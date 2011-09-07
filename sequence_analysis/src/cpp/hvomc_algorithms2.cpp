@@ -67,6 +67,450 @@ extern char* label(const char *file_name);
 
 
 
+/*--------------------------------------------------------------*
+ *
+ *  Calcul des entropies des sequences d'etats par l'algorithme forward-backward.
+ *
+ *  argument : reference sur un objet VariableOrderMarkovData.
+ *
+ *--------------------------------------------------------------*/
+
+void HiddenVariableOrderMarkov::forward_backward(VariableOrderMarkovData &seq) const
+
+{
+  register int i , j , k , m;
+  int **pioutput;
+  double seq_likelihood , **forward , norm , **predicted , buff ,
+         *transition_predicted , **forward_state_entropy , **proutput;
+
+# ifdef MESSAGE
+  double entropy , **backward , *auxiliary , **transition_entropy;
+# endif
+
+
+  // initialisations
+
+  seq.entropy = new double[seq.nb_sequence];
+
+  forward = new double*[seq.max_length];
+  for (i = 0;i < seq.max_length;i++) {
+    forward[i] = new double[nb_row];
+  }
+
+  predicted = new double*[seq.max_length];
+  for (i = 0;i < seq.max_length;i++) {
+    predicted[i] = new double[nb_row];
+  }
+
+  transition_predicted = new double[nb_row];
+
+  forward_state_entropy = new double*[seq.max_length];
+  for (i = 0;i < seq.max_length;i++) {
+    forward_state_entropy[i] = new double[nb_row];
+  }
+
+# ifdef MESSAGE
+  backward = new double*[seq.max_length];
+  for (i = 0;i < seq.max_length;i++) {
+    backward[i] = new double[nb_row];
+  }
+
+  auxiliary = new double[nb_row];
+
+  transition_entropy = new double*[nb_row];
+  for (i = 1;i < nb_row;i++) {
+    transition_entropy[i] = new double[nb_state];
+  }
+# endif
+
+  pioutput = new int*[nb_output_process];
+  proutput = new double*[nb_output_process];
+
+  seq.sample_entropy = 0.;
+
+  for (i = 0;i < seq.nb_sequence;i++) {
+    for (j = 0;j < nb_output_process;j++) {
+      switch (seq.type[j + 1]) {
+      case INT_VALUE :
+        pioutput[j] = seq.int_sequence[i][j + 1];
+        break;
+      case REAL_VALUE :
+        proutput[j] = seq.real_sequence[i][j + 1];
+        break;
+      }
+    }
+
+    // recurrence "forward"
+
+    seq_likelihood = 0.;
+    norm = 0.;
+
+    switch (type) {
+
+    case 'o' : {
+      for (j = 1;j < nb_row;j++) {
+        if (order[j] == 1) {
+          forward[0][j] = initial[state[j][0]];
+
+          for (k = 0;k < nb_output_process;k++) {
+            if (nonparametric_process[k + 1]) {
+              forward[0][j] *= nonparametric_process[k + 1]->observation[state[j][0]]->mass[*pioutput[k]];
+            }
+
+            else if (discrete_parametric_process[k + 1]) {
+              forward[0][j] *= discrete_parametric_process[k + 1]->observation[state[j][0]]->mass[*pioutput[k]];
+            }
+
+            else {
+              switch (seq.type[k + 1]) {
+              case INT_VALUE :
+                forward[0][j] *= continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*pioutput[k] - seq.min_interval[k + 1] / 2 , *pioutput[k] + seq.min_interval[k + 1] / 2);
+                break;
+              case REAL_VALUE :
+                forward[0][j] *= continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*proutput[k] - seq.min_interval[k + 1] / 2 , *proutput[k] + seq.min_interval[k + 1] / 2);
+                break;
+              }
+            }
+          }
+
+          norm += forward[0][j];
+        }
+
+        else {
+          forward[0][j] = 0.;
+        }
+      }
+      break;
+    }
+
+    case 'e' : {
+      for (j = 1;j < nb_row;j++) {
+        if (!child[j]) {
+          forward[0][j] = initial[j];
+
+          for (k = 0;k < nb_output_process;k++) {
+            if (nonparametric_process[k + 1]) {
+              forward[0][j] *= nonparametric_process[k + 1]->observation[state[j][0]]->mass[*pioutput[k]];
+            }
+
+            else if (discrete_parametric_process[k + 1]) {
+              forward[0][j] *= discrete_parametric_process[k + 1]->observation[state[j][0]]->mass[*pioutput[k]];
+            }
+
+            else {
+              switch (seq.type[k + 1]) {
+              case INT_VALUE :
+                forward[0][j] *= continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*pioutput[k] - seq.min_interval[k + 1] / 2 , *pioutput[k] + seq.min_interval[k + 1] / 2);
+                break;
+              case REAL_VALUE :
+                forward[0][j] *= continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*proutput[k] - seq.min_interval[k + 1] / 2 , *proutput[k] + seq.min_interval[k + 1] / 2);
+                break;
+              }
+            }
+          }
+
+          norm += forward[0][j];
+        }
+
+        else {
+          forward[0][j] = 0.;
+        }
+      }
+      break;
+    }
+    }
+
+    if (norm > 0.) {
+      for (j = 1;j < nb_row;j++) {
+        forward[0][j] /= norm;
+      }
+
+      seq_likelihood += log(norm);
+    }
+
+    else {
+      seq_likelihood = D_INF;
+    }
+
+    if (seq_likelihood != D_INF) {
+      for (j = 1;j < nb_row;j++) {
+        forward_state_entropy[0][j] = 0.;
+      }
+
+      for (j = 1;j < seq.length[i];j++) {
+        for (k = 0;k < nb_output_process;k++) {
+          switch (seq.type[k + 1]) {
+          case INT_VALUE :
+            pioutput[k]++;
+            break;
+          case REAL_VALUE :
+            proutput[k]++;
+            break;
+          }
+        }
+        norm = 0.;
+
+        for (k = 1;k < nb_row;k++) {
+          forward[j][k] = 0.;
+          for (m = 0;m < nb_memory[k];m++) {
+            transition_predicted[m] = transition[previous[k][m]][state[k][0]] * forward[j - 1][previous[k][m]];
+            forward[j][k] += transition_predicted[m];
+
+//            forward[j][k] += transition[previous[k][m]][state[k][0]] * forward[j - 1][previous[k][m]];
+          }
+          predicted[j][k] = forward[j][k];
+
+          forward_state_entropy[j][k] = 0.;
+          if (predicted[j][k] > 0.) {
+            for (m = 0;m < nb_memory[k];m++) {
+              if (transition_predicted[m] > 0.) {
+                buff = transition_predicted[m] / predicted[j][k];
+                forward_state_entropy[j][k] += buff * (forward_state_entropy[j - 1][previous[k][m]] - log(buff));
+              }
+            }
+
+            if (forward_state_entropy[j][k] < 0.) {
+              forward_state_entropy[j][k] = 0.;
+            }
+          }
+
+          for (m = 0;m < nb_output_process;m++) {
+            if (nonparametric_process[m + 1]) {
+              forward[j][k] *= nonparametric_process[m + 1]->observation[state[k][0]]->mass[*pioutput[m]];
+            }
+
+            else if (discrete_parametric_process[m + 1]) {
+              forward[j][k] *= discrete_parametric_process[m + 1]->observation[state[k][0]]->mass[*pioutput[m]];
+            }
+
+            else {
+              switch (seq.type[m + 1]) {
+              case INT_VALUE :
+                forward[j][k] *= continuous_parametric_process[m + 1]->observation[state[k][0]]->mass_computation(*pioutput[m] - seq.min_interval[m + 1] / 2 , *pioutput[m] + seq.min_interval[m + 1] / 2);
+                break;
+              case REAL_VALUE :
+                forward[j][k] *= continuous_parametric_process[m + 1]->observation[state[k][0]]->mass_computation(*proutput[m] - seq.min_interval[m + 1] / 2 , *proutput[m] + seq.min_interval[m + 1] / 2);
+                break;
+              }
+            }
+          }
+
+          norm += forward[j][k];
+        }
+
+        if (norm > 0.) {
+          for (k = 1;k < nb_row;k++) {
+            forward[j][k] /= norm;
+          }
+          seq_likelihood += log(norm);
+        }
+
+        else {
+          seq_likelihood = D_INF;
+          break;
+        }
+      }
+
+      seq.entropy[i] = 0.;
+      j = seq.length[i] - 1;
+      for (k = 1;k < nb_row;k++) {
+        if (forward[j][k] > 0.) {
+          seq.entropy[i] += forward[j][k] * (forward_state_entropy[j][k] - log(forward[j][k]));
+        }
+      }
+      seq.sample_entropy += seq.entropy[i];
+
+#     ifdef DEBUG
+      cout << "\n";
+      for (j = 0;j < seq.length[i];j++) {
+        cout << j << " |";
+        for (k = 1;k < nb_row;k++) {
+          cout << " " << forward_state_entropy[j][k];
+        }
+        cout << endl;
+      }
+#     endif
+
+    }
+
+    // recurrence "backward"
+
+#   ifdef MESSAGE
+    if (seq_likelihood != D_INF) {
+      entropy = 0.;
+
+      for (j = 1;j < nb_row;j++) {
+        for (k = 0;k < nb_state;k++) {
+          transition_entropy[j][k] = 0.;
+        }
+      }
+
+      j = seq.length[i] - 1;
+      for (k = 1;k < nb_row;k++) {
+        backward[j][k] = forward[j][k];
+
+        if (backward[j][k] > 0.) {
+          for (m = 0;m < nb_output_process;m++) {
+            if (nonparametric_process[m + 1]) {
+              if (nonparametric_process[m + 1]->observation[state[k][0]]->mass[*pioutput[m]] > 0.) {
+                entropy -= backward[j][k] * log(nonparametric_process[m + 1]->observation[state[k][0]]->mass[*pioutput[m]]);
+              }
+            }
+
+            else if (discrete_parametric_process[m + 1]) {
+              if (discrete_parametric_process[m + 1]->observation[state[k][0]]->mass[*pioutput[m]] > 0.) {
+                entropy -= backward[j][k] * log(discrete_parametric_process[m + 1]->observation[state[k][0]]->mass[*pioutput[m]]);
+              }
+            }
+
+            else {
+              switch (seq.type[m + 1]) {
+              case INT_VALUE :
+                entropy -= backward[j][k] * log(continuous_parametric_process[m + 1]->observation[state[k][0]]->mass_computation(*pioutput[m] - seq.min_interval[m + 1] / 2 , *pioutput[m] + seq.min_interval[m + 1] / 2));
+                break;
+              case REAL_VALUE :
+                entropy -= backward[j][k] * log(continuous_parametric_process[m + 1]->observation[state[k][0]]->mass_computation(*proutput[m] - seq.min_interval[m + 1] / 2 , *proutput[m] + seq.min_interval[m + 1] / 2));
+                break;
+              }
+            }
+          }
+        }
+      }
+
+      for (j = seq.length[i] - 2;j >= 0;j--) {
+        for (k = 0;k < nb_output_process;k++) {
+          switch (seq.type[k + 1]) {
+          case INT_VALUE :
+            pioutput[k]--;
+            break;
+          case REAL_VALUE :
+            proutput[k]--;
+            break;
+          }
+        }
+
+        for (k = 1;k < nb_row;k++) {
+          if (predicted[j + 1][k] > 0.) {
+            auxiliary[k] = backward[j + 1][k] / predicted[j + 1][k];
+          }
+          else {
+            auxiliary[k] = 0.;
+          }
+        }
+
+        for (k = 1;k < nb_row;k++) {
+          backward[j][k] = 0.;
+
+          if (next[k]) {
+            for (m = 0;m < nb_state;m++) {
+              buff = auxiliary[next[k][m]] * transition[k][m] * forward[j][k];
+              backward[j][k] += buff;
+              transition_entropy[k][m] += buff;
+            }
+
+            if (backward[j][k] > 0.) {
+              for (m = 0;m < nb_output_process;m++) {
+                if (nonparametric_process[m + 1]) {
+                  if (nonparametric_process[m + 1]->observation[state[k][0]]->mass[*pioutput[m]] > 0.) {
+                    entropy -= backward[j][k] * log(nonparametric_process[m + 1]->observation[state[k][0]]->mass[*pioutput[m]]);
+                  }
+                }
+
+                else if (discrete_parametric_process[m + 1]) {
+                  if (discrete_parametric_process[m + 1]->observation[state[k][0]]->mass[*pioutput[m]] > 0.) {
+                    entropy -= backward[j][k] * log(discrete_parametric_process[m + 1]->observation[state[k][0]]->mass[*pioutput[m]]);
+                  }
+                }
+
+                else {
+                  switch (seq.type[m + 1]) {
+                  case INT_VALUE :
+                    entropy -= backward[j][k] * log(continuous_parametric_process[m + 1]->observation[state[k][0]]->mass_computation(*pioutput[m] - seq.min_interval[m + 1] / 2 , *pioutput[m] + seq.min_interval[m + 1] / 2));
+                    break;
+                  case REAL_VALUE :
+                    entropy -= backward[j][k] * log(continuous_parametric_process[m + 1]->observation[state[k][0]]->mass_computation(*proutput[m] - seq.min_interval[m + 1] / 2 , *proutput[m] + seq.min_interval[m + 1] / 2));
+                    break;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      for (j = 1;j < nb_row;j++) {
+        switch (type) {
+
+        case 'o' : {
+          if ((order[j] == 1) && (initial[state[j][0]] > 0.)) {
+            entropy -= backward[0][j] * log(initial[state[j][0]]);
+          }
+          break;
+        }
+
+        case 'e' : {
+          if ((!child[j]) && (initial[j] > 0.)) {
+            entropy -= backward[0][j] * log(initial[j]);
+          }
+          break;
+        }
+        }
+      }
+
+      for (j = 1;j < nb_row;j++) {
+        for (k = 0;k < nb_state;k++) {
+          if (transition[j][k] > 0.) {
+            entropy -= transition_entropy[j][k] * log(transition[j][k]);
+          }
+        }
+      }
+
+      entropy += seq_likelihood;
+
+      if ((entropy < seq.entropy[i] - DOUBLE_ERROR) || (entropy > seq.entropy[i] + DOUBLE_ERROR)) {
+        cout << "\nERROR: " << i << " " << seq.entropy[i] << " " << entropy << endl;
+      }
+    }
+#   endif
+
+  }
+
+  for (i = 0;i < seq.max_length;i++) {
+    delete [] forward[i];
+  }
+  delete [] forward;
+
+  for (i = 0;i < seq.max_length;i++) {
+    delete [] predicted[i];
+  }
+  delete [] predicted;
+
+  delete [] transition_predicted;
+
+  for (i = 0;i < seq.max_length;i++) {
+    delete [] forward_state_entropy[i];
+  }
+  delete [] forward_state_entropy;
+
+# ifdef MESSAGE
+  for (i = 0;i < seq.max_length;i++) {
+    delete [] backward[i];
+  }
+  delete [] backward;
+
+  delete [] auxiliary;
+
+  for (i = 1;i < nb_row;i++) {
+    delete [] transition_entropy[i];
+  }
+  delete [] transition_entropy;
+# endif
+
+  delete [] pioutput;
+  delete [] proutput;
+}
+
+
 /*--------------------------------------------------------------
  *
  *  Ecriture des profils d'etats et d'entropie.
@@ -1032,9 +1476,14 @@ double HiddenVariableOrderMarkov::forward_backward(const MarkovianSequences &seq
     max_marginal_entropy = 0.;
     for (i = 0;i < seq.length[index];i++) {
       marginal_entropy[i] = 0.;
-      for (j = 0;j < nb_state;j++) {
+/*      for (j = 0;j < nb_state;j++) {
         if (state_backward[i][j] > 0.) {
           marginal_entropy[i] -= state_backward[i][j] * log(state_backward[i][j]);
+        }
+      } */
+      for (j = 1;j < nb_row;j++) {
+        if (backward[i][j] > 0.) {
+          marginal_entropy[i] -= backward[i][j] * log(backward[i][j]);
         }
       }
       if (marginal_entropy[i] > max_marginal_entropy) {
@@ -2012,6 +2461,22 @@ double HiddenVariableOrderMarkov::viterbi(const MarkovianSequences &seq ,
   delete [] proutput;
 
   return likelihood;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul des sequences d'etats les plus probables par l'algorithme de Viterbi.
+ *
+ *  argument : reference sur un objet VariableOrderMarkovData.
+ *
+ *--------------------------------------------------------------*/
+
+void HiddenVariableOrderMarkov::viterbi(VariableOrderMarkovData &seq) const
+
+{
+  seq.posterior_probability = new double[seq.nb_sequence];
+  seq.likelihood = viterbi(seq , seq.posterior_probability);
 }
 
 
@@ -4119,11 +4584,11 @@ VariableOrderMarkovData* HiddenVariableOrderMarkov::state_sequence_computation(S
 
     hmarkov = new HiddenVariableOrderMarkov(*this , false);
 
+    hmarkov->forward_backward(*seq);
+
     hmarkov->create_cumul();
     hmarkov->log_computation();
-
-    seq->posterior_probability = new double[seq->nb_sequence];
-    seq->likelihood = hmarkov->viterbi(*seq , seq->posterior_probability);
+    hmarkov->viterbi(*seq);
 
     // extraction des caracteristiques des sequences et
     // calcul des lois caracteristiques du modele
@@ -4146,7 +4611,7 @@ VariableOrderMarkovData* HiddenVariableOrderMarkov::state_sequence_computation(S
       seq->build_characteristic(0);
 
       seq->build_transition_count(*hmarkov);
-      seq->build_observation_frequency_distribution();
+      seq->build_observation_frequency_distribution(nb_state);
 
 /*      if ((seq->max_value[0] < nb_state - 1) || (!(seq->characteristics[0]))) {
         delete seq;
@@ -4289,10 +4754,10 @@ bool MarkovianSequences::comparison(StatError &error , ostream &os , int nb_mode
       for (j = 0;j < nb_model;j++) {
         switch (algorithm) {
         case FORWARD :
-          likelihood[i][j] = ihmarkov[j]->likelihood_computation(*this , 0 , i);
+          likelihood[i][j] = ihmarkov[j]->likelihood_computation(*this , NULL , i);
           break;
         case VITERBI :
-          likelihood[i][j] = hmarkov[j]->viterbi(*seq , 0 , i);
+          likelihood[i][j] = hmarkov[j]->viterbi(*seq , NULL , i);
           break;
         }
       }
@@ -4478,8 +4943,9 @@ DistanceMatrix* HiddenVariableOrderMarkov::divergence_computation(StatError &err
 {
   bool status = true , lstatus;
   register int i , j , k;
-  int cumul_length;
-  double ref_likelihood , target_likelihood , **likelihood;
+  int cumul_length , nb_failure;
+  double **likelihood;
+  long double divergence;
   const HiddenVariableOrderMarkov **hmarkov;
   MarkovianSequences *seq;
   VariableOrderMarkovData *simul_seq;
@@ -4614,32 +5080,51 @@ DistanceMatrix* HiddenVariableOrderMarkov::divergence_computation(StatError &err
         likelihood[j] = new double[nb_model];
       }
 
-      ref_likelihood = 0.;
       for (j = 0;j < seq->nb_sequence;j++) {
-        likelihood[j][i] = hmarkov[i]->likelihood_computation(*seq , 0 , j);
-        ref_likelihood += likelihood[j][i];
+        likelihood[j][i] = hmarkov[i]->likelihood_computation(*seq , NULL , j);
+
+#       ifdef MESSAGE
+        if (likelihood[j][i] == D_INF) {
+          os << "\nERROR - " << SEQ_error[SEQR_REFERENCE_MODEL] << ": " << i + 1 << endl;
+        }
+#       endif
+
       }
 
       // calcul des vraisemblances de l'echantillon pour chacune des chaines de Markov cachees
 
       for (j = 0;j < nb_model;j++) {
         if (j != i) {
-          target_likelihood = 0.;
+          divergence = 0.;
+          cumul_length = 0;
+          nb_failure = 0;
+
           for (k = 0;k < seq->nb_sequence;k++) {
-            likelihood[k][j] = hmarkov[j]->likelihood_computation(*seq , 0 , k);
-            if (target_likelihood != D_INF) {
+            likelihood[k][j] = hmarkov[j]->likelihood_computation(*seq , NULL , k);
+
+//            if (divergence != -D_INF) {
               if (likelihood[k][j] != D_INF) {
-                target_likelihood += likelihood[k][j];
+                divergence += likelihood[k][i] - likelihood[k][j];
+                cumul_length += seq->length[k];
               }
               else {
-                target_likelihood = D_INF;
+                nb_failure++;
+//                divergence = -D_INF;
               }
-            }
+//            }
           }
 
-          if (target_likelihood != D_INF) {
-            dist_matrix->update(i + 1 , j + 1 , ref_likelihood - target_likelihood , seq->cumul_length);
+#         ifdef MESSAGE
+          if (nb_failure > 0) {
+            os << "\nWARNING - " << SEQ_error[SEQR_REFERENCE_MODEL] << ": " << i + 1 << ", "
+               << SEQ_error[SEQR_TARGET_MODEL] << ": " << j + 1 << " - "
+               << SEQ_error[SEQR_DIVERGENCE_NB_FAILURE] << ": " << nb_failure << endl;
           }
+#         endif
+
+//          if (divergence != -D_INF) {
+            dist_matrix->update(i + 1 , j + 1 , divergence , cumul_length);
+//          }
         }
       }
 
