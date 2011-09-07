@@ -63,6 +63,723 @@ extern char* label(const char *file_name);
 
 /*--------------------------------------------------------------*
  *
+ *  Calcul des entropies des sequences d'etats par l'algorithme forward-backward.
+ *
+ *  argument : reference sur un objet SemiMarkovData.
+ *
+ *--------------------------------------------------------------*/
+
+void HiddenSemiMarkov::forward_backward(SemiMarkovData &seq) const
+
+{
+  register int i , j , k , m , n;
+  int **pioutput;
+  double seq_likelihood , obs_product , buff , sum ,
+         **observation , *norm , *state_norm , **forward1 , **state_in , *transition_predicted ,
+         *occupancy_predicted , **state_entropy , **predicted_entropy , **proutput;
+  DiscreteParametric *occupancy;
+
+# ifdef MESSAGE
+  double entropy , **backward , **backward1 , *auxiliary , *occupancy_auxiliary ,
+         **transition_entropy , **occupancy_entropy;
+# endif
+
+
+  // initialisations
+
+  seq.entropy = new double[seq.nb_sequence];
+
+  observation = new double*[seq.max_length];
+  for (i = 0;i < seq.max_length;i++) {
+    observation[i] = new double[nb_state];
+  }
+
+  norm = new double[seq.max_length];
+  state_norm = new double[nb_state];
+
+  forward1 = new double*[seq.max_length];
+  for (i = 0;i < seq.max_length;i++) {
+    forward1[i] = new double[nb_state];
+  }
+
+  state_in = new double*[seq.max_length - 1];
+  for (i = 0;i < seq.max_length - 1;i++) {
+    state_in[i] = new double[nb_state];
+  }
+
+  transition_predicted = new double[nb_state];
+  occupancy_predicted = new double[seq.max_length + 1];
+
+  state_entropy = new double*[seq.max_length];
+  for (i = 0;i < seq.max_length;i++) {
+    state_entropy[i] = new double[nb_state];
+  }
+
+  predicted_entropy = new double*[seq.max_length];
+  for (i = 0;i < seq.max_length;i++) {
+    predicted_entropy[i] = new double[nb_state];
+  }
+
+# ifdef MESSAGE
+  backward = new double*[seq.max_length];
+  for (i = 0;i < seq.max_length;i++) {
+    backward[i] = new double[nb_state];
+  }
+
+  backward1 = new double*[seq.max_length];
+  for (i = 0;i < seq.max_length;i++) {
+    backward1[i] = new double[nb_state];
+  }
+
+  auxiliary = new double[nb_state];
+  occupancy_auxiliary = new double[seq.max_length + 1];
+
+  transition_entropy = new double*[nb_state];
+  for (i = 0;i < nb_state;i++) {
+    transition_entropy[i] = new double[nb_state];
+  }
+
+  occupancy_entropy = new double*[nb_state];
+  for (i = 0;i < nb_state;i++) {
+    switch (state_subtype[i]) {
+    case SEMI_MARKOVIAN :
+      occupancy = nonparametric_process[0]->sojourn_time[i];
+      occupancy_entropy[i] = new double[MIN(seq.max_length , occupancy->nb_value)];
+      break;
+    case MARKOVIAN :
+      occupancy_entropy[i] = NULL;
+      break;
+    }
+  }
+# endif
+
+  pioutput = new int*[nb_output_process];
+  proutput = new double*[nb_output_process];
+
+  seq.sample_entropy = 0.;
+
+  for (i = 0;i < seq.nb_sequence;i++) {
+    for (j = 0;j < nb_output_process;j++) {
+      switch (seq.type[j + 1]) {
+      case INT_VALUE :
+        pioutput[j] = seq.int_sequence[i][j + 1];
+        break;
+      case REAL_VALUE :
+        proutput[j] = seq.real_sequence[i][j + 1];
+        break;
+      }
+    }
+
+    // recurrence "forward"
+
+    seq_likelihood = 0.;
+    for (j = 0;j < seq.length[i];j++) {
+      norm[j] = 0.;
+
+      for (k = 0;k < nb_state;k++) {
+
+        // calcul des probabilites d'observation
+
+        observation[j][k] = 1.;
+        for (m = 0;m < nb_output_process;m++) {
+          if (nonparametric_process[m + 1]) {
+            observation[j][k] *= nonparametric_process[m + 1]->observation[k]->mass[*pioutput[m]];
+          }
+
+          else if (discrete_parametric_process[m + 1]) {
+            observation[j][k] *= discrete_parametric_process[m + 1]->observation[k]->mass[*pioutput[m]];
+          }
+
+          else {
+            switch (seq.type[m + 1]) {
+            case INT_VALUE :
+              observation[j][k] *= continuous_parametric_process[m + 1]->observation[k]->mass_computation(*pioutput[m] - seq.min_interval[m + 1] / 2 , *pioutput[m] + seq.min_interval[m + 1] / 2);
+              break;
+            case REAL_VALUE :
+              observation[j][k] *= continuous_parametric_process[m + 1]->observation[k]->mass_computation(*proutput[m] - seq.min_interval[m + 1] / 2 , *proutput[m] + seq.min_interval[m + 1] / 2);
+              break;
+            }
+          }
+        }
+
+        switch (state_subtype[k]) {
+
+        // cas etat semi-markovien 
+
+        case SEMI_MARKOVIAN : {
+          if (j == 0) {
+            state_norm[k] = initial[k];
+          }
+          else {
+            state_norm[k] += state_in[j - 1][k] - forward1[j - 1][k];
+          }
+          state_norm[k] *= observation[j][k];
+
+          norm[j] += state_norm[k];
+          break;
+        }
+
+        // cas etat markovien
+
+        case MARKOVIAN : {
+          if (j == 0) {
+            forward1[j][k] = initial[k];
+            state_entropy[j][k] = 0.;
+          }
+          else {
+            forward1[j][k] = state_in[j - 1][k];
+            state_entropy[j][k] = predicted_entropy[j - 1][k];
+          }
+          forward1[j][k] *= observation[j][k];
+
+          norm[j] += forward1[j][k];
+          break;
+        }
+        }
+      }
+
+      if (norm[j] > 0.) {
+        for (k = 0;k < nb_state;k++) {
+          switch (state_subtype[k]) {
+          case SEMI_MARKOVIAN :
+            state_norm[k] /= norm[j];
+            break;
+          case MARKOVIAN :
+            forward1[j][k] /= norm[j];
+            break;
+          }
+        }
+
+        seq_likelihood += log(norm[j]);
+      }
+
+      else {
+        seq_likelihood = D_INF;
+        break;
+      }
+
+      for (k = 0;k < nb_state;k++) {
+
+        // cas etat semi-markovien
+
+        if (state_subtype[k] == SEMI_MARKOVIAN) {
+          occupancy = nonparametric_process[0]->sojourn_time[k];
+          obs_product = 1.;
+          forward1[j][k] = 0.;
+
+          if (j < seq.length[i] - 1) {
+            for (m = 1;m <= MIN(j + 1 , occupancy->nb_value - 1);m++) {
+              obs_product *= observation[j - m + 1][k] / norm[j - m + 1];
+              if (obs_product == 0.) {
+                break;
+              }
+
+              if (m < j + 1) {
+                occupancy_predicted[m] = obs_product * occupancy->mass[m] * state_in[j - m][k];
+//                forward1[j][k] += obs_product * occupancy->mass[m] * state_in[j - m][k];
+              }
+
+              else {
+                switch (type) {
+                case 'o' :
+                  occupancy_predicted[m] = obs_product * occupancy->mass[m] * initial[k];
+//                  forward1[j][k] += obs_product * occupancy->mass[m] * initial[k];
+                  break;
+                case 'e' :
+                  occupancy_predicted[m] = obs_product * forward[k]->mass[m] * initial[k];
+//                  forward1[j][k] += obs_product * forward[k]->mass[m] * initial[k];
+                  break;
+                }
+              }
+
+              forward1[j][k] += occupancy_predicted[m];
+            }
+          }
+
+          else {
+            for (m = 1;m <= MIN(j + 1 , occupancy->nb_value - 1);m++) {
+              obs_product *= observation[j - m + 1][k] / norm[j - m + 1];
+              if (obs_product == 0.) {
+                break;
+              }
+
+              if (m < j + 1) {
+                occupancy_predicted[m] = obs_product * (1. - occupancy->cumul[m - 1]) * state_in[j - m][k];
+//                forward1[j][k] += obs_product * (1. - occupancy->cumul[m - 1]) * state_in[j - m][k];
+              }
+
+              else {
+                switch (type) {
+                case 'o' :
+                  occupancy_predicted[m] = obs_product * (1. - occupancy->cumul[m - 1]) * initial[k];
+//                  forward1[j][k] += obs_product * (1. - occupancy->cumul[m - 1]) * initial[k];
+                  break;
+                case 'e' :
+                  occupancy_predicted[m] = obs_product * (1. - forward[k]->cumul[m - 1]) * initial[k];
+//                  forward1[j][k] += obs_product * (1. - forward[k]->cumul[m - 1]) * initial[k];
+                  break;
+                }
+              }
+
+              forward1[j][k] += occupancy_predicted[m];
+            }
+          }
+
+          state_entropy[j][k] = 0.;
+
+          if (forward1[j][k] > 0.) {
+            for (n = 1;n < m;n++) {
+              buff = occupancy_predicted[n] / forward1[j][k];
+              if (buff > 0.) {
+                if (n < j + 1) {
+                  state_entropy[j][k] += buff * (predicted_entropy[j - n][k] - log(buff));
+                }
+                else {
+                  state_entropy[j][k] -= buff * log(buff);
+                }
+              }
+            }
+
+            if (state_entropy[j][k] < 0.) {
+              state_entropy[j][k] = 0.;
+            }
+          }
+        }
+      }
+
+      if (j < seq.length[i] - 1) {
+        for (k = 0;k < nb_state;k++) {
+          state_in[j][k] = 0.;
+          for (m = 0;m < nb_state;m++) {
+            transition_predicted[m] = transition[m][k] * forward1[j][m];
+            state_in[j][k] += transition_predicted[m];
+
+//            state_in[j][k] += transition[m][k] * forward1[j][m];
+          }
+
+          predicted_entropy[j][k] = 0.;
+
+          if (state_in[j][k] > 0.) {
+            for (m = 0;m < nb_state;m++) {
+              buff = transition_predicted[m] / state_in[j][k];
+              if (buff > 0.) {
+                predicted_entropy[j][k] += buff * (state_entropy[j][m] - log(buff));
+              }
+            }
+
+            if (predicted_entropy[j][k] < 0.) {
+              predicted_entropy[j][k] = 0.;
+            }
+          }
+        }
+      }
+
+      for (k = 0;k < nb_output_process;k++) {
+        switch (seq.type[k + 1]) {
+        case INT_VALUE :
+          pioutput[k]++;
+          break;
+        case REAL_VALUE :
+          proutput[k]++;
+          break;
+        }
+      }
+    }
+
+    if (seq_likelihood != D_INF) {
+      seq.entropy[i] = 0.;
+      j = seq.length[i] - 1;
+      for (k = 0;k < nb_state;k++) {
+        if (forward1[j][k] > 0.) {
+          seq.entropy[i] += forward1[j][k] * (state_entropy[j][k] - log(forward1[j][k]));
+        }
+      }
+      seq.sample_entropy += seq.entropy[i];
+
+/*      for (j = 0;j < nb_state;j++) {
+        if (state_subtype[j] == SEMI_MARKOVIAN) {
+          for (k = 0;k < seq.length[i];k++) {
+            state_entropy[k][j] = 0.;
+          }
+        }
+        } */
+
+      // recurrence "backward"
+
+#     ifdef MESSAGE
+      entropy = 0.;
+
+      for (j = 0;j < nb_output_process;j++) {
+        switch (seq.type[j + 1]) {
+        case INT_VALUE :
+          pioutput[j]--;
+          break;
+        case REAL_VALUE :
+          proutput[j]--;
+          break;
+        }
+      }
+
+      for (j = 0;j < nb_state;j++) {
+        for (k = 0;k < nb_state;k++) {
+          transition_entropy[j][k] = 0.;
+        }
+      }
+
+      for (j = 0;j < nb_state;j++) {
+        if (state_subtype[j] == SEMI_MARKOVIAN) {
+          occupancy = nonparametric_process[0]->sojourn_time[j];
+          for (k = occupancy->offset;k < MIN(seq.length[i] , occupancy->nb_value);k++) {
+            occupancy_entropy[j][k] = 0.;
+          }
+        }
+      }
+
+      j = seq.length[i] - 1;
+      for (k = 0;k < nb_state;k++) {
+        backward[j][k] = forward1[j][k];
+        backward1[j][k] = backward[j][k];
+
+        if (backward[j][k] > 0.) {
+          for (m = 0;m < nb_output_process;m++) {
+            if (nonparametric_process[m + 1]) {
+              if (nonparametric_process[m + 1]->observation[k]->mass[*pioutput[m]] > 0.) {
+                entropy -= backward[j][k] * log(nonparametric_process[m + 1]->observation[k]->mass[*pioutput[m]]);
+              }
+            }
+
+            else if (discrete_parametric_process[m + 1]) {
+              if (discrete_parametric_process[m + 1]->observation[k]->mass[*pioutput[m]] > 0.) {
+                entropy -= backward[j][k] * log(discrete_parametric_process[m + 1]->observation[k]->mass[*pioutput[m]]);
+              }
+            }
+
+            else {
+              switch (seq.type[m + 1]) {
+              case INT_VALUE :
+                entropy -= backward[j][k] * log(continuous_parametric_process[m + 1]->observation[k]->mass_computation(*pioutput[m] - seq.min_interval[m + 1] / 2 , *pioutput[m] + seq.min_interval[m + 1] / 2));
+                break;
+              case REAL_VALUE :
+                entropy -= backward[j][k] * log(continuous_parametric_process[m + 1]->observation[k]->mass_computation(*proutput[m] - seq.min_interval[m + 1] / 2 , *proutput[m] + seq.min_interval[m + 1] / 2));
+                break;
+              }
+            }
+          }
+        }
+      }
+
+      for (j = seq.length[i] - 2;j >= 0;j--) {
+        for (k = 0;k < nb_output_process;k++) {
+          switch (seq.type[k + 1]) {
+          case INT_VALUE :
+            pioutput[k]--;
+            break;
+          case REAL_VALUE :
+            proutput[k]--;
+            break;
+          }
+        }
+
+        for (k = 0;k < nb_state;k++) {
+          auxiliary[k] = 0.;
+
+          switch (state_subtype[k]) {
+
+          // cas etat semi-markovien
+
+          case SEMI_MARKOVIAN : {
+            occupancy = nonparametric_process[0]->sojourn_time[k];
+            obs_product = 1.;
+
+            for (m = 1;m < MIN(seq.length[i] - j , occupancy->nb_value);m++) {
+              obs_product *= observation[j + m][k] / norm[j + m];
+              if (obs_product == 0.) {
+                break;
+              }
+
+              occupancy_auxiliary[m] = 0.;
+
+              if (backward1[j + m][k] > 0.) {
+//              if (forward1[j + m][k] > 0.) {
+                if (m < seq.length[i] - j - 1) {
+                  buff = backward1[j + m][k] * obs_product * occupancy->mass[m] /
+                         forward1[j + m][k];
+                  occupancy_auxiliary[m] = buff * state_in[j][k];
+                  occupancy_entropy[k][m] += occupancy_auxiliary[m];
+
+/*                  if (occupancy->mass[m] > 0.) {
+                    entropy -= occupancy_auxiliary[m] * log(occupancy->mass[m]);
+                  } */
+                }
+
+                else {
+                  buff = obs_product * (1. - occupancy->cumul[m - 1]);
+                  occupancy_auxiliary[m] = buff * state_in[j][k];
+                  if (occupancy->cumul[m - 1] < 1.) {
+                    entropy -= occupancy_auxiliary[m] * log(1. - occupancy->cumul[m - 1]);
+                  }
+                }
+
+                auxiliary[k] += buff;
+              }
+            }
+            break;
+          }
+
+          // cas etat markovien
+
+          case MARKOVIAN : {
+            if (backward1[j + 1][k] > 0.) {
+//            if (forward1[j + 1][k] > 0.) {
+              auxiliary[k] = backward1[j + 1][k] / state_in[j][k];
+
+/*              auxiliary[k] = backward1[j + 1][k] * observation[j + 1][k] /
+                             (forward1[j + 1][k] * norm[j + 1]); */
+            }
+            break;
+          }
+          }
+        }
+
+        for (k = 0;k < nb_state;k++) {
+          backward1[j][k] = 0.;
+
+          for (m = 0;m < nb_state;m++) {
+            buff = auxiliary[m] * transition[k][m] * forward1[j][k];
+            backward1[j][k] += buff;
+            transition_entropy[k][m] += buff;
+
+/*            if (transition[k][m] > 0.) {
+              entropy -= buff * log(transition[k][m]);
+            } */
+          }
+
+          switch (state_subtype[k]) {
+
+          // cas etat semi-markovien
+
+          case SEMI_MARKOVIAN : {
+            backward[j][k] = backward[j + 1][k] + backward1[j][k] - auxiliary[k] * state_in[j][k];
+            if (backward[j][k] < 0.) {
+              backward[j][k] = 0.;
+            }
+            if (backward[j][k] > 1.) {
+              backward[j][k] = 1.;
+            }
+            break;
+          }
+
+          // cas etat markovien
+
+          case MARKOVIAN : {
+            backward[j][k] = backward1[j][k];
+            break;
+          }
+          }
+
+          if (backward[j][k] > 0.) {
+            for (m = 0;m < nb_output_process;m++) {
+              if (nonparametric_process[m + 1]) {
+                if (nonparametric_process[m + 1]->observation[k]->mass[*pioutput[m]] > 0.) {
+                  entropy -= backward[j][k] * log(nonparametric_process[m + 1]->observation[k]->mass[*pioutput[m]]);
+                }
+              }
+
+              else if (discrete_parametric_process[m + 1]) {
+                if (discrete_parametric_process[m + 1]->observation[k]->mass[*pioutput[m]] > 0.) {
+                  entropy -= backward[j][k] * log(discrete_parametric_process[m + 1]->observation[k]->mass[*pioutput[m]]);
+                }
+              }
+
+              else {
+                switch (seq.type[m + 1]) {
+                case INT_VALUE :
+                  entropy -= backward[j][k] * log(continuous_parametric_process[m + 1]->observation[k]->mass_computation(*pioutput[m] - seq.min_interval[m + 1] / 2 , *pioutput[m] + seq.min_interval[m + 1] / 2));
+                  break;
+                case REAL_VALUE :
+                  entropy -= backward[j][k] * log(continuous_parametric_process[m + 1]->observation[k]->mass_computation(*proutput[m] - seq.min_interval[m + 1] / 2 , *proutput[m] + seq.min_interval[m + 1] / 2));
+                  break;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      for (j = 0;j < nb_state;j++) {
+        if (initial[j] > 0.) {
+          entropy -= backward[0][j] * log(initial[j]);
+        }
+      }
+
+      for (j = 0;j < nb_state;j++) {
+        for (k = 0;k < nb_state;k++) {
+          if (transition[j][k] > 0.) {
+            entropy -= transition_entropy[j][k] * log(transition[j][k]);
+          }
+        }
+      }
+
+      for (j = 0;j < nb_state;j++) {
+        if (state_subtype[j] == SEMI_MARKOVIAN) {
+          occupancy = nonparametric_process[0]->sojourn_time[j];
+
+          if (initial[j] > 0.) {
+            obs_product = 1.;
+
+#           ifdef DEBUG
+            backward0[j] = 0.;
+#           endif
+
+            for (k = 1;k < MIN(seq.length[i] + 1 , occupancy->nb_value);k++) {
+              obs_product *= observation[k - 1][j] / norm[k - 1];
+              if (obs_product == 0.) {
+                break;
+              }
+
+              occupancy_auxiliary[k] = 0.;
+
+              if (backward1[k - 1][j] > 0.) {
+//              if (forward1[k - 1][j] > 0.) {
+                if (k < seq.length[i]) {
+                  switch (type) {
+
+                  case 'o' : {
+                    occupancy_auxiliary[k] = backward1[k - 1][j] * obs_product * occupancy->mass[k] *
+                                             initial[j] / forward1[k - 1][j];
+                    occupancy_entropy[j][k] += occupancy_auxiliary[k];
+
+/*                    if (occupancy->mass[k] > 0.) {
+                      entropy -= occupancy_auxiliary[k] * log(occupancy->mass[k]);
+                    } */
+                    break;
+                  }
+
+                  case 'e' : {
+                    occupancy_auxiliary[k] = backward1[k - 1][j] * obs_product * forward[j]->mass[k] *
+                                             initial[j] / forward1[k - 1][j];
+                    if (forward[j]->mass[k] > 0.) {
+                      entropy -= occupancy_auxiliary[k] * log(forward[j]->mass[k]);
+                    }
+                    break;
+                  }
+                  }
+                }
+
+                else {
+                  switch (type) {
+
+                  case 'o' : {
+                    occupancy_auxiliary[k] = obs_product * (1. - occupancy->cumul[k - 1]) * initial[j];
+                    if (occupancy->cumul[k - 1] < 1.) {
+                      entropy -= occupancy_auxiliary[k] * log(1. - occupancy->cumul[k - 1]);
+                    }
+                    break;
+                  }
+
+                  case 'e' : {
+                    occupancy_auxiliary[k] = obs_product * (1. - forward[j]->cumul[k - 1]) * initial[j];
+                    if (forward[j]->cumul[k - 1] < 1.) {
+                      entropy -= occupancy_auxiliary[k] * log(1. - forward[j]->cumul[k - 1]);
+                    }
+                    break;
+                  }
+                  }
+                }
+
+#               ifdef DEBUG
+                backward0[j] += occupancy_auxiliary[k];
+#               endif
+
+              }
+            }
+
+#           ifdef DEBUG
+            cout << j << " " << backward[0][j] << " " << backward0[j] << endl;
+#           endif
+          }
+
+          for (k = occupancy->offset;k < MIN(seq.length[i] , occupancy->nb_value);k++) {
+            if (occupancy->mass[k] > 0.) {
+              entropy -= occupancy_entropy[j][k] * log(occupancy->mass[k]);
+            }
+          }
+        }
+      }
+
+      entropy += seq_likelihood;
+
+      if ((entropy < seq.entropy[i] - DOUBLE_ERROR) || (entropy > seq.entropy[i] + DOUBLE_ERROR)) {
+        cout << "\nERROR: " << i << " " << seq.entropy[i] << " " << entropy << endl;
+      }
+#     endif
+
+    }
+  }
+
+  for (i = 0;i < seq.max_length;i++) {
+    delete [] observation[i];
+  }
+  delete [] observation;
+
+  delete [] norm;
+  delete [] state_norm;
+
+  for (i = 0;i < seq.max_length;i++) {
+    delete [] forward1[i];
+  }
+  delete [] forward1;
+
+  for (i = 0;i < seq.max_length - 1;i++) {
+    delete [] state_in[i];
+  }
+  delete [] state_in;
+
+  delete [] transition_predicted;
+  delete [] occupancy_predicted;
+
+  for (i = 0;i < seq.max_length;i++) {
+    delete [] state_entropy[i];
+  }
+  delete [] state_entropy;
+
+  for (i = 0;i < seq.max_length;i++) {
+    delete [] predicted_entropy[i];
+  }
+  delete [] predicted_entropy;
+
+# ifdef MESSAGE
+  for (i = 0;i < seq.max_length;i++) {
+    delete [] backward[i];
+  }
+  delete [] backward;
+
+  for (i = 0;i < seq.max_length;i++) {
+    delete [] backward1[i];
+  }
+  delete [] backward1;
+
+  delete [] auxiliary;
+  delete [] occupancy_auxiliary;
+
+  for (i = 0;i < nb_state;i++) {
+    delete [] transition_entropy[i];
+  }
+  delete [] transition_entropy;
+
+  for (i = 0;i < nb_state;i++) {
+    delete [] occupancy_entropy[i];
+  }
+  delete [] occupancy_entropy;
+# endif
+
+  delete [] pioutput;
+  delete [] proutput;
+}
+
+
+/*--------------------------------------------------------------*
+ *
  *  Calcul des profils d'etats et d'entropie par l'algorithme forward-backward.
  *
  *  arguments : reference sur un objet MarkovianSequences, indice de la sequence,
@@ -2268,6 +2985,22 @@ double HiddenSemiMarkov::viterbi(const MarkovianSequences &seq ,
   delete [] proutput;
 
   return likelihood;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul des sequences d'etats les plus probables par l'algorithme de Viterbi.
+ *
+ *  argument : reference sur un objet SemiMarkovData.
+ *
+ *--------------------------------------------------------------*/
+
+void HiddenSemiMarkov::viterbi(SemiMarkovData &seq) const
+
+{
+  seq.posterior_probability = new double[seq.nb_sequence];
+  seq.likelihood = viterbi(seq , seq.posterior_probability);
 }
 
 
@@ -4819,11 +5552,11 @@ SemiMarkovData* HiddenSemiMarkov::state_sequence_computation(StatError &error , 
 
     hsmarkov = new HiddenSemiMarkov(*this , false);
 
+    hsmarkov->forward_backward(*seq);
+
     hsmarkov->create_cumul();
     hsmarkov->log_computation();
-
-    seq->posterior_probability = new double[seq->nb_sequence];
-    seq->likelihood = hsmarkov->viterbi(*seq , seq->posterior_probability);
+    hsmarkov->viterbi(*seq);
 
     delete hsmarkov;
 
@@ -4886,7 +5619,7 @@ SemiMarkovData* HiddenSemiMarkov::state_sequence_computation(StatError &error , 
       seq->build_characteristic(0 , true , (type == 'e' ? true : false));
 
       seq->build_transition_count(this);
-      seq->build_observation_frequency_distribution();
+      seq->build_observation_frequency_distribution(nb_state);
 
 /*      if ((seq->max_value[0] < nb_state - 1) || (!(seq->characteristics[0]))) {
         delete seq;
@@ -5030,10 +5763,10 @@ bool MarkovianSequences::comparison(StatError &error , ostream &os , int nb_mode
       for (j = 0;j < nb_model;j++) {
         switch (algorithm) {
         case FORWARD :
-          likelihood[i][j] = hsmarkov[j]->likelihood_computation(*this , 0 , i);
+          likelihood[i][j] = hsmarkov[j]->likelihood_computation(*this , NULL , i);
           break;
         case VITERBI :
-          likelihood[i][j] = hsmarkov[j]->viterbi(*seq , 0 , i);
+          likelihood[i][j] = hsmarkov[j]->viterbi(*seq , NULL , i);
           break;
         }
       }
@@ -5196,8 +5929,9 @@ DistanceMatrix* HiddenSemiMarkov::divergence_computation(StatError &error , ostr
 {
   bool status = true , lstatus;
   register int i , j , k;
-  int cumul_length;
-  double ref_likelihood , target_likelihood , **likelihood;
+  int cumul_length , nb_failure;
+  double **likelihood;
+  long double divergence;
   const HiddenSemiMarkov **hsmarkov;
   MarkovianSequences *seq;
   SemiMarkovData *simul_seq;
@@ -5332,32 +6066,51 @@ DistanceMatrix* HiddenSemiMarkov::divergence_computation(StatError &error , ostr
         likelihood[j] = new double[nb_model];
       }
 
-      ref_likelihood = 0.;
       for (j = 0;j < seq->nb_sequence;j++) {
-        likelihood[j][i] = hsmarkov[i]->likelihood_computation(*seq , 0 , j);
-        ref_likelihood += likelihood[j][i];
+        likelihood[j][i] = hsmarkov[i]->likelihood_computation(*seq , NULL , j);
+
+#       ifdef MESSAGE
+        if (likelihood[j][i] == D_INF) {
+          os << "\nERROR - " << SEQ_error[SEQR_REFERENCE_MODEL] << ": " << i + 1 << endl;
+        }
+#       endif
+
       }
 
       // calcul des vraisemblances de l'echantillon pour chacune des semi-chaines de Markov cachees
 
       for (j = 0;j < nb_model;j++) {
         if (j != i) {
-          target_likelihood = 0.;
+          divergence = 0.;
+          cumul_length = 0;
+          nb_failure = 0;
+
           for (k = 0;k < seq->nb_sequence;k++) {
-            likelihood[k][j] = hsmarkov[j]->likelihood_computation(*seq , 0 , k);
-            if (target_likelihood != D_INF) {
+            likelihood[k][j] = hsmarkov[j]->likelihood_computation(*seq , NULL , k);
+
+//            if (divergence != -D_INF) {
               if (likelihood[k][j] != D_INF) {
-                target_likelihood += likelihood[k][j];
+                divergence += likelihood[k][i] - likelihood[k][j];
+                cumul_length += seq->length[k];
               }
               else {
-                target_likelihood = D_INF;
+                nb_failure++;
+//                divergence = -D_INF;
               }
-            }
+//            }
           }
 
-          if (target_likelihood != D_INF) {
-            dist_matrix->update(i + 1 , j + 1 , ref_likelihood - target_likelihood , seq->cumul_length);
+#         ifdef MESSAGE
+          if (nb_failure > 0) {
+            os << "\nWARNING - " << SEQ_error[SEQR_REFERENCE_MODEL] << ": " << i + 1 << ", "
+               << SEQ_error[SEQR_TARGET_MODEL] << ": " << j + 1 << " - "
+               << SEQ_error[SEQR_DIVERGENCE_NB_FAILURE] << ": " << nb_failure << endl;
           }
+#         endif
+
+//          if (divergence != -D_INF) {
+            dist_matrix->update(i + 1 , j + 1 , divergence , cumul_length);
+//          }
         }
       }
 
