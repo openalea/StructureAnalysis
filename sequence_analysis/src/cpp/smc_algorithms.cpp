@@ -187,11 +187,8 @@ void SemiMarkov::initial_probability_computation()
   for (i = 0;i < nb_state;i++) {
     sum += initial[i];
   }
-
-  if (sum < 1.) {
-    for (i = 0;i < nb_state;i++) {
-      initial[i] /= sum;
-    }
+  for (i = 0;i < nb_state;i++) {
+    initial[i] /= sum;
   }
 
   delete [] state;
@@ -1602,7 +1599,7 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostrea
       // estimation des lois d'observation
 
       if (smarkov->nb_output_process == 1) {
-        seq->build_observation_frequency_distribution();
+        seq->build_observation_frequency_distribution(smarkov->nb_state);
 
         for (i = 0;i < smarkov->nb_state;i++) {
           seq->observation_distribution[1][i]->distribution_estimation(smarkov->nonparametric_process[1]->observation[i]);
@@ -2017,8 +2014,8 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , const FrequencyDistrib
     }
 
     seq->build_transition_count(smarkov);
-    seq->build_observation_frequency_distribution();
-    seq->build_observation_histogram();
+    seq->build_observation_frequency_distribution(nb_state);
+    seq->build_observation_histogram(nb_state);
     seq->build_characteristic(I_DEFAULT , true , (type == 'e' ? true : false));
 
 /*    if ((seq->max_value[0] < nb_state - 1) || (!(seq->characteristics[0]))) {
@@ -2173,8 +2170,9 @@ DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , ostream &o
 {
   bool status = true , lstatus;
   register int i , j , k;
-  int cumul_length;
-  double ref_likelihood , target_likelihood , **likelihood;
+  int cumul_length , nb_failure;
+  double **likelihood;
+  long double divergence;
   const SemiMarkov **smarkov;
   MarkovianSequences *iseq , *seq;
   SemiMarkovData *simul_seq;
@@ -2316,10 +2314,15 @@ DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , ostream &o
         likelihood[j] = new double[nb_model];
       }
 
-      ref_likelihood = 0.;
       for (j = 0;j < simul_seq->nb_sequence;j++) {
         likelihood[j][i] = smarkov[i]->likelihood_computation(*simul_seq , j);
-        ref_likelihood += likelihood[j][i];
+
+#       ifdef MESSAGE
+        if (likelihood[j][i] == D_INF) {
+          os << "\nERROR - " << SEQ_error[SEQR_REFERENCE_MODEL] << ": " << i + 1 << endl;
+        }
+#       endif
+
       }
 
       if (smarkov[i]->nb_output_process == 1) {
@@ -2340,22 +2343,36 @@ DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , ostream &o
             seq = iseq;
           }
 
-          target_likelihood = 0.;
+          divergence = 0.;
+          cumul_length = 0;
+          nb_failure = 0;
+
           for (k = 0;k < seq->nb_sequence;k++) {
             likelihood[k][j] = smarkov[j]->likelihood_computation(*seq , k);
-            if (target_likelihood != D_INF) {
+
+//            if (divergence != -D_INF) {
               if (likelihood[k][j] != D_INF) {
-                target_likelihood += likelihood[k][j];
+                divergence += likelihood[k][i] - likelihood[k][j];
+                cumul_length += seq->length[k];
               }
               else {
-                target_likelihood = D_INF;
+                nb_failure++;
+//                divergence = -D_INF;
               }
-            }
+//            }
           }
 
-          if (target_likelihood != D_INF) {
-            dist_matrix->update(i + 1 , j + 1 , ref_likelihood - target_likelihood , seq->cumul_length);
+#         ifdef MESSAGE
+          if (nb_failure > 0) {
+            os << "\nWARNING - " << SEQ_error[SEQR_REFERENCE_MODEL] << ": " << i + 1 << ", "
+               << SEQ_error[SEQR_TARGET_MODEL] << ": " << j + 1 << " - "
+               << SEQ_error[SEQR_DIVERGENCE_NB_FAILURE] << ": " << nb_failure << endl;
           }
+#         endif
+
+//          if (divergence != -D_INF) {
+            dist_matrix->update(i + 1 , j + 1 , divergence , cumul_length);
+//          }
 
           if (smarkov[j]->nb_output_process == 1) {
             delete seq;
