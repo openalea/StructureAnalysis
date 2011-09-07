@@ -71,6 +71,7 @@ class HiddenVariableOrderMarkov : public VariableOrderMarkov {  // chaine de Mar
 
 private :
 
+    void forward_backward(VariableOrderMarkovData &seq) const;
     double forward_backward(const MarkovianSequences &seq , int index ,
                             std::ostream *os , MultiPlotSet *plot_set , char format ,
                             double &max_marginal_entropy , double &entropy1) const;
@@ -79,8 +80,9 @@ private :
                                      int nb_state_sequence = NB_STATE_SEQUENCE) const;
 
     void log_computation();
-    double viterbi(const MarkovianSequences &seq , double *posterior_probability = NULL ,
+    double viterbi(const MarkovianSequences &seq , double *posterior_probability ,
                    int index = I_DEFAULT) const;
+    void viterbi(VariableOrderMarkovData &seq) const;
     double generalized_viterbi(const MarkovianSequences &seq , int index ,
                                std::ostream &os , double seq_likelihood , char format ,
                                int inb_state_sequence) const;
