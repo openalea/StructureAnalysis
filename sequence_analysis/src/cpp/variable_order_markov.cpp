@@ -1891,7 +1891,7 @@ void VariableOrderMarkov::threshold_application(double min_probability)
         norm = 0.;
 
         for (j = 0;j < nb_state;j++) {
-          if (transition[i][j] <= min_probability) {
+          if ((accessibility[state[i][0]][j]) && (transition[i][j] <= min_probability)) {
             nb_correction++;
             transition[i][j] = min_probability;
           }
@@ -1921,7 +1921,7 @@ void VariableOrderMarkov::threshold_application(double min_probability)
     }
   }
 
-  if (accessibility) {
+/*  if (accessibility) {
     for (i = 0;i < nb_state;i++) {
       delete [] accessibility[i];
     }
@@ -1939,7 +1939,7 @@ void VariableOrderMarkov::threshold_application(double min_probability)
   }
   nb_component = 0;
 
-  component_computation();
+  component_computation(); */
 
   if (next) {
     for (i = 1;i < nb_row;i++) {
