@@ -3608,7 +3608,7 @@ bool HiddenVariableOrderMarkov::state_profile_write(StatError &error , ostream &
   }
 
   if (status) {
-    if (iseq.type[0] != STATE) {
+    if (nb_output_process == iseq.nb_variable) {
       seq = new VariableOrderMarkovData(iseq);
     }
     else {
