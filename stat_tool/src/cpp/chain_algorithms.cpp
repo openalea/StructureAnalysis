@@ -775,7 +775,8 @@ void Chain::thresholding(double min_probability , bool semi_markov)
       norm = 0.;
 
       for (j = 0;j < nb_state;j++) {
-        if (((!semi_markov) || (j != i)) && (transition[i][j] <= min_probability)) {
+        if (((!semi_markov) || (j != i)) && (accessibility[i][j]) &&
+            (transition[i][j] <= min_probability)) {
           nb_correction++;
           transition[i][j] = min_probability;
         }
@@ -798,7 +799,7 @@ void Chain::thresholding(double min_probability , bool semi_markov)
     while (!stop);
   }
 
-  if (accessibility) {
+/*  if (accessibility) {
     for (i = 0;i < nb_state;i++) {
       delete [] accessibility[i];
     }
@@ -816,7 +817,7 @@ void Chain::thresholding(double min_probability , bool semi_markov)
   }
   nb_component = 0;
 
-  component_computation();
+  component_computation(); */
 }
 
 
