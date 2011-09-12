@@ -221,7 +221,8 @@ double SemiMarkov::likelihood_computation(const MarkovianSequences &seq , int in
 
   if (nb_output_process + 1 == seq.nb_variable) {
     for (i = 0;i <= nb_output_process;i++) {
-      if ((nonparametric_process[i]) || (discrete_parametric_process[i])) {
+      if (((nonparametric_process[i]) || (discrete_parametric_process[i])) &&
+          (seq.marginal_distribution[i])) {
         if (nonparametric_process[i]) {
           nb_value = nonparametric_process[i]->nb_value;
         }
