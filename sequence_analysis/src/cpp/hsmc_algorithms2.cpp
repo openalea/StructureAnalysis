@@ -4538,7 +4538,7 @@ bool HiddenSemiMarkov::state_profile_write(StatError &error , ostream &os ,
   }
 
   if (status) {
-    if (iseq.type[0] != STATE) {
+    if (nb_output_process == iseq.nb_variable) {
       seq = new SemiMarkovData(iseq);
     }
     else {
