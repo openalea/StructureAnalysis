@@ -1637,14 +1637,14 @@ double ContinuousParametric::simulation() const
         value += step;
         i++;
       }
-      while (cumul[i] < limit);
+      while ((cumul[i] < limit) && (i < VON_MISES_NB_STEP));
 
       value -= step * (cumul[i] - limit) / (cumul[i] - cumul[i - 1]);
     }
 
     else {
-      current_cumul = 0.;
       value = 0.;
+      current_cumul = 0.;
 
       switch (unit) {
 
@@ -1657,7 +1657,7 @@ double ContinuousParametric::simulation() const
           current_cumul += exp(dispersion * cos((value - step / 2 - location) * M_PI / 180)) * step /
                            (360 * cyl_bessel_i(0 , dispersion));
         }
-        while (current_cumul < limit);
+        while ((current_cumul < limit) && (value < 360.));
         break;
       }
 
@@ -1670,7 +1670,7 @@ double ContinuousParametric::simulation() const
           current_cumul += exp(dispersion * cos(value - step / 2 - location)) * step /
                            (2 * M_PI * cyl_bessel_i(0 , dispersion));
         }
-        while (current_cumul < limit);
+        while ((current_cumul < limit) && (value < 2 * M_PI));
         break;
       }
       }
