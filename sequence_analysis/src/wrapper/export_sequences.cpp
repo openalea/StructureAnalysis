@@ -1075,11 +1075,11 @@ public:
   }
 
   static Sequences*
-  pointwise_average(const Sequences &seq, bool standard_deviation, int output,
+  pointwise_average(const Sequences &seq, bool circular, bool standard_deviation, int output,
       const char *path, char format)
   {
     SIMPLE_METHOD_TEMPLATE_1(seq, pointwise_average, Sequences,
-        standard_deviation, output, path, format);
+        circular, standard_deviation, output, path, format);
   }
 
   static Sequences*
@@ -1453,7 +1453,7 @@ class_sequences()
    DEF_RETURN_VALUE("moving_average", SequencesWrap::moving_average,args("nb_point" ,"filter" , "variable" , "begin_end" , "output"),"Moving average from an array")
    DEF_RETURN_VALUE("moving_average_from_distribution", SequencesWrap::moving_average_from_distribution,args("nb_point" ,"filter" , "variable" , "begin_end" , "output"),"Moving average fron distribution ")
    DEF_RETURN_VALUE("partial_autocorrelation_computation", SequencesWrap::partial_autocorrelation_computation, args("variable", "itype", "max_lag"),"Transcode")
-   DEF_RETURN_VALUE("pointwise_average", SequencesWrap::pointwise_average, args("standard_deviation", "output", "path", "format"), "Pointwise average")
+   DEF_RETURN_VALUE("pointwise_average", SequencesWrap::pointwise_average, args("circular", "standard_deviation", "output", "path", "format"), "Pointwise average")
    DEF_RETURN_VALUE("recurrence_time_sequences", SequencesWrap::recurrence_time_sequences,args("variable", "value"),"Recurrence time sequences")
    DEF_RETURN_VALUE("remove_run",SequencesWrap::remove_run, args("variable","ivalue", "position", "max_run_length"), "see RemoveRun")
    DEF_RETURN_VALUE("round", SequencesWrap::round, args("variable", "mode"),"round variable")
