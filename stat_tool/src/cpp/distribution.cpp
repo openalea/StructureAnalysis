@@ -168,6 +168,42 @@ Distribution::Distribution(int inb_value)
 
 /*--------------------------------------------------------------*
  *
+ *  Constructeur de la classe Distribution.
+ *
+ *  arguments : nombre de valeurs, masses de probabilite.
+ *
+ *--------------------------------------------------------------*/
+
+Distribution::Distribution(int inb_value , double *imass)
+
+{
+  register int i;
+
+
+  nb_value = inb_value;
+  alloc_nb_value = nb_value;
+
+  complement = 0.;
+  nb_parameter = 0;
+
+  mass = new double[nb_value];
+  cumul = new double[nb_value];
+
+  for (i = 0;i < nb_value;i++) {
+    mass[i] = imass[i];
+  }
+
+  cumul_computation();
+
+  offset_computation();
+  max_computation();
+  mean_computation();
+  variance_computation();
+}
+
+
+/*--------------------------------------------------------------*
+ *
  *  Construction d'un objet Distribution a partir d'un objet
  *  Distribution initial avec changement d'echelle.
  *
