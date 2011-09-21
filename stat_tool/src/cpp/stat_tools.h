@@ -514,6 +514,7 @@ class Distribution {    // loi de probabilite discrete
 // public :
 
     Distribution(int inb_value = 0);
+    Distribution(int inb_value , double *imass);
     Distribution(const Distribution &dist , double scaling_coeff);
     Distribution(const FrequencyDistribution &histo);
     Distribution(const Distribution &dist , char transform = 'c' ,
