@@ -43,7 +43,10 @@ public:
 
 	//Constructor
   PyGeneralMatchPath(boost::python::object in_list,  boost::python::object ref_list, boost::python::object in_successor, boost::python::object ref_predecessor) :  
-	  GeneralMatchPath( extract_vec<int>(in_list)(),extract_vec<int>(ref_list)()), 
+	  GeneralMatchPath( extract_vec<int>(in_list)(),
+                        extract_vec<int>(ref_list)(),
+                        extract_vec<std::vector<int>, extract_vec<int> >(in_successor)(),
+                        extract_vec<std::vector<int>, extract_vec<int> >(ref_predecessor)()), 
 	  bp::wrapper<GeneralMatchPath>() 
 	  {      }
 
@@ -93,7 +96,10 @@ typedef boost::shared_ptr<PyGeneralMatchPath> PyGeneralMatchPathPtr;
 void export_GeneralMatchPath() {
 
 	class_<PyGeneralMatchPath,PyGeneralMatchPathPtr,boost::noncopyable>
-	  ("GeneralMatchPath", init<boost::python::object,boost::python::object>("Constructor of GeneralMatchPath"))
+	  ("GeneralMatchPath", init<boost::python::object,
+                                boost::python::object,
+                                boost::python::object,
+                                boost::python::object>("Constructor of GeneralMatchPath"))
 	  .def( "bipartiteMatching", &PyGeneralMatchPath::py_minCostFlow,"Get the list of mapped vertices")
 	  .def("edgeCost", &GeneralMatchPath::edgeCost, &PyGeneralMatchPath::default_edgeCost)
 	;

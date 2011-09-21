@@ -40,12 +40,12 @@
 /* ----------------------------------------------------------------------- */
 
 template<class T, 
-	 template < typename > class extractor_t = boost::python::extract, 
+	 class extractor_t = boost::python::extract<T>, 
 	 class result_type = std::vector<T> >
 struct extract_vec {
 
 	typedef T element_type;
-	typedef extractor_t<T> extractor_type;
+	typedef extractor_t extractor_type;
 
 	extract_vec(boost::python::object _pylist):pylist(_pylist) {}
 	boost::python::object pylist;
