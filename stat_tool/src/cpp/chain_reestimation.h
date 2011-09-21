@@ -51,7 +51,6 @@ template <typename Type>
 class ChainReestimation {  // structure de donnees correspondant a une chaine de Markov
 
 /*    friend class Markovian_sequences;
-
     friend class Hidden_markov_tree_data;   module STAT_TREES */
 
     friend std::ostream& operator<<(std::ostream &os , const ChainReestimation<Type> &chain_data)
