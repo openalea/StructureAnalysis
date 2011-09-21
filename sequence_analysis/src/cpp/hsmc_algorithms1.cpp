@@ -2061,7 +2061,14 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
 
       for (i = 1;i <= hsmarkov->nb_output_process;i++) {
         if ((hsmarkov->discrete_parametric_process[i]) || (hsmarkov->continuous_parametric_process[i])) {
-          weight = hsmarkov->nonparametric_process[0]->weight_computation();
+          switch (hsmarkov->type) {
+          case 'o' :
+            weight = hsmarkov->nonparametric_process[0]->weight_computation();
+            break;
+          case 'e' :
+            weight = new Distribution(hsmarkov->nb_state , hsmarkov->initial);
+            break;
+          }
           break;
         }
       }
@@ -3861,7 +3868,14 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
 
       for (i = 1;i <= hsmarkov->nb_output_process;i++) {
         if ((hsmarkov->discrete_parametric_process[i]) || (hsmarkov->continuous_parametric_process[i])) {
-          weight = hsmarkov->nonparametric_process[0]->weight_computation();
+          switch (hsmarkov->type) {
+          case 'o' :
+            weight = hsmarkov->nonparametric_process[0]->weight_computation();
+            break;
+          case 'e' :
+            weight = new Distribution(hsmarkov->nb_state , hsmarkov->initial);
+            break;
+          }
           break;
         }
       }
