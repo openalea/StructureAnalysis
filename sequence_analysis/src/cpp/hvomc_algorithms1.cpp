@@ -1549,7 +1549,30 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_esti
 
       for (i = 1;i <= hmarkov->nb_output_process;i++) {
         if ((hmarkov->discrete_parametric_process[i]) || (hmarkov->continuous_parametric_process[i])) {
-          weight = hmarkov->nonparametric_process[0]->weight_computation();
+          switch (hmarkov->type) {
+
+          case 'o' : {
+            weight = hmarkov->nonparametric_process[0]->weight_computation();
+            break;
+          }
+
+          case 'e' : {
+            weight = new Distribution(hmarkov->nb_state);
+
+            for (j = 0;j < hmarkov->nb_state;j++) {
+              weight->mass[j] = 0.;
+            }
+            for (j = 1;j < hmarkov->nb_row;j++) {
+              if ((hmarkov->memory_type[j] == TERMINAL) || (hmarkov->memory_type[j] == COMPLETION)) {
+                weight->mass[hmarkov->state[j][0]] += hmarkov->initial[j];
+              }
+            }
+
+            weight->cumul_computation();
+            weight->max_computation();
+            break;
+          }
+          }
           break;
         }
       }
@@ -2770,7 +2793,30 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_stoc
 
       for (i = 1;i <= hmarkov->nb_output_process;i++) {
         if ((hmarkov->discrete_parametric_process[i]) || (hmarkov->continuous_parametric_process[i])) {
-          weight = hmarkov->nonparametric_process[0]->weight_computation();
+          switch (hmarkov->type) {
+
+          case 'o' : {
+            weight = hmarkov->nonparametric_process[0]->weight_computation();
+            break;
+          }
+
+          case 'e' : {
+            weight = new Distribution(hmarkov->nb_state);
+
+            for (j = 0;j < hmarkov->nb_state;j++) {
+              weight->mass[j] = 0.;
+            }
+            for (j = 1;j < hmarkov->nb_row;j++) {
+              if ((hmarkov->memory_type[j] == TERMINAL) || (hmarkov->memory_type[j] == COMPLETION)) {
+                weight->mass[hmarkov->state[j][0]] += hmarkov->initial[j];
+              }
+            }
+
+            weight->cumul_computation();
+            weight->max_computation();
+            break;
+          }
+          }
           break;
         }
       }
