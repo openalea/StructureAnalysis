@@ -900,7 +900,7 @@ NonparametricSequenceProcess* occupancy_parsing(StatError &error , ifstream &in_
 
 /*--------------------------------------------------------------*
  *
- *  Calcul de la distribution marginale des etats.
+ *  Calcul de la distribution marginale des etats pour un processus ordinaire.
  *
  *--------------------------------------------------------------*/
 
