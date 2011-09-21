@@ -46,4 +46,5 @@ BOOST_PYTHON_MODULE(__tree_matching__)
   export_ExtMatching();
   export_MatchPath();
   export_ChoiceTable();
+  export_GeneralMatchPath();
 };
