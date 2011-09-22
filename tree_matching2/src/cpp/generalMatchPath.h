@@ -111,6 +111,7 @@ class TREEMATCH_API GeneralMatchPath : public MatchPath
     CostVector         cost;     // Vecteur cout
     int                nbEdge;          // Nombre d'arcs dans le graphe de flot.
     int                nbVertex;        // Nombre de sommets dans le graphe de flot.
+    
 };
 
 #endif

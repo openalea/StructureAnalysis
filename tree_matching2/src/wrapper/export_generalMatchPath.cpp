@@ -48,7 +48,7 @@ public:
                         extract_vec<std::vector<int>, extract_vec<int> >(in_successor)(),
                         extract_vec<std::vector<int>, extract_vec<int> >(ref_predecessor)()), 
 	  bp::wrapper<GeneralMatchPath>() 
-	  {      }
+  { cerr<<"Constructor"<<endl ;    }
 
   virtual ~PyGeneralMatchPath() {}
 
@@ -73,6 +73,7 @@ public:
 
 
   boost::python::object py_minCostFlow(){
+    cerr<<"Min Cost Flow"<<endl;
     VertexVector map_list;
     map_list.resize(this->nbVertex,-1);
     DistanceType dist = this->minCostFlow(map_list);
