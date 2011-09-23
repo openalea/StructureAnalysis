@@ -16,7 +16,7 @@ class MyMatching(GeneralMatchPath):
                 return abs(a-b)
 
 
-def test(maxinrange = 1000 ,maxoutrange = 1000,deg = 4):
+def test(maxinrange = 10000 ,maxoutrange = 10000,deg = 4):
     print "test"
     m = MyMatching(maxinrange,maxoutrange,deg)
     print "Debut Matching" 
