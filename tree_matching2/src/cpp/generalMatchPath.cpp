@@ -356,12 +356,17 @@ DistanceType GeneralMatchPath::minCostFlow(VertexVector& map_list)
   // La valeur du flot initialement est de 0
   DistanceType flow_value=0;
   // Le flot maximum est le max de ni, nj.
-  DistanceType flow_max=D_MAX(ni,nj);
+  //  DistanceType flow_max=D_MAX(ni,nj);
+  //DistanceType flow_max=D_MAX(ni,nj);a
+  DistanceType flow_max=ni+nj;
 
   bool path = true ;
 
   for (int f=1;(f<=flow_max)&&(path);f++)
     {
+      if (int(100.*f/flow_max)%5 == 0)
+	cerr << "\x0d" << "Already computed : "<<int(100.*f/flow_max) <<"% " <<" matched ... "<<flush;              
+
       //cerr<<"Current Flow = "<<f<<" - current vertex = "<<current_vertex<<endl;
       //cerr<<"Flow value = "<<flow_value<<endl;
       //On cherche le plus court chemin avec les poids de EDMONS AND KARP"<<endl;
@@ -403,6 +408,7 @@ DistanceType GeneralMatchPath::minCostFlow(VertexVector& map_list)
 	  while(current_vertex!=source);
 	}
     }
+  cerr<<endl;
   return(flow_value);	
 }
 
