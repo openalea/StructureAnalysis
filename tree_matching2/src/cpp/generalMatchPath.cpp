@@ -51,7 +51,7 @@ GeneralMatchPath::GeneralMatchPath():
 
 GeneralMatchPath::GeneralMatchPath(const NodeList& input_list,const NodeList& reference_list, const VertexArray inputSuccessors, const VertexArray referencePredecessors):
   _inputList(0), _referenceList(0), _inputSuccessors(0), _referencePredecessors(0){
-  cerr<<"Initialisation GeneralMatch Path"<<endl;
+  //cerr<<"Initialisation GeneralMatch Path"<<endl;
   make(input_list,reference_list,inputSuccessors,referencePredecessors);
   int deg_max = I_MAX(input_list.size(),reference_list.size());
   // le degre max correspond aux noeuds vides
@@ -79,7 +79,7 @@ void GeneralMatchPath::link(int deg_max,MatchingDistanceTable* mdtable)
 		
 void GeneralMatchPath::make(const NodeList& input_list,const NodeList& reference_list, const VertexArray inputSuccessors, const VertexArray referencePredecessors)
 {
-  cerr<<"make"<<endl;
+  //cerr<<"make"<<endl;
   if(_inputList) delete _inputList;
   _inputList= new NodeList(input_list);
   if(_referenceList) delete _referenceList;
@@ -94,15 +94,16 @@ void GeneralMatchPath::make(const NodeList& input_list,const NodeList& reference
   int nj=_referenceList->size();
 
   // Le nombre de vertex est egal a la somme des deux ensembles plus deux noeuds 
-  // plus deux noeuds vides plus la source et le puis
+  // plus deux noeuds vides plus la source et le puit
   nbVertex=ni+nj+4;
   // le nombre d'arcs depend de la liste des successeurs somme des élements de _inputSuccessors
   nbEdge = 0;
-  for (int i = 0; i < _inputSuccessors.size(); i++)
-    nbEdge += _inputSuccessors[i].size();
-  nbEdge += 2*(ni + nj + 1);
+  // for (int i = 0; i < _inputSuccessors.size(); i++)
+  //   nbEdge += _inputSuccessors[i].size();
+  // nbEdge += 2*(ni + nj + 1);
 
-  cerr << "Nb edges = "<<nbEdge<<endl;
+  nbEdge = ni +(ni+1)*(nj+1) +nj+2;
+  //cerr << "Nb edges = "<<nbEdge<<endl;
 
   flow = CapacityVector(flow.size(),0);
   cost = CostVector(cost.size(),0.0);
@@ -231,8 +232,8 @@ bool GeneralMatchPath::findPath(VertexVector& VertexOnThePath,EdgeList& EdgeOnTh
 	  current_out_vertex=next_vertex(current_vertex,i);
 	  current_out_edge=next_edge(current_vertex,i);
 	  
-	  cerr<<"Next Edge : "<<current_vertex<<" - "<<i<<" -> "<<current_out_edge<<endl;
-	  cerr<<"Next Vertex : "<<current_vertex<<" - "<<i<<" -> "<<current_out_vertex<<endl;
+	  //cerr<<"Next Edge : "<<current_vertex<<" - "<<i<<" -> "<<current_out_edge<<endl;
+	  //cerr<<"Next Vertex : "<<current_vertex<<" - "<<i<<" -> "<<current_out_vertex<<endl;
 
 
 	  // On applique la transformation d'Edmonds and Karp pour que l'arc est une valeur non negative
@@ -252,7 +253,7 @@ bool GeneralMatchPath::findPath(VertexVector& VertexOnThePath,EdgeList& EdgeOnTh
 	      assert(VertexOnThePath.size() > current_out_vertex);
 	      VertexOnThePath[current_out_vertex]=current_vertex;
 	      if (EdgeOnThePath.size() <= current_out_vertex)
-		cerr<<"Probleme acces memoire"<<endl;
+		//cerr<<"Probleme acces memoire"<<endl;
 	      assert(EdgeOnThePath.size() > current_out_vertex);
 	      EdgeOnThePath[current_out_vertex]=current_out_edge;
 	      
@@ -361,6 +362,8 @@ DistanceType GeneralMatchPath::minCostFlow(VertexVector& map_list)
 
   for (int f=1;(f<=flow_max)&&(path);f++)
     {
+      //cerr<<"Current Flow = "<<f<<" - current vertex = "<<current_vertex<<endl;
+      //cerr<<"Flow value = "<<flow_value<<endl;
       //On cherche le plus court chemin avec les poids de EDMONS AND KARP"<<endl;
       path=findPath(PredOnThePath,EdgeOfThePath);
       current_vertex = sink;
@@ -392,7 +395,7 @@ DistanceType GeneralMatchPath::minCostFlow(VertexVector& map_list)
 	      else
 		{
 		  flow[flow_edge]=flow[flow_edge]+1;
-
+		  //cerr<<"Capacity => "<<flow_edge<<" = "<<capacity(flow_edge)<<endl;
 		  assert(flow[flow_edge]<=capacity(flow_edge));
 		}
 	      current_vertex=PredOnThePath[current_vertex];
@@ -414,7 +417,6 @@ DistanceType GeneralMatchPath::length(int residual_edge,int vertex1,int vertex2)
   int source=0;
   int sink=nbVertex-1;
   
-  
   if ((direct(residual_edge))&&(saturated(flow_edge))) 	{return(2*MAXDIST);};
   if ((reverse(residual_edge))&&(empty(flow_edge))) 	{return(2*MAXDIST);};
   
@@ -424,11 +426,14 @@ DistanceType GeneralMatchPath::length(int residual_edge,int vertex1,int vertex2)
     }
   else
     {
+      // cerr<<residual_edge<<" - "<<vertex1<<" -> "<<who(vertex1)<<" - "<<vertex2<<" -> "<<who(vertex2)<<endl;
       int treevertex1 = who(vertex1);
       int treevertex2 = who(vertex2);
       int empty=ni+1;
-      if (vertex1<=empty)
+      if (vertex1<=empty){
+	//	cerr<<"Edge Cost => "<<treevertex1<<" = "<<treevertex2<<" : "<<edgeCost(treevertex1,treevertex2)<<endl;
 	return((capacity(flow_edge)-flow[flow_edge])*edgeCost(treevertex1,treevertex2));
+      }
       else
 	return(-1*flow[flow_edge]*edgeCost(treevertex2,treevertex1));
     }				
@@ -437,6 +442,7 @@ DistanceType GeneralMatchPath::length(int residual_edge,int vertex1,int vertex2)
 
 int GeneralMatchPath::who(int vertex)
 {
+  //cerr<<"who("<<vertex<<")"<<endl;
   int ni=_inputList->size();
   int nj=_referenceList->size();
   int source=0;
@@ -449,24 +455,32 @@ int GeneralMatchPath::who(int vertex)
   int empty_ref=ni+nj+2;
   if ((vertex == empty_input) || (vertex == empty_ref))
     return EMPTY;
-  if (vertex < ni) 
-    {
-      NodeList::iterator begin;
-      begin = _inputList->begin();
-      //	  for (int i=0;i<vertex-1;i++)
-      for (int i=1;i<vertex;i++)
-	begin++;
-      return(*begin);
-    }
-  else 
-    {
-      NodeList::iterator begin;
-      begin = _referenceList->begin();
-      //	  for (int i=0;i<vertex-ni-1;i++)
-      for (int i=ni+1;i<vertex;i++)
-	begin++;
-      return(*begin);
-    }
+  // if (vertex <= ni) 
+  //   {
+  //     //cerr<<"input list"<<endl;
+  //     NodeList::iterator begin;
+  //     begin = _inputList->begin();
+  //     //	  for (int i=0;i<vertex-1;i++)
+  //     for (int i=0;i<vertex-1;i++){
+  // 	//cerr<<*begin<<endl;
+  // 	begin++;
+  //     }
+  //     return(*begin);
+  //   }
+  // else {
+  // 	NodeList::iterator begin;
+  // 	begin = _referenceList->begin();
+  // 	//	  for (int i=0;i<vertex-ni-1;i++)
+  // 	for (int i=0;i<vertex-2;i++){
+  // 	  cerr<<*begin<<endl;
+  // 	  begin++;
+  // 	}
+  // 	return(*begin);
+  //   }
+  if (vertex <= ni) 
+      return vertex -1;
+  else
+    return vertex-2;
 }
 
 //--------------------------------------------------------------------------
@@ -484,14 +498,14 @@ int GeneralMatchPath::nbOut(int n)
   nj++;
   if (n==0)  
     return ni; // connection de la source aux autres noeuds
-  if (n <= ni) 
+  if (n < ni) 
     return _inputSuccessors[n-1].size()+2;
-  if (n == ni+1)
-    return nj+1;
-  if (n <= ni + nj +1)
-    return _referencePredecessors[n-ni-2].size()+2;
-  if (n == ni + nj+2)
-    return ni+1; // Les deux noeuds vides ne sont pas reliés.
+  if (n == ni)
+    return nj;
+  if (n < ni + nj )
+    return _referencePredecessors[n-ni-1].size()+2;
+  if (n == ni + nj)
+    return ni; // Les deux noeuds vides ne sont pas reliés.
   else
     return nj;
 }
@@ -508,9 +522,9 @@ int GeneralMatchPath::next_edge(int n,int i)
   if (n==0) 
     return(2*(i-1));
   // sink
-  if (n==ni+nj+3) 
+  if (n==ni+nj+1) 
     return(2*ni+2*ni*nj+2*(i-1)+1);
-  if (n<=ni)
+  if (n<ni)
     {
       if (i==nbOut(n)) // arc retour
 	return 2*(n-1)+1;
@@ -518,29 +532,29 @@ int GeneralMatchPath::next_edge(int n,int i)
 	// on considere que le successor est code a partir de ni
 	int successor ;
 	if (i == nbOut(n)-1)
-	  return 2*ni+2*nj*n;
+	  return 2*ni+2*nj*n-2;
 	else
 	  successor = _inputSuccessors[n-1][i-1];
 	return 2*ni+2*nj*(n-1)+2*(successor-ni+1);
       }
     }
-  if (n == ni+1) // empty node
+  if (n == ni) // empty node
     if (i==nbOut(n))
       return 2*(n-1)+1;
     else
  	return 2*ni+2*nj*(n-1)+2*(i-1);
-  if (n <= ni+nj+1)
+  if (n < ni+nj)
     {
       if (i==nbOut(n))
 	return (2*(ni+ni*nj+(n-ni-1)));
       else{
 	int predecessor ;
 	if (i == nbOut(n) -1) // connection au noeud vide
-	  predecessor = ni + 1;
+	  predecessor = ni;
 	else
-	  predecessor = _referencePredecessors[n-ni-2][i-1]+1;
-	cerr<<"n "<<n<<" ni "<<ni<<" i "<<i<<" nbOut "<<nbOut(n)<<" pred = "<<predecessor<<endl;
-	return 2*ni+2*nj*(predecessor-1)+2*(n-ni+1)+1;
+	  predecessor = _referencePredecessors[n-ni-1][i-1]+1;
+	//	cerr<<"n "<<n<<" ni "<<ni<<" i "<<i<<" nbOut "<<nbOut(n)<<" pred = "<<predecessor<<endl;
+	return 2*ni+2*nj*(predecessor-1)+2*(n-ni-1)+1;
       }
     }
   else{ //empty node
@@ -557,8 +571,8 @@ int GeneralMatchPath::next_edge(int n,int i)
 
 int GeneralMatchPath::next_vertex(int n,int i)
 {
-  if (i>5)
-    exit(0);
+  // if (i>5)
+  //   exit(0);
   int ni=_inputList->size();
   int nj=_referenceList->size();
   ni++;
@@ -566,9 +580,9 @@ int GeneralMatchPath::next_vertex(int n,int i)
   
   if (n==0)
     return i;
-  if (n==ni+nj+3) 
+  if (n==ni+nj+1) 
     return ni+i ;
-  if (n<=ni)
+  if (n<ni)
     {      
       if (i==nbOut(n))        
 	return 0;      
@@ -579,20 +593,20 @@ int GeneralMatchPath::next_vertex(int n,int i)
 	return _inputSuccessors[n-1][i-1]+2;
       }
     }
-  if (n==ni+1){
+  if (n==ni){
     if (i==nbOut(n))        
       return 0;      
     else    
       return ni+i;        
   }  
-  if (n <= ni+nj+1)
+  if (n < ni+nj)
     {
       if (i==nbOut(n))
 	return ni+nj+1;
       else{
 	if (i == nbOut(n) - 1)
 	  return ni;
-	return _referencePredecessors[n-ni-2][i-1]-1;
+	return _referencePredecessors[n-ni-1][i-1]+1;
       }
     }
   else {

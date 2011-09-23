@@ -1,5 +1,5 @@
 from openalea.tree_matching import *
-
+import time
 
 class MyMatching(GeneralMatchPath):
     def __init__(self,maxinrange,maxoutrange,deg):
@@ -9,17 +9,23 @@ class MyMatching(GeneralMatchPath):
         print "inconnect = " , inconnect
         print "outconnect = " , outconnect
     def edgeCost(self,a,b):
-            print a,b
-            return abs(a-b)
+            #print "EdgeCost = ",a,b
+            if a == -1 or b == -1:
+                return 10000
+            else:
+                return abs(a-b)
 
 
-def test(maxinrange = 3 ,maxoutrange = 3,deg = 2):
+def test(maxinrange = 10000 ,maxoutrange = 10000,deg = 4):
     print "test"
     m = MyMatching(maxinrange,maxoutrange,deg)
     print "Debut Matching" 
+    start = time.clock()
     res = m.bipartiteMatching()
+    end = time.clock()
+    print "Elaspsed Time = ",end-start,seconds
     print "Matching"
-    print res
+    #print res
 
 if __name__ == '__main__':
     test()
