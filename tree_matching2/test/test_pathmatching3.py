@@ -11,12 +11,12 @@ class MyMatching(GeneralMatchPath):
     def edgeCost(self,a,b):
             #print "EdgeCost = ",a,b
             if a == -1 or b == -1:
-                return 1000.
+                return 10.
             else:
                 return abs(a-b)
 
 
-def test(maxinrange = 3 ,maxoutrange = 3,deg = 3):
+def test(maxinrange = 10 ,maxoutrange = 10,deg = 3):
     print "test"
     m = MyMatching(maxinrange,maxoutrange,deg)
     print "Debut Matching" 

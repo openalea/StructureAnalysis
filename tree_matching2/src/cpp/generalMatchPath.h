@@ -87,6 +87,8 @@ class TREEMATCH_API GeneralMatchPath : public MatchPath
     int nbOut(int);
     int who(int );
     int capacity(int);
+    bool is_saturated();
+
 
 	// call the evaluator. Still can be redefined.
     virtual DistanceType edgeCost(int a, int b)

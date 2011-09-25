@@ -183,6 +183,24 @@ bool GeneralMatchPath::direct(int residual_edge)
   return((residual_edge%2)==0);
 }
 
+// Test si tous les arcs sauf ceux rentrant et sortants des noeuds vides sont satures
+bool GeneralMatchPath::is_saturated()
+{
+  int ni=_inputList->size();
+  int nj=_referenceList->size();
+  bool sat = true;
+  for (int flow_edge = 0; flow_edge<ni; flow_edge++)
+    if (!saturated(flow_edge)){
+      // cerr<<"edge "<<flow_edge<<" is not saturated"<<endl;
+      return false;
+    }
+  for (int flow_edge = nbEdge-1-nj; flow_edge<nbEdge-1; flow_edge++)
+    if (!saturated(flow_edge)){
+      // cerr<<"edge "<<flow_edge<<" is not saturated"<<endl;
+      return false;
+    }
+  return true;
+}
 
 
 // -----------------------------------------
@@ -357,13 +375,14 @@ DistanceType GeneralMatchPath::minCostFlow(VertexVector& map_list)
   DistanceType flow_value=0;
   // Le flot maximum est le max de ni, nj.
   //  DistanceType flow_max=D_MAX(ni,nj);
-  //DistanceType flow_max=D_MAX(ni,nj);a
+  //DistanceType flow_max=D_MAX(ni,nj);
   DistanceType flow_max=ni+nj;
 
   bool path = true ;
 
-  for (int f=1;(f<=flow_max)&&(path);f++)
+  for (int f=1;(f<=flow_max)&&(path)&&(!is_saturated());f++)
     {
+      // cerr<<"Flow = "<<f<<endl;
       if (int(100.*f/flow_max)%5 == 0)
 	cerr << "\x0d" << "Already computed : "<<int(100.*f/flow_max) <<"% " <<" matched ... "<<flush;              
 
@@ -400,7 +419,7 @@ DistanceType GeneralMatchPath::minCostFlow(VertexVector& map_list)
 	      else
 		{
 		  flow[flow_edge]=flow[flow_edge]+1;
-		  //cerr<<"Capacity => "<<flow_edge<<" = "<<capacity(flow_edge)<<endl;
+		  //		  cerr<<"Capacity => "<<flow_edge<<" = "<<capacity(flow_edge)<<" - "<<flow[flow_edge]<<endl;
 		  assert(flow[flow_edge]<=capacity(flow_edge));
 		}
 	      current_vertex=PredOnThePath[current_vertex];

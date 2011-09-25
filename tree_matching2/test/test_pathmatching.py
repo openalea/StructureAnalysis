@@ -11,12 +11,12 @@ class MyMatching(GeneralMatchPath):
     def edgeCost(self,a,b):
             #print "EdgeCost = ",a,b
             if a == -1 or b == -1:
-                return 1000.
+                return 1.
             else:
                 return abs(a-b)
 
 
-def test(maxinrange = 10000 ,maxoutrange = 10000,deg = 4):
+def test(maxinrange = 3 ,maxoutrange = 3,deg = 2):
     print "test"
     m = MyMatching(maxinrange,maxoutrange,deg)
     print "Debut Matching" 
@@ -25,7 +25,7 @@ def test(maxinrange = 10000 ,maxoutrange = 10000,deg = 4):
     end = time.clock()
     print "Elaspsed Time = ",end-start,"seconds"
     print "Matching"
-   # print res
+    print res
 
 if __name__ == '__main__':
     test()
