@@ -376,15 +376,20 @@ DistanceType GeneralMatchPath::minCostFlow(VertexVector& map_list)
   // Le flot maximum est le max de ni, nj.
   //  DistanceType flow_max=D_MAX(ni,nj);
   //DistanceType flow_max=D_MAX(ni,nj);
+  DistanceType flow_min=D_MAX(ni,nj);
   DistanceType flow_max=ni+nj;
 
   bool path = true ;
+  int last_percentage = -1;
 
-  for (int f=1;(f<=flow_max)&&(path)&&(!is_saturated());f++)
+  for (int f=1;(f<=flow_max)&&(path)&&(f<flow_min || !is_saturated());f++)
+  // for (int f=1;(f<=flow_max)&&(path)&&(!is_saturated());f++)
     {
-      // cerr<<"Flow = "<<f<<endl;
-      if (int(100.*f/flow_max)%5 == 0)
-	cerr << "\x0d" << "Already computed : "<<int(100.*f/flow_max) <<"% " <<" matched ... "<<flush;              
+      int percentage = int(100.*f/flow_max);
+      if (percentage > last_percentage){
+        last_percentage = percentage;
+	    cerr << "\x0d" << "Already computed : "<< percentage <<"% " <<" matched ... "<<flush;
+      }
 
       //cerr<<"Current Flow = "<<f<<" - current vertex = "<<current_vertex<<endl;
       //cerr<<"Flow value = "<<flow_value<<endl;

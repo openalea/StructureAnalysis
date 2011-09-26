@@ -52,6 +52,26 @@ std::string treegraph_str( TreeGraph* tree )
 } 
 
 
+int py_next_iter(TreeGraph::const_pre_order_iterator * iter) {
+    if (iter->atEnd()) {
+         PyErr_SetString(PyExc_StopIteration, "index out of range");
+         boost::python::throw_error_already_set();
+    }
+    int value = *(*iter);
+    ++(*iter);
+    return value;
+}
+
+boost::python::object py_subtree_list(TreeGraph * tg, int node){
+    boost::python::list result;
+    for(TreeGraph::const_pre_order_iterator it = tg->subtree_iterator_begin(node); it != tg->subtree_iterator_end(node); ++it)
+        result.append(*it);
+    return result;
+}
+
+
+inline void nullfunc(TreeGraph::const_pre_order_iterator * ) { }
+
 void export_TreeGraph() {
 
 	class_<TreeGraph,TreeGraphPtr,boost::noncopyable>
@@ -74,6 +94,13 @@ void export_TreeGraph() {
     .def( "__repr__", treegraph_str )
     .def( "__str__", treegraph_str )
     .def( "__repr__", treegraph_str )
+    .def( "subtree_iter", &TreeGraph::subtree_iterator_begin)
+    .def( "subtree_list", &py_subtree_list)
 	;
 
+	class_<TreeGraph::const_pre_order_iterator>("TreeGraphPreOrderIterator",no_init)
+    .def("next",&py_next_iter)
+    .def("atEnd",&TreeGraph::const_pre_order_iterator::atEnd)
+    .def("__iter__",&nullfunc, return_self<>())
+    ;
 }

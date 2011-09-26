@@ -127,7 +127,7 @@ int TreeGraph::child(const int node,const int child_number) const
 }
 
 
-const NodeList TreeGraph::childList(const int vertex) const
+const NodeList& TreeGraph::childList(const int vertex) const
 {
   assert((vertex>=0)&&(vertex<_treenodes.size()));
   return (_treenodes[vertex]->getChildList());
@@ -255,3 +255,28 @@ ostream& TreeGraph::mtg_write(ostream &os) const
   return os;
 }
 
+/* -----------------------------------------------------------------*/
+
+
+// advance in the traversal
+void TreeGraph::const_pre_order_iterator::increment() {
+    int currentid = *__current;
+    const NodeList& childlist = __treegraph->childList(currentid);
+    if (!childlist.empty()){
+        push();
+        __current = childlist.begin();
+        __current_end = childlist.end();
+    }
+    else {
+        if (__current != __current_end) ++__current;
+        while (__current == __current_end && !__stack.empty()) {
+            pop(); 
+            if (__current != __current_end) ++__current;
+        }
+    }
+}
+
+bool TreeGraph::const_pre_order_iterator::atEnd() const { 
+    // printf("%i %i\n", distance(__current,__current_end), __stack.size());
+    return (__current == __current_end && __stack.empty()); 
+}
