@@ -1005,7 +1005,7 @@ bool Sequences::ascii_write(StatError &error , const char *path ,
  *
  *  Ecriture des sequences.
  *
- *  arguments : stream, format ('c' : column / 'l' : line / 'a' : array),
+ *  arguments : stream, format ('c' : column / 'l' : line / 'a' : array / 'p' : posterior),
  *              flag commentaire, probabilites a posteriori des sequences
  *              d'etats les plus probables, entropie des sequences d'etats
  *              (modeles markoviens caches), nombre de caracteres par ligne.
@@ -1407,14 +1407,15 @@ ostream& Sequences::ascii_print(ostream &os , char format , bool comment_flag ,
 
       old_adjust = os.setf(ios::left , ios::adjustfield);
 
-      os << "\n3 " << STAT_word[STATW_VARIABLES] << endl;
+      os << "\n4 " << STAT_word[STATW_VARIABLES] << endl;
 
-      os << "\n";
-      for (i = 0;i < 2;i++) {
-        os << STAT_word[STATW_VARIABLE] << " " << i + 1 << " : "
+      os << "\n" << STAT_word[STATW_VARIABLE] << " 1 : "
+         << STAT_variable_word[INT_VALUE] << endl;
+      for (i = 2;i < 4;i++) {
+        os << STAT_word[STATW_VARIABLE] << " " << i << " : "
            << STAT_variable_word[REAL_VALUE] << endl;
       }
-      os << STAT_word[STATW_VARIABLE] << " 3 : "
+      os << STAT_word[STATW_VARIABLE] << " 4 : "
          << STAT_variable_word[INT_VALUE] << endl;
 
       os << "\n";
@@ -1450,7 +1451,7 @@ ostream& Sequences::ascii_print(ostream &os , char format , bool comment_flag ,
 
         selected_sequence[index] = true;
 
-        os << setw(width[0]) << i
+        os << setw(width[0]) << i + 1
            << setw(width[1]) << posterior_probability[index]
            << setw(width[2]) << entropy[index]
            << setw(width[3]) << length[index];
