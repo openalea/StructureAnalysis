@@ -1559,7 +1559,12 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostrea
           else {
             delete smarkov;
             smarkov = NULL;
-            error.update(STAT_error[STATR_ESTIMATION_FAILURE]);
+
+            ostringstream error_message;
+            error_message << STAT_label[STATL_STATE] << " " << i << " "
+                          << SEQ_label[SEQL_OCCUPANCY_DISTRIBUTION] << " "
+                          << STAT_error[STATR_ESTIMATION_FAILURE];
+            error.update((error_message.str()).c_str());
             break;
           }
         }
