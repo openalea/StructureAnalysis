@@ -111,6 +111,7 @@ protected :
 
     void init(int inb_vector , int *iidentifier , int inb_variable , int *itype , bool init_flag);
     void copy(const Vectors &vec);
+    void add_response_variable(const Vectors &vec , int itype);
     void remove();
 
     void build_real_vector(int variable = I_DEFAULT);
@@ -183,8 +184,8 @@ public :
             int **iint_vector , double **ireal_vector);
     Vectors(const Vectors &vec , int variable , int itype);
     Vectors(const Vectors &vec , int inb_vector , int *index);
-    Vectors(const Vectors &vec)
-    { copy(vec); }
+    Vectors(const Vectors &vec , char transform = 'c' , int itype = I_DEFAULT);
+//    { copy(vec); }
     ~Vectors();
     Vectors& operator=(const Vectors &vec);
 
