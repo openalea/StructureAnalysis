@@ -185,7 +185,6 @@ public :
     Vectors(const Vectors &vec , int variable , int itype);
     Vectors(const Vectors &vec , int inb_vector , int *index);
     Vectors(const Vectors &vec , char transform = 'c' , int itype = I_DEFAULT);
-//    { copy(vec); }
     ~Vectors();
     Vectors& operator=(const Vectors &vec);
 
