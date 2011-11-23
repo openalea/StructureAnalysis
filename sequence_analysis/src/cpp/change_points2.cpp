@@ -40,6 +40,8 @@
 #include <sstream>
 #include <iomanip>
 
+#include <boost/math/special_functions/gamma.hpp>
+
 #include "tool/config.h"
 
 #include "stat_tool/stat_tools.h"
@@ -693,8 +695,8 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
   register int i , j , k , m;
   int max_nb_value , *frequency , *pisequence;
   double sum , factorial_sum , diff , buff , rlikelihood , *mean , *prsequence ,
-         *likelihood , **factorial , **backward_output , ***smoothed;
-  long double sum_square , segment_norm , sequence_norm , lbuff , lsum ,
+         *likelihood , **hyperparam , **factorial , **backward_output , ***smoothed;
+  long double sum_square , segment_norm , sequence_norm , lbuff , lsum , prior_contrast ,
               segmentation_entropy , first_order_entropy , change_point_entropy_sum ,
               marginal_entropy , *residual , *contrast , *normalized_contrast , *norm ,
               *forward_norm , *backward_norm , *entropy_smoothed , *segment_predicted ,
@@ -709,6 +711,7 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
 
   max_nb_value = 0;
   factorial = new double*[nb_variable];
+  hyperparam = new double*[nb_variable];
 
   for (i = 1;i < nb_variable;i++) {
     if ((model_type[i - 1] == MULTINOMIAL_CHANGE) &&
@@ -716,11 +719,36 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
       max_nb_value = marginal_distribution[i]->nb_value;
     }
 
-    if (model_type[i - 1] == POISSON_CHANGE) {
+    if ((model_type[i - 1] == POISSON_CHANGE) || (model_type[i - 1] == BAYESIAN_POISSON_CHANGE)) {
       factorial[i] = new double[length[index]];
     }
     else {
       factorial[i] = NULL;
+    }
+
+    if (model_type[i - 1] == BAYESIAN_POISSON_CHANGE) {
+      hyperparam[i] = new double[2];
+      gamma_hyperparameter_computation(index , i , hyperparam[i]);
+
+#     ifdef MESSAGE
+      cout << "\nGamma hyperparameters: " << hyperparam[i][0] << " " << hyperparam[i][1] << endl;
+#     endif
+
+    }
+
+    else if (model_type[i - 1] == BAYESIAN_GAUSSIAN_CHANGE) {
+      hyperparam[i] = new double[4];
+      gaussian_gamma_hyperparameter_computation(index , i , hyperparam[i]);
+
+#     ifdef MESSAGE
+      cout << "\nGaussian gamma hyperparameters: " << hyperparam[i][0] << " " << hyperparam[i][1]
+           << " " << hyperparam[i][2] << " " << hyperparam[i][3] << endl;
+#     endif
+
+    }
+
+    else {
+      hyperparam[i] = NULL;
     }
   }
 
@@ -890,6 +918,91 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
           factorial_sum += factorial[j][k];
           if ((contrast[k] != D_INF) && (sum > 0.)) {
             contrast[k] += sum * (log(sum / (i - k + 1)) - 1) - factorial_sum;
+          }
+        }
+      }
+
+      else if (model_type[j - 1] == BAYESIAN_POISSON_CHANGE) {
+        prior_contrast = -lgamma(hyperparam[j][0]) + hyperparam[j][0] * log(hyperparam[j][1]);
+
+        factorial[j][i] = 0.;
+        for (k = 2;k <= int_sequence[index][j][i];k++) {
+          factorial[j][i] += log((double)k);
+        }
+
+        sum = 0.;
+        factorial_sum = 0.;
+
+        pisequence = int_sequence[index][j] + i;
+        for (k = i;k >= 0;k--) {
+          sum += *pisequence--;
+          factorial_sum += factorial[j][k];
+          if (contrast[k] != D_INF) {
+            contrast[k] += prior_contrast - factorial_sum + lgamma(hyperparam[j][0] + sum) -
+                           (hyperparam[j][0] + sum) * log(hyperparam[j][1] + i - k + 1);
+          }
+        }
+      }
+
+      else if (model_type[j - 1] == BAYESIAN_GAUSSIAN_CHANGE) {
+        prior_contrast = log(hyperparam[j][1]) / 2 - lgamma(hyperparam[j][2] / 2) +
+                         hyperparam[j][2] * log(hyperparam[j][3] / 2) / 2;
+
+        if (type[j] != REAL_VALUE) {
+          pisequence = int_sequence[index][j] + i;
+          sum_square = 0.;
+          sum = *pisequence--;
+          if (contrast[i] != D_INF) {
+            diff = hyperparam[j][0] - sum;
+            contrast[i] += prior_contrast - log(2 * M_PI) / 2 -
+                           log(hyperparam[j][1] + 1) / 2 + lgamma((hyperparam[j][2] + 1) / 2) -
+                           (hyperparam[j][2] + 1) *
+                           log((hyperparam[j][3] + hyperparam[j][1] *
+                                diff * diff / (hyperparam[j][1] + 1)) / 2) / 2;
+          }
+
+          for (k = i - 1;k >= 0;k--) {
+            diff = *pisequence - sum / (i - k);
+            sum_square += ((double)(i - k) / (double)(i - k + 1)) * diff * diff;
+            sum += *pisequence--;
+            if (contrast[k] != D_INF) {
+              diff = hyperparam[j][0] - sum / (i - k + 1);
+              contrast[k] += prior_contrast - (i - k + 1) * log(2 * M_PI) / 2 -
+                             log(hyperparam[j][1] + i - k + 1) / 2 +
+                             lgamma((hyperparam[j][2] + i - k + 1) / 2) -
+                             (hyperparam[j][2] + i - k + 1) *
+                             logl((hyperparam[j][3] + sum_square + hyperparam[j][1] * (i - k + 1) *
+                                   diff * diff / (hyperparam[j][1] + i - k + 1)) / 2) / 2;
+            }
+          }
+        }
+
+        else {
+          prsequence = real_sequence[index][j] + i;
+          sum_square = 0.;
+          sum = *prsequence--;
+          if (contrast[i] != D_INF) {
+            diff = hyperparam[j][0] - sum;
+            contrast[i] += prior_contrast - log(2 * M_PI) / 2 -
+                           log(hyperparam[j][1] + 1) / 2 + lgamma((hyperparam[j][2] + 1) / 2) -
+                           (hyperparam[j][2] + 1) *
+                           log((hyperparam[j][3] + hyperparam[j][1] *
+                                diff * diff / (hyperparam[j][1] + 1)) / 2) / 2;
+          }
+
+          for (k = i - 1;k >= 0;k--) {
+            diff = *prsequence - sum / (i - k);
+            sum_square += ((double)(i - k) / (double)(i - k + 1)) * diff * diff;
+            sum += *prsequence--;
+            if (contrast[k] != D_INF) {
+              diff = hyperparam[j][0] - sum / (i - k + 1);
+              contrast[k] += prior_contrast - (i - k + 1) * log(2 * M_PI) / 2 -
+                             log(hyperparam[j][1] + i - k + 1) / 2 +
+                             lgamma((hyperparam[j][2] + i - k + 1) / 2) -
+                             (hyperparam[j][2] + i - k + 1) *
+                             logl((hyperparam[j][3] + sum_square + hyperparam[j][1] * (i - k + 1) *
+                                   diff * diff / (hyperparam[j][1] + i - k + 1)) / 2) / 2;
+            }
           }
         }
       }
@@ -1195,6 +1308,86 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
             factorial_sum += factorial[j][k];
             if ((contrast[k] != D_INF) && (sum > 0.)) {
               contrast[k] += sum * (log(sum / (k - i + 1)) - 1) - factorial_sum;
+            }
+          }
+        }
+
+        else if (model_type[j - 1] == BAYESIAN_POISSON_CHANGE) {
+          prior_contrast = -lgamma(hyperparam[j][0]) + hyperparam[j][0] * log(hyperparam[j][1]);
+
+          sum = 0.;
+          factorial_sum = 0.;
+
+          pisequence = int_sequence[index][j] + i;
+          for (k = i;k < length[index];k++) {
+            sum += *pisequence++;
+            factorial_sum += factorial[j][k];
+            if (contrast[k] != D_INF) {
+              contrast[k] += prior_contrast - factorial_sum + lgamma(hyperparam[j][0] + sum) -
+                             (hyperparam[j][0] + sum) * log(hyperparam[j][1] + k - i + 1);
+            }
+          }
+        }
+
+        else if (model_type[j - 1] == BAYESIAN_GAUSSIAN_CHANGE) {
+          prior_contrast = log(hyperparam[j][1]) / 2 - lgamma(hyperparam[j][2] / 2) +
+                           hyperparam[j][2] * log(hyperparam[j][3] / 2) / 2;
+
+          if (type[j] != REAL_VALUE) {
+            pisequence = int_sequence[index][j] + i;
+            sum_square = 0.;
+            sum = *pisequence++;
+            if (contrast[i] != D_INF) {
+              diff = hyperparam[j][0] - sum;
+              contrast[i] += prior_contrast - log(2 * M_PI) / 2 -
+                             log(hyperparam[j][1] + 1) / 2 + lgamma((hyperparam[j][2] + 1) / 2) -
+                             (hyperparam[j][2] + 1) *
+                             log((hyperparam[j][3] + hyperparam[j][1] *
+                                  diff * diff / (hyperparam[j][1] + 1)) / 2) / 2;
+            }
+
+            for (k = i + 1;k < length[index];k++) {
+              diff = *pisequence - sum / (k - i);
+              sum_square += ((double)(k - i) / (double)(k - i + 1)) * diff * diff;
+              sum += *pisequence++;
+              if (contrast[k] != D_INF) {
+                diff = hyperparam[j][0] - sum / (k - i + 1);
+                contrast[k] += prior_contrast - (k - i + 1) * log(2 * M_PI) / 2 -
+                               log(hyperparam[j][1] + k - i + 1) / 2 +
+                               lgamma((hyperparam[j][2] + k - i + 1) / 2) -
+                               (hyperparam[j][2] + k - i + 1) *
+                               logl((hyperparam[j][3] + sum_square + hyperparam[j][1] * (k - i + 1) *
+                                     diff * diff / (hyperparam[j][1] + k - i + 1)) / 2) / 2;
+              }
+            }
+          }
+
+          else {
+            prsequence = real_sequence[index][j] + i;
+            sum_square = 0.;
+            sum = *prsequence++;
+            if (contrast[i] != D_INF) {
+              diff = hyperparam[j][0] - sum;
+              contrast[i] += prior_contrast - log(2 * M_PI) / 2 -
+                             log(hyperparam[j][1] + 1) / 2 + lgamma((hyperparam[j][2] + 1) / 2) -
+                             (hyperparam[j][2] + 1) *
+                             log((hyperparam[j][3] + hyperparam[j][1] *
+                                  diff * diff / (hyperparam[j][1] + 1)) / 2) / 2;
+            }
+
+            for (k = i + 1;k < length[index];k++) {
+              diff = *prsequence - sum / (k - i);
+              sum_square += ((double)(k - i) / (double)(k - i + 1)) * diff * diff;
+              sum += *prsequence++;
+              if (contrast[k] != D_INF) {
+                diff = hyperparam[j][0] - sum / (k - i + 1);
+                contrast[k] += prior_contrast - (k - i + 1) * log(2 * M_PI) / 2 -
+                               log(hyperparam[j][1] + k - i + 1) / 2 +
+                               lgamma((hyperparam[j][2] + k - i + 1) / 2) -
+                               (hyperparam[j][2] + k - i + 1) *
+                               logl((hyperparam[j][3] + sum_square + hyperparam[j][1] * (k - i + 1) *
+                                     diff * diff / (hyperparam[j][1] + k - i + 1)) / 2) / 2;
+              }
             }
           }
         }
@@ -1780,11 +1973,6 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
         }
 
         else if (model_type[j - 1] == POISSON_CHANGE) {
-          factorial[j][i] = 0.;
-          for (k = 2;k <= int_sequence[index][j][i];k++) {
-            factorial[j][i] += log((double)k);
-          }
-
           sum = 0.;
           factorial_sum = 0.;
 
@@ -1794,6 +1982,86 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
             factorial_sum += factorial[j][k];
             if ((contrast[k] != D_INF) && (sum > 0.)) {
               contrast[k] += sum * (log(sum / (i - k + 1)) - 1) - factorial_sum;
+            }
+          }
+        }
+
+        else if (model_type[j - 1] == BAYESIAN_POISSON_CHANGE) {
+          prior_contrast = -lgamma(hyperparam[j][0]) + hyperparam[j][0] * log(hyperparam[j][1]);
+
+          sum = 0.;
+          factorial_sum = 0.;
+
+          pisequence = int_sequence[index][j] + i;
+          for (k = i;k >= 0;k--) {
+            sum += *pisequence--;
+            factorial_sum += factorial[j][k];
+            if (contrast[k] != D_INF) {
+              contrast[k] += prior_contrast - factorial_sum + lgamma(hyperparam[j][0] + sum) -
+                             (hyperparam[j][0] + sum) * log(hyperparam[j][1] + i - k + 1);
+            }
+          }
+        }
+
+        else if (model_type[j - 1] == BAYESIAN_GAUSSIAN_CHANGE) {
+          prior_contrast = log(hyperparam[j][1]) / 2 - lgamma(hyperparam[j][2] / 2) +
+                           hyperparam[j][2] * log(hyperparam[j][3] / 2) / 2;
+
+          if (type[j] != REAL_VALUE) {
+            pisequence = int_sequence[index][j] + i;
+            sum_square = 0.;
+            sum = *pisequence--;
+            if (contrast[i] != D_INF) {
+              diff = hyperparam[j][0] - sum;
+              contrast[i] += prior_contrast - log(2 * M_PI) / 2 -
+                             log(hyperparam[j][1] + 1) / 2 + lgamma((hyperparam[j][2] + 1) / 2) -
+                             (hyperparam[j][2] + 1) *
+                             log((hyperparam[j][3] + hyperparam[j][1] *
+                                  diff * diff / (hyperparam[j][1] + 1)) / 2) / 2;
+            }
+
+            for (k = i - 1;k >= 0;k--) {
+              diff = *pisequence - sum / (i - k);
+              sum_square += ((double)(i - k) / (double)(i - k + 1)) * diff * diff;
+              sum += *pisequence--;
+              if (contrast[k] != D_INF) {
+                diff = hyperparam[j][0] - sum / (i - k + 1);
+                contrast[k] += prior_contrast - (i - k + 1) * log(2 * M_PI) / 2 -
+                               log(hyperparam[j][1] + i - k + 1) / 2 +
+                               lgamma((hyperparam[j][2] + i - k + 1) / 2) -
+                               (hyperparam[j][2] + i - k + 1) *
+                               logl((hyperparam[j][3] + sum_square + hyperparam[j][1] * (i - k + 1) *
+                                     diff * diff / (hyperparam[j][1] + i - k + 1)) / 2) / 2;
+              }
+            }
+          }
+
+          else {
+            prsequence = real_sequence[index][j] + i;
+            sum_square = 0.;
+            sum = *prsequence--;
+            if (contrast[i] != D_INF) {
+              diff = hyperparam[j][0] - sum;
+              contrast[i] += prior_contrast - log(2 * M_PI) / 2 -
+                             log(hyperparam[j][1] + 1) / 2 + lgamma((hyperparam[j][2] + 1) / 2) -
+                             (hyperparam[j][2] + 1) *
+                             log((hyperparam[j][3] + hyperparam[j][1] *
+                                  diff * diff / (hyperparam[j][1] + 1)) / 2) / 2;
+            }
+
+            for (k = i - 1;k >= 0;k--) {
+              diff = *prsequence - sum / (i - k);
+              sum_square += ((double)(i - k) / (double)(i - k + 1)) * diff * diff;
+              sum += *prsequence--;
+              if (contrast[k] != D_INF) {
+                diff = hyperparam[j][0] - sum / (i - k + 1);
+                contrast[k] += prior_contrast - (i - k + 1) * log(2 * M_PI) / 2 -
+                               log(hyperparam[j][1] + i - k + 1) / 2 +
+                               lgamma((hyperparam[j][2] + i - k + 1) / 2) -
+                               (hyperparam[j][2] + i - k + 1) *
+                               logl((hyperparam[j][3] + sum_square + hyperparam[j][1] * (i - k + 1) *
+                                     diff * diff / (hyperparam[j][1] + i - k + 1)) / 2) / 2;
+              }
             }
           }
         }
@@ -2176,7 +2444,8 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
 
         i = 1;
         for (j = 1;j < nb_variable;j++) {
-          if ((model_type[j - 1] == POISSON_CHANGE) || (model_type[j - 1] == GAUSSIAN_CHANGE) ||
+          if ((model_type[j - 1] == POISSON_CHANGE) || (model_type[j - 1] == BAYESIAN_POISSON_CHANGE) ||
+              (model_type[j - 1] == GAUSSIAN_CHANGE) || (model_type[j - 1] == BAYESIAN_GAUSSIAN_CHANGE) ||
               (model_type[j - 1] == MEAN_CHANGE) || (model_type[j - 1] == VARIANCE_CHANGE) ||
               (model_type[j - 1] == MEAN_VARIANCE_CHANGE)) {
             i++;
@@ -2245,6 +2514,11 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
     delete [] factorial[i];
   }
   delete [] factorial;
+
+  for (i = 1;i < nb_variable;i++) {
+    delete [] hyperparam[i];
+  }
+  delete [] hyperparam;
 
   delete [] mean;
   delete [] residual;
@@ -2347,14 +2621,15 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *mo
   register int i , j , k , m , n;
   int max_nb_value , segment_length , *frequency , *pisequence , *psegment , **sisequence;
   double sum , factorial_sum , diff , likelihood , segmentation_likelihood , *sequence_mean ,
-         *prsequence , *backward , *cumul_backward , **factorial , **srsequence ,
-         **mean , **variance;
-  long double sum_square , segment_norm , sequence_norm , *residual , *contrast ,
-              *norm , **forward;
+         *prsequence , *backward , *cumul_backward , **hyperparam , **factorial ,
+         **srsequence , **mean , **variance;
+  long double sum_square , segment_norm , sequence_norm , prior_contrast , *residual ,
+              *contrast , *norm , **forward;
 
 
   max_nb_value = 0;
   factorial = new double*[nb_variable];
+  hyperparam = new double*[nb_variable];
 
   for (i = 1;i < nb_variable;i++) {
     if ((model_type[i - 1] == MULTINOMIAL_CHANGE) &&
@@ -2362,11 +2637,23 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *mo
       max_nb_value = marginal_distribution[i]->nb_value;
     }
 
-    if (model_type[i - 1] == POISSON_CHANGE) {
+    if ((model_type[i - 1] == POISSON_CHANGE) || (model_type[i - 1] == BAYESIAN_POISSON_CHANGE)) {
       factorial[i] = new double[length[index]];
     }
     else {
       factorial[i] = NULL;
+    }
+
+    if (model_type[i - 1] == BAYESIAN_POISSON_CHANGE) {
+      hyperparam[i] = new double[2];
+      gamma_hyperparameter_computation(index , i , hyperparam[i]);
+    }
+    else if (model_type[i - 1] == BAYESIAN_GAUSSIAN_CHANGE) {
+      hyperparam[i] = new double[4];
+      gaussian_gamma_hyperparameter_computation(index , i , hyperparam[i]);
+    }
+    else {
+      hyperparam[i] = NULL;
     }
   }
 
@@ -2395,7 +2682,8 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *mo
   mean = new double*[nb_variable];
   variance = new double*[nb_variable];
   for (i = 1;i < nb_variable;i++) {
-    if ((model_type[i - 1] == POISSON_CHANGE) || (model_type[i - 1] == GAUSSIAN_CHANGE) ||
+    if ((model_type[i - 1] == POISSON_CHANGE) || (model_type[i - 1] == BAYESIAN_POISSON_CHANGE) ||
+        (model_type[i - 1] == GAUSSIAN_CHANGE) || (model_type[i - 1] == BAYESIAN_GAUSSIAN_CHANGE) ||
         (model_type[i - 1] == VARIANCE_CHANGE) || (model_type[i - 1] == MEAN_VARIANCE_CHANGE)) {
       mean[i] = new double[nb_segment];
       variance[i] = new double[nb_segment];
@@ -2501,6 +2789,91 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *mo
           factorial_sum += factorial[j][k];
           if ((contrast[k] != D_INF) && (sum > 0.)) {
             contrast[k] += sum * (log(sum / (i - k + 1)) - 1) - factorial_sum;
+          }
+        }
+      }
+
+      else if (model_type[j - 1] == BAYESIAN_POISSON_CHANGE) {
+        prior_contrast = -lgamma(hyperparam[j][0]) + hyperparam[j][0] * log(hyperparam[j][1]);
+
+        factorial[j][i] = 0.;
+        for (k = 2;k <= int_sequence[index][j][i];k++) {
+          factorial[j][i] += log((double)k);
+        }
+
+        sum = 0.;
+        factorial_sum = 0.;
+
+        pisequence = int_sequence[index][j] + i;
+        for (k = i;k >= 0;k--) {
+          sum += *pisequence--;
+          factorial_sum += factorial[j][k];
+          if (contrast[k] != D_INF) {
+            contrast[k] += prior_contrast - factorial_sum + lgamma(hyperparam[j][0] + sum) -
+                           (hyperparam[j][0] + sum) * log(hyperparam[j][1] + i - k + 1);
+          }
+        }
+      }
+
+      else if (model_type[j - 1] == BAYESIAN_GAUSSIAN_CHANGE) {
+        prior_contrast = log(hyperparam[j][1]) / 2 - lgamma(hyperparam[j][2] / 2) +
+                         hyperparam[j][2] * log(hyperparam[j][3] / 2) / 2;
+
+        if (type[j] != REAL_VALUE) {
+          pisequence = int_sequence[index][j] + i;
+          sum_square = 0.;
+          sum = *pisequence--;
+          if (contrast[i] != D_INF) {
+            diff = hyperparam[j][0] - sum;
+            contrast[i] += prior_contrast - log(2 * M_PI) / 2 -
+                           log(hyperparam[j][1] + 1) / 2 + lgamma((hyperparam[j][2] + 1) / 2) -
+                           (hyperparam[j][2] + 1) *
+                           log((hyperparam[j][3] + hyperparam[j][1] *
+                                diff * diff / (hyperparam[j][1] + 1)) / 2) / 2;
+          }
+
+          for (k = i - 1;k >= 0;k--) {
+            diff = *pisequence - sum / (i - k);
+            sum_square += ((double)(i - k) / (double)(i - k + 1)) * diff * diff;
+            sum += *pisequence--;
+            if (contrast[k] != D_INF) {
+              diff = hyperparam[j][0] - sum / (i - k + 1);
+              contrast[k] += prior_contrast - (i - k + 1) * log(2 * M_PI) / 2 -
+                             log(hyperparam[j][1] + i - k + 1) / 2 +
+                             lgamma((hyperparam[j][2] + i - k + 1) / 2) -
+                             (hyperparam[j][2] + i - k + 1) *
+                             logl((hyperparam[j][3] + sum_square + hyperparam[j][1] * (i - k + 1) *
+                                   diff * diff / (hyperparam[j][1] + i - k + 1)) / 2) / 2;
+            }
+          }
+        }
+
+        else {
+          prsequence = real_sequence[index][j] + i;
+          sum_square = 0.;
+          sum = *prsequence--;
+          if (contrast[i] != D_INF) {
+            diff = hyperparam[j][0] - sum;
+            contrast[i] += prior_contrast - log(2 * M_PI) / 2 -
+                           log(hyperparam[j][1] + 1) / 2 + lgamma((hyperparam[j][2] + 1) / 2) -
+                           (hyperparam[j][2] + 1) *
+                           log((hyperparam[j][3] + hyperparam[j][1] *
+                                diff * diff / (hyperparam[j][1] + 1)) / 2) / 2;
+          }
+
+          for (k = i - 1;k >= 0;k--) {
+            diff = *prsequence - sum / (i - k);
+            sum_square += ((double)(i - k) / (double)(i - k + 1)) * diff * diff;
+            sum += *prsequence--;
+            if (contrast[k] != D_INF) {
+              diff = hyperparam[j][0] - sum / (i - k + 1);
+              contrast[k] += prior_contrast - (i - k + 1) * log(2 * M_PI) / 2 -
+                             log(hyperparam[j][1] + i - k + 1) / 2 +
+                             lgamma((hyperparam[j][2] + i - k + 1) / 2) -
+                             (hyperparam[j][2] + i - k + 1) *
+                             logl((hyperparam[j][3] + sum_square + hyperparam[j][1] * (i - k + 1) *
+                                   diff * diff / (hyperparam[j][1] + i - k + 1)) / 2) / 2;
+            }
           }
         }
       }
@@ -2751,6 +3124,86 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *mo
             }
           }
 
+          else if (model_type[m - 1] == BAYESIAN_POISSON_CHANGE) {
+            prior_contrast = -lgamma(hyperparam[m][0]) + hyperparam[m][0] * log(hyperparam[m][1]);
+
+            sum = 0.;
+            factorial_sum = 0.;
+
+            pisequence = int_sequence[index][m] + j;
+            for (n = j;n >= k;n--) {
+              sum += *pisequence++;
+              factorial_sum += factorial[m][n];
+              if (contrast[n] != D_INF) {
+                contrast[n] += prior_contrast - factorial_sum + lgamma(hyperparam[m][0] + sum) -
+                               (hyperparam[m][0] + sum) * log(hyperparam[m][1] + j - n + 1);
+              }
+            }
+          }
+
+          else if (model_type[m - 1] == BAYESIAN_GAUSSIAN_CHANGE) {
+            prior_contrast = log(hyperparam[m][1]) / 2 - lgamma(hyperparam[m][2] / 2) +
+                             hyperparam[m][2] * log(hyperparam[m][3] / 2) / 2;
+
+            if (type[m] != REAL_VALUE) {
+              pisequence = int_sequence[index][m] + j;
+              sum_square = 0.;
+              sum = *pisequence--;
+              if (contrast[j] != D_INF) {
+                diff = hyperparam[m][0] - sum;
+                contrast[j] += prior_contrast - log(2 * M_PI) / 2 -
+                               log(hyperparam[m][1] + 1) / 2 + lgamma((hyperparam[m][2] + 1) / 2) -
+                               (hyperparam[m][2] + 1) *
+                               log((hyperparam[m][3] + hyperparam[m][1] *
+                                    diff * diff / (hyperparam[m][1] + 1)) / 2) / 2;
+              }
+
+              for (n = j - 1;n >= k;n--) {
+                diff = *pisequence - sum / (j - n);
+                sum_square += ((double)(j - n) / (double)(j - n + 1)) * diff * diff;
+                sum += *pisequence--;
+                if (contrast[n] != D_INF) {
+                  diff = hyperparam[m][0] - sum / (j - n + 1);
+                  contrast[n] += prior_contrast - (j - n + 1) * log(2 * M_PI) / 2 -
+                                 log(hyperparam[m][1] + j - n + 1) / 2 +
+                                 lgamma((hyperparam[m][2] + j - n + 1) / 2) -
+                                 (hyperparam[m][2] + j - n + 1) *
+                                 logl((hyperparam[m][3] + sum_square + hyperparam[m][1] * (j - n + 1) *
+                                       diff * diff / (hyperparam[m][1] + j - n + 1)) / 2) / 2;
+                }
+              }
+            }
+
+            else {
+              prsequence = real_sequence[index][m] + j;
+              sum_square = 0.;
+              sum = *prsequence--;
+              if (contrast[j] != D_INF) {
+                diff = hyperparam[m][0] - sum;
+                contrast[j] += prior_contrast - log(2 * M_PI) / 2 -
+                               log(hyperparam[m][1] + 1) / 2 + lgamma((hyperparam[m][2] + 1) / 2) -
+                               (hyperparam[m][2] + 1) *
+                               log((hyperparam[m][3] + hyperparam[m][1] *
+                                    diff * diff / (hyperparam[m][1] + 1)) / 2) / 2;
+              }
+
+              for (n = j - 1;n >= k;n--) {
+                diff = *prsequence - sum / (j - n);
+                sum_square += ((double)(j - n) / (double)(j - n + 1)) * diff * diff;
+                sum += *prsequence--;
+                if (contrast[n] != D_INF) {
+                  diff = hyperparam[m][0] - sum / (j - n + 1);
+                  contrast[n] += prior_contrast - (j - n + 1) * log(2 * M_PI) / 2 -
+                                 log(hyperparam[m][1] + j - n + 1) / 2 +
+                                 lgamma((hyperparam[m][2] + j - n + 1) / 2) -
+                                 (hyperparam[m][2] + j - n + 1) *
+                                 logl((hyperparam[m][3] + sum_square + hyperparam[m][1] * (j - n + 1) *
+                                       diff * diff / (hyperparam[m][1] + j - n + 1)) / 2) / 2;
+                }
+              }
+            }
+          }
+
           else {
             if (model_type[m - 1] == VARIANCE_CHANGE) {
               sum_square = 0.;
@@ -2899,7 +3352,8 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *mo
         }
 
         for (m = 1;m < nb_variable;m++) {
-          if ((model_type[m - 1] == POISSON_CHANGE) || (model_type[m - 1] == GAUSSIAN_CHANGE) ||
+          if ((model_type[m - 1] == POISSON_CHANGE) || (model_type[m - 1] == BAYESIAN_POISSON_CHANGE) ||
+              (model_type[m - 1] == GAUSSIAN_CHANGE) || (model_type[m - 1] == BAYESIAN_GAUSSIAN_CHANGE) ||
               (model_type[m - 1] == VARIANCE_CHANGE) || (model_type[m - 1] == MEAN_VARIANCE_CHANGE)) {
             mean[m][k] = 0.;
             variance[m][k] = 0.;
@@ -3038,7 +3492,7 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *mo
            << exp(segmentation_likelihood - likelihood) << endl;
 
         for (j = 1;j < nb_variable;j++) {
-          if (model_type[j - 1] == POISSON_CHANGE) {
+          if ((model_type[j - 1] == POISSON_CHANGE) || (model_type[j - 1] == BAYESIAN_POISSON_CHANGE)) {
             if (nb_variable > 2) {
               os << STAT_label[STATL_VARIABLE] << "\t" << j << "\t";
             }
@@ -3049,8 +3503,8 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *mo
             os << endl;
           }
 
-          else if ((model_type[j - 1] == GAUSSIAN_CHANGE) || (model_type[j - 1] == VARIANCE_CHANGE) ||
-                   (model_type[j - 1] == MEAN_VARIANCE_CHANGE)) {
+          else if ((model_type[j - 1] == GAUSSIAN_CHANGE) || (model_type[j - 1] == BAYESIAN_GAUSSIAN_CHANGE) ||
+                   (model_type[j - 1] == VARIANCE_CHANGE) || (model_type[j - 1] == MEAN_VARIANCE_CHANGE)) {
             if (nb_variable > 2) {
               os << STAT_label[STATL_VARIABLE] << "\t" << j << "\t";
             }
@@ -3096,6 +3550,11 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *mo
     delete [] factorial[i];
   }
   delete [] factorial;
+
+  for (i = 1;i < nb_variable;i++) {
+    delete [] hyperparam[i];
+  }
+  delete [] hyperparam;
 
   delete [] sequence_mean;
   delete [] residual;
@@ -3153,9 +3612,9 @@ double Sequences::N_segmentation(int index , int nb_segment , int *model_type ,
   int max_nb_value , brank , previous_rank , nb_cell , *frequency , *pisequence , *rank ,
       *psegment , **sisequence , ***optimal_length , ***optimal_rank;
   double sum , factorial_sum , diff , buff , segmentation_likelihood , *nb_segmentation ,
-         *sequence_mean , *prsequence , **factorial , **nb_segmentation_forward ,
+         *sequence_mean , *prsequence , **hyperparam , **factorial , **nb_segmentation_forward ,
          **srsequence , **mean , **variance , ***forward;
-  long double sum_square , *residual , *contrast , likelihood_cumul;
+  long double sum_square , prior_contrast , *residual , *contrast , likelihood_cumul;
 
 # ifdef MESSAGE
   double sum2;
@@ -3166,6 +3625,7 @@ double Sequences::N_segmentation(int index , int nb_segment , int *model_type ,
 
   max_nb_value = 0;
   factorial = new double*[nb_variable];
+  hyperparam = new double*[nb_variable];
 
   for (i = 1;i < nb_variable;i++) {
     if ((model_type[i - 1] == MULTINOMIAL_CHANGE) &&
@@ -3173,11 +3633,23 @@ double Sequences::N_segmentation(int index , int nb_segment , int *model_type ,
       max_nb_value = marginal_distribution[i]->nb_value;
     }
 
-    if (model_type[i - 1] == POISSON_CHANGE) {
+    if ((model_type[i - 1] == POISSON_CHANGE) || (model_type[i - 1] == BAYESIAN_POISSON_CHANGE)) {
       factorial[i] = new double[length[index]];
     }
     else {
       factorial[i] = NULL;
+    }
+
+    if (model_type[i - 1] == BAYESIAN_POISSON_CHANGE) {
+      hyperparam[i] = new double[2];
+      gamma_hyperparameter_computation(index , i , hyperparam[i]);
+    }
+    else if (model_type[i - 1] == BAYESIAN_GAUSSIAN_CHANGE) {
+      hyperparam[i] = new double[4];
+      gaussian_gamma_hyperparameter_computation(index , i , hyperparam[i]);
+    }
+    else {
+      hyperparam[i] = NULL;
     }
   }
 
@@ -3228,7 +3700,8 @@ double Sequences::N_segmentation(int index , int nb_segment , int *model_type ,
   mean = new double*[nb_variable];
   variance = new double*[nb_variable];
   for (i = 1;i < nb_variable;i++) {
-    if ((model_type[i - 1] == POISSON_CHANGE) || (model_type[i - 1] == GAUSSIAN_CHANGE) ||
+    if ((model_type[i - 1] == POISSON_CHANGE) || (model_type[i - 1] == BAYESIAN_POISSON_CHANGE) ||
+        (model_type[i - 1] == GAUSSIAN_CHANGE) || (model_type[i - 1] == BAYESIAN_GAUSSIAN_CHANGE) ||
         (model_type[i - 1] == MEAN_CHANGE) || (model_type[i - 1] == VARIANCE_CHANGE) ||
         (model_type[i - 1] == MEAN_VARIANCE_CHANGE)) {
       mean[i] = new double[nb_segment];
@@ -3384,6 +3857,91 @@ double Sequences::N_segmentation(int index , int nb_segment , int *model_type ,
           factorial_sum += factorial[j][k];
           if ((contrast[k] != D_INF) && (sum > 0.)) {
             contrast[k] += sum * (log(sum / (i - k + 1)) - 1) - factorial_sum;
+          }
+        }
+      }
+
+      else if (model_type[j - 1] == BAYESIAN_POISSON_CHANGE) {
+        prior_contrast = -lgamma(hyperparam[j][0]) + hyperparam[j][0] * log(hyperparam[j][1]);
+
+        factorial[j][i] = 0.;
+        for (k = 2;k <= int_sequence[index][j][i];k++) {
+          factorial[j][i] += log((double)k);
+        }
+
+        sum = 0.;
+        factorial_sum = 0.;
+
+        pisequence = int_sequence[index][j] + i;
+        for (k = i;k >= 0;k--) {
+          sum += *pisequence--;
+          factorial_sum += factorial[j][k];
+          if (contrast[k] != D_INF) {
+            contrast[k] += prior_contrast - factorial_sum + lgamma(hyperparam[j][0] + sum) -
+                           (hyperparam[j][0] + sum) * log(hyperparam[j][1] + i - k + 1);
+          }
+        }
+      }
+
+      else if (model_type[j - 1] == BAYESIAN_GAUSSIAN_CHANGE) {
+        prior_contrast = log(hyperparam[j][1]) / 2 - lgamma(hyperparam[j][2] / 2) +
+                         hyperparam[j][2] * log(hyperparam[j][3] / 2) / 2;
+
+        if (type[j] != REAL_VALUE) {
+          pisequence = int_sequence[index][j] + i;
+          sum_square = 0.;
+          sum = *pisequence--;
+          if (contrast[i] != D_INF) {
+            diff = hyperparam[j][0] - sum;
+            contrast[i] += prior_contrast - log(2 * M_PI) / 2 -
+                           log(hyperparam[j][1] + 1) / 2 + lgamma((hyperparam[j][2] + 1) / 2) -
+                           (hyperparam[j][2] + 1) *
+                           log((hyperparam[j][3] + hyperparam[j][1] *
+                                diff * diff / (hyperparam[j][1] + 1)) / 2) / 2;
+          }
+
+          for (k = i - 1;k >= 0;k--) {
+            diff = *pisequence - sum / (i - k);
+            sum_square += ((double)(i - k) / (double)(i - k + 1)) * diff * diff;
+            sum += *pisequence--;
+            if (contrast[k] != D_INF) {
+              diff = hyperparam[j][0] - sum / (i - k + 1);
+              contrast[k] += prior_contrast - (i - k + 1) * log(2 * M_PI) / 2 -
+                             log(hyperparam[j][1] + i - k + 1) / 2 +
+                             lgamma((hyperparam[j][2] + i - k + 1) / 2) -
+                             (hyperparam[j][2] + i - k + 1) *
+                             logl((hyperparam[j][3] + sum_square + hyperparam[j][1] * (i - k + 1) *
+                                   diff * diff / (hyperparam[j][1] + i - k + 1)) / 2) / 2;
+            }
+          }
+        }
+
+        else {
+          prsequence = real_sequence[index][j] + i;
+          sum_square = 0.;
+          sum = *prsequence--;
+          if (contrast[i] != D_INF) {
+            diff = hyperparam[j][0] - sum;
+            contrast[i] += prior_contrast - log(2 * M_PI) / 2 -
+                           log(hyperparam[j][1] + 1) / 2 + lgamma((hyperparam[j][2] + 1) / 2) -
+                           (hyperparam[j][2] + 1) *
+                           log((hyperparam[j][3] + hyperparam[j][1] *
+                                diff * diff / (hyperparam[j][1] + 1)) / 2) / 2;
+          }
+
+          for (k = i - 1;k >= 0;k--) {
+            diff = *prsequence - sum / (i - k);
+            sum_square += ((double)(i - k) / (double)(i - k + 1)) * diff * diff;
+            sum += *prsequence--;
+            if (contrast[k] != D_INF) {
+              diff = hyperparam[j][0] - sum / (i - k + 1);
+              contrast[k] += prior_contrast - (i - k + 1) * log(2 * M_PI) / 2 -
+                             log(hyperparam[j][1] + i - k + 1) / 2 +
+                             lgamma((hyperparam[j][2] + i - k + 1) / 2) -
+                             (hyperparam[j][2] + i - k + 1) *
+                             logl((hyperparam[j][3] + sum_square + hyperparam[j][1] * (i - k + 1) *
+                                   diff * diff / (hyperparam[j][1] + i - k + 1)) / 2) / 2;
+            }
           }
         }
       }
@@ -3716,7 +4274,8 @@ double Sequences::N_segmentation(int index , int nb_segment , int *model_type ,
       }
 
       for (m = 1;m < nb_variable;m++) {
-        if ((model_type[m - 1] == POISSON_CHANGE) || (model_type[m - 1] == GAUSSIAN_CHANGE) ||
+        if ((model_type[m - 1] == POISSON_CHANGE) || (model_type[m - 1] == BAYESIAN_POISSON_CHANGE) ||
+            (model_type[m - 1] == GAUSSIAN_CHANGE) || (model_type[m - 1] == BAYESIAN_GAUSSIAN_CHANGE) ||
             (model_type[m - 1] == MEAN_CHANGE) || (model_type[m - 1] == VARIANCE_CHANGE) ||
             (model_type[m - 1] == MEAN_VARIANCE_CHANGE)) {
           mean[m][k] = 0.;
@@ -3878,7 +4437,7 @@ double Sequences::N_segmentation(int index , int nb_segment , int *model_type ,
       os << endl;
 
       for (j = 1;j < nb_variable;j++) {
-        if (model_type[j - 1] == POISSON_CHANGE) {
+        if ((model_type[j - 1] == POISSON_CHANGE) || (model_type[j - 1] == BAYESIAN_POISSON_CHANGE)) {
           if (nb_variable > 2) {
             os << STAT_label[STATL_VARIABLE] << " " << j << "   ";
           }
@@ -3892,8 +4451,9 @@ double Sequences::N_segmentation(int index , int nb_segment , int *model_type ,
           os << endl;
         }
 
-        else if ((model_type[j - 1] == GAUSSIAN_CHANGE) || (model_type[j - 1] == MEAN_CHANGE) ||
-                 (model_type[j - 1] == VARIANCE_CHANGE) || (model_type[j - 1] == MEAN_VARIANCE_CHANGE)) {
+        else if ((model_type[j - 1] == GAUSSIAN_CHANGE) || (model_type[j - 1] == BAYESIAN_GAUSSIAN_CHANGE) ||
+                 (model_type[j - 1] == MEAN_CHANGE) || (model_type[j - 1] == VARIANCE_CHANGE) ||
+                 (model_type[j - 1] == MEAN_VARIANCE_CHANGE)) {
           if (nb_variable > 2) {
             os << STAT_label[STATL_VARIABLE] << " " << j << "   ";
           }
@@ -3928,7 +4488,7 @@ double Sequences::N_segmentation(int index , int nb_segment , int *model_type ,
       os << "\t" << nb_cell << endl;
 
       for (j = 1;j < nb_variable;j++) {
-        if (model_type[j - 1] == POISSON_CHANGE) {
+        if ((model_type[j - 1] == POISSON_CHANGE) || (model_type[j - 1] == BAYESIAN_POISSON_CHANGE)) {
           if (nb_variable > 2) {
             os << STAT_label[STATL_VARIABLE] << "\t" << j << "\t";
           }
@@ -3939,8 +4499,9 @@ double Sequences::N_segmentation(int index , int nb_segment , int *model_type ,
           os << endl;
         }
 
-        else if ((model_type[j - 1] == GAUSSIAN_CHANGE) || (model_type[j - 1] == MEAN_CHANGE) ||
-                 (model_type[j - 1] == VARIANCE_CHANGE) || (model_type[j - 1] == MEAN_VARIANCE_CHANGE)) {
+        else if ((model_type[j - 1] == GAUSSIAN_CHANGE) || (model_type[j - 1] == BAYESIAN_GAUSSIAN_CHANGE) ||
+                 (model_type[j - 1] == MEAN_CHANGE) || (model_type[j - 1] == VARIANCE_CHANGE) ||
+                 (model_type[j - 1] == MEAN_VARIANCE_CHANGE)) {
           if (nb_variable > 2) {
             os << STAT_label[STATL_VARIABLE] << "\t" << j << "\t";
           }
@@ -4158,6 +4719,11 @@ double Sequences::N_segmentation(int index , int nb_segment , int *model_type ,
   }
   delete [] factorial;
 
+  for (i = 1;i < nb_variable;i++) {
+    delete [] hyperparam[i];
+  }
+  delete [] hyperparam;
+
   delete [] sequence_mean;
   delete [] residual;
 
@@ -4258,13 +4824,14 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
   register int i , j , k , m;
   int max_nb_value , *frequency , *pisequence , *psegment , **optimal_length;
   double sum , factorial_sum , diff , buff , segmentation_likelihood , backward_max ,
-         *sequence_mean , *prsequence , **factorial , **forward , **backward ,
-         **backward_output , **mean;
-  long double sum_square , *residual , *contrast;
+         *sequence_mean , *prsequence , **hyperparam , **factorial , **forward ,
+         **backward , **backward_output , **mean;
+  long double sum_square , prior_contrast , *residual , *contrast;
 
 
   max_nb_value = 0;
   factorial = new double*[nb_variable];
+  hyperparam = new double*[nb_variable];
 
   for (i = 1;i < nb_variable;i++) {
     if ((model_type[i - 1] == MULTINOMIAL_CHANGE) &&
@@ -4272,11 +4839,23 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
       max_nb_value = marginal_distribution[i]->nb_value;
     }
 
-    if (model_type[i - 1] == POISSON_CHANGE) {
+    if ((model_type[i - 1] == POISSON_CHANGE) || (model_type[i - 1] == BAYESIAN_POISSON_CHANGE)) {
       factorial[i] = new double[length[index]];
     }
     else {
       factorial[i] = NULL;
+    }
+
+    if (model_type[i - 1] == BAYESIAN_POISSON_CHANGE) {
+      hyperparam[i] = new double[2];
+      gamma_hyperparameter_computation(index , i , hyperparam[i]);
+    }
+    else if (model_type[i - 1] == BAYESIAN_GAUSSIAN_CHANGE) {
+      hyperparam[i] = new double[4];
+      gaussian_gamma_hyperparameter_computation(index , i , hyperparam[i]);
+    }
+    else {
+      hyperparam[i] = NULL;
     }
   }
 
@@ -4314,7 +4893,8 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
 
   mean = new double*[nb_variable];
   for (i = 1;i < nb_variable;i++) {
-    if ((model_type[i - 1] == POISSON_CHANGE) || (model_type[i - 1] == GAUSSIAN_CHANGE) ||
+    if ((model_type[i - 1] == POISSON_CHANGE) || (model_type[i - 1] == BAYESIAN_POISSON_CHANGE) ||
+        (model_type[i - 1] == GAUSSIAN_CHANGE) || (model_type[i - 1] == BAYESIAN_GAUSSIAN_CHANGE) ||
         (model_type[i - 1] == MEAN_CHANGE) || (model_type[i - 1] == VARIANCE_CHANGE) ||
         (model_type[i - 1] == MEAN_VARIANCE_CHANGE)) {
       mean[i] = new double[length[index]];
@@ -4404,6 +4984,91 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
           factorial_sum += factorial[j][k];
           if ((contrast[k] != D_INF) && (sum > 0.)) {
             contrast[k] += sum * (log(sum / (i - k + 1)) - 1) - factorial_sum;
+          }
+        }
+      }
+
+      else if (model_type[j - 1] == BAYESIAN_POISSON_CHANGE) {
+        prior_contrast = -lgamma(hyperparam[j][0]) + hyperparam[j][0] * log(hyperparam[j][1]);
+
+        factorial[j][i] = 0.;
+        for (k = 2;k <= int_sequence[index][j][i];k++) {
+          factorial[j][i] += log((double)k);
+        }
+
+        sum = 0.;
+        factorial_sum = 0.;
+
+        pisequence = int_sequence[index][j] + i;
+        for (k = i;k >= 0;k--) {
+          sum += *pisequence--;
+          factorial_sum += factorial[j][k];
+          if (contrast[k] != D_INF) {
+            contrast[k] += prior_contrast - factorial_sum + lgamma(hyperparam[j][0] + sum) -
+                           (hyperparam[j][0] + sum) * log(hyperparam[j][1] + i - k + 1);
+          }
+        }
+      }
+
+      else if (model_type[j - 1] == BAYESIAN_GAUSSIAN_CHANGE) {
+        prior_contrast = log(hyperparam[j][1]) / 2 - lgamma(hyperparam[j][2] / 2) +
+                         hyperparam[j][2] * log(hyperparam[j][3] / 2) / 2;
+
+        if (type[j] != REAL_VALUE) {
+          pisequence = int_sequence[index][j] + i;
+          sum_square = 0.;
+          sum = *pisequence--;
+          if (contrast[i] != D_INF) {
+            diff = hyperparam[j][0] - sum;
+            contrast[i] += prior_contrast - log(2 * M_PI) / 2 -
+                           log(hyperparam[j][1] + 1) / 2 + lgamma((hyperparam[j][2] + 1) / 2) -
+                           (hyperparam[j][2] + 1) *
+                           log((hyperparam[j][3] + hyperparam[j][1] *
+                                diff * diff / (hyperparam[j][1] + 1)) / 2) / 2;
+          }
+
+          for (k = i - 1;k >= 0;k--) {
+            diff = *pisequence - sum / (i - k);
+            sum_square += ((double)(i - k) / (double)(i - k + 1)) * diff * diff;
+            sum += *pisequence--;
+            if (contrast[k] != D_INF) {
+              diff = hyperparam[j][0] - sum / (i - k + 1);
+              contrast[k] += prior_contrast - (i - k + 1) * log(2 * M_PI) / 2 -
+                             log(hyperparam[j][1] + i - k + 1) / 2 +
+                             lgamma((hyperparam[j][2] + i - k + 1) / 2) -
+                             (hyperparam[j][2] + i - k + 1) *
+                             logl((hyperparam[j][3] + sum_square + hyperparam[j][1] * (i - k + 1) *
+                                   diff * diff / (hyperparam[j][1] + i - k + 1)) / 2) / 2;
+            }
+          }
+        }
+
+        else {
+          prsequence = real_sequence[index][j] + i;
+          sum_square = 0.;
+          sum = *prsequence--;
+          if (contrast[i] != D_INF) {
+            diff = hyperparam[j][0] - sum;
+            contrast[i] += prior_contrast - log(2 * M_PI) / 2 -
+                           log(hyperparam[j][1] + 1) / 2 + lgamma((hyperparam[j][2] + 1) / 2) -
+                           (hyperparam[j][2] + 1) *
+                           log((hyperparam[j][3] + hyperparam[j][1] *
+                                diff * diff / (hyperparam[j][1] + 1)) / 2) / 2;
+          }
+
+          for (k = i - 1;k >= 0;k--) {
+            diff = *prsequence - sum / (i - k);
+            sum_square += ((double)(i - k) / (double)(i - k + 1)) * diff * diff;
+            sum += *prsequence--;
+            if (contrast[k] != D_INF) {
+              diff = hyperparam[j][0] - sum / (i - k + 1);
+              contrast[k] += prior_contrast - (i - k + 1) * log(2 * M_PI) / 2 -
+                             log(hyperparam[j][1] + i - k + 1) / 2 +
+                             lgamma((hyperparam[j][2] + i - k + 1) / 2) -
+                             (hyperparam[j][2] + i - k + 1) *
+                             logl((hyperparam[j][3] + sum_square + hyperparam[j][1] * (i - k + 1) *
+                                   diff * diff / (hyperparam[j][1] + i - k + 1)) / 2) / 2;
+            }
           }
         }
       }
@@ -4622,6 +5287,86 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
           }
         }
 
+        else if (model_type[j - 1] == BAYESIAN_POISSON_CHANGE) {
+          prior_contrast = -lgamma(hyperparam[j][0]) + hyperparam[j][0] * log(hyperparam[j][1]);
+
+          sum = 0.;
+          factorial_sum = 0.;
+
+          pisequence = int_sequence[index][j] + i;
+          for (k = i;k < length[index];k++) {
+            sum += *pisequence++;
+            factorial_sum += factorial[j][k];
+            if (contrast[k] != D_INF) {
+              contrast[k] += prior_contrast - factorial_sum + lgamma(hyperparam[j][0] + sum) -
+                             (hyperparam[j][0] + sum) * log(hyperparam[j][1] + k - i + 1);
+            }
+          }
+        }
+
+        else if (model_type[j - 1] == BAYESIAN_GAUSSIAN_CHANGE) {
+          prior_contrast = log(hyperparam[j][1]) / 2 - lgamma(hyperparam[j][2] / 2) +
+                           hyperparam[j][2] * log(hyperparam[j][3] / 2) / 2;
+
+          if (type[j] != REAL_VALUE) {
+            pisequence = int_sequence[index][j] + i;
+            sum_square = 0.;
+            sum = *pisequence++;
+            if (contrast[i] != D_INF) {
+              diff = hyperparam[j][0] - sum;
+              contrast[i] += prior_contrast - log(2 * M_PI) / 2 -
+                             log(hyperparam[j][1] + 1) / 2 + lgamma((hyperparam[j][2] + 1) / 2) -
+                             (hyperparam[j][2] + 1) *
+                             log((hyperparam[j][3] + hyperparam[j][1] *
+                                  diff * diff / (hyperparam[j][1] + 1)) / 2) / 2;
+            }
+
+            for (k = i + 1;k < length[index];k++) {
+              diff = *pisequence - sum / (k - i);
+              sum_square += ((double)(k - i) / (double)(k - i + 1)) * diff * diff;
+              sum += *pisequence++;
+              if (contrast[k] != D_INF) {
+                diff = hyperparam[j][0] - sum / (k - i + 1);
+                contrast[k] += prior_contrast - (k - i + 1) * log(2 * M_PI) / 2 -
+                               log(hyperparam[j][1] + k - i + 1) / 2 +
+                               lgamma((hyperparam[j][2] + k - i + 1) / 2) -
+                               (hyperparam[j][2] + k - i + 1) *
+                               logl((hyperparam[j][3] + sum_square + hyperparam[j][1] * (k - i + 1) *
+                                     diff * diff / (hyperparam[j][1] + k - i + 1)) / 2) / 2;
+              }
+            }
+          }
+
+          else {
+            prsequence = real_sequence[index][j] + i;
+            sum_square = 0.;
+            sum = *prsequence++;
+            if (contrast[i] != D_INF) {
+              diff = hyperparam[j][0] - sum;
+              contrast[i] += prior_contrast - log(2 * M_PI) / 2 -
+                             log(hyperparam[j][1] + 1) / 2 + lgamma((hyperparam[j][2] + 1) / 2) -
+                             (hyperparam[j][2] + 1) *
+                             log((hyperparam[j][3] + hyperparam[j][1] *
+                                  diff * diff / (hyperparam[j][1] + 1)) / 2) / 2;
+            }
+
+            for (k = i + 1;k < length[index];k++) {
+              diff = *prsequence - sum / (k - i);
+              sum_square += ((double)(k - i) / (double)(k - i + 1)) * diff * diff;
+              sum += *prsequence++;
+              if (contrast[k] != D_INF) {
+                diff = hyperparam[j][0] - sum / (k - i + 1);
+                contrast[k] += prior_contrast - (k - i + 1) * log(2 * M_PI) / 2 -
+                               log(hyperparam[j][1] + k - i + 1) / 2 +
+                               lgamma((hyperparam[j][2] + k - i + 1) / 2) -
+                               (hyperparam[j][2] + k - i + 1) *
+                               logl((hyperparam[j][3] + sum_square + hyperparam[j][1] * (k - i + 1) *
+                                     diff * diff / (hyperparam[j][1] + k - i + 1)) / 2) / 2;
+              }
+            }
+          }
+        }
+
         else {
           if (model_type[j - 1] == VARIANCE_CHANGE) {
             sum_square = 0.;
@@ -4836,7 +5581,8 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
 #   endif
 
     for (i = 1;i < nb_variable;i++) {
-      if ((model_type[i - 1] == POISSON_CHANGE) || (model_type[i - 1] == GAUSSIAN_CHANGE) ||
+      if ((model_type[i - 1] == POISSON_CHANGE) || (model_type[i - 1] == BAYESIAN_POISSON_CHANGE) ||
+          (model_type[i - 1] == GAUSSIAN_CHANGE) || (model_type[i - 1] == BAYESIAN_GAUSSIAN_CHANGE) ||
           (model_type[i - 1] == MEAN_CHANGE) || (model_type[i - 1] == VARIANCE_CHANGE) ||
           (model_type[i - 1] == MEAN_VARIANCE_CHANGE)) {
         psegment = int_sequence[index][0] + 1;
@@ -5051,7 +5797,8 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
 
       i = 0;
       for (j = 1;j < nb_variable;j++) {
-        if ((model_type[j - 1] == POISSON_CHANGE) || (model_type[j - 1] == GAUSSIAN_CHANGE) ||
+        if ((model_type[j - 1] == POISSON_CHANGE) || (model_type[j - 1] == BAYESIAN_POISSON_CHANGE) ||
+            (model_type[j - 1] == GAUSSIAN_CHANGE) || (model_type[j - 1] == BAYESIAN_GAUSSIAN_CHANGE) ||
             (model_type[j - 1] == MEAN_CHANGE) || (model_type[j - 1] == VARIANCE_CHANGE) ||
             (model_type[j - 1] == MEAN_VARIANCE_CHANGE)) {
           plot[i].resize(2);
@@ -5139,6 +5886,11 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
   }
   delete [] factorial;
 
+  for (i = 1;i < nb_variable;i++) {
+    delete [] hyperparam[i];
+  }
+  delete [] hyperparam;
+
   delete [] sequence_mean;
   delete [] residual;
 
@@ -5212,7 +5964,7 @@ bool Sequences::segment_profile_write(StatError &error , ostream &os , int iiden
 
   for (i = 0;i < nb_variable;i++) {
     if ((model_type[i] == MULTINOMIAL_CHANGE) || (model_type[i] == ORDINAL_GAUSSIAN_CHANGE) ||
-        (model_type[i] == POISSON_CHANGE)) {
+        (model_type[i] == POISSON_CHANGE) || (model_type[i] == BAYESIAN_POISSON_CHANGE)) {
       if ((type[i] != INT_VALUE) && (type[i] != STATE)) {
         status = false;
         ostringstream error_message , correction_message;
@@ -5436,7 +6188,7 @@ bool Sequences::segment_profile_plot_write(StatError &error , const char *prefix
 
   for (i = 0;i < nb_variable;i++) {
     if ((model_type[i] == MULTINOMIAL_CHANGE) || (model_type[i] == ORDINAL_GAUSSIAN_CHANGE) ||
-        (model_type[i] == POISSON_CHANGE)) {
+        (model_type[i] == POISSON_CHANGE) || (model_type[i] == BAYESIAN_POISSON_CHANGE)) {
       if ((type[i] != INT_VALUE) && (type[i] != STATE)) {
         status = false;
         ostringstream error_message , correction_message;
@@ -5605,7 +6357,8 @@ bool Sequences::segment_profile_plot_write(StatError &error , const char *prefix
 
             j = 2;
             for (k = 1;k < seq->nb_variable;k++) {
-              if ((model_type[k - 1] == POISSON_CHANGE) || (model_type[k - 1] == GAUSSIAN_CHANGE) ||
+              if ((model_type[k - 1] == POISSON_CHANGE) || (model_type[k - 1] == BAYESIAN_POISSON_CHANGE) ||
+                  (model_type[k - 1] == GAUSSIAN_CHANGE) || (model_type[k - 1] == BAYESIAN_GAUSSIAN_CHANGE) ||
                   (model_type[k - 1] == MEAN_CHANGE) || (model_type[k - 1] == VARIANCE_CHANGE) ||
                   (model_type[k - 1] == MEAN_VARIANCE_CHANGE)) {
                 out_file << "set title \"";
@@ -5824,7 +6577,8 @@ bool Sequences::segment_profile_plot_write(StatError &error , const char *prefix
 
             j = 1;
             for (k = 1;k < seq->nb_variable;k++) {
-              if ((model_type[k - 1] == POISSON_CHANGE) || (model_type[k - 1] == GAUSSIAN_CHANGE) ||
+              if ((model_type[k - 1] == POISSON_CHANGE) || (model_type[k - 1] == BAYESIAN_POISSON_CHANGE) ||
+                  (model_type[k - 1] == GAUSSIAN_CHANGE) || (model_type[k - 1] == BAYESIAN_GAUSSIAN_CHANGE) ||
                   (model_type[k - 1] == MEAN_CHANGE) || (model_type[k - 1] == VARIANCE_CHANGE) ||
                   (model_type[k - 1] == MEAN_VARIANCE_CHANGE)) {
                 out_file << "set title \"";
@@ -6088,7 +6842,7 @@ MultiPlotSet* Sequences::segment_profile_plotable_write(StatError &error , int i
 
   for (i = 0;i < nb_variable;i++) {
     if ((model_type[i] == MULTINOMIAL_CHANGE) || (model_type[i] == ORDINAL_GAUSSIAN_CHANGE) ||
-        (model_type[i] == POISSON_CHANGE)) {
+        (model_type[i] == POISSON_CHANGE) || (model_type[i] == BAYESIAN_POISSON_CHANGE)) {
       if ((type[i] != INT_VALUE) && (type[i] != STATE)) {
         status = false;
         ostringstream error_message , correction_message;
@@ -6177,7 +6931,8 @@ MultiPlotSet* Sequences::segment_profile_plotable_write(StatError &error , int i
 
     nb_plot_set = 1;
     for (i = 1;i < seq->nb_variable;i++) {
-      if ((model_type[i - 1] == POISSON_CHANGE) || (model_type[i - 1] == GAUSSIAN_CHANGE) ||
+      if ((model_type[i - 1] == POISSON_CHANGE) || (model_type[i - 1] == BAYESIAN_POISSON_CHANGE) ||
+          (model_type[i - 1] == GAUSSIAN_CHANGE) || (model_type[i - 1] == BAYESIAN_GAUSSIAN_CHANGE) ||
           (model_type[i - 1] == MEAN_CHANGE) || (model_type[i - 1] == VARIANCE_CHANGE) ||
           (model_type[i - 1] == MEAN_VARIANCE_CHANGE)) {
         nb_plot_set++;
@@ -6231,7 +6986,8 @@ MultiPlotSet* Sequences::segment_profile_plotable_write(StatError &error , int i
       // vues : sequence et fonction en escalier
 
       for (j = 1;j < seq->nb_variable;j++) {
-        if ((model_type[j - 1] == POISSON_CHANGE) || (model_type[j - 1] == GAUSSIAN_CHANGE) ||
+        if ((model_type[j - 1] == POISSON_CHANGE) || (model_type[j - 1] == BAYESIAN_POISSON_CHANGE) ||
+            (model_type[j - 1] == GAUSSIAN_CHANGE) || (model_type[j - 1] == BAYESIAN_GAUSSIAN_CHANGE) ||
             (model_type[j - 1] == MEAN_CHANGE) || (model_type[j - 1] == VARIANCE_CHANGE) ||
             (model_type[j - 1] == MEAN_VARIANCE_CHANGE)) {
           if (seq->nb_variable > 2) {
