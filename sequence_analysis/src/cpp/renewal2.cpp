@@ -219,7 +219,8 @@ ostream& Renewal::ascii_write(ostream &os , const RenewalData *timev ,
            << " | " << STAT_label[STATL_CUMULATIVE] << " " << SEQ_label[SEQL_LENGTH_BIASED] << " "
            << STAT_label[STATL_DISTRIBUTION] << " " << STAT_label[STATL_FUNCTION] << endl;
 
-        length_bias->Distribution::ascii_print(os , 1 , pdist , scale , file_flag , true , timev->length_bias);
+        length_bias->Distribution::ascii_print(os , 1 , pdist , scale , file_flag , true ,
+                                               timev->length_bias , true);
       }
 
       // ecriture de la loi des intervalles de temps apres le dernier evenement
@@ -256,7 +257,8 @@ ostream& Renewal::ascii_write(ostream &os , const RenewalData *timev ,
          << " " << SEQ_label[SEQL_BACKWARD] << " " << SEQ_label[SEQL_RECURRENCE_TIME]
          << " " << STAT_label[STATL_DISTRIBUTION] << " " << STAT_label[STATL_FUNCTION] << endl;
 
-      backward->Distribution::ascii_print(os , 1 , pdist , scale , file_flag , true , timev->backward);
+      backward->Distribution::ascii_print(os , 1 , pdist , scale , file_flag , true ,
+                                          timev->backward , true);
 
       // ecriture de la loi des intervalles de temps residuel
 
@@ -292,7 +294,8 @@ ostream& Renewal::ascii_write(ostream &os , const RenewalData *timev ,
          << " " << SEQ_label[SEQL_FORWARD] << " " << SEQ_label[SEQL_RECURRENCE_TIME]
          << " " << STAT_label[STATL_DISTRIBUTION] << " " << STAT_label[STATL_FUNCTION] << endl;
 
-      forward->Distribution::ascii_print(os , 1 , pdist , scale , file_flag , true , timev->forward);
+      forward->Distribution::ascii_print(os , 1 , pdist , scale , file_flag , true ,
+                                         timev->forward , true);
 
       delete [] pdist;
       delete [] scale;
@@ -350,7 +353,8 @@ ostream& Renewal::ascii_write(ostream &os , const RenewalData *timev ,
        << " | " << STAT_label[STATL_CUMULATIVE] << " " << SEQ_label[SEQL_INTER_EVENT]
        << " " << STAT_label[STATL_DISTRIBUTION] << " " << STAT_label[STATL_FUNCTION] << endl;
 
-    inter_event->Distribution::ascii_print(os , 3 , pdist , scale , file_flag , true);
+    inter_event->Distribution::ascii_print(os , 3 , pdist , scale , file_flag , true ,
+                                           NULL , true);
 
     delete [] pdist;
     delete [] scale;
@@ -387,7 +391,8 @@ ostream& Renewal::ascii_write(ostream &os , const RenewalData *timev ,
       }
       os << endl;
 
-      nevent_time[inf]->Distribution::ascii_print(os , nb_dist , pdist , scale , file_flag , false);
+      nevent_time[inf]->Distribution::ascii_print(os , nb_dist , pdist , scale , file_flag ,
+                                                  false , NULL , true);
 
       delete [] pdist;
       delete [] scale;
@@ -572,7 +577,8 @@ ostream& Renewal::ascii_write(ostream &os , const RenewalData *timev ,
         os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION] << " "
            << STAT_label[STATL_FUNCTION] << endl;
 
-        nb_event[i]->Distribution::ascii_print(os , file_flag , true , false , (timev ? timev->hnb_event[i] : NULL));
+        nb_event[i]->Distribution::ascii_print(os , file_flag , true , false ,
+                                               (timev ? timev->hnb_event[i] : NULL));
       }
     }
   }
@@ -987,7 +993,8 @@ ostream& Renewal::spreadsheet_write(ostream &os , const RenewalData *timev) cons
          << "\t" << STAT_label[STATL_CUMULATIVE] << " " << SEQ_label[SEQL_LENGTH_BIASED] << " "
          << STAT_label[STATL_DISTRIBUTION] << " " << STAT_label[STATL_FUNCTION] << endl;
 
-      length_bias->Distribution::spreadsheet_print(os , 1 , pdist , scale , true , timev->length_bias);
+      length_bias->Distribution::spreadsheet_print(os , 1 , pdist , scale , true ,
+                                                   timev->length_bias , true);
     }
 
     // ecriture de la loi des intervalles de temps apres le dernier evenement
@@ -1011,7 +1018,8 @@ ostream& Renewal::spreadsheet_write(ostream &os , const RenewalData *timev) cons
        << " " << SEQ_label[SEQL_BACKWARD] << " " << SEQ_label[SEQL_RECURRENCE_TIME]
        << " " << STAT_label[STATL_DISTRIBUTION] << " " << STAT_label[STATL_FUNCTION] << endl;
 
-    backward->Distribution::spreadsheet_print(os , 1 , pdist , scale , true , timev->backward);
+    backward->Distribution::spreadsheet_print(os , 1 , pdist , scale , true ,
+                                              timev->backward , true);
 
     // ecriture de la loi des intervalles de temps residuel
 
@@ -1034,7 +1042,8 @@ ostream& Renewal::spreadsheet_write(ostream &os , const RenewalData *timev) cons
        << " " << SEQ_label[SEQL_FORWARD] << " " << SEQ_label[SEQL_RECURRENCE_TIME]
        << " " << STAT_label[STATL_DISTRIBUTION] << " " << STAT_label[STATL_FUNCTION] << endl;
 
-    forward->Distribution::spreadsheet_print(os , 1 , pdist , scale , true , timev->forward);
+    forward->Distribution::spreadsheet_print(os , 1 , pdist , scale , true ,
+                                             timev->forward , true);
 
     delete [] pdist;
     delete [] scale;
@@ -1073,7 +1082,7 @@ ostream& Renewal::spreadsheet_write(ostream &os , const RenewalData *timev) cons
        << "\t" << STAT_label[STATL_CUMULATIVE] << " " << SEQ_label[SEQL_INTER_EVENT]
        << " " << STAT_label[STATL_DISTRIBUTION] << " " << STAT_label[STATL_FUNCTION] << endl;
 
-    inter_event->Distribution::spreadsheet_print(os , 3 , pdist , scale , true);
+    inter_event->Distribution::spreadsheet_print(os , 3 , pdist , scale , true , NULL , true);
 
     delete [] pdist;
     delete [] scale;
@@ -1104,7 +1113,8 @@ ostream& Renewal::spreadsheet_write(ostream &os , const RenewalData *timev) cons
     }
     os << endl;
 
-    nevent_time[inf]->Distribution::spreadsheet_print(os , nb_dist , pdist , scale , false);
+    nevent_time[inf]->Distribution::spreadsheet_print(os , nb_dist , pdist , scale ,
+                                                      false , NULL , true);
 
     delete [] pdist;
     delete [] scale;
