@@ -581,6 +581,113 @@ void Vectors::copy(const Vectors &vec)
 
 /*--------------------------------------------------------------*
  *
+ *  Copie d'un objet Vectors avec ajout d'une variable reponse.
+ *
+ *  arguments : reference sur un objet Vectors, type de la variable reponse.
+ *
+ *--------------------------------------------------------------*/
+
+void Vectors::add_response_variable(const Vectors &vec , int itype)
+
+{
+  register int i , j;
+
+
+  nb_vector = vec.nb_vector;
+
+  identifier = new int[nb_vector];
+  for (i = 0;i < nb_vector;i++) {
+    identifier[i] = vec.identifier[i];
+  }
+
+  nb_variable = vec.nb_variable + 1;
+
+  type = new int[nb_variable];
+  min_value = new double[nb_variable];
+  max_value = new double[nb_variable];
+  marginal_distribution = new FrequencyDistribution*[nb_variable];
+  marginal_histogram = new Histogram*[nb_variable];
+
+  type[0] = itype;
+  min_value[0] = 0.;
+  max_value[0] = 0.;
+  marginal_distribution[0] = NULL;
+  marginal_histogram[0] = NULL;
+
+  for (i = 0;i < vec.nb_variable;i++) {
+    type[i + 1] = vec.type[i];
+    min_value[i + 1] = vec.min_value[i];
+    max_value[i + 1] = vec.max_value[i];
+
+    if (vec.marginal_distribution[i]) {
+      marginal_distribution[i + 1] = new FrequencyDistribution(*(vec.marginal_distribution[i]));
+    }
+    else {
+      marginal_distribution[i + 1] = NULL;
+    }
+
+    if (vec.marginal_histogram[i]) {
+      marginal_histogram[i + 1] = new Histogram(*(vec.marginal_histogram[i]));
+    }
+    else {
+      marginal_histogram[i + 1] = NULL;
+    }
+  }
+
+  mean = new double[nb_variable];
+  for (i = 0;i < vec.nb_variable;i++) {
+    mean[i + 1] = vec.mean[i];
+  }
+
+  covariance = new double*[nb_variable];
+  for (i = 0;i < nb_variable;i++) {
+    covariance[i] = new double[nb_variable];
+  }
+
+  for (i = 0;i < vec.nb_variable;i++) {
+    for (j = 0;j < vec.nb_variable;j++) {
+      covariance[i + 1][j + 1] = vec.covariance[i][j];
+    }
+  }
+
+  int_vector = new int*[nb_vector];
+  real_vector = new double*[nb_vector];
+  for (i = 0;i < nb_vector;i++) {
+    int_vector[i] = new int[nb_variable];
+    real_vector[i] = new double[nb_variable];
+    for (j = 0;j < vec.nb_variable;j++) {
+      int_vector[i][j + 1] = vec.int_vector[i][j];
+      real_vector[i][j + 1] = vec.real_vector[i][j];
+    }
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Constructeur par copie de la classe Vectors.
+ *
+ *  arguments : reference sur un objet Vectors, type de transformation ('c' : copie,
+ *              'a' : addition d'une variable reponse), type de la variable reponse.
+ *
+ *--------------------------------------------------------------*/
+
+Vectors::Vectors(const Vectors &seq , char transform , int itype)
+
+{
+  switch (transform) {
+  case 'a' :
+    Vectors::add_response_variable(seq , itype);
+    break;
+  default :
+    Vectors::copy(seq);
+    break;
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
  *  Destruction des champs d'un objet Vectors.
  *
  *--------------------------------------------------------------*/
