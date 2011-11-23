@@ -104,7 +104,13 @@ enum {
   BAYESIAN_GAUSSIAN_CHANGE
 };
 
-const double PRIOR_VARIANCE_FACTOR = 100.;  // facteur pour deduire la variance de la loi a priori
+const double PRIOR_VARIANCE_FACTOR = 100.;  // facteur pour deduire la variance
+                                            // de la loi a priori gamma
+const double PRIOR_SAMPLE_SIZE = 1.;  // hyperparametre de la loi gaussiennne-gamma
+const double PRIOR_DEGREES_OF_FREEDOM = 2.;  // hyperparametre de la loi gaussiennne-gamma
+const double PRIOR_DISPERSION_FACTOR = 10.;  // facteur pour deduire la somme des carres
+                                             // des ecarts de la loi a priori
+const int PRIOR_PRECISION = 2;         // precision hyperparametres
 
 const double MAX_NB_WORD = 1.e7;       // nombre maximum de mots
 
@@ -527,6 +533,8 @@ protected :
 
     void gamma_hyperparameter_computation(int index , int variable ,
                                           double *hyperparam) const;
+    void gaussian_gamma_hyperparameter_computation(int index , int variable ,
+                                                   double *hyperparam) const;
     int nb_parameter_computation(int index , int nb_segment , int *model_type) const;
     double one_segment_likelihood(int index , int *model_type , double **rank) const;
     Sequences* segmentation_output(int *nb_segment , int *model_type , std::ostream &os ,
