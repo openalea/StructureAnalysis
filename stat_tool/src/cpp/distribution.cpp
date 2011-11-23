@@ -685,13 +685,13 @@ ostream& Distribution::ascii_print(ostream &os , bool comment_flag , bool cumul_
  *  arguments : stream, nombre de lois, pointeurs sur les lois,
  *              facteurs d'echelle, flag commentaire,
  *              flag sur l'ecriture de la fonction de repartition,
- *              pointeur sur une loi empirique.
+ *              pointeur sur une loi empirique, flag sur l'ordre des lois.
  *
  *--------------------------------------------------------------*/
 
 ostream& Distribution::ascii_print(ostream &os , int nb_dist , const Distribution **dist ,
                                    double *dist_scale , bool comment_flag , bool cumul_flag ,
-                                   const FrequencyDistribution *histo) const
+                                   const FrequencyDistribution *histo , bool mass_first) const
 
 {
   register int i , j;
@@ -758,6 +758,15 @@ ostream& Distribution::ascii_print(ostream &os , int nb_dist , const Distributio
       }
     }
 
+    if (mass_first) {
+      if (i < nb_value) {
+        os << setw(width[nb_dist + 2]) << mass[i] * scale;
+      }
+      else {
+        os << setw(width[nb_dist + 2]) << " ";
+      }
+    }
+
     for (j = 0;j < nb_dist;j++) {
       if (i < dist[j]->nb_value) {
         os << setw(width[j + 2]) << dist[j]->mass[i] * dist_scale[j];
@@ -767,11 +776,13 @@ ostream& Distribution::ascii_print(ostream &os , int nb_dist , const Distributio
       }
     }
 
-    if (i < nb_value) {
-      os << setw(width[nb_dist + 2]) << mass[i] * scale;
-    }
-    else {
-      os << setw(width[nb_dist + 2]) << " ";
+    if (!mass_first) {
+      if (i < nb_value) {
+        os << setw(width[nb_dist + 2]) << mass[i] * scale;
+      }
+      else {
+        os << setw(width[nb_dist + 2]) << " ";
+      }
     }
 
     if (cumul_flag) {
@@ -945,13 +956,14 @@ ostream& Distribution::spreadsheet_print(ostream &os , bool cumul_flag ,
  *
  *  arguments : stream, nombre de lois, pointeurs sur les lois,
  *              facteurs d'echelle, flag sur l'ecriture de la fonction
- *              de repartition, pointeur sur une loi empirique.
+ *              de repartition, pointeur sur une loi empirique,
+ *              flag sur l'ordre des lois.
  *
  *--------------------------------------------------------------*/
 
 ostream& Distribution::spreadsheet_print(ostream &os , int nb_dist , const Distribution **dist ,
                                          double *dist_scale , bool cumul_flag ,
-                                         const FrequencyDistribution *histo) const
+                                         const FrequencyDistribution *histo , bool mass_first) const
 
 {
   register int i , j;
@@ -991,6 +1003,13 @@ ostream& Distribution::spreadsheet_print(ostream &os , int nb_dist , const Distr
       }
     }
 
+    if (mass_first) {
+      os << "\t";
+      if (i < nb_value) {
+        os << mass[i] * scale;
+      }
+    }
+
     for (j = 0;j < nb_dist;j++) {
       os << "\t";
       if (i < dist[j]->nb_value) {
@@ -998,9 +1017,11 @@ ostream& Distribution::spreadsheet_print(ostream &os , int nb_dist , const Distr
       }
     }
 
-    os << "\t";
-    if (i < nb_value) {
-      os << mass[i] * scale;
+    if (!mass_first) {
+      os << "\t";
+      if (i < nb_value) {
+        os << mass[i] * scale;
+      }
     }
 
     if (cumul_flag) {
