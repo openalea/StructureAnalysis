@@ -144,6 +144,8 @@ const char *SEQ_label[] = {
   "self-transition" ,
   "asymptote" ,
 
+  "occupancy distribution" ,
+
   "probability of no-occurrence of " ,
   "time up to the first occurrence" ,
   "time up to the first occurrence of " ,
