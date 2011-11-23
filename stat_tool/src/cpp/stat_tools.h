@@ -467,7 +467,8 @@ class Distribution {    // loi de probabilite discrete
 
     std::ostream& ascii_print(std::ostream &os , int nb_dist , const Distribution **dist ,
                               double *dist_scale , bool comment_flag , bool cumul_flag ,
-                              const FrequencyDistribution *histo = NULL) const;
+                              const FrequencyDistribution *histo = NULL ,
+                              bool mass_first = false) const;
 
     std::ostream& spreadsheet_characteristic_print(std::ostream &os , bool shape = false) const;
 
@@ -477,7 +478,8 @@ class Distribution {    // loi de probabilite discrete
 
     std::ostream& spreadsheet_print(std::ostream &os , int nb_dist , const Distribution **dist ,
                                     double *dist_scale , bool cumul_flag ,
-                                    const FrequencyDistribution *histo = NULL) const;
+                                    const FrequencyDistribution *histo = NULL ,
+                                    bool mass_first = false) const;
 
     int plot_nb_value_computation(const FrequencyDistribution *histo = NULL) const;
     bool plot_print(const char *path , double *concentration , double scale) const;
