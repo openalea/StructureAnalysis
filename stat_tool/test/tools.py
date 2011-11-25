@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Abstract base class used by test_mixture, test_compound, etc
 
 author: Thomas Cokelaer, Thomas.Cokelaer@inria.fr

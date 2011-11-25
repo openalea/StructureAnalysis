@@ -282,7 +282,7 @@ def Save(obj, *args, **kargs):
 
       * ViewPoint (string): point of view on the object ("Data" or "Survival" or "StateProfile").
         This optional argument can be set at :
-          * "Data" only if the first argument is of type `_Vectors`, `_Sequences`,
+          * "Data" only if the first argument is of type `_Sequences`,
             `_DiscreteSequences`, `_MarkovData`, `_SemiMarkovData` or `_Tops`,
           * "Survival" only if the first argument is of type `_Distribution`,
             `_Mixture`, `_Convolution`, `_Compound`, `_FrequencyDistribution`, `_MixtureData`,
@@ -301,8 +301,9 @@ def Save(obj, *args, **kargs):
       * Format (string): format of sequences (only relevant for multivariate sequences):
         "Column" (default value) or "Line". This optional argument can only be used if the
         optional argument ViewPoint is set at "Data", and hence, if the first argument is of
-        type `_Vectors`, `_Sequences`, `_DiscreteSequences`, `_MarkovData`, `_SemiMarkovData`
-        or `_Tops`.
+        type `_Sequences`, `_DiscreteSequences`, `_MarkovData`, `_SemiMarkovData`
+        or `_Tops`. If the first argument is of type `_Vectors`, use Format="Data" to actually
+        save the data rather than their summary.
       * Sequence (int): identifier of a sequence. This optional argument can only be used
         if the optional argument ViewPoint is set at "StateProfile", and hence, if the first
         mandatory argument is of type `_HiddenMarkov` or `_HiddenSemiMarkov`.
@@ -318,6 +319,7 @@ def Save(obj, *args, **kargs):
         >>> Save(obj, file_name, Format="ASCII", Detail=2)
         >>> Save(histo, file_name, ViewPoint="Data")
         >>> Save(vec, file_name, ViewPoint="Data", Detail=2)
+        >>> Save(vec, file_name, Format="Data")
         >>> Save(timev, file_name, ViewPoint="Data")
         >>> Save(seq, file_name, ViewPoint="Data", Format="Line", Detail=2)
         >>> Save(dist, file_name, ViewPoint="Survival", Format="SpreadSheet")
