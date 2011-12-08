@@ -137,6 +137,8 @@ bool GeneralMatchPath::saturated(int flow_edge)
     return flow[flow_edge] == nj; // correspond au noeud vide connecte aux refs
   if (flow_edge == nbEdge-1)
     return flow[flow_edge] == ni; // correspond au noeud vide connecte aux input
+  if (flow_edge == nbEdge-nj-2)
+    return flow[flow_edge] == std::max(ni,nj)-std::min(ni,nj); // correspond au noeud vide connecte aux input
   
  
   return(flow[flow_edge]==1); // tous les autres arcs sont de capacites 1
@@ -155,6 +157,8 @@ int GeneralMatchPath::capacity(int flow_edge)
     return  nj; // correspond au noeud vide connecte aux refs
   if (flow_edge == nbEdge-1)
     return  ni; // correspond au noeud vide connecte aux input
+  if (flow_edge ==  nbEdge-nj-2)
+    return  std::max(ni,nj)-std::min(ni,nj); // correspond au noeud vide connecte aux input
   
  
   
@@ -374,16 +378,15 @@ DistanceType GeneralMatchPath::minCostFlow(VertexVector& map_list)
   // La valeur du flot initialement est de 0
   DistanceType flow_value=0;
   // Le flot maximum est le max de ni, nj.
-  //  DistanceType flow_max=D_MAX(ni,nj);
   //DistanceType flow_max=D_MAX(ni,nj);
-  DistanceType flow_min=D_MAX(ni,nj);
+  //DistanceType flow_min=D_MAX(ni,nj);
   DistanceType flow_max=ni+nj;
 
   bool path = true ;
   int last_percentage = -1;
 
-  for (int f=1;(f<=flow_max)&&(path)&&(f<flow_min || !is_saturated());f++)
-  // for (int f=1;(f<=flow_max)&&(path)&&(!is_saturated());f++)
+  //  for (int f=1;(f<=flow_max)&&(path)&&(f<flow_min || !is_saturated());f++)
+  for (int f=1;(f<=flow_max)&&(path);f++)
     {
       int percentage = int(100.*f/flow_max);
       if (percentage > last_percentage){
@@ -530,12 +533,12 @@ int GeneralMatchPath::nbOut(int n)
     return ni; // connection de la source aux autres noeuds
   if (n < ni) 
     return _inputSuccessors[n-1].size()+2;
-  if (n == ni)
-    return nj;
+  if (n == ni) // empty node -> connecté à tous les autres noeuds (y compris le noeud vide)
+    return nj+1;
   if (n < ni + nj )
     return _referencePredecessors[n-ni-1].size()+2;
   if (n == ni + nj)
-    return ni; // Les deux noeuds vides ne sont pas reliés.
+    return ni+1 ; // Les deux noeuds vides  sont  reliés.
   else
     return nj;
 }
@@ -569,7 +572,7 @@ int GeneralMatchPath::next_edge(int n,int i)
       }
     }
   if (n == ni) // empty node
-    if (i==nbOut(n))
+    if (i == nbOut(n))
       return 2*(n-1)+1;
     else
  	return 2*ni+2*nj*(n-1)+2*(i-1);
@@ -624,7 +627,7 @@ int GeneralMatchPath::next_vertex(int n,int i)
       }
     }
   if (n==ni){
-    if (i==nbOut(n))        
+    if (i == nbOut(n))        
       return 0;      
     else    
       return ni+i;        
