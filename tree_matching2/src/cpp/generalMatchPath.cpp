@@ -138,7 +138,7 @@ bool GeneralMatchPath::saturated(int flow_edge)
   if (flow_edge == nbEdge-1)
     return flow[flow_edge] == ni; // correspond au noeud vide connecte aux input
   if (flow_edge == nbEdge-nj-2)
-    return flow[flow_edge] == std::max(ni,nj)-std::min(ni,nj); // correspond a l'arc entre mles deux noeud vide
+    return flow[flow_edge] == std::min(ni,nj); // correspond a l'arc entre mles deux noeud vide
   
  
   return(flow[flow_edge]==1); // tous les autres arcs sont de capacites 1
@@ -158,7 +158,7 @@ int GeneralMatchPath::capacity(int flow_edge)
   if (flow_edge == nbEdge-1)
     return  ni; // correspond au noeud vide connecte aux input
    if (flow_edge == nbEdge-nj-2)
-    return std::max(ni,nj)-std::min(ni,nj); // correspond a l'arc entre mles deux noeud vide
+    return std::min(ni,nj); // correspond a l'arc entre mles deux noeud vide
  
   
  
@@ -255,8 +255,8 @@ bool GeneralMatchPath::findPath(VertexVector& VertexOnThePath,EdgeList& EdgeOnTh
 	  current_out_vertex=next_vertex(current_vertex,i);
 	  current_out_edge=next_edge(current_vertex,i);
 	  
-	  //cerr<<"Next Edge : "<<current_vertex<<" - "<<i<<" -> "<<current_out_edge<<endl;
-	  //cerr<<"Next Vertex : "<<current_vertex<<" - "<<i<<" -> "<<current_out_vertex<<endl;
+	  cerr<<"Next Edge : "<<current_vertex<<" - "<<i<<" -> "<<current_out_edge<<endl;
+	  cerr<<"Next Vertex : "<<current_vertex<<" - "<<i<<" -> "<<current_out_vertex<<endl;
 
 
 	  // On applique la transformation d'Edmonds and Karp pour que l'arc est une valeur non negative
@@ -594,7 +594,7 @@ int GeneralMatchPath::next_edge(int n,int i)
   else{ //empty node
       if (i==nbOut(n))
 	{
-	  return(2*(ni-1)+2*ni*nj+2*(nj-ni));
+	  return(2*(ni-1)+2*ni*nj+2*nj);
 	}
       else 
 	{
