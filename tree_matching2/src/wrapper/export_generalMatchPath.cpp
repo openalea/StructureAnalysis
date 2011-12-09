@@ -33,9 +33,12 @@
 #include "export_list.h"
 #include <boost/python.hpp>
 #include "generalMatchPath.h"
+#include <hash_map>
 
 using namespace boost::python;
 #define bp boost::python
+
+
 
 class PyGeneralMatchPath : public GeneralMatchPath, public bp::wrapper<GeneralMatchPath>
 {
@@ -62,8 +65,9 @@ public:
     /** Returns the edge cost between /e i_node and /e r_node*/
   virtual DistanceType edgeCost(int node1, int node2) 
     { 
-	  if(bp::override f = this->get_override("edgeCost"))
+	  if(bp::override f = this->get_override("edgeCost")){
 	    return bp::call<DistanceType>(f.ptr(), bp::object(node1), bp::object(node2));
+      }
 	  else return default_edgeCost(node1,node2);
 	}
 

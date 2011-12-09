@@ -138,7 +138,7 @@ bool GeneralMatchPath::saturated(int flow_edge)
   if (flow_edge == nbEdge-1)
     return flow[flow_edge] == ni; // correspond au noeud vide connecte aux input
   if (flow_edge == nbEdge-nj-2)
-    return flow[flow_edge] == std::max(ni,nj)-std::min(ni,nj); // correspond au noeud vide connecte aux input
+    return flow[flow_edge] == std::max(ni,nj)-std::min(ni,nj); // correspond a l'arc entre mles deux noeud vide
   
  
   return(flow[flow_edge]==1); // tous les autres arcs sont de capacites 1
@@ -157,8 +157,9 @@ int GeneralMatchPath::capacity(int flow_edge)
     return  nj; // correspond au noeud vide connecte aux refs
   if (flow_edge == nbEdge-1)
     return  ni; // correspond au noeud vide connecte aux input
-  if (flow_edge ==  nbEdge-nj-2)
-    return  std::max(ni,nj)-std::min(ni,nj); // correspond au noeud vide connecte aux input
+   if (flow_edge == nbEdge-nj-2)
+    return std::max(ni,nj)-std::min(ni,nj); // correspond a l'arc entre mles deux noeud vide
+ 
   
  
   
@@ -568,14 +569,14 @@ int GeneralMatchPath::next_edge(int n,int i)
 	  return 2*ni+2*nj*n-2;
 	else
 	  successor = _inputSuccessors[n-1][i-1];
-	return 2*ni+2*nj*(n-1)+2*(successor-ni+1);
+	return 2*(ni-1)+2*nj*(n-1)+2*(successor-ni+1);
       }
     }
   if (n == ni) // empty node
     if (i == nbOut(n))
       return 2*(n-1)+1;
     else
- 	return 2*ni+2*nj*(n-1)+2*(i-1);
+ 	return 2*ni+2*nj*(n-1)+2*(i-1); //ok
   if (n < ni+nj)
     {
       if (i==nbOut(n))
@@ -587,17 +588,20 @@ int GeneralMatchPath::next_edge(int n,int i)
 	else
 	  predecessor = _referencePredecessors[n-ni-1][i-1]+1;
 	//	cerr<<"n "<<n<<" ni "<<ni<<" i "<<i<<" nbOut "<<nbOut(n)<<" pred = "<<predecessor<<endl;
-	return 2*ni+2*nj*(predecessor-1)+2*(n-ni-1)+1;
+	return 2*(ni-1)+2*nj*(predecessor-1)+2*(n-ni)+1;
       }
     }
   else{ //empty node
       if (i==nbOut(n))
 	{
-	  return(2*(ni+ni*nj+(n-ni-1)));
+	 // return(2*(ni+ni*nj+(n-ni-1)));
+         return(2*(ni+ni*nj+(nj-1)));
+
 	}
       else // Pas sur de ça
 	{
-	  return(2*ni+2*nj*(i-1)+2*(n-ni-1)+1);	
+	  //return(2*ni+2*nj*(i-1)+2*(n-ni-1)+1);
+        return(2*ni+2*nj*i-2);
 	}
   }
 }
