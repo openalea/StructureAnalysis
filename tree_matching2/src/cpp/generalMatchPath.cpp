@@ -557,7 +557,7 @@ int GeneralMatchPath::next_edge(int n,int i)
     return(2*(i-1));
   // sink
   if (n==ni+nj+1) 
-    return(2*ni+2*ni*nj+2*(i-1)+1);
+    return(2*(ni-1)+2*ni*nj+2*i+1);
   if (n<ni)
     {
       if (i==nbOut(n)) // arc retour
@@ -566,21 +566,21 @@ int GeneralMatchPath::next_edge(int n,int i)
 	// on considere que le successor est code a partir de ni
 	int successor ;
 	if (i == nbOut(n)-1)
-	  return 2*ni+2*nj*n-2;
+	  return 2*(ni-1)+2*nj*n;
 	else
-	  successor = _inputSuccessors[n-1][i-1];
-	return 2*(ni-1)+2*nj*(n-1)+2*(successor-ni+1);
+	  successor = _inputSuccessors[n-1][i-1]+2;
+	return 2*(ni-1)+2*nj*(n-1)+2*(successor-ni);
       }
     }
   if (n == ni) // empty node
     if (i == nbOut(n))
-      return 2*(n-1)+1;
+      return 2*(ni-1)+1;
     else
- 	return 2*ni+2*nj*(n-1)+2*(i-1); //ok
+      return 2*(ni-1)+2*nj*(ni-1)+2*i;
   if (n < ni+nj)
     {
       if (i==nbOut(n))
-	return (2*(ni+ni*nj+(n-ni-1)));
+	return (2*(ni-1)+2*ni*nj+2*(n-ni));
       else{
 	int predecessor ;
 	if (i == nbOut(n) -1) // connection au noeud vide
@@ -594,18 +594,14 @@ int GeneralMatchPath::next_edge(int n,int i)
   else{ //empty node
       if (i==nbOut(n))
 	{
-	 // return(2*(ni+ni*nj+(n-ni-1)));
-         return(2*(ni+ni*nj+(nj-1)));
-
+	  return(2*(ni-1)+2*ni*nj+2*(nj-ni));
 	}
-      else // Pas sur de ça
+      else 
 	{
-	  //return(2*ni+2*nj*(i-1)+2*(n-ni-1)+1);
-        return(2*ni+2*nj*i-2);
+	  return(2*(ni-1)+2*nj*(i-1)+2*nj+1);	
 	}
   }
 }
-
 int GeneralMatchPath::next_vertex(int n,int i)
 {
   // if (i>5)
