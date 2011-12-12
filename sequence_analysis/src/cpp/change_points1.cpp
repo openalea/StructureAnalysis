@@ -166,7 +166,7 @@ void Sequences::gaussian_gamma_hyperparameter_computation(int index , int variab
 
     magnitude = (int)(log10(hyperparam[0])) + 1;
     if (magnitude > PRIOR_PRECISION) {
-      round_factor = pow(10 , magnitude - PRIOR_PRECISION);
+      round_factor = pow(10.0 , magnitude - PRIOR_PRECISION);
 
 #     ifdef DEBUG
       cout << "\nTEST 0: " << magnitude << " " << round_factor << endl;
@@ -177,7 +177,7 @@ void Sequences::gaussian_gamma_hyperparameter_computation(int index , int variab
 
     magnitude = (int)(log10(hyperparam[3])) + 1;
     if (magnitude > PRIOR_PRECISION) {
-      round_factor = pow(10 , magnitude - PRIOR_PRECISION);
+      round_factor = pow(10.0 , magnitude - PRIOR_PRECISION);
 
 #     ifdef DEBUG
       cout << "\nTEST 3: " << magnitude << " " << round_factor << endl;
