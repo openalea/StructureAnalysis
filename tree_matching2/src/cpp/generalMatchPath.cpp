@@ -87,16 +87,16 @@ void GeneralMatchPath::make(const NodeList& input_list,const NodeList& reference
 
   _inputSuccessors = VertexArray(inputSuccessors);
   _referencePredecessors = VertexArray(referencePredecessors);
-  
-
+ 
+ 
   // On recupere le nombre d'arbres des forets initiales et finales
   int ni=_inputList->size();
   int nj=_referenceList->size();
-
+ 
   // Le nombre de vertex est egal a la somme des deux ensembles plus deux noeuds 
   // plus deux noeuds vides plus la source et le puit
   nbVertex=ni+nj+4;
-  // le nombre d'arcs depend de la liste des successeurs somme des élements de _inputSuccessors
+  // le nombre d'arcs depend de la liste des successeurs somme des Ã©lements de _inputSuccessors
   nbEdge = 0;
   // for (int i = 0; i < _inputSuccessors.size(); i++)
   //   nbEdge += _inputSuccessors[i].size();
@@ -126,7 +126,7 @@ GeneralMatchPath::~GeneralMatchPath()
 // ----------------------------------------
 
 // -------------------------------------------
-// Cette fonction vérifie si un arc est saturé
+// Cette fonction vÃ©rifie si un arc est saturÃ©
 // ------------------------------------------
 
 bool GeneralMatchPath::saturated(int flow_edge)
@@ -158,11 +158,8 @@ int GeneralMatchPath::capacity(int flow_edge)
   if (flow_edge == nbEdge-1)
     return  ni; // correspond au noeud vide connecte aux input
    if (flow_edge == nbEdge-nj-2)
-    return std::min(ni,nj); // correspond a l'arc entre mles deux noeud vide
- 
-  
- 
-  
+    return std::min(ni,nj); // correspond a l'arc entre les deux noeud vide
+
   return 1;
 }
 
@@ -248,6 +245,7 @@ bool GeneralMatchPath::findPath(VertexVector& VertexOnThePath,EdgeList& EdgeOnTh
   do
     {
       // Pour tous les sommets relie au sommets courant:
+      //      std::cerr<<"Current Vertex : "<<current_vertex<<" - Nb Out = "<<nbOut(current_vertex)<<std::endl;
       for (int i=1;i<=nbOut(current_vertex);i++)
 	{
 	  // On regarde les premier cotes et sommets adjacents du sommet courant
@@ -255,8 +253,8 @@ bool GeneralMatchPath::findPath(VertexVector& VertexOnThePath,EdgeList& EdgeOnTh
 	  current_out_vertex=next_vertex(current_vertex,i);
 	  current_out_edge=next_edge(current_vertex,i);
 	  
-	  cerr<<"Next Edge : "<<current_vertex<<" - "<<i<<" -> "<<current_out_edge<<endl;
-	  cerr<<"Next Vertex : "<<current_vertex<<" - "<<i<<" -> "<<current_out_vertex<<endl;
+	  //	  cerr<<"Next Edge : "<<current_vertex<<" - "<<i<<" -> "<<current_out_edge<<endl;
+	  //â‰ˆs	  cerr<<"Next Vertex : "<<current_vertex<<" - "<<i<<" -> "<<current_out_vertex<<endl;
 
 
 	  // On applique la transformation d'Edmonds and Karp pour que l'arc est une valeur non negative
@@ -335,7 +333,7 @@ bool GeneralMatchPath::findPath(VertexVector& VertexOnThePath,EdgeList& EdgeOnTh
 // On resout ici le probleme du flot de cout minimum
 // -------------------------------------------------
 
-//Méthode générale pour le calcul du cout minimum de flot maximum
+//MÃ©thode gÃ©nÃ©rale pour le calcul du cout minimum de flot maximum
 // DistanceType GeneralMatchPath::minCostFlow(int *int_list)
 // {
 //   int ni=_inputList->size();
@@ -414,6 +412,7 @@ DistanceType GeneralMatchPath::minCostFlow(VertexVector& map_list)
 		{
 		  map_list[PredOnThePath[current_vertex]]=current_vertex;
 		  map_list[current_vertex]=PredOnThePath[current_vertex];
+		  //		  std::cerr<<current_vertex<<" -> "<<PredOnThePath[current_vertex]<<std::endl;
 		} 
 	      // Si l'arc considere est un arc de renversement alors, on diminue le flot de 
 	      // une unite sur cet arc,
@@ -528,20 +527,18 @@ int GeneralMatchPath::nbOut(int n)
 
   int ni=_inputList->size();
   int nj=_referenceList->size();
-  ni++;
-  nj++;
   if (n==0)  
-    return ni; // connection de la source aux autres noeuds
-  if (n < ni) 
+    return ni+1; // connection de la source aux autres noeuds
+  if (n < ni+1) 
     return _inputSuccessors[n-1].size()+2;
-  if (n == ni) // empty node -> connecté à tous les autres noeuds (y compris le noeud vide)
-    return nj+1;
-  if (n < ni + nj )
-    return _referencePredecessors[n-ni-1].size()+2;
-  if (n == ni + nj)
-    return ni+1 ; // Les deux noeuds vides  sont  reliés.
+  if (n == ni+1) // empty node -> connectÃ© Ã  tous les autres noeuds (y compris le noeud vide)
+    return nj+2;
+  if (n < ni + nj + 2 )
+    return _referencePredecessors[n-ni-2].size()+2;
+  if (n == ni + nj + 2)
+    return ni+2 ; // Les deux noeuds vides  sont  reliÃ©s.
   else
-    return nj;
+    return nj+1;
 }
 
 int GeneralMatchPath::next_edge(int n,int i)

@@ -32,8 +32,8 @@
 #include "extract_list.h"
 #include "export_list.h"
 #include <boost/python.hpp>
+//#include <hash_map>
 #include "generalMatchPath.h"
-#include <hash_map>
 
 using namespace boost::python;
 #define bp boost::python
@@ -87,8 +87,10 @@ public:
     VertexVector::iterator end = map_list.end();
     begin++;end--;
     int i = 1;
+    //std::cerr<<"Mapping : "<<dist<<std::endl;
     for (it = begin;it!=end;it++, i++){
       result.append(make_tuple(this->who(i),who(*it)));
+      //std::cerr<<who(i)<<" -> "<<who(*it)<<std::endl;
     }
     return make_tuple(dist,result);
   }
