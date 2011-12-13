@@ -11,9 +11,9 @@ class MyMatching(GeneralMatchPath):
     def edgeCost(self,a,b):
             #print "EdgeCost = ",a,b
             if a == -1 or b == -1:
-                return 101.
+                return 0
             else:
-                return abs(a-b)
+                return abs(a-(b-100))
 
 
 def test(maxinrange = 100 ,maxoutrange = 100,deg = 3):
