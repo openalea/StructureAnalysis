@@ -32,7 +32,7 @@ def test2():
     print "test"
     set1 = [i+1 for i in xrange(maxinrange)]
     set2 = [i+4 for i in xrange(maxoutrange)]
-    edges = [(1,4,2),(1,5,2),(2,5,2),(2,6,1),(1,7,4)]
+    edges = [(1,4,2),(1,5,2),(2,5,2),(2,6,2),(1,7,4)]
     print edges
     print set1,set2
     m = BipartiteMatching(set1,set2,edges,[1 for i in xrange(maxinrange)],[1 for i in xrange(maxoutrange)])
