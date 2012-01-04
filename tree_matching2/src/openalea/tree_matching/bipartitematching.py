@@ -80,9 +80,9 @@ def filter_perfect_matches(set1,set2, edges, nonmatchingset1cost, nonmatchingset
     
     perfect_matches = []
     for ni,njs in perfectly_matched1.iteritems():
-        if len(njs) == 1 and len(perfectly_matched2[njs[0]]) == [ni]: # A unique one-to-one relation
+        if len(njs) == 1 and perfectly_matched2[njs[0]] == [ni]: # A unique one-to-one relation
             perfect_matches.append((ni,njs[0]))
-            
+    
     if len(perfect_matches) == 0:
         return set1,set2, edges, nonmatchingset1cost, nonmatchingset2cost, perfect_matches
     
@@ -125,7 +125,7 @@ class BipartiteMatching:
         # print 'Orphans 2 :',self.orphans2
         iipossiblematching = possiblematching
         set1,set2, possiblematching, nonmatchingset1cost, nonmatchingset2cost, self.perfect_matches = filter_perfect_matches(set1, set2, iipossiblematching, nonmatchingset1cost, nonmatchingset2cost)
-        # print len(self.perfect_matches), len(iipossiblematching)-len(possiblematching)
+        print len(self.perfect_matches), len(iipossiblematching)-len(possiblematching)
         
         self.nb_ni = len(set1)
         self.nb_nj = len(set2)
@@ -198,4 +198,4 @@ class BipartiteMatching:
                 newmatching.add(newelem)
         # print             
 
-        return distance+self.orphanscost, list(newmatching) , self.orphans1+list(nonmatching1), self.orphans2+list(nonmatching2)
+        return distance+self.orphanscost, list(newmatching)+self.perfect_matches , self.orphans1+list(nonmatching1), self.orphans2+list(nonmatching2)
