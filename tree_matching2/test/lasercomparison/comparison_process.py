@@ -1,5 +1,6 @@
 from openalea.plantgl.scenegraph import BoundingBox, Point3Array, Polyline
 from openalea.mtg.mtg import colored_tree
+from util import readfile, writefile
 import os, os.path
 
 def get_shared_data(x) : return x
@@ -110,7 +111,7 @@ def create_edges_with_space_division(bbxprop1,bbxprop2,skeletonprop1,skeletonpro
                 vid2tocompare = vid2tocompare.union(bbxcontains[key])
         for vid2 in vid2tocompare:
             if bbx.distance(bbxprop2[vid2]) <= maxdistance:
-                edges.append( (vid1,vid2,1 ) ) #skeletonprop1[vid1].hausdorff_distance(skeletonprop2[vid2])) )
+                edges.append( (vid1,vid2, skeletonprop1[vid1].hausdorff_distance(skeletonprop2[vid2])) )
     return edges
 
 def create_edges(bbxprop1,bbxprop2,skeletonprop1,skeletonprop2,maxdistance):
@@ -118,7 +119,7 @@ def create_edges(bbxprop1,bbxprop2,skeletonprop1,skeletonprop2,maxdistance):
     for vid1, bbx in bbxprop1.iteritems():
         for vid2, bbx2 in bbxprop2.iteritems():
             if bbx.distance(bbx2) <= maxdistance:
-                edges.append( (vid1,vid2, 1 )) #skeletonprop1[vid1].hausdorff_distance(skeletonprop2[vid2])) )
+                edges.append( (vid1,vid2, skeletonprop1[vid1].hausdorff_distance(skeletonprop2[vid2])) )
     return edges
 
 def check_minimum_edges_cost(edges,set1,set2,delcost1,delcost2):
@@ -165,7 +166,7 @@ def create_comparison(mtg1,mtg2,maxdistance = None, cacheprefix = None, cachepat
         skel1 = skeletonprop1[secondelem]
         skel1length = Polyline(skel1).getLength()
         nbsegments = (len(skel1)-1)
-        maxdistance = skel1length / nbsegments
+        maxdistance = 2 * skel1length / nbsegments
         print 'Use max distance :',maxdistance,(skel1length , nbsegments)
     
     # Compute edge
@@ -196,9 +197,6 @@ def create_comparison(mtg1,mtg2,maxdistance = None, cacheprefix = None, cachepat
         delset1cost =  [sizeprop1[i] for i in set1]
         delset2cost =  [sizeprop2[i] for i in set2]
 
-    # delset1cost =  [2 for i in set1]
-    # delset2cost =  [2 for i in set2]
-        
     # return BipartiteMatching
     return BipartiteMatching(set1,set2,edges,delset1cost,delset2cost)
 
@@ -298,58 +296,7 @@ def topological_comparison(ref_mtg,tested_mtg, mapping, nonmapping1, nonmapping2
     edge_mapping = []
     edge_nonmapping1 = []
     edge_nonmapping2 = []
-    
-    groupid1, groupid2 = {}, {}
-    groupcomponents1 = groupcomponents2 = {}, {}
-    groupmapping =  {}
-    for nis,njs in mapping:        
-        if isinstance(nis,int):
-            ni = nis
-        else:
-            rids = [i for i in nis if not ref_mtg.parent(i) in nis]
-            assert len(rids) == 1
-            ni = rids[0]
-            for lni in nis: groupid1[lni] = ni
-            groupcomponents1[ni] = nis
-        
-        if isinstance(njs,int):
-            nj = njs
-        else:
-            rids = [i for i in njs if not tested_mtg.parent(i) in njs]
-            assert len(rids) == 1
-            nj = rids[0]
-            for lnj in njs: groupid2[lnj] = nj
-            groupcomponents2[nj] = njs
-        groupmapping[ni] = nj
-        
-    
-    for ni,nj in groupmapping.iteritems():
-        ni_parent =  groupid1.get(ref_mtg.parent(ni),ref_mtg.parent(ni)) 
-        nj_parent =  groupid2.get(tested_mtg.parent(nj),tested_mtg.parent(nj))
-        if ni_parent is None or nj_parent is None:
-            if ni_parent == nj_parent: edge_mapping.append((groupcomponents1.get(ni,ni),groupcomponents2.get(nj,nj)))
-            else :
-                edge_nonmapping1.append(groupcomponents1.get(ni,ni))
-                edge_nonmapping2.append(groupcomponents2.get(nj,nj))
-            continue
-        while ni_parent in nonmapping1 : ni_parent = groupid1[ref_mtg.parent(ni_parent)]
-        while nj_parent in nonmapping2 : nj_parent = groupid2[tested_mtg.parent(nj_parent)]
-        mappedniparent = groupmapping[ni_parent] 
-            
-        if nj_parent == mappedniparent:
-            edge_mapping.append((groupcomponents1.get(ni,ni),groupcomponents2.get(nj,nj)))
-        else:
-            edge_nonmapping1.append(groupcomponents1.get(ni,ni))
-            edge_nonmapping2.append(groupcomponents2.get(nj,nj))
-    return edge_mapping, edge_nonmapping1, edge_nonmapping2
-    
-    
-def topological_comparison_simple(ref_mtg,tested_mtg, mapping, nonmapping1, nonmapping2, verbose = False):
-    edge_mapping = []
-    edge_nonmapping1 = []
-    edge_nonmapping2 = []
-
-    mapping1, mapping2 = {}, {}    
+    mapping1, mapping2 = {}, {}
     
     for nis,njs in mapping:
         if isinstance(nis,int):
@@ -397,6 +344,8 @@ def topological_comparison_simple(ref_mtg,tested_mtg, mapping, nonmapping1, nonm
             edge_nonmapping1.append(nis)
             edge_nonmapping2.append(njs)
     return edge_mapping, edge_nonmapping1,edge_nonmapping2
+    
+
         
 def comparison_process(ref_mtg,tested_mtg,cacheprefix = None,cachepath = get_shared_data('comparison')):
     """ Return score of geometrical comparison (nb of common elements) and topological comparison (nb of common edges) """

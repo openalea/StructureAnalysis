@@ -32,10 +32,10 @@ def test2():
     print "test"
     set1 = [i+1 for i in xrange(maxinrange)]
     set2 = [i+4 for i in xrange(maxoutrange)]
-    edges = [(1,4,2),(1,5,2),(2,5,2),(2,6,2),(1,7,4)]
-    print edges
+    edges = [(1,4,2),(1,5,2),(2,5,2),(2,6,2),(1,7,10)]
     print set1,set2
-    m = BipartiteMatching(set1,set2,edges,[1 for i in xrange(maxinrange)],[1 for i in xrange(maxoutrange)])
+    print edges
+    m = BipartiteMatching(set1,set2,edges,[5 for i in xrange(maxinrange)],[5 for i in xrange(maxoutrange)])
     print "Debut Matching" 
     start = time.clock()
     res = m.match()
@@ -48,4 +48,4 @@ def test2():
 
 
 if __name__ == '__main__':
-    test()
+    test2()
