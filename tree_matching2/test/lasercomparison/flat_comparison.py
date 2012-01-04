@@ -1,4 +1,4 @@
-from comparison import *
+from comparison_process import *
 from util import readfile, writefile
 
 

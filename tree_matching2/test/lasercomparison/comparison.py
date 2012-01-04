@@ -269,17 +269,17 @@ def extend_comparison(ref_mtg,tested_mtg, mapping, nonmapping1, nonmapping2, ver
             a.sort(cmp=lambda x,y : cmp(x[1],y[1]))
             newmindistpath2 = paths2[a[0][0]]
             newmindist2 = a[0][1]
-        choices = [actualdistvalue,newmindist1,newmindist2]
+        choices = [newmindist1,newmindist2,actualdistvalue]
         choice = choices.index(min(choices))
-        if choice == 0:
+        if choice == 2:
             newmapping += [(ni,nj)]
-        elif choice == 1:
+        elif choice == 0:
             if verbose: print 'Extend mapping from',(ni,nj),' to ',(newmindistpath1,nj)
             newmapping += [(newmindistpath1,nj)]
             for v in newmindistpath1:
                 if v != ni:
                     nonmapping1.discard(v)
-        elif choice == 2:
+        elif choice == 1:
             if verbose: print 'Extend mapping from',(ni,nj),' to ',(ni,newmindistpath2)
             newmapping += [(ni,newmindistpath2)]
             for v in newmindistpath2:
@@ -298,7 +298,58 @@ def topological_comparison(ref_mtg,tested_mtg, mapping, nonmapping1, nonmapping2
     edge_mapping = []
     edge_nonmapping1 = []
     edge_nonmapping2 = []
-    mapping1, mapping2 = {}, {}
+    
+    groupid1, groupid2 = {}, {}
+    groupcomponents1 = groupcomponents2 = {}, {}
+    groupmapping =  {}
+    for nis,njs in mapping:        
+        if isinstance(nis,int):
+            ni = nis
+        else:
+            rids = [i for i in nis if not ref_mtg.parent(i) in nis]
+            assert len(rids) == 1
+            ni = rids[0]
+            for lni in nis: groupid1[lni] = ni
+            groupcomponents1[ni] = nis
+        
+        if isinstance(njs,int):
+            nj = njs
+        else:
+            rids = [i for i in njs if not tested_mtg.parent(i) in njs]
+            assert len(rids) == 1
+            nj = rids[0]
+            for lnj in njs: groupid2[lnj] = nj
+            groupcomponents2[nj] = njs
+        groupmapping[ni] = nj
+        
+    
+    for ni,nj in groupmapping.iteritems():
+        ni_parent =  groupid1.get(ref_mtg.parent(ni),ref_mtg.parent(ni)) 
+        nj_parent =  groupid2.get(tested_mtg.parent(nj),tested_mtg.parent(nj))
+        if ni_parent is None or nj_parent is None:
+            if ni_parent == nj_parent: edge_mapping.append((groupcomponents1.get(ni,ni),groupcomponents2.get(nj,nj)))
+            else :
+                edge_nonmapping1.append(groupcomponents1.get(ni,ni))
+                edge_nonmapping2.append(groupcomponents2.get(nj,nj))
+            continue
+        while ni_parent in nonmapping1 : ni_parent = groupid1[ref_mtg.parent(ni_parent)]
+        while nj_parent in nonmapping2 : nj_parent = groupid2[tested_mtg.parent(nj_parent)]
+        mappedniparent = groupmapping[ni_parent] 
+            
+        if nj_parent == mappedniparent:
+            edge_mapping.append((groupcomponents1.get(ni,ni),groupcomponents2.get(nj,nj)))
+        else:
+            edge_nonmapping1.append(groupcomponents1.get(ni,ni))
+            edge_nonmapping2.append(groupcomponents2.get(nj,nj))
+    return edge_mapping, edge_nonmapping1, edge_nonmapping2
+    
+    
+def topological_comparison_simple(ref_mtg,tested_mtg, mapping, nonmapping1, nonmapping2, verbose = False):
+    edge_mapping = []
+    edge_nonmapping1 = []
+    edge_nonmapping2 = []
+
+    mapping1, mapping2 = {}, {}    
     
     for nis,njs in mapping:
         if isinstance(nis,int):
@@ -386,9 +437,6 @@ def comparison_process(ref_mtg,tested_mtg,cacheprefix = None,cachepath = get_sha
     matchedlength = sum([ref_sizes[i] for i,j in mapping])+sum([tested_sizes[j] for i,j in mapping])
     cscore = matchedlength/totlength
     print 'Weighted mapping score :',cscore
-    # First visualization
-    # scene = comparison_representation(ref_mtg,tested_mtg,mapping)
-    # Viewer.display(scene)
     
     # Extended comparison
     with_extension = False
@@ -419,105 +467,6 @@ def comparison_process(ref_mtg,tested_mtg,cacheprefix = None,cachepath = get_sha
     print map(len,[edgematching,nonedgematching1,nonedgematching2])
     tscore = (2*len(edgematching))/float(sum(map(len,[edgematching,edgematching,nonedgematching1,nonedgematching2])))
     print 'Topological comparison score',tscore
-    # Third visualization
-    # nonmapping1b = set(ref_mtg.vertices(scale=2))
-    # nonmapping1b.difference_update([i for i,j in edgematching])
-    # nonmapping1b.difference_update(nonedgematching1)
-    # nonmapping2b = set(tested_mtg.vertices(scale=2))
-    # nonmapping2b.difference_update([j for i,j in edgematching])
-    # nonmapping2b.difference_update(nonedgematching2)
-    # scene1,scene2 = topo_comparison_representation(ref_mtg,tested_mtg,edgematching,nonmapping1b,nonmapping2)
-    # from gui.comparisonviewer import showComparison
-    # showComparison(scene1,scene2,newmapping)
     return newcscore, tscore
     
 
-# from random import randint
-# MatchingColorTheme = [(0,i,0) for i in xrange(50,255)]
-# UnmatchColorTheme = (255,0,0)
-# NotConsideredColorTheme = (0,0,0)
-# UColorTheme = (255,255,255)
-
-# class CircularColorIterator:
-    # def __init__(self, theme):
-        # self.value = theme
-        # self.iter = iter(self.value)
-    # def __iter__(self): return self
-    # def next(self):
-        # try:
-            # return self.iter.next()
-        # except:
-            # self.iter = iter(self.value)
-            # return self.iter.next()
-
-# def color_table(mapping):
-    # ref_color = {}
-    # tested_color = {}
-    # iter = CircularColorIterator(MatchingColorTheme)
-    # for ni,nj in mapping:
-        # if ni is None or nj is None:
-            # if not ni is None: ref_color[ni] = UnmatchColorTheme
-            # if not nj is None: tested_color[nj] = UnmatchColorTheme
-        # else:
-            # color = iter.next()
-            # if isinstance(ni,int):
-                # ref_color[ni] = color
-            # else:
-                # for lni in ni: ref_color[lni] = color
-            # if isinstance(nj,int):
-                # tested_color[nj] = color
-            # else:
-                # for lnj in nj:                     
-                    # tested_color[lnj] = color
-    
-    # return ref_color,tested_color
-
-    
-# def create_rep(mtg,colortable,translation):
-    # circle = Polyline2D.Circle()
-    # scene = Scene()
-    # skeleton = mtg.property('skeleton')
-    # skeletonradii = mtg.property('skeletonradii')
-    # for vid in mtg.vertices(scale=2):
-        # geom = Extrusion(Polyline(skeleton[vid]),circle,[(i,i) for i in skeletonradii[vid]])
-        # mat = Material(colortable.get(vid,UnmatchColorTheme))
-        # sh = Shape(Translated(translation,geom),mat,id=vid)
-        # scene += sh
-    # return scene
-
-# def comparison_representation(ref_mtg,tested_mtg,mapping):
-    # global_bbx = compute_global_bbx(tested_mtg.property('bbox'))
-    # ref_color,tested_color = color_table(mapping)
-    
-    # decal = global_bbx.getYRange()/2
-    # return create_rep(ref_mtg,ref_color,(0,-decal,0))+create_rep(tested_mtg,tested_color,(0,decal,0))
-
-# def ext_comparison_representation(ref_mtg,tested_mtg,mapping,newmapping):
-    # circle = Polyline2D.Circle()
-    
-    # global_bbx = compute_global_bbx(tested_mtg.property('bbox'))
-    # ref_color,tested_color = color_table(mapping)
-    # ref_color2,tested_color2 = color_table(newmapping)
-    
-    # decal = global_bbx.getYRange()
-    # return create_rep(ref_mtg,ref_color,(0,-1.5*decal,0))+create_rep(tested_mtg,tested_color,(0,-0.5*decal,0))+create_rep(tested_mtg,tested_color2,(0,0.5*decal,0))+create_rep(ref_mtg,ref_color2,(0,1.5*decal,0))
-
-# def topo_comparison_representation(ref_mtg,tested_mtg,mapping,nonmapping1,nonmapping2):
-    # ref_color,tested_color = color_table(mapping)
-    # for i in nonmapping1: ref_color[i] = NotConsideredColorTheme
-    # for i in nonmapping2: tested_color[i] = NotConsideredColorTheme
-    
-    # # global_bbx = compute_global_bbx(tested_mtg.property('bbox'))
-    # decal = 0 #global_bbx.getYRange()/2
-    # return create_rep(ref_mtg,ref_color,(0,-decal,0)),create_rep(tested_mtg,tested_color,(0,decal,0))
-
-
-    
-def get_edges(prefix,cachepath = get_shared_data('comparison')):
-    edge_cache_file = os.path.join(cachepath,prefix+'_edges.pkl')
-    return readfile(edge_cache_file)
-
-def get_edges(prefix,cachepath = get_shared_data('comparison')):
-    edge_cache_file = os.path.join(cachepath,prefix+'_edges.pkl')
-    return readfile(edge_cache_file)
-    
