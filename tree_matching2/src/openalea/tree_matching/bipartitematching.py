@@ -107,7 +107,7 @@ def filter_perfect_matches(set1,set2, edges, nonmatchingset1cost, nonmatchingset
 
     
 class BipartiteMatching:
-    def __init__(self, set1, set2, possiblematching, nonmatchingset1cost, nonmatchingset2cost):
+    def __init__(self, set1, set2, possiblematching, nonmatchingset1cost, nonmatchingset2cost, filter = True):
         """ Built with the ids of the two sets and the possible matching between them (list of triplet (id1,id2,cost).
             nonmatchingset1cost is an ordered list containing the costs to not match an element of set 1. Same with set2 and nonmatchingset2cost.  """
                     
@@ -116,16 +116,16 @@ class BipartiteMatching:
         
         self.orphans1, self.orphans2, self.perfect_matches = [], [], []
         self.orphanscost = 0
-        ipossiblematching = possiblematching
-        possiblematching = filter_insdel_sup_edges(set1, set2, ipossiblematching, nonmatchingset1cost, nonmatchingset2cost)
-        # print len(ipossiblematching)-len(possiblematching)
-        set1,set2, nonmatchingset1cost, nonmatchingset2cost, self.orphans1, self.orphans2, self.orphanscost = filter_orphans(set1, set2, possiblematching, nonmatchingset1cost, nonmatchingset2cost)
-        # print len(self.orphans1), len(self.orphans2)
-        # print 'Orphans 1 :',self.orphans1
-        # print 'Orphans 2 :',self.orphans2
-        iipossiblematching = possiblematching
-        set1,set2, possiblematching, nonmatchingset1cost, nonmatchingset2cost, self.perfect_matches = filter_perfect_matches(set1, set2, iipossiblematching, nonmatchingset1cost, nonmatchingset2cost)
-        print len(self.perfect_matches), len(iipossiblematching)-len(possiblematching)
+        if filter:
+            ipossiblematching = possiblematching
+            possiblematching = filter_insdel_sup_edges(set1, set2, ipossiblematching, nonmatchingset1cost, nonmatchingset2cost)
+            # print len(ipossiblematching)-len(possiblematching)
+            iipossiblematching = possiblematching
+            set1,set2, possiblematching, nonmatchingset1cost, nonmatchingset2cost, self.perfect_matches = filter_perfect_matches(set1, set2, iipossiblematching, nonmatchingset1cost, nonmatchingset2cost)
+            # print len(self.perfect_matches), len(iipossiblematching)-len(possiblematching)
+            set1,set2, nonmatchingset1cost, nonmatchingset2cost, self.orphans1, self.orphans2, self.orphanscost = filter_orphans(set1, set2, possiblematching, nonmatchingset1cost, nonmatchingset2cost)
+            # print len(self.orphans1), len(self.orphans2)
+            # print 'Orphans :',self.orphans1 , self.orphans2
         
         self.nb_ni = len(set1)
         self.nb_nj = len(set2)
