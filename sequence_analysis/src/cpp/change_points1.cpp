@@ -52,6 +52,7 @@
 #include "sequence_label.h"
 
 using namespace std;
+using namespace boost::math;
 
 
 extern int column_width(int value);
@@ -248,6 +249,7 @@ int Sequences::nb_parameter_computation(int index , int nb_segment , int *model_
     }
 
     else if ((model_type[i - 1] == POISSON_CHANGE) ||
+             (model_type[i - 1] == BAYESIAN_POISSON_CHANGE) ||
              (model_type[i - 1] == MEAN_CHANGE) ||
              (model_type[i - 1] == MEAN_VARIANCE_CHANGE)) {
       nb_parameter += nb_segment;
@@ -1903,6 +1905,7 @@ double Sequences::segmentation(int *nb_segment , int *model_type , double **rank
           }
 
           else if ((model_type[k - 1] == POISSON_CHANGE) ||
+                   (model_type[k - 1] == BAYESIAN_POISSON_CHANGE) ||
                    (model_type[k - 1] == MEAN_CHANGE) ||
                    (model_type[k - 1] == MEAN_VARIANCE_CHANGE)) {
             nb_parameter[j] += j + 1;
@@ -3787,6 +3790,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
 
       for (i = 2;i <= max_nb_segment;i++) {
         if (likelihood[i] != D_INF) {
+//          penalized_likelihood[0][i] = 2 * (likelihood[i] - segmentation_entropy[i]);
           penalized_likelihood[0][i] = 2 * (likelihood[i] - segmentation_entropy[i] -
                                             uniform_entropy[i]);
 
