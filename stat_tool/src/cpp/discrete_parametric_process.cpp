@@ -427,7 +427,7 @@ ostream& DiscreteParametricProcess::ascii_print(ostream &os , FrequencyDistribut
     os << "\n" << STAT_word[STATW_STATE] << " " << i << " "
        << STAT_word[STATW_OBSERVATION_DISTRIBUTION] << endl;
     observation[i]->ascii_print(os);
-    observation[i]->ascii_characteristic_print(os , false , file_flag);
+    observation[i]->ascii_parametric_characteristic_print(os , false , file_flag);
 
     if (empirical_observation) {
       os << "\n";
@@ -693,7 +693,7 @@ ostream& DiscreteParametricProcess::spreadsheet_print(ostream &os , FrequencyDis
     os << "\n" << STAT_word[STATW_STATE] << " " << i << "\t"
        << STAT_word[STATW_OBSERVATION_DISTRIBUTION] << endl;
     observation[i]->spreadsheet_print(os);
-    observation[i]->spreadsheet_characteristic_print(os);
+    observation[i]->spreadsheet_parametric_characteristic_print(os);
 
     if (empirical_observation) {
       os << "\n" << STAT_label[STATL_STATE] << " " << i << " "
@@ -882,7 +882,7 @@ bool DiscreteParametricProcess::plot_print(const char *prefix , const char *titl
 
   if (nb_dist > 0) {
     pdist = new const Distribution*[nb_dist];
-    scale = new double[nb_dist];
+    scale = new double[nb_dist + 1];
 
     phisto = new const FrequencyDistribution*[nb_dist];
 
@@ -947,13 +947,13 @@ bool DiscreteParametricProcess::plot_print(const char *prefix , const char *titl
           pdist[0] = observation[j];
 
           if (marginal_distribution) {
-            scale[0] = weight->mass[j] * marginal_distribution->nb_element;
+            scale[nb_dist] = weight->mass[j] * marginal_distribution->nb_element;
           }
           else {
-            scale[0] = weight->mass[j];
+            scale[nb_dist] = weight->mass[j];
           }
 
-          ::plot_print((data_file_name[i].str()).c_str() , 1 , pdist , scale ,
+          ::plot_print((data_file_name[i].str()).c_str() , 1 , pdist , scale + nb_dist ,
                        NULL , 0 , NULL);
           i++;
         }
@@ -966,13 +966,13 @@ bool DiscreteParametricProcess::plot_print(const char *prefix , const char *titl
           pdist[0] = observation[j];
 
           if (marginal_distribution) {
-            scale[0] = restoration_weight->mass[j] * marginal_distribution->nb_element;
+            scale[nb_dist] = restoration_weight->mass[j] * marginal_distribution->nb_element;
           }
           else {
-            scale[0] = restoration_weight->mass[j];
+            scale[nb_dist] = restoration_weight->mass[j];
           }
 
-          ::plot_print((data_file_name[i].str()).c_str() , 1 , pdist , scale ,
+          ::plot_print((data_file_name[i].str()).c_str() , 1 , pdist , scale + nb_dist ,
                        NULL , 0 , NULL);
           i++;
         }
