@@ -1050,7 +1050,7 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostrea
 
   else {
     if ((marginal_distribution[0]->nb_value < 2) ||
-        (marginal_distribution[0]->nb_value > NB_STATE)) {
+        (marginal_distribution[0]->nb_value > NB_OUTPUT)) {
       status = false;
       error.update(SEQ_error[SEQR_NB_STATE]);
     }
@@ -1867,6 +1867,31 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , const FrequencyDistrib
         if (smarkov->continuous_parametric_process[i + 1]) {
           switch (smarkov->continuous_parametric_process[i + 1]->ident) {
 
+          case GAMMA : {
+            min_location = smarkov->continuous_parametric_process[i + 1]->observation[0]->location * smarkov->continuous_parametric_process[i + 1]->observation[0]->dispersion;
+            for (j = 1;j < smarkov->nb_state;j++) {
+              buff = smarkov->continuous_parametric_process[i + 1]->observation[j]->location * smarkov->continuous_parametric_process[i + 1]->observation[0]->dispersion;
+              if (buff < min_location) {
+                min_location = buff;
+              }
+            }
+
+            buff = (int)ceil(log(min_location) / log(10));
+            if (buff < GAMMA_MAX_NB_DECIMAL) {
+              decimal_scale[i] = pow(10 , (GAMMA_MAX_NB_DECIMAL - buff));
+            }
+            else {
+              decimal_scale[i] = 1;
+            }
+
+ 
+#           ifdef MESSAGE
+            cout << "\nScale: " << i + 1 << " " << decimal_scale[i] << endl;
+#           endif
+
+            break;
+          }
+
           case GAUSSIAN : {
             min_location = fabs(smarkov->continuous_parametric_process[i + 1]->observation[0]->location);
             for (j = 1;j < smarkov->nb_state;j++) {
@@ -1883,7 +1908,7 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , const FrequencyDistrib
             else {
               decimal_scale[i] = 1;
             }
- 
+
 #           ifdef MESSAGE
             cout << "\nScale: " << i + 1 << " " << decimal_scale[i] << endl;
 #           endif
