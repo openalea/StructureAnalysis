@@ -536,6 +536,266 @@ Sequences* Sequences::shift(StatError &error , int variable , double shift_param
 
 /*--------------------------------------------------------------*
  *
+ *  Seuillage des valeurs d'une variable.
+ *
+ *  arguments : reference sur un objet StatError, indice de la variable,
+ *              seuil, mode (ABOVE/BELOW).
+ *
+ *--------------------------------------------------------------*/
+
+Sequences* Sequences::thresholding(StatError &error , int variable , int threshold , int mode) const
+
+{
+  bool status = true;
+  register int i , j;
+  Sequences *seq;
+
+
+  seq = NULL;
+  error.init();
+
+  if ((variable < 1) || (variable > nb_variable)) {
+    status = false;
+    error.update(STAT_error[STATR_VARIABLE_INDEX]);
+  }
+
+  else {
+    variable--;
+
+    if ((type[variable] != INT_VALUE) && (type[variable] != REAL_VALUE)) {
+      status = false;
+      ostringstream correction_message;
+      correction_message << STAT_variable_word[INT_VALUE] << " or " << STAT_variable_word[REAL_VALUE];
+      error.correction_update(STAT_error[STATR_VARIABLE_TYPE] , (correction_message.str()).c_str());
+    }
+
+    if ((type[variable] == INT_VALUE) && (variable + 1 < nb_variable) &&
+        (type[variable + 1] == AUXILIARY)) {
+      status = false;
+      ostringstream error_message;
+      error_message << STAT_label[STATL_VARIABLE] << " " << variable + 1 << ": "
+                    << STAT_error[STATR_VARIABLE_TYPE];
+      error.update((error_message.str()).c_str());
+    }
+
+    if (threshold <= min_value[variable]) {
+      status = false;
+      ostringstream correction_message;
+      correction_message << STAT_error[STATR_GREATER_THAN] << " " << min_value[variable];
+      error.correction_update(STAT_error[STATR_THRESHOLD_VALUE] , (correction_message.str()).c_str());
+    }
+
+    if (threshold >= max_value[variable]) {
+      status = false;
+      ostringstream correction_message;
+      correction_message << STAT_error[STATR_SMALLER_THAN] << " " << max_value[variable];
+      error.correction_update(STAT_error[STATR_THRESHOLD_VALUE] , (correction_message.str()).c_str());
+    }
+  }
+
+  if (status) {
+    seq = new Sequences(*this , variable , type[variable]);
+
+    switch (seq->type[variable]) {
+
+    // seuillage des valeurs entieres
+
+    case INT_VALUE : {
+      switch (mode) {
+
+      case ABOVE : {
+        for (i = 0;i < seq->nb_sequence;i++) {
+          for (j = 0;j < seq->length[i];j++) {
+            if (int_sequence[i][variable][j] > threshold) {
+              seq->int_sequence[i][variable][j] = threshold;
+            }
+            else {
+              seq->int_sequence[i][variable][j] = int_sequence[i][variable][j];
+            }
+          }
+        }
+        break;
+      }
+
+      case BELOW : {
+        for (i = 0;i < seq->nb_sequence;i++) {
+          for (j = 0;j < seq->length[i];j++) {
+            if (int_sequence[i][variable][j] < threshold) {
+              seq->int_sequence[i][variable][j] = threshold;
+            }
+            else {
+              seq->int_sequence[i][variable][j] = int_sequence[i][variable][j];
+            }
+          }
+        }
+        break;
+      }
+      }
+
+      break;
+    }
+
+    // seuillage des valeurs reelles
+
+    case REAL_VALUE : {
+      switch (mode) {
+
+      case ABOVE : {
+        for (i = 0;i < seq->nb_sequence;i++) {
+          for (j = 0;j < seq->length[i];j++) {
+            if (real_sequence[i][variable][j] > threshold) {
+              seq->real_sequence[i][variable][j] = threshold;
+            }
+            else {
+              seq->real_sequence[i][variable][j] = real_sequence[i][variable][j];
+            }
+          }
+        }
+        break;
+      }
+
+      case BELOW : {
+        for (i = 0;i < seq->nb_sequence;i++) {
+          for (j = 0;j < seq->length[i];j++) {
+            if (real_sequence[i][variable][j] < threshold) {
+              seq->real_sequence[i][variable][j] = threshold;
+            }
+            else {
+              seq->real_sequence[i][variable][j] = real_sequence[i][variable][j];
+            }
+          }
+        }
+        break;
+      }
+      }
+
+      break;
+    }
+    }
+
+    switch (mode) {
+    case ABOVE :
+      seq->min_value[variable] = min_value[variable];
+      seq->max_value[variable] = threshold;
+      break;
+    case BELOW :
+      seq->min_value[variable] = threshold;
+      seq->max_value[variable] = max_value[variable];
+      break;
+    }
+
+    if ((seq->type[variable] == INT_VALUE) && (seq->min_value[variable] >= 0) &&
+        (seq->max_value[variable] <= MARGINAL_DISTRIBUTION_MAX_VALUE)) {
+      seq->build_marginal_frequency_distribution(variable);
+    }
+    else {
+      seq->build_marginal_histogram(variable);
+    }
+  }
+
+  return seq;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Seuillage des valeurs d'une variable reelle.
+ *
+ *  arguments : reference sur un objet StatError, indice de la variable,
+ *              seuil, mode (ABOVE/BELOW).
+ *
+ *--------------------------------------------------------------*/
+
+Sequences* Sequences::thresholding(StatError &error , int variable , double threshold , int mode) const
+
+{
+  bool status = true;
+  register int i , j;
+  Sequences *seq;
+
+
+  seq = NULL;
+  error.init();
+
+  if ((variable < 1) || (variable > nb_variable)) {
+    status = false;
+    error.update(STAT_error[STATR_VARIABLE_INDEX]);
+  }
+
+  else {
+    variable--;
+
+    if (type[variable] != REAL_VALUE) {
+      status = false;
+      error.correction_update(STAT_error[STATR_VARIABLE_TYPE] , STAT_variable_word[REAL_VALUE]);
+    }
+
+    if (threshold <= min_value[variable]) {
+      status = false;
+      ostringstream correction_message;
+      correction_message << STAT_error[STATR_GREATER_THAN] << " " << min_value[variable];
+      error.correction_update(STAT_error[STATR_THRESHOLD_VALUE] , (correction_message.str()).c_str());
+    }
+
+    if (threshold >= max_value[variable]) {
+      status = false;
+      ostringstream correction_message;
+      correction_message << STAT_error[STATR_SMALLER_THAN] << " " << max_value[variable];
+      error.correction_update(STAT_error[STATR_THRESHOLD_VALUE] , (correction_message.str()).c_str());
+    }
+  }
+
+  if (status) {
+    seq = new Sequences(*this , variable , type[variable]);
+
+    // seuillage des valeurs reelles
+
+    switch (mode) {
+
+    case ABOVE : {
+      for (i = 0;i < seq->nb_sequence;i++) {
+        for (j = 0;j < seq->length[i];j++) {
+          if (real_sequence[i][variable][j] > threshold) {
+            seq->real_sequence[i][variable][j] = threshold;
+          }
+          else {
+            seq->real_sequence[i][variable][j] = real_sequence[i][variable][j];
+          }
+        }
+      }
+
+      seq->min_value[variable] = min_value[variable];
+      seq->max_value[variable] = threshold;
+      break;
+    }
+
+    case BELOW : {
+      for (i = 0;i < seq->nb_sequence;i++) {
+        for (j = 0;j < seq->length[i];j++) {
+          if (real_sequence[i][variable][j] < threshold) {
+            seq->real_sequence[i][variable][j] = threshold;
+          }
+          else {
+            seq->real_sequence[i][variable][j] = real_sequence[i][variable][j];
+          }
+        }
+      }
+
+      seq->min_value[variable] = threshold;
+      seq->max_value[variable] = max_value[variable];
+      break;
+    }
+    }
+
+    seq->build_marginal_histogram(variable);
+  }
+
+  return seq;
+}
+
+
+/*--------------------------------------------------------------*
+ *
  *  Regroupement des valeurs d'une variable.
  *
  *  arguments : reference sur un objet Sequences, indice de la variable,
@@ -1214,6 +1474,95 @@ Sequences* Sequences::scaling(StatError &error , int variable , int scaling_coef
     seq->max_value[variable] = max_value[variable] * scaling_coeff;
 
     seq->build_marginal_frequency_distribution(variable);
+
+    if ((variable + 1 < seq->nb_variable) && (seq->type[variable + 1] == AUXILIARY)) {
+      for (i = 0;i < seq->nb_sequence;i++) {
+        for (j = 0;j < seq->length[i];j++) {
+          seq->real_sequence[i][variable + 1][j] = real_sequence[i][variable + 1][j] * scaling_coeff;
+        }
+      }
+
+      seq->min_value[variable + 1] = min_value[variable + 1] * scaling_coeff;
+      seq->max_value[variable + 1] = max_value[variable + 1] * scaling_coeff;
+    }
+  }
+
+  return seq;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Changement d'unite d'une variable.
+ *
+ *  arguments : reference sur un objet StatError, variable, facteur d'echelle.
+ *
+ *--------------------------------------------------------------*/
+
+Sequences* Sequences::scaling(StatError &error , int variable , double scaling_coeff) const
+
+{
+  bool status = true;
+  register int i , j;
+  Sequences *seq;
+
+
+  seq = NULL;
+  error.init();
+
+  if ((variable < 1) || (variable > nb_variable)) {
+    status = false;
+    error.update(STAT_error[STATR_VARIABLE_INDEX]);
+  }
+
+  else {
+    variable--;
+
+    if ((type[variable] != INT_VALUE) && (type[variable] != REAL_VALUE)) {
+      status = false;
+      ostringstream correction_message;
+      correction_message << STAT_variable_word[INT_VALUE] << " or " << STAT_variable_word[REAL_VALUE];
+      error.correction_update(STAT_error[STATR_VARIABLE_TYPE] , (correction_message.str()).c_str());
+    }
+  }
+
+  if (scaling_coeff <= 0) {
+    status = false;
+    error.update(STAT_error[STATR_SCALING_COEFF]);
+  }
+
+  if (status) {
+    seq = new Sequences(*this , variable , REAL_VALUE);
+
+    switch (type[variable]) {
+
+    // mise a l'echelle des valeurs entieres
+
+    case INT_VALUE : {
+      for (i = 0;i < seq->nb_sequence;i++) {
+        for (j = 0;j < seq->length[i];j++) {
+          seq->real_sequence[i][variable][j] = int_sequence[i][variable][j] * scaling_coeff;
+        }
+      }
+      break;
+    }
+
+    // mise a l'echelle des valeurs reelles
+
+    case REAL_VALUE : {
+      for (i = 0;i < seq->nb_sequence;i++) {
+        for (j = 0;j < seq->length[i];j++) {
+          seq->real_sequence[i][variable][j] = real_sequence[i][variable][j] * scaling_coeff;
+        }
+      }
+      break;
+    }
+    }
+
+    seq->min_value[variable] = min_value[variable] * scaling_coeff;
+    seq->max_value[variable] = max_value[variable] * scaling_coeff;
+
+    seq->build_marginal_histogram(variable);
 
     if ((variable + 1 < seq->nb_variable) && (seq->type[variable + 1] == AUXILIARY)) {
       for (i = 0;i < seq->nb_sequence;i++) {
