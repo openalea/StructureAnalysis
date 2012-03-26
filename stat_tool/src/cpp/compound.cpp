@@ -483,7 +483,7 @@ ostream& Compound::ascii_write(ostream &os , const CompoundData *compound_histo 
 
   os << "\n" << STAT_word[STATW_SUM] << endl;
   sum_distribution->ascii_print(os);
-  sum_distribution->ascii_characteristic_print(os , exhaustive , file_flag);
+  sum_distribution->ascii_parametric_characteristic_print(os , exhaustive , file_flag);
 
   if (compound_histo) {
     os << "\n";
@@ -517,7 +517,7 @@ ostream& Compound::ascii_write(ostream &os , const CompoundData *compound_histo 
 
   os << "\n" << STAT_word[STATW_ELEMENTARY] << endl;
   distribution->ascii_print(os);
-  distribution->ascii_characteristic_print(os , exhaustive , file_flag);
+  distribution->ascii_parametric_characteristic_print(os , exhaustive , file_flag);
 
   if (compound_histo) {
     os << "\n";
@@ -655,7 +655,7 @@ ostream& Compound::spreadsheet_write(ostream &os , const CompoundData *compound_
 
   os << "\n" << STAT_word[STATW_SUM] << endl;
   sum_distribution->spreadsheet_print(os);
-  sum_distribution->spreadsheet_characteristic_print(os , true);
+  sum_distribution->spreadsheet_parametric_characteristic_print(os , true);
 
   if (compound_histo) {
     os << "\n" << STAT_label[STATL_SUM] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
@@ -679,7 +679,7 @@ ostream& Compound::spreadsheet_write(ostream &os , const CompoundData *compound_
 
   os << "\n" << STAT_word[STATW_ELEMENTARY] << endl;
   distribution->spreadsheet_print(os);
-  distribution->spreadsheet_characteristic_print(os , true);
+  distribution->spreadsheet_parametric_characteristic_print(os , true);
 
   if (compound_histo) {
     os << "\n" << STAT_label[STATL_ELEMENTARY] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
