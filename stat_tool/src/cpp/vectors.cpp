@@ -1245,6 +1245,244 @@ Vectors* Vectors::shift(StatError &error , int variable , double shift_param) co
 
 /*--------------------------------------------------------------*
  *
+ *  Seuillage des valeurs d'une variable.
+ *
+ *  arguments : reference sur un objet StatError, indice de la variable,
+ *              seuil, mode (ABOVE/BELOW).
+ *
+ *--------------------------------------------------------------*/
+
+Vectors* Vectors::thresholding(StatError &error , int variable , int threshold , int mode) const
+
+{
+  bool status = true;
+  register int i;
+  Vectors *vec;
+
+
+  vec = NULL;
+  error.init();
+
+  if ((variable < 1) || (variable > nb_variable)) {
+    status = false;
+    error.update(STAT_error[STATR_VARIABLE_INDEX]);
+  }
+
+  else {
+    variable--;
+
+    if (threshold <= min_value[variable]) {
+      status = false;
+      ostringstream correction_message;
+      correction_message << STAT_error[STATR_GREATER_THAN] << " " << min_value[variable];
+      error.correction_update(STAT_error[STATR_THRESHOLD_VALUE] , (correction_message.str()).c_str());
+    }
+
+    if (threshold >= max_value[variable]) {
+      status = false;
+      ostringstream correction_message;
+      correction_message << STAT_error[STATR_SMALLER_THAN] << " " << max_value[variable];
+      error.correction_update(STAT_error[STATR_THRESHOLD_VALUE] , (correction_message.str()).c_str());
+    }
+  }
+
+  if (status) {
+    vec = new Vectors(*this , variable , type[variable]);
+
+    switch (vec->type[variable]) {
+
+    // seuillage des valeurs entieres
+
+    case INT_VALUE : {
+      switch (mode) {
+
+      case ABOVE : {
+        for (i = 0;i < vec->nb_vector;i++) {
+          if (int_vector[i][variable] > threshold) {
+            vec->int_vector[i][variable] = threshold;
+          }
+          else {
+            vec->int_vector[i][variable] = int_vector[i][variable];
+          }
+        }
+        break;
+      }
+
+      case BELOW : {
+        for (i = 0;i < vec->nb_vector;i++) {
+          if (int_vector[i][variable] < threshold) {
+            vec->int_vector[i][variable] = threshold;
+          }
+          else {
+            vec->int_vector[i][variable] = int_vector[i][variable];
+          }
+        }
+        break;
+      }
+      }
+
+      break;
+    }
+
+    // seuillage des valeurs reelles
+
+    case REAL_VALUE : {
+      switch (mode) {
+
+      case ABOVE : {
+        for (i = 0;i < vec->nb_vector;i++) {
+          if (real_vector[i][variable] > threshold) {
+            vec->real_vector[i][variable] = threshold;
+          }
+          else {
+            vec->real_vector[i][variable] = real_vector[i][variable];
+          }
+        }
+        break;
+      }
+
+      case BELOW : {
+        for (i = 0;i < vec->nb_vector;i++) {
+          if (real_vector[i][variable] < threshold) {
+            vec->real_vector[i][variable] = threshold;
+          }
+          else {
+            vec->real_vector[i][variable] = real_vector[i][variable];
+          }
+        }
+        break;
+      }
+      }
+
+      break;
+    }
+    }
+
+    switch (mode) {
+    case ABOVE :
+      vec->min_value[variable] = min_value[variable];
+      vec->max_value[variable] = threshold;
+      break;
+    case BELOW :
+      vec->min_value[variable] = threshold;
+      vec->max_value[variable] = max_value[variable];
+      break;
+    }
+
+    if ((vec->type[variable] == INT_VALUE) && (vec->min_value[variable] >= 0) &&
+        (vec->max_value[variable] <= MARGINAL_DISTRIBUTION_MAX_VALUE)) {
+      vec->build_marginal_frequency_distribution(variable);
+    }
+    else {
+      vec->build_marginal_histogram(variable);
+      vec->mean_computation(variable);
+    }
+
+    vec->covariance_computation(variable);
+  }
+
+  return vec;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Seuillage des valeurs d'une variable reelle.
+ *
+ *  arguments : reference sur un objet StatError, indice de la variable,
+ *              seuil, mode (ABOVE/BELOW).
+ *
+ *--------------------------------------------------------------*/
+
+Vectors* Vectors::thresholding(StatError &error , int variable , double threshold , int mode) const
+
+{
+  bool status = true;
+  register int i;
+  Vectors *vec;
+
+
+  vec = NULL;
+  error.init();
+
+  if ((variable < 1) || (variable > nb_variable)) {
+    status = false;
+    error.update(STAT_error[STATR_VARIABLE_INDEX]);
+  }
+
+  else {
+    variable--;
+
+    if (type[variable] != REAL_VALUE) {
+      status = false;
+      error.correction_update(STAT_error[STATR_VARIABLE_TYPE] , STAT_variable_word[REAL_VALUE]);
+    }
+
+    if (threshold <= min_value[variable]) {
+      status = false;
+      ostringstream correction_message;
+      correction_message << STAT_error[STATR_GREATER_THAN] << " " << min_value[variable];
+      error.correction_update(STAT_error[STATR_THRESHOLD_VALUE] , (correction_message.str()).c_str());
+    }
+
+    if (threshold >= max_value[variable]) {
+      status = false;
+      ostringstream correction_message;
+      correction_message << STAT_error[STATR_SMALLER_THAN] << " " << max_value[variable];
+      error.correction_update(STAT_error[STATR_THRESHOLD_VALUE] , (correction_message.str()).c_str());
+    }
+  }
+
+  if (status) {
+    vec = new Vectors(*this , variable , type[variable]);
+
+    // seuillage des valeurs reelles
+
+    switch (mode) {
+
+    case ABOVE : {
+      for (i = 0;i < vec->nb_vector;i++) {
+        if (real_vector[i][variable] > threshold) {
+          vec->real_vector[i][variable] = threshold;
+        }
+        else {
+          vec->real_vector[i][variable] = real_vector[i][variable];
+        }
+      }
+
+      vec->min_value[variable] = min_value[variable];
+      vec->max_value[variable] = threshold;
+      break;
+    }
+
+    case BELOW : {
+      for (i = 0;i < vec->nb_vector;i++) {
+        if (real_vector[i][variable] < threshold) {
+          vec->real_vector[i][variable] = threshold;
+        }
+        else {
+          vec->real_vector[i][variable] = real_vector[i][variable];
+        }
+      }
+
+      vec->min_value[variable] = threshold;
+      vec->max_value[variable] = max_value[variable];
+      break;
+    }
+    }
+
+    vec->build_marginal_histogram(variable);
+
+    vec->mean_computation(variable);
+    vec->covariance_computation(variable);
+  }
+
+  return vec;
+}
+
+
+/*--------------------------------------------------------------*
+ *
  *  Regroupement des valeurs d'une variable.
  *
  *  arguments : reference sur un objet StatError, indice de la variable,
@@ -1757,6 +1995,76 @@ Vectors* Vectors::scaling(StatError &error , int variable , int scaling_coeff) c
 
     vec->build_marginal_frequency_distribution(variable);
 
+    vec->covariance_computation(variable);
+  }
+
+  return vec;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Changement d'unite d'une variable.
+ *
+ *  arguments : reference sur un objet StatError, variable, facteur d'echelle.
+ *
+ *--------------------------------------------------------------*/
+
+Vectors* Vectors::scaling(StatError &error , int variable , double scaling_coeff) const
+
+{
+  bool status = true;
+  register int i;
+  Vectors *vec;
+
+
+  vec = NULL;
+  error.init();
+
+  if ((variable < 1) || (variable > nb_variable)) {
+    status = false;
+    error.update(STAT_error[STATR_VARIABLE_INDEX]);
+  }
+
+  else {
+    variable--;
+  }
+
+  if (scaling_coeff <= 0) {
+    status = false;
+    error.update(STAT_error[STATR_SCALING_COEFF]);
+  }
+
+  if (status) {
+    vec = new Vectors(*this , variable , REAL_VALUE);
+
+    switch (type[variable]) {
+
+    // mise a l'echelle des valeurs entieres
+
+    case INT_VALUE : {
+      for (i = 0;i < vec->nb_vector;i++) {
+        vec->real_vector[i][variable] = int_vector[i][variable] * scaling_coeff;
+      }
+      break;
+    }
+
+    // mise a l'echelle des valeurs reelles
+
+    case REAL_VALUE : {
+      for (i = 0;i < vec->nb_vector;i++) {
+        vec->real_vector[i][variable] = real_vector[i][variable] * scaling_coeff;
+      }
+      break;
+    }
+    }
+
+    vec->min_value[variable] = min_value[variable] * scaling_coeff;
+    vec->max_value[variable] = max_value[variable] * scaling_coeff;
+
+    vec->build_marginal_histogram(variable);
+
+    vec->mean[variable] = mean[variable] * scaling_coeff;
     vec->covariance_computation(variable);
   }
 
