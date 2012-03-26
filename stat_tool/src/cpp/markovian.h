@@ -74,6 +74,8 @@ const int MIN_NB_ELEMENT = 10;         // taille minimum de l'echantillon constr
 const int OBSERVATION_COEFF = 10;      // coefficient arrondi estimateur pour les lois
                                        // d'observation parametriques
 
+const int GAMMA_MAX_NB_DECIMAL = 6;     // nombre maximum de decimales pour la simulation
+                                        // d'une loi gamma
 const int GAUSSIAN_MAX_NB_DECIMAL = 6;  // nombre maximum de decimales pour la simulation
                                         // d'une loi gaussienne
 const int DEGREE_DECIMAL_SCALE = 10;   // facteur pour determiner le nombre de decimales
