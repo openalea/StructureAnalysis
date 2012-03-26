@@ -352,7 +352,12 @@ ostream& NonparametricSequenceProcess::ascii_print(ostream &os , int process ,
             os << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
                << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_DISTRIBUTION] << endl;
           }
-          sojourn_time[i]->ascii_characteristic_print(os , false , file_flag);
+
+#         ifdef DEBUG
+          sojourn_time[i]->ascii_characteristic_print(os , (sojourn_time[i]->ident == NONPARAMETRIC ? false : true) , file_flag);
+#         endif
+
+          sojourn_time[i]->ascii_parametric_characteristic_print(os , (sojourn_time[i]->ident == NONPARAMETRIC ? false : true) , file_flag);
         }
       }
 
@@ -891,7 +896,8 @@ ostream& NonparametricSequenceProcess::spreadsheet_print(ostream &os , int proce
             os << "\n" << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
                << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_DISTRIBUTION] << endl;
           }
-          sojourn_time[i]->spreadsheet_characteristic_print(os);
+
+          sojourn_time[i]->spreadsheet_parametric_characteristic_print(os , (sojourn_time[i]->ident == NONPARAMETRIC ? false : true));
         }
       }
 
