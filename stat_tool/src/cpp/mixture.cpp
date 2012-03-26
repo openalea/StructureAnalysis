@@ -773,7 +773,7 @@ ostream& Mixture::ascii_write(ostream &os , const MixtureData *mixt_histo ,
          << STAT_word[STATW_WEIGHT] << " : "  << weight->mass[i] << endl;
 
       component[i]->ascii_print(os);
-      component[i]->ascii_characteristic_print(os , exhaustive , file_flag);
+      component[i]->ascii_parametric_characteristic_print(os , exhaustive , file_flag);
     }
   }
 
@@ -834,7 +834,7 @@ ostream& Mixture::ascii_write(ostream &os , const MixtureData *mixt_histo ,
       os << "\n" << STAT_word[STATW_DISTRIBUTION] << " " << i + 1 << "  "
          << STAT_word[STATW_WEIGHT] << " : "  << weight->mass[i] << endl;
       component[i]->ascii_print(os);
-      component[i]->ascii_characteristic_print(os , exhaustive , file_flag);
+      component[i]->ascii_parametric_characteristic_print(os , exhaustive , file_flag);
 
       os << "\n";
       if (file_flag) {
@@ -990,7 +990,7 @@ ostream& Mixture::spreadsheet_write(ostream &os , const MixtureData *mixt_histo)
       os << "\n" << STAT_word[STATW_DISTRIBUTION] << "\t" << i + 1 << "\t"
          << STAT_word[STATW_WEIGHT] << "\t"  << weight->mass[i] << endl;
       component[i]->spreadsheet_print(os);
-      component[i]->spreadsheet_characteristic_print(os , true);
+      component[i]->spreadsheet_parametric_characteristic_print(os , true);
     }
   }
 
@@ -1035,7 +1035,7 @@ ostream& Mixture::spreadsheet_write(ostream &os , const MixtureData *mixt_histo)
       os << "\n" << STAT_word[STATW_DISTRIBUTION] << "\t" << i + 1 << "\t"
          << STAT_word[STATW_WEIGHT] << "\t"  << weight->mass[i] << endl;
       component[i]->spreadsheet_print(os);
-      component[i]->spreadsheet_characteristic_print(os , true);
+      component[i]->spreadsheet_parametric_characteristic_print(os , true);
 
       os << "\n" << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << i + 1 << "\t";
       mixt_histo->component[i]->spreadsheet_characteristic_print(os , true);
