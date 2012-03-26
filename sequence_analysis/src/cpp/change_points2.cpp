@@ -52,6 +52,7 @@
 #include "sequence_label.h"
 
 using namespace std;
+using namespace boost::math;
 
 
 extern int column_width(int value);
