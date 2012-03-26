@@ -122,7 +122,7 @@ ostream& Renewal::ascii_write(ostream &os , const RenewalData *timev ,
   }
   os << SEQ_label[SEQL_INTER_EVENT] << " " << STAT_label[STATL_DISTRIBUTION] << endl;
   inter_event->ascii_print(os);
-  inter_event->ascii_characteristic_print(os , false , file_flag);
+  inter_event->ascii_parametric_characteristic_print(os , false , file_flag);
   if (file_flag) {
     os << "# ";
   }
@@ -933,7 +933,7 @@ ostream& Renewal::spreadsheet_write(ostream &os , const RenewalData *timev) cons
 
   os << "\n" << SEQ_label[SEQL_INTER_EVENT] << " " << STAT_label[STATL_DISTRIBUTION] << endl;
   inter_event->spreadsheet_print(os);
-  inter_event->spreadsheet_characteristic_print(os);
+  inter_event->spreadsheet_parametric_characteristic_print(os);
   os << STAT_label[STATL_VARIATION_COEFF] << "\t"
      << sqrt(inter_event->variance) / inter_event->mean << endl;
 
