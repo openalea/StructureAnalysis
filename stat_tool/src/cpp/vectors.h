@@ -195,6 +195,8 @@ public :
     Vectors* merge(StatError &error, int nb_sample , const Vectors **ivec) const;
     Vectors* shift(StatError &error , int variable , int shift_param) const;
     Vectors* shift(StatError &error , int variable , double shift_param) const;
+    Vectors* thresholding(StatError &error , int variable , int threshold , int mode) const;
+    Vectors* thresholding(StatError &error , int variable , double threshold , int mode) const;
     Vectors* transcode(StatError &error , int variable , int *symbol) const;
     Vectors* cluster(StatError &error , int variable , int step ,
                      int mode = FLOOR) const;
@@ -203,6 +205,7 @@ public :
     Vectors* cluster(StatError &error , int variable , int nb_class ,
                      double *ilimit) const;
     Vectors* scaling(StatError &error , int variable , int scaling_coeff) const;
+    Vectors* scaling(StatError &error , int variable , double scaling_coeff) const;
     Vectors* round(StatError &error , int variable = I_DEFAULT ,
                    int mode = ROUND) const;
 
