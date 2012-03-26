@@ -2075,7 +2075,12 @@ double FrequencyDistribution::likelihood_computation(const ContinuousParametric 
 
     for (i = offset;i < nb_value;i++) {
       if (frequency[i] > 0) {
-        mass = dist.mass_computation(i - (double)min_interval / 2. , i + (double)min_interval / 2.);
+        if ((dist.ident == GAMMA) && (offset < (double)min_interval / 2.)) {
+          mass = dist.mass_computation(i , i + (double)min_interval);
+        }
+        else {
+          mass = dist.mass_computation(i - (double)min_interval / 2. , i + (double)min_interval / 2.);
+        }
 
         if (mass > 0.) {
           likelihood += frequency[i] * log(mass);
