@@ -162,13 +162,26 @@ void HiddenVariableOrderMarkov::forward_backward(VariableOrderMarkovData &seq) c
             }
 
             else {
-              switch (seq.type[k + 1]) {
-              case INT_VALUE :
-                forward[0][j] *= continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*pioutput[k] - seq.min_interval[k + 1] / 2 , *pioutput[k] + seq.min_interval[k + 1] / 2);
-                break;
-              case REAL_VALUE :
-                forward[0][j] *= continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*proutput[k] - seq.min_interval[k + 1] / 2 , *proutput[k] + seq.min_interval[k + 1] / 2);
-                break;
+              if ((continuous_parametric_process[k + 1]->ident == GAMMA) && (seq.min_value[k + 1] < seq.min_interval[k + 1] / 2)) {
+                switch (seq.type[k + 1]) {
+                case INT_VALUE :
+                  forward[0][j] *= continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*pioutput[k] , *pioutput[k] + seq.min_interval[k + 1]);
+                  break;
+                case REAL_VALUE :
+                  forward[0][j] *= continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*proutput[k] , *proutput[k] + seq.min_interval[k + 1]);
+                  break;
+                }
+              }
+
+              else {
+                switch (seq.type[k + 1]) {
+                case INT_VALUE :
+                  forward[0][j] *= continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*pioutput[k] - seq.min_interval[k + 1] / 2 , *pioutput[k] + seq.min_interval[k + 1] / 2);
+                  break;
+                case REAL_VALUE :
+                  forward[0][j] *= continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*proutput[k] - seq.min_interval[k + 1] / 2 , *proutput[k] + seq.min_interval[k + 1] / 2);
+                  break;
+                }
               }
             }
           }
@@ -198,13 +211,26 @@ void HiddenVariableOrderMarkov::forward_backward(VariableOrderMarkovData &seq) c
             }
 
             else {
-              switch (seq.type[k + 1]) {
-              case INT_VALUE :
-                forward[0][j] *= continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*pioutput[k] - seq.min_interval[k + 1] / 2 , *pioutput[k] + seq.min_interval[k + 1] / 2);
-                break;
-              case REAL_VALUE :
-                forward[0][j] *= continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*proutput[k] - seq.min_interval[k + 1] / 2 , *proutput[k] + seq.min_interval[k + 1] / 2);
-                break;
+              if ((continuous_parametric_process[k + 1]->ident == GAMMA) && (seq.min_value[k + 1] < seq.min_interval[k + 1] / 2)) {
+                switch (seq.type[k + 1]) {
+                case INT_VALUE :
+                  forward[0][j] *= continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*pioutput[k] , *pioutput[k] + seq.min_interval[k + 1]);
+                  break;
+                case REAL_VALUE :
+                  forward[0][j] *= continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*proutput[k] , *proutput[k] + seq.min_interval[k + 1]);
+                  break;
+                }
+              }
+
+              else {
+                switch (seq.type[k + 1]) {
+                case INT_VALUE :
+                  forward[0][j] *= continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*pioutput[k] - seq.min_interval[k + 1] / 2 , *pioutput[k] + seq.min_interval[k + 1] / 2);
+                  break;
+                case REAL_VALUE :
+                  forward[0][j] *= continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*proutput[k] - seq.min_interval[k + 1] / 2 , *proutput[k] + seq.min_interval[k + 1] / 2);
+                  break;
+                }
               }
             }
           }
@@ -284,13 +310,26 @@ void HiddenVariableOrderMarkov::forward_backward(VariableOrderMarkovData &seq) c
             }
 
             else {
-              switch (seq.type[m + 1]) {
-              case INT_VALUE :
-                forward[j][k] *= continuous_parametric_process[m + 1]->observation[state[k][0]]->mass_computation(*pioutput[m] - seq.min_interval[m + 1] / 2 , *pioutput[m] + seq.min_interval[m + 1] / 2);
-                break;
-              case REAL_VALUE :
-                forward[j][k] *= continuous_parametric_process[m + 1]->observation[state[k][0]]->mass_computation(*proutput[m] - seq.min_interval[m + 1] / 2 , *proutput[m] + seq.min_interval[m + 1] / 2);
-                break;
+              if ((continuous_parametric_process[m + 1]->ident == GAMMA) && (seq.min_value[m + 1] < seq.min_interval[m + 1] / 2)) {
+                switch (seq.type[m + 1]) {
+                case INT_VALUE :
+                  forward[j][k] *= continuous_parametric_process[m + 1]->observation[state[k][0]]->mass_computation(*pioutput[m] , *pioutput[m] + seq.min_interval[m + 1]);
+                  break;
+                case REAL_VALUE :
+                  forward[j][k] *= continuous_parametric_process[m + 1]->observation[state[k][0]]->mass_computation(*proutput[m] , *proutput[m] + seq.min_interval[m + 1]);
+                  break;
+                }
+              }
+
+              else {
+                switch (seq.type[m + 1]) {
+                case INT_VALUE :
+                  forward[j][k] *= continuous_parametric_process[m + 1]->observation[state[k][0]]->mass_computation(*pioutput[m] - seq.min_interval[m + 1] / 2 , *pioutput[m] + seq.min_interval[m + 1] / 2);
+                  break;
+                case REAL_VALUE :
+                  forward[j][k] *= continuous_parametric_process[m + 1]->observation[state[k][0]]->mass_computation(*proutput[m] - seq.min_interval[m + 1] / 2 , *proutput[m] + seq.min_interval[m + 1] / 2);
+                  break;
+                }
               }
             }
           }
@@ -364,13 +403,26 @@ void HiddenVariableOrderMarkov::forward_backward(VariableOrderMarkovData &seq) c
             }
 
             else {
-              switch (seq.type[m + 1]) {
-              case INT_VALUE :
-                entropy -= backward[j][k] * log(continuous_parametric_process[m + 1]->observation[state[k][0]]->mass_computation(*pioutput[m] - seq.min_interval[m + 1] / 2 , *pioutput[m] + seq.min_interval[m + 1] / 2));
-                break;
-              case REAL_VALUE :
-                entropy -= backward[j][k] * log(continuous_parametric_process[m + 1]->observation[state[k][0]]->mass_computation(*proutput[m] - seq.min_interval[m + 1] / 2 , *proutput[m] + seq.min_interval[m + 1] / 2));
-                break;
+              if ((continuous_parametric_process[m + 1]->ident == GAMMA) && (seq.min_value[m + 1] < seq.min_interval[m + 1] / 2)) {
+                switch (seq.type[m + 1]) {
+                case INT_VALUE :
+                  entropy -= backward[j][k] * log(continuous_parametric_process[m + 1]->observation[state[k][0]]->mass_computation(*pioutput[m] , *pioutput[m] + seq.min_interval[m + 1]));
+                  break;
+                case REAL_VALUE :
+                  entropy -= backward[j][k] * log(continuous_parametric_process[m + 1]->observation[state[k][0]]->mass_computation(*proutput[m] , *proutput[m] + seq.min_interval[m + 1]));
+                  break;
+                }
+              }
+
+              else {
+                switch (seq.type[m + 1]) {
+                case INT_VALUE :
+                  entropy -= backward[j][k] * log(continuous_parametric_process[m + 1]->observation[state[k][0]]->mass_computation(*pioutput[m] - seq.min_interval[m + 1] / 2 , *pioutput[m] + seq.min_interval[m + 1] / 2));
+                  break;
+                case REAL_VALUE :
+                  entropy -= backward[j][k] * log(continuous_parametric_process[m + 1]->observation[state[k][0]]->mass_computation(*proutput[m] - seq.min_interval[m + 1] / 2 , *proutput[m] + seq.min_interval[m + 1] / 2));
+                  break;
+                }
               }
             }
           }
@@ -423,13 +475,26 @@ void HiddenVariableOrderMarkov::forward_backward(VariableOrderMarkovData &seq) c
                 }
 
                 else {
-                  switch (seq.type[m + 1]) {
-                  case INT_VALUE :
-                    entropy -= backward[j][k] * log(continuous_parametric_process[m + 1]->observation[state[k][0]]->mass_computation(*pioutput[m] - seq.min_interval[m + 1] / 2 , *pioutput[m] + seq.min_interval[m + 1] / 2));
-                    break;
-                  case REAL_VALUE :
-                    entropy -= backward[j][k] * log(continuous_parametric_process[m + 1]->observation[state[k][0]]->mass_computation(*proutput[m] - seq.min_interval[m + 1] / 2 , *proutput[m] + seq.min_interval[m + 1] / 2));
-                    break;
+                  if ((continuous_parametric_process[m + 1]->ident == GAMMA) && (seq.min_value[m + 1] < seq.min_interval[m + 1] / 2)) {
+                    switch (seq.type[m + 1]) {
+                    case INT_VALUE :
+                      entropy -= backward[j][k] * log(continuous_parametric_process[m + 1]->observation[state[k][0]]->mass_computation(*pioutput[m] , *pioutput[m] + seq.min_interval[m + 1]));
+                      break;
+                    case REAL_VALUE :
+                      entropy -= backward[j][k] * log(continuous_parametric_process[m + 1]->observation[state[k][0]]->mass_computation(*proutput[m] , *proutput[m] + seq.min_interval[m + 1]));
+                      break;
+                    }
+                  }
+
+                  else {
+                    switch (seq.type[m + 1]) {
+                    case INT_VALUE :
+                      entropy -= backward[j][k] * log(continuous_parametric_process[m + 1]->observation[state[k][0]]->mass_computation(*pioutput[m] - seq.min_interval[m + 1] / 2 , *pioutput[m] + seq.min_interval[m + 1] / 2));
+                      break;
+                    case REAL_VALUE :
+                      entropy -= backward[j][k] * log(continuous_parametric_process[m + 1]->observation[state[k][0]]->mass_computation(*proutput[m] - seq.min_interval[m + 1] / 2 , *proutput[m] + seq.min_interval[m + 1] / 2));
+                      break;
+                    }
                   }
                 }
               }
@@ -951,13 +1016,26 @@ double HiddenVariableOrderMarkov::forward_backward(const MarkovianSequences &seq
           }
 
           else {
-            switch (seq.type[j + 1]) {
-            case INT_VALUE :
-              forward[0][i] *= continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*pioutput[j] - seq.min_interval[j + 1] / 2 , *pioutput[j] + seq.min_interval[j + 1] / 2);
-              break;
-            case REAL_VALUE :
-              forward[0][i] *= continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*proutput[j] - seq.min_interval[j + 1] / 2 , *proutput[j] + seq.min_interval[j + 1] / 2);
-              break;
+            if ((continuous_parametric_process[j + 1]->ident == GAMMA) && (seq.min_value[j + 1] < seq.min_interval[j + 1] / 2)) {
+              switch (seq.type[j + 1]) {
+              case INT_VALUE :
+                forward[0][i] *= continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*pioutput[j] , *pioutput[j] + seq.min_interval[j + 1]);
+                break;
+              case REAL_VALUE :
+                forward[0][i] *= continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*proutput[j] , *proutput[j] + seq.min_interval[j + 1]);
+                break;
+              }
+            }
+
+            else {
+              switch (seq.type[j + 1]) {
+              case INT_VALUE :
+                forward[0][i] *= continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*pioutput[j] - seq.min_interval[j + 1] / 2 , *pioutput[j] + seq.min_interval[j + 1] / 2);
+                break;
+              case REAL_VALUE :
+                forward[0][i] *= continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*proutput[j] - seq.min_interval[j + 1] / 2 , *proutput[j] + seq.min_interval[j + 1] / 2);
+                break;
+              }
             }
           }
         }
@@ -987,13 +1065,26 @@ double HiddenVariableOrderMarkov::forward_backward(const MarkovianSequences &seq
           }
 
           else {
-            switch (seq.type[j + 1]) {
-            case INT_VALUE :
-              forward[0][i] *= continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*pioutput[j] - seq.min_interval[j + 1] / 2 , *pioutput[j] + seq.min_interval[j + 1] / 2);
-              break;
-            case REAL_VALUE :
-              forward[0][i] *= continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*proutput[j] - seq.min_interval[j + 1] / 2 , *proutput[j] + seq.min_interval[j + 1] / 2);
-              break;
+            if ((continuous_parametric_process[j + 1]->ident == GAMMA) && (seq.min_value[j + 1] < seq.min_interval[j + 1] / 2)) {
+              switch (seq.type[j + 1]) {
+              case INT_VALUE :
+                forward[0][i] *= continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*pioutput[j] , *pioutput[j] + seq.min_interval[j + 1]);
+                break;
+              case REAL_VALUE :
+                forward[0][i] *= continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*proutput[j] , *proutput[j] + seq.min_interval[j + 1]);
+                break;
+              }
+            }
+
+            else {
+              switch (seq.type[j + 1]) {
+              case INT_VALUE :
+                forward[0][i] *= continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*pioutput[j] - seq.min_interval[j + 1] / 2 , *pioutput[j] + seq.min_interval[j + 1] / 2);
+                break;
+              case REAL_VALUE :
+                forward[0][i] *= continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*proutput[j] - seq.min_interval[j + 1] / 2 , *proutput[j] + seq.min_interval[j + 1] / 2);
+                break;
+              }
             }
           }
         }
@@ -1073,13 +1164,26 @@ double HiddenVariableOrderMarkov::forward_backward(const MarkovianSequences &seq
           }
 
           else {
-            switch (seq.type[k + 1]) {
-            case INT_VALUE :
-              forward[i][j] *= continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*pioutput[k] - seq.min_interval[k + 1] / 2 , *pioutput[k] + seq.min_interval[k + 1] / 2);
-              break;
-            case REAL_VALUE :
-              forward[i][j] *= continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*proutput[k] - seq.min_interval[k + 1] / 2 , *proutput[k] + seq.min_interval[k + 1] / 2);
-              break;
+            if ((continuous_parametric_process[k + 1]->ident == GAMMA) && (seq.min_value[k + 1] < seq.min_interval[k + 1] / 2)) {
+              switch (seq.type[k + 1]) {
+              case INT_VALUE :
+                forward[i][j] *= continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*pioutput[k] , *pioutput[k] + seq.min_interval[k + 1]);
+                break;
+              case REAL_VALUE :
+                forward[i][j] *= continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*proutput[k] , *proutput[k] + seq.min_interval[k + 1]);
+                break;
+              }
+            }
+
+            else {
+              switch (seq.type[k + 1]) {
+              case INT_VALUE :
+                forward[i][j] *= continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*pioutput[k] - seq.min_interval[k + 1] / 2 , *pioutput[k] + seq.min_interval[k + 1] / 2);
+                break;
+              case REAL_VALUE :
+                forward[i][j] *= continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*proutput[k] - seq.min_interval[k + 1] / 2 , *proutput[k] + seq.min_interval[k + 1] / 2);
+                break;
+              }
             }
           }
         }
@@ -1151,13 +1255,26 @@ double HiddenVariableOrderMarkov::forward_backward(const MarkovianSequences &seq
           }
 
           else {
-            switch (seq.type[k + 1]) {
-            case INT_VALUE :
-              entropy2 -= backward[i][j] * log(continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*pioutput[k] - seq.min_interval[k + 1] / 2 , *pioutput[k] + seq.min_interval[k + 1] / 2));
-              break;
-            case REAL_VALUE :
-              entropy2 -= backward[i][j] * log(continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*proutput[k] - seq.min_interval[k + 1] / 2 , *proutput[k] + seq.min_interval[k + 1] / 2));
-              break;
+            if ((continuous_parametric_process[k + 1]->ident == GAMMA) && (seq.min_value[k + 1] < seq.min_interval[k + 1] / 2)) {
+              switch (seq.type[k + 1]) {
+              case INT_VALUE :
+                entropy2 -= backward[i][j] * log(continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*pioutput[k] , *pioutput[k] + seq.min_interval[k + 1]));
+                break;
+              case REAL_VALUE :
+                entropy2 -= backward[i][j] * log(continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*proutput[k] , *proutput[k] + seq.min_interval[k + 1]));
+                break;
+              }
+            }
+
+            else {
+              switch (seq.type[k + 1]) {
+              case INT_VALUE :
+                entropy2 -= backward[i][j] * log(continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*pioutput[k] - seq.min_interval[k + 1] / 2 , *pioutput[k] + seq.min_interval[k + 1] / 2));
+                break;
+              case REAL_VALUE :
+                entropy2 -= backward[i][j] * log(continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*proutput[k] - seq.min_interval[k + 1] / 2 , *proutput[k] + seq.min_interval[k + 1] / 2));
+                break;
+              }
             }
           }
         }
@@ -1235,13 +1352,26 @@ double HiddenVariableOrderMarkov::forward_backward(const MarkovianSequences &seq
               }
 
               else {
-                switch (seq.type[k + 1]) {
-                case INT_VALUE :
-                  entropy2 -= backward[i][j] * log(continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*pioutput[k] - seq.min_interval[k + 1] / 2 , *pioutput[k] + seq.min_interval[k + 1] / 2));
-                  break;
-                case REAL_VALUE :
-                  entropy2 -= backward[i][j] * log(continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*proutput[k] - seq.min_interval[k + 1] / 2 , *proutput[k] + seq.min_interval[k + 1] / 2));
-                  break;
+                if ((continuous_parametric_process[k + 1]->ident == GAMMA) && (seq.min_value[k + 1] < seq.min_interval[k + 1] / 2)) {
+                  switch (seq.type[k + 1]) {
+                  case INT_VALUE :
+                    entropy2 -= backward[i][j] * log(continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*pioutput[k] , *pioutput[k] + seq.min_interval[k + 1]));
+                    break;
+                  case REAL_VALUE :
+                    entropy2 -= backward[i][j] * log(continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*proutput[k] , *proutput[k] + seq.min_interval[k + 1]));
+                    break;
+                  }
+                }
+
+                else {
+                  switch (seq.type[k + 1]) {
+                  case INT_VALUE :
+                    entropy2 -= backward[i][j] * log(continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*pioutput[k] - seq.min_interval[k + 1] / 2 , *pioutput[k] + seq.min_interval[k + 1] / 2));
+                    break;
+                  case REAL_VALUE :
+                    entropy2 -= backward[i][j] * log(continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*proutput[k] - seq.min_interval[k + 1] / 2 , *proutput[k] + seq.min_interval[k + 1] / 2));
+                    break;
+                  }
                 }
               }
             }
@@ -1595,13 +1725,26 @@ double HiddenVariableOrderMarkov::forward_backward(const MarkovianSequences &seq
               }
 
               else {
-                switch (seq.type[j + 1]) {
-                case INT_VALUE :
-                  forward[0][i] *= continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*pioutput[j] - seq.min_interval[j + 1] / 2 , *pioutput[j] + seq.min_interval[j + 1] / 2);
-                  break;
-                case REAL_VALUE :
-                  forward[0][i] *= continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*proutput[j] - seq.min_interval[j + 1] / 2 , *proutput[j] + seq.min_interval[j + 1] / 2);
-                  break;
+                if ((continuous_parametric_process[j + 1]->ident == GAMMA) && (seq.min_value[j + 1] < seq.min_interval[j + 1] / 2)) {
+                  switch (seq.type[j + 1]) {
+                  case INT_VALUE :
+                    forward[0][i] *= continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*pioutput[j] , *pioutput[j] + seq.min_interval[j + 1]);
+                    break;
+                  case REAL_VALUE :
+                    forward[0][i] *= continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*proutput[j] , *proutput[j] + seq.min_interval[j + 1]);
+                    break;
+                  }
+                }
+
+                else {
+                  switch (seq.type[j + 1]) {
+                  case INT_VALUE :
+                    forward[0][i] *= continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*pioutput[j] - seq.min_interval[j + 1] / 2 , *pioutput[j] + seq.min_interval[j + 1] / 2);
+                    break;
+                  case REAL_VALUE :
+                    forward[0][i] *= continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*proutput[j] - seq.min_interval[j + 1] / 2 , *proutput[j] + seq.min_interval[j + 1] / 2);
+                    break;
+                  }
                 }
               }
             }
@@ -1633,13 +1776,26 @@ double HiddenVariableOrderMarkov::forward_backward(const MarkovianSequences &seq
               }
 
               else {
-                switch (seq.type[j + 1]) {
-                case INT_VALUE :
-                  forward[0][i] *= continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*pioutput[j] - seq.min_interval[j + 1] / 2 , *pioutput[j] + seq.min_interval[j + 1] / 2);
-                  break;
-                case REAL_VALUE :
-                  forward[0][i] *= continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*proutput[j] - seq.min_interval[j + 1] / 2 , *proutput[j] + seq.min_interval[j + 1] / 2);
-                  break;
+                if ((continuous_parametric_process[j + 1]->ident == GAMMA) && (seq.min_value[j + 1] < seq.min_interval[j + 1] / 2)) {
+                  switch (seq.type[j + 1]) {
+                  case INT_VALUE :
+                    forward[0][i] *= continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*pioutput[j] , *pioutput[j] + seq.min_interval[j + 1]);
+                    break;
+                  case REAL_VALUE :
+                    forward[0][i] *= continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*proutput[j] , *proutput[j] + seq.min_interval[j + 1]);
+                    break;
+                  }
+                }
+
+                else {
+                  switch (seq.type[j + 1]) {
+                  case INT_VALUE :
+                    forward[0][i] *= continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*pioutput[j] - seq.min_interval[j + 1] / 2 , *pioutput[j] + seq.min_interval[j + 1] / 2);
+                    break;
+                  case REAL_VALUE :
+                    forward[0][i] *= continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*proutput[j] - seq.min_interval[j + 1] / 2 , *proutput[j] + seq.min_interval[j + 1] / 2);
+                    break;
+                  }
                 }
               }
             }
@@ -1688,13 +1844,26 @@ double HiddenVariableOrderMarkov::forward_backward(const MarkovianSequences &seq
             }
 
             else {
-              switch (seq.type[k + 1]) {
-              case INT_VALUE :
-                observation *= continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*pioutput[k] - seq.min_interval[k + 1] / 2 , *pioutput[k] + seq.min_interval[k + 1] / 2);
-                break;
-              case REAL_VALUE :
-                observation *= continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*proutput[k] - seq.min_interval[k + 1] / 2 , *proutput[k] + seq.min_interval[k + 1] / 2);
-                break;
+              if ((continuous_parametric_process[k + 1]->ident == GAMMA) && (seq.min_value[k + 1] < seq.min_interval[k + 1] / 2)) {
+                switch (seq.type[k + 1]) {
+                case INT_VALUE :
+                  observation *= continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*pioutput[k] , *pioutput[k] + seq.min_interval[k + 1]);
+                  break;
+                case REAL_VALUE :
+                  observation *= continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*proutput[k] , *proutput[k] + seq.min_interval[k + 1]);
+                  break;
+                }
+              }
+
+              else {
+                switch (seq.type[k + 1]) {
+                case INT_VALUE :
+                  observation *= continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*pioutput[k] - seq.min_interval[k + 1] / 2 , *pioutput[k] + seq.min_interval[k + 1] / 2);
+                  break;
+                case REAL_VALUE :
+                  observation *= continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*proutput[k] - seq.min_interval[k + 1] / 2 , *proutput[k] + seq.min_interval[k + 1] / 2);
+                  break;
+                }
               }
             }
           }
@@ -1883,13 +2052,26 @@ double HiddenVariableOrderMarkov::forward_backward_sampling(const MarkovianSeque
           }
 
           else {
-            switch (seq.type[j + 1]) {
-            case INT_VALUE :
-              forward[0][i] *= continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*pioutput[j] - seq.min_interval[j + 1] / 2 , *pioutput[j] + seq.min_interval[j + 1] / 2);
-              break;
-            case REAL_VALUE :
-              forward[0][i] *= continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*proutput[j] - seq.min_interval[j + 1] / 2 , *proutput[j] + seq.min_interval[j + 1] / 2);
-              break;
+            if ((continuous_parametric_process[j + 1]->ident == GAMMA) && (seq.min_value[j + 1] < seq.min_interval[j + 1] / 2)) {
+              switch (seq.type[j + 1]) {
+              case INT_VALUE :
+                forward[0][i] *= continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*pioutput[j] , *pioutput[j] + seq.min_interval[j + 1]);
+                break;
+              case REAL_VALUE :
+                forward[0][i] *= continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*proutput[j] , *proutput[j] + seq.min_interval[j + 1]);
+                break;
+              }
+            }
+
+            else {
+              switch (seq.type[j + 1]) {
+              case INT_VALUE :
+                forward[0][i] *= continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*pioutput[j] - seq.min_interval[j + 1] / 2 , *pioutput[j] + seq.min_interval[j + 1] / 2);
+                break;
+              case REAL_VALUE :
+                forward[0][i] *= continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*proutput[j] - seq.min_interval[j + 1] / 2 , *proutput[j] + seq.min_interval[j + 1] / 2);
+                break;
+              }
             }
           }
         }
@@ -1919,13 +2101,26 @@ double HiddenVariableOrderMarkov::forward_backward_sampling(const MarkovianSeque
           }
 
           else {
-            switch (seq.type[j + 1]) {
-            case INT_VALUE :
-              forward[0][i] *= continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*pioutput[j] - seq.min_interval[j + 1] / 2 , *pioutput[j] + seq.min_interval[j + 1] / 2);
-              break;
-            case REAL_VALUE :
-              forward[0][i] *= continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*proutput[j] - seq.min_interval[j + 1] / 2 , *proutput[j] + seq.min_interval[j + 1] / 2);
-              break;
+            if ((continuous_parametric_process[j + 1]->ident == GAMMA) && (seq.min_value[j + 1] < seq.min_interval[j + 1] / 2)) {
+              switch (seq.type[j + 1]) {
+              case INT_VALUE :
+                forward[0][i] *= continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*pioutput[j] , *pioutput[j] + seq.min_interval[j + 1]);
+                break;
+              case REAL_VALUE :
+                forward[0][i] *= continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*proutput[j] , *proutput[j] + seq.min_interval[j + 1]);
+                break;
+              }
+            }
+
+            else {
+              switch (seq.type[j + 1]) {
+              case INT_VALUE :
+                forward[0][i] *= continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*pioutput[j] - seq.min_interval[j + 1] / 2 , *pioutput[j] + seq.min_interval[j + 1] / 2);
+                break;
+              case REAL_VALUE :
+                forward[0][i] *= continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*proutput[j] - seq.min_interval[j + 1] / 2 , *proutput[j] + seq.min_interval[j + 1] / 2);
+                break;
+              }
             }
           }
         }
@@ -1984,13 +2179,26 @@ double HiddenVariableOrderMarkov::forward_backward_sampling(const MarkovianSeque
           }
 
           else {
-            switch (seq.type[k + 1]) {
-            case INT_VALUE :
-              forward[i][j] *= continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*pioutput[k] - seq.min_interval[k + 1] / 2 , *pioutput[k] + seq.min_interval[k + 1] / 2);
-              break;
-            case REAL_VALUE :
-              forward[i][j] *= continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*proutput[k] - seq.min_interval[k + 1] / 2 , *proutput[k] + seq.min_interval[k + 1] / 2);
-              break;
+            if ((continuous_parametric_process[k + 1]->ident == GAMMA) && (seq.min_value[k + 1] < seq.min_interval[k + 1] / 2)) {
+              switch (seq.type[k + 1]) {
+              case INT_VALUE :
+                forward[i][j] *= continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*pioutput[k] , *pioutput[k] + seq.min_interval[k + 1]);
+                break;
+              case REAL_VALUE :
+                forward[i][j] *= continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*proutput[k] , *proutput[k] + seq.min_interval[k + 1]);
+                break;
+              }
+            }
+
+            else {
+              switch (seq.type[k + 1]) {
+              case INT_VALUE :
+                forward[i][j] *= continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*pioutput[k] - seq.min_interval[k + 1] / 2 , *pioutput[k] + seq.min_interval[k + 1] / 2);
+                break;
+              case REAL_VALUE :
+                forward[i][j] *= continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*proutput[k] - seq.min_interval[k + 1] / 2 , *proutput[k] + seq.min_interval[k + 1] / 2);
+                break;
+              }
             }
           }
         }
@@ -2233,13 +2441,26 @@ double HiddenVariableOrderMarkov::viterbi(const MarkovianSequences &seq ,
                 }
 
                 else {
-                  switch (seq.type[k + 1]) {
-                  case INT_VALUE :
-                    buff = continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*pioutput[k] - seq.min_interval[k + 1] / 2 , *pioutput[k] + seq.min_interval[k + 1] / 2);
-                    break;
-                  case REAL_VALUE :
-                    buff = continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*proutput[k] - seq.min_interval[k + 1] / 2 , *proutput[k] + seq.min_interval[k + 1] / 2);
-                    break;
+                  if ((continuous_parametric_process[k + 1]->ident == GAMMA) && (seq.min_value[k + 1] < seq.min_interval[k + 1] / 2)) {
+                    switch (seq.type[k + 1]) {
+                    case INT_VALUE :
+                      buff = continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*pioutput[k] , *pioutput[k] + seq.min_interval[k + 1]);
+                      break;
+                    case REAL_VALUE :
+                      buff = continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*proutput[k] , *proutput[k] + seq.min_interval[k + 1]);
+                      break;
+                    }
+                  }
+
+                  else {
+                    switch (seq.type[k + 1]) {
+                    case INT_VALUE :
+                      buff = continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*pioutput[k] - seq.min_interval[k + 1] / 2 , *pioutput[k] + seq.min_interval[k + 1] / 2);
+                      break;
+                    case REAL_VALUE :
+                      buff = continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*proutput[k] - seq.min_interval[k + 1] / 2 , *proutput[k] + seq.min_interval[k + 1] / 2);
+                      break;
+                    }
                   }
 
                   if (buff > 0.) {
@@ -2284,13 +2505,26 @@ double HiddenVariableOrderMarkov::viterbi(const MarkovianSequences &seq ,
                 }
 
                 else {
-                  switch (seq.type[k + 1]) {
-                  case INT_VALUE :
-                    buff = continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*pioutput[k] - seq.min_interval[k + 1] / 2 , *pioutput[k] + seq.min_interval[k + 1] / 2);
-                    break;
-                  case REAL_VALUE :
-                    buff = continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*proutput[k] - seq.min_interval[k + 1] / 2 , *proutput[k] + seq.min_interval[k + 1] / 2);
-                    break;
+                  if ((continuous_parametric_process[k + 1]->ident == GAMMA) && (seq.min_value[k + 1] < seq.min_interval[k + 1] / 2)) {
+                    switch (seq.type[k + 1]) {
+                    case INT_VALUE :
+                      buff = continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*pioutput[k] , *pioutput[k] + seq.min_interval[k + 1]);
+                      break;
+                    case REAL_VALUE :
+                      buff = continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*proutput[k] , *proutput[k] + seq.min_interval[k + 1]);
+                      break;
+                    }
+                  }
+
+                  else {
+                    switch (seq.type[k + 1]) {
+                    case INT_VALUE :
+                      buff = continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*pioutput[k] - seq.min_interval[k + 1] / 2 , *pioutput[k] + seq.min_interval[k + 1] / 2);
+                      break;
+                    case REAL_VALUE :
+                      buff = continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*proutput[k] - seq.min_interval[k + 1] / 2 , *proutput[k] + seq.min_interval[k + 1] / 2);
+                      break;
+                    }
                   }
 
                   if (buff > 0.) {
@@ -2365,13 +2599,26 @@ double HiddenVariableOrderMarkov::viterbi(const MarkovianSequences &seq ,
               }
 
               else {
-                switch (seq.type[m + 1]) {
-                case INT_VALUE :
-                  buff = continuous_parametric_process[m + 1]->observation[state[k][0]]->mass_computation(*pioutput[m] - seq.min_interval[m + 1] / 2 , *pioutput[m] + seq.min_interval[m + 1] / 2);
-                  break;
-                case REAL_VALUE :
-                  buff = continuous_parametric_process[m + 1]->observation[state[k][0]]->mass_computation(*proutput[m] - seq.min_interval[m + 1] / 2 , *proutput[m] + seq.min_interval[m + 1] / 2);
-                  break;
+                if ((continuous_parametric_process[m + 1]->ident == GAMMA) && (seq.min_value[m + 1] < seq.min_interval[m + 1] / 2)) {
+                  switch (seq.type[m + 1]) {
+                  case INT_VALUE :
+                    buff = continuous_parametric_process[m + 1]->observation[state[k][0]]->mass_computation(*pioutput[m] , *pioutput[m] + seq.min_interval[m + 1]);
+                    break;
+                  case REAL_VALUE :
+                    buff = continuous_parametric_process[m + 1]->observation[state[k][0]]->mass_computation(*proutput[m] , *proutput[m] + seq.min_interval[m + 1]);
+                    break;
+                  }
+                }
+
+                else {
+                  switch (seq.type[m + 1]) {
+                  case INT_VALUE :
+                    buff = continuous_parametric_process[m + 1]->observation[state[k][0]]->mass_computation(*pioutput[m] - seq.min_interval[m + 1] / 2 , *pioutput[m] + seq.min_interval[m + 1] / 2);
+                    break;
+                  case REAL_VALUE :
+                    buff = continuous_parametric_process[m + 1]->observation[state[k][0]]->mass_computation(*proutput[m] - seq.min_interval[m + 1] / 2 , *proutput[m] + seq.min_interval[m + 1] / 2);
+                    break;
+                  }
                 }
 
                 if (buff > 0.) {
@@ -2596,13 +2843,26 @@ double HiddenVariableOrderMarkov::generalized_viterbi(const MarkovianSequences &
             }
 
             else {
-              switch (seq.type[j + 1]) {
-              case INT_VALUE :
-                buff = continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*pioutput[j] - seq.min_interval[j + 1] / 2 , *pioutput[j] + seq.min_interval[j + 1] / 2);
-                break;
-              case REAL_VALUE :
-                 buff = continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*proutput[j] - seq.min_interval[j + 1] / 2 , *proutput[j] + seq.min_interval[j + 1] / 2);
-                break;
+              if ((continuous_parametric_process[j + 1]->ident == GAMMA) && (seq.min_value[j + 1] < seq.min_interval[j + 1] / 2)) {
+                switch (seq.type[j + 1]) {
+                case INT_VALUE :
+                  buff = continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*pioutput[j] , *pioutput[j] + seq.min_interval[j + 1]);
+                  break;
+                case REAL_VALUE :
+                   buff = continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*proutput[j] , *proutput[j] + seq.min_interval[j + 1]);
+                  break;
+                }
+              }
+
+              else {
+                switch (seq.type[j + 1]) {
+                case INT_VALUE :
+                  buff = continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*pioutput[j] - seq.min_interval[j + 1] / 2 , *pioutput[j] + seq.min_interval[j + 1] / 2);
+                  break;
+                case REAL_VALUE :
+                   buff = continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*proutput[j] - seq.min_interval[j + 1] / 2 , *proutput[j] + seq.min_interval[j + 1] / 2);
+                  break;
+                }
               }
 
               if (buff > 0.) {
@@ -2647,13 +2907,26 @@ double HiddenVariableOrderMarkov::generalized_viterbi(const MarkovianSequences &
             }
 
             else {
-              switch (seq.type[j + 1]) {
-              case INT_VALUE :
-                buff = continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*pioutput[j] - seq.min_interval[j + 1] / 2 , *pioutput[j] + seq.min_interval[j + 1] / 2);
-                break;
-              case REAL_VALUE :
-                 buff = continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*proutput[j] - seq.min_interval[j + 1] / 2 , *proutput[j] + seq.min_interval[j + 1] / 2);
-                break;
+              if ((continuous_parametric_process[j + 1]->ident == GAMMA) && (seq.min_value[j + 1] < seq.min_interval[j + 1] / 2)) {
+                switch (seq.type[j + 1]) {
+                case INT_VALUE :
+                  buff = continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*pioutput[j] , *pioutput[j] + seq.min_interval[j + 1]);
+                  break;
+                case REAL_VALUE :
+                   buff = continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*proutput[j] , *proutput[j] + seq.min_interval[j + 1]);
+                  break;
+                }
+              }
+
+              else {
+                switch (seq.type[j + 1]) {
+                case INT_VALUE :
+                  buff = continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*pioutput[j] - seq.min_interval[j + 1] / 2 , *pioutput[j] + seq.min_interval[j + 1] / 2);
+                  break;
+                case REAL_VALUE :
+                   buff = continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*proutput[j] - seq.min_interval[j + 1] / 2 , *proutput[j] + seq.min_interval[j + 1] / 2);
+                  break;
+                }
               }
 
               if (buff > 0.) {
@@ -2725,13 +2998,26 @@ double HiddenVariableOrderMarkov::generalized_viterbi(const MarkovianSequences &
         }
 
         else {
-          switch (seq.type[k + 1]) {
-          case INT_VALUE :
-            buff = continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*pioutput[k] - seq.min_interval[k + 1] / 2 , *pioutput[k] + seq.min_interval[k + 1] / 2);
-            break;
-          case REAL_VALUE :
-            buff = continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*proutput[k] - seq.min_interval[k + 1] / 2 , *proutput[k] + seq.min_interval[k + 1] / 2);
-            break;
+          if ((continuous_parametric_process[k + 1]->ident == GAMMA) && (seq.min_value[k + 1] < seq.min_interval[k + 1] / 2)) {
+            switch (seq.type[k + 1]) {
+            case INT_VALUE :
+              buff = continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*pioutput[k] , *pioutput[k] + seq.min_interval[k + 1]);
+              break;
+            case REAL_VALUE :
+              buff = continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*proutput[k] , *proutput[k] + seq.min_interval[k + 1]);
+              break;
+            }
+          }
+
+          else {
+            switch (seq.type[k + 1]) {
+            case INT_VALUE :
+              buff = continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*pioutput[k] - seq.min_interval[k + 1] / 2 , *pioutput[k] + seq.min_interval[k + 1] / 2);
+              break;
+            case REAL_VALUE :
+              buff = continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*proutput[k] - seq.min_interval[k + 1] / 2 , *proutput[k] + seq.min_interval[k + 1] / 2);
+              break;
+            }
           }
 
           if (buff > 0.) {
@@ -2780,13 +3066,26 @@ double HiddenVariableOrderMarkov::generalized_viterbi(const MarkovianSequences &
             }
 
             else {
-              switch (seq.type[m + 1]) {
-              case INT_VALUE :
-                buff = continuous_parametric_process[m + 1]->observation[state[j][0]]->mass_computation(*pioutput[m] - seq.min_interval[m + 1] / 2 , *pioutput[m] + seq.min_interval[m + 1] / 2);
-                break;
-              case REAL_VALUE :
-                buff = continuous_parametric_process[m + 1]->observation[state[j][0]]->mass_computation(*proutput[m] - seq.min_interval[m + 1] / 2 , *proutput[m] + seq.min_interval[m + 1] / 2);
-                break;
+              if ((continuous_parametric_process[m + 1]->ident == GAMMA) && (seq.min_value[m + 1] < seq.min_interval[m + 1] / 2)) {
+                switch (seq.type[m + 1]) {
+                case INT_VALUE :
+                  buff = continuous_parametric_process[m + 1]->observation[state[j][0]]->mass_computation(*pioutput[m] , *pioutput[m] + seq.min_interval[m + 1]);
+                  break;
+                case REAL_VALUE :
+                  buff = continuous_parametric_process[m + 1]->observation[state[j][0]]->mass_computation(*proutput[m] , *proutput[m] + seq.min_interval[m + 1]);
+                  break;
+                }
+              }
+
+              else {
+                switch (seq.type[m + 1]) {
+                case INT_VALUE :
+                  buff = continuous_parametric_process[m + 1]->observation[state[j][0]]->mass_computation(*pioutput[m] - seq.min_interval[m + 1] / 2 , *pioutput[m] + seq.min_interval[m + 1] / 2);
+                  break;
+                case REAL_VALUE :
+                  buff = continuous_parametric_process[m + 1]->observation[state[j][0]]->mass_computation(*proutput[m] - seq.min_interval[m + 1] / 2 , *proutput[m] + seq.min_interval[m + 1] / 2);
+                  break;
+                }
               }
 
               if (buff > 0.) {
@@ -3091,13 +3390,26 @@ double HiddenVariableOrderMarkov::viterbi_forward_backward(const MarkovianSequen
             }
 
             else {
-              switch (seq.type[j + 1]) {
-              case INT_VALUE :
-                buff = continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*pioutput[j] - seq.min_interval[j + 1] / 2 , *pioutput[j] + seq.min_interval[j + 1] / 2);
-                break;
-              case REAL_VALUE :
-                buff = continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*proutput[j] - seq.min_interval[j + 1] / 2 , *proutput[j] + seq.min_interval[j + 1] / 2);
-                break;
+              if ((continuous_parametric_process[j + 1]->ident == GAMMA) && (seq.min_value[j + 1] < seq.min_interval[j + 1] / 2)) {
+                switch (seq.type[j + 1]) {
+                case INT_VALUE :
+                  buff = continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*pioutput[j] , *pioutput[j] + seq.min_interval[j + 1]);
+                  break;
+                case REAL_VALUE :
+                  buff = continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*proutput[j] , *proutput[j] + seq.min_interval[j + 1]);
+                  break;
+                }
+              }
+
+              else {
+                switch (seq.type[j + 1]) {
+                case INT_VALUE :
+                  buff = continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*pioutput[j] - seq.min_interval[j + 1] / 2 , *pioutput[j] + seq.min_interval[j + 1] / 2);
+                  break;
+                case REAL_VALUE :
+                  buff = continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*proutput[j] - seq.min_interval[j + 1] / 2 , *proutput[j] + seq.min_interval[j + 1] / 2);
+                  break;
+                }
               }
 
               if (buff > 0.) {
@@ -3142,13 +3454,26 @@ double HiddenVariableOrderMarkov::viterbi_forward_backward(const MarkovianSequen
             }
 
             else {
-              switch (seq.type[j + 1]) {
-              case INT_VALUE :
-                buff = continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*pioutput[j] - seq.min_interval[j + 1] / 2 , *pioutput[j] + seq.min_interval[j + 1] / 2);
-                break;
-              case REAL_VALUE :
-                buff = continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*proutput[j] - seq.min_interval[j + 1] / 2 , *proutput[j] + seq.min_interval[j + 1] / 2);
-                break;
+              if ((continuous_parametric_process[j + 1]->ident == GAMMA) && (seq.min_value[j + 1] < seq.min_interval[j + 1] / 2)) {
+                switch (seq.type[j + 1]) {
+                case INT_VALUE :
+                  buff = continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*pioutput[j] , *pioutput[j] + seq.min_interval[j + 1]);
+                  break;
+                case REAL_VALUE :
+                  buff = continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*proutput[j] , *proutput[j] + seq.min_interval[j + 1]);
+                  break;
+                }
+              }
+
+              else {
+                switch (seq.type[j + 1]) {
+                case INT_VALUE :
+                  buff = continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*pioutput[j] - seq.min_interval[j + 1] / 2 , *pioutput[j] + seq.min_interval[j + 1] / 2);
+                  break;
+                case REAL_VALUE :
+                  buff = continuous_parametric_process[j + 1]->observation[state[i][0]]->mass_computation(*proutput[j] - seq.min_interval[j + 1] / 2 , *proutput[j] + seq.min_interval[j + 1] / 2);
+                  break;
+                }
               }
 
               if (buff > 0.) {
@@ -3214,13 +3539,26 @@ double HiddenVariableOrderMarkov::viterbi_forward_backward(const MarkovianSequen
           }
 
           else {
-            switch (seq.type[k + 1]) {
-            case INT_VALUE :
-              buff = continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*pioutput[k] - seq.min_interval[k + 1] / 2 , *pioutput[k] + seq.min_interval[k + 1] / 2);
-              break;
-            case REAL_VALUE :
-              buff = continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*proutput[k] - seq.min_interval[k + 1] / 2 , *proutput[k] + seq.min_interval[k + 1] / 2);
-              break;
+            if ((continuous_parametric_process[k + 1]->ident == GAMMA) && (seq.min_value[k + 1] < seq.min_interval[k + 1] / 2)) {
+              switch (seq.type[k + 1]) {
+              case INT_VALUE :
+                buff = continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*pioutput[k] , *pioutput[k] + seq.min_interval[k + 1]);
+                break;
+              case REAL_VALUE :
+                buff = continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*proutput[k] , *proutput[k] + seq.min_interval[k + 1]);
+                break;
+              }
+            }
+
+            else {
+              switch (seq.type[k + 1]) {
+              case INT_VALUE :
+                buff = continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*pioutput[k] - seq.min_interval[k + 1] / 2 , *pioutput[k] + seq.min_interval[k + 1] / 2);
+                break;
+              case REAL_VALUE :
+                buff = continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*proutput[k] - seq.min_interval[k + 1] / 2 , *proutput[k] + seq.min_interval[k + 1] / 2);
+                break;
+              }
             }
 
             if (buff > 0.) {
@@ -3292,13 +3630,26 @@ double HiddenVariableOrderMarkov::viterbi_forward_backward(const MarkovianSequen
           }
 
           else {
-            switch (seq.type[k + 1]) {
-            case INT_VALUE :
-               buff = continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*pioutput[k] - seq.min_interval[k + 1] / 2 , *pioutput[k] + seq.min_interval[k + 1] / 2);
-              break;
-            case REAL_VALUE :
-              buff  = continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*proutput[k] - seq.min_interval[k + 1] / 2 , *proutput[k] + seq.min_interval[k + 1] / 2);
-              break;
+            if ((continuous_parametric_process[k + 1]->ident == GAMMA) && (seq.min_value[k + 1] < seq.min_interval[k + 1] / 2)) {
+              switch (seq.type[k + 1]) {
+              case INT_VALUE :
+                 buff = continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*pioutput[k] , *pioutput[k] + seq.min_interval[k + 1]);
+                break;
+              case REAL_VALUE :
+                buff  = continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*proutput[k] , *proutput[k] + seq.min_interval[k + 1]);
+                break;
+              }
+            }
+
+            else {
+              switch (seq.type[k + 1]) {
+              case INT_VALUE :
+                 buff = continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*pioutput[k] - seq.min_interval[k + 1] / 2 , *pioutput[k] + seq.min_interval[k + 1] / 2);
+                break;
+              case REAL_VALUE :
+                buff  = continuous_parametric_process[k + 1]->observation[state[j][0]]->mass_computation(*proutput[k] - seq.min_interval[k + 1] / 2 , *proutput[k] + seq.min_interval[k + 1] / 2);
+                break;
+              }
             }
 
             if (buff > 0.) {
