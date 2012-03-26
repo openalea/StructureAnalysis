@@ -94,6 +94,11 @@ const int NB_VALUE = 1000;             // nombre de valeurs prises par une v.a.
 const int SAMPLE_NB_VALUE = NB_VALUE;  // nombre de valeurs d'un echantillon
 
 enum {
+  ABOVE ,
+  BELOW
+};
+
+enum {
   FLOOR ,
   ROUND ,
   CEIL
@@ -109,7 +114,7 @@ enum {
 };
 
 enum {
-//  GAMMA ,
+  GAMMA ,
   GAUSSIAN ,
   VON_MISES
 };
@@ -234,6 +239,9 @@ const int MIN_RANGE = 10;              // intervalle de definition minimum
 const double MAX_SURFACE = 3.;         // surface maximum pour appliquer la methode du rejet
 const int DIST_NB_ELEMENT = 1000000;   // taille maximum de l'echantillon pour la simulation
 
+const double GAMMA_TAIL = 1.e-3;       // traine de la loi Gamma
+const int GAMMA_NB_STEP = 1000;        // nombre de pas pour le calcul de la loi Gamma
+const int GAMMA_NB_SUB_STEP = 10;      // nombre de pas pour le calcul de la loi Gamma
 const double GAUSSIAN_TAIL = 5.e-4;    // traine de la loi de Gauss
 const int GAUSSIAN_NB_STEP = 1000;     // nombre de pas pour le calcul de la loi de Gauss
 const int GAUSSIAN_NB_SUB_STEP = 10;   // nombre de pas pour le calcul de la loi de Gauss
@@ -625,8 +633,12 @@ public :
     void init(int iinf_bound , int isup_bound , double iparameter , double iprobability);
     void init(int iident , int iinf_bound , int isup_bound , double iparameter , double iprobability);
     void copy(const DiscreteParametric &dist);
+
     std::ostream& ascii_print(std::ostream &os) const;
+    std::ostream& ascii_parametric_characteristic_print(std::ostream &os , bool shape = false ,
+                                                        bool comment_flag = false) const;
     std::ostream& spreadsheet_print(std::ostream &os) const;
+    std::ostream& spreadsheet_parametric_characteristic_print(std::ostream &os , bool shape = false) const;
     std::ostream& plot_title_print(std::ostream &os) const;
 
     void nb_parameter_update();
@@ -992,9 +1004,10 @@ class ContinuousParametric {  // loi de probabilite continue parametrique
 public :
 
     int ident;              // identificateur
-    double location;        // parametre de moyenne
-    double dispersion;      // parametre de dispersion - ecart-type (GAUSSIAN),
-                            // concentration (VON_MISES)
+    double location;        // moyenne (GAUSSIAN), direction moyenne (VON_MISES),
+                            // parametre de forme (GAMMA)
+    double dispersion;      // ecart-type (GAUSSIAN), concentration (VON_MISES),
+                            // parametre d'echelle (GAMMA)
     double min_value;       // valeur minimum
     double max_value;       // valeur maximum
     int unit;               // unite (degre/radian) pour la loi de von Mises
