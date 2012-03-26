@@ -39,6 +39,8 @@
 #include <math.h>
 #include <sstream>
 
+#include <boost/math/special_functions/digamma.hpp>
+
 #include "stat_tool/stat_tools.h"
 #include "stat_tool/curves.h"
 #include "stat_tool/markovian.h"
@@ -52,6 +54,7 @@
 #include "sequence_label.h"
 
 using namespace std;
+using namespace boost::math;
 
 
 /* template <typename Type>    - probleme compilateur C++ Windows
@@ -167,13 +170,26 @@ double HiddenSemiMarkov::likelihood_computation(const MarkovianSequences &seq ,
               }
 
               else {
-                switch (seq.type[m]) {
-                case INT_VALUE :
-                  observation[j][k] *= continuous_parametric_process[m + 1]->observation[k]->mass_computation(*pioutput[m] - seq.min_interval[m] / 2 , *pioutput[m] + seq.min_interval[m] / 2);
-                  break;
-                case REAL_VALUE :
-                  observation[j][k] *= continuous_parametric_process[m + 1]->observation[k]->mass_computation(*proutput[m] - seq.min_interval[m] / 2 , *proutput[m] + seq.min_interval[m] / 2);
-                  break;
+                if ((continuous_parametric_process[m + 1]->ident == GAMMA) && (seq.min_value[m] < seq.min_interval[m] / 2)) {
+                  switch (seq.type[m]) {
+                  case INT_VALUE :
+                    observation[j][k] *= continuous_parametric_process[m + 1]->observation[k]->mass_computation(*pioutput[m] , *pioutput[m] + seq.min_interval[m]);
+                    break;
+                  case REAL_VALUE :
+                    observation[j][k] *= continuous_parametric_process[m + 1]->observation[k]->mass_computation(*proutput[m] , *proutput[m] + seq.min_interval[m]);
+                    break;
+                  }
+                }
+
+                else {
+                  switch (seq.type[m]) {
+                  case INT_VALUE :
+                    observation[j][k] *= continuous_parametric_process[m + 1]->observation[k]->mass_computation(*pioutput[m] - seq.min_interval[m] / 2 , *pioutput[m] + seq.min_interval[m] / 2);
+                    break;
+                  case REAL_VALUE :
+                    observation[j][k] *= continuous_parametric_process[m + 1]->observation[k]->mass_computation(*proutput[m] - seq.min_interval[m] / 2 , *proutput[m] + seq.min_interval[m] / 2);
+                    break;
+                  }
                 }
               }
             }
@@ -377,7 +393,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
          min_likelihood , obs_product , buff , sum , occupancy_mean , **observation , *norm ,
          *state_norm , **forward , **state_in , *backward , **backward1 , *auxiliary ,
          *ofrequency , *lfrequency , *occupancy_survivor , *censored_occupancy_survivor ,
-         ***state_sequence_count , *state_frequency , *mean , diff , *variance ,
+         ***state_sequence_count , *state_frequency , *mean , log_geometric_mean , diff , *variance ,
          **mean_direction , global_mean_direction , concentration , **proutput;
   Distribution *weight;
   DiscreteParametric *occupancy;
@@ -668,6 +684,14 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
     if (i <= hsmarkov->nb_output_process) {
       switch (hsmarkov->continuous_parametric_process[i]->ident) {
 
+      case GAMMA : {
+        if (state_sequence_count) {
+          mean = new double[hsmarkov->nb_state];
+          variance = new double[hsmarkov->nb_state];
+        }
+        break;
+      }
+
       case GAUSSIAN : {
         if (state_sequence_count) {
           mean = new double[hsmarkov->nb_state];
@@ -784,13 +808,26 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
               }
 
               else {
-                switch (type[m]) {
-                case INT_VALUE :
-                  observation[j][k] *= hsmarkov->continuous_parametric_process[m + 1]->observation[k]->mass_computation(*pioutput[m] - min_interval[m] / 2 , *pioutput[m] + min_interval[m] / 2);
-                  break;
-                case REAL_VALUE :
-                  observation[j][k] *= hsmarkov->continuous_parametric_process[m + 1]->observation[k]->mass_computation(*proutput[m] - min_interval[m] / 2 , *proutput[m] + min_interval[m] / 2);
-                  break;
+                if ((hsmarkov->continuous_parametric_process[m + 1]->ident == GAMMA) && (min_value[m] < min_interval[m] / 2)) {
+                  switch (type[m]) {
+                  case INT_VALUE :
+                    observation[j][k] *= hsmarkov->continuous_parametric_process[m + 1]->observation[k]->mass_computation(*pioutput[m] , *pioutput[m] + min_interval[m]);
+                    break;
+                  case REAL_VALUE :
+                    observation[j][k] *= hsmarkov->continuous_parametric_process[m + 1]->observation[k]->mass_computation(*proutput[m] , *proutput[m] + min_interval[m]);
+                    break;
+                  }
+                }
+
+                else {
+                  switch (type[m]) {
+                  case INT_VALUE :
+                    observation[j][k] *= hsmarkov->continuous_parametric_process[m + 1]->observation[k]->mass_computation(*pioutput[m] - min_interval[m] / 2 , *pioutput[m] + min_interval[m] / 2);
+                    break;
+                  case REAL_VALUE :
+                    observation[j][k] *= hsmarkov->continuous_parametric_process[m + 1]->observation[k]->mass_computation(*proutput[m] - min_interval[m] / 2 , *proutput[m] + min_interval[m] / 2);
+                    break;
+                  }
                 }
               }
             }
@@ -1442,6 +1479,47 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
             else {
               switch (hsmarkov->continuous_parametric_process[i + 1]->ident) {
 
+              case GAMMA : {
+                for (j = 0;j < hsmarkov->nb_state;j++) {
+                  hsmarkov->continuous_parametric_process[i + 1]->observation[j]->location = observation_reestim[i][j]->mean * observation_reestim[i][j]->mean / observation_reestim[i][j]->variance;
+                  hsmarkov->continuous_parametric_process[i + 1]->observation[j]->dispersion = observation_reestim[i][j]->variance / observation_reestim[i][j]->mean;
+
+                  if ((hsmarkov->continuous_parametric_process[i + 1]->observation[j]->location >= GAMMA_MIN_SCALE_PARAMETER) &&
+                      (observation_reestim[i][j]->nb_element < GAMMA_FREQUENCY_THRESHOLD)) {
+                    log_geometric_mean = observation_reestim[i][j]->log_geometric_mean_computation();
+
+/*                    k = 0;
+
+#                   ifdef MESSAGE
+                    cout << "\n" << STAT_word[STATW_STATE] << " " << j << "   "
+                         << STAT_word[STATW_SHAPE] << " : " << hsmarkov->continuous_parametric_process[i + 1]->observation[j]->location << "   "
+                         << STAT_word[STATW_SCALE] << " : " << hsmarkov->continuous_parametric_process[i + 1]->observation[j]->dispersion << endl;
+#                   endif
+
+                    do {
+                      hsmarkov->continuous_parametric_process[i + 1]->observation[j]->dispersion = exp(log_geometric_mean - digamma(hsmarkov->continuous_parametric_process[i + 1]->observation[j]->location));
+                      hsmarkov->continuous_parametric_process[i + 1]->observation[j]->location = observation_reestim[i][j]->mean / hsmarkov->continuous_parametric_process[i + 1]->observation[j]->dispersion;
+                      k++;
+
+#                     ifdef MESSAGE
+                      cout << STAT_word[STATW_SHAPE] << " : " << hsmarkov->continuous_parametric_process[i + 1]->observation[j]->location  << "   "
+                           << STAT_word[STATW_SCALE] << " : " << hsmarkov->continuous_parametric_process[i + 1]->observation[j]->dispersion << endl;
+#                     endif
+
+                    }
+                    while (k < MIN(GAMMA_ITERATION_FACTOR * iter , GAMMA_MAX_NB_ITERATION)); */
+
+                    // approximations Johnson, Kotz & Balakrishnan, Continuous Univariate Distributions, vol. 1, 2nd ed., pp. 361-362
+
+/*                    hsmarkov->continuous_parametric_process[i + 1]->observation[j]->location = observation_reestim[i][j]->mean / (2 * (observation_reestim[i][j]->mean - exp(log_geometric_mean))) - 1./12.;
+                    buff = log(observation_reestim[i][j]->mean) - log_geometric_mean;
+                    hsmarkov->continuous_parametric_process[i + 1]->observation[j]->location = (1 + sqrt(1 + 4 * buff / 3)) / (4 * buff);
+                    hsmarkov->continuous_parametric_process[i + 1]->observation[j]->dispersion = observation_reestim[i][j]->mean / hsmarkov->continuous_parametric_process[i + 1]->observation[j]->location; */
+                  }
+                }
+                break;
+              }
+
               case GAUSSIAN : {
                 for (j = 0;j < hsmarkov->nb_state;j++) {
                   hsmarkov->continuous_parametric_process[i + 1]->observation[j]->location = observation_reestim[i][j]->mean;
@@ -1520,9 +1598,8 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
           }
 
           else {
-            switch (hsmarkov->continuous_parametric_process[i + 1]->ident) {
-
-            case GAUSSIAN : {
+            if ((hsmarkov->continuous_parametric_process[i + 1]->ident == GAMMA) ||
+                (hsmarkov->continuous_parametric_process[i + 1]->ident == GAUSSIAN)) {
               for (j = 0;j < hsmarkov->nb_state;j++) {
                 mean[j] = 0.;
                 state_frequency[j] = 0.;
@@ -1557,6 +1634,123 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
 
               for (j = 0;j < hsmarkov->nb_state;j++) {
                 mean[j] /= state_frequency[j];
+              }
+            }
+
+            if ((hsmarkov->continuous_parametric_process[i + 1]->ident == GAMMA) ||
+                ((hsmarkov->continuous_parametric_process[i + 1]->ident == GAUSSIAN) && (!common_dispersion))) {
+              for (j = 0;j < hsmarkov->nb_state;j++) {
+                variance[j] = 0.;
+              }
+
+              switch (type[i]) {
+
+              case INT_VALUE : {
+                for (j = 0;j < nb_sequence;j++) {
+                  for (k = 0;k < length[j];k++) {
+                    for (m = 0;m < hsmarkov->nb_state;m++) {
+                      diff = int_sequence[j][i][k] - mean[m];
+                      variance[m] += state_sequence_count[j][k][m] * diff * diff;
+                    }
+                  }
+                }
+                break;
+              }
+
+              case REAL_VALUE : {
+                for (j = 0;j < nb_sequence;j++) {
+                  for (k = 0;k < length[j];k++) {
+                    for (m = 0;m < hsmarkov->nb_state;m++) {
+                      diff = real_sequence[j][i][k] - mean[m];
+                      variance[m] += state_sequence_count[j][k][m] * diff * diff;
+                    }
+                  }
+                }
+                break;
+              }
+              }
+
+              for (j = 0;j < hsmarkov->nb_state;j++) {
+                variance[j] /= state_frequency[j];
+//                variance[j] /= (state_frequency[j] - 1);
+              }
+            }
+
+            switch (hsmarkov->continuous_parametric_process[i + 1]->ident) {
+
+            case GAMMA : {
+              for (j = 0;j < hsmarkov->nb_state;j++) {
+                hsmarkov->continuous_parametric_process[i + 1]->observation[j]->location = mean[j] * mean[j] / variance[j];
+                hsmarkov->continuous_parametric_process[i + 1]->observation[j]->dispersion = variance[j] / mean[j];
+
+                if ((hsmarkov->continuous_parametric_process[i + 1]->observation[j]->location >= GAMMA_MIN_SCALE_PARAMETER) &&
+                    (state_frequency[j] < GAMMA_FREQUENCY_THRESHOLD)) {
+                  log_geometric_mean = 0.;
+                  state_frequency[j] = 0.;
+
+                  switch (type[i]) {
+
+                  case INT_VALUE : {
+                    for (k = 0;k < nb_sequence;k++) {
+                      for (m = 0;m < length[k];m++) {
+                        if (int_sequence[k][i][m] > 0) {
+                          log_geometric_mean += state_sequence_count[k][m][j] * log(int_sequence[k][i][m]);
+                          state_frequency[j] += state_sequence_count[k][m][j];
+                        }
+                      }
+                    }
+                    break;
+                  }
+
+                  case REAL_VALUE : {
+                    for (k = 0;k < nb_sequence;k++) {
+                      for (m = 0;m < length[k];m++) {
+                        if (real_sequence[k][i][m] > 0.) {
+                          log_geometric_mean += state_sequence_count[k][m][j] * log(real_sequence[k][i][m]);
+                          state_frequency[j] += state_sequence_count[k][m][j];
+                        }
+                      }
+                    }
+                    break;
+                  }
+                  }
+
+                  log_geometric_mean /= state_frequency[j];
+
+                  k = 0;
+
+#                 ifdef MESSAGE
+                  cout << "\n" << STAT_word[STATW_STATE] << " " << j << "   "
+                       << STAT_word[STATW_SHAPE] << " : " << hsmarkov->continuous_parametric_process[i + 1]->observation[j]->location << "   "
+                       << STAT_word[STATW_SCALE] << " : " << hsmarkov->continuous_parametric_process[i + 1]->observation[j]->dispersion << endl;
+#                 endif
+
+                  do {
+                    hsmarkov->continuous_parametric_process[i + 1]->observation[j]->dispersion = exp(log_geometric_mean - digamma(hsmarkov->continuous_parametric_process[i + 1]->observation[j]->location));
+                    hsmarkov->continuous_parametric_process[i + 1]->observation[j]->location = mean[j] / hsmarkov->continuous_parametric_process[i + 1]->observation[j]->dispersion;
+                    k++;
+
+#                   ifdef MESSAGE
+                    cout << STAT_word[STATW_SHAPE] << " : " << hsmarkov->continuous_parametric_process[i + 1]->observation[j]->location  << "   "
+                         << STAT_word[STATW_SCALE] << " : " << hsmarkov->continuous_parametric_process[i + 1]->observation[j]->dispersion << endl;
+#                   endif
+
+                  }
+                  while (k < MIN(GAMMA_ITERATION_FACTOR * iter , GAMMA_MAX_NB_ITERATION));
+
+                  // approximations Johnson, Kotz & Balakrishnan, Continuous Univariate Distributions, vol. 1, 2nd ed., pp. 361-362
+
+/*                  hsmarkov->continuous_parametric_process[i + 1]->observation[j]->location = mean[j] / (2 * (mean[j] - exp(log_geometric_mean))) - 1./12.;
+                  buff = log(mean[j]) - log_geometric_mean;
+                  hsmarkov->continuous_parametric_process[i + 1]->observation[j]->location = (1 + sqrt(1 + 4 * buff / 3)) / (4 * buff);
+                  hsmarkov->continuous_parametric_process[i + 1]->observation[j]->dispersion = mean[j] / hsmarkov->continuous_parametric_process[i + 1]->observation[j]->location; */
+                }
+              }
+              break;
+            }
+
+            case GAUSSIAN : {
+              for (j = 0;j < hsmarkov->nb_state;j++) {
                 hsmarkov->continuous_parametric_process[i + 1]->observation[j]->location = mean[j];
               }
 
@@ -1564,39 +1758,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
 
               case false : {
                 for (j = 0;j < hsmarkov->nb_state;j++) {
-                  variance[j] = 0.;
-                }
-
-                switch (type[i]) {
-
-                case INT_VALUE : {
-                  for (j = 0;j < nb_sequence;j++) {
-                    for (k = 0;k < length[j];k++) {
-                      for (m = 0;m < hsmarkov->nb_state;m++) {
-                        diff = int_sequence[j][i][k] - mean[m];
-                        variance[m] += state_sequence_count[j][k][m] * diff * diff;
-                      }
-                    }
-                  }
-                  break;
-                }
-
-                case REAL_VALUE : {
-                  for (j = 0;j < nb_sequence;j++) {
-                    for (k = 0;k < length[j];k++) {
-                      for (m = 0;m < hsmarkov->nb_state;m++) {
-                        diff = real_sequence[j][i][k] - mean[m];
-                        variance[m] += state_sequence_count[j][k][m] * diff * diff;
-                      }
-                    }
-                  }
-                  break;
-                }
-                }
-
-                for (j = 0;j < hsmarkov->nb_state;j++) {
-                  hsmarkov->continuous_parametric_process[i + 1]->observation[j]->dispersion = sqrt(variance[j] / state_frequency[j]);
-//                  hsmarkov->continuous_parametric_process[i + 1]->observation[j]->dispersion = sqrt(variance[j] / (state_frequency[j] - 1));
+                  hsmarkov->continuous_parametric_process[i + 1]->observation[j]->dispersion = sqrt(variance[j]);
                 }
                 break;
               }
@@ -1606,7 +1768,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
                   state_frequency[0] += state_frequency[j];
                 }
 
-                variance[0] = 0;
+                variance[0] = 0.;
 
                 switch (type[i]) {
 
@@ -1635,9 +1797,10 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
                 }
                 }
 
-                for (j = 0;j < hsmarkov->nb_state;j++) {
-                  hsmarkov->continuous_parametric_process[i + 1]->observation[j]->dispersion = sqrt(variance[0] / state_frequency[0]);
-//                  hsmarkov->continuous_parametric_process[i + 1]->observation[j]->dispersion = sqrt(variance[0] / (state_frequency[0] - 1));
+                variance[0] /= state_frequency[0];
+//                variance[0] /= (state_frequency[0] - 1);
+                for (j = 0;j < hsmarkov->nb_state;j++) {                  
+                  hsmarkov->continuous_parametric_process[i + 1]->observation[j]->dispersion = sqrt(variance[0]);
                 }
                 break;
               }
@@ -2561,6 +2724,14 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
     if (i <= hsmarkov->nb_output_process) {
       switch (hsmarkov->continuous_parametric_process[i]->ident) {
 
+      case GAMMA : {
+        if (state_sequence_count) {
+          mean = new double[hsmarkov->nb_state];
+          variance = new double[hsmarkov->nb_state];
+        }
+        break;
+      }
+
       case GAUSSIAN : {
         if (state_sequence_count) {
           mean = new double[hsmarkov->nb_state];
@@ -2686,13 +2857,26 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
               }
 
               else {
-                switch (type[m]) {
-                case INT_VALUE :
-                  observation[j][k] *= hsmarkov->continuous_parametric_process[m + 1]->observation[k]->mass_computation(*pioutput[m] - min_interval[m] / 2 , *pioutput[m] + min_interval[m] / 2);
-                  break;
-                case REAL_VALUE :
-                  observation[j][k] *= hsmarkov->continuous_parametric_process[m + 1]->observation[k]->mass_computation(*proutput[m] - min_interval[m] / 2 , *proutput[m] + min_interval[m] / 2);
-                  break;
+                if ((hsmarkov->continuous_parametric_process[m + 1]->ident == GAMMA) && (min_value[m] < min_interval[m] / 2)) {
+                  switch (type[m]) {
+                  case INT_VALUE :
+                    observation[j][k] *= hsmarkov->continuous_parametric_process[m + 1]->observation[k]->mass_computation(*pioutput[m] , *pioutput[m] + min_interval[m]);
+                    break;
+                  case REAL_VALUE :
+                    observation[j][k] *= hsmarkov->continuous_parametric_process[m + 1]->observation[k]->mass_computation(*proutput[m] , *proutput[m] + min_interval[m]);
+                    break;
+                  }
+                }
+
+                else {
+                  switch (type[m]) {
+                  case INT_VALUE :
+                    observation[j][k] *= hsmarkov->continuous_parametric_process[m + 1]->observation[k]->mass_computation(*pioutput[m] - min_interval[m] / 2 , *pioutput[m] + min_interval[m] / 2);
+                    break;
+                  case REAL_VALUE :
+                    observation[j][k] *= hsmarkov->continuous_parametric_process[m + 1]->observation[k]->mass_computation(*proutput[m] - min_interval[m] / 2 , *proutput[m] + min_interval[m] / 2);
+                    break;
+                  }
                 }
               }
             }
@@ -3245,6 +3429,14 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
             else {
               switch (hsmarkov->continuous_parametric_process[i + 1]->ident) {
 
+              case GAMMA : {
+                for (j = 0;j < hsmarkov->nb_state;j++) {
+                  hsmarkov->continuous_parametric_process[i + 1]->observation[j]->location = observation_reestim[i][j]->mean * observation_reestim[i][j]->mean / observation_reestim[i][j]->variance;
+                  hsmarkov->continuous_parametric_process[i + 1]->observation[j]->dispersion = observation_reestim[i][j]->variance / observation_reestim[i][j]->mean;
+                }
+                break;
+              }
+
               case GAUSSIAN : {
                 for (j = 0;j < hsmarkov->nb_state;j++) {
                   hsmarkov->continuous_parametric_process[i + 1]->observation[j]->location = observation_reestim[i][j]->mean;
@@ -3322,9 +3514,8 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
           }
 
           else {
-            switch (hsmarkov->continuous_parametric_process[i + 1]->ident) {
-
-            case GAUSSIAN : {
+            if ((hsmarkov->continuous_parametric_process[i + 1]->ident == GAMMA) ||
+                (hsmarkov->continuous_parametric_process[i + 1]->ident == GAUSSIAN)) {
               for (j = 0;j < hsmarkov->nb_state;j++) {
                 mean[j] = 0.;
                 state_frequency[j] = 0;
@@ -3359,6 +3550,60 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
 
               for (j = 0;j < hsmarkov->nb_state;j++) {
                 mean[j] /= state_frequency[j];
+              }
+            }
+
+            if ((hsmarkov->continuous_parametric_process[i + 1]->ident == GAMMA) ||
+                ((hsmarkov->continuous_parametric_process[i + 1]->ident == GAUSSIAN) && (!common_dispersion))) {
+              for (j = 0;j < hsmarkov->nb_state;j++) {
+                variance[j] = 0.;
+              }
+
+              switch (type[i]) {
+
+              case INT_VALUE : {
+                for (j = 0;j < nb_sequence;j++) {
+                  for (k = 0;k < length[j];k++) {
+                    for (m = 0;m < hsmarkov->nb_state;m++) {
+                      diff = int_sequence[j][i][k] - mean[m];
+                      variance[m] += state_sequence_count[j][k][m] * diff * diff;
+                    }
+                  }
+                }
+                break;
+              }
+
+              case REAL_VALUE : {
+                for (j = 0;j < nb_sequence;j++) {
+                  for (k = 0;k < length[j];k++) {
+                    for (m = 0;m < hsmarkov->nb_state;m++) {
+                      diff = real_sequence[j][i][k] - mean[m];
+                      variance[m] += state_sequence_count[j][k][m] * diff * diff;
+                    }
+                  }
+                }
+                break;
+              }
+              }
+
+              for (j = 0;j < hsmarkov->nb_state;j++) {
+                variance[j] /= state_frequency[j];
+//                variance[j] /= (state_frequency[j] - 1);
+              }
+            }
+
+            switch (hsmarkov->continuous_parametric_process[i + 1]->ident) {
+
+            case GAMMA : {
+              for (j = 0;j < hsmarkov->nb_state;j++) {
+                hsmarkov->continuous_parametric_process[i + 1]->observation[j]->location = mean[j] * mean[j] / variance[j];
+                hsmarkov->continuous_parametric_process[i + 1]->observation[j]->dispersion = variance[j] / mean[j];
+              }
+              break;
+            }
+
+            case GAUSSIAN : {
+              for (j = 0;j < hsmarkov->nb_state;j++) {
                 hsmarkov->continuous_parametric_process[i + 1]->observation[j]->location = mean[j];
               }
 
@@ -3366,39 +3611,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
 
               case false : {
                 for (j = 0;j < hsmarkov->nb_state;j++) {
-                  variance[j] = 0.;
-                }
-
-                switch (type[i]) {
-
-                case INT_VALUE : {
-                  for (j = 0;j < nb_sequence;j++) {
-                    for (k = 0;k < length[j];k++) {
-                      for (m = 0;m < hsmarkov->nb_state;m++) {
-                        diff = int_sequence[j][i][k] - mean[m];
-                        variance[m] += state_sequence_count[j][k][m] * diff * diff;
-                      }
-                    }
-                  }
-                  break;
-                }
-
-                case REAL_VALUE : {
-                  for (j = 0;j < nb_sequence;j++) {
-                    for (k = 0;k < length[j];k++) {
-                      for (m = 0;m < hsmarkov->nb_state;m++) {
-                        diff = real_sequence[j][i][k] - mean[m];
-                        variance[m] += state_sequence_count[j][k][m] * diff * diff;
-                      }
-                    }
-                  }
-                  break;
-                }
-                }
-
-                for (j = 0;j < hsmarkov->nb_state;j++) {
-                  hsmarkov->continuous_parametric_process[i + 1]->observation[j]->dispersion = sqrt(variance[j] / state_frequency[j]);
-//                  hsmarkov->continuous_parametric_process[i + 1]->observation[j]->dispersion = sqrt(variance[j] / (state_frequency[j] - 1));
+                  hsmarkov->continuous_parametric_process[i + 1]->observation[j]->dispersion = sqrt(variance[j]);
                 }
                 break;
               }
@@ -3408,7 +3621,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
                   state_frequency[0] += state_frequency[j];
                 }
 
-                variance[0] = 0;
+                variance[0] = 0.;
 
                 switch (type[i]) {
 
@@ -3437,9 +3650,10 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
                 }
                 }
 
+                variance[0] /= state_frequency[0];
+//                variance[0] /= (state_frequency[0] - 1);
                 for (j = 0;j < hsmarkov->nb_state;j++) {
-                  hsmarkov->continuous_parametric_process[i + 1]->observation[j]->dispersion = sqrt(variance[0] / state_frequency[0]);
-//                  hsmarkov->continuous_parametric_process[i + 1]->observation[j]->dispersion = sqrt(variance[0] / (state_frequency[0] - 1));
+                  hsmarkov->continuous_parametric_process[i + 1]->observation[j]->dispersion = sqrt(variance[0]);
                 }
                 break;
               }
