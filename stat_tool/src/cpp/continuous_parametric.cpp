@@ -39,6 +39,7 @@
 #include <math.h>
 #include <sstream>
 
+#include <boost/math/distributions/gamma.hpp>
 #include <boost/math/distributions/normal.hpp>
 #include <boost/math/special_functions/bessel.hpp>
 
@@ -201,7 +202,7 @@ ContinuousParametric* continuous_parametric_parsing(StatError &error , ifstream 
       // test nom de la loi
 
       if (i == 0) {
-        for (j = GAUSSIAN;j <= VON_MISES;j++) {
+        for (j = GAMMA;j <= VON_MISES;j++) {
           if (token == STAT_continuous_distribution_word[j]) {
             ident = j;
             break;
@@ -222,19 +223,34 @@ ContinuousParametric* continuous_parametric_parsing(StatError &error , ifstream 
         case 0 : {
           switch ((i - 1) / 3) {
 
-          // 1er parametre : moyenne
+          // 1er parametre : parametre de forme (Gamma), moyenne (Gauss), direction moyenne (von Mises)
 
           case 0 : {
-            if (token != STAT_word[STATW_MEAN]) {
+            if ((ident == GAMMA) && (token != STAT_word[STATW_SHAPE])) {
+              status = false;
+              error.correction_update(STAT_parsing[STATP_PARAMETER_NAME] , STAT_word[STATW_SHAPE] , line , i + 1);
+            }
+
+            if ((ident == GAUSSIAN) && (token != STAT_word[STATW_MEAN])) {
               status = false;
               error.correction_update(STAT_parsing[STATP_PARAMETER_NAME] , STAT_word[STATW_MEAN] , line , i + 1);
+            }
+
+            if ((ident == VON_MISES) && (token != STAT_word[STATW_MEAN_DIRECTION])) {
+              status = false;
+              error.correction_update(STAT_parsing[STATP_PARAMETER_NAME] , STAT_word[STATW_MEAN_DIRECTION] , line , i + 1);
             }
             break;
           }
 
-          // 2eme parametre : ecart-type (Gauss) ou concentration (von Mises)
+          // 2eme parametre : parametre d'echelle (Gamma), ecart-type (Gauss), concentration (von Mises)
 
           case 1 : {
+            if ((ident == GAMMA) && (token != STAT_word[STATW_SCALE])) {
+              status = false;
+              error.correction_update(STAT_parsing[STATP_PARAMETER_NAME] , STAT_word[STATW_SCALE] , line , i + 1);
+            }
+
             if ((ident == GAUSSIAN) && (token != STAT_word[STATW_STANDARD_DEVIATION])) {
               status = false;
               error.correction_update(STAT_parsing[STATP_PARAMETER_NAME] , STAT_word[STATW_STANDARD_DEVIATION] , line , i + 1);
@@ -266,14 +282,17 @@ ContinuousParametric* continuous_parametric_parsing(StatError &error , ifstream 
         case 2 : {
           switch ((i - 1) / 3) {
 
-          // 1er parametre : moyenne
+          // 1er parametre : parametre de forme (Gamma), moyenne (Gauss), direction moyenne (von Mises)
 
           case 0 : {
             lstatus = locale.stringToNum(token , &location);
+            if ((lstatus) && (ident == GAMMA) && (location <= 0.)) {
+              lstatus = false;
+            }
             break;
           }
 
-          // 2eme parametre : ecart-type (Gauss) ou concentration (von Mises)
+          // 2eme parametre : parametre d'echelle (Gamma), ecart-type (Gauss), concentration (von Mises)
 
           case 1 : {
             lstatus = locale.stringToNum(token , &dispersion);
@@ -331,15 +350,20 @@ ContinuousParametric* continuous_parametric_parsing(StatError &error , ifstream 
 ostream& ContinuousParametric::ascii_parameter_print(ostream &os) const
 
 {
-  os << STAT_continuous_distribution_word[ident] << "   "
-     << STAT_word[STATW_MEAN] << " : " << location << "   ";
+  os << STAT_continuous_distribution_word[ident] << "   ";
 
   switch (ident) {
+  case GAMMA :
+    os << STAT_word[STATW_SHAPE] << " : " << location << "   "
+       << STAT_word[STATW_SCALE] << " : " << dispersion;
+    break;
   case GAUSSIAN :
-    os << STAT_word[STATW_STANDARD_DEVIATION] << " : " << dispersion;
+    os << STAT_word[STATW_MEAN] << " : " << location << "   "
+       << STAT_word[STATW_STANDARD_DEVIATION] << " : " << dispersion;
     break;
   case VON_MISES :
-    os << STAT_word[STATW_CONCENTRATION] << " : " << dispersion;
+    os << STAT_word[STATW_MEAN_DIRECTION] << " : " << location << "   "
+       << STAT_word[STATW_CONCENTRATION] << " : " << dispersion;
     break;
   }
   os << endl;
@@ -362,11 +386,20 @@ ostream& ContinuousParametric::ascii_characteristic_print(ostream &os , bool fil
   if (file_flag) {
     os << "# ";
   }
-/*  if ((ident != GAUSSIAN) && (ident != VON_MISES)) {
-    os << STAT_label[STATL_MEAN] << ": " << mean << "   ";
-  } */
 
   switch (ident) {
+
+  case GAMMA : {
+    os << STAT_label[STATL_MEAN] << ": " << location * dispersion << "   "
+       << STAT_label[STATL_VARIANCE] << ": " << location * dispersion * dispersion << endl;
+
+    if (file_flag) {
+      os << "# ";
+    }
+    os << STAT_label[STATL_SKEWNESS_COEFF] << ": " << 2 / sqrt(location) << "   "
+       << STAT_label[STATL_KURTOSIS_COEFF] << ": " << 6 / location << endl;
+    break;
+  }
 
   case GAUSSIAN : {
     os << STAT_label[STATL_VARIANCE] << ": " << dispersion * dispersion << endl;
@@ -407,14 +440,6 @@ ostream& ContinuousParametric::ascii_characteristic_print(ostream &os , bool fil
   }
   }
 
-/*  if ((ident != GAUSSIAN) && (ident != VON_MISES) && (variance > 0.)) {
-    if (file_flag) {
-      os << "# ";
-    }
-    os << STAT_label[STATL_SKEWNESS_COEFF] << ": " << skewness_computation() << "   "
-       << STAT_label[STATL_KURTOSIS_COEFF] << ": " << kurtosis_computation() << endl;
-  } */
-
   return os;
 }
 
@@ -452,32 +477,39 @@ ostream& ContinuousParametric::ascii_print(ostream &os , bool file_flag ,
       scale = histo2->nb_element;
     }
 
-    min_value = location;
-
-    if (histo1) {
-      switch (histo1->type) {
-
-      case INT_VALUE : {
-        if (histo1->min_value < min_value) {
-          min_value = histo1->min_value;
-        }
-        break;
-      }
-
-      case REAL_VALUE : {
-        if (histo1->min_value - histo1->step / 2 < min_value) {
-          min_value = histo1->min_value - histo1->step / 2;
-        }
-        break;
-      }
-      }
+    if (ident == GAMMA) {
+      min_value = 0.;
+      max_value = location * dispersion;
     }
 
-    if ((histo2) && (histo2->offset < min_value)) {
-      min_value = histo2->offset;
-    }
+    else if ((ident == GAUSSIAN) || (ident == VON_MISES)) {
+      min_value = location;
 
-    max_value = location;
+      if (histo1) {
+        switch (histo1->type) {
+
+        case INT_VALUE : {
+          if (histo1->min_value < min_value) {
+            min_value = histo1->min_value;
+          }
+          break;
+        }
+
+        case REAL_VALUE : {
+          if (histo1->min_value - histo1->step / 2 < min_value) {
+            min_value = histo1->min_value - histo1->step / 2;
+          }
+          break;
+        }
+        }
+      }
+
+      if ((histo2) && (histo2->offset < min_value)) {
+        min_value = histo2->offset;
+      }
+
+      max_value = location;
+    }
 
     if (histo1) {
       switch (histo1->type) {
@@ -515,6 +547,33 @@ ostream& ContinuousParametric::ascii_print(ostream &os , bool file_flag ,
 
     switch (ident) {
 
+    case GAMMA : {
+      gamma_distribution<double> dist(location , dispersion);
+
+      value = quantile(complement(dist , GAMMA_TAIL));
+      while (max_value < value) {
+        max_value += step;
+      }
+
+      nb_step = (int)((max_value - min_value) / step) + 1;
+      frequency = new double[nb_step];
+      dist_cumul = new double[nb_step];
+
+//      value = step;
+//      dist_cumul[0] = cdf(dist , value);
+      value = step / 2;
+      dist_cumul[0] = cdf(dist , value + step / 2);
+      frequency[0] = dist_cumul[0] * scale;
+
+      for (i = 1;i < nb_step;i++) {
+        value += step;
+//        dist_cumul[i] = cdf(dist , value);
+        dist_cumul[i] = cdf(dist , value + step / 2);
+        frequency[i] = (dist_cumul[i] - dist_cumul[i - 1]) * scale;
+      }
+      break;
+    }
+
     case GAUSSIAN : {
       normal dist(location , dispersion);
 
@@ -536,12 +595,11 @@ ostream& ContinuousParametric::ascii_print(ostream &os , bool file_flag ,
       value = min_value;
       dist_cumul[0] = cdf(dist , value + step / 2);
       frequency[0] = (dist_cumul[0] - cdf(dist , value - step / 2)) * scale;
-      value += step;
 
       for (i = 1;i < nb_step;i++) {
+        value += step;
         dist_cumul[i] = cdf(dist , value + step / 2);
         frequency[i] = (dist_cumul[i] - dist_cumul[i - 1]) * scale;
-        value += step;
       }
       break;
     }
@@ -564,13 +622,12 @@ ostream& ContinuousParametric::ascii_print(ostream &os , bool file_flag ,
       mass = von_mises_mass_computation(value - step / 2 , value + step / 2);
       frequency[0] = mass * scale;
       dist_cumul[0] = mass;
-      value += step;
 
       for (i = 1;i < nb_step;i++) {
+        value += step;
         mass = von_mises_mass_computation(value - step / 2 , value + step / 2);
         frequency[i] = mass * scale;
         dist_cumul[i] = dist_cumul[i - 1] + mass;
-        value += step;
       }
       break;
     }
@@ -677,15 +734,20 @@ ostream& ContinuousParametric::ascii_print(ostream &os , bool file_flag ,
 ostream& ContinuousParametric::spreadsheet_parameter_print(ostream &os) const
 
 {
-  os << "\n" << STAT_continuous_distribution_word[ident] << "\t"
-     << STAT_word[STATW_MEAN] << "\t" << location << "\t";
+  os << "\n" << STAT_continuous_distribution_word[ident] << "\t";
 
   switch (ident) {
+  case GAMMA :
+    os << STAT_word[STATW_SHAPE] << "\t" << location << "\t"
+       << STAT_word[STATW_SCALE] << "\t" << dispersion;
+    break;
   case GAUSSIAN :
-    os << STAT_word[STATW_STANDARD_DEVIATION] << "\t" << dispersion;
+    os << STAT_word[STATW_MEAN] << "\t" << location << "\t"
+       << STAT_word[STATW_STANDARD_DEVIATION] << "\t" << dispersion;
     break;
   case VON_MISES :
-    os << STAT_word[STATW_CONCENTRATION] << "\t" << dispersion;
+    os << STAT_word[STATW_MEAN_DIRECTION] << "\t" << location << "\t"
+       << STAT_word[STATW_CONCENTRATION] << "\t" << dispersion;
     break;
   }
   os << endl;
@@ -703,11 +765,16 @@ ostream& ContinuousParametric::spreadsheet_parameter_print(ostream &os) const
 ostream& ContinuousParametric::spreadsheet_characteristic_print(ostream &os) const
 
 {
-/*  if ((ident != GAUSSIAN) && (ident != VON_MISES)) {
-    os << STAT_label[STATL_MEAN] << "\t" << mean_computation << "\t";
-  } */
-
   switch (ident) {
+
+  case GAMMA : {
+    os << STAT_label[STATL_MEAN] << "\t" << location * dispersion << "\t"
+       << STAT_label[STATL_VARIANCE] << "\t" << location * dispersion * dispersion << endl;
+
+    os << STAT_label[STATL_SKEWNESS_COEFF] << "\t" << 2 / sqrt(location) << "\t"
+       << STAT_label[STATL_KURTOSIS_COEFF] << "\t" << 6 / location << endl;
+    break;
+  }
 
   case GAUSSIAN : {
     os << STAT_label[STATL_VARIANCE] << "\t" << dispersion * dispersion << endl;
@@ -735,11 +802,6 @@ ostream& ContinuousParametric::spreadsheet_characteristic_print(ostream &os) con
     break;
   }
   }
-
-/*  if ((ident != GAUSSIAN) && (ident != VON_MISES) && (variance > 0.)) {
-    os << STAT_label[STATL_SKEWNESS_COEFF] << "\t" << skewness_computation() << "\t"
-       << STAT_label[STATL_KURTOSIS_COEFF] << "\t" << kurtosis_computation() << endl;
-  } */
 
   return os;
 }
@@ -775,32 +837,39 @@ ostream& ContinuousParametric::spreadsheet_print(ostream &os , bool cumul_flag ,
       scale = histo2->nb_element;
     }
 
-    min_value = location;
-
-    if (histo1) {
-      switch (histo1->type) {
-
-      case INT_VALUE : {
-        if (histo1->min_value < min_value) {
-          min_value = histo1->min_value;
-        }
-        break;
-      }
-
-      case REAL_VALUE : {
-        if (histo1->min_value - histo1->step / 2 < min_value) {
-          min_value = histo1->min_value - histo1->step / 2;
-        }
-        break;
-      }
-      }
+    if (ident == GAMMA) {
+      min_value = 0.;
+      max_value = location * dispersion;
     }
 
-    if ((histo2) && (histo2->offset < min_value)) {
-      min_value = histo2->offset;
-    }
+    else if ((ident == GAUSSIAN) || (ident == VON_MISES)) {
+      min_value = location;
 
-    max_value = location;
+      if (histo1) {
+        switch (histo1->type) {
+
+        case INT_VALUE : {
+          if (histo1->min_value < min_value) {
+            min_value = histo1->min_value;
+          }
+          break;
+        }
+
+        case REAL_VALUE : {
+          if (histo1->min_value - histo1->step / 2 < min_value) {
+            min_value = histo1->min_value - histo1->step / 2;
+          }
+          break;
+        }
+        }
+      }
+
+      if ((histo2) && (histo2->offset < min_value)) {
+        min_value = histo2->offset;
+      }
+
+      max_value = location;
+    }
 
     if (histo1) {
       switch (histo1->type) {
@@ -838,6 +907,33 @@ ostream& ContinuousParametric::spreadsheet_print(ostream &os , bool cumul_flag ,
 
     switch (ident) {
 
+    case GAMMA : {
+      gamma_distribution<double> dist(location , dispersion);
+
+      value = quantile(complement(dist , GAMMA_TAIL));
+      while (max_value < value) {
+        max_value += step;
+      }
+
+      nb_step = (int)((max_value - min_value) / step) + 1;
+      frequency = new double[nb_step];
+      dist_cumul = new double[nb_step];
+
+//      value = step;
+//      dist_cumul[0] = cdf(dist , value);
+      value = step / 2;
+      dist_cumul[0] = cdf(dist , value + step / 2);
+      frequency[0] = dist_cumul[0] * scale;
+
+      for (i = 1;i < nb_step;i++) {
+        value += step;
+//        dist_cumul[i] = cdf(dist , value);
+        dist_cumul[i] = cdf(dist , value + step / 2);
+        frequency[i] = (dist_cumul[i] - dist_cumul[i - 1]) * scale;
+      }
+      break;
+    }
+
     case GAUSSIAN : {
       normal dist(location , dispersion);
 
@@ -858,12 +954,11 @@ ostream& ContinuousParametric::spreadsheet_print(ostream &os , bool cumul_flag ,
       value = min_value;
       dist_cumul[0] = cdf(dist , value + step / 2);
       frequency[0] = (dist_cumul[0] - cdf(dist , value - step / 2)) * scale;
-      value += step;
 
       for (i = 1;i < nb_step;i++) {
+        value += step;
         dist_cumul[i] = cdf(dist , value + step / 2);
         frequency[i] = (dist_cumul[i] - dist_cumul[i - 1]) * scale;
-        value += step;
       }
       break;
     }
@@ -886,13 +981,12 @@ ostream& ContinuousParametric::spreadsheet_print(ostream &os , bool cumul_flag ,
       mass = von_mises_mass_computation(value - step / 2 , value + step / 2);
       frequency[0] = mass * scale;
       dist_cumul[0] = mass;
-      value += step;
 
       for (i = 1;i < nb_step;i++) {
+        value += step;
         mass = von_mises_mass_computation(value - step / 2 , value + step / 2);
         frequency[i] = mass * scale;
         dist_cumul[i] = dist_cumul[i - 1] + mass;
-        value += step;
       }
       break;
     }
@@ -1005,6 +1099,46 @@ bool ContinuousParametric::plot_print(const char *path , const Histogram *histo1
     }
 
     switch (ident) {
+
+    case GAMMA : {
+      gamma_distribution<double> dist(location , dispersion);
+
+      min_value = 0.;
+
+      max_value = quantile(complement(dist , GAMMA_TAIL));
+      if ((histo1) && (histo1->max_value + histo1->step > max_value)) {
+        max_value = histo1->max_value + histo1->step;
+      }
+      if ((histo2) && (histo2->nb_value - 1)) {
+        max_value = histo2->nb_value - 1;
+      }
+
+      step = max_value / GAMMA_NB_STEP;
+      if (histo1) {
+        buff = histo1->step / GAMMA_NB_SUB_STEP;
+      }
+      else if (histo2) {
+        buff = histo2->min_interval_computation() / GAMMA_NB_SUB_STEP;
+      }
+      if (((histo1) || (histo2)) && (buff < step)) {
+        step = buff;
+      }
+
+      nb_step = (int)(max_value / step) + 1;
+      frequency = new double[nb_step];
+
+      value = 0.;
+      max = 0.;
+      for (i = 0;i < nb_step;i++) {
+        frequency[i] = pdf(dist , value) *  scale;
+        value += step;
+
+        if (frequency[i] > max) {
+          max = frequency[i];
+        }
+      }
+      break;
+    }
 
     case GAUSSIAN : {
       normal dist(location , dispersion);
@@ -1206,6 +1340,46 @@ void ContinuousParametric::plotable_write(SinglePlot &plot , const Histogram *hi
 
   switch (ident) {
 
+  case GAMMA : {
+    gamma_distribution<double> dist(location , dispersion);
+
+    min_value = 0.;
+
+    max_value = quantile(complement(dist , GAMMA_TAIL));
+    if ((histo1) && (histo1->max_value + histo1->step > max_value)) {
+      max_value = histo1->max_value + histo1->step;
+    }
+    if ((histo2) && (histo2->nb_value - 1)) {
+      max_value = histo2->nb_value - 1;
+    }
+
+    step = max_value / GAMMA_NB_STEP;
+    if (histo1) {
+      buff = histo1->step / GAMMA_NB_SUB_STEP;
+    }
+    else if (histo2) {
+      buff = histo2->min_interval_computation() / GAMMA_NB_SUB_STEP;
+    }
+    if (((histo1) || (histo2)) && (buff < step)) {
+      step = buff;
+    }
+
+    nb_step = (int)(max_value / step) + 1;
+    frequency = new double[nb_step];
+
+    value = 0.;
+    max = 0.;
+    for (i = 0;i < nb_step;i++) {
+      frequency[i] = pdf(dist , value) *  scale;
+      value += step;
+
+      if (frequency[i] > max) {
+        max = frequency[i];
+      }
+    }
+    break;
+  }
+
   case GAUSSIAN : {
     normal dist(location , dispersion);
 
@@ -1364,6 +1538,9 @@ int ContinuousParametric::nb_parameter_computation() const
 
 
   switch (ident) {
+  case GAMMA :
+    nb_parameter = 2;
+    break;
   case GAUSSIAN :
     nb_parameter = 2;
     break;
@@ -1445,6 +1622,16 @@ double ContinuousParametric::mass_computation(double inf , double sup) const
 
 
   switch (ident) {
+
+  case GAMMA : {
+    gamma_distribution<double> dist(location , dispersion);
+
+    if (inf < 0.) {
+      inf = 0.;
+    }
+    mass = cdf(dist , sup) - cdf(dist , inf);
+    break;
+  }
 
   case GAUSSIAN : {
     normal dist(location , dispersion);
@@ -1534,6 +1721,15 @@ double** ContinuousParametric::q_q_plot_computation(int nb_value ,
 
   switch (ident) {
 
+  case GAMMA : {
+    gamma_distribution<double> dist(location , dispersion);
+
+    for (i = 0;i < nb_value - 1;i++) {
+      qqplot[1][i] = quantile(dist , empirical_cdf[1][i]);
+    }
+    break;
+  }
+
   case GAUSSIAN : {
     normal dist(location , dispersion);
 
@@ -1611,6 +1807,13 @@ double ContinuousParametric::simulation() const
   limit = ((double)rand() / (RAND_MAX + 1.));
 
   switch (ident) {
+
+  case GAMMA : {
+    gamma_distribution<double> dist(location , dispersion);
+
+    value = quantile(dist , limit);
+    break;
+  }
 
   case GAUSSIAN : {
     normal dist(location , dispersion);
