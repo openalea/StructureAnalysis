@@ -658,6 +658,78 @@ ostream& DiscreteParametric::spreadsheet_print(ostream &os) const
 
 /*--------------------------------------------------------------*
  *
+ *  Ecriture des caracteristiques d'une loi.
+ *
+ *  arguments : stream, flag ecriture des parametres de forme, flag commentaire.
+ *
+ *--------------------------------------------------------------*/
+
+ostream& DiscreteParametric::ascii_parametric_characteristic_print(ostream &os , bool shape , bool comment_flag) const
+
+{
+  if (ident == NONPARAMETRIC) {
+    ascii_characteristic_print(os , shape , comment_flag);
+  }
+
+  else {
+    double variance = parametric_variance_computation();
+
+
+    if (comment_flag) {
+      os << "# ";
+    }
+    os << STAT_label[STATL_MEAN] << ": " << parametric_mean_computation() << "   "
+       << STAT_label[STATL_VARIANCE] << ": " << variance << "   "
+       << STAT_label[STATL_STANDARD_DEVIATION] << ": " << sqrt(variance) << endl;
+
+    if ((shape) && (variance > 0.)) {
+      if (comment_flag) {
+        os << "# ";
+      }
+      os << STAT_label[STATL_SKEWNESS_COEFF] << ": " << parametric_skewness_computation() << "   "
+         << STAT_label[STATL_KURTOSIS_COEFF] << ": " << parametric_kurtosis_computation() << endl;
+    }
+  }
+
+  return os;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Ecriture des caracteristiques d'une loi au format tableur.
+ *
+ *  arguments : stream, flag ecriture des parametres de forme.
+ *
+ *--------------------------------------------------------------*/
+
+ostream& DiscreteParametric::spreadsheet_parametric_characteristic_print(ostream &os , bool shape) const
+
+{
+  if (ident == NONPARAMETRIC) {
+    spreadsheet_characteristic_print(os , shape);
+  }
+
+  else {
+    double variance = parametric_variance_computation();
+
+
+    os << STAT_label[STATL_MEAN] << "\t" << parametric_mean_computation() << "\t"
+       << STAT_label[STATL_VARIANCE] << "\t" << variance << "\t"
+       << STAT_label[STATL_STANDARD_DEVIATION] << "\t" << sqrt(variance) << endl;
+
+    if ((shape) && (variance > 0.)) {
+      os << STAT_label[STATL_SKEWNESS_COEFF] << "\t" << parametric_skewness_computation() << "\t"
+         << STAT_label[STATL_KURTOSIS_COEFF] << "\t" << parametric_kurtosis_computation() << endl;
+    }
+  }
+
+  return os;
+}
+
+
+/*--------------------------------------------------------------*
+ *
  *  Ecriture des parametres d'une loi discrete au format Gnuplot.
  *
  *  argument : stream.
@@ -1206,7 +1278,7 @@ ostream& DiscreteParametricModel::ascii_write(ostream &os , const DiscreteDistri
        << STAT_label[STATL_COMPLEMENTARY_PROBABILITY] << ": " << complement << ")" << endl;
   }
 
-  ascii_characteristic_print(os , true , file_flag);
+  ascii_parametric_characteristic_print(os , true , file_flag);
 
   if (file_flag) {
     os << "# ";
@@ -1364,7 +1436,7 @@ ostream& DiscreteParametricModel::spreadsheet_write(ostream &os ,
        << STAT_label[STATL_COMPLEMENTARY_PROBABILITY] << "\t" << complement << endl;
   }
 
-  spreadsheet_characteristic_print(os , true);
+  spreadsheet_parametric_characteristic_print(os , true);
 
   os << STAT_label[STATL_MEAN_ABSOLUTE_DEVIATION] << "\t" << mean_absolute_deviation_computation();
   if (mean > 0.) {
@@ -1861,7 +1933,7 @@ MultiPlotSet* DiscreteParametricModel::get_plotable(const DiscreteDistributionDa
 /*        legend.str("");
         legend << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
                << STAT_label[STATL_FUNCTION];
-	       plot[2][0].legend = legend.str(); */
+               plot[2][0].legend = legend.str(); */
 
         plot[2][0].style = "linespoints";
 
