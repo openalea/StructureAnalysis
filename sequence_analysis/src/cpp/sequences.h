@@ -126,13 +126,18 @@ const double CTM_KT_THRESHOLD = 12.;   // seuil pour elaguer les memoires
 const double LOCAL_BIC_THRESHOLD = 10.;  // seuil pour elaguer les memoires
 const double CONTEXT_THRESHOLD = 5.;  // seuil pour elaguer les memoires
 
-const double OCCUPANCY_THRESHOLD = 0.99999;  // seuil sur la fonction de repartition
-                                             // pour borner une loi d'occupation d'un etat
-const double OCCUPANCY_MEAN = 10.;     // temps moyen d'occupation d'un etat
+const double GAMMA_MIN_SCALE_PARAMETER = 3.;  // seuil sur la valeur pour l'estimation des parametres de la loi gamma
+const double GAMMA_FREQUENCY_THRESHOLD = 100.;  // seuil sur la frequence pour l'estimation des parametres de la loi gamma
+const double GAMMA_ITERATION_FACTOR = 0.5;  // facteur pour l'estimation des parametres de la loi gamma
+const int GAMMA_MAX_NB_ITERATION = 5;  // nombre maximum d'iterations pour l'estimation des parametres de la loi gamma
 
 const int MIN_NB_STATE_SEQUENCE = 1;   // nombre de sequences d'etats 1ere iteration de l'algorithme MCEM
 const int MAX_NB_STATE_SEQUENCE = 10;  // nombre de sequences d'etats maximum pour l'algorithme MCEM
 const double NB_STATE_SEQUENCE_PARAMETER = 1.;  // parametre nombre de sequences d'etats pour l'algorithme MCEM
+
+const double OCCUPANCY_THRESHOLD = 0.99999;  // seuil sur la fonction de repartition
+                                             // pour borner une loi d'occupation d'un etat
+const double OCCUPANCY_MEAN = 10.;     // temps moyen d'occupation d'un etat
 
 const int POSTERIOR_PROBABILITY_NB_SEQUENCE = 300; // nombre maximum de sequences pour la sortie des probabilites
                                                    // a posteriori des sequences d'etats les plus probables
@@ -629,6 +634,8 @@ public :
 
     Sequences* shift(StatError &error , int variable , int shift_param) const;
     Sequences* shift(StatError &error , int variable , double shift_param) const;
+    Sequences* thresholding(StatError &error , int variable , int threshold , int mode) const;
+    Sequences* thresholding(StatError &error , int variable , double threshold , int mode) const;
     Sequences* cluster(StatError &error , int variable , int step ,
                        int mode = FLOOR) const;
     Sequences* transcode(StatError &error , int variable , int *symbol) const;
@@ -637,6 +644,7 @@ public :
     Sequences* cluster(StatError &error , int variable , int nb_class ,
                        double *ilimit) const;
     Sequences* scaling(StatError &error , int variable , int scaling_coeff) const;
+    Sequences* scaling(StatError &error , int variable , double scaling_coeff) const;
     Sequences* round(StatError &error , int variable = I_DEFAULT ,
                      int mode = ROUND) const;
 
@@ -901,7 +909,7 @@ public :
 class VariableOrderChainData;
 
 class MarkovianSequences : public Sequences {  // trajectoires correspondant a
-                                                // un processus markovien
+                                               // un processus markovien
     friend class VariableOrderMarkov;
     friend class HiddenVariableOrderMarkov;
     friend class SemiMarkov;
