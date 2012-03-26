@@ -493,6 +493,32 @@ double Reestimation<Type>::mean_absolute_deviation_computation() const
 
 /*--------------------------------------------------------------*
  *
+ *  Calcul du log de la moyenne geometrique.
+ *
+ *--------------------------------------------------------------*/
+
+template <typename Type>
+double Reestimation<Type>::log_geometric_mean_computation() const
+
+{
+  register int i;
+  double log_geometric_mean = D_DEFAULT;
+
+
+  if (nb_element - frequency[0] > 0) {
+    log_geometric_mean = 0.;
+    for (i = MAX(offset , 2);i < nb_value;i++) {
+      log_geometric_mean += frequency[i] * log(i);
+    }
+    log_geometric_mean /= (nb_element - frequency[0]);
+  }
+
+  return log_geometric_mean;
+}
+
+
+/*--------------------------------------------------------------*
+ *
  *  Calcul du coefficient d'asymetrie d'une loi empirique.
  *
  *--------------------------------------------------------------*/
