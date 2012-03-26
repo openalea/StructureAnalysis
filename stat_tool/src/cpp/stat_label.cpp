@@ -48,8 +48,11 @@ const char *STAT_word[] = {
   "PARAMETER" ,
   "PROBABILITY" ,
 
+  "SHAPE" ,
+  "SCALE" ,
   "MEAN" ,
   "STANDARD_DEVIATION" ,
+  "MEAN_DIRECTION" ,
   "CONCENTRATION" ,
 
   "MIXTURE" ,
@@ -110,12 +113,14 @@ const char *STAT_discrete_distribution_letter[] = {
 
 
 const char *STAT_continuous_distribution_word[] = {
+  "GAMMA" ,
   "GAUSSIAN" ,
   "VON_MISES"
 };
 
 
 const char *STAT_continuous_distribution_letter[] = {
+  "Ga" ,
   "G" ,
   "VM"
 };
@@ -468,6 +473,7 @@ const char *STAT_error[] = {
   "bad clustering step" ,
   "bad number of classes" ,
   "bad shift value" ,
+  "bad threshold value" ,
   "bad rounded value" ,
   "smaller than" ,
   "greater than" ,
