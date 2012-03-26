@@ -617,7 +617,7 @@ ostream& Convolution::ascii_write(ostream &os , const ConvolutionData *convol_hi
     for (i = 0;i < nb_distribution;i++) {
       os << "\n" << STAT_word[STATW_DISTRIBUTION] << " " << i + 1 << endl;
       distribution[i]->ascii_print(os);
-      distribution[i]->ascii_characteristic_print(os , exhaustive , file_flag);
+      distribution[i]->ascii_parametric_characteristic_print(os , exhaustive , file_flag);
       if (exhaustive) {
         if (file_flag) {
           os << "# ";
@@ -656,7 +656,7 @@ ostream& Convolution::ascii_write(ostream &os , const ConvolutionData *convol_hi
     for (i = 0;i < nb_distribution;i++) {
       os << "\n" << STAT_word[STATW_DISTRIBUTION] << " " << i + 1 << endl;
       distribution[i]->ascii_print(os);
-      distribution[i]->ascii_characteristic_print(os , exhaustive , file_flag);
+      distribution[i]->ascii_parametric_characteristic_print(os , exhaustive , file_flag);
     }
   }
 
@@ -783,7 +783,7 @@ ostream& Convolution::spreadsheet_write(ostream &os , const ConvolutionData *con
     for (i = 0;i < nb_distribution;i++) {
       os << "\n" << STAT_word[STATW_DISTRIBUTION] << "\t" << i + 1 << endl;
       distribution[i]->spreadsheet_print(os);
-      distribution[i]->spreadsheet_characteristic_print(os , true);
+      distribution[i]->spreadsheet_parametric_characteristic_print(os , true);
       os << STAT_label[STATL_VARIANCE_MEAN_RATIO] << "\t"
          << distribution[i]->variance / distribution[i]->mean << "\t"
          << STAT_label[STATL_VARIATION_COEFF] << "\t"
@@ -807,7 +807,7 @@ ostream& Convolution::spreadsheet_write(ostream &os , const ConvolutionData *con
     for (i = 0;i < nb_distribution;i++) {
       os << "\n" << STAT_word[STATW_DISTRIBUTION] << "\t" << i + 1 << endl;
       distribution[i]->spreadsheet_print(os);
-      distribution[i]->spreadsheet_characteristic_print(os , true);
+      distribution[i]->spreadsheet_parametric_characteristic_print(os , true);
     }
   }
 
