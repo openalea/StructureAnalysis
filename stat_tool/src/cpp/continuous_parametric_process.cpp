@@ -38,6 +38,7 @@
 
 #include <math.h>
 
+#include <boost/math/distributions/gamma.hpp>
 #include <boost/math/distributions/normal.hpp>
 #include <boost/math/special_functions/bessel.hpp>
 
@@ -396,33 +397,53 @@ ostream& ContinuousParametricProcess::ascii_print(ostream &os , Histogram **obse
   long old_adjust;
   double step , value , min_value , max_value , mass , *observation_cumul ,
          **frequency , **cumul;
-  normal **dist;
+  gamma_distribution<double> **gamma_dist;
+  normal **gaussian_dist;
 
 
   if ((marginal_histogram) || (marginal_distribution)) {
     if (marginal_histogram) {
       step = marginal_histogram->step;
+    }
+    else {
+      step = marginal_distribution->min_interval_computation();
+    }
 
-      switch (marginal_histogram->type) {
-
-      case INT_VALUE : {
-        min_value = marginal_histogram->min_value;
-        max_value = marginal_histogram->max_value;
-        break;
+    if (ident == GAMMA) {
+      if (marginal_histogram) {
+        switch (marginal_histogram->type) {
+        case INT_VALUE :
+          max_value = marginal_histogram->max_value;
+          break;
+        case REAL_VALUE :
+          max_value = marginal_histogram->max_value + marginal_histogram->step;
+          break;
+        }
       }
 
-      case REAL_VALUE : {
-        min_value = marginal_histogram->min_value - marginal_histogram->step / 2;
-        max_value = marginal_histogram->max_value + marginal_histogram->step / 2;
-        break;
-      }
+      else {
+        max_value = marginal_distribution->nb_value - 1;
       }
     }
 
-    else {
-      step = marginal_distribution->min_interval_computation();
-      min_value = marginal_distribution->offset;
-      max_value = marginal_distribution->nb_value - 1;
+    else if ((ident == GAUSSIAN) || (ident == VON_MISES)) {
+      if (marginal_histogram) {
+        switch (marginal_histogram->type) {
+        case INT_VALUE :
+          min_value = marginal_histogram->min_value;
+          max_value = marginal_histogram->max_value;
+          break;
+        case REAL_VALUE :
+          min_value = marginal_histogram->min_value - marginal_histogram->step / 2;
+          max_value = marginal_histogram->max_value + marginal_histogram->step / 2;
+          break;
+        }
+      }
+
+      else {
+        min_value = marginal_distribution->offset;
+        max_value = marginal_distribution->nb_value - 1;
+      }
     }
 
     frequency = new double*[nb_state + 1];
@@ -430,18 +451,35 @@ ostream& ContinuousParametricProcess::ascii_print(ostream &os , Histogram **obse
 
     switch (ident) {
 
-    case GAUSSIAN : {
-      dist = new normal*[nb_state];
+    case GAMMA : {
+      min_value = 0.;
+      gamma_dist = new gamma_distribution<double>*[nb_state];
 
       for (i = 0;i < nb_state;i++) {
-        dist[i] = new normal(observation[i]->location , observation[i]->dispersion);
+        gamma_dist[i] = new gamma_distribution<double>(observation[i]->location , observation[i]->dispersion);
 
-        value = quantile(*dist[i] , GAUSSIAN_TAIL);
+        value = quantile(complement(*gamma_dist[i] , GAMMA_TAIL));
+        while (max_value < value) {
+          max_value += step;
+        }
+      }
+
+      nb_step = (int)(max_value / step) + 1;
+      break;
+    }
+
+    case GAUSSIAN : {
+      gaussian_dist = new normal*[nb_state];
+
+      for (i = 0;i < nb_state;i++) {
+        gaussian_dist[i] = new normal(observation[i]->location , observation[i]->dispersion);
+
+        value = quantile(*gaussian_dist[i] , GAUSSIAN_TAIL);
         while (min_value > value) {
           min_value -= step;
         }
 
-        value = quantile(complement(*dist[i] , GAUSSIAN_TAIL));
+        value = quantile(complement(*gaussian_dist[i] , GAUSSIAN_TAIL));
         while (max_value < value) {
           max_value += step;
         }
@@ -477,15 +515,33 @@ ostream& ContinuousParametricProcess::ascii_print(ostream &os , Histogram **obse
 
     switch (ident) {
 
-    case GAUSSIAN : {
+    case GAMMA : {
       for (i = 0;i < nb_state;i++) {
-        value = min_value;
-        cumul[i][0] = cdf(*dist[i] , value + step / 2);
-        frequency[i][0] = (cumul[i][0] - cdf(*dist[i] , value - step / 2));
+//        value = step;
+//        cumul[i][0] = cdf(*gamma_dist[i] , value);
+        value = step / 2;
+        cumul[i][0] = cdf(*gamma_dist[i] , value + step / 2);
+        frequency[i][0] = cumul[i][0];
 
         for (j = 1;j < nb_step;j++) {
           value += step;
-          cumul[i][j] = cdf(*dist[i] , value + step / 2);
+//          cumul[i][j] = cdf(*gamma_dist[i] , value);
+          cumul[i][j] = cdf(*gamma_dist[i] , value + step / 2);
+          frequency[i][j] = (cumul[i][j] - cumul[i][j - 1]);
+        }
+      }
+      break;
+    }
+
+    case GAUSSIAN : {
+      for (i = 0;i < nb_state;i++) {
+        value = min_value;
+        cumul[i][0] = cdf(*gaussian_dist[i] , value + step / 2);
+        frequency[i][0] = (cumul[i][0] - cdf(*gaussian_dist[i] , value - step / 2));
+
+        for (j = 1;j < nb_step;j++) {
+          value += step;
+          cumul[i][j] = cdf(*gaussian_dist[i] , value + step / 2);
           frequency[i][j] = (cumul[i][j] - cumul[i][j - 1]);
         }
       }
@@ -528,6 +584,9 @@ ostream& ContinuousParametricProcess::ascii_print(ostream &os , Histogram **obse
            << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
 
         switch (ident) {
+        case GAMMA :
+          observation_distribution[i]->ascii_characteristic_print(os , true , file_flag);
+          break;
         case GAUSSIAN :
           observation_distribution[i]->ascii_characteristic_print(os , false , file_flag);
           break;
@@ -1042,11 +1101,23 @@ ostream& ContinuousParametricProcess::ascii_print(ostream &os , Histogram **obse
   }
 
   if ((marginal_histogram) || (marginal_distribution)) {
-    if (ident == GAUSSIAN) {
+    switch (ident) {
+
+    case GAMMA : {
       for (i = 0;i < nb_state;i++) {
-        delete dist[i];
+        delete gamma_dist[i];
       }
-      delete [] dist;
+      delete [] gamma_dist;
+      break;
+    }
+
+    case GAUSSIAN : {
+      for (i = 0;i < nb_state;i++) {
+        delete gaussian_dist[i];
+      }
+      delete [] gaussian_dist;
+      break;
+    }
     }
 
     for (i = 0;i < nb_state;i++) {
@@ -1086,33 +1157,54 @@ ostream& ContinuousParametricProcess::spreadsheet_print(ostream &os , Histogram 
   int nb_step , nb_element;
   double step , value , min_value , max_value , mass , *observation_cumul ,
          **frequency , **cumul;
-  normal **dist;
+  gamma_distribution<double> **gamma_dist;
+  normal **gaussian_dist;
 
 
   if ((marginal_histogram) || (marginal_distribution)) {
     if (marginal_histogram) {
       step = marginal_histogram->step;
+    }
+    else {
+      step = marginal_distribution->min_interval_computation();
+    }
 
-      switch (marginal_histogram->type) {
-
-      case INT_VALUE : {
-        min_value = marginal_histogram->min_value;
-        max_value = marginal_histogram->max_value;
-        break;
+    if (ident == GAMMA) {
+      if (marginal_histogram) {
+        switch (marginal_histogram->type) {
+        case INT_VALUE :
+          max_value = marginal_histogram->max_value;
+          break;
+        case REAL_VALUE :
+          max_value = marginal_histogram->max_value + marginal_histogram->step;
+          break;
+        }
       }
 
-      case REAL_VALUE : {
-        min_value = marginal_histogram->min_value - marginal_histogram->step / 2;
-        max_value = marginal_histogram->max_value + marginal_histogram->step / 2;
-        break;
-      }
+      else {
+        max_value = marginal_distribution->nb_value - 1;
       }
     }
 
-    else {
-      step = marginal_distribution->min_interval_computation();
-      min_value = marginal_distribution->offset;
-      max_value = marginal_distribution->nb_value - 1;
+    else if ((ident == GAUSSIAN) || (ident == VON_MISES)) {
+      if (marginal_histogram) {
+        switch (marginal_histogram->type) {
+
+        case INT_VALUE :
+          min_value = marginal_histogram->min_value;
+          max_value = marginal_histogram->max_value;
+          break;
+        case REAL_VALUE :
+          min_value = marginal_histogram->min_value - marginal_histogram->step / 2;
+          max_value = marginal_histogram->max_value + marginal_histogram->step / 2;
+          break;
+        }
+      }
+
+      else {
+        min_value = marginal_distribution->offset;
+        max_value = marginal_distribution->nb_value - 1;
+      }
     }
 
     frequency = new double*[nb_state + 1];
@@ -1120,18 +1212,35 @@ ostream& ContinuousParametricProcess::spreadsheet_print(ostream &os , Histogram 
 
     switch (ident) {
 
-    case GAUSSIAN : {
-      dist = new normal*[nb_state];
+    case GAMMA : {
+      min_value = 0.;
+      gamma_dist = new gamma_distribution<double>*[nb_state];
 
       for (i = 0;i < nb_state;i++) {
-        dist[i] = new normal(observation[i]->location , observation[i]->dispersion);
+        gamma_dist[i] = new gamma_distribution<double>(observation[i]->location , observation[i]->dispersion);
 
-        value = quantile(*dist[i] , GAUSSIAN_TAIL);
+        value = quantile(complement(*gamma_dist[i] , GAMMA_TAIL));
+        while (max_value < value) {
+          max_value += step;
+        }
+      }
+
+      nb_step = (int)(max_value / step) + 1;
+      break;
+    }
+
+    case GAUSSIAN : {
+      gaussian_dist = new normal*[nb_state];
+
+      for (i = 0;i < nb_state;i++) {
+        gaussian_dist[i] = new normal(observation[i]->location , observation[i]->dispersion);
+
+        value = quantile(*gaussian_dist[i] , GAUSSIAN_TAIL);
         while (min_value > value) {
           min_value -= step;
         }
 
-        value = quantile(complement(*dist[i] , GAUSSIAN_TAIL));
+        value = quantile(complement(*gaussian_dist[i] , GAUSSIAN_TAIL));
         while (max_value < value) {
           max_value += step;
         }
@@ -1167,15 +1276,33 @@ ostream& ContinuousParametricProcess::spreadsheet_print(ostream &os , Histogram 
 
     switch (ident) {
 
-    case GAUSSIAN : {
+    case GAMMA : {
       for (i = 0;i < nb_state;i++) {
-        value = min_value;
-        cumul[i][0] = cdf(*dist[i] , value + step / 2);
-        frequency[i][0] = (cumul[i][0] - cdf(*dist[i] , value - step / 2));
+//        value = step;
+//        cumul[i][0] = cdf(*gamma_dist[i] , value);
+        value = step / 2;
+        cumul[i][0] = cdf(*gamma_dist[i] , value + step / 2);
+        frequency[i][0] = cumul[i][0];
 
         for (j = 1;j < nb_step;j++) {
           value += step;
-          cumul[i][j] = cdf(*dist[i] , value + step / 2);
+//          cumul[i][j] = cdf(*gamma_dist[i] , value);
+          cumul[i][j] = cdf(*gamma_dist[i] , value + step / 2);
+          frequency[i][j] = (cumul[i][j] - cumul[i][j - 1]);
+        }
+      }
+      break;
+    }
+
+    case GAUSSIAN : {
+      for (i = 0;i < nb_state;i++) {
+        value = min_value;
+        cumul[i][0] = cdf(*gaussian_dist[i] , value + step / 2);
+        frequency[i][0] = (cumul[i][0] - cdf(*gaussian_dist[i] , value - step / 2));
+
+        for (j = 1;j < nb_step;j++) {
+          value += step;
+          cumul[i][j] = cdf(*gaussian_dist[i] , value + step / 2);
           frequency[i][j] = (cumul[i][j] - cumul[i][j - 1]);
         }
       }
@@ -1212,8 +1339,11 @@ ostream& ContinuousParametricProcess::spreadsheet_print(ostream &os , Histogram 
            << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
 
         switch (ident) {
+        case GAMMA :
+          observation_distribution[i]->spreadsheet_characteristic_print(os , true);
+          break;
         case GAUSSIAN :
-          observation_distribution[i]->spreadsheet_characteristic_print(os);
+          observation_distribution[i]->spreadsheet_characteristic_print(os , false);
           break;
         case VON_MISES :
           observation_distribution[i]->spreadsheet_circular_characteristic_print(os);
@@ -1308,24 +1438,58 @@ ostream& ContinuousParametricProcess::spreadsheet_print(ostream &os , Histogram 
 
     switch (ident) {
 
-    case GAUSSIAN : {
-      dist = new normal*[nb_state];
+    case GAMMA : {
+      gamma_dist = new gamma_distribution<double>*[nb_state];
 
       for (i = 0;i < nb_state;i++) {
-        dist[i] = new normal(observation[i]->location , observation[i]->dispersion);
+        gamma_dist[i] = new gamma_distribution<double>(observation[i]->location , observation[i]->dispersion);
       }
 
-      min_value = quantile(*dist[0] , GAUSSIAN_TAIL);
+      max_value = quantile(complement(*gamma_dist[0] , GAMMA_TAIL));
       for (i = 1;i < nb_state;i++) {
-        value = quantile(*dist[i] , GAUSSIAN_TAIL);
+        value = quantile(complement(*gamma_dist[i] , GAMMA_TAIL));
+        if (value > max_value) {
+          max_value = value;
+        }
+      }
+
+      step = max_value / GAMMA_NB_STEP + 1;
+      value = 0.;
+
+      for (i = 0;i < nb_step;i++) {
+        os << value;
+        for (j = 0;j < nb_state;j++) {
+          os << "\t" << pdf(*gamma_dist[j] , value);
+        }
+        value += step;
+        os << endl;
+      }
+
+      for (i = 0;i < nb_state;i++) {
+        delete gamma_dist[i];
+      }
+      delete [] gamma_dist;
+      break;
+    }
+
+    case GAUSSIAN : {
+      gaussian_dist = new normal*[nb_state];
+
+      for (i = 0;i < nb_state;i++) {
+        gaussian_dist[i] = new normal(observation[i]->location , observation[i]->dispersion);
+      }
+
+      min_value = quantile(*gaussian_dist[0] , GAUSSIAN_TAIL);
+      for (i = 1;i < nb_state;i++) {
+        value = quantile(*gaussian_dist[i] , GAUSSIAN_TAIL);
         if (value < min_value) {
           min_value = value;
         }
       }
 
-      max_value = quantile(complement(*dist[0] , GAUSSIAN_TAIL));
+      max_value = quantile(complement(*gaussian_dist[0] , GAUSSIAN_TAIL));
       for (i = 1;i < nb_state;i++) {
-        value = quantile(complement(*dist[i] , GAUSSIAN_TAIL));
+        value = quantile(complement(*gaussian_dist[i] , GAUSSIAN_TAIL));
         if (value > max_value) {
           max_value = value;
         }
@@ -1337,16 +1501,16 @@ ostream& ContinuousParametricProcess::spreadsheet_print(ostream &os , Histogram 
       for (i = 0;i < GAUSSIAN_NB_STEP;i++) {
         os << value;
         for (j = 0;j < nb_state;j++) {
-          os << "\t" << pdf(*dist[j] , value);
+          os << "\t" << pdf(*gaussian_dist[j] , value);
         }
         value += step;
         os << endl;
       }
 
       for (i = 0;i < nb_state;i++) {
-        delete dist[i];
+        delete gaussian_dist[i];
       }
-      delete [] dist;
+      delete [] gaussian_dist;
       break;
     }
 
@@ -1648,11 +1812,23 @@ ostream& ContinuousParametricProcess::spreadsheet_print(ostream &os , Histogram 
   }
 
   if ((marginal_histogram) || (marginal_distribution)) {
-    if (ident == GAUSSIAN) {
+    switch (ident) {
+
+    case GAMMA : {
       for (i = 0;i < nb_state;i++) {
-        delete dist[i];
+        delete gamma_dist[i];
       }
-      delete [] dist;
+      delete [] gamma_dist;
+      break;
+    }
+
+    case GAUSSIAN : {
+      for (i = 0;i < nb_state;i++) {
+        delete gaussian_dist[i];
+      }
+      delete [] gaussian_dist;
+      break;
+    }
     }
 
     for (i = 0;i < nb_state;i++) {
@@ -1777,7 +1953,8 @@ bool ContinuousParametricProcess::plot_print(const char *prefix , const char *ti
   int min_interval , nb_step , dist_index , file_index;
   double value , min_value , max_value , step , buff , max , *scale , *dist_max ,
          **cumul , **frequency , **qqplot;
-  normal **dist;
+  gamma_distribution<double> **gamma_dist;
+  normal **gaussian_dist;
   ostringstream data_file_name[NB_STATE + 4];
 
 
@@ -1816,16 +1993,83 @@ bool ContinuousParametricProcess::plot_print(const char *prefix , const char *ti
 
     switch (ident) {
 
-    case GAUSSIAN : {
-      dist = new normal*[nb_state];
+    case GAMMA : {
+      gamma_dist = new gamma_distribution<double>*[nb_state];
 
       for (i = 0;i < nb_state;i++) {
-        dist[i] = new normal(observation[i]->location , observation[i]->dispersion);
+        gamma_dist[i] = new gamma_distribution<double>(observation[i]->location , observation[i]->dispersion);
       }
 
-      min_value = quantile(*dist[0] , GAUSSIAN_TAIL);
+      min_value = 0.;
+
+      max_value = quantile(complement(*gamma_dist[0] , GAMMA_TAIL));
       for (i = 1;i < nb_state;i++) {
-        value = quantile(*dist[i] , GAUSSIAN_TAIL);
+        value = quantile(complement(*gamma_dist[i] , GAMMA_TAIL));
+        if (value > max_value) {
+          max_value = value;
+        }
+      }
+      if ((marginal_histogram) && (marginal_histogram->max_value + marginal_histogram->step > max_value)) {
+        max_value = marginal_histogram->max_value + marginal_histogram->step;
+      }
+      if ((marginal_distribution) && (marginal_distribution->nb_value - 1 > max_value)) {
+        max_value = marginal_distribution->nb_value - 1;
+      }
+
+      if (step == D_DEFAULT) {
+        step = max_value / GAMMA_NB_STEP;
+      }
+      else {
+        buff = max_value / GAMMA_NB_STEP;
+        if (buff < step) {
+          step = buff;
+        }
+      }
+
+      if (marginal_histogram) {
+        buff = marginal_histogram->step / GAMMA_NB_SUB_STEP;
+      }
+      else if (marginal_distribution) {
+        buff = (double)min_interval / GAMMA_NB_SUB_STEP;
+      }
+      if (((marginal_histogram) || (marginal_distribution)) && (buff < step)) {
+        step = buff;
+      }
+
+#     ifdef DEBUG
+      cout << "\nTest: " << max_value << " | " << step << endl;
+#     endif
+
+      nb_step = (int)(max_value / step) + 1;
+
+      for (i = 0;i < nb_state;i++) {
+        frequency[i] = new double[nb_step];
+        cumul[i] = new double[nb_step];
+
+        dist_max[i] = 0.;
+        value = 0.;
+        for (j = 0;j < nb_step;j++) {
+          frequency[i][j] = pdf(*gamma_dist[i] , value);
+          if (frequency[i][j] > dist_max[i]) {
+            dist_max[i] = frequency[i][j];
+          }
+          cumul[i][j] = cdf(*gamma_dist[i] , value);
+          value += step;
+        }
+      }
+      break;
+    }
+
+    case GAUSSIAN : {
+      gaussian_dist = new normal*[nb_state];
+
+      for (i = 0;i < nb_state;i++) {
+        gaussian_dist[i] = new normal(observation[i]->location , observation[i]->dispersion);
+      }
+
+      min_value = quantile(*gaussian_dist[0] , GAUSSIAN_TAIL);
+      for (i = 1;i < nb_state;i++) {
+        value = quantile(*gaussian_dist[i] , GAUSSIAN_TAIL);
         if (value < min_value) {
           min_value = value;
         }
@@ -1837,9 +2081,9 @@ bool ContinuousParametricProcess::plot_print(const char *prefix , const char *ti
         min_value = marginal_distribution->offset;
       }
 
-      max_value = quantile(complement(*dist[0] , GAUSSIAN_TAIL));
+      max_value = quantile(complement(*gaussian_dist[0] , GAUSSIAN_TAIL));
       for (i = 1;i < nb_state;i++) {
-        value = quantile(complement(*dist[i] , GAUSSIAN_TAIL));
+        value = quantile(complement(*gaussian_dist[i] , GAUSSIAN_TAIL));
         if (value > max_value) {
           max_value = value;
         }
@@ -1883,8 +2127,8 @@ bool ContinuousParametricProcess::plot_print(const char *prefix , const char *ti
 
         value = min_value;
         for (j = 0;j < nb_step;j++) {
-          frequency[i][j] = pdf(*dist[i] , value);
-          cumul[i][j] = cdf(*dist[i] , value);
+          frequency[i][j] = pdf(*gaussian_dist[i] , value);
+          cumul[i][j] = cdf(*gaussian_dist[i] , value);
           value += step;
         }
 
@@ -2380,11 +2624,23 @@ bool ContinuousParametricProcess::plot_print(const char *prefix , const char *ti
       out_file << "\npause 0 \"" << STAT_label[STATL_END] << "\"" << endl;
     }
 
-    if (ident == GAUSSIAN) {
+    switch (ident) {
+
+    case GAMMA : {
       for (i = 0;i < nb_state;i++) {
-        delete dist[i];
+        delete gamma_dist[i];
       }
-      delete [] dist;
+      delete [] gamma_dist;
+      break;
+    }
+
+    case GAUSSIAN : {
+      for (i = 0;i < nb_state;i++) {
+        delete gaussian_dist[i];
+      }
+      delete [] gaussian_dist;
+      break;
+    }
     }
 
     for (i = 0;i < nb_state + 2;i++) {
@@ -2455,7 +2711,8 @@ void ContinuousParametricProcess::plotable_write(MultiPlotSet &plot , int &index
   int min_interval , nb_step;
   double value , min_value , max_value , step , buff , scale , max , *dist_max ,
          **cumul , **frequency , **qqplot;
-  normal **dist;
+  gamma_distribution<double> **gamma_dist;
+  normal **gaussian_dist;
   ostringstream title , legend;
 
 
@@ -2484,16 +2741,83 @@ void ContinuousParametricProcess::plotable_write(MultiPlotSet &plot , int &index
 
   switch (ident) {
 
-  case GAUSSIAN : {
-    dist = new normal*[nb_state];
+  case GAMMA : {
+    gamma_dist = new gamma_distribution<double>*[nb_state];
 
     for (i = 0;i < nb_state;i++) {
-      dist[i] = new normal(observation[i]->location , observation[i]->dispersion);
+      gamma_dist[i] = new gamma_distribution<double>(observation[i]->location , observation[i]->dispersion);
     }
 
-    min_value = quantile(*dist[0] , GAUSSIAN_TAIL);
+    min_value = 0.;
+
+    max_value = quantile(complement(*gamma_dist[0] , GAMMA_TAIL));
     for (i = 1;i < nb_state;i++) {
-      value = quantile(*dist[i] , GAUSSIAN_TAIL);
+      value = quantile(complement(*gamma_dist[i] , GAMMA_TAIL));
+      if (value > max_value) {
+        max_value = value;
+      }
+    }
+    if ((marginal_histogram) && (marginal_histogram->max_value + marginal_histogram->step > max_value)) {
+      max_value = marginal_histogram->max_value + marginal_histogram->step;
+    }
+    if ((marginal_distribution) && (marginal_distribution->nb_value - 1 > max_value)) {
+      max_value = marginal_distribution->nb_value - 1;
+    }
+
+    if (step == D_DEFAULT) {
+      step = max_value / GAMMA_NB_STEP;
+    }
+    else {
+      buff = max_value / GAMMA_NB_STEP;
+      if (buff < step) {
+        step = buff;
+      }
+    }
+
+    if (marginal_histogram) {
+      buff = marginal_histogram->step / GAMMA_NB_SUB_STEP;
+    }
+    else if (marginal_distribution) {
+      buff = (double)min_interval / GAMMA_NB_SUB_STEP;
+    }
+    if (((marginal_histogram) || (marginal_distribution)) && (buff < step)) {
+      step = buff;
+    }
+
+#   ifdef DEBUG
+    cout << "\nTest: " << max_value << " | " << step << endl;
+#   endif
+
+    nb_step = (int)(max_value / step) + 1;
+
+    for (i = 0;i < nb_state;i++) {
+      frequency[i] = new double[nb_step];
+      cumul[i] = new double[nb_step];
+
+      dist_max[i] = 0.;
+      value = 0.;
+      for (j = 0;j < nb_step;j++) {
+        frequency[i][j] = pdf(*gamma_dist[i] , value);
+        if (frequency[i][j] > dist_max[i]) {
+          dist_max[i] = frequency[i][j];
+        }
+        cumul[i][j] = cdf(*gamma_dist[i] , value);
+        value += step;
+      }
+    }
+    break;
+  }
+
+  case GAUSSIAN : {
+    gaussian_dist = new normal*[nb_state];
+
+    for (i = 0;i < nb_state;i++) {
+      gaussian_dist[i] = new normal(observation[i]->location , observation[i]->dispersion);
+    }
+
+    min_value = quantile(*gaussian_dist[0] , GAUSSIAN_TAIL);
+    for (i = 1;i < nb_state;i++) {
+      value = quantile(*gaussian_dist[i] , GAUSSIAN_TAIL);
       if (value < min_value) {
         min_value = value;
       }
@@ -2505,10 +2829,10 @@ void ContinuousParametricProcess::plotable_write(MultiPlotSet &plot , int &index
       min_value = marginal_distribution->offset;
     }
 
-//    max_value = quantile(*dist[0] , 1. - GAUSSIAN_TAIL);
-    max_value = quantile(complement(*dist[0] , GAUSSIAN_TAIL));
+//    max_value = quantile(*gaussian_dist[0] , 1. - GAUSSIAN_TAIL);
+    max_value = quantile(complement(*gaussian_dist[0] , GAUSSIAN_TAIL));
     for (i = 1;i < nb_state;i++) {
-      value = quantile(complement(*dist[i] , GAUSSIAN_TAIL));
+      value = quantile(complement(*gaussian_dist[i] , GAUSSIAN_TAIL));
       if (value > max_value) {
         max_value = value;
       }
@@ -2548,8 +2872,8 @@ void ContinuousParametricProcess::plotable_write(MultiPlotSet &plot , int &index
 
       value = min_value;
       for (j = 0;j < nb_step;j++) {
-        frequency[i][j] = pdf(*dist[i] , value);
-        cumul[i][j] = cdf(*dist[i] , value);
+        frequency[i][j] = pdf(*gaussian_dist[i] , value);
+        cumul[i][j] = cdf(*gaussian_dist[i] , value);
         value += step;
       }
 
@@ -3016,11 +3340,23 @@ void ContinuousParametricProcess::plotable_write(MultiPlotSet &plot , int &index
     delete [] cumul[nb_state];
   }
 
-  if (ident == GAUSSIAN) {
+  switch (ident) {
+
+  case GAMMA : {
     for (i = 0;i < nb_state;i++) {
-      delete dist[i];
+      delete gamma_dist[i];
     }
-    delete [] dist;
+    delete [] gamma_dist;
+    break;
+  }
+
+  case GAUSSIAN : {
+    for (i = 0;i < nb_state;i++) {
+      delete gaussian_dist[i];
+    }
+    delete [] gaussian_dist;
+    break;
+  }
   }
 
   for (i = 0;i < nb_state;i++) {
