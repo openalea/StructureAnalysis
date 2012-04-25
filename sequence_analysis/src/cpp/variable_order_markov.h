@@ -66,10 +66,14 @@ namespace Stat_trees {
                                          int &line);
 };
 
+
+
 /****************************************************************
  *
  *  Definition des classes :
  */
+
+
 // class VariableOrderMarkov : public StatInterface , public Chain {
 class VariableOrderMarkov : public StatInterface , protected Chain {  // chaine de Markov
                                                                        // d'ordre variable
