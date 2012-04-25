@@ -37,6 +37,8 @@
 
 
 #include <sstream>
+#include <iomanip>
+
 #include "tool/rw_tokenizer.h"
 #include "tool/rw_cstring.h"
 #include "tool/rw_locale.h"
@@ -49,6 +51,7 @@
 using namespace std;
 
 
+extern int column_width(int nb_value , const double *value , double scale = 1.);
 extern char* label(const char *file_name);
 
 
@@ -670,10 +673,11 @@ ostream& Mixture::ascii_write(ostream &os , const MixtureData *mixt_histo ,
                               bool exhaustive , bool file_flag) const
 
 {
-  register int i;
-  int bnb_parameter;
-  double scale[MIXTURE_NB_COMPONENT];
+  register int i , j;
+  int bnb_parameter , buff , width;
+  double **sup_norm_dist , scale[MIXTURE_NB_COMPONENT];
   const Distribution *pcomponent[MIXTURE_NB_COMPONENT];
+  long old_adjust;
 
 
   os << STAT_word[STATW_MIXTURE] << " " << nb_component << " " << STAT_word[STATW_DISTRIBUTIONS] << endl;
@@ -861,6 +865,58 @@ ostream& Mixture::ascii_write(ostream &os , const MixtureData *mixt_histo ,
     }
   }
 
+  old_adjust = os.setf(ios::left , ios::adjustfield);
+
+  sup_norm_dist = new double*[nb_component];
+  for (i = 0;i < nb_component;i++) {
+    sup_norm_dist[i] = new double[nb_component];
+  }
+
+  for (i = 0;i < nb_component;i++) {
+    sup_norm_dist[i][i] = 0.;
+    for (j = i + 1;j < nb_component;j++) {
+      sup_norm_dist[i][j] = component[i]->sup_norm_distance_computation(*(component[j]));
+      sup_norm_dist[j][i] = sup_norm_dist[i][j];
+    }
+  }
+
+  width = column_width(nb_component , sup_norm_dist[0]);
+  for (i = 1;i < nb_component;i++) {
+    buff = column_width(nb_component , sup_norm_dist[i]);
+    if (buff > width) {
+      width = buff;
+    }
+  }
+  width += ASCII_SPACE;
+
+  os << "\n";
+  if (file_flag) {
+    os << "# ";
+  }
+  os << STAT_label[STATL_COMPONENT_DISTANCE] << endl;
+
+  for (i = 0;i < nb_component;i++) {
+    if (file_flag) {
+      os << "# ";
+    }
+    for (j = 0;j < nb_component;j++) {
+      if (j != i) {
+        os << setw(width) << sup_norm_dist[i][j];
+      }
+      else {
+        os << setw(width) << " ";
+      }
+    }
+    os << endl;
+  }
+
+  for (i = 0;i < nb_component;i++) {
+    delete [] sup_norm_dist[i];
+  }
+  delete [] sup_norm_dist;
+
+  os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
+
   return os;
 }
 
@@ -925,9 +981,9 @@ bool Mixture::ascii_write(StatError &error , const char *path ,
 ostream& Mixture::spreadsheet_write(ostream &os , const MixtureData *mixt_histo) const
 
 {
-  register int i;
+  register int i , j;
   int bnb_parameter;
-  double scale[MIXTURE_NB_COMPONENT];
+  double **sup_norm_dist , scale[MIXTURE_NB_COMPONENT];
   const Distribution *pcomponent[MIXTURE_NB_COMPONENT];
 
 
@@ -1053,6 +1109,35 @@ ostream& Mixture::spreadsheet_write(ostream &os , const MixtureData *mixt_histo)
       }
     }
   }
+
+  sup_norm_dist = new double*[nb_component];
+  for (i = 0;i < nb_component;i++) {
+    sup_norm_dist[i] = new double[nb_component];
+  }
+
+  for (i = 0;i < nb_component;i++) {
+    for (j = i + 1;j < nb_component;j++) {
+      sup_norm_dist[i][j] = component[i]->sup_norm_distance_computation(*(component[j]));
+      sup_norm_dist[j][i] = sup_norm_dist[i][j];
+    }
+  }
+
+  os << "\n" << STAT_label[STATL_COMPONENT_DISTANCE] << endl;
+
+  for (i = 0;i < nb_component;i++) {
+    for (j = 0;j < nb_component;j++) {
+      if (j != i) {
+        os << sup_norm_dist[i][j];
+      }
+      os << "\t";
+    }
+    os << endl;
+  }
+
+  for (i = 0;i < nb_component;i++) {
+    delete [] sup_norm_dist[i];
+  }
+  delete [] sup_norm_dist;
 
   return os;
 }
