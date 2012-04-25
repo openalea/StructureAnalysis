@@ -2142,7 +2142,7 @@ bool ContinuousParametricProcess::plot_print(const char *prefix , const char *ti
 
       switch (unit) {
       case DEGREE :
-        max_value = 360.;
+        max_value = 360;
         break;
       case RADIAN :
         max_value = 2 * M_PI;
@@ -2887,7 +2887,7 @@ void ContinuousParametricProcess::plotable_write(MultiPlotSet &plot , int &index
 
     switch (unit) {
     case DEGREE :
-      max_value = 360.;
+      max_value = 360;
       break;
     case RADIAN :
       max_value = 2 * M_PI;
@@ -3773,7 +3773,7 @@ ostream& ContinuousParametricProcess::interval_computation(ostream &os)
       else {
         switch (unit) {
         case DEGREE :
-          os << quantile_limit[2 * i + 1][j] - (quantile_limit[2 * i][j] - 360.) << endl;
+          os << quantile_limit[2 * i + 1][j] - (quantile_limit[2 * i][j] - 360) << endl;
           break;
         case RADIAN :
           os << quantile_limit[2 * i + 1][j] - (quantile_limit[2 * i][j] - 2 * M_PI) << endl;
@@ -3794,7 +3794,7 @@ ostream& ContinuousParametricProcess::interval_computation(ostream &os)
       else {
         switch (unit) {
         case DEGREE :
-          os << posterior_limit[2 * i + 1][j] - (posterior_limit[2 * i][j] - 360.) << endl;
+          os << posterior_limit[2 * i + 1][j] - (posterior_limit[2 * i][j] - 360) << endl;
           break;
         case RADIAN :
           os << posterior_limit[2 * i + 1][j] - (posterior_limit[2 * i][j] - 2 * M_PI) << endl;
