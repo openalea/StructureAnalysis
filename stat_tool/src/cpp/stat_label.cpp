@@ -254,6 +254,7 @@ const char *STAT_label[] = {
   "curve" ,
   "mixture" ,
   "weight" ,
+  "distances between components" ,
   "convolution" ,
   "compound" ,
   "sum" ,
