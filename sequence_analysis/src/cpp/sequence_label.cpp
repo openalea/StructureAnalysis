@@ -167,6 +167,7 @@ const char *SEQ_label[] = {
   "words" ,
 
   "state probabilities" ,
+  "distances between observation distributions for consecutive states" ,
   "posterior state sequence probability" ,
   "state begin" ,
   "posterior state probabilities" ,
