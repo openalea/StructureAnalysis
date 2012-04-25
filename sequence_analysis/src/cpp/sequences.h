@@ -126,7 +126,11 @@ const double CTM_KT_THRESHOLD = 12.;   // seuil pour elaguer les memoires
 const double LOCAL_BIC_THRESHOLD = 10.;  // seuil pour elaguer les memoires
 const double CONTEXT_THRESHOLD = 5.;  // seuil pour elaguer les memoires
 
-const double GAMMA_MIN_SCALE_PARAMETER = 3.;  // seuil sur la valeur pour l'estimation des parametres de la loi gamma
+const int GAMMA_MIN_MEAN = 0.1;       // moyenne minimum de la loi gamma
+const double GAMMA_MIN_SHAPE_PARAMETER = 0.1;  // parametre de forme minimum de la loi gamma
+const double GAMMA_DEFAULT_SCALE_PARAMETER = 1;  // parametre d'echelle par defaut de la loi gamma
+const double GAMMA_SCALE_PARAMETER_THRESHOLD = 3.;  // seuil sur la valeur du parametre d'echelle
+                                                    // pour l'estimation des parametres de la loi gamma
 const double GAMMA_FREQUENCY_THRESHOLD = 100.;  // seuil sur la frequence pour l'estimation des parametres de la loi gamma
 const double GAMMA_ITERATION_FACTOR = 0.5;  // facteur pour l'estimation des parametres de la loi gamma
 const int GAMMA_MAX_NB_ITERATION = 5;  // nombre maximum d'iterations pour l'estimation des parametres de la loi gamma
