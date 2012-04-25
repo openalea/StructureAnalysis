@@ -1226,7 +1226,7 @@ bool ContinuousParametric::plot_print(const char *path , const Histogram *histo1
       switch (unit) {
 
       case DEGREE : {
-        max_value = 360.;
+        max_value = 360;
         step =  max_value / VON_MISES_NB_STEP;
 
         value = 0.;
@@ -1453,7 +1453,7 @@ void ContinuousParametric::plotable_write(SinglePlot &plot , const Histogram *hi
     switch (unit) {
 
     case DEGREE : {
-      max_value = 360.;
+      max_value = 360;
       step = max_value / VON_MISES_NB_STEP;
 
       value = 0.;
@@ -1659,23 +1659,41 @@ double ContinuousParametric::mass_computation(double inf , double sup) const
 void ContinuousParametric::von_mises_cumul_computation()
 
 {
-  register int i;
+  register int i , j;
+  int start;
   double step , value;
 
 
   cumul = new double[VON_MISES_NB_STEP];
-  value = step / 2;
 
   switch (unit) {
 
   case DEGREE : {
     step = 360. / VON_MISES_NB_STEP;
 
-    cumul[0] = 0.;
-    for (i = 1;i < VON_MISES_NB_STEP;i++) {
-      cumul[i] = cumul[i - 1] + exp(dispersion * cos((value - location) * M_PI / 180)) * step /
-                 (360 * cyl_bessel_i(0 , dispersion));
+    if (location < 180) {
+      value = location + 180;
+    }
+    else {
+      value = location - 180;
+    }
+    start = (int)round(value * VON_MISES_NB_STEP / 360);
+
+    cumul[start] = exp(dispersion * cos((value - location) * M_PI / 180)) * step /
+                   (360 * cyl_bessel_i(0 , dispersion));
+    for (i = start + 1;i < VON_MISES_NB_STEP;i++) {
       value += step;
+      cumul[i] = cumul[i - 1] + exp(dispersion * cos((value - location) * M_PI / 180)) * step /
+                                (360 * cyl_bessel_i(0 , dispersion));
+    }
+
+    value += step - 360;
+    cumul[0] = cumul[VON_MISES_NB_STEP - 1] + exp(dispersion * cos((value - location) * M_PI / 180)) * step /
+                                              (360 * cyl_bessel_i(0 , dispersion));
+    for (i = 1;i < start;i++) {
+      value += step;
+      cumul[i] = cumul[i - 1] + exp(dispersion * cos((value - location) * M_PI / 180)) * step /
+                                (360 * cyl_bessel_i(0 , dispersion));
     }
     break;
   }
@@ -1683,11 +1701,29 @@ void ContinuousParametric::von_mises_cumul_computation()
   case RADIAN : {
     step = 2 * M_PI / VON_MISES_NB_STEP;
 
-    cumul[0] = 0.;
-    for (i = 1;i < VON_MISES_NB_STEP;i++) {
-      cumul[i] = cumul[i - 1] + exp(dispersion * cos(value - location)) * step /
-                 (2 * M_PI * cyl_bessel_i(0 , dispersion));
+    if (location < M_PI) {
+      value = location + M_PI;
+    }
+    else {
+      value = location - M_PI;
+    }
+    start = (int)round(value * VON_MISES_NB_STEP / (2 * M_PI));
+
+    cumul[start] = exp(dispersion * cos(value - location)) * step /
+                   (2 * M_PI * cyl_bessel_i(0 , dispersion));
+    for (i = start + 1;i < VON_MISES_NB_STEP;i++) {
       value += step;
+      cumul[i] = cumul[i - 1] + exp(dispersion * cos(value - location)) * step /
+                                (2 * M_PI * cyl_bessel_i(0 , dispersion));
+    }
+
+    value += step - 2 * M_PI;
+    cumul[0] = cumul[VON_MISES_NB_STEP - 1] + exp(dispersion * cos(value - location)) * step /
+                                              (2 * M_PI * cyl_bessel_i(0 , dispersion));
+    for (i = 1;i < start;i++) {
+      value += step;
+      cumul[i] = cumul[i - 1] + exp(dispersion * cos(value - location)) * step /
+                                (2 * M_PI * cyl_bessel_i(0 , dispersion));
     }
     break;
   }
@@ -1793,14 +1829,330 @@ double** ContinuousParametric::q_q_plot_computation(int nb_value ,
 
 /*--------------------------------------------------------------*
  *
+ *  Calcul de la distance entre deux lois continues (sup de la difference
+ *  absolue des fonctions de repartition dans le cas de fonctions de repartition
+ *  ne se croisant pas; sinon somme des sup avant et apres croisement
+ *  de la difference des fonctions de repartition).
+ *
+ *--------------------------------------------------------------*/
+
+double ContinuousParametric::sup_norm_distance_computation(ContinuousParametric &dist)
+
+{
+  bool crossing;
+  register int i;
+  double min , max , step , value , buff , distance , max_absolute_diff , cumul1[2] , cumul2[2];
+
+# ifdef MESSAGE
+  double overlap;
+# endif
+
+
+  switch (ident) {
+
+  case GAMMA : {
+    gamma_distribution<double> dist1(location , dispersion) , dist2(dist.location , dist.dispersion);
+
+    max = MIN(quantile(complement(dist1 , GAMMA_TAIL)) , quantile(complement(dist2 , GAMMA_TAIL)));
+
+    step = max / GAMMA_NB_STEP;
+    distance = 0.;
+    value = 0.;
+    cumul1[0] = cdf(dist1 , value);
+    cumul2[0] = cdf(dist2 , value);
+    max_absolute_diff = fabs(cumul1[0] - cumul2[0]);
+    crossing = false;
+
+    for (i = 1;i < GAMMA_NB_STEP;i++) {
+      value += step;
+      cumul1[1] = cdf(dist1 , value);
+      cumul2[1] = cdf(dist2 , value);
+
+      buff = fabs(cumul1[1] - cumul2[1]);
+      if (buff > max_absolute_diff) {
+        max_absolute_diff = buff;
+      }
+
+      if ((!crossing) && (((cumul1[1] > cumul2[1]) && (cumul1[0] <= cumul2[0])) ||
+          ((cumul1[1] <= cumul2[1]) && (cumul1[0] > cumul2[0])))) {
+        crossing = true;
+        distance = max_absolute_diff;
+        max_absolute_diff = 0.;
+      }
+
+      cumul1[0] = cumul1[1];
+      cumul2[0] = cumul2[1];
+    }
+    distance += max_absolute_diff;
+
+#   ifdef DEBUG
+    value = 0.;
+    cumul1[0] = 0.;
+    cumul2[0] = 0.;
+    overlap = 0.;
+
+    for (i = 0;i < GAMMA_NB_STEP;i++) {
+      cumul1[1] = cdf(dist1 , value);
+      cumul2[1] = cdf(dist2 , value);
+      value += step;
+
+      overlap += MIN(cumul1[1] - cumul1[0] , cumul2[1] - cumul2[0]);
+      cumul1[0] = cumul1[1];
+      cumul2[0] = cumul2[1];
+    }
+
+    cout << "\nSup norm distance: " << distance << " " << 1. - overlap << endl;
+#   endif
+
+    break;
+  }
+
+  case GAUSSIAN : {
+    normal dist1(location , dispersion) , dist2(dist.location , dist.dispersion);
+
+    min = MAX(quantile(dist1 , GAUSSIAN_TAIL) , quantile(dist2 , GAUSSIAN_TAIL));
+    max = MIN(quantile(complement(dist1 , GAUSSIAN_TAIL)) , quantile(complement(dist2 , GAUSSIAN_TAIL)));
+
+    step = (max - min) / GAUSSIAN_NB_STEP;
+    distance = 0.;
+    value = min;
+    cumul1[0] = cdf(dist1 , value);
+    cumul2[0] = cdf(dist2 , value);
+    max_absolute_diff = fabs(cumul1[0] - cumul2[0]);
+    crossing = false;
+
+    for (i = 1;i < GAUSSIAN_NB_STEP;i++) {
+      value += step;
+      cumul1[1] = cdf(dist1 , value);
+      cumul2[1] = cdf(dist2 , value);
+
+      buff = fabs(cumul1[1] - cumul2[1]);
+      if (buff > max_absolute_diff) {
+        max_absolute_diff = buff;
+      }
+
+      if ((!crossing) && (((cumul1[1] > cumul2[1]) && (cumul1[0] <= cumul2[0])) ||
+          ((cumul1[1] <= cumul2[1]) && (cumul1[0] > cumul2[0])))) {
+        crossing = true;
+        distance = max_absolute_diff;
+        max_absolute_diff = 0.;
+      }
+
+      cumul1[0] = cumul1[1];
+      cumul2[0] = cumul2[1];
+    }
+    distance += max_absolute_diff;
+
+#   ifdef DEBUG
+    value = min;
+    cumul1[0] = 0.;
+    cumul2[0] = 0.;
+    overlap = 0.;
+
+    for (i = 0;i < GAUSSIAN_NB_STEP;i++) {
+      cumul1[1] = cdf(dist1 , value);
+      cumul2[1] = cdf(dist2 , value);
+      value += step;
+
+      overlap += MIN(cumul1[1] - cumul1[0] , cumul2[1] - cumul2[0]);
+      cumul1[0] = cumul1[1];
+      cumul2[0] = cumul2[1];
+    }
+
+    cout << "\nSup norm distance: " << distance << " " << 1. - overlap << endl;
+#   endif
+
+    break;
+  }
+
+  case VON_MISES : {
+    int inf , sup;
+
+    if (!cumul) {
+      von_mises_cumul_computation();
+    }
+    if (!dist.cumul) {
+      dist.von_mises_cumul_computation();
+    }
+
+    switch (unit) {
+
+    case DEGREE : {
+      if (location < dist.location) {
+        if (dist.location - location <= 180) {
+          min = dist.location - 180;
+          max = location + 180;
+        }
+        else {
+          min = location - 180;
+          max = dist.location + 180;
+        }
+      }
+
+      else {
+        if (location - dist.location <= 180) {
+          min = location - 180;
+          max = dist.location + 180;
+        }
+        else {
+          min = dist.location - 180;
+          max = location + 180;
+        }
+      }
+
+      if (min < 0) {
+        min += 360;
+      }
+      if (max >= 360) {
+        max -= 360;
+      }
+
+      inf = (int)round(min * VON_MISES_NB_STEP / 360);
+      sup = (int)round(max * VON_MISES_NB_STEP / 360);
+      break;
+    }
+
+    case RADIAN : {
+      if (location < dist.location) {
+        if (dist.location - location <= M_PI) {
+          min = dist.location - M_PI;
+          max = location + M_PI;
+        }
+        else {
+          min = location - M_PI;
+          max = dist.location + M_PI;
+        }
+      }
+
+      else {
+        if (location - dist.location <= M_PI) {
+          min = location - M_PI;
+          max = dist.location + M_PI;
+        }
+        else {
+          min = dist.location - M_PI;
+          max = location + M_PI;
+        }
+      }
+
+      if (min < 0) {
+        min += 2 * M_PI;
+      }
+      if (max >= 2 * M_PI) {
+        max -= 2 * M_PI;
+      }
+
+      inf = (int)round(min * VON_MISES_NB_STEP / (2 * M_PI));
+      sup = (int)round(max * VON_MISES_NB_STEP / (2 * M_PI));
+      break;
+    }
+    }
+
+#   ifdef DEBUG
+    cout << "\nInf: " << inf << ",  Sup: " << sup << endl;
+#   endif
+
+    distance = 0.;
+    max_absolute_diff = fabs(cumul[inf] - dist.cumul[inf]);
+    crossing = false;
+
+    if (inf <= sup) {
+      for (i = inf + 1;i < sup;i++) {
+        buff = fabs(cumul[i] - dist.cumul[i]);
+        if (buff > max_absolute_diff) {
+          max_absolute_diff = buff;
+        }
+
+        if ((!crossing) && (((cumul[i] > dist.cumul[i]) && (cumul[i - 1] <= dist.cumul[i - 1])) ||
+            ((cumul[i] <= dist.cumul[i]) && (cumul[i - 1] > dist.cumul[i - 1])))) {
+
+#         ifdef DEBUG
+          cout << "\nCrossing: " << i << endl;
+#         endif
+
+          crossing = true;
+          distance = max_absolute_diff;
+          max_absolute_diff = 0.;
+        }
+      }
+    }
+
+    else {
+      for (i = inf + 1;i < VON_MISES_NB_STEP;i++) {
+        buff = fabs(cumul[i] - dist.cumul[i]);
+        if (buff > max_absolute_diff) {
+          max_absolute_diff = buff;
+        }
+
+        if ((!crossing) && (((cumul[i] > dist.cumul[i]) && (cumul[i - 1] <= dist.cumul[i - 1])) ||
+            ((cumul[i] <= dist.cumul[i]) && (cumul[i - 1] > dist.cumul[i - 1])))) {
+          crossing = true;
+          distance = max_absolute_diff;
+          max_absolute_diff = 0.;
+        }
+      }
+
+      buff = fabs(cumul[0] - dist.cumul[0]);
+      if (buff > max_absolute_diff) {
+        max_absolute_diff = buff;
+      }
+
+      if ((!crossing) && (((cumul[0] > dist.cumul[0]) && (cumul[VON_MISES_NB_STEP - 1] <= dist.cumul[VON_MISES_NB_STEP - 1])) ||
+          ((cumul[0] <= dist.cumul[0]) && (cumul[VON_MISES_NB_STEP - 1] > dist.cumul[VON_MISES_NB_STEP - 1])))) {
+        crossing = true;
+        distance = max_absolute_diff;
+        max_absolute_diff = 0.;
+      }
+
+      for (i = 1;i < sup;i++) {
+        buff = fabs(cumul[i] - dist.cumul[i]);
+        if (buff > max_absolute_diff) {
+          max_absolute_diff = buff;
+        }
+
+        if ((!crossing) && (((cumul[i] > dist.cumul[i]) && (cumul[i - 1] <= dist.cumul[i - 1])) ||
+            ((cumul[i] <= dist.cumul[i]) && (cumul[i - 1] > dist.cumul[i - 1])))) {
+          crossing = true;
+          distance = max_absolute_diff;
+          max_absolute_diff = 0.;
+        }
+      }
+    }
+
+    distance += max_absolute_diff;
+
+#   ifdef MESSAGE
+    step = (unit == DEGREE ? 360. : 2 * M_PI) / VON_MISES_NB_STEP;
+    value = 0.;
+    overlap = 0.;
+
+    for (i = 0;i < VON_MISES_NB_STEP;i++) {
+      overlap += MIN(von_mises_mass_computation(value , value + step) , dist.von_mises_mass_computation(value , value + step));
+      value += step;
+    }
+
+    cout << "\nSup norm distance: " << distance << " " << 1. - overlap << endl;
+#   endif
+
+    break;
+  }
+  }
+
+  return distance;
+}
+
+
+/*--------------------------------------------------------------*
+ *
  *  Simulation d'une loi continue.
  *
  *--------------------------------------------------------------*/
 
-double ContinuousParametric::simulation() const
+double ContinuousParametric::simulation()
 
 {
   register int i;
+  int start;
   double limit , value , step , current_cumul , previous_cumul;
 
 
@@ -1823,62 +2175,70 @@ double ContinuousParametric::simulation() const
   }
 
   case VON_MISES : {
-    if (cumul) {
-      value = 0.;
-      i = 0;
-
-      switch (unit) {
-      case DEGREE :
-        step = 360. / VON_MISES_NB_STEP;
-        break;
-      case RADIAN :
-        step = 2 * M_PI / VON_MISES_NB_STEP;
-        break;
-      }
-
-      do {
-        value += step;
-        i++;
-      }
-      while ((cumul[i] < limit) && (i < VON_MISES_NB_STEP));
-
-      value -= step * (cumul[i] - limit) / (cumul[i] - cumul[i - 1]);
+    if (!cumul) {
+      von_mises_cumul_computation();
     }
 
-    else {
-      value = 0.;
-      current_cumul = 0.;
+    switch (unit) {
 
-      switch (unit) {
+    case DEGREE : {
+      step = 360. / VON_MISES_NB_STEP;
 
-      case DEGREE : {
-        step = 360. / VON_MISES_NB_STEP;
+      if (location < 180) {
+        value = location + 180.;
+      }
+      else {
+        value = location - 180.;
+      }
 
-        do {
-          value += step;
-          previous_cumul = current_cumul;
-          current_cumul += exp(dispersion * cos((value - step / 2 - location) * M_PI / 180)) * step /
-                           (360 * cyl_bessel_i(0 , dispersion));
+      start = (int)round(value * VON_MISES_NB_STEP / 360);
+      break;
+    }
+
+    case RADIAN : {
+      step = 2 * M_PI / VON_MISES_NB_STEP;
+
+      if (location < M_PI) {
+        value = location + M_PI;
+      }
+      else {
+        value = location - M_PI;
+      }
+
+      start = (int)round(value * VON_MISES_NB_STEP / (2 * M_PI));
+      break;
+    }
+    }
+
+    for (i = start;i < VON_MISES_NB_STEP;i++) {
+      if (cumul[i] >= limit) {
+        if (i > start) {
+          value -= step * (cumul[i] - limit) / (cumul[i] - cumul[i - 1]);
         }
-        while ((current_cumul < limit) && (value < 360.));
         break;
       }
 
-      case RADIAN : {
-        step = 2 * M_PI / VON_MISES_NB_STEP;
+      else {
+        value += step;
+      }
+    }
 
-        do {
-          value += step;
-          previous_cumul = current_cumul;
-          current_cumul += exp(dispersion * cos(value - step / 2 - location)) * step /
-                           (2 * M_PI * cyl_bessel_i(0 , dispersion));
+    if (i == VON_MISES_NB_STEP) {
+      for (i = 0;i < start;i++) {
+        if (cumul[i] >= limit) {
+          if (i == 0) {
+            value -= step * (cumul[i] - limit) / (cumul[i] - cumul[VON_MISES_NB_STEP - 1]);
+          }
+          else {
+            value -= step * (cumul[i] - limit) / (cumul[i] - cumul[i - 1]);
+          }
+          break;
         }
-        while ((current_cumul < limit) && (value < 2 * M_PI));
-        break;
-      }
-      }
 
-      value -= step * (current_cumul - limit) / (current_cumul - previous_cumul);
+        else {
+          value += step;
+        }
+      }
     }
     break;
   }
