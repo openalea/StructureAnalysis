@@ -3246,9 +3246,10 @@ ostream& VariableOrderMarkov::ascii_write(ostream &os , const VariableOrderMarko
                                           bool exhaustive , bool file_flag , bool hidden) const
 
 {
-  register int i , j;
+  bool **logic_transition;
+  register int i , j , k;
   int buff , variable , max_memory_count , *memory_count , width[2];
-  double standard_normal_value , half_confidence_interval;
+  double standard_normal_value , half_confidence_interval , **sup_norm_dist;
   long old_adjust;
   FrequencyDistribution **observation_dist = NULL;
   Histogram **observation_histo = NULL;
@@ -3550,20 +3551,126 @@ ostream& VariableOrderMarkov::ascii_write(ostream &os , const VariableOrderMarko
       }
     }
 
+    if ((hidden) && ((discrete_parametric_process[i]) || (continuous_parametric_process[i]))) {
+      logic_transition = logic_transition_computation();
+
+      sup_norm_dist = new double*[nb_state];
+      for (j = 0;j < nb_state;j++) {
+        sup_norm_dist[j] = new double[nb_state];
+      }
+    }
+
     if (nonparametric_process[i]) {
       nonparametric_process[i]->ascii_print(os , i , observation_dist , characteristics ,
                                             exhaustive , file_flag);
+
+/*      if (hidden) {
+        for (j = 0;j < nb_state;j++) {
+          sup_norm_dist[j][j] = 0.;
+
+          for (k = j + 1;k < nb_state;k++) {
+            if ((logic_transition[j][k]) || (logic_transition[k][j])) {
+              sup_norm_dist[j][k] = nonparametric_process[i]->observation[j]->sup_norm_distance_computation(*(nonparametric_process[i]->observation[k]));
+            }
+            else {
+              sup_norm_dist[j][k] = 1.;
+            }
+
+            sup_norm_dist[k][j] = sup_norm_dist[j][k];
+          }
+        }
+      } */
     }
+
     else if (discrete_parametric_process[i]) {
       discrete_parametric_process[i]->ascii_print(os , observation_dist ,
                                                   (seq ? seq->marginal_distribution[variable] : NULL) ,
                                                   exhaustive , file_flag);
+
+      if (hidden) {
+        for (j = 0;j < nb_state;j++) {
+          sup_norm_dist[j][j] = 0.;
+
+          for (k = j + 1;k < nb_state;k++) {
+            if ((logic_transition[j][k]) || (logic_transition[k][j])) {
+              sup_norm_dist[j][k] = discrete_parametric_process[i]->observation[j]->sup_norm_distance_computation(*(discrete_parametric_process[i]->observation[k]));
+            }
+            else {
+              sup_norm_dist[j][k] = 1.;
+            }
+
+            sup_norm_dist[k][j] = sup_norm_dist[j][k];
+          }
+        }
+      }
     }
+
     else {
       continuous_parametric_process[i]->ascii_print(os , observation_histo , observation_dist ,
                                                     (seq ? seq->marginal_histogram[variable] : NULL) ,
                                                     (seq ? seq->marginal_distribution[variable] : NULL) ,
                                                     exhaustive , file_flag);
+
+      if (hidden) {
+        for (j = 0;j < nb_state;j++) {
+          sup_norm_dist[j][j] = 0.;
+
+          for (k = j + 1;k < nb_state;k++) {
+            if ((logic_transition[j][k]) || (logic_transition[k][j])) {
+              sup_norm_dist[j][k] = continuous_parametric_process[i]->observation[j]->sup_norm_distance_computation(*(continuous_parametric_process[i]->observation[k]));
+            }
+            else {
+              sup_norm_dist[j][k] = 1.;
+            }
+
+            sup_norm_dist[k][j] = sup_norm_dist[j][k];
+          }
+        }
+      }
+    }
+
+    if ((hidden) && ((discrete_parametric_process[i]) || (continuous_parametric_process[i]))) {
+      width[0] = column_width(nb_state , sup_norm_dist[0]);
+      for (j = 1;j < nb_state;j++) {
+        buff = column_width(nb_state , sup_norm_dist[j]);
+        if (buff > width[0]) {
+          width[0] = buff;
+        }
+      }
+      width[0] += ASCII_SPACE;
+
+      os.setf(ios::left , ios::adjustfield);
+
+      os << "\n";
+      if (file_flag) {
+        os << "# ";
+      }
+      os << SEQ_label[SEQL_OBSERVATION_DISTRIBUTION_DISTANCE] << endl;
+
+      for (j = 0;j < nb_state;j++) {
+        if (file_flag) {
+          os << "# ";
+        }
+        for (k = 0;k < nb_state;k++) {
+          if ((k != j) && (logic_transition[j][k])) {
+            os << setw(width[0]) << sup_norm_dist[j][k];
+          }
+          else {
+            os << setw(width[0]) << "_";
+          }
+        }
+        os << endl;
+      }
+
+      for (j = 0;j < nb_state;j++) {
+        delete [] logic_transition[j];
+      }
+      delete [] logic_transition;
+
+      for (j = 0;j < nb_state;j++) {
+        delete [] sup_norm_dist[j];
+      }
+      delete [] sup_norm_dist;
     }
   }
 
@@ -4007,8 +4114,10 @@ ostream& VariableOrderMarkov::spreadsheet_write(ostream &os ,
                                                 bool hidden) const
 
 {
-  register int i;
+  bool **logic_transition;
+  register int i , j , k;
   int variable;
+  double **sup_norm_dist;
   FrequencyDistribution **observation_dist = NULL;
   Histogram **observation_histo = NULL;
   SequenceCharacteristics *characteristics;
@@ -4104,17 +4213,85 @@ ostream& VariableOrderMarkov::spreadsheet_write(ostream &os ,
       }
     }
 
+    if ((hidden) && ((discrete_parametric_process[i]) || (continuous_parametric_process[i]))) {
+      logic_transition = logic_transition_computation();
+
+      sup_norm_dist = new double*[nb_state];
+      for (j = 0;j < nb_state;j++) {
+        sup_norm_dist[j] = new double[nb_state];
+      }
+    }
+
     if (nonparametric_process[i]) {
       nonparametric_process[i]->spreadsheet_print(os , i , observation_dist , characteristics);
+
+/*      if (hidden) {
+        for (j = 0;j < nb_state;j++) {
+          for (k = j + 1;k < nb_state;k++) {
+            if ((logic_transition[j][k]) || (logic_transition[k][j])) {
+              sup_norm_dist[j][k] = nonparametric_process[i]->observation[j]->sup_norm_distance_computation(*(nonparametric_process[i]->observation[k]));
+              sup_norm_dist[k][j] = sup_norm_dist[j][k];
+            }
+          }
+        }
+      } */
     }
+
     else if (discrete_parametric_process[i]) {
       discrete_parametric_process[i]->spreadsheet_print(os , observation_dist ,
                                                         (seq ? seq->marginal_distribution[variable] : NULL));
+
+      if (hidden) {
+        for (j = 0;j < nb_state;j++) {
+          for (k = j + 1;k < nb_state;k++) {
+            if ((logic_transition[j][k]) || (logic_transition[k][j])) {
+              sup_norm_dist[j][k] = discrete_parametric_process[i]->observation[j]->sup_norm_distance_computation(*(discrete_parametric_process[i]->observation[k]));
+              sup_norm_dist[k][j] = sup_norm_dist[j][k];
+            }
+          }
+        }
+      }
     }
+
     else {
       continuous_parametric_process[i]->spreadsheet_print(os , observation_histo , observation_dist ,
                                                           (seq ? seq->marginal_histogram[variable] : NULL) ,
                                                           (seq ? seq->marginal_distribution[variable] : NULL));
+
+      if (hidden) {
+        for (j = 0;j < nb_state;j++) {
+          for (k = j + 1;k < nb_state;k++) {
+            if ((logic_transition[j][k]) || (logic_transition[k][j])) {
+              sup_norm_dist[j][k] = continuous_parametric_process[i]->observation[j]->sup_norm_distance_computation(*(continuous_parametric_process[i]->observation[k]));
+              sup_norm_dist[k][j] = sup_norm_dist[j][k];
+            }
+          }
+        }
+      }
+    }
+
+    if ((hidden) && ((discrete_parametric_process[i]) || (continuous_parametric_process[i]))) {
+      os << "\n" << SEQ_label[SEQL_OBSERVATION_DISTRIBUTION_DISTANCE] << endl;
+
+      for (j = 0;j < nb_state;j++) {
+        for (k = 0;k < nb_state;k++) {
+          if ((k != j) && (logic_transition[j][k])) {
+            os << sup_norm_dist[j][k];
+          }
+          os << "\t";
+        }
+        os << endl;
+      }
+
+      for (j = 0;j < nb_state;j++) {
+        delete [] logic_transition[j];
+      }
+      delete [] logic_transition;
+
+      for (j = 0;j < nb_state;j++) {
+        delete [] sup_norm_dist[j];
+      }
+      delete [] sup_norm_dist;
     }
   }
 
