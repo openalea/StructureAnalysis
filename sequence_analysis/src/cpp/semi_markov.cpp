@@ -961,8 +961,9 @@ ostream& SemiMarkov::ascii_write(ostream &os , const SemiMarkovData *seq ,
                                  bool exhaustive , bool file_flag , bool hidden) const
 
 {
-  register int i , j;
+  register int i , j , k;
   int buff , width , variable;
+  double **sup_norm_dist;
   FrequencyDistribution **observation_dist = NULL;
   Histogram **observation_histo = NULL;
   SequenceCharacteristics *characteristics;
@@ -1055,6 +1056,7 @@ ostream& SemiMarkov::ascii_write(ostream &os , const SemiMarkovData *seq ,
           }
           os << endl;
         }
+
         break;
       }
 
@@ -1097,6 +1099,7 @@ ostream& SemiMarkov::ascii_write(ostream &os , const SemiMarkovData *seq ,
           }
           os << endl;
         }
+
         break;
       }
     }
@@ -1150,20 +1153,121 @@ ostream& SemiMarkov::ascii_write(ostream &os , const SemiMarkovData *seq ,
       }
     }
 
+//    if ((hidden) && ((discrete_parametric_process[i]) || (continuous_parametric_process[i]))) {
+    if (hidden) {
+      sup_norm_dist = new double*[nb_state];
+      for (j = 0;j < nb_state;j++) {
+        sup_norm_dist[j] = new double[nb_state];
+      }
+    }
+
     if (nonparametric_process[i]) {
       nonparametric_process[i]->ascii_print(os , i , observation_dist , characteristics ,
                                             exhaustive , file_flag);
+
+      if (hidden) {
+        for (j = 0;j < nb_state;j++) {
+          sup_norm_dist[j][j] = 0.;
+
+          for (k = j + 1;k < nb_state;k++) {
+            if ((transition[j][k] > MIN_PROBABILITY) || (transition[k][j] > MIN_PROBABILITY)) {
+              sup_norm_dist[j][k] = nonparametric_process[i]->observation[j]->sup_norm_distance_computation(*(nonparametric_process[i]->observation[k]));
+            }
+            else {
+              sup_norm_dist[j][k] = 1.;
+            }
+
+            sup_norm_dist[k][j] = sup_norm_dist[j][k];
+          }
+        }
+      }
     }
+
     else if (discrete_parametric_process[i]) {
       discrete_parametric_process[i]->ascii_print(os , observation_dist ,
                                                   (seq ? seq->marginal_distribution[variable] : NULL) ,
                                                   exhaustive , file_flag);
+
+      if (hidden) {
+        for (j = 0;j < nb_state;j++) {
+          sup_norm_dist[j][j] = 0.;
+
+          for (k = j + 1;k < nb_state;k++) {
+            if ((transition[j][k] > MIN_PROBABILITY) || (transition[k][j] > MIN_PROBABILITY)) {
+              sup_norm_dist[j][k] = discrete_parametric_process[i]->observation[j]->sup_norm_distance_computation(*(discrete_parametric_process[i]->observation[k]));
+            }
+            else {
+              sup_norm_dist[j][k] = 1.;
+            }
+
+            sup_norm_dist[k][j] = sup_norm_dist[j][k];
+          }
+        }
+      }
     }
+
     else {
       continuous_parametric_process[i]->ascii_print(os , observation_histo , observation_dist ,
                                                     (seq ? seq->marginal_histogram[variable] : NULL) ,
                                                     (seq ? seq->marginal_distribution[variable] : NULL) ,
                                                     exhaustive , file_flag);
+
+      if (hidden) {
+        for (j = 0;j < nb_state;j++) {
+          sup_norm_dist[j][j] = 0.;
+
+          for (k = j + 1;k < nb_state;k++) {
+            if ((transition[j][k] > MIN_PROBABILITY) || (transition[k][j] > MIN_PROBABILITY)) {
+              sup_norm_dist[j][k] = continuous_parametric_process[i]->observation[j]->sup_norm_distance_computation(*(continuous_parametric_process[i]->observation[k]));
+            }
+            else {
+              sup_norm_dist[j][k] = 1.;
+            }
+
+            sup_norm_dist[k][j] = sup_norm_dist[j][k];
+          }
+        }
+      }
+    }
+
+//    if ((hidden) && ((discrete_parametric_process[i]) || (continuous_parametric_process[i]))) {
+    if (hidden) {
+      width = column_width(nb_state , sup_norm_dist[0]);
+      for (j = 1;j < nb_state;j++) {
+        buff = column_width(nb_state , sup_norm_dist[j]);
+        if (buff > width) {
+          width = buff;
+        }
+      }
+      width += ASCII_SPACE;
+
+      os.setf(ios::left , ios::adjustfield);
+
+      os << "\n";
+      if (file_flag) {
+        os << "# ";
+      }
+      os << SEQ_label[SEQL_OBSERVATION_DISTRIBUTION_DISTANCE] << endl;
+
+      for (j = 0;j < nb_state;j++) {
+        if (file_flag) {
+          os << "# ";
+        }
+        for (k = 0;k < nb_state;k++) {
+          if ((k != j) && (transition[j][k] > MIN_PROBABILITY)) {
+            os << setw(width) << sup_norm_dist[j][k];
+          }
+          else {
+            os << setw(width) << "_";
+          }
+        }
+        os << endl;
+      }
+
+      for (j = 0;j < nb_state;j++) {
+        delete [] sup_norm_dist[j];
+      }
+      delete [] sup_norm_dist;
     }
   }
 
@@ -1391,8 +1495,9 @@ ostream& SemiMarkov::spreadsheet_write(ostream &os , const SemiMarkovData *seq ,
                                        bool hidden) const
 
 {
-  register int i;
+  register int i , j , k;
   int variable;
+  double **sup_norm_dist;
   FrequencyDistribution **observation_dist = NULL;
   Histogram **observation_histo = NULL;
   SequenceCharacteristics *characteristics;
@@ -1490,17 +1595,78 @@ ostream& SemiMarkov::spreadsheet_write(ostream &os , const SemiMarkovData *seq ,
       }
     }
 
+    if ((hidden) && ((discrete_parametric_process[i]) || (continuous_parametric_process[i]))) {
+      sup_norm_dist = new double*[nb_state];
+      for (j = 0;j < nb_state;j++) {
+        sup_norm_dist[j] = new double[nb_state];
+      }
+    }
+
     if (nonparametric_process[i]) {
       nonparametric_process[i]->spreadsheet_print(os , i , observation_dist , characteristics);
+
+/*      if (hidden) {
+        for (j = 0;j < nb_state;j++) {
+          for (k = j + 1;k < nb_state;k++) {
+            if ((transition[j][k] > MIN_PROBABILITY) || (transition[k][j] > MIN_PROBABILITY)) {
+              sup_norm_dist[j][k] = nonparametric_process[i]->observation[j]->sup_norm_distance_computation(*(nonparametric_process[i]->observation[k]));
+              sup_norm_dist[k][j] = sup_norm_dist[j][k];
+            }
+          }
+        }
+      } */
     }
+
     else if (discrete_parametric_process[i]) {
       discrete_parametric_process[i]->spreadsheet_print(os , observation_dist ,
                                                         (seq ? seq->marginal_distribution[variable] : NULL));
+
+      if (hidden) {
+        for (j = 0;j < nb_state;j++) {
+          for (k = j + 1;k < nb_state;k++) {
+            if ((transition[j][k] > MIN_PROBABILITY) || (transition[k][j] > MIN_PROBABILITY)) {
+              sup_norm_dist[j][k] = discrete_parametric_process[i]->observation[j]->sup_norm_distance_computation(*(discrete_parametric_process[i]->observation[k]));
+              sup_norm_dist[k][j] = sup_norm_dist[j][k];
+            }
+          }
+        }
+      }
     }
+
     else {
       continuous_parametric_process[i]->spreadsheet_print(os , observation_histo , observation_dist ,
                                                           (seq ? seq->marginal_histogram[variable] : NULL) ,
                                                           (seq ? seq->marginal_distribution[variable] : NULL));
+
+      if (hidden) {
+        for (j = 0;j < nb_state;j++) {
+          for (k = j + 1;k < nb_state;k++) {
+            if ((transition[j][k] > MIN_PROBABILITY) || (transition[k][j] > MIN_PROBABILITY)) {
+              sup_norm_dist[j][k] = continuous_parametric_process[i]->observation[j]->sup_norm_distance_computation(*(continuous_parametric_process[i]->observation[k]));
+              sup_norm_dist[k][j] = sup_norm_dist[j][k];
+            }
+          }
+        }
+      }
+    }
+
+    if ((hidden) && ((discrete_parametric_process[i]) || (continuous_parametric_process[i]))) {
+      os << "\n" << SEQ_label[SEQL_OBSERVATION_DISTRIBUTION_DISTANCE] << endl;
+
+      for (j = 0;j < nb_state;j++) {
+        for (k = 0;k < nb_state;k++) {
+          if ((k != j) && (transition[j][k] > MIN_PROBABILITY)) {
+            os << sup_norm_dist[j][k];
+          }
+          os << "\t";
+        }
+        os << endl;
+      }
+
+      for (j = 0;j < nb_state;j++) {
+        delete [] sup_norm_dist[j];
+      }
+      delete [] sup_norm_dist;
     }
   }
 
