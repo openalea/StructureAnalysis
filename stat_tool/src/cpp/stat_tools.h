@@ -555,6 +555,8 @@ class Distribution {    // loi de probabilite discrete
     double first_difference_norm_computation() const;
     double second_difference_norm_computation() const;
 
+    double sup_norm_distance_computation(const Distribution &dist) const;
+
     double likelihood_computation(const Reestimation<int> &histo) const
     { return histo.likelihood_computation(*this); }
     double likelihood_computation(const Reestimation<double> &histo) const
@@ -1050,13 +1052,15 @@ public :
     int nb_parameter_computation() const;
 
     double von_mises_mass_computation(double inf , double sup) const;
-    void von_mises_cumul_computation();
     double mass_computation(double inf , double sup) const;
+    void von_mises_cumul_computation();
+
+    double sup_norm_distance_computation(ContinuousParametric &dist);
 
     double likelihood_computation(const FrequencyDistribution &histo , int min_interval) const
     { return histo.likelihood_computation(*this , min_interval); }
 
-    double simulation() const;
+    double simulation();
 };
 
 
