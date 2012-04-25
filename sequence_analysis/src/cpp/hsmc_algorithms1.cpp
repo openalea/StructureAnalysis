@@ -1481,10 +1481,16 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
 
               case GAMMA : {
                 for (j = 0;j < hsmarkov->nb_state;j++) {
-                  hsmarkov->continuous_parametric_process[i + 1]->observation[j]->location = observation_reestim[i][j]->mean * observation_reestim[i][j]->mean / observation_reestim[i][j]->variance;
-                  hsmarkov->continuous_parametric_process[i + 1]->observation[j]->dispersion = observation_reestim[i][j]->variance / observation_reestim[i][j]->mean;
+                  if (observation_reestim[i][j]->mean > GAMMA_MIN_MEAN) {
+                    hsmarkov->continuous_parametric_process[i + 1]->observation[j]->location = observation_reestim[i][j]->mean * observation_reestim[i][j]->mean / observation_reestim[i][j]->variance;
+                    hsmarkov->continuous_parametric_process[i + 1]->observation[j]->dispersion = observation_reestim[i][j]->variance / observation_reestim[i][j]->mean;
+                  }
+                  else {
+                    hsmarkov->continuous_parametric_process[i + 1]->observation[j]->location = GAMMA_MIN_SHAPE_PARAMETER;
+                    hsmarkov->continuous_parametric_process[i + 1]->observation[j]->dispersion = GAMMA_DEFAULT_SCALE_PARAMETER;
+                  }
 
-                  if ((hsmarkov->continuous_parametric_process[i + 1]->observation[j]->location >= GAMMA_MIN_SCALE_PARAMETER) &&
+                  if ((hsmarkov->continuous_parametric_process[i + 1]->observation[j]->location >= GAMMA_SCALE_PARAMETER_THRESHOLD) &&
                       (observation_reestim[i][j]->nb_element < GAMMA_FREQUENCY_THRESHOLD)) {
                     log_geometric_mean = observation_reestim[i][j]->log_geometric_mean_computation();
 
@@ -1680,10 +1686,16 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
 
             case GAMMA : {
               for (j = 0;j < hsmarkov->nb_state;j++) {
-                hsmarkov->continuous_parametric_process[i + 1]->observation[j]->location = mean[j] * mean[j] / variance[j];
-                hsmarkov->continuous_parametric_process[i + 1]->observation[j]->dispersion = variance[j] / mean[j];
+                if (mean[j] > GAMMA_MIN_MEAN) {
+                  hsmarkov->continuous_parametric_process[i + 1]->observation[j]->location = mean[j] * mean[j] / variance[j];
+                  hsmarkov->continuous_parametric_process[i + 1]->observation[j]->dispersion = variance[j] / mean[j];
+                }
+                else {
+                  hsmarkov->continuous_parametric_process[i + 1]->observation[j]->location = GAMMA_MIN_SHAPE_PARAMETER;
+                  hsmarkov->continuous_parametric_process[i + 1]->observation[j]->dispersion = GAMMA_DEFAULT_SCALE_PARAMETER;
+                }
 
-                if ((hsmarkov->continuous_parametric_process[i + 1]->observation[j]->location >= GAMMA_MIN_SCALE_PARAMETER) &&
+                if ((hsmarkov->continuous_parametric_process[i + 1]->observation[j]->location >= GAMMA_SCALE_PARAMETER_THRESHOLD) &&
                     (state_frequency[j] < GAMMA_FREQUENCY_THRESHOLD)) {
                   log_geometric_mean = 0.;
                   state_frequency[j] = 0.;
@@ -3431,8 +3443,14 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
 
               case GAMMA : {
                 for (j = 0;j < hsmarkov->nb_state;j++) {
-                  hsmarkov->continuous_parametric_process[i + 1]->observation[j]->location = observation_reestim[i][j]->mean * observation_reestim[i][j]->mean / observation_reestim[i][j]->variance;
-                  hsmarkov->continuous_parametric_process[i + 1]->observation[j]->dispersion = observation_reestim[i][j]->variance / observation_reestim[i][j]->mean;
+                  if (observation_reestim[i][j]->mean > GAMMA_MIN_MEAN) {
+                    hsmarkov->continuous_parametric_process[i + 1]->observation[j]->location = observation_reestim[i][j]->mean * observation_reestim[i][j]->mean / observation_reestim[i][j]->variance;
+                    hsmarkov->continuous_parametric_process[i + 1]->observation[j]->dispersion = observation_reestim[i][j]->variance / observation_reestim[i][j]->mean;
+                  }
+                  else {
+                    hsmarkov->continuous_parametric_process[i + 1]->observation[j]->location = GAMMA_MIN_SHAPE_PARAMETER;
+                    hsmarkov->continuous_parametric_process[i + 1]->observation[j]->dispersion = GAMMA_DEFAULT_SCALE_PARAMETER;
+                  }
                 }
                 break;
               }
@@ -3596,8 +3614,14 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
 
             case GAMMA : {
               for (j = 0;j < hsmarkov->nb_state;j++) {
-                hsmarkov->continuous_parametric_process[i + 1]->observation[j]->location = mean[j] * mean[j] / variance[j];
-                hsmarkov->continuous_parametric_process[i + 1]->observation[j]->dispersion = variance[j] / mean[j];
+                if (mean[j] > GAMMA_MIN_MEAN) {
+                  hsmarkov->continuous_parametric_process[i + 1]->observation[j]->location = mean[j] * mean[j] / variance[j];
+                  hsmarkov->continuous_parametric_process[i + 1]->observation[j]->dispersion = variance[j] / mean[j];
+                }
+                else {
+                  hsmarkov->continuous_parametric_process[i + 1]->observation[j]->location = GAMMA_MIN_SHAPE_PARAMETER;
+                  hsmarkov->continuous_parametric_process[i + 1]->observation[j]->dispersion = GAMMA_DEFAULT_SCALE_PARAMETER;
+                }
               }
               break;
             }
