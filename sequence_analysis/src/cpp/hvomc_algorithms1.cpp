@@ -1063,8 +1063,14 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_esti
 
               case GAMMA : {
                 for (j = 0;j < hmarkov->nb_state;j++) {
-                  hmarkov->continuous_parametric_process[i + 1]->observation[j]->location = observation_reestim[i][j]->mean * observation_reestim[i][j]->mean / observation_reestim[i][j]->variance;
-                  hmarkov->continuous_parametric_process[i + 1]->observation[j]->dispersion = observation_reestim[i][j]->variance / observation_reestim[i][j]->mean;
+                  if (observation_reestim[i][j]->mean > GAMMA_MIN_MEAN) {
+                    hmarkov->continuous_parametric_process[i + 1]->observation[j]->location = observation_reestim[i][j]->mean * observation_reestim[i][j]->mean / observation_reestim[i][j]->variance;
+                    hmarkov->continuous_parametric_process[i + 1]->observation[j]->dispersion = observation_reestim[i][j]->variance / observation_reestim[i][j]->mean;
+                  }
+                  else {
+                    hmarkov->continuous_parametric_process[i + 1]->observation[j]->location = GAMMA_MIN_SHAPE_PARAMETER;
+                    hmarkov->continuous_parametric_process[i + 1]->observation[j]->dispersion = GAMMA_DEFAULT_SCALE_PARAMETER;
+                  }
                 }
                 break;
               }
@@ -1229,8 +1235,14 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_esti
 
             case GAMMA : {
               for (j = 0;j < hmarkov->nb_state;j++) {
-                hmarkov->continuous_parametric_process[i + 1]->observation[j]->location = mean[j] * mean[j] / variance[j];
-                hmarkov->continuous_parametric_process[i + 1]->observation[j]->dispersion = variance[j] / mean[j];
+                if (mean[j] > GAMMA_MIN_MEAN) {
+                  hmarkov->continuous_parametric_process[i + 1]->observation[j]->location = mean[j] * mean[j] / variance[j];
+                  hmarkov->continuous_parametric_process[i + 1]->observation[j]->dispersion = variance[j] / mean[j];
+                }
+                else {
+                  hmarkov->continuous_parametric_process[i + 1]->observation[j]->location = GAMMA_MIN_SHAPE_PARAMETER;
+                  hmarkov->continuous_parametric_process[i + 1]->observation[j]->dispersion = GAMMA_DEFAULT_SCALE_PARAMETER;
+                }
               }
               break;
             }
@@ -2386,8 +2398,14 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_stoc
 
               case GAMMA : {
                 for (j = 0;j < hmarkov->nb_state;j++) {
-                  hmarkov->continuous_parametric_process[i + 1]->observation[j]->location = observation_reestim[i][j]->mean * observation_reestim[i][j]->mean / observation_reestim[i][j]->variance;
-                  hmarkov->continuous_parametric_process[i + 1]->observation[j]->dispersion = observation_reestim[i][j]->variance / observation_reestim[i][j]->mean;
+                  if (observation_reestim[i][j]->mean > GAMMA_MIN_MEAN) {
+                    hmarkov->continuous_parametric_process[i + 1]->observation[j]->location = observation_reestim[i][j]->mean * observation_reestim[i][j]->mean / observation_reestim[i][j]->variance;
+                    hmarkov->continuous_parametric_process[i + 1]->observation[j]->dispersion = observation_reestim[i][j]->variance / observation_reestim[i][j]->mean;
+                  }
+                  else {
+                    hmarkov->continuous_parametric_process[i + 1]->observation[j]->location = GAMMA_MIN_SHAPE_PARAMETER;
+                    hmarkov->continuous_parametric_process[i + 1]->observation[j]->dispersion = GAMMA_DEFAULT_SCALE_PARAMETER;
+                  }
                 }
                 break;
               }
@@ -2551,8 +2569,14 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_stoc
 
             case GAMMA : {
               for (j = 0;j < hmarkov->nb_state;j++) {
-                hmarkov->continuous_parametric_process[i + 1]->observation[j]->location = mean[j] * mean[j] / variance[j];
-                hmarkov->continuous_parametric_process[i + 1]->observation[j]->dispersion = variance[j] / mean[j];
+                if (mean[j] > GAMMA_MIN_MEAN) {
+                  hmarkov->continuous_parametric_process[i + 1]->observation[j]->location = mean[j] * mean[j] / variance[j];
+                  hmarkov->continuous_parametric_process[i + 1]->observation[j]->dispersion = variance[j] / mean[j];
+                }
+                else {
+                  hmarkov->continuous_parametric_process[i + 1]->observation[j]->location = GAMMA_MIN_SHAPE_PARAMETER;
+                  hmarkov->continuous_parametric_process[i + 1]->observation[j]->dispersion = GAMMA_DEFAULT_SCALE_PARAMETER;
+                }
               }
               break;
             }
