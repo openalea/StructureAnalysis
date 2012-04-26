@@ -555,7 +555,7 @@ class Distribution {    // loi de probabilite discrete
     double first_difference_norm_computation() const;
     double second_difference_norm_computation() const;
 
-    double sup_norm_distance_computation(const Distribution &dist) const;
+    double overlap_distance_computation(const Distribution &dist) const;
 
     double likelihood_computation(const Reestimation<int> &histo) const
     { return histo.likelihood_computation(*this); }
@@ -705,6 +705,8 @@ public :
     double parametric_variance_computation() const;
     double parametric_skewness_computation() const;
     double parametric_kurtosis_computation() const;
+
+    double sup_norm_distance_computation(const DiscreteParametric &dist) const;
 
     void computation(int min_nb_value = 1 ,
                      double cumul_threshold = CUMUL_THRESHOLD);
