@@ -390,8 +390,11 @@ ostream& ContinuousParametric::ascii_characteristic_print(ostream &os , bool fil
   switch (ident) {
 
   case GAMMA : {
+    double variance = location * dispersion * dispersion;
+
     os << STAT_label[STATL_MEAN] << ": " << location * dispersion << "   "
-       << STAT_label[STATL_VARIANCE] << ": " << location * dispersion * dispersion << endl;
+       << STAT_label[STATL_VARIANCE] << ": " << variance << "   "
+       << STAT_label[STATL_STANDARD_DEVIATION] << ": " << sqrt(variance) << endl;
 
     if (file_flag) {
       os << "# ";
@@ -768,8 +771,11 @@ ostream& ContinuousParametric::spreadsheet_characteristic_print(ostream &os) con
   switch (ident) {
 
   case GAMMA : {
+    double variance = location * dispersion * dispersion;
+
     os << STAT_label[STATL_MEAN] << "\t" << location * dispersion << "\t"
-       << STAT_label[STATL_VARIANCE] << "\t" << location * dispersion * dispersion << endl;
+       << STAT_label[STATL_VARIANCE] << "\t" << variance << "\t"
+       << STAT_label[STATL_STANDARD_DEVIATION] << "\t" << sqrt(variance) << endl;
 
     os << STAT_label[STATL_SKEWNESS_COEFF] << "\t" << 2 / sqrt(location) << "\t"
        << STAT_label[STATL_KURTOSIS_COEFF] << "\t" << 6 / location << endl;
