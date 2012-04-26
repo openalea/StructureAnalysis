@@ -2897,54 +2897,23 @@ double Distribution::concentration_computation() const
 
 /*--------------------------------------------------------------*
  *
- *  Calcul de la distance entre deux lois discretes (sup de la difference
- *  absolue des fonctions de repartition dans le cas de fonctions de repartition
- *  ne se croisant pas; sinon somme des sup avant et apres croisement
- *  de la difference des fonctions de repartition).
+ *  Calcul de la distance entre deux lois discretes (1 - recouvrement entre les 2 lois).
  *
  *--------------------------------------------------------------*/
 
-double Distribution::sup_norm_distance_computation(const Distribution &dist) const
+double Distribution::overlap_distance_computation(const Distribution &dist) const
 
 {
-  bool crossing;
   register int i;
-  int inf;
-  double buff , distance , max_absolute_diff;
-
-
-  distance = 0.;
-  inf = MAX(offset , dist.offset);
-  max_absolute_diff = fabs(cumul[inf] - dist.cumul[inf]);
-  crossing = false;
-
-  for (i = inf + 1;i < MIN(nb_value , dist.nb_value);i++) {
-    buff = fabs(cumul[i] - dist.cumul[i]);
-    if (buff > max_absolute_diff) {
-      max_absolute_diff = buff;
-    }
-
-    if ((!crossing) && (((cumul[i] > dist.cumul[i]) && (cumul[i - 1] <= dist.cumul[i - 1])) ||
-        ((cumul[i] <= dist.cumul[i]) && (cumul[i - 1] > dist.cumul[i - 1])))) {
-      crossing = true;
-      distance = max_absolute_diff;
-      max_absolute_diff = 0.;
-    }
-  }
-  distance += max_absolute_diff;
-
-# ifdef DEBUG
   double overlap;
 
+
   overlap = 0.;
-  for (i = inf;i < MIN(nb_value , dist.nb_value);i++) {
+  for (i = MAX(offset , dist.offset);i < MIN(nb_value , dist.nb_value);i++) {
     overlap += MIN(mass[i] , dist.mass[i]);
   }
 
-  cout << "\nSup norm distance: " << distance << " " << 1. - overlap << endl;
-# endif
-
-  return distance;
+  return (1. - overlap);
 }
 
 
