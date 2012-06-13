@@ -73,7 +73,7 @@ struct RWQueue : public std::queue<T>
  typedef typename std::queue<T>::const_reference const_reference;
 #endif
   bool isEmpty() const { return this->empty();}
-  size_t entries() const { return this->size();}
+  std::size_t entries() const { return this->size();}
 #ifndef WIN32_STL_EXTENSION
   const_reference first () const { return this->front();}
   const_reference last () const { return this->back();}
