@@ -1,3 +1,21 @@
+vplants-stattool (1.0.1~ppa1) precise; urgency=low
+
+  *  Release 1.0 on precise  
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Sun, 25 Mar 2012 16:33:05 +0200
+
+vplants-stattool (1.0.0b2~ppa1) oneiric; urgency=low
+
+  * Fix vplants and openalea namespace 
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Fri, 06 Jan 2012 17:17:15 +0100
+
+vplants-stattool (1.0.0b1~ppa1) oneiric; urgency=low
+
+  * Release 1.0
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Tue, 06 Dec 2011 10:42:42 +0100
+
 vplants-stattool (0.9.0-1~ppa2) lucid; urgency=low
 
   * add a binary dependency on libvplants-tool 
