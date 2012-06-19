@@ -1,3 +1,33 @@
+vplants-sequenceanalysis (1.0.1~ppa1) precise; urgency=low
+
+  *  Release 1.0 on precise  
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Sun, 25 Mar 2012 16:33:12 +0200
+
+vplants-sequenceanalysis (1.0.0b2~ppa4) oneiric; urgency=low
+
+  * Upload to oneiric 
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Fri, 13 Jan 2012 10:03:40 +0100
+
+vplants-sequenceanalysis (1.0.0b2~ppa3) natty; urgency=low
+
+  * Remove egg dependencies on Ubuntu
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Thu, 12 Jan 2012 09:30:25 +0100
+
+vplants-sequenceanalysis (1.0.0b2~ppa1) oneiric; urgency=low
+
+  * Fix Vplants and openalea namespace 
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Fri, 06 Jan 2012 17:17:21 +0100
+
+vplants-sequenceanalysis (1.0.0b1~ppa1) oneiric; urgency=low
+
+  * Release 1.0
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Tue, 06 Dec 2011 10:44:47 +0100
+
 vplants-sequenceanalysis (0.9.0-1~ppa2) lucid; urgency=low
 
   * update binary dependencies 

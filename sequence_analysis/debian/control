@@ -2,8 +2,8 @@ Source: vplants-sequenceanalysis
 Maintainer: Christophe Pradal <christophe.pradal@cirad.fr>
 Section: python
 Priority: optional
-Build-Depends: python-setuptools (>= 0.6b3), python-all-dev, debhelper (>= 7), python-support (>= 0.8.4), libvplants-tool, python-vplants.stattool, python-openalea.deploy, python-openalea.sconsx, libqt4-dev, libqt4-opengl-dev, libboost-python-dev, libreadline-dev, pkg-config
-Standards-Version: 3.8.4
+Build-Depends: python-setuptools (>= 0.6b3), python-dev, debhelper (>= 7), python-support (>= 0.8.4), libvplants-tool, python-vplants.stattool, python-openalea.deploy, python-openalea.sconsx, libqt4-dev, libqt4-opengl-dev, libboost-python-dev, libreadline-dev, pkg-config
+Standards-Version: 3.9.1
 
 Package: python-vplants.sequenceanalysis
 Architecture: any
