@@ -17,7 +17,7 @@ scons_parameters=["build_prefix="+build_prefix]
 # platform dependencies
 install_requires = []
 if sys.platform == 'win32':
-    install_requires.append(binary_deps("boostpython"))
+    install_requires.append(binary_deps("boost"))
 
 setup_requires = ['openalea.deploy']
 
@@ -25,7 +25,7 @@ setup_requires = ['openalea.deploy']
 if __name__ == '__main__':
     
     setup(name='VPlants.Tree_Matching2',
-          version='0.6.2',
+          version='1.0.0',
           author='Pascal Ferraro, Aida Ouangraoua',
           description='Tree matching library',
           url='',
@@ -37,7 +37,7 @@ if __name__ == '__main__':
           scons_parameters=scons_parameters,
         
           # Packages
-          #namespace_packages = ["openalea"],
+          namespace_packages = ["openalea"],
           #create_namespaces = True,
           
           # pure python  packages
