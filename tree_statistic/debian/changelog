@@ -1,3 +1,21 @@
+vplants-treestatistic (1.0.1~ppa1) precise; urgency=low
+
+  *  Release 1.0 on precise  
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Sun, 25 Mar 2012 16:33:55 +0200
+
+vplants-treestatistic (1.0.0b2~ppa1) oneiric; urgency=low
+
+  * Fix Vplants and openalea namespace 
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Fri, 06 Jan 2012 17:18:16 +0100
+
+vplants-treestatistic (1.0.0b1~ppa1) oneiric; urgency=low
+
+  * Release
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Tue, 06 Dec 2011 10:52:10 +0100
+
 vplants-treestatistic (0.9.0-1~ppa2) lucid; urgency=low
 
   * Add build dependencies to fix build error 

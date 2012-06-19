@@ -19,6 +19,8 @@ scons_parameters=["build_prefix="+build_prefix]
 
 # platform dependencies
 install_requires = ['vplants.aml','vplants.tree']
+# Remove egg dependencies on ubuntu
+install_requires = []
 setup_requires = install_requires + ['openalea.deploy']
           
 packages=[namespace,
