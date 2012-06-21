@@ -108,7 +108,7 @@ public:
     int nb_variable_int = 0;
     int index_int=0, index_float=0;
     boost::python::list sequences = extract<boost::python::list> (input_sequences);
-    
+
 
     lengths = new int[nb_sequences];
     identifiers = new int[nb_identifiers];
@@ -118,7 +118,7 @@ public:
 
 
     //cout << "allocate memory and set values of index_parameters"<<endl;
-    // allocate memory for index_parameters 
+    // allocate memory for index_parameters
     for (int iseq; iseq<nb_sequences; iseq++)
     {
         boost::python::list sequence = extract<boost::python::list> (input_sequences[iseq]);
@@ -177,8 +177,8 @@ public:
 
 
     // get the list of sequences, assuming that input format is [ [ [1,1], [2,4] ], [ [1,4] ,[4,7] , [8,9]] ]
-    // the most inner level being vectors of same length (2 variables here), the middle level being 
-    // the sequences of vectors, which may have different lengths (first sequence of length 2 and second of 
+    // the most inner level being vectors of same length (2 variables here), the middle level being
+    // the sequences of vectors, which may have different lengths (first sequence of length 2 and second of
     // length 3).
 
     // allocate memory
@@ -215,14 +215,14 @@ public:
         for (int kk=0; kk<nb_variable_float; kk++)
             real_sequences[iseq][kk] = new double[nb_vectors];
         // fill the sequences lengths
-        lengths[iseq] = len(sequence); 
+        lengths[iseq] = len(sequence);
         //look at the first vector to get the length and therefore number of variables
         boost::python::list vector = extract<boost::python::list> (sequence[0]);
         nb_variables = len(vector);
         vertex_identifiers[iseq] = new int[nb_vectors];
         for (int ivec = 0; ivec < nb_vectors; ivec++)
         {
-  
+
             boost::python::list vector = extract<boost::python::list> (sequence[ivec]);
             //cout << "length vector" << ivec << "="<< len(vector)<< " and expected is "<<  nb_variables <<endl;
             vertex_identifiers[iseq][ivec] = extract<int>(vertex[ivec]);
@@ -275,7 +275,7 @@ public:
     if (real_sequences)
     {
 
-      
+
       for (int i = 0; i < nb_sequences; i++)
       {
         if (nb_variable_float>0)
@@ -344,12 +344,12 @@ public:
   {
 
     // case 1 list of n lists of floats (only 1 variable and different sizes possible):
-    //			seq = Sequences([ [1,1,1], [2,2,2,2,2]])
+    //          seq = Sequences([ [1,1,1], [2,2,2,2,2]])
     //
     // case 2 list of n lists (different sizes) of variables (same size)
-    //			seq = Sequences([ [ [1,1,1], [11,11,11] ],
-    //							  [ [2,2,2,2,2], [22,22,22,22,22] ]
-    //  						])
+    //          seq = Sequences([ [ [1,1,1], [11,11,11] ],
+    //                            [ [2,2,2,2,2], [22,22,22,22,22] ]
+    //                          ])
 
     // the length of the main lists to get the number of sequences
     int nb_sequences = boost::python::len(input_list);
@@ -900,7 +900,7 @@ public:
     std::ostringstream os;
 
     ret = input.length_select(error, os,
-		min_length, max_length, keep);
+        min_length, max_length, keep);
     if (!ret)
       sequence_analysis::wrap_util::throw_error(error);
     cout << os.str() << endl;
@@ -954,6 +954,26 @@ public:
   }
 
   static double
+  get_index_parameter(const Sequences &seq, int iseq, int index)
+  {
+    if (iseq < 0 || iseq >= seq.get_nb_sequence())
+      {
+        PyErr_SetString(PyExc_IndexError,
+            "id of sequence must be positive and less than number of sequences");
+        boost::python::throw_error_already_set();
+      }
+
+    if (index < 0 || index >= seq.get_length(iseq))
+      {
+        PyErr_SetString(PyExc_IndexError,
+            "index must be positive and less than sequence length");
+        boost::python::throw_error_already_set();
+      }
+
+    return seq.get_index_parameter(iseq, index);
+  }
+
+  static double
   get_max_value(const Sequences &seq, int variable)
   {
     if (variable < 0 || variable >= seq.get_nb_variable())
@@ -999,7 +1019,7 @@ public:
     std::ostringstream os;
 
     ret = input.index_parameter_select(error,  os,
-		min_index_parameter, max_index_parameter, keep);
+        min_index_parameter, max_index_parameter, keep);
     if (!ret)
       sequence_analysis::wrap_util::throw_error(error);
     cout << os.str() << endl;
@@ -1435,6 +1455,7 @@ class_sequences()
    .def("file_ascii_write", SequencesWrap::file_ascii_write,"Save vector summary into a file")
    .def("file_ascii_data_write", SequencesWrap::file_ascii_data_write,"Save vector data into a file")
 
+   .def("get_index_parameter", SequencesWrap::get_index_parameter,args("iseq", "index"), "return index")
 
    DEF_RETURN_VALUE("alignment_vector_distance", SequencesWrap::alignment_vector_distance, args(""), "todo")
    DEF_RETURN_VALUE("alignment", SequencesWrap::alignment, args(""), "todo")
@@ -1498,9 +1519,9 @@ class_sequences()
 
 /*
  Sequences(int inb_sequence , int inb_variable);
- Sequences(int inb_sequence , int *iidentifier , int *ilength , int iindex_parameter_type ,	              int inb_variable , int *itype , bool init_flag = false)	    { init(inb_sequence , iidentifier , ilength , iindex_parameter_type , inb_variable ,	           itype , init_flag); }
- Sequences(int inb_sequence , int *iidentifier , int *ilength , int inb_variable , int *itype , bool init_flag = false){ init(inb_sequence , iidentifier , ilength , IMPLICIT_TYPE , inb_variable ,	           itype , init_flag); }
- Sequences(int inb_sequence , int *iidentifier , int *ilength , int inb_variable ,  bool init_flag = false)	    { init(inb_sequence , iidentifier , ilength , inb_variable , init_flag); }
+ Sequences(int inb_sequence , int *iidentifier , int *ilength , int iindex_parameter_type ,               int inb_variable , int *itype , bool init_flag = false)       { init(inb_sequence , iidentifier , ilength , iindex_parameter_type , inb_variable ,               itype , init_flag); }
+ Sequences(int inb_sequence , int *iidentifier , int *ilength , int inb_variable , int *itype , bool init_flag = false){ init(inb_sequence , iidentifier , ilength , IMPLICIT_TYPE , inb_variable ,            itype , init_flag); }
+ Sequences(int inb_sequence , int *iidentifier , int *ilength , int inb_variable ,  bool init_flag = false)     { init(inb_sequence , iidentifier , ilength , inb_variable , init_flag); }
  Sequences(const FrequencyDistribution &ihlength , int inb_variable , bool init_flag = false);
  Sequences(const Sequences &seq , int inb_sequence , int *index);
  Sequences(const Sequences &seq , bool *segment_mean);
