@@ -57,7 +57,7 @@ int main(void)
    std::vector<HiddenMarkovTreeData*> tree_list;
 
    // read and print a hidden Markov out tree
-   hmot= hidden_markov_out_tree_ascii_read(error, hmotpath);
+   hmot = hidden_markov_ind_out_tree_ascii_read(error, hmotpath);
    cout << error;
 
    if (hmot != NULL)
