@@ -134,6 +134,16 @@ protected :
                       int index= I_DEFAULT) const;
                       // should be const double *** const marginal_prob, etc
 
+   double upward_step_norm(const HiddenMarkovTreeData& trees,
+                           double_array_3d& upward_prob,
+                           double_array_3d& upward_parent_prob,
+                           double_array_3d& state_entropy,
+                           double_array_2d& norm,
+                           double_array_3d marginal_prob,
+                           double_array_3d output_cond_prob,
+                           double& entropy1,
+                           int index) const;
+
    /**Compute the state posterior probabilities,
       the state posterior probabilities,
       and the state tree process entropy - loglikelihood*/
@@ -392,8 +402,8 @@ public :
                                                 int index= I_DEFAULT,
                                                 int entropy_algo= UPWARD) const;
 
-   /** Compute the nb_state_trees best state trees starting under some vertex */
-
+   /** Compute the nb_state_trees best state trees starting under some vertex
+       \todo: ensure that likelihood is that of subtree, at call. */
    HiddenMarkovTreeData* generalized_viterbi_subtree(const HiddenMarkovTreeData& trees,
                                                      std::vector<ostringstream*>& messages,
                                                      int nb_state_trees,

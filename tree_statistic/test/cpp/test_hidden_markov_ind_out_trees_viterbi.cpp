@@ -31,6 +31,10 @@ int main(void)
    typedef HiddenMarkovTreeData::tree_type tree_type;
    typedef HiddenMarkovTreeData::key key;
    typedef HiddenMarkovTreeData::value value;
+   typedef HiddenMarkovTree::double_array_2d double_array_2d;
+   typedef HiddenMarkovTree::double_array_3d double_array_3d;
+   typedef tree_type::vertex_descriptor vd;
+
    typedef generic_visitor<tree_type> visitor;
    typedef visitor::vertex_array vertex_array;
 
@@ -57,7 +61,7 @@ int main(void)
    std::vector<HiddenMarkovTreeData*> tree_list;
 
    // read and print a hidden Markov out tree
-   hmot= hidden_markov_ind_out_tree_ascii_read(error, hmotpath);
+   hmot = hidden_markov_ind_out_tree_ascii_read(error, hmotpath);
    cout << error;
 
    if (hmot != NULL)
@@ -353,6 +357,61 @@ int main(void)
       // Test of the generalized Viterbi algorithm
       // on subtrees
       vid= 1;
+      hmot->state_profile(error, *hmtd, tid, smoothed, hmtdv,
+                          vud, generalized, messages,
+                          GENERALIZED_VITERBI, 5,
+                          UPWARD, vid);
+      cout << error << endl;
+      ptrees= new state_tree_type*[1];
+
+      if (smoothed != NULL)
+      {
+         delete messages[cptm];
+         messages[cptm++]= NULL;
+         delete messages[cptm];
+         messages[cptm++]= NULL;
+         delete messages[cptm];
+         messages[cptm++]= NULL;
+         delete smoothed;
+         smoothed= NULL;
+      }
+      if (vud != NULL)
+      {
+         delete messages[cptm];
+         messages[cptm++]= NULL;
+         delete messages[cptm];
+         messages[cptm++]= NULL;
+         delete vud;
+         vud= NULL;
+      }
+
+      if (generalized != NULL)
+      {
+         cout << endl
+              << "Generalized viterbi started at vertex "
+              << vid << ": " << endl;
+         cout << messages[cptm]->str();
+         delete messages[cptm];
+         messages[cptm++]= NULL;
+         potrees= new tree_type*[1];
+         potrees[0]= generalized->get_tree(0);
+         potrees[0]->display(cout, 0);
+         cout << endl;
+         delete potrees[0];
+         potrees[0]= NULL;
+
+         cout << messages[cptm]->str();
+         delete messages[cptm];
+         messages[cptm++]= NULL;
+         delete generalized;
+         generalized= NULL;
+         delete [] potrees;
+         potrees= NULL;
+      }
+      // Test of the generalized Viterbi algorithm
+      // on subtrees
+
+      vid= 2;
       hmot->state_profile(error, *hmtd, tid, smoothed, hmtdv,
                           vud, generalized, messages,
                           GENERALIZED_VITERBI, 5,

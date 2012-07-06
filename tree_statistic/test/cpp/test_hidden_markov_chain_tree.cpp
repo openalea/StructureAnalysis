@@ -61,7 +61,7 @@ int main(void)
 
 
    // reading and printing of a hidden Markov out tree
-   hmotref= hidden_markov_ind_out_tree_ascii_read(error, hmotrefpath);
+   hmotref = hidden_markov_ind_out_tree_ascii_read(error, hmotrefpath);
    cout << error;
 
    if (hmotref != NULL)

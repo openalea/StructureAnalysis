@@ -84,12 +84,12 @@ double HiddenMarkovIndOutTree::likelihood_computation(const Trees& otrees,
 
    assert(index < otrees.get_nb_trees());
    if (index == I_DEFAULT)
-      sotrees= new Trees(otrees);
+      sotrees = new Trees(otrees);
    else
    {
-      iindividual= new int[1];
-      iindividual[0]= index;
-      sotrees= otrees.select_individual(error, 1, iindividual, true);
+      iindividual = new int[1];
+      iindividual[0] = index;
+      sotrees = otrees.select_individual(error, 1, iindividual, true);
       if (sotrees == NULL)
          return D_INF;
    }
@@ -374,10 +374,16 @@ bool HiddenMarkovIndOutTree::state_profile(StatError& error,
                                            int entropy_algo,
                                            int root) const
 {
+   typedef HiddenMarkovTreeData::tree_type tree_type;
+   typedef tree_type::vertex_descriptor vid;
+   typedef generic_visitor<tree_type> visitor;
+   typedef visitor::vertex_array vertex_array;
+
    bool status= true;
+   const int nb_trees = trees._nb_trees;
    int iroot;
    long double nb_possible_state_trees;
-   double likelihood, hidden_likelihood, state_likelihood;
+   double likelihood, hidden_likelihood, state_likelihood, partial_likelihood;
           // ambiguity;
    ostringstream *m;
    std::deque<int> *path= NULL;
@@ -387,7 +393,7 @@ bool HiddenMarkovIndOutTree::state_profile(StatError& error,
 
    error.init();
 
-   if ((index >= trees._nb_trees) || (index < 0))
+   if ((index >= nb_trees) || (index < 0))
    {
       // index cannot be I_DEFAULT in this context
       status= false;
@@ -481,11 +487,106 @@ bool HiddenMarkovIndOutTree::state_profile(StatError& error,
          messages.push_back(m);
       }
 
-      generalized_restoration= hmarkov->generalized_viterbi_subtree(*cptrees,
-                                                                    messages,
-                                                                    nb_state_trees,
-                                                                    likelihood,
-                                                                    index, iroot);
+      if (iroot != I_DEFAULT)
+      {
+         // compute loglikelihood on subtree
+         register int t, j;
+         double likelihood2, entropy1;
+         HiddenMarkovTreeData::int_array iindividual;
+         double_array_3d state_marginal = NULL, output_cond = NULL,
+                         upward_prob = NULL, upward_parent_prob = NULL,
+                         state_entropy = NULL;
+         double_array_2d norm = NULL;
+         StatError error;
+         unsigned int current_size, u;
+         vid cnode; // current node;
+         Typed_edge_int_fl_tree<Int_fl_container> *current_tree;
+         visitor *v;
+         vertex_array va;
+
+         assert(index < trees.get_nb_trees());
+
+         state_marginal_distribution(*cptrees, state_marginal);
+         output_conditional_distribution(*cptrees, output_cond);
+
+         likelihood2 = upward_step_norm(*cptrees, upward_prob, upward_parent_prob,
+                                        state_entropy, norm, state_marginal, output_cond,
+                                        entropy1, index);
+         assert((abs(likelihood-likelihood2)/likelihood) < 1e-10);
+
+         partial_likelihood = 0.0;
+
+         for(t = 0; t < nb_trees; t++)
+            if ((index == I_DEFAULT) || (index == t))
+            {
+               current_tree = cptrees->trees[t];
+               v = new generic_visitor<tree_type>;
+               traverse_tree(iroot, *current_tree, *v);
+               va = v->get_postorder(*current_tree);
+               delete v;
+               current_size = va.size();
+
+               for(u = 0; u < current_size; u++)
+               {
+                  cnode = va[u];
+                  if (norm[t][cnode] > 0)
+                     partial_likelihood += log(norm[t][cnode]);
+                  else
+                     partial_likelihood = D_INF;
+               }
+            }
+
+         for(t = 0; t < cptrees->get_nb_trees(); t++)
+            if ((index == I_DEFAULT) || (t == index))
+            {
+               for(j = 0; j < nb_state; j++)
+               {
+                  delete [] state_marginal[t][j];
+                  state_marginal[t][j]= NULL;
+                  delete [] output_cond[t][j];
+                  output_cond[t][j]= NULL;
+                  delete [] upward_prob[t][j];
+                  upward_prob[t][j]= NULL;
+                  delete [] upward_parent_prob[t][j];
+                  upward_parent_prob[t][j]= NULL;
+                  delete [] state_entropy[t][j];
+                  state_entropy[t][j]= NULL;
+               }
+
+               delete [] state_marginal[t];
+               state_marginal[t]= NULL;
+               delete [] output_cond[t];
+               output_cond[t]= NULL;
+               delete [] upward_prob[t];
+               upward_prob[t]= NULL;
+               delete [] upward_parent_prob[t];
+               upward_parent_prob[t]= NULL;
+               delete [] state_entropy[t];
+               state_entropy[t]= NULL;
+               delete [] norm[t];
+               norm[t] = NULL;
+            }
+
+         delete [] state_marginal;
+         state_marginal= NULL;
+         delete [] output_cond;
+         output_cond= NULL;
+         delete [] upward_prob;
+         upward_prob= NULL;
+         delete [] upward_parent_prob;
+         upward_parent_prob= NULL;
+         delete [] state_entropy;
+         state_entropy= NULL;
+         delete [] norm;
+
+      }
+      else
+          partial_likelihood = likelihood;
+      generalized_restoration = hmarkov->generalized_viterbi_subtree(*cptrees,
+                                                                     messages,
+                                                                     nb_state_trees,
+                                                                     partial_likelihood,
+                                                                     index, iroot);
 
 /*
       generalized_restoration= hmarkov->generalized_viterbi(*cptrees,
@@ -1466,7 +1567,6 @@ double** HiddenMarkovIndOutTree::state_marginal_distribution(const Trees& trees,
  *  compute the entropy of the state tree and subtree processes.
  *
  **/
-
 double HiddenMarkovIndOutTree::upward_step(const HiddenMarkovTreeData& trees,
                                            double_array_3d& upward_prob,
                                            double_array_3d& upward_parent_prob,
@@ -1475,6 +1575,48 @@ double HiddenMarkovIndOutTree::upward_step(const HiddenMarkovTreeData& trees,
                                            double_array_3d output_cond_prob,
                                            double& entropy1,
                                            int index) const
+{
+   const int nb_trees= trees._nb_trees;
+   int t;
+   double_array_2d norm = NULL;
+   double likelihood = upward_step_norm(trees, upward_prob, upward_parent_prob,
+                                        state_entropy, norm, marginal_prob,
+                                        output_cond_prob, entropy1, index);
+   for(t = 0; t < nb_trees; t++)
+      if ((index == I_DEFAULT) || (index == t))
+      {
+         delete [] norm[t];
+         norm[t] = NULL;
+      }
+   delete [] norm;
+   norm = NULL;
+   return likelihood;
+}
+
+/*****************************************************************
+ *
+ *  Upward step of the upward-downward algorithm
+ *  for HiddenMarkovIndOutTree class
+ *  using a HiddenMarkovTreeData object,
+ *  the upward probabilities (stored as a byproduct),
+ *  the marginal and the output conditional distributions
+ *  and the index of considered tree
+ *  Return the log-likelihood;
+ *  compute the normalizing factors and
+ *  the entropy of the state tree and subtree processes.
+ *
+ **/
+
+double HiddenMarkovIndOutTree::upward_step_norm(const HiddenMarkovTreeData& trees,
+                                                double_array_3d& upward_prob,
+                                                double_array_3d& upward_parent_prob,
+                                                double_array_3d& state_entropy,
+                                                double_array_2d& norm,
+                                                double_array_3d marginal_prob,
+                                                double_array_3d output_cond_prob,
+                                                double& entropy1,
+                                                int index) const
+
 {
    typedef HiddenMarkovTreeData::tree_type tree_type;
    typedef tree_type::vertex_descriptor vid;
@@ -1486,7 +1628,6 @@ double HiddenMarkovIndOutTree::upward_step(const HiddenMarkovTreeData& trees,
    unsigned int current_size, u;
    register int k, j;
    vid cnode; // current node;
-   double_array_2d norm= new double*[nb_trees];
    Typed_edge_int_fl_tree<Int_fl_container> *current_tree;
    children_iterator ch_it, ch_end;
    visitor *v;
@@ -1527,13 +1668,20 @@ double HiddenMarkovIndOutTree::upward_step(const HiddenMarkovTreeData& trees,
       for(t= 0; t < nb_trees; t++)
          state_entropy[t]= NULL;
    }
+   if (norm == NULL)
+   {
+      norm = new double*[nb_trees];
+      for(t = 0; t < nb_trees; t++)
+         norm[t] = NULL;
+   }
 
    for(t= 0; t < nb_trees; t++)
       if ((index == I_DEFAULT) || (index == t))
       {
          current_tree= trees.trees[t];
          current_size= current_tree->get_size();
-         norm[t]= new double[current_size];
+         if (norm[t] == NULL)
+            norm[t] = new double[current_size];
 
          if (upward_prob[t] == NULL)
          {
@@ -1670,11 +1818,7 @@ double HiddenMarkovIndOutTree::upward_step(const HiddenMarkovTreeData& trees,
             if (upward_prob[t][j][cnode] > 0)
                entropy1+= upward_prob[t][j][cnode]
                   * (state_entropy[t][j][cnode] - log(upward_prob[t][j][cnode]));
-         delete [] norm[t];
-         norm[t]= NULL;
       } // end for t
-   delete [] norm;
-   norm= NULL;
    return res;
 }
 
@@ -3468,14 +3612,14 @@ long double HiddenMarkovIndOutTree::nb_state_trees(const HiddenMarkovTreeData& t
 
 HiddenMarkovTreeData*
 HiddenMarkovIndOutTree::viterbi_upward_downward(const HiddenMarkovTreeData& trees,
-                                             std::vector<ostringstream*>& messages,
-                                             double likelihood,
-                                             double& state_tree_likelihood,
-                                             std::deque<int>*& path,
-                                             int index,
-                                             std::ostream* os,
-                                             char format,
-                                             int vertex) const
+                                                std::vector<ostringstream*>& messages,
+                                                double likelihood,
+                                                double& state_tree_likelihood,
+                                                std::deque<int>*& path,
+                                                int index,
+                                                std::ostream* os,
+                                                char format,
+                                                int vertex) const
 {
    typedef HiddenMarkovTreeData::tree_type tree_type;
    typedef tree_type::vertex_descriptor vid;
@@ -3903,16 +4047,19 @@ HiddenMarkovIndOutTree::viterbi_upward_downward(const HiddenMarkovTreeData& tree
 /*****************************************************************
  *
  *  Generalized Viterbi algorithm for HiddenMarkovIndOutTrees.
- *  Applies generalized_viterbi on a subtree
+ *  Applies generalized_viterbi on a subtree,  using the number of
+ *  trees to compute, the log-likelihood, the tree index,
+ *  and the state at root vertex if known. 1 message is produced
+ *  \todo: ensure that likelihood is that of subtree, at call.
  *
  **/
 
 HiddenMarkovTreeData*
 HiddenMarkovIndOutTree::generalized_viterbi_subtree(const HiddenMarkovTreeData& trees,
-                                                 std::vector<ostringstream*>& messages,
-                                                 int nb_state_trees,
-                                                 double likelihood,
-                                                 int index, int root) const
+                                                    std::vector<ostringstream*>& messages,
+                                                    int nb_state_trees,
+                                                    double likelihood,
+                                                    int index, int root) const
 {
    typedef HiddenMarkovTreeData::tree_type tree_type;
    typedef tree_type::vertex_descriptor vid;
@@ -3951,17 +4098,18 @@ HiddenMarkovIndOutTree::generalized_viterbi_subtree(const HiddenMarkovTreeData& 
    hmarkov->log_computation();
    cp_trees->build_state_trees();
 
-   // Viterbi algorithm on the whole tree
    hmarkov->viterbi(*cp_trees, index);
    if (root == I_DEFAULT)
-      croot= trees.trees[index]->root();
+      // Viterbi algorithm on the whole tree
+      croot = trees.trees[index]->root();
    else
-      croot= root;
+      croot = root;
    // optimal value at root vertex
    if (root != I_DEFAULT)
-      sroot= cp_trees->state_trees[index]->get(trees.trees[index]->parent(croot)).Int();
+      sroot = cp_trees->state_trees[index]->get(trees.trees[index]->parent(croot)).Int();
    else
-      sroot= cp_trees->state_trees[index]->get(croot).Int();
+      sroot = I_DEFAULT;
+   //   sroot= cp_trees->state_trees[index]->get(croot).Int();
    sub_trees= trees.select_subtrees(error, croot, index);
 
    // build correspondance table between the vids of both trees
@@ -3996,8 +4144,10 @@ HiddenMarkovIndOutTree::generalized_viterbi_subtree(const HiddenMarkovTreeData& 
 
    hmt_sub_trees->build_state_trees();
 
+   // likelihood of subtree should be computed.
    res_trees= hmarkov->generalized_viterbi(*hmt_sub_trees, messages, nb_state_trees,
-                                           likelihood, index,  sroot);
+                                           likelihood, index, sroot);
+
    _nb_integral= res_trees->get_nb_int();
    i.reset(_nb_integral, 0);
 
@@ -4080,16 +4230,17 @@ HiddenMarkovIndOutTree::generalized_viterbi_subtree(const HiddenMarkovTreeData& 
  *  Generalized Viterbi algorithm for HiddenMarkovIndOutTrees.
  *  Compute the nb_state_trees best trees associated with
  *  the given trees, using the likelihood, the tree index,
- *  and the state at root vertex if known. 1 message is produced
+ *  and the state at root vertex if known (I_DEFAULT if unknown).
+ *  1 message is produced
  *
  **/
 
 HiddenMarkovTreeData*
 HiddenMarkovIndOutTree::generalized_viterbi(const HiddenMarkovTreeData& trees,
-                                         std::vector<ostringstream*>& messages,
-                                         int nb_state_trees,
-                                         double likelihood,
-                                         int index, int state_root) const
+                                            std::vector<ostringstream*>& messages,
+                                            int nb_state_trees,
+                                            double likelihood,
+                                            int index, int state_root) const
 {
    typedef HiddenMarkovTreeData::tree_type tree_type;
    typedef tree_type::vertex_descriptor vid;
@@ -4114,7 +4265,9 @@ HiddenMarkovIndOutTree::generalized_viterbi(const HiddenMarkovTreeData& trees,
        combination, cp_combination, max_combination, next_max_combination;
    vid cnode, pnode; // current and parent vertices;
    double state_tree_likelihood= 0., pmap, mapm, mpmap,
-          hidden_likelihood, likelihood_cumul;
+          hidden_likelihood, likelihood_cumul,
+          partial_hidden_likelihood; // completed log-likelihood on subtree
+
    bool skip_combination;
    int *itype= NULL;
    double_array_3d map_upward= NULL, map2_upward= NULL;
@@ -4448,7 +4601,7 @@ HiddenMarkovIndOutTree::generalized_viterbi(const HiddenMarkovTreeData& trees,
             cnode= current_tree->root();
             if (state_root == I_DEFAULT)
             {
-               mapm= D_INF;
+               mapm= D_INF; // completed loglikelihood of mth best state tree
                for(j= 0; j < nb_state; j++)
                {
                   if (map_upward[j][cnode][rank[j]] > D_INF)
@@ -4467,6 +4620,7 @@ HiddenMarkovIndOutTree::generalized_viterbi(const HiddenMarkovTreeData& trees,
                if (m == 0)
                {
                   hidden_likelihood= mapm;
+                  partial_hidden_likelihood= mapm;
                   if (mapm <= D_INF)
                      break;
                   else
@@ -4475,11 +4629,36 @@ HiddenMarkovIndOutTree::generalized_viterbi(const HiddenMarkovTreeData& trees,
             }
             else
             {
-               state= state_root;
-               if (current_tree->is_root(cnode))
-                  val_states[cnode][m]= state;
-               else
-                  val_states[current_tree->parent(cnode)][m]= state;
+               mapm = D_INF; // completed loglikelihood of mth best state subtree
+                             // given parent state
+               state = state_root;
+               assert(current_tree->is_root(cnode));
+               val_states[cnode][m] = state;
+               // else
+                  // val_states[current_tree->parent(cnode)][m] = state;
+               for(j = 0; j < nb_state; j++)
+               {
+                  if (map_upward[j][cnode][rank[j]] > D_INF)
+                     pmap = map_upward[j][cnode][rank[j]];
+                  else
+                     pmap = D_INF;
+                  if (pmap > mapm)
+                  {
+                     mapm = pmap;
+                     state = j;
+                  }
+               }
+   #           ifdef DEBUG
+               cout << "\n hidden_likelihood = " << mapm << endl;
+   #           endif
+               if (m == 0)
+               {
+                  partial_hidden_likelihood = mapm;
+                  if (mapm <= D_INF)
+                     break;
+                  else
+                     state_tree_likelihood += mapm;
+               }
             }
 
             // restoration
@@ -4518,8 +4697,11 @@ HiddenMarkovIndOutTree::generalized_viterbi(const HiddenMarkovTreeData& trees,
                      nb_cell++;
             likelihood_cumul+= exp(mapm);
 
+            // joined (?) log-likelihood of mth best state tree
             likelihood_array[m]= mapm;
-            ratio_array[m]= exp(mapm-hidden_likelihood);
+            // ratio of likelihood of mth best state tree over that of best state tree
+            ratio_array[m]= exp(mapm - partial_hidden_likelihood);
+            // ratio of cumulated likelihood up to mth best state tree over likelihood
             cumul_array[m]= exp(log(likelihood_cumul) - likelihood);
             nb_cell_array[m]= nb_cell;
 
@@ -4537,25 +4719,25 @@ HiddenMarkovIndOutTree::generalized_viterbi(const HiddenMarkovTreeData& trees,
 #        ifdef DEBUG
          cout << "maximal number of digits: " << max_digits << endl;
 #        endif
-         *msg << " ";
+         *msg << "ranks:        " << setw(max_digits+2);
          for(m= 0; m < effective_nb_state_trees-1; m++)
-            *msg << setw(max_digits+2) << m;
+            *msg << setw(max_digits+2) << m << "\t";
          *msg << setw(max_digits+2) << m << endl;
-         *msg << "|";
+         *msg << "log-probs:   |" << setw(max_digits+2);
          for(m= 0; m < effective_nb_state_trees-1; m++)
-            *msg << fixed << setw(max_digits+2) << setprecision(2) << likelihood_array[m]; // << "\t";
+            *msg << fixed << setw(max_digits+2) << setprecision(2) << likelihood_array[m] << "\t";
          *msg << fixed << setw(max_digits+2) << setprecision(2) << likelihood_array[m] << "|" << endl;
-         *msg << "|";
+         *msg << "prob ratio:  |" << setw(max_digits+2);
          for(m= 0; m < effective_nb_state_trees-1; m++)
-            *msg << fixed << setw(max_digits+2) << setprecision(2) << ratio_array[m]; // << "\t";
+            *msg << fixed << setw(max_digits+2) << setprecision(2) << ratio_array[m] << "\t";
          *msg << fixed << setw(max_digits+2) << setprecision(2) << ratio_array[m] << "|" << endl;
-         *msg << "|";
+         *msg << "cumul ratio: |" << setw(max_digits+2);
          for(m= 0; m < effective_nb_state_trees-1; m++)
-            *msg << setw(max_digits+2) << cumul_array[m]; // << "\t";
+            *msg << setw(max_digits+2) << cumul_array[m] << "\t";
          *msg << setw(max_digits+2) << cumul_array[m] << "|" << endl;
-         *msg << "|";
+         *msg << "nb cells:    |" << setw(max_digits+2);
          for(m= 0; m < effective_nb_state_trees-1; m++)
-            *msg << setw(max_digits+2) << nb_cell_array[m]; // << "\t";
+            *msg << setw(max_digits+2) << nb_cell_array[m] << "\t";
          *msg << setw(max_digits+2) << nb_cell_array[m] << "|" << endl;
 
          messages.push_back(msg);
@@ -4612,10 +4794,10 @@ HiddenMarkovIndOutTree::generalized_viterbi(const HiddenMarkovTreeData& trees,
          res_trees->state_trees[t]= new Typed_edge_one_int_tree(*(trees.state_trees[t]));
    }
    else // (t == index)
-      res_trees->state_trees[0]= new Typed_edge_one_int_tree(*(trees.state_trees[index]));
-   res_trees->likelihood= likelihood;
-   res_trees->hidden_likelihood= state_tree_likelihood;
-   res_trees->_nb_states= nb_state;
+      res_trees->state_trees[0] = new Typed_edge_one_int_tree(*(trees.state_trees[index]));
+   res_trees->likelihood = likelihood;
+   res_trees->hidden_likelihood = state_tree_likelihood;
+   res_trees->_nb_states = nb_state;
 
    // res->chain_data= new ChainData(*res, 0, 1, markov);
 
