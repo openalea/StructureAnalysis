@@ -409,6 +409,11 @@ number of occurrences of output 4 per length 20 sequence distribution
 mean: 3.31111   variance: 2.95714   standard deviation: 1.71963
 coefficient of skewness: 0.438291   coefficient of kurtosis: 0.0927595
 
+distances between observation distributions for consecutive states
+_    0.8  0.9  
+0.8  _    0.1  
+0.9  0.1  _    
+
 iteration 1   log-likelihood of the observed trees: -767.042
 iteration 2   log-likelihood of the observed trees: -743.582
 iteration 3   log-likelihood of the observed trees: -741.797
@@ -846,6 +851,8 @@ information of the trees in the iid case: -741.254 (-1.45344)
 
 log-likelihood of the state trees: -891.172   (normalized: -1.7474)
 
+state tree entropy: 299.991   (normalized: 0.588218)
+
 log-likelihood of the observed trees: -736.183   (normalized: -1.4435)
 
 14 free parameters   2 * penalyzed log-likelihood (AIC): -1500.37
@@ -856,7 +863,7 @@ log-likelihood of the observed trees: -736.183   (normalized: -1.4435)
 
 14 free parameters   2 * penalyzed log-likelihood (BICc): -nan
 
-14 free parameters   2 * penalyzed log-likelihood (ICL): -1869.63
+14 free parameters   2 * penalyzed log-likelihood (ICL): -2159.63
 
 14 free parameters   2 * penalyzed log-likelihood (ICLc): -nan
 log-likelihood of the state trees: -891.172
@@ -1201,6 +1208,11 @@ number of occurrences of output 4 per sequence frequency distribution - sample s
 mean: 6.8   variance: 7.28889   standard deviation: 2.69979
 coefficient of skewness: 0.475985   coefficient of kurtosis: -1.10062
 
+distances between observation distributions for consecutive states
+_         0.789346  0.867523  
+0.789346  _         0.437226  
+0.867523  0.437226  _         
+
 sequence length frequency distribution - sample size: 10
 mean: 51   variance: 0   standard deviation: 0
 
@@ -1209,6 +1221,8 @@ cumulated length: 510
 information of the sequences in the iid case: -741.254 (-1.45344)
 
 log-likelihood of the state sequences: -891.172   (normalized: -1.7474)
+
+state sequence entropy: 299.991   (normalized: 0.588218)
 
 log-likelihood of the observed sequences: -736.183   (normalized: -1.4435)
 
@@ -1220,9 +1234,9 @@ log-likelihood of the observed sequences: -736.183   (normalized: -1.4435)
 
 14 free parameters   2 * penalyzed log-likelihood (BICc): -1544.57
 
-14 free parameters   2 * penalyzed log-likelihood (ICL): -1869.63
+14 free parameters   2 * penalyzed log-likelihood (ICL): -2159.63
 
-14 free parameters   2 * penalyzed log-likelihood (ICLc): -1854.54
+14 free parameters   2 * penalyzed log-likelihood (ICLc): -2144.55
 
 
 posterior state probabilities
@@ -1528,8 +1542,8 @@ Generalized viterbi:
                                                                                                   |-(1, 1, 1, 1, 1)
                                                                                                     
 
- 01234
-|0.000.000.000.000.00|
-|1.001.001.001.001.00|
-|16907188112993064401040296307182272512.0033814376225986194915211352789397536768.0050721564338979075143958817180416475136.0067628752451972512611951260189570629632.0084535940564965562845892107887817261056.00|
-|5153545555|
+ranks:                0	        1	        2	        3	        4
+log-probs:   |  -101.39	  -101.39	  -101.44	  -101.64	  -101.64|
+prob ratio:  |     1.00	     1.00	     0.95	     0.78	     0.78|
+cumul ratio: |     0.00	     0.00	     0.00	     0.00	     0.00|
+nb cells:    |       51	       53	       54	       55	       55|

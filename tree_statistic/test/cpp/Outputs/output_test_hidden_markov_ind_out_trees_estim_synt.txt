@@ -487,6 +487,8 @@ information of the trees in the iid case: -32.4821 (-0.691109)
 
 log-likelihood of the state trees: -51.6719   (normalized: -1.0994)
 
+state tree entropy: 29.6608   (normalized: 0.631082)
+
 log-likelihood of the observed trees: -32.3654   (normalized: -0.688626)
 
 4 free parameters   2 * penalyzed log-likelihood (AIC): -72.7309
@@ -497,7 +499,7 @@ log-likelihood of the observed trees: -32.3654   (normalized: -0.688626)
 
 4 free parameters   2 * penalyzed log-likelihood (BICc): -nan
 
-4 free parameters   2 * penalyzed log-likelihood (ICL): -118.744
+4 free parameters   2 * penalyzed log-likelihood (ICL): -139.453
 
 4 free parameters   2 * penalyzed log-likelihood (ICLc): -nan
 iteration 1   log-likelihood of the observed trees: -32.3654
@@ -642,6 +644,8 @@ information of the trees in the iid case: -32.4821 (-0.691109)
 
 log-likelihood of the state trees: -47.9638   (normalized: -1.02051)
 
+state tree entropy: 27.5475   (normalized: 0.586116)
+
 log-likelihood of the observed trees: -32.0409   (normalized: -0.68172)
 
 4 free parameters   2 * penalyzed log-likelihood (AIC): -72.0817
@@ -652,7 +656,7 @@ log-likelihood of the observed trees: -32.0409   (normalized: -0.68172)
 
 4 free parameters   2 * penalyzed log-likelihood (BICc): -nan
 
-4 free parameters   2 * penalyzed log-likelihood (ICL): -111.328
+4 free parameters   2 * penalyzed log-likelihood (ICL): -134.577
 
 4 free parameters   2 * penalyzed log-likelihood (ICLc): -nan
 
@@ -768,6 +772,8 @@ information of the trees in the iid case: -32.4821 (-0.691109)
 
 log-likelihood of the state trees: -47.9638   (normalized: -1.02051)
 
+state tree entropy: 27.5475   (normalized: 0.586116)
+
 log-likelihood of the observed trees: -32.0409   (normalized: -0.68172)
 
 4 free parameters   2 * penalyzed log-likelihood (AIC): -72.0817
@@ -778,7 +784,7 @@ log-likelihood of the observed trees: -32.0409   (normalized: -0.68172)
 
 4 free parameters   2 * penalyzed log-likelihood (BICc): -nan
 
-4 free parameters   2 * penalyzed log-likelihood (ICL): -111.328
+4 free parameters   2 * penalyzed log-likelihood (ICL): -134.577
 
 4 free parameters   2 * penalyzed log-likelihood (ICLc): -nan
 
@@ -899,6 +905,8 @@ information of the trees in the iid case: -32.4821 (-0.691109)
 
 log-likelihood of the state trees: -35.4685   (normalized: -0.754648)
 
+state tree entropy: 3.96394   (normalized: 0.0843392)
+
 log-likelihood of the observed trees: -32.492   (normalized: -0.691319)
 
 3 free parameters   2 * penalyzed log-likelihood (AIC): -70.9839
@@ -909,7 +917,7 @@ log-likelihood of the observed trees: -32.492   (normalized: -0.691319)
 
 3 free parameters   2 * penalyzed log-likelihood (BICc): -nan
 
-3 free parameters   2 * penalyzed log-likelihood (ICL): -82.4874
+3 free parameters   2 * penalyzed log-likelihood (ICL): -84.4623
 
 3 free parameters   2 * penalyzed log-likelihood (ICLc): -nan
 iteration 1   log-likelihood of the observed trees: -32.492
@@ -1054,6 +1062,8 @@ information of the trees in the iid case: -32.4821 (-0.691109)
 
 log-likelihood of the state trees: -35.7271   (normalized: -0.760151)
 
+state tree entropy: 4.04741   (normalized: 0.0861152)
+
 log-likelihood of the observed trees: -32.4867   (normalized: -0.691207)
 
 3 free parameters   2 * penalyzed log-likelihood (AIC): -70.9735
@@ -1064,7 +1074,7 @@ log-likelihood of the observed trees: -32.4867   (normalized: -0.691207)
 
 3 free parameters   2 * penalyzed log-likelihood (BICc): -nan
 
-3 free parameters   2 * penalyzed log-likelihood (ICL): -83.0047
+3 free parameters   2 * penalyzed log-likelihood (ICL): -84.6188
 
 3 free parameters   2 * penalyzed log-likelihood (ICLc): -nan
 
@@ -1119,14 +1129,14 @@ OUTPUT_PROCESS 1 : PARAMETRIC
 
 STATE 0 OBSERVATION_DISTRIBUTION
 NEGATIVE_BINOMIAL   INF_BOUND : 0   PARAMETER : 200.105   PROBABILITY : 0.402956
-mean: 296.396   variance: 727.19   standard deviation: 26.9665
+mean: 296.489   variance: 735.786   standard deviation: 27.1254
 
 state 0 observation frequency distribution - sample size: 54
 mean: 296.37   variance: 750.464   standard deviation: 27.3946
 
 STATE 1 OBSERVATION_DISTRIBUTION
 NEGATIVE_BINOMIAL   INF_BOUND : 0   PARAMETER : 186.233   PROBABILITY : 0.389113
-mean: 292.281   variance: 742.541   standard deviation: 27.2496
+mean: 292.376   variance: 751.39   standard deviation: 27.4115
 
 state 1 observation frequency distribution - sample size: 0
 
@@ -1134,14 +1144,14 @@ OUTPUT_PROCESS 2 : PARAMETRIC
 
 STATE 0 OBSERVATION_DISTRIBUTION
 NEGATIVE_BINOMIAL   INF_BOUND : 0   PARAMETER : 25404.9   PROBABILITY : 0.974866
-mean: 654.903   variance: 665.214   standard deviation: 25.7917
+mean: 654.983   variance: 671.87   standard deviation: 25.9205
 
 state 0 observation frequency distribution - sample size: 54
 mean: 654.889   variance: 683.912   standard deviation: 26.1517
 
 STATE 1 OBSERVATION_DISTRIBUTION
 POISSON   INF_BOUND : 3   PARAMETER : 648.732   
-mean: 651.651   variance: 642.132   standard deviation: 25.3403
+mean: 651.732   variance: 648.732   standard deviation: 25.4702
 
 state 1 observation frequency distribution - sample size: 0
 
@@ -1154,6 +1164,8 @@ information of the trees in the iid case: -394.06 (-7.29741)
 
 log-likelihood of the state trees: -507.921   (normalized: -9.40594)
 
+state tree entropy: 0.826693   (normalized: 0.0153091)
+
 log-likelihood of the observed trees: -507.71   (normalized: -9.40204)
 
 13 free parameters   2 * penalyzed log-likelihood (AIC): -1041.42
@@ -1164,7 +1176,7 @@ log-likelihood of the observed trees: -507.71   (normalized: -9.40204)
 
 13 free parameters   2 * penalyzed log-likelihood (BICc): -nan
 
-13 free parameters   2 * penalyzed log-likelihood (ICL): -1067.7
+13 free parameters   2 * penalyzed log-likelihood (ICL): -1068.93
 
 13 free parameters   2 * penalyzed log-likelihood (ICLc): -nan
 
@@ -1239,6 +1251,8 @@ information of the trees in the iid case: -32.4821 (-0.691109)
 
 log-likelihood of the state trees: -33.5638   (normalized: -0.714124)
 
+state tree entropy: 2.66012   (normalized: 0.0565983)
+
 log-likelihood of the observed trees: -32.4831   (normalized: -0.69113)
 
 7 free parameters   2 * penalyzed log-likelihood (AIC): -78.9662
@@ -1249,7 +1263,7 @@ log-likelihood of the observed trees: -32.4831   (normalized: -0.69113)
 
 7 free parameters   2 * penalyzed log-likelihood (BICc): -nan
 
-7 free parameters   2 * penalyzed log-likelihood (ICL): -94.0787
+7 free parameters   2 * penalyzed log-likelihood (ICL): -97.2375
 
 7 free parameters   2 * penalyzed log-likelihood (ICLc): -nan
 Testing estimation using SEM algorithm
@@ -1370,6 +1384,8 @@ information of the trees in the iid case: -32.4821 (-0.691109)
 
 log-likelihood of the state trees: -35.4684   (normalized: -0.754646)
 
+state tree entropy: 3.93597   (normalized: 0.0837441)
+
 log-likelihood of the observed trees: -32.5739   (normalized: -0.693062)
 
 2 free parameters   2 * penalyzed log-likelihood (AIC): -69.1478
@@ -1380,7 +1396,7 @@ log-likelihood of the observed trees: -32.5739   (normalized: -0.693062)
 
 2 free parameters   2 * penalyzed log-likelihood (BICc): -nan
 
-2 free parameters   2 * penalyzed log-likelihood (ICL): -78.637
+2 free parameters   2 * penalyzed log-likelihood (ICL): -80.72
 
 2 free parameters   2 * penalyzed log-likelihood (ICLc): -nan
 
@@ -1502,6 +1518,8 @@ information of the trees in the iid case: -32.4821 (-0.691109)
 
 log-likelihood of the state trees: -35.4684   (normalized: -0.754646)
 
+state tree entropy: 3.93597   (normalized: 0.0837441)
+
 log-likelihood of the observed trees: -32.5739   (normalized: -0.693062)
 
 2 free parameters   2 * penalyzed log-likelihood (AIC): -69.1478
@@ -1512,7 +1530,7 @@ log-likelihood of the observed trees: -32.5739   (normalized: -0.693062)
 
 2 free parameters   2 * penalyzed log-likelihood (BICc): -nan
 
-2 free parameters   2 * penalyzed log-likelihood (ICL): -78.637
+2 free parameters   2 * penalyzed log-likelihood (ICL): -80.72
 
 2 free parameters   2 * penalyzed log-likelihood (ICLc): -nan
 
@@ -1634,6 +1652,8 @@ information of the trees in the iid case: -32.4821 (-0.691109)
 
 log-likelihood of the state trees: -35.4684   (normalized: -0.754646)
 
+state tree entropy: 3.93597   (normalized: 0.0837441)
+
 log-likelihood of the observed trees: -32.5739   (normalized: -0.693062)
 
 2 free parameters   2 * penalyzed log-likelihood (AIC): -69.1478
@@ -1644,7 +1664,7 @@ log-likelihood of the observed trees: -32.5739   (normalized: -0.693062)
 
 2 free parameters   2 * penalyzed log-likelihood (BICc): -nan
 
-2 free parameters   2 * penalyzed log-likelihood (ICL): -78.637
+2 free parameters   2 * penalyzed log-likelihood (ICL): -80.72
 
 2 free parameters   2 * penalyzed log-likelihood (ICLc): -nan
 
@@ -1773,6 +1793,8 @@ information of the trees in the iid case: -32.4821 (-0.691109)
 
 log-likelihood of the state trees: -33.6989   (normalized: -0.716998)
 
+state tree entropy: 2.79393   (normalized: 0.0594453)
+
 log-likelihood of the observed trees: -32.4841   (normalized: -0.691151)
 
 2 free parameters   2 * penalyzed log-likelihood (AIC): -68.9682
@@ -1783,7 +1805,7 @@ log-likelihood of the observed trees: -32.4841   (normalized: -0.691151)
 
 2 free parameters   2 * penalyzed log-likelihood (BICc): -nan
 
-2 free parameters   2 * penalyzed log-likelihood (ICL): -75.0981
+2 free parameters   2 * penalyzed log-likelihood (ICL): -78.2564
 
 2 free parameters   2 * penalyzed log-likelihood (ICLc): -nan
 
@@ -1913,6 +1935,8 @@ information of the trees in the iid case: -32.4821 (-0.691109)
 
 log-likelihood of the state trees: -32.9753   (normalized: -0.701602)
 
+state tree entropy: 1.64081   (normalized: 0.0349109)
+
 log-likelihood of the observed trees: -32.483   (normalized: -0.691128)
 
 2 free parameters   2 * penalyzed log-likelihood (AIC): -68.966
@@ -1923,7 +1947,7 @@ log-likelihood of the observed trees: -32.483   (normalized: -0.691128)
 
 2 free parameters   2 * penalyzed log-likelihood (BICc): -nan
 
-2 free parameters   2 * penalyzed log-likelihood (ICL): -73.6509
+2 free parameters   2 * penalyzed log-likelihood (ICL): -75.9479
 
 2 free parameters   2 * penalyzed log-likelihood (ICLc): -nan
 

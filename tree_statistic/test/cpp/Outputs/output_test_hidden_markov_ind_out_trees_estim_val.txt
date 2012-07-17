@@ -162,6 +162,8 @@ information of the trees in the iid case: -9296.88 (-8.93931)
 
 log-likelihood of the state trees: -8596.41   (normalized: -8.26578)
 
+state tree entropy: 1.33227e-15   (normalized: 1.28103e-18)
+
 log-likelihood of the observed trees: -8596.41   (normalized: -8.26578)
 
 14 free parameters   2 * penalyzed log-likelihood (AIC): -17220.8
@@ -170,11 +172,11 @@ log-likelihood of the observed trees: -8596.41   (normalized: -8.26578)
 
 14 free parameters   2 * penalyzed log-likelihood (BIC): -17290.1
 
-14 free parameters   2 * penalyzed log-likelihood (BICc): nan
+14 free parameters   2 * penalyzed log-likelihood (BICc): -nan
 
 14 free parameters   2 * penalyzed log-likelihood (ICL): -17290.1
 
-14 free parameters   2 * penalyzed log-likelihood (ICLc): nan
+14 free parameters   2 * penalyzed log-likelihood (ICLc): -nan
 iteration 1   log-likelihood of the observed trees: -16768.5
 iteration 2   log-likelihood of the observed trees: -13742.5
 iteration 3   log-likelihood of the observed trees: -13637.7
@@ -231,14 +233,14 @@ OUTPUT_PROCESS 1 : PARAMETRIC
 
 STATE 0 OBSERVATION_DISTRIBUTION
 NEGATIVE_BINOMIAL   INF_BOUND : 289   PARAMETER : 385.724   PROBABILITY : 0.704761
-mean: 450.538   variance: 226.771   standard deviation: 15.0589
+mean: 450.587   variance: 229.28   standard deviation: 15.142
 
 state 0 observation frequency distribution - sample size: 519
 mean: 450.588   variance: 229.679   standard deviation: 15.1552
 
 STATE 1 OBSERVATION_DISTRIBUTION
 NEGATIVE_BINOMIAL   INF_BOUND : 38   PARAMETER : 82.6404   PROBABILITY : 0.616043
-mean: 89.484   variance: 82.8323   standard deviation: 9.10123
+mean: 89.5068   variance: 83.609   standard deviation: 9.1438
 
 state 1 observation frequency distribution - sample size: 521
 mean: 89.5086   variance: 83.7735   standard deviation: 9.15279
@@ -268,6 +270,8 @@ information of the trees in the iid case: -9296.88 (-8.93931)
 
 log-likelihood of the state trees: -8593.5   (normalized: -8.26299)
 
+state tree entropy: 6.55032e-15   (normalized: 6.29838e-18)
+
 log-likelihood of the observed trees: -8593.5   (normalized: -8.26299)
 
 14 free parameters   2 * penalyzed log-likelihood (AIC): -17215
@@ -276,8 +280,8 @@ log-likelihood of the observed trees: -8593.5   (normalized: -8.26299)
 
 14 free parameters   2 * penalyzed log-likelihood (BIC): -17284.3
 
-14 free parameters   2 * penalyzed log-likelihood (BICc): nan
+14 free parameters   2 * penalyzed log-likelihood (BICc): -nan
 
 14 free parameters   2 * penalyzed log-likelihood (ICL): -17284.3
 
-14 free parameters   2 * penalyzed log-likelihood (ICLc): nan
+14 free parameters   2 * penalyzed log-likelihood (ICLc): -nan

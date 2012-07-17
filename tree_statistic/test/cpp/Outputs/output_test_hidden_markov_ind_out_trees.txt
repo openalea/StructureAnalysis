@@ -42,11 +42,13 @@ mean: 1   variance: 0   standard deviation: 0
 
 STATE 0 OCCUPANCY_DISTRIBUTION
 NEGATIVE_BINOMIAL   INF_BOUND : 1   PARAMETER : 1   PROBABILITY : 0.1
-mean: 9.99898   variance: 89.8879   standard deviation: 9.48092
+mean: 10   variance: 90   standard deviation: 9.48683
+coefficient of skewness: 2.00278   coefficient of kurtosis: 6.01111
 
 STATE 1 OCCUPANCY_DISTRIBUTION
 NEGATIVE_BINOMIAL   INF_BOUND : 1   PARAMETER : 1   PROBABILITY : 0.1
-mean: 9.99898   variance: 89.8879   standard deviation: 9.48092
+mean: 10   variance: 90   standard deviation: 9.48683
+coefficient of skewness: 2.00278   coefficient of kurtosis: 6.01111
 
 absorption probability of state 2: 1
 
@@ -90,6 +92,11 @@ STATE 2 OBSERVATION_DISTRIBUTION
 BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.9
 mean: 810   variance: 81   standard deviation: 9
 
+distances between observation distributions for consecutive states
+_  1  1  
+_  _  1  
+_  _  _  
+
 OUTPUT_PROCESS 2 : DISCRETE_PARAMETRIC
 
 STATE 0 OBSERVATION_DISTRIBUTION
@@ -103,6 +110,11 @@ mean: 7.5   variance: 3.75   standard deviation: 1.93649
 STATE 2 OBSERVATION_DISTRIBUTION
 BINOMIAL   INF_BOUND : 0   SUP_BOUND : 15   PROBABILITY : 0.9
 mean: 13.5   variance: 1.35   standard deviation: 1.1619
+
+distances between observation distributions for consecutive states
+_         0.928045  0.999933  
+_         _         0.928045  
+_         _         _         
 
 HIDDEN_MARKOV_INDEPENDENT_OUT_TREE
 

@@ -258,6 +258,8 @@ information of the trees in the iid case: -93.3781 (-1.43659)
 
 log-likelihood of the state trees: -126.115   (normalized: -1.94023)
 
+state tree entropy: 50.0264   (normalized: 0.769637)
+
 log-likelihood of the observed trees: -97.0198   (normalized: -1.49261)
 
 14 free parameters   2 * penalyzed log-likelihood (AIC): -222.04
@@ -268,9 +270,9 @@ log-likelihood of the observed trees: -97.0198   (normalized: -1.49261)
 
 14 free parameters   2 * penalyzed log-likelihood (BICc): -194.04
 
-14 free parameters   2 * penalyzed log-likelihood (ICL): -310.671
+14 free parameters   2 * penalyzed log-likelihood (ICL): -352.534
 
-14 free parameters   2 * penalyzed log-likelihood (ICLc): -252.229
+14 free parameters   2 * penalyzed log-likelihood (ICLc): -352.282
 
 chi-square test
 chi-square value: 1e+37   critical probability: -1
@@ -509,6 +511,8 @@ information of the trees in the iid case: -93.3781 (-1.43659)
 
 log-likelihood of the state trees: -115.594   (normalized: -1.77837)
 
+state tree entropy: 43.3761   (normalized: 0.667324)
+
 log-likelihood of the observed trees: -90.8011   (normalized: -1.39694)
 
 14 free parameters   2 * penalyzed log-likelihood (AIC): -209.602
@@ -517,11 +521,11 @@ log-likelihood of the observed trees: -90.8011   (normalized: -1.39694)
 
 14 free parameters   2 * penalyzed log-likelihood (BIC): -240.044
 
-14 free parameters   2 * penalyzed log-likelihood (BICc): nan
+14 free parameters   2 * penalyzed log-likelihood (BICc): -nan
 
-14 free parameters   2 * penalyzed log-likelihood (ICL): -289.629
+14 free parameters   2 * penalyzed log-likelihood (ICL): -326.796
 
-14 free parameters   2 * penalyzed log-likelihood (ICLc): nan
+14 free parameters   2 * penalyzed log-likelihood (ICLc): -nan
 Print the data with the hidden Markov tree: 
 
 3 STATES
@@ -738,6 +742,8 @@ information of the trees in the iid case: -93.3781 (-1.43659)
 
 log-likelihood of the state trees: -126.115   (normalized: -1.94023)
 
+state tree entropy: 50.0264   (normalized: 0.769637)
+
 log-likelihood of the observed trees: -97.0198   (normalized: -1.49261)
 
 14 free parameters   2 * penalyzed log-likelihood (AIC): -222.04
@@ -748,9 +754,9 @@ log-likelihood of the observed trees: -97.0198   (normalized: -1.49261)
 
 14 free parameters   2 * penalyzed log-likelihood (BICc): -194.04
 
-14 free parameters   2 * penalyzed log-likelihood (ICL): -310.671
+14 free parameters   2 * penalyzed log-likelihood (ICL): -352.534
 
-14 free parameters   2 * penalyzed log-likelihood (ICLc): -252.229
+14 free parameters   2 * penalyzed log-likelihood (ICLc): -352.282
 
 chi-square test
 chi-square value: 1e+37   critical probability: -1
@@ -1122,19 +1128,21 @@ information of the trees in the iid case: -93.3781 (-1.43659)
 
 log-likelihood of the state trees: -126.115   (normalized: -1.94023)
 
+state tree entropy: 50.0264   (normalized: 0.769637)
+
 log-likelihood of the observed trees: -97.0198   (normalized: -1.49261)
 
--1 free parameters   2 * penalyzed log-likelihood (AIC): -192.04
+14 free parameters   2 * penalyzed log-likelihood (AIC): -222.04
 
--1 free parameters   2 * penalyzed log-likelihood (AICc): -192.04
+14 free parameters   2 * penalyzed log-likelihood (AICc): -230.44
 
--1 free parameters   2 * penalyzed log-likelihood (BIC): -189.865
+14 free parameters   2 * penalyzed log-likelihood (BIC): -252.481
 
--1 free parameters   2 * penalyzed log-likelihood (BICc): -194.04
+14 free parameters   2 * penalyzed log-likelihood (BICc): -194.04
 
--1 free parameters   2 * penalyzed log-likelihood (ICL): -248.055
+14 free parameters   2 * penalyzed log-likelihood (ICL): -352.534
 
--1 free parameters   2 * penalyzed log-likelihood (ICLc): -252.229
+14 free parameters   2 * penalyzed log-likelihood (ICLc): -352.282
 
 
 Plot of the augmented HiddenMarkovTreeData:
@@ -1355,6 +1363,8 @@ information of the trees in the iid case: -93.3781 (-1.43659)
 
 log-likelihood of the state trees: -115.594   (normalized: -1.77837)
 
+state tree entropy: 43.3761   (normalized: 0.667324)
+
 log-likelihood of the observed trees: -90.8011   (normalized: -1.39694)
 
 14 free parameters   2 * penalyzed log-likelihood (AIC): -209.602
@@ -1365,12 +1375,12 @@ log-likelihood of the observed trees: -90.8011   (normalized: -1.39694)
 
 14 free parameters   2 * penalyzed log-likelihood (BICc): -181.602
 
-14 free parameters   2 * penalyzed log-likelihood (ICL): -289.629
+14 free parameters   2 * penalyzed log-likelihood (ICL): -326.796
 
-14 free parameters   2 * penalyzed log-likelihood (ICLc): -231.188
+14 free parameters   2 * penalyzed log-likelihood (ICLc): -317.94
 
 chi-square test (6 degrees of freedom)
-chi-square value: 13.5393   critical probability: 0.0352274
+chi-square value: 1.38429e+08   critical probability: 0
 reference chi-square value: 12.5916   reference critical probability: 0.05
 reference chi-square value: 16.8119   reference critical probability: 0.01
 
@@ -1523,6 +1533,8 @@ information of the trees in the iid case: -473.346 (-7.28225)
 
 log-likelihood of the state trees: -521.89   (normalized: -8.02907)
 
+state tree entropy: 2.22045e-16   (normalized: 3.41607e-18)
+
 log-likelihood of the observed trees: -521.89   (normalized: -8.02907)
 
 14 free parameters   2 * penalyzed log-likelihood (AIC): -1071.78
@@ -1634,6 +1646,8 @@ information of the trees in the iid case: -473.346 (-7.28225)
 
 log-likelihood of the state trees: -511.466   (normalized: -7.86871)
 
+state tree entropy: 1.44329e-15   (normalized: 2.22045e-17)
+
 log-likelihood of the observed trees: -511.466   (normalized: -7.86871)
 
 14 free parameters   2 * penalyzed log-likelihood (AIC): -1050.93
@@ -1642,11 +1656,11 @@ log-likelihood of the observed trees: -511.466   (normalized: -7.86871)
 
 14 free parameters   2 * penalyzed log-likelihood (BIC): -1081.37
 
-14 free parameters   2 * penalyzed log-likelihood (BICc): nan
+14 free parameters   2 * penalyzed log-likelihood (BICc): -nan
 
 14 free parameters   2 * penalyzed log-likelihood (ICL): -1081.37
 
-14 free parameters   2 * penalyzed log-likelihood (ICLc): nan
+14 free parameters   2 * penalyzed log-likelihood (ICLc): -nan
 Print the data with the hidden Markov tree: 
 
 2 STATES
@@ -1723,6 +1737,8 @@ information of the trees in the iid case: -473.346 (-7.28225)
 
 log-likelihood of the state trees: -521.89   (normalized: -8.02907)
 
+state tree entropy: 2.22045e-16   (normalized: 3.41607e-18)
+
 log-likelihood of the observed trees: -521.89   (normalized: -8.02907)
 
 14 free parameters   2 * penalyzed log-likelihood (AIC): -1071.78
@@ -1787,14 +1803,12 @@ Number of hidden states: 2
 Marginal output histogram (1st variable) : 
 frequency distribution - sample size: 65
 mean: 227.446   variance: 31420.6   standard deviation: 177.259
-coefficient of skewness: 0.490053   coefficient of kurtosis: -1.77897
 mean absolute deviation: 170.918   coefficient of concentration: 0.385604
 information: -230.513 (-3.54635)
 
 Marginal state histogram: 
 frequency distribution - sample size: 65
 mean: 0.384615   variance: 0.240385   standard deviation: 0.49029
-coefficient of skewness: 0.485621   coefficient of kurtosis: -1.79385
 mean absolute deviation: 0.473373   coefficient of concentration: 0.615385
 information: -43.3081 (-0.666278)
 
@@ -1804,14 +1818,12 @@ Occurrence state histogram:
 Number of occurrences for value 0 : 
 frequency distribution - sample size: 5
 mean: 8   variance: 4   standard deviation: 2
-coefficient of skewness: -0.9375   coefficient of kurtosis: -1.4375
 mean absolute deviation: 1.6   coefficient of concentration: 0.12
 information: -6.6609 (-1.33218)
 
 Number of occurrences for value 1 : 
 frequency distribution - sample size: 5
 mean: 5   variance: 4   standard deviation: 2
-coefficient of skewness: 0.9375   coefficient of kurtosis: -1.4375
 mean absolute deviation: 1.6   coefficient of concentration: 0.192
 information: -6.6609 (-1.33218)
 
@@ -1820,28 +1832,24 @@ State-conditional output histograms:
 Observation frequency distribution for state 0 and variable 0 : 
 frequency distribution - sample size: 40
 mean: 88.575   variance: 31.1224   standard deviation: 5.57875
-coefficient of skewness: 0.131146   coefficient of kurtosis: -0.313654
 mean absolute deviation: 4.325   coefficient of concentration: 0.0349492
 information: -113.665 (-2.84161)
 
 Observation frequency distribution for state 1 and variable 0 : 
 frequency distribution - sample size: 25
 mean: 449.64   variance: 168.49   standard deviation: 12.9804
-coefficient of skewness: -0.0370793   coefficient of kurtosis: -0.767906
 mean absolute deviation: 10.5056   coefficient of concentration: 0.0161267
 information: -73.5404 (-2.94162)
 
 Observation frequency distribution for state 0 and variable 1 : 
 frequency distribution - sample size: 40
 mean: 270.6   variance: 199.323   standard deviation: 14.1182
-coefficient of skewness: -0.0754172   coefficient of kurtosis: 0.305483
 mean absolute deviation: 10.75   coefficient of concentration: 0.0283906
 information: -129.281 (-3.23202)
 
 Observation frequency distribution for state 1 and variable 1 : 
 frequency distribution - sample size: 25
 mean: 808.84   variance: 59.2233   standard deviation: 7.69567
-coefficient of skewness: 0.16221   coefficient of kurtosis: -1.01044
 mean absolute deviation: 6.4064   coefficient of concentration: 0.00533307
 information: -70.2446 (-2.80978)
 
@@ -1956,20 +1964,25 @@ information of the trees in the iid case: -473.346 (-7.28225)
 
 log-likelihood of the state trees: -521.89   (normalized: -8.02907)
 
+state tree entropy: 2.22045e-16   (normalized: 3.41607e-18)
+
 log-likelihood of the observed trees: -521.89   (normalized: -8.02907)
 
--1 free parameters   2 * penalyzed log-likelihood (AIC): -1041.78
+14 free parameters   2 * penalyzed log-likelihood (AIC): -1071.78
 
--1 free parameters   2 * penalyzed log-likelihood (AICc): -1041.78
+14 free parameters   2 * penalyzed log-likelihood (AICc): -1080.18
 
--1 free parameters   2 * penalyzed log-likelihood (BIC): -1039.6
+14 free parameters   2 * penalyzed log-likelihood (BIC): -1102.22
 
--1 free parameters   2 * penalyzed log-likelihood (BICc): -1043.78
+14 free parameters   2 * penalyzed log-likelihood (BICc): -1043.78
 
--1 free parameters   2 * penalyzed log-likelihood (ICL): -1039.6
+14 free parameters   2 * penalyzed log-likelihood (ICL): -1102.22
 
--1 free parameters   2 * penalyzed log-likelihood (ICLc): -1043.78
+14 free parameters   2 * penalyzed log-likelihood (ICLc): -1043.78
 
+chi-square test (2 degrees of freedom)
+chi-square value: 3.26667   critical probability: 0.195278
+reference chi-square value: 5.99146   reference critical probability: 0.05
 
 Plot of the augmented HiddenMarkovTreeData:
 
@@ -2048,6 +2061,8 @@ cumulative size: 65
 information of the trees in the iid case: -473.346 (-7.28225)
 
 log-likelihood of the state trees: -511.466   (normalized: -7.86871)
+
+state tree entropy: 1.44329e-15   (normalized: 2.22045e-17)
 
 log-likelihood of the observed trees: -511.466   (normalized: -7.86871)
 
@@ -2248,6 +2263,8 @@ information of the trees in the iid case: -43.3081 (-0.666278)
 
 log-likelihood of the state trees: -43.3087   (normalized: -0.666288)
 
+state tree entropy: 0.00782484   (normalized: 0.000120382)
+
 log-likelihood of the observed trees: -43.3081   (normalized: -0.666278)
 
 2 free parameters   2 * penalyzed log-likelihood (AIC): -90.6161
@@ -2256,8 +2273,8 @@ log-likelihood of the observed trees: -43.3081   (normalized: -0.666278)
 
 2 free parameters   2 * penalyzed log-likelihood (BIC): -94.9649
 
-2 free parameters   2 * penalyzed log-likelihood (BICc): nan
+2 free parameters   2 * penalyzed log-likelihood (BICc): -nan
 
-2 free parameters   2 * penalyzed log-likelihood (ICL): -94.9662
+2 free parameters   2 * penalyzed log-likelihood (ICL): -94.9806
 
-2 free parameters   2 * penalyzed log-likelihood (ICLc): nan
+2 free parameters   2 * penalyzed log-likelihood (ICLc): -nan
