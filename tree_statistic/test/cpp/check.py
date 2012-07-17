@@ -28,7 +28,7 @@ def check(p):
    if res!='':
       print "actual and theoretical outputs differ for ", p, ": \n", res, "\n"
    else:
-      print "actual and theoretical ouputs match for ", p, "\n"
+      print "actual and theoretical outputs match for ", p, "\n"
 
 map(check, tests)
 

@@ -217,6 +217,20 @@ HiddenMarkovIndOutTree::~HiddenMarkovIndOutTree()
 
 /*****************************************************************
  *
+ *  Return a copy of an instance of HiddenMarkovTree with the same
+ *  dynamic class
+ *
+ **/
+
+HiddenMarkovIndOutTree* HiddenMarkovIndOutTree::HiddenMarkovTreeCopy(bool data_flag,
+                                                                     bool characteristic_flag) const
+{
+   HiddenMarkovIndOutTree *res = new HiddenMarkovIndOutTree(*this, data_flag, characteristic_flag) ;
+   return res;
+}
+
+/*****************************************************************
+ *
  *  Return the data part of a HiddenMarkovIndOutTree
  *  using a StatError object, keeping a reference on self
  *
@@ -286,7 +300,7 @@ ostream& HiddenMarkovIndOutTree::ascii_write(ostream& os, bool exhaustive) const
  **/
 
 bool HiddenMarkovIndOutTree::ascii_write(StatError& error, const char * path,
-                                      bool exhaustive) const
+                                         bool exhaustive) const
 {
    bool status;
    ofstream out_file(path);
@@ -371,10 +385,10 @@ bool HiddenMarkovIndOutTree::plot_write(StatError& error,
  **/
 
 ostream& HiddenMarkovIndOutTree::ascii_write(ostream& os,
-                                          const HiddenMarkovTreeData * otrees,
-                                          bool exhaustive,
-                                          bool file_flag,
-                                          const Test* test) const
+                                             const HiddenMarkovTreeData * otrees,
+                                             bool exhaustive,
+                                             bool file_flag,
+                                             const Test* test) const
 {
    // register int i;
    // int variable, cumul_size, nb_output_process= _nb_ioutput_process+_nb_doutput_process;
@@ -643,7 +657,7 @@ void HiddenMarkovIndOutTree::get_output_conditional_distribution(const HiddenMar
                                                               double_array_3d& res) const
 { output_conditional_distribution(trees, res); }
 
-double HiddenMarkovIndOutTree::get_upward_step(const HiddenMarkovTreeData& trees,
+double HiddenMarkovIndOutTree::get_upward_step(HiddenMarkovTreeData& trees,
                                                double_array_3d& upward_prob,
                                                double_array_3d& upward_parent_prob,
                                                double_array_3d& state_entropy,

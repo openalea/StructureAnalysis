@@ -153,7 +153,7 @@ double HiddenMarkovIndOutTree::likelihood_computation(const Trees& otrees,
    return likelihood;
 }
 
-double HiddenMarkovIndOutTree::likelihood_computation(const HiddenMarkovTreeData& otrees) const
+double HiddenMarkovIndOutTree::likelihood_computation(HiddenMarkovTreeData& otrees) const
 {
    register int t, j;
    double likelihood, entropy1;
@@ -385,6 +385,7 @@ bool HiddenMarkovIndOutTree::state_profile(StatError& error,
    long double nb_possible_state_trees;
    double likelihood, hidden_likelihood, state_likelihood, partial_likelihood;
           // ambiguity;
+   double *tree_entropies = NULL;
    ostringstream *m;
    std::deque<int> *path= NULL;
    HiddenMarkovTreeData *smoothed_tree= NULL, *cptrees= NULL;
@@ -511,8 +512,13 @@ bool HiddenMarkovIndOutTree::state_profile(StatError& error,
 
          likelihood2 = upward_step_norm(*cptrees, upward_prob, upward_parent_prob,
                                         state_entropy, norm, state_marginal, output_cond,
-                                        entropy1, index);
+                                        entropy1, tree_entropies, index);
          assert((abs(likelihood-likelihood2)/likelihood) < 1e-10);
+         if (tree_entropies != NULL)
+         {
+            delete [] tree_entropies;
+            tree_entropies = NULL;
+         }
 
          partial_likelihood = 0.0;
 
@@ -847,7 +853,7 @@ HiddenMarkovTreeData* HiddenMarkovIndOutTree::simulation(StatError& error,
    int cumul_size, cumul_nb_children, parent_state;
    // double **pcumul;
    HiddenMarkovTreeData *res= NULL;
-   HiddenMarkovTree *markov;
+   HiddenMarkovIndOutTree *markov;
    Typed_edge_one_int_tree *state_tree;
    tree_type *tree;
    Typed_edge_one_int_tree::value state_v;
@@ -928,9 +934,13 @@ HiddenMarkovTreeData* HiddenMarkovIndOutTree::simulation(StatError& error,
       for(var= 0; var < _nb_doutput_process; var++)
          res->_type[0]= REAL_VALUE;*/
 
-      res->markov= new HiddenMarkovIndOutTree(*this, false, false);
+      markov= new HiddenMarkovIndOutTree(*this, false, false);
 
-      markov= res->markov; // *markov is a HiddenMarkovIndOutTree
+      res->markov = markov; // res->markov is a HiddenMarkovIndOutTree
+
+      /* res->markov= new HiddenMarkovIndOutTree(*this, false, false);
+
+      markov= res->markov; */ // *markov is a HiddenMarkovIndOutTree
       markov->create_cumul();
       markov->cumul_computation();
       // N.B. : Chain::create_cumul(), etc.
@@ -1142,7 +1152,7 @@ HiddenMarkovTreeData* HiddenMarkovIndOutTree::simulation(const Trees& otrees,
    typedef tree_type::value value;
 
    HiddenMarkovTreeData *res =NULL;
-   HiddenMarkovTree *markov = NULL;
+   HiddenMarkovIndOutTree *markov = NULL;
 
    Typed_edge_one_int_tree *state_tree;
    tree_type *tree;
@@ -1234,9 +1244,8 @@ HiddenMarkovTreeData* HiddenMarkovIndOutTree::simulation(const Trees& otrees,
    }//end init states
 
    //simulation of states
-   res->markov = new HiddenMarkovIndOutTree(*this, false, false);
-
-   markov = res->markov;
+   markov = new HiddenMarkovIndOutTree(*this, false, false);
+   res->markov = markov;
    markov->create_cumul();
    markov->cumul_computation();
 
@@ -1576,12 +1585,83 @@ double HiddenMarkovIndOutTree::upward_step(const HiddenMarkovTreeData& trees,
                                            double& entropy1,
                                            int index) const
 {
+   unsigned int t;
+   double* tree_entropies = new double[trees._nb_trees];
+   const double likelihood = upward_step(trees, upward_prob, upward_parent_prob,
+                                         state_entropy, marginal_prob,
+                                         output_cond_prob, entropy1,
+                                         tree_entropies, index);
+   delete [] tree_entropies;
+   return likelihood;
+}
+
+/*****************************************************************
+ *
+ *  Upward step of the upward-downward algorithm
+ *  for HiddenMarkovIndOutTree class
+ *  using a HiddenMarkovTreeData object,
+ *  the upward probabilities (stored as a byproduct),
+ *  the marginal and the output conditional distributions
+ *  and the index of considered tree
+ *  Return the log-likelihood;
+ *  compute the entropy of the state tree and subtree processes,
+ *  and update them in trees
+ *
+ **/
+double HiddenMarkovIndOutTree::upward_step(HiddenMarkovTreeData& trees,
+                                           double_array_3d& upward_prob,
+                                           double_array_3d& upward_parent_prob,
+                                           double_array_3d& state_entropy,
+                                           double_array_3d marginal_prob,
+                                           double_array_3d output_cond_prob,
+                                           double& entropy1,
+                                           int index) const
+{
+   unsigned int t;
+   double* tree_entropies = new double[trees._nb_trees];
+   const double likelihood = upward_step(trees, upward_prob, upward_parent_prob,
+                                         state_entropy, marginal_prob,
+                                         output_cond_prob, entropy1,
+                                         tree_entropies, index);
+   trees.sample_entropy = entropy1;
+   if (trees.entropy == NULL)
+      trees.entropy = new double[trees._nb_trees];
+   for (t = 0; t < trees._nb_trees; t++)
+      trees.entropy[t] = tree_entropies[t];
+   delete [] tree_entropies;
+   return likelihood;
+}
+
+/*****************************************************************
+ *
+ *  Upward step of the upward-downward algorithm
+ *  for HiddenMarkovIndOutTree class
+ *  using a HiddenMarkovTreeData object,
+ *  the upward probabilities (stored as a byproduct),
+ *  the marginal and the output conditional distributions
+ *  and the index of considered tree
+ *  Return the log-likelihood;
+ *  compute the entropy of the state trees and subtrees processes,
+ *  compute the entropy of each state tree
+ *
+ **/
+double HiddenMarkovIndOutTree::upward_step(const HiddenMarkovTreeData& trees,
+                                           double_array_3d& upward_prob,
+                                           double_array_3d& upward_parent_prob,
+                                           double_array_3d& state_entropy,
+                                           double_array_3d marginal_prob,
+                                           double_array_3d output_cond_prob,
+                                           double& entropy1,
+                                           double*& tree_entropies,
+                                           int index) const
+{
    const int nb_trees= trees._nb_trees;
    int t;
    double_array_2d norm = NULL;
    double likelihood = upward_step_norm(trees, upward_prob, upward_parent_prob,
                                         state_entropy, norm, marginal_prob,
-                                        output_cond_prob, entropy1, index);
+                                        output_cond_prob, entropy1, tree_entropies,
+                                        index);
    for(t = 0; t < nb_trees; t++)
       if ((index == I_DEFAULT) || (index == t))
       {
@@ -1615,6 +1695,7 @@ double HiddenMarkovIndOutTree::upward_step_norm(const HiddenMarkovTreeData& tree
                                                 double_array_3d marginal_prob,
                                                 double_array_3d output_cond_prob,
                                                 double& entropy1,
+                                                double*& tree_entropies,
                                                 int index) const
 
 {
@@ -1624,7 +1705,7 @@ double HiddenMarkovIndOutTree::upward_step_norm(const HiddenMarkovTreeData& tree
    typedef generic_visitor<tree_type> visitor;
    typedef visitor::vertex_array vertex_array;
 
-   int nb_trees= trees._nb_trees, t;
+   int nb_trees = trees._nb_trees, t;
    unsigned int current_size, u;
    register int k, j;
    vid cnode; // current node;
@@ -1632,7 +1713,7 @@ double HiddenMarkovIndOutTree::upward_step_norm(const HiddenMarkovTreeData& tree
    children_iterator ch_it, ch_end;
    visitor *v;
    vertex_array va;
-   double res= .0, buff;
+   double res = .0, buff;
 
    // upward_prob[t][j][u] is the probability that the state variable
    // is equal to j at node u for tree t, given the subtree rooted at u
@@ -1644,29 +1725,29 @@ double HiddenMarkovIndOutTree::upward_step_norm(const HiddenMarkovTreeData& tree
    // state_entropy[t][j][u] is the entropy of the state forest of descendants of u
    // given state u and the observed subtree rooted at u
 
-   entropy1= .0;
+   entropy1 = .0;
 
    assert((index < nb_trees));
 
    if (upward_prob == NULL)
    {
-      upward_prob= new double_array_2d[nb_trees];
-      for(t= 0; t < nb_trees; t++)
-         upward_prob[t]= NULL;
+      upward_prob = new double_array_2d[nb_trees];
+      for(t = 0; t < nb_trees; t++)
+         upward_prob[t] = NULL;
    }
 
    if (upward_parent_prob == NULL)
    {
-      upward_parent_prob= new double_array_2d[nb_trees];
-      for(t= 0; t < nb_trees; t++)
-         upward_parent_prob[t]= NULL;
+      upward_parent_prob = new double_array_2d[nb_trees];
+      for(t = 0; t < nb_trees; t++)
+         upward_parent_prob[t] = NULL;
    }
 
    if (state_entropy == NULL)
    {
-      state_entropy= new double_array_2d[nb_trees];
-      for(t= 0; t < nb_trees; t++)
-         state_entropy[t]= NULL;
+      state_entropy = new double_array_2d[nb_trees];
+      for(t = 0; t < nb_trees; t++)
+         state_entropy[t] = NULL;
    }
    if (norm == NULL)
    {
@@ -1675,150 +1756,158 @@ double HiddenMarkovIndOutTree::upward_step_norm(const HiddenMarkovTreeData& tree
          norm[t] = NULL;
    }
 
-   for(t= 0; t < nb_trees; t++)
+   if (tree_entropies == NULL)
+      tree_entropies = new double[nb_trees];
+
+   for(t = 0; t < nb_trees; t++)
       if ((index == I_DEFAULT) || (index == t))
       {
-         current_tree= trees.trees[t];
-         current_size= current_tree->get_size();
+         tree_entropies[t] = 0.0;
+         current_tree = trees.trees[t];
+         current_size = current_tree->get_size();
          if (norm[t] == NULL)
             norm[t] = new double[current_size];
 
          if (upward_prob[t] == NULL)
          {
-            upward_prob[t]= new double*[nb_state];
-            for(j= 0; j < nb_state; j++)
-               upward_prob[t][j]= NULL;
+            upward_prob[t] = new double*[nb_state];
+            for(j = 0; j < nb_state; j++)
+               upward_prob[t][j] = NULL;
          }
 
          if (upward_parent_prob[t] == NULL)
          {
-            upward_parent_prob[t]= new double*[nb_state];
-            for(j= 0; j < nb_state; j++)
-               upward_parent_prob[t][j]= NULL;
+            upward_parent_prob[t] = new double*[nb_state];
+            for(j = 0; j < nb_state; j++)
+               upward_parent_prob[t][j] = NULL;
          }
 
          if (state_entropy[t] == NULL)
          {
-            state_entropy[t]= new double*[nb_state];
-            for(j= 0; j < nb_state; j++)
-               state_entropy[t][j]= NULL;
+            state_entropy[t] = new double*[nb_state];
+            for(j = 0; j < nb_state; j++)
+               state_entropy[t][j] = NULL;
          }
 
-         for(j= 0; j < nb_state; j++)
+         for(j = 0; j < nb_state; j++)
          {
             if (upward_prob[t][j] == NULL)
-               upward_prob[t][j]= new double[current_size];
+               upward_prob[t][j] = new double[current_size];
 
             if (upward_parent_prob[t][j] == NULL)
-               upward_parent_prob[t][j]= new double[current_size];
+               upward_parent_prob[t][j] = new double[current_size];
 
             if (state_entropy[t][j] == NULL)
-               state_entropy[t][j]= new double[current_size];
+               state_entropy[t][j] = new double[current_size];
 
-            upward_parent_prob[t][j][current_tree->root()]= D_DEFAULT;
+            upward_parent_prob[t][j][current_tree->root()] = D_DEFAULT;
          }
 
-         v= new generic_visitor<tree_type>;
+         v = new generic_visitor<tree_type>;
          traverse_tree(current_tree->root(), *current_tree, *v);
-         va= v->get_postorder(*current_tree);
+         va = v->get_postorder(*current_tree);
          delete v;
 
          // a node must be reached before its parent
          assert(va.size() == current_size);
 
-         for(u= 0; u < current_size; u++)
+         for(u = 0; u < current_size; u++)
          {
-            cnode= va[u];
-            norm[t][cnode]= .0;
+            cnode = va[u];
+            norm[t][cnode] = .0;
             if (current_tree->is_leaf(cnode))
             // leaf node
             {
-               for(j= 0; j < nb_state; j++)
+               for(j = 0; j < nb_state; j++)
                {
-                  upward_prob[t][j][cnode]=
+                  upward_prob[t][j][cnode] =
                      output_cond_prob[t][j][cnode] * marginal_prob[t][j][cnode];
-                  norm[t][cnode]+= upward_prob[t][j][cnode];
+                  norm[t][cnode] += upward_prob[t][j][cnode];
                }
 
-               for(j= 0; j < nb_state; j++)
+               for(j = 0; j < nb_state; j++)
                   upward_prob[t][j][cnode] /= norm[t][cnode];
 
-               for(j= 0; j < nb_state; j++)
+               for(j = 0; j < nb_state; j++)
                {
-                  upward_parent_prob[t][j][cnode]= .0;
-                  for(k= 0; k < nb_state; k++)
+                  upward_parent_prob[t][j][cnode] = .0;
+                  for(k = 0; k < nb_state; k++)
                      if (marginal_prob[t][k][cnode] > 0)
-                        upward_parent_prob[t][j][cnode]+= upward_prob[t][k][cnode]
+                        upward_parent_prob[t][j][cnode] += upward_prob[t][k][cnode]
                            * transition[j][k] / marginal_prob[t][k][cnode];
-                  state_entropy[t][j][cnode]= .0;
+                  state_entropy[t][j][cnode] = .0;
                }
             }
             else // non-terminal node
             {
-               for(j= 0; j < nb_state; j++)
+               for(j = 0; j < nb_state; j++)
                {
-                  upward_prob[t][j][cnode]= 1.;
-                  state_entropy[t][j][cnode]= .0;
-                  tie(ch_it, ch_end)= current_tree->children(cnode);
+                  upward_prob[t][j][cnode] = 1.;
+                  state_entropy[t][j][cnode] = .0;
+                  tie(ch_it, ch_end) = current_tree->children(cnode);
                   while(ch_it < ch_end)
                   {
-                     upward_prob[t][j][cnode]*= upward_parent_prob[t][j][*ch_it];
-                     for(k= 0; k < nb_state; k++)
+                     upward_prob[t][j][cnode] *= upward_parent_prob[t][j][*ch_it];
+                     for(k = 0; k < nb_state; k++)
                      {
                         if ((marginal_prob[t][k][*ch_it] > 0)
                            && (upward_parent_prob[t][j][*ch_it] > 0))
                         {
                            // probability of child state given parent state
                            // and subtree rooted at child state
-                           buff= upward_prob[t][k][*ch_it] * transition[j][k]
+                           buff = upward_prob[t][k][*ch_it] * transition[j][k]
                               / (marginal_prob[t][k][*ch_it] * upward_parent_prob[t][j][*ch_it]);
                            if (buff > 0)
-                              state_entropy[t][j][cnode]+= buff
+                              state_entropy[t][j][cnode] += buff
                                  * (state_entropy[t][k][*ch_it] - log(buff));
                         }
                      }
                      ch_it++;
                   }
 
-                  upward_prob[t][j][cnode]*=
+                  upward_prob[t][j][cnode] *=
                      output_cond_prob[t][j][cnode] * marginal_prob[t][j][cnode];
-                  norm[t][cnode]+= upward_prob[t][j][cnode];
+                  norm[t][cnode] += upward_prob[t][j][cnode];
                }
 
-               for(j= 0; j < nb_state; j++)
+               for(j = 0; j < nb_state; j++)
                   upward_prob[t][j][cnode] /= norm[t][cnode];
 
                if (!current_tree->is_root(cnode))
-                  for(j= 0; j < nb_state; j++)
+                  for(j = 0; j < nb_state; j++)
                   {
-                     upward_parent_prob[t][j][cnode]= .0;
-                     for(k= 0; k < nb_state; k++)
+                     upward_parent_prob[t][j][cnode] = .0;
+                     for(k = 0; k < nb_state; k++)
                         if (marginal_prob[t][k][cnode] > 0)
-                           upward_parent_prob[t][j][cnode]+= upward_prob[t][k][cnode]
+                           upward_parent_prob[t][j][cnode] += upward_prob[t][k][cnode]
                               * transition[j][k] / marginal_prob[t][k][cnode];
                   }
                else
                {
                   // just checking subroutine coherence
-                  for(j= 0; j < nb_state; j++)
+                  for(j = 0; j < nb_state; j++)
                      assert(upward_parent_prob[t][j][cnode] == D_DEFAULT);
                   assert(u == current_size-1);
                }
             } // end non-terminal node
             if (norm[t][cnode] > 0)
-               res+= log(norm[t][cnode]);
+               res += log(norm[t][cnode]);
             else
-               res= D_INF;
+               res = D_INF;
          } // end for u
 
          // computation of the conditional hidden state tree entropy
          // root node
-         cnode= current_tree->root();
-         for (j= 0; j < nb_state; j++)
+         cnode = current_tree->root();
+         for (j = 0; j < nb_state; j++)
             if (upward_prob[t][j][cnode] > 0)
-               entropy1+= upward_prob[t][j][cnode]
+               tree_entropies[t] += upward_prob[t][j][cnode]
                   * (state_entropy[t][j][cnode] - log(upward_prob[t][j][cnode]));
+         entropy1 += tree_entropies[t];
       } // end for t
+      else
+         tree_entropies[t] = D_INF;
+
    return res;
 }
 
@@ -2243,7 +2332,7 @@ HiddenMarkovTreeData::hidden_markov_ind_out_tree_estimation(StatError& error,
                break;
          }
          else
-            likelihood= hmarkovt->likelihood_computation(*this);
+            likelihood= hmarkovt->likelihood_computation(*otrees);
 
          if (algorithm == VITERBI)
          {
@@ -2740,7 +2829,7 @@ HiddenMarkovTreeData::hidden_markov_ind_out_tree_estimation(StatError& error,
 
          // computation of the likelihood and of the model characteristics
 
-         otrees->likelihood= hmarkovt->likelihood_computation(*this);
+         otrees->likelihood= hmarkovt->likelihood_computation(*otrees);
 
          hmarkovt->component_computation();
          hmarkovt->characteristic_computation(*otrees, counting_flag, I_DEFAULT, false);

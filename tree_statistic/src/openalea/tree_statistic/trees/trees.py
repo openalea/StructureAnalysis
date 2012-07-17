@@ -2479,8 +2479,38 @@ class Trees(object):
             types=self.__types
             cselected=self.__ctrees.SelectIndividual(id_list, keep)
         selected = Trees(cselected, types, attributes)
-        self._copy_vid_conversion(selected)
-        self._copy_tid_conversion(selected)
+        # mapping mtg to tree vertices and vice-versa
+        if mode.upper()=="KEEP":
+            selected_ind = list(id_list) # kept individuals
+        else:
+            selected_ind = set(range(self.NbTrees())).difference(set(id_list))
+        selected_ind.sort()
+        if self.__mtg_to_tree_vid is None:
+            selected.__mtg_to_tree_vid = None
+            selected.__tree_to_mtg_vid = None
+        else:
+            selected.__tree_to_mtg_vid = []
+            selected.__mtg_to_tree_vid = []
+            for i in selected_ind:
+                map = dict(self.__tree_to_mtg_vid[i])
+                mapinv = {}
+                selected.__tree_to_mtg_vid.append(map)
+                for v in map.keys():
+                    mapinv[map[v]] = v
+                selected.__mtg_to_tree_vid.append(mapinv)
+        if self.__tree_to_mtg_tid is None:
+            selected.__mtg_to_tree_tid = None
+            selected.__tree_to_mtg_tid = None
+        else:
+            selected.__tree_to_mtg_tid = {}
+            selected.__mtg_to_tree_tid = {}
+            indiv = 0
+            for i in selected_ind:
+                selected.__tree_to_mtg_tid[indiv] = self.__tree_to_mtg_tid[i]
+                indiv += 1
+            for v in selected.__tree_to_mtg_tid.keys():
+                    selected.__mtg_to_tree_tid[selected.__tree_to_mtg_tid[v]] = v
+
         return selected
 
     def SegmentationExtract(self, variable, values, mode="Keep"):
@@ -2686,7 +2716,7 @@ class Trees(object):
         return self.__ctrees.Display(False)
 
     def _copy_vid_conversion(self, dest):
-        """Copy the dictionnaries corresponding to the tree -> MTG
+        """Copy the dictionaries corresponding to the tree -> MTG
             and MTG -> tree vid conversions
 
         :Usage:

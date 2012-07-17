@@ -48,10 +48,31 @@ def setup_func():
 
 @with_setup(setup_func)
 
+def check_mtg_mapping(mtg_t):
+    """Check consistency between tree vertices
+    and mapping betweeen mtg vertices and tree vertices"""
+    for t in range(mtg_t.NbTrees()):
+        # map: TreeId -> MTGVertexId
+        Tr = mtg_t.Tree(t)
+        tmap = Tr.MTGVertex()
+        tmapinv = Tr.TreeVertex()
+        for m in [tmap, tmapinv]:
+            if len(m) != Tr.Size():
+                msg = "Length of mapping (" + str(len(m))
+                msg += ") and number of tree vertices (" + str(Tr.Size())
+                msg += ") do not match for tree: " + str(t)
+                assert len(m) == Tr.Size(), msg
+        for i in tmap.keys():
+            if tmapinv[tmap[i]] != i:
+                msg = "Inconsistency in mapping and inverse mapping"
+                msg += " in tree: " + str(t)
+                assert tmapinv[tmap[i]] != i, msg
+
 def test_mtg_build():
     """constructor from a MTG"""
     mtg_t = trees.Trees(mtg_name)
     assert mtg_t
+    check_mtg_mapping(mtg_t)
     return mtg_t
 
 def test_tree_size():
@@ -129,6 +150,22 @@ def test_select_variable():
         assert False, str(msg) + "\n" + str(mtg_t)
     msg = "Bad number of trees after variable selection"
     assert T.NbTrees() == mtg_t.NbTrees(), msg
+    msg = "Bad number of variables after variable selection"
+    assert T.NbVariables() == 1, msg
+
+def test_select_individual():
+    """Select individuals 0, 2"""
+    mtg_t = test_mtg_build()
+    try:
+        T = mtg_t.SelectIndividual([0, 2])
+    except trees.StatTreeError, msg:
+        assert False, str(msg) + "\n" + str(mtg_t)
+    msg = "Bad number of trees after variable selection"
+    assert T.NbTrees() == 2, msg
+    msg = "Bad number of variables after variable selection"
+    assert T.NbVariables() == mtg_t.NbVariables(), msg
+    check_mtg_mapping(T)
+    return T
 
 def test_merge_failure():
     """use invalid tree in merge"""
@@ -176,6 +213,7 @@ if __name__ == "__main__":
     test_difference()
     test_merge()
     test_select_variable()
+    test_select_individual()
     test_merge_failure()
     test_build_vectors()
     test_build_sequences()

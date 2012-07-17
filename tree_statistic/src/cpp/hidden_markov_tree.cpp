@@ -3659,6 +3659,21 @@ HiddenMarkovTree& HiddenMarkovTree::operator=(const HiddenMarkovTree& markov)
 
 /*****************************************************************
  *
+ *  Return a copy of an instance of HiddenMarkovTree with the same
+ *  dynamic class
+ *
+ **/
+
+HiddenMarkovTree* HiddenMarkovTree::HiddenMarkovTreeCopy(bool data_flag,
+                                                         bool characteristic_flag) const
+{
+   HiddenMarkovTree *res = new HiddenMarkovTree(*this, data_flag, characteristic_flag) ;
+   return res;
+}
+
+
+/*****************************************************************
+ *
  *  Extraction of a distribution for HiddenMarkovTree class
  *  using a StatError object, the type of distribution,
  *  the considered variable and value (or state)
@@ -4233,7 +4248,7 @@ double HiddenMarkovTree::likelihood_computation(const Trees& otrees,
                                                 int index) const
 { return D_INF; }
 
-double HiddenMarkovTree::likelihood_computation(const HiddenMarkovTreeData& otrees) const
+double HiddenMarkovTree::likelihood_computation(HiddenMarkovTreeData& otrees) const
 { return D_INF; }
 
 HiddenMarkovTreeData*
@@ -4973,6 +4988,15 @@ ostream& HiddenMarkovTree::ascii_write(ostream& os,
             << STAT_label[STATL_NORMALIZED] << ": " << hidden_likelihood / cumul_size << ")" << endl;
       }
 
+      if (otrees->sample_entropy != D_DEFAULT) {
+        os << "\n";
+        if (file_flag) {
+          os << "# ";
+        }
+        os << STAT_TREES_label[STATL_STATE_TREE_ENTROPY] << ": " << otrees->sample_entropy << "   ("
+           << STAT_label[STATL_NORMALIZED] << ": " << otrees->sample_entropy / cumul_size << ")" << endl;
+      }
+
       if (likelihood != D_INF)
       {
          os << "\n";
@@ -4982,7 +5006,7 @@ ostream& HiddenMarkovTree::ascii_write(ostream& os,
             << STAT_label[STATL_NORMALIZED] << ": " << likelihood / cumul_size << ")" << endl;
       }
 
-      // print AIC, AICc and BIC
+      // print AIC, AICc and BIC.
       if (likelihood != D_INF)
       {
          os << "\n";
@@ -5018,7 +5042,7 @@ ostream& HiddenMarkovTree::ascii_write(ostream& os,
             << 2 * likelihood-penalty_computation(MIN_PROBABILITY) << endl;
       }
 
-      // print ICL
+      // print BIC-ICL
       if (otrees->hidden_likelihood != D_INF)
       {
          os << "\n";
@@ -5026,7 +5050,9 @@ ostream& HiddenMarkovTree::ascii_write(ostream& os,
             os << "# ";
          os << nb_parameter << " " << STAT_label[nb_parameter == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS]
             << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[ICL] << "): "
-            << 2*hidden_likelihood-nb_parameter*log((double)cumul_size) << endl;
+            // << 2*hidden_likelihood-nb_parameter*log((double)cumul_size) << endl;
+            << ((otrees->sample_entropy != D_INF) ? (2 * (likelihood - otrees->sample_entropy) - nb_parameter
+                  * log((double)cumul_size)) : D_INF) << endl;
          // otrees->likelihood == completed likelihood
 
          os << "\n";
@@ -5034,7 +5060,9 @@ ostream& HiddenMarkovTree::ascii_write(ostream& os,
             os << "# ";
          os << nb_parameter << " " << STAT_label[nb_parameter == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS]
             << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[ICLc] << "): "
-            << 2*hidden_likelihood-penalty_computation(MIN_PROBABILITY) << endl;
+            // << 2*hidden_likelihood-penalty_computation(MIN_PROBABILITY) << endl;
+            << ((otrees->sample_entropy != D_INF) ? (2 * (hidden_likelihood - otrees->sample_entropy)
+               - penalty_computation(MIN_PROBABILITY)) : D_INF) << endl;
       }
 
 
@@ -6660,6 +6688,8 @@ HiddenMarkovTreeData::HiddenMarkovTreeData()
  , likelihood(D_INF)
  , hidden_likelihood(D_INF)
  , _nb_states(I_DEFAULT)
+ , sample_entropy(D_INF)
+ , entropy(NULL)
  , state_trees(NULL)
  , observation_distribution(NULL)
  , state_characteristics(NULL)
@@ -6689,6 +6719,8 @@ HiddenMarkovTreeData::HiddenMarkovTreeData(int inb_integral,
  , likelihood(D_INF)
  , hidden_likelihood(D_INF)
  , _nb_states(I_DEFAULT)
+ , sample_entropy(D_INF)
+ , entropy(NULL)
  , state_trees(NULL)
  , observation_distribution(NULL)
  , state_characteristics(NULL)
@@ -6739,6 +6771,8 @@ HiddenMarkovTreeData::HiddenMarkovTreeData(int inb_integral,
  , likelihood(D_INF)
  , hidden_likelihood(D_INF)
  , _nb_states(I_DEFAULT)
+ , sample_entropy(D_INF)
+ , entropy(NULL)
  , state_trees(NULL)
  , observation_distribution(NULL)
  , state_characteristics(NULL)
@@ -6761,6 +6795,8 @@ HiddenMarkovTreeData::HiddenMarkovTreeData(int inb_trees,
  , likelihood(D_INF)
  , hidden_likelihood(D_INF)
  , _nb_states(I_DEFAULT)
+ , sample_entropy(D_INF)
+ , entropy(NULL)
  , state_trees(NULL)
  , observation_distribution(NULL)
  , state_characteristics(NULL)
@@ -6780,6 +6816,8 @@ HiddenMarkovTreeData::HiddenMarkovTreeData(const Trees& otrees)
  , likelihood(D_INF)
  , hidden_likelihood(D_INF)
  , _nb_states(I_DEFAULT)
+ , sample_entropy(D_INF)
+ , entropy(NULL)
  , state_trees(NULL)
  , observation_distribution(NULL)
  , state_characteristics(NULL)
@@ -6803,6 +6841,8 @@ HiddenMarkovTreeData::HiddenMarkovTreeData(const HiddenMarkovTreeData& trees,
  , likelihood(D_INF)
  , hidden_likelihood(D_INF)
  , _nb_states(I_DEFAULT)
+ , sample_entropy(D_INF)
+ , entropy(NULL)
  , state_trees(NULL)
  , observation_distribution(NULL)
  , state_characteristics(NULL)
@@ -7694,8 +7734,9 @@ HiddenMarkovTreeData::get_state_smoothed_hidden_markov_tree_data(int index,
                tmp_utree= NULL;
             }
 
-         res= new HiddenMarkovTreeData(inb_trees, itype, otrees);
-         res->markov= new HiddenMarkovTree(*markov, false, false);
+         res = new HiddenMarkovTreeData(inb_trees, itype, otrees);
+         res->markov = hmarkovt->HiddenMarkovTreeCopy(false, false);
+         // new HiddenMarkovTree(*markov, false, false);
 
          res->state_trees= new Typed_edge_one_int_tree*[inb_trees];
          for(t= 0; t < _nb_trees; t++)
@@ -7730,7 +7771,18 @@ HiddenMarkovTreeData::get_state_smoothed_hidden_markov_tree_data(int index,
                   }
                }
             }
-         res->likelihood= likelihood;
+         // res->markov->likelihood_computation(*res) impossible
+         // since the number of variables of res has been increased
+         res->likelihood = likelihood;
+         res->sample_entropy = sample_entropy;
+         if (entropy != NULL)
+         {
+            res->entropy = new double[_nb_trees];
+            for(t = 0; t < _nb_trees; t++)
+               res->entropy[t] = entropy[t];
+         }
+
+
          if (algorithm == FORWARD_BACKWARD)
          {
             this_cp= new HiddenMarkovTreeData(*this, false);
@@ -8254,55 +8306,61 @@ void HiddenMarkovTreeData::remove()
    if (markov != NULL)
    {
       delete markov;
-      markov= NULL;
+      markov = NULL;
    }
 
    if (chain_data != NULL)
    {
       delete chain_data;
-      chain_data= NULL;
+      chain_data = NULL;
+   }
+
+   if (this->entropy != NULL)
+   {
+      delete [] this->entropy;
+      this->entropy = NULL;
    }
 
    if (this->state_trees != NULL)
    {
-       for(t= 0; t < _nb_trees; t++)
+       for(t = 0; t < _nb_trees; t++)
        {
           if (this->state_trees[t] != NULL)
           {
              delete this->state_trees[t];
-             this->state_trees[t]= NULL;
+             this->state_trees[t] = NULL;
           }
        }
        delete [] this->state_trees;
-       this->state_trees= NULL;
+       this->state_trees = NULL;
    }
 
    if (observation_distribution != NULL)
    {
-      for(var= 0; var < _nb_integral; var++)
+      for(var = 0; var < _nb_integral; var++)
       {
          if (observation_distribution[var] != NULL)
          {
-            for(j= 0; j < state_characteristics->marginal_distribution->nb_value; j++)
+            for(j = 0; j < state_characteristics->marginal_distribution->nb_value; j++)
             {
                if (observation_distribution[var][j] != NULL)
                {
                   delete observation_distribution[var][j];
-                  observation_distribution[var][j]= NULL;
+                  observation_distribution[var][j] = NULL;
                }
             }
             delete [] observation_distribution[var];
          }
-         observation_distribution[var]= NULL;
+         observation_distribution[var] = NULL;
       }
       delete [] observation_distribution;
-      observation_distribution= NULL;
+      observation_distribution = NULL;
    }
 
    if (state_characteristics != NULL)
    {
       delete state_characteristics;
-      state_characteristics= NULL;
+      state_characteristics = NULL;
    }
 
    // A posterior call to Trees::remove() is required...
@@ -8325,33 +8383,46 @@ void HiddenMarkovTreeData::copy(const HiddenMarkovTreeData& trees,
    {
       if (markov != NULL)
          delete markov;
-      markov= new HiddenMarkovTree(*(trees.markov), false);
+      markov = new HiddenMarkovTree(*(trees.markov), false);
    }
    else
-      markov= NULL;
+      markov = NULL;
 
    if (trees.chain_data != NULL)
    {
       if (chain_data != NULL)
          delete chain_data;
-      chain_data= new ChainData(*(trees.chain_data));
+      chain_data = new ChainData(*(trees.chain_data));
    }
    else
-      chain_data= NULL;
+      chain_data = NULL;
 
-   likelihood= trees.likelihood;
-   hidden_likelihood= trees.hidden_likelihood;
+   likelihood = trees.likelihood;
+   hidden_likelihood = trees.hidden_likelihood;
+   sample_entropy = trees.sample_entropy;
+
+   if (trees.entropy != NULL)
+   {
+      this->entropy = new double[_nb_trees];
+      for(t = 0; t < _nb_trees; t++)
+      {
+         this->entropy[t] = trees.entropy[t];
+      }
+   }
+   else
+      this->entropy = NULL;
+
 
    if (trees.state_trees != NULL)
    {
-      this->state_trees= new Typed_edge_one_int_tree*[_nb_trees];
-      for(t= 0; t < _nb_trees; t++)
+      this->state_trees = new Typed_edge_one_int_tree*[_nb_trees];
+      for(t = 0; t < _nb_trees; t++)
       {
           if (trees.state_trees[t] != NULL)
-             this->state_trees[t]=
+             this->state_trees[t] =
                 new Typed_edge_one_int_tree(*(trees.state_trees[t]));
           else
-             this->state_trees[t]= NULL;
+             this->state_trees[t] = NULL;
       }
    }
    else
@@ -8360,30 +8431,30 @@ void HiddenMarkovTreeData::copy(const HiddenMarkovTreeData& trees,
    if (characteristic_flag)
    {
       if (trees.state_characteristics != NULL)
-         state_characteristics= new TreeCharacteristics(*(trees.state_characteristics));
+         state_characteristics = new TreeCharacteristics(*(trees.state_characteristics));
       else
-         state_characteristics= NULL;
+         state_characteristics = NULL;
 
       if (trees.observation_distribution != NULL)
       {
          observation_distribution= new ptFrequencyDistribution_array[_nb_integral];
-         for(var= 0; var < _nb_integral; var++)
+         for(var = 0; var < _nb_integral; var++)
             if (trees.observation_distribution[var] != NULL)
             {
                observation_distribution[var]= new FrequencyDistribution*[state_characteristics->marginal_distribution->nb_value];
-               for(j= 0; j < state_characteristics->marginal_distribution->nb_value; j++)
+               for(j = 0; j < state_characteristics->marginal_distribution->nb_value; j++)
                {
                   if (trees.observation_distribution[var][j] != NULL)
-                     observation_distribution[var][j]= new FrequencyDistribution(*(trees.observation_distribution[var][j]));
+                     observation_distribution[var][j] = new FrequencyDistribution(*(trees.observation_distribution[var][j]));
                   else
-                     observation_distribution[var][j]= NULL;
+                     observation_distribution[var][j] = NULL;
                }
             }
             else
-               observation_distribution[var]= NULL;
+               observation_distribution[var] = NULL;
       }
       else
-         observation_distribution= NULL;
+         observation_distribution = NULL;
    }
    else
    {
@@ -8391,8 +8462,8 @@ void HiddenMarkovTreeData::copy(const HiddenMarkovTreeData& trees,
          delete state_characteristics;
       if (observation_distribution != NULL)
          delete observation_distribution;
-      state_characteristics= NULL;
-      observation_distribution= NULL;
+      state_characteristics = NULL;
+      observation_distribution = NULL;
    }
 
 }

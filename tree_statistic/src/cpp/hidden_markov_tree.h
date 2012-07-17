@@ -504,6 +504,10 @@ public :
    virtual ~HiddenMarkovTree();
    HiddenMarkovTree& operator=(const HiddenMarkovTree& markov);
 
+   /** Return a copy of \e self with the same dynamic class */
+   virtual HiddenMarkovTree* HiddenMarkovTreeCopy(bool data_flag = true,
+                                                  bool characteristic_flag = true) const;
+
    DiscreteParametricModel* extract(StatError& error, int type,
                                     int variable, int value) const;
    /** Return the data part of a HiddenMarkovTree,
@@ -564,7 +568,7 @@ public :
    // virtual functions common to all hidden_markov_trees ?
 
    virtual double likelihood_computation(const Trees& trees, int index) const;
-   virtual double likelihood_computation(const HiddenMarkovTreeData& trees) const;
+   virtual double likelihood_computation(HiddenMarkovTreeData& trees) const;
 
    /** Compute optimal state trees */
    virtual HiddenMarkovTreeData* state_tree_computation(StatError& error,
@@ -652,8 +656,12 @@ private :
    double likelihood;
    /// completed likelihood
    double hidden_likelihood;
-   // number of hidden states
+   /// number of hidden states
    int _nb_states;
+   /// entropy of state trees given observations
+   double sample_entropy;
+   /// entropy of each state tree given observed tree
+   double* entropy;
 
    /// hidden trees
    ptOne_int_tree_set state_trees;
