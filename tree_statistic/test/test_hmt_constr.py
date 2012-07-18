@@ -49,7 +49,17 @@ def test_hmt_read_failure():
     """Use bad file name reading some HMT from a file"""
     msg = "Failed to raise exception for bad file name"
     try:
-        H = hmt.HiddenMarkovIndOutTree("nosuch-hmt_name1")
+        H = hmt.HiddenMarkovIndOutTree("too_few_states_param.hmt")
+    except hmt.StatTreeError, e:
+        print e
+    else:
+        assert False, msg
+
+def test_hmt_too_few_states_param_failure():
+    """Read HMT from a file with too few states (parametric case)"""
+    msg = "Failed to raise exception for too few state in parametric HMT"
+    try:
+        H = hmt.HiddenMarkovIndOutTree("")
     except hmt.StatTreeError, e:
         print e
     else:
@@ -139,6 +149,7 @@ if __name__ == "__main__":
     test_hmt_read()
     test_hmt_ascii_read
     test_hmt_read_failure()
+    test_hmt_too_few_states_param_failure()
     test_hmt_save()
     test_hmt_spreadsheet_save()
     test_compare_display()
