@@ -388,6 +388,10 @@ DiscreteParametricProcess* discrete_observation_parsing(StatError &error , ifstr
         break;
       }
     }
+    if ((!dist[i]) && (j==0)) {
+      status = false;
+      error.update(STAT_parsing[STATP_FORMAT] , line);
+    }
   }
 
   if (status) {
