@@ -116,9 +116,9 @@ def test_mtg_build():
     return mtg_t
 
 def test_mtg_vertices():
-    """Test correspondance between MTG and Tree vertices"""
-    msg1 = "Bad correspondance from Tree to MTG vertices: "
-    msg2 = "Bad correspondance from MTG to Tree vertices: "
+    """Test correspondence between MTG and Tree vertices"""
+    msg1 = "Bad correspondence from Tree to MTG vertices: "
+    msg2 = "Bad correspondence from MTG to Tree vertices: "
     mtg_t = test_mtg_build()
     d = mtg_t.MTGVertexId(0)
     d_check = {0: 2, 1: 3, 2: 4, 3: 5, 4: 6, 5: 7, 6: 8, 7: 9, 8: 10, \
@@ -130,6 +130,30 @@ def test_mtg_vertices():
         d2[d[k]] = k
     msg2 += str(d2) + "\n - should be \n" + str(mtg_t.TreeVertexId(0))
     assert (d2 == mtg_t.TreeVertexId(0)), msg2
+
+def test_tree_structures():
+    """Test TreeStructure class"""
+    msg1 = "Bad number of vertices for TreeStructure: "
+    msg2 = "Bad correspondence from MTG to Tree vertices: "
+    mtg_t = test_mtg_build()
+    TrMTG = mtg_t.Tree(0)
+    # Copy tree structures
+    Tr = trees.TreeStructure(TrMTG)
+    assert Tr.Size() == TrMTG.Size(), msg1 + str(Tr.Size())
+    assert Tr.TreeVertex() == TrMTG.TreeVertex(), msg2
+    assert Tr.MTGVertex() == TrMTG.MTGVertex(), msg2
+    # Build trees with same structures as mtg_t
+    tree_list = []
+    attributes = mtg_t.Attributes()
+    for t in range(mtg_t.NbTrees()):
+        TrMTG2 = mtg_t.Tree(t)
+        Tr = trees.TreeStructure(TrMTG2)
+        tree_list += [trees.Tree([0], Tr)]
+    T0 = trees.Trees(tree_list, attribute_names=[attributes[0]])
+    Tr = T0.Tree(0)
+    assert Tr.Size() == TrMTG.Size(), msg1 + str(Tr.Size())
+    assert Tr.TreeVertex() == TrMTG.TreeVertex(), msg2
+    assert Tr.MTGVertex() == TrMTG.MTGVertex(), msg2
 
 def test_exception_inheritance():
     """Test whether StatTreeError are also seen as StatError"""
@@ -290,6 +314,7 @@ if __name__ == "__main__":
     test_nb_trees()
     test_copy()
     test_mtg_build()
+    test_tree_structures()
     test_exception_inheritance()
     test_mtg_vertices()
     test_mtg_build_failure()

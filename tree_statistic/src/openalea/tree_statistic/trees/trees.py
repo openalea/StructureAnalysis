@@ -142,7 +142,13 @@ class TreeValue:
 
 
 class Tree:
-    """An implementation of trees with integral and floating attributes."""
+    """
+    An implementation of trees with integral and floating attributes.
+
+    .. todo:: Make Tree and TreeStructure derive from a same abstract class
+
+    .. seealso:: :class:`TreeStructure`
+    """
 
     def __init__(self, arg, arg2=None, 
                  attribute_names=None, attribute_def=None, scale=None):
@@ -213,6 +219,17 @@ class Tree:
                 self.__ctree = ctree.CTree(arg2)
             else:
                 self.__ctree = ctree.CTree(arg2._tree(), i)
+                try:
+                    # extract MTG <-> Tree ids dictionaries
+                    mtg2tree = arg2.TreeVertex()
+                    tree2mtg = arg2.MTGVertex()
+                    tid = arg2.MTGVertex(arg2.Root())
+                except Warning:
+                    pass
+                else:
+                    self._copy_vid_conversion(mtg2tree,
+                                            tree2mtg)
+                    self.__mtg_tid = tid
         if len(attributes) == 0:
             # Default attribute name : "Variable0", etc.
             for var in range(self.NbVariables()):
@@ -840,7 +857,14 @@ class Tree:
         return self._display(self.Root(), False, True, False)
 
 class TreeStructure:
-    """An implementation of tree structures, i.e. trees with no attributes."""
+    """
+    An implementation of tree structures, i.e. trees with no attributes.
+
+    .. todo:: Make Tree and TreeStructure derive from a same abstract class
+
+    .. seealso:: :class:`Tree`
+
+    """
 
     def __init__(self, arg=None, max_size=I_DEFAULT_TREE_SIZE,
                  max_depth=I_DEFAULT_TREE_DEPTH):
@@ -858,9 +882,17 @@ class TreeStructure:
             # arg is supposed to be a tree...
             ctree_val = arg._ctree()
             self.__tree = ctree.TreeStructure(ctree_val)
-            self._copy_vid_conversion(arg.__mtg_to_tree_vid,
-                                      arg.__tree_to_mtg_vid)
-            self.__mtg_tid = arg.__mtg_tid            
+            try:
+                # extract MTG <-> Tree ids dictionaries
+                mtg2tree = arg.TreeVertex()
+                tree2mtg = arg.MTGVertex()
+                tid = arg.MTGVertex(arg.Root())
+            except Warning:
+                pass
+            else:
+                self._copy_vid_conversion(mtg2tree,
+                                          tree2mtg)
+                self.__mtg_tid = tid
         elif issubclass(arg.__class__,TreeStructure):
             #... or a tree structure
             self.__tree = ctree.TreeStructure(arg.__tree)            
@@ -895,6 +927,25 @@ class TreeStructure:
             return "<"
         else:
             return "+"
+
+    def MTGVertex(self, treevid=None):
+        """
+        Return the MTG vertex identifier (vid) of a TreeStructure vertex
+
+        :Parameters:
+          `treevid` (int) - a valid vertex identifier (vid).
+
+        :Returns:
+            If `treevid` defines a valid vertex of self, and that self
+            was obtained from a MTG, a MTG vid (int) is returned.
+        """
+        if self.__tree_to_mtg_vid is None:
+            raise Warning, "Current Trees object has not been obtained from " \
+                "a MTG"
+        if treevid is None:
+            return dict(self.__tree_to_mtg_vid)
+        else:
+            return self.__tree_to_mtg_vid[treevid]
 
     def Root(self):
         """Return the root vertex identifier (vid)."""
@@ -931,8 +982,43 @@ class TreeStructure:
         """Return the number of vertices."""
         return self.__tree.Size()
 
+    def TreeVertex(self, mtgvid=None):
+        """Return the tree vid of a MTG vertex"""
+        if self.__mtg_to_tree_vid is None:
+            raise Warning, "Current Trees object has not been obtained from " \
+                "a MTG"
+        if mtgvid is None:
+            return dict(self.__mtg_to_tree_vid)
+        else:
+            return self.__mtg_to_tree_vid[mtgvid]
+
     def _tree(self):
         return self.__tree
+
+    def _copy_mtg_tid(self, Vid):
+        """Set vertex identifier in the MTG corresponding to the root of self as "Vid"
+
+        :Usage:
+
+            _copy_mtg_tid(Vid)
+
+        :Parameters:
+
+          Vid (int) - Vertex considered as the root of self
+        """
+        self.__mtg_tid = Vid
+
+    def _copy_vid_conversion(self, source_mtg2treedict, source_tree2mtgdict):
+        # copy the dictionaries corresponding to the tree -> MTG
+        # and MTG -> tree vid conversion from source to self
+            if source_mtg2treedict is None:
+                self.__mtg_to_tree_vid=None
+            else:
+                self.__mtg_to_tree_vid=dict(source_mtg2treedict)
+            if source_tree2mtgdict is None:
+                self.__tree_to_mtg_vid=None
+            else:
+                self.__tree_to_mtg_vid=dict(source_tree2mtgdict)
 
     def __display(self, key, vids, edgetypes):
         return self.__display_skip(key, "", False, vids, edgetypes)
@@ -1062,11 +1148,11 @@ class Trees(object):
         self.__attributes = []
         if issubclass(arg.__class__, Trees):
             # arg is supposed to be a Trees object...
-            self.__ctrees=ctrees.CTrees(arg.__ctrees)
-            self.__types=list(arg.__types)
-            self.__tmap=list(arg.__tmap)
-            self.__tmapi=list(arg.__tmapi)
-            self.__attributes=list(arg.Attributes())
+            self.__ctrees = ctrees.CTrees(arg.__ctrees)
+            self.__types = list(arg.__types)
+            self.__tmap = list(arg.__tmap)
+            self.__tmapi = list(arg.__tmapi)
+            self.__attributes = list(arg.Attributes())
             arg._copy_vid_conversion(self)
             arg._copy_tid_conversion(self)
         elif issubclass(arg.__class__, ctrees.CTrees):
