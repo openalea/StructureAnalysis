@@ -850,17 +850,29 @@ class TreeStructure:
         - a Tree or a TreeStructure object;
         - a distribution and values for the maximal size and depth."""
         if arg is None:
-            self.__tree=ctree.TreeStructure()
+            self.__tree = ctree.TreeStructure()
+            self.__mtg_to_tree_vid = None
+            self.__tree_to_mtg_vid = None
+            self.__mtg_tid = None
         elif issubclass(arg.__class__, Tree):
             # arg is supposed to be a tree...
-            ctree_val=arg._ctree()
-            self.__tree=ctree.TreeStructure(ctree_val)
+            ctree_val = arg._ctree()
+            self.__tree = ctree.TreeStructure(ctree_val)
+            self._copy_vid_conversion(arg.__mtg_to_tree_vid,
+                                      arg.__tree_to_mtg_vid)
+            self.__mtg_tid = arg.__mtg_tid            
         elif issubclass(arg.__class__,TreeStructure):
             #... or a tree structure
-            self.__tree=ctree.TreeStructure(arg.__tree)
+            self.__tree = ctree.TreeStructure(arg.__tree)            
+            self._copy_vid_conversion(arg.__mtg_to_tree_vid,
+                                      arg.__tree_to_mtg_vid)
+            self.__mtg_tid = arg.__mtg_tid
         else:
             #... or a Distribution
             self.__tree=ctree.TreeStructure(arg, max_size, max_depth)
+            self.__mtg_to_tree_vid = None
+            self.__tree_to_mtg_vid = None
+            self.__mtg_tid = None
 
     def Depth(self):
             """Return the tree depth."""
