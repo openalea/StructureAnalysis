@@ -3544,6 +3544,57 @@ Sequences* Sequences::segmentation_extract(StatError &error , int variable ,
     if (concatenation) {
       delete [] sequence_length;
     }
+
+#   ifdef MESSAGE
+    if ((seq->index_parameter_type == TIME) && (seq->index_interval->variance > 0.)) {  // pour les suivis de croissance manguier
+      double average_diff , individual_mean , global_mean , diff , individual_variance , global_variance;
+
+      for (i = 0;i < seq->nb_variable;i++) {
+        if (seq->type[i] == INT_VALUE) {
+          average_diff = 0.;
+          for (j = 0;j < seq->nb_sequence;j++) {
+            average_diff += seq->int_sequence[j][i][seq->length[j] - 1] - seq->int_sequence[j][i][0];
+          }
+          average_diff /= seq->nb_sequence;
+
+          global_mean = 0.;
+          individual_variance = 0.;
+          for (j = 0;j < seq->nb_sequence;j++) {
+            individual_mean = 0.;
+            for (k = 0;k < seq->length[j];k++) {
+              individual_mean += seq->int_sequence[j][i][k];
+            }
+            global_mean += individual_mean;
+            individual_mean /= seq->length[j];
+
+            for (k = 0;k < seq->length[j];k++) {
+              diff = seq->int_sequence[j][i][k] - individual_mean;
+              individual_variance += diff * diff;
+            }
+          }
+          global_mean /= seq->cumul_length;
+          individual_variance /= (seq->cumul_length - 1);
+
+          global_variance = 0.;
+          for (j = 0;j < seq->nb_sequence;j++) {
+            for (k = 0;k < seq->length[j];k++) {
+              diff = seq->int_sequence[j][i][k] - global_mean;
+              global_variance += diff * diff;
+            }
+          }
+          global_variance /= (seq->cumul_length - 1);
+
+          cout << "\n" << STAT_label[STATL_VARIABLE] << " " << i + 1 << " - "
+               << "avergage difference: " <<  average_diff << " | "
+               << "within-individual variance: " << individual_variance << " | "
+               << "global variance: " << global_variance << " | "
+               << individual_variance / global_variance;
+        }
+      }
+      cout << endl;
+    }
+#   endif
+
   }
 
   return seq;
@@ -3666,12 +3717,13 @@ Sequences* Sequences::cumulate(StatError &error , int variable) const
  *  Differenciation au 1er ordre des sequences.
  *
  *  arguments : reference sur un objet StatError, indice de la variable,
- *              premier element de la sequence garde ou pas.
+ *              premier element de la sequence garde ou pas,
+ *              normalisation (relative growth rate).
  *
  *--------------------------------------------------------------*/
 
 Sequences* Sequences::difference(StatError &error , int variable ,
-                                 bool first_element) const
+                                 bool first_element , bool normalization) const
 
 {
   bool status = true;
@@ -3738,8 +3790,8 @@ Sequences* Sequences::difference(StatError &error , int variable ,
       inb_variable = 1;
     }
 
-    if ((index_parameter_type != IMPLICIT_TYPE) && ((index_interval->mean != 1.) ||
-         (index_interval->variance > 0.))) {
+    if (((index_parameter_type != IMPLICIT_TYPE) && ((index_interval->mean != 1.) ||
+          (index_interval->variance > 0.))) || (normalization)) {
       itype = new int[inb_variable];
       for (i = 0;i < inb_variable;i++) {
         itype[i] = REAL_VALUE;
@@ -3761,8 +3813,8 @@ Sequences* Sequences::difference(StatError &error , int variable ,
     if (!first_element) {
       delete [] ilength;
     }
-    if ((index_parameter_type != IMPLICIT_TYPE) && ((index_interval->mean != 1.) ||
-         (index_interval->variance > 0.))) {
+    if (((index_parameter_type != IMPLICIT_TYPE) && ((index_interval->mean != 1.) ||
+          (index_interval->variance > 0.))) || (normalization)) {
       delete [] itype;
     }
 
@@ -3832,28 +3884,114 @@ Sequences* Sequences::difference(StatError &error , int variable ,
             if (type[k] != REAL_VALUE) {
               cisequence = int_sequence[i][k];
 
-              if (first_element) {
-                *prsequence++ = (double)*cisequence / (double)*cindex_param;
+              switch (normalization) {
+
+              case false : {
+                if (first_element) {
+                  if (*cindex_param > 0) {
+                    *prsequence++ = (double)*cisequence / (double)*cindex_param;
+                  }
+                  else {
+                    *prsequence++ = D_DEFAULT;
+                  }
+                }
+
+                for (m = 0;m < length[i] - 1;m++) {
+                  *prsequence++ = (double)(*(cisequence + 1) - *cisequence) /
+                                  (double)(*(cindex_param + 1) - *cindex_param);
+                  cindex_param++;
+                  cisequence++;
+                }
+                break;
               }
-              for (m = 0;m < length[i] - 1;m++) {
-                *prsequence++ = (double)(*(cisequence + 1) - *cisequence) /
-                                (double)(*(cindex_param + 1) - *cindex_param);
-                cindex_param++;
-                cisequence++;
+
+              case true : {
+                if (first_element) {
+                  if (*cisequence != 0.) {
+                    if (*cindex_param > 0) {
+                      *prsequence++ = 2. / (double)*cindex_param;
+                    }
+                    else {
+                      *prsequence++ = D_DEFAULT;
+                    }
+                  }
+
+                  else {
+                    *prsequence++ = 0.;
+                  }
+                }
+
+                for (m = 0;m < length[i] - 1;m++) {
+                  if (*cisequence + *(cisequence + 1) != 0) {
+                    *prsequence++ = 2 * (double)(*(cisequence + 1) - *cisequence) /
+                                    (double)((*(cindex_param + 1) - *cindex_param) *
+                                             (*cisequence + *(cisequence + 1)));
+                  }
+                  else {
+                    *prsequence++ = 0.;
+                  }
+                  cindex_param++;
+                  cisequence++;
+                }
+                break;
+              }
               }
             }
 
             else {
               crsequence = real_sequence[i][k];
 
-              if (first_element) {
-                *prsequence++ = *crsequence / *cindex_param;
+              switch (normalization) {
+
+              case false : {
+                if (first_element) {
+                  if (*cindex_param > 0) {
+                    *prsequence++ = *crsequence / *cindex_param;
+                  }
+                  else {
+                    *prsequence++ = D_DEFAULT;
+                  }
+                }
+
+                for (m = 0;m < length[i] - 1;m++) {
+                  *prsequence++ = (*(crsequence + 1) - *crsequence) /
+                                  (*(cindex_param + 1) - *cindex_param);
+                  cindex_param++;
+                  crsequence++;
+                }
+                break;
               }
-              for (m = 0;m < length[i] - 1;m++) {
-                *prsequence++ = (*(crsequence + 1) - *crsequence) /
-                                (*(cindex_param + 1) - *cindex_param);
-                cindex_param++;
-                crsequence++;
+
+              case true : {
+                if (first_element) {
+                  if (*crsequence != 0.) {
+                    if (*cindex_param > 0) {
+                      *prsequence++ = 2. / (double)*cindex_param;
+                    }
+                    else {
+                      *prsequence++ = D_DEFAULT;
+                    }
+                  }
+
+                  else {
+                    *prsequence++ = 0.;
+                  }
+                }
+
+                for (m = 0;m < length[i] - 1;m++) {
+                  if (*crsequence + *(crsequence + 1) != 0.) {
+                    *prsequence++ =  2 * (*(crsequence + 1) - *crsequence) /
+                                     ((*(cindex_param + 1) - *cindex_param) *
+                                      (*crsequence + *(crsequence + 1)));
+                  }
+                  else {
+                    *prsequence++ = 0.;
+                  }
+                  cindex_param++;
+                  crsequence++;
+                }
+                break;
+              }
               }
             }
 
@@ -3869,15 +4007,47 @@ Sequences* Sequences::difference(StatError &error , int variable ,
         for (k = 0;k < nb_variable;k++) {
           if ((variable == I_DEFAULT) || (variable == k)) {
             if (type[k] != REAL_VALUE) {
-              pisequence = seq->int_sequence[i][j];
               cisequence = int_sequence[i][k];
 
-              if (first_element) {
-                *pisequence++ = *cisequence;
+              switch (normalization) {
+
+              case false : {
+                pisequence = seq->int_sequence[i][j];
+
+                if (first_element) {
+                  *pisequence++ = *cisequence;
+                }
+                for (m = 0;m < length[i] - 1;m++) {
+                  *pisequence++ = *(cisequence + 1) - *cisequence;
+                  cisequence++;
+                }
+                break;
               }
-              for (m = 0;m < length[i] - 1;m++) {
-                *pisequence++ = *(cisequence + 1) - *cisequence;
-                cisequence++;
+
+              case true : {
+                prsequence = seq->real_sequence[i][j];
+
+                if (first_element) {
+                  if (*cisequence != 0.) {
+                    *prsequence++ = 2.;
+                  }
+                  else {
+                    *prsequence++ = 0.;
+                  }
+                }
+
+                for (m = 0;m < length[i] - 1;m++) {
+                  if (*cisequence + *(cisequence + 1) != 0) {
+                    *prsequence++ = 2 * (double)(*(cisequence + 1) - *cisequence) /
+                                    (double)(*cisequence + *(cisequence + 1));
+                  }
+                  else {
+                    *prsequence++ = 0.;
+                  }
+                  cisequence++;
+                }
+                break;
+              }
               }
             }
 
@@ -3885,12 +4055,41 @@ Sequences* Sequences::difference(StatError &error , int variable ,
               prsequence = seq->real_sequence[i][j];
               crsequence = real_sequence[i][k];
 
-              if (first_element) {
-                *prsequence++ = *crsequence;
+              switch (normalization) {
+
+              case false : {
+                if (first_element) {
+                  *prsequence++ = *crsequence;
+                }
+                for (m = 0;m < length[i] - 1;m++) {
+                  *prsequence++ = *(crsequence + 1) - *crsequence;
+                  crsequence++;
+                }
+                break;
               }
-              for (m = 0;m < length[i] - 1;m++) {
-                *prsequence++ = *(crsequence + 1) - *crsequence;
-                crsequence++;
+
+              case true : {
+                if (first_element) {
+                  if (*crsequence != 0.) {
+                    *prsequence++ = 2.;
+                  }
+                  else {
+                    *prsequence++ = 0.;
+                  }
+                }
+
+                for (m = 0;m < length[i] - 1;m++) {
+                  if (*crsequence + *(crsequence + 1) != 0.) {
+                    *prsequence++ = 2 * (*(crsequence + 1) - *crsequence) /
+                                    (*crsequence + *(crsequence + 1));
+                  }
+                  else {
+                    *prsequence++ = 0.;
+                  }
+                  crsequence++;
+                }
+                break;
+              }
               }
             }
 
@@ -5662,7 +5861,8 @@ Sequences* Sequences::sojourn_time_sequences(StatError &error , int variable) co
 {
   bool status = true;
   register int i , j;
-  int ilength , run_length , *pstate , *psequence , itype[2];
+  int ilength , begin_run , *pstate , *psequence , itype[2];
+//  int run_length;
   Sequences *seq;
 
 
@@ -5702,27 +5902,56 @@ Sequences* Sequences::sojourn_time_sequences(StatError &error , int variable) co
 
     // calcul des sequences de temps de sejour
 
-    for (i = 0;i < nb_sequence;i++) {
-      pstate = seq->int_sequence[i][0];
-      psequence = seq->int_sequence[i][1];
-      run_length = 1;
-      ilength = 0;
+    if ((index_parameter_type == TIME) && (index_interval->variance > 0.)) {  // pour les suivis de croissance manguier
+      for (i = 0;i < nb_sequence;i++) {
+        pstate = seq->int_sequence[i][0];
+        psequence = seq->int_sequence[i][1];
+        begin_run = 0;
+        ilength = 0;
 
-      for (j = 0;j < length[i] - 1;j++) {
-        if (int_sequence[i][variable][j + 1] != int_sequence[i][variable][j]) {
-          *pstate++ = int_sequence[i][variable][j];
-          *psequence++ = run_length;
-          run_length = 0;
-          ilength++;
+        for (j = 0;j < length[i] - 1;j++) {
+          if (int_sequence[i][variable][j + 1] != int_sequence[i][variable][j]) {
+            *pstate++ = int_sequence[i][variable][j];
+            *psequence++ = index_parameter[i][j + 1] - begin_run - 1;
+            begin_run = index_parameter[i][j + 1];
+            ilength++;
+          }
         }
 
-        run_length++;
+        *pstate = int_sequence[i][variable][length[i] - 1];
+        *psequence = index_parameter[i][j] - begin_run;
+
+        seq->length[i] = ilength + 1;
       }
+    }
 
-      *pstate = int_sequence[i][variable][length[i] - 1];
-      *psequence = run_length;
+    else {
+      for (i = 0;i < nb_sequence;i++) {
+        pstate = seq->int_sequence[i][0];
+        psequence = seq->int_sequence[i][1];
+//        run_length = 1;
+        begin_run = 0;
+        ilength = 0;
 
-      seq->length[i] = ilength + 1;
+        for (j = 0;j < length[i] - 1;j++) {
+          if (int_sequence[i][variable][j + 1] != int_sequence[i][variable][j]) {
+            *pstate++ = int_sequence[i][variable][j];
+//            *psequence++ = run_length;
+//            run_length = 0;
+            *psequence++ = j + 1 - begin_run;
+            begin_run = j + 1;
+            ilength++;
+          }
+
+//          run_length++;
+        }
+
+        *pstate = int_sequence[i][variable][length[i] - 1];
+//        *psequence = run_length;
+        *psequence = length[i] - begin_run;
+
+        seq->length[i] = ilength + 1;
+      }
     }
 
     seq->max_length_computation();
