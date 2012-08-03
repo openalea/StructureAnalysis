@@ -49,7 +49,7 @@
 
 const int DEFAULT_LENGTH = 20;         // longueur par defaut d'une sequence
 
-const int SEQUENCE_NB_VARIABLE = NB_OUTPUT_PROCESS;  // nombre maximum de variables observees
+const int SEQUENCE_NB_VARIABLE = 30;   // nombre maximum de variables observees
 
 const int PLOT_NB_SEQUENCE = 200;      // nombre maximum de sequences visualisees (sortie Gnuplot)
 const int PLOT_LEGEND_NB_SEQUENCE = 15;  // nombre maximum de sequences identifiees (sortie Gnuplot)
@@ -681,7 +681,7 @@ public :
 
     Sequences* cumulate(StatError &error , int variable = I_DEFAULT) const;
     Sequences* difference(StatError &error , int variable = I_DEFAULT ,
-                          bool first_element = false) const;
+                          bool first_element = false , bool normalization = false) const;
     Sequences* moving_average(StatError &error , int nb_point , double *filter ,
                               int variable = I_DEFAULT , bool begin_end = false ,
                               int output = TREND) const;
