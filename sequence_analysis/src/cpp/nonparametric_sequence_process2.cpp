@@ -357,7 +357,16 @@ ostream& NonparametricSequenceProcess::ascii_print(ostream &os , int process ,
           sojourn_time[i]->ascii_characteristic_print(os , (sojourn_time[i]->ident == NONPARAMETRIC ? false : true) , file_flag);
 #         endif
 
+//          sojourn_time[i]->ascii_parametric_characteristic_print(os , true , file_flag);
           sojourn_time[i]->ascii_parametric_characteristic_print(os , (sojourn_time[i]->ident == NONPARAMETRIC ? false : true) , file_flag);
+
+#         ifdef MESSAGE
+          if (file_flag) {
+            os << "# ";
+          }
+          os << STAT_label[STATL_VARIATION_COEFF] << ": " << (sojourn_time[i]->ident == NONPARAMETRIC ? sqrt(sojourn_time[i]->variance) / sojourn_time[i]->mean : sqrt(sojourn_time[i]->parametric_variance_computation()) / sojourn_time[i]->parametric_mean_computation()) << endl;
+#         endif
+
         }
       }
 
