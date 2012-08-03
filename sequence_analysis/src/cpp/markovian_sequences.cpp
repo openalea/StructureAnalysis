@@ -2741,8 +2741,9 @@ void MarkovianSequences::min_interval_computation(int variable) const
   }
 
   else if (type[variable] != AUXILIARY) {
-    register int i , j , k;
-    int int_min , int_value;
+    bool *selected_value;
+    register int i , j , k , m;
+    int int_min , int_value , nb_value , max_frequency , *frequency , *index;
     double real_min , real_value;
 
 
@@ -2793,6 +2794,11 @@ void MarkovianSequences::min_interval_computation(int variable) const
     }
 
     case REAL_VALUE : {
+      frequency = new int[cumul_length];
+
+//      double max_interval = 0.;
+      j = 0;
+
       do {
 
         // recherche de la valeur minimum courante
@@ -2803,11 +2809,11 @@ void MarkovianSequences::min_interval_computation(int variable) const
 
         else {
           real_min = max_value[variable] + 1;
-          for (j = 0;j < nb_sequence;j++) {
-            for (k = 0;k < length[j];k++) {
-              if ((real_sequence[j][variable][k] > real_value) &&
-                  (real_sequence[j][variable][k] < real_min)) {
-                real_min = real_sequence[j][variable][k];
+          for (k = 0;k < nb_sequence;k++) {
+            for (m = 0;m < length[k];m++) {
+              if ((real_sequence[k][variable][m] > real_value) &&
+                  (real_sequence[k][variable][m] < real_min)) {
+                real_min = real_sequence[k][variable][m];
               }
             }
           }
@@ -2815,21 +2821,69 @@ void MarkovianSequences::min_interval_computation(int variable) const
           if (real_min - real_value < min_interval[variable]) {
             min_interval[variable] = real_min - real_value;
           }
+/*          if (real_min - real_value > max_interval) {
+            max_interval = real_min - real_value;
+	  } */
           real_value = real_min;
         }
 
         // recherche du nombre de vecteurs prenant pour la variable selectionnee
         // la valeur minimum courante
 
-        for (j = 0;j < nb_sequence;j++) {
-          for (k = 0;k < length[j];k++) {
-            if (real_sequence[j][variable][k] == real_value) {
+        frequency[j] = 0;
+        for (k = 0;k < nb_sequence;k++) {
+          for (m = 0;m < length[k];m++) {
+            if (real_sequence[k][variable][m] == real_value) {
               i++;
+              frequency[j]++;
             }
           }
         }
+        j++;
       }
       while (i < cumul_length);
+
+      // recherche de la frequence mediane
+
+      nb_value = j;
+      selected_value = new bool[nb_value];
+      index = new int [nb_value];
+
+      for (i = 0;i < nb_value;i++) {
+        selected_value[i] = false;
+      }
+
+      i = 0;
+      do {
+        max_frequency = 0;
+        for (j = 0;j < nb_value;j++) {
+          if ((!selected_value[j]) && (frequency[j] > max_frequency)) {
+            max_frequency = frequency[j];
+          }
+        }
+
+        for (j = 0;j < nb_value;j++) {
+          if (frequency[j] == max_frequency) {
+            selected_value[j] = true;
+            index[i++] = j;
+          }
+        }
+      }
+      while (i < nb_value);
+
+#     ifdef DEBUG
+      cout << "\n" << STAT_label[STATL_VARIABLE] << " " <<  variable + 1 << ": "
+           << min_interval[variable] << " " << frequency[index[nb_value / 2]]
+           << " | " << nb_value << " " << cumul_length << endl;
+#     endif
+
+      if (frequency[index[nb_value / 2]] == 1) {
+        min_interval[variable] = 0.;
+      }
+
+      delete [] frequency;
+      delete [] selected_value;
+      delete [] index;
       break;
     }
     }
