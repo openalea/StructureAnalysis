@@ -153,6 +153,7 @@ const char *SEQ_label[] = {
   "absorption probability of " ,
   "biased" ,
   "occupancy" ,
+  "complete/censored state occupancy weights",
   "sojourn time" ,
   "initial run" ,
   "final run" ,
