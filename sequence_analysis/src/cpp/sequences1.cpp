@@ -1947,8 +1947,7 @@ Vectors* Sequences::extract_vectors(StatError &error , int feature_type ,
 {
   bool status = true;
   register int i , j;
-  int count , *pisequence , itype[1];
-  double *prsequence;
+  int begin_run , count , itype[1];
   Vectors *vec;
 
 
@@ -2019,8 +2018,22 @@ Vectors* Sequences::extract_vectors(StatError &error , int feature_type ,
     switch (feature_type) {
 
     case LENGTH : {
-      for (i = 0;i < nb_sequence;i++) {
-        vec->int_vector[i][0] = length[i];
+      if (index_parameter_type == POSITION) {
+        for (i = 0;i < nb_sequence;i++) {
+          vec->int_vector[i][0] = index_parameter[i][length[i]];
+        }
+      }
+
+      else if ((index_parameter_type == TIME) && (index_interval->variance > 0.)) {
+        for (i = 0;i < nb_sequence;i++) {
+          vec->int_vector[i][0] = index_parameter[i][length[i] - 1];
+        }
+      }
+
+      else {
+        for (i = 0;i < nb_sequence;i++) {
+          vec->int_vector[i][0] = length[i];
+        }
       }
       break;
     }
@@ -2029,9 +2042,8 @@ Vectors* Sequences::extract_vectors(StatError &error , int feature_type ,
       if (type[variable] != REAL_VALUE) {
         for (i = 0;i < nb_sequence;i++) {
           vec->int_vector[i][0] = 0;
-          pisequence = int_sequence[i][variable];
           for (j = 0;j < length[i];j++) {
-            vec->int_vector[i][0] += *pisequence++;
+            vec->int_vector[i][0] += int_sequence[i][variable][j];
           }
         }
       }
@@ -2039,9 +2051,8 @@ Vectors* Sequences::extract_vectors(StatError &error , int feature_type ,
       else {
         for (i = 0;i < nb_sequence;i++) {
           vec->real_vector[i][0] = 0.;
-          prsequence = real_sequence[i][variable];
           for (j = 0;j < length[i];j++) {
-            vec->real_vector[i][0] += *prsequence++;
+            vec->real_vector[i][0] += real_sequence[i][variable][j];
           }
         }
       }
@@ -2052,9 +2063,8 @@ Vectors* Sequences::extract_vectors(StatError &error , int feature_type ,
       if (type[variable] != REAL_VALUE) {
         for (i = 0;i < nb_sequence;i++) {
           vec->real_vector[i][0] = 0.;
-          pisequence = int_sequence[i][variable];
           for (j = 0;j < length[i];j++) {
-            vec->real_vector[i][0] += *pisequence++;
+            vec->real_vector[i][0] += int_sequence[i][variable][j];
           }
           vec->real_vector[i][0] /= length[i];
         }
@@ -2063,9 +2073,8 @@ Vectors* Sequences::extract_vectors(StatError &error , int feature_type ,
       else {
         for (i = 0;i < nb_sequence;i++) {
           vec->real_vector[i][0] = 0.;
-          prsequence = real_sequence[i][variable];
           for (j = 0;j < length[i];j++) {
-            vec->real_vector[i][0] += *prsequence++;
+            vec->real_vector[i][0] += real_sequence[i][variable][j];
           }
           vec->real_vector[i][0] /= length[i];
         }
@@ -2074,13 +2083,79 @@ Vectors* Sequences::extract_vectors(StatError &error , int feature_type ,
     }
 
     case FIRST_OCCURRENCE : {
-      for (i = 0;i < nb_sequence;i++) {
-        vec->int_vector[i][0] = -1;
-        pisequence = int_sequence[i][variable];
-        for (j = 0;j < length[i];j++) {
-          if (*pisequence++ == value) {
-            vec->int_vector[i][0] = j;
-            break;
+      if (index_parameter_type != IMPLICIT_TYPE) {
+        for (i = 0;i < nb_sequence;i++) {
+          vec->int_vector[i][0] = -1;
+          for (j = 0;j < length[i];j++) {
+            if (int_sequence[i][variable][j] == value) {
+              vec->int_vector[i][0] = index_parameter[i][j];
+              break;
+            }
+          }
+        }
+      }
+
+      else {
+        for (i = 0;i < nb_sequence;i++) {
+          vec->int_vector[i][0] = -1;
+          for (j = 0;j < length[i];j++) {
+            if (int_sequence[i][variable][j] == value) {
+              vec->int_vector[i][0] = j;
+              break;
+            }
+          }
+        }
+      }
+      break;
+    }
+
+    case SOJOURN_TIME : {
+      if ((index_parameter_type == TIME) && (index_interval->variance > 0.)) {  // pour les suivis de croissance manguier
+        for (i = 0;i < nb_sequence;i++) {
+          vec->int_vector[i][0] = -1;
+          if (int_sequence[i][variable][0] == value) {
+            begin_run = 0;
+          }
+
+          for (j = 0;j < length[i] - 1;j++) {
+            if (int_sequence[i][variable][j + 1] != int_sequence[i][variable][j]) {
+              if (int_sequence[i][variable][j + 1] == value) {
+                begin_run = index_parameter[i][j + 1];
+              }
+              else if (int_sequence[i][variable][j] == value) {
+                vec->int_vector[i][0] = index_parameter[i][j + 1] - begin_run - 1;
+                break;
+              }
+            }
+          }
+
+          if ((j == length[i] - 1) && (int_sequence[i][variable][length[i] - 1] == value)) {
+            vec->int_vector[i][0] = index_parameter[i][j] - begin_run;
+          }
+        }
+      }
+
+      else {
+        for (i = 0;i < nb_sequence;i++) {
+          vec->int_vector[i][0] = -1;
+          if (int_sequence[i][variable][0] == value) {
+            begin_run = 0;
+          }
+
+          for (j = 0;j < length[i] - 1;j++) {
+            if (int_sequence[i][variable][j + 1] != int_sequence[i][variable][j]) {
+              if (int_sequence[i][variable][j + 1] == value) {
+                begin_run = j + 1;
+              }
+              else if (int_sequence[i][variable][j] == value) {
+                vec->int_vector[i][0] = j + 1 - begin_run;
+                break;
+              }
+            }
+          }
+
+          if ((j == length[i] - 1) && (int_sequence[i][variable][length[i] - 1] == value)) {
+            vec->int_vector[i][0] = length[i] - begin_run;
           }
         }
       }
@@ -2089,16 +2164,15 @@ Vectors* Sequences::extract_vectors(StatError &error , int feature_type ,
 
     case NB_RUN : {
       for (i = 0;i < nb_sequence;i++) {
-        pisequence = int_sequence[i][variable];
         count = 0;
-        if (*pisequence++ == value) {
+        if (int_sequence[i][variable][0] == value) {
           count++;
         }
         for (j = 1;j < length[i];j++) {
-          if ((*pisequence != *(pisequence - 1)) && (*pisequence == value)) {
+          if ((int_sequence[i][variable][j] != int_sequence[i][variable][j - 1]) &&
+              (int_sequence[i][variable][j] == value)) {
             count++;
           }
-          pisequence++;
         }
 
         vec->int_vector[i][0] = count;
@@ -2108,10 +2182,9 @@ Vectors* Sequences::extract_vectors(StatError &error , int feature_type ,
 
     case NB_OCCURRENCE : {
       for (i = 0;i < nb_sequence;i++) {
-        pisequence = int_sequence[i][variable];
         count = 0;
         for (j = 0;j < length[i];j++) {
-          if (*pisequence++ == value) {
+          if (int_sequence[i][variable][j] == value) {
             count++;
           }
         }
@@ -2150,8 +2223,9 @@ MarkovianSequences* Sequences::markovian_sequences(StatError &error) const
   seq = NULL;
   error.init();
 
-  if (((index_parameter_type == TIME) && (index_interval->variance > 0.)) ||
-      (index_parameter_type == POSITION)) {
+//  if (((index_parameter_type == TIME) && (index_interval->variance > 0.)) ||
+//      (index_parameter_type == POSITION)) {
+  if (index_parameter_type == POSITION) {
     status = false;
     error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
   }
