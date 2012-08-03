@@ -2962,7 +2962,8 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_stoc
         }
 
         for (i = 1;i <= hmarkov->nb_output_process;i++) {
-          if ((hmarkov->discrete_parametric_process[i]) && (seq->characteristics[i - 1])) {
+          if (((hmarkov->discrete_parametric_process[i]) || (hmarkov->continuous_parametric_process[i])) &&
+              (seq->characteristics[i - 1])) {
             delete seq->characteristics[i - 1];
             seq->characteristics[i - 1] = NULL;
           }
