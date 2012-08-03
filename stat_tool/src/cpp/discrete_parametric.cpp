@@ -1014,40 +1014,47 @@ double DiscreteParametric::sup_norm_distance_computation(const DiscreteParametri
 {
   bool crossing;
   register int i;
-  int inf;
+  int inf , sup;
   double buff , distance , max_absolute_diff;
 
 
-  distance = 0.;
   inf = MAX(offset , dist.offset);
-  max_absolute_diff = fabs(cumul[inf] - dist.cumul[inf]);
-  crossing = false;
-
-  for (i = inf + 1;i < MIN(nb_value , dist.nb_value);i++) {
-    buff = fabs(cumul[i] - dist.cumul[i]);
-    if (buff > max_absolute_diff) {
-      max_absolute_diff = buff;
-    }
-
-    if ((!crossing) && (((cumul[i] > dist.cumul[i]) && (cumul[i - 1] <= dist.cumul[i - 1])) ||
-        ((cumul[i] <= dist.cumul[i]) && (cumul[i - 1] > dist.cumul[i - 1])))) {
-      crossing = true;
-      distance = max_absolute_diff;
-      max_absolute_diff = 0.;
-    }
-  }
-  distance += max_absolute_diff;
-
-# ifdef DEBUG
-  double overlap;
-
-  overlap = 0.;
-  for (i = inf;i < MIN(nb_value , dist.nb_value);i++) {
-    overlap += MIN(mass[i] , dist.mass[i]);
+  sup = MIN(nb_value , dist.nb_value) - 1;
+  if (sup < inf) {
+    distance = 1.;
   }
 
-  cout << "\nSup norm distance: " << distance << " " << 1. - overlap << endl;
-# endif
+  else {
+    distance = 0.;
+    max_absolute_diff = fabs(cumul[inf] - dist.cumul[inf]);
+    crossing = false;
+
+    for (i = inf + 1;i <= sup;i++) {
+      buff = fabs(cumul[i] - dist.cumul[i]);
+      if (buff > max_absolute_diff) {
+        max_absolute_diff = buff;
+      }
+
+      if ((!crossing) && (((cumul[i] > dist.cumul[i]) && (cumul[i - 1] <= dist.cumul[i - 1])) ||
+          ((cumul[i] <= dist.cumul[i]) && (cumul[i - 1] > dist.cumul[i - 1])))) {
+        crossing = true;
+        distance = max_absolute_diff;
+        max_absolute_diff = 0.;
+      }
+    }
+    distance += max_absolute_diff;
+
+#   ifdef DEBUG
+    double overlap;
+
+    overlap = 0.;
+    for (i = inf;i <= sup;i++) {
+      overlap += MIN(mass[i] , dist.mass[i]);
+    }
+
+    cout << "\nSup norm distance: " << distance << " " << 1. - overlap << endl;
+#   endif
+  }
 
   return distance;
 }
