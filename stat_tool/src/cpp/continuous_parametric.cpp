@@ -1635,19 +1635,55 @@ double ContinuousParametric::mass_computation(double inf , double sup) const
     if (inf < 0.) {
       inf = 0.;
     }
-    mass = cdf(dist , sup) - cdf(dist , inf);
+    if (sup < inf) {
+      sup = inf;
+    }
+
+    if (inf == sup) {
+      mass = pdf(dist , MAX(inf , 1.e-12));  // bug boost C++
+    }
+    else {
+      mass = cdf(dist , sup) - cdf(dist , inf);
+    }
+
+#   ifdef DEBUG
+    if ((location == 1.) && (mass == 0.)) {
+      cout << "\nERROR: " << inf << " " << sup << " | " << location << " " << dispersion << endl;
+    }
+#   endif
+
     break;
   }
 
   case GAUSSIAN : {
     normal dist(location , dispersion);
 
-    mass = cdf(dist , sup) - cdf(dist , inf);
+    if (inf == sup) {
+      mass = pdf(dist , inf);
+    }
+    else {
+      mass = cdf(dist , sup) - cdf(dist , inf);
+    }
     break;
   }
 
   case VON_MISES : {
-    mass = von_mises_mass_computation(inf , sup);
+    if (inf == sup) {
+      switch (unit) {
+      case DEGREE :
+        mass = exp(dispersion * cos((inf - location) * M_PI / 180)) /
+               (360 * cyl_bessel_i(0 , dispersion));
+        break;
+      case RADIAN :
+        mass = exp(dispersion * cos(inf - location)) /
+               (2 * M_PI * cyl_bessel_i(0 , dispersion));
+        break;
+      }
+    }
+
+    else {
+      mass = von_mises_mass_computation(inf , sup);
+    }
     break;
   }
   }
