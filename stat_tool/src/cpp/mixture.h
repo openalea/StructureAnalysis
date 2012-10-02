@@ -176,6 +176,7 @@ public :
 
     MixtureData();
     MixtureData(const FrequencyDistribution &histo , int inb_component);
+    MixtureData(const FrequencyDistribution &histo , const Mixture *pmixture);
     MixtureData(const Mixture &mixt);
     MixtureData(const MixtureData &mixt_histo , bool model_flag = true)
     :FrequencyDistribution(mixt_histo) { copy(mixt_histo , model_flag); }

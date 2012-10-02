@@ -1709,6 +1709,32 @@ MixtureData::MixtureData(const FrequencyDistribution &histo , int inb_component)
   }
 }
 
+/*--------------------------------------------------------------*
+ *
+ *  Constructeur de la classe MixtureData.
+ *
+ *  arguments : reference sur un objet FrequencyDistribution,
+ *              reference sur un objet Mixture.
+ *
+ *--------------------------------------------------------------*/
+
+MixtureData::MixtureData(const FrequencyDistribution &histo , const Mixture *pmixture)
+:FrequencyDistribution(histo)
+{ 
+  register int i;
+
+  nb_component = pmixture->nb_component;
+
+  weight = new FrequencyDistribution(nb_component);
+
+  component = new FrequencyDistribution*[nb_component];
+  for (i = 0;i < nb_component;i++) {
+    component[i] = new FrequencyDistribution(nb_value);
+  }
+   mixture = new Mixture(*pmixture); 
+   mixture->mixture_data = new MixtureData(*this, false);
+}
+
 
 /*--------------------------------------------------------------*
  *

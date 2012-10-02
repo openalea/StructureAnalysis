@@ -15,11 +15,12 @@ namespace stat_tool
 {
   namespace wrap_util
   {
-    // This new error is instantiated in the file stat_tool_wrap 
+    // This new error is instantiated in the file stat_tool_wrap
     // during the initialisation of the module.
     static object StatErrorClass;
 
-    template<int num, int id> 
+
+    template<int num, int id>
       struct UniqueInt
       {
         int v;
@@ -28,8 +29,8 @@ namespace stat_tool
         UniqueInt(int _v) : v(_v) { }
         operator int() const { return v; }
       };
-    
-    
+
+
 
     inline void throw_stat_error(StatError &error)
     {
@@ -54,7 +55,7 @@ namespace stat_tool
       boost::python::throw_error_already_set();
     };
 
-    
+
     inline void throw_error(const char* error_message)
     {
       PyErr_SetString(PyExc_Exception, error_message);
@@ -108,10 +109,10 @@ namespace stat_tool
             return ap;
         }
 
-	T& operator[](int index) throw()
-	{
-	  return ap[index];
-	}
+    T& operator[](int index) throw()
+    {
+      return ap[index];
+    }
 
         T& operator*() const throw()
         {
@@ -145,5 +146,5 @@ namespace stat_tool
 
   };
 };
- 
+
 #endif
