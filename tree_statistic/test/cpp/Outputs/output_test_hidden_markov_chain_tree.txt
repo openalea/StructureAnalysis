@@ -265,12 +265,15 @@ mean: 2.99964   variance: 9.98568   standard deviation: 3.16001
 
 state 0 sojourn time distribution
 mean: 1.99987   variance: 1.9978   standard deviation: 1.41343
+coefficient of variation: 0.706763
 
 state 1 sojourn time distribution
 mean: 1.99987   variance: 1.9978   standard deviation: 1.41343
+coefficient of variation: 0.706763
 
 state 2 sojourn time distribution
 mean: 1.99987   variance: 1.9978   standard deviation: 1.41343
+coefficient of variation: 0.706763
 
 number of runs of state 0 per length 20 sequence distribution
 mean: 3.54444   variance: 1.40728   standard deviation: 1.18629
@@ -356,18 +359,23 @@ mean: 5.96461   variance: 30.7992   standard deviation: 5.5497
 
 output 0 sojourn time distribution
 mean: 2.1067   variance: 2.4271   standard deviation: 1.55792
+coefficient of variation: 0.739504
 
 output 1 sojourn time distribution
 mean: 1.17444   variance: 0.199504   standard deviation: 0.446659
+coefficient of variation: 0.380315
 
 output 2 sojourn time distribution
 mean: 1.17444   variance: 0.199504   standard deviation: 0.446659
+coefficient of variation: 0.380315
 
 output 3 sojourn time distribution
 mean: 1.17444   variance: 0.199504   standard deviation: 0.446659
+coefficient of variation: 0.380315
 
 output 4 sojourn time distribution
 mean: 1.23328   variance: 0.283844   standard deviation: 0.53277
+coefficient of variation: 0.431993
 
 number of runs of output 0 per length 20 sequence distribution
 mean: 4.35767   variance: 1.35861   standard deviation: 1.16559
@@ -620,6 +628,8 @@ iteration 99   log-likelihood of the observed sequences: -736.315
 iteration 100   log-likelihood of the observed sequences: -736.25
 
 100 iterations
+
+complete/censored state occupancy weights
 
 log-likelihood of the state sequences: -891.172 | -891.172
 
@@ -922,6 +932,7 @@ mean: 3.15436   variance: 1.92871   standard deviation: 1.38878
 
 state 0 sojourn time distribution
 mean: 1.37815   variance: 0.520579   standard deviation: 0.721512
+coefficient of variation: 0.523535
 
 state 0 sojourn time frequency distribution - sample size: 127
 mean: 1.61417   variance: 0.984877   standard deviation: 0.99241
@@ -931,6 +942,7 @@ mean: 2.75   variance: 2.91667   standard deviation: 1.70783
 
 state 1 sojourn time distribution
 mean: 1.68776   variance: 1.1596   standard deviation: 1.07685
+coefficient of variation: 0.638032
 
 state 1 sojourn time frequency distribution - sample size: 102
 mean: 1.29412   variance: 0.387886   standard deviation: 0.622805
@@ -940,6 +952,7 @@ mean: 1   variance: 0   standard deviation: 0
 
 state 2 sojourn time distribution
 mean: 1.15598   variance: 0.180141   standard deviation: 0.42443
+coefficient of variation: 0.36716
 
 state 2 sojourn time frequency distribution - sample size: 156
 mean: 1   variance: 0   standard deviation: 0
@@ -1085,6 +1098,7 @@ mean: 7.13793   variance: 44.542   standard deviation: 6.67398
 
 output 0 sojourn time distribution
 mean: 1.66418   variance: 1.07953   standard deviation: 1.03901
+coefficient of variation: 0.624337
 
 output 0 sojourn time frequency distribution - sample size: 127
 mean: 1.61417   variance: 0.984877   standard deviation: 0.99241
@@ -1094,6 +1108,7 @@ mean: 2.75   variance: 2.91667   standard deviation: 1.70783
 
 output 1 sojourn time distribution
 mean: 1.19856   variance: 0.2339   standard deviation: 0.483632
+coefficient of variation: 0.40351
 
 output 1 sojourn time frequency distribution - sample size: 95
 mean: 1.11579   variance: 0.124748   standard deviation: 0.353197
@@ -1103,6 +1118,7 @@ mean: 1   variance: 0   standard deviation: 0
 
 output 2 sojourn time distribution
 mean: 1.09804   variance: 0.103543   standard deviation: 0.321781
+coefficient of variation: 0.29305
 
 output 2 sojourn time frequency distribution - sample size: 40
 mean: 1.075   variance: 0.0711538   standard deviation: 0.266747
@@ -1112,6 +1128,7 @@ mean: 1   variance: 0   standard deviation: 0
 
 output 3 sojourn time distribution
 mean: 1.18117   variance: 0.207501   standard deviation: 0.455523
+coefficient of variation: 0.385653
 
 output 3 sojourn time frequency distribution - sample size: 64
 mean: 1.15625   variance: 0.197421   standard deviation: 0.44432
@@ -1121,6 +1138,7 @@ mean: 1   variance: 0   standard deviation: 0
 
 output 4 sojourn time distribution
 mean: 1.1313   variance: 0.147698   standard deviation: 0.384315
+coefficient of variation: 0.33971
 
 output 4 sojourn time frequency distribution - sample size: 61
 mean: 1.06557   variance: 0.0622951   standard deviation: 0.24959

@@ -26,6 +26,7 @@
 #include "stat_tool/markovian.h"
 #include "stat_tool/distribution.h"
 #include "stat_tool/vectors.h"
+#include "stat_tool/mixture.h"
 
 #include "tree_statistic/tree_labels.h"
 #include "tree_statistic/int_fl_containers.h"
@@ -1025,6 +1026,22 @@ public :
       }
    }
 
+   static MixtureData* Chmt_data_wrapper_extract_marginal(const HiddenMarkovTreeData& reftree,
+                                                          int variable)
+   {
+      ostringstream error_message;
+      StatError error;
+      MixtureData *histo = NULL;
+
+      histo = reftree.extract_marginal(error, variable);
+      if (histo == NULL)
+      {
+         error_message << error;
+         throw_stat_tree_error(error_message);
+      }
+      return histo;
+   }
+
    static HiddenMarkovIndOutTree*
    Chmt_data_wrapper_hidden_markov_ind_out_tree_estimation_markov(const HiddenMarkovTreeData& hmtd,
                                                               const HiddenMarkovIndOutTree& ihmarkov,
@@ -1202,6 +1219,11 @@ void class_hmt_data()
                             "IsParametric(self, variable) -> bool \n\n"
                             "Return True if process 'variable' "
                             "is parametric")
+        .def("ExtractMarginal", WRAP::Chmt_data_wrapper_extract_marginal,
+             return_value_policy< manage_new_object>(),
+             "ExtractMarginal(self, variable) -> MixtureData \n\n"
+             "Return the mixture of observation distributions"
+             "for a given variable")
         .def("StateTrees",
              &HiddenMarkovTreeData::get_state_hidden_markov_tree_data,
              return_value_policy< manage_new_object >(),

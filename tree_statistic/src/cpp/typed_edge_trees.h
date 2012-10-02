@@ -417,6 +417,9 @@ public :
 //     // ? Typed_edge_trees* cumulate(StatError &error, int variable = I_DEFAULT) const;
    /** First-order differentiation for trees */
    Typed_edge_trees* difference(StatError &error, int variable= I_DEFAULT) const;
+
+   /** Type conversion for trees */
+   void to_int_type(StatError &error, int variable= I_DEFAULT);
 //     // Typed_edge_trees* moving_average(StatError &error, ostream& os, int nb_point, double *filter,
 //     //                          int variable = I_DEFAULT, bool begin_end = false,
 //     //                          int output = TREND, const char *path = 0, char format = 's') const;

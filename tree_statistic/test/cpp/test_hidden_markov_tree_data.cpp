@@ -12,6 +12,7 @@
 #include "stat_tool/distribution.h"
 #include "stat_tool/curves.h"
 #include "stat_tool/markovian.h"
+#include "stat_tool/mixture.h"
 #include "sequence_analysis/sequences.h"
 #include "sequence_analysis/semi_markov.h"
 #include "sequence_analysis/hidden_semi_markov.h"
@@ -34,33 +35,35 @@ int main(void)
    typedef generic_visitor<tree_type> visitor;
    typedef visitor::vertex_array vertex_array;
 
-   const int nb_trees= 5, size= 25, nb_children_max= 2;
+   const int nb_trees  = 5, size  = 25, nb_children_max  = 2;
    register int t; //, u, j, i, nb_states;
    value default_value;
    visitor v;
    vertex_iterator it, end;
    vertex_array va;
    StatError error;
-   const char *hmotpath= "./hmot_np.hmt";
-   const char *hmotparampath= "./hmot.hmt";
-   int * const variables= new int[1];
+   const char *hmotpath  = "./hmot_np.hmt";
+   const char *hmotparampath = "./hmot.hmt";
+   int * const variables  = new int[1];
    HiddenMarkovIndOutTree *hmot= NULL, *hmot_estim= NULL;
-   HiddenMarkovTreeData *hmtd, *state_hmtd, *ehmtd, *state_tree=NULL;
-   tree_type **potrees= NULL;
-   state_tree_type **pstrees= NULL;
-   const DiscreteDistributionData *pdd= NULL; //, *marginal=NULL;
-   Trees *tmp_trees= NULL;
+   HiddenMarkovTreeData *hmtd, *state_hmtd, *ehmtd, *state_tree = NULL,
+                        *hmtdv = NULL;
+   tree_type **potrees  = NULL;
+   state_tree_type **pstrees  = NULL;
+   const DiscreteDistributionData *pdd  = NULL; //, *marginal=NULL;
+   Trees *tmp_trees  = NULL;
+   MixtureData *mixture_data  = NULL;
    // double likelihood;
 
    // default constructor of HiddenMarkovTreeData
-   hmtd= new HiddenMarkovTreeData();
+   hmtd = new HiddenMarkovTreeData();
 
    // destructor of HiddenMarkovTreeData
    delete hmtd;
-   hmtd= NULL;
+   hmtd = NULL;
 
-   potrees= new tree_type*[nb_trees];
-   pstrees= new state_tree_type*[nb_trees];
+   potrees = new tree_type*[nb_trees];
+   pstrees = new state_tree_type*[nb_trees];
 
    // read and print a non-parametric hidden Markov out tree
    cout << "Reference hidden Markov tree (non-parametric): " << endl;
@@ -74,7 +77,7 @@ int main(void)
 
    // simulation of hidden Markov out trees
    cout << "Simulate the attributes..." << endl;
-   hmtd= hmot->simulation(error, nb_trees, size, nb_children_max);
+   hmtd = hmot->simulation(error, nb_trees, size, nb_children_max);
    cout << error;
 
    cout << "Print the data with the hidden Markov tree: " << endl;
@@ -92,23 +95,23 @@ int main(void)
    // print the simulated trees
 
    cout << endl << "Simulated trees : " << endl;
-   for(t= 0; t < nb_trees; t++)
+   for(t = 0; t < nb_trees; t++)
       if (t == 0)
       {
-         potrees[t]= hmtd->get_tree(t);
+         potrees[t] = hmtd->get_tree(t);
          potrees[t]->display(cout, 0);
          delete potrees[t];
-         potrees[t]= NULL;
+         potrees[t] = NULL;
       }
 
    cout << endl << "Simulated hidden trees : " << endl;
-   for (t= 0; t < nb_trees; t++)
+   for (t = 0; t < nb_trees; t++)
       if (t == 0)
       {
-         pstrees[t]= hmtd->get_state_tree(t);
+         pstrees[t] = hmtd->get_state_tree(t);
          pstrees[t]->display(cout, 0);
          delete pstrees[t];
-         pstrees[t]= NULL;
+         pstrees[t] = NULL;
       }
    cout << endl;
 
@@ -135,15 +138,34 @@ int main(void)
 
    cout << endl << "HiddenMarkovTreeData augmented with the state tree"
         <<" and the smoothed probabilities:" << endl;
-   state_hmtd= hmtd->get_state_smoothed_hidden_markov_tree_data();
+   state_hmtd = hmtd->get_state_smoothed_hidden_markov_tree_data();
    state_hmtd->ascii_write(cout, false);
 
-   /*
-   cout << endl << "Marginal distribution of variable 1:" << endl;
-   marginal= hmtd->extract_marginal(error, 1);
-   marginal->ascii_write(cout, false);
-   delete marginal;
-   marginal= NULL; */
+   cout << endl << "Extract marginal distribution of variable 1:" << endl;
+   mixture_data = hmtd->extract_marginal(error, 1);
+   cout << error << endl;
+   if (mixture_data != NULL)
+   {
+      mixture_data->ascii_write(cout, false);
+      delete mixture_data;
+      mixture_data = NULL;
+   }
+   // Same thing using state_tree_computation
+   hmtdv = hmtd->get_state_hidden_markov_tree_data();
+   cout << endl
+        << "Extract marginal distribution of variable 1 on restored tree:"
+        << endl;
+   mixture_data = hmtdv->extract_marginal(error, 2);
+   cout << error << endl;
+   if (mixture_data != NULL)
+   {
+      mixture_data->ascii_write(cout, false);
+      delete mixture_data;
+      mixture_data = NULL;
+   }
+   delete hmtdv;
+   hmtdv = NULL;
+
 
 #ifdef DEBUG
    cout << endl << "Plot of the augmented HiddenMarkovTreeData:" << endl;
@@ -151,52 +173,52 @@ int main(void)
    cout << error;
 #endif
 
-   ehmtd= hmot_estim->extract_data(error);
+   ehmtd = hmot_estim->extract_data(error);
    cout << error;
    cout << endl << "Plain HiddenMarkovTreeData:" << endl;
    ehmtd->ascii_write(cout, false);
    cout << endl << "Extract an observation distribution from "
         << "plain HiddenMarkovTreeData:" << endl;
-   pdd= ehmtd->extract(error, Stat_trees::OBSERVATION, 1, 0);
+   pdd = ehmtd->extract(error, Stat_trees::OBSERVATION, 1, 0);
    cout << error;
-   if (pdd!= NULL)
+   if (pdd != NULL)
    {
       pdd->ascii_write(cout);
       delete pdd;
-      pdd= NULL;
+      pdd = NULL;
    }
 
    cout << endl << "Extract a observation distribution from "
         << "augmented HiddenMarkovTreeData:" << endl;
-   pdd= state_hmtd->extract(error, Stat_trees::OBSERVATION, 2, 0);
+   pdd = state_hmtd->extract(error, Stat_trees::OBSERVATION, 2, 0);
    cout << error;
-   if (pdd!= NULL)
+   if (pdd != NULL)
    {
       pdd->ascii_write(cout);
       delete pdd;
-      pdd= NULL;
+      pdd = NULL;
    }
 
    cout << endl << "Extract a characteristic distribution (zones) from "
         << "plain HiddenMarkovTreeData:" << endl;
-   pdd= ehmtd->extract(error, Stat_trees::NB_ZONES, 1, 0);
+   pdd = ehmtd->extract(error, Stat_trees::NB_ZONES, 1, 0);
    cout << error;
-   if (pdd!= NULL)
+   if (pdd != NULL)
    {
       pdd->ascii_write(cout);
       delete pdd;
-      pdd= NULL;
+      pdd = NULL;
    }
 
    cout << endl << "Extract a characteristic distribution (zones) from "
         << "augmented HiddenMarkovTreeData:" << endl;
-   pdd= state_hmtd->extract(error, Stat_trees::NB_ZONES, 2, 0);
+   pdd = state_hmtd->extract(error, Stat_trees::NB_ZONES, 2, 0);
    cout << error;
-   if (pdd!= NULL)
+   if (pdd != NULL)
    {
       pdd->ascii_write(cout);
       delete pdd;
-      pdd= NULL;
+      pdd = NULL;
    }
 
    delete hmot;
@@ -204,10 +226,10 @@ int main(void)
    delete hmtd;
    delete state_hmtd;
 
-   hmot= NULL;
-   hmot_estim= NULL;
-   hmtd= NULL;
-   state_hmtd= NULL;
+   hmot = NULL;
+   hmot_estim = NULL;
+   hmtd = NULL;
+   state_hmtd = NULL;
 
    // read and print a parametric hidden Markov out tree
    cout << "Reference hidden Markov tree (parametric): " << endl;
@@ -221,7 +243,7 @@ int main(void)
 
    // simulation of hidden Markov out trees
    cout << "Simulate the attributes..." << endl;
-   hmtd= hmot->simulation(error, nb_trees, size, nb_children_max);
+   hmtd = hmot->simulation(error, nb_trees, size, nb_children_max);
    cout << error;
 
    cout << "Print the data with the hidden Markov tree: " << endl;
@@ -239,23 +261,23 @@ int main(void)
    // print the simulated trees
 
    cout << endl << "Simulated trees : " << endl;
-   for(t= 0; t < nb_trees; t++)
+   for(t = 0; t < nb_trees; t++)
       if (t == 0)
       {
-         potrees[t]= hmtd->get_tree(t);
+         potrees[t] = hmtd->get_tree(t);
          potrees[t]->display(cout, 0);
          delete potrees[t];
-         potrees[t]= NULL;
+         potrees[t] = NULL;
       }
 
    cout << endl << "Simulated hidden trees : " << endl;
-   for (t= 0; t < nb_trees; t++)
+   for (t = 0; t < nb_trees; t++)
       if (t == 0)
       {
-         pstrees[t]= hmtd->get_state_tree(t);
+         pstrees[t] = hmtd->get_state_tree(t);
          pstrees[t]->display(cout, 0);
          delete pstrees[t];
-         pstrees[t]= NULL;
+         pstrees[t] = NULL;
       }
    cout << endl;
 
@@ -282,7 +304,7 @@ int main(void)
 
    cout << endl << "HiddenMarkovTreeData augmented with the state tree"
         <<" and the smoothed probabilities:" << endl;
-   state_hmtd= hmtd->get_state_smoothed_hidden_markov_tree_data();
+   state_hmtd = hmtd->get_state_smoothed_hidden_markov_tree_data();
    state_hmtd->ascii_write(cout, false);
 #ifdef DEBUG
    cout << endl << "Plot of the augmented HiddenMarkovTreeData:" << endl;
@@ -290,64 +312,64 @@ int main(void)
    cout << error;
 #endif
 
-   ehmtd= hmot_estim->extract_data(error);
+   ehmtd = hmot_estim->extract_data(error);
    cout << error;
    cout << endl << "Plain HiddenMarkovTreeData:" << endl;
    ehmtd->ascii_write(cout, false);
    cout << endl << "Extract an observation distribution from "
         << "plain HiddenMarkovTreeData:" << endl;
-   pdd= ehmtd->extract(error, Stat_trees::OBSERVATION, 1, 0);
+   pdd = ehmtd->extract(error, Stat_trees::OBSERVATION, 1, 0);
    cout << error;
-   if (pdd!= NULL)
+   if (pdd != NULL)
    {
       pdd->ascii_write(cout);
       delete pdd;
-      pdd= NULL;
+      pdd = NULL;
    }
 
    cout << endl << "Extract an observation distribution from "
         << "augmented HiddenMarkovTreeData:" << endl;
-   pdd= state_hmtd->extract(error, Stat_trees::OBSERVATION, 2, 0);
+   pdd = state_hmtd->extract(error, Stat_trees::OBSERVATION, 2, 0);
    cout << error;
-   if (pdd!= NULL)
+   if (pdd != NULL)
    {
       pdd->ascii_write(cout);
       delete pdd;
-      pdd= NULL;
+      pdd = NULL;
    }
 
    cout << endl << "Extract an observation distribution from "
         << "augmented HiddenMarkovTreeData with a "
         << "wrong state identifier:" << endl;
-   pdd= state_hmtd->extract(error, Stat_trees::OBSERVATION, 2, hmtd->get_nb_states());
+   pdd = state_hmtd->extract(error, Stat_trees::OBSERVATION, 2, hmtd->get_nb_states());
    cout << error;
-   if (pdd!= NULL)
+   if (pdd != NULL)
    {
       pdd->ascii_write(cout);
       delete pdd;
-      pdd= NULL;
+      pdd = NULL;
    }
 
    cout << endl << "Extract a characteristic distribution (zones) from "
         << "plain HiddenMarkovTreeData:" << endl;
-   pdd= ehmtd->extract(error, Stat_trees::NB_ZONES, 1, 0);
+   pdd = ehmtd->extract(error, Stat_trees::NB_ZONES, 1, 0);
    cout << error;
-   if (pdd!= NULL)
+   if (pdd != NULL)
    {
       pdd->ascii_write(cout);
       delete pdd;
-      pdd= NULL;
+      pdd = NULL;
    }
 
    cout << endl << "Extract a characteristic distribution (zones) from "
         << "augmented HiddenMarkovTreeData:" << endl;
-   pdd= state_hmtd->extract(error, Stat_trees::NB_ZONES, 2, 0);
+   pdd = state_hmtd->extract(error, Stat_trees::NB_ZONES, 2, 0);
    cout << error;
-   if (pdd!= NULL)
+   if (pdd != NULL)
    {
       pdd->ascii_write(cout);
       delete pdd;
-      pdd= NULL;
+      pdd = NULL;
    }
 
    // estimation of an HMT from augmented HiddenMarkovTreeData
@@ -355,10 +377,10 @@ int main(void)
    hmot_estim=NULL;
 
    variables[0]=1;
-   tmp_trees= state_hmtd->select_variable(error, 1, variables);
-   state_tree= new HiddenMarkovTreeData(*tmp_trees);
+   tmp_trees = state_hmtd->select_variable(error, 1, variables);
+   state_tree = new HiddenMarkovTreeData(*tmp_trees);
    delete tmp_trees;
-   tmp_trees= NULL;
+   tmp_trees = NULL;
    hmot_estim= state_tree->hidden_markov_ind_out_tree_estimation(error, cout, 'o', 2, true,
                                                              true, VITERBI, FORWARD_BACKWARD,
                                                              1., 0.99999, 1);
@@ -367,7 +389,7 @@ int main(void)
    hmot_estim->ascii_write(cout, false);
 
    delete state_tree;
-   state_tree= NULL;
+   state_tree = NULL;
    delete hmot;
    delete hmot_estim;
    delete hmtd;
@@ -375,11 +397,11 @@ int main(void)
    delete [] potrees;
    delete [] pstrees;
 
-   hmot= NULL;
-   hmot_estim= NULL;
-   hmtd= NULL;
-   state_hmtd= NULL;
-   potrees= NULL;
-   pstrees= NULL;
+   hmot = NULL;
+   hmot_estim = NULL;
+   hmtd = NULL;
+   state_hmtd = NULL;
+   potrees = NULL;
+   pstrees = NULL;
    return 0;
 }

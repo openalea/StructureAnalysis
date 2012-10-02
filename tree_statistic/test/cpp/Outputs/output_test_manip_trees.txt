@@ -1439,7 +1439,7 @@ VARIABLE 2 : INT   (minimum value: 1, maximum value: 20)
 marginal frequency distribution - sample size: 34
 mean: 10.5294   variance: 41.2264   standard deviation: 6.42078
 
-VARIABLE 3 : REAL VALUE   (minimum value: -0.0260395, maximum value: 9.88131e-323)
+VARIABLE 3 : REAL VALUE   (minimum value: -0.0353272, maximum value: 9.88131e-323)
 
 
 tree size frequency distribution - sample size: 3

@@ -436,6 +436,5 @@ information: -70.4997 (-1.35576)
 Distribution_data for marginal distribution (1st variable)
 frequency distribution - sample size: 52
 mean: 2.36538   variance: 1.4129   standard deviation: 1.18865
-coefficient of skewness: 0.115073   coefficient of kurtosis: -1.52174
 mean absolute deviation: 1.07175   coefficient of concentration: 0.276266
 information: -70.4997 (-1.35576)

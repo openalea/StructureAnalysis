@@ -1,4 +1,4 @@
-HIDDEN_MARKOV_OUT_TREE
+HIDDEN_MARKOV_INDEPENDENT_OUT_TREE
 
 2 STATES
 
@@ -10,22 +10,6 @@ TRANSITION_PROBABILITIES
 0.3  0.7  
 
 # recurrent class: states 0 1
-
-# path length (starting from root) up to the first occurrence of state 0 distribution
-
-# path length (starting from root) up to the first occurrence of state 1 distribution
-
-# path length (starting from terminal node) up to the first occurrence of state 0 distribution
-
-# path length (starting from terminal node) up to the first occurrence of state 1 distribution
-
-# number of zones of state 0 per size 50 tree distribution
-
-# number of zones of state 1 per size 50 tree distribution
-
-# number of occurrences of state 0 per size 50 tree distribution
-
-# number of occurrences of state 1 per size 50 tree distribution
 
 2 OUTPUT_PROCESSES
 

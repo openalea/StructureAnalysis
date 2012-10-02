@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Hidden Markov tree models"""
 import string
+import openalea.stat_tool.error as check_error
 import openalea.tree_statistic._errors as _errors
 import openalea.stat_tool as stat_tool, openalea.tree_statistic.trees as trees
 import stat_tool.error as check_error
@@ -483,19 +484,28 @@ class HiddenMarkovIndOutTree:
                                     "expected"
         elif issubclass(arg1.__class__, stat_tool.histogram._DiscreteDistributionData):
             # Simulate(size_histo, nb_children_histo)
-            if issubclass(arg2.__class__, stat_tool.histogram._DiscreteDistributionData):
-                chmt_data= \
-                    self.__chmt.Simulate(arg1, arg2, True, False)
+            expected_class = stat_tool.histogram._DiscreteDistributionData
+            if issubclass(arg1.__class__, expected_class):
+                if issubclass(arg2.__class__, expected_class):
+                    chmt_data= \
+                        self.__chmt.Simulate(arg1, arg2, True, False)
+                else:
+                    msg = "bad type for argument 2:  " +  \
+                          str(expected_class) + "expected"
+                    raise TypeError, msg
             else:
-                raise TypeError, "bad type for argument 2:  " \
-                                    "stat_tool.histogram._DiscreteDistributionData expected"
+                msg = "bad type for argument 1:  " +  \
+                        str(expected_class) + "expected"
+                raise TypeError, msg
         else:
             # Simulate(Trees)
-            if issubclass(arg1.__class__, trees.Trees):
+            expected_class = trees.Trees
+            msg = "bad type for argument 1:  " +  \
+                       str(expected_class) + "expected"
+            if issubclass(arg1.__class__, expected_class):
                 chmt_data = self.__chmt.Simulate(arg1._ctrees(), True)
             else:
-                raise TypeError, "bad type for argument 1: trees.Trees " \
-                                    "expected"
+                raise TypeError, msg
         chmt_data = chmt_data.StateTrees()
         return HiddenMarkovTreeData(chmt_data, self, True)
 
@@ -593,55 +603,59 @@ class HiddenMarkovTreeData(trees.Trees):
                 ExtractHistogram("VariableName")
                 ExtractHistogram("NbZones", variable, value)
                 ExtractHistogram("Observation", variable, state)"""
-        if type(nature)==str:
-            if ((string.upper(nature)=="SIZE") or
-                (string.upper(nature)=="NBCHILDREN") or
-                (string.upper(nature)=="VALUE")):
-                chisto=trees.Trees.ExtractHistogram(self, nature, variable)
-                # chisto=self.__ctrees.ExtractValueHistogram(variable)            
-            elif ((nature.upper()=="FIRSTOCCURRENCEROOT") or
-                  (nature.upper()=="FIRSTOCCURRENCELEAVES") or
-                  (nature.upper()=="SOJOURNSIZE") or
-                  (nature.upper()=="NBZONES") or
-                  (nature.upper()=="NBOCCURRENCES") or
-                  (nature.upper()=="OBSERVATION")):
-                if variable is None:
-                    if ((self.NbVariables()==1) 
-                        and (nature.upper()!="OBSERVATION")):
-                    # variable argument is not mandatory if there is only
-                    # one variable for other features than observation
-                        variable=0
-                    else:
-                        msg='argument 2 is mandatory in ExtractHistogram' + \
+        check_error.CheckType([nature], [str])
+        if ((string.upper(nature)=="SIZE") or
+            (string.upper(nature)=="NBCHILDREN")):
+            chisto = trees.Trees.ExtractHistogram(self, nature, variable)
+            # chisto=self.__ctrees.ExtractValueHistogram(variable)
+        elif (string.upper(nature)=="VALUE"):
+            # Extract marginal histogram with mixture of observation distributions
+            check_error.CheckType([variable], [int])
+            if (variable < 1) or (variable > self.NbVariables()):
+                msg = "bad variable: " + str(variable)
+                raise IndexError, msg
+            chisto = self.__ctrees.ExtractMarginal(variable+1)
+        elif ((nature.upper()=="FIRSTOCCURRENCEROOT") or
+                (nature.upper()=="FIRSTOCCURRENCELEAVES") or
+                (nature.upper()=="SOJOURNSIZE") or
+                (nature.upper()=="NBZONES") or
+                (nature.upper()=="NBOCCURRENCES") or
+                (nature.upper()=="OBSERVATION")):
+            if variable is None:
+                if ((self.NbVariables()==1)
+                    and (nature.upper()!="OBSERVATION")):
+                # variable argument is not mandatory if there is only
+                # one variable for other features than observation
+                    variable = 0
+                else:
+                    msg = 'argument 2 is mandatory in ExtractHistogram' + \
                             '(FeatureName, variable, state/value)'
-                        raise TypeError, msg
-                if state is None:
-                    # value argument is mandatory 
-                    raise TypeError, 'argument 3 is mandatory in ' \
-                        'ExtractHistogram(FeatureName, variable, state/value)'
-                elif type(state)!=int:
-                    raise TypeError, "bad type for argument 3: " \
-                                      "type 'int' expected"
-                if nature.upper()=="FIRSTOCCURRENCEROOT":
-                    chartype = CharacteristicType.FIRST_OCCURRENCE_ROOT
-                elif nature.upper()=="FIRSTOCCURRENCELEAVES":
-                    chartype = CharacteristicType.FIRST_OCCURRENCE_LEAVES
-                elif nature.upper()=="SOJOURNSIZE":
-                    chartype = CharacteristicType.SOJOURN_SIZE
-                elif nature.upper()=="NBZONES":
-                    chartype = CharacteristicType.NB_ZONES
-                elif nature.upper()=="NBOCCURRENCES":
-                    chartype = CharacteristicType.NB_OCCURRENCES
-                elif nature.upper()=="OBSERVATION":
-                    chartype = CharacteristicType.OBSERVATION
-                chartype+=0
-                chisto = self.__ctrees.ExtractValueHistogram(
-                            chartype, self._valid_cvariable(variable)+1, state)
-            else:
-                chisto = trees.Trees.ExtractHistogram(self, nature)
-            return chisto
+                    raise TypeError, msg
+            if state is None:
+                # value argument is mandatory
+                raise TypeError, 'argument 3 is mandatory in ' \
+                    'ExtractHistogram(FeatureName, variable, state/value)'
+            elif type(state)!=int:
+                raise TypeError, "bad type for argument 3: " \
+                                    "type 'int' expected"
+            if nature.upper()=="FIRSTOCCURRENCEROOT":
+                chartype = CharacteristicType.FIRST_OCCURRENCE_ROOT
+            elif nature.upper()=="FIRSTOCCURRENCELEAVES":
+                chartype = CharacteristicType.FIRST_OCCURRENCE_LEAVES
+            elif nature.upper()=="SOJOURNSIZE":
+                chartype = CharacteristicType.SOJOURN_SIZE
+            elif nature.upper()=="NBZONES":
+                chartype = CharacteristicType.NB_ZONES
+            elif nature.upper()=="NBOCCURRENCES":
+                chartype = CharacteristicType.NB_OCCURRENCES
+            elif nature.upper()=="OBSERVATION":
+                chartype = CharacteristicType.OBSERVATION
+            chartype+=0
+            chisto = self.__ctrees.ExtractValueHistogram(
+                        chartype, self._valid_cvariable(variable)+1, state)
         else:
-            raise TypeError, "bad type for argument 1: type 'str' expected"
+            chisto = trees.Trees.ExtractHistogram(self, nature)
+        return chisto
 
     def Plot(self, ViewPoint="Data", Length=None, BottomDiameter=None, 
              Color=None, DressingFile=None, Title="", variable=0):

@@ -13,7 +13,7 @@ def init():
     return setup_func()
 
 def setup_func():
-    global  T,tv,nb_trees, tree_list, mtg_name
+    global  T, tv, nb_trees, tree_list, mtg_name
     # build some random initial tree
     stat_tool.plot.DISABLE_PLOT = True
     inf_bound = 0

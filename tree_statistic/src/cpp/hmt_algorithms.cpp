@@ -44,6 +44,7 @@
 #include "stat_tool/distribution_reestimation.h"
 #include "stat_tool/distribution.h"   // definition of DiscreteParametricModel class
 #include "stat_tool/vectors.h"
+#include "stat_tool/mixture.h"
 
 #include "sequence_analysis/sequences.h"
 
@@ -1574,8 +1575,10 @@ double** HiddenMarkovIndOutTree::state_marginal_distribution(const Trees& trees,
  *  and the index of considered tree
  *  Return the log-likelihood;
  *  compute the entropy of the state tree and subtree processes.
+ *  Entropy is not updated in trees.
  *
  **/
+
 double HiddenMarkovIndOutTree::upward_step(const HiddenMarkovTreeData& trees,
                                            double_array_3d& upward_prob,
                                            double_array_3d& upward_parent_prob,
@@ -1672,6 +1675,7 @@ double HiddenMarkovIndOutTree::upward_step(const HiddenMarkovTreeData& trees,
    norm = NULL;
    return likelihood;
 }
+
 
 /*****************************************************************
  *
@@ -5640,6 +5644,7 @@ HiddenMarkovIndOutTree::local_entropy_computation(const HiddenMarkovTreeData& tr
       } // end for tr
    return res;
 }
+
 
 /*****************************************************************
  *

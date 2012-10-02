@@ -12,8 +12,8 @@ distrib = stat_tool.Uniform(1, 1)
 hmotrefpath= "./hmot_np.hmt";
 hmotinitpath= "./hmot_np_init.hmt";
 hmcinitpath= "./hmc_init.hmc";
-HMT=hmt.HiddenMarkovTree(hmotrefpath)
-HMTI=hmt.HiddenMarkovTree(hmotinitpath)
+HMT=hmt.HiddenMarkovIndOutTree(hmotrefpath)
+HMTI=hmt.HiddenMarkovIndOutTree(hmotinitpath)
 HMCI=aml.HiddenSemiMarkov(hmcinitpath)
 T=HMT.Simulate(2, size, nb_children)
 # delete state variable

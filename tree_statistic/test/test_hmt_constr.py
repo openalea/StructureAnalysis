@@ -25,7 +25,7 @@ def setup_func():
 @with_setup(setup_func)
 def test_hmt_read():
     """Read some HMT from a file"""
-    msg = "Could not read MTG file"
+    msg = "Could not read HMT file"
     try:
         H = hmt.HiddenMarkovIndOutTree(hmt_name1)
     except hmt.StatTreeError:
@@ -36,7 +36,7 @@ def test_hmt_read():
 
 def test_hmt_ascii_read():
     """Read some HMT from a file"""
-    msg = "Could not read MTG file"
+    msg = "Could not read HMT file"
     try:
         H = hmt.HiddenMarkovIndOutTree(hmt_name2)
     except hmt.StatTreeError:

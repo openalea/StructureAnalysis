@@ -1,11 +1,12 @@
-# a test for the class chmt.Hmt: constructor and basic methods
+# -*- coding: utf-8 -*-
+# a test for the class _hmt.Hmt: constructor and basic methods
 import sys
 import os
 import openalea.stat_tool as cstat_tools
 import openalea.tree_statistic.trees as trees
 #cstat_tools
 import openalea.tree_statistic.hmt
-import openalea.tree_statistic.hmt.chmt as chmt
+import openalea.tree_statistic.hmt._hmt as _hmt
 
 
 #AMLLIBDIR=os.getenv("HOME")+"/devlp/AMAPmod/build-linux/lib"
@@ -18,10 +19,10 @@ import openalea.tree_statistic.hmt.chmt as chmt
 inf_bound = 1
 sup_bound = 3
 probability = 0.6
-ident = cstat_tools.DistributionIdentifier.UNIFORM
+ident = cstat_tools.DistributionIdentifierType.UNIFORM
 parameter = cstat_tools.D_DEFAULT
-distrib = cstat_tools._ParametricModel(ident, inf_bound, sup_bound, parameter, 
-                                probability)
+distrib = cstat_tools.distribution._DiscreteParametricModel(ident, inf_bound, sup_bound, parameter,
+                                                            probability)
 
 print "Distribution used for the number of children and the tree attributes:"
 print distrib
@@ -55,7 +56,7 @@ for n in range(len(tree_list)):
 
 # initialize a Trees object
 T = trees.Trees(tree_list)
-H = chmt.HmtAsciiRead("hmot_np_2s.hmt")
+H = _hmt.HmtAsciiRead("hmot_np_2s.hmt")
 print "A HMT read from file 'hmot_np_2s.hmt':"
 print H.Display(False)
 T = H.Simulate(3, 20, 3, True)
@@ -75,6 +76,6 @@ print T.Display(False)
 # test the initialization of a CHmt_data object
 #print "Test the initialization of a CHmt_data object"
 # copy
-chmtd = chmt.CHmt_data(T)
+chmtd = _hmt.CHmt_data(T)
 print chmtd.Display(True)
 

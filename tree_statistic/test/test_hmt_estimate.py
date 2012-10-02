@@ -171,6 +171,29 @@ def test_bad_hmt_init_failure():
     else:
         assert False, msg
 
+def test_bad_variable_hmt_estimate():
+    """Estimate HMT with variable of incorrect type"""
+    msg = "Failed to raise exception for incorrect HMT variable"
+    EH = T.Estimate("HIDDEN_MARKOV_TREE", 3, "IRREDUCIBLE", 0.9, 50)
+    S = T.ComputeStateTrees(EH, "Viterbi")
+    SS = S.SelectVariable([0])
+    try:
+        #SS.ToIntType(0)
+        EH2 = SS.Estimate("HIDDEN_MARKOV_TREE", 2, "Irreductible", 0.999, 20)
+    except Warning, e:
+        print e
+    else:
+        assert False, msg
+
+def test_state_variable_hmt_estimate():
+    """Estimate HMT with observed state variable"""
+    EH = T.Estimate("HIDDEN_MARKOV_TREE", 3, "IRREDUCIBLE", 0.9, 50)
+    S = T.ComputeStateTrees(EH, "Viterbi")
+    SS = S.SelectVariable([0])
+    SS.ToIntType(0)
+    EH2 = SS.Estimate("HIDDEN_MARKOV_TREE", 2, "Irreductible", 0.999, 20)
+    msg = "Failed to estimate HMT with observed state variable"
+    assert EH2, msg
 
 if __name__ == "__main__":
     hmt_name, mtg_name, T, HInit = init()
@@ -185,3 +208,5 @@ if __name__ == "__main__":
     test_estimate_init_hmt_cem()
     test_estimate_init_state_cem()
     test_bad_hmt_init_failure()
+    test_state_variable_hmt_estimate()
+    test_bad_variable_hmt_estimate()

@@ -48,6 +48,7 @@
 #include "stat_tool/markovian.h"
 #include "stat_tool/distribution.h"   // definition of DiscreteParametricModel class
 #include "stat_tool/vectors.h"
+#include "stat_tool/mixture.h"
 #include "sequence_analysis/sequences.h"
 
 #include "int_fl_containers.h"
@@ -4832,7 +4833,8 @@ ostream& HiddenMarkovTree::ascii_write(ostream& os,
                                        bool ch_order_flag) const
 {
    register int i;
-   int variable, cumul_size, nb_output_process= _nb_ioutput_process+_nb_doutput_process;
+   int variable, cumul_size, nb_variable,
+   nb_output_process= _nb_ioutput_process+_nb_doutput_process;
    FrequencyDistribution **observation = NULL, *marginal = NULL;
    TreeCharacteristics *characteristics = NULL;
 
@@ -4870,10 +4872,13 @@ ostream& HiddenMarkovTree::ascii_write(ostream& os,
 
          if (otrees != NULL)
          {
+            nb_variable = otrees->get_nb_int() + otrees->get_nb_float();
             switch (otrees->_type[0])
             {
                case STATE:
-                  if (nb_output_process > 1)
+               // first variable of otrees is not an output process
+               // but the state process
+                  if ((nb_output_process > 1) && (nb_variable > nb_output_process))
                      variable= i;
                   else
                      variable= i-1;
@@ -7012,20 +7017,30 @@ DiscreteDistributionData* HiddenMarkovTreeData::extract(StatError& error, int ty
    return histo;
 }
 
-/*
+/*****************************************************************
+ *
+ *  Extract marginal Histogram with observation distributions
+ *  for Hidden_markov_data class, using a StatError object
+ *  and the considered variable
+ *
+ **/
 
-DiscreteDistributionData* HiddenMarkovTreeData::extract_marginal(StatError& error,
-                                                                 int variable) const
+MixtureData* HiddenMarkovTreeData::extract_marginal(StatError& error,
+                                                    int variable) const
 
 {
    register int j;
-   bool status= true;
-   double *pweight= NULL;
-   FrequencyDistribution *phisto= NULL;
-   DiscreteDistributionData *histo= NULL;
-   Mixture *pmixt= NULL;
-   DiscreteParametric **pcomp= NULL;
-   DiscreteParametricModel *pm= NULL;
+   int ivariable = I_DEFAULT;
+   bool status = true, mixture = false;
+   double *pweight = NULL;
+   FrequencyDistribution *pstate_marginal = NULL; // state_marginal
+   DiscreteDistributionData *phisto = NULL, // marginal histogram
+                            *pstate_marginal_ddd = NULL; // state_marginal
+   MixtureData *histo = NULL;
+   Mixture *pmixt = NULL;
+   // DiscreteParametric **pcomp = NULL;
+   const DiscreteParametric **pcomp = new const DiscreteParametric*[_nb_states];
+   // DiscreteParametricModel *pm = NULL;
 
    error.init();
 
@@ -7035,74 +7050,136 @@ DiscreteDistributionData* HiddenMarkovTreeData::extract_marginal(StatError& erro
    // consequently, the number of observed processes for markov and
    // for Trees differ by one
 
-   if (_type[0] != STATE)
+   if ((_type[0] != STATE) && (state_trees == NULL))
    {
-      status= false;
+      status = false;
       error.update(STAT_TREES_error[STATR_STATE_TREES]);
    }
    else
    {
-      // frequency distribution part
-      if ((variable < 2) || (variable > _nb_integral))
+      if ((variable < 1) || (variable > _nb_integral))
       {
-         status= false;
+         status = false;
          error.update(STAT_error[STATR_VARIABLE_INDEX]);
       }
       else
       {
-          phisto= Trees::extract(error, variable);
+         if ((status) && (_type[0] == STATE) && (variable == 1))
+         {
+            // cannot plot state variable versus itself
+            status = false;
+            error.update(STAT_error[STATR_VARIABLE_INDEX]);
+         }
+         else
+         {
+            // marginal histogram of target variable
+            phisto = Trees::extract(error, variable);
 
-          if (phisto == NULL)
-          {
-             status= false;
-             error.update(STAT_error[STATR_EMPTY_SAMPLE]);
-          }
+            if (phisto == NULL)
+            {
+               status = false;
+               error.update(STAT_error[STATR_EMPTY_SAMPLE]);
+            }
+
+            if (_type[0] == STATE)
+            {
+               pstate_marginal_ddd = Trees::extract(error, 1);
+               if (pstate_marginal_ddd != NULL)
+               {
+                  pstate_marginal = new FrequencyDistribution(*pstate_marginal_ddd);
+                  delete pstate_marginal_ddd;
+                  pstate_marginal_ddd = NULL;
+               }
+               ivariable = variable-1; // HMT variable != trees variable
+            }
+            else
+            {
+               ivariable = variable; // HMT variable == trees variable
+               if (state_characteristics)
+                  pstate_marginal = state_characteristics->marginal_distribution;
+            }
+
+            if (pstate_marginal == NULL)
+            {
+               status = false;
+               error.update(STAT_error[STATR_EMPTY_SAMPLE]);
+            }
+         }
       }
       if (status)
       {
-         pweight= new double[_nb_states];
+         // mixture weights
+         pweight = new double[_nb_states];
 
-         for(j= 0; j < _nb_states; j++)
-            pweight[j]= phisto->frequency[j] / phisto-> nb_element;
+         for(j = 0; j < _nb_states; j++)
+            pweight[j] = (double)(pstate_marginal->frequency[j]) /
+                            pstate_marginal->nb_element;
 
-         pcomp= new DiscreteParametric*[_nb_states];
-         if (markov->npprocess[variable] != NULL)
+         // add observation distributions iif markov part is present
+         if (this->markov != NULL)
+            mixture = true;
+
+         if (mixture)
          {
-            for(j= 0; j < _nb_states; j++)
-               pcomp[j]=
-                  new DiscreteParametric(*markov->npprocess[variable]->observation[j]);
+            // pcomp = new DiscreteParametric*[_nb_states];
+            if (markov->npprocess[ivariable] != NULL)
+            {
+               for(j = 0; j < _nb_states; j++)
+                  pcomp[j] =
+                     new DiscreteParametric(*markov->npprocess[ivariable]->observation[j]);
+            }
+            else
+            {
+               for(j = 0; j < _nb_states; j++)
+                  pcomp[j] =
+                     new DiscreteParametric(*markov->piprocess[ivariable]->observation[j]);
+            }
          }
+
+         if (mixture)
+            pmixt = new Mixture(_nb_states, pweight, pcomp);
+
+         if (pmixt != NULL)
+            histo = new MixtureData(*phisto, pmixt);
          else
-            // pcomp= markov->piprocess[variable]->observation;
+            histo = new MixtureData(*phisto, _nb_states);
+
+         if (pmixt != NULL)
          {
-            for(j= 0; j < _nb_states; j++)
-               pcomp[j]=
-                  new DiscreteParametric(*markov->npprocess[variable]->observation[j]);
+            delete pmixt;
+            pmixt = NULL;
          }
 
-         pmixt= new Mixture(_nb_states, pweight, pcomp);
-         pddata= new Mixture_data(*pmixt)
-         pm pddata->extract(error, );
-         histo= phisto->fit(error, *pm);
-
-
-         for(j= 0; j < _nb_states; j++)
+         if (mixture)
          {
-            delete pcomp[j];
-            pcomp[j]= NULL;
+            for(j = 0; j < _nb_states; j++)
+            {
+               delete pcomp[j];
+               pcomp[j]= NULL;
+            }
+            delete [] pcomp;
+            pcomp = NULL;
          }
-         delete [] pcomp;
-         pcomp= NULL;
          delete [] pweight;
-         pweight= NULL;
+         pweight = NULL;
          delete pmixt;
-         pmixt= NULL;
-         delete pm;
-         pm= NULL;
+         pmixt = NULL;
+         // delete pm;
+         // pm = NULL;
+      }
+      if (phisto != NULL)
+      {
+         delete phisto;
+         phisto = NULL;
+      }
+      if ((pstate_marginal != NULL) && (_type[0] == STATE))
+      {
+         delete pstate_marginal;
+         pstate_marginal = NULL;
       }
    }
    return histo;
-} */
+}
 
 /*****************************************************************
  *

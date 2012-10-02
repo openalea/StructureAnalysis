@@ -1145,6 +1145,95 @@ log-likelihood of the observed trees: -97.0198   (normalized: -1.49261)
 14 free parameters   2 * penalyzed log-likelihood (ICLc): -352.282
 
 
+Extract marginal distribution of variable 1:
+
+MIXTURE 3 DISTRIBUTIONS
+mean: 1.49077   variance: 2.30838   standard deviation: 1.51933
+
+frequency distribution - sample size: 65
+mean: 1.35385   variance: 2.01346   standard deviation: 1.41896
+
+log-likelihood: -97.0151   (normalized: -1.49254)
+maximum possible log-likelihood: -93.3781   (information: -1.43659)
+deviance: 7.27408
+
+2 free parameters   2 * penalyzed log-likelihood (AIC): -198.03
+2 free parameters   2 * penalyzed log-likelihood (AICc): -198.224
+2 free parameters   2 * penalyzed log-likelihood (BIC): -202.379
+2 free parameters   2 * penalyzed log-likelihood (BICc): -202.379
+
+log-likelihood of the optimal classification: 0   (normalized: 0)
+maximum possible log-likelihood of the optimal classification: -1e+37   (information: -1.53846e+35)
+
+chi-square test (4 degrees of freedom)
+chi-square value: 6.8451   critical probability: 0.144304
+reference chi-square value: 9.48773   reference critical probability: 0.05
+
+DISTRIBUTION 1  WEIGHT : 0.2
+NONPARAMETRIC   
+
+frequency distribution 1 - sample size: 0
+
+DISTRIBUTION 2  WEIGHT : 0.292308
+NONPARAMETRIC   
+
+frequency distribution 2 - sample size: 0
+
+DISTRIBUTION 3  WEIGHT : 0.507692
+NONPARAMETRIC   
+
+frequency distribution 3 - sample size: 0
+
+distances between components
+          2e+37     2e+37     
+2e+37               0.405465  
+2e+37     0.405465            
+
+Extract marginal distribution of variable 1 on restored tree:
+
+MIXTURE 3 DISTRIBUTIONS
+mean: 1.11077   variance: 2.0985   standard deviation: 1.44862
+
+frequency distribution - sample size: 65
+mean: 1.35385   variance: 2.01346   standard deviation: 1.41896
+
+log-likelihood: -98.5563   (normalized: -1.51625)
+maximum possible log-likelihood: -93.3781   (information: -1.43659)
+deviance: 10.3565
+
+2 free parameters   2 * penalyzed log-likelihood (AIC): -201.113
+2 free parameters   2 * penalyzed log-likelihood (AICc): -201.306
+2 free parameters   2 * penalyzed log-likelihood (BIC): -205.461
+2 free parameters   2 * penalyzed log-likelihood (BICc): -nan
+
+log-likelihood of the optimal classification: 0   (normalized: 0)
+maximum possible log-likelihood of the optimal classification: -1e+37   (information: -1.53846e+35)
+
+chi-square test (4 degrees of freedom)
+chi-square value: 12.3519   critical probability: 0.0149173
+reference chi-square value: 9.48773   reference critical probability: 0.05
+reference chi-square value: 13.2767   reference critical probability: 0.01
+
+DISTRIBUTION 1  WEIGHT : 0.415385
+NONPARAMETRIC   
+
+frequency distribution 1 - sample size: 0
+
+DISTRIBUTION 2  WEIGHT : 0
+NONPARAMETRIC   
+
+frequency distribution 2 - sample size: 0
+
+DISTRIBUTION 3  WEIGHT : 0.584615
+NONPARAMETRIC   
+
+frequency distribution 3 - sample size: 0
+
+distances between components
+          2e+37     2e+37     
+2e+37               0.405465  
+2e+37     0.405465            
+
 Plot of the augmented HiddenMarkovTreeData:
 
 Plain HiddenMarkovTreeData:

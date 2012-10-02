@@ -10,8 +10,8 @@ distrib = stat_tool.Uniform(inf_bound, sup_bound)
 file_name = "hmot_np_2s.hmt"
 # read a HMT from a file
 print 'A hidden Markov tree H read from file "', file_name, '"'
-H = hmt.HiddenMarkovTree(file_name)
-H2O = hmt.HiddenMarkovTree("hmot_np_2o.hmt")
+H = hmt.HiddenMarkovIndOutTree(file_name)
+H2O = hmt.HiddenMarkovIndOutTree("hmot_np_2o.hmt")
 sample_size = 2
 tree_size = 30
 nb_children = 2
@@ -36,7 +36,7 @@ print "Parameter estimation using a initial HMT "+ \
 "with bad number of output processes:"
 try:
     EH = T.Estimate("HIDDEN_MARKOV_TREE", H2O, 20)
-except trees.FormatError, f:
+except trees.StatTreeError, f:
     print f
 else:
     print "Failed to raise exception for bad number of output processes"
@@ -50,7 +50,7 @@ else:
 print "Parameter estimation with bad value for Saem exponent:"
 try:
     EH = T.Estimate("HIDDEN_MARKOV_TREE", H, 20, Algorithm="GibbsSampling", Saem=2.)
-except trees.FormatError, f:
+except trees.StatTreeError, f:
     print f
 else:
     print "Failed to raise exception for bad value of Saem"
@@ -80,10 +80,10 @@ EH.Display()
 print "Extract the data part of the initial (file) HMT, with no data:"
 try:
     HMTD = H.ExtractData()
-except trees.FormatError, f:
+except trees.StatTreeError, f:
     print f
 else:
-    print "Failed to raise exception for no data part in HiddenMarkovTree"
+    print "Failed to raise exception for no data part in HiddenMarkovIndOutTree"
     print HMTD
 print "Extract the data part of the estimated HMT"
 HMTD = EH.ExtractData()
@@ -123,5 +123,17 @@ EH.Display()
 # Re-estimate on segmented tree
 print "Estimate an HMT on state tree: "
 SS = S.SelectVariable([0])
+SS.ToIntType(0)
 EH2 = SS.Estimate("HIDDEN_MARKOV_TREE", 2, "Irreductible", 0.999, 20)
 EH2.Display()
+
+# HMT with discrete parametric observations
+print "Estimation of an HMT with parametric discrete observations"
+HP = hmt.HiddenMarkovIndOutTree("hmot_param.hmt")
+TP = HP.Simulate(sample_size*10, tree_size, nb_children)
+TP.ToIntType(0)
+EHP = TP.Estimate("HIDDEN_MARKOV_TREE", 2, "Irreductible", 0.999, 20)
+SP = TP.ComputeStateTrees(EHP, "Viterbi")
+OBSP1 = SP.ExtractHistogram("Value", 3)
+#EHP.Display()
+

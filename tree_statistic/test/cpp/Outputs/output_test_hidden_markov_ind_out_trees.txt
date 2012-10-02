@@ -44,11 +44,13 @@ STATE 0 OCCUPANCY_DISTRIBUTION
 NEGATIVE_BINOMIAL   INF_BOUND : 1   PARAMETER : 1   PROBABILITY : 0.1
 mean: 10   variance: 90   standard deviation: 9.48683
 coefficient of skewness: 2.00278   coefficient of kurtosis: 6.01111
+coefficient of variation: 0.948683
 
 STATE 1 OCCUPANCY_DISTRIBUTION
 NEGATIVE_BINOMIAL   INF_BOUND : 1   PARAMETER : 1   PROBABILITY : 0.1
 mean: 10   variance: 90   standard deviation: 9.48683
 coefficient of skewness: 2.00278   coefficient of kurtosis: 6.01111
+coefficient of variation: 0.948683
 
 absorption probability of state 2: 1
 

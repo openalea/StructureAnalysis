@@ -6,6 +6,7 @@ import string
 import openalea.stat_tool as stat_tool
 import openalea.tree_statistic.int_fl_containers as int_fl_containers
 import openalea.tree_statistic._errors as _errors
+import stat_tool.error as check_error
 import ctree, ctrees
 
 from openalea.stat_tool import interface
@@ -888,7 +889,9 @@ class TreeStructure:
                 tree2mtg = arg.MTGVertex()
                 tid = arg.MTGVertex(arg.Root())
             except Warning:
-                pass
+                self.__mtg_to_tree_vid = None
+                self.__tree_to_mtg_vid = None
+                self.__mtg_tid = None
             else:
                 self._copy_vid_conversion(mtg2tree,
                                           tree2mtg)
@@ -1691,7 +1694,9 @@ class Trees(object):
                  ForceParametric=[]):
         """Estimate a (hidden) Markov tree.
 
-        Algorithm correspond to
+        Algorithm correspond to the type of restoration/maximisation algorithm:
+        'ForwardBackward', 'Viterbi', 'ForwardBackwardSampling'
+        or 'GibbsSampling'
         Saem correspond to the rate of decay of the part corresponding 
         to restored states. Saem=0. for pure SEM or CEM algorithms.
 
@@ -1738,7 +1743,7 @@ class Trees(object):
         import openalea.tree_statistic.hmt as hmt
         import openalea.tree_statistic.hmt._hmt as _hmt
         RestorationAlgorithm = stat_tool.RestorationAlgorithm
-        chmt_data = _hmt.CHmt_data(self._ctrees())
+        chmt_data=_hmt.CHmt_data(self._ctrees())
         if type(model_name) == str:
             if type(Algorithm) != str:
                 msg = 'bad type for argument "Algorithm" in ' \
@@ -1775,6 +1780,17 @@ class Trees(object):
                 +"type 'float' expected"
                 raise TypeError, msg
             if model_name.upper() == "HIDDEN_MARKOV_TREE":
+                # check types
+                types = self.Types()
+                for v in range(len(types)):
+                    if types[v] == stat_tool._stat_tool.VariableTypeBis.STATE:
+                        msg = "Estimation from state variables not supported. (variable "
+                        msg += str(v) + "). Conversion into integral variable required."
+                        raise Warning, msg
+                    elif types[v] != stat_tool._stat_tool.VariableTypeBis.INT_VALUE:
+                        msg = "Bad type for variable " + str(v)
+                        msg += ". Integral variable required."
+                        raise TypeError, msg
                 if type(arg1) == int:
                     # Estimate("HIDDEN_MARKOV_TREE", nb_state, structure, 
                     #          InitialSelfTransition, NbIteration, StateTrees, 
@@ -2184,7 +2200,6 @@ class Trees(object):
                 msg='bad value for argument "ViewPoint": '+ViewPoint
                 raise ValueError, msg
             cvariable = self._valid_cvariable(variable)
-            print "Using cvariable", cvariable
             if (not self.__ctrees.IsCharacteristic(cvariable, ftype)):
                 msg = "Characteristic " + ViewPoint + " not computed " + \
                     "for variable ", variable
@@ -2681,6 +2696,38 @@ class Trees(object):
         elif self._valid_tree(TreeId):
             return self.__ctrees.Size(TreeId)
 
+    def ToIntType(self, Variable=None):
+        """Conversion of a variable type to INT_VALUE.
+
+        :Usage:
+
+            ToIntType(Variable)
+
+        :Parameters:
+
+          `Variable` (int) - Variable which type is to be converted (every variable if not given)
+
+
+        :Examples:
+
+        .. doctest::
+            :options: +SKIP
+
+            >>> ToIntType(0)
+            >>> ToIntType()
+
+        .. seealso::
+            :func:`~openalea.tree_statistic.trees.Trees.Types`.
+        """
+        check_error.CheckType([Variable], [int])
+        cvariable = self._valid_cvariable(Variable) + 1
+        try:
+            self.__ctrees.ToIntType(cvariable)
+        except _errors.StatTreeError, error:
+            replaced = self.__replacestr(str(error), "variable")
+            raise _errors.StatTreeError(replaced)
+        self.__types[Variable] = stat_tool._stat_tool.VariableTypeBis.INT_VALUE
+
     def Transcode(self, variable, new_values):
         """Transcoding of values.
 
@@ -3008,6 +3055,14 @@ class Trees(object):
                             +message[i+len(sub)+2:len(message)]
         return message
 
+    def __valid_tree(self, TreeId):
+        if type(TreeId)!=int:
+            raise TypeError, "bad tree index type: "+str(type(TreeId))
+        elif (TreeId < 0) or (TreeId >= self.NbTrees()):
+            raise IndexError, "tree index out of range: "+str(TreeId)
+        else:
+            return True
+        
     def __str__(self):
         """Display the trees."""
         

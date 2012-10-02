@@ -2805,10 +2805,12 @@ Typed_edge_trees<Generic_Int_fl_container>::segmentation_extract(StatError& erro
    return otrees;
 }
 
-/*--------------------------------------------------------------*
+/*****************************************************************
  *
+ *  Difference between parent and children values using StatError
+ *  object and variable index.
  *
- *--------------------------------------------------------------*/
+ **/
 
 template<typename Generic_Int_fl_container>
 Typed_edge_trees<Generic_Int_fl_container>*
@@ -2908,6 +2910,45 @@ Typed_edge_trees<Generic_Int_fl_container>::difference(StatError &error,
    }
    return res;
 }
+
+/*****************************************************************
+ *
+ *  Change the type of a variable into an INT_VALUE using
+ *  the variable index and a StatError object
+ *
+ **/
+template<typename Generic_Int_fl_container>
+void Typed_edge_trees<Generic_Int_fl_container>::to_int_type(StatError &error, int variable)
+{
+   bool status = true;
+   const int nb_variables = _nb_integral + _nb_float;
+   register int i;
+
+   error.init();
+
+   if (variable != I_DEFAULT)
+      if ((variable < 1) || (variable > nb_variables))
+      {
+         status = false;
+         error.update(STAT_error[STATR_VARIABLE_INDEX]);
+      }
+
+   if (status)
+      for(i = 0; i < nb_variables; i++)
+         if ((variable != I_DEFAULT) || (variable-1 == i))
+            if (_type[i] == REAL_VALUE)
+            {
+               status = false;
+               error.update(STAT_error[STATR_VARIABLE_TYPE]);
+            }
+
+   if (status)
+      for(i = 0; i < nb_variables; i++)
+         if ((variable != I_DEFAULT) || (variable-1 == i))
+            _type[i] == INT_VALUE;
+
+}
+
 
 /*****************************************************************
  *

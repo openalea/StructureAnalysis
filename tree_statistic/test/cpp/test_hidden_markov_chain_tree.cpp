@@ -8,6 +8,7 @@
 #include "tree/basic_visitors.h"
 #include "stat_tool/stat_tools.h"
 #include "stat_tool/vectors.h"
+#include "stat_tool/mixture.h"
 #include "stat_tool/distribution.h"
 #include "stat_tool/curves.h"
 #include "stat_tool/markovian.h"

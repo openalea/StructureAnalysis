@@ -612,3 +612,4 @@ def Success1stBuild(T, Reverse=False):
         R._copy_vid_conversion(mtg_to_tree_vid_new, tree_to_mtg_vid_new)
         R._copy_mtg_tid(mtg_tid) # copy root of mtg
     return R, ovid_to_nvid
+    return R, ovid_to_nvid

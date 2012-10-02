@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # a test for the class hmt.Hmt: constructor and basic methods
 import sys, os
 import openalea.stat_tool as stat_tool
@@ -5,9 +6,9 @@ import openalea.tree_statistic.trees as trees, openalea.tree_statistic.hmt as hm
 inf_bound=1
 sup_bound=3
 probability= 0.6
-ident=stat_tool.DistributionIdentifier.UNIFORM
+ident=stat_tool.DistributionIdentifierType.UNIFORM
 parameter=stat_tool.D_DEFAULT
-distrib= stat_tool._ParametricModel(ident, inf_bound, sup_bound, parameter, probability)
+distrib= stat_tool.distribution._DiscreteParametricModel(ident, inf_bound, sup_bound, parameter, probability)
 # Distribution used for the number of children and the tree attributes
 print distrib
 max_depth=3
@@ -33,16 +34,16 @@ for n in range(len(tree_list)):
     tree_list[n].Simulate(distrib_list)
 # initializing a Trees object
 T_ind=trees.Trees(tree_list)
-H=hmt.HiddenMarkovTree("hmot.hmt")
+H=hmt.HiddenMarkovIndOutTree("hmot.hmt")
 sample_size=2
 tree_size=20
 nb_children=3
 print 'A hidden Markov tree H read from file "hmot.hmt":'
 print H
 H.Save("hmot_ascii.hmt", "ASCII", True)
-I=hmt.HiddenMarkovTree("hmot_ascii.hmt")
+I=hmt.HiddenMarkovIndOutTree("hmot_ascii.hmt")
 I.Save("hmot_ascii.hmt", "ASCII", True)
-J=hmt.HiddenMarkovTree("hmot_ascii.hmt")
+J=hmt.HiddenMarkovIndOutTree("hmot_ascii.hmt")
 if str(I)==str(J):
     print "load o (save o load) == load"
 else:
@@ -65,7 +66,7 @@ for t in range(T.NbTrees()):
     T.Tree(t).Display()
 print "Type of the attributes:", T.Types()
 print "Copy a hmt"
-HC=hmt.HiddenMarkovTree(H)
+HC=hmt.HiddenMarkovIndOutTree(H)
 HC.Display()
 # permutation of the states
 # check exceptions raised by StatePermutation
@@ -77,13 +78,13 @@ else:
     print "Failed to raise exception for bad permutation"
 try:
     HC.StatePermutation([1, 1])
-except trees.FormatError, e:
+except trees.StatTreeError, e:
     print e
 else:
     print "Failed to raise exception for bad permutation"
 try:
     HC.StatePermutation([0, 1, 2])
-except trees.FormatError, e:
+except trees.StatTreeError, e:
     print e
 else:
     print "Failed to raise exception for bad permutation"

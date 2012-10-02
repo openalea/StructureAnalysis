@@ -746,10 +746,10 @@ public :
    DiscreteDistributionData* extract(StatError& error, int type,
                                      int variable, int value) const;
 
-   /*
-   Return mixture distribution with frequency distribution for a given variable
-   DiscreteDistributionData* extract_marginal(StatError& error, int variable) const;
+   /** Return mixture distribution with frequency distribution for a given variable */
+   MixtureData* extract_marginal(StatError& error, int variable) const;
 
+   /*
    Print mixture distribution with frequency distribution for a given variable
    bool marginal_ascii_write(StatError& error, int variable,
                              const char *path, bool exhaustive= true) const; */

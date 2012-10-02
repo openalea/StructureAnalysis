@@ -177,6 +177,20 @@ Trees* Trees_wrapper_init1(boost::python::list tree_list)
    return trees;
 }
 
+void Trees_wrapper_to_int_type(Trees& reftree, int variable)
+{
+   // requires that "variable" is valid
+   ostringstream error_message;
+   StatError error;
+
+   reftree.to_int_type(error, variable);
+   if (error.get_nb_error() > 0)
+   {
+      error_message << error;
+      throw_stat_tree_error(error_message);
+   }
+}
+
 Trees* Trees_wrapper_transcode(const Trees& reftree, int variable,
                                boost::python::list symbols)
 {
@@ -1037,7 +1051,7 @@ Trees* Trees_wrapper_merge_variable(const Trees& reftree, boost::python::list tr
 }
 
 MultiPlotSet* Trees_wrapper_get_plotable(const Trees& reftree,
-                     int plot_type,
+                                         int plot_type,
                      int variable)
 {
    StatError error;
@@ -1218,6 +1232,9 @@ BOOST_PYTHON_MODULE(ctrees)
         .def("Size", &Trees::get_size,
                      "Size(self, int) -> int \n\n"
                      "Return the number of vertices of a given tree.")
+        .def("ToIntType", &Trees_wrapper_to_int_type,
+                     "ToIntType(self, variable) -> void \n\n"
+                     "Switch a variable type to INT_VALUE.")
         .def("Transcode", &Trees_wrapper_transcode,
                         return_value_policy< manage_new_object >(),
                         "Transcode(self, variable, new_values) ->CTrees \n\n"
