@@ -5,10 +5,6 @@ from amlPy import *
 from vplants.self_similarity.graph import *
 from vplants.self_similarity.cst import *
 from vplants.self_similarity.mtg2graph import *
-"""from vplants.tree_matching2.mtgmatching import *"""
-"""
-from openalea.tree_matching.mtgmatching import *
-from openalea.mtg import *"""
 from vplants.tree_reduction.graph import *
 from vplants.tree_reduction.functions import *
 from openalea.container.graph import *
