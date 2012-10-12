@@ -16,12 +16,12 @@ def comparable_mtg(mtg):
         macro nodes has associated skeleton, boundingbox and size.
         Scale 3 correspond to normal nodes. """
     s = mtg.max_scale()
-    root = mtg.roots(scale=s).next()  # starting node ID of scale=s, eg, in scale 3 --> starting node ID is 3
+    root = mtg.roots_iter(scale=s).next()  # starting node ID of scale=s, eg, in scale 3 --> starting node ID is 3
 
     colors = {}
     colors[1] = [root]
-    colors[2] = [vid for vid in mtg.vertices(scale=s) if vid == root or mtg.nb_children(mtg.parent(vid)) > 1]
-    colors[3] = list(mtg.vertices(scale=s))
+    colors[2] = [vid for vid in mtg.vertices_iter(scale=s) if vid == root or mtg.nb_children(mtg.parent(vid)) > 1]
+    colors[3] = mtg.vertices(scale=s)
 
     new_mtg, mapping_ids = colored_tree(mtg, colors)
     
@@ -31,8 +31,8 @@ def comparable_mtg(mtg):
     skeletons = {}
     bbox = {}
     sizes = {}
-    for vid in new_mtg.vertices(scale=2):
-        component_iter = new_mtg.components(vid)
+    for vid in new_mtg.vertices_iter(scale=2):
+        component_iter = new_mtg.components_iter(vid)
         fcomponent = component_iter.next()
         pfcomponent = new_mtg.parent(fcomponent)
         points = []
@@ -147,8 +147,8 @@ def check_minimum_edges_cost(edges,set1,set2,delcost1,delcost2):
     print len(pb2),pb2
     
 def create_comparison(mtg1,mtg2,maxdistance = None, cacheprefix = None, cachepath = get_shared_data('comparison')):    
-    set1 = list(mtg1.vertices(scale=2))
-    set2 = list(mtg2.vertices(scale=2))
+    set1 = mtg1.vertices(scale=2)
+    set2 = mtg2.vertices(scale=2)
     # bbox properties
     bbxprop1 = mtg1.property('bbox')
     bbxprop2 = mtg2.property('bbox')
@@ -161,8 +161,8 @@ def create_comparison(mtg1,mtg2,maxdistance = None, cacheprefix = None, cachepat
     # max distance
     if maxdistance is None:
         # take second element to avoid appended trunk at the begining
-        firstelem = mtg1.roots(scale=2).next()
-        secondelem = mtg1.children(firstelem).next()
+        firstelem = mtg1.roots_iter(scale=2).next()
+        secondelem = mtg1.children_iter(firstelem).next()
         skel1 = skeletonprop1[secondelem]
         skel1length = Polyline(skel1).getLength()
         nbsegments = (len(skel1)-1)
@@ -350,11 +350,11 @@ def topological_comparison(ref_mtg,tested_mtg, mapping, nonmapping1, nonmapping2
 def comparison_process(ref_mtg,tested_mtg,cacheprefix = None,cachepath = get_shared_data('comparison')):
     """ Return score of geometrical comparison (nb of common elements) and topological comparison (nb of common edges) """
     from time import clock
-    print 'mtgs sizes :',len(list(ref_mtg.vertices(scale=ref_mtg.max_scale()))),len(list(tested_mtg.vertices(scale=tested_mtg.max_scale())))
+    print 'mtgs sizes :',ref_mtg.nb_vertices(scale=ref_mtg.max_scale()),tested_mtg.nb_vertices(scale=tested_mtg.max_scale())
     print 'make mtgs comparable'
     ref_mtg = comparable_mtg(ref_mtg)
     tested_mtg = comparable_mtg(tested_mtg)
-    print 'mtgs sizes :',len(list(ref_mtg.vertices(scale=2))),len(list(tested_mtg.vertices(scale=2)))
+    print 'mtgs sizes :',ref_mtg.nb_vertices(scale=2),tested_mtg.nb_vertices(scale=2)
     
     if cacheprefix:
         if not os.path.exists(cachepath): os.makedirs(cachepath)    
