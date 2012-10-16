@@ -85,20 +85,20 @@ VPTOOLS_BEGIN_NAMESPACE
  #define CORPUS_SLIST(T,OBJ,SUPOBJ) \
  CORPUS(T,OBJ,SUPOBJ) \
  const_reference first() const { return Master::front(); } \
- const_reference last() const { return *(previous(this->end())); } \
+ const_reference last() const { return *(this->previous(this->end())); } \
  reference removeFirst() { reference elt= this->front(); this->pop_front(); return elt; } \
- void append( const_reference a ) { insert_after( previous(this->end()), a ); } \
- inline void insert( const_reference a ) { append(a); } \
+ void append( const_reference a ) { this->insert_after( this->previous(this->end()), a ); } \
+ inline void insert( const_reference a ) { this->append(a); } \
  void insertAt( size_t i, const_reference a ) \
-        { if(i==0) { prepend(a); return; } \
-		  iterator it= this->begin(); std::advance(it,i-1); insert_after(it,a); } \
+        { if(i==0) { this->prepend(a); return; } \
+		  iterator it= this->begin(); std::advance(it,i-1); this->insert_after(it,a); } \
  void removeIn(size_t b, size_t e) \
    { \
    iterator it1= this->begin(); std::advance(it1,b); \
    iterator it2= this->begin(); std::advance(it2,e+1); \
-   erase(it1,it2); \
+   this->erase(it1,it2); \
    } \
- void prepend( const_reference a ) { push_front(a); } \
+ void prepend( const_reference a ) { this->push_front(a); } \
  const_reference operator[](size_t n) const \
    { const_iterator it= this->begin(); std::advance(it,n); return *it; } \
  reference operator[](size_t n) \
@@ -127,9 +127,9 @@ VPTOOLS_BEGIN_NAMESPACE
    { \
    iterator it1= begin(); std::advance(it1,b); \
    iterator it2= begin(); std::advance(it2,e+1); \
-   erase(it1,it2); \
+   this->erase(it1,it2); \
    } \
- void prepend( const_reference a ) { push_front(a); } \
+ void prepend( const_reference a ) { this->push_front(a); } \
  const_reference operator[](size_t n) const \
    { const_iterator it= begin(); std::advance(it,n); return *it; } \
  reference operator[](size_t n) \

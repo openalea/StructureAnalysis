@@ -89,16 +89,16 @@ struct ValHDict : public STDEXT::hash_map< Key, T, rw_hash<Key> >
 		) {}
   size_t entries() { return this->size(); }
   bool contains( const key_type& k ) const
-   { return ( count(k) != 0 ); }
+   { return ( this->count(k) != 0 ); }
 #ifndef WIN32_STL_EXTENSION
   void insertKeyAndValue( const key_type& k, const data_type& a )
     { operator[](k)= a; }
   bool findValue( const key_type& k, data_type& a ) const
     {
-    const_iterator it= find(k);
+    const_iterator it= this->find(k);
     if( it == this->end() )
       return false;
-    assert(count(k));
+    assert(this->count(k));
     a= (*it).second;
     return true;
     }
@@ -110,12 +110,12 @@ struct ValHDict : public STDEXT::hash_map< Key, T, rw_hash<Key> >
     const_iterator it= find(k);
     if( it == end() )
       return false;
-    assert(count(k));
+    assert(this->count(k));
     a= (*it).second;
     return true;
     }
 #endif
-  bool remove( const key_type& k ) { return erase(k); }
+  bool remove( const key_type& k ) { return this->erase(k); }
 };
 
 template < class Key, class T >

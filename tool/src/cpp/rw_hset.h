@@ -87,8 +87,8 @@ struct ValHSet : public STDEXT::hash_set< T, rw_hash<T> >
 
   size_t entries() const { return this->size(); }
   bool contains( const key_type& k ) const
-   { return ( count(k) != 0 ); }
-  bool remove( const key_type& k ) { return erase(k); }
+   { return ( this->count(k) != 0 ); }
+  bool remove( const key_type& k ) { return this->erase(k); }
 };
 
 template < class T >
@@ -107,7 +107,7 @@ struct ValHSetIt : public STDEXT::hash_set<T, rw_hash<T> >::iterator
 
   virtual ~ValHSetIt() { c= 0; first= true; }
 
-  bool operator++() { return operator()(); }
+  bool operator++() { return this->operator()(); }
 
   bool operator()()
     {
