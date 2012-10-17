@@ -92,7 +92,7 @@ struct ValHDict : public STDEXT::hash_map< Key, T, rw_hash<Key> >
    { return ( this->count(k) != 0 ); }
 #ifndef WIN32_STL_EXTENSION
   void insertKeyAndValue( const key_type& k, const data_type& a )
-    { operator[](k)= a; }
+    { this->operator[](k)= a; }
   bool findValue( const key_type& k, data_type& a ) const
     {
     const_iterator it= this->find(k);
