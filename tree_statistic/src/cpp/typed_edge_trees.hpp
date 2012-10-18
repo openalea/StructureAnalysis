@@ -221,7 +221,7 @@ Typed_edge_one_int_tree* Typed_edge_int_fl_tree<Generic_Int_fl_container>::selec
    tie(it, end)= this->vertices();
    while ( it != end )
      {
-       v.Int()= get(*it).Int(variable);
+       v.Int()= this->get(*it).Int(variable);
        res_tree->put(*it, v);
        it++;
      }
@@ -319,10 +319,10 @@ void Typed_edge_int_fl_tree<Generic_Int_fl_container>::iid_simulation(Distributi
    tie(it, end)= this->vertices();
    while ( it != end )
    {
-       v= get(*it);
+       v= this->get(*it);
        for(var= 0; var < _nb_integral; var++)
           v.Int(var)= distrib[var]->simulation();
-       put(*it++, v);
+       this->put(*it++, v);
    }
 }
 

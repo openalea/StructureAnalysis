@@ -173,7 +173,7 @@ Generic_tree<Type>::Generic_tree(Unlabelled_tree& utree, const value& default_va
   tie(it,end)= utree.vertices();
   while( it != end )
     {
-      add_vertex(default_value);
+      this->add_vertex(default_value);
       it++;
     }
 
@@ -243,7 +243,7 @@ void Generic_tree<Type>::set_structure(Unlabelled_tree& utree,
   tie(it, end)= this->vertices();
   while (ch_it != ch_end)
   {
-      put(*it++, default_value);
+      this->put(*it++, default_value);
       ch_it++;
   }
 }
@@ -290,7 +290,7 @@ unsigned int Generic_tree<Type>::get_depth(key v)
     if(v == this->root())
          return 0;
     else
-         return(get_depth(parent(v))+1);
+         return(get_depth(this->parent(v))+1);
 }
 
 /*--------------------------------------------------------------*
@@ -316,7 +316,7 @@ bool Generic_tree<Type>::is_edge(key parent, key child)
    children_iterator it, end;
    bool res= false;
 
-   tie(it, end)= children(parent);
+   tie(it, end)= this->children(parent);
    while (it < end)
       if (*it++ == child)
          res= true;
@@ -347,10 +347,10 @@ void Generic_tree<Type>::display_skip(ostream& os,
 {
    std::string tab= "|-";
 
-   os << get(v) << endl;
+   os << this->get(v) << endl;
    lineskip= 0;
    children_iterator i, end;
-   tie(i, end) = children(v);
+   tie(i, end) = this->children(v);
    if (i != end)
    {
       int s= tabulation.size();

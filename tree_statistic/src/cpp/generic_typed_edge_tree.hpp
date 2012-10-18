@@ -262,7 +262,7 @@ bool Typed_edge_tree<Type>::add_edge(key parent,
                                      bool type)
 {
    bool res= true;
-   if (!is_edge(parent, child))
+   if (!this->is_edge(parent, child))
       res= Generic_tree<Type>::add_edge(parent, child);
    edge_types[child]= type;
    return res;
@@ -318,7 +318,7 @@ unsigned int Typed_edge_tree<Type>::get_branching_order()
    vertex_array va= visitor.get_breadthorder(*this);
 
    for(node= 0; node < (vid)va.size(); node++)
-      if (get_nb_children(va[node]) == 0)
+      if (this->get_nb_children(va[node]) == 0)
          res= max(res, get_branching_order(va[node]));
 
 
@@ -339,12 +339,12 @@ unsigned int Typed_edge_tree<Type>::get_branching_order(key v)
 
    if(v != this->root())
    {
-      p= parent(v);
-      if (!edge_type(p, v))
+      p= this->parent(v);
+      if (!this->edge_type(p, v))
          // branching
-         res= get_branching_order(parent(v))+1;
+         res= get_branching_order(this->parent(v))+1;
       else
-         res= get_branching_order(parent(v));
+         res= get_branching_order(this->parent(v));
    }
    return res;
 }
