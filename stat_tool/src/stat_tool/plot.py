@@ -307,18 +307,22 @@ class mplotlib(plotter):
                     legends.append(legend)
             # Legend
             try:
-                #Plot(seq1, ViewPoint="Data", nbcol=2, 
-                #    legend_kwds={'prop':{'size':9}})
-                kwds = {}
-                kwds['prop'] = {'size':legend_size}
-                kwds['ncol'] = legend_nbcol
-                kwds['loc'] = legend_loc
-                if legend_on is True and len(legends)<15:
-                    lg = pylab.legend(lines, legends, **kwds)
-                    lg.legendPatch.set_alpha(0.1) # transparency
-            except:
                 import warnings
-                warnings.warn('legend failed')
+                with warnings.catch_warnings(record=True) as w:
+                    #Plot(seq1, Viewpoint="Data", nbcol=2, 
+                    #    legend_kwds={'prop':{'size':9}})
+                    kwds = {}
+                    kwds['prop'] = {'size':legend_size}
+                    kwds['ncol'] = legend_nbcol
+                    kwds['loc'] = legend_loc
+                    if legend_on is True and len(legends)<15:
+                        lg = pylab.legend(lines, legends, **kwds)
+                        lg.legendPatch.set_alpha(0.1) # transparency
+                        if w:
+                            pylab.legend(legends, **kwds)
+            except Exception, e:
+                import warnings
+                warnings.warn('legend failed:'+str(e))
 
             # Grid
             pylab.grid(bool(multiplot.grid))
