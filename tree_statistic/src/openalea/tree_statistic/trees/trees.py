@@ -2302,6 +2302,77 @@ class Trees(object):
         """Return the number of trees."""
         return self.__ctrees.NbTrees()
 
+    def PickleDump(self, name):
+        """Dump Trees into a file. An intermediate MTG is created and dumped using
+        pickle.
+
+        :Usage:
+
+            PickleDump(name)
+
+        :Parameters:
+
+          `name` (str) - Filename
+          
+        :Notes:
+        
+            If possible, Attribute names should not include 'Prop' or 
+            'tree_to_mtg_vid' or mtg_to_tree_vid, since this properties
+            may not be taken into account by loading the dumped file.        
+        """
+        import openalea.mtg as mtg
+        import etrees
+        g = mtg.MTG()
+        mtg2tree = {} # correspondence mtg components -> tree ids 
+        tree2mtg = {} # correspondence tree ids -> mtg components
+        # MTG properties are just used to store their names
+        # The actual properties are stored in "Prop"
+        prop_name = "Prop" 
+        l = 0
+        while prop_name in self.Attributes():
+            prop_name += str(l)
+            l += 1
+        g.add_property(prop_name)
+        # check whether some other mtg is associated with self
+        mtgtree_prop = False 
+        if not(self.__tree_to_mtg_vid is None):
+            mtgtree_prop = True
+            g.add_property("tree_to_mtg_vid")
+            g.add_property("mtg_to_tree_vid")
+            g.add_property("tree_to_mtg_tid")
+        for t in range(self.NbTrees()):
+            tree2mtg[t] = g.add_component(0)
+            mtg2tree[tree2mtg[t]] = t
+            ET = etrees.Tree(self.Tree(t))
+            mtg2tree_vid = {} # correspondence mtg vids -> tree vids 
+            tree2mtg_vid = {} # correspondence tree vids -> mtg vids
+            # add root
+            r = ET.Root()
+            tree2mtg_vid[r] = g.add_component(tree2mtg[t])
+            mtg2tree_vid[tree2mtg_vid[r]] = r 
+            g.node(tree2mtg_vid[r]).Prop = list(ET.Get(r))
+            if mtgtree_prop:
+                g.node(tree2mtg[t]).tree_to_mtg_tid = \
+                    self.MTGComponentRoot(t)
+            for v in ET.Preorder():
+                if (v != r):
+                    p = ET.Parent(v)
+                    edge = ET.EdgeType(p, v)
+                    tree2mtg_vid[v] = g.add_child(tree2mtg_vid[p], edge_type=edge)
+                    mtg2tree_vid[tree2mtg_vid[v]] = v
+                    g.node(tree2mtg_vid[v]).Prop = list(ET.Get(v))
+                if mtgtree_prop:
+                    mtgv = self.MTGVertexId(t, TreeVertexId=v)
+                    g.node(tree2mtg_vid[v]).tree_to_mtg_vid = mtgv
+                    g.node(tree2mtg_vid[v]).mtg_to_tree_vid = \
+                        self.TreeVertexId(TreeId=t, MTGVid=mtgv)
+
+        import pickle
+        pkl_file = open(name, 'wb')
+        obj = g, prop_name, self.Attributes() 
+        pickle.dump(obj, pkl_file, -1)
+        pkl_file.close()
+        
     def Plot(self, ViewPoint="Data", Length=None, BottomDiameter=None, 
              Color=None, DressingFile=None, Title="", variable=0):
         """Graphical output using the Geom 3D viewer for Trees 
@@ -3073,13 +3144,50 @@ class Trees(object):
         res=classstr+": "+str(self._ctrees())
         return res
 
+def PickleLoad(name):
+    """Load Trees from a file. An intermediate MTG is created and loaded using
+    pickle.
 
-if __name__ == '__main__':
-    pass # add a call to run your script here
+    :Usage:
 
+        T = PickleLoad(name)
 
-if __name__ == '__main__':
-    pass # add a call to run your script here
+    :Parameters:
+
+      `name` (str) - Filename
+      
+    """
+    import pickle
+    try:
+        pkl_file = open(name, 'rb')
+        g, prop_name, attributes = pickle.load(pkl_file)
+        pkl_file.close()
+    except IOError, e:
+        print e
+        g = None
+    if g:
+        from openalea.mtg import treestats
+        variable_funcs = []
+        prop = g.property(prop_name)
+        # variable_funcs = filter(lambda var: lambda x: prop[x][var], range(len(attributes)))
+        variable_funcs = map(lambda i: lambda x: prop[x][i], range(len(attributes)))
+        T = treestats.extract_trees(g, 2, filter=lambda x: True, \
+                                    variable_funcs=variable_funcs, variable_names=attributes)
+        # T contains its own mapping with g.
+        # If g also contains one mapping with the Dumped tree T', both mappings
+        # should be composed
+        mtg2tree_vid_list = [] # correspondance tree id -> MTG component
+        if "tree_to_mtg_vid" in g.property_names():
+            # mtg2tree_tid = [] # correspondance MTG component -> tree id 
+            for t in range(T.NbTrees()):
+                mtg2tree_vid_list += [{}]
+            for v in g.vertices(scale=2):
+                # map T' to g
+                t, tid = T.TreeVertexId(MTGVid=v) # find v in T
+                mtg2tree_vid_list[t][g.node(v).tree_to_mtg_vid] = tid
+                # mtg2tree_tid[tree2mtg_tid[t]] = t
+        T._SetMTGVidDictionary(mtg2tree_vid_list)
+    return T
 
 
 if __name__ == '__main__':

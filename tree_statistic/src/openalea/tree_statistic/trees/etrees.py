@@ -327,8 +327,8 @@ class TreeStructure(trees.TreeStructure):
 
             If TreeId is None, VidDict must be a list of dictionaries with length self.NbTrees().
             Otherwise, VidDict must be a single dictionary.
-            The keys of the dictionary(ies) are the vertex identifiers of the associated trees,
-            and values are the corresponding vertex identifiers in MTG.
+            The keys of the dictionary(ies) are the vertex identifiers of the MTG,
+            and values are the corresponding vertex identifiers in associated trees.
         """
         msg = "Correspondence between MTG and tree vertex identifiers "
         msg += "was previously defined already. This will be overwritten."
@@ -425,9 +425,9 @@ class Trees(trees.Trees):
 
             If TreeId is None, VidDict must be a list of dictionaries with length self.NbTrees().
             Otherwise, VidDict must be a single dictionary.
-            The keys of the dictionary(ies) are the vertex identifiers of the associated trees,
-            and values are the corresponding vertex identifiers in MTG.
-
+            The keys of the dictionary(ies) are the vertex identifiers of the MTG,
+            and values are the corresponding vertex identifiers in associated trees.
+            
         :Examples:
 
         .. doctest::
@@ -443,6 +443,7 @@ class Trees(trees.Trees):
         msg += "was previously defined already. This correspondence "
         msg += "will be overwritten."
         import warnings
+        replace = True
         if ((TreeId is None) and not(self.__mtg_to_tree_vid is None)
             and (len(self.__mtg_to_tree_vid) > 0)):
             warnings.warn(msg, Warning)
@@ -470,9 +471,17 @@ class Trees(trees.Trees):
             if (len(self.__mtg_to_tree_vid[t]) > 0):
                 warnings.warn(msg, Warning)
         elif (len(VidDict) != self.NbTrees()):
-            msg = "Bad number of dictionaries: " + str(len(VidDict))
-            msg += " - should be " + str(self.NbTrees())
-            raise ValueError, msg
+            if len(VidDict) == 0:
+                # erase dictionaries
+                replace = False
+                self.__mtg_to_tree_vid = None
+                self.__tree_to_mtg_vid = None
+                self.__tree_to_mtg_tid = None
+                self.__mtg_to_tree_tid = None
+            else:
+                msg = "Bad number of dictionaries: " + str(len(VidDict))
+                msg += " - should be " + str(self.NbTrees())
+                raise ValueError, msg
         if (ValidityCheck):
             for t in range(self.NbTrees()):
                 if ((TreeId is None) or (TreeId == t)):
@@ -482,7 +491,7 @@ class Trees(trees.Trees):
                         check_error.CheckType([k], [int])
         for t in range(self.NbTrees()):
             # copy dictionary MTG->Tree
-            if ((TreeId is None) or (TreeId == t)):
+            if (((TreeId is None) or (TreeId == t)) and replace):
                 self.__mtg_to_tree_vid[t] = dict(VidDict[t])
                 # build dictionary Tree->MTG
                 self.__tree_to_mtg_vid[t] = {}

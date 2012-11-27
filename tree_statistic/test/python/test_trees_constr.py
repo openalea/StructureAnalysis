@@ -63,6 +63,9 @@ T.ExtractHistogram("Value", variable=1).plot()
 T.Plot(ViewPoint="FirstOccurrenceRoot", variable=1)
 T.MPlot(ViewPoint="FirstOccurrenceRoot", variable=1)
 
+# save trees as openalea.mtg.MTG
+T.PickleDump("tree.pkl")
+T2 = trees.PickleLoad("tree.pkl")
 #T.Plot()
 
 #m = MyThread()
@@ -120,7 +123,7 @@ T=trees.Trees("sample_mtg_forest.txt")
 print "Read ", T.NbTrees(), " trees."
 print T
 print "Print 1st tree of Trees object:"
-print T.Tree(0).Display()
+T.Tree(0).Display()
 
 
 
@@ -216,4 +219,49 @@ try:
     T=trees.Trees("sample_mtg_forest.txt", filter, attributes, [f], scale=1)
 except TypeError, t:
     print t
+
+# build MTG
+import openalea.mtg as mtg
+vtxlist = [2*i for i in range(2,27)]
+mtgvtx = []
+g = mtg.MTG()
+mtgvtx += [g.add_component(0)]
+mtgvtx += [g.add_component(0)]
+mtgroots = list(mtgvtx)
+for v in range(13):
+    mtgvtx += [g.add_component(mtgroots[0], vtxlist[v])]
+
+g.add_child(4,6,edge_type='<')
+for v in range(2):
+    g.add_child(4,8+2*v,edge_type='+')
+g.add_child(6,12,edge_type='<')
+for v in range(2):
+    g.add_child(6,14+2*v,edge_type='+')
+for v in range(4):
+    g.add_child(8,18+2*v,edge_type='+')
+g.add_child(24,26,edge_type='<')
+g.add_child(24,28,edge_type='+')
+
+for v in range(13, 25):
+    mtgvtx += [g.add_component(mtgroots[1], vtxlist[v])]
+g.add_child(30,32,edge_type='<')
+for v in range(3):
+    g.add_child(30,34+2*v,edge_type='+')
+g.add_child(34,40,edge_type='<')
+for v in range(2):
+    g.add_child(34,42+2*v,edge_type='+')
+for v in range(4):
+    g.add_child(44,46+2*v,edge_type='+')
+g.add_property("Name1")
+g.add_property("Name2")
+for v in mtgvtx:
+    g.node(v).Name1 = v
+    g.node(v).Name2 = 52-v
+from openalea.mtg import treestats
+flist = [lambda x: g.node(x).Name1, lambda x: g.node(x).Name2]
+T = treestats.extract_trees(g, 2, lambda x: True, flist)
+T.PickleDump("tree.pkl")
+T2 = trees.PickleLoad("tree.pkl")
+print T2.NbTrees()
+T2.Tree(0).Display()
 

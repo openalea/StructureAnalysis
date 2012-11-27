@@ -12,8 +12,47 @@ from nose import with_setup
 def init():
     return setup_func()
 
+def build_mtg():
+    import openalea.mtg as mtg
+    vtxlist = [2*i for i in range(2,27)]
+    mtgvtx = []
+    g = mtg.MTG()
+    mtgvtx += [g.add_component(0)]
+    mtgvtx += [g.add_component(0)]
+    mtgroots = list(mtgvtx)
+    for v in range(13):
+        mtgvtx += [g.add_component(mtgroots[0], vtxlist[v])]
+
+    g.add_child(4,6,edge_type='<')
+    for v in range(2):
+        g.add_child(4,8+2*v,edge_type='+')
+    g.add_child(6,12,edge_type='<')
+    for v in range(2):
+        g.add_child(6,14+2*v,edge_type='+')
+    for v in range(4):
+        g.add_child(8,18+2*v,edge_type='+')
+    g.add_child(24,26,edge_type='<')
+    g.add_child(24,28,edge_type='+')
+
+    for v in range(13, 25):
+        mtgvtx += [g.add_component(mtgroots[1], vtxlist[v])]
+    g.add_child(30,32,edge_type='<')
+    for v in range(3):
+        g.add_child(30,34+2*v,edge_type='+')
+    g.add_child(34,40,edge_type='<')
+    for v in range(2):
+        g.add_child(34,42+2*v,edge_type='+')
+    for v in range(4):
+        g.add_child(44,46+2*v,edge_type='+')
+    g.add_property("Name1")
+    g.add_property("Name2")
+    for v in mtgvtx:
+        g.node(v).Name1 = v
+        g.node(v).Name2 = 52-v
+    return g
+    
 def setup_func():
-    global  T, tv, nb_trees, tree_list, mtg_name
+    global  T, tv, nb_trees, tree_list, mtg_name, g
     # build some random initial tree
     stat_tool.plot.DISABLE_PLOT = True
     inf_bound = 0
@@ -42,8 +81,9 @@ def setup_func():
     T = trees.Trees(tree_list)
     nb_trees = nbtrees
     mtg_name = "data/sample_mtg_forest.mtg"
+    g = build_mtg()
     
-    return T, tv, nb_trees, tree_list, mtg_name
+    return T, tv, nb_trees, tree_list, mtg_name, g
 
 
 @with_setup(setup_func)
@@ -302,8 +342,29 @@ def test_filter_type_failure():
         msg = "Failed to raise exception for bad filter type"
         assert False, msg
 
+def test_tree_dump_load():
+    """Dump and load Trees using pickle and compare results"""
+    from openalea.mtg import treestats
+    flist = [lambda x: g.node(x).Name1, lambda x: g.node(x).Name2]
+    T1 = treestats.extract_trees(g, 2, lambda x: True, flist)
+    import tempfile
+    code, filename = tempfile.mkstemp()
+    T1.PickleDump(filename)
+    T2 = trees.PickleLoad(filename)
+    os.remove(filename)
+    
+    msg1 = "Number of saved and dumped trees do not match"
+    assert T1.NbTrees() == T2.NbTrees(), msg1
+    for t in range(T1.NbTrees()):
+        msg1 = "Saved and dumped trees n. " 
+        msg1 += str(t) + " do not match"
+        assert str(T1.Tree(t)) == str(T2.Tree(t)), msg2
+
+    return T1, T2
+    
+
 if __name__ == "__main__":
-    T, tv, nb_trees, tree_list, mtg_name = init()
+    T, tv, nb_trees, tree_list, mtg_name, g = init()
     test_types()
     test_display()
     test_tree()
@@ -326,3 +387,4 @@ if __name__ == "__main__":
     test_filter_failure()
     test_nonrecursive_filter_failure()
     test_filter_type_failure()
+    test_tree_dump_load()
