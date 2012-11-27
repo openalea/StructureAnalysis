@@ -319,7 +319,18 @@ class mplotlib(plotter):
                         lg = pylab.legend(lines, legends, **kwds)
                         lg.legendPatch.set_alpha(0.1) # transparency
                         if w:
-                            pylab.legend(legends, **kwds)
+                            # it seems that matplotlib.collections.LineCollection appear
+                            # last in legends
+                            new_legends = [] # permutation of legends with LineCollection at the end
+                            index_begin_line_collection = 0 # where LineCollection objects begin 
+                            for li in range(len(lines)):
+                                current_legend = legends[li]
+                                if str(lines[li].__class__) == "<class 'matplotlib.collections.LineCollection'>":
+                                    new_legends += [current_legend]
+                                else:
+                                    new_legends.insert(index_begin_line_collection, current_legend)
+                                    index_begin_line_collection += 1
+                            pylab.legend(new_legends, **kwds)
             except Exception, e:
                 import warnings
                 warnings.warn('legend failed:'+str(e))
