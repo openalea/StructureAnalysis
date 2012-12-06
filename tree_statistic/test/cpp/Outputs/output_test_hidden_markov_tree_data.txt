@@ -41,6 +41,11 @@ observation probability matrix
 1  0.3  0.2  0.1  0.2  0.2
 2  0.2  0.3  0.1  0.2  0.2
 
+distances between observation distributions for consecutive states
+_    0.7  0.8  
+0.7  _    0.1  
+0.8  0.1  _    
+
 Simulate the attributes...
 Print the data with the hidden Markov tree: 
 
@@ -109,10 +114,10 @@ OUTPUT 4 : 0.2
 
 observation probability matrix
 
-     0    1    2    3    4
-0    1    0    0    0    0
-1  0.3  0.2  0.1  0.2  0.2
-2  0.2  0.3  0.1  0.2  0.2
+0     1    2    3    4    
+01    0    0    0    0    
+10.3  0.2  0.1  0.2  0.2  
+20.2  0.3  0.1  0.2  0.2  
 
 path length (starting from root) up to the first occurrence of output 0 distribution
 
@@ -248,6 +253,11 @@ number of occurrences of output 4 per size 13 tree distribution
 number of occurrences of output 4 per tree frequency distribution - sample size: 5
 mean: 1   variance: 1.5   standard deviation: 1.22474
 coefficient of skewness: 1.36083   coefficient of kurtosis: -1
+
+distances between observation distributions for consecutive states
+_    0.7  0.8  
+0.7  _    0.1  
+0.8  0.1  _    
 
 tree size frequency distribution - sample size: 5
 mean: 13   variance: 0   standard deviation: 0
@@ -362,10 +372,10 @@ OUTPUT 4 : 0.128812
 
 observation probability matrix
 
-          0         1         2         3         4
-0         1         0         0         0         0
-1  0.269971  0.246085  0.102351  0.310344  0.071249
-2   0.18217   0.18847  0.213875  0.286674  0.128812
+0          1         2         3         4         
+01         0         0         0         0         
+10.269971  0.246085  0.102351  0.310344  0.071249  
+20.18217   0.18847   0.213875  0.286674  0.128812  
 
 path length (starting from root) up to the first occurrence of output 0 distribution
 
@@ -501,6 +511,11 @@ number of occurrences of output 4 per size 13 tree distribution
 number of occurrences of output 4 per tree frequency distribution - sample size: 5
 mean: 1   variance: 1.5   standard deviation: 1.22474
 coefficient of skewness: 1.36083   coefficient of kurtosis: -1
+
+distances between observation distributions for consecutive states
+_         0.730029  0.81783   
+0.730029  _         0.169086  
+0.81783   0.169086  _         
 
 tree size frequency distribution - sample size: 5
 mean: 13   variance: 0   standard deviation: 0
@@ -593,10 +608,10 @@ OUTPUT 4 : 0.2
 
 observation probability matrix
 
-     0    1    2    3    4
-0    1    0    0    0    0
-1  0.3  0.2  0.1  0.2  0.2
-2  0.2  0.3  0.1  0.2  0.2
+0     1    2    3    4    
+01    0    0    0    0    
+10.3  0.2  0.1  0.2  0.2  
+20.2  0.3  0.1  0.2  0.2  
 
 path length (starting from root) up to the first occurrence of output 0 distribution
 
@@ -732,6 +747,11 @@ number of occurrences of output 4 per size 13 tree distribution
 number of occurrences of output 4 per tree frequency distribution - sample size: 5
 mean: 1   variance: 1.5   standard deviation: 1.22474
 coefficient of skewness: 1.36083   coefficient of kurtosis: -1
+
+distances between observation distributions for consecutive states
+_    0.7  0.8  
+0.7  _    0.1  
+0.8  0.1  _    
 
 tree size frequency distribution - sample size: 5
 mean: 13   variance: 0   standard deviation: 0
@@ -1064,10 +1084,10 @@ OUTPUT 4 : 0.2
 
 observation probability matrix
 
-     0    1    2    3    4
-0    1    0    0    0    0
-1  0.3  0.2  0.1  0.2  0.2
-2  0.2  0.3  0.1  0.2  0.2
+0     1    2    3    4    
+01    0    0    0    0    
+10.3  0.2  0.1  0.2  0.2  
+20.2  0.3  0.1  0.2  0.2  
 
 path length (starting from root) up to the first occurrence of output 0 distribution
 
@@ -1119,6 +1139,11 @@ number of occurrences of output 3 per size 13 tree distribution
 
 number of occurrences of output 4 per size 13 tree distribution
 
+distances between observation distributions for consecutive states
+_    0.7  0.8  
+0.7  _    0.1  
+0.8  0.1  _    
+
 tree size frequency distribution - sample size: 5
 mean: 13   variance: 0   standard deviation: 0
 
@@ -1144,6 +1169,10 @@ log-likelihood of the observed trees: -97.0198   (normalized: -1.49261)
 
 14 free parameters   2 * penalyzed log-likelihood (ICLc): -352.282
 
+chi-square test (6 degrees of freedom)
+chi-square value: 9.26076e+08   critical probability: 0
+reference chi-square value: 12.5916   reference critical probability: 0.05
+reference chi-square value: 16.8119   reference critical probability: 0.01
 
 Extract marginal distribution of variable 1:
 
@@ -1303,10 +1332,10 @@ OUTPUT 4 : 0.128812
 
 observation probability matrix
 
-          0         1         2         3         4
-0         1         0         0         0         0
-1  0.269971  0.246085  0.102351  0.310344  0.071249
-2   0.18217   0.18847  0.213875  0.286674  0.128812
+0          1         2         3         4         
+01         0         0         0         0         
+10.269971  0.246085  0.102351  0.310344  0.071249  
+20.18217   0.18847   0.213875  0.286674  0.128812  
 
 path length (starting from root) up to the first occurrence of output 0 distribution
 
@@ -1443,6 +1472,11 @@ number of occurrences of output 4 per tree frequency distribution - sample size:
 mean: 1   variance: 1.5   standard deviation: 1.22474
 coefficient of skewness: 1.36083   coefficient of kurtosis: -1
 
+distances between observation distributions for consecutive states
+_         0.730029  0.81783   
+0.730029  _         0.169086  
+0.81783   0.169086  _         
+
 tree size frequency distribution - sample size: 5
 mean: 13   variance: 0   standard deviation: 0
 
@@ -1469,7 +1503,7 @@ log-likelihood of the observed trees: -90.8011   (normalized: -1.39694)
 14 free parameters   2 * penalyzed log-likelihood (ICLc): -317.94
 
 chi-square test (6 degrees of freedom)
-chi-square value: 1.38429e+08   critical probability: 0
+chi-square value: 9.69473e+08   critical probability: 0
 reference chi-square value: 12.5916   reference critical probability: 0.05
 reference chi-square value: 16.8119   reference critical probability: 0.01
 
@@ -1535,6 +1569,10 @@ STATE 1 OBSERVATION_DISTRIBUTION
 BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.5
 mean: 450   variance: 225   standard deviation: 15
 
+distances between observation distributions for consecutive states
+_  1  
+1  _  
+
 OUTPUT_PROCESS 2 : PARAMETRIC
 
 STATE 0 OBSERVATION_DISTRIBUTION
@@ -1544,6 +1582,10 @@ mean: 270   variance: 189   standard deviation: 13.7477
 STATE 1 OBSERVATION_DISTRIBUTION
 BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.9
 mean: 810   variance: 81   standard deviation: 9
+
+distances between observation distributions for consecutive states
+_  1  
+1  _  
 
 Simulate the attributes...
 Print the data with the hidden Markov tree: 
@@ -1597,6 +1639,10 @@ mean: 450   variance: 225   standard deviation: 15
 state 1 observation frequency distribution - sample size: 25
 mean: 449.64   variance: 168.49   standard deviation: 12.9804
 
+distances between observation distributions for consecutive states
+_      1e+37  
+1e+37  _      
+
 OUTPUT_PROCESS 2 : PARAMETRIC
 
 STATE 0 OBSERVATION_DISTRIBUTION
@@ -1612,6 +1658,10 @@ mean: 810   variance: 81   standard deviation: 9
 
 state 1 observation frequency distribution - sample size: 25
 mean: 808.84   variance: 59.2233   standard deviation: 7.69567
+
+distances between observation distributions for consecutive states
+_      2e+37  
+2e+37  _      
 
 tree size frequency distribution - sample size: 5
 mean: 13   variance: 0   standard deviation: 0
@@ -1710,6 +1760,10 @@ mean: 449.638   variance: 161.64   standard deviation: 12.7138
 state 1 observation frequency distribution - sample size: 25
 mean: 449.64   variance: 168.49   standard deviation: 12.9804
 
+distances between observation distributions for consecutive states
+_  1  
+1  _  
+
 OUTPUT_PROCESS 2 : PARAMETRIC
 
 STATE 0 OBSERVATION_DISTRIBUTION
@@ -1725,6 +1779,10 @@ mean: 808.835   variance: 56.3907   standard deviation: 7.50937
 
 state 1 observation frequency distribution - sample size: 25
 mean: 808.84   variance: 59.2233   standard deviation: 7.69567
+
+distances between observation distributions for consecutive states
+_  1  
+1  _  
 
 tree size frequency distribution - sample size: 5
 mean: 13   variance: 0   standard deviation: 0
@@ -1801,6 +1859,10 @@ mean: 450   variance: 225   standard deviation: 15
 state 1 observation frequency distribution - sample size: 25
 mean: 449.64   variance: 168.49   standard deviation: 12.9804
 
+distances between observation distributions for consecutive states
+_      1e+37  
+1e+37  _      
+
 OUTPUT_PROCESS 2 : PARAMETRIC
 
 STATE 0 OBSERVATION_DISTRIBUTION
@@ -1816,6 +1878,10 @@ mean: 810   variance: 81   standard deviation: 9
 
 state 1 observation frequency distribution - sample size: 25
 mean: 808.84   variance: 59.2233   standard deviation: 7.69567
+
+distances between observation distributions for consecutive states
+_      2e+37  
+2e+37  _      
 
 tree size frequency distribution - sample size: 5
 mean: 13   variance: 0   standard deviation: 0
@@ -2028,6 +2094,10 @@ mean: 450   variance: 225   standard deviation: 15
 state 1 observation frequency distribution - sample size: 25
 mean: 449.64   variance: 168.49   standard deviation: 12.9804
 
+distances between observation distributions for consecutive states
+_      1e+37  
+1e+37  _      
+
 OUTPUT_PROCESS 2 : PARAMETRIC
 
 STATE 0 OBSERVATION_DISTRIBUTION
@@ -2043,6 +2113,10 @@ mean: 810   variance: 81   standard deviation: 9
 
 state 1 observation frequency distribution - sample size: 25
 mean: 808.84   variance: 59.2233   standard deviation: 7.69567
+
+distances between observation distributions for consecutive states
+_      2e+37  
+2e+37  _      
 
 tree size frequency distribution - sample size: 5
 mean: 13   variance: 0   standard deviation: 0
@@ -2069,9 +2143,6 @@ log-likelihood of the observed trees: -521.89   (normalized: -8.02907)
 
 14 free parameters   2 * penalyzed log-likelihood (ICLc): -1043.78
 
-chi-square test (2 degrees of freedom)
-chi-square value: 3.26667   critical probability: 0.195278
-reference chi-square value: 5.99146   reference critical probability: 0.05
 
 Plot of the augmented HiddenMarkovTreeData:
 
@@ -2126,6 +2197,10 @@ mean: 449.638   variance: 161.64   standard deviation: 12.7138
 state 1 observation frequency distribution - sample size: 25
 mean: 449.64   variance: 168.49   standard deviation: 12.9804
 
+distances between observation distributions for consecutive states
+_  1  
+1  _  
+
 OUTPUT_PROCESS 2 : PARAMETRIC
 
 STATE 0 OBSERVATION_DISTRIBUTION
@@ -2141,6 +2216,10 @@ mean: 808.835   variance: 56.3907   standard deviation: 7.50937
 
 state 1 observation frequency distribution - sample size: 25
 mean: 808.84   variance: 59.2233   standard deviation: 7.69567
+
+distances between observation distributions for consecutive states
+_  1  
+1  _  
 
 tree size frequency distribution - sample size: 5
 mean: 13   variance: 0   standard deviation: 0
@@ -2167,6 +2246,10 @@ log-likelihood of the observed trees: -511.466   (normalized: -7.86871)
 
 14 free parameters   2 * penalyzed log-likelihood (ICLc): -1022.93
 
+chi-square test (2 degrees of freedom)
+chi-square value: 1.26014e+07   critical probability: 0
+reference chi-square value: 5.99146   reference critical probability: 0.05
+reference chi-square value: 9.21034   reference critical probability: 0.01
 
 Extract an observation distribution from plain HiddenMarkovTreeData:
 *** ERROR : state trees not in the data
@@ -2285,9 +2368,9 @@ OUTPUT 1 : 0.534482
 
 observation probability matrix
 
-          0         1
-0  0.615388  0.384612
-1  0.465518  0.534482
+0          1         
+00.615388  0.384612  
+10.465518  0.534482  
 
 path length (starting from root) up to the first occurrence of output 0 distribution
 
@@ -2342,6 +2425,10 @@ number of occurrences of output 1 per size 13 tree distribution
 number of occurrences of output 1 per tree frequency distribution - sample size: 5
 mean: 5   variance: 4   standard deviation: 2
 coefficient of skewness: 0.9375   coefficient of kurtosis: -1.4375
+
+distances between observation distributions for consecutive states
+_        0.14987  
+_        _        
 
 tree size frequency distribution - sample size: 5
 mean: 13   variance: 0   standard deviation: 0

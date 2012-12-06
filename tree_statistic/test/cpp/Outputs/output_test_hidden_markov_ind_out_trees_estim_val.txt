@@ -24,6 +24,10 @@ STATE 1 OBSERVATION_DISTRIBUTION
 BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.5
 mean: 450   variance: 225   standard deviation: 15
 
+distances between observation distributions for consecutive states
+_  1  
+1  _  
+
 OUTPUT_PROCESS 2 : PARAMETRIC
 
 STATE 0 OBSERVATION_DISTRIBUTION
@@ -33,6 +37,10 @@ mean: 270   variance: 189   standard deviation: 13.7477
 STATE 1 OBSERVATION_DISTRIBUTION
 BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.9
 mean: 810   variance: 81   standard deviation: 9
+
+distances between observation distributions for consecutive states
+_  1  
+1  _  
 
 Simulate trees from this hidden Markov tree
 Initialization HMT: 
@@ -61,6 +69,10 @@ STATE 1 OBSERVATION_DISTRIBUTION
 BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.35
 mean: 315   variance: 204.75   standard deviation: 14.3091
 
+distances between observation distributions for consecutive states
+_         0.891043  
+0.891043  _         
+
 OUTPUT_PROCESS 2 : PARAMETRIC
 
 STATE 0 OBSERVATION_DISTRIBUTION
@@ -70,6 +82,10 @@ mean: 630   variance: 189   standard deviation: 13.7477
 STATE 1 OBSERVATION_DISTRIBUTION
 BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.75
 mean: 675   variance: 168.75   standard deviation: 12.9904
+
+distances between observation distributions for consecutive states
+_         0.907323  
+0.907323  _         
 iteration 1   log-likelihood of the observed trees: -278546
 iteration 2   log-likelihood of the observed trees: -8596.41
 iteration 3   log-likelihood of the observed trees: -8596.41
@@ -137,6 +153,10 @@ mean: 450.588   variance: 225   standard deviation: 15
 state 1 observation frequency distribution - sample size: 519
 mean: 450.588   variance: 229.679   standard deviation: 15.1552
 
+distances between observation distributions for consecutive states
+_  1  
+1  _  
+
 OUTPUT_PROCESS 2 : PARAMETRIC
 
 STATE 0 OBSERVATION_DISTRIBUTION
@@ -152,6 +172,10 @@ mean: 809.544   variance: 81.3644   standard deviation: 9.02022
 
 state 1 observation frequency distribution - sample size: 519
 mean: 809.545   variance: 85.7002   standard deviation: 9.25744
+
+distances between observation distributions for consecutive states
+_  1  
+1  _  
 
 tree size frequency distribution - sample size: 40
 mean: 26   variance: 0   standard deviation: 0
@@ -245,6 +269,10 @@ mean: 89.5068   variance: 83.609   standard deviation: 9.1438
 state 1 observation frequency distribution - sample size: 521
 mean: 89.5086   variance: 83.7735   standard deviation: 9.15279
 
+distances between observation distributions for consecutive states
+_  1  
+1  _  
+
 OUTPUT_PROCESS 2 : PARAMETRIC
 
 STATE 0 OBSERVATION_DISTRIBUTION
@@ -260,6 +288,10 @@ mean: 269.783   variance: 181.055   standard deviation: 13.4557
 
 state 1 observation frequency distribution - sample size: 521
 mean: 269.783   variance: 181.266   standard deviation: 13.4635
+
+distances between observation distributions for consecutive states
+_  1  
+1  _  
 
 tree size frequency distribution - sample size: 40
 mean: 26   variance: 0   standard deviation: 0

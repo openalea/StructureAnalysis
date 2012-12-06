@@ -134,6 +134,7 @@ const char *STAT_TREES_label[] = {
   "per tree" ,
   "per size" ,
   "state probabilities" , // STATL_STATE_PROBABILITY
+  "distances between observation distributions for consecutive states" , // STATL_OBSERVATION_DISTRIBUTION_DISTANCE
   "posterior state probabilities" ,
   "posterior in state probabilities" ,
   "posterior out state probabilities" ,

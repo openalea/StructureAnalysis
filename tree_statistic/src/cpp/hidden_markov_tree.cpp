@@ -4832,9 +4832,12 @@ ostream& HiddenMarkovTree::ascii_write(ostream& os,
                                        const Test* test,
                                        bool ch_order_flag) const
 {
-   register int i;
-   int variable, cumul_size, nb_variable,
-   nb_output_process= _nb_ioutput_process+_nb_doutput_process;
+   register int i, j, k;
+   int variable, cumul_size, nb_variable, buff;
+   int width[2];
+   int nb_output_process = _nb_ioutput_process+_nb_doutput_process;
+   bool **logic_transition = NULL;
+   double **distance = NULL;
    FrequencyDistribution **observation = NULL, *marginal = NULL;
    TreeCharacteristics *characteristics = NULL;
 
@@ -4858,7 +4861,7 @@ ostream& HiddenMarkovTree::ascii_write(ostream& os,
       os << "\n" << nb_output_process << " "
          << STAT_word[nb_output_process == 1 ? STATW_OUTPUT_PROCESS : STATW_OUTPUT_PROCESSES] << endl;
 
-      for(i= 1; i <= _nb_ioutput_process; i++)
+      for(i = 1; i <= _nb_ioutput_process; i++)
       {
          os << "\n" << STAT_word[STATW_OUTPUT_PROCESS];
          os << " " << i;
@@ -4909,16 +4912,106 @@ ostream& HiddenMarkovTree::ascii_write(ostream& os,
 
          }
 
+         logic_transition = logic_transition_computation();
+
+         distance = new double*[nb_state];
+         for(j = 0; j < nb_state; j++)
+            distance[j] = new double[nb_state];
+
          if (npprocess[i] != NULL)
+         {
             npprocess[i]->ascii_print(os, i, observation, characteristics,
                                       exhaustive, file_flag);
+
+            for(j = 0; j < nb_state; j++)
+            {
+               distance[j][j] = 0.;
+
+               for(k = j + 1;k < nb_state;k++)
+               {
+                  if ((logic_transition[j][k]) || (logic_transition[k][j]))
+                     distance[j][k] =
+                         npprocess[i]->observation[j]->overlap_distance_computation(*(npprocess[i]->observation[k]));
+                  else
+                     distance[j][k] = 1.;
+
+                  distance[k][j] = distance[j][k];
+               }
+            }
+         }
          else
+         {
+            // does not seem to work when observation == NULL and exhaustiv == true
             piprocess[i]->ascii_print(os, observation, marginal,
                                       exhaustive, file_flag);
-            // does not seem to work when observation == NULL and exhaustiv == true
-      }
 
-      for(i= 0; i < _nb_doutput_process; i++)
+            for(j = 0; j < nb_state; j++)
+            {
+               distance[j][j] = 0.;
+
+               for(k = j + 1; k < nb_state; k++)
+               {
+                  if ((logic_transition[j][k]) || (logic_transition[k][j]))
+                     distance[j][k] =
+                         piprocess[i]->observation[j]->sup_norm_distance_computation(*(piprocess[i]->observation[k]));
+                  else
+                     distance[j][k] = 1.;
+
+                  distance[k][j] = distance[j][k];
+               }
+            }
+         }
+
+         width[0] = column_width(nb_state , distance[0]);
+         for(j = 1; j < nb_state; j++)
+         {
+            buff = column_width(nb_state , distance[j]);
+            if (buff > width[0])
+                      width[0] = buff;
+         }
+         width[0] += ASCII_SPACE;
+
+         os.setf(ios::left , ios::adjustfield);
+
+         os << "\n";
+         if (file_flag)
+            os << "# ";
+
+         os << STAT_TREES_label[STATL_OBSERVATION_DISTRIBUTION_DISTANCE] << endl;
+
+         for(j = 0; j < nb_state; j++)
+         {
+            if (file_flag)
+               os << "# ";
+
+            for(k = 0; k < nb_state; k++)
+            {
+               if ((k != j) && (logic_transition[j][k]))
+                  os << setw(width[0]) << distance[j][k];
+               else
+                  os << setw(width[0]) << "_";
+            }
+            os << endl;
+         }
+
+         for(j = 0; j < nb_state; j++)
+         {
+            delete [] logic_transition[j];
+            logic_transition[j] = NULL;
+         }
+
+         delete [] logic_transition;
+         logic_transition = NULL;
+
+         for(j = 0; j < nb_state; j++)
+         {
+            delete [] distance[j];
+            distance[j] = NULL;
+         }
+         delete [] distance;
+      } // end for i <= _nb_ioutput_process
+
+      for(i = 0; i < _nb_doutput_process; i++)
       {
          os << "\n" << STAT_word[STATW_OUTPUT_PROCESS];
          os << " " << i;
@@ -4937,6 +5030,72 @@ ostream& HiddenMarkovTree::ascii_write(ostream& os,
                                       exhaustive, file_flag);
          else
             pdprocess[i]->ascii_print(os, observation, NULL, exhaustive, file_flag);
+
+         for(j = 0; j < nb_state; j++)
+         {
+            distance[j][j] = 0.;
+
+            for(k = j + 1; k < nb_state; k++)
+            {
+               if ((logic_transition[j][k]) || (logic_transition[k][j]))
+                  distance[j][k] =
+                      pdprocess[i]->observation[j]->sup_norm_distance_computation(*(pdprocess[i]->observation[k]));
+               else
+                  distance[j][k] = 1.;
+
+               distance[k][j] = distance[j][k];
+            }
+         }
+         if (pdprocess[i] != NULL)
+         {
+            width[0] = column_width(nb_state , distance[0]);
+            for(j = 1; j < nb_state; j++)
+            {
+               buff = column_width(nb_state , distance[j]);
+               if (buff > width[0])
+                         width[0] = buff;
+            }
+            width[0] += ASCII_SPACE;
+
+            os.setf(ios::left , ios::adjustfield);
+
+            os << "\n";
+            if (file_flag)
+               os << "# ";
+
+            os << STAT_TREES_label[STATL_OBSERVATION_DISTRIBUTION_DISTANCE] << endl;
+
+            for(j = 0; j < nb_state; j++)
+            {
+               if (file_flag)
+                  os << "# ";
+
+               for(k = 0; k < nb_state; k++)
+               {
+                  if ((k != j) && (logic_transition[j][k]))
+                     os << setw(width[0]) << distance[j][k];
+                  else
+                     os << setw(width[0]) << "_";
+               }
+               os << endl;
+            }
+
+            for(j = 0; j < nb_state; j++)
+            {
+               delete [] logic_transition[j];
+               logic_transition[j] = NULL;
+            }
+
+            delete [] logic_transition;
+            logic_transition = NULL;
+
+            for(j = 0; j < nb_state; j++)
+            {
+               delete [] distance[j];
+               distance[j] = NULL;
+            }
+            delete [] distance;
+         }
       }
    }
 
@@ -5114,10 +5273,13 @@ ostream& HiddenMarkovTree::ascii_write(ostream& os,
 ostream& HiddenMarkovTree::spreadsheet_write(ostream& os, const HiddenMarkovTreeData * otrees,
                                              const Test * test) const
 {
-   register int i;
-   int variable= 0, cumul_size, nb_output_process= _nb_ioutput_process+_nb_doutput_process;
-   FrequencyDistribution **observation= NULL;
-   TreeCharacteristics *characteristics= NULL;
+   register int i, j, k;
+   int variable = 0, cumul_size,
+       nb_output_process = _nb_ioutput_process+_nb_doutput_process;
+   bool **logic_transition = NULL;
+   double **distance = NULL;
+   FrequencyDistribution **observation = NULL;
+   TreeCharacteristics *characteristics = NULL;
 
    switch (type)
    {
@@ -5174,14 +5336,88 @@ ostream& HiddenMarkovTree::spreadsheet_write(ostream& os, const HiddenMarkovTree
             }
 
             if (otrees->observation_distribution != NULL)
-               observation= otrees->observation_distribution[variable];
+               observation = otrees->observation_distribution[variable];
             if (otrees->characteristics[variable] != NULL)
-               characteristics= otrees->characteristics[variable];
+               characteristics = otrees->characteristics[variable];
          }
+
+         logic_transition = logic_transition_computation();
+
+         distance = new double*[nb_state];
+         for(j = 0; j < nb_state; j++)
+            distance[j] = new double[nb_state];
+
          if (npprocess[i] != NULL)
+         {
             npprocess[i]->spreadsheet_print(os, i, observation, characteristics);
+            for(j = 0; j < nb_state; j++)
+            {
+               distance[j][j] = 0.;
+
+               for(k = j + 1;k < nb_state;k++)
+               {
+                  if ((logic_transition[j][k]) || (logic_transition[k][j]))
+                     distance[j][k] =
+                         npprocess[i]->observation[j]->overlap_distance_computation(*(npprocess[i]->observation[k]));
+                  else
+                     distance[j][k] = 1.;
+
+                  distance[k][j] = distance[j][k];
+               }
+            }
+         }
          else
+         {
             piprocess[i]->spreadsheet_print(os, observation);
+
+            for(j = 0; j < nb_state; j++)
+            {
+               distance[j][j] = 0.;
+
+               for(k = j + 1; k < nb_state; k++)
+               {
+                  if ((logic_transition[j][k]) || (logic_transition[k][j]))
+                     distance[j][k] =
+                         piprocess[i]->observation[j]->sup_norm_distance_computation(*(piprocess[i]->observation[k]));
+                  else
+                     distance[j][k] = 1.;
+
+                  distance[k][j] = distance[j][k];
+               }
+            }
+         }
+         os << "\n";
+         os << STAT_TREES_label[STATL_OBSERVATION_DISTRIBUTION_DISTANCE] << endl;
+
+         for(j = 0; j < nb_state; j++)
+         {
+            for(k = 0; k < nb_state; k++)
+            {
+               if ((k != j) && (logic_transition[j][k]))
+                  os << distance[j][k];
+               else
+                  os << "\t";
+            }
+            os << endl;
+         }
+
+         for(j = 0; j < nb_state; j++)
+         {
+            delete [] logic_transition[j];
+            logic_transition[j] = NULL;
+         }
+
+         delete [] logic_transition;
+         logic_transition = NULL;
+
+         for(j = 0; j < nb_state; j++)
+         {
+            delete [] distance[j];
+            distance[j] = NULL;
+         }
+         delete [] distance;
+
+
       }
 
       for(i= 0; i < _nb_ioutput_process; i++)

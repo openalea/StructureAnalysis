@@ -29,6 +29,10 @@ observation probability matrix
 0  0.8  0.2
 1  0.3  0.7
 
+distances between observation distributions for consecutive states
+_    0.5  
+0.5  _    
+
 Indices for tree number 0:
 0
 |-1
@@ -368,9 +372,13 @@ OUTPUT 1 : 0.8
 
 observation probability matrix
 
-     0    1
-0  0.5  0.5
-1  0.2  0.8
+0     1    
+00.5  0.5  
+10.2  0.8  
+
+distances between observation distributions for consecutive states
+_    0.3  
+0.3  _    
 iteration 1   log-likelihood of the observed trees: -33.8657
 
 1 iteration
@@ -424,9 +432,9 @@ OUTPUT 1 : 0.709939
 
 observation probability matrix
 
-          0         1
-0   0.62039   0.37961
-1  0.290061  0.709939
+0          1         
+00.62039   0.37961   
+10.290061  0.709939  
 
 path length (starting from root) up to the first occurrence of output 0 distribution
 
@@ -477,6 +485,10 @@ mixture of number of occurrences of output 1 per tree distributions
 
 number of occurrences of output 1 per tree frequency distribution - sample size: 6
 mean: 4.16667   variance: 6.16667   standard deviation: 2.48328
+
+distances between observation distributions for consecutive states
+_        0.33033  
+0.33033  _        
 
 tree size frequency distribution - sample size: 6
 mean: 7.83333   variance: 8.16667   standard deviation: 2.85774
@@ -581,9 +593,9 @@ OUTPUT 1 : 0.741019
 
 observation probability matrix
 
-          0         1
-0  0.650501  0.349499
-1  0.258981  0.741019
+0          1         
+00.650501  0.349499  
+10.258981  0.741019  
 
 path length (starting from root) up to the first occurrence of output 0 distribution
 
@@ -634,6 +646,10 @@ mixture of number of occurrences of output 1 per tree distributions
 
 number of occurrences of output 1 per tree frequency distribution - sample size: 6
 mean: 4.16667   variance: 6.16667   standard deviation: 2.48328
+
+distances between observation distributions for consecutive states
+_         0.391519  
+0.391519  _         
 
 tree size frequency distribution - sample size: 6
 mean: 7.83333   variance: 8.16667   standard deviation: 2.85774
@@ -709,9 +725,9 @@ OUTPUT 1 : 0.349499
 
 observation probability matrix
 
-          0         1
-0  0.258981  0.741019
-1  0.650501  0.349499
+0          1         
+00.258981  0.741019  
+10.650501  0.349499  
 
 path length (starting from root) up to the first occurrence of output 0 distribution
 
@@ -762,6 +778,10 @@ mixture of number of occurrences of output 1 per tree distributions
 
 number of occurrences of output 1 per tree frequency distribution - sample size: 6
 mean: 4.16667   variance: 6.16667   standard deviation: 2.48328
+
+distances between observation distributions for consecutive states
+_         0.391519  
+0.391519  _         
 
 tree size frequency distribution - sample size: 6
 mean: 7.83333   variance: 8.16667   standard deviation: 2.85774
@@ -842,9 +862,9 @@ OUTPUT 1 : 0.575496
 
 observation probability matrix
 
-          0         1
-0  0.519278  0.480722
-1  0.424504  0.575496
+0          1         
+00.519278  0.480722  
+10.424504  0.575496  
 
 path length (starting from root) up to the first occurrence of output 0 distribution
 
@@ -895,6 +915,10 @@ mixture of number of occurrences of output 1 per tree distributions
 
 number of occurrences of output 1 per tree frequency distribution - sample size: 6
 mean: 4.16667   variance: 6.16667   standard deviation: 2.48328
+
+distances between observation distributions for consecutive states
+_          0.0947739  
+0.0947739  _          
 
 tree size frequency distribution - sample size: 6
 mean: 7.83333   variance: 8.16667   standard deviation: 2.85774
@@ -999,9 +1023,9 @@ OUTPUT 1 : 0.564943
 
 observation probability matrix
 
-          0         1
-0  0.505978  0.494022
-1  0.435057  0.564943
+0          1         
+00.505978  0.494022  
+10.435057  0.564943  
 
 path length (starting from root) up to the first occurrence of output 0 distribution
 
@@ -1052,6 +1076,10 @@ mixture of number of occurrences of output 1 per tree distributions
 
 number of occurrences of output 1 per tree frequency distribution - sample size: 6
 mean: 4.16667   variance: 6.16667   standard deviation: 2.48328
+
+distances between observation distributions for consecutive states
+_          0.0709209  
+0.0709209  _          
 
 tree size frequency distribution - sample size: 6
 mean: 7.83333   variance: 8.16667   standard deviation: 2.85774
@@ -1140,6 +1168,10 @@ mean: 292.376   variance: 751.39   standard deviation: 27.4115
 
 state 1 observation frequency distribution - sample size: 0
 
+distances between observation distributions for consecutive states
+_          0.0610288  
+0.0610288  _          
+
 OUTPUT_PROCESS 2 : PARAMETRIC
 
 STATE 0 OBSERVATION_DISTRIBUTION
@@ -1154,6 +1186,10 @@ POISSON   INF_BOUND : 3   PARAMETER : 648.732
 mean: 651.732   variance: 648.732   standard deviation: 25.4702
 
 state 1 observation frequency distribution - sample size: 0
+
+distances between observation distributions for consecutive states
+_          0.0507028  
+0.0507028  _          
 
 tree size frequency distribution - sample size: 6
 mean: 9   variance: 0   standard deviation: 0
@@ -1242,6 +1278,10 @@ mean: 0.493333   variance: 0.249956   standard deviation: 0.499956
 
 state 1 observation frequency distribution - sample size: 0
 
+distances between observation distributions for consecutive states
+_          0.0447377  
+0.0447377  _          
+
 tree size frequency distribution - sample size: 6
 mean: 7.83333   variance: 8.16667   standard deviation: 2.85774
 
@@ -1321,9 +1361,9 @@ OUTPUT 1 : 0.55
 
 observation probability matrix
 
-      0     1
-0  0.55  0.45
-1  0.45  0.55
+0      1     
+00.55  0.45  
+10.45  0.55  
 
 path length (starting from root) up to the first occurrence of output 0 distribution
 
@@ -1374,6 +1414,10 @@ mixture of number of occurrences of output 1 per tree distributions
 
 number of occurrences of output 1 per tree frequency distribution - sample size: 6
 mean: 4.16667   variance: 6.16667   standard deviation: 2.48328
+
+distances between observation distributions for consecutive states
+_    0.1  
+0.1  _    
 
 tree size frequency distribution - sample size: 6
 mean: 7.83333   variance: 8.16667   standard deviation: 2.85774
@@ -1455,9 +1499,9 @@ OUTPUT 1 : 0.55
 
 observation probability matrix
 
-      0     1
-0  0.55  0.45
-1  0.45  0.55
+0      1     
+00.55  0.45  
+10.45  0.55  
 
 path length (starting from root) up to the first occurrence of output 0 distribution
 
@@ -1508,6 +1552,10 @@ mixture of number of occurrences of output 1 per tree distributions
 
 number of occurrences of output 1 per tree frequency distribution - sample size: 6
 mean: 4.16667   variance: 6.16667   standard deviation: 2.48328
+
+distances between observation distributions for consecutive states
+_    0.1  
+0.1  _    
 
 tree size frequency distribution - sample size: 6
 mean: 7.83333   variance: 8.16667   standard deviation: 2.85774
@@ -1589,9 +1637,9 @@ OUTPUT 1 : 0.55
 
 observation probability matrix
 
-      0     1
-0  0.55  0.45
-1  0.45  0.55
+0      1     
+00.55  0.45  
+10.45  0.55  
 
 path length (starting from root) up to the first occurrence of output 0 distribution
 
@@ -1642,6 +1690,10 @@ mixture of number of occurrences of output 1 per tree distributions
 
 number of occurrences of output 1 per tree frequency distribution - sample size: 6
 mean: 4.16667   variance: 6.16667   standard deviation: 2.48328
+
+distances between observation distributions for consecutive states
+_    0.1  
+0.1  _    
 
 tree size frequency distribution - sample size: 6
 mean: 7.83333   variance: 8.16667   standard deviation: 2.85774
@@ -1730,9 +1782,9 @@ OUTPUT 1 : 0.582247
 
 observation probability matrix
 
-          0         1
-0  0.480245  0.519755
-1  0.417753  0.582247
+0          1         
+00.480245  0.519755  
+10.417753  0.582247  
 
 path length (starting from root) up to the first occurrence of output 0 distribution
 
@@ -1783,6 +1835,10 @@ mixture of number of occurrences of output 1 per tree distributions
 
 number of occurrences of output 1 per tree frequency distribution - sample size: 6
 mean: 4.16667   variance: 6.16667   standard deviation: 2.48328
+
+distances between observation distributions for consecutive states
+_          0.0624915  
+0.0624915  _          
 
 tree size frequency distribution - sample size: 6
 mean: 7.83333   variance: 8.16667   standard deviation: 2.85774
@@ -1872,9 +1928,9 @@ OUTPUT 1 : 0.573218
 
 observation probability matrix
 
-          0         1
-0  0.473955  0.526045
-1  0.426782  0.573218
+0          1         
+00.473955  0.526045  
+10.426782  0.573218  
 
 path length (starting from root) up to the first occurrence of output 0 distribution
 
@@ -1925,6 +1981,10 @@ mixture of number of occurrences of output 1 per tree distributions
 
 number of occurrences of output 1 per tree frequency distribution - sample size: 6
 mean: 4.16667   variance: 6.16667   standard deviation: 2.48328
+
+distances between observation distributions for consecutive states
+_          0.0471732  
+0.0471732  _          
 
 tree size frequency distribution - sample size: 6
 mean: 7.83333   variance: 8.16667   standard deviation: 2.85774

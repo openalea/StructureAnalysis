@@ -41,6 +41,11 @@ observation probability matrix
 1  0.3  0.2  0.1  0.2  0.2
 2  0.2  0.3  0.1  0.2  0.2
 
+distances between observation distributions for consecutive states
+_    0.7  0.8  
+0.7  _    0.1  
+0.8  0.1  _    
+
 Markovian sequences: 
 1 VARIABLE
 
@@ -225,10 +230,15 @@ OUTPUT 4 : 0.3
 
 observation probability matrix
 
-     0    1    2    3    4
-0    1    0    0    0    0
-1  0.2  0.2  0.2  0.2  0.2
-2  0.1  0.2  0.2  0.2  0.3
+0     1    2    3    4    
+01    0    0    0    0    
+10.2  0.2  0.2  0.2  0.2  
+20.1  0.2  0.2  0.2  0.3  
+
+distances between observation distributions for consecutive states
+_    0.8  0.9  
+0.8  _    0.1  
+0.9  0.1  _    
 
 Initialization HMC : 
 HIDDEN_SEMI-MARKOV_CHAIN
@@ -712,10 +722,10 @@ OUTPUT 4 : 0.263159
 
 observation probability matrix
 
-            0           1           2           3           4
-0           1           0           0           0           0
-1    0.210654    0.163215     0.21955    0.274483    0.132098
-2    0.132477     0.46938  0.00423288    0.130751    0.263159
+0            1           2           3           4           
+01           0           0           0           0           
+10.210654    0.163215    0.21955     0.274483    0.132098    
+20.132477    0.46938     0.00423288  0.130751    0.263159    
 
 path length (starting from root) up to the first occurrence of output 0 distribution
 
@@ -851,6 +861,11 @@ number of occurrences of output 4 per size 51 tree distribution
 number of occurrences of output 4 per tree frequency distribution - sample size: 10
 mean: 6.8   variance: 7.28889   standard deviation: 2.69979
 coefficient of skewness: 0.475985   coefficient of kurtosis: -1.10062
+
+distances between observation distributions for consecutive states
+_         0.789346  0.867523  
+0.789346  _         0.437226  
+0.867523  0.437226  _         
 
 tree size frequency distribution - sample size: 10
 mean: 51   variance: 0   standard deviation: 0

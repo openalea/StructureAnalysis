@@ -29,6 +29,10 @@ observation probability matrix
 0  0.8  0.2
 1  0.3  0.7
 
+distances between observation distributions for consecutive states
+_    0.5  
+0.5  _    
+
 Simulated trees : 
 1
 |-1
@@ -806,7 +810,7 @@ Generalized viterbi started at vertex 2:
 ranks:               0	       1	       2	       3	       4
 log-probs:   |   -8.35	   -8.35	   -8.48	   -8.48	  -10.44|
 prob ratio:  |    1.00	    1.00	    0.87	    0.87	    0.12|
-cumul ratio: |1265772263597279281152.00	2525394030286900035584.00	3632944760934528712704.00	4735113806787912925184.00	4890863128285252943872.00|
+cumul ratio: |1265772263597297369088.00	2525394030286935687168.00	3632944760934554927104.00	4735113806787980034048.00	4890863128285322149888.00|
 nb cells:    |      13	      15	      16	      16	      17|
 (1, 1, 1, 1, 1)
 |-(1, 1, 1, 1, 1)

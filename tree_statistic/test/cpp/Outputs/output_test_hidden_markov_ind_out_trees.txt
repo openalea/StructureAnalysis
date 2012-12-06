@@ -143,6 +143,10 @@ STATE 1 OBSERVATION_DISTRIBUTION
 BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.5
 mean: 450   variance: 225   standard deviation: 15
 
+distances between observation distributions for consecutive states
+_  1  
+1  _  
+
 OUTPUT_PROCESS 2 : PARAMETRIC
 
 STATE 0 OBSERVATION_DISTRIBUTION
@@ -152,6 +156,10 @@ mean: 270   variance: 189   standard deviation: 13.7477
 STATE 1 OBSERVATION_DISTRIBUTION
 BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.9
 mean: 810   variance: 81   standard deviation: 9
+
+distances between observation distributions for consecutive states
+_  1  
+1  _  
 Permutation of the states: 
 HIDDEN_MARKOV_INDEPENDENT_OUT_TREE
 
@@ -178,6 +186,10 @@ STATE 1 OBSERVATION_DISTRIBUTION
 BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.1
 mean: 90   variance: 81   standard deviation: 9
 
+distances between observation distributions for consecutive states
+_  1  
+1  _  
+
 OUTPUT_PROCESS 2 : PARAMETRIC
 
 STATE 0 OBSERVATION_DISTRIBUTION
@@ -187,6 +199,10 @@ mean: 810   variance: 81   standard deviation: 9
 STATE 1 OBSERVATION_DISTRIBUTION
 BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.3
 mean: 270   variance: 189   standard deviation: 13.7477
+
+distances between observation distributions for consecutive states
+_  1  
+1  _  
 
 HIDDEN_MARKOV_INDEPENDENT_OUT_TREE
 
@@ -213,6 +229,10 @@ STATE 1 OBSERVATION_DISTRIBUTION
 BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.1
 mean: 90   variance: 81   standard deviation: 9
 
+distances between observation distributions for consecutive states
+_  1  
+1  _  
+
 OUTPUT_PROCESS 2 : PARAMETRIC
 
 STATE 0 OBSERVATION_DISTRIBUTION
@@ -222,6 +242,10 @@ mean: 810   variance: 81   standard deviation: 9
 STATE 1 OBSERVATION_DISTRIBUTION
 BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.3
 mean: 270   variance: 189   standard deviation: 13.7477
+
+distances between observation distributions for consecutive states
+_  1  
+1  _  
 
 Simulated trees : 
 (463, 822)
