@@ -204,6 +204,14 @@ def test_build_sequences():
     msg += str(mtg_t.Size())
     assert (nb_items == mtg_t.Size()), msg
 
+def test_extract_mtg():
+    """Extract an MTG object from a trees"""
+    msg1 = "Extraction of MTG failed"
+    msg2 = "Bad number of trees: "
+    g = trees.Mtg(T)
+    assert g, msg1
+    assert len(g.vertices(scale=1)) == T.NbTrees(), msg2
+    
 if __name__ == "__main__":
     T, tv, nb_trees, tree_list, mtg_name = init()
     test_mtg_build()
@@ -217,3 +225,4 @@ if __name__ == "__main__":
     test_merge_failure()
     test_build_vectors()
     test_build_sequences()
+    test_extract_mtg()

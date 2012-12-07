@@ -2320,53 +2320,7 @@ class Trees(object):
             'tree_to_mtg_vid' or mtg_to_tree_vid, since this properties
             may not be taken into account by loading the dumped file.        
         """
-        import openalea.mtg as mtg
-        import etrees
-        g = mtg.MTG()
-        mtg2tree = {} # correspondence mtg components -> tree ids 
-        tree2mtg = {} # correspondence tree ids -> mtg components
-        # MTG properties are just used to store their names
-        # The actual properties are stored in "Prop"
-        prop_name = "Prop" 
-        l = 0
-        while prop_name in self.Attributes():
-            prop_name += str(l)
-            l += 1
-        g.add_property(prop_name)
-        # check whether some other mtg is associated with self
-        mtgtree_prop = False 
-        if not(self.__tree_to_mtg_vid is None):
-            mtgtree_prop = True
-            g.add_property("tree_to_mtg_vid")
-            g.add_property("mtg_to_tree_vid")
-            g.add_property("tree_to_mtg_tid")
-        for t in range(self.NbTrees()):
-            tree2mtg[t] = g.add_component(0)
-            mtg2tree[tree2mtg[t]] = t
-            ET = etrees.Tree(self.Tree(t))
-            mtg2tree_vid = {} # correspondence mtg vids -> tree vids 
-            tree2mtg_vid = {} # correspondence tree vids -> mtg vids
-            # add root
-            r = ET.Root()
-            tree2mtg_vid[r] = g.add_component(tree2mtg[t])
-            mtg2tree_vid[tree2mtg_vid[r]] = r 
-            g.node(tree2mtg_vid[r]).Prop = list(ET.Get(r))
-            if mtgtree_prop:
-                g.node(tree2mtg[t]).tree_to_mtg_tid = \
-                    self.MTGComponentRoot(t)
-            for v in ET.Preorder():
-                if (v != r):
-                    p = ET.Parent(v)
-                    edge = ET.EdgeType(p, v)
-                    tree2mtg_vid[v] = g.add_child(tree2mtg_vid[p], edge_type=edge)
-                    mtg2tree_vid[tree2mtg_vid[v]] = v
-                    g.node(tree2mtg_vid[v]).Prop = list(ET.Get(v))
-                if mtgtree_prop:
-                    mtgv = self.MTGVertexId(t, TreeVertexId=v)
-                    g.node(tree2mtg_vid[v]).tree_to_mtg_vid = mtgv
-                    g.node(tree2mtg_vid[v]).mtg_to_tree_vid = \
-                        self.TreeVertexId(TreeId=t, MTGVid=mtgv)
-
+        g, prop_name = self._trees_to_mtg()
         import pickle
         pkl_file = open(name, 'wb')
         obj = g, prop_name, self.Attributes() 
@@ -2998,6 +2952,70 @@ class Trees(object):
         else:
             self._valid_cvariable(variable)
             return res[variable]
+
+    def _trees_to_mtg(self):
+        """Converts Trees into an MTG object.
+        
+        :Returns: 
+            
+            Return an MTG object and a str object corresponding to
+            the Trees attribute names used as MTG properties
+            
+        :Notes:
+            If possible, Attribute names should not include 'Prop' or 
+            'tree_to_mtg_vid' or mtg_to_tree_vid, since this properties
+            may be used to keep a conversion between Trees and MTG
+            vertex identifiers.
+            
+        """
+        import openalea.mtg as mtg
+        import etrees
+        g = mtg.MTG()
+        mtg2tree = {} # correspondence mtg components -> tree ids 
+        tree2mtg = {} # correspondence tree ids -> mtg components
+        # MTG properties are just used to store their names
+        # The actual properties are stored in "Prop"
+        prop_name = "Prop" 
+        l = 0
+        while prop_name in self.Attributes():
+            prop_name += str(l)
+            l += 1
+        g.add_property(prop_name)
+        # check whether some other mtg is associated with self
+        mtgtree_prop = False 
+        if not(self.__tree_to_mtg_vid is None):
+            mtgtree_prop = True
+            g.add_property("tree_to_mtg_vid")
+            g.add_property("mtg_to_tree_vid")
+            g.add_property("tree_to_mtg_tid")
+        for t in range(self.NbTrees()):
+            tree2mtg[t] = g.add_component(0)
+            mtg2tree[tree2mtg[t]] = t
+            ET = etrees.Tree(self.Tree(t))
+            mtg2tree_vid = {} # correspondence mtg vids -> tree vids 
+            tree2mtg_vid = {} # correspondence tree vids -> mtg vids
+            # add root
+            r = ET.Root()
+            tree2mtg_vid[r] = g.add_component(tree2mtg[t])
+            mtg2tree_vid[tree2mtg_vid[r]] = r 
+            g.node(tree2mtg_vid[r]).Prop = list(ET.Get(r))
+            if mtgtree_prop:
+                g.node(tree2mtg[t]).tree_to_mtg_tid = \
+                    self.MTGComponentRoot(t)
+            for v in ET.Preorder():
+                if (v != r):
+                    p = ET.Parent(v)
+                    edge = ET.EdgeType(p, v)
+                    tree2mtg_vid[v] = g.add_child(tree2mtg_vid[p], edge_type=edge)
+                    mtg2tree_vid[tree2mtg_vid[v]] = v
+                    g.node(tree2mtg_vid[v]).Prop = list(ET.Get(v))
+                if mtgtree_prop:
+                    mtgv = self.MTGVertexId(t, TreeVertexId=v)
+                    g.node(tree2mtg_vid[v]).tree_to_mtg_vid = mtgv
+                    g.node(tree2mtg_vid[v]).mtg_to_tree_vid = \
+                        self.TreeVertexId(TreeId=t, MTGVid=mtgv)
+
+        return g, prop_name
     
     def _set_int_value_type(self, variable):
         # turns a state variable into an integer-valued variable
@@ -3189,6 +3207,21 @@ def PickleLoad(name):
         T._SetMTGVidDictionary(mtg2tree_vid_list)
     return T
 
+def Mtg(T):
+    """Conversion from :class:`TreeStructure` to :class:`MTG`
+
+        :Returns: 
+            
+            Return an MTG object and a str object corresponding to
+            the Trees attribute names used as MTG properties
+    """
+    if issubclass(T.__class__, Trees):
+        # T is supposed to be a Trees object...
+        g, prop_name = T._trees_to_mtg()
+        return g
+    else:
+        msg = 'bad type for argument "T": Trees expected'
+        raise TypeError, msg
 
 if __name__ == '__main__':
     pass # add a call to run your script here
