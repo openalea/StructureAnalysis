@@ -2,8 +2,8 @@ Source: vplants-treematching2
 Maintainer: Christophe Pradal <christophe.pradal@cirad.fr>
 Section: python
 Priority: optional
-Build-Depends: python-setuptools (>= 0.6b3), python-dev (>= 2.7), debhelper (>= 7), python-support (>= 0.8.4), libboost-python-dev, python-openalea.deploy, python-openalea.sconsx
-Standards-Version: 3.9.1
+Build-Depends: python-all (>= 2.6.6-3~), python-setuptools (>= 0.6b3), python-dev (>= 2.7), debhelper (>= 7),  libboost-python-dev, python-openalea.deploy, python-openalea.sconsx
+
 
 Package: python-vplants.treematching2
 Architecture: any

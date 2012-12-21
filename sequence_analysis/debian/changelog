@@ -1,3 +1,45 @@
+vplants-sequenceanalysis (1.0.1~ppa13) quantal; urgency=low
+
+  * Idem for quantal 
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Wed, 19 Dec 2012 13:10:32 +0100
+
+vplants-sequenceanalysis (1.0.1~ppa12) precise; urgency=low
+
+  * Merge with trunk rev 13386 
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Wed, 19 Dec 2012 13:09:24 +0100
+
+vplants-sequenceanalysis (1.0.1~ppa11) precise; urgency=low
+
+  * Port to precise 
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Tue, 11 Dec 2012 18:13:04 +0100
+
+vplants-sequenceanalysis (1.0.1~ppa10) quantal; urgency=low
+
+  * Merge with trunk rev 12654
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Tue, 11 Dec 2012 18:07:04 +0100
+
+vplants-sequenceanalysis (1.0.1~ppa9) quantal; urgency=low
+
+  * Port to Quantal  
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Mon, 10 Dec 2012 17:16:40 +0100
+
+vplants-sequenceanalysis (1.0.1~ppa8) precise; urgency=low
+
+  * Rebuild with new PlantGL 
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Thu, 06 Dec 2012 14:00:18 +0100
+
+vplants-sequenceanalysis (1.0.1~ppa2) precise; urgency=low
+
+  *  Switch to dh_python2 
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Wed, 12 Sep 2012 15:41:01 +0200
+
 vplants-sequenceanalysis (1.0.1~ppa1) precise; urgency=low
 
   *  Release 1.0 on precise  

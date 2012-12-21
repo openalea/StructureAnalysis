@@ -1,3 +1,27 @@
+libvplants-tool (1.0.1~ppa9) quantal; urgency=low
+
+  * Port to Quantal 
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Mon, 10 Dec 2012 17:16:15 +0100
+
+libvplants-tool (1.0.1~ppa8) precise; urgency=low
+
+  * Rebuild with new PlantGL 
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Thu, 06 Dec 2012 13:59:47 +0100
+
+libvplants-tool (1.0.1~ppa3) precise; urgency=low
+
+  * Port to gcc 4.7 
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Mon, 29 Oct 2012 15:42:42 +0100
+
+libvplants-tool (1.0.1~ppa2) precise; urgency=low
+
+  * Switch to dh_python2 
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Wed, 12 Sep 2012 15:39:52 +0200
+
 libvplants-tool (1.0.1~ppa1) precise; urgency=low
 
   * Release 1.0 on precise 
