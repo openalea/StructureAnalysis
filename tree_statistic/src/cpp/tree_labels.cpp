@@ -217,6 +217,8 @@ const char *STAT_TREES_error[] = {
 
   "not present" , // STATR_NOT_PRESENT
 
+  "model not present" , // STATR_NO_MODEL
+
   "vector does not define a permutation" , // STATR_NO_PERMUTATION
 
   "bad exponent for saem" , // STATR_SAEM_EXP

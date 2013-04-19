@@ -60,6 +60,24 @@ def test_hmt_simulate():
     assert(THMT.Tree(0).Get(7)[1] in [6, 7]), msg3
     return T, THMT
 
+def test_extract_model():
+    """Extract model part of HiddenMarkovTreeData"""
+    T, THMT = test_hmt_simulate()
+    # THMT.Display(Detail=2)
+    H2 = THMT.ExtractMarkov()
+    assert H2, msg
+    THMT2 = H2.ExtractData()
+    msg = "Bad value for extracted HiddenMarkovTree"
+    file_name = "hmot_extract_write.hmt"
+    H2.Save(file_name, "ASCII", True)
+    H3 = hmt.HiddenMarkovIndOutTree(hmt_name)
+    import os
+    os.remove(file_name)
+    s1 = H3._chmt().Display(True)
+    s2 = H._chmt().Display(True)
+    assert(s1 == s2), msg
+    assert(str(THMT)==str(THMT2)), msg
+
 def test_hmt_permutation():
     """Permute the states of an HMT"""
     P = [1, 2, 3, 4, 0]
@@ -82,4 +100,6 @@ if __name__ == "__main__":
     test_nb_states()
     test_hmt_data_failure()
     test_hmt_simulate()
+    test_extract_model()
     test_hmt_permutation()
+    

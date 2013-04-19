@@ -65,9 +65,10 @@ for i in range(5):
 inf_bound=0
 sup_bound=3
 probability= 0.6
-ident=stat_tool.DistributionIdentifier.UNIFORM
+ident=stat_tool.DistributionIdentifierType.UNIFORM
 parameter=stat_tool.D_DEFAULT
-distrib= stat_tool._ParametricModel(ident, inf_bound, sup_bound, parameter, probability)
+distrib= stat_tool.distribution._DiscreteParametricModel(ident, inf_bound, sup_bound, parameter, probability)
+
 print distrib
 max_depth= 3
 max_size= 20

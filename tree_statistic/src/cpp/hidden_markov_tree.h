@@ -510,6 +510,7 @@ public :
 
    DiscreteParametricModel* extract(StatError& error, int type,
                                     int variable, int value) const;
+
    /** Return the data part of a HiddenMarkovTree,
        keeping a reference on \e self */
    virtual HiddenMarkovTreeData* extract_data(StatError& error) const;
@@ -693,6 +694,9 @@ private :
    void build_state_trees();
    void build_state_characteristics();
 
+   /** Return a HiddenMarkovTreeData without the state variable */
+   HiddenMarkovTreeData* remove_state_variable() const;
+
    /** Permutation of the states of \e self */
    void state_permutation(int* perm);
 
@@ -745,6 +749,10 @@ public :
 
    DiscreteDistributionData* extract(StatError& error, int type,
                                      int variable, int value) const;
+
+   /** Return the model part of a HiddenMarkovTreeData,
+       keeping a reference on \e self */
+   HiddenMarkovTree* extract_model(StatError& error) const;
 
    /** Return mixture distribution with frequency distribution for a given variable */
    MixtureData* extract_marginal(StatError& error, int variable) const;

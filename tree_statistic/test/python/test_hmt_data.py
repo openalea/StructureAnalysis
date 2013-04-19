@@ -51,8 +51,10 @@ print OBS2.display()
 # OBS2.plot()
 # T2.Plot("Observation", 1)
 # Copy constructor of HiddenMarkovIndOutTreeData
-CPT2=hmt.HiddenMarkovTreeData(T2)
-OBS3=CPT2.ExtractHistogram("Observation", 1, 1)
+CPT2 = hmt.HiddenMarkovTreeData(T2)
+OBS3 = CPT2.ExtractHistogram("Observation", 1, 1)
+
+ECPT2 = T.ExtractMarkov()
 
 HIST3 = T2.ExtractHistogram("Value", variable=2)
 print HIST3.display(Detail=2)

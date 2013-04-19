@@ -46,6 +46,7 @@ int main(void)
    const char *hmotparampath = "./hmot.hmt";
    int * const variables  = new int[1];
    HiddenMarkovIndOutTree *hmot= NULL, *hmot_estim= NULL;
+   HiddenMarkovTree *ehmot = NULL;
    HiddenMarkovTreeData *hmtd, *state_hmtd, *ehmtd, *state_tree = NULL,
                         *hmtdv = NULL;
    tree_type **potrees  = NULL;
@@ -84,8 +85,8 @@ int main(void)
    cout << *hmtd << endl;
 
    hmot_estim= hmtd->hidden_markov_ind_out_tree_estimation(error, cout, *hmot,
-                                                       true, VITERBI, FORWARD_BACKWARD,
-                                                       1., 10, true);
+                                                           true, VITERBI, FORWARD_BACKWARD,
+                                                           1., 10, true);
    cout << endl << "Parameter estimation:" << endl;
    cout << error;
    hmot_estim->ascii_write(cout, false);
@@ -163,6 +164,18 @@ int main(void)
       delete mixture_data;
       mixture_data = NULL;
    }
+
+   // extract markov part of hmtdv
+   ehmot = hmtdv->extract_model(error);
+   cout << error;
+   if (ehmot != NULL)
+   {
+      cout << "Extract Markov part of HiddenMarkovTreeData:" << endl;
+      ehmot->ascii_write(cout);
+      delete ehmot;
+      ehmot = NULL;
+   }
+
    delete hmtdv;
    hmtdv = NULL;
 
@@ -248,6 +261,17 @@ int main(void)
 
    cout << "Print the data with the hidden Markov tree: " << endl;
    cout << *hmtd << endl;
+
+   // extract markov part of state_hmtd
+   ehmot = hmtd->extract_model(error);
+   cout << error;
+   if (ehmot != NULL)
+   {
+      cout << "Extract Markov part of HiddenMarkovTreeData:" << endl;
+      ehmot->ascii_write(cout, true);
+      delete ehmot;
+      ehmot = NULL;
+   }
 
    hmot_estim= hmtd->hidden_markov_ind_out_tree_estimation(error, cout, *hmot,
                                                        true, VITERBI, FORWARD_BACKWARD,

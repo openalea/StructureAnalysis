@@ -1042,6 +1042,22 @@ public :
       return histo;
    }
 
+   static HiddenMarkovTree*
+   Chmt_data_wrapper_extract_model(const HiddenMarkovTreeData& tree)
+   {
+      HiddenMarkovTree *res;
+      StatError error;
+      ostringstream error_message;
+
+      res = tree.extract_model(error);
+      if (res == NULL)
+      {
+         error_message << error;
+         throw_stat_tree_error(error_message);
+      }
+      return res;
+   }
+
    static HiddenMarkovIndOutTree*
    Chmt_data_wrapper_hidden_markov_ind_out_tree_estimation_markov(const HiddenMarkovTreeData& hmtd,
                                                               const HiddenMarkovIndOutTree& ihmarkov,
@@ -1224,6 +1240,10 @@ void class_hmt_data()
              "ExtractMarginal(self, variable) -> MixtureData \n\n"
              "Return the mixture of observation distributions"
              "for a given variable")
+        .def("ExtractMarkov", WRAP::Chmt_data_wrapper_extract_model,
+             return_value_policy< manage_new_object>(),
+             "ExtractMarginal(self) -> HiddenMarkovTree \n\n"
+             "Return the model part of self \n")
         .def("StateTrees",
              &HiddenMarkovTreeData::get_state_hidden_markov_tree_data,
              return_value_policy< manage_new_object >(),

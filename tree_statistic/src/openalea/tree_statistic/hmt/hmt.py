@@ -574,8 +574,7 @@ class HiddenMarkovTreeData(trees.Trees):
                 self.__ctrees=trees_object
             else:
                 self.__ctrees=_hmt.CHmt_data(trees_object, True)
-        elif issubclass(trees_object.__class__, HiddenMarkovIndOutTree):
-            # above line is weird: class must be Trees...
+        elif issubclass(trees_object.__class__, trees.Trees):
             # ... or a Trees object...
             if trees_object is None:
                 raise ValueError, "second argument is mandatory"
@@ -584,16 +583,21 @@ class HiddenMarkovTreeData(trees.Trees):
                 # in the latter case
                 trees.Trees.__init__(self, trees_object, 
                                      attribute_names=attribute_names)
-                self.__ctrees=_hmt.CHmt_data(self._ctrees(), markov._chmt())
+                self.__ctrees=_hmt.CHmt_data(super(HiddenMarkovTreeData, self)._ctrees(), markov._chmt())
             else:
                 msg="bad type for second argument: "+str(type(trees_object))
                 raise TypeError, msg                
         else:
-            msg="bad type for first argument: "+str(type(arg))
+            msg="bad type for first argument: "+str(type(trees_object))
             raise TypeError, msg
 ##        if not (attribute_names is None):
 ##            self.__attributes=list(attribute_names)
-                          
+
+    def ExtractMarkov(self):
+        """Extract the 'model' part of the HiddenMarkovTreeData."""
+        chmt = self.__ctrees.ExtractMarkov()
+        return HiddenMarkovIndOutTree(chmt, aliasing=True)
+
     def ExtractHistogram(self, nature, variable=None, state=None):
         """Extract a frequency distribution from self.
         

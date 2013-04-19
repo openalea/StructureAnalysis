@@ -701,6 +701,7 @@ ostream& NonparametricTreeProcess::ascii_print(ostream &os, int process,
                                                const TreeCharacteristics* characteristics,
                                                bool exhaustive, bool file_flag) const
 {
+   bool no_characteristic_print = false;
    register int i , j;
    int buff , width[2];
    double *pmass;
@@ -849,18 +850,23 @@ ostream& NonparametricTreeProcess::ascii_print(ostream &os, int process,
                os << "# ";
 
             os << "  ";
-            if ((characteristics != NULL) && (characteristics->first_occurrence_root[i]->nb_element > 0))
+            if ((characteristics != NULL) && (characteristics->first_occurrence_root != NULL))
             {
-               os << " | " << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
-                  << " " << i << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
+               no_characteristic_print = false;
+               if (characteristics->first_occurrence_root[i]->nb_element > 0)
+                  os << " | " << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+                     << " " << i << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
             }
+            else
+               no_characteristic_print = true;
 
             if ((first_occurrence_root != NULL) && (first_occurrence_root[i] != NULL))
             {
                os << " | " << STAT_TREES_label[process == 0 ? STATL_STATE_FIRST_OCCURRENCE_ROOT : STATL_OUTPUT_FIRST_OCCURRENCE_ROOT]
                   << " " << i << " " << STAT_label[STATL_DISTRIBUTION];
 
-               if ((characteristics != NULL) && (characteristics->first_occurrence_root[i]->nb_element > 0))
+               if ((characteristics != NULL) && (characteristics->first_occurrence_root != NULL)
+                    && (characteristics->first_occurrence_root[i]->nb_element > 0))
                   os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
                      << STAT_label[STATL_FUNCTION];
 
@@ -868,7 +874,7 @@ ostream& NonparametricTreeProcess::ascii_print(ostream &os, int process,
                   << STAT_label[STATL_FUNCTION] << endl;
 
                first_occurrence_root[i]->ascii_print(os, file_flag, true, true,
-                                                     ((characteristics != NULL) ? characteristics->first_occurrence_root[i] : NULL));
+                                                     ((!no_characteristic_print) ? characteristics->first_occurrence_root[i] : NULL));
             }
             else
             // first_occurrence_root == NULL
@@ -934,18 +940,23 @@ ostream& NonparametricTreeProcess::ascii_print(ostream &os, int process,
                os << "# ";
 
             os << "  ";
-            if ((characteristics != NULL) && (characteristics->first_occurrence_leaves[i]->nb_element > 0))
+            if ((characteristics != NULL) && (characteristics->first_occurrence_leaves != NULL))
             {
-               os << " | " << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
-                  << " " << i << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
+               no_characteristic_print = false;
+               if (characteristics->first_occurrence_leaves[i]->nb_element > 0)
+                  os << " | " << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+                     << " " << i << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
             }
+            else
+               no_characteristic_print = true;
 
             if ((first_occurrence_leaves != NULL) && (first_occurrence_leaves[i] != NULL))
             {
                os << " | " << STAT_TREES_label[process == 0 ? STATL_STATE_FIRST_OCCURRENCE_LEAVES : STATL_OUTPUT_FIRST_OCCURRENCE_LEAVES]
                   << " " << i << " " << STAT_label[STATL_DISTRIBUTION];
 
-               if ((characteristics != NULL) && (characteristics->first_occurrence_leaves[i]->nb_element > 0))
+               if ((characteristics != NULL) && (characteristics->first_occurrence_leaves != NULL)
+                   && (characteristics->first_occurrence_leaves[i]->nb_element > 0))
                   os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
                      << STAT_label[STATL_FUNCTION];
 
@@ -953,7 +964,7 @@ ostream& NonparametricTreeProcess::ascii_print(ostream &os, int process,
                   << STAT_label[STATL_FUNCTION] << endl;
 
                first_occurrence_leaves[i]->ascii_print(os, file_flag, true, true,
-                                                     ((characteristics != NULL) ? characteristics->first_occurrence_leaves[i] : NULL));
+                                                     ((!no_characteristic_print) ? characteristics->first_occurrence_leaves[i] : NULL));
             }
             else
             // first_occurrence_leaves == NULL
@@ -1019,17 +1030,22 @@ ostream& NonparametricTreeProcess::ascii_print(ostream &os, int process,
                os << "# ";
 
             os << "  ";
-            if ((characteristics != NULL) && (characteristics->sojourn_size[i]->nb_element > 0))
+            if ((characteristics != NULL) && (characteristics->sojourn_size != NULL)
+                && (characteristics->sojourn_size[i]->nb_element > 0))
+
             {
+               no_characteristic_print = false;
                os << " | " << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
                   << STAT_TREES_label[STATL_SOJOURN_SIZE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
             }
+            else
+               no_characteristic_print = true;
 
             if ((sojourn_size != NULL) && (sojourn_size[i] != NULL))
             {
                os << " | " << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
                   << STAT_TREES_label[STATL_SOJOURN_SIZE] << " " << STAT_label[STATL_DISTRIBUTION];
-               if ((characteristics != NULL) && (characteristics->sojourn_size[i]->nb_element > 0))
+               if (!no_characteristic_print)
                {
                   os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
                      << STAT_label[STATL_FUNCTION];
@@ -1038,14 +1054,15 @@ ostream& NonparametricTreeProcess::ascii_print(ostream &os, int process,
                   << STAT_label[STATL_FUNCTION] << endl;
 
                sojourn_size[i]->Distribution::ascii_print(os, file_flag, true, false,
-                                                          (((characteristics != NULL) && (characteristics->sojourn_size[i]->nb_element > 0)) ?
+                                                          ((!no_characteristic_print) ?
                                                            characteristics->sojourn_size[i] : NULL));
             }
             else
-            {
-               os << endl;
-               characteristics->sojourn_size[i]->ascii_print(os, file_flag);
-            }
+               if (!no_characteristic_print)
+               {
+                  os << endl;
+                  characteristics->sojourn_size[i]->ascii_print(os, file_flag);
+               }
          }
       } // end for
    } // end if
@@ -1117,7 +1134,13 @@ ostream& NonparametricTreeProcess::ascii_print(ostream &os, int process,
                {
                   os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
                      << STAT_label[STATL_FUNCTION];
+                  if (characteristics->nb_zones != NULL)
+                     no_characteristic_print = false;
+                  else
+                     no_characteristic_print = true;
                }
+               else
+                  no_characteristic_print = true;
                if ((size != NULL) && (size->variance == 0.))
                {
                   os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION] << " "
@@ -1128,14 +1151,16 @@ ostream& NonparametricTreeProcess::ascii_print(ostream &os, int process,
                   os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_MIXTURE] << " "
                      << STAT_label[STATL_FUNCTION] << endl;
                }
-
                nb_zones[i]->ascii_print(os, file_flag, true, false,
-                                        ((characteristics != NULL) ? characteristics->nb_zones[i] : NULL));
+                                        ((!no_characteristic_print) ? characteristics->nb_zones[i] : NULL));
             }
             else
             {
-               os << endl;
-               characteristics->nb_zones[i]->ascii_print(os, file_flag);
+               if ((!no_characteristic_print) && (characteristics->nb_zones[i] != NULL))
+               {
+                  os << endl;
+                  characteristics->nb_zones[i]->ascii_print(os, file_flag);
+               }
             }
          }
       }
@@ -1208,7 +1233,13 @@ ostream& NonparametricTreeProcess::ascii_print(ostream &os, int process,
                {
                   os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
                      << STAT_label[STATL_FUNCTION];
+                  if (characteristics->nb_zones != NULL)
+                     no_characteristic_print = false;
+                  else
+                     no_characteristic_print = true;
                }
+               else
+                  no_characteristic_print = true;
                if ((size != NULL) && (size->variance == 0.))
                {
                   os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION] << " "
@@ -1220,12 +1251,15 @@ ostream& NonparametricTreeProcess::ascii_print(ostream &os, int process,
                      << STAT_label[STATL_FUNCTION] << endl;
                }
                nb_occurrences[i]->ascii_print(os, file_flag, true, false ,
-                                             ((characteristics != NULL) ? characteristics->nb_occurrences[i] : NULL));
+                                             ((!no_characteristic_print) ? characteristics->nb_occurrences[i] : NULL));
             }
             else
             {
-               os << endl;
-               characteristics->nb_occurrences[i]->ascii_print(os, file_flag);
+               if ((!no_characteristic_print) && (characteristics->nb_occurrences[i] != NULL))
+               {
+                  os << endl;
+                  characteristics->nb_occurrences[i]->ascii_print(os, file_flag);
+               }
             }
          }
       }
@@ -3870,7 +3904,7 @@ HiddenMarkovTreeData* HiddenMarkovTree::extract_data(StatError& error) const
    if (status)
    {
       tree= new HiddenMarkovTreeData(*markov_data);
-      tree->markov= new HiddenMarkovTree(*this, false);
+      tree->markov= this->HiddenMarkovTreeCopy(false);
    }
 
    return tree;
@@ -3888,7 +3922,7 @@ HiddenMarkovTree* HiddenMarkovTree::thresholding(double min_probability) const
    register int i;
    HiddenMarkovTree *markov;
 
-   markov= new HiddenMarkovTree(*this, false, false);
+   markov= this->HiddenMarkovTreeCopy(false, false);
    markov->Chain::thresholding(min_probability);
 
    for(i= 0; i < _nb_ioutput_process; i++)
@@ -7255,6 +7289,60 @@ DiscreteDistributionData* HiddenMarkovTreeData::extract(StatError& error, int ty
 
 /*****************************************************************
  *
+ *  Return the model part of a HiddenMarkovTreeData
+ *  using a StatError object, keeping a reference on self
+ *
+ **/
+
+HiddenMarkovTree* HiddenMarkovTreeData::extract_model(StatError& error) const
+{
+   bool status = true, ignore_state_variable = false;
+   HiddenMarkovTree *model = NULL;
+   HiddenMarkovTreeData *hmt_data = NULL;
+
+   error.init();
+
+   if (markov == NULL)
+   {
+      status = false;
+      error.update(STAT_TREES_error[STATR_NO_MODEL]);
+   }
+
+   // if the first variable corresponds to the state variable,
+   // ignore this variable
+   if ((_nb_integral > 0)
+       && (_nb_integral-1 == markov->_nb_ioutput_process)
+       && (this->_type[0] == STATE))
+       ignore_state_variable = true;
+   if (!(ignore_state_variable)
+         && ((_nb_integral != markov->_nb_ioutput_process))
+      || (_nb_float != markov->_nb_doutput_process))
+   {
+      status = false;
+      error.update(STAT_TREES_error[STATR_NB_OUTPUT_PROCESS]);
+   }
+
+   if (status)
+   {
+      model = markov->HiddenMarkovTreeCopy(true, true);
+      if (ignore_state_variable)
+      {
+         hmt_data = this->remove_state_variable();
+         model->markov_data = new HiddenMarkovTreeData(*hmt_data, false);
+         delete hmt_data;
+         hmt_data = NULL;
+      }
+      else
+         model->markov_data = new HiddenMarkovTreeData(*this, false);
+     model->markov_data->likelihood = model->likelihood_computation(*model->markov_data);
+
+   }
+
+   return model;
+}
+
+/*****************************************************************
+ *
  *  Extract marginal Histogram with observation distributions
  *  for Hidden_markov_data class, using a StatError object
  *  and the considered variable
@@ -7643,7 +7731,7 @@ HiddenMarkovTree* HiddenMarkovTreeData::get_markov() const
    HiddenMarkovTree *res= NULL;
 
    if (markov != NULL)
-      res= new HiddenMarkovTree(*markov);
+      res= markov->HiddenMarkovTreeCopy();
 
    return res;
 }
@@ -7831,7 +7919,8 @@ HiddenMarkovTreeData::get_state_hidden_markov_tree_data() const
    int inb_variables, inb_trees, var, t;
    int *itype= NULL;
    // register int st;
-   Int_fl_container i(_nb_integral+added_int_variables, 0), s;
+   // Int_fl_container i(_nb_integral+added_int_variables, 0), s;
+   Int_fl_container i(_nb_integral+added_int_variables, _nb_float), s;
    vertex_iterator it, end;
    Default_tree** otrees= NULL;
 
@@ -7884,7 +7973,7 @@ HiddenMarkovTreeData::get_state_hidden_markov_tree_data() const
       }
 
       res= new HiddenMarkovTreeData(inb_trees, itype, otrees);
-      res->markov= new HiddenMarkovTree(*markov, false, false);
+      res->markov= markov->HiddenMarkovTreeCopy(false, false);
 
       res->state_trees= new Typed_edge_one_int_tree*[inb_trees];
       for(t= 0; t < inb_trees; t++)
@@ -8445,6 +8534,128 @@ void HiddenMarkovTreeData::build_state_characteristics()
 
 /*****************************************************************
  *
+ * Return a HiddenMarkovTreeData without the state variable
+ * If the first variable corresponds to the state variable,
+ * remove it. Otherwise, return a copy of this.
+ *
+ **/
+
+HiddenMarkovTreeData* HiddenMarkovTreeData::remove_state_variable() const
+{
+   register int offset;
+   const short int remove_int_variable = 1;
+   int state;
+   HiddenMarkovTreeData *res = NULL, *pre_res = NULL;
+   Unlabelled_typed_edge_tree *tmp_utree = NULL;
+   bool return_this = false;
+   int inb_variables, inb_trees, var, t;
+   int *itype = NULL;
+   // register int st;
+   Int_fl_container i(MAX(1,
+                          _nb_integral-remove_int_variable),
+                      _nb_float);
+   Int_fl_container s;
+   vertex_iterator it, end;
+   Default_tree** otrees = NULL;
+
+   if ((this->state_trees == NULL) || (markov == NULL))
+   {
+      return_this = true;
+      // res = new HiddenMarkovTreeData(*this, true);
+   }
+
+   // check whether the first variable is the state variable
+   if ((!return_this) && (this->_type[0] != STATE))
+      return_this = true;
+
+   if (!return_this)
+   {
+      inb_trees= _nb_trees;
+      inb_variables = _nb_integral - remove_int_variable;
+      itype = new int[inb_variables];
+
+      offset = remove_int_variable;
+      for(var=offset ; var < _nb_integral; var++)
+         itype[var-offset] = _type[var];
+
+      for(var=0; var < _nb_float; var++)
+         itype[var+_nb_integral-offset] = _type[var+_nb_integral];
+
+      otrees = new Default_tree*[inb_trees];
+      for(t = 0; t < inb_trees; t++)
+      {
+         tmp_utree = trees[t]->get_structure();
+         otrees[t] = new Default_tree(_nb_integral-remove_int_variable,
+                                      _nb_float+0,
+                                      trees[t]->root(), 1);
+         otrees[t]->set_structure(*tmp_utree, i);
+         tie(it, end) = trees[t]->vertices();
+         while (it < end)
+         {
+            s = trees[t]->get(*it);
+            // remove state variable
+            state = (this->state_trees[t]->get(*it)).Int();
+            if (s.Int(0) != state)
+               return_this = true;
+            // copy existing integer variables
+            for(var = offset; var < _nb_integral; var++)
+               i.Int(var-offset) = s.Int(var);
+            // copy existing floating variables
+            for(var=0; var < _nb_float; var++)
+               i.Double(var+0) = s.Double(var);
+            otrees[t]->put(*it++, i);
+         }
+         delete tmp_utree;
+         tmp_utree = NULL;
+      }
+
+      pre_res = new HiddenMarkovTreeData(inb_trees, itype, otrees);
+      pre_res->markov = markov->HiddenMarkovTreeCopy(false, false);
+
+      pre_res->state_trees = new Typed_edge_one_int_tree*[inb_trees];
+      for(t=0; t < inb_trees; t++)
+         pre_res->state_trees[t] =
+            new Typed_edge_one_int_tree(*(this->state_trees[t]));
+      pre_res->likelihood = likelihood;
+      pre_res->hidden_likelihood = hidden_likelihood;
+      pre_res->_nb_states = _nb_states;
+
+      pre_res->chain_data= new ChainData(markov->type, markov->nb_state,
+                                         markov->nb_state);
+      pre_res->build_characteristics();
+      pre_res->build_size_frequency_distribution();
+      pre_res->build_nb_children_frequency_distribution();
+      pre_res->build_observation_frequency_distribution();
+
+      pre_res->markov->characteristic_computation(*pre_res, true);
+
+      if (itype != NULL)
+      {
+         delete [] itype;
+         itype = NULL;
+         for(t=0; t < inb_trees; t++)
+         {
+            delete otrees[t];
+            otrees[t] = NULL;
+         }
+         delete [] otrees;
+         otrees = NULL;
+      }
+   }
+
+   if (return_this)
+      res = new HiddenMarkovTreeData(*this, true);
+   else
+   {
+      res = new HiddenMarkovTreeData(*pre_res, true);
+      delete pre_res;
+      pre_res = NULL;
+   }
+   return res;
+}
+
+/*****************************************************************
+ *
  *  Permutation of the states of a HiddenMarkovTreeData
  *  based on a given permutation perm.
  *  Validity of permutation must be ensured before call
@@ -8696,7 +8907,7 @@ void HiddenMarkovTreeData::copy(const HiddenMarkovTreeData& trees,
    {
       if (markov != NULL)
          delete markov;
-      markov = new HiddenMarkovTree(*(trees.markov), false);
+      markov = trees.markov->HiddenMarkovTreeCopy(false);
    }
    else
       markov = NULL;
