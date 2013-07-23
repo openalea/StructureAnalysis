@@ -4,7 +4,7 @@ import string
 import openalea.stat_tool.error as check_error
 import openalea.tree_statistic._errors as _errors
 import openalea.stat_tool as stat_tool, openalea.tree_statistic.trees as trees
-import stat_tool.error as check_error
+import openalea.stat_tool.error as check_error
 import _hmt
 
 VariableType=stat_tool.VariableTypeBis

@@ -6,7 +6,7 @@ import string
 import openalea.stat_tool as stat_tool
 import openalea.tree_statistic.int_fl_containers as int_fl_containers
 import openalea.tree_statistic._errors as _errors
-import stat_tool.error as check_error
+import openalea.stat_tool.error as check_error
 import ctree, ctrees
 
 from openalea.stat_tool import interface
