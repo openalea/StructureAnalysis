@@ -119,7 +119,7 @@ public:
 
     //cout << "allocate memory and set values of index_parameters"<<endl;
     // allocate memory for index_parameters
-    for (int iseq; iseq<nb_sequences; iseq++)
+    for (int iseq=0; iseq<nb_sequences; iseq++)
     {
         boost::python::list sequence = extract<boost::python::list> (input_sequences[iseq]);
         boost::python::list index_parameter = extract<boost::python::list> (input_index_parameters[iseq]);
