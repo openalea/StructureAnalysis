@@ -65,7 +65,7 @@ void class_regression_kernel()
     //.def( init<int, int, int>()) // seems to cause memory problem inside python
     .def("__init__", make_constructor(WRAP::regression_constructor),  "Build from 3 ints" )
 
-    .add_property("ident", &RegressionKernel::get_ident, "returns ident")
+/*    .add_property("ident", &RegressionKernel::get_ident, "returns ident")
     .add_property("min_value", &RegressionKernel::get_min_value, "returns min value")
     .add_property("max_value", &RegressionKernel::get_max_value, "returns max value")
     .add_property("regression_df", &RegressionKernel::get_regression_df, "returns regression df")
@@ -73,7 +73,7 @@ void class_regression_kernel()
     .add_property("nb_parameter", &RegressionKernel::get_nb_parameter, "returns nb parameter")
 
     .def("get_parameter", &RegressionKernel::get_parameter,args("index"), "returns parameter")
-    .def("get_point", &RegressionKernel::get_point,args("index"), "returns point")
+    .def("get_point", &RegressionKernel::get_point,args("index"), "returns point") */
 
     //DONE
     //TODO: check index validity of get_parameter and get_point
