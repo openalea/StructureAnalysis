@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
@@ -108,17 +108,17 @@ private :
 public :
 
     HiddenSemiMarkov() {}
-    HiddenSemiMarkov(const Chain *pchain , const NonparametricSequenceProcess *poccupancy ,
-                     int inb_output_process , NonparametricProcess **pobservation ,
+    HiddenSemiMarkov(const Chain *pchain , const CategoricalSequenceProcess *poccupancy ,
+                     int inb_output_process , CategoricalProcess **pobservation ,
                      int length , bool counting_flag)
     :SemiMarkov(pchain , poccupancy , inb_output_process , pobservation , length ,
                 counting_flag) {}
-    HiddenSemiMarkov(const Chain *pchain , const NonparametricSequenceProcess *poccupancy ,
-                     int inb_output_process , NonparametricProcess **nonparametric_observation ,
+    HiddenSemiMarkov(const Chain *pchain , const CategoricalSequenceProcess *poccupancy ,
+                     int inb_output_process , CategoricalProcess **categorical_observation ,
                      DiscreteParametricProcess **discrete_parametric_observation ,
                      ContinuousParametricProcess **continuous_parametric_observation ,
                      int length , bool counting_flag)
-    :SemiMarkov(pchain , poccupancy , inb_output_process , nonparametric_observation ,
+    :SemiMarkov(pchain , poccupancy , inb_output_process , categorical_observation ,
                 discrete_parametric_observation ,
                 continuous_parametric_observation , length , counting_flag) {}
     HiddenSemiMarkov(const HiddenSemiMarkov &hsmarkov , bool data_flag = true ,
