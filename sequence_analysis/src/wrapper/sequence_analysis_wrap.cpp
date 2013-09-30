@@ -30,7 +30,7 @@
 #include "export_correlation.h"
 #include "export_markovian_sequences.h"
 #include "export_nonhomogeneous_markov.h"
-#include "export_nonparametric_sequence_process.h"
+#include "export_categorical_sequence_process.h"
 #include "export_renewal.h"
 #include "export_time_events.h"
 #include "export_semi_markov.h"
