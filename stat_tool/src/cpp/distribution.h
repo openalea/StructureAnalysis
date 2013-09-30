@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
@@ -41,11 +41,9 @@
 
 
 
-// class DiscreteParametricModel : public StatInterface , protected DiscreteParametric {
 class DiscreteParametricModel : public StatInterface , public DiscreteParametric {  // loi discrete parametrique
 
     friend class Distribution;  // Hack pour Windows
-
     friend class FrequencyDistribution;
     friend class DiscreteDistributionData;
 
@@ -68,7 +66,7 @@ private :
 
 public :
 
-    DiscreteParametricModel(int inb_value = 0 , int iident = NONPARAMETRIC ,
+    DiscreteParametricModel(int inb_value = 0 , int iident = CATEGORICAL ,
                      int iinf_bound = I_DEFAULT , int isup_bound = I_DEFAULT ,
                      double iparameter = D_DEFAULT, double iprobability = D_DEFAULT)
     :DiscreteParametric(inb_value , iident , iinf_bound , isup_bound , iparameter , iprobability)
@@ -111,7 +109,6 @@ DiscreteParametricModel* discrete_parametric_ascii_read(StatError &error , const
 
 
 
-// class DiscreteDistributionData : public StatInterface , protected FrequencyDistribution {
 class DiscreteDistributionData : public StatInterface , public FrequencyDistribution {  // loi discrete empirique
 
     friend class DiscreteParametricModel;
