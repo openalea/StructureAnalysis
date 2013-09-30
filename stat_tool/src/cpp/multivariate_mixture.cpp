@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): J.-B. Durand (jean-baptiste.durand@imag.fr) and
  *                       Y. Guedon (yann.guedon@cirad.fr)
@@ -80,13 +80,13 @@ MultivariateMixture::MultivariateMixture()
  *  Constructeur de la classe MultivariateMixture.
  *
  *  arguments : nombre de composantes, poids, pointeurs sur les composantes parametriques
- *  et non parametriques
+ *  et categorielles
  *
  *--------------------------------------------------------------*/
 
 MultivariateMixture::MultivariateMixture(int inb_component , double *pweight , int inb_variable,
                                          DiscreteParametricProcess **ppcomponent,
-                                         NonparametricProcess **pnpcomponent)
+                                         CategoricalProcess **pnpcomponent)
 
 {
   register int var, i;
@@ -102,17 +102,17 @@ MultivariateMixture::MultivariateMixture(int inb_component , double *pweight , i
   weight->cumul_computation();
   weight->max_computation();
 
-  if (weight->ident != NONPARAMETRIC) {
+  if (weight->ident != CATEGORICAL) {
     weight->computation(1 , CUMUL_THRESHOLD);
   }
 
   pcomponent = new DiscreteParametricProcess*[nb_var];
-  npcomponent = new NonparametricProcess*[nb_var];
+  npcomponent = new CategoricalProcess*[nb_var];
 
   for (var = 0;var < nb_var;var++) {
     if ((pnpcomponent != NULL) && (pnpcomponent[var] != NULL))
       {
-         npcomponent[var]= new NonparametricProcess(*(pnpcomponent[var]));
+         npcomponent[var]= new CategoricalProcess(*(pnpcomponent[var]));
          pcomponent[var]= NULL;
       }
       else
@@ -147,7 +147,7 @@ MultivariateMixture::MultivariateMixture(const MultivariateMixture &mixt ,
 
   nb_var = inb_variable;
   pcomponent = new DiscreteParametricProcess*[nb_var];
-  npcomponent = new NonparametricProcess*[nb_var];
+  npcomponent = new CategoricalProcess*[nb_var];
 
   for (var = 0;var < nb_var;var++) {
     if (variable_flag[var]) {
@@ -157,7 +157,7 @@ MultivariateMixture::MultivariateMixture(const MultivariateMixture &mixt ,
       }
       else {
     pcomponent[var] = NULL;
-    npcomponent[var] = new NonparametricProcess(*mixt.npcomponent[var]);
+    npcomponent[var] = new CategoricalProcess(*mixt.npcomponent[var]);
       }
     }
   }
@@ -174,7 +174,7 @@ MultivariateMixture::MultivariateMixture(const MultivariateMixture &mixt ,
 
 MultivariateMixture::MultivariateMixture(int inb_component , int inb_variable,
                                          const DiscreteParametricProcess **ppcomponent,
-                                         const NonparametricProcess **pnpcomponent)
+                                         const CategoricalProcess **pnpcomponent)
 
 {
   register int var;
@@ -187,7 +187,7 @@ MultivariateMixture::MultivariateMixture(int inb_component , int inb_variable,
   weight = NULL;
 
   pcomponent = new DiscreteParametricProcess*[nb_var];
-  npcomponent = new NonparametricProcess*[nb_var];
+  npcomponent = new CategoricalProcess*[nb_var];
 
   for (var = 0;var < nb_var;var++) {
     if (ppcomponent[var] != NULL) {
@@ -196,7 +196,7 @@ MultivariateMixture::MultivariateMixture(int inb_component , int inb_variable,
     }
     else {
        pcomponent[var] = NULL;
-       npcomponent[var] = new NonparametricProcess(*pnpcomponent[var]);
+       npcomponent[var] = new CategoricalProcess(*pnpcomponent[var]);
     }
   }
 }
@@ -228,7 +228,7 @@ MultivariateMixture::MultivariateMixture(int inb_component, int inb_variable,
   weight = NULL;
 
   pcomponent = new DiscreteParametricProcess*[nb_var];
-  npcomponent = new NonparametricProcess*[nb_var];
+  npcomponent = new CategoricalProcess*[nb_var];
 
   fparam= new bool[nb_var];
   if (force_param == NULL) {
@@ -240,12 +240,12 @@ MultivariateMixture::MultivariateMixture(int inb_component, int inb_variable,
       fparam[var]= force_param[var];
   }
 
-  npcomponent= new NonparametricProcess*[nb_var];
+  npcomponent= new CategoricalProcess*[nb_var];
   pcomponent= new DiscreteParametricProcess*[nb_var];
 
   for(var = 0; var < nb_var; var++) {
     if ((*nb_value <= NB_OUTPUT) && !(fparam[var])) {
-      npcomponent[var] = new NonparametricProcess(nb_component, *nb_value++, true);
+      npcomponent[var] = new CategoricalProcess(nb_component, *nb_value++, true);
       pcomponent[var] = NULL;
     }
     else {
@@ -290,7 +290,7 @@ void MultivariateMixture::copy(const MultivariateMixture &mixt , bool data_flag)
   nb_var = mixt.nb_var;
 
   pcomponent = new DiscreteParametricProcess*[nb_var];
-  npcomponent = new NonparametricProcess*[nb_var];
+  npcomponent = new CategoricalProcess*[nb_var];
 
   weight = new DiscreteParametric(*(mixt.weight));
 
@@ -301,7 +301,7 @@ void MultivariateMixture::copy(const MultivariateMixture &mixt , bool data_flag)
     }
     else {
        pcomponent[var] = NULL;
-       npcomponent[var] = new NonparametricProcess(*mixt.npcomponent[var]);
+       npcomponent[var] = new CategoricalProcess(*mixt.npcomponent[var]);
     }
   }
 }
@@ -431,14 +431,14 @@ DiscreteParametricModel* MultivariateMixture::extract_parametric_model(StatError
 
 /*--------------------------------------------------------------*
  *
- *  Extraction d'une composante non parametrique.
+ *  Extraction d'une composante categorielle.
  *
  *  arguments : reference sur un objet StatError, variable,
  *  indice de la composante.
  *
  *--------------------------------------------------------------*/
 
-Distribution* MultivariateMixture::extract_nonparametric_model(StatError &error ,
+Distribution* MultivariateMixture::extract_categorical_model(StatError &error ,
                                                                int ivariable, int index) const
 
 {
@@ -459,7 +459,7 @@ Distribution* MultivariateMixture::extract_nonparametric_model(StatError &error 
   if (status) {
     if (npcomponent[ivariable] != NULL){
       index--;
-      pnpcomponent = new Distribution(*npcomponent[ivariable]->get_observation(index));
+      pnpcomponent = new Distribution(*npcomponent[ivariable]->observation[index]);
     }
   }
 
@@ -522,15 +522,15 @@ Distribution* MultivariateMixture::extract_distribution(StatError &error , int i
     }
     else { // npcomponent[variable] != NULL)
         for (i = 0;i < nb_component;i++) {
-            if (npcomponent[variable]->get_observation(i)->nb_value > pDistribution->nb_value) {
-                pDistribution->nb_value = npcomponent[variable]->get_observation(i)->nb_value;
+            if (npcomponent[variable]->observation[i]->nb_value > pDistribution->nb_value) {
+                pDistribution->nb_value = npcomponent[variable]->observation[i]->nb_value;
                 }
             }
 
         pDistribution->offset = pDistribution->nb_value; // majorant
         for (i = 0;i < nb_component;i++) {
-            if (npcomponent[variable]->get_observation(i)->offset < pDistribution->offset) {
-                pDistribution->offset = npcomponent[variable]->get_observation(i)->offset;
+            if (npcomponent[variable]->observation[i]->offset < pDistribution->offset) {
+                pDistribution->offset = npcomponent[variable]->observation[i]->offset;
             }
         }
 
@@ -542,8 +542,8 @@ Distribution* MultivariateMixture::extract_distribution(StatError &error , int i
             pweight = weight->mass;
             *++pmass = 0.;
             for (j = 0;j < nb_component;j++) {
-                if (i < npcomponent[variable]->get_observation(j)->nb_value) {
-                    *pmass += *pweight * npcomponent[variable]->get_observation(j)->mass[i];
+                if (i < npcomponent[variable]->observation[j]->nb_value) {
+                    *pmass += *pweight * npcomponent[variable]->observation[j]->mass[i];
                 }
                 pweight++;
             }
@@ -601,7 +601,7 @@ MultivariateMixtureData* MultivariateMixture::extract_data(StatError &error) con
 MultivariateMixture* multivariate_mixture_building(StatError &error , int nb_component ,
                                                    int nb_variable , double *weight,
                                                    DiscreteParametricProcess **ppcomponent,
-                                                   NonparametricProcess **pnpcomponent)
+                                                   CategoricalProcess **pnpcomponent)
 
 {
   bool status;
@@ -659,12 +659,12 @@ MultivariateMixture* multivariate_mixture_ascii_read(StatError &error , const ch
   RWLocaleSnapshot locale("en");
   RWCString buffer , token;
   size_t position;
-  bool status , lstatus, nonparametric = false;
+  bool status , lstatus, categorical = false;
   register int i , j;
   int line, nb_variable;
   long index , nb_component, value;
   double cumul , *weight = NULL;
-  NonparametricProcess **np_observation;
+  CategoricalProcess **np_observation;
   DiscreteParametricProcess **p_observation;
   MultivariateMixture *mixt;
   ifstream in_file(path);
@@ -942,7 +942,7 @@ MultivariateMixture* multivariate_mixture_ascii_read(StatError &error , const ch
             }
             else
             {
-               np_observation= new NonparametricProcess*[nb_variable];
+               np_observation= new CategoricalProcess*[nb_variable];
                p_observation = new DiscreteParametricProcess*[nb_variable];
                for(i= 0; i < nb_variable; i++)
                {
@@ -975,7 +975,7 @@ MultivariateMixture* multivariate_mixture_ascii_read(StatError &error , const ch
 
              case 0 :
                {
-                 nonparametric= true;
+                 categorical= true;
 
                  if (token == STAT_word[STATW_VARIABLE])
                    index++;
@@ -1017,22 +1017,24 @@ MultivariateMixture* multivariate_mixture_ascii_read(StatError &error , const ch
                  break;
                }
 
-               // test sur les mots-cles NONPARAMETRIC / PARAMETRIC
+               // test sur les mots-cles CATEGORICAL / DISCRETE_PARAMETRIC
 
              case 3 :
                {
-                 if (token == STAT_word[STATW_NONPARAMETRIC])
-                   nonparametric = true;
+                 if ((token == STAT_word[STATW_CATEGORICAL]) ||
+                     (token == STAT_word[STATW_NONPARAMETRIC]))
+                   categorical = true;
                  else
                    {
-                 if (token == STAT_word[STATW_PARAMETRIC])
-                   nonparametric = false;
+                 if ((token == STAT_word[STATW_DISCRETE_PARAMETRIC]) ||
+                     (token == STAT_word[STATW_PARAMETRIC]))
+                   categorical = false;
                  else
                    {
                      status = false;
                      ostringstream correction_message;
-                     correction_message << STAT_word[STATW_NONPARAMETRIC] << " or "
-                            << STAT_word[STATW_PARAMETRIC] << "(instead of "
+                     correction_message << STAT_word[STATW_CATEGORICAL] << " or "
+                            << STAT_word[STATW_DISCRETE_PARAMETRIC] << "(instead of "
                             << token << ")";
                      error.correction_update(STAT_parsing[STATP_KEY_WORD],
                                  (correction_message.str()).c_str(),
@@ -1054,13 +1056,13 @@ MultivariateMixture* multivariate_mixture_ascii_read(StatError &error , const ch
                error.update(STAT_parsing[STATP_FORMAT], line);
              }
 
-               switch (nonparametric)
+               switch (categorical)
              {
 
              case true :
                {
-                 np_observation[index-1]= observation_parsing(error, in_file, line,
-                                      nb_component, true);
+                 np_observation[index-1]= categorical_observation_parsing(error, in_file, line,
+                                                                          nb_component, true);
                  if (np_observation[index-1] == NULL)
                    status= false;
                  break;
@@ -1069,8 +1071,8 @@ MultivariateMixture* multivariate_mixture_ascii_read(StatError &error , const ch
              case false :
                {
                  p_observation[index-1]= discrete_observation_parsing(error, in_file, line,
-                                     nb_component,
-                                     cumul_threshold);
+                                                                      nb_component,
+                                                                      cumul_threshold);
                  if (p_observation[index-1] == NULL)
                    status = false;
                  break;
@@ -1178,7 +1180,7 @@ void MultivariateMixture::state_permutation(StatError& error,
       weight->cumul_computation();
       weight->max_computation();
 
-      if (weight->ident != NONPARAMETRIC) {
+      if (weight->ident != CATEGORICAL) {
          weight->computation(1 , CUMUL_THRESHOLD);
       }
 
@@ -1256,9 +1258,9 @@ ostream& MultivariateMixture::ascii_write(ostream &os , const MultivariateMixtur
     os << " " << var;
 
     if (npcomponent[var-1] != NULL)
-      os << " : " << STAT_word[STATW_NONPARAMETRIC];
+      os << " : " << STAT_word[STATW_CATEGORICAL];
     else
-      os << " : " << STAT_word[STATW_PARAMETRIC];
+      os << " : " << STAT_word[STATW_DISCRETE_PARAMETRIC];
 
     os << endl;
     if (mixt_data != NULL) {
@@ -1286,7 +1288,7 @@ ostream& MultivariateMixture::ascii_write(ostream &os , const MultivariateMixtur
         if (pcomponent[var-1] != NULL)
           ptComponent[var-1] = pcomponent[var-1]->observation[i];
         else
-          ptComponent[var-1] = npcomponent[var-1]->get_observation(i);
+          ptComponent[var-1] = npcomponent[var-1]->observation[i];
 
         if (mixt_data) {
           scale[i] = mixt_data->nb_vector * weight->mass[i];
@@ -1519,7 +1521,7 @@ bool MultivariateMixture::ascii_write(StatError &error , const char *path ,
  *  Ecriture d'un melange et de la structure de donnees associee
  *  dans un fichier au format tableur. Les probabilites sont
  *  remises a l'echelle des effectifs dans les lois parametriques,
- *  et aussi pour les lois non-parametriques mais au niveau
+ *  et aussi pour les lois categorielles mais au niveau
  *  des histogrammes
  *
  *  arguments : stream, pointeur sur un objet MultivariateMixtureData.
@@ -1556,9 +1558,9 @@ ostream& MultivariateMixture::spreadsheet_write(ostream &os ,
     os << "\t" << var;
 
     if (npcomponent[var-1] != NULL)
-      os << "\t" << STAT_word[STATW_NONPARAMETRIC];
+      os << "\t" << STAT_word[STATW_CATEGORICAL];
     else
-      os << "\t" << STAT_word[STATW_PARAMETRIC];
+      os << "\t" << STAT_word[STATW_DISCRETE_PARAMETRIC];
 
     os << endl;
     if (mixt_data != NULL) {
@@ -2033,13 +2035,13 @@ DiscreteParametricProcess* MultivariateMixture::get_parametric_process(int varia
  *
  *--------------------------------------------------------------*/
 
-NonparametricProcess* MultivariateMixture::get_nonparametric_process(int variable) const
+CategoricalProcess* MultivariateMixture::get_categorical_process(int variable) const
 {
-  NonparametricProcess *pnpcomponent = NULL;
+  CategoricalProcess *pnpcomponent = NULL;
 
   assert((variable >= 0) && (variable < nb_var));
   if (npcomponent[variable] != NULL)
-    pnpcomponent = new NonparametricProcess(*npcomponent[variable]);
+    pnpcomponent = new CategoricalProcess(*npcomponent[variable]);
 
   return pnpcomponent;
 }
@@ -2063,17 +2065,17 @@ DiscreteParametric* MultivariateMixture::get_parametric_component(int variable, 
 
 /*--------------------------------------------------------------*
  *
- *  Loi d'observation non parametrique pour une variable et un etat donnes
+ *  Loi d'observation categorielle pour une variable et un etat donnes
  *
  *--------------------------------------------------------------*/
 
-Distribution* MultivariateMixture::get_nonparametric_component(int variable, int index) const
+Distribution* MultivariateMixture::get_categorical_component(int variable, int index) const
 {
   Distribution *pnpcomponent = NULL;
 
   assert((variable >= 0) && (variable < nb_var));
   if (npcomponent[variable] != NULL)
-    pnpcomponent = new Distribution(*npcomponent[variable]->get_observation(index));
+    pnpcomponent = new Distribution(*npcomponent[variable]->observation[index]);
 
   return pnpcomponent;
 }
@@ -2175,7 +2177,7 @@ MultivariateMixtureData::MultivariateMixtureData(const MultivariateMixture &mixt
       if (mixt.pcomponent[var] != NULL)
     component[var][i] = new FrequencyDistribution(*mixt.pcomponent[var]->observation[i]);
       else
-    component[var][i] = new FrequencyDistribution(*mixt.npcomponent[var]->get_observation(i));
+    component[var][i] = new FrequencyDistribution(*mixt.npcomponent[var]->observation[i]);
     }
   }
 }
@@ -2385,7 +2387,7 @@ DiscreteDistributionData* MultivariateMixtureData::extract(StatError &error , in
                         mixture->pcomponent[ivariable]->observation[index]);
       else
     ppcomponent = new DiscreteDistributionData(*component[ivariable][index] ,
-                        mixture->npcomponent[ivariable]->get_observation(index));
+                        mixture->npcomponent[ivariable]->observation[index]);
     }
     else
       ppcomponent = new DiscreteDistributionData(*component[ivariable][index] , (Distribution*)NULL);
