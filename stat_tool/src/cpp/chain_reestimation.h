@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
@@ -50,13 +50,9 @@
 template <typename Type>
 class ChainReestimation {  // structure de donnees correspondant a une chaine de Markov
 
-/*    friend class Markovian_sequences;
-    friend class Hidden_markov_tree_data;   module STAT_TREES */
-
     friend std::ostream& operator<<(std::ostream &os , const ChainReestimation<Type> &chain_data)
     { return chain_data.print(os); }
 
-// protected :
 public :
 
     char type;              // 'o' : ordinaire, 'e' : en equilibre
@@ -69,9 +65,6 @@ public :
     void init();
     void copy(const ChainReestimation<Type> &chain_data);
     void remove();
-    std::ostream& print(std::ostream &os) const;
-
-// public :
 
     ChainReestimation();
     ChainReestimation(char itype , int inb_state , int inb_row , bool init_flag = false);
@@ -79,11 +72,13 @@ public :
     { copy(chain_data); }
     ~ChainReestimation();
     ChainReestimation<Type>& operator=(const ChainReestimation<Type> &chain_data);
+
+    std::ostream& print(std::ostream &os) const;
 };
 
 
 
-#include "chain_reestimation.cpp"
+#include "chain_reestimation.hpp"
 
 
 
