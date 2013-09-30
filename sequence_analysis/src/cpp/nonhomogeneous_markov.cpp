@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
@@ -819,7 +819,7 @@ NonhomogeneousMarkov::NonhomogeneousMarkov(int inb_state , int *ident)
     self_transition[i] = NULL;
   }
 
-  process = new NonparametricSequenceProcess(nb_state , nb_state);
+  process = new CategoricalSequenceProcess(nb_state , nb_state);
 }
 
 
@@ -857,7 +857,7 @@ NonhomogeneousMarkov::NonhomogeneousMarkov(const Chain *pchain , const Function 
     }
   }
 
-  process = new NonparametricSequenceProcess(nb_state , nb_state);
+  process = new CategoricalSequenceProcess(nb_state , nb_state);
 
   characteristic_computation(length , true);
 }
@@ -900,7 +900,7 @@ void NonhomogeneousMarkov::copy(const NonhomogeneousMarkov &markov , bool data_f
     }
   }
 
-  process = new NonparametricSequenceProcess(*(markov.process) , 'c' , characteristic_flag);
+  process = new CategoricalSequenceProcess(*(markov.process) , 'c' , characteristic_flag);
 }
 
 
@@ -1375,7 +1375,7 @@ ostream& NonhomogeneousMarkov::ascii_write(ostream &os , const NonhomogeneousMar
       os << "# ";
     }
     os << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
-    seq->hlength->ascii_characteristic_print(os , false , file_flag);
+    seq->length_distribution->ascii_characteristic_print(os , false , file_flag);
 
     if (exhaustive) {
       os << "\n";
@@ -1383,7 +1383,7 @@ ostream& NonhomogeneousMarkov::ascii_write(ostream &os , const NonhomogeneousMar
         os << "# ";
       }
       os << "   | " << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
-      seq->hlength->ascii_print(os , file_flag);
+      seq->length_distribution->ascii_print(os , file_flag);
     }
 
     os << "\n";
@@ -1551,10 +1551,10 @@ ostream& NonhomogeneousMarkov::spreadsheet_write(ostream &os , const Nonhomogene
     // ecriture de la loi empirique des longueurs des sequences
 
     os << "\n" << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
-    seq->hlength->spreadsheet_characteristic_print(os);
+    seq->length_distribution->spreadsheet_characteristic_print(os);
 
     os << "\n\t" << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
-    seq->hlength->spreadsheet_print(os);
+    seq->length_distribution->spreadsheet_print(os);
 
     os << "\n" << SEQ_label[SEQL_CUMUL_LENGTH] << "\t" << seq->cumul_length << endl;
 
@@ -1648,7 +1648,7 @@ bool NonhomogeneousMarkov::plot_write(const char *prefix , const char *title ,
 
   if (seq) {
     status = process->plot_print(prefix , title , 0 , NULL ,
-                                 seq->characteristics[0] , seq->hlength);
+                                 seq->characteristics[0] , seq->length_distribution);
   }
   else {
     status = process->plot_print(prefix , title , 0);
@@ -1891,18 +1891,18 @@ MultiPlotSet* NonhomogeneousMarkov::get_plotable(const NonhomogeneousMarkovData 
   double residual_mean , residual_standard_deviation , min_standard_residual ,
          max_standard_residual , *standard_residual , *presidual;
   ostringstream legend;
-  FrequencyDistribution *hlength;
+  FrequencyDistribution *length_distribution;
   SequenceCharacteristics *characteristics;
   MultiPlotSet *plot_set;
 
 
   if (seq) {
     characteristics = seq->characteristics[0];
-    hlength = seq->hlength;
+    length_distribution = seq->length_distribution;
   }
   else {
     characteristics = NULL;
-    hlength = NULL;
+    length_distribution = NULL;
   }
 
   // calcul du nombre de vues
@@ -2184,7 +2184,7 @@ MultiPlotSet* NonhomogeneousMarkov::get_plotable(const NonhomogeneousMarkovData 
     }
   }
 
-  process->plotable_write(*plot_set , index , 0 , 0 , characteristics , hlength);
+  process->plotable_write(*plot_set , index , 0 , 0 , characteristics , length_distribution);
 
   return plot_set;
 }
@@ -2249,8 +2249,8 @@ NonhomogeneousMarkovData::NonhomogeneousMarkovData()
  *
  *--------------------------------------------------------------*/
 
-NonhomogeneousMarkovData::NonhomogeneousMarkovData(const FrequencyDistribution &ihlength)
-:MarkovianSequences(ihlength , 1 , NULL , false)
+NonhomogeneousMarkovData::NonhomogeneousMarkovData(const FrequencyDistribution &ilength_distribution)
+:MarkovianSequences(ilength_distribution , 1 , NULL , false)
 
 {
   markov = NULL;
@@ -2466,7 +2466,36 @@ NonhomogeneousMarkovData* NonhomogeneousMarkovData::remove_index_parameter(StatE
     error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
   }
   else {
-    seq = new NonhomogeneousMarkovData(*this , true , 'r');
+    seq = new NonhomogeneousMarkovData(*this , true , 'm');
+  }
+
+  return seq;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Copie d'un objet NonhomogeneousMarkovData avec transformation du parametre d'index implicite
+ *  en parametre d'index explicite.
+ *
+ *  argument : reference sur un objet StatError.
+ *
+ *--------------------------------------------------------------*/
+
+NonhomogeneousMarkovData* NonhomogeneousMarkovData::explicit_index_parameter(StatError &error) const
+
+{
+  NonhomogeneousMarkovData *seq;
+
+
+  error.init();
+
+  if (index_parameter) {
+    seq = NULL;
+    error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
+  }
+  else {
+    seq = new NonhomogeneousMarkovData(*this , true , 'e');
   }
 
   return seq;
