@@ -18,16 +18,8 @@ if lib_env['compiler'] == 'mingw':
     lib_env.AppendUnique(LINKFLAGS=LINKFLAGS)
 
 includes= lib_env.ALEAGlob('*.h')
+includes += lib_env.ALEAGlob('*.hpp')
 sources = lib_env.ALEAGlob('*.cpp')
-
-# Add hpp files
-hpp = Split("""
-reestimation.cpp
-chain_reestimation.cpp
-""")
-
-includes += hpp
-sources = [x for x in sources if bn(x) not in hpp]
 
 
 # Add defines to export symbols on Windows
