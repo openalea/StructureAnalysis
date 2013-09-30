@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
@@ -71,7 +71,7 @@ void LengthBias::computation(const DiscreteParametric &inter_event)
 
   // calcul de la quantite de normalisation
 
-  if (ident == NONPARAMETRIC) {
+  if (ident == CATEGORICAL) {
     norm = inter_event.mean;
   }
   else {
@@ -116,7 +116,7 @@ void Backward::computation(const DiscreteParametric &inter_event , const Distrib
 
   // calcul de la quantite de normalisation
 
-  if (ident == NONPARAMETRIC) {
+  if (ident == CATEGORICAL) {
     norm = inter_event.mean;
   }
   else {
@@ -238,7 +238,7 @@ void NbEvent::computation(DiscreteParametric &inter_event)
 
         // calcul de la loi du temps de (n+1) evenements
 
-        if ((j == 1) && (ident != NONPARAMETRIC)) {
+        if ((j == 1) && (ident != CATEGORICAL)) {
           nevent_time->mass_copy(inter_event , time + 1);
           nevent_time->cumul_computation();
         }
@@ -246,7 +246,7 @@ void NbEvent::computation(DiscreteParametric &inter_event)
         else {
           switch (ident) {
 
-          case NONPARAMETRIC : {
+          case CATEGORICAL : {
             nevent_time->convolution(inter_event , *nevent_time , time + 1);
             nevent_time->cumul_computation();
             break;
@@ -278,7 +278,7 @@ void NbEvent::computation(DiscreteParametric &inter_event)
           }
         }
 
-        if ((type == 'e') && (ident != NONPARAMETRIC)) {
+        if ((type == 'e') && (ident != CATEGORICAL)) {
           nevent_time->convolution(*forward , *nevent_time , time + 1);
           nevent_time->cumul_computation();
         }
@@ -894,7 +894,7 @@ void Renewal::computation(bool inter_event_flag , char itype , const Distributio
 
         switch (inter_event->ident) {
 
-        case NONPARAMETRIC : {
+        case CATEGORICAL : {
           switch (type) {
           case 'o' :
             power->convolution(*inter_event , *nevent_time[j - 1] , time_nb_value);
