@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
@@ -203,17 +203,16 @@ public :
     int get_label_size() const { return label_size; }
     char* get_label() const { return label; }
 
-
-    bool is_match()
-    { if (nb_match!=NULL) return true; else return false;}
     bool is_deletion()
-    { if (nb_deletion!=NULL) return true; else return false;}
-    bool is_transposition()
-    { if (nb_transposition!=NULL) return true; else return false;}
-    bool is_substitution()
-    { if (nb_substitution!=NULL) return true; else return false;}
+    { if (nb_deletion != NULL) return true; else return false; }
     bool is_insertion()
-    { if (nb_insertion!=NULL) return true; else return false;}
+    { if (nb_insertion != NULL) return true; else return false; }
+    bool is_match()
+    { if (nb_match != NULL) return true; else return false; }
+    bool is_substitution()
+    { if (nb_substitution != NULL) return true; else return false; }
+    bool is_transposition()
+    { if (nb_transposition != NULL) return true; else return false; }
 };
 
 
