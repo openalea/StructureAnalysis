@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
@@ -71,7 +71,6 @@ class FrequencyDistribution;
 class ConvolutionData;
 
 
-// class Convolution : public StatInterface , protected Distribution {
 class Convolution : public StatInterface , public Distribution {  // produit de convolution
                                                                   // de lois discretes
     friend class FrequencyDistribution;
@@ -145,7 +144,6 @@ Convolution* convolution_ascii_read(StatError &error , const char *path ,
 
 
 
-// class ConvolutionData : public StatInterface , protected FrequencyDistribution {
 class ConvolutionData : public StatInterface , public FrequencyDistribution {  // structure de donnees correspondant
                                                                                // a un produit de convolution de lois discretes
     friend class FrequencyDistribution;
