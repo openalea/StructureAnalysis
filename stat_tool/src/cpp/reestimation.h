@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
@@ -69,23 +69,15 @@ const int BISECTION_NB_ITER = 100;     // nombre d'iterations maximum pour la me
 
 class Distribution;
 class DiscreteParametric;
+class ContinuousParametric;
 
 
 template <typename Type>
 class Reestimation {    // loi empirique a frequences entieres ou reelles (estimateur EM)
 
-/*    friend class DiscreteParametric;
-      friend class FrequencyDistribution;
-      friend class Compound;
-      friend class Convolution;
-      friend class Renewal;
-      friend class TimeEvents;
-      friend class MarkovianSequences; */
-
     friend std::ostream& operator<<(std::ostream &os , const Reestimation<Type> &histo)
     { return histo.print(os); }
 
-// protected :
 public :
 
     int nb_value;           // nombre de valeurs a partir de 0
@@ -102,6 +94,12 @@ public :
     void init(int inb_value);
     void copy(const Reestimation<Type> &histo);
 
+    Reestimation(int inb_value = 0) { init(inb_value); }
+    Reestimation(const Reestimation<Type> &histo);
+    Reestimation(int nb_histo , const Reestimation<Type> **histo);
+    ~Reestimation();
+    Reestimation<Type>& operator=(const Reestimation<Type> &histo);
+
     std::ostream& ascii_characteristic_print(std::ostream &os , bool shape = false ,
                                              bool comment_flag = false) const;
     std::ostream& ascii_circular_characteristic_print(std::ostream &os ,
@@ -115,7 +113,15 @@ public :
     void mean_computation();
     void variance_computation(bool bias = false);
 
+    double mean_absolute_deviation_computation() const;
+    double log_geometric_mean_computation() const;
+    double skewness_computation() const;
+    double kurtosis_computation() const;
+
     void mean_direction_computation(double *mean_direction) const;
+
+    double information_computation() const;
+    double likelihood_computation(const Distribution &dist) const;
 
     void distribution_estimation(Distribution *pdist) const;
     void penalized_likelihood_estimation(Distribution *dist , double weight , int type ,
@@ -148,21 +154,8 @@ public :
                                     Type *occupancy_survivor , Type *censored_occupancy_survivor ,
                                     bool characteristic_computation = true);
 
-// public :
-
-    Reestimation(int inb_value = 0) { init(inb_value); }
-    Reestimation(const Reestimation<Type> &histo);
-    Reestimation(int nb_histo , const Reestimation<Type> **histo);
-    ~Reestimation();
-    Reestimation<Type>& operator=(const Reestimation<Type> &histo);
-
-    double mean_absolute_deviation_computation() const;
-    double log_geometric_mean_computation() const;
-    double skewness_computation() const;
-    double kurtosis_computation() const;
-
-    double information_computation() const;
-    double likelihood_computation(const Distribution &dist) const;
+    void gamma_estimation(ContinuousParametric *dist , int iter) const;
+    void zero_inflated_gamma_estimation(ContinuousParametric *dist , int iter) const;
 };
 
 
