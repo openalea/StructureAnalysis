@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
@@ -105,7 +105,7 @@ enum {
 };
 
 enum {
-  NONPARAMETRIC ,
+  CATEGORICAL ,
   BINOMIAL ,
   POISSON ,
   NEGATIVE_BINOMIAL ,
@@ -115,6 +115,7 @@ enum {
 
 enum {
   GAMMA ,
+  ZERO_INFLATED_GAMMA ,
   GAUSSIAN ,
   VON_MISES
 };
@@ -242,14 +243,27 @@ const int DIST_NB_ELEMENT = 1000000;   // taille maximum de l'echantillon pour l
 const double GAMMA_TAIL = 1.e-3;       // traine de la loi Gamma
 const int GAMMA_NB_STEP = 1000;        // nombre de pas pour le calcul de la loi Gamma
 const int GAMMA_NB_SUB_STEP = 10;      // nombre de pas pour le calcul de la loi Gamma
+// const int GAMMA_MIN_MEAN = 0.1;        // moyenne minimum de la loi gamma
+const double GAMMA_MIN_SHAPE_PARAMETER = 0.1;  // parametre de forme minimum de la loi gamma
+const double GAMMA_DEFAULT_SCALE_PARAMETER = 1;  // parametre d'echelle par defaut de la loi gamma
+const double GAMMA_ZERO_FREQUENCY_THRESHOLD = 0.999;  // seuil sur la frequence relative de 0
+                                                      // pour l'estimation des parametres de la loi gamma
+const double GAMMA_SCALE_PARAMETER_THRESHOLD = 3.;  // seuil sur la valeur du parametre d'echelle
+                                                    // pour l'estimation des parametres de la loi gamma
+const double GAMMA_FREQUENCY_THRESHOLD = 100.;  // seuil sur la frequence pour l'estimation des parametres de la loi gamma
+const double GAMMA_ITERATION_FACTOR = 0.5;  // facteur pour l'estimation des parametres de la loi gamma
+const int GAMMA_MAX_NB_ITERATION = 5;  // nombre maximum d'iterations pour l'estimation des parametres de la loi gamma
+// const double GAMMA_VARIATION_COEFF_THRESHOLD = 1.e-2;  seuil sur le coefficient de variation pour l'estimation
+//                                                        des parametres de la loi gamma
+
 const double GAUSSIAN_TAIL = 5.e-4;    // traine de la loi de Gauss
 const int GAUSSIAN_NB_STEP = 1000;     // nombre de pas pour le calcul de la loi de Gauss
 const int GAUSSIAN_NB_SUB_STEP = 10;   // nombre de pas pour le calcul de la loi de Gauss
+
 const int VON_MISES_NB_STEP = 3600;    // nombre de pas pour le calcul de la loi de von Mises
 const int VON_MISES_NB_SUB_STEP = 10;  // nombre de pas pour le calcul de la loi de von Mises
-// const double CONCENTRATION_THRESHOLD = 10.;  seuil sur le parametre de concentration
-                                             // pour appliquer l'approximation gaussienne
-                                             // pour le calcul de la loi de von Mises
+// const double VON_MISES_CONCENTRATION_THRESHOLD = 10.;  seuil sur le parametre de concentration pour appliquer
+//                                                        l'approximation gaussienne pour le calcul de la loi de von Mises
 
 const int CHI2_FREQUENCY = 2;          // effectif theorique minimum pour un
                                        // test d'ajustement du Chi2
@@ -274,8 +288,8 @@ const double SPREADSHEET_ROUNDNESS = 1.e-7;  // arrondi sur la fonction de repar
 
 const int DISPLAY_NB_INDIVIDUAL = 50;  // nombre maximum d'individus selectionnes affiches
 
-const int PLOT_NB_DISTRIBUTION = 10;   // nombre maximum de lois affichees (sortie graphique)
-const int PLOT_NB_HISTOGRAM = 10;      // nombre maximum d'histogrammes affiches (sortie graphique)
+const int PLOT_NB_DISTRIBUTION = 15;   // nombre maximum de lois affichees (sortie graphique)
+const int PLOT_NB_HISTOGRAM = 15;      // nombre maximum d'histogrammes affiches (sortie graphique)
 const double PLOT_ROUNDNESS = 1.e-5;   // arrondi sur la fonction de repartition
                                        // pour borner une loi (sortie graphique)
 const double PLOT_SHIFT = 0.2;         // decalage entre 2 histogrammes (sortie graphique)
@@ -297,15 +311,9 @@ const double YSCALE = 1.4;             // facteur d'echelle axe y (sortie graphi
 
 class Test {            // test d'hypothese
 
-/*    friend class Distribution;
-    friend class Vectors;
-    friend class Regression;
-    friend class Chain; */
-
     friend std::ostream& operator<<(std::ostream &os , const Test &test)
     { return test.ascii_print(os); }
 
-// private :
 public :
 
     int ident;              // identificateur (Normale / Chi2 / F / t)
@@ -316,8 +324,6 @@ public :
     double critical_probability;  // probabilite critique
 
     void copy(const Test &test);
-
-// public :
 
     Test(int iident , bool ione_side = true);
     Test(int iident , bool ione_side , int idf1 , int idf2 , double ivalue);
@@ -339,15 +345,6 @@ public :
     void F_value_computation();
     void t_critical_probability_computation();
     void t_value_computation();
-
-    // acces membres de la classe
-
-/*    int get_ident() const { return ident; }
-    bool get_one_side() const { return one_side; }
-    int get_df1() const { return df1; }
-    int get_df2() const { return df2; }
-    double get_value() const { return value; }
-    double get_critical_probability() const { return critical_probability; } */
 };
 
 
@@ -412,38 +409,9 @@ class DiscreteParametricModel;
 
 class Distribution {    // loi de probabilite discrete
 
-/*    template <typename Type> friend class Reestimation;  probleme Windows
-    friend class FrequencyDistribution;
-    friend class DiscreteParametricModel;
-    friend class DiscreteDistributionData;
-    friend class Convolution;
-    friend class CompoundData;
-    friend class Vectors;
-    friend class VectorDistance;
-    friend class Backward;
-    friend class Renewal;
-    friend class TimeEvents;
-    friend class Curves;
-    friend class ChainData;
-    friend class NonparametricProcess;
-    friend class NonparametricSequenceProcess;
-    friend class NonhomogeneousMarkov;
-    friend class VariableOrderMarkov;
-    friend class HiddenVariableOrderMarkov;
-    friend class SemiMarkov;
-    friend class HiddenSemiMarkov;
-    friend class Sequences;
-    friend class MarkovianSequences;
-    friend class Correlation;
-    friend class TopParameters; */
-
     friend std::ostream& operator<<(std::ostream& , const Distribution&);
-    friend bool plot_print(const char *path , int nb_dist , const Distribution **dist ,
-                           double *scale , int *dist_nb_value , int nb_histo ,
-                           const FrequencyDistribution **histo);
 
-// protected :
-  public :
+public :
 
     int nb_value;           // nombre de valeurs a partir de 0
     int alloc_nb_value;     // nombre de valeurs allouees
@@ -457,15 +425,22 @@ class Distribution {    // loi de probabilite discrete
     double *mass;           // probabilites de chaque valeur
     double *cumul;          // fonction de repartition
 
-    void max_computation();
-    void mean_computation();
-    void variance_computation();
-
     void mass_copy(const Distribution &dist , int inb_value = I_DEFAULT);
     void equal_size_copy(const Distribution &dist);
     void init(int inb_value);
     void copy(const Distribution &dist , int ialloc_nb_value = I_DEFAULT);
     void normalization_copy(const Distribution &dist);
+
+    Distribution(int inb_value = 0);
+    Distribution(int inb_value , double *imass);
+    Distribution(const Distribution &dist , double scaling_coeff);
+    Distribution(const FrequencyDistribution &histo);
+    Distribution(const Distribution &dist , char transform = 'c' ,
+                 int ialloc_nb_value = I_DEFAULT);
+    virtual ~Distribution();
+    Distribution& operator=(const Distribution&);
+    bool operator==(const Distribution&) const;
+    bool operator!=(const Distribution &dist) const { return !(*this == dist); }
 
     std::ostream& ascii_characteristic_print(std::ostream &os , bool shape = false ,
                                              bool comment_flag = false) const;
@@ -477,6 +452,8 @@ class Distribution {    // loi de probabilite discrete
                               double *dist_scale , bool comment_flag , bool cumul_flag ,
                               const FrequencyDistribution *histo = NULL ,
                               bool mass_first = false) const;
+
+    std::ostream& print(std::ostream&) const;
 
     std::ostream& spreadsheet_characteristic_print(std::ostream &os , bool shape = false) const;
 
@@ -495,7 +472,9 @@ class Distribution {    // loi de probabilite discrete
     virtual std::ostream& plot_title_print(std::ostream &os) const
     { return os; }
     bool survival_plot_print(const char *path , double *survivor) const;
-    std::ostream& print(std::ostream&) const;
+
+    bool plot_write(StatError &error , const char *prefix , int nb_dist ,
+                    const Distribution **idist , const char *title) const;
 
     void plotable_mass_write(SinglePlot &plot , double scale = 1.) const;
     void plotable_cumul_write(SinglePlot &plot) const;
@@ -503,39 +482,6 @@ class Distribution {    // loi de probabilite discrete
     void plotable_concentration_write(SinglePlot &plot) const;
     void plotable_survivor_write(SinglePlot &plot) const;
 
-    void convolution(Distribution &dist1 , Distribution &dist2 ,
-                     int inb_value = I_DEFAULT);
-
-    void nb_value_computation();
-    void offset_computation();
-    double concentration_computation() const;
-
-    void cumul_computation();
-    double* survivor_function_computation() const;
-    double* concentration_function_computation() const;
-    void log_computation();
-
-    double survivor_likelihood_computation(const FrequencyDistribution &histo) const;
-    double chi2_value_computation(const FrequencyDistribution &histo) const;
-    void chi2_degree_of_freedom(const FrequencyDistribution &histo , Test &test) const;
-
-    void penalty_computation(double weight , int type , double *penalty , int outside) const;
-
-// public :
-
-    Distribution(int inb_value = 0);
-    Distribution(int inb_value , double *imass);
-    Distribution(const Distribution &dist , double scaling_coeff);
-    Distribution(const FrequencyDistribution &histo);
-    Distribution(const Distribution &dist , char transform = 'c' ,
-                 int ialloc_nb_value = I_DEFAULT);
-    virtual ~Distribution();
-    Distribution& operator=(const Distribution&);
-    bool operator==(const Distribution&) const;
-    bool operator!=(const Distribution &dist) const { return !(*this == dist); }
-
-    bool plot_write(StatError &error , const char *prefix , int nb_dist ,
-                    const Distribution **idist , const char *title) const;
     MultiPlotSet* get_plotable() const;
     MultiPlotSet* get_plotable_distributions(StatError &error , int nb_dist ,
                                              const Distribution **idist) const;
@@ -547,6 +493,13 @@ class Distribution {    // loi de probabilite discrete
                              const char *title = NULL) const;
     MultiPlotSet* survival_get_plotable(StatError &error) const;
 
+    void max_computation();
+    void mean_computation();
+    void variance_computation();
+    void nb_value_computation();
+    void offset_computation();
+    double concentration_computation() const;
+
     double mean_absolute_deviation_computation() const;
     double skewness_computation() const;
     double kurtosis_computation() const;
@@ -555,7 +508,19 @@ class Distribution {    // loi de probabilite discrete
     double first_difference_norm_computation() const;
     double second_difference_norm_computation() const;
 
+    void cumul_computation();
+    double* survivor_function_computation() const;
+    double* concentration_function_computation() const;
+
     double overlap_distance_computation(const Distribution &dist) const;
+
+    void log_computation();
+
+    double survivor_likelihood_computation(const FrequencyDistribution &histo) const;
+    double chi2_value_computation(const FrequencyDistribution &histo) const;
+    void chi2_degree_of_freedom(const FrequencyDistribution &histo , Test &test) const;
+
+    void penalty_computation(double weight , int type , double *penalty , int outside) const;
 
     double likelihood_computation(const Reestimation<int> &histo) const
     { return histo.likelihood_computation(*this); }
@@ -563,21 +528,11 @@ class Distribution {    // loi de probabilite discrete
     { return histo.likelihood_computation(*this); }
     void chi2_fit(const FrequencyDistribution &histo , Test &test) const;
 
+    void convolution(Distribution &dist1 , Distribution &dist2 ,
+                     int inb_value = I_DEFAULT);
     int simulation() const;
 
     DiscreteParametricModel* truncate(StatError &error , int imax_value) const;
-
-    // acces membres de la classe
-
-/*    int get_offset() const { return offset; }
-    int get_nb_value() const { return nb_value; }
-    double get_max() const { return max; }
-    double get_complement() const { return complement; }
-    double get_mean() const { return mean; }
-    double get_variance() const { return variance; }
-    double& operator[](int index) const { return mass[index]; }
-    double get_mass(int index) const { return mass[index]; }
-    double get_cumul(int index) const { return cumul[index]; } */
 };
 
 
@@ -591,39 +546,8 @@ class Forward;
 
 class DiscreteParametric : public Distribution {  // loi de probabilite discrete parametrique
 
-/*    template <typename Type> friend class Reestimation;  probleme Windows
-    friend class FrequencyDistribution;
-    friend class DiscreteDistributionData;
-    friend class Compound;
-    friend class Convolution;
-    friend class Mixture;
-    friend class Backward;
-    friend class Forward;
-    friend class LengthBias;
-    friend class NbEvent;
-    friend class Renewal;
-    friend class TimeEvents;
-    friend class RenewalData;
-    friend class NonparametricSequenceProcess;
-    friend class DiscreteParametricProcess;
-    friend class NonhomogeneousMarkov;
-    friend class VariableOrderMarkov;
-    friend class SemiMarkov;
-    friend class HiddenSemiMarkov;
-    friend class MarkovianSequences;
-    friend class TopParameters; */
-
-    friend int nb_value_computation(int ident , int inf_bound , int sup_bound ,
-                                    double parameter , double probability ,
-                                    double cumul_threshold);
-    friend DiscreteParametric* discrete_parametric_parsing(StatError &error ,
-                                                           std::ifstream &in_file ,
-                                                           int &line , int last_ident ,
-                                                           double cumul_threshold,
-                                                           int min_inf_bound);
     friend std::ostream& operator<<(std::ostream& , const DiscreteParametric&);
 
-// protected :
 public :
 
     int ident;              // identificateur
@@ -636,6 +560,19 @@ public :
     void init(int iident , int iinf_bound , int isup_bound , double iparameter , double iprobability);
     void copy(const DiscreteParametric &dist);
 
+    DiscreteParametric(int inb_value = 0 , int iident = CATEGORICAL ,
+                       int iinf_bound = I_DEFAULT , int isup_bound = I_DEFAULT ,
+                       double iparameter = D_DEFAULT , double iprobability = D_DEFAULT);
+    DiscreteParametric(int iident , int iinf_bound , int isup_bound , double iparameter ,
+                       double iprobability , double cumul_threshold = CUMUL_THRESHOLD);
+    DiscreteParametric(const Distribution &dist , int ialloc_nb_value = I_DEFAULT);
+    DiscreteParametric(const Distribution &dist , double scaling_coeff);
+    DiscreteParametric(const DiscreteParametric &dist , double scaling_coeff);
+    DiscreteParametric(const FrequencyDistribution &histo);
+    DiscreteParametric(const DiscreteParametric &dist , char transform = 'c' ,
+                       int ialloc_nb_value = I_DEFAULT);
+    DiscreteParametric& operator=(const DiscreteParametric &dist);
+
     std::ostream& ascii_print(std::ostream &os) const;
     std::ostream& ascii_parametric_characteristic_print(std::ostream &os , bool shape = false ,
                                                         bool comment_flag = false) const;
@@ -643,7 +580,15 @@ public :
     std::ostream& spreadsheet_parametric_characteristic_print(std::ostream &os , bool shape = false) const;
     std::ostream& plot_title_print(std::ostream &os) const;
 
+    int nb_parameter_computation();
     void nb_parameter_update();
+
+    double parametric_mean_computation() const;
+    double parametric_variance_computation() const;
+    double parametric_skewness_computation() const;
+    double parametric_kurtosis_computation() const;
+
+    double sup_norm_distance_computation(const DiscreteParametric &dist) const;
 
     void binomial_computation(int inb_value , char mode);
     void poisson_computation(int inb_value , double cumul_threshold ,
@@ -651,6 +596,10 @@ public :
     void negative_binomial_computation(int inb_value , double cumul_threshold ,
                                        char mode);
     void uniform_computation();
+
+    void computation(int min_nb_value = 1 ,
+                     double cumul_threshold = CUMUL_THRESHOLD);
+    int simulation() const;
 
     double renewal_likelihood_computation(const Forward &forward_dist ,  // sequence_analysis
                                           const FrequencyDistribution &within ,
@@ -683,42 +632,6 @@ public :
                           Reestimation<double> *occupancy_reestim ,
                           Reestimation<double> *length_bias_reestim , int iter ,
                           bool combination = false , int mean_computation_method = COMPUTED) const;
-
-// public :
-
-    DiscreteParametric(int inb_value = 0 , int iident = NONPARAMETRIC ,
-                       int iinf_bound = I_DEFAULT , int isup_bound = I_DEFAULT ,
-                       double iparameter = D_DEFAULT , double iprobability = D_DEFAULT);
-    DiscreteParametric(int iident , int iinf_bound , int isup_bound , double iparameter ,
-                       double iprobability , double cumul_threshold = CUMUL_THRESHOLD);
-    DiscreteParametric(const Distribution &dist , int ialloc_nb_value = I_DEFAULT);
-    DiscreteParametric(const Distribution &dist , double scaling_coeff);
-    DiscreteParametric(const DiscreteParametric &dist , double scaling_coeff);
-    DiscreteParametric(const FrequencyDistribution &histo);
-    DiscreteParametric(const DiscreteParametric &dist , char transform = 'c' ,
-                       int ialloc_nb_value = I_DEFAULT);
-    DiscreteParametric& operator=(const DiscreteParametric &dist);
-
-    int nb_parameter_computation();
-
-    double parametric_mean_computation() const;
-    double parametric_variance_computation() const;
-    double parametric_skewness_computation() const;
-    double parametric_kurtosis_computation() const;
-
-    double sup_norm_distance_computation(const DiscreteParametric &dist) const;
-
-    void computation(int min_nb_value = 1 ,
-                     double cumul_threshold = CUMUL_THRESHOLD);
-    int simulation() const;
-
-    // acces membres de la classe
-
-/*    int get_ident() const { return ident; }
-    int get_inf_bound() const { return inf_bound; }
-    int get_sup_bound() const { return sup_bound; }
-    double get_parameter() const { return parameter; }
-    double get_probability() const { return probability; } */
 };
 
 
@@ -729,19 +642,14 @@ DiscreteParametric* discrete_parametric_parsing(StatError &error , std::ifstream
                                                 int &line , int last_ident = NEGATIVE_BINOMIAL ,
                                                 double cumul_threshold = CUMUL_THRESHOLD ,
                                                 int min_inf_bound = 0);
-std::ostream& operator<<(std::ostream& , const DiscreteParametric&);
 
 
 
 class Forward : public DiscreteParametric {  // loi de l'intervalle de temps residuel
 
-/*    friend class Renewal;
-    friend class Renewal_data;
-    friend class Semi_markov; */
-
 public :
 
-    Forward(int inb_value = 0 , int iident = NONPARAMETRIC ,
+    Forward(int inb_value = 0 , int iident = CATEGORICAL ,
             int iinf_bound = I_DEFAULT , int isup_bound = I_DEFAULT ,
             double iparameter = D_DEFAULT , double iprobability = D_DEFAULT)
     :DiscreteParametric(inb_value , iident , iinf_bound , isup_bound , iparameter , iprobability) {}
@@ -758,60 +666,27 @@ public :
 class DiscreteDistributionData;
 class ContinuousParametric;
 class TimeEvents;
-class Mixture;
+class DiscreteMixture;
 class Convolution;
 class Compound;
 
-// class FrequencyDistribution : protected Reestimation<int> {
+
 class FrequencyDistribution : public Reestimation<int> {  // loi discrete empirique
 
-/*    friend class Distribution;
-    friend class DiscreteParametric;
-    friend class DiscreteParametricModel;
-    friend class DiscreteDistributionData;
-    friend class Compound;
-    friend class CompoundData;
-    friend class Convolution;
-    friend class ConvolutionData;
-    friend class Mixture;
-    friend class MixtureData;
-    friend class Vectors;
-    friend class Regression;
-    friend class VectorDistance;
-    friend class Renewal;
-    friend class TimeEvents;
-    friend class RenewalData;
-    friend class Curves;
-    friend class ChainData;
-    friend class NonparametricSequenceProcess;
-    friend class Nonparametric_tree_process;
-    friend class DiscreteParametricProcess;
-    friend class NonhomogeneousMarkov;
-    friend class NonhomogeneousMarkovData;
-    friend class VariableOrderMarkov;
-    friend class VariableOrderMarkovData;
-    friend class HiddenVariableOrderMarkov;
-    friend class SemiMarkov;
-    friend class SemiMarkovData;
-    friend class HiddenSemiMarkov;
-    friend class Sequences;
-    friend class SequenceCharacteristics;
-    friend class MarkovianSequences;
-    friend class TopParameters;
-    friend class Tops; */
-
-    friend DiscreteDistributionData* frequency_distribution_ascii_read(StatError &error ,
-                                                                       const char *path);
-
-    friend bool plot_print(const char *path , int nb_dist , const Distribution **dist ,
-                           double *scale , int *dist_nb_value , int nb_histo ,
-                           const FrequencyDistribution **histo);
-
-// protected :
 public :
 
-    void shift(const FrequencyDistribution &histo , int shift_param);
-    void cluster(const FrequencyDistribution &histo , int step , int mode);
+    FrequencyDistribution(int inb_value = 0)
+    :Reestimation<int>(inb_value) {}
+    FrequencyDistribution(const Distribution &dist)
+    :Reestimation<int>(dist.nb_value) {}
+    FrequencyDistribution(int inb_element , int *pelement);
+    FrequencyDistribution(int nb_histo , const FrequencyDistribution **histo)
+    :Reestimation<int>(nb_histo , (const Reestimation<int>**)histo) {}
+    FrequencyDistribution(const FrequencyDistribution &histo , char transform ,
+                          int param , int mode = FLOOR);
+
+    bool operator==(const FrequencyDistribution&) const;
+    bool operator!=(const FrequencyDistribution &histo) const { return !(*this == histo); }
 
     std::ostream& ascii_print(std::ostream &os , int comment_flag = false , bool cumul_flag = false) const;
     std::ostream& ascii_write(std::ostream &os , bool exhaustive , bool file_flag) const;
@@ -868,20 +743,8 @@ public :
     double likelihood_computation(const ContinuousParametric &dist ,
                                   int min_interval = I_DEFAULT) const;
 
-// public :
-
-    FrequencyDistribution(int inb_value = 0)
-    :Reestimation<int>(inb_value) {}
-    FrequencyDistribution(const Distribution &dist)
-    :Reestimation<int>(dist.nb_value) {}
-    FrequencyDistribution(int inb_element , int *pelement);
-    FrequencyDistribution(int nb_histo , const FrequencyDistribution **histo)
-    :Reestimation<int>(nb_histo , (const Reestimation<int>**)histo) {}
-    FrequencyDistribution(const FrequencyDistribution &histo , char transform ,
-                          int param , int mode = FLOOR);
-
-    bool operator==(const FrequencyDistribution&) const;
-    bool operator!=(const FrequencyDistribution &histo) const { return !(*this == histo); }
+    void shift(const FrequencyDistribution &histo , int shift_param);
+    void cluster(const FrequencyDistribution &histo , int step , int mode);
 
     DiscreteDistributionData* shift(StatError &error , int shift_param) const;
     DiscreteDistributionData* cluster(StatError &error , int step , int mode = FLOOR) const;
@@ -927,19 +790,19 @@ public :
                                                         int min_inf_bound = 0 , bool flag = true ,
                                                         double cumul_threshold = CUMUL_THRESHOLD) const;
 
-    Mixture* mixture_estimation(StatError &error , const Mixture &imixt , bool *estimate ,
-                                int min_inf_bound = 0 , bool mixt_flag = true ,
-                                bool component_flag = true , double weight_step = 0.1) const;
-    Mixture* mixture_estimation(StatError &error , const Mixture &imixt ,
-                                int min_inf_bound = 0 , bool mixt_flag = true ,
-                                bool component_flag = true , double weight_step = 0.1) const;
-    Mixture* mixture_estimation(StatError &error , int nb_component , int *ident ,
-                                int min_inf_bound = 0 , bool mixt_flag = true ,
-                                bool component_flag = true , double weight_step = 0.1) const;
-    Mixture* mixture_estimation(StatError &error , std::ostream &os , int min_nb_component ,
-                                int max_nb_component , int *ident , int min_inf_bound = 0 ,
-                                bool mixt_flag = true , bool component_flag = true ,
-                                int penalty_type = BICc , double weight_step = 0.1) const;
+    DiscreteMixture* discrete_mixture_estimation(StatError &error , const DiscreteMixture &imixt , bool *estimate ,
+                                                 int min_inf_bound = 0 , bool mixt_flag = true ,
+                                                 bool component_flag = true , double weight_step = 0.1) const;
+    DiscreteMixture* discrete_mixture_estimation(StatError &error , const DiscreteMixture &imixt ,
+                                                 int min_inf_bound = 0 , bool mixt_flag = true ,
+                                                 bool component_flag = true , double weight_step = 0.1) const;
+    DiscreteMixture* discrete_mixture_estimation(StatError &error , int nb_component , int *ident ,
+                                                 int min_inf_bound = 0 , bool mixt_flag = true ,
+                                                 bool component_flag = true , double weight_step = 0.1) const;
+    DiscreteMixture* discrete_mixture_estimation(StatError &error , std::ostream &os , int min_nb_component ,
+                                                 int max_nb_component , int *ident , int min_inf_bound = 0 ,
+                                                 bool mixt_flag = true , bool component_flag = true ,
+                                                 int penalty_type = BICc , double weight_step = 0.1) const;
 
     Convolution* convolution_estimation(StatError &error , std::ostream &os , const DiscreteParametric &known_dist ,
                                         const DiscreteParametric &unknown_dist , int estimator = LIKELIHOOD ,
@@ -975,22 +838,13 @@ public :
                                         int estimator = LIKELIHOOD , int nb_iter = I_DEFAULT ,
                                         int mean_computation_method = COMPUTED , double weight = D_DEFAULT ,
                                         int penalty_type = SECOND_DIFFERENCE , int outside = ZERO) const;
-
-    // acces membres de la classe
-
-/*    int get_nb_value() const { return nb_value; }
-    int get_alloc_nb_value() const { return alloc_nb_value; }
-    int get_offset() const { return offset; }
-    int get_nb_element() const { return nb_element; }
-    int get_max() const { return max; }
-    double get_mean() const { return mean; }
-    double get_variance() const { return variance; }
-    int& operator[](int index) const { return frequency[index]; }
-    int get_frequency(int index) const { return frequency[index]; } */
 };
 
 
 DiscreteDistributionData* frequency_distribution_ascii_read(StatError &error , const char *path);
+bool plot_print(const char *path , int nb_dist , const Distribution **dist ,
+                double *scale , int *dist_nb_value , int nb_histo ,
+                const FrequencyDistribution **histo);
 
 
 
@@ -998,13 +852,9 @@ class Histogram;
 
 class ContinuousParametric {  // loi de probabilite continue parametrique
 
-    friend ContinuousParametric* continuous_parametric_parsing(StatError &error ,
-                                                               std::ifstream &in_file ,
-                                                               int &line);
 //    friend std::ostream& operator<<(std::ostream &os , const ContinuousParametric &dist)
 //    { return dist.ascii_print(os); }
 
-// private :
 public :
 
     int ident;              // identificateur
@@ -1012,12 +862,21 @@ public :
                             // parametre de forme (GAMMA)
     double dispersion;      // ecart-type (GAUSSIAN), concentration (VON_MISES),
                             // parametre d'echelle (GAMMA)
+    double zero_probability;  // probabilite pour 0 (ZERO_INFLATED_GAMMA)
     double min_value;       // valeur minimum
     double max_value;       // valeur maximum
     int unit;               // unite (degre/radian) pour la loi de von Mises
     double *cumul;          // fonction de repartition (loi de von Mises)
 
     void copy(const ContinuousParametric &dist);
+
+    ContinuousParametric(int iident = GAUSSIAN , double ilocation = D_INF ,
+                         double idispersion = D_DEFAULT , double izero_probability = D_DEFAULT ,
+                         int iunit = I_DEFAULT);
+    ContinuousParametric(const ContinuousParametric &dist)
+    { copy(dist); }
+    ~ContinuousParametric();
+    ContinuousParametric& operator=(const ContinuousParametric&);
 
     std::ostream& ascii_parameter_print(std::ostream &os) const;
     std::ostream& ascii_characteristic_print(std::ostream &os ,
@@ -1042,15 +901,6 @@ public :
 
     double** q_q_plot_computation(int nb_value , double **cdf) const;
 
-// public :
-
-    ContinuousParametric(int iident = GAUSSIAN , double ilocation = D_INF ,
-                         double idispersion = D_DEFAULT , int iunit = I_DEFAULT);
-    ContinuousParametric(const ContinuousParametric &dist)
-    { copy(dist); }
-    ~ContinuousParametric();
-    ContinuousParametric& operator=(const ContinuousParametric&);
-
     int nb_parameter_computation() const;
 
     double von_mises_mass_computation(double inf , double sup) const;
@@ -1074,7 +924,6 @@ ContinuousParametric* continuous_parametric_parsing(StatError &error ,
 
 class Histogram {       // histogramme
 
-// private :
 public :
 
     int nb_element;         // effectif total
@@ -1088,15 +937,6 @@ public :
 
     void copy(const Histogram &histo);
 
-    std::ostream& ascii_print(std::ostream &os , bool comment_flag = false) const;
-    std::ostream& spreadsheet_print(std::ostream &os) const;
-    bool plot_print(const char *path) const;
-    void plotable_write(SinglePlot &plot) const;
-
-    void max_computation();
-
-// public :
-
     Histogram(int inb_category = 0 , bool init_flag = true);
     Histogram(const FrequencyDistribution &histo);
     Histogram(const Histogram &histo)
@@ -1104,12 +944,18 @@ public :
     ~Histogram();
     Histogram& operator=(const Histogram &histo);
 
+    std::ostream& ascii_print(std::ostream &os , bool comment_flag = false) const;
+    std::ostream& spreadsheet_print(std::ostream &os) const;
+    bool plot_print(const char *path) const;
+    void plotable_write(SinglePlot &plot) const;
+
+    void max_computation();
     double* cumul_computation() const;
 };
 
 
 
-#include "reestimation.cpp"
+#include "reestimation.hpp"
 
 
 
