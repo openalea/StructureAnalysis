@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
@@ -67,7 +67,7 @@ extern int cumul_method(int nb_value , const double *cumul , double scale = 1.);
  *
  *--------------------------------------------------------------*/
 
-void SemiMarkov::initial_probability_computation()
+void SemiMarkovChain::initial_probability_computation()
 
 {
   register int i , j , k;
@@ -107,7 +107,7 @@ void SemiMarkov::initial_probability_computation()
           state[j] += state_in[i - 1][j] - state_out[j];
         }
 
-        occupancy = nonparametric_process[0]->sojourn_time[j];
+        occupancy = state_process->sojourn_time[j];
         state_out[j] = 0.;
 
         for (k = 1;k <= MIN(i + 1 , occupancy->nb_value - 1);k++) {
@@ -220,17 +220,21 @@ double SemiMarkov::likelihood_computation(const MarkovianSequences &seq , int in
   // verification de la compatibilite entre le modele et les donnees
 
   if (nb_output_process + 1 == seq.nb_variable) {
-    for (i = 0;i <= nb_output_process;i++) {
-      if (((nonparametric_process[i]) || (discrete_parametric_process[i])) &&
+    if (state_process->nb_value < seq.marginal_distribution[0]->nb_value) {
+      likelihood = D_INF;
+    }
+
+    for (i = 0;i < nb_output_process;i++) {
+      if (((categorical_process[i]) || (discrete_parametric_process[i])) &&
           (seq.marginal_distribution[i])) {
-        if (nonparametric_process[i]) {
-          nb_value = nonparametric_process[i]->nb_value;
+        if (categorical_process[i]) {
+          nb_value = categorical_process[i]->nb_value;
         }
         else {
           nb_value = discrete_parametric_process[i]->nb_value;
         }
 
-        if (nb_value < seq.marginal_distribution[i]->nb_value) {
+        if (nb_value < seq.marginal_distribution[i + 1]->nb_value) {
           likelihood = D_INF;
           break;
         }
@@ -313,12 +317,12 @@ double SemiMarkov::likelihood_computation(const MarkovianSequences &seq , int in
               }
 
               else {
-                if (occupancy < nonparametric_process[0]->sojourn_time[*pstate]->nb_value) {
+                if (occupancy < state_process->sojourn_time[*pstate]->nb_value) {
                   if (j < seq.length[i]) {
-                    proba = nonparametric_process[0]->sojourn_time[*pstate]->mass[occupancy];
+                    proba = state_process->sojourn_time[*pstate]->mass[occupancy];
                   }
                   else {
-                    proba = (1. - nonparametric_process[0]->sojourn_time[*pstate]->cumul[occupancy - 1]);
+                    proba = (1. - state_process->sojourn_time[*pstate]->cumul[occupancy - 1]);
                   }
                 }
               }
@@ -341,22 +345,22 @@ double SemiMarkov::likelihood_computation(const MarkovianSequences &seq , int in
           if (nb_output_process > 0) {
             for (k = 0;k < occupancy;k++) {
               for (m = 0;m < nb_output_process;m++) {
-                if (nonparametric_process[m + 1]) {
-                  proba = nonparametric_process[m + 1]->observation[*pstate]->mass[*pioutput[m]++];
+                if (categorical_process[m]) {
+                  proba = categorical_process[m]->observation[*pstate]->mass[*pioutput[m]++];
                 }
 
-                else if (discrete_parametric_process[m + 1]) {
-                  proba = discrete_parametric_process[m + 1]->observation[*pstate]->mass[*pioutput[m]++];
+                else if (discrete_parametric_process[m]) {
+                  proba = discrete_parametric_process[m]->observation[*pstate]->mass[*pioutput[m]++];
                 }
 
                 else {
                   switch (seq.type[m + 1]) {
                   case INT_VALUE :
-                    proba = continuous_parametric_process[m + 1]->observation[*pstate]->mass_computation(*pioutput[m] - seq.min_interval[m + 1] / 2 , *pioutput[m] + seq.min_interval[m + 1] / 2);
+                    proba = continuous_parametric_process[m]->observation[*pstate]->mass_computation(*pioutput[m] - seq.min_interval[m + 1] / 2 , *pioutput[m] + seq.min_interval[m + 1] / 2);
                     pioutput[m]++;
                     break;
                   case REAL_VALUE :
-                    proba = continuous_parametric_process[m + 1]->observation[*pstate]->mass_computation(*proutput[m] - seq.min_interval[m + 1] / 2 , *proutput[m] + seq.min_interval[m + 1] / 2);
+                    proba = continuous_parametric_process[m]->observation[*pstate]->mass_computation(*proutput[m] - seq.min_interval[m + 1] / 2 , *proutput[m] + seq.min_interval[m + 1] / 2);
                     proutput[m]++;
                     break;
                   }
@@ -419,22 +423,26 @@ double SemiMarkov::likelihood_computation(const SemiMarkovData &seq) const
   // verification de la compatibilite entre le modele et les donnees
 
   if (nb_output_process + 1 == seq.nb_variable) {
-    for (i = 0;i <= nb_output_process;i++) {
-      if ((nonparametric_process[i]) || (discrete_parametric_process[i])) {
-        if (nonparametric_process[i]) {
-          nb_value = nonparametric_process[i]->nb_value;
+    if ((!(seq.marginal_distribution[0])) || (state_process->nb_value < seq.marginal_distribution[0]->nb_value)) {
+      likelihood = D_INF;
+    }
+
+    for (i = 0;i < nb_output_process;i++) {
+      if ((categorical_process[i]) || (discrete_parametric_process[i])) {
+        if (categorical_process[i]) {
+          nb_value = categorical_process[i]->nb_value;
         }
         else {
           nb_value = discrete_parametric_process[i]->nb_value;
         }
 
-        if (nb_value < seq.marginal_distribution[i]->nb_value) {
+        if (nb_value < seq.marginal_distribution[i + 1]->nb_value) {
           likelihood = D_INF;
           break;
         }
       }
 
-      else if (!(seq.marginal_distribution[i])) {
+      else if (!(seq.marginal_distribution[i + 1])) {
         likelihood = D_INF;
         break;
       }
@@ -475,7 +483,7 @@ double SemiMarkov::likelihood_computation(const SemiMarkovData &seq) const
 
       for (i = 0;i < nb_state;i++) {
         if (state_subtype[i] == SEMI_MARKOVIAN) {
-          buff = nonparametric_process[0]->sojourn_time[i]->likelihood_computation(*(seq.characteristics[0]->sojourn_time[i]));
+          buff = state_process->sojourn_time[i]->likelihood_computation(*(seq.characteristics[0]->sojourn_time[i]));
 
           if (buff != D_INF) {
             likelihood += buff;
@@ -488,7 +496,7 @@ double SemiMarkov::likelihood_computation(const SemiMarkovData &seq) const
           switch (type) {
 
           case 'o' : {
-            buff = nonparametric_process[0]->sojourn_time[i]->survivor_likelihood_computation(*(seq.characteristics[0]->final_run[i]));
+            buff = state_process->sojourn_time[i]->survivor_likelihood_computation(*(seq.characteristics[0]->final_run[i]));
 
             if (buff != D_INF) {
               likelihood += buff;
@@ -500,7 +508,7 @@ double SemiMarkov::likelihood_computation(const SemiMarkovData &seq) const
           }
 
           case 'e' : {
-            buff = nonparametric_process[0]->sojourn_time[i]->survivor_likelihood_computation(*(final_run[i]));
+            buff = state_process->sojourn_time[i]->survivor_likelihood_computation(*(final_run[i]));
 
             if (buff != D_INF) {
               likelihood += buff;
@@ -555,10 +563,10 @@ double SemiMarkov::likelihood_computation(const SemiMarkovData &seq) const
     }
 
     if (likelihood != D_INF) {
-      for (i = 1;i <= nb_output_process;i++) {
-        if (nonparametric_process[i]) {
+      for (i = 0;i < nb_output_process;i++) {
+        if (categorical_process[i]) {
           for (j = 0;j < nb_state;j++) {
-            buff = nonparametric_process[i]->observation[j]->likelihood_computation(*(seq.observation_distribution[i][j]));
+            buff = categorical_process[i]->observation[j]->likelihood_computation(*(seq.observation_distribution[i + 1][j]));
 
             if (buff != D_INF) {
               likelihood += buff;
@@ -572,7 +580,7 @@ double SemiMarkov::likelihood_computation(const SemiMarkovData &seq) const
 
         else if (discrete_parametric_process[i]) {
           for (j = 0;j < nb_state;j++) {
-            buff = discrete_parametric_process[i]->observation[j]->likelihood_computation(*(seq.observation_distribution[i][j]));
+            buff = discrete_parametric_process[i]->observation[j]->likelihood_computation(*(seq.observation_distribution[i + 1][j]));
 
             if (buff != D_INF) {
               likelihood += buff;
@@ -586,7 +594,8 @@ double SemiMarkov::likelihood_computation(const SemiMarkovData &seq) const
 
         else {
           for (j = 0;j < nb_state;j++) {
-            buff = continuous_parametric_process[i]->observation[j]->likelihood_computation(*(seq.observation_distribution[i][j]) , (int)seq.min_interval[i]);
+            buff = continuous_parametric_process[i]->observation[j]->likelihood_computation(*(seq.observation_distribution[i + 1][j]) ,
+                                                                                            (int)seq.min_interval[i]);
 
             if (buff != D_INF) {
               likelihood += buff;
@@ -1182,23 +1191,23 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostrea
       }
 
       smarkov->state_subtype = new int[smarkov->nb_state];
-      smarkov->nonparametric_process[0]->absorption = new double[smarkov->nb_state];
-      smarkov->nonparametric_process[0]->sojourn_time = new DiscreteParametric*[smarkov->nb_state];
+      smarkov->state_process->absorption = new double[smarkov->nb_state];
+      smarkov->state_process->sojourn_time = new DiscreteParametric*[smarkov->nb_state];
       smarkov->forward = new Forward*[smarkov->nb_state];
       for (i = 0;i < smarkov->nb_state;i++) {
         smarkov->forward[i] = NULL;
-        smarkov->nonparametric_process[0]->sojourn_time[i] = NULL;
+        smarkov->state_process->sojourn_time[i] = NULL;
       }
 
       for (i = 0;i < smarkov->nb_state;i++) {
         if ((seq->characteristics[0]->sojourn_time[i]->nb_element == 0) &&
             ((model_type == 'o') || (initial_run[i]->nb_element == 0))) {
           smarkov->state_subtype[i] = MARKOVIAN;
-          smarkov->nonparametric_process[0]->absorption[i] = 1.;
+          smarkov->state_process->absorption[i] = 1.;
         }
 
         else {
-          smarkov->nonparametric_process[0]->absorption[i] = 0.;
+          smarkov->state_process->absorption[i] = 0.;
 
           if ((model_type == 'e') && (seq->characteristics[0]->sojourn_time[i]->nb_element == 0)) {
             occupancy = NULL;
@@ -1239,7 +1248,7 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostrea
               occupancy = new DiscreteParametric(NEGATIVE_BINOMIAL , 1 , I_DEFAULT , 1. ,
                                                  (occupancy_reestim->mean > 1. ? 1. / occupancy_reestim->mean : 0.99) ,
                                                  OCCUPANCY_THRESHOLD);
-              occupancy->init(NONPARAMETRIC , I_DEFAULT , I_DEFAULT , D_DEFAULT , D_DEFAULT);
+              occupancy->init(CATEGORICAL , I_DEFAULT , I_DEFAULT , D_DEFAULT , D_DEFAULT);
               forward = new Forward(*occupancy , occupancy->alloc_nb_value);
 
               delete occupancy_reestim;
@@ -1404,7 +1413,7 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostrea
                                                                                  censored_occupancy_survivor);
             occupancy = new DiscreteParametric(NEGATIVE_BINOMIAL , 1 , I_DEFAULT , 1. ,
                                                1. / occupancy_reestim->mean , OCCUPANCY_THRESHOLD);
-            occupancy->init(NONPARAMETRIC , I_DEFAULT , I_DEFAULT , D_DEFAULT , D_DEFAULT);
+            occupancy->init(CATEGORICAL , I_DEFAULT , I_DEFAULT , D_DEFAULT , D_DEFAULT);
 
             delete occupancy_reestim;
             occupancy_reestim = new Reestimation<double>(MAX(occupancy->alloc_nb_value , max_length + 1));
@@ -1547,9 +1556,9 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostrea
 
             else {
               smarkov->state_subtype[i] = SEMI_MARKOVIAN;
-              smarkov->nonparametric_process[0]->sojourn_time[i] = new DiscreteParametric(*occupancy);
+              smarkov->state_process->sojourn_time[i] = new DiscreteParametric(*occupancy);
               if (smarkov->state_type[i] == 'r') {
-                smarkov->forward[i] = new Forward(*(smarkov->nonparametric_process[0]->sojourn_time[i]));
+                smarkov->forward[i] = new Forward(*(smarkov->state_process->sojourn_time[i]));
               }
             }
 
@@ -1608,7 +1617,7 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostrea
         seq->build_observation_frequency_distribution(smarkov->nb_state);
 
         for (i = 0;i < smarkov->nb_state;i++) {
-          seq->observation_distribution[1][i]->distribution_estimation(smarkov->nonparametric_process[1]->observation[i]);
+          seq->observation_distribution[1][i]->distribution_estimation(smarkov->categorical_process[0]->observation[i]);
         }
       }
 
@@ -1725,7 +1734,7 @@ bool MarkovianSequences::comparison(StatError &error , ostream &os , int nb_mode
     }
 
     else {
-      if (ismarkov[i]->nonparametric_process[0]->nb_value < marginal_distribution[0]->nb_value) {
+      if (ismarkov[i]->state_process->nb_value < marginal_distribution[0]->nb_value) {
         status = false;
         ostringstream error_message;
         error_message << SEQ_label[SEQL_SEMI_MARKOV_CHAIN] << " " << i + 1 << ": "
@@ -1734,7 +1743,7 @@ bool MarkovianSequences::comparison(StatError &error , ostream &os , int nb_mode
       }
 
       if (nb_variable == 2) {
-        if (ismarkov[i]->nonparametric_process[1]->nb_value < marginal_distribution[1]->nb_value) {
+        if (ismarkov[i]->categorical_process[0]->nb_value < marginal_distribution[1]->nb_value) {
           status = false;
           ostringstream error_message;
           error_message << SEQ_label[SEQL_SEMI_MARKOV_CHAIN] << " " << i + 1 << ": "
@@ -1788,7 +1797,7 @@ bool MarkovianSequences::comparison(StatError &error , ostream &os , int nb_mode
  *
  *--------------------------------------------------------------*/
 
-SemiMarkovData* SemiMarkov::simulation(StatError &error , const FrequencyDistribution &hlength ,
+SemiMarkovData* SemiMarkov::simulation(StatError &error , const FrequencyDistribution &length_distribution ,
                                        bool counting_flag , bool divergence_flag) const
 
 {
@@ -1804,23 +1813,23 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , const FrequencyDistrib
   seq = NULL;
   error.init();
 
-  if ((hlength.nb_element < 1) || (hlength.nb_element > NB_SEQUENCE)) {
+  if ((length_distribution.nb_element < 1) || (length_distribution.nb_element > NB_SEQUENCE)) {
     status = false;
     error.update(SEQ_error[SEQR_NB_SEQUENCE]);
   }
-  if (hlength.offset < 2) {
+  if (length_distribution.offset < 2) {
     status = false;
     error.update(SEQ_error[SEQR_SHORT_SEQUENCE_LENGTH]);
   }
-  if (hlength.nb_value - 1 > MAX_LENGTH) {
+  if (length_distribution.nb_value - 1 > MAX_LENGTH) {
     status = false;
     error.update(SEQ_error[SEQR_LONG_SEQUENCE_LENGTH]);
   }
 
   if (status) {
     cumul_length = 0;
-    for (i = hlength.offset;i < hlength.nb_value;i++) {
-      cumul_length += i * hlength.frequency[i];
+    for (i = length_distribution.offset;i < length_distribution.nb_value;i++) {
+      cumul_length += i * length_distribution.frequency[i];
     }
 
     if (cumul_length > CUMUL_LENGTH) {
@@ -1830,7 +1839,7 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , const FrequencyDistrib
   }
 
   if (status) {
-    if (hlength.nb_value - 1 > COUNTING_MAX_LENGTH) {
+    if (length_distribution.nb_value - 1 > COUNTING_MAX_LENGTH) {
       counting_flag = false;
     }
 
@@ -1839,16 +1848,16 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , const FrequencyDistrib
     itype = new int[nb_output_process + 1];
 
     itype[0] = STATE;
-    for (i = 1;i <= nb_output_process;i++) {
+    for (i = 0;i < nb_output_process;i++) {
       if (!continuous_parametric_process[i]) {
-        itype[i] = INT_VALUE;
+        itype[i + 1] = INT_VALUE;
       }
       else {
-        itype[i] = REAL_VALUE;
+        itype[i + 1] = REAL_VALUE;
       }
     }
 
-    seq = new SemiMarkovData(hlength , nb_output_process + 1 , itype);
+    seq = new SemiMarkovData(length_distribution , nb_output_process + 1 , itype);
     delete [] itype;
 
     seq->semi_markov = new SemiMarkov(*this , false);
@@ -1864,13 +1873,13 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , const FrequencyDistrib
       decimal_scale = new int[smarkov->nb_output_process];
 
       for (i = 0;i < smarkov->nb_output_process;i++) {
-        if (smarkov->continuous_parametric_process[i + 1]) {
-          switch (smarkov->continuous_parametric_process[i + 1]->ident) {
+        if (smarkov->continuous_parametric_process[i]) {
+          switch (smarkov->continuous_parametric_process[i]->ident) {
 
           case GAMMA : {
-            min_location = smarkov->continuous_parametric_process[i + 1]->observation[0]->location * smarkov->continuous_parametric_process[i + 1]->observation[0]->dispersion;
+            min_location = smarkov->continuous_parametric_process[i]->observation[0]->location * smarkov->continuous_parametric_process[i]->observation[0]->dispersion;
             for (j = 1;j < smarkov->nb_state;j++) {
-              buff = smarkov->continuous_parametric_process[i + 1]->observation[j]->location * smarkov->continuous_parametric_process[i + 1]->observation[0]->dispersion;
+              buff = smarkov->continuous_parametric_process[i]->observation[j]->location * smarkov->continuous_parametric_process[i]->observation[0]->dispersion;
               if (buff < min_location) {
                 min_location = buff;
               }
@@ -1893,9 +1902,9 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , const FrequencyDistrib
           }
 
           case GAUSSIAN : {
-            min_location = fabs(smarkov->continuous_parametric_process[i + 1]->observation[0]->location);
+            min_location = fabs(smarkov->continuous_parametric_process[i]->observation[0]->location);
             for (j = 1;j < smarkov->nb_state;j++) {
-              buff = fabs(smarkov->continuous_parametric_process[i + 1]->observation[j]->location);
+              buff = fabs(smarkov->continuous_parametric_process[i]->observation[j]->location);
               if (buff < min_location) {
                 min_location = buff;
               }
@@ -1917,7 +1926,7 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , const FrequencyDistrib
           }
 
           case VON_MISES : {
-            switch (smarkov->continuous_parametric_process[i + 1]->unit) {
+            switch (smarkov->continuous_parametric_process[i]->unit) {
             case DEGREE :
               decimal_scale[i] = DEGREE_DECIMAL_SCALE;
               break;
@@ -1927,7 +1936,7 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , const FrequencyDistrib
             }
 
             for (j = 0;j < smarkov->nb_state;j++) {
-              smarkov->continuous_parametric_process[i + 1]->observation[j]->von_mises_cumul_computation();
+              smarkov->continuous_parametric_process[i]->observation[j]->von_mises_cumul_computation();
             }
             break;
           }
@@ -1965,7 +1974,7 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , const FrequencyDistrib
             occupancy = smarkov->forward[*pstate]->simulation();
           }
           else {
-            occupancy = smarkov->nonparametric_process[0]->sojourn_time[*pstate]->simulation();
+            occupancy = smarkov->state_process->sojourn_time[*pstate]->simulation();
           }
 
           if (j + occupancy > seq->length[i]) {
@@ -1994,14 +2003,14 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , const FrequencyDistrib
 
         for (k = 0;k < occupancy;k++) {
           for (m = 0;m < smarkov->nb_output_process;m++) {
-            if (smarkov->nonparametric_process[m + 1]) {
-              *pioutput[m]++ = smarkov->nonparametric_process[m + 1]->observation[*pstate]->simulation();
+            if (smarkov->categorical_process[m]) {
+              *pioutput[m]++ = smarkov->categorical_process[m]->observation[*pstate]->simulation();
             }
-            else if (smarkov->discrete_parametric_process[m + 1]) {
-              *pioutput[m]++ = smarkov->discrete_parametric_process[m + 1]->observation[*pstate]->simulation();
+            else if (smarkov->discrete_parametric_process[m]) {
+              *pioutput[m]++ = smarkov->discrete_parametric_process[m]->observation[*pstate]->simulation();
             }
             else {
-              *proutput[m]++ = round(smarkov->continuous_parametric_process[m + 1]->observation[*pstate]->simulation() * decimal_scale[m]) / decimal_scale[m];
+              *proutput[m]++ = round(smarkov->continuous_parametric_process[m]->observation[*pstate]->simulation() * decimal_scale[m]) / decimal_scale[m];
             }
           }
         }
@@ -2018,10 +2027,10 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , const FrequencyDistrib
       delete [] decimal_scale;
 
       for (i = 0;i < smarkov->nb_output_process;i++) {
-        if ((smarkov->continuous_parametric_process[i + 1]) &&
-            (smarkov->continuous_parametric_process[i + 1]->ident == VON_MISES)) {
+        if ((smarkov->continuous_parametric_process[i]) &&
+            (smarkov->continuous_parametric_process[i]->ident == VON_MISES)) {
           for (j = 0;j < smarkov->nb_state;j++) {
-            delete [] smarkov->continuous_parametric_process[i + 1]->observation[j]->cumul;
+            delete [] smarkov->continuous_parametric_process[i]->observation[j]->cumul;
           }
         }
       }
@@ -2067,15 +2076,15 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , const FrequencyDistrib
     weight = NULL;
     restoration_weight = NULL;
 
-    for (i = 1;i <= smarkov->nb_output_process;i++) {
+    for (i = 0;i < smarkov->nb_output_process;i++) {
       if ((smarkov->discrete_parametric_process[i]) || (smarkov->continuous_parametric_process[i])) {
-        weight = smarkov->nonparametric_process[0]->weight_computation();
+        weight = smarkov->state_process->weight_computation();
         restoration_weight = seq->weight_computation();
         break;
       }
     }
 
-    for (i = 1;i <= smarkov->nb_output_process;i++) {
+    for (i = 0;i < smarkov->nb_output_process;i++) {
       if (smarkov->discrete_parametric_process[i]) {
         smarkov->discrete_parametric_process[i]->weight = new Distribution(*weight);
         smarkov->discrete_parametric_process[i]->mixture = smarkov->discrete_parametric_process[i]->mixture_computation(smarkov->discrete_parametric_process[i]->weight);
@@ -2132,16 +2141,16 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , int nb_sequence ,
   }
 
   if (status) {
-    FrequencyDistribution hlength(length + 1);
+    FrequencyDistribution length_distribution(length + 1);
 
-    hlength.nb_element = nb_sequence;
-    hlength.offset = length;
-    hlength.max = nb_sequence;
-    hlength.mean = length;
-    hlength.variance = 0.;
-    hlength.frequency[length] = nb_sequence;
+    length_distribution.nb_element = nb_sequence;
+    length_distribution.offset = length;
+    length_distribution.max = nb_sequence;
+    length_distribution.mean = length;
+    length_distribution.variance = 0.;
+    length_distribution.frequency[length] = nb_sequence;
 
-    seq = simulation(error , hlength , counting_flag);
+    seq = simulation(error , length_distribution , counting_flag);
   }
 
   return seq;
@@ -2162,7 +2171,7 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , int nb_sequence ,
                                        const MarkovianSequences &iseq , bool counting_flag) const
 
 {
-  FrequencyDistribution *hlength;
+  FrequencyDistribution *length_distribution;
   SemiMarkovData *seq;
 
 
@@ -2174,10 +2183,10 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , int nb_sequence ,
   }
 
   else {
-    hlength = iseq.hlength->frequency_scale(nb_sequence);
+    length_distribution = iseq.length_distribution->frequency_scale(nb_sequence);
 
-    seq = simulation(error , *hlength , counting_flag);
-    delete hlength;
+    seq = simulation(error , *length_distribution , counting_flag);
+    delete length_distribution;
   }
 
   return seq;
@@ -2196,7 +2205,8 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , int nb_sequence ,
 
 DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , ostream &os ,
                                                    int nb_model , const SemiMarkov **ismarkov ,
-                                                   FrequencyDistribution **hlength , const char *path) const
+                                                   FrequencyDistribution **length_distribution ,
+                                                   const char *path) const
 
 {
   bool status = true , lstatus;
@@ -2233,7 +2243,7 @@ DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , ostream &o
       }
 
       if (nb_output_process == 1) {
-        if (ismarkov[i]->nonparametric_process[1]->nb_value != nonparametric_process[1]->nb_value) {
+        if (ismarkov[i]->categorical_process[0]->nb_value != categorical_process[0]->nb_value) {
           status = false;
           ostringstream error_message;
           error_message << SEQ_label[SEQL_SEMI_MARKOV_CHAIN] << " " << i + 2 << ": "
@@ -2244,7 +2254,7 @@ DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , ostream &o
     }
 
     else if ((nb_output_process == 0) && (ismarkov[i]->nb_output_process == 1)) {
-      if (ismarkov[i]->nonparametric_process[1]->nb_value != nb_state) {
+      if (ismarkov[i]->categorical_process[0]->nb_value != nb_state) {
         status = false;
         ostringstream error_message;
         error_message << SEQ_label[SEQL_SEMI_MARKOV_CHAIN] << " " << i + 2 << ": "
@@ -2254,7 +2264,7 @@ DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , ostream &o
     }
 
     else {  //  if ((nb_output_process == 1) && (ismarkov[i]->nb_output_process == 0))
-      if (ismarkov[i]->nb_state != nonparametric_process[1]->nb_value) {
+      if (ismarkov[i]->nb_state != categorical_process[0]->nb_value) {
         status = false;
         ostringstream error_message;
         error_message << SEQ_label[SEQL_SEMI_MARKOV_CHAIN] << " " << i + 2 << ": "
@@ -2267,21 +2277,21 @@ DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , ostream &o
   for (i = 0;i < nb_model;i++) {
     lstatus = true;
 
-    if ((hlength[i]->nb_element < 1) || (hlength[i]->nb_element > NB_SEQUENCE)) {
+    if ((length_distribution[i]->nb_element < 1) || (length_distribution[i]->nb_element > NB_SEQUENCE)) {
       lstatus = false;
       ostringstream error_message;
       error_message << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
                     << i + 1 << ": "  << SEQ_error[SEQR_NB_SEQUENCE];
       error.update((error_message.str()).c_str());
     }
-    if (hlength[i]->offset < 2) {
+    if (length_distribution[i]->offset < 2) {
       lstatus = false;
       ostringstream error_message;
       error_message << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
                     << i + 1 << ": "  << SEQ_error[SEQR_SHORT_SEQUENCE_LENGTH];
       error.update((error_message.str()).c_str());
     }
-    if (hlength[i]->nb_value - 1 > MAX_LENGTH) {
+    if (length_distribution[i]->nb_value - 1 > MAX_LENGTH) {
       lstatus = false;
       ostringstream error_message;
       error_message << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
@@ -2295,8 +2305,8 @@ DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , ostream &o
 
     else {
       cumul_length = 0;
-      for (j = hlength[i]->offset;j < hlength[i]->nb_value;j++) {
-        cumul_length += j * hlength[i]->frequency[j];
+      for (j = length_distribution[i]->offset;j < length_distribution[i]->nb_value;j++) {
+        cumul_length += j * length_distribution[i]->frequency[j];
       }
 
       if (cumul_length > CUMUL_LENGTH) {
@@ -2338,7 +2348,7 @@ DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , ostream &o
 
       // simulation d'un echantillon de sequences a partir d'une semi-chaine de Markov
 
-      simul_seq = smarkov[i]->simulation(error , *hlength[i] , false , true);
+      simul_seq = smarkov[i]->simulation(error , *length_distribution[i] , false , true);
 
       likelihood = new double*[simul_seq->nb_sequence];
       for (j = 0;j < simul_seq->nb_sequence;j++) {
@@ -2368,7 +2378,7 @@ DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , ostream &o
       for (j = 0;j < nb_model;j++) {
         if (j != i) {
           if (smarkov[j]->nb_output_process == 1) {
-            seq = iseq->transcode(error , smarkov[j]->nonparametric_process[1]);
+            seq = iseq->transcode(error , smarkov[j]->categorical_process[0]);
           }
           else {
             seq = iseq;
@@ -2463,7 +2473,7 @@ DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , ostream &o
 {
   bool status = true;
   register int i;
-  FrequencyDistribution **hlength;
+  FrequencyDistribution **length_distribution;
   DistanceMatrix *dist_matrix;
 
 
@@ -2484,27 +2494,27 @@ DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , ostream &o
   }
 
   if (status) {
-    hlength = new FrequencyDistribution*[nb_model];
+    length_distribution = new FrequencyDistribution*[nb_model];
 
-    hlength[0] = new FrequencyDistribution(length + 1);
+    length_distribution[0] = new FrequencyDistribution(length + 1);
 
-    hlength[0]->nb_element = nb_sequence;
-    hlength[0]->offset = length;
-    hlength[0]->max = nb_sequence;
-    hlength[0]->mean = length;
-    hlength[0]->variance = 0.;
-    hlength[0]->frequency[length] = nb_sequence;
+    length_distribution[0]->nb_element = nb_sequence;
+    length_distribution[0]->offset = length;
+    length_distribution[0]->max = nb_sequence;
+    length_distribution[0]->mean = length;
+    length_distribution[0]->variance = 0.;
+    length_distribution[0]->frequency[length] = nb_sequence;
 
     for (i = 1;i < nb_model;i++) {
-      hlength[i] = new FrequencyDistribution(*hlength[0]);
+      length_distribution[i] = new FrequencyDistribution(*length_distribution[0]);
     }
 
-    dist_matrix = divergence_computation(error , os , nb_model , smarkov , hlength , path);
+    dist_matrix = divergence_computation(error , os , nb_model , smarkov , length_distribution , path);
 
     for (i = 0;i < nb_model;i++) {
-      delete hlength[i];
+      delete length_distribution[i];
     }
-    delete [] hlength;
+    delete [] length_distribution;
   }
 
   return dist_matrix;
@@ -2528,7 +2538,7 @@ DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , ostream &o
 
 {
   register int i;
-  FrequencyDistribution **hlength;
+  FrequencyDistribution **length_distribution;
   DistanceMatrix *dist_matrix;
 
 
@@ -2540,17 +2550,17 @@ DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , ostream &o
   }
 
   else {
-    hlength = new FrequencyDistribution*[nb_model];
+    length_distribution = new FrequencyDistribution*[nb_model];
     for (i = 0;i < nb_model;i++) {
-      hlength[i] = seq[i]->hlength->frequency_scale(nb_sequence);
+      length_distribution[i] = seq[i]->length_distribution->frequency_scale(nb_sequence);
     }
 
-    dist_matrix = divergence_computation(error , os , nb_model , smarkov , hlength , path);
+    dist_matrix = divergence_computation(error , os , nb_model , smarkov , length_distribution , path);
 
     for (i = 0;i < nb_model;i++) {
-      delete hlength[i];
+      delete length_distribution[i];
     }
-    delete [] hlength;
+    delete [] length_distribution;
   }
 
   return dist_matrix;
@@ -2577,7 +2587,7 @@ SemiMarkovIterator::SemiMarkovIterator(SemiMarkov *ismarkov)
   }
 
   state = I_DEFAULT;
-  occupancy = NULL;
+  occupancy = 0;
   counter = I_DEFAULT;
 }
 
@@ -2674,7 +2684,7 @@ bool SemiMarkovIterator::simulation(int **int_seq , int length , bool initializa
       case SEMI_MARKOVIAN : {
         switch (semi_markov->type) {
         case 'o' :
-          occupancy = semi_markov->nonparametric_process[0]->sojourn_time[state]->simulation();
+          occupancy = semi_markov->state_process->sojourn_time[state]->simulation();
           break;
         case 'e' :
           occupancy = semi_markov->forward[state]->simulation();
@@ -2711,14 +2721,14 @@ bool SemiMarkovIterator::simulation(int **int_seq , int length , bool initializa
       *pstate++ = state;
 
       for (j = 0;j < semi_markov->nb_output_process;j++) {
-        if (semi_markov->nonparametric_process[j + 1]) {
-          *pioutput[j]++ = semi_markov->nonparametric_process[j + 1]->observation[state]->simulation();
+        if (semi_markov->categorical_process[j]) {
+          *pioutput[j]++ = semi_markov->categorical_process[j]->observation[state]->simulation();
         }
-        else if (semi_markov->discrete_parametric_process[j + 1]) {
-          *pioutput[j]++ = semi_markov->discrete_parametric_process[j + 1]->observation[state]->simulation();
+        else if (semi_markov->discrete_parametric_process[j]) {
+          *pioutput[j]++ = semi_markov->discrete_parametric_process[j]->observation[state]->simulation();
         }
         else {
-//          *proutput[j]++ = semi_markov->continuous_parametric_process[j + 1]->observation[state]->simulation();
+//          *proutput[j]++ = semi_markov->continuous_parametric_process[j]->observation[state]->simulation();
         }
       }
 
@@ -2727,7 +2737,7 @@ bool SemiMarkovIterator::simulation(int **int_seq , int length , bool initializa
 
         switch (semi_markov->state_subtype[state]) {
         case SEMI_MARKOVIAN :
-          occupancy = semi_markov->nonparametric_process[0]->sojourn_time[state]->simulation();
+          occupancy = semi_markov->state_process->sojourn_time[state]->simulation();
           break;
         case MARKOVIAN :
           occupancy = 1;
