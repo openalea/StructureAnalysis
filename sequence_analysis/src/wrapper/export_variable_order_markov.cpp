@@ -219,7 +219,7 @@ void class_variable_order_markov() {
 //    .def("ascii_data_write", WRAP::ascii_data_write,"Return a string with the object representation")
 //    .def("file_ascii_data_write", WRAP::file_ascii_data_write,"Save vector data into a file")
 
-    .add_property("nb_iterator", &VariableOrderMarkov::get_nb_iterator, "todo")
+/*    .add_property("nb_iterator", &VariableOrderMarkov::get_nb_iterator, "todo")
     .add_property("max_order", &VariableOrderMarkov::get_max_order, "todo")
     .add_property("nb_output_process", &VariableOrderMarkov::get_nb_output_process, "todo")
 
@@ -230,7 +230,7 @@ void class_variable_order_markov() {
     .def("get_child", &VariableOrderMarkov::get_child, args("memory", "state"),"todo")
     .def("get_next", &VariableOrderMarkov::get_next, args("memory", "state"),"todo")
     .def("get_nb_memory", &VariableOrderMarkov::get_nb_memory, args("memory"),"todo")
-    .def("get_previous", &VariableOrderMarkov::get_previous,args("memory", "state"), "todo")
+    .def("get_previous", &VariableOrderMarkov::get_previous,args("memory", "state"), "todo") */
 
     DEF_RETURN_VALUE_NO_ARGS("extract_data", WRAP::extract_data, "returns variable_order_markov_data")
     DEF_RETURN_VALUE_NO_ARGS("get_plotable", WRAP::get_plotable, "Return a plotable")
