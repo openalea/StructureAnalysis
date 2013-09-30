@@ -854,7 +854,7 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , const Vect
 #   endif
 
     if (index_parameter) {
-      width = column_width(hindex_parameter->nb_value - 1);
+      width = column_width(index_parameter_distribution->nb_value - 1);
     }
     else {
       width = 0;
@@ -1699,7 +1699,7 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , int ref_id
     substitution_distance = INDEL_DISTANCE * 2.1;
 
     if (index_parameter) {
-      width = column_width(hindex_parameter->nb_value - 1);
+      width = column_width(index_parameter_distribution->nb_value - 1);
     }
     else {
       width = 0;
