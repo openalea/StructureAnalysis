@@ -101,7 +101,7 @@ HiddenMarkovIndOutTree::HiddenMarkovIndOutTree(char itype, int inb_state,
 
 HiddenMarkovIndOutTree::HiddenMarkovIndOutTree(const Chain * pchain,
                                                int inb_ioutput_process,
-                                               NonparametricProcess** pobservation,
+                                               CategoricalProcess** pobservation,
                                                int size, bool counting_flag)
  : HiddenMarkovTree(pchain, 1, inb_ioutput_process, pobservation, size, counting_flag)
 {}
@@ -118,7 +118,7 @@ HiddenMarkovIndOutTree::HiddenMarkovIndOutTree(const Chain * pchain,
 HiddenMarkovIndOutTree::HiddenMarkovIndOutTree(const Chain * pchain,
                                                int inb_ioutput_process,
                                                int inb_doutput_process,
-                                               NonparametricProcess** np_observation,
+                                               CategoricalProcess** np_observation,
                                                DiscreteParametricProcess** ip_observation,
                                                DiscreteParametricProcess** dp_observation,
                                                int size, bool counting_flag)
@@ -465,9 +465,9 @@ ostream& HiddenMarkovIndOutTree::spreadsheet_write(ostream& os, const HiddenMark
          os << "\t" << i;
 
          if (npprocess[i] != NULL)
-            os << "\t" << STAT_word[STATW_NONPARAMETRIC];
+            os << "\t" << STAT_word[STATW_CATEGORICAL];
          else
-            os << "\t" << STAT_word[STATW_PARAMETRIC];
+            os << "\t" << STAT_word[STATW_DISCRETE_PARAMETRIC];
 
          os << endl;
 
@@ -499,7 +499,7 @@ ostream& HiddenMarkovIndOutTree::spreadsheet_write(ostream& os, const HiddenMark
          os << "\n" << STAT_word[STATW_OUTPUT_PROCESS];
          os << "\t" << i;
 
-         os << "\t" << STAT_word[STATW_PARAMETRIC] << endl;
+         os << "\t" << STAT_word[STATW_DISCRETE_PARAMETRIC] << endl;
 
          if (otrees != NULL)
          {
