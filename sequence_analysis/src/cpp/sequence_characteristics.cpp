@@ -458,7 +458,8 @@ void SequenceCharacteristics::create_sojourn_time_frequency_distribution(int max
  *
  *--------------------------------------------------------------*/
 
-ostream& SequenceCharacteristics::ascii_print(ostream &os , int type , const FrequencyDistribution &hlength ,
+ostream& SequenceCharacteristics::ascii_print(ostream &os , int type ,
+                                              const FrequencyDistribution &length_distribution ,
                                               bool exhaustive , bool comment_flag) const
 
 {
@@ -590,7 +591,7 @@ ostream& SequenceCharacteristics::ascii_print(ostream &os , int type , const Fre
       }
       os << SEQ_label[SEQL_NB_RUN_OF] << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE]
          << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
-      nb_run[i]->ascii_characteristic_print(os , (hlength.variance > 0. ? false : true) , comment_flag);
+      nb_run[i]->ascii_characteristic_print(os , (length_distribution.variance > 0. ? false : true) , comment_flag);
 
       if ((nb_run[i]->nb_element > 0) && (exhaustive)) {
         os << "\n";
@@ -612,7 +613,7 @@ ostream& SequenceCharacteristics::ascii_print(ostream &os , int type , const Fre
       }
       os << SEQ_label[SEQL_NB_OCCURRENCE_OF] << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE]
          << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
-      nb_occurrence[i]->ascii_characteristic_print(os , (hlength.variance > 0. ? false : true) , comment_flag);
+      nb_occurrence[i]->ascii_characteristic_print(os , (length_distribution.variance > 0. ? false : true) , comment_flag);
 
       if ((nb_occurrence[i]->nb_element > 0) && (exhaustive)) {
         os << "\n";
@@ -640,7 +641,7 @@ ostream& SequenceCharacteristics::ascii_print(ostream &os , int type , const Fre
  *--------------------------------------------------------------*/
 
 ostream& SequenceCharacteristics::spreadsheet_print(ostream &os , int type ,
-                                                    const FrequencyDistribution &hlength) const
+                                                    const FrequencyDistribution &length_distribution) const
 
 {
   register int i;
@@ -733,7 +734,7 @@ ostream& SequenceCharacteristics::spreadsheet_print(ostream &os , int type ,
     for (i = 0;i < nb_value;i++) {
       os << "\n" << SEQ_label[SEQL_NB_RUN_OF] << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE]
          << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
-      nb_run[i]->spreadsheet_characteristic_print(os , (hlength.variance > 0. ? false : true));
+      nb_run[i]->spreadsheet_characteristic_print(os , (length_distribution.variance > 0. ? false : true));
 
       if (nb_run[i]->nb_element > 0) {
         os << "\n\t" << SEQ_label[SEQL_NB_RUN_OF] << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE]
@@ -747,7 +748,7 @@ ostream& SequenceCharacteristics::spreadsheet_print(ostream &os , int type ,
     for (i = 0;i < nb_value;i++) {
       os << "\n" << SEQ_label[SEQL_NB_OCCURRENCE_OF] << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE]
          << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
-      nb_occurrence[i]->spreadsheet_characteristic_print(os , (hlength.variance > 0. ? false : true));
+      nb_occurrence[i]->spreadsheet_characteristic_print(os , (length_distribution.variance > 0. ? false : true));
 
       if (nb_occurrence[i]->nb_element > 0) {
         os << "\n\t" << SEQ_label[SEQL_NB_OCCURRENCE_OF] << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE]
@@ -773,7 +774,7 @@ ostream& SequenceCharacteristics::spreadsheet_print(ostream &os , int type ,
 
 bool SequenceCharacteristics::plot_print(const char *prefix , const char *title ,
                                          int variable , int nb_variable , int type ,
-                                         const FrequencyDistribution &hlength) const
+                                         const FrequencyDistribution &length_distribution) const
 
 {
   bool status , start;
@@ -840,7 +841,7 @@ bool SequenceCharacteristics::plot_print(const char *prefix , const char *title 
       }
     }
 
-    hlength.plot_print((data_file_name[1].str()).c_str() , nb_histo , phisto);
+    length_distribution.plot_print((data_file_name[1].str()).c_str() , nb_histo , phisto);
 
     // ecriture des fichiers de commandes et des fichiers d'impression
 
@@ -941,23 +942,23 @@ bool SequenceCharacteristics::plot_print(const char *prefix , const char *title 
       }
       out_file << endl;
 
-      if (hlength.nb_value - 1 < TIC_THRESHOLD) {
+      if (length_distribution.nb_value - 1 < TIC_THRESHOLD) {
         out_file << "set xtics 0,1" << endl;
       }
-      if ((int)(hlength.max * YSCALE) + 1 < TIC_THRESHOLD) {
+      if ((int)(length_distribution.max * YSCALE) + 1 < TIC_THRESHOLD) {
         out_file << "set ytics 0,1" << endl;
       }
 
-      out_file << "plot [0:" << hlength.nb_value - 1 << "] [0:"
-               << (int)(hlength.max * YSCALE) + 1 << "] \"" 
+      out_file << "plot [0:" << length_distribution.nb_value - 1 << "] [0:"
+               << (int)(length_distribution.max * YSCALE) + 1 << "] \"" 
                << label((data_file_name[1].str()).c_str()) << "\" using 1 title \""
                << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                << "\" with impulses" << endl;
 
-      if (hlength.nb_value - 1 < TIC_THRESHOLD) {
+      if (length_distribution.nb_value - 1 < TIC_THRESHOLD) {
         out_file << "set xtics autofreq" << endl;
       }
-      if ((int)(hlength.max * YSCALE) + 1 < TIC_THRESHOLD) {
+      if ((int)(length_distribution.max * YSCALE) + 1 < TIC_THRESHOLD) {
         out_file << "set ytics autofreq" << endl;
       }
 
@@ -1399,23 +1400,23 @@ bool SequenceCharacteristics::plot_print(const char *prefix , const char *title 
         }
         out_file << endl;
 
-        if (hlength.nb_value - 1 < TIC_THRESHOLD) {
+        if (length_distribution.nb_value - 1 < TIC_THRESHOLD) {
           out_file << "set xtics 0,1" << endl;
         }
-        if ((int)(hlength.max * YSCALE) + 1 < TIC_THRESHOLD) {
+        if ((int)(length_distribution.max * YSCALE) + 1 < TIC_THRESHOLD) {
           out_file << "set ytics 0,1" << endl;
         }
 
-        out_file << "plot [0:" << hlength.nb_value - 1 << "] [0:"
-                 << (int)(hlength.max * YSCALE) + 1 << "] \"" 
+        out_file << "plot [0:" << length_distribution.nb_value - 1 << "] [0:"
+                 << (int)(length_distribution.max * YSCALE) + 1 << "] \"" 
                  << label((data_file_name[1].str()).c_str()) << "\" using 1 title \""
                  << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                  << "\" with impulses" << endl;
 
-        if (hlength.nb_value - 1 < TIC_THRESHOLD) {
+        if (length_distribution.nb_value - 1 < TIC_THRESHOLD) {
           out_file << "set xtics autofreq" << endl;
         }
-        if ((int)(hlength.max * YSCALE) + 1 < TIC_THRESHOLD) {
+        if ((int)(length_distribution.max * YSCALE) + 1 < TIC_THRESHOLD) {
           out_file << "set ytics autofreq" << endl;
         }
 
@@ -1446,7 +1447,7 @@ bool SequenceCharacteristics::plot_print(const char *prefix , const char *title 
 
 void SequenceCharacteristics::plotable_write(MultiPlotSet &plot , int &index ,
                                              int variable , int type ,
-                                             const FrequencyDistribution &hlength) const
+                                             const FrequencyDistribution &length_distribution) const
 
 {
   register int i , j , k;
@@ -1583,13 +1584,13 @@ void SequenceCharacteristics::plotable_write(MultiPlotSet &plot , int &index ,
   plot.variable[index] = variable;
   plot.viewpoint[index] = INTENSITY;
 
-  plot[index].xrange = Range(0 , hlength.nb_value - 1);
-  plot[index].yrange = Range(0 , ceil(hlength.max * YSCALE));
+  plot[index].xrange = Range(0 , length_distribution.nb_value - 1);
+  plot[index].yrange = Range(0 , ceil(length_distribution.max * YSCALE));
 
-  if (hlength.nb_value - 1 < TIC_THRESHOLD) {
+  if (length_distribution.nb_value - 1 < TIC_THRESHOLD) {
     plot[index].xtics = 1;
   }
-  if (ceil(hlength.max * YSCALE) < TIC_THRESHOLD) {
+  if (ceil(length_distribution.max * YSCALE) < TIC_THRESHOLD) {
     plot[index].ytics = 1;
   }
 
@@ -1601,7 +1602,7 @@ void SequenceCharacteristics::plotable_write(MultiPlotSet &plot , int &index ,
 
   plot[index][0].style = "impulses";
 
-  hlength.plotable_frequency_write(plot[index][0]);
+  length_distribution.plotable_frequency_write(plot[index][0]);
   index++;
 
   // vue : lois empiriques du temps avant 1ere occurrence d'une observation
@@ -2236,13 +2237,13 @@ void SequenceCharacteristics::plotable_write(MultiPlotSet &plot , int &index ,
     plot.variable[index] = variable;
     plot.viewpoint[index] = COUNTING;
 
-    plot[index].xrange = Range(0 , hlength.nb_value - 1);
-    plot[index].yrange = Range(0 , ceil(hlength.max * YSCALE));
+    plot[index].xrange = Range(0 , length_distribution.nb_value - 1);
+    plot[index].yrange = Range(0 , ceil(length_distribution.max * YSCALE));
 
-    if (hlength.nb_value - 1 < TIC_THRESHOLD) {
+    if (length_distribution.nb_value - 1 < TIC_THRESHOLD) {
       plot[index].xtics = 1;
     }
-    if (ceil(hlength.max * YSCALE) < TIC_THRESHOLD) {
+    if (ceil(length_distribution.max * YSCALE) < TIC_THRESHOLD) {
       plot[index].ytics = 1;
     }
 
@@ -2254,7 +2255,7 @@ void SequenceCharacteristics::plotable_write(MultiPlotSet &plot , int &index ,
 
     plot[index][0].style = "impulses";
 
-    hlength.plotable_frequency_write(plot[index][0]);
+    length_distribution.plotable_frequency_write(plot[index][0]);
     index++;
   }
 }
