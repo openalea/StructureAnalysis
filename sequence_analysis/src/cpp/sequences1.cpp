@@ -72,12 +72,12 @@ Sequences::Sequences()
   max_length = 0;
   cumul_length = 0;
   length = NULL;
-  hlength = NULL;
+  length_distribution = NULL;
 
   vertex_identifier = NULL;
 
   index_parameter_type = IMPLICIT_TYPE;
-  hindex_parameter = NULL;
+  index_parameter_distribution = NULL;
   index_interval = NULL;
   index_parameter = NULL;
 
@@ -122,12 +122,12 @@ Sequences::Sequences(int inb_sequence , int inb_variable)
 
   max_length = 0;
   cumul_length = 0;
-  hlength = NULL;
+  length_distribution = NULL;
 
   vertex_identifier = NULL;
 
   index_parameter_type = IMPLICIT_TYPE;
-  hindex_parameter = NULL;
+  index_parameter_distribution = NULL;
   index_interval = NULL;
   index_parameter = NULL;
 
@@ -224,7 +224,7 @@ void Sequences::init(int inb_sequence , int *iidentifier , int *ilength ,
   }
 
   index_parameter_type = iindex_parameter_type;
-  hindex_parameter = NULL;
+  index_parameter_distribution = NULL;
   index_interval = NULL;
 
   if (index_parameter_type != IMPLICIT_TYPE) {
@@ -335,7 +335,7 @@ void Sequences::init(int inb_sequence , int *iidentifier , int *ilength ,
   vertex_identifier = NULL;
 
   index_parameter_type = IMPLICIT_TYPE;
-  hindex_parameter = NULL;
+  index_parameter_distribution = NULL;
   index_interval = NULL;
   index_parameter = NULL;
 
@@ -578,15 +578,15 @@ Sequences::Sequences(int inb_sequence , int *iidentifier , int *ilength ,
  *
  *--------------------------------------------------------------*/
 
-Sequences::Sequences(const FrequencyDistribution &ihlength , int inb_variable ,
-                     int *itype , bool init_flag)
+Sequences::Sequences(const FrequencyDistribution &ilength_distribution ,
+                     int inb_variable , int *itype , bool init_flag)
 
 {
   register int i , j , k;
   int *plength;
 
 
-  nb_sequence = ihlength.nb_element;
+  nb_sequence = ilength_distribution.nb_element;
 
   identifier = new int[nb_sequence];
   for (i = 0;i < nb_sequence;i++) {
@@ -595,20 +595,20 @@ Sequences::Sequences(const FrequencyDistribution &ihlength , int inb_variable ,
 
   length = new int[nb_sequence];
   plength = length;
-  for (i = ihlength.offset;i < ihlength.nb_value;i++) {
-    for (j = 0;j < ihlength.frequency[i];j++) {
+  for (i = ilength_distribution.offset;i < ilength_distribution.nb_value;i++) {
+    for (j = 0;j < ilength_distribution.frequency[i];j++) {
       *plength++ = i;
     }
   }
 
-  max_length = ihlength.nb_value - 1;
+  max_length = ilength_distribution.nb_value - 1;
   cumul_length_computation();
-  hlength = new FrequencyDistribution(ihlength);
+  length_distribution = new FrequencyDistribution(ilength_distribution);
 
   vertex_identifier = NULL;
 
   index_parameter_type = IMPLICIT_TYPE;
-  hindex_parameter = NULL;
+  index_parameter_distribution = NULL;
   index_interval = NULL;
   index_parameter = NULL;
 
@@ -705,7 +705,7 @@ Sequences::Sequences(const RenewalData &timev)
   vertex_identifier = NULL;
 
   index_parameter_type = IMPLICIT_TYPE;
-  hindex_parameter = NULL;
+  index_parameter_distribution = NULL;
   index_interval = NULL;
   index_parameter = NULL;
 
@@ -771,7 +771,7 @@ Sequences::Sequences(const Sequences &seq , int variable , int itype)
     length[i] = seq.length[i];
   }
 
-  hlength = new FrequencyDistribution(*(seq.hlength));
+  length_distribution = new FrequencyDistribution(*(seq.length_distribution));
 
   if (seq.vertex_identifier) {
     vertex_identifier = new int*[nb_sequence];
@@ -789,11 +789,11 @@ Sequences::Sequences(const Sequences &seq , int variable , int itype)
 
   index_parameter_type = seq.index_parameter_type;
 
-  if (seq.hindex_parameter) {
-    hindex_parameter = new FrequencyDistribution(*(seq.hindex_parameter));
+  if (seq.index_parameter_distribution) {
+    index_parameter_distribution = new FrequencyDistribution(*(seq.index_parameter_distribution));
   }
   else {
-    hindex_parameter = NULL;
+    index_parameter_distribution = NULL;
   }
 
   if (seq.index_interval) {
@@ -953,7 +953,7 @@ Sequences::Sequences(const Sequences &seq , int inb_sequence , int *index)
   }
 
   else {
-    hindex_parameter = NULL;
+    index_parameter_distribution = NULL;
     index_interval = NULL;
     index_parameter = NULL;
   }
@@ -1003,7 +1003,12 @@ Sequences::Sequences(const Sequences &seq , int inb_sequence , int *index)
     max_value_computation(i);
 
     if (type[i] != AUXILIARY) {
-      build_marginal_frequency_distribution(i);
+      if (type[i] != REAL_VALUE) {
+        build_marginal_frequency_distribution(i);
+      }
+      else {
+        build_marginal_histogram(i , seq.marginal_histogram[i]->step);
+      }
     }
   }
 }
@@ -1039,7 +1044,7 @@ Sequences::Sequences(const Sequences &seq , bool *auxiliary)
     length[i] = seq.length[i];
   }
 
-  hlength = new FrequencyDistribution(*(seq.hlength));
+  length_distribution = new FrequencyDistribution(*(seq.length_distribution));
 
   if (seq.vertex_identifier) {
     vertex_identifier = new int*[nb_sequence];
@@ -1057,11 +1062,11 @@ Sequences::Sequences(const Sequences &seq , bool *auxiliary)
 
   index_parameter_type = seq.index_parameter_type;
 
-  if (seq.hindex_parameter) {
-    hindex_parameter = new FrequencyDistribution(*(seq.hindex_parameter));
+  if (seq.index_parameter_distribution) {
+    index_parameter_distribution = new FrequencyDistribution(*(seq.index_parameter_distribution));
   }
   else {
-    hindex_parameter = NULL;
+    index_parameter_distribution = NULL;
   }
 
   if (seq.index_interval) {
@@ -1171,11 +1176,142 @@ Sequences::Sequences(const Sequences &seq , bool *auxiliary)
  *
  *  Copie d'un objet Sequences.
  *
- *  arguments : reference sur un objet Sequences, flag inversion.
+ *  argument : reference sur un objet Sequences.
  *
  *--------------------------------------------------------------*/
 
-void Sequences::copy(const Sequences &seq , bool reverse_flag)
+void Sequences::copy(const Sequences &seq)
+
+{
+  register int i , j , k;
+
+
+  nb_sequence = seq.nb_sequence;
+
+  identifier = new int[nb_sequence];
+  for (i = 0;i < nb_sequence;i++) {
+    identifier[i] = seq.identifier[i];
+  }
+
+  max_length = seq.max_length;
+  cumul_length = seq.cumul_length;
+
+  length = new int[nb_sequence];
+  for (i = 0;i < nb_sequence;i++) {
+    length[i] = seq.length[i];
+  }
+
+  length_distribution = new FrequencyDistribution(*(seq.length_distribution));
+
+  if (seq.vertex_identifier) {
+    vertex_identifier = new int*[nb_sequence];
+    for (i = 0;i < nb_sequence;i++) {
+      vertex_identifier[i] = new int[length[i]];
+      for (j = 0;j < length[i];j++) {
+        vertex_identifier[i][j] = seq.vertex_identifier[i][j];
+      }
+    }
+  }
+
+  else {
+    vertex_identifier = NULL;
+  }
+
+  index_parameter_type = seq.index_parameter_type;
+
+  if (seq.index_parameter_distribution) {
+    index_parameter_distribution = new FrequencyDistribution(*(seq.index_parameter_distribution));
+  }
+  else {
+    index_parameter_distribution = NULL;
+  }
+
+  if (seq.index_interval) {
+    index_interval = new FrequencyDistribution(*(seq.index_interval));
+  }
+  else {
+    index_interval = NULL;
+  }
+
+  if (seq.index_parameter) {
+    index_parameter = new int*[nb_sequence];
+    for (i = 0;i < nb_sequence;i++) {
+      index_parameter[i] = new int[length[i]];
+      for (j = 0;j < length[i];j++) {
+        index_parameter[i][j] = seq.index_parameter[i][j];
+      }
+    }
+  }
+
+  else {
+    index_parameter = NULL;
+  }
+
+  nb_variable = seq.nb_variable;
+
+  type = new int[nb_variable];
+  min_value = new double[nb_variable];
+  max_value = new double[nb_variable];
+  marginal_distribution = new FrequencyDistribution*[nb_variable];
+  marginal_histogram = new Histogram*[nb_variable];
+
+  for (i = 0;i < nb_variable;i++) {
+    type[i] = seq.type[i];
+    min_value[i] = seq.min_value[i];
+    max_value[i] = seq.max_value[i];
+
+    if (seq.marginal_distribution[i]) {
+      marginal_distribution[i] = new FrequencyDistribution(*(seq.marginal_distribution[i]));
+    }
+    else {
+      marginal_distribution[i] = NULL;
+    }
+
+    if (seq.marginal_histogram[i]) {
+      marginal_histogram[i] = new Histogram(*(seq.marginal_histogram[i]));
+    }
+    else {
+      marginal_histogram[i] = NULL;
+    }
+  }
+
+  int_sequence = new int**[nb_sequence];
+  real_sequence = new double**[nb_sequence];
+  for (i = 0;i < nb_sequence;i++) {
+    int_sequence[i] = new int*[nb_variable];
+    real_sequence[i] = new double*[nb_variable];
+    for (j = 0;j < nb_variable;j++) {
+      if ((type[j] != REAL_VALUE) && (type[j] != AUXILIARY)) {
+        int_sequence[i][j] = new int[length[i]];
+        real_sequence[i][j] = NULL;
+
+        for (k = 0;k < length[i];k++) {
+          int_sequence[i][j][k] = seq.int_sequence[i][j][k];
+        }
+      }
+
+      else {
+        int_sequence[i][j] = NULL;
+        real_sequence[i][j] = new double[length[i]];
+
+        for (k = 0;k < length[i];k++) {
+          real_sequence[i][j][k] = seq.real_sequence[i][j][k];
+        }
+      }
+    }
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Copie d'un objet Sequences avec inversion du sens de parcours des sequences.
+ *
+ *  arguments : reference sur un objet Sequences.
+ *
+ *--------------------------------------------------------------*/
+
+void Sequences::reverse(const Sequences &seq)
 
 {
   register int i , j , k;
@@ -1199,7 +1335,7 @@ void Sequences::copy(const Sequences &seq , bool reverse_flag)
     length[i] = seq.length[i];
   }
 
-  hlength = new FrequencyDistribution(*(seq.hlength));
+  length_distribution = new FrequencyDistribution(*(seq.length_distribution));
 
   if (seq.vertex_identifier) {
     vertex_identifier = new int*[nb_sequence];
@@ -1207,24 +1343,9 @@ void Sequences::copy(const Sequences &seq , bool reverse_flag)
       vertex_identifier[i] = new int[length[i]];
 
       pidentifier = vertex_identifier[i];
-
-      switch (reverse_flag) {
-
-      case false : {
-        cidentifier = seq.vertex_identifier[i];
-        for (j = 0;j < length[i];j++) {
-          *pidentifier++ = *cidentifier++;
-        }
-        break;
-      }
-
-      case true : {
-        cidentifier = seq.vertex_identifier[i] + length[i] - 1;
-        for (j = 0;j < length[i];j++) {
-          *pidentifier++ = *cidentifier--;
-        }
-        break;
-      }
+      cidentifier = seq.vertex_identifier[i] + length[i] - 1;
+      for (j = 0;j < length[i];j++) {
+        *pidentifier++ = *cidentifier--;
       }
     }
   }
@@ -1235,11 +1356,11 @@ void Sequences::copy(const Sequences &seq , bool reverse_flag)
 
   index_parameter_type = seq.index_parameter_type;
 
-  if (seq.hindex_parameter) {
-    hindex_parameter = new FrequencyDistribution(*(seq.hindex_parameter));
+  if (seq.index_parameter_distribution) {
+    index_parameter_distribution = new FrequencyDistribution(*(seq.index_parameter_distribution));
   }
   else {
-    hindex_parameter = NULL;
+    index_parameter_distribution = NULL;
   }
 
   if (seq.index_interval) {
@@ -1256,34 +1377,20 @@ void Sequences::copy(const Sequences &seq , bool reverse_flag)
       index_parameter[i] = new int[blength];
       pindex_param = index_parameter[i];
 
-      switch (reverse_flag) {
-
-      case false : {
-        cindex_param = seq.index_parameter[i];
-        for (j = 0;j < blength;j++) {
-          *pindex_param++ = *cindex_param++;
+      if (index_parameter_type == POSITION) {
+        cindex_param = seq.index_parameter[i] + length[i];
+        end_position = *cindex_param--;
+        for (j = 0;j < length[i];j++) {
+          *pindex_param++ = end_position - *cindex_param--;
         }
-        break;
+        *pindex_param = end_position;
       }
 
-      case true : {
-        if (index_parameter_type == POSITION) {
-          cindex_param = seq.index_parameter[i] + length[i];
-          end_position = *cindex_param--;
-          for (j = 0;j < length[i];j++) {
-            *pindex_param++ = end_position - *cindex_param--;
-          }
-          *pindex_param = end_position;
+      else {
+        cindex_param = seq.index_parameter[i] + length[i] - 1;
+        for (j = 0;j < length[i];j++) {
+          *pindex_param++ = *cindex_param--;
         }
-
-        else {
-          cindex_param = seq.index_parameter[i] + length[i] - 1;
-          for (j = 0;j < length[i];j++) {
-            *pindex_param++ = *cindex_param--;
-          }
-        }
-        break;
-      }
       }
     }
   }
@@ -1331,24 +1438,9 @@ void Sequences::copy(const Sequences &seq , bool reverse_flag)
         real_sequence[i][j] = NULL;
 
         pisequence = int_sequence[i][j];
-
-        switch (reverse_flag) {
-
-        case false : {
-          cisequence = seq.int_sequence[i][j];
-          for (k = 0;k < length[i];k++) {
-            *pisequence++ = *cisequence++;
-          }
-          break;
-        }
-
-        case true : {
-          cisequence = seq.int_sequence[i][j] + length[i] - 1;
-          for (k = 0;k < length[i];k++) {
-            *pisequence++ = *cisequence--;
-          }
-          break;
-        }
+        cisequence = seq.int_sequence[i][j] + length[i] - 1;
+        for (k = 0;k < length[i];k++) {
+          *pisequence++ = *cisequence--;
         }
       }
 
@@ -1357,24 +1449,9 @@ void Sequences::copy(const Sequences &seq , bool reverse_flag)
         real_sequence[i][j] = new double[length[i]];
 
         prsequence = real_sequence[i][j];
-
-        switch (reverse_flag) {
-
-        case false : {
-          crsequence = seq.real_sequence[i][j];
-          for (k = 0;k < length[i];k++) {
-            *prsequence++ = *crsequence++;
-          }
-          break;
-        }
-
-        case true : {
-          crsequence = seq.real_sequence[i][j] + length[i] - 1;
-          for (k = 0;k < length[i];k++) {
-            *prsequence++ = *crsequence--;
-          }
-          break;
-        }
+        crsequence = seq.real_sequence[i][j] + length[i] - 1;
+        for (k = 0;k < length[i];k++) {
+          *prsequence++ = *crsequence--;
         }
       }
     }
@@ -1411,7 +1488,7 @@ void Sequences::add_state_variable(const Sequences &seq)
     length[i] = seq.length[i];
   }
 
-  hlength = new FrequencyDistribution(*(seq.hlength));
+  length_distribution = new FrequencyDistribution(*(seq.length_distribution));
 
   if (seq.vertex_identifier) {
     vertex_identifier = new int*[nb_sequence];
@@ -1429,11 +1506,11 @@ void Sequences::add_state_variable(const Sequences &seq)
 
   index_parameter_type = seq.index_parameter_type;
 
-  if (seq.hindex_parameter) {
-    hindex_parameter = new FrequencyDistribution(*(seq.hindex_parameter));
+  if (seq.index_parameter_distribution) {
+    index_parameter_distribution = new FrequencyDistribution(*(seq.index_parameter_distribution));
   }
   else {
-    hindex_parameter = NULL;
+    index_parameter_distribution = NULL;
   }
 
   if (seq.index_interval) {
@@ -1556,7 +1633,7 @@ void Sequences::remove_index_parameter(const Sequences &seq)
     length[i] = seq.length[i];
   }
 
-  hlength = new FrequencyDistribution(*(seq.hlength));
+  length_distribution = new FrequencyDistribution(*(seq.length_distribution));
 
   if (seq.vertex_identifier) {
     vertex_identifier = new int*[nb_sequence];
@@ -1573,7 +1650,7 @@ void Sequences::remove_index_parameter(const Sequences &seq)
   }
 
   index_parameter_type = IMPLICIT_TYPE;
-  hindex_parameter = NULL;
+  index_parameter_distribution = NULL;
   index_interval = NULL;
   index_parameter = NULL;
 
@@ -1635,11 +1712,43 @@ void Sequences::remove_index_parameter(const Sequences &seq)
 
 /*--------------------------------------------------------------*
  *
+ *  Copie d'un objet Sequences avec transformation du parametre d'index implicite
+ *  en parametre d'index explicite.
+ *
+ *  argument : reference sur un objet Sequences.
+ *
+ *--------------------------------------------------------------*/
+
+void Sequences::explicit_index_parameter(const Sequences &seq)
+
+{
+  register int i , j;
+
+
+  Sequences::copy(seq);
+
+  index_parameter_type = TIME;
+
+  index_parameter = new int*[nb_sequence];
+  for (i = 0;i < nb_sequence;i++) {
+    index_parameter[i] = new int[length[i]];
+    for (j = 0;j < length[i];j++) {
+      index_parameter[i][j] = j;
+    }
+  }
+
+  build_index_parameter_frequency_distribution();
+  index_interval_computation();
+}
+
+
+/*--------------------------------------------------------------*
+ *
  *  Constructeur par copie de la classe Sequences.
  *
- *  arguments : reference sur un objet Sequences, type de transformation ('c' : copie,
- *              'a' : addition d'une variable, 'r' : suppression du parametre d'index),
- *              inversion.
+ *  arguments : reference sur un objet Sequences, type de transformation
+ *             ('r' : inversion du sens de parcours, 'a' : addition d'une variable,
+ *              'm' : suppression du parametre d'index, 'e' : parametre d'index rendu explicite).
  *
  *--------------------------------------------------------------*/
 
@@ -1647,14 +1756,17 @@ Sequences::Sequences(const Sequences &seq , char transform , int param)
 
 {
   switch (transform) {
-  case 'c' :
-    Sequences::copy(seq , (param == REVERSE ? true : false));
+  case 'r' :
+    Sequences::reverse(seq);
     break;
   case 'a' :
     Sequences::add_state_variable(seq);
     break;
-  case 'r' :
+  case 'm' :
     Sequences::remove_index_parameter(seq);
+    break;
+  case 'e' :
+    Sequences::explicit_index_parameter(seq);
     break;
   default :
     Sequences::copy(seq);
@@ -1678,7 +1790,7 @@ void Sequences::remove()
   delete [] identifier;
 
   delete [] length;
-  delete hlength;
+  delete length_distribution;
 
   if (vertex_identifier) {
     for (i = 0;i < nb_sequence;i++) {
@@ -1687,7 +1799,7 @@ void Sequences::remove()
     delete [] vertex_identifier;
   }
 
-  delete hindex_parameter;
+  delete index_parameter_distribution;
   delete index_interval;
 
   if (index_parameter) {
@@ -1896,8 +2008,8 @@ Vectors* Sequences::build_vectors(bool index_variable) const
 
   if (index_variable) {
     if (index_parameter) {
-      vec->min_value[0] = hindex_parameter->offset;
-      vec->max_value[0] = hindex_parameter->nb_value - 1;
+      vec->min_value[0] = index_parameter_distribution->offset;
+      vec->max_value[0] = index_parameter_distribution->nb_value - 1;
     }
     else {
       vec->min_value[0] = 0;
@@ -2391,18 +2503,41 @@ bool Sequences::increasing_sequence_checking(StatError &error , int variable , b
   register int i , j;
 
 
-  for (i = 0;i < nb_sequence;i++) {
-    for (j = 1;j < length[i];j++) {
-      if (((!strict) && (int_sequence[i][variable][j] < int_sequence[i][variable][j - 1])) ||
-          ((strict) && (int_sequence[i][variable][j] <= int_sequence[i][variable][j - 1]))) {
-        status = false;
-        ostringstream error_message;
-        error_message << pattern_label << " " << i + 1 << ": " << STAT_label[STATL_VARIABLE] << " "
-                      << variable + 1 << ": " << variable_label << " "
-                      << int_sequence[i][variable][j] << " " << STAT_error[STATR_NOT_ALLOWED];
-        error.update((error_message.str()).c_str());
+  switch (type[variable]) {
+
+  case INT_VALUE : {
+    for (i = 0;i < nb_sequence;i++) {
+      for (j = 1;j < length[i];j++) {
+        if (((!strict) && (int_sequence[i][variable][j] < int_sequence[i][variable][j - 1])) ||
+            ((strict) && (int_sequence[i][variable][j] <= int_sequence[i][variable][j - 1]))) {
+          status = false;
+          ostringstream error_message;
+          error_message << pattern_label << " " << i + 1 << ": " << STAT_label[STATL_VARIABLE] << " "
+                        << variable + 1 << ": " << variable_label << " "
+                        << int_sequence[i][variable][j] << " " << STAT_error[STATR_NOT_ALLOWED];
+          error.update((error_message.str()).c_str());
+        }
       }
     }
+    break;
+  }
+
+  case REAL_VALUE : {
+    for (i = 0;i < nb_sequence;i++) {
+      for (j = 1;j < length[i];j++) {
+        if (((!strict) && (real_sequence[i][variable][j] < real_sequence[i][variable][j - 1])) ||
+            ((strict) && (real_sequence[i][variable][j] <= real_sequence[i][variable][j - 1]))) {
+          status = false;
+          ostringstream error_message;
+          error_message << pattern_label << " " << i + 1 << ": " << STAT_label[STATL_VARIABLE] << " "
+                        << variable + 1 << ": " << variable_label << " "
+                        << real_sequence[i][variable][j] << " " << STAT_error[STATR_NOT_ALLOWED];
+          error.update((error_message.str()).c_str());
+        }
+      }
+    }
+    break;
+  }
   }
 
   return status;
