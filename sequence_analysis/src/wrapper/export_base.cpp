@@ -111,7 +111,7 @@ void class_constant_sequence()
 
 
   enum_<sequence_analysis::wrap_util::UniqueInt<6, 104> > ("ChangeType")
-    .value("MULTINOMIAL_CHANGE", MULTINOMIAL_CHANGE)
+    .value("CATEGORICAL_CHANGE", CATEGORICAL_CHANGE)
     .value("POISSON_CHANGE", POISSON_CHANGE)
     .value("ORDINAL_GAUSSIAN_CHANGE", ORDINAL_GAUSSIAN_CHANGE)
     .value("GAUSSIAN_CHANGE", GAUSSIAN_CHANGE)
