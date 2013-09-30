@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
@@ -71,22 +71,8 @@ const int PLOT_MIN_FREQUENCY = 10;     // effectif minimum pour afficher les poi
 
 class Curves {          // famille de courbes avec effectif
 
-/*    friend class Distribution;
-    friend class FrequencyDistribution;
-    friend class Function;
-    friend class Renewal;
-    friend class Renewal_data;
-    friend class Nonparametric_sequence_process;
-    friend class Markov;
-    friend class Variable_order_markov;
-    friend class Semi_markov;
-    friend class Sequences;
-    friend class Sequence_characteristics;
-    friend class Markovian_sequences; */
-
     friend std::ostream& operator<<(std::ostream& , const Curves&);
 
-// protected :
 public :
 
     int nb_curve;           // nombre de courbes
@@ -99,6 +85,14 @@ public :
     void smooth(const Curves &curves , int max_frequency);
     void remove();
 
+    Curves();
+    Curves(int inb_curve , int ilength , bool frequency_flag = false , bool init_flag = true);
+    Curves(const Curves &curves , char transform = 'c' , int max_frequency = MAX_FREQUENCY);
+    Curves(const Distribution &dist);
+    Curves(const FrequencyDistribution &histo);
+    ~Curves();
+    Curves& operator=(const Curves &curves);
+
     std::ostream& ascii_print(std::ostream &os , bool file_flag = false ,
                               const Curves *curves = NULL) const;
     std::ostream& spreadsheet_print(std::ostream &os , const Curves *curves = NULL) const;
@@ -110,30 +104,10 @@ public :
     void plotable_write(MultiPlot &plot) const;
     void plotable_frequency_write(SinglePlot &plot) const;
 
-    double mean_computation(int index) const;
-    double total_square_sum_computation(int index , double mean) const;
-
-// public :
-
-    Curves();
-    Curves(int inb_curve , int ilength , bool frequency_flag = false , bool init_flag = true);
-    Curves(const Curves &curves , char transform = 'c' , int max_frequency = MAX_FREQUENCY);
-    Curves(const Distribution &dist);
-    Curves(const FrequencyDistribution &histo);
-    ~Curves();
-    Curves& operator=(const Curves &curves);
-
     int max_frequency_computation() const;
     int nb_element_computation() const;
-
-    // acces membres de la classe
-
-/*    int get_nb_curve() const { return nb_curve; }
-    int get_length() const { return length; }
-    int get_offset() const { return offset; }
-    int get_frequency(int ilength) const { return frequency[ilength]; }
-    double get_point(int index_curve , int ilength) const
-    { return point[index_curve][ilength]; } */
+    double mean_computation(int index) const;
+    double total_square_sum_computation(int index , double mean) const;
 };
 
 
