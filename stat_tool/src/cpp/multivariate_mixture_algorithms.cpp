@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): J.-B. Durand (jean-baptiste.durand@imag.fr) and
  *                       Y. Guedon (yann.guedon@cirad.fr)
@@ -49,7 +49,7 @@
 #include "stat_label.h"
 #include "vectors.h"
 #include "markovian.h"
-#include "stat_tool/distribution_reestimation.h"
+#include "stat_tool/distribution_reestimation.hpp"
 
 using namespace std;
 
@@ -139,15 +139,15 @@ void MultivariateMixture::get_output_conditional_distribution(const Vectors &mix
 	}
 	else {
 	  if (log_computation) {
-	    if (npcomponent[var]->get_observation(i)->mass[mixt_data.int_vector[n][var]] > 0)
-	      output_cond[n][i] += log(npcomponent[var]->get_observation(i)->mass[mixt_data.int_vector[n][var]]);
+	    if (npcomponent[var]->observation[i]->mass[mixt_data.int_vector[n][var]] > 0)
+	      output_cond[n][i] += log(npcomponent[var]->observation[i]->mass[mixt_data.int_vector[n][var]]);
 	    else {
 	      output_cond[n][i] = D_INF;
 	      break;
 	    }
 	  }
 	  else
-	    output_cond[n][i]*= npcomponent[var]->get_observation(i)->mass[mixt_data.int_vector[n][var]];
+	    output_cond[n][i]*= npcomponent[var]->observation[i]->mass[mixt_data.int_vector[n][var]];
 	}
       }
     }
@@ -335,7 +335,7 @@ void MultivariateMixture::init() {
     pcomponent = new DiscreteParametricProcess*[nb_var];
 
   if (npcomponent == NULL)
-    npcomponent = new NonparametricProcess*[nb_var];
+    npcomponent = new CategoricalProcess*[nb_var];
 
 
   for(j = 0; j < nb_component; j++)
@@ -412,7 +412,7 @@ MultivariateMixture* Vectors::mixture_estimation(StatError &error, ostream& os,
     else {
       for(var = 0; var < nb_variable; var++) {
     if (((imixture.npcomponent[var] != NULL) &&
-         (imixture.npcomponent[var]->get_nb_value() != (int)get_max_value(var)+1)) ||
+         (imixture.npcomponent[var]->nb_value != (int)get_max_value(var)+1)) ||
         ((imixture.pcomponent[var] != NULL) &&
          (imixture.pcomponent[var]->nb_value < (int)get_max_value(var)+1))) {
       status = false;
@@ -644,7 +644,7 @@ MultivariateMixture* Vectors::mixture_estimation(StatError &error, ostream& os,
     if (mixt->npcomponent[var] != NULL)
       for(j = 0; j < mixt->nb_component; j++)
         reestimation((int)get_max_value(var)+1, observation_reestim[var][j]->frequency,
-             mixt->npcomponent[var]->get_observation(j)->mass,
+             mixt->npcomponent[var]->observation[j]->mass,
              MIN_PROBABILITY, false);
 
     else { // (mixt->pcomponent[var] != NULL)
@@ -730,7 +730,7 @@ MultivariateMixture* Vectors::mixture_estimation(StatError &error, ostream& os,
     if (mixt->npcomponent[var] != NULL)
       for(j = 0; j < mixt->nb_component; j++)
         reestimation((int)get_max_value(var)+1, observation_reestim[var][j]->frequency,
-             mixt->npcomponent[var]->get_observation(j)->mass,
+             mixt->npcomponent[var]->observation[j]->mass,
              MIN_PROBABILITY, false);
 
     else { // (mixt->pcomponent[var] != NULL)
@@ -924,8 +924,8 @@ MultivariateMixture* Vectors::mixture_estimation(StatError &error, ostream& os,
     for(var = 0; var < mixt->nb_var; var++)
       if (mixt->npcomponent[var] != NULL)
     for(j = 0; j < mixt->nb_component; j++) {
-      mixt->npcomponent[var]->get_observation(j)->cumul_computation();
-      mixt->npcomponent[var]->get_observation(j)->max_computation();
+      mixt->npcomponent[var]->observation[j]->cumul_computation();
+      mixt->npcomponent[var]->observation[j]->max_computation();
     }
   }
 
@@ -1046,7 +1046,7 @@ MultivariateMixtureData* MultivariateMixture::simulation(StatError &error ,
     if (pcomponent[var] != NULL)
       value = pcomponent[var]->observation[k]->simulation();
     else
-      value = npcomponent[var]->get_observation(k)->simulation();
+      value = npcomponent[var]->observation[k]->simulation();
     (hcomponent[var][k]->frequency[value])++;
     iint_vector[n][var] = value;
       }
