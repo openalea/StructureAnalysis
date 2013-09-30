@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
@@ -68,22 +68,20 @@ const int REGRESSION_NB_ITER = 1000;   // nombre d'iterations pour la regression
 
 class Function : public RegressionKernel {  // fonction d'evolution des probabilites
                                             // de rester dans un etat
-
-    friend class SelfTransition;
-    friend class NonhomogeneousMarkov;
-    friend class MarkovianSequences;
-    friend class NonhomogeneousMarkovData;
-
-    friend Function* function_parsing(StatError &error , std::ifstream &in_file , int &line ,
-                                      int length , double min, double max);
-
-private :
+public :
 
     double *residual;       // residus
     int *frequency;         // effectifs correspondant a chaque index
 
     void copy(const Function&);
     void remove();
+
+    Function();
+    Function(int iident , int length , double *iparameter);
+    Function(int iident , int length);
+    Function(const Function &function);
+    ~Function();
+    Function& operator=(const Function &function);
 
     std::ostream& ascii_print(std::ostream &os , bool exhaustive , bool file_flag ,
                               const Curves *curves = NULL) const;
@@ -95,20 +93,6 @@ private :
     double residual_mean_computation() const;
     double residual_variance_computation(double residual_mean) const;
     double residual_square_sum_computation() const;
-
-public :
-
-    Function();
-    Function(int iident , int length , double *iparameter);
-    Function(int iident , int length);
-    Function(const Function &function);
-    ~Function();
-    Function& operator=(const Function &function);
-
-    // acces membres de la classe
-
-    double get_residual(int index) const { return residual[index]; }
-    int get_frequency(int index) const { return frequency[index]; }
 };
 
 
@@ -117,7 +101,6 @@ Function* function_parsing(StatError &error , std::ifstream &in_file , int &line
 
 
 
-// class NonhomogeneousMarkov : public StatInterface , public Chain {
 class NonhomogeneousMarkov : public StatInterface , protected Chain {  // chaine de Markov non-homogene
 
     friend class MarkovianSequences;
@@ -134,7 +117,7 @@ protected :
     bool *homogeneity;      // homogeneite des etats
     Function **self_transition;  // fonction d'evolution des probabilites
                                  // de rester dans un etat
-    NonparametricSequenceProcess *process;
+    CategoricalSequenceProcess *process;
 
     void copy(const NonhomogeneousMarkov &markov , bool data_flag = true ,
               bool characteristic_flag = true);
@@ -199,7 +182,7 @@ public :
     NonhomogeneousMarkovData* get_markov_data() const { return markov_data; }
     bool get_homogeneity(int state) const { return homogeneity[state]; }
     Function* get_self_transition(int state) const { return self_transition[state]; }
-    NonparametricSequenceProcess* get_process() const { return process; }
+    CategoricalSequenceProcess* get_process() const { return process; }
 };
 
 
@@ -238,6 +221,7 @@ public :
 
     DiscreteDistributionData* extract(StatError &error , int type , int state) const;
     NonhomogeneousMarkovData* remove_index_parameter(StatError &error) const;
+    NonhomogeneousMarkovData* explicit_index_parameter(StatError &error) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
     bool ascii_write(StatError &error , const char *path ,
