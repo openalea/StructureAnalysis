@@ -272,7 +272,7 @@ void class_renewal_data() {
     .def(init <int, int>())
     .def(init <int, Renewal>())
     .def(init <TimeEvents, int>())
-    .def(init <RenewalData, optional<bool> >())
+    .def(init <RenewalData, boost::python::optional<bool> >())
 
     // Python Operators
     .def("get_renewal", &RenewalData::get_renewal, return_value_policy<manage_new_object> (),"get renewal")
