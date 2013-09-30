@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
@@ -573,7 +573,7 @@ void NonhomogeneousMarkov::characteristic_computation(int length , bool counting
             process->sojourn_time[i]->init(NEGATIVE_BINOMIAL , 1 , I_DEFAULT , 1. ,
                                            1. - transition[i][i]);
             process->sojourn_time[i]->computation(1 , OCCUPANCY_THRESHOLD);
-            process->sojourn_time[i]->ident = NONPARAMETRIC;
+            process->sojourn_time[i]->ident = CATEGORICAL;
           }
 
           else {
@@ -609,7 +609,7 @@ void NonhomogeneousMarkov::characteristic_computation(const NonhomogeneousMarkov
 {
   if (nb_component > 0) {
     register int i;
-    Distribution dlength(*(seq.hlength));
+    Distribution dlength(*(seq.length_distribution));
 
 
     // calcul des lois caracteristiques au niveau etat
@@ -630,7 +630,7 @@ void NonhomogeneousMarkov::characteristic_computation(const NonhomogeneousMarkov
                                            1. - transition[i][i]);
             process->sojourn_time[i]->computation(seq.characteristics[0]->sojourn_time[i]->nb_value ,
                                                   OCCUPANCY_THRESHOLD);
-            process->sojourn_time[i]->ident = NONPARAMETRIC;
+            process->sojourn_time[i]->ident = CATEGORICAL;
           }
 
           else {
@@ -1334,7 +1334,7 @@ NonhomogeneousMarkov* MarkovianSequences::nonhomogeneous_markov_estimation(StatE
  *--------------------------------------------------------------*/
 
 NonhomogeneousMarkovData* NonhomogeneousMarkov::simulation(StatError &error ,
-                                                           const FrequencyDistribution &hlength ,
+                                                           const FrequencyDistribution &length_distribution ,
                                                            bool counting_flag) const
 
 {
@@ -1349,23 +1349,23 @@ NonhomogeneousMarkovData* NonhomogeneousMarkov::simulation(StatError &error ,
   seq = NULL;
   error.init();
 
-  if ((hlength.nb_element < 1) || (hlength.nb_element > NB_SEQUENCE)) {
+  if ((length_distribution.nb_element < 1) || (length_distribution.nb_element > NB_SEQUENCE)) {
     status = false;
     error.update(SEQ_error[SEQR_NB_SEQUENCE]);
   }
-  if (hlength.offset < 2) {
+  if (length_distribution.offset < 2) {
     status = false;
     error.update(SEQ_error[SEQR_SHORT_SEQUENCE_LENGTH]);
   }
-  if (hlength.nb_value - 1 > MAX_LENGTH) {
+  if (length_distribution.nb_value - 1 > MAX_LENGTH) {
     status = false;
     error.update(SEQ_error[SEQR_LONG_SEQUENCE_LENGTH]);
   }
 
   if (status) {
     cumul_length = 0;
-    for (i = hlength.offset;i < hlength.nb_value;i++) {
-      cumul_length += i * hlength.frequency[i];
+    for (i = length_distribution.offset;i < length_distribution.nb_value;i++) {
+      cumul_length += i * length_distribution.frequency[i];
     }
 
     if (cumul_length > CUMUL_LENGTH) {
@@ -1378,7 +1378,7 @@ NonhomogeneousMarkovData* NonhomogeneousMarkov::simulation(StatError &error ,
 
     // initialisations
 
-    seq = new NonhomogeneousMarkovData(hlength);
+    seq = new NonhomogeneousMarkovData(length_distribution);
     seq->type[0] = STATE;
 
     seq->markov = new NonhomogeneousMarkov(*this , false);
@@ -1499,16 +1499,16 @@ NonhomogeneousMarkovData* NonhomogeneousMarkov::simulation(StatError &error , in
   }
 
   if (status) {
-    FrequencyDistribution hlength(length + 1);
+    FrequencyDistribution length_distribution(length + 1);
 
-    hlength.nb_element = nb_sequence;
-    hlength.offset = length;
-    hlength.max = nb_sequence;
-    hlength.mean = length;
-    hlength.variance = 0.;
-    hlength.frequency[length] = nb_sequence;
+    length_distribution.nb_element = nb_sequence;
+    length_distribution.offset = length;
+    length_distribution.max = nb_sequence;
+    length_distribution.mean = length;
+    length_distribution.variance = 0.;
+    length_distribution.frequency[length] = nb_sequence;
 
-    seq = simulation(error , hlength , counting_flag);
+    seq = simulation(error , length_distribution , counting_flag);
   }
 
   return seq;
@@ -1530,7 +1530,7 @@ NonhomogeneousMarkovData* NonhomogeneousMarkov::simulation(StatError &error , in
                                                            bool counting_flag) const
 
 {
-  FrequencyDistribution *hlength;
+  FrequencyDistribution *length_distribution;
   NonhomogeneousMarkovData *seq;
 
 
@@ -1542,10 +1542,10 @@ NonhomogeneousMarkovData* NonhomogeneousMarkov::simulation(StatError &error , in
   }
 
   else {
-    hlength = iseq.hlength->frequency_scale(nb_sequence);
+    length_distribution = iseq.length_distribution->frequency_scale(nb_sequence);
 
-    seq = simulation(error , *hlength , counting_flag);
-    delete hlength;
+    seq = simulation(error , *length_distribution , counting_flag);
+    delete length_distribution;
   }
 
   return seq;
