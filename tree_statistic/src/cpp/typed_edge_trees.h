@@ -573,7 +573,7 @@ class TreeCharacteristics
    friend class Observed_int_trees;
    friend class HiddenMarkovTree;
    friend class HiddenMarkovTreeData;
-   friend class NonparametricTreeProcess;
+   friend class CategoricalTreeProcess;
    friend class MarkovOutTree;
    friend class MarkovOutTreeData;
 
