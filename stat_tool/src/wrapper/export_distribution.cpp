@@ -111,10 +111,10 @@ void class_distribution()
 #define WRAP DistributionWrap
   // Distribution base class
   class_< Distribution>("_Distribution")
-    .def(init< optional< int > > ())
+    .def(init< boost::python::optional< int > > ())
     .def(init<const FrequencyDistribution&>())
     .def(init<const Distribution&, double>())
-    .def(init<const Distribution&, optional< char, int > >())
+    .def(init<const Distribution&, boost::python::optional< char, int > >())
 
     .def(self_ns::str(self)) // __str__
     .def( self == self )
@@ -252,14 +252,14 @@ void class_discrete_parametric()
 
   // DiscreteParametric base class
   class_< DiscreteParametric, bases< Distribution > >
-    ("_DiscreteParametric", init< optional< int, int, int, int, double, double > >())
-    .def(init<int, int, int, double, double, optional< double > >())
+    ("_DiscreteParametric", init< boost::python::optional< int, int, int, int, double, double > >())
+    .def(init<int, int, int, double, double, boost::python::optional< double > >())
     .def(init<int, int>())
-    .def(init<const Distribution&, optional<int> >())
+    .def(init<const Distribution&, boost::python::optional<int> >())
     .def(init<const Distribution&, double>())
     .def(init<const DiscreteParametric&, double>())
     .def(init<const FrequencyDistribution& >())
-    .def(init<const DiscreteParametric&, optional< char, int> >())
+    .def(init<const DiscreteParametric&, boost::python::optional< char, int> >())
     .def(init<Distribution&>())
     .def(init<DiscreteParametric&>())
     //to remove
@@ -411,12 +411,12 @@ void class_discrete_parametric_model()
   class_< DiscreteParametricModel, bases< DiscreteParametric, StatInterface > >
   ("_DiscreteParametricModel", "Parametric model", init <const FrequencyDistribution& >())
 
-  .def(init< int, int, int, double, double, optional< double > >())
+  .def(init< int, int, int, double, double, boost::python::optional< double > >())
   // this constructor clashes with the previous one and fail to pass tests.
-  //.def(init< int, optional <int, int, int, double, double > >())
+  //.def(init< int, boost::python::optional <int, int, int, double, double > >())
   .def(init <const Distribution& >())
   .def(init <const DiscreteParametric& >())
-  .def(init <const DiscreteParametricModel& ,optional< bool> >())
+  .def(init <const DiscreteParametricModel& , boost::python::optional< bool> >())
 
   .def("__init__", make_constructor(DiscreteParametricModelWrap::parametric_model_from_file))
   .def(self_ns::str(self)) // __str__
