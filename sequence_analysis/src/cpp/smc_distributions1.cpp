@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
@@ -47,7 +47,6 @@
 using namespace std;
 
 
-
 /*--------------------------------------------------------------*
  *
  *  Calcul des probabilites de chaque etat en fonction du temps
@@ -55,7 +54,7 @@ using namespace std;
  *
  *--------------------------------------------------------------*/
 
-void SemiMarkov::index_state_distribution()
+void SemiMarkovChain::index_state_distribution()
 
 {
   register int i , j , k;
@@ -64,7 +63,7 @@ void SemiMarkov::index_state_distribution()
   DiscreteParametric *occupancy;
 
 
-  index_state = nonparametric_process[0]->index_value;
+  index_state = state_process->index_value;
 
   state_out = new double[nb_state];
 
@@ -88,7 +87,7 @@ void SemiMarkov::index_state_distribution()
         }
 
         if (i < index_state->length - 1) {
-          occupancy = nonparametric_process[0]->sojourn_time[j];
+          occupancy = state_process->sojourn_time[j];
           state_out[j] = 0.;
 //          istate = 0.;
 
@@ -173,7 +172,7 @@ void SemiMarkov::index_state_distribution()
  *
  *--------------------------------------------------------------*/
 
-double* SemiMarkov::memory_computation() const
+double* SemiMarkovChain::memory_computation() const
 
 {
   register int i , j , k;
@@ -187,8 +186,8 @@ double* SemiMarkov::memory_computation() const
   switch (type) {
 
   case 'o' : {
-    state_in = new double*[nonparametric_process[0]->length->nb_value - 3];
-    for (i = 0;i < nonparametric_process[0]->length->nb_value - 3;i++) {
+    state_in = new double*[state_process->length->nb_value - 3];
+    for (i = 0;i < state_process->length->nb_value - 3;i++) {
       state_in[i] = new double[nb_state];
     }
 
@@ -196,14 +195,14 @@ double* SemiMarkov::memory_computation() const
       memory[i] = 0.;
     }
 
-    for (i = 0;i < nonparametric_process[0]->length->nb_value - 2;i++) {
+    for (i = 0;i < state_process->length->nb_value - 2;i++) {
       for (j = 0;j < nb_state;j++) {
         switch (state_subtype[j]) {
 
         // cas etat semi-markovien
 
         case SEMI_MARKOVIAN : {
-          occupancy = nonparametric_process[0]->sojourn_time[j];
+          occupancy = state_process->sojourn_time[j];
           state_out[j] = 0.;
 
           for (k = 1;k <= MIN(i + 1 , occupancy->nb_value - 1);k++) {
@@ -232,10 +231,10 @@ double* SemiMarkov::memory_computation() const
 
         // accumulation des probabilites des memoires
 
-        memory[j] += state_out[j] * (1. - nonparametric_process[0]->length->cumul[i + 1]);
+        memory[j] += state_out[j] * (1. - state_process->length->cumul[i + 1]);
       }
 
-      if (i < nonparametric_process[0]->length->nb_value - 3) {
+      if (i < state_process->length->nb_value - 3) {
         for (j = 0;j < nb_state;j++) {
           state_in[i][j] = 0.;
           for (k = 0;k < nb_state;k++) {
@@ -245,7 +244,7 @@ double* SemiMarkov::memory_computation() const
       }
     }
 
-    for (i = 0;i < nonparametric_process[0]->length->nb_value - 3;i++) {
+    for (i = 0;i < state_process->length->nb_value - 3;i++) {
       delete [] state_in[i];
     }
     delete [] state_in;
@@ -276,7 +275,7 @@ double* SemiMarkov::memory_computation() const
         // cas etat semi-markovien
 
         case SEMI_MARKOVIAN : {
-          occupancy = nonparametric_process[0]->sojourn_time[j];
+          occupancy = state_process->sojourn_time[j];
           state_out[j] = 0.;
 
           for (k = 1;k <= MIN(i + 1 , occupancy->nb_value - 1);k++) {
@@ -358,7 +357,7 @@ double* SemiMarkov::memory_computation() const
  *
  *--------------------------------------------------------------*/
 
-void SemiMarkov::state_no_occurrence_probability(int state , double increment)
+void SemiMarkovChain::state_no_occurrence_probability(int state , double increment)
 
 {
   register int i;
@@ -373,7 +372,7 @@ void SemiMarkov::state_no_occurrence_probability(int state , double increment)
     register int j , k;
     int min_time;
     double sum , *state_out , **state_in ,
-           &no_occurrence = nonparametric_process[0]->no_occurrence[state];
+           &no_occurrence = state_process->no_occurrence[state];
     DiscreteParametric *occupancy;
 
 
@@ -398,7 +397,7 @@ void SemiMarkov::state_no_occurrence_probability(int state , double increment)
         switch (state_subtype[i]) {
 
         case SEMI_MARKOVIAN : {
-          sum += nonparametric_process[0]->sojourn_time[i]->mean;
+          sum += state_process->sojourn_time[i]->mean;
           break;
         }
 
@@ -429,7 +428,7 @@ void SemiMarkov::state_no_occurrence_probability(int state , double increment)
           // cas etat semi-markovien
 
           case SEMI_MARKOVIAN : {
-            occupancy = nonparametric_process[0]->sojourn_time[j];
+            occupancy = state_process->sojourn_time[j];
             state_out[j] = 0.;
 
             for (k = 1;k <= MIN(i , occupancy->nb_value - 1);k++) {
@@ -506,8 +505,8 @@ void SemiMarkov::state_no_occurrence_probability(int state , double increment)
  *
  *--------------------------------------------------------------*/
 
-void SemiMarkov::state_first_occurrence_distribution(int state , int min_nb_value ,
-                                                     double cumul_threshold)
+void SemiMarkovChain::state_first_occurrence_distribution(int state , int min_nb_value ,
+                                                          double cumul_threshold)
 
 {
   register int i , j , k;
@@ -516,8 +515,8 @@ void SemiMarkov::state_first_occurrence_distribution(int state , int min_nb_valu
   Distribution *first_occurrence;
 
 
-  first_occurrence = nonparametric_process[0]->first_occurrence[state];
-  first_occurrence->complement = nonparametric_process[0]->no_occurrence[state];
+  first_occurrence = state_process->first_occurrence[state];
+  first_occurrence->complement = state_process->no_occurrence[state];
 
   pmass = first_occurrence->mass;
   pcumul = first_occurrence->cumul;
@@ -550,7 +549,7 @@ void SemiMarkov::state_first_occurrence_distribution(int state , int min_nb_valu
         // cas etat semi-markovien
 
         case SEMI_MARKOVIAN : {
-          occupancy = nonparametric_process[0]->sojourn_time[j];
+          occupancy = state_process->sojourn_time[j];
           state_out[j] = 0.;
 
           for (k = 1;k <= MIN(i , occupancy->nb_value - 1);k++) {
@@ -631,13 +630,13 @@ void SemiMarkov::state_first_occurrence_distribution(int state , int min_nb_valu
  *
  *--------------------------------------------------------------*/
 
-void SemiMarkov::state_leave_probability(int state , double increment)
+void SemiMarkovChain::state_leave_probability(int state , double increment)
 
 {
   if (state_type[state] == 't') {
     register int i , j , k;
     int min_time;
-    double sum , *state_out , **state_in , &leave = nonparametric_process[0]->leave[state];
+    double sum , *state_out , **state_in , &leave = state_process->leave[state];
     DiscreteParametric *occupancy;
 
 
@@ -662,7 +661,7 @@ void SemiMarkov::state_leave_probability(int state , double increment)
       if (i != state) {
         switch (state_subtype[i]) {
         case SEMI_MARKOVIAN :
-          sum += nonparametric_process[0]->sojourn_time[i]->mean;
+          sum += state_process->sojourn_time[i]->mean;
           break;
         case MARKOVIAN :
           sum += 1. / (1. - transition[i][i]);
@@ -688,7 +687,7 @@ void SemiMarkov::state_leave_probability(int state , double increment)
           // cas etat semi-markovien
 
           case SEMI_MARKOVIAN : {
-            occupancy = nonparametric_process[0]->sojourn_time[j];
+            occupancy = state_process->sojourn_time[j];
             state_out[j] = 0.;
 
             for (k = 1;k < MIN(i , occupancy->nb_value);k++) {
@@ -752,7 +751,7 @@ void SemiMarkov::state_leave_probability(int state , double increment)
     while (((sum > increment) || (i <= min_time)) && (i < LEAVE_LENGTH));
 
     if (state_subtype[state] == SEMI_MARKOVIAN) {
-      leave /= nonparametric_process[0]->sojourn_time[state]->parametric_mean_computation();
+      leave /= state_process->sojourn_time[state]->parametric_mean_computation();
     }
 
     delete [] state_out;
@@ -775,8 +774,8 @@ void SemiMarkov::state_leave_probability(int state , double increment)
  *
  *--------------------------------------------------------------*/
 
-void SemiMarkov::state_recurrence_time_distribution(int state , int min_nb_value ,
-                                                    double cumul_threshold)
+void SemiMarkovChain::state_recurrence_time_distribution(int state , int min_nb_value ,
+                                                         double cumul_threshold)
 
 {
   register int i , j , k;
@@ -785,8 +784,8 @@ void SemiMarkov::state_recurrence_time_distribution(int state , int min_nb_value
   DiscreteParametric *occupancy;
 
 
-  recurrence_time = nonparametric_process[0]->recurrence_time[state];
-  recurrence_time->complement = nonparametric_process[0]->leave[state];
+  recurrence_time = state_process->recurrence_time[state];
+  recurrence_time->complement = state_process->leave[state];
 
   pmass = recurrence_time->mass;
   pcumul = recurrence_time->cumul;
@@ -806,7 +805,7 @@ void SemiMarkov::state_recurrence_time_distribution(int state , int min_nb_value
 
   switch (state_subtype[state]) {
   case SEMI_MARKOVIAN :
-    occupancy_mean = nonparametric_process[0]->sojourn_time[state]->parametric_mean_computation();
+    occupancy_mean = state_process->sojourn_time[state]->parametric_mean_computation();
     *++pmass = (occupancy_mean - 1.) / occupancy_mean;
     break;
   case MARKOVIAN :
@@ -833,7 +832,7 @@ void SemiMarkov::state_recurrence_time_distribution(int state , int min_nb_value
         // cas etat semi-markovien
 
         case SEMI_MARKOVIAN : {
-          occupancy = nonparametric_process[0]->sojourn_time[j];
+          occupancy = state_process->sojourn_time[j];
           state_out[j] = 0.;
 
           for (k = 1;k < MIN(i , occupancy->nb_value);k++) {
@@ -901,8 +900,8 @@ void SemiMarkov::state_recurrence_time_distribution(int state , int min_nb_value
   }
 
   else {
-    delete nonparametric_process[0]->recurrence_time[state];
-    nonparametric_process[0]->recurrence_time[state] = NULL;
+    delete state_process->recurrence_time[state];
+    state_process->recurrence_time[state] = NULL;
   }
 }
 
@@ -923,24 +922,24 @@ void SemiMarkov::index_output_distribution(int variable)
   Curves *index_state , *index_value;
 
 
-  index_value = nonparametric_process[variable]->index_value;
+  index_value = categorical_process[variable]->index_value;
 
   // calcul des probabilites des etats de la semi-chaine de Markov
   // sous-jacente en fonction de l'index si necessaire
 
-  if (!(nonparametric_process[0]->index_value)) {
-    nonparametric_process[0]->index_value = new Curves(nb_state , index_value->length);
+  if (!(state_process->index_value)) {
+    state_process->index_value = new Curves(nb_state , index_value->length);
     index_state_distribution();
   }
-  index_state = nonparametric_process[0]->index_value;
+  index_state = state_process->index_value;
 
   // prise en compte des probabilites d'observation
 
   for (i = 0;i < index_value->length;i++) {
-    for (j = 0;j < nonparametric_process[variable]->nb_value;j++) {
+    for (j = 0;j < categorical_process[variable]->nb_value;j++) {
       index_value->point[j][i] = 0.;
       for (k = 0;k < nb_state;k++) {
-        index_value->point[j][i] += nonparametric_process[variable]->observation[k]->mass[j] *
+        index_value->point[j][i] += categorical_process[variable]->observation[k]->mass[j] *
                                     index_state->point[k][i];
       }
     }
@@ -966,13 +965,13 @@ void SemiMarkov::output_no_occurrence_probability(int variable , int output ,
   register int i , j , k;
   int min_time;
   double sum , *state_out , **state_in , *observation , **obs_power ,
-         &no_occurrence = nonparametric_process[variable]->no_occurrence[output];
+         &no_occurrence = categorical_process[variable]->no_occurrence[output];
   DiscreteParametric *occupancy;
 
 
   observation = new double[nb_state];
   for (i = 0;i < nb_state;i++) {
-    observation[i] = nonparametric_process[variable]->observation[i]->mass[output];
+    observation[i] = categorical_process[variable]->observation[i]->mass[output];
   }
 
   // calcul de l'accessibilite d'une observation a partir d'un etat donne
@@ -1031,7 +1030,7 @@ void SemiMarkov::output_no_occurrence_probability(int variable , int output ,
       switch (state_subtype[i]) {
 
       case SEMI_MARKOVIAN : {
-        sum += nonparametric_process[0]->sojourn_time[i]->mean;
+        sum += state_process->sojourn_time[i]->mean;
         break;
       }
 
@@ -1061,7 +1060,7 @@ void SemiMarkov::output_no_occurrence_probability(int variable , int output ,
           // cas etat semi-markovien
 
           case SEMI_MARKOVIAN : {
-            occupancy = nonparametric_process[0]->sojourn_time[j];
+            occupancy = state_process->sojourn_time[j];
             state_out[j] = 0.;
 
             // calcul des puissances des probabilites d'observation
@@ -1162,15 +1161,15 @@ void SemiMarkov::output_first_occurrence_distribution(int variable , int output 
   Distribution *first_occurrence;
 
 
-  first_occurrence = nonparametric_process[variable]->first_occurrence[output];
-  first_occurrence->complement = nonparametric_process[variable]->no_occurrence[output];
+  first_occurrence = categorical_process[variable]->first_occurrence[output];
+  first_occurrence->complement = categorical_process[variable]->no_occurrence[output];
 
   pmass = first_occurrence->mass - 1;
   pcumul = first_occurrence->cumul - 1;
 
   observation = new double[nb_state];
   for (i = 0;i < nb_state;i++) {
-    observation[i] = nonparametric_process[variable]->observation[i]->mass[output];
+    observation[i] = categorical_process[variable]->observation[i]->mass[output];
   }
 
   obs_power = new double*[nb_state];
@@ -1203,7 +1202,7 @@ void SemiMarkov::output_first_occurrence_distribution(int variable , int output 
       // cas etat semi-markovien
 
       case SEMI_MARKOVIAN : {
-        occupancy = nonparametric_process[0]->sojourn_time[j];
+        occupancy = state_process->sojourn_time[j];
         state_out[j] = 0.;
         sum = 0.;
 
@@ -1314,13 +1313,13 @@ void SemiMarkov::output_leave_probability(const double *memory , int variable ,
   register int i , j , k;
   int min_time;
   double sum0 , sum1 , *observation , **obs_power , *input_proba , *state_out ,
-         **state_in , &leave = nonparametric_process[variable]->leave[output];
+         **state_in , &leave = categorical_process[variable]->leave[output];
   DiscreteParametric *occupancy;
 
 
   observation = new double[nb_state];
   for (i = 0;i < nb_state;i++) {
-    observation[i] = nonparametric_process[variable]->observation[i]->mass[output];
+    observation[i] = categorical_process[variable]->observation[i]->mass[output];
   }
 
   // calcul de l'accessibilite d'une observation a partir d'un etat donne
@@ -1387,7 +1386,7 @@ void SemiMarkov::output_leave_probability(const double *memory , int variable ,
       if (transition[i][i] < 1.) {
         switch (state_subtype[i]) {
         case SEMI_MARKOVIAN :
-          sum0 += nonparametric_process[0]->sojourn_time[i]->mean * input_proba[i];
+          sum0 += state_process->sojourn_time[i]->mean * input_proba[i];
           break;
         case MARKOVIAN :
           sum0 += input_proba[i] / (1. - transition[i][i]);
@@ -1411,7 +1410,7 @@ void SemiMarkov::output_leave_probability(const double *memory , int variable ,
       switch (state_subtype[i]) {
 
       case SEMI_MARKOVIAN : {
-        sum0 += nonparametric_process[0]->sojourn_time[i]->mean;
+        sum0 += state_process->sojourn_time[i]->mean;
         break;
       }
 
@@ -1442,7 +1441,7 @@ void SemiMarkov::output_leave_probability(const double *memory , int variable ,
           // cas etat non-absorbant
 
           if (transition[j][j] < 1.) {
-            occupancy = nonparametric_process[0]->sojourn_time[j];
+            occupancy = state_process->sojourn_time[j];
 
             // calcul des puissances des probabilites d'observation
 
@@ -1549,8 +1548,8 @@ void SemiMarkov::output_recurrence_time_distribution(const double *memory , int 
   DiscreteParametric *occupancy;
 
 
-  recurrence_time = nonparametric_process[variable]->recurrence_time[output];
-  recurrence_time->complement = nonparametric_process[variable]->leave[output];
+  recurrence_time = categorical_process[variable]->recurrence_time[output];
+  recurrence_time->complement = categorical_process[variable]->leave[output];
 
   pmass = recurrence_time->mass;
   pcumul = recurrence_time->cumul;
@@ -1559,7 +1558,7 @@ void SemiMarkov::output_recurrence_time_distribution(const double *memory , int 
 
   observation = new double[nb_state];
   for (i = 0;i < nb_state;i++) {
-    observation[i] = nonparametric_process[variable]->observation[i]->mass[output];
+    observation[i] = categorical_process[variable]->observation[i]->mass[output];
   }
 
   obs_power = new double*[nb_state];
@@ -1598,7 +1597,7 @@ void SemiMarkov::output_recurrence_time_distribution(const double *memory , int 
     if (transition[i][i] < 1.) {
       switch (state_subtype[i]) {
       case SEMI_MARKOVIAN :
-        sum0 += nonparametric_process[0]->sojourn_time[i]->mean * input_proba[i];
+        sum0 += state_process->sojourn_time[i]->mean * input_proba[i];
         break;
       case MARKOVIAN :
         sum0 += input_proba[i] / (1. - transition[i][i]);
@@ -1653,7 +1652,7 @@ void SemiMarkov::output_recurrence_time_distribution(const double *memory , int 
       // cas etat non-absorbant
 
       if (transition[j][j] < 1.) {
-        occupancy = nonparametric_process[0]->sojourn_time[j];
+        occupancy = state_process->sojourn_time[j];
         state_out[j] = 0.;
         sum0 = 0.;
 
@@ -1725,8 +1724,8 @@ void SemiMarkov::output_recurrence_time_distribution(const double *memory , int 
   }
 
   else {
-    delete nonparametric_process[variable]->recurrence_time[output];
-    nonparametric_process[variable]->recurrence_time[output] = NULL;
+    delete categorical_process[variable]->recurrence_time[output];
+    categorical_process[variable]->recurrence_time[output] = NULL;
   }
 
   delete [] observation;
@@ -1769,11 +1768,11 @@ void SemiMarkov::output_sojourn_time_distribution(const double *memory , int var
   register int i , j , k , m;
   double sum0 , sum1 , *observation , **obs_power , **input_proba ,
          *output_proba , *state_out , **state_in , *pmass , *pcumul ,
-         &absorption = nonparametric_process[variable]->absorption[output];
+         &absorption = categorical_process[variable]->absorption[output];
   DiscreteParametric *sojourn_time , *occupancy;
 
 
-  sojourn_time = nonparametric_process[variable]->sojourn_time[output];
+  sojourn_time = categorical_process[variable]->sojourn_time[output];
 
   pmass = sojourn_time->mass;
   pcumul = sojourn_time->cumul;
@@ -1782,7 +1781,7 @@ void SemiMarkov::output_sojourn_time_distribution(const double *memory , int var
 
   observation = new double[nb_state];
   for (i = 0;i < nb_state;i++) {
-    observation[i] = nonparametric_process[variable]->observation[i]->mass[output];
+    observation[i] = categorical_process[variable]->observation[i]->mass[output];
   }
 
   obs_power = new double*[nb_state];
@@ -1832,7 +1831,7 @@ void SemiMarkov::output_sojourn_time_distribution(const double *memory , int var
 
       switch (state_subtype[i]) {
       case SEMI_MARKOVIAN :
-        sum0 += (nonparametric_process[0]->sojourn_time[i]->mean - 1) * input_proba[i][1];
+        sum0 += (state_process->sojourn_time[i]->mean - 1) * input_proba[i][1];
         break;
       case MARKOVIAN :
         sum0 += (1. / (1. - transition[i][i]) - 1) * input_proba[i][1];
@@ -1888,7 +1887,7 @@ void SemiMarkov::output_sojourn_time_distribution(const double *memory , int var
         // cas etat non-absorbant
 
         if (transition[j][j] < 1.) {
-          occupancy = nonparametric_process[0]->sojourn_time[j];
+          occupancy = state_process->sojourn_time[j];
           sum0 = 0.;
 
           // calcul des puissances des probabilites d'observation
@@ -1977,8 +1976,8 @@ void SemiMarkov::output_sojourn_time_distribution(const double *memory , int var
 
   if (*pcumul == 0.) {
     absorption = 1.;
-    delete nonparametric_process[variable]->sojourn_time[output];
-    nonparametric_process[variable]->sojourn_time[output] = NULL;
+    delete categorical_process[variable]->sojourn_time[output];
+    categorical_process[variable]->sojourn_time[output] = NULL;
   }
 
   else {
