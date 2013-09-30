@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
@@ -70,7 +70,6 @@ class FrequencyDistribution;
 class CompoundData;
 
 
-// class Compound : public StatInterface , protected Distribution {
 class Compound : public StatInterface , public Distribution {  // loi composee
 
     friend class FrequencyDistribution;
@@ -142,7 +141,6 @@ Compound* compound_ascii_read(StatError &error , const char *path ,
 
 
 
-// class CompoundData : public StatInterface , protected FrequencyDistribution {
 class CompoundData : public StatInterface , public FrequencyDistribution {  // structure de donnees correspondant
                                                                             // a une loi composee
     friend class FrequencyDistribution;
