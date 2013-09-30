@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
@@ -57,7 +57,7 @@ using namespace std;
  *
  *--------------------------------------------------------------*/
 
-void VariableOrderMarkov::index_state_distribution()
+void VariableOrderMarkovChain::index_state_distribution()
 
 {
   register int i , j , k;
@@ -65,7 +65,7 @@ void VariableOrderMarkov::index_state_distribution()
   Curves *index_state;
 
 
-  index_state = nonparametric_process[0]->index_value;
+  index_state = state_process->index_value;
 
   // initialisation des probabilites des memoires et des etats
 
@@ -146,7 +146,7 @@ void VariableOrderMarkov::index_state_distribution()
  *
  *--------------------------------------------------------------*/
 
-double* VariableOrderMarkov::memory_computation() const
+double* VariableOrderMarkovChain::memory_computation() const
 
 {
   register int i , j , k;
@@ -175,7 +175,7 @@ double* VariableOrderMarkov::memory_computation() const
 
   // calcul des probabilites de chaque memoire en fonction de l'index
 
-  for (i = 1;i < nonparametric_process[0]->length->nb_value - 2;i++) {
+  for (i = 1;i < state_process->length->nb_value - 2;i++) {
 
     // mise a jour des probabilites des memoires
 
@@ -195,7 +195,7 @@ double* VariableOrderMarkov::memory_computation() const
     // accumulation des probabilites des memoires
 
     for (j = 1;j < nb_row;j++) {
-      average_memory[j] += memory[j] * (1. - nonparametric_process[0]->length->cumul[i]);
+      average_memory[j] += memory[j] * (1. - state_process->length->cumul[i]);
     }
   }
 
@@ -215,7 +215,7 @@ double* VariableOrderMarkov::memory_computation() const
  *
  *--------------------------------------------------------------*/
 
-void VariableOrderMarkov::state_no_occurrence_probability(int istate , double increment)
+void VariableOrderMarkovChain::state_no_occurrence_probability(int istate , double increment)
 
 {
   register int i;
@@ -229,7 +229,7 @@ void VariableOrderMarkov::state_no_occurrence_probability(int istate , double in
   if (i < nb_state) {
     register int j , k;
     double memory_sum , *memory , *previous_memory ,
-           &no_occurrence = nonparametric_process[0]->no_occurrence[istate];
+           &no_occurrence = state_process->no_occurrence[istate];
 
 
     // initialisation des probabilites des memoires
@@ -327,8 +327,8 @@ void VariableOrderMarkov::state_no_occurrence_probability(int istate , double in
  *
  *--------------------------------------------------------------*/
 
-void VariableOrderMarkov::state_first_occurrence_distribution(int istate , int min_nb_value ,
-                                                              double cumul_threshold)
+void VariableOrderMarkovChain::state_first_occurrence_distribution(int istate , int min_nb_value ,
+                                                                   double cumul_threshold)
 
 {
   register int i , j , k;
@@ -336,8 +336,8 @@ void VariableOrderMarkov::state_first_occurrence_distribution(int istate , int m
   Distribution *first_occurrence;
 
 
-  first_occurrence = nonparametric_process[0]->first_occurrence[istate];
-  first_occurrence->complement = nonparametric_process[0]->no_occurrence[istate];
+  first_occurrence = state_process->first_occurrence[istate];
+  first_occurrence->complement = state_process->no_occurrence[istate];
 
   pmass = first_occurrence->mass;
   pcumul = first_occurrence->cumul;
@@ -472,14 +472,14 @@ void VariableOrderMarkov::state_first_occurrence_distribution(int istate , int m
  *
  *--------------------------------------------------------------*/
 
-void VariableOrderMarkov::state_leave_probability(const double *imemory , int istate ,
-                                                  double increment)
+void VariableOrderMarkovChain::state_leave_probability(const double *imemory , int istate ,
+                                                       double increment)
 
 {
   if (state_type[istate] == 't') {
     register int i , j , k;
     double memory_sum , *memory , *previous_memory ,
-           &leave = nonparametric_process[0]->leave[istate];
+           &leave = state_process->leave[istate];
 
 
     memory = new double[nb_row];
@@ -571,8 +571,8 @@ void VariableOrderMarkov::state_leave_probability(const double *imemory , int is
  *
  *--------------------------------------------------------------*/
 
-void VariableOrderMarkov::state_recurrence_time_distribution(const double *imemory , int istate ,
-                                                             int min_nb_value , double cumul_threshold)
+void VariableOrderMarkovChain::state_recurrence_time_distribution(const double *imemory , int istate ,
+                                                                  int min_nb_value , double cumul_threshold)
 
 {
   register int i , j , k;
@@ -580,8 +580,8 @@ void VariableOrderMarkov::state_recurrence_time_distribution(const double *imemo
   Distribution *recurrence_time;
 
 
-  recurrence_time = nonparametric_process[0]->recurrence_time[istate];
-  recurrence_time->complement = nonparametric_process[0]->leave[istate];
+  recurrence_time = state_process->recurrence_time[istate];
+  recurrence_time->complement = state_process->leave[istate];
 
   pmass = recurrence_time->mass;
   pcumul = recurrence_time->cumul;
@@ -673,8 +673,8 @@ void VariableOrderMarkov::state_recurrence_time_distribution(const double *imemo
   }
 
   else {
-    delete nonparametric_process[0]->recurrence_time[istate];
-    nonparametric_process[0]->recurrence_time[istate] = NULL;
+    delete state_process->recurrence_time[istate];
+    state_process->recurrence_time[istate] = NULL;
   }
 
   delete [] memory;
@@ -691,8 +691,8 @@ void VariableOrderMarkov::state_recurrence_time_distribution(const double *imemo
  *
  *--------------------------------------------------------------*/
 
-void VariableOrderMarkov::state_sojourn_time_distribution(const double *imemory , int istate ,
-                                                          int min_nb_value , double cumul_threshold)
+void VariableOrderMarkovChain::state_sojourn_time_distribution(const double *imemory , int istate ,
+                                                               int min_nb_value , double cumul_threshold)
 
 {
   register int i , j , k;
@@ -701,7 +701,7 @@ void VariableOrderMarkov::state_sojourn_time_distribution(const double *imemory 
   DiscreteParametric *sojourn_time;
 
 
-  sojourn_time = nonparametric_process[0]->sojourn_time[istate];
+  sojourn_time = state_process->sojourn_time[istate];
 
   pmass = sojourn_time->mass;
   pcumul = sojourn_time->cumul;
@@ -831,24 +831,24 @@ void VariableOrderMarkov::index_output_distribution(int variable)
   Curves *index_state , *index_value;
 
 
-  index_value = nonparametric_process[variable]->index_value;
+  index_value = categorical_process[variable]->index_value;
 
   // calcul des probabilites des etats de la chaine de Markov d'ordre variable
   // sous-jacente en fonction de l'index si necessaire
 
-  if (!(nonparametric_process[0]->index_value)) {
-    nonparametric_process[0]->index_value = new Curves(nb_state , index_value->length);
+  if (!(state_process->index_value)) {
+    state_process->index_value = new Curves(nb_state , index_value->length);
     index_state_distribution();
   }
-  index_state = nonparametric_process[0]->index_value;
+  index_state = state_process->index_value;
 
   // prise en compte des probabilites d'observation
 
   for (i = 0;i < index_value->length;i++) {
-    for (j = 0;j < nonparametric_process[variable]->nb_value;j++) {
+    for (j = 0;j < categorical_process[variable]->nb_value;j++) {
       index_value->point[j][i] = 0.;
       for (k = 0;k < nb_state;k++) {
-        index_value->point[j][i] += nonparametric_process[variable]->observation[k]->mass[j] *
+        index_value->point[j][i] += categorical_process[variable]->observation[k]->mass[j] *
                                     index_state->point[k][i];
       }
     }
@@ -873,12 +873,12 @@ void VariableOrderMarkov::output_no_occurrence_probability(int variable , int ou
   bool status = false , *output_accessibility;
   register int i , j , k;
   double memory_sum , sum , *observation , *memory , *previous_memory ,
-         &no_occurrence = nonparametric_process[variable]->no_occurrence[output];
+         &no_occurrence = categorical_process[variable]->no_occurrence[output];
 
 
   observation = new double[nb_state];
   for (i = 0;i < nb_state;i++) {
-    observation[i] = nonparametric_process[variable]->observation[i]->mass[output];
+    observation[i] = categorical_process[variable]->observation[i]->mass[output];
   }
 
   // calcul de l'accessibilite d'une observation a partir d'un etat donne
@@ -999,15 +999,15 @@ void VariableOrderMarkov::output_first_occurrence_distribution(int variable , in
   Distribution *first_occurrence;
 
 
-  first_occurrence = nonparametric_process[variable]->first_occurrence[output];
-  first_occurrence->complement = nonparametric_process[variable]->no_occurrence[output];
+  first_occurrence = categorical_process[variable]->first_occurrence[output];
+  first_occurrence->complement = categorical_process[variable]->no_occurrence[output];
 
   pmass = first_occurrence->mass;
   pcumul = first_occurrence->cumul;
 
   observation = new double[nb_state];
   for (i = 0;i < nb_state;i++) {
-    observation[i] = nonparametric_process[variable]->observation[i]->mass[output];
+    observation[i] = categorical_process[variable]->observation[i]->mass[output];
   }
 
   // initialisation des probabilites des memoires
@@ -1110,12 +1110,12 @@ void VariableOrderMarkov::output_leave_probability(const double *imemory , int v
   bool status = false , *output_accessibility;
   register int i , j , k;
   double memory_sum , sum , *observation , *memory , *previous_memory ,
-         &leave = nonparametric_process[variable]->leave[output];
+         &leave = categorical_process[variable]->leave[output];
 
 
   observation = new double[nb_state];
   for (i = 0;i < nb_state;i++) {
-    observation[i] = nonparametric_process[variable]->observation[i]->mass[output];
+    observation[i] = categorical_process[variable]->observation[i]->mass[output];
   }
 
   // calcul de l'accessibilite d'une observation a partir d'un etat donne
@@ -1237,8 +1237,8 @@ void VariableOrderMarkov::output_recurrence_time_distribution(const double *imem
   Distribution *recurrence_time;
 
 
-  recurrence_time = nonparametric_process[variable]->recurrence_time[output];
-  recurrence_time->complement = nonparametric_process[variable]->leave[output];
+  recurrence_time = categorical_process[variable]->recurrence_time[output];
+  recurrence_time->complement = categorical_process[variable]->leave[output];
 
   pmass = recurrence_time->mass;
   pcumul = recurrence_time->cumul;
@@ -1247,7 +1247,7 @@ void VariableOrderMarkov::output_recurrence_time_distribution(const double *imem
 
   observation = new double[nb_state];
   for (i = 0;i < nb_state;i++) {
-    observation[i] = nonparametric_process[variable]->observation[i]->mass[output];
+    observation[i] = categorical_process[variable]->observation[i]->mass[output];
   }
 
   memory = new double[nb_row];
@@ -1315,8 +1315,8 @@ void VariableOrderMarkov::output_recurrence_time_distribution(const double *imem
   }
 
   else {
-    delete nonparametric_process[variable]->recurrence_time[output];
-    nonparametric_process[variable]->recurrence_time[output] = NULL;
+    delete categorical_process[variable]->recurrence_time[output];
+    categorical_process[variable]->recurrence_time[output] = NULL;
   }
 
   delete [] observation;
@@ -1343,11 +1343,11 @@ void VariableOrderMarkov::output_sojourn_time_distribution(const double *imemory
 {
   register int i , j , k;
   double sum , *observation , *memory , *previous_memory , *pmass , *pcumul ,
-         &absorption = nonparametric_process[variable]->absorption[output];
+         &absorption = categorical_process[variable]->absorption[output];
   DiscreteParametric *sojourn_time;
 
 
-  sojourn_time = nonparametric_process[variable]->sojourn_time[output];
+  sojourn_time = categorical_process[variable]->sojourn_time[output];
 
   pmass = sojourn_time->mass;
   pcumul = sojourn_time->cumul;
@@ -1356,7 +1356,7 @@ void VariableOrderMarkov::output_sojourn_time_distribution(const double *imemory
 
   observation = new double[nb_state];
   for (i = 0;i < nb_state;i++) {
-    observation[i] = nonparametric_process[variable]->observation[i]->mass[output];
+    observation[i] = categorical_process[variable]->observation[i]->mass[output];
   }
 
   memory = new double[nb_row];
@@ -1436,8 +1436,8 @@ void VariableOrderMarkov::output_sojourn_time_distribution(const double *imemory
 
   if (*pcumul == 0.) {
     absorption = 1.;
-    delete nonparametric_process[variable]->sojourn_time[output];
-    nonparametric_process[variable]->sojourn_time[output] = NULL;
+    delete categorical_process[variable]->sojourn_time[output];
+    categorical_process[variable]->sojourn_time[output] = NULL;
   }
 
   else {
@@ -1473,9 +1473,9 @@ void VariableOrderMarkov::output_sojourn_time_distribution(const double *imemory
  *
  *--------------------------------------------------------------*/
 
-Correlation* VariableOrderMarkov::state_autocorrelation_computation(StatError &error ,
-                                                                    int istate , int max_lag ,
-                                                                    const VariableOrderMarkovData *seq) const
+Correlation* VariableOrderMarkovChain::state_autocorrelation_computation(StatError &error ,
+                                                                         int istate , int max_lag ,
+                                                                         const MarkovianSequences *seq) const
 
 {
   bool status = true;
@@ -1654,7 +1654,7 @@ Correlation* VariableOrderMarkov::state_autocorrelation_computation(StatError &e
   Correlation *correl;
 
 
-  correl = state_autocorrelation_computation(error , istate , max_lag , markov_data);
+  correl = VariableOrderMarkovChain::state_autocorrelation_computation(error , istate , max_lag , markov_data);
 
   return correl;
 }
@@ -1676,7 +1676,7 @@ Correlation* VariableOrderMarkovData::state_autocorrelation_computation(StatErro
   Correlation *correl;
 
 
-  correl = markov->state_autocorrelation_computation(error , istate , max_lag , this);
+  correl = markov->VariableOrderMarkovChain::state_autocorrelation_computation(error , istate , max_lag , this);
 
   return correl;
 }
@@ -1720,13 +1720,15 @@ Correlation* VariableOrderMarkov::output_autocorrelation_computation(StatError &
   }
 
   else {
-    if ((variable < 1) || (variable > nb_output_process) || (!nonparametric_process[variable])) {
+    if ((variable < 1) || (variable > nb_output_process) || (!categorical_process[variable - 1])) {
       status = false;
       error.update(SEQ_error[SEQR_OUTPUT_PROCESS_INDEX]);
     }
 
     else {
-      if ((output < 0) || (output >= nonparametric_process[variable]->nb_value)) {
+      variable--;
+
+      if ((output < 0) || (output >= categorical_process[variable]->nb_value)) {
         status = false;
         ostringstream error_message;
         error_message << STAT_label[STATL_OUTPUT] << " " << output << " "
@@ -1778,7 +1780,7 @@ Correlation* VariableOrderMarkov::output_autocorrelation_computation(StatError &
 
     observation = new double[nb_state];
     for (i = 0;i < nb_state;i++) {
-      observation[i] = nonparametric_process[variable]->observation[i]->mass[output];
+      observation[i] = categorical_process[variable]->observation[i]->mass[output];
     }
 
     memory = new double[nb_row];
@@ -1846,8 +1848,8 @@ Correlation* VariableOrderMarkov::output_autocorrelation_computation(StatError &
         break;
       }
 
-      symbol = new int[nonparametric_process[variable]->nb_value];
-      for (i = 0;i < nonparametric_process[variable]->nb_value;i++) {
+      symbol = new int[categorical_process[variable]->nb_value];
+      for (i = 0;i < categorical_process[variable]->nb_value;i++) {
         symbol[i] = 0;
       }
       symbol[output] = 1;
