@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
@@ -170,6 +170,7 @@ const char *SEQ_label[] = {
   "state probabilities" ,
   "distances between observation distributions for consecutive states" ,
   "posterior state sequence probability" ,
+  "posterior state sequence probability log ratio" ,
   "state begin" ,
   "posterior state probabilities" ,
   "posterior in state probabilities" ,
@@ -179,6 +180,7 @@ const char *SEQ_label[] = {
   "sum of marginal entropies" ,
   "partial state sequence entropy" ,
   "state sequence entropy" ,
+  "state sequence divergence" ,
   "upper bound" ,
   "number of state sequences" ,
   "maximum posterior state probabilities" ,
@@ -351,6 +353,7 @@ const char *SEQ_error[] = {
   "bad index parameter type" ,
   "bad index parameter" ,
   "bad variable indices" ,
+  "bad variable lag" ,
   "bad minimum value: should be positive" ,
   "bad date order" ,
   "bad begin index parameter" ,
