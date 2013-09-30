@@ -184,7 +184,7 @@ void DiscreteParametricProcess::copy(const DiscreteParametricProcess &process)
  *
  *--------------------------------------------------------------*/
 
-void DiscreteParametricProcess::state_permutation(int *perm) const
+void DiscreteParametricProcess::state_permutation(int *permut) const
 
 {
   register int i;
@@ -194,7 +194,7 @@ void DiscreteParametricProcess::state_permutation(int *perm) const
   pobservation = new DiscreteParametric*[nb_state];
 
   for (i = 0;i < nb_state;i++) {
-    pobservation[perm[i]] = observation[i];
+    pobservation[permut[i]] = observation[i];
   }
   for (i = 0;i < nb_state;i++) {
     observation[i] = pobservation[i];
