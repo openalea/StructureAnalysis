@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
@@ -69,7 +69,7 @@ enum {
 
 class RegressionKernel {  // noyau de regression
 
-protected :
+public :
 
     int ident;              // identificateur de la fonction de regression
     int min_value;          // valeur minimum
@@ -84,6 +84,13 @@ protected :
     void copy(const RegressionKernel&);
     void remove();
 
+    RegressionKernel();
+//    RegressionKernel(int iident , double imin_value , double imax_value , double istep = 1);
+    RegressionKernel(int iident , int imin_value , int imax_value);
+    RegressionKernel(const RegressionKernel &regression) { copy(regression); }
+    ~RegressionKernel();
+    RegressionKernel& operator=(const RegressionKernel &regression);
+
     std::ostream& ascii_parameter_print(std::ostream &os) const;
     std::ostream& ascii_formal_print(std::ostream &os) const;
     std::ostream& ascii_print(std::ostream &os) const;
@@ -94,27 +101,6 @@ protected :
     void computation();
     double min_computation() const;
     double max_computation() const;
-
-public :
-
-    RegressionKernel();
-//    RegressionKernel(int iident , double imin_value , double imax_value , double istep = 1);
-    RegressionKernel(int iident , int imin_value , int imax_value);
-    RegressionKernel(const RegressionKernel &regression) { copy(regression); }
-    ~RegressionKernel();
-    RegressionKernel& operator=(const RegressionKernel &regression);
-
-    // acces membres de la classe
-
-    int get_ident() const { return ident; }
-    int get_min_value() const { return min_value; }
-    int get_max_value() const { return max_value; }
-    double get_regression_df() const { return regression_df; }
-    double get_residual_df() const { return residual_df; }
-    int get_nb_parameter() const { return nb_parameter; }
-    double get_parameter(int index) const { return parameter[index]; }
-//    double get_step() const { return step; }
-    double get_point(int index) const { return point[index]; }
 };
 
 
