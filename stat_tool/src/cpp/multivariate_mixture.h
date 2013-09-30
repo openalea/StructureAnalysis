@@ -57,7 +57,7 @@ const double MVMIXTURE_LIKELIHOOD_DIFF = 1.e-6;
 class FrequencyDistribution;
 class MultivariateMixtureData;
 class DiscreteParametricProcess;
-class NonparametricProcess;
+class CategoricalProcess;
 
 // melange de lois multivariees
 // a variables independantes
@@ -83,7 +83,7 @@ private :
     int nb_var;       // dimension
     DiscreteParametric *weight;     // poids de chaque composante
     DiscreteParametricProcess **pcomponent; // composantes parametriques
-    NonparametricProcess **npcomponent; // composantes non parametriques
+    CategoricalProcess **npcomponent; // composantes non parametriques
 
     void copy(const MultivariateMixture &mixt , bool data_flag = true);
     void remove();
@@ -122,10 +122,10 @@ public :
     MultivariateMixture();
     MultivariateMixture(int inb_component , double *pweight , int inb_variable,
                         DiscreteParametricProcess **ppcomponent,
-                        NonparametricProcess **pnpcomponent);
+                        CategoricalProcess **pnpcomponent);
     MultivariateMixture(int inb_component , int inb_variable,
                         const DiscreteParametricProcess **ppcomponent,
-                        const NonparametricProcess **pnpcomponent);
+                        const CategoricalProcess **pnpcomponent);
     MultivariateMixture(const MultivariateMixture &mixt , bool *variable_flag ,
                         int inb_variable);
     MultivariateMixture(int inb_component, int inb_variable, int *nb_value,
@@ -138,8 +138,8 @@ public :
     /** extract parametric component */
     DiscreteParametricModel* extract_parametric_model(StatError &error , int ivariable,
                            int index) const;
-    /** extract nonparametric component */
-    Distribution* extract_nonparametric_model(StatError &error , int ivariable,
+    /** extract categorical component */
+    Distribution* extract_categorical_model(StatError &error , int ivariable,
                           int index) const;
     /** extract marginal mixture distribution */
     Distribution* extract_distribution(StatError &error , int ivariable) const;
@@ -177,16 +177,16 @@ public :
     int get_nb_variable() const { return nb_var; }
     DiscreteParametric* get_weight() const { return weight; }
     DiscreteParametricProcess* get_parametric_process(int variable) const;
-    NonparametricProcess* get_nonparametric_process(int variable) const;
+    CategoricalProcess* get_categorical_process(int variable) const;
     DiscreteParametric* get_parametric_component(int variable, int index) const;
-    Distribution* get_nonparametric_component(int variable, int index) const;
+    Distribution* get_categorical_component(int variable, int index) const;
 };
 
 
 MultivariateMixture* multivariate_mixture_building(StatError &error , int nb_component ,
                                                    int nb_variable, double *weight,
                                                    DiscreteParametricProcess **ppcomponent,
-                                                   NonparametricProcess **pnpcomponent);
+                                                   CategoricalProcess **pnpcomponent);
 MultivariateMixture* multivariate_mixture_ascii_read(StatError &error , const char *path ,
                                                      double cumul_threshold = CUMUL_THRESHOLD);
 
