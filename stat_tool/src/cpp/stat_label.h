@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
@@ -55,6 +55,7 @@ enum {
 
   STATW_SHAPE ,
   STATW_SCALE ,
+  STATW_ZERO_PROBABILITY ,
   STATW_MEAN ,
   STATW_STANDARD_DEVIATION ,
   STATW_MEAN_DIRECTION ,
@@ -87,7 +88,8 @@ enum {
 
   STATW_OUTPUT_PROCESS ,
   STATW_OUTPUT_PROCESSES ,
-  STATW_NONPARAMETRIC ,
+  STATW_NONPARAMETRIC ,   // pour compatibilite ascendante
+  STATW_CATEGORICAL ,
   STATW_PARAMETRIC ,   // pour compatibilite ascendante
   STATW_DISCRETE_PARAMETRIC ,
   STATW_CONTINUOUS_PARAMETRIC ,
