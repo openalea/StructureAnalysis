@@ -18,6 +18,7 @@ if lib_env['compiler'] == 'mingw':
     
 
 includes= lib_env.ALEAGlob('*.h')
+includes += lib_env.ALEAGlob('*.hpp')
 sources = lib_env.ALEAGlob('*.cpp')
 
 # files to exclude from sources
