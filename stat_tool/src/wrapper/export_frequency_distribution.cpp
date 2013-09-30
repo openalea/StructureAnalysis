@@ -137,12 +137,12 @@ public:
 
   // Estimation functions
 
-  static Mixture*
-  mixture_estimation1(const FrequencyDistribution &h, const Mixture& imixt,
+  static DiscreteMixture*
+  discrete_mixture_estimation1(const FrequencyDistribution &h, const DiscreteMixture& imixt,
       boost::python::list& estimate_tuple, int min_inf_bound, bool flag,
       bool component_flag)
   {
-    Mixture* ret;
+    DiscreteMixture* ret;
     StatError error;
     bool estimate[MIXTURE_NB_COMPONENT];
 
@@ -152,7 +152,7 @@ public:
     for (int i = 0; i < nb_element; i++)
       estimate[i] = boost::python::extract<bool>(estimate_tuple[i]);
 
-    ret = h.mixture_estimation(error, imixt, estimate, min_inf_bound, flag,
+    ret = h.discrete_mixture_estimation(error, imixt, estimate, min_inf_bound, flag,
         component_flag);
 
     if (!ret)
@@ -162,11 +162,11 @@ public:
 
   }
 
-  static Mixture*
-  mixture_estimation2(const FrequencyDistribution &h, boost::python::list& ident_list,
+  static DiscreteMixture*
+  discrete_mixture_estimation2(const FrequencyDistribution &h, boost::python::list& ident_list,
       int min_inf_bound, bool flag, bool component_flag, int penalty)
   {
-    Mixture* ret;
+    DiscreteMixture* ret;
     ostringstream output;
     StatError error;
 
@@ -176,7 +176,7 @@ public:
     for (int i = 0; i < nb_component; i++)
       ident[i] = boost::python::extract<int>(ident_list[i]);
 
-    ret = h.mixture_estimation(error, output, 1, nb_component, ident,
+    ret = h.discrete_mixture_estimation(error, output, 1, nb_component, ident,
         min_inf_bound, flag, component_flag, penalty);
 
     if (!ret)
@@ -409,18 +409,18 @@ void class_frequency_distribution()
   // Estimation
   .def("parametric_estimation", FrequencyDistributionWrap::parametric_estimation,
       return_value_policy<manage_new_object> (), "Parametric model estimation")
-  .def("mixture_estimation1", FrequencyDistributionWrap::mixture_estimation1,
-      return_value_policy<manage_new_object> (), "Mixture Estimation")
-  .def("mixture_estimation2", FrequencyDistributionWrap::mixture_estimation2,
-      return_value_policy<manage_new_object> (), "Mixture Estimation")
+  .def("discrete_mixture_estimation1", FrequencyDistributionWrap::discrete_mixture_estimation1,
+      return_value_policy<manage_new_object> (), "Discrete mixture estimation")
+  .def("discrete_mixture_estimation2", FrequencyDistributionWrap::discrete_mixture_estimation2,
+      return_value_policy<manage_new_object> (), "Discrete mixture estimation")
   .def("convolution_estimation1", FrequencyDistributionWrap::convolution_estimation1,
-      return_value_policy<manage_new_object> (), "Convolution Estimation")
+      return_value_policy<manage_new_object> (), "Convolution estimation")
   .def("convolution_estimation2", FrequencyDistributionWrap::convolution_estimation2,
-      return_value_policy<manage_new_object> (), "Convolution Estimation")
+      return_value_policy<manage_new_object> (), "Convolution estimation")
   .def("compound_estimation1", FrequencyDistributionWrap::compound_estimation1,
-      return_value_policy<manage_new_object> (), "Compound  Estimation")
+      return_value_policy<manage_new_object> (), "Compound distribution  estimation")
   .def("compound_estimation2", FrequencyDistributionWrap::compound_estimation2,
-      return_value_policy<manage_new_object> (), "Compound  Estimation")
+      return_value_policy<manage_new_object> (), "Compound distribution estimation")
 
   // Select
   .def("value_select", FrequencyDistributionWrap::value_select, return_value_policy<
@@ -563,7 +563,7 @@ void class_distribution_data()
 {
     // _DiscreteDistributionData
   class_<DiscreteDistributionData, bases<FrequencyDistribution, StatInterface> >
-    ("_DiscreteDistributionData", "_DiscreteDistributionData", init< optional< int > >())
+    ("_DiscreteDistributionData", "_DiscreteDistributionData", init< boost::python::optional< int > >())
 
     .def("__init__", make_constructor(DistributionDataWrap::distribution_data_from_list ))
     .def("__init__", make_constructor(DistributionDataWrap::distribution_data_from_file))
