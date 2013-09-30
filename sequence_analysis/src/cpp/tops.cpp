@@ -1213,16 +1213,17 @@ void Tops::copy(const Tops &tops , bool model_flag)
 Tops::Tops(const Tops &tops , bool model_flag , bool reverse_flag)
 
 {
-  Sequences::copy(tops , reverse_flag);
-
   switch (reverse_flag) {
 
   case false : {
+    Sequences::copy(tops);
     copy(tops , model_flag);
     break;
   }
 
   case true : {
+    Sequences::reverse(tops);
+
     top_parameters = NULL;
 
     max_position = 0;
@@ -1278,17 +1279,17 @@ Tops::Tops(int nb_sample , const Tops **ptops)
       max_length = ptops[j]->max_length;
     }
     cumul_length += ptops[j]->cumul_length;
-    phisto[j] = ptops[j]->hlength;
+    phisto[j] = ptops[j]->length_distribution;
   }
 
-  hlength = new FrequencyDistribution(nb_sample , phisto);
+  length_distribution = new FrequencyDistribution(nb_sample , phisto);
 
   index_parameter_type = POSITION;
 
   for (i = 0;i < nb_sample;i++) {
-    phisto[i] = ptops[i]->hindex_parameter;
+    phisto[i] = ptops[i]->index_parameter_distribution;
   }
-  hindex_parameter = new FrequencyDistribution(nb_sample , phisto);
+  index_parameter_distribution = new FrequencyDistribution(nb_sample , phisto);
 
   index_interval = NULL;
 
