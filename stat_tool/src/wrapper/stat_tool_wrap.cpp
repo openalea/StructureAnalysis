@@ -29,7 +29,7 @@
 #include "export_curves.h"
 #include "export_distribution.h"
 #include "export_frequency_distribution.h"
-#include "export_discrete_mixture.h"
+#include "export_mixture.h"
 #include "export_vectors.h"
 #include "export_convolution.h"
 #include "export_compound.h"
