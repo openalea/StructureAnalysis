@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
@@ -181,7 +181,7 @@ MarkovianSequences::MarkovianSequences(const MarkovianSequences &seq , bool *aux
  *
  *  Copie d'un objet MarkovianSequences.
  *
- *  arguments : reference sur un objet MarkovianSequences, inversion /
+ *  arguments : reference sur un objet MarkovianSequences,
  *              ajout/suppression des lois empiriques de temps de sejour initial.
  *
  *--------------------------------------------------------------*/
@@ -198,7 +198,7 @@ void MarkovianSequences::copy(const MarkovianSequences &seq , int param)
     min_interval[i] = seq.min_interval[i];
   }
 
-  if ((seq.self_transition) && (param != REVERSE)) {
+  if (seq.self_transition) {
     self_transition = new SelfTransition*[marginal_distribution[0]->nb_value];
     for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
       if (seq.self_transition[i]) {
@@ -280,19 +280,94 @@ void MarkovianSequences::copy(const MarkovianSequences &seq , int param)
         }
       }
 
-      else if (param == REVERSE) {
-        characteristics[i] = new SequenceCharacteristics(*(seq.characteristics[i]), 'r');
+      else {
+        characteristics[i] = new SequenceCharacteristics(*(seq.characteristics[i]));
+      }
+    }
 
-        build_index_value(i);
-        build_first_occurrence_frequency_distribution(i);
+    else {
+      characteristics[i] = NULL;
+    }
+  }
+}
 
-        if (!(seq.characteristics[i]->initial_run)) {
-          build_sojourn_time_frequency_distribution(i);
+
+/*--------------------------------------------------------------*
+ *
+ *  Copie d'un objet MarkovianSequences avec inversion du sens de parcours des sequences.
+ *
+ *  arguments : reference sur un objet MarkovianSequences.
+ *
+ *--------------------------------------------------------------*/
+
+void MarkovianSequences::reverse(const MarkovianSequences &seq)
+
+{
+  register int i , j;
+
+
+  min_interval = new double[nb_variable];
+  for (i = 0;i < nb_variable;i++) {
+    min_interval[i] = seq.min_interval[i];
+  }
+
+  self_transition = NULL;
+
+  if (seq.observation_distribution) {
+    observation_distribution = new FrequencyDistribution**[nb_variable];
+    observation_distribution[0] = NULL;
+
+    for (i = 1;i < nb_variable;i++) {
+      if (seq.observation_distribution[i]) {
+        observation_distribution[i] = new FrequencyDistribution*[marginal_distribution[0]->nb_value];
+        for (j = 0;j < marginal_distribution[0]->nb_value;j++) {
+          observation_distribution[i][j] = new FrequencyDistribution(*(seq.observation_distribution[i][j]));
         }
       }
 
       else {
-        characteristics[i] = new SequenceCharacteristics(*(seq.characteristics[i]));
+        observation_distribution[i] = NULL;
+      }
+    }
+  }
+
+  else {
+    observation_distribution = NULL;
+  }
+
+  if (seq.observation_histogram) {
+    observation_histogram = new Histogram**[nb_variable];
+    observation_histogram[0] = NULL;
+
+    for (i = 1;i < nb_variable;i++) {
+      if (seq.observation_histogram[i]) {
+        observation_histogram[i] = new Histogram*[marginal_distribution[0]->nb_value];
+        for (j = 0;j < marginal_distribution[0]->nb_value;j++) {
+          observation_histogram[i][j] = new Histogram(*(seq.observation_histogram[i][j]));
+        }
+      }
+
+      else {
+        observation_histogram[i] = NULL;
+      }
+    }
+  }
+
+  else {
+    observation_histogram = NULL;
+  }
+
+  characteristics = new SequenceCharacteristics*[nb_variable];
+
+  for (i = 0;i < nb_variable;i++) {
+    if (seq.characteristics[i]) {
+      characteristics[i] = new SequenceCharacteristics(*(seq.characteristics[i]), 'r');
+
+      build_index_value(i);
+      build_first_occurrence_frequency_distribution(i);
+
+      if (!(seq.characteristics[i]->initial_run)) {
+        build_sojourn_time_frequency_distribution(i);
       }
     }
 
@@ -369,26 +444,34 @@ void MarkovianSequences::add_state_variable(const MarkovianSequences &seq , int 
  *  Constructeur par copie de la classe MarkovianSequences.
  *
  *  arguments : reference sur un objet MarkovianSequences, type de transformation ('c' : copie,
- *              'a' : addition d'une variable d'etat, 'r' : suppression du parametre d'index),
- *              inversion / ajout/suppression des lois empiriques de temps de sejour initial.
+ *              'r' : inversion du sens de parcours, 'a' : addition d'une variable d'etat,
+ *              'm' : suppression du parametre d'index, 'e' : parametre d'index rendu explicite),
+ *              ajout/suppression des lois empiriques de temps de sejour initial.
  *
  *--------------------------------------------------------------*/
 
-MarkovianSequences::MarkovianSequences(const MarkovianSequences &seq , char transform ,
-                                       int param)
+MarkovianSequences::MarkovianSequences(const MarkovianSequences &seq , char transform , int param)
 
 {
   switch (transform) {
   case 'c' :
-    Sequences::copy(seq , (param == REVERSE ? true : false));
+    Sequences::copy(seq);
     copy(seq , param);
+    break;
+  case 'r' :
+    Sequences::reverse(seq);
+    reverse(seq);
     break;
   case 'a' :
     Sequences::add_state_variable(seq);
     add_state_variable(seq , param);
     break;
-  case 'r' :
+  case 'm' :
     Sequences::remove_index_parameter(seq);
+    copy(seq);
+    break;
+  case 'e' :
+    Sequences::explicit_index_parameter(seq);
     copy(seq);
     break;
   default :
@@ -872,9 +955,9 @@ MarkovianSequences* MarkovianSequences::merge(StatError &error , int nb_sample ,
       }
 
       for (i = 0;i < nb_sample;i++) {
-        phisto[i] = pseq[i]->hindex_parameter;
+        phisto[i] = pseq[i]->index_parameter_distribution;
       }
-      seq->hindex_parameter = new FrequencyDistribution(nb_sample , phisto);
+      seq->index_parameter_distribution = new FrequencyDistribution(nb_sample , phisto);
 
       for (i = 0;i < nb_sample;i++) {
         phisto[i] = pseq[i]->index_interval;
@@ -1279,12 +1362,12 @@ MarkovianSequences* MarkovianSequences::transcode(StatError &error , int ivariab
  *  Transcodage des symboles d'une variable entiere.
  *
  *  arguments : references sur un objet StatError et
- *              sur un objet NonparametricSequenceProcess.
+ *              sur un objet CategoricalSequenceProcess.
  *
  *--------------------------------------------------------------*/
 
 MarkovianSequences* MarkovianSequences::transcode(StatError &error ,
-                                                  const NonparametricSequenceProcess *process) const
+                                                  const CategoricalSequenceProcess *process) const
 
 {
   register int i , j;
@@ -1670,7 +1753,36 @@ MarkovianSequences* MarkovianSequences::remove_index_parameter(StatError &error)
     error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
   }
   else {
-    seq = new MarkovianSequences(*this , 'r');
+    seq = new MarkovianSequences(*this , 'm');
+  }
+
+  return seq;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Copie d'un objet MarkovianSequences avec transformation du parametre d'index implicite
+ *  en parametre d'index explicite.
+ *
+ *  argument : reference sur un objet StatError.
+ *
+ *--------------------------------------------------------------*/
+
+MarkovianSequences* MarkovianSequences::explicit_index_parameter(StatError &error) const
+
+{
+  MarkovianSequences *seq;
+
+
+  error.init();
+
+  if (index_parameter) {
+    seq = NULL;
+    error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
+  }
+  else {
+    seq = new MarkovianSequences(*this , 'e');
   }
 
   return seq;
@@ -1998,8 +2110,8 @@ MarkovianSequences* MarkovianSequences::merge_variable(StatError &error , int nb
 
     // copie des parametres d'index
 
-    if (hindex_parameter) {
-      seq->hindex_parameter = new FrequencyDistribution(*hindex_parameter);
+    if (index_parameter_distribution) {
+      seq->index_parameter_distribution = new FrequencyDistribution(*index_parameter_distribution);
     }
     if (index_interval) {
       seq->index_interval = new FrequencyDistribution(*index_interval);
@@ -2302,8 +2414,8 @@ MarkovianSequences* MarkovianSequences::build_auxiliary_variable(DiscreteParamet
 
   auxiliary[0] = false;
   for (i = 1;i < nb_variable;i++) {
-    if (((discrete_process) && (discrete_process[i])) ||
-        ((continuous_process) && (continuous_process[i]))) {
+    if (((discrete_process) && (discrete_process[i - 1])) ||
+        ((continuous_process) && (continuous_process[i - 1]))) {
       auxiliary[i] = true;
     }
     else {
@@ -2318,23 +2430,23 @@ MarkovianSequences* MarkovianSequences::build_auxiliary_variable(DiscreteParamet
     for (k = 1;k < nb_variable;k++) {
       j++;
 
-      if ((discrete_process) && (discrete_process[k])) {
+      if ((discrete_process) && (discrete_process[k - 1])) {
         j++;
         pstate = seq->int_sequence[i][0];
         pauxiliary = seq->real_sequence[i][j];
 
         for (m = 0;m < length[i];m++) {
-          *pauxiliary++ = discrete_process[k]->observation[*pstate++]->mean;
+          *pauxiliary++ = discrete_process[k - 1]->observation[*pstate++]->mean;
         }
       }
 
-      else if ((continuous_process) && (continuous_process[k])) {
+      else if ((continuous_process) && (continuous_process[k - 1])) {
         j++;
         pstate = seq->int_sequence[i][0];
         pauxiliary = seq->real_sequence[i][j];
 
         for (m = 0;m < length[i];m++) {
-          *pauxiliary++ = continuous_process[k]->observation[*pstate++]->location;
+          *pauxiliary++ = continuous_process[k - 1]->observation[*pstate++]->location;
         }
       }
     }
@@ -2443,7 +2555,7 @@ MarkovianSequences* MarkovianSequences::split(StatError &error , int step) const
     }
 
     if (seq->index_parameter_type == TIME) {
-      seq->hindex_parameter = new FrequencyDistribution(*hindex_parameter);
+      seq->index_parameter_distribution = new FrequencyDistribution(*index_parameter_distribution);
       seq->index_interval_computation();
     }
 
@@ -2794,9 +2906,10 @@ void MarkovianSequences::min_interval_computation(int variable) const
     }
 
     case REAL_VALUE : {
+//      double max_interval = 0.;
+
       frequency = new int[cumul_length];
 
-//      double max_interval = 0.;
       j = 0;
 
       do {
@@ -2871,15 +2984,20 @@ void MarkovianSequences::min_interval_computation(int variable) const
       }
       while (i < nb_value);
 
-#     ifdef DEBUG
+#     ifdef MESSAGE
       cout << "\n" << STAT_label[STATL_VARIABLE] << " " <<  variable + 1 << ": "
-           << min_interval[variable] << " " << frequency[index[nb_value / 2]]
-           << " | " << nb_value << " " << cumul_length << endl;
+           << min_interval[variable] << " " << frequency[index[nb_value / 2]];
 #     endif
+
+      // a finaliser
 
       if (frequency[index[nb_value / 2]] == 1) {
         min_interval[variable] = 0.;
       }
+
+#     ifdef MESSAGE
+      cout << " | " << nb_value << " " << cumul_length << endl;
+#     endif
 
       delete [] frequency;
       delete [] selected_value;
@@ -3314,7 +3432,7 @@ void MarkovianSequences::build_observation_histogram(int nb_state)
     for (i = 1;i < nb_variable;i++) {
       observation_histogram[i] = NULL;
       if (marginal_histogram[i]) {
-        build_observation_histogram(i , nb_state);
+        build_observation_histogram(i , nb_state , marginal_histogram[i]->step);
       }
     }
   }
@@ -4258,8 +4376,8 @@ bool MarkovianSequences::word_count(StatError &error , ostream &os , int variabl
 
       else {
         max_nb_word = 0;
-        for (i = MAX(hlength->offset , word_length);i < hlength->nb_value;i++) {
-          max_nb_word += hlength->frequency[i] * (i - (word_length - 1));
+        for (i = MAX(length_distribution->offset , word_length);i < length_distribution->nb_value;i++) {
+          max_nb_word += length_distribution->frequency[i] * (i - (word_length - 1));
         }
         nb_word_bound = pow((double)nb_state , word_length);
         if (nb_word_bound < max_nb_word) {
@@ -4445,15 +4563,15 @@ ostream& MarkovianSequences::ascii_write(ostream &os , bool exhaustive , bool co
     if (comment_flag) {
       os << "# ";
     }
-    os << "(" << SEQ_label[SEQL_MIN_INDEX_PARAMETER] << ": " << hindex_parameter->offset << ", "
-       << SEQ_label[SEQL_MAX_INDEX_PARAMETER] << ": " << hindex_parameter->nb_value - 1 << ")" << endl;
+    os << "(" << SEQ_label[SEQL_MIN_INDEX_PARAMETER] << ": " << index_parameter_distribution->offset << ", "
+       << SEQ_label[SEQL_MAX_INDEX_PARAMETER] << ": " << index_parameter_distribution->nb_value - 1 << ")" << endl;
 
     os << "\n";
     if (comment_flag) {
       os << "# ";
     }
     os << SEQ_label[SEQL_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
-    hindex_parameter->ascii_characteristic_print(os , false , comment_flag);
+    index_parameter_distribution->ascii_characteristic_print(os , false , comment_flag);
 
     if (exhaustive) {
       os << "\n";
@@ -4461,7 +4579,7 @@ ostream& MarkovianSequences::ascii_write(ostream &os , bool exhaustive , bool co
         os << "# ";
       }
       os << "   | " << SEQ_label[SEQL_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
-      hindex_parameter->ascii_print(os , comment_flag);
+      index_parameter_distribution->ascii_print(os , comment_flag);
     }
     os << endl;
   }
@@ -4589,7 +4707,7 @@ ostream& MarkovianSequences::ascii_write(ostream &os , bool exhaustive , bool co
       }
 
       if (characteristics[i]) {
-        characteristics[i]->ascii_print(os , type[i] , *hlength , exhaustive , comment_flag);
+        characteristics[i]->ascii_print(os , type[i] , *length_distribution , exhaustive , comment_flag);
       }
     }
 
@@ -4617,7 +4735,7 @@ ostream& MarkovianSequences::ascii_write(ostream &os , bool exhaustive , bool co
     os << "# ";
   }
   os << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
-  hlength->ascii_characteristic_print(os , false , comment_flag);
+  length_distribution->ascii_characteristic_print(os , false , comment_flag);
 
   if (exhaustive) {
     os << "\n";
@@ -4625,7 +4743,7 @@ ostream& MarkovianSequences::ascii_write(ostream &os , bool exhaustive , bool co
       os << "# ";
     }
     os << "   | " << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
-    hlength->ascii_print(os , comment_flag);
+    length_distribution->ascii_print(os , comment_flag);
   }
 
   os << "\n";
@@ -4771,14 +4889,14 @@ bool MarkovianSequences::spreadsheet_write(StatError &error , const char *path) 
     if (index_parameter_type == TIME) {
       out_file << SEQ_word[SEQW_INDEX_PARAMETER] << "\t"
                << SEQ_index_parameter_word[index_parameter_type] << "\t\t"
-               << SEQ_label[SEQL_MIN_INDEX_PARAMETER] << "\t" << hindex_parameter->offset << "\t\t"
-               << SEQ_label[SEQL_MAX_INDEX_PARAMETER] << "\t" << hindex_parameter->nb_value - 1 << endl;
+               << SEQ_label[SEQL_MIN_INDEX_PARAMETER] << "\t" << index_parameter_distribution->offset << "\t\t"
+               << SEQ_label[SEQL_MAX_INDEX_PARAMETER] << "\t" << index_parameter_distribution->nb_value - 1 << endl;
 
       out_file << "\n" << SEQ_label[SEQL_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
-      hindex_parameter->spreadsheet_characteristic_print(out_file);
+      index_parameter_distribution->spreadsheet_characteristic_print(out_file);
 
       out_file << "\n\t" << SEQ_label[SEQL_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
-      hindex_parameter->spreadsheet_print(out_file);
+      index_parameter_distribution->spreadsheet_print(out_file);
       out_file << endl;
     }
 
@@ -4848,7 +4966,7 @@ bool MarkovianSequences::spreadsheet_write(StatError &error , const char *path) 
         }
 
         if (characteristics[i]) {
-          characteristics[i]->spreadsheet_print(out_file , type[i] , *hlength);
+          characteristics[i]->spreadsheet_print(out_file , type[i] , *length_distribution);
         }
       }
 
@@ -4858,10 +4976,10 @@ bool MarkovianSequences::spreadsheet_write(StatError &error , const char *path) 
     }
 
     out_file << "\n" << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
-    hlength->spreadsheet_characteristic_print(out_file);
+    length_distribution->spreadsheet_characteristic_print(out_file);
 
     out_file << "\n\t" << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
-    hlength->spreadsheet_print(out_file);
+    length_distribution->spreadsheet_print(out_file);
 
     out_file << "\n" << SEQ_label[SEQL_CUMUL_LENGTH] << "\t" << cumul_length << endl;
   }
@@ -4896,11 +5014,11 @@ bool MarkovianSequences::plot_print(const char *prefix , const char *title , int
   data_file_name[0] << prefix << variable + 1 << 0 << ".dat";
 
   nb_histo = 0;
-  if (hindex_parameter) {
-    phisto[nb_histo++] = hindex_parameter;
+  if (index_parameter_distribution) {
+    phisto[nb_histo++] = index_parameter_distribution;
   }
 
-  status = hlength->plot_print((data_file_name[0].str()).c_str() , nb_histo , phisto);
+  status = length_distribution->plot_print((data_file_name[0].str()).c_str() , nb_histo , phisto);
 
   if (status) {
     if (marginal_distribution[variable]) {
@@ -5010,50 +5128,50 @@ bool MarkovianSequences::plot_print(const char *prefix , const char *title , int
         out_file << endl;
       }
 
-      if (hlength->nb_value - 1 < TIC_THRESHOLD) {
+      if (length_distribution->nb_value - 1 < TIC_THRESHOLD) {
         out_file << "set xtics 0,1" << endl;
       }
-      if ((int)(hlength->max * YSCALE) + 1 < TIC_THRESHOLD) {
+      if ((int)(length_distribution->max * YSCALE) + 1 < TIC_THRESHOLD) {
         out_file << "set ytics 0,1" << endl;
       }
 
-      out_file << "plot [0:" << hlength->nb_value - 1 << "] [0:"
-               << (int)(hlength->max * YSCALE) + 1 << "] \""
+      out_file << "plot [0:" << length_distribution->nb_value - 1 << "] [0:"
+               << (int)(length_distribution->max * YSCALE) + 1 << "] \""
                << label((data_file_name[0].str()).c_str()) << "\" using 1 title \""
                << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                << "\" with impulses" << endl;
 
-      if (hlength->nb_value - 1 < TIC_THRESHOLD) {
+      if (length_distribution->nb_value - 1 < TIC_THRESHOLD) {
         out_file << "set xtics autofreq" << endl;
       }
-      if ((int)(hlength->max * YSCALE) + 1 < TIC_THRESHOLD) {
+      if ((int)(length_distribution->max * YSCALE) + 1 < TIC_THRESHOLD) {
         out_file << "set ytics autofreq" << endl;
       }
 
-      if (hindex_parameter) {
+      if (index_parameter_distribution) {
         if (i == 0) {
           out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
         }
         out_file << endl;
 
-        if (hindex_parameter->nb_value - 1 < TIC_THRESHOLD) {
+        if (index_parameter_distribution->nb_value - 1 < TIC_THRESHOLD) {
           out_file << "set xtics 0,1" << endl;
         }
-        if ((int)(hindex_parameter->max * YSCALE) + 1 < TIC_THRESHOLD) {
+        if ((int)(index_parameter_distribution->max * YSCALE) + 1 < TIC_THRESHOLD) {
           out_file << "set ytics 0,1" << endl;
         }
 
-        out_file << "plot [" << hindex_parameter->offset << ":"
-                 << hindex_parameter->nb_value - 1 << "] [0:"
-                 << (int)(hindex_parameter->max * YSCALE) + 1 << "] \""
+        out_file << "plot [" << index_parameter_distribution->offset << ":"
+                 << index_parameter_distribution->nb_value - 1 << "] [0:"
+                 << (int)(index_parameter_distribution->max * YSCALE) + 1 << "] \""
                  << label((data_file_name[0].str()).c_str()) << "\" using 2 title \""
                  << SEQ_label[SEQL_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                  << "\" with impulses" << endl;
 
-        if (hindex_parameter->nb_value - 1 < TIC_THRESHOLD) {
+        if (index_parameter_distribution->nb_value - 1 < TIC_THRESHOLD) {
           out_file << "set xtics autofreq" << endl;
         }
-        if ((int)(hindex_parameter->max * YSCALE) + 1 < TIC_THRESHOLD) {
+        if ((int)(index_parameter_distribution->max * YSCALE) + 1 < TIC_THRESHOLD) {
           out_file << "set ytics autofreq" << endl;
         }
       }
@@ -5092,7 +5210,7 @@ bool MarkovianSequences::plot_write(StatError &error , const char *prefix ,
   error.init();
 
   if (characteristics[0]) {
-    status = characteristics[0]->plot_print(prefix , title , 0 , nb_variable , type[0] , *hlength);
+    status = characteristics[0]->plot_print(prefix , title , 0 , nb_variable , type[0] , *length_distribution);
   }
   else {
     status = plot_print(prefix , title , 0 , nb_variable);
@@ -5101,7 +5219,7 @@ bool MarkovianSequences::plot_write(StatError &error , const char *prefix ,
   if (status) {
     for (i = 1;i < nb_variable;i++) {
       if (characteristics[i]) {
-        characteristics[i]->plot_print(prefix , title , i , nb_variable , type[i] , *hlength);
+        characteristics[i]->plot_print(prefix , title , i , nb_variable , type[i] , *length_distribution);
       }
       else {
         plot_print(prefix , title , i , nb_variable);
@@ -5248,7 +5366,7 @@ void MarkovianSequences::plotable_write(MultiPlotSet &plot , int &index , int va
   if ((marginal_distribution[variable]) || (marginal_histogram[variable])) {
     nb_plot_set++;
   }
-  if (hindex_parameter) {
+  if (index_parameter_distribution) {
     nb_plot_set++;
   } */
 
@@ -5312,13 +5430,13 @@ void MarkovianSequences::plotable_write(MultiPlotSet &plot , int &index , int va
 
   plot.variable[index] = variable;
 
-  plot[index].xrange = Range(0 , hlength->nb_value - 1);
-  plot[index].yrange = Range(0 , ceil(hlength->max * YSCALE));
+  plot[index].xrange = Range(0 , length_distribution->nb_value - 1);
+  plot[index].yrange = Range(0 , ceil(length_distribution->max * YSCALE));
 
-  if (hlength->nb_value - 1 < TIC_THRESHOLD) {
+  if (length_distribution->nb_value - 1 < TIC_THRESHOLD) {
     plot[index].xtics = 1;
   }
-  if (ceil(hlength->max * YSCALE) < TIC_THRESHOLD) {
+  if (ceil(length_distribution->max * YSCALE) < TIC_THRESHOLD) {
     plot[index].ytics = 1;
   }
 
@@ -5330,22 +5448,22 @@ void MarkovianSequences::plotable_write(MultiPlotSet &plot , int &index , int va
 
   plot[index][0].style = "impulses";
 
-  hlength->plotable_frequency_write(plot[index][0]);
+  length_distribution->plotable_frequency_write(plot[index][0]);
   index++;
 
-  if (hindex_parameter) {
+  if (index_parameter_distribution) {
 
     // vue : loi empirique des parametres d'index
 
     plot.variable[index] = variable;
 
-    plot[index].xrange = Range(hindex_parameter->offset , hindex_parameter->nb_value - 1);
-    plot[index].yrange = Range(0 , ceil(hindex_parameter->max * YSCALE));
+    plot[index].xrange = Range(index_parameter_distribution->offset , index_parameter_distribution->nb_value - 1);
+    plot[index].yrange = Range(0 , ceil(index_parameter_distribution->max * YSCALE));
 
-    if (hindex_parameter->nb_value - 1 < TIC_THRESHOLD) {
+    if (index_parameter_distribution->nb_value - 1 < TIC_THRESHOLD) {
       plot[index].xtics = 1;
     }
-    if (ceil(hindex_parameter->max * YSCALE) < TIC_THRESHOLD) {
+    if (ceil(index_parameter_distribution->max * YSCALE) < TIC_THRESHOLD) {
       plot[index].ytics = 1;
     }
 
@@ -5357,7 +5475,7 @@ void MarkovianSequences::plotable_write(MultiPlotSet &plot , int &index , int va
 
     plot[index][0].style = "impulses";
 
-    hindex_parameter->plotable_frequency_write(plot[index][0]);
+    index_parameter_distribution->plotable_frequency_write(plot[index][0]);
     index++;
   }
 }
@@ -5435,7 +5553,7 @@ MultiPlotSet* MarkovianSequences::get_plotable() const
       if ((marginal_distribution[i]) || (marginal_histogram[i])) {
         nb_plot_set++;
       }
-      if (hindex_parameter) {
+      if (index_parameter_distribution) {
         nb_plot_set++;
       }
     }
@@ -5532,7 +5650,7 @@ MultiPlotSet* MarkovianSequences::get_plotable() const
 
   for (i = 0;i < nb_variable;i++) {
     if (characteristics[i]) {
-      characteristics[i]->plotable_write(plot , index , i , type[i] , *hlength);
+      characteristics[i]->plotable_write(plot , index , i , type[i] , *length_distribution);
     }
     else if (type[i] != AUXILIARY) {
       plotable_write(plot , index , i);
