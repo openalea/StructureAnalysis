@@ -1026,12 +1026,12 @@ public :
       }
    }
 
-   static MixtureData* Chmt_data_wrapper_extract_marginal(const HiddenMarkovTreeData& reftree,
-                                                          int variable)
+   static DiscreteMixtureData* Chmt_data_wrapper_extract_marginal(const HiddenMarkovTreeData& reftree,
+                                                                  int variable)
    {
       ostringstream error_message;
       StatError error;
-      MixtureData *histo = NULL;
+      DiscreteMixtureData *histo = NULL;
 
       histo = reftree.extract_marginal(error, variable);
       if (histo == NULL)
@@ -1237,7 +1237,7 @@ void class_hmt_data()
                             "is parametric")
         .def("ExtractMarginal", WRAP::Chmt_data_wrapper_extract_marginal,
              return_value_policy< manage_new_object>(),
-             "ExtractMarginal(self, variable) -> MixtureData \n\n"
+             "ExtractMarginal(self, variable) -> DiscreteMixtureData \n\n"
              "Return the mixture of observation distributions"
              "for a given variable")
         .def("ExtractMarkov", WRAP::Chmt_data_wrapper_extract_model,
