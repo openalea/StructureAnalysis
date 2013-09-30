@@ -46,7 +46,7 @@ namespace Stat_trees
 
 /*! \file hidden_markov_tree.h
     \brief Purpose:
-     provide the class "Non_parametric_tree_process" for the representation
+     provide the class "CategoricalTreeProcess" for the representation
         of tree processes controlled by a discrete tree process. Includes
         the characteristic quantity distributions for each random variable and
      the class "HiddenMarkovTree", which corresponds to hidden Markov trees and
@@ -86,15 +86,15 @@ enum {
  */
 
 /**
-   \class NonparametricTreeProcess
-   \brief a collection of nonparametric distributions, mainly used for
+   \class CategoricalTreeProcess
+   \brief a collection of categorical distributions, mainly used for
           the representation of emission distributions given
           a state variable (e.g. a hidden state)
           and that of the distribution of characteristic quantities
 */
 
-class NonparametricTreeProcess : public NonparametricProcess
-{  // a collection of nonparametric distributions, mainly used for
+class CategoricalTreeProcess : public CategoricalProcess
+{  // a collection of categorical distributions, mainly used for
    // the representation of emission distributions given
    // a state variable (e.g. a hidden state)
    // and that of the distribution of characteristic quantities
@@ -105,10 +105,10 @@ class NonparametricTreeProcess : public NonparametricProcess
    friend class MarkovOutTree;
    friend class MarkovOutTreeData;
 
-   // friend NonparametricTreeProcess* occupancy_parsing(StatError &error , ifstream &in_file ,
-   //                                                    int &line , const Chain &chain ,
-   //                                                    double cumul_threshold = CUMUL_THRESHOLD);
-   friend bool test_hidden(int nb_output_process, NonparametricTreeProcess **process);
+   // friend CategoricalTreeProcess* occupancy_parsing(StatError &error , ifstream &in_file ,
+   //                                                  int &line , const Chain &chain ,
+   //                                                  double cumul_threshold = CUMUL_THRESHOLD);
+   friend bool test_hidden(int nb_output_process, CategoricalTreeProcess **process);
 
 private :
 
@@ -145,7 +145,7 @@ private :
    void create_characteristic(const Distribution& hsize, bool sojourn_time_flag= true,
                               bool counting_flag= true);
 
-   void copy(const NonparametricTreeProcess& process, bool characteristic_flag= true);
+   void copy(const CategoricalTreeProcess& process, bool characteristic_flag= true);
 
    void copy_double_array(double*& dest, const double* source, int inb_value);
    void copy_Distribution_array(Distribution**& dest,
@@ -157,7 +157,7 @@ private :
    void remove_Distribution_array(Distribution**& d, int inb_value);
 
    void init_Distribution_array(Distribution**& d, int inb_value);
-   void init_occupancy(const NonparametricTreeProcess& process, int occupancy_nb_value);
+   void init_occupancy(const CategoricalTreeProcess& process, int occupancy_nb_value);
 
    /** Permutation of the states of \e self */
    void state_permutation(int* perm) const;
@@ -181,7 +181,7 @@ private :
                    const TreeCharacteristics * characteristics= NULL,
                    const FrequencyDistribution * hsize= NULL) const;
 
-   /** Matplotlib output of NonparametricTreeProcess */
+   /** Matplotlib output of CategoricalTreeProcess */
    MultiPlotSet* plotable_write(MultiPlotSet &plot, int &index,
                                 int process, FrequencyDistribution * const * empirical_observation = NULL,
                                 const TreeCharacteristics * characteristics = NULL,
@@ -194,14 +194,14 @@ private :
 
 public :
 
-   NonparametricTreeProcess(int inb_state= 0, int inb_value= 0,
-                              int observation_flag= false);
-   // NonparametricTreeProcess(int inb_state , Distribution **occupancy);
-   NonparametricTreeProcess(const NonparametricProcess& process);
-   NonparametricTreeProcess(const NonparametricTreeProcess& process ,
-                            char manip= 'c', int param= true);
-   ~NonparametricTreeProcess();
-   NonparametricTreeProcess& operator=(const NonparametricTreeProcess& process);
+   CategoricalTreeProcess(int inb_state= 0, int inb_value= 0,
+                          int observation_flag= false);
+   // CategoricalTreeProcess(int inb_state , Distribution **occupancy);
+   CategoricalTreeProcess(const CategoricalProcess& process);
+   CategoricalTreeProcess(const CategoricalTreeProcess& process ,
+                          char manip= 'c', int param= true);
+   ~CategoricalTreeProcess();
+   CategoricalTreeProcess& operator=(const CategoricalTreeProcess& process);
 
    // access to class members
 
@@ -228,7 +228,7 @@ public :
    Distribution* get_nb_occurrences(int value) const;
 };
 
-bool test_hidden(int nb_output_process, NonparametricTreeProcess **process);
+bool test_hidden(int nb_output_process, CategoricalTreeProcess **process);
 
 /**
    \class HiddenMarkovTree
@@ -267,14 +267,14 @@ protected :
    /// number of double (parametric) observation processes
    int _nb_doutput_process;
    /// non-parametric observation processes
-   NonparametricTreeProcess **npprocess;
+   CategoricalTreeProcess **npprocess;
    /// integer parametric observation processes
    DiscreteParametricProcess **piprocess;
    /// double (i.e. floating) parametric observation processes
    DiscreteParametricProcess **pdprocess;
 
    /* HiddenMarkovTree(const Chain * pchain, int inb_nonparam, int inb_param,
-                     NonparametricProcess** pobservation, int size);
+                     CategoricalProcess** pobservation, int size);
    HiddenMarkovTree(const HiddenMarkovTree& markov,
                     char manip,
                     int param);
@@ -491,11 +491,11 @@ public :
                     int inb_ioutput_process, int inb_doutput_process,
                     int* nb_value, bool* force_param= NULL);
    HiddenMarkovTree(const Chain * pchain, int ich_order, int inb_ioutput_process,
-                    NonparametricProcess** pobservation,
+                    CategoricalProcess** pobservation,
                     int size, bool counting_flag);
    HiddenMarkovTree(const Chain * pchain,
                     int ich_order, int inb_ioutput_process, int inb_doutput_process,
-                    NonparametricProcess** nonparametric_observation,
+                    CategoricalProcess** categorical_observation,
                     DiscreteParametricProcess** iparametric_observation,
                     DiscreteParametricProcess** dparametric_observation,
                     int size, bool counting_flag);
@@ -595,8 +595,8 @@ public :
    int get_nb_values(int variable) const;
    /** return "true" if process ivariable is parametric */
    bool is_parametric(int ivariable) const;
-   NonparametricTreeProcess** get_non_parametric_process() const;
-   NonparametricTreeProcess* get_non_parametric_process(int variable) const;
+   CategoricalTreeProcess** get_categorical_process() const;
+   CategoricalTreeProcess* get_categorical_process(int variable) const;
    DiscreteParametricProcess** get_iparametric_process() const;
    DiscreteParametricProcess* get_iparametric_process(int variable) const;
    DiscreteParametricProcess** get_dparametric_process() const;
@@ -755,7 +755,7 @@ public :
    HiddenMarkovTree* extract_model(StatError& error) const;
 
    /** Return mixture distribution with frequency distribution for a given variable */
-   MixtureData* extract_marginal(StatError& error, int variable) const;
+   DiscreteMixtureData* extract_marginal(StatError& error, int variable) const;
 
    /*
    Print mixture distribution with frequency distribution for a given variable
