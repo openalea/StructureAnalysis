@@ -117,8 +117,8 @@ void class_top_parameters() {
   class_<TopParameters, bases<StatInterface> >
   ("_TopParameters", "Top parameters")
     .def("__init__", make_constructor(TopParametersWrap::top_parameters_from_file))
-    .def(init< optional <double, double, double, int> >())
-    .def(init< const TopParameters& ,optional <bool> >())
+//    .def(init< optional <double, double, double, int> >())
+//    .def(init< const TopParameters& ,optional <bool> >())
 
     .def(self_ns::str(self)) //__str__
 
