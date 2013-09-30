@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
@@ -779,13 +779,13 @@ ostream& Sequences::ascii_write(ostream &os , bool exhaustive , bool comment_fla
        << SEQ_index_parameter_word[index_parameter_type];
   }
 
-  if (hindex_parameter) {
+  if (index_parameter_distribution) {
     os << "   ";
     if (comment_flag) {
       os << "# ";
     }
-    os << "(" << SEQ_label[SEQL_MIN_INDEX_PARAMETER] << ": " << hindex_parameter->offset << ", "
-       << SEQ_label[SEQL_MAX_INDEX_PARAMETER] << ": " << hindex_parameter->nb_value - 1 << ")" << endl;
+    os << "(" << SEQ_label[SEQL_MIN_INDEX_PARAMETER] << ": " << index_parameter_distribution->offset << ", "
+       << SEQ_label[SEQL_MAX_INDEX_PARAMETER] << ": " << index_parameter_distribution->nb_value - 1 << ")" << endl;
 
     os << "\n";
     if (comment_flag) {
@@ -793,7 +793,7 @@ ostream& Sequences::ascii_write(ostream &os , bool exhaustive , bool comment_fla
     }
     os << (index_parameter_type == TIME ? SEQ_label[SEQL_TIME] : SEQ_label[SEQL_POSITION])
        << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
-    hindex_parameter->ascii_characteristic_print(os , false , comment_flag);
+    index_parameter_distribution->ascii_characteristic_print(os , false , comment_flag);
 
     if (exhaustive) {
       os << "\n";
@@ -802,7 +802,7 @@ ostream& Sequences::ascii_write(ostream &os , bool exhaustive , bool comment_fla
       }
       os << "   | " << (index_parameter_type == TIME ? SEQ_label[SEQL_TIME] : SEQ_label[SEQL_POSITION])
          << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
-      hindex_parameter->ascii_print(os , comment_flag);
+      index_parameter_distribution->ascii_print(os , comment_flag);
     }
   }
 
@@ -932,7 +932,7 @@ ostream& Sequences::ascii_write(ostream &os , bool exhaustive , bool comment_fla
     os << "# ";
   }
   os << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
-  hlength->ascii_characteristic_print(os , false , comment_flag);
+  length_distribution->ascii_characteristic_print(os , false , comment_flag);
 
   if (exhaustive) {
     os << "\n";
@@ -940,7 +940,7 @@ ostream& Sequences::ascii_write(ostream &os , bool exhaustive , bool comment_fla
       os << "# ";
     }
     os << "   | " << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
-    hlength->ascii_print(os , comment_flag);
+    length_distribution->ascii_print(os , comment_flag);
   }
 
   os << "\n";
@@ -1006,15 +1006,15 @@ bool Sequences::ascii_write(StatError &error , const char *path ,
  *  Ecriture des sequences.
  *
  *  arguments : stream, format ('c' : column / 'l' : line / 'a' : array / 'p' : posterior),
- *              flag commentaire, probabilites a posteriori des sequences
- *              d'etats les plus probables, entropie des sequences d'etats
+ *              flag commentaire, probabilites a posteriori des sequences d'etats
+ *              les plus probables, entropie des sequences d'etats, nombre de sequences d'etats
  *              (modeles markoviens caches), nombre de caracteres par ligne.
  *
  *--------------------------------------------------------------*/
 
 ostream& Sequences::ascii_print(ostream &os , char format , bool comment_flag ,
                                 double *posterior_probability , double *entropy ,
-                                int line_nb_character) const
+                                double *nb_state_sequence , int line_nb_character) const
 
 {
   register int i , j , k , m;
@@ -1096,13 +1096,21 @@ ostream& Sequences::ascii_print(ostream &os , char format , bool comment_flag ,
       }
       os << "(" << identifier[i] << ")" << endl;
 
-      if ((posterior_probability) && (entropy)) {
+      if ((posterior_probability) && (entropy) && (nb_state_sequence)) {
         if (comment_flag) {
           os << "# ";
         }
         os << SEQ_label[SEQL_POSTERIOR_STATE_SEQUENCE_PROBABILITY]
            << ": " << posterior_probability[i] << "   "
-           << SEQ_label[SEQL_STATE_SEQUENCE_ENTROPY] << ": " << entropy[i] << endl;
+           << SEQ_label[SEQL_STATE_SEQUENCE_ENTROPY] << ": " << entropy[i] << "   "
+           << SEQ_label[SEQL_NB_STATE_SEQUENCE] << ": " << nb_state_sequence[i] << endl;
+        if (comment_flag) {
+          os << "# ";
+        }
+//        os << SEQ_label[SEQL_POSTERIOR_STATE_SEQUENCE_PROBABILITY_LOG_RATIO]
+//           << ": " << log(nb_state_sequence[i]) + log(posterior_probability[i]) << "   "
+        os << SEQ_label[SEQL_STATE_SEQUENCE_DIVERGENCE] << ": "
+           << log(nb_state_sequence[i]) - entropy[i] << endl;
       }
     }
     break;
@@ -1140,13 +1148,21 @@ ostream& Sequences::ascii_print(ostream &os , char format , bool comment_flag ,
       }
       os << "(" << identifier[i] << ")" << endl;
 
-      if ((posterior_probability) && (entropy)) {
+      if ((posterior_probability) && (entropy) && (nb_state_sequence)) {
         if (comment_flag) {
           os << "# ";
         }
         os << SEQ_label[SEQL_POSTERIOR_STATE_SEQUENCE_PROBABILITY]
            << ": " << posterior_probability[i] << "   "
-           << SEQ_label[SEQL_STATE_SEQUENCE_ENTROPY] << ": " << entropy[i] << endl;
+           << SEQ_label[SEQL_STATE_SEQUENCE_ENTROPY] << ": " << entropy[i] << "   "
+           << SEQ_label[SEQL_NB_STATE_SEQUENCE] << ": " << nb_state_sequence[i] << endl;
+        if (comment_flag) {
+          os << "# ";
+        }
+//        os << SEQ_label[SEQL_POSTERIOR_STATE_SEQUENCE_PROBABILITY_LOG_RATIO]
+//           << ": " << log(nb_state_sequence[i]) + log(posterior_probability[i]) << "   "
+        os << SEQ_label[SEQL_STATE_SEQUENCE_DIVERGENCE] << ": "
+           << log(nb_state_sequence[i]) - entropy[i] << endl;
       }
     }
     break;
@@ -1160,7 +1176,7 @@ ostream& Sequences::ascii_print(ostream &os , char format , bool comment_flag ,
     old_adjust = os.setf(ios::right , ios::adjustfield);
 
     if (index_parameter) {
-      width = column_width(hindex_parameter->nb_value - 1);
+      width = column_width(index_parameter_distribution->nb_value - 1);
     }
     else {
       width = 0;
@@ -1257,13 +1273,21 @@ ostream& Sequences::ascii_print(ostream &os , char format , bool comment_flag ,
       }
       os << "(" << identifier[i] << ")" << endl;
 
-      if ((posterior_probability) && (entropy)) {
+      if ((posterior_probability) && (entropy) && (nb_state_sequence)) {
         if (comment_flag) {
           os << "# ";
         }
         os << SEQ_label[SEQL_POSTERIOR_STATE_SEQUENCE_PROBABILITY]
            << ": " << posterior_probability[i] << "   "
-           << SEQ_label[SEQL_STATE_SEQUENCE_ENTROPY] << ": " << entropy[i] << endl;
+           << SEQ_label[SEQL_STATE_SEQUENCE_ENTROPY] << ": " << entropy[i] << "   "
+           << SEQ_label[SEQL_NB_STATE_SEQUENCE] << ": " << nb_state_sequence[i] << endl;
+        if (comment_flag) {
+          os << "# ";
+        }
+//        os << SEQ_label[SEQL_POSTERIOR_STATE_SEQUENCE_PROBABILITY_LOG_RATIO]
+//           << ": " << log(nb_state_sequence[i]) + log(posterior_probability[i]) << "   "
+        os << SEQ_label[SEQL_STATE_SEQUENCE_DIVERGENCE] << ": "
+           << log(nb_state_sequence[i]) - entropy[i] << endl;
       }
     }
 
@@ -1388,17 +1412,24 @@ ostream& Sequences::ascii_print(ostream &os , char format , bool comment_flag ,
   }
 
   case 'p' : {
-    if ((posterior_probability) && (entropy)) {
+    if ((posterior_probability) && (entropy) && (nb_state_sequence)) {
       bool *selected_sequence;
-      int index , width[4];
+      int index , width[6];
       long old_adjust;
-      double max;
+      double max , *divergence;
 
+
+      divergence = new double[nb_sequence];
+      for (i = 0;i < nb_sequence;i++) {
+        divergence[i] = log(nb_state_sequence[i]) - entropy[i];
+      }
 
       width[0] = column_width(nb_sequence) + ASCII_SPACE;
       width[1] = column_width(nb_sequence , posterior_probability) + ASCII_SPACE;
       width[2] = column_width(nb_sequence , entropy) + ASCII_SPACE;
-      width[3] = column_width(max_length) + ASCII_SPACE;
+      width[3] = column_width(nb_sequence , divergence) + ASCII_SPACE;
+      width[4] = column_width(nb_sequence , nb_state_sequence) + ASCII_SPACE;
+      width[5] = column_width(max_length) + ASCII_SPACE;
 
       selected_sequence = new bool[nb_sequence];
       for (i = 0;i < nb_sequence;i++) {
@@ -1407,16 +1438,39 @@ ostream& Sequences::ascii_print(ostream &os , char format , bool comment_flag ,
 
       old_adjust = os.setf(ios::left , ios::adjustfield);
 
-      os << "\n4 " << STAT_word[STATW_VARIABLES] << endl;
+      os << "\n6 " << STAT_word[STATW_VARIABLES] << endl;
 
-      os << "\n" << STAT_word[STATW_VARIABLE] << " 1 : "
-         << STAT_variable_word[INT_VALUE] << endl;
-      for (i = 2;i < 4;i++) {
-        os << STAT_word[STATW_VARIABLE] << " " << i << " : "
-           << STAT_variable_word[REAL_VALUE] << endl;
+      os << "\n" << STAT_word[STATW_VARIABLE] << " 1 : " << STAT_variable_word[INT_VALUE] << endl;
+
+      os << STAT_word[STATW_VARIABLE] << " 2 : " << STAT_variable_word[REAL_VALUE] << "   ";
+      if (comment_flag) {
+        os << "# ";
       }
-      os << STAT_word[STATW_VARIABLE] << " 4 : "
-         << STAT_variable_word[INT_VALUE] << endl;
+      os << SEQ_label[SEQL_POSTERIOR_STATE_SEQUENCE_PROBABILITY] << endl;
+
+      os << STAT_word[STATW_VARIABLE] << " 3 : " << STAT_variable_word[REAL_VALUE] << "   ";
+      if (comment_flag) {
+        os << "# ";
+      }
+      os << SEQ_label[SEQL_STATE_SEQUENCE_ENTROPY] << endl;
+
+      os << STAT_word[STATW_VARIABLE] << " 4 : " << STAT_variable_word[REAL_VALUE] << "   ";
+      if (comment_flag) {
+        os << "# ";
+      }
+      os << SEQ_label[SEQL_STATE_SEQUENCE_DIVERGENCE] << endl;
+
+      os << STAT_word[STATW_VARIABLE] << " 5 : " << STAT_variable_word[REAL_VALUE] << "   ";
+      if (comment_flag) {
+        os << "# ";
+      }
+      os << SEQ_label[SEQL_NB_STATE_SEQUENCE] << endl;
+
+      os << STAT_word[STATW_VARIABLE] << " 6 : " << STAT_variable_word[INT_VALUE] << "    ";
+      if (comment_flag) {
+        os << "# ";
+      }
+      os << SEQ_label[SEQL_SEQUENCE_LENGTH] << endl;
 
       os << "\n";
       for (i = 0;i < nb_sequence;i++) {
@@ -1431,7 +1485,9 @@ ostream& Sequences::ascii_print(ostream &os , char format , bool comment_flag ,
         if (j < length[i]) {
           os << setw(width[1]) << posterior_probability[i]
              << setw(width[2]) << entropy[i]
-             << setw(width[3]) << length[i];
+             << setw(width[3]) << divergence[i]
+             << setw(width[4]) << nb_state_sequence[i]
+             << setw(width[5]) << length[i];
           if (comment_flag) {
             os << "# ";
           }
@@ -1454,13 +1510,16 @@ ostream& Sequences::ascii_print(ostream &os , char format , bool comment_flag ,
         os << setw(width[0]) << i + 1
            << setw(width[1]) << posterior_probability[index]
            << setw(width[2]) << entropy[index]
-           << setw(width[3]) << length[index];
+           << setw(width[3]) << divergence[index]
+           << setw(width[4]) << nb_state_sequence[index]
+           << setw(width[5]) << length[index];
         if (comment_flag) {
           os << "# ";
         }
         os << "(" << identifier[index] << ")" << endl;
       }
 
+      delete [] divergence;
       delete [] selected_sequence;
 
       os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
@@ -1559,17 +1618,17 @@ bool Sequences::spreadsheet_write(StatError &error , const char *path) const
                << SEQ_index_parameter_word[index_parameter_type];
     }
 
-    if (hindex_parameter) {
-      out_file << "\t\t" << SEQ_label[SEQL_MIN_INDEX_PARAMETER] << "\t" << hindex_parameter->offset
-               << "\t\t" << SEQ_label[SEQL_MAX_INDEX_PARAMETER] << "\t" << hindex_parameter->nb_value - 1 << endl;
+    if (index_parameter_distribution) {
+      out_file << "\t\t" << SEQ_label[SEQL_MIN_INDEX_PARAMETER] << "\t" << index_parameter_distribution->offset
+               << "\t\t" << SEQ_label[SEQL_MAX_INDEX_PARAMETER] << "\t" << index_parameter_distribution->nb_value - 1 << endl;
 
       out_file << "\n" << (index_parameter_type == TIME ? SEQ_label[SEQL_TIME] : SEQ_label[SEQL_POSITION])
                << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
-      hindex_parameter->spreadsheet_characteristic_print(out_file);
+      index_parameter_distribution->spreadsheet_characteristic_print(out_file);
 
       out_file << "\n\t" << (index_parameter_type == TIME ? SEQ_label[SEQL_TIME] : SEQ_label[SEQL_POSITION])
                << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
-      hindex_parameter->spreadsheet_print(out_file);
+      index_parameter_distribution->spreadsheet_print(out_file);
     }
 
     else {
@@ -1636,10 +1695,10 @@ bool Sequences::spreadsheet_write(StatError &error , const char *path) const
     }
 
     out_file << "\n" << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
-    hlength->spreadsheet_characteristic_print(out_file);
+    length_distribution->spreadsheet_characteristic_print(out_file);
 
     out_file << "\n\t" << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
-    hlength->spreadsheet_print(out_file);
+    length_distribution->spreadsheet_print(out_file);
 
     out_file << "\n" << SEQ_label[SEQL_CUMUL_LENGTH] << "\t" << cumul_length << endl;
   }
@@ -1677,14 +1736,14 @@ bool Sequences::plot_write(StatError &error , const char *prefix ,
 
   nb_histo = 0;
 
-  if (hindex_parameter) {
-    phisto[nb_histo++] = hindex_parameter;
+  if (index_parameter_distribution) {
+    phisto[nb_histo++] = index_parameter_distribution;
   }
   if (index_interval) {
     phisto[nb_histo++] = index_interval;
   }
 
-  status = hlength->plot_print((data_file_name[0].str()).c_str() , nb_histo , phisto);
+  status = length_distribution->plot_print((data_file_name[0].str()).c_str() , nb_histo , phisto);
 
   if (!status) {
     error.update(STAT_error[STATR_FILE_PREFIX]);
@@ -1733,25 +1792,25 @@ bool Sequences::plot_write(StatError &error , const char *prefix ,
 
       j = 2;
 
-      if (hindex_parameter) {
-        if (hindex_parameter->nb_value - 1 < TIC_THRESHOLD) {
+      if (index_parameter_distribution) {
+        if (index_parameter_distribution->nb_value - 1 < TIC_THRESHOLD) {
           out_file << "set xtics 0,1" << endl;
         }
-        if ((int)(hindex_parameter->max * YSCALE) + 1 < TIC_THRESHOLD) {
+        if ((int)(index_parameter_distribution->max * YSCALE) + 1 < TIC_THRESHOLD) {
           out_file << "set ytics 0,1" << endl;
         }
 
-        out_file << "plot [" << hindex_parameter->offset << ":"
-                 << hindex_parameter->nb_value - 1 << "] [0:"
-                 << (int)(hindex_parameter->max * YSCALE) + 1 << "] \""
+        out_file << "plot [" << index_parameter_distribution->offset << ":"
+                 << index_parameter_distribution->nb_value - 1 << "] [0:"
+                 << (int)(index_parameter_distribution->max * YSCALE) + 1 << "] \""
                  << label((data_file_name[0].str()).c_str()) << "\" using " << j++ << " title \""
                  << (index_parameter_type == TIME ? SEQ_label[SEQL_TIME] : SEQ_label[SEQL_POSITION])
                  << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\" with impulses" << endl;
 
-        if (hindex_parameter->nb_value - 1 < TIC_THRESHOLD) {
+        if (index_parameter_distribution->nb_value - 1 < TIC_THRESHOLD) {
           out_file << "set xtics autofreq" << endl;
         }
-        if ((int)(hindex_parameter->max * YSCALE) + 1 < TIC_THRESHOLD) {
+        if ((int)(index_parameter_distribution->max * YSCALE) + 1 < TIC_THRESHOLD) {
           out_file << "set ytics autofreq" << endl;
         }
 
@@ -1843,23 +1902,23 @@ bool Sequences::plot_write(StatError &error , const char *prefix ,
         }
       }
 
-      if (hlength->nb_value - 1 < TIC_THRESHOLD) {
+      if (length_distribution->nb_value - 1 < TIC_THRESHOLD) {
         out_file << "set xtics 0,1" << endl;
       }
-      if ((int)(hlength->max * YSCALE) + 1 < TIC_THRESHOLD) {
+      if ((int)(length_distribution->max * YSCALE) + 1 < TIC_THRESHOLD) {
         out_file << "set ytics 0,1" << endl;
       }
 
-      out_file << "plot [0:" << hlength->nb_value - 1 << "] [0:"
-               << (int)(hlength->max * YSCALE) + 1 << "] \""
+      out_file << "plot [0:" << length_distribution->nb_value - 1 << "] [0:"
+               << (int)(length_distribution->max * YSCALE) + 1 << "] \""
                << label((data_file_name[0].str()).c_str()) << "\" using 1 title \""
                << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                << "\" with impulses" << endl;
 
-      if (hlength->nb_value - 1 < TIC_THRESHOLD) {
+      if (length_distribution->nb_value - 1 < TIC_THRESHOLD) {
         out_file << "set xtics autofreq" << endl;
       }
-      if ((int)(hlength->max * YSCALE) + 1 < TIC_THRESHOLD) {
+      if ((int)(length_distribution->max * YSCALE) + 1 < TIC_THRESHOLD) {
         out_file << "set ytics autofreq" << endl;
       }
 
@@ -1893,7 +1952,7 @@ MultiPlotSet* Sequences::get_plotable() const
 
 
   nb_plot_set = 1;
-  if (hindex_parameter) {
+  if (index_parameter_distribution) {
     nb_plot_set++;
   }
   if (index_interval) {
@@ -1913,17 +1972,17 @@ MultiPlotSet* Sequences::get_plotable() const
 
   i = 0;
 
-  if (hindex_parameter) {
+  if (index_parameter_distribution) {
 
     // vue : loi empirique des parametres d'index
 
-    plot[i].xrange = Range(hindex_parameter->offset , hindex_parameter->nb_value - 1);
-    plot[i].yrange = Range(0 , ceil(hindex_parameter->max * YSCALE));
+    plot[i].xrange = Range(index_parameter_distribution->offset , index_parameter_distribution->nb_value - 1);
+    plot[i].yrange = Range(0 , ceil(index_parameter_distribution->max * YSCALE));
 
-    if (hindex_parameter->nb_value - 1 < TIC_THRESHOLD) {
+    if (index_parameter_distribution->nb_value - 1 < TIC_THRESHOLD) {
       plot[i].xtics = 1;
     }
-    if (ceil(hindex_parameter->max * YSCALE) < TIC_THRESHOLD) {
+    if (ceil(index_parameter_distribution->max * YSCALE) < TIC_THRESHOLD) {
       plot[i].ytics = 1;
     }
 
@@ -1936,7 +1995,7 @@ MultiPlotSet* Sequences::get_plotable() const
 
     plot[i][0].style = "impulses";
 
-    hindex_parameter->plotable_frequency_write(plot[i][0]);
+    index_parameter_distribution->plotable_frequency_write(plot[i][0]);
     i++;
   }
 
@@ -2025,13 +2084,13 @@ MultiPlotSet* Sequences::get_plotable() const
 
   // vue : loi empirique des longueurs des sequences
 
-  plot[i].xrange = Range(0 , hlength->nb_value - 1);
-  plot[i].yrange = Range(0 , ceil(hlength->max * YSCALE));
+  plot[i].xrange = Range(0 , length_distribution->nb_value - 1);
+  plot[i].yrange = Range(0 , ceil(length_distribution->max * YSCALE));
 
-  if (hlength->nb_value - 1 < TIC_THRESHOLD) {
+  if (length_distribution->nb_value - 1 < TIC_THRESHOLD) {
     plot[i].xtics = 1;
   }
-  if (ceil(hlength->max * YSCALE) < TIC_THRESHOLD) {
+  if (ceil(length_distribution->max * YSCALE) < TIC_THRESHOLD) {
     plot[i].ytics = 1;
   }
 
@@ -2043,7 +2102,7 @@ MultiPlotSet* Sequences::get_plotable() const
 
   plot[i][0].style = "impulses";
 
-  hlength->plotable_frequency_write(plot[i][0]);
+  length_distribution->plotable_frequency_write(plot[i][0]);
 
   return plot_set;
 }
@@ -2134,28 +2193,28 @@ bool Sequences::plot_data_write(StatError &error , const char *prefix ,
 
     // ecriture des fichiers de donnees
 
-    data_file_name = new ostringstream[hlength->nb_value];
+    data_file_name = new ostringstream[length_distribution->nb_value];
 
-    data_file_name[hlength->offset] << prefix << hlength->offset << ".dat";
-    status = plot_print((data_file_name[hlength->offset].str()).c_str() , hlength->offset);
+    data_file_name[length_distribution->offset] << prefix << length_distribution->offset << ".dat";
+    status = plot_print((data_file_name[length_distribution->offset].str()).c_str() , length_distribution->offset);
 
     if (!status) {
       error.update(STAT_error[STATR_FILE_PREFIX]);
     }
 
     else {
-      pfrequency = hlength->frequency + hlength->offset + 1;
-      for (i = hlength->offset + 1;i < hlength->nb_value;i++) {
+      pfrequency = length_distribution->frequency + length_distribution->offset + 1;
+      for (i = length_distribution->offset + 1;i < length_distribution->nb_value;i++) {
         if (*pfrequency++ > 0) {
           data_file_name[i] << prefix << i << ".dat";
           plot_print((data_file_name[i].str()).c_str() , i);
         }
       }
 
-      length_nb_sequence = new int[hlength->nb_value];
+      length_nb_sequence = new int[length_distribution->nb_value];
 
       if (index_parameter) {
-        min_index_parameter = hindex_parameter->offset;
+        min_index_parameter = index_parameter_distribution->offset;
         max_index_parameter = max_index_parameter_computation(true);
       }
 
@@ -2184,7 +2243,7 @@ bool Sequences::plot_data_write(StatError &error , const char *prefix ,
         out_file << "set border 15 lw 0\n" << "set tics out\n" << "set xtics nomirror\n";
 
         for (j = 0;j < nb_variable;j++) {
-          for (k = 0;k < hlength->nb_value;k++) {
+          for (k = 0;k < length_distribution->nb_value;k++) {
             length_nb_sequence[k] = 0;
           }
 
@@ -2376,7 +2435,7 @@ MultiPlotSet* Sequences::get_plotable_data(StatError &error) const
     plot.border = "15 lw 0";
 
     if (index_parameter) {
-      min_index_parameter = hindex_parameter->offset;
+      min_index_parameter = index_parameter_distribution->offset;
       max_index_parameter = max_index_parameter_computation(true);
     }
 
