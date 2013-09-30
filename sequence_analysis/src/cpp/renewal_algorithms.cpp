@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
@@ -674,7 +674,7 @@ Renewal* TimeEvents::estimation(StatError &error , ostream &os , char type ,
 
     renew->computation();
 
-    renew->init(NONPARAMETRIC , I_DEFAULT , I_DEFAULT , D_DEFAULT , D_DEFAULT);
+    renew->init(CATEGORICAL , I_DEFAULT , I_DEFAULT , D_DEFAULT , D_DEFAULT);
     likelihood = D_INF;
     i = 0;
 
@@ -1341,7 +1341,7 @@ DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , os
     // creation de la loi inter-evenement
 
     inter_event = new DiscreteParametricModel(iinter_event , this);
-    inter_event->init(NONPARAMETRIC , I_DEFAULT , I_DEFAULT , D_DEFAULT , D_DEFAULT);
+    inter_event->init(CATEGORICAL , I_DEFAULT , I_DEFAULT , D_DEFAULT , D_DEFAULT);
     forward_dist = new Forward(*inter_event);
 
     if (estimator == PENALIZED_LIKELIHOOD) {
