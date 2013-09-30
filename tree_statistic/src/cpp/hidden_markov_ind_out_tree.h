@@ -391,11 +391,11 @@ public :
                        int inb_doutput_process, int* nb_value,
                        bool* force_param=NULL);
    HiddenMarkovIndOutTree(const Chain * pchain, int inb_ioutput_process,
-                       NonparametricProcess** pobservation,
+                       CategoricalProcess** pobservation,
                        int size, bool counting_flag);
    HiddenMarkovIndOutTree(const Chain * pchain,
                        int inb_ioutput_process, int inb_doutput_process,
-                       NonparametricProcess** nonparametric_observation,
+                       CategoricalProcess** categorical_observation,
                        DiscreteParametricProcess** iparametric_observation,
                        DiscreteParametricProcess** dparametric_observation,
                        int size, bool counting_flag);
