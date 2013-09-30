@@ -86,8 +86,8 @@ void class_function() {
     .def("__init__", make_constructor(FunctionWrap::function_from_list))
     .def(init<int, int>())
     .def(init<const Function &>())
-    .def("get_residual",&Function::get_residual,args("index"), "get residual")
-    .def("get_frequency",&Function::get_frequency,args("index"), "get frequency")
+/*    .def("get_residual",&Function::get_residual,args("index"), "get residual")
+      .def("get_frequency",&Function::get_frequency,args("index"), "get frequency") */
 
     ;
   //DONE
