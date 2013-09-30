@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
@@ -68,8 +68,43 @@ enum {
  */
 
 
-// class SemiMarkov : public StatInterface , public Chain {
-class SemiMarkov : public StatInterface , protected Chain {  // semi-chaine de Markov
+class SemiMarkovChain : public Chain {  // semi-chaine de Markov
+
+public :
+
+    int *state_subtype;     //  MARKOVIAN/SEMI_MARKOVIAN
+    CategoricalSequenceProcess *state_process;  // processus d'etat
+    Forward **forward;      // lois de l'intervalle de temps residuel
+
+    void copy(const SemiMarkovChain &smarkov , int param = I_DEFAULT);
+    void remove();
+
+    SemiMarkovChain();
+    SemiMarkovChain(char itype , int inb_state);
+    SemiMarkovChain(const Chain *pchain , const CategoricalSequenceProcess *poccupancy);
+    SemiMarkovChain(const SemiMarkovChain &smarkov , int param = I_DEFAULT)
+    :Chain(smarkov) { copy(smarkov , param); }
+    ~SemiMarkovChain();
+    SemiMarkovChain& operator=(const SemiMarkovChain &smarkov);
+
+    int nb_parameter_computation(double min_probability = 0.) const;
+
+    void initial_probability_computation();
+
+    void index_state_distribution();
+    double* memory_computation() const;
+    void state_no_occurrence_probability(int state , double increment = LEAVE_INCREMENT);
+    void state_first_occurrence_distribution(int state , int min_nb_value = 1 ,
+                                             double cumul_threshold = CUMUL_THRESHOLD);
+    void state_leave_probability(int state , double increment = LEAVE_INCREMENT);
+    void state_recurrence_time_distribution(int state , int min_nb_value = 1 ,
+                                            double cumul_threshold = OCCUPANCY_THRESHOLD);
+    void state_nb_pattern_mixture(int state , char pattern);
+};
+
+
+
+class SemiMarkov : public StatInterface , protected SemiMarkovChain {  // semi-chaine de Markov
 
     friend class MarkovianSequences;
     friend class SemiMarkovIterator;
@@ -85,18 +120,16 @@ protected :
 
     int nb_iterator;        // nombre d'iterateurs pointant sur l'objet
     SemiMarkovData *semi_markov_data;  // pointeur sur un objet SemiMarkovData
-    int *state_subtype;     //  MARKOVIAN/SEMI_MARKOVIAN
-    Forward **forward;      // lois de l'intervalle de temps residuel
     int nb_output_process;  // nombre de processus d'observation
-    NonparametricSequenceProcess **nonparametric_process;  // processus d'observation discrets non-parametriques
+    CategoricalSequenceProcess **categorical_process;  // processus d'observation categoriels
     DiscreteParametricProcess **discrete_parametric_process;  // processus d'observation discrets parametriques
     ContinuousParametricProcess **continuous_parametric_process;  // processus d'observation continus parametriques
 
-    SemiMarkov(const Chain *pchain , const NonparametricSequenceProcess *poccupancy ,
-               int inb_output_process , NonparametricProcess **pobservation ,
+    SemiMarkov(const Chain *pchain , const CategoricalSequenceProcess *poccupancy ,
+               int inb_output_process , CategoricalProcess **pobservation ,
                int length , bool counting_flag);
-    SemiMarkov(const Chain *pchain , const NonparametricSequenceProcess *poccupancy ,
-               int inb_output_process , NonparametricProcess **nonparametric_observation ,
+    SemiMarkov(const Chain *pchain , const CategoricalSequenceProcess *poccupancy ,
+               int inb_output_process , CategoricalProcess **categorical_observation ,
                DiscreteParametricProcess **discrete_parametric_observation ,
                ContinuousParametricProcess **continuous_parametric_observation ,
                int length , bool counting_flag);
@@ -116,18 +149,6 @@ protected :
 
     int nb_parameter_computation(double min_probability = 0.) const;
     double penalty_computation(bool hidden , double min_probability = 0.) const;
-
-    void initial_probability_computation();
-
-    void index_state_distribution();
-    double* memory_computation() const;
-    void state_no_occurrence_probability(int state , double increment = LEAVE_INCREMENT);
-    void state_first_occurrence_distribution(int state , int min_nb_value = 1 ,
-                                             double cumul_threshold = CUMUL_THRESHOLD);
-    void state_leave_probability(int state , double increment = LEAVE_INCREMENT);
-    void state_recurrence_time_distribution(int state , int min_nb_value = 1 ,
-                                            double cumul_threshold = OCCUPANCY_THRESHOLD);
-    void state_nb_pattern_mixture(int state , char pattern);
 
     void index_output_distribution(int variable);
     void output_no_occurrence_probability(int variable , int output ,
@@ -151,12 +172,12 @@ public :
 
     SemiMarkov();
     SemiMarkov(char itype , int inb_state , int inb_output_process , int *nb_value);
-    SemiMarkov(const Chain *pchain , const NonparametricSequenceProcess *poccupancy ,
-               const NonparametricProcess *pobservation , int length ,
+    SemiMarkov(const Chain *pchain , const CategoricalSequenceProcess *poccupancy ,
+               const CategoricalProcess *pobservation , int length ,
                bool counting_flag);
     SemiMarkov(const SemiMarkov &smarkov , bool data_flag = true ,
                int param = I_DEFAULT)
-    :Chain(smarkov) { copy(smarkov , data_flag , param); }
+    :SemiMarkovChain(smarkov , param) { copy(smarkov , data_flag , param); }
     void conditional_delete();
     ~SemiMarkov();
     SemiMarkov& operator=(const SemiMarkov &smarkov);
@@ -208,12 +229,11 @@ public :
 
     int get_nb_iterator() const { return nb_iterator; }
     SemiMarkovData* get_semi_markov_data() const { return semi_markov_data; }
-    int get_state_subtype(int state) const { return state_subtype[state]; }
-    Forward** get_forward() const { return forward; }
-    Forward* get_forward(int state) const { return forward[state]; }
     int get_nb_output_process() const { return nb_output_process; }
-    NonparametricSequenceProcess* get_nonparametric_process(int variable)
-    const { return nonparametric_process[variable]; }
+    CategoricalSequenceProcess** get_categorical_process()
+    const { return categorical_process; }
+    CategoricalSequenceProcess* get_categorical_process(int variable)
+    const { return categorical_process[variable]; }
     DiscreteParametricProcess** get_discrete_parametric_process() const
     { return discrete_parametric_process; }
     DiscreteParametricProcess* get_discrete_parametric_process(int variable) const
@@ -283,6 +303,7 @@ private :
     double sample_entropy;  // entropie des sequences d'etats
     double *posterior_probability;  // probabilite a posteriori de la sequence d'etats la plus probable
     double *entropy;        // entropie des sequences d'etats
+    double *nb_state_sequence;  // nombre des sequences d'etats
 
     void copy(const SemiMarkovData &seq , bool model_flag = true);
 
@@ -301,6 +322,7 @@ public :
     DiscreteDistributionData* extract(StatError &error , int type ,
                                       int variable , int value) const;
     SemiMarkovData* remove_index_parameter(StatError &error) const;
+    SemiMarkovData* explicit_index_parameter(StatError &error) const;
     MarkovianSequences* build_auxiliary_variable(StatError &error) const;
 
     std::ostream& ascii_data_write(std::ostream &os , char format = 'c' ,
@@ -327,6 +349,7 @@ public :
     double get_sample_entropy() const { return sample_entropy; }
     double get_posterior_probability(int index) const { return posterior_probability[index]; }
     double get_entropy(int index) const { return entropy[index]; }
+    double get_nb_state_sequence(int index) const { return nb_state_sequence[index]; }
 };
 
 
