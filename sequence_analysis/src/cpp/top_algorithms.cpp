@@ -571,7 +571,7 @@ Tops* TopParameters::simulation(StatError &error , int nb_top ,
 
     tops->max_length_computation();
     tops->cumul_length_computation();
-    delete tops->hlength;
+    delete tops->length_distribution;
     tops->build_length_frequency_distribution();
 
     tops->build_index_parameter_frequency_distribution();
