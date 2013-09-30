@@ -95,14 +95,14 @@ public:
     return ret;
   }
 
-  static Forward*
+/*  static Forward*
   get_forward(const SemiMarkov &input, int state)
   {
     Forward *ret;
     ret = input.get_forward(state);
     return ret;
   }
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(get_forward_overloads, SemiMarkovWrap::get_forward, 0, 1);
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(get_forward_overloads, SemiMarkovWrap::get_forward, 0, 1); */
 
 
   static void
@@ -223,13 +223,9 @@ class_semi_markov()
     .add_property("nb_iterator", &SemiMarkov::get_nb_iterator, "returns nb iterator")
     .add_property("nb_output_process", &SemiMarkov::get_nb_output_process, "returns nb output process")
 
-    .def("get_state_subtype", &SemiMarkov::get_state_subtype, args("index"), "returns state subtype")
-
     //DEF_RETURN_VALUE("get_parametric_process", &SemiMarkov::get_parametric_process, args("variable_index"), "returns parametric process corresponding to the given variable")
     .def("extract_histogram", SemiMarkovWrap::extract_histogram, return_value_policy< manage_new_object >(), "todo")
     .def("extract", SemiMarkovWrap::extract, return_value_policy< manage_new_object >(), "todo")
-
-    .def("get_forward", (Forward *(*)(const SemiMarkov&, int)) SemiMarkovWrap::get_forward, return_value_policy< manage_new_object >(), SemiMarkovWrap::get_forward_overloads())
 
     DEF_RETURN_VALUE_NO_ARGS("get_semi_markov_data", &SemiMarkov::get_semi_markov_data, "returns semi_markov_data")
     DEF_RETURN_VALUE_NO_ARGS("extract_data", SemiMarkovWrap::extract_data, "returns semi_markov_data")
