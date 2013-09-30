@@ -45,7 +45,7 @@
 
 #include "stat_tools.h"
 #include "distribution.h"
-#include "mixture.h"
+#include "discrete_mixture.h"
 #include "stat_label.h"
 
 using namespace std;
