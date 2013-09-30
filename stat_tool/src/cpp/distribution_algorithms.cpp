@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
@@ -743,7 +743,7 @@ void Forward::computation(const DiscreteParametric &dist)
 
   // calcul de la quantite de normalisation
 
-  if (ident == NONPARAMETRIC) {
+  if (ident == CATEGORICAL) {
     norm = dist.mean;
   }
   else {
@@ -1454,7 +1454,7 @@ int DiscreteParametric::simulation() const
   double x , y;
 
 
-  if ((ident == NONPARAMETRIC) || (range < MIN_RANGE) || (range * max > MAX_SURFACE)) {
+  if ((ident == CATEGORICAL) || (range < MIN_RANGE) || (range * max > MAX_SURFACE)) {
     value = Distribution::simulation();
   }
 
