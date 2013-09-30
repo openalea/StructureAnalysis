@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
@@ -86,7 +86,7 @@ void Compound::computation(int min_nb_value , double cumul_threshold ,
     mass[0] += sum_distribution->mass[0];
   }
 
-  if (((distribution->ident == NONPARAMETRIC) || (distribution->ident == UNIFORM)) &&
+  if (((distribution->ident == CATEGORICAL) || (distribution->ident == UNIFORM)) &&
       (sum_distribution->offset > 1)) {
     power_dist->mass_copy(*distribution);
     for (i = 2;i < sum_distribution->offset;i++) {
@@ -100,7 +100,7 @@ void Compound::computation(int min_nb_value , double cumul_threshold ,
     }
 
     else {
-      if ((distribution->ident == NONPARAMETRIC) || (distribution->ident == UNIFORM)) {
+      if ((distribution->ident == CATEGORICAL) || (distribution->ident == UNIFORM)) {
         power_dist->convolution(*power_dist , *distribution);
       }
  
@@ -170,7 +170,7 @@ void Compound::computation(DiscreteParametric **power_dist , int min_nb_value ,
     min = sum_nb_value;
   }
 
-  if ((distribution->ident == NONPARAMETRIC) || (distribution->ident == UNIFORM)) {
+  if ((distribution->ident == CATEGORICAL) || (distribution->ident == UNIFORM)) {
     power_dist[min]->ident = distribution->ident;
 
     if (dist_flag) {
@@ -489,10 +489,10 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream 
 
     switch (type) {
     case 's' :
-      compound->sum_distribution->init(NONPARAMETRIC , I_DEFAULT , I_DEFAULT , D_DEFAULT , D_DEFAULT);
+      compound->sum_distribution->init(CATEGORICAL , I_DEFAULT , I_DEFAULT , D_DEFAULT , D_DEFAULT);
       break;
     case 'e' :
-      compound->distribution->init(NONPARAMETRIC , I_DEFAULT , I_DEFAULT , D_DEFAULT , D_DEFAULT);
+      compound->distribution->init(CATEGORICAL , I_DEFAULT , I_DEFAULT , D_DEFAULT , D_DEFAULT);
       break;
     }
 
