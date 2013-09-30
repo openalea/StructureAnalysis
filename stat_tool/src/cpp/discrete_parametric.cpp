@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
@@ -175,7 +175,7 @@ DiscreteParametric::DiscreteParametric(const Distribution &dist , int ialloc_nb_
 :Distribution(dist , 'c' , ialloc_nb_value)
 
 {
-  ident = NONPARAMETRIC;
+  ident = CATEGORICAL;
 
   inf_bound = I_DEFAULT;
   sup_bound = I_DEFAULT;
@@ -197,7 +197,7 @@ DiscreteParametric::DiscreteParametric(const Distribution &dist , double scaling
 :Distribution(dist , scaling_coeff)
 
 {
-  ident = NONPARAMETRIC;
+  ident = CATEGORICAL;
 
   inf_bound = I_DEFAULT;
   sup_bound = I_DEFAULT;
@@ -279,7 +279,7 @@ DiscreteParametric::DiscreteParametric(const FrequencyDistribution &histo)
 :Distribution(histo)
 
 {
-  ident = NONPARAMETRIC;
+  ident = CATEGORICAL;
 
   inf_bound = I_DEFAULT;
   sup_bound = I_DEFAULT;
@@ -667,7 +667,7 @@ ostream& DiscreteParametric::spreadsheet_print(ostream &os) const
 ostream& DiscreteParametric::ascii_parametric_characteristic_print(ostream &os , bool shape , bool comment_flag) const
 
 {
-  if (ident == NONPARAMETRIC) {
+  if (ident == CATEGORICAL) {
     ascii_characteristic_print(os , shape , comment_flag);
   }
 
@@ -706,7 +706,7 @@ ostream& DiscreteParametric::ascii_parametric_characteristic_print(ostream &os ,
 ostream& DiscreteParametric::spreadsheet_parametric_characteristic_print(ostream &os , bool shape) const
 
 {
-  if (ident == NONPARAMETRIC) {
+  if (ident == CATEGORICAL) {
     spreadsheet_characteristic_print(os , shape);
   }
 
@@ -739,7 +739,7 @@ ostream& DiscreteParametric::spreadsheet_parametric_characteristic_print(ostream
 ostream& DiscreteParametric::plot_title_print(ostream &os) const
 
 {
-  if (ident != NONPARAMETRIC) {
+  if (ident != CATEGORICAL) {
     os << " " << STAT_discrete_distribution_letter[ident] << "(";
 
     os << inf_bound;
@@ -1306,9 +1306,16 @@ ostream& DiscreteParametricModel::line_write(ostream &os) const
 {
   os << STAT_discrete_distribution_word[ident];
 
-  if ((mean != D_DEFAULT) && (variance != D_DEFAULT)) {
-    os << "   " << STAT_label[STATL_MEAN] << ": " << mean
-       << "   " << STAT_label[STATL_VARIANCE] << ": " << variance;
+  if (ident == CATEGORICAL) {
+    if ((mean != D_DEFAULT) && (variance != D_DEFAULT)) {
+      os << "   " << STAT_label[STATL_MEAN] << ": " << mean
+         << "   " << STAT_label[STATL_VARIANCE] << ": " << variance;
+    }
+  }
+
+  else {
+    os << "   " << STAT_label[STATL_MEAN] << ": " << parametric_mean_computation()
+       << "   " << STAT_label[STATL_VARIANCE] << ": " << parametric_variance_computation();
   }
 
   return os;
@@ -1328,7 +1335,7 @@ ostream& DiscreteParametricModel::ascii_write(ostream &os , const DiscreteDistri
                                               bool exhaustive , bool file_flag) const
 
 {
-  if (ident == NONPARAMETRIC) {
+  if (ident == CATEGORICAL) {
     file_flag = false;
   }
 
