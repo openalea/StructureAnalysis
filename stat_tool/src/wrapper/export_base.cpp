@@ -204,7 +204,7 @@ void class_constant()
   ;
 
   enum_<stat_tool::wrap_util::UniqueInt<6, 5> >("DistributionIdentifierType")
-  .value("NON_PARAMETRIC", NONPARAMETRIC)
+  .value("CATEGORICAL", CATEGORICAL)
   .value("BINOMIAL",BINOMIAL)
   .value("POISSON",POISSON)
   .value("NEGATIVE_BINOMIAL",NEGATIVE_BINOMIAL)
@@ -363,7 +363,7 @@ c  onst int NB_PARAMETER = 100000;
 void class_stat_error()
 {
   // _StatError
-  class_< StatError >("_StatError", init< optional< int > >())
+  class_< StatError >("_StatError", init< boost::python::optional< int > >())
     .def("init", &StatError::init)
     .def("update", &StatError::update, StatError_update_overloads_1_3())
     .def("correction_update", (void (StatError::*)(const char*, const char*, int, int) )
@@ -410,7 +410,7 @@ void class_forward()
 
 ;
 /*
-    Forward(int inb_value = 0 , int iident = NONPARAMETRIC ,  int iinf_bound = I_DEFAULT , int isup_bound = I_DEFAULT , double iparameter = D_DEFAULT , double iprobability = D_DEFAULT)    :DiscreteParametric(inb_value , iident , iinf_bound , isup_bound , iparameter , iprobability) {}
+    Forward(int inb_value = 0 , int iident = CATEGORICAL ,  int iinf_bound = I_DEFAULT , int isup_bound = I_DEFAULT , double iparameter = D_DEFAULT , double iprobability = D_DEFAULT)    :DiscreteParametric(inb_value , iident , iinf_bound , isup_bound , iparameter , iprobability) {}
     Forward(const DiscreteParametric &dist , int ialloc_nb_value = I_DEFAULT) :DiscreteParametric(dist , 'c' , ialloc_nb_value) { computation(dist); }
     Forward(const Forward &forward , int ialloc_nb_value = I_DEFAULT)  :DiscreteParametric((DiscreteParametric&)forward , 'c' , ialloc_nb_value) {}
 
