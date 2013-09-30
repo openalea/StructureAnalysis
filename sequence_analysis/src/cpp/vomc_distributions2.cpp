@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
@@ -58,7 +58,7 @@ using namespace std;
  *
  *--------------------------------------------------------------*/
 
-void VariableOrderMarkov::state_nb_pattern_mixture(int istate , char pattern)
+void VariableOrderMarkovChain::state_nb_pattern_mixture(int istate , char pattern)
 
 {
   register int i , j , k , m;
@@ -67,15 +67,15 @@ void VariableOrderMarkov::state_nb_pattern_mixture(int istate , char pattern)
   Distribution *pdist;
 
 
-  max_length = nonparametric_process[0]->length->nb_value - 1;
+  max_length = state_process->length->nb_value - 1;
 
   switch (pattern) {
   case 'r' :
-    pdist = nonparametric_process[0]->nb_run[istate];
+    pdist = state_process->nb_run[istate];
     nb_pattern = max_length / 2 + 2;
     break;
   case 'o' :
-    pdist = nonparametric_process[0]->nb_occurrence[istate];
+    pdist = state_process->nb_occurrence[istate];
     nb_pattern = max_length + 1;
     break;
   }
@@ -92,7 +92,7 @@ void VariableOrderMarkov::state_nb_pattern_mixture(int istate , char pattern)
     previous_memory[i] = new double[nb_pattern];
   }
 
-  lmass = nonparametric_process[0]->length->mass;
+  lmass = state_process->length->mass;
   index_nb_pattern = 1;
 
   for (i = 0;i < max_length;i++) {
@@ -238,9 +238,9 @@ void VariableOrderMarkov::output_nb_run_mixture(int variable , int output)
   Distribution *nb_run;
 
 
-  nb_run = nonparametric_process[variable]->nb_run[output];
+  nb_run = categorical_process[variable]->nb_run[output];
 
-  max_length = nonparametric_process[variable]->length->nb_value - 1;
+  max_length = categorical_process[variable]->length->nb_value - 1;
   nb_pattern = max_length / 2 + 2;
 
   pmass = nb_run->mass;
@@ -250,7 +250,7 @@ void VariableOrderMarkov::output_nb_run_mixture(int variable , int output)
 
   observation = new double[nb_state];
   for (i = 0;i < nb_state;i++) {
-    observation[i] = nonparametric_process[variable]->observation[i]->mass[output];
+    observation[i] = categorical_process[variable]->observation[i]->mass[output];
   }
 
   memory = new double*[nb_row];
@@ -260,7 +260,7 @@ void VariableOrderMarkov::output_nb_run_mixture(int variable , int output)
     previous_memory[i] = new double[nb_pattern * 2];
   }
 
-  lmass = nonparametric_process[variable]->length->mass;
+  lmass = categorical_process[variable]->length->mass;
   index_nb_pattern = 1;
 
   for (i = 0;i < max_length;i++) {
@@ -398,9 +398,9 @@ void VariableOrderMarkov::output_nb_occurrence_mixture(int variable , int output
   Distribution *nb_occurrence;
 
 
-  nb_occurrence = nonparametric_process[variable]->nb_occurrence[output];
+  nb_occurrence = categorical_process[variable]->nb_occurrence[output];
 
-  max_length = nonparametric_process[variable]->length->nb_value - 1;
+  max_length = categorical_process[variable]->length->nb_value - 1;
   nb_pattern = max_length + 1;
 
   pmass = nb_occurrence->mass;
@@ -410,7 +410,7 @@ void VariableOrderMarkov::output_nb_occurrence_mixture(int variable , int output
 
   observation = new double[nb_state];
   for (i = 0;i < nb_state;i++) {
-    observation[i] = nonparametric_process[variable]->observation[i]->mass[output];
+    observation[i] = categorical_process[variable]->observation[i]->mass[output];
   }
 
   memory = new double*[nb_row];
@@ -420,7 +420,7 @@ void VariableOrderMarkov::output_nb_occurrence_mixture(int variable , int output
     previous_memory[i] = new double[nb_pattern];
   }
 
-  lmass = nonparametric_process[variable]->length->mass;
+  lmass = categorical_process[variable]->length->mass;
   index_nb_pattern = 1;
 
   for (i = 0;i < max_length;i++) {
@@ -550,10 +550,10 @@ void VariableOrderMarkov::characteristic_computation(int length , bool counting_
     // calcul des lois de type intensite et intervalle au niveau etat
 
     if (((variable == I_DEFAULT) || (variable == 0)) &&
-        ((!(nonparametric_process[0]->length)) ||
-         (dlength != *(nonparametric_process[0]->length)))) {
+        ((!(state_process->length)) ||
+         (dlength != *(state_process->length)))) {
       computation[0] = true;
-      nonparametric_process[0]->create_characteristic(dlength , true , counting_flag);
+      state_process->create_characteristic(dlength , true , counting_flag);
 
       switch (type) {
 
@@ -588,9 +588,9 @@ void VariableOrderMarkov::characteristic_computation(int length , bool counting_
           state_sojourn_time_distribution(memory , i);
         }
         else {
-          nonparametric_process[0]->absorption[i] = 1.;
-          delete nonparametric_process[0]->sojourn_time[i];
-          nonparametric_process[0]->sojourn_time[i] = NULL;
+          state_process->absorption[i] = 1.;
+          delete state_process->sojourn_time[i];
+          state_process->sojourn_time[i] = NULL;
         }
       }
 
@@ -609,10 +609,10 @@ void VariableOrderMarkov::characteristic_computation(int length , bool counting_
         cout << endl;
 
         for (i = 0;i < nb_state;i++) {
-          sum += 1. / nonparametric_process[0]->recurrence_time[i]->mean;
+          sum += 1. / state_process->recurrence_time[i]->mean;
         }
         for (i = 0;i < nb_state;i++) {
-          cout << 1. / (nonparametric_process[0]->recurrence_time[i]->mean * sum) << " ";
+          cout << 1. / (state_process->recurrence_time[i]->mean * sum) << " ";
         }
         cout << endl;
       }
@@ -626,12 +626,12 @@ void VariableOrderMarkov::characteristic_computation(int length , bool counting_
 
     // calcul des lois de type intensite et intervalle au niveau observation
 
-    for (i = 1;i <= nb_output_process;i++) {
-      if ((nonparametric_process[i]) && ((variable == I_DEFAULT) || (i == variable)) &&
-          ((!(nonparametric_process[i]->length)) ||
-           (dlength != *(nonparametric_process[i]->length)))) {
-        computation[i] = true;
-        nonparametric_process[i]->create_characteristic(dlength , true , counting_flag);
+    for (i = 0;i < nb_output_process;i++) {
+      if ((categorical_process[i]) && ((variable == I_DEFAULT) || (i == variable)) &&
+          ((!(categorical_process[i]->length)) ||
+           (dlength != *(categorical_process[i]->length)))) {
+        computation[i + 1] = true;
+        categorical_process[i]->create_characteristic(dlength , true , counting_flag);
 
         index_output_distribution(i);
 
@@ -653,33 +653,33 @@ void VariableOrderMarkov::characteristic_computation(int length , bool counting_
           }
         }
 
-        for (j = 0;j < nonparametric_process[i]->nb_value;j++) {
+        for (j = 0;j < categorical_process[i]->nb_value;j++) {
           if (type == 'o') {
             output_no_occurrence_probability(i , j);
           }
-          if (nonparametric_process[i]->no_occurrence[j] < 1. - DOUBLE_ERROR) {
+          if (categorical_process[i]->no_occurrence[j] < 1. - DOUBLE_ERROR) {
             output_first_occurrence_distribution(i , j);
           }
           else {
-            delete nonparametric_process[i]->first_occurrence[j];
-            nonparametric_process[i]->first_occurrence[j] = NULL;
-            nonparametric_process[i]->leave[j] = 1.;
+            delete categorical_process[i]->first_occurrence[j];
+            categorical_process[i]->first_occurrence[j] = NULL;
+            categorical_process[i]->leave[j] = 1.;
           }
 
-          if ((type == 'o') && (nonparametric_process[i]->first_occurrence[j])) {
+          if ((type == 'o') && (categorical_process[i]->first_occurrence[j])) {
             output_leave_probability(memory , i , j);
           }
-          if (nonparametric_process[i]->leave[j] < 1. - DOUBLE_ERROR) {
+          if (categorical_process[i]->leave[j] < 1. - DOUBLE_ERROR) {
             output_recurrence_time_distribution(memory , i , j);
           }
           else {
-            delete nonparametric_process[i]->recurrence_time[j];
-            nonparametric_process[i]->recurrence_time[j] = NULL;
+            delete categorical_process[i]->recurrence_time[j];
+            categorical_process[i]->recurrence_time[j] = NULL;
           }
 
           for (k = 0;k < nb_state;k++) {
-            if ((nonparametric_process[i]->observation[k]->mass[j] > 0.) &&
-                ((state_type[k] != 'a') || (nonparametric_process[i]->observation[k]->mass[j] < 1.))) {
+            if ((categorical_process[i]->observation[k]->mass[j] > 0.) &&
+                ((state_type[k] != 'a') || (categorical_process[i]->observation[k]->mass[j] < 1.))) {
               break;
             }
           }
@@ -688,15 +688,15 @@ void VariableOrderMarkov::characteristic_computation(int length , bool counting_
             output_sojourn_time_distribution(memory , i , j);
           }
           else {
-            nonparametric_process[i]->absorption[j] = 1.;
-            delete nonparametric_process[i]->sojourn_time[j];
-            nonparametric_process[i]->sojourn_time[j] = NULL;
+            categorical_process[i]->absorption[j] = 1.;
+            delete categorical_process[i]->sojourn_time[j];
+            categorical_process[i]->sojourn_time[j] = NULL;
           }
         }
       }
 
       else {
-        computation[i] = false;
+        computation[i + 1] = false;
       }
     }
 
@@ -715,9 +715,9 @@ void VariableOrderMarkov::characteristic_computation(int length , bool counting_
 
       // calcul des lois de comptage au niveau observation
 
-      for (i = 1;i <= nb_output_process;i++) {
-        if (computation[i]) {
-          for (j = 0;j < nonparametric_process[i]->nb_value;j++) {
+      for (i = 0;i < nb_output_process;i++) {
+        if (computation[i + 1]) {
+          for (j = 0;j < categorical_process[i]->nb_value;j++) {
             output_nb_run_mixture(i , j);
             output_nb_occurrence_mixture(i , j);
           }
@@ -749,7 +749,7 @@ void VariableOrderMarkov::characteristic_computation(const VariableOrderMarkovDa
     register int i , j , k;
     int seq_variable;
     double *memory;
-    Distribution dlength(*(seq.hlength));
+    Distribution dlength(*(seq.length_distribution));
 
 
     memory = NULL;
@@ -757,10 +757,10 @@ void VariableOrderMarkov::characteristic_computation(const VariableOrderMarkovDa
     // calcul des lois caracteristiques au niveau etat
 
     if  (((variable == I_DEFAULT) || (variable == 0)) && ((!length_flag) ||
-          ((length_flag) && ((!(nonparametric_process[0]->length)) ||
-            (dlength != *(nonparametric_process[0]->length)))))) {
+          ((length_flag) && ((!(state_process->length)) ||
+            (dlength != *(state_process->length)))))) {
       computation[0] = true;
-      nonparametric_process[0]->create_characteristic(dlength , true , counting_flag);
+      state_process->create_characteristic(dlength , true , counting_flag);
 
       switch (type) {
 
@@ -811,9 +811,9 @@ void VariableOrderMarkov::characteristic_computation(const VariableOrderMarkovDa
         }
 
         else {
-          nonparametric_process[0]->absorption[i] = 1.;
-          delete nonparametric_process[0]->sojourn_time[i];
-          nonparametric_process[0]->sojourn_time[i] = NULL;
+          state_process->absorption[i] = 1.;
+          delete state_process->sojourn_time[i];
+          state_process->sojourn_time[i] = NULL;
         }
       }
 
@@ -832,10 +832,10 @@ void VariableOrderMarkov::characteristic_computation(const VariableOrderMarkovDa
         cout << endl;
 
         for (i = 0;i < nb_state;i++) {
-          sum += 1. / nonparametric_process[0]->recurrence_time[i]->mean;
+          sum += 1. / state_process->recurrence_time[i]->mean;
         }
         for (i = 0;i < nb_state;i++) {
-          cout << 1. / (nonparametric_process[0]->recurrence_time[i]->mean * sum) << " ";
+          cout << 1. / (state_process->recurrence_time[i]->mean * sum) << " ";
         }
         cout << endl;
       }
@@ -849,12 +849,12 @@ void VariableOrderMarkov::characteristic_computation(const VariableOrderMarkovDa
 
     // calcul des lois de type intensite et intervalle au niveau observation
 
-    for (i = 1;i <= nb_output_process;i++) {
-      if ((nonparametric_process[i]) && ((variable == I_DEFAULT) || (variable == 1)) &&
-          ((!length_flag) || ((length_flag) && ((!(nonparametric_process[i]->length)) ||
-           (dlength != *(nonparametric_process[i]->length)))))) {
-        computation[i] = true;
-        nonparametric_process[i]->create_characteristic(dlength , true , counting_flag);
+    for (i = 0;i < nb_output_process;i++) {
+      if ((categorical_process[i]) && ((variable == I_DEFAULT) || (variable == 1)) &&
+          ((!length_flag) || ((length_flag) && ((!(categorical_process[i]->length)) ||
+           (dlength != *(categorical_process[i]->length)))))) {
+        computation[i + 1] = true;
+        categorical_process[i]->create_characteristic(dlength , true , counting_flag);
 
         switch (seq.type[0]) {
         case INT_VALUE :
@@ -885,33 +885,33 @@ void VariableOrderMarkov::characteristic_computation(const VariableOrderMarkovDa
           }
         }
 
-        for (j = 0;j < nonparametric_process[i]->nb_value;j++) {
+        for (j = 0;j < categorical_process[i]->nb_value;j++) {
           if (type == 'o') {
             output_no_occurrence_probability(i , j);
           }
-          if (nonparametric_process[i]->no_occurrence[j] < 1. - DOUBLE_ERROR) {
+          if (categorical_process[i]->no_occurrence[j] < 1. - DOUBLE_ERROR) {
             output_first_occurrence_distribution(i , j , ((seq.characteristics[seq_variable]) && (j < seq.characteristics[seq_variable]->nb_value) && (seq.characteristics[seq_variable]->first_occurrence[j]->nb_element > 0) ? seq.characteristics[seq_variable]->first_occurrence[j]->nb_value : 1));
           }
           else {
-            delete nonparametric_process[i]->first_occurrence[j];
-            nonparametric_process[i]->first_occurrence[j] = NULL;
-            nonparametric_process[i]->leave[j] = 1.;
+            delete categorical_process[i]->first_occurrence[j];
+            categorical_process[i]->first_occurrence[j] = NULL;
+            categorical_process[i]->leave[j] = 1.;
           }
 
-          if ((type == 'o') && (nonparametric_process[i]->first_occurrence[j])) {
+          if ((type == 'o') && (categorical_process[i]->first_occurrence[j])) {
             output_leave_probability(memory , i , j);
           }
-          if (nonparametric_process[i]->leave[j] < 1. - DOUBLE_ERROR) {
+          if (categorical_process[i]->leave[j] < 1. - DOUBLE_ERROR) {
             output_recurrence_time_distribution(memory , i , j , ((seq.characteristics[seq_variable]) && (j < seq.characteristics[seq_variable]->nb_value) && (seq.characteristics[seq_variable]->recurrence_time[j]->nb_element > 0) ? seq.characteristics[seq_variable]->recurrence_time[j]->nb_value : 1));
           }
           else {
-            delete nonparametric_process[i]->recurrence_time[j];
-            nonparametric_process[i]->recurrence_time[j] = NULL;
+            delete categorical_process[i]->recurrence_time[j];
+            categorical_process[i]->recurrence_time[j] = NULL;
           }
 
           for (k = 0;k < nb_state;k++) {
-            if ((nonparametric_process[i]->observation[k]->mass[j] > 0.) &&
-                ((state_type[k] != 'a') || (nonparametric_process[i]->observation[k]->mass[j] < 1.))) {
+            if ((categorical_process[i]->observation[k]->mass[j] > 0.) &&
+                ((state_type[k] != 'a') || (categorical_process[i]->observation[k]->mass[j] < 1.))) {
               break;
             }
           }
@@ -920,15 +920,15 @@ void VariableOrderMarkov::characteristic_computation(const VariableOrderMarkovDa
             output_sojourn_time_distribution(memory , i , j , ((seq.characteristics[seq_variable]) && (j < seq.characteristics[seq_variable]->nb_value) && (seq.characteristics[seq_variable]->sojourn_time[j]->nb_element > 0) ? seq.characteristics[seq_variable]->sojourn_time[j]->nb_value : 1));
           }
           else {
-            nonparametric_process[i]->absorption[j] = 1.;
-            delete nonparametric_process[i]->sojourn_time[j];
-            nonparametric_process[i]->sojourn_time[j] = NULL;
+            categorical_process[i]->absorption[j] = 1.;
+            delete categorical_process[i]->sojourn_time[j];
+            categorical_process[i]->sojourn_time[j] = NULL;
           }
         }
       }
 
       else {
-        computation[i] = false;
+        computation[i + 1] = false;
       }
     }
 
@@ -947,9 +947,9 @@ void VariableOrderMarkov::characteristic_computation(const VariableOrderMarkovDa
 
       // calcul des lois de comptage au niveau observation
 
-      for (i = 1;i <= nb_output_process;i++) {
-        if (computation[i]) {
-          for (j = 0;j < nonparametric_process[i]->nb_value;j++) {
+      for (i = 0;i < nb_output_process;i++) {
+        if (computation[i + 1]) {
+          for (j = 0;j < categorical_process[i]->nb_value;j++) {
             output_nb_run_mixture(i , j);
             output_nb_occurrence_mixture(i , j);
           }
