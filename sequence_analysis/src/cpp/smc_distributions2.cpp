@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
@@ -58,7 +58,7 @@ using namespace std;
  *
  *--------------------------------------------------------------*/
 
-void SemiMarkov::state_nb_pattern_mixture(int state , char pattern)
+void SemiMarkovChain::state_nb_pattern_mixture(int state , char pattern)
 
 {
   register int i , j , k , m;
@@ -70,10 +70,10 @@ void SemiMarkov::state_nb_pattern_mixture(int state , char pattern)
 
   switch (pattern) {
   case 'r' :
-    pdist = nonparametric_process[0]->nb_run[state];
+    pdist = state_process->nb_run[state];
     break;
   case 'o' :
-    pdist = nonparametric_process[0]->nb_occurrence[state];
+    pdist = state_process->nb_occurrence[state];
     break;
   }
 
@@ -82,7 +82,7 @@ void SemiMarkov::state_nb_pattern_mixture(int state , char pattern)
     *pmass++ = 0.;
   }
 
-  max_length = nonparametric_process[0]->length->nb_value - 1;
+  max_length = state_process->length->nb_value - 1;
 
   state_out = new double*[nb_state];
   for (i = 0;i < nb_state;i++) {
@@ -105,7 +105,7 @@ void SemiMarkov::state_nb_pattern_mixture(int state , char pattern)
   // calcul des probabilites de quitter (semi-Markov) / d'etre dans (Markov) un etat
   // fonction du nombre de formes de l'etat selectionne
 
-  lmass = nonparametric_process[0]->length->mass;
+  lmass = state_process->length->mass;
   index_nb_pattern = 1;
 
   for (i = 0;i < max_length;i++) {
@@ -127,7 +127,7 @@ void SemiMarkov::state_nb_pattern_mixture(int state , char pattern)
       // cas etat semi-markovien
 
       case SEMI_MARKOVIAN : {
-        occupancy = nonparametric_process[0]->sojourn_time[j];
+        occupancy = state_process->sojourn_time[j];
 
         for (k = (*lmass > 0. ? 1 : occupancy->offset);k <= MIN(i + 1 , occupancy->nb_value - 1);k++) {
           switch (pattern) {
@@ -350,14 +350,14 @@ void SemiMarkov::output_nb_run_mixture(int variable , int output)
   DiscreteParametric *occupancy;
 
 
-  nb_run = nonparametric_process[variable]->nb_run[output];
+  nb_run = categorical_process[variable]->nb_run[output];
 
   pmass = nb_run->mass;
   for (i = 0;i < nb_run->nb_value;i++) {
     *pmass++ = 0.;
   }
 
-  max_length = nonparametric_process[variable]->length->nb_value - 1;
+  max_length = categorical_process[variable]->length->nb_value - 1;
 
   state_out = new double*[nb_state * 2];
   for (i = 0;i < nb_state * 2;i++) {
@@ -385,7 +385,7 @@ void SemiMarkov::output_nb_run_mixture(int variable , int output)
 
   for (i = 0;i < nb_state * 2;i++) {
     if (state_subtype[i / 2] == SEMI_MARKOVIAN) {
-      occupancy = nonparametric_process[0]->sojourn_time[i / 2];
+      occupancy = state_process->sojourn_time[i / 2];
       state_nb_run[i] = new double*[MIN(max_length + 1 , occupancy->nb_value) * 2];
 
       state_nb_run[i][0] = NULL;
@@ -406,35 +406,35 @@ void SemiMarkov::output_nb_run_mixture(int variable , int output)
       switch (i % 2) {
 
       case 0 : {
-        state_nb_run[i][2][0] = 1. - nonparametric_process[variable]->observation[i / 2]->mass[output];
+        state_nb_run[i][2][0] = 1. - categorical_process[variable]->observation[i / 2]->mass[output];
         state_nb_run[i][2][1] = 0.;
         state_nb_run[i][3][0] = 0.;
-        state_nb_run[i][3][1] = nonparametric_process[variable]->observation[i / 2]->mass[output];
+        state_nb_run[i][3][1] = categorical_process[variable]->observation[i / 2]->mass[output];
         break;
       }
 
       case 1 : {
-        state_nb_run[i][2][0] = 1. - nonparametric_process[variable]->observation[i / 2]->mass[output];
+        state_nb_run[i][2][0] = 1. - categorical_process[variable]->observation[i / 2]->mass[output];
         state_nb_run[i][2][1] = 0.;
-        state_nb_run[i][3][0] = nonparametric_process[variable]->observation[i / 2]->mass[output];
+        state_nb_run[i][3][0] = categorical_process[variable]->observation[i / 2]->mass[output];
         state_nb_run[i][3][1] = 0.;
         break;
       }
       }
 
-      occupancy = nonparametric_process[0]->sojourn_time[i / 2];
+      occupancy = state_process->sojourn_time[i / 2];
       index_nb_pattern = 1;
 
       for (j = 2;j < MIN(max_length + 1 , occupancy->nb_value);j++) {
         for (k = 0;k <= index_nb_pattern;k++) {
-          state_nb_run[i][j * 2][k] = (1. - nonparametric_process[variable]->observation[i / 2]->mass[output]) *
+          state_nb_run[i][j * 2][k] = (1. - categorical_process[variable]->observation[i / 2]->mass[output]) *
                                       (state_nb_run[i][j * 2 - 2][k] + state_nb_run[i][j * 2 - 1][k]);
 
           sum0 = state_nb_run[i][j * 2 - 1][k];
           if (k > 0) {
             sum0 += state_nb_run[i][j * 2 - 2][k - 1];
           }
-          state_nb_run[i][j * 2 + 1][k] = nonparametric_process[variable]->observation[i / 2]->mass[output] * sum0;
+          state_nb_run[i][j * 2 + 1][k] = categorical_process[variable]->observation[i / 2]->mass[output] * sum0;
         }
 
         if (j % 2 == 0) {
@@ -449,7 +449,7 @@ void SemiMarkov::output_nb_run_mixture(int variable , int output)
   // calcul des probabilites de quitter (semi-Markov) / d'etre dans (Markov) un etat
   // fonction du nombre de series de l'observation selectionnee
 
-  lmass = nonparametric_process[variable]->length->mass;
+  lmass = categorical_process[variable]->length->mass;
   index_nb_pattern = 1;
 
   for (i = 0;i < max_length;i++) {
@@ -469,7 +469,7 @@ void SemiMarkov::output_nb_run_mixture(int variable , int output)
       // cas etat semi-markovien
 
       case SEMI_MARKOVIAN : {
-        occupancy = nonparametric_process[0]->sojourn_time[j];
+        occupancy = state_process->sojourn_time[j];
 
         for (k = (*lmass > 0. ? 1 : occupancy->offset);k <= MIN(i + 1 , occupancy->nb_value - 1);k++) {
           if (*lmass > 0.) {
@@ -546,8 +546,8 @@ void SemiMarkov::output_nb_run_mixture(int variable , int output)
         }
 
         if (i == 0) {
-          state_out[j * 2][0] = (1. - nonparametric_process[variable]->observation[j]->mass[output]) * initial[j];
-          state_out[j * 2 + 1][1] = nonparametric_process[variable]->observation[j]->mass[output] * initial[j];
+          state_out[j * 2][0] = (1. - categorical_process[variable]->observation[j]->mass[output]) * initial[j];
+          state_out[j * 2 + 1][1] = categorical_process[variable]->observation[j]->mass[output] * initial[j];
 
            if (*lmass > 0.) {
             *pmass++ += *lmass * state_out[j * 2][0];
@@ -559,14 +559,14 @@ void SemiMarkov::output_nb_run_mixture(int variable , int output)
           for (k = 0;k <= index_nb_pattern;k++) {
             sum0 = 0.;
             if ((k < index_nb_pattern) || (i % 2 == 1)) {
-              state_out[j * 2][k] = (1. - nonparametric_process[variable]->observation[j]->mass[output]) *
+              state_out[j * 2][k] = (1. - categorical_process[variable]->observation[j]->mass[output]) *
                                     (state_in[i - 1][j * 2][k] + state_in[i - 1][j * 2 + 1][k]);
               sum0 += state_in[i - 1][j * 2 + 1][k];
             }
             if (k > 0) {
               sum0 += state_in[i - 1][j * 2][k - 1];
             }
-            state_out[j * 2 + 1][k] = nonparametric_process[variable]->observation[j]->mass[output] * sum0;
+            state_out[j * 2 + 1][k] = categorical_process[variable]->observation[j]->mass[output] * sum0;
 
             if (*lmass > 0.) {
               *pmass++ += *lmass * (state_out[j * 2][k] + state_out[j * 2 + 1][k]);
@@ -623,7 +623,7 @@ void SemiMarkov::output_nb_run_mixture(int variable , int output)
 
   for (i = 0;i < nb_state * 2;i++) {
     if (state_subtype[i / 2] == SEMI_MARKOVIAN) {
-      occupancy = nonparametric_process[0]->sojourn_time[i / 2];
+      occupancy = state_process->sojourn_time[i / 2];
       for (j = 1;j < MIN(max_length + 1 , occupancy->nb_value);j++) {
         delete [] state_nb_run[i][j * 2];
         delete [] state_nb_run[i][j * 2 + 1];
@@ -668,14 +668,14 @@ void SemiMarkov::output_nb_occurrence_mixture(int variable , int output)
   DiscreteParametric *occupancy , ***observation;
 
 
-  nb_occurrence = nonparametric_process[variable]->nb_occurrence[output];
+  nb_occurrence = categorical_process[variable]->nb_occurrence[output];
 
   pmass = nb_occurrence->mass;
   for (i = 0;i < nb_occurrence->nb_value;i++) {
     *pmass++ = 0.;
   }
 
-  max_length = nonparametric_process[variable]->length->nb_value - 1;
+  max_length = categorical_process[variable]->length->nb_value - 1;
 
   state_out = new double*[nb_state];
   for (i = 0;i < nb_state;i++) {
@@ -696,13 +696,13 @@ void SemiMarkov::output_nb_occurrence_mixture(int variable , int output)
   observation = new DiscreteParametric**[nb_state];
   for (i = 0;i < nb_state;i++) {
     if (state_subtype[i] == SEMI_MARKOVIAN) {
-      occupancy = nonparametric_process[0]->sojourn_time[i];
+      occupancy = state_process->sojourn_time[i];
       observation[i] = new DiscreteParametric*[MIN(max_length + 1 , occupancy->nb_value)];
 
       observation[i][0] = NULL;
       for (j = 1;j < MIN(max_length + 1 , occupancy->nb_value);j++) {
         observation[i][j] = new DiscreteParametric(BINOMIAL , 0 , j , D_DEFAULT ,
-                                                   nonparametric_process[variable]->observation[i]->mass[output]);
+                                                   categorical_process[variable]->observation[i]->mass[output]);
       }
     }
   }
@@ -710,7 +710,7 @@ void SemiMarkov::output_nb_occurrence_mixture(int variable , int output)
   // calcul des probabilites de quitter (semi-Markov) / d'etre dans (Markov) un etat
   // fonction du nombre d'occurrences de l'observation selectionnee
 
-  lmass = nonparametric_process[variable]->length->mass;
+  lmass = categorical_process[variable]->length->mass;
 
   for (i = 0;i < max_length;i++) {
     lmass++;
@@ -728,7 +728,7 @@ void SemiMarkov::output_nb_occurrence_mixture(int variable , int output)
       // cas etat semi-markovien
 
       case SEMI_MARKOVIAN : {
-        occupancy = nonparametric_process[0]->sojourn_time[j];
+        occupancy = state_process->sojourn_time[j];
 
         for (k = (*lmass > 0. ? 1 : occupancy->offset);k <= MIN(i + 1 , occupancy->nb_value - 1);k++) {
           if (*lmass > 0.) {
@@ -798,8 +798,8 @@ void SemiMarkov::output_nb_occurrence_mixture(int variable , int output)
         }
 
         if (i == 0) {
-          state_out[j][0] = (1. - nonparametric_process[variable]->observation[j]->mass[output]) * initial[j];
-          state_out[j][1] = nonparametric_process[variable]->observation[j]->mass[output] * initial[j];
+          state_out[j][0] = (1. - categorical_process[variable]->observation[j]->mass[output]) * initial[j];
+          state_out[j][1] = categorical_process[variable]->observation[j]->mass[output] * initial[j];
 
            if (*lmass > 0.) {
             *pmass++ += *lmass * state_out[j][0];
@@ -810,11 +810,11 @@ void SemiMarkov::output_nb_occurrence_mixture(int variable , int output)
         else {
           for (k = 0;k <= i + 1;k++) {
             if (k < i + 1) {
-              state_out[j][k] += (1. - nonparametric_process[variable]->observation[j]->mass[output]) *
+              state_out[j][k] += (1. - categorical_process[variable]->observation[j]->mass[output]) *
                                  state_in[i - 1][j][k];
             }
             if (k > 0) {
-              state_out[j][k] += nonparametric_process[variable]->observation[j]->mass[output] *
+              state_out[j][k] += categorical_process[variable]->observation[j]->mass[output] *
                                  state_in[i - 1][j][k - 1];
             }
 
@@ -867,7 +867,7 @@ void SemiMarkov::output_nb_occurrence_mixture(int variable , int output)
 
   for (i = 0;i < nb_state;i++) {
     if (state_subtype[i] == SEMI_MARKOVIAN) {
-      for (j = 1;j < MIN(max_length + 1 , nonparametric_process[0]->sojourn_time[i]->nb_value);j++) {
+      for (j = 1;j < MIN(max_length + 1 , state_process->sojourn_time[i]->nb_value);j++) {
         delete observation[i][j];
       }
       delete [] observation[i];
@@ -914,10 +914,10 @@ void SemiMarkov::characteristic_computation(int length , bool counting_flag , in
     // calcul des lois de type intensite et intervalle au niveau etat
 
     if (((variable == I_DEFAULT) || (variable == 0)) &&
-        ((!(nonparametric_process[0]->length)) ||
-         (dlength != *(nonparametric_process[0]->length)))) {
+        ((!(state_process->length)) ||
+         (dlength != *(state_process->length)))) {
       computation[0] = true;
-      nonparametric_process[0]->create_characteristic(dlength , false , counting_flag);
+      state_process->create_characteristic(dlength , false , counting_flag);
 
       index_state_distribution();
 
@@ -930,31 +930,31 @@ void SemiMarkov::characteristic_computation(int length , bool counting_flag , in
         if (type == 'o') {
           state_leave_probability(i);
         }
-        if (nonparametric_process[0]->leave[i] < 1. - DOUBLE_ERROR) {
+        if (state_process->leave[i] < 1. - DOUBLE_ERROR) {
           state_recurrence_time_distribution(i);
         }
         else {
-          delete nonparametric_process[0]->recurrence_time[i];
-          nonparametric_process[0]->recurrence_time[i] = NULL;
+          delete state_process->recurrence_time[i];
+          state_process->recurrence_time[i] = NULL;
         }
 
         if ((state_subtype[i] == MARKOVIAN) && (transition[i][i] < 1.)) {
           if (transition[i][i] > 0.) {
-            nonparametric_process[0]->sojourn_time[i] = new DiscreteParametric(NEGATIVE_BINOMIAL , 1 ,
-                                                                               I_DEFAULT , 1. , 1. - transition[i][i] ,
-                                                                               OCCUPANCY_THRESHOLD);
-            nonparametric_process[0]->sojourn_time[i]->parameter = D_DEFAULT;
-            nonparametric_process[0]->sojourn_time[i]->probability = D_DEFAULT;
+            state_process->sojourn_time[i] = new DiscreteParametric(NEGATIVE_BINOMIAL , 1 ,
+                                                                    I_DEFAULT , 1. , 1. - transition[i][i] ,
+                                                                    OCCUPANCY_THRESHOLD);
+            state_process->sojourn_time[i]->parameter = D_DEFAULT;
+            state_process->sojourn_time[i]->probability = D_DEFAULT;
           }
 
           else {
-            nonparametric_process[0]->sojourn_time[i] = new DiscreteParametric(UNIFORM , 1 , 1 ,
-                                                                               D_DEFAULT , D_DEFAULT);
-            nonparametric_process[0]->sojourn_time[i]->sup_bound = I_DEFAULT;
+            state_process->sojourn_time[i] = new DiscreteParametric(UNIFORM , 1 , 1 ,
+                                                                    D_DEFAULT , D_DEFAULT);
+            state_process->sojourn_time[i]->sup_bound = I_DEFAULT;
           }
 
-          nonparametric_process[0]->sojourn_time[i]->ident = NONPARAMETRIC;
-          nonparametric_process[0]->sojourn_time[i]->inf_bound = I_DEFAULT;
+          state_process->sojourn_time[i]->ident = CATEGORICAL;
+          state_process->sojourn_time[i]->inf_bound = I_DEFAULT;
         }
       }
 
@@ -967,13 +967,13 @@ void SemiMarkov::characteristic_computation(int length , bool counting_flag , in
         // les fonctions de repartition des lois de temps de retour dans les etats
 
         for (i = 0;i < nb_state;i++) {
-          sum += 1. / nonparametric_process[0]->recurrence_time[i]->mean;
+          sum += 1. / state_process->recurrence_time[i]->mean;
         }
 
         cout << "\n" << STAT_label[STATL_STATIONARY_PROBABILITIES] << endl;
         for (i = 0;i < nb_state;i++) {
           cout << initial[i] << " | "
-               << 1. / (nonparametric_process[0]->recurrence_time[i]->mean * sum) << endl;
+               << 1. / (state_process->recurrence_time[i]->mean * sum) << endl;
         }
       }
 #     endif
@@ -986,12 +986,12 @@ void SemiMarkov::characteristic_computation(int length , bool counting_flag , in
 
     // calcul des lois de type intensite et intervalle au niveau observation
 
-    for (i = 1;i <= nb_output_process;i++) {
-      if ((nonparametric_process[i]) && ((variable == I_DEFAULT) || (i == variable)) &&
-          ((!(nonparametric_process[i]->length)) ||
-           (dlength != *(nonparametric_process[i]->length)))) {
-        computation[i] = true;
-        nonparametric_process[i]->create_characteristic(dlength , true , counting_flag);
+    for (i = 0;i < nb_output_process;i++) {
+      if ((categorical_process[i]) && ((variable == I_DEFAULT) || (i == variable)) &&
+          ((!(categorical_process[i]->length)) ||
+           (dlength != *(categorical_process[i]->length)))) {
+        computation[i + 1] = true;
+        categorical_process[i]->create_characteristic(dlength , true , counting_flag);
 
         index_output_distribution(i);
 
@@ -999,33 +999,33 @@ void SemiMarkov::characteristic_computation(int length , bool counting_flag , in
           memory = memory_computation();
         }
 
-        for (j = 0;j < nonparametric_process[i]->nb_value;j++) {
+        for (j = 0;j < categorical_process[i]->nb_value;j++) {
           if (type == 'o') {
             output_no_occurrence_probability(i , j);
           }
-          if (nonparametric_process[i]->no_occurrence[j] < 1. - DOUBLE_ERROR) {
+          if (categorical_process[i]->no_occurrence[j] < 1. - DOUBLE_ERROR) {
             output_first_occurrence_distribution(i , j);
           }
           else {
-            delete nonparametric_process[i]->first_occurrence[j];
-            nonparametric_process[i]->first_occurrence[j] = NULL;
-            nonparametric_process[i]->leave[j] = 1.;
+            delete categorical_process[i]->first_occurrence[j];
+            categorical_process[i]->first_occurrence[j] = NULL;
+            categorical_process[i]->leave[j] = 1.;
           }
 
-          if ((type == 'o') && (nonparametric_process[i]->first_occurrence[j])) {
+          if ((type == 'o') && (categorical_process[i]->first_occurrence[j])) {
             output_leave_probability(memory , i , j);
           }
-          if (nonparametric_process[i]->leave[j] < 1. - DOUBLE_ERROR) {
+          if (categorical_process[i]->leave[j] < 1. - DOUBLE_ERROR) {
             output_recurrence_time_distribution(memory , i , j);
           }
           else {
-            delete nonparametric_process[i]->recurrence_time[j];
-            nonparametric_process[i]->recurrence_time[j] = NULL;
+            delete categorical_process[i]->recurrence_time[j];
+            categorical_process[i]->recurrence_time[j] = NULL;
           }
 
           for (k = 0;k < nb_state;k++) {
-            if ((nonparametric_process[i]->observation[k]->mass[j] > 0.) &&
-                ((state_type[k] != 'a') || (nonparametric_process[i]->observation[k]->mass[j] < 1.))) {
+            if ((categorical_process[i]->observation[k]->mass[j] > 0.) &&
+                ((state_type[k] != 'a') || (categorical_process[i]->observation[k]->mass[j] < 1.))) {
               break;
             }
           }
@@ -1034,15 +1034,15 @@ void SemiMarkov::characteristic_computation(int length , bool counting_flag , in
             output_sojourn_time_distribution(memory , i , j);
           }
           else {
-            nonparametric_process[i]->absorption[j] = 1.;
-            delete nonparametric_process[i]->sojourn_time[j];
-            nonparametric_process[i]->sojourn_time[j] = NULL;
+            categorical_process[i]->absorption[j] = 1.;
+            delete categorical_process[i]->sojourn_time[j];
+            categorical_process[i]->sojourn_time[j] = NULL;
           }
         }
       }
 
       else {
-        computation[i] = false;
+        computation[i + 1] = false;
       }
     }
 
@@ -1061,9 +1061,9 @@ void SemiMarkov::characteristic_computation(int length , bool counting_flag , in
 
       // calcul des lois de comptage au niveau observation
 
-      for (i = 1;i <= nb_output_process;i++) {
-        if (computation[i]) {
-          for (j = 0;j < nonparametric_process[i]->nb_value;j++) {
+      for (i = 0;i < nb_output_process;i++) {
+        if (computation[i + 1]) {
+          for (j = 0;j < categorical_process[i]->nb_value;j++) {
             output_nb_run_mixture(i , j);
             output_nb_occurrence_mixture(i , j);
           }
@@ -1094,7 +1094,7 @@ void SemiMarkov::characteristic_computation(const SemiMarkovData &seq , bool cou
     register int i , j , k;
     int seq_variable;
     double *memory;
-    Distribution dlength(*(seq.hlength));
+    Distribution dlength(*(seq.length_distribution));
 
 
     memory = NULL;
@@ -1102,10 +1102,10 @@ void SemiMarkov::characteristic_computation(const SemiMarkovData &seq , bool cou
     // calcul des lois de type intensite et intervalle au niveau etat
 
     if (((variable == I_DEFAULT) || (variable == 0)) && ((!length_flag) ||
-         ((length_flag) && ((!(nonparametric_process[0]->length)) ||
-           (dlength != *(nonparametric_process[0]->length)))))) {
+         ((length_flag) && ((!(state_process->length)) ||
+           (dlength != *(state_process->length)))))) {
       computation[0] = true;
-      nonparametric_process[0]->create_characteristic(dlength , false , counting_flag);
+      state_process->create_characteristic(dlength , false , counting_flag);
 
       index_state_distribution();
 
@@ -1123,7 +1123,7 @@ void SemiMarkov::characteristic_computation(const SemiMarkovData &seq , bool cou
         if (type == 'o') {
           state_leave_probability(i);
         }
-        if (nonparametric_process[0]->leave[i] < 1. - DOUBLE_ERROR) {
+        if (state_process->leave[i] < 1. - DOUBLE_ERROR) {
           if (seq.type[0] == STATE) {
             state_recurrence_time_distribution(i , ((seq.characteristics[0]) && (i < seq.marginal_distribution[0]->nb_value) && (seq.characteristics[0]->recurrence_time[i]->nb_element > 0) ? seq.characteristics[0]->recurrence_time[i]->nb_value : 1));
           }
@@ -1132,32 +1132,32 @@ void SemiMarkov::characteristic_computation(const SemiMarkovData &seq , bool cou
           }
         }
         else {
-          delete nonparametric_process[0]->recurrence_time[i];
-          nonparametric_process[0]->recurrence_time[i] = NULL;
+          delete state_process->recurrence_time[i];
+          state_process->recurrence_time[i] = NULL;
         }
 
         if ((state_subtype[i] == MARKOVIAN) && (transition[i][i] < 1.)) {
           if (transition[i][i] > 0.) {
-            nonparametric_process[0]->sojourn_time[i] = new DiscreteParametric(NEGATIVE_BINOMIAL , 1 ,
-                                                                               I_DEFAULT , 1. , 1. - transition[i][i] ,
-                                                                               OCCUPANCY_THRESHOLD);
+            state_process->sojourn_time[i] = new DiscreteParametric(NEGATIVE_BINOMIAL , 1 ,
+                                                                    I_DEFAULT , 1. , 1. - transition[i][i] ,
+                                                                    OCCUPANCY_THRESHOLD);
 
             if ((seq.type[0] == STATE) && (seq.characteristics[0]) && (i < seq.marginal_distribution[0]->nb_value) &&
-                (seq.characteristics[0]->sojourn_time[i]->nb_value > nonparametric_process[0]->sojourn_time[i]->nb_value)) {
-              nonparametric_process[0]->sojourn_time[i]->computation(seq.characteristics[0]->sojourn_time[i]->nb_value , OCCUPANCY_THRESHOLD);
+                (seq.characteristics[0]->sojourn_time[i]->nb_value > state_process->sojourn_time[i]->nb_value)) {
+              state_process->sojourn_time[i]->computation(seq.characteristics[0]->sojourn_time[i]->nb_value , OCCUPANCY_THRESHOLD);
             }
-            nonparametric_process[0]->sojourn_time[i]->parameter = D_DEFAULT;
-            nonparametric_process[0]->sojourn_time[i]->probability = D_DEFAULT;
+            state_process->sojourn_time[i]->parameter = D_DEFAULT;
+            state_process->sojourn_time[i]->probability = D_DEFAULT;
           }
 
           else {
-            nonparametric_process[0]->sojourn_time[i] = new DiscreteParametric(UNIFORM , 1 , 1 ,
-                                                                               D_DEFAULT , D_DEFAULT);
-            nonparametric_process[0]->sojourn_time[i]->sup_bound = I_DEFAULT;
+            state_process->sojourn_time[i] = new DiscreteParametric(UNIFORM , 1 , 1 ,
+                                                                    D_DEFAULT , D_DEFAULT);
+            state_process->sojourn_time[i]->sup_bound = I_DEFAULT;
           }
 
-          nonparametric_process[0]->sojourn_time[i]->ident = NONPARAMETRIC;
-          nonparametric_process[0]->sojourn_time[i]->inf_bound = I_DEFAULT;
+          state_process->sojourn_time[i]->ident = CATEGORICAL;
+          state_process->sojourn_time[i]->inf_bound = I_DEFAULT;
         }
       }
 
@@ -1170,13 +1170,13 @@ void SemiMarkov::characteristic_computation(const SemiMarkovData &seq , bool cou
         // les fonctions de repartition des lois de temps de retour dans les etats
 
         for (i = 0;i < nb_state;i++) {
-          sum += 1. / nonparametric_process[0]->recurrence_time[i]->mean;
+          sum += 1. / state_process->recurrence_time[i]->mean;
         }
 
         cout << "\n" << STAT_label[STATL_STATIONARY_PROBABILITIES] << endl;
         for (i = 0;i < nb_state;i++) {
           cout << initial[i] << " | "
-               << 1. / (nonparametric_process[0]->recurrence_time[i]->mean * sum) << endl;
+               << 1. / (state_process->recurrence_time[i]->mean * sum) << endl;
         }
       }
 #     endif
@@ -1189,12 +1189,12 @@ void SemiMarkov::characteristic_computation(const SemiMarkovData &seq , bool cou
 
     // calcul des lois de type intensite et intervalle au niveau observation
 
-    for (i = 1;i <= nb_output_process;i++) {
-      if ((nonparametric_process[i]) && ((variable == I_DEFAULT) || (i == variable)) &&
-          ((!length_flag) || ((length_flag) && ((!(nonparametric_process[i]->length)) ||
-             (dlength != *(nonparametric_process[i]->length)))))) {
-        computation[i] = true;
-        nonparametric_process[i]->create_characteristic(dlength , true , counting_flag);
+    for (i = 0;i < nb_output_process;i++) {
+      if ((categorical_process[i]) && ((variable == I_DEFAULT) || (i == variable)) &&
+          ((!length_flag) || ((length_flag) && ((!(categorical_process[i]->length)) ||
+             (dlength != *(categorical_process[i]->length)))))) {
+        computation[i + 1] = true;
+        categorical_process[i]->create_characteristic(dlength , true , counting_flag);
 
         switch (seq.type[0]) {
         case INT_VALUE :
@@ -1211,33 +1211,33 @@ void SemiMarkov::characteristic_computation(const SemiMarkovData &seq , bool cou
           memory = memory_computation();
         }
 
-        for (j = 0;j < nonparametric_process[i]->nb_value;j++) {
+        for (j = 0;j < categorical_process[i]->nb_value;j++) {
           if (type == 'o') {
             output_no_occurrence_probability(i , j);
           }
-          if (nonparametric_process[i]->no_occurrence[j] < 1. - DOUBLE_ERROR) {
+          if (categorical_process[i]->no_occurrence[j] < 1. - DOUBLE_ERROR) {
             output_first_occurrence_distribution(i , j , ((seq.characteristics[seq_variable]) && (j < seq.characteristics[seq_variable]->nb_value) && (seq.characteristics[seq_variable]->first_occurrence[j]->nb_element > 0) ? seq.characteristics[seq_variable]->first_occurrence[j]->nb_value : 1));
           }
           else {
-            delete nonparametric_process[i]->first_occurrence[j];
-            nonparametric_process[i]->first_occurrence[j] = NULL;
-            nonparametric_process[i]->leave[j] = 1.;
+            delete categorical_process[i]->first_occurrence[j];
+            categorical_process[i]->first_occurrence[j] = NULL;
+            categorical_process[i]->leave[j] = 1.;
           }
 
-          if ((type == 'o') && (nonparametric_process[i]->first_occurrence[j])) {
+          if ((type == 'o') && (categorical_process[i]->first_occurrence[j])) {
             output_leave_probability(memory , i , j);
           }
-          if (nonparametric_process[i]->leave[j] < 1. - DOUBLE_ERROR) {
+          if (categorical_process[i]->leave[j] < 1. - DOUBLE_ERROR) {
             output_recurrence_time_distribution(memory , i , j , ((seq.characteristics[seq_variable]) && (j < seq.characteristics[seq_variable]->nb_value) && (seq.characteristics[seq_variable]->recurrence_time[j]->nb_element > 0) ? seq.characteristics[seq_variable]->recurrence_time[j]->nb_value : 1));
           }
           else {
-            delete nonparametric_process[i]->recurrence_time[j];
-            nonparametric_process[i]->recurrence_time[j] = NULL;
+            delete categorical_process[i]->recurrence_time[j];
+            categorical_process[i]->recurrence_time[j] = NULL;
           }
 
           for (k = 0;k < nb_state;k++) {
-            if ((nonparametric_process[i]->observation[k]->mass[j] > 0.) &&
-                ((state_type[k] != 'a') || (nonparametric_process[i]->observation[k]->mass[j] < 1.))) {
+            if ((categorical_process[i]->observation[k]->mass[j] > 0.) &&
+                ((state_type[k] != 'a') || (categorical_process[i]->observation[k]->mass[j] < 1.))) {
               break;
             }
           }
@@ -1246,15 +1246,15 @@ void SemiMarkov::characteristic_computation(const SemiMarkovData &seq , bool cou
             output_sojourn_time_distribution(memory , i , j , ((seq.characteristics[seq_variable]) && (j < seq.characteristics[seq_variable]->nb_value) && (seq.characteristics[seq_variable]->sojourn_time[j]->nb_element > 0) ? seq.characteristics[seq_variable]->sojourn_time[j]->nb_value : 1));
           }
           else {
-            nonparametric_process[i]->absorption[j] = 1.;
-            delete nonparametric_process[i]->sojourn_time[j];
-            nonparametric_process[i]->sojourn_time[j] = NULL;
+            categorical_process[i]->absorption[j] = 1.;
+            delete categorical_process[i]->sojourn_time[j];
+            categorical_process[i]->sojourn_time[j] = NULL;
           }
         }
       }
 
       else {
-        computation[i] = false;
+        computation[i + 1] = false;
       }
     }
 
@@ -1273,9 +1273,9 @@ void SemiMarkov::characteristic_computation(const SemiMarkovData &seq , bool cou
 
       // calcul des lois de comptage au niveau observation
 
-      for (i = 1;i <= nb_output_process;i++) {
-        if (computation[i]) {
-          for (j = 0;j < nonparametric_process[i]->nb_value;j++) {
+      for (i = 0;i < nb_output_process;i++) {
+        if (computation[i + 1]) {
+          for (j = 0;j < categorical_process[i]->nb_value;j++) {
             output_nb_run_mixture(i , j);
             output_nb_occurrence_mixture(i , j);
           }
