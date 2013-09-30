@@ -41,7 +41,7 @@
 #include "stat_tool/stat_label.h"
 #include "stat_tool/curves.h"
 #include "stat_tool/markovian.h"
-#include "stat_tool/distribution_reestimation.h"
+#include "stat_tool/distribution_reestimation.hpp"
 #include "stat_tool/distribution.h"   // definition of DiscreteParametricModel class
 #include "stat_tool/vectors.h"
 #include "stat_tool/mixture.h"
@@ -2167,7 +2167,7 @@ HiddenMarkovTreeData::hidden_markov_ind_out_tree_estimation(StatError& error,
          for(var= 0; var < _nb_integral; var++)
          {
             if (((ihmarkov.npprocess[var+1] != NULL) &&
-                 (ihmarkov.npprocess[var+1]->get_nb_value() != get_max_int_value(var)+1)) ||
+                 (ihmarkov.npprocess[var+1]->nb_value != get_max_int_value(var)+1)) ||
                 ((ihmarkov.piprocess[var+1] != NULL) &&
                  (ihmarkov.piprocess[var+1]->nb_value < get_max_int_value(var)+1)))
             {
