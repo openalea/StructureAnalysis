@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
@@ -50,6 +50,7 @@ const char *STAT_word[] = {
 
   "SHAPE" ,
   "SCALE" ,
+  "ZERO_PROBABILITY" ,
   "MEAN" ,
   "STANDARD_DEVIATION" ,
   "MEAN_DIRECTION" ,
@@ -82,7 +83,8 @@ const char *STAT_word[] = {
 
   "OUTPUT_PROCESS" ,
   "OUTPUT_PROCESSES" ,
-  "NONPARAMETRIC" ,
+  "NONPARAMETRIC" ,   // pour compatibilite ascendante
+  "CATEGORICAL" ,
   "PARAMETRIC" ,   // pour compatibilite ascendante
   "DISCRETE_PARAMETRIC" ,
   "CONTINUOUS_PARAMETRIC" ,
@@ -95,7 +97,7 @@ const char *STAT_word[] = {
 
 
 const char *STAT_discrete_distribution_word[] = {
-  "NONPARAMETRIC" ,
+  "CATEGORICAL" ,
   "BINOMIAL" ,
   "POISSON" ,
   "NEGATIVE_BINOMIAL" ,
@@ -104,7 +106,7 @@ const char *STAT_discrete_distribution_word[] = {
 
 
 const char *STAT_discrete_distribution_letter[] = {
-  "NP" ,
+  "C" ,
   "B" ,
   "P" ,
   "NB" ,
@@ -114,6 +116,7 @@ const char *STAT_discrete_distribution_letter[] = {
 
 const char *STAT_continuous_distribution_word[] = {
   "GAMMA" ,
+  "ZERO_INFLATED_GAMMA" ,
   "GAUSSIAN" ,
   "VON_MISES"
 };
@@ -121,6 +124,7 @@ const char *STAT_continuous_distribution_word[] = {
 
 const char *STAT_continuous_distribution_letter[] = {
   "Ga" ,
+  "ZIGa" ,
   "G" ,
   "VM"
 };
