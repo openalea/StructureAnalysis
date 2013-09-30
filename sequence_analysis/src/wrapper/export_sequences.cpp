@@ -1095,8 +1095,8 @@ public:
   }
 
   static Sequences*
-  pointwise_average(const Sequences &seq, bool circular, bool standard_deviation, int output,
-      const char *path, char format)
+  pointwise_average(const Sequences &seq, bool circular, bool standard_deviation,
+      int output, const char *path, char format)
   {
     SIMPLE_METHOD_TEMPLATE_1(seq, pointwise_average, Sequences,
         circular, standard_deviation, output, path, format);
@@ -1146,7 +1146,7 @@ public:
   extract_length(const Sequences &input)
   {
     DiscreteDistributionData *res;
-    res = new DiscreteDistributionData(*(input.get_hlength()));
+    res = new DiscreteDistributionData(*(input.get_length_distribution()));
     return res;
   }
 
@@ -1522,11 +1522,11 @@ class_sequences()
  Sequences(int inb_sequence , int *iidentifier , int *ilength , int iindex_parameter_type ,               int inb_variable , int *itype , bool init_flag = false)       { init(inb_sequence , iidentifier , ilength , iindex_parameter_type , inb_variable ,               itype , init_flag); }
  Sequences(int inb_sequence , int *iidentifier , int *ilength , int inb_variable , int *itype , bool init_flag = false){ init(inb_sequence , iidentifier , ilength , IMPLICIT_TYPE , inb_variable ,            itype , init_flag); }
  Sequences(int inb_sequence , int *iidentifier , int *ilength , int inb_variable ,  bool init_flag = false)     { init(inb_sequence , iidentifier , ilength , inb_variable , init_flag); }
- Sequences(const FrequencyDistribution &ihlength , int inb_variable , bool init_flag = false);
+ Sequences(const FrequencyDistribution &ilength_distribution , int inb_variable , bool init_flag = false);
  Sequences(const Sequences &seq , int inb_sequence , int *index);
  Sequences(const Sequences &seq , bool *segment_mean);
  Sequences(const Sequences &seq , char transform = 'c' , int param = DEFAULT);
- Sequences(const FrequencyDistribution &ihlength , int inb_variable , bool init_flag = false);
+ Sequences(const FrequencyDistribution &ilength_distribution , int inb_variable , bool init_flag = false);
 
  Tops* tops(StatError &error) const;
  bool check(StatError &error , const char *pattern_label);
@@ -1561,8 +1561,8 @@ class_sequences()
 
 
 
- FrequencyDistribution* get_hlength() const { return hlength; }
- FrequencyDistribution* get_hindex_parameter() const { return hindex_parameter; }
+ FrequencyDistribution* get_length_distribution() const { return length_distribution; }
+ FrequencyDistribution* get_index_parameter_distribution() const { return index_parameter_distribution; }
  FrequencyDistribution* get_index_interval() const { return index_interval; }
  int get_index_parameter(int iseq , int index) const  { return index_parameter[iseq][index]; }
  FrequencyDistribution* get_marginal(int variable) const { return marginal[variable]; }
@@ -1582,22 +1582,22 @@ public:
 
     boost::python::list list;
 
-    for (int i = 0; i < input.get_nb_value(); i++)
+/*    for (int i = 0; i < input.get_nb_value(); i++)
       {
-        //list.append(  boost::python::extract<FrequencyDistribution>(input.get_initial_run(i)));
-        //extract<FrequencyDistribution>(input.get_initial_run(i));
+        list.append(  boost::python::extract<FrequencyDistribution>(input.get_initial_run(i)));
+        extract<FrequencyDistribution>(input.get_initial_run(i));
         list.append(i);
 
-      }
+      } */
 
     return list;
   }
 
-  static FrequencyDistribution*
+/*  static FrequencyDistribution*
   get_initial_run_from_index(SequenceCharacteristics &input, int index)
   {
     return input.get_initial_run(index);
-  }
+  } */
 };
 
 void
@@ -1605,11 +1605,11 @@ class_sequence_characteristics()
 {
 
   class_<SequenceCharacteristics> ("_SequenceCharacteristics", "SequenceCharacteristics")
-  .def(init<optional<int> >())
-  .def(init<SequenceCharacteristics, optional<bool> >())
-  .def(init<SequenceCharacteristics, optional<char> >())
+//  .def(init<optional<int> >())
+//  .def(init<SequenceCharacteristics, optional<bool> >())
+//  .def(init<SequenceCharacteristics, optional<char> >())
 
-  .add_property("get_nb_value", &SequenceCharacteristics::get_nb_value)
+/*  .add_property("get_nb_value", &SequenceCharacteristics::get_nb_value)
 
   .def("get_initial_run", &WRAP::get_initial_run, "returns initial run")
 
@@ -1621,7 +1621,7 @@ class_sequence_characteristics()
   DEF_RETURN_VALUE_NO_ARGS("get_sojourn_time", &SequenceCharacteristics::get_sojourn_time,"returns sojourn time")
   DEF_RETURN_VALUE_NO_ARGS("get_final_run", &SequenceCharacteristics::get_final_run,"returns final run")
   DEF_RETURN_VALUE_NO_ARGS("get_nb_run", &SequenceCharacteristics::get_nb_run, "returns number of run")
-  DEF_RETURN_VALUE_NO_ARGS("get_nb_occurrence", &SequenceCharacteristics::get_nb_occurrence, "returns number of ocurrences")
+  DEF_RETURN_VALUE_NO_ARGS("get_nb_occurrence", &SequenceCharacteristics::get_nb_occurrence, "returns number of ocurrences") */
   ;
 
 //DONE
