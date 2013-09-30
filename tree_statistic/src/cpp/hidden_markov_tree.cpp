@@ -69,17 +69,17 @@ using namespace Stat_trees;
 
 /*****************************************************************
  *
- *  Default constructor of NonparametricTreeProcess class
+ *  Default constructor of CategoricalTreeProcess class
  *  using the state number, the number of values and a flag
  *  on emission distributions (indicating whether the obsevation
  *  distributions are allocated)
  *
  **/
 
-NonparametricTreeProcess::NonparametricTreeProcess(int inb_state,
-                                                   int inb_value,
-                                                   int observation_flag)
- : NonparametricProcess(inb_state, inb_value, observation_flag)
+CategoricalTreeProcess::CategoricalTreeProcess(int inb_state,
+                                               int inb_value,
+                                               int observation_flag)
+ : CategoricalProcess(inb_state, inb_value, observation_flag)
 
 {
    size= NULL;
@@ -95,14 +95,14 @@ NonparametricTreeProcess::NonparametricTreeProcess(int inb_state,
 
 /*****************************************************************
  *
- *  Constructor of NonparametricTreeProcess class
+ *  Constructor of CategoricalTreeProcess class
  *  usgin the state number and the state occupancy distributions
  *
  **/
 
 /*
-NonparametricTreeProcess::NonparametricTreeProcess(int inb_state,
-                                                   Distribution** occupancy)
+CategoricalTreeProcess::CategoricalTreeProcess(int inb_state,
+                                               Distribution** occupancy)
  :  nb_state(inb_state)
  ,  nb_value(inb_state)
  ,  size(NULL)
@@ -132,13 +132,13 @@ NonparametricTreeProcess::NonparametricTreeProcess(int inb_state,
 
 /*****************************************************************
  *
- *  Constructor of NonparametricTreeProcess class
- *  from a NonparametricProcess object
+ *  Constructor of CategoricalTreeProcess class
+ *  from a CategoricalProcess object
  *
  **/
 
-NonparametricTreeProcess::NonparametricTreeProcess(const NonparametricProcess& process)
- : NonparametricProcess(process)
+CategoricalTreeProcess::CategoricalTreeProcess(const CategoricalProcess& process)
+ : CategoricalProcess(process)
  , size(NULL)
  , no_occurrence(NULL)
  , leave(NULL)
@@ -153,8 +153,8 @@ NonparametricTreeProcess::NonparametricTreeProcess(const NonparametricProcess& p
 
 /*****************************************************************
  *
- *  Copy constructor NonparametricTreeProcess class
- *  using a reference on a NonparametricTreeProcess object,
+ *  Copy constructor CategoricalTreeProcess class
+ *  using a reference on a CategoricalTreeProcess object,
  *  the kind of copy ('c' : copy, 'o' :occupancy)
  *  and a parameter (flag on the caracteristic distribution computation /
  *  number of allocated values for state occupancy distributions /
@@ -162,10 +162,10 @@ NonparametricTreeProcess::NonparametricTreeProcess(const NonparametricProcess& p
  *
  **/
 
-NonparametricTreeProcess::NonparametricTreeProcess(const NonparametricTreeProcess& process,
-                                                   char manip, int param)
+CategoricalTreeProcess::CategoricalTreeProcess(const CategoricalTreeProcess& process,
+                                               char manip, int param)
 
- : NonparametricProcess(process)
+ : CategoricalProcess(process)
  , size(NULL)
  , no_occurrence(NULL)
  , leave(NULL)
@@ -181,7 +181,7 @@ NonparametricTreeProcess::NonparametricTreeProcess(const NonparametricTreeProces
 
       case 'c':
       {
-         // NonparametricProcess::copy(process);
+         // CategoricalProcess::copy(process);
          // should already be done by constructor
          copy(process, param);
          break;
@@ -197,28 +197,28 @@ NonparametricTreeProcess::NonparametricTreeProcess(const NonparametricTreeProces
 
 /*****************************************************************
  *
- *  Destructor for NonparametricTreeProcess class
+ *  Destructor for CategoricalTreeProcess class
  *
  **/
 
-NonparametricTreeProcess::~NonparametricTreeProcess()
+CategoricalTreeProcess::~CategoricalTreeProcess()
 { remove(); }
 
 /*****************************************************************
  *
- *  Assignement operator for NonparametricTreeProcess class
+ *  Assignement operator for CategoricalTreeProcess class
  *
  **/
 
-Stat_trees::NonparametricTreeProcess& NonparametricTreeProcess::operator=(const NonparametricTreeProcess &process)
+Stat_trees::CategoricalTreeProcess& CategoricalTreeProcess::operator=(const CategoricalTreeProcess &process)
 
 {
   if (&process != this)
   {
      remove();
-     NonparametricProcess::remove();
+     CategoricalProcess::remove();
 
-     NonparametricProcess::copy(process);
+     CategoricalProcess::copy(process);
      copy(process);
   }
 
@@ -227,15 +227,15 @@ Stat_trees::NonparametricTreeProcess& NonparametricTreeProcess::operator=(const 
 
 /*****************************************************************
  *
- *  Permutation of the states for NonparametricTreeProcess
+ *  Permutation of the states for CategoricalTreeProcess
  *  using a given permutation perm (validity checked before call)
  *
  **/
 
-void NonparametricTreeProcess::state_permutation(int* perm) const
+void CategoricalTreeProcess::state_permutation(int* perm) const
 {
    if (observation != NULL)
-      NonparametricProcess::state_permutation(perm);
+      CategoricalProcess::state_permutation(perm);
 
    // if the characteristic distributions were actually computed,
    // they should be permuted as well
@@ -244,11 +244,11 @@ void NonparametricTreeProcess::state_permutation(int* perm) const
 
 /*****************************************************************
  *
- *  Access to members of NonparametricTreeProcess class
+ *  Access to members of CategoricalTreeProcess class
  *
  **/
 
-double NonparametricTreeProcess::get_double_characteristic(double* d, int value) const
+double CategoricalTreeProcess::get_double_characteristic(double* d, int value) const
 {
    double res= -1.;
 
@@ -260,7 +260,7 @@ double NonparametricTreeProcess::get_double_characteristic(double* d, int value)
    return res;
 }
 
-Distribution** NonparametricTreeProcess::get_ptptDistribution_characteristic(Distribution** d) const
+Distribution** CategoricalTreeProcess::get_ptptDistribution_characteristic(Distribution** d) const
 {
    Distribution **res= NULL;
    int v;
@@ -279,8 +279,8 @@ Distribution** NonparametricTreeProcess::get_ptptDistribution_characteristic(Dis
    return res;
 }
 
-Distribution* NonparametricTreeProcess::get_ptDistribution_characteristic(Distribution** d,
-                                                                          int value) const
+Distribution* CategoricalTreeProcess::get_ptDistribution_characteristic(Distribution** d,
+                                                                        int value) const
 {
    Distribution *res= NULL;
 
@@ -293,7 +293,7 @@ Distribution* NonparametricTreeProcess::get_ptDistribution_characteristic(Distri
    return res;
 }
 
-Distribution* NonparametricTreeProcess::get_size() const
+Distribution* CategoricalTreeProcess::get_size() const
 {
    Distribution *res= NULL;
 
@@ -303,55 +303,55 @@ Distribution* NonparametricTreeProcess::get_size() const
    return res;
 }
 
-double NonparametricTreeProcess::get_no_occurrence(int value) const
+double CategoricalTreeProcess::get_no_occurrence(int value) const
 { return get_double_characteristic(no_occurrence, value); }
 
-double NonparametricTreeProcess::get_leave(int value) const
+double CategoricalTreeProcess::get_leave(int value) const
 { return get_double_characteristic(leave, value); }
 
-double NonparametricTreeProcess::get_absorption(int value) const
+double CategoricalTreeProcess::get_absorption(int value) const
 { return get_double_characteristic(absorption, value); }
 
-Distribution** NonparametricTreeProcess::get_first_occurrence_root() const
+Distribution** CategoricalTreeProcess::get_first_occurrence_root() const
 { return get_ptptDistribution_characteristic(first_occurrence_root); }
 
-Distribution* NonparametricTreeProcess::get_first_occurrence_root(int value) const
+Distribution* CategoricalTreeProcess::get_first_occurrence_root(int value) const
 { return get_ptDistribution_characteristic(first_occurrence_root, value); }
 
-Distribution** NonparametricTreeProcess::get_first_occurrence_leaves() const
+Distribution** CategoricalTreeProcess::get_first_occurrence_leaves() const
 { return get_ptptDistribution_characteristic(first_occurrence_leaves); }
 
-Distribution* NonparametricTreeProcess::get_first_occurrence_leaves(int value) const
+Distribution* CategoricalTreeProcess::get_first_occurrence_leaves(int value) const
 { return get_ptDistribution_characteristic(first_occurrence_leaves, value); }
 
-Distribution** NonparametricTreeProcess::get_sojourn_size() const
+Distribution** CategoricalTreeProcess::get_sojourn_size() const
 { return get_ptptDistribution_characteristic(sojourn_size); }
 
-Distribution* NonparametricTreeProcess::get_sojourn_size(int value) const
+Distribution* CategoricalTreeProcess::get_sojourn_size(int value) const
 { return get_ptDistribution_characteristic(sojourn_size, value); }
 
-Distribution** NonparametricTreeProcess::get_nb_zones() const
+Distribution** CategoricalTreeProcess::get_nb_zones() const
 { return get_ptptDistribution_characteristic(nb_zones); }
 
-Distribution* NonparametricTreeProcess::get_nb_zones(int value) const
+Distribution* CategoricalTreeProcess::get_nb_zones(int value) const
 { return get_ptDistribution_characteristic(nb_zones, value); }
 
-Distribution** NonparametricTreeProcess::get_nb_occurrences() const
+Distribution** CategoricalTreeProcess::get_nb_occurrences() const
 { return get_ptptDistribution_characteristic(nb_occurrences); }
 
-Distribution* NonparametricTreeProcess::get_nb_occurrences(int value) const
+Distribution* CategoricalTreeProcess::get_nb_occurrences(int value) const
 { return get_ptDistribution_characteristic(nb_occurrences, value); }
 
 
 /*****************************************************************
  *
- *  Copy operator for NonparametricTreeProcess class
+ *  Copy operator for CategoricalTreeProcess class
  *  using a flag on the copy of caracteristic distributions
  *
  **/
 
-void NonparametricTreeProcess::copy(const NonparametricTreeProcess& process,
-                                    bool characteristic_flag)
+void CategoricalTreeProcess::copy(const CategoricalTreeProcess& process,
+                                  bool characteristic_flag)
 
 {
    // register int i;
@@ -408,11 +408,11 @@ void NonparametricTreeProcess::copy(const NonparametricTreeProcess& process,
 /*****************************************************************
  *
  *  Deallocation of the double and Distribution* arrays
- *  for NonparametricTreeProcess' characteristic distributions
+ *  for CategoricalTreeProcess' characteristic distributions
  *
  **/
 
-void NonparametricTreeProcess::remove_double_array(double*& d)
+void CategoricalTreeProcess::remove_double_array(double*& d)
 {
    if (d != NULL)
       delete [] d;
@@ -426,8 +426,8 @@ void NonparametricTreeProcess::remove_double_array(double*& d)
  *
  **/
 
-void NonparametricTreeProcess::remove_Distribution_array(Distribution**& d,
-                                                         int inb_value)
+void CategoricalTreeProcess::remove_Distribution_array(Distribution**& d,
+                                                       int inb_value)
 {
    int i;
 
@@ -446,11 +446,11 @@ void NonparametricTreeProcess::remove_Distribution_array(Distribution**& d,
 
 /*****************************************************************
  *
- *  Deallocation of the pointer for NonparametricTreeProcess
+ *  Deallocation of the pointer for CategoricalTreeProcess
  *
  **/
 
-void NonparametricTreeProcess::remove()
+void CategoricalTreeProcess::remove()
 
 {
    // register int i;
@@ -481,12 +481,12 @@ void NonparametricTreeProcess::remove()
 /*****************************************************************
  *
  *  Allocation of Distribution* arrays for
- *  NonparametricTreeProcess class
+ *  CategoricalTreeProcess class
  *
  **/
 
-void NonparametricTreeProcess::init_Distribution_array(Distribution**& d,
-                                                       int inb_value)
+void CategoricalTreeProcess::init_Distribution_array(Distribution**& d,
+                                                     int inb_value)
 {
    int i;
 
@@ -499,8 +499,8 @@ void NonparametricTreeProcess::init_Distribution_array(Distribution**& d,
        d[i] = new Distribution(NB_VALUE);
 }
 
-void NonparametricTreeProcess::init_occupancy(const NonparametricTreeProcess& process,
-                                              int occupancy_nb_value)
+void CategoricalTreeProcess::init_occupancy(const CategoricalTreeProcess& process,
+                                            int occupancy_nb_value)
 {
    register int i;
 
@@ -534,16 +534,16 @@ void NonparametricTreeProcess::init_occupancy(const NonparametricTreeProcess& pr
 
 /*****************************************************************
  *
- *  Allocation of the distributions for NonparametricTreeProcess
+ *  Allocation of the distributions for CategoricalTreeProcess
  *  class, except the observation distributions, using the distribution
  *  of the tree size (and maybe several other things)
  *  and flags on couting distributions and on sojourn_size
  *
  **/
 
-void NonparametricTreeProcess::create_characteristic(const Distribution& isize,
-                                                     bool sojourn_size_flag,
-                                                     bool counting_flag)
+void CategoricalTreeProcess::create_characteristic(const Distribution& isize,
+                                                   bool sojourn_size_flag,
+                                                   bool counting_flag)
 {
    register int i;
    int max_size= isize.nb_value - 1;
@@ -646,13 +646,13 @@ void NonparametricTreeProcess::create_characteristic(const Distribution& isize,
 /*****************************************************************
  *
  *  Copy of double or Distribution* arrays for
- *  NonparametricTreeProcess class
+ *  CategoricalTreeProcess class
  *
  **/
 
-void NonparametricTreeProcess::copy_double_array(double*& dest,
-                                                 const double* source,
-                                                 int inb_value)
+void CategoricalTreeProcess::copy_double_array(double*& dest,
+                                               const double* source,
+                                               int inb_value)
 {
    int i;
 
@@ -667,9 +667,9 @@ void NonparametricTreeProcess::copy_double_array(double*& dest,
       dest= NULL;
 }
 
-void NonparametricTreeProcess::copy_Distribution_array(Distribution**& dest,
-                                                       Distribution** const source,
-                                                       int inb_value)
+void CategoricalTreeProcess::copy_Distribution_array(Distribution**& dest,
+                                                     Distribution** const source,
+                                                     int inb_value)
 {
    int i;
 
@@ -689,17 +689,17 @@ void NonparametricTreeProcess::copy_Distribution_array(Distribution**& dest,
 
 /*****************************************************************
  *
- *  Prints a NonparametricTreeProcess
+ *  Prints a CategoricalTreeProcess
  *  using an output stream, the process identifier,
  *  empirical observation distributions, tree characteristics
  *  and flags on the level of detail and on the file use
  *
  **/
 
-ostream& NonparametricTreeProcess::ascii_print(ostream &os, int process,
-                                               FrequencyDistribution** empirical_observation,
-                                               const TreeCharacteristics* characteristics,
-                                               bool exhaustive, bool file_flag) const
+ostream& CategoricalTreeProcess::ascii_print(ostream &os, int process,
+                                             FrequencyDistribution** empirical_observation,
+                                             const TreeCharacteristics* characteristics,
+                                             bool exhaustive, bool file_flag) const
 {
    bool no_characteristic_print = false;
    register int i , j;
@@ -1268,19 +1268,19 @@ ostream& NonparametricTreeProcess::ascii_print(ostream &os, int process,
    return os;
 }
 
-ostream& NonparametricTreeProcess::spreadsheet_print(ostream &os, int process,
-                                                     FrequencyDistribution** empirical_observation,
-                                                     const TreeCharacteristics* characteristics) const
+ostream& CategoricalTreeProcess::spreadsheet_print(ostream &os, int process,
+                                                   FrequencyDistribution** empirical_observation,
+                                                   const TreeCharacteristics* characteristics) const
 {
 #ifdef __GNUC__
-   #warning NonparametricTreeProcess::spreadsheet_print not implemented
+   #warning CategoricalTreeProcess::spreadsheet_print not implemented
 #endif
    return os;
 }
 
 /*****************************************************************
  *
- *  Gnuplot output of a NonparametricTreeProcess, using
+ *  Gnuplot output of a CategoricalTreeProcess, using
  *  a file prefix, the title of the output figures,
  *  the identifier of the considered process
  *  the empirical observation distributions,
@@ -1289,11 +1289,11 @@ ostream& NonparametricTreeProcess::spreadsheet_print(ostream &os, int process,
  *
  **/
 
-bool NonparametricTreeProcess::plot_print(const char * prefix, const char * title,
-                                          int process,
-                                          FrequencyDistribution** empirical_observation,
-                                          const TreeCharacteristics * characteristics,
-                                          const FrequencyDistribution * hsize) const
+bool CategoricalTreeProcess::plot_print(const char * prefix, const char * title,
+                                        int process,
+                                        FrequencyDistribution** empirical_observation,
+                                        const TreeCharacteristics * characteristics,
+                                        const FrequencyDistribution * hsize) const
 {
    bool status= false, start;
    register int val, i, j= 0, k= 0;
@@ -2522,7 +2522,7 @@ bool NonparametricTreeProcess::plot_print(const char * prefix, const char * titl
 
 /*****************************************************************
  *
- *  Matplotlib output of NonparametricTreeProcess, using
+ *  Matplotlib output of CategoricalTreeProcess, using
  *  a MultiPlotSet instance, the current Plot index,
  *  the identifier of the considered process
  *  the empirical observation distributions,
@@ -2531,10 +2531,10 @@ bool NonparametricTreeProcess::plot_print(const char * prefix, const char * titl
  *
  **/
 
-MultiPlotSet* NonparametricTreeProcess::plotable_write(MultiPlotSet &plot, int &index,
-                                                       int process, FrequencyDistribution * const * empirical_observation,
-                                                       const TreeCharacteristics * characteristics,
-                                                       const FrequencyDistribution * hsize) const
+MultiPlotSet* CategoricalTreeProcess::plotable_write(MultiPlotSet &plot, int &index,
+                                                     int process, FrequencyDistribution * const * empirical_observation,
+                                                     const TreeCharacteristics * characteristics,
+                                                     const FrequencyDistribution * hsize) const
 {
    register int val, i, j, var;
    int dist_nb_value;
@@ -3370,7 +3370,7 @@ MultiPlotSet* NonparametricTreeProcess::plotable_write(MultiPlotSet &plot, int &
 /*****************************************************************
  *
  *  Return the number of views (i.e. the size) in Matplotlib output
- *  of NonparametricTreeProcess, using
+ *  of CategoricalTreeProcess, using
  *  the identifier of the considered process
  *  the empirical observation distributions,
  *  the empirical tree characteristics and
@@ -3378,9 +3378,9 @@ MultiPlotSet* NonparametricTreeProcess::plotable_write(MultiPlotSet &plot, int &
  *
  **/
 
-unsigned int NonparametricTreeProcess::nb_plot_set_computation(int process, FrequencyDistribution * const * empirical_observation,
-                                                               const TreeCharacteristics * characteristics,
-                                                               const FrequencyDistribution * hsize) const
+unsigned int CategoricalTreeProcess::nb_plot_set_computation(int process, FrequencyDistribution * const * empirical_observation,
+                                                             const TreeCharacteristics * characteristics,
+                                                             const FrequencyDistribution * hsize) const
 {
    unsigned int nb_plot_set = 0;
    register int val;
@@ -3411,7 +3411,7 @@ unsigned int NonparametricTreeProcess::nb_plot_set_computation(int process, Freq
  *
  **/
 
-bool Stat_trees::test_hidden(int nb_output_process, NonparametricTreeProcess** process)
+bool Stat_trees::test_hidden(int nb_output_process, CategoricalTreeProcess** process)
 
 {
    bool hidden= false;
@@ -3492,8 +3492,8 @@ HiddenMarkovTree::HiddenMarkovTree(char itype, int inb_state,
          fparam[i]= force_param[i];
    }
 
-   npprocess= new NonparametricTreeProcess*[_nb_ioutput_process+1];
-   npprocess[0]= new NonparametricTreeProcess(nb_state, nb_state, false);
+   npprocess= new CategoricalTreeProcess*[_nb_ioutput_process+1];
+   npprocess[0]= new CategoricalTreeProcess(nb_state, nb_state, false);
    // since the number of values is equal to the number of states,
    // npprocess[0] represents the hidden state process
 
@@ -3503,7 +3503,7 @@ HiddenMarkovTree::HiddenMarkovTree(char itype, int inb_state,
    for(i= 0; i < _nb_ioutput_process; i++)
       if ((*nb_value <= NB_OUTPUT) && !(fparam[i]))
       {
-         npprocess[i+1]= new NonparametricTreeProcess(nb_state, *nb_value++, true);
+         npprocess[i+1]= new CategoricalTreeProcess(nb_state, *nb_value++, true);
          piprocess[i+1]= NULL;
       }
       else
@@ -3531,7 +3531,7 @@ HiddenMarkovTree::HiddenMarkovTree(char itype, int inb_state,
 
 HiddenMarkovTree::HiddenMarkovTree(const Chain * pchain, int ich_order,
                                    int inb_ioutput_process,
-                                   NonparametricProcess** pobservation,
+                                   CategoricalProcess** pobservation,
                                    int size, bool counting_flag)
  : Chain(*pchain)
  , markov_data(NULL)
@@ -3548,12 +3548,12 @@ HiddenMarkovTree::HiddenMarkovTree(const Chain * pchain, int ich_order,
    self_row= new int[nb_state];
    self_row_computation();
 
-   npprocess= new NonparametricTreeProcess*[_nb_ioutput_process+1];
-   npprocess[0]= new NonparametricTreeProcess(nb_state, nb_state, false);
+   npprocess= new CategoricalTreeProcess*[_nb_ioutput_process+1];
+   npprocess[0]= new CategoricalTreeProcess(nb_state, nb_state, false);
    // index 0 corresponds to the hidden process for npprocess
 
    for(i= 0; i < _nb_ioutput_process; i++)
-      npprocess[i+1]= new NonparametricTreeProcess(*(pobservation[i]));
+      npprocess[i+1]= new CategoricalTreeProcess(*(pobservation[i]));
 
    // index 0 corresponds to the first observed process for pobservation
 
@@ -3586,7 +3586,7 @@ HiddenMarkovTree::HiddenMarkovTree(const Chain * pchain, int ich_order,
 HiddenMarkovTree::HiddenMarkovTree(const Chain * pchain, int ich_order,
                                    int inb_ioutput_process,
                                    int inb_doutput_process,
-                                   NonparametricProcess** nonparametric_observation,
+                                   CategoricalProcess** categorical_observation,
                                    DiscreteParametricProcess** iparametric_observation,
                                    DiscreteParametricProcess** dparametric_observation,
                                    int size, bool counting_flag)
@@ -3605,17 +3605,17 @@ HiddenMarkovTree::HiddenMarkovTree(const Chain * pchain, int ich_order,
    self_row= new int[nb_state];
    self_row_computation();
 
-   npprocess= new NonparametricTreeProcess*[_nb_ioutput_process+1];
-   npprocess[0]= new NonparametricTreeProcess(nb_state, nb_state, false);
+   npprocess= new CategoricalTreeProcess*[_nb_ioutput_process+1];
+   npprocess[0]= new CategoricalTreeProcess(nb_state, nb_state, false);
 
    piprocess= new DiscreteParametricProcess*[_nb_ioutput_process+1];
    piprocess[0]= NULL;
 
    for(i= 0; i < _nb_ioutput_process; i++)
    {
-      if (nonparametric_observation[i] != NULL)
+      if (categorical_observation[i] != NULL)
       {
-         npprocess[i+1]= new NonparametricTreeProcess(*(nonparametric_observation[i]));
+         npprocess[i+1]= new CategoricalTreeProcess(*(categorical_observation[i]));
          piprocess[i+1]= NULL;
       }
       else
@@ -4398,16 +4398,16 @@ bool HiddenMarkovTree::is_parametric(int ivariable) const
  *
  **/
 
-NonparametricTreeProcess* HiddenMarkovTree::get_non_parametric_process(int variable) const
+CategoricalTreeProcess* HiddenMarkovTree::get_categorical_process(int variable) const
 {
-   NonparametricTreeProcess *res= NULL;
+   CategoricalTreeProcess *res= NULL;
 
    if (npprocess != NULL)
    {
       assert((variable > 0) && (variable <= _nb_ioutput_process));
       // I believe npprocess[0] points to the (hidden) state process
       if (npprocess[variable] != NULL)
-         res= new NonparametricTreeProcess(*(npprocess[variable]));
+         res= new CategoricalTreeProcess(*(npprocess[variable]));
    }
    return res;
 }
@@ -4461,7 +4461,7 @@ DiscreteParametricProcess* HiddenMarkovTree::get_dparametric_process(int variabl
  *
  **/
 
-NonparametricTreeProcess** HiddenMarkovTree::get_non_parametric_process() const
+CategoricalTreeProcess** HiddenMarkovTree::get_categorical_process() const
 { return npprocess; }
 
 /*****************************************************************
@@ -4579,7 +4579,7 @@ void HiddenMarkovTree::characteristic_computation(int size,
                 npprocess[0]->sojourn_size[i]= new DiscreteParametric(NEGATIVE_BINOMIAL , 1 , I_DEFAULT , 1. ,
                                                                       1.-transition[i][i] , OCCUPANCY_THRESHOLD);
              }
-             npprocess[0]->sojourn_size[i]->ident= NON_PARAMETRIC;
+             npprocess[0]->sojourn_size[i]->ident= CATEGORICAL;
           }*/
 
           // valid for semi-markov processes
@@ -4759,21 +4759,21 @@ void HiddenMarkovTree::copy(const HiddenMarkovTree& markov, bool data_flag,
 
    if ((markov.npprocess != NULL) && (markov.piprocess != NULL))
    {
-      npprocess= new NonparametricTreeProcess*[_nb_ioutput_process+1];
+      npprocess= new CategoricalTreeProcess*[_nb_ioutput_process+1];
       piprocess= new DiscreteParametricProcess*[_nb_ioutput_process+1];
       piprocess[0]= NULL;
 
       if (markov.npprocess[0] != NULL)
-         npprocess[0]= new NonparametricTreeProcess(*(markov.npprocess[0]),
-                                                    'c',
-                                                     characteristic_flag);
+         npprocess[0]= new CategoricalTreeProcess(*(markov.npprocess[0]),
+                                                  'c',
+                                                   characteristic_flag);
       for(i= 0; i < _nb_ioutput_process; i++)
       {
          if (markov.npprocess[i+1] != NULL)
          {
-            npprocess[i+1]= new NonparametricTreeProcess(*(markov.npprocess[i+1]),
-                                                         'c',
-                                                          characteristic_flag);
+            npprocess[i+1]= new CategoricalTreeProcess(*(markov.npprocess[i+1]),
+                                                       'c',
+                                                        characteristic_flag);
             piprocess[i+1]= NULL;
          }
          else
@@ -4901,9 +4901,9 @@ ostream& HiddenMarkovTree::ascii_write(ostream& os,
          os << " " << i;
 
          if (npprocess[i] != NULL)
-            os << " : " << STAT_word[STATW_NONPARAMETRIC];
+            os << " : " << STAT_word[STATW_CATEGORICAL];
          else
-            os << " : " << STAT_word[STATW_PARAMETRIC];
+            os << " : " << STAT_word[STATW_DISCRETE_PARAMETRIC];
 
          os << endl;
 
@@ -5050,7 +5050,7 @@ ostream& HiddenMarkovTree::ascii_write(ostream& os,
          os << "\n" << STAT_word[STATW_OUTPUT_PROCESS];
          os << " " << i;
 
-         os << " : " << STAT_word[STATW_PARAMETRIC] << endl;
+         os << " : " << STAT_word[STATW_DISCRETE_PARAMETRIC] << endl;
 
          if (otrees != NULL)
          {
@@ -5351,9 +5351,9 @@ ostream& HiddenMarkovTree::spreadsheet_write(ostream& os, const HiddenMarkovTree
          os << "\t" << i;
 
          if (npprocess[i] != NULL)
-            os << "\t" << STAT_word[STATW_NONPARAMETRIC];
+            os << "\t" << STAT_word[STATW_CATEGORICAL];
          else
-            os << "\t" << STAT_word[STATW_PARAMETRIC];
+            os << "\t" << STAT_word[STATW_DISCRETE_PARAMETRIC];
 
          os << endl;
 
@@ -5459,7 +5459,7 @@ ostream& HiddenMarkovTree::spreadsheet_write(ostream& os, const HiddenMarkovTree
          os << "\n" << STAT_word[STATW_OUTPUT_PROCESS];
          os << "\t" << i;
 
-         os << "\t" << STAT_word[STATW_PARAMETRIC] << endl;
+         os << "\t" << STAT_word[STATW_DISCRETE_PARAMETRIC] << endl;
 
          if (otrees != NULL)
          {
@@ -6125,7 +6125,7 @@ double HiddenMarkovTree::penalty_computation(double min_probability) const
             for(val= 0; val < npprocess[0]->size->nb_value-1; val++)
                for(j = 0;j < nb_state;j++)
                   state_marginal[j] += npprocess[0]->index_value->point[j][val] *
-                                       (1.-nonparametric_process[0]->size->cumul[val]);
+                                       (1.-categorical_process[0]->size->cumul[val]);
             */
             sum= 0.;
 
@@ -6577,13 +6577,13 @@ HiddenMarkovTree* Stat_trees::hidden_markov_tree_ascii_read(StatError& error,
    RWCString buffer, token, tree_ident;
    size_t position;
    char type= 'v';
-   bool status, lstatus, nonparametric= false;
+   bool status, lstatus, categorical= false;
    register int i;
    int line, ch_order, nb_state, index, // j, n,
        nb_ioutput_process= 0, nb_doutput_process, nb_output_process= 0;
    long value;
    const Chain *chain;
-   NonparametricProcess **np_observation;
+   CategoricalProcess **np_observation;
    DiscreteParametricProcess **ip_observation;
    DiscreteParametricProcess **dp_observation= NULL;
    HiddenMarkovTree *markov= NULL;
@@ -6765,7 +6765,7 @@ HiddenMarkovTree* Stat_trees::hidden_markov_tree_ascii_read(StatError& error,
             }
             else
             {
-               np_observation= new NonparametricProcess*[nb_output_process];
+               np_observation= new CategoricalProcess*[nb_output_process];
                ip_observation = new DiscreteParametricProcess*[nb_output_process];
                for(i= 0; i < nb_output_process; i++)
                {
@@ -6800,7 +6800,7 @@ HiddenMarkovTree* Stat_trees::hidden_markov_tree_ascii_read(StatError& error,
 
                         case 0 :
                         {
-                           nonparametric= true;
+                           categorical= true;
 
                            if (token == STAT_word[STATW_OUTPUT_PROCESS])
                               index++;
@@ -6842,21 +6842,23 @@ HiddenMarkovTree* Stat_trees::hidden_markov_tree_ascii_read(StatError& error,
                            break;
                         }
 
-                        // test on keyword NONPARAMETRIC / PARAMETRIC
+                        // test on keyword CATEGORICAL / DISCRETE_PARAMETRIC
 
                         case 3 :
                         {
-                           if (token == STAT_word[STATW_NONPARAMETRIC])
-                              nonparametric= true;
+			  if ((token == STAT_word[STATW_CATEGORICAL]) || (token == STAT_word[STATW_NONPARAMETRIC]))
+                              categorical= true;
                            else
                            {
-                              if (token == STAT_word[STATW_PARAMETRIC])
-                                 nonparametric= false;
+                             if ((token == STAT_word[STATW_DISCRETE_PARAMETRIC]) || (token == STAT_word[STATW_PARAMETRIC]))
+                                 categorical= false;
                               else
                               {
                                  status= false;
                                  ostringstream correction_message;
-                                 correction_message << STAT_word[STATW_NONPARAMETRIC] << " or "
+                                 correction_message << STAT_word[STATW_CATEGORICAL] << " or "
+                                                    << STAT_word[STATW_DISCRETE_PARAMETRIC] << " or "
+                                                    << STAT_word[STATW_NONPARAMETRIC] << " or "  // pour compatibilite ascendante
                                                     << STAT_word[STATW_PARAMETRIC];
                                  error.correction_update(STAT_parsing[STATP_KEY_WORD],
                                                          (correction_message.str()).c_str(),
@@ -6878,13 +6880,13 @@ HiddenMarkovTree* Stat_trees::hidden_markov_tree_ascii_read(StatError& error,
                         error.update(STAT_parsing[STATP_FORMAT], line);
                      }
 
-                     switch (nonparametric)
+                     switch (categorical)
                      {
 
                         case true :
                         {
-                           np_observation[index-1]= observation_parsing(error, in_file, line,
-                                                                        chain->nb_state, true);
+                           np_observation[index-1]= categorical_observation_parsing(error, in_file, line,
+                                                                                    chain->nb_state, true);
                            // ip_observation[index-1]= NULL;
                            if (np_observation[index-1] == NULL)
                               status= false;
@@ -7349,8 +7351,8 @@ HiddenMarkovTree* HiddenMarkovTreeData::extract_model(StatError& error) const
  *
  **/
 
-MixtureData* HiddenMarkovTreeData::extract_marginal(StatError& error,
-                                                    int variable) const
+DiscreteMixtureData* HiddenMarkovTreeData::extract_marginal(StatError& error,
+                                                            int variable) const
 
 {
    register int j;
@@ -7360,8 +7362,8 @@ MixtureData* HiddenMarkovTreeData::extract_marginal(StatError& error,
    FrequencyDistribution *pstate_marginal = NULL; // state_marginal
    DiscreteDistributionData *phisto = NULL, // marginal histogram
                             *pstate_marginal_ddd = NULL; // state_marginal
-   MixtureData *histo = NULL;
-   Mixture *pmixt = NULL;
+   DiscreteMixtureData *histo = NULL;
+   DiscreteMixture *pmixt = NULL;
    // DiscreteParametric **pcomp = NULL;
    const DiscreteParametric **pcomp = new const DiscreteParametric*[_nb_states];
    // DiscreteParametricModel *pm = NULL;
@@ -7461,12 +7463,12 @@ MixtureData* HiddenMarkovTreeData::extract_marginal(StatError& error,
          }
 
          if (mixture)
-            pmixt = new Mixture(_nb_states, pweight, pcomp);
+            pmixt = new DiscreteMixture(_nb_states, pweight, pcomp);
 
          if (pmixt != NULL)
-            histo = new MixtureData(*phisto, pmixt);
+	   histo = new DiscreteMixtureData(*phisto, pmixt);
          else
-            histo = new MixtureData(*phisto, _nb_states);
+            histo = new DiscreteMixtureData(*phisto, _nb_states);
 
          if (pmixt != NULL)
          {
