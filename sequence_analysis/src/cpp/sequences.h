@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
@@ -71,8 +71,7 @@ enum {
 };
 
 enum {
-  DEFAULT ,
-  REVERSE ,
+  UNCHANGED ,
   ADD_INITIAL_RUN ,
   REMOVE_INITIAL_RUN
 };
@@ -93,8 +92,12 @@ enum {
 };
 
 enum {
-  MULTINOMIAL_CHANGE ,
+  CATEGORICAL_CHANGE ,
   POISSON_CHANGE ,
+  MULTIVARIATE_POISSON_CHANGE ,
+  GEOMETRIC_0_CHANGE ,
+  GEOMETRIC_1_CHANGE ,
+  MULTIVARIATE_GEOMETRIC_0_CHANGE ,
   ORDINAL_GAUSSIAN_CHANGE ,
   GAUSSIAN_CHANGE ,
   MEAN_CHANGE ,
@@ -125,15 +128,6 @@ const double CTM_BIC_THRESHOLD = 6.;   // seuil pour elaguer les memoires
 const double CTM_KT_THRESHOLD = 12.;   // seuil pour elaguer les memoires
 const double LOCAL_BIC_THRESHOLD = 10.;  // seuil pour elaguer les memoires
 const double CONTEXT_THRESHOLD = 5.;  // seuil pour elaguer les memoires
-
-const int GAMMA_MIN_MEAN = 0.1;       // moyenne minimum de la loi gamma
-const double GAMMA_MIN_SHAPE_PARAMETER = 0.1;  // parametre de forme minimum de la loi gamma
-const double GAMMA_DEFAULT_SCALE_PARAMETER = 1;  // parametre d'echelle par defaut de la loi gamma
-const double GAMMA_SCALE_PARAMETER_THRESHOLD = 3.;  // seuil sur la valeur du parametre d'echelle
-                                                    // pour l'estimation des parametres de la loi gamma
-const double GAMMA_FREQUENCY_THRESHOLD = 100.;  // seuil sur la frequence pour l'estimation des parametres de la loi gamma
-const double GAMMA_ITERATION_FACTOR = 0.5;  // facteur pour l'estimation des parametres de la loi gamma
-const int GAMMA_MAX_NB_ITERATION = 5;  // nombre maximum d'iterations pour l'estimation des parametres de la loi gamma
 
 const int MIN_NB_STATE_SEQUENCE = 1;   // nombre de sequences d'etats 1ere iteration de l'algorithme MCEM
 const int MAX_NB_STATE_SEQUENCE = 10;  // nombre de sequences d'etats maximum pour l'algorithme MCEM
@@ -231,7 +225,7 @@ const int MAX_ABSORBING_RUN_LENGTH = 20;  // longueur maximum de la serie finale
  */
 
 
-class NonparametricSequenceProcess;
+class CategoricalSequenceProcess;
 class VariableOrderMarkov;
 class VariableOrderMarkovData;
 class VariableOrderMarkovIterator;
@@ -250,27 +244,9 @@ class Vectors;
 class Switching_sequence;  // ajout par Florence Chaubert
 
 
-class NonparametricSequenceProcess : public NonparametricProcess {  // processus d'observation non-parametrique
-                                                                    // pour des sequences
-
-    friend class VariableOrderMarkov;
-    friend class VariableOrderMarkovIterator;
-    friend class VariableOrderMarkovData;
-    friend class HiddenVariableOrderMarkov;
-    friend class SemiMarkov;
-    friend class SemiMarkovIterator;
-    friend class SemiMarkovData;
-    friend class HiddenSemiMarkov;
-    friend class NonhomogeneousMarkov;
-    friend class NonhomogeneousMarkovData;
-    friend class MarkovianSequences;
-
-    friend NonparametricSequenceProcess* occupancy_parsing(StatError &error , ifstream &in_file ,
-                                                           int &line , const Chain &chain ,
-                                                           double cumul_threshold);
-    friend bool test_hidden(int nb_output_process , NonparametricSequenceProcess **process);
-
-private :
+class CategoricalSequenceProcess : public CategoricalProcess {  // processus d'observation categoriel
+                                                                // pour des sequences
+public :
 
     Distribution *length;   // loi des longueurs des sequences
     Curves *index_value;    // probabilites des valeurs en fonction de l'index
@@ -287,9 +263,18 @@ private :
                                bool counting_flag = true);
     void create_characteristic(const Distribution &ilength , bool sojourn_time_flag = true ,
                                bool counting_flag = true);
-    void copy(const NonparametricSequenceProcess &process , bool characteristic_flag = true);
-    void init_occupancy(const NonparametricSequenceProcess &process , int occupancy_nb_value);
+    void copy(const CategoricalSequenceProcess &process , bool characteristic_flag = true);
+    void init_occupancy(const CategoricalSequenceProcess &process , int occupancy_nb_value);
     void remove();
+
+    CategoricalSequenceProcess(int inb_state = 0 , int inb_value = 0 ,
+                                 int observation_flag = false);
+    CategoricalSequenceProcess(int inb_state , DiscreteParametric **occupancy);
+    CategoricalSequenceProcess(const CategoricalProcess &process);
+    CategoricalSequenceProcess(const CategoricalSequenceProcess &process ,
+                                 char manip = 'c' , int param = true);
+    ~CategoricalSequenceProcess();
+    CategoricalSequenceProcess& operator=(const CategoricalSequenceProcess &process);
 
     Distribution* weight_computation() const;
 
@@ -309,48 +294,19 @@ private :
                         FrequencyDistribution **empirical_observation = NULL ,
                         const SequenceCharacteristics *characteristics = NULL ,
                         const FrequencyDistribution *hlength = NULL , Forward **forward = NULL) const;
-
-public :
-
-    NonparametricSequenceProcess(int inb_state = 0 , int inb_value = 0 ,
-                                 int observation_flag = false);
-    NonparametricSequenceProcess(int inb_state , DiscreteParametric **occupancy);
-    NonparametricSequenceProcess(const NonparametricProcess &process);
-    NonparametricSequenceProcess(const NonparametricSequenceProcess &process ,
-                                 char manip = 'c' , int param = true);
-    ~NonparametricSequenceProcess();
-    NonparametricSequenceProcess& operator=(const NonparametricSequenceProcess &process);
-
-    // acces membres de la classe
-
-    Distribution* get_length() const { return length; }
-    Curves* get_index_value() const { return index_value; }
-    double get_no_occurrence(int value) const { return no_occurrence[value]; }
-    Distribution** get_first_occurrence() const { return first_occurrence; }
-    Distribution* get_first_occurrence(int value) const { return first_occurrence[value]; }
-    double get_leave(int value) const { return leave[value]; }
-    Distribution** get_recurrence_time() const { return recurrence_time; }
-    Distribution* get_recurrence_time(int value) const { return recurrence_time[value]; }
-    double get_absorption(int value) const { return absorption[value]; }
-    DiscreteParametric** get_sojourn_time() const { return sojourn_time; }
-    DiscreteParametric* get_sojourn_time(int value) const { return sojourn_time[value]; }
-    Distribution** get_nb_run() const { return nb_run; }
-    Distribution* get_nb_run(int value) const { return nb_run[value]; }
-    Distribution** get_nb_occurrence() const { return nb_occurrence; }
-    Distribution* get_nb_occurrence(int value) const { return nb_occurrence[value]; }
 };
 
 
-NonparametricSequenceProcess* occupancy_parsing(StatError &error , ifstream &in_file ,
+CategoricalSequenceProcess* occupancy_parsing(StatError &error , ifstream &in_file ,
                                                 int &line , const Chain &chain ,
                                                 double cumul_threshold = CUMUL_THRESHOLD);
-bool test_hidden(int nb_output_process , NonparametricSequenceProcess **process);
+bool test_hidden(int nb_output_process , CategoricalSequenceProcess **process);
 
 
 
-// class Correlation : public StatInterface , public Curves {
-class Correlation : public StatInterface , protected Curves {  // fonctions de correlation
+class Correlation : public StatInterface , public Curves {  // fonctions de correlation
 
+    friend class VariableOrderMarkovChain;
     friend class VariableOrderMarkov;
     friend class Sequences;
 
@@ -428,10 +384,10 @@ protected :
     int max_length;         // longueur maximum des sequences
     int cumul_length;       // longueur cumulee des sequences
     int *length;            // longueurs des sequences
-    FrequencyDistribution *hlength;  // loi empirique des longueurs des sequences
+    FrequencyDistribution *length_distribution;  // loi empirique des longueurs des sequences
     int **vertex_identifier;  // identificateurs des vertex d'un MTG associe
     int index_parameter_type;  // type du parametre d'index (TIME/POSITION)
-    FrequencyDistribution *hindex_parameter;  // loi empirique des parametres d'index explicites
+    FrequencyDistribution *index_parameter_distribution;  // loi empirique des parametres d'index explicites
     FrequencyDistribution *index_interval;  // intervalles entre parametres d'index explicites
     int **index_parameter;  // parametres d'index explicites
     int nb_variable;        // nombre de variables
@@ -448,9 +404,11 @@ protected :
               bool vertex_identifier_copy , bool init_flag);
     void init(int inb_sequence , int *iidentifier , int *ilength , int inb_variable ,
               bool init_flag);
-    void copy(const Sequences &seq , bool reverse_flag = false);
+    void copy(const Sequences &seq);
+    void reverse(const Sequences &seq);
     void add_state_variable(const Sequences &seq);
     void remove_index_parameter(const Sequences &seq);
+    void explicit_index_parameter(const Sequences &seq);
     void remove();
 
     bool increasing_index_parameter_checking(StatError &error , bool strict ,
@@ -472,7 +430,7 @@ protected :
     std::ostream& ascii_write(std::ostream &os , bool exhaustive , bool comment_flag) const;
     std::ostream& ascii_print(std::ostream &os , char format , bool comment_flag ,
                               double *posterior_probability = NULL , double *entropy = NULL ,
-                              int line_nb_character = LINE_NB_CHARACTER) const;
+                              double *nb_state_sequence = NULL , int line_nb_character = LINE_NB_CHARACTER) const;
     bool plot_print(const char *path , int ilength) const;
 
     void max_length_computation();
@@ -607,13 +565,13 @@ public :
     Sequences(int inb_sequence , int *iidentifier , int *ilength , int inb_variable ,
               bool init_flag = false)
     { init(inb_sequence , iidentifier , ilength , inb_variable , init_flag); }
-    Sequences(const FrequencyDistribution &ihlength , int inb_variable ,
+    Sequences(const FrequencyDistribution &ilength_distribution , int inb_variable ,
               int *itype , bool init_flag = false);
     Sequences(const RenewalData &timev);
     Sequences(const Sequences &seq , int variable , int itype);
     Sequences(const Sequences &seq , int inb_sequence , int *index);
     Sequences(const Sequences &seq , bool *auxiliary);
-    Sequences(const Sequences &seq , char transform = 'c' , int param = DEFAULT);
+    Sequences(const Sequences &seq , char transform = 'c' , int param = UNCHANGED);
     ~Sequences();
     Sequences& operator=(const Sequences &seq);
 
@@ -663,10 +621,12 @@ public :
                                  bool keep = true) const;
 
     Sequences* remove_index_parameter(StatError &error) const;
+    Sequences* explicit_index_parameter(StatError &error) const;
     Sequences* select_variable(StatError &error , int inb_variable , int *ivariable ,
                                bool keep = true) const;
     Sequences* merge_variable(StatError &error , int nb_sample , const Sequences **iseq ,
                               int ref_sample = I_DEFAULT) const;
+    Sequences* shift_variable(StatError &error , int variable , int lag) const;
 
     Sequences* reverse(StatError &error) const;
     Sequences* length_select(StatError &error , std::ostream &os , int min_length ,
@@ -682,6 +642,7 @@ public :
     Sequences* cumulate(StatError &error , int variable = I_DEFAULT) const;
     Sequences* difference(StatError &error , int variable = I_DEFAULT ,
                           bool first_element = false , bool normalization = false) const;
+    Sequences* sequence_normalization(StatError &error , int variable = I_DEFAULT) const;
     Sequences* moving_average(StatError &error , int nb_point , double *filter ,
                               int variable = I_DEFAULT , bool begin_end = false ,
                               int output = TREND) const;
@@ -794,11 +755,11 @@ public :
     int get_max_length() const { return max_length; }
     int get_cumul_length() const { return cumul_length; }
     int get_length(int index_seq) const { return length[index_seq]; }
-    FrequencyDistribution* get_hlength() const { return hlength; }
+    FrequencyDistribution* get_length_distribution() const { return length_distribution; }
     int get_vertex_identifier(int iseq , int index) const
     { return vertex_identifier[iseq][index]; }
     int get_index_parameter_type() const { return index_parameter_type; }
-    FrequencyDistribution* get_hindex_parameter() const { return hindex_parameter; }
+    FrequencyDistribution* get_index_parameter_distribution() const { return index_parameter_distribution; }
     FrequencyDistribution* get_index_interval() const { return index_interval; }
     int get_index_parameter(int iseq , int index) const
     { return index_parameter[iseq][index]; }
@@ -824,18 +785,7 @@ Sequences* sequences_ascii_read(StatError &error , const char *path ,
 
 class SequenceCharacteristics {  // caracteristiques des sequences pour une variable
 
-    friend class NonparametricSequenceProcess;
-    friend class VariableOrderMarkov;
-    friend class VariableOrderMarkovData;
-    friend class SemiMarkov;
-    friend class SemiMarkovData;
-    friend class NonhomogeneousMarkov;
-    friend class NonhomogeneousMarkovData;
-    friend class MarkovianSequences;
-
-    friend class Switching_sequence;  // ajout par Florence Chaubert
-
-private :
+public :
 
     int nb_value;           // nombre de valeurs a partir de 0
     Curves *index_value;    // probabilites des valeurs en fonction de l'index
@@ -860,16 +810,14 @@ private :
     void create_sojourn_time_frequency_distribution(int max_length , int initial_run_flag = false);
 
     std::ostream& ascii_print(std::ostream &os , int type ,
-                              const FrequencyDistribution &hlength ,
+                              const FrequencyDistribution &length_distribution ,
                               bool exhaustive , bool comment_flag) const;
     std::ostream& spreadsheet_print(std::ostream &os , int type ,
-                                    const FrequencyDistribution &hlength) const;
+                                    const FrequencyDistribution &length_distribution) const;
     bool plot_print(const char *prefix , const char *title , int variable ,
-                    int nb_variable , int type , const FrequencyDistribution &hlength) const;
+                    int nb_variable , int type , const FrequencyDistribution &length_distribution) const;
     void plotable_write(MultiPlotSet &plot , int &index , int variable ,
-                        int type , const FrequencyDistribution &hlength) const;
-
-public :
+                        int type , const FrequencyDistribution &length_distribution) const;
 
     SequenceCharacteristics(int inb_value = I_DEFAULT);
     SequenceCharacteristics(const SequenceCharacteristics &characteristics ,
@@ -878,19 +826,6 @@ public :
                             char transform = 'c');
     ~SequenceCharacteristics();
     SequenceCharacteristics& operator=(const SequenceCharacteristics &characteristics);
-
-    // acces membres de la classe
-
-    int get_nb_value() const { return nb_value; }
-    Curves* get_index_value() const { return index_value; }
-    FrequencyDistribution* get_first_occurrence(int value) const { return first_occurrence[value]; }
-    FrequencyDistribution* get_recurrence_time(int value) const { return recurrence_time[value]; }
-    FrequencyDistribution* get_sojourn_time(int value) const { return sojourn_time[value]; }
-    FrequencyDistribution** get_initial_run() const { return initial_run; }
-    FrequencyDistribution* get_initial_run(int value) const { return initial_run[value]; }
-    FrequencyDistribution* get_final_run(int value) const { return final_run[value]; }
-    FrequencyDistribution* get_nb_run(int value) const { return nb_run[value]; }
-    FrequencyDistribution* get_nb_occurrence(int value) const { return nb_occurrence[value]; }
 };
 
 
@@ -910,10 +845,12 @@ public :
 
 
 
-class VariableOrderChainData;
+class VariableOrderMarkovChain;
+class VariableOrderMarkovChainData;
 
 class MarkovianSequences : public Sequences {  // trajectoires correspondant a
                                                // un processus markovien
+    friend class VariableOrderMarkovChain;
     friend class VariableOrderMarkov;
     friend class HiddenVariableOrderMarkov;
     friend class SemiMarkov;
@@ -933,12 +870,13 @@ protected :
     SequenceCharacteristics **characteristics;  // caracteristiques pour une variable donnee
 
     void init();
-    void copy(const MarkovianSequences &seq , int param = DEFAULT);
+    void copy(const MarkovianSequences &seq , int param = UNCHANGED);
+    void reverse(const MarkovianSequences &seq);
     void add_state_variable(const MarkovianSequences &seq , int param);
     void remove();
 
     MarkovianSequences* transcode(StatError &error ,
-                                  const NonparametricSequenceProcess *process) const;
+                                  const CategoricalSequenceProcess *process) const;
     MarkovianSequences* build_auxiliary_variable(DiscreteParametricProcess **discrete_process ,
                                                  ContinuousParametricProcess **continuous_process) const;
 
@@ -951,8 +889,8 @@ protected :
 
     void min_interval_computation(int variable) const;
 
-    void transition_count_computation(const VariableOrderChainData &chain_data ,
-                                      const VariableOrderMarkov &markov ,
+    void transition_count_computation(const VariableOrderMarkovChainData &chain_data ,
+                                      const VariableOrderMarkovChain &markov ,
                                       bool begin = true , bool non_terminal = false) const;
     void transition_count_computation(const ChainData &chain_data ,
                                       const SemiMarkov *smarkov = NULL) const;
@@ -973,6 +911,19 @@ protected :
                                                                   FrequencyDistribution **final_run ,
                                                                   FrequencyDistribution **single_run) const;
 
+    template <typename Type>
+    void gamma_estimation(Type ***state_sequence_count , int variable ,
+                          ContinuousParametricProcess *process , int iter) const;
+    template <typename Type>
+    void zero_inflated_gamma_estimation(Type ***state_sequence_count , int variable ,
+                                        ContinuousParametricProcess *process , int iter) const;
+    template <typename Type>
+    void gaussian_estimation(Type ***state_sequence_count , int variable ,
+                             ContinuousParametricProcess *process , bool common_variance) const;
+    template <typename Type>
+    void von_mises_estimation(Type ***state_sequence_count , int variable ,
+                              ContinuousParametricProcess *process , bool common_concentration) const;
+
     std::ostream& likelihood_write(std::ostream &os , int nb_model , double **likelihood ,
                                    const char *label , bool exhaustive = false ,
                                    char algorithm = 'd') const;
@@ -988,15 +939,15 @@ public :
     :Sequences(inb_sequence , iidentifier , ilength , ivertex_identifier ,
                iindex_parameter_type , inb_variable , itype ,
                vertex_identifier_copy , init_flag) { init(); }
-    MarkovianSequences(const FrequencyDistribution &ihlength , int inb_variable ,
+    MarkovianSequences(const FrequencyDistribution &ilength_distribution , int inb_variable ,
                        int *itype , bool init_flag = false)
-    :Sequences(ihlength , inb_variable , itype , init_flag) { init(); }
+    :Sequences(ilength_distribution , inb_variable , itype , init_flag) { init(); }
     MarkovianSequences(const MarkovianSequences &seq , int variable , int itype)
     :Sequences(seq , variable , itype) { init(); }
     MarkovianSequences(const Sequences &seq);
     MarkovianSequences(const MarkovianSequences &seq , bool *auxiliary);
     MarkovianSequences(const MarkovianSequences &seq , char transform = 'c' ,
-                       int param = DEFAULT);
+                       int param = UNCHANGED);
     ~MarkovianSequences();
     MarkovianSequences& operator=(const MarkovianSequences &seq);
 
@@ -1018,6 +969,7 @@ public :
                                 double *ilimit) const;
 
     MarkovianSequences* remove_index_parameter(StatError &error) const;
+    MarkovianSequences* explicit_index_parameter(StatError &error) const;
     MarkovianSequences* select_variable(StatError &error , int inb_variable ,
                                         int *ivariable , bool keep = true) const;
     MarkovianSequences* merge_variable(StatError &error , int nb_sample ,
@@ -1191,6 +1143,10 @@ public :
     SequenceCharacteristics* get_characteristics(int variable) const
     { return characteristics[variable]; }
 };
+
+
+
+#include "continuous_parametric_estimation.hpp"
 
 
 
