@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
@@ -61,17 +61,17 @@ using namespace std;
  *
  *  Constructeur de la classe SemiMarkov.
  *
- *  arguments : pointeur sur un objet Chain et sur un objet NonparametricSequenceProcess,
+ *  arguments : pointeur sur un objet Chain et sur un objet CategoricalSequenceProcess,
  *              nombre de processus d'observation, pointeurs sur
- *              des objets NonparametricProcess, longueur des sequences,
+ *              des objets CategoricalProcess, longueur des sequences,
  *              flag sur le calcul des lois de comptage.
  *
  *--------------------------------------------------------------*/
 
-SemiMarkov::SemiMarkov(const Chain *pchain , const NonparametricSequenceProcess *poccupancy ,
-                       int inb_output_process , NonparametricProcess **pobservation ,
+SemiMarkov::SemiMarkov(const Chain *pchain , const CategoricalSequenceProcess *poccupancy ,
+                       int inb_output_process , CategoricalProcess **pobservation ,
                        int length , bool counting_flag)
-:Chain(*pchain)
+:SemiMarkovChain(pchain , poccupancy)
 
 {
   register int i;
@@ -80,23 +80,14 @@ SemiMarkov::SemiMarkov(const Chain *pchain , const NonparametricSequenceProcess 
   nb_iterator = 0;
   semi_markov_data = NULL;
 
-  nb_output_process = inb_output_process;
-
-  nonparametric_process = new NonparametricSequenceProcess*[nb_output_process + 1];
-  nonparametric_process[0] = new NonparametricSequenceProcess(*poccupancy);
-  for (i = 1;i <= nb_output_process;i++) {
-    nonparametric_process[i] = new NonparametricSequenceProcess(*pobservation[i - 1]);
-  }
-
-  discrete_parametric_process = NULL;
-  continuous_parametric_process = NULL;
+  state_process = new CategoricalSequenceProcess(*poccupancy);
 
   for (i = 0;i < nb_state;i++) {
     if (transition[i][i] < 1.) {
-      nonparametric_process[0]->absorption[i] = 0.;
+      state_process->absorption[i] = 0.;
     }
     else {
-      nonparametric_process[0]->absorption[i] = 1.;
+      state_process->absorption[i] = 1.;
     }
   }
 
@@ -104,10 +95,10 @@ SemiMarkov::SemiMarkov(const Chain *pchain , const NonparametricSequenceProcess 
   forward = new Forward*[nb_state];
 
   for (i = 0;i < nb_state;i++) {
-    state_subtype[i] = (nonparametric_process[0]->sojourn_time[i] ? SEMI_MARKOVIAN : MARKOVIAN);
+    state_subtype[i] = (state_process->sojourn_time[i] ? SEMI_MARKOVIAN : MARKOVIAN);
 
     if ((state_subtype[i] == SEMI_MARKOVIAN) && (state_type[i] == 'r')) {
-      forward[i] = new Forward(*(nonparametric_process[0]->sojourn_time[i]));
+      forward[i] = new Forward(*(state_process->sojourn_time[i]));
     }
     else {
       forward[i] = NULL;
@@ -119,6 +110,13 @@ SemiMarkov::SemiMarkov(const Chain *pchain , const NonparametricSequenceProcess 
       initial[i] = 1. / (double)nb_state;
     }
     initial_probability_computation();
+  }
+
+  nb_output_process = inb_output_process;
+
+  categorical_process = new CategoricalSequenceProcess*[nb_output_process];
+  for (i = 0;i < nb_output_process;i++) {
+    categorical_process[i] = new CategoricalSequenceProcess(*pobservation[i]);
   }
 
   if (length > COUNTING_MAX_LENGTH) {
@@ -132,20 +130,20 @@ SemiMarkov::SemiMarkov(const Chain *pchain , const NonparametricSequenceProcess 
  *
  *  Constructeur de la classe SemiMarkov.
  *
- *  arguments : pointeur sur un objet Chain et sur un objet NonparametricSequenceProcess,
+ *  arguments : pointeur sur un objet Chain et sur un objet CategoricalSequenceProcess,
  *              nombre de processus d'observation, pointeurs sur des objets
- *              NonparametricProcess, DiscreteParametricProcess et
+ *              CategoricalProcess, DiscreteParametricProcess et
  *              ContinuousParametricProcess, longueur des sequences,
  *              flag sur le calcul des lois de comptage.
  *
  *--------------------------------------------------------------*/
 
-SemiMarkov::SemiMarkov(const Chain *pchain , const NonparametricSequenceProcess *poccupancy ,
-                       int inb_output_process , NonparametricProcess **nonparametric_observation ,
+SemiMarkov::SemiMarkov(const Chain *pchain , const CategoricalSequenceProcess *poccupancy ,
+                       int inb_output_process , CategoricalProcess **categorical_observation ,
                        DiscreteParametricProcess **discrete_parametric_observation ,
                        ContinuousParametricProcess **continuous_parametric_observation ,
                        int length , bool counting_flag)
-:Chain(*pchain)
+:SemiMarkovChain(pchain , poccupancy)
 
 {
   register int i;
@@ -154,40 +152,14 @@ SemiMarkov::SemiMarkov(const Chain *pchain , const NonparametricSequenceProcess 
   nb_iterator = 0;
   semi_markov_data = NULL;
 
-  nb_output_process = inb_output_process;
-
-  nonparametric_process = new NonparametricSequenceProcess*[nb_output_process + 1];
-  discrete_parametric_process = new DiscreteParametricProcess*[nb_output_process + 1];
-  continuous_parametric_process = new ContinuousParametricProcess*[nb_output_process + 1];
-
-  nonparametric_process[0] = new NonparametricSequenceProcess(*poccupancy);
-  discrete_parametric_process[0] = NULL;
-  continuous_parametric_process[0] = NULL;
-
-  for (i = 1;i <= nb_output_process;i++) {
-    if (nonparametric_observation[i - 1]) {
-      nonparametric_process[i] = new NonparametricSequenceProcess(*nonparametric_observation[i - 1]);
-      discrete_parametric_process[i] = NULL;
-      continuous_parametric_process[i] = NULL;
-    }
-    else if (discrete_parametric_observation[i - 1]) {
-      nonparametric_process[i] = NULL;
-      discrete_parametric_process[i] = new DiscreteParametricProcess(*discrete_parametric_observation[i - 1]);
-      continuous_parametric_process[i] = NULL;
-    }
-    else {
-      nonparametric_process[i] = NULL;
-      discrete_parametric_process[i] = NULL;
-      continuous_parametric_process[i] = new ContinuousParametricProcess(*continuous_parametric_observation[i - 1]);
-    }
-  }
+  state_process = new CategoricalSequenceProcess(*poccupancy);
 
   for (i = 0;i < nb_state;i++) {
     if (transition[i][i] < 1.) {
-      nonparametric_process[0]->absorption[i] = 0.;
+      state_process->absorption[i] = 0.;
     }
     else {
-      nonparametric_process[0]->absorption[i] = 1.;
+      state_process->absorption[i] = 1.;
     }
   }
 
@@ -195,10 +167,10 @@ SemiMarkov::SemiMarkov(const Chain *pchain , const NonparametricSequenceProcess 
   forward = new Forward*[nb_state];
 
   for (i = 0;i < nb_state;i++) {
-    state_subtype[i] = (nonparametric_process[0]->sojourn_time[i] ? SEMI_MARKOVIAN : MARKOVIAN);
+    state_subtype[i] = (state_process->sojourn_time[i] ? SEMI_MARKOVIAN : MARKOVIAN);
 
     if ((state_subtype[i] == SEMI_MARKOVIAN) && (state_type[i] == 'r')) {
-      forward[i] = new Forward(*(nonparametric_process[0]->sojourn_time[i]));
+      forward[i] = new Forward(*(state_process->sojourn_time[i]));
     }
     else {
       forward[i] = NULL;
@@ -210,6 +182,30 @@ SemiMarkov::SemiMarkov(const Chain *pchain , const NonparametricSequenceProcess 
       initial[i] = 1. / (double)nb_state;
     }
     initial_probability_computation();
+  }
+
+  nb_output_process = inb_output_process;
+
+  categorical_process = new CategoricalSequenceProcess*[nb_output_process];
+  discrete_parametric_process = new DiscreteParametricProcess*[nb_output_process];
+  continuous_parametric_process = new ContinuousParametricProcess*[nb_output_process];
+
+  for (i = 0;i < nb_output_process;i++) {
+    if (categorical_observation[i]) {
+      categorical_process[i] = new CategoricalSequenceProcess(*categorical_observation[i]);
+      discrete_parametric_process[i] = NULL;
+      continuous_parametric_process[i] = NULL;
+    }
+    else if (discrete_parametric_observation[i]) {
+      categorical_process[i] = NULL;
+      discrete_parametric_process[i] = new DiscreteParametricProcess(*discrete_parametric_observation[i]);
+      continuous_parametric_process[i] = NULL;
+    }
+    else {
+      categorical_process[i] = NULL;
+      discrete_parametric_process[i] = NULL;
+      continuous_parametric_process[i] = new ContinuousParametricProcess(*continuous_parametric_observation[i]);
+    }
   }
 
   if (length > COUNTING_MAX_LENGTH) {
@@ -246,9 +242,9 @@ HiddenSemiMarkov* HiddenSemiMarkov::thresholding(double min_probability) const
   hsmarkov = new HiddenSemiMarkov(*this , false , false);
   hsmarkov->Chain::thresholding(min_probability , true);
 
-  for (i = 1;i <= hsmarkov->nb_output_process;i++) {
-    if (hsmarkov->nonparametric_process[i]) {
-      hsmarkov->nonparametric_process[i]->thresholding(min_probability);
+  for (i = 0;i < hsmarkov->nb_output_process;i++) {
+    if (hsmarkov->categorical_process[i]) {
+      hsmarkov->categorical_process[i]->thresholding(min_probability);
     }
   }
 
@@ -280,8 +276,8 @@ HiddenSemiMarkov* hidden_semi_markov_ascii_read(StatError &error , const char *p
   int line , nb_output_process , output_process_type , index;
   long value;
   const Chain *chain;
-  const NonparametricSequenceProcess *occupancy;
-  NonparametricProcess **nonparametric_observation;
+  const CategoricalSequenceProcess *occupancy;
+  CategoricalProcess **categorical_observation;
   DiscreteParametricProcess **discrete_parametric_observation;
   ContinuousParametricProcess **continuous_parametric_observation;
   HiddenSemiMarkov *hsmarkov;
@@ -377,7 +373,7 @@ HiddenSemiMarkov* hidden_semi_markov_ascii_read(StatError &error , const char *p
         case false : {
           nb_output_process = I_DEFAULT;
 
-          nonparametric_observation = NULL;
+          categorical_observation = NULL;
           discrete_parametric_observation = NULL;
           continuous_parametric_observation = NULL;
 
@@ -449,12 +445,12 @@ HiddenSemiMarkov* hidden_semi_markov_ascii_read(StatError &error , const char *p
           }
 
           else {
-            nonparametric_observation = new NonparametricProcess*[nb_output_process];
+            categorical_observation = new CategoricalProcess*[nb_output_process];
             discrete_parametric_observation = new DiscreteParametricProcess*[nb_output_process];
             continuous_parametric_observation = new ContinuousParametricProcess*[nb_output_process];
 
             for (i = 0;i < nb_output_process;i++) {
-              nonparametric_observation[i] = NULL;
+              categorical_observation[i] = NULL;
               discrete_parametric_observation[i] = NULL;
               continuous_parametric_observation[i] = NULL;
             }
@@ -482,7 +478,7 @@ HiddenSemiMarkov* hidden_semi_markov_ascii_read(StatError &error , const char *p
                 // test mot cle OUTPUT_PROCESS
 
                 case 0 : {
-                  output_process_type = NON_PARAMETRIC;
+                  output_process_type = CATEGORICAL_PROCESS;
 
                   if (token == STAT_word[STATW_OUTPUT_PROCESS]) {
                     index++;
@@ -519,11 +515,12 @@ HiddenSemiMarkov* hidden_semi_markov_ascii_read(StatError &error , const char *p
                   break;
                 }
 
-                // test mot cle NONPARAMETRIC / DISCRETE_PARAMETRIC / CONTINUOUS_PARAMETRIC
+                // test mot cle CATEGORICAL / DISCRETE_PARAMETRIC / CONTINUOUS_PARAMETRIC
 
                 case 3 : {
-                  if (token == STAT_word[STATW_NONPARAMETRIC]) {
-                    output_process_type = NON_PARAMETRIC;
+                  if ((token == STAT_word[STATW_CATEGORICAL]) ||
+                      (token == STAT_word[STATW_NONPARAMETRIC])) {
+                    output_process_type = CATEGORICAL_PROCESS;
                   }
                   else if ((token == STAT_word[STATW_DISCRETE_PARAMETRIC]) ||
                            (token == STAT_word[STATW_PARAMETRIC])) {
@@ -535,7 +532,7 @@ HiddenSemiMarkov* hidden_semi_markov_ascii_read(StatError &error , const char *p
                   else {
                     status = false;
                     ostringstream correction_message;
-                    correction_message << STAT_word[STATW_NONPARAMETRIC] << " or "
+                    correction_message << STAT_word[STATW_CATEGORICAL] << " or "
                                        << STAT_word[STATW_DISCRETE_PARAMETRIC] << " or "
                                        << STAT_word[STATW_CONTINUOUS_PARAMETRIC];
                     error.correction_update(STAT_parsing[STATP_KEY_WORD] , (correction_message.str()).c_str() , line , i + 1);
@@ -555,10 +552,12 @@ HiddenSemiMarkov* hidden_semi_markov_ascii_read(StatError &error , const char *p
 
                 switch (output_process_type) {
 
-                case NON_PARAMETRIC : {
-                  nonparametric_observation[index - 1] = observation_parsing(error , in_file , line ,
-                                                                             chain->nb_state , true);
-                  if (!nonparametric_observation[index - 1]) {
+                case CATEGORICAL_PROCESS : {
+                  categorical_observation[index - 1] = categorical_observation_parsing(error , in_file , line ,
+                                                                                       chain->nb_state , true);
+//                  categorical_observation[index - 1] = categorical_observation_parsing(error , in_file , line ,  pour les donnees de suivi de croissance manguier
+//                                                                                       chain->nb_state , false);
+                  if (!categorical_observation[index - 1]) {
                     status = false;
                   }
                   break;
@@ -593,18 +592,18 @@ HiddenSemiMarkov* hidden_semi_markov_ascii_read(StatError &error , const char *p
 
             if (status) {
               hsmarkov = new HiddenSemiMarkov(chain , occupancy , nb_output_process ,
-                                              nonparametric_observation ,
+                                              categorical_observation ,
                                               discrete_parametric_observation ,
                                               continuous_parametric_observation ,
                                               length , counting_flag);
             }
 
             for (i = 0;i < nb_output_process;i++) {
-              delete nonparametric_observation[i];
+              delete categorical_observation[i];
               delete discrete_parametric_observation[i];
               delete continuous_parametric_observation[i];
             }
-            delete [] nonparametric_observation;
+            delete [] categorical_observation;
             delete [] discrete_parametric_observation;
             delete [] continuous_parametric_observation;
           }
@@ -612,20 +611,19 @@ HiddenSemiMarkov* hidden_semi_markov_ascii_read(StatError &error , const char *p
         }
 
         case true : {
-          nonparametric_observation = old_observation_parsing(error , in_file , line ,
-                                                              chain->nb_state ,
-                                                              nb_output_process);
+          categorical_observation = old_categorical_observation_parsing(error , in_file , line ,
+                                                                        chain->nb_state , nb_output_process);
 
-          if (nonparametric_observation) {
+          if (categorical_observation) {
             if (status) {
               hsmarkov = new HiddenSemiMarkov(chain , occupancy , nb_output_process ,
-                                              nonparametric_observation , length , counting_flag);
+                                              categorical_observation , length , counting_flag);
             }
 
             for (i = 0;i < nb_output_process;i++) {
-              delete nonparametric_observation[i];
+              delete categorical_observation[i];
             }
-            delete [] nonparametric_observation;
+            delete [] categorical_observation;
           }
           break;
         }
@@ -748,10 +746,10 @@ int HiddenSemiMarkov::end_state() const
 
       end_state = i;
 
-      for (j = 1;j <= nb_output_process;j++) {
-        if (nonparametric_process[j]) {
-          for (k = nonparametric_process[j]->observation[i]->offset;k < nonparametric_process[j]->observation[i]->nb_value;k++) {
-            if (nonparametric_process[j]->observation[i]->mass[k] == 1.) {
+      for (j = 0;j < nb_output_process;j++) {
+        if (categorical_process[j]) {
+          for (k = categorical_process[j]->observation[i]->offset;k < categorical_process[j]->observation[i]->nb_value;k++) {
+            if (categorical_process[j]->observation[i]->mass[k] == 1.) {
               output = k;
 
 #             ifdef DEBUG
@@ -762,11 +760,11 @@ int HiddenSemiMarkov::end_state() const
             }
           }
 
-          if (k < nonparametric_process[j]->observation[i]->nb_value) {
+          if (k < categorical_process[j]->observation[i]->nb_value) {
             for (k = 0;k < nb_state;k++) {
-              if ((k != i) && (output >= nonparametric_process[j]->observation[k]->offset) &&
-                  (output < nonparametric_process[j]->observation[k]->nb_value) &&
-                  (nonparametric_process[j]->observation[k]->mass[output] > 0.)) {
+              if ((k != i) && (output >= categorical_process[j]->observation[k]->offset) &&
+                  (output < categorical_process[j]->observation[k]->nb_value) &&
+                  (categorical_process[j]->observation[k]->mass[output] > 0.)) {
                 end_state = I_DEFAULT;
                 break;
               }
