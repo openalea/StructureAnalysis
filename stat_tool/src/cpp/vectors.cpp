@@ -4497,7 +4497,7 @@ void Vectors::build_marginal_histogram(int variable , double step , double imin_
       step = MAX(::round((max_value[variable] - min_value[variable]) * HISTOGRAM_FREQUENCY / nb_vector) , 1);
 
 #     ifdef MESSAGE
-      cout << "\n" << STAT_label[STATL_VARIABLE] << " " << variable << " - "
+      cout << "\n" << STAT_label[STATL_VARIABLE] << " " << variable + 1 << " - "
            << STAT_label[STATL_STEP] << ": " << step << endl;
 //           << " (" << min_value[variable] << ", " << max_value[variable] << ")"
 #     endif
