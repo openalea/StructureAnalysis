@@ -557,7 +557,6 @@ void class_markovian_sequences() {
     .def("__init__", make_constructor(WRAP::markovian_sequences3))
 
     .def(init <Sequences>())
-    .def(init <MarkovianSequences, optional<char, int> >())
 
     .def(self_ns::str(self)) //__str__
 
