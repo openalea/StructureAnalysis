@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
@@ -97,12 +97,9 @@ const int RENEWAL_NB_ELEMENT = 1000000;  // taille maximum de l'echantillon pour
 
 class LengthBias : public DiscreteParametric {  // loi biaisee par la longueur
 
-/*    friend class Renewal;
-    friend class RenewalData; */
-
 public :
 
-    LengthBias(int inb_value = 0 , int iident = NONPARAMETRIC ,
+    LengthBias(int inb_value = 0 , int iident = CATEGORICAL ,
                int iinf_bound = I_DEFAULT , int isup_bound = I_DEFAULT ,
                double iparameter = D_DEFAULT, double iprobability = D_DEFAULT)
     :DiscreteParametric(inb_value , iident , iinf_bound , isup_bound , iparameter , iprobability) {}
@@ -118,12 +115,9 @@ public :
 
 class Backward : public DiscreteParametric {  // loi de l'intervalle de temps apres le dernier evenement
 
-/*    friend class Renewal;
-    friend class RenewalData; */
-
 public :
 
-    Backward(int inb_value = 0 , int iident = NONPARAMETRIC ,
+    Backward(int inb_value = 0 , int iident = CATEGORICAL ,
              int iinf_bound = I_DEFAULT , int isup_bound = I_DEFAULT ,
              double iparameter = D_DEFAULT, double iprobability = D_DEFAULT)
     :DiscreteParametric(inb_value , iident , iinf_bound , isup_bound , iparameter , iprobability) {}
@@ -137,32 +131,22 @@ public :
 
 class NbEvent : public DiscreteParametric {  // loi du nombre d'evenements
 
-//    friend class Renewal;
-
-// private :
 public :
 
     char type;              // 'o' : ordinaire, 'e' : en equilibre
     int time;               // temps d'observation
 
-    void binomial_computation();
-    void negative_binomial_computation();
-
-// public :
-
-    NbEvent(char itype = 'v' , int itime = 0 , int inb_value = 0 , int iident = NONPARAMETRIC ,
+    NbEvent(char itype = 'v' , int itime = 0 , int inb_value = 0 , int iident = CATEGORICAL ,
             int iinf_bound = I_DEFAULT , int isup_bound = I_DEFAULT ,
             double iparameter = D_DEFAULT , double iprobability = D_DEFAULT);
     NbEvent(char itype , int itime , DiscreteParametric &inter_event);
     NbEvent(const NbEvent &nb_event , int ialloc_nb_value = I_DEFAULT);
 
+    void binomial_computation();
+    void negative_binomial_computation();
+
     void ordinary_computation(DiscreteParametric &inter_event);
     void computation(DiscreteParametric &inter_event);
-
-    // acces membres de la classe
-
-/*    char get_type() const { return type; }
-    int get_time() const { return time; } */
 };
 
 
