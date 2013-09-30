@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
@@ -60,75 +60,49 @@ using namespace std;
  *
  *  Constructeur de la classe VariableOrderMarkov.
  *
- *  arguments : pointeur sur un objet VariableOrderMarkov,
+ *  arguments : pointeur sur un objet VariableOrderMarkovChain,
  *              nombre de processus d'observation, pointeurs sur des objets
- *              NonparametricProcess, DiscreteParametricProcess et
+ *              CategoricalProcess, DiscreteParametricProcess et
  *              ContinuousParametricProcess, longueur des sequences.
  *
  *--------------------------------------------------------------*/
 
-VariableOrderMarkov::VariableOrderMarkov(const VariableOrderMarkov *pmarkov , int inb_output_process ,
-                                         NonparametricProcess **nonparametric_observation ,
+VariableOrderMarkov::VariableOrderMarkov(const VariableOrderMarkovChain *pmarkov , int inb_output_process ,
+                                         CategoricalProcess **categorical_observation ,
                                          DiscreteParametricProcess **discrete_parametric_observation ,
                                          ContinuousParametricProcess **continuous_parametric_observation ,
                                          int length)
 
 {
   register int i;
-  int nb_terminal;
 
 
-  memory_tree_completion(*pmarkov);
+  build(*pmarkov);
 
-  switch (type) {
-
-  case 'o' : {
-    non_terminal_transition_probability_computation();
-    break;
-  }
-
-  case 'e' : {
-    nb_terminal = (nb_row - 1) * (nb_state - 1) / nb_state + 1;
-
-    for (i = 1;i < nb_row;i++) {
-      if (!child[i]) {
-        initial[i] = 1. / (double)nb_terminal;
-      }
-      else {
-        initial[i] = 0.;
-      }
-    }
-
-    initial_probability_computation();
-    break;
-  }
-  }
+  nb_iterator = 0;
+  markov_data = NULL;
 
   nb_output_process = inb_output_process;
 
-  nonparametric_process = new NonparametricSequenceProcess*[nb_output_process + 1];
-  discrete_parametric_process = new DiscreteParametricProcess*[nb_output_process + 1];
-  continuous_parametric_process = new ContinuousParametricProcess*[nb_output_process + 1];
+  categorical_process = new CategoricalSequenceProcess*[nb_output_process];
+  discrete_parametric_process = new DiscreteParametricProcess*[nb_output_process];
+  continuous_parametric_process = new ContinuousParametricProcess*[nb_output_process];
 
-  nonparametric_process[0] = new NonparametricSequenceProcess(nb_state , nb_state);
-  discrete_parametric_process[0] = NULL;
-  continuous_parametric_process[0] = NULL;
-
-  for (i = 1;i <= nb_output_process;i++) {
-    if (nonparametric_observation[i - 1]) {
-      nonparametric_process[i] = new NonparametricSequenceProcess(*nonparametric_observation[i - 1]);
+  for (i = 0;i < nb_output_process;i++) {
+    if (categorical_observation[i]) {
+      categorical_process[i] = new CategoricalSequenceProcess(*categorical_observation[i]);
       discrete_parametric_process[i] = NULL;
       continuous_parametric_process[i] = NULL;
     }
-    else if (discrete_parametric_observation[i - 1]) {
-      nonparametric_process[i] = NULL;
-      discrete_parametric_process[i] = new DiscreteParametricProcess(*discrete_parametric_observation[i - 1]);
+    else if (discrete_parametric_observation[i]) {
+      categorical_process[i] = NULL;
+      discrete_parametric_process[i] = new DiscreteParametricProcess(*discrete_parametric_observation[i]);
       continuous_parametric_process[i] = NULL;
     }
     else {
-      nonparametric_process[i] = NULL;
+      categorical_process[i] = NULL;
       discrete_parametric_process[i] = NULL;
-      continuous_parametric_process[i] = new ContinuousParametricProcess(*continuous_parametric_observation[i - 1]);
+      continuous_parametric_process[i] = new ContinuousParametricProcess(*continuous_parametric_observation[i]);
     }
   }
 
@@ -161,11 +135,11 @@ HiddenVariableOrderMarkov* HiddenVariableOrderMarkov::thresholding(double min_pr
 
 
   hmarkov = new HiddenVariableOrderMarkov(*this , false);
-  hmarkov->threshold_application(min_probability);
+  hmarkov->VariableOrderMarkovChain::thresholding(min_probability);
 
-  for (i = 1;i <= hmarkov->nb_output_process;i++) {
-    if (hmarkov->nonparametric_process[i]) {
-      hmarkov->nonparametric_process[i]->thresholding(min_probability);
+  for (i = 0;i < hmarkov->nb_output_process;i++) {
+    if (hmarkov->categorical_process[i]) {
+      hmarkov->categorical_process[i]->thresholding(min_probability);
     }
   }
 
@@ -195,8 +169,8 @@ HiddenVariableOrderMarkov* hidden_variable_order_markov_ascii_read(StatError &er
   register int i;
   int line , nb_output_process , output_process_type , index;
   long value;
-  const VariableOrderMarkov *imarkov;
-  NonparametricProcess **nonparametric_observation;
+  const VariableOrderMarkovChain *imarkov;
+  CategoricalProcess **categorical_observation;
   DiscreteParametricProcess **discrete_parametric_observation;
   ContinuousParametricProcess **continuous_parametric_observation;
   HiddenVariableOrderMarkov *hmarkov;
@@ -282,7 +256,7 @@ HiddenVariableOrderMarkov* hidden_variable_order_markov_ascii_read(StatError &er
       if (imarkov) {
         nb_output_process = I_DEFAULT;
 
-        nonparametric_observation = NULL;
+        categorical_observation = NULL;
         discrete_parametric_observation = NULL;
         continuous_parametric_observation = NULL;
 
@@ -354,12 +328,12 @@ HiddenVariableOrderMarkov* hidden_variable_order_markov_ascii_read(StatError &er
         }
 
         else {
-          nonparametric_observation = new NonparametricProcess*[nb_output_process];
+          categorical_observation = new CategoricalProcess*[nb_output_process];
           discrete_parametric_observation = new DiscreteParametricProcess*[nb_output_process];
           continuous_parametric_observation = new ContinuousParametricProcess*[nb_output_process];
 
           for (i = 0;i < nb_output_process;i++) {
-            nonparametric_observation[i] = NULL;
+            categorical_observation[i] = NULL;
             discrete_parametric_observation[i] = NULL;
             continuous_parametric_observation[i] = NULL;
           }
@@ -387,7 +361,7 @@ HiddenVariableOrderMarkov* hidden_variable_order_markov_ascii_read(StatError &er
               // test mot cle OUTPUT_PROCESS
 
               case 0 : {
-                output_process_type = NON_PARAMETRIC;
+                output_process_type = CATEGORICAL_PROCESS;
 
                 if (token == STAT_word[STATW_OUTPUT_PROCESS]) {
                   index++;
@@ -424,11 +398,12 @@ HiddenVariableOrderMarkov* hidden_variable_order_markov_ascii_read(StatError &er
                 break;
               }
 
-              // test mot cle NONPARAMETRIC / DISCRETE_PARAMETRIC / CONTINUOUS_PARAMETRIC
+              // test mot cle CATEGORICAL / DISCRETE_PARAMETRIC / CONTINUOUS_PARAMETRIC
 
               case 3 : {
-                if (token == STAT_word[STATW_NONPARAMETRIC]) {
-                  output_process_type = NON_PARAMETRIC;
+                if ((token == STAT_word[STATW_CATEGORICAL]) ||
+                    (token == STAT_word[STATW_NONPARAMETRIC])) {
+                  output_process_type = CATEGORICAL_PROCESS;
                 }
                 else if ((token == STAT_word[STATW_DISCRETE_PARAMETRIC]) ||
                          (token == STAT_word[STATW_PARAMETRIC])) {
@@ -440,7 +415,7 @@ HiddenVariableOrderMarkov* hidden_variable_order_markov_ascii_read(StatError &er
                 else {
                   status = false;
                   ostringstream correction_message;
-                  correction_message << STAT_word[STATW_NONPARAMETRIC] << " or "
+                  correction_message << STAT_word[STATW_CATEGORICAL] << " or "
                                      << STAT_word[STATW_DISCRETE_PARAMETRIC] << " or "
                                      << STAT_word[STATW_CONTINUOUS_PARAMETRIC];
                   error.correction_update(STAT_parsing[STATP_KEY_WORD] , (correction_message.str()).c_str() , line , i + 1);
@@ -460,10 +435,10 @@ HiddenVariableOrderMarkov* hidden_variable_order_markov_ascii_read(StatError &er
 
               switch (output_process_type) {
 
-              case NON_PARAMETRIC : {
-                nonparametric_observation[index - 1] = observation_parsing(error , in_file , line ,
-                                                                           ((Chain*)imarkov)->nb_state , true);
-                if (!nonparametric_observation[index - 1]) {
+              case CATEGORICAL_PROCESS : {
+                categorical_observation[index - 1] = categorical_observation_parsing(error , in_file , line ,
+                                                                                     ((Chain*)imarkov)->nb_state , true);
+                if (!categorical_observation[index - 1]) {
                   status = false;
                 }
                 break;
@@ -498,7 +473,7 @@ HiddenVariableOrderMarkov* hidden_variable_order_markov_ascii_read(StatError &er
 
           if (status) {
             hmarkov = new HiddenVariableOrderMarkov(imarkov , nb_output_process ,
-                                                    nonparametric_observation ,
+                                                    categorical_observation ,
                                                     discrete_parametric_observation ,
                                                     continuous_parametric_observation , length);
 
@@ -511,11 +486,11 @@ HiddenVariableOrderMarkov* hidden_variable_order_markov_ascii_read(StatError &er
           delete imarkov;
 
           for (i = 0;i < nb_output_process;i++) {
-            delete nonparametric_observation[i];
+            delete categorical_observation[i];
             delete discrete_parametric_observation[i];
             delete continuous_parametric_observation[i];
           }
-          delete [] nonparametric_observation;
+          delete [] categorical_observation;
           delete [] discrete_parametric_observation;
           delete [] continuous_parametric_observation;
         }
