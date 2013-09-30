@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
@@ -93,12 +93,12 @@ private :
 public :
 
     HiddenVariableOrderMarkov() {}
-    HiddenVariableOrderMarkov(const VariableOrderMarkov *pmarkov , int inb_output_process ,
-                              NonparametricProcess **nonparametric_observation ,
+    HiddenVariableOrderMarkov(const VariableOrderMarkovChain *pmarkov , int inb_output_process ,
+                              CategoricalProcess **categorical_observation ,
                               DiscreteParametricProcess **discrete_parametric_observation ,
                               ContinuousParametricProcess **continuous_parametric_observation ,
                               int length)
-    :VariableOrderMarkov(pmarkov , inb_output_process , nonparametric_observation ,
+    :VariableOrderMarkov(pmarkov , inb_output_process , categorical_observation ,
                          discrete_parametric_observation ,
                          continuous_parametric_observation , length) {}
     HiddenVariableOrderMarkov(const HiddenVariableOrderMarkov &hmarkov , bool data_flag = true)
