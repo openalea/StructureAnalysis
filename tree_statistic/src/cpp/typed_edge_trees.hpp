@@ -255,7 +255,7 @@ Generic_Int_fl_container* Typed_edge_int_fl_tree<Generic_Int_fl_container>::get_
     tie(it, end)= this->vertices();
     while (it < end)
     {
-       v= get(*it);
+       v= this->get(*it);
        for(var= 0; var < this->_nb_integral; var++)
            _min_value->Int(var)= min(_min_value->Int(var),
                                      v.Int(var));
@@ -286,7 +286,7 @@ Generic_Int_fl_container* Typed_edge_int_fl_tree<Generic_Int_fl_container>::get_
     tie(it, end)= this->vertices();
     while (it < end)
     {
-       v= get(*it);
+       v= this->get(*it);
        for(var= 0; var < _nb_integral; var++)
            _max_value->Int(var)= max(_max_value->Int(var),
                                      v.Int(var));

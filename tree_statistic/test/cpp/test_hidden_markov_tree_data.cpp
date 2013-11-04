@@ -12,7 +12,7 @@
 #include "stat_tool/distribution.h"
 #include "stat_tool/curves.h"
 #include "stat_tool/markovian.h"
-#include "stat_tool/mixture.h"
+#include "stat_tool/discrete_mixture.h"
 #include "sequence_analysis/sequences.h"
 #include "sequence_analysis/semi_markov.h"
 #include "sequence_analysis/hidden_semi_markov.h"
@@ -53,7 +53,7 @@ int main(void)
    state_tree_type **pstrees  = NULL;
    const DiscreteDistributionData *pdd  = NULL; //, *marginal=NULL;
    Trees *tmp_trees  = NULL;
-   MixtureData *mixture_data  = NULL;
+   DiscreteMixtureData *mixture_data  = NULL;
    // double likelihood;
 
    // default constructor of HiddenMarkovTreeData

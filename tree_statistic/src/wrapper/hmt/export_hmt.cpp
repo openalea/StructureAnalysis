@@ -26,7 +26,7 @@
 #include "stat_tool/markovian.h"
 #include "stat_tool/distribution.h"
 #include "stat_tool/vectors.h"
-#include "stat_tool/mixture.h"
+#include "stat_tool/discrete_mixture.h"
 
 #include "tree_statistic/tree_labels.h"
 #include "tree_statistic/int_fl_containers.h"
