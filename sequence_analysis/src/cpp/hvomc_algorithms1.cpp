@@ -1065,6 +1065,10 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_esti
                 case false : {
                   for (j = 0;j < hmarkov->nb_state;j++) {
                     hmarkov->continuous_parametric_process[i]->observation[j]->dispersion = sqrt(observation_reestim[i][j]->variance);
+                    if (hmarkov->continuous_parametric_process[i]->observation[j]->dispersion /
+                        hmarkov->continuous_parametric_process[i]->observation[j]->location < GAUSSIAN_MIN_VARIATION_COEFF) {
+                      hmarkov->continuous_parametric_process[i]->observation[j]->dispersion = hmarkov->continuous_parametric_process[i]->observation[j]->location * GAUSSIAN_MIN_VARIATION_COEFF;
+                    }
                   }
                   break;
                 }
@@ -2137,6 +2141,10 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_stoc
                 case false : {
                   for (j = 0;j < hmarkov->nb_state;j++) {
                     hmarkov->continuous_parametric_process[i]->observation[j]->dispersion = sqrt(observation_reestim[i][j]->variance);
+                    if (hmarkov->continuous_parametric_process[i]->observation[j]->dispersion /
+                        hmarkov->continuous_parametric_process[i]->observation[j]->location < GAUSSIAN_MIN_VARIATION_COEFF) {
+                      hmarkov->continuous_parametric_process[i]->observation[j]->dispersion = hmarkov->continuous_parametric_process[i]->observation[j]->location * GAUSSIAN_MIN_VARIATION_COEFF;
+                    }
                   }
                   break;
                 }
