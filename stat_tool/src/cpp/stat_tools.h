@@ -259,6 +259,8 @@ const int GAMMA_MAX_NB_ITERATION = 5;  // nombre maximum d'iterations pour l'est
 const double GAUSSIAN_TAIL = 5.e-4;    // traine de la loi de Gauss
 const int GAUSSIAN_NB_STEP = 1000;     // nombre de pas pour le calcul de la loi de Gauss
 const int GAUSSIAN_NB_SUB_STEP = 10;   // nombre de pas pour le calcul de la loi de Gauss
+const double GAUSSIAN_MIN_VARIATION_COEFF = 1.e-3;  // coefficient de variation minimum pour l'estimation
+                                                    // de l'ecart-type de la loi de Gauss
 
 const int VON_MISES_NB_STEP = 3600;    // nombre de pas pour le calcul de la loi de von Mises
 const int VON_MISES_NB_SUB_STEP = 10;  // nombre de pas pour le calcul de la loi de von Mises
