@@ -44,7 +44,7 @@
 #include "stat_tool/distribution_reestimation.hpp"
 #include "stat_tool/distribution.h"   // definition of DiscreteParametricModel class
 #include "stat_tool/vectors.h"
-#include "stat_tool/mixture.h"
+#include "stat_tool/discrete_mixture.h"
 
 #include "sequence_analysis/sequences.h"
 
