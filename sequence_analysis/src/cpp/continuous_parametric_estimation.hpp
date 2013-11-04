@@ -600,7 +600,11 @@ void MarkovianSequences::gaussian_estimation(Type ***state_sequence_count , int 
         variance[i] /= state_frequency[i];
 //        variance[i] /= (state_frequency[i] - 1);
         process->observation[i]->dispersion = sqrt(variance[i]);
+        if (process->observation[i]->dispersion / process->observation[i]->location < GAUSSIAN_MIN_VARIATION_COEFF) {
+          process->observation[i]->dispersion = process->observation[i]->location * GAUSSIAN_MIN_VARIATION_COEFF;
+        }
       }
+
       else {
         process->observation[i]->dispersion = D_DEFAULT;
       }
