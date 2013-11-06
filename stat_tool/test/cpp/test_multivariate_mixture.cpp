@@ -7,7 +7,7 @@
 #include "stat_tool/distribution.h"
 #include "stat_tool/curves.h"
 #include "stat_tool/markovian.h"
-#include "stat_tool/mixture.h"
+#include "stat_tool/discrete_mixture.h"
 #include "stat_tool/multivariate_mixture.h"
 
 int main(void) {
