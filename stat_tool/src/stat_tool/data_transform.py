@@ -23,8 +23,8 @@ __revision__ = "$Id$"
 
 import error
 from openalea.stat_tool._stat_tool import \
-     _Mixture, \
-     _MixtureData, \
+     _DiscreteMixture, \
+     _DiscreteMixtureData, \
      _Compound, \
      _CompoundData, \
      _Convolution, \
@@ -41,7 +41,7 @@ def Merge(obj, *args):
 
     :Parameters:
 
-      * histo1, histo2, ... (_Histogram, _MixtureData, _ConvolutionData, _CompoundData),
+      * histo1, histo2, ... (_Histogram, _DiscreteMixtureData, _ConvolutionData, _CompoundData),
       * vec1, vec2, ... (_Vectors),
       * timev1, timev2, ... (_TimeEvents, _RenewalData),
       * seq1, seq2, ... (_Sequences, _DiscreteSequences, _MarkovData, _SemiMarkovData),
@@ -50,7 +50,7 @@ def Merge(obj, *args):
 
     :Returns:
 
-        If the arguments are of type _Histogram, _MixtureData, _ConvolutionData, _CompoundData
+        If the arguments are of type _Histogram, _DiscreteMixtureData, _ConvolutionData, _CompoundData
         an object of type _Histogram is returned.
 
         If the arguments are of type _Vectors and if the vectors have the same number of variables,
@@ -196,14 +196,14 @@ def ExtractData(model):
     "Viterbi").
 
     :Parameters:
-      * mixt (_Mixture),
+      * mixt (_DiscreteMixture),
       * convol (_Convolution),
       * compound (_Compound),
       * hmc (_HiddenMarkov),
       * hsmc (_HiddenSemiMarkov).
 
     :Returns:
-      - If mixt contains a 'data' part, an object of type `_MixtureData` is returned.
+      - If mixt contains a 'data' part, an object of type `_DiscreteMixtureData` is returned.
       - If convol contains a 'data' part, an object of type `_ConvolutionData` is returned.
       - If compound contains a 'data' part, an object of type `_CompoundData` is returned.
       - If hmc contains a 'data' part, an object of type `_MarkovData` is returned.
@@ -233,7 +233,7 @@ def ExtractDistribution(model, *args):
 
     :Parameters:
 
-      * mixt (_Mixture),
+      * mixt (_DiscreteMixture),
       * mixt_type (string): type of distribution: "Weight" or "Mixture",
       * index (int): index of the elementary distribution,
       * convol (_Convolution),
@@ -287,7 +287,7 @@ def ExtractHistogram(data, *args, **kargs):
 
     :Parameters:
 
-      * mixt_histo (_MixtureData),
+      * mixt_histo (_DiscreteMixtureData),
       * mixt_type (string): type of distribution: "Weight" or "Mixture",
       * index (int): index of the elementary distribution,
       * convol_histo (_ConvolutionData),
@@ -352,12 +352,12 @@ def Extract(obj, *args, **kargs):
 
     ret = None
 
-    if type(obj) in [_Mixture, _MixtureData]:
+    if type(obj) in [_DiscreteMixture, _DiscreteMixtureData]:
         assert len(args)>=1
         error.CheckType([args[0]], [str])
         if args[0] == 'Mixture':
             assert len(args) == 1
-            ret = obj.extract_mixture()
+            ret = obj.extract_DiscreteMixture()
         elif args[0] == 'Component':
             assert len(args) == 2
             error.CheckType([args[1]], [int])

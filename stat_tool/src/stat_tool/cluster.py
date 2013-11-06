@@ -60,7 +60,7 @@ def Cluster(obj, utype, *args, **kargs):
 
     :Parameters:
 
-      * `histo` (`_FrequencyDistribution`, `_MixtureData`, `_ConvolutionData`, `_CompoundData`),
+      * `histo` (`_FrequencyDistribution`, `_DiscreteMixtureData`, `_ConvolutionData`, `_CompoundData`),
       * `step` (int) - step for the clustering of values
       * `information_ratio` (float) - proportion of the information measure of \
         the original sample for determining the clustering step,

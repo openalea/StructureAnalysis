@@ -33,7 +33,7 @@ from openalea.stat_tool._stat_tool import _DiscreteParametric
 from openalea.stat_tool._stat_tool import _Compound
 from openalea.stat_tool._stat_tool import _Convolution
 from openalea.stat_tool._stat_tool import _Distribution
-from openalea.stat_tool._stat_tool import _Mixture
+from openalea.stat_tool._stat_tool import _DiscreteMixture
 from openalea.stat_tool._stat_tool import _FrequencyDistribution
 from openalea.stat_tool._stat_tool import LikelihoodPenaltyType
 
@@ -104,7 +104,7 @@ class EstimateFunctions(object):
 
 
 
-    def estimate_mixture(histo, *args, **kargs):
+    def estimate_DiscreteMixture(histo, *args, **kargs):
 
 
         """ Estimate a finite  mixture of discrete distributions
@@ -145,10 +145,10 @@ class EstimateFunctions(object):
         .. doctest::
             :options: +SKIP
 
-            >>> estimate_mixture(histo, "MIXTURE", "B", dist,...,,
+            >>> estimate_DiscreteMixture(histo, "MIXTURE", "B", dist,...,,
                              MinInfBound=1, InfBoundStatus="Fixed",
                              DistInfBoundStatus="Fixed")
-            >>> estimate_mixture(histo, "MIXTURE", "B", "NB",...,,
+            >>> estimate_DiscreteMixture(histo, "MIXTURE", "B", "NB",...,,
                                MinInfBound=1, InfBoundStatus="Fixed",
                                DistInfBoundStatus="Fixed",
                                NbComponent="Estimated", Penalty="AIC")
@@ -167,7 +167,7 @@ class EstimateFunctions(object):
 
         # get user arguments
         # list of distributions can be either a list or several arguments
-        # e.g.: estimate_mixture(["B","B"]) or estimate_mixture("B", "B")
+        # e.g.: estimate_DiscreteMixture(["B","B"]) or estimate_DiscreteMixture("B", "B")
         if len(args)==1 and type(args[0])==list:
             distributions = args[0]
         else:
@@ -220,7 +220,7 @@ class EstimateFunctions(object):
                 pcomponent.append(_DiscreteParametric(dist))
                 ident.append(None)
                 estimate.append(False)
-            elif type(dist) in [_Mixture, _Convolution, _Compound]:
+            elif type(dist) in [_DiscreteMixture, _Convolution, _Compound]:
                 pcomponent.append(_Distribution(dist))
                 ident.append(None)
                 estimate.append(False)
@@ -236,7 +236,7 @@ class EstimateFunctions(object):
             Penalty can only be used with NbComponent set to 'Estimated'""")
 
         if not NbComponent: # "FIXED"
-            imixt = _Mixture(pcomponent)
+            imixt = _DiscreteMixture(pcomponent)
             ret = histo.mixture_estimation1(imixt, estimate, MinInfBound,
                                             InfBoundStatus, DistInfBoundStatus)
 
@@ -267,11 +267,11 @@ class EstimateFunctions(object):
         known_distribution = args[0]
         ##if isinstance(known_distribution, _DiscreteParametricModel):
         #    known_distribution = _DiscreteParametric(known_distribution)
-        #elif type(known_distribution) in [_Mixture, _Convolution, _Compound]:
+        #elif type(known_distribution) in [_DiscreteMixture, _Convolution, _Compound]:
         #    known_distribution = _Distribution(known_distribution)
         #else:
         #    raise TypeError("""
-        #    argument "known_distribution" must be of type _Mixture,
+        #    argument "known_distribution" must be of type _DiscreteMixture,
         #     _COnvolution, _Compound or _DiscreteParametricModel""")
 
         Type = args[1]
@@ -314,12 +314,12 @@ class EstimateFunctions(object):
             if isinstance(unknown_distribution, _Distribution):
                 unknown_distribution = _DiscreteParametric(unknown_distribution)
             elif type(unknown_distribution) in \
-                [_Mixture, _Convolution, _Compound]:
+                [_DiscreteMixture, _Convolution, _Compound]:
                 unknown_distribution = _Distribution(unknown_distribution)
             else:
                 raise TypeError("""
                     argument "known_distribution" must be of type
-                     _Mixture, _COnvolution, _Compound or _DiscreteParametricModel""")
+                     _DiscreteMixture, _COnvolution, _Compound or _DiscreteParametricModel""")
             if Type == 's':
 
                 return histo.compound_estimation1(
@@ -369,11 +369,11 @@ class EstimateFunctions(object):
 
         if isinstance(known_distribution, _DiscreteParametricModel):
             known_distribution = _DiscreteParametric(known_distribution)
-        elif type(known_distribution) in [_Mixture, _Convolution, _Compound]:
+        elif type(known_distribution) in [_DiscreteMixture, _Convolution, _Compound]:
             known_distribution = _Distribution(known_distribution)
         else:
             raise TypeError("""
-            argument "known_distribution" must be of type _Mixture, _COnvolution,
+            argument "known_distribution" must be of type _DiscreteMixture, _COnvolution,
             _Compound or _DiscreteParametricModel""")
 
         if InitialDistribution:
@@ -407,7 +407,7 @@ def Estimate(histo, itype, *args, **kargs):
     .. seealso::
         :func:`~openalea.stat_tool.estimate.EstimateFunctions.estimate_nonparametric`,
         :func:`~openalea.stat_tool.estimate.EstimateFunctions.estimate_parametric`,
-        :func:`~openalea.stat_tool.estimate.EstimateFunctions.estimate_mixture`,
+        :func:`~openalea.stat_tool.estimate.EstimateFunctions.estimate_DiscreteMixture`,
         :func:`~openalea.stat_tool.estimate.EstimateFunctions.estimate_convolution`,
         :func:`~openalea.stat_tool.estimate.EstimateFunctions.estimate_compound`,
     """
@@ -423,7 +423,7 @@ def Estimate(histo, itype, *args, **kargs):
         "NEGATIVE_BINOMIAL" :  _FrequencyDistribution.estimate_parametric,
         "U" : _FrequencyDistribution.estimate_parametric,
         "UNIFORM" : _FrequencyDistribution.estimate_parametric,
-        "MIXTURE" : _FrequencyDistribution.estimate_mixture,
+        "MIXTURE" : _FrequencyDistribution.estimate_DiscreteMixture,
         "CONVOLUTION" : _FrequencyDistribution.estimate_convolution,
         "COMPOUND": _FrequencyDistribution.estimate_compound,
         }
@@ -443,7 +443,7 @@ def Estimate(histo, itype, *args, **kargs):
 
         if fct == _FrequencyDistribution.estimate_parametric:
             return fct(histo, Type, *args, **kargs)
-        elif fct == _FrequencyDistribution.estimate_mixture:
+        elif fct == _FrequencyDistribution.estimate_DiscreteMixture:
             return fct(histo, *args, **kargs)
         else:
             return fct(histo, *args, **kargs)

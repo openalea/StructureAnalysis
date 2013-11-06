@@ -72,7 +72,7 @@ def Display(obj, *args, **kargs):
     * `vec` (`_Vectors`),
     * `seq` (`_Sequences`, `_DiscreteSequences`, `_MarkovData`, `_SemiMarkovData`, `_Tops`),
     * `dist` (`_Distribution`, `_MixtureDist`, `_Convolution`, `_Compound`),
-    * `histo` (`_FrequencyDistribution`, `_MixtureData`, `_ConvolutionData`, `_CompoundData`),
+    * `histo` (`_FrequencyDistribution`, `_DiscreteMixtureData`, `_ConvolutionData`, `_CompoundData`),
     * `hmc` (`_HiddenMarkov`),
     * `hsmc` (`_HiddenSemiMarkov`),
     * `identifier` (int) - identifier of a sequence.
@@ -87,7 +87,7 @@ def Display(obj, *args, **kargs):
         `_SemiMarkovData` or `_Tops`,
       * "Survival" only if the first argument is of type `_Distribution`,
         `_MixtureDist`, `_Convolution`, `_Compound`, `_FrequencyDistribution`,
-        `_MixtureData`, `_ConvolutionData` or `_CompoundData`
+        `_DiscreteMixtureData`, `_ConvolutionData` or `_CompoundData`
       * "StateProfile" only if the first argument is of type `_HiddenMarkov`
         or `_HiddenSemiMarkov`.
 
@@ -164,7 +164,7 @@ def Plot(obj, *args, **kargs):
 
     :Parameters:
       * obj1 (`_Distribution`, `_Mixture`, `_Convolution`, `_Compound`,
-        `_DiscreteDistributionData`, `_MixtureData`, `_ConvolutionData`,
+        `_DiscreteDistributionData`, `_DiscreteMixtureData`, `_ConvolutionData`,
         `_CompoundData`,`_Renewal`, `_TimeEvents`, `_RenewalData`,
         `_Sequences`, `_DistanceMatrix`, ` _TopParameters`, `_Tops`),
       * vec1 (`_Vectors`): values,
@@ -180,12 +180,12 @@ def Plot(obj, *args, **kargs):
         or sequences: "SelfTransition", "Observation", "Intensity",
         "FirstOccurrence", "Recurrence", "Sojourn" or "Counting",
       * dist1, dist2, ... (`_Distribution`, `_Mixture`, `_Convolution`, `_Compound`),
-      * histo1, histo2, ... (`_DiscreteDistributionData`, `_MixtureData`, `_ConvolutionData`,
+      * histo1, histo2, ... (`_DiscreteDistributionData`, `_DiscreteMixtureData`, `_ConvolutionData`,
         `_CompoundData`),
       * seq (`_Sequences`, `_DiscreteSequences`, `_MarkovData`, `_SemiMarkovData`,
         `_Tops`),
       * dist (`_Distribution`, `_Mixture`, `_Convolution`, `_Compound`),
-      * histo (`_DiscreteDistributionData`, `_MixtureData`, `_ConvolutionData`,
+      * histo (`_DiscreteDistributionData`, `_DiscreteMixtureData`, `_ConvolutionData`,
         `_CompoundData`),
       * hmc (_HiddenMarkov),
       * hsmc (_HiddenSemiMarkov),
@@ -270,7 +270,7 @@ def Save(obj, *args, **kargs):
 
       * obj: object of the STAT module (except objects of type vector_distance),
       * file_name (string),
-      * histo (_FrequencyDistribution, _MixtureData, _ConvolutionData, _CompoundData),
+      * histo (_FrequencyDistribution, _DiscreteMixtureData, _ConvolutionData, _CompoundData),
       * vec (_Vectors),
       * timev (_TimeEvents, _RenewalData),
       * seq (_Sequences, _DiscreteSequences, _MarkovData, _SemiMarkovData, _Tops).
@@ -285,7 +285,7 @@ def Save(obj, *args, **kargs):
           * "Data" only if the first argument is of type `_Sequences`,
             `_DiscreteSequences`, `_MarkovData`, `_SemiMarkovData` or `_Tops`,
           * "Survival" only if the first argument is of type `_Distribution`,
-            `_Mixture`, `_Convolution`, `_Compound`, `_FrequencyDistribution`, `_MixtureData`,
+            `_Mixture`, `_Convolution`, `_Compound`, `_FrequencyDistribution`, `_DiscreteMixtureData`,
             `_ConvolutionData` or `_CompoundData`
           * "StateProfile" only if the first argument is of type `_HiddenMarkov or
             `_HiddenSemiMarkov`.

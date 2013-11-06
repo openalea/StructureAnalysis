@@ -9,8 +9,8 @@ __version__ = "$Id$"
 
 from openalea.stat_tool._stat_tool import *
 
-from openalea.stat_tool._stat_tool import _FrequencyDistribution, _MixtureData, \
-    _CompoundData,_ConvolutionData, _DiscreteDistributionData, _Mixture, \
+from openalea.stat_tool._stat_tool import _FrequencyDistribution, _DiscreteMixtureData, \
+    _CompoundData,_ConvolutionData, _DiscreteDistributionData, _DiscreteMixture, \
     _Compound, _Convolution, _DiscreteParametricModel, _Distribution, \
     _Vectors, _Cluster, _DistanceMatrix, _VectorDistance, _Regression, \
     _MultivariateMixture, _MultivariateMixtureData
@@ -183,24 +183,24 @@ algo_map = {"Averaging": 'a',
 
 
 histogram_types = [ _FrequencyDistribution, 
-                    _MixtureData, 
+                    _DiscreteMixtureData, 
                     _CompoundData, 
                     _ConvolutionData,
                     _DiscreteDistributionData]
 
 
-model_distribution_types = [ _Mixture,
+model_distribution_types = [ _DiscreteMixture,
                             _Compound, 
                             _Convolution, 
                             _DiscreteParametricModel, 
                             _Distribution]
 
 all_stat_tool_types  = [_FrequencyDistribution,
-                        _MixtureData,
+                        _DiscreteMixtureData,
                         _CompoundData,
                         _ConvolutionData,
                         _DiscreteDistributionData,
-                        _Mixture,
+                        _DiscreteMixture,
                         _MultivariateMixture,
                         _MultivariateMixtureData,
                         _Compound,

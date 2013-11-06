@@ -25,7 +25,7 @@ import error
 
 
 from openalea.stat_tool._stat_tool import _Convolution
-from openalea.stat_tool._stat_tool import _Mixture
+from openalea.stat_tool._stat_tool import _DiscreteMixture
 from openalea.stat_tool._stat_tool import _Compound
 from openalea.stat_tool._stat_tool import _ConvolutionData
 from openalea.stat_tool._stat_tool import _DiscreteParametricModel
@@ -77,7 +77,7 @@ def Convolution(*args):
     """
     error.CheckArgumentsLength(args, 1)
 
-    possible_types = [_DiscreteParametricModel, _Mixture,
+    possible_types = [_DiscreteParametricModel, _DiscreteMixture,
                       _Compound, _Convolution]
 
     # filename

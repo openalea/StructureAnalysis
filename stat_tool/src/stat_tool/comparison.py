@@ -24,7 +24,7 @@ from enums import format_type
 from openalea.stat_tool._stat_tool import \
     _CompoundData,\
     _DiscreteDistributionData,\
-    _MixtureData,\
+    _DiscreteMixtureData,\
     _ConvolutionData,\
     _Vectors,\
     _VectorDistance,\
@@ -69,13 +69,13 @@ def compare_histo(histo, *args, **kargs):
     utype = variable_type[args[-1]]
 
     error.CheckType([histo],
-                        [[_DiscreteDistributionData, _MixtureData,
+                        [[_DiscreteDistributionData, _DiscreteMixtureData,
                           _ConvolutionData, _CompoundData]])
 
     histos = args[0:-1]
     for h in histos:
         error.CheckType([h],
-                        [[_DiscreteDistributionData, _MixtureData,
+                        [[_DiscreteDistributionData, _DiscreteMixtureData,
                           _ConvolutionData, _CompoundData]])
     filename = kargs.get("Filename", None)
     format = error.ParseKargs(kargs, "Format", "ASCII",
@@ -232,7 +232,7 @@ def ComparisonTest(utype, histo1, histo2):
 
     """
     error.CheckType([histo1, histo2],
-                        [[_DiscreteDistributionData, _MixtureData,
+                        [[_DiscreteDistributionData, _DiscreteMixtureData,
                           _ConvolutionData, _CompoundData]]*2)
 
     utype = utype.lower()

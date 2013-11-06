@@ -22,14 +22,14 @@ __version__ = "$Id$"
 import interface
 import error
 
-from openalea.stat_tool._stat_tool import _Mixture
-from openalea.stat_tool._stat_tool import _MixtureData
+from openalea.stat_tool._stat_tool import _DiscreteMixture
+from openalea.stat_tool._stat_tool import _DiscreteMixtureData
 from openalea.stat_tool._stat_tool import _DiscreteParametricModel
 from openalea.stat_tool._stat_tool import _Compound
 from openalea.stat_tool._stat_tool import _Convolution
 
-__all__ = ['_Mixture',
-           '_MixtureData',
+__all__ = ['_DiscreteMixture',
+           '_DiscreteMixtureData',
            'Mixture', ]
 
 
@@ -44,7 +44,7 @@ def Mixture(*args):
       * `weight1`, `weight2`, ... (float) - weights of each component.
          These weights should sum to one (they constitute a discrete
          distribution).
-      * `dist1`, `dist2`, ... (`_DiscreteParametricModel`, `_Mixture`, `_Convolution`,
+      * `dist1`, `dist2`, ... (`_DiscreteParametricModel`, `_DiscreteMixture`, `_Convolution`,
         `_Compound`) elementary distributions (or components).
       * `filename` (string) -
 
@@ -68,12 +68,12 @@ def Mixture(*args):
     """
     error.CheckArgumentsLength(args, 1)
 
-    types = [_DiscreteParametricModel, _Mixture, _Compound, _Convolution]
+    types = [_DiscreteParametricModel, _DiscreteMixture, _Compound, _Convolution]
 
     # filename 
     if (len(args) == 1):
         error.CheckType([args[0]], [str], arg_id=[1])
-        result = _Mixture(args[0])
+        result = _DiscreteMixture(args[0])
 
     # build list of weights and distributions
     else:
@@ -91,14 +91,14 @@ def Mixture(*args):
             #dists.append(_Distribution(args[i * 2 + 1]))
             dists.append((args[i * 2 + 1]))
 
-        result = _Mixture(weights, dists)
+        result = _DiscreteMixture(weights, dists)
 
     return result
 
-# Extend _Mixture
-interface.extend_class(_Mixture, interface.StatInterface)
+# Extend _DiscreteMixture
+interface.extend_class(_DiscreteMixture, interface.StatInterface)
 
-# Extend _MixtureData
-interface.extend_class(_MixtureData, interface.StatInterface)
+# Extend _DiscreteMixtureData
+interface.extend_class(_DiscreteMixtureData, interface.StatInterface)
 
-_Mixture.__doc__ = Mixture.__doc__
+_DiscreteMixture.__doc__ = Mixture.__doc__

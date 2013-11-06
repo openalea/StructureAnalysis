@@ -20,7 +20,7 @@ import error
 
 from openalea.stat_tool._stat_tool import _Compound
 from openalea.stat_tool._stat_tool import _Convolution
-from openalea.stat_tool._stat_tool import _Mixture
+from openalea.stat_tool._stat_tool import _DiscreteMixture
 from openalea.stat_tool._stat_tool import _CompoundData
 from openalea.stat_tool._stat_tool import _DiscreteParametricModel
 
@@ -88,7 +88,7 @@ def Compound(*args, **kargs):
         error.CheckType([args[0]], [str])
         result =  _Compound(args[0])
 
-    possible_types = [_DiscreteParametricModel, _Mixture,
+    possible_types = [_DiscreteParametricModel, _DiscreteMixture,
                       _Compound, _Convolution]
 
     # build from two objects and optional threshold

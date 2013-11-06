@@ -23,7 +23,7 @@ from openalea.stat_tool._stat_tool import _Vectors
 from openalea.stat_tool._stat_tool import _DiscreteParametricModel
 from openalea.stat_tool._stat_tool import _Compound
 from openalea.stat_tool._stat_tool import _Convolution
-from openalea.stat_tool._stat_tool import _Mixture
+from openalea.stat_tool._stat_tool import _DiscreteMixture
 
 
 from enums import algo_map
@@ -126,7 +126,7 @@ def Regression(vec, utype, explanatory, response,
         # todo: test case of compound, convolution, mixture 
         else:
             error.CheckType([param],
-                            [[_DiscreteParametricModel, _Mixture,
+                            [[_DiscreteParametricModel, _DiscreteMixture,
                              _Convolution, _Compound]])
             return vec.moving_average_regression_distribution(
                             explanatory, response,
