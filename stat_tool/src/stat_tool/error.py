@@ -101,6 +101,67 @@ def CheckType(variables, types, **kargs):
                     """Expect %s argument's type to be in %s.
                     \nFound %s instead.""" % (label, mytype, type(variable)))
 
+def CheckValue(variables, values, **kargs):
+    """Check values of input list of variables
+
+    .. warning:: only list are supported.
+
+    :param variables: a list of variables to be checked
+    :param values: list of possible values
+    :param variable_pos: optional argument that provides the position of
+        each variable. Used to enhance output message. For instance, if only
+        a specific arguments (let us say the third one) has to be checked,
+        use variable_pos=[3] and in case of errorm, the error message will be
+        'the third argument is incorrect'
+
+    .. todo:: consider removing the optional argument that is hardly used.
+
+    :Examples:
+
+        >>> CheckValue([1, 'a'], [[0,1], ['a']], variable_pos=[1,2])
+        >>> CheckValue([1, 'a'], [1, ['a', 'b']], variable_pos=[1,2])
+
+    """
+    variable_pos = kargs.get("variable_pos", None)
+
+    if type(variables)!=list:
+        raise TypeError("first argument(variables) must be a list")
+
+    if type(values)!=list:
+        raise TypeError("second argument(variables) must be a list")
+
+    if type(variable_pos)!=list and variable_pos is not None:
+        raise TypeError("variable_pos must be a list")
+
+
+    n = len(variables)
+    #populate labels from 0 to N or with contents of variable_pos
+    labels = []
+    if variable_pos is None:
+        for index in range(1, n+1):
+            try:
+                labels.append(arguments_labels[index])
+            except:
+                raise KeyError("""consider adding keys in the labels dictionary:
+                 you've reached the limit""")
+    else:
+        for var in variable_pos:
+            if var in arguments_labels.keys():
+                labels.append(arguments_labels[var])
+            else:
+                labels.append("unknown position (larger than 10)")
+
+    if len(variables) != len(values):
+        raise ValueError('length of first and second arguments must be equal')
+
+
+    for variable, myval, label in zip(variables, values, labels):
+        if type(myval)!=list:
+            myval = [myval]
+        if variable not in myval:
+            raise Exception(
+                    """Expect %s argument's value to be in %s.
+                    \nFound %s instead.""" % (label, myval, variable))
 
 def CheckArgumentsLength(args, min_nargs=0, max_nargs=32):
     """Check that the number of arguments is valid
