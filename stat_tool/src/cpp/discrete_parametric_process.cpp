@@ -238,7 +238,6 @@ void DiscreteParametricProcess::remove()
     observation = NULL;
   }
 
-
   delete weight;
   weight = NULL;
   delete mixture;
