@@ -942,14 +942,12 @@ Sequences::Sequences(const Sequences &seq , int inb_sequence , int *index)
     for (i = 0;i < nb_sequence;i++) {
       blength = (index_parameter_type == POSITION ? length[i] + 1 : length[i]);
       index_parameter[i] = new int[blength];
-
       for (j = 0;j < blength;j++) {
         index_parameter[i][j] = seq.index_parameter[index[i]][j];
       }
     }
 
     build_index_parameter_frequency_distribution();
-    index_interval_computation();
   }
 
   else {
@@ -970,6 +968,10 @@ Sequences::Sequences(const Sequences &seq , int inb_sequence , int *index)
     type[i] = seq.type[i];
     marginal_distribution[i] = NULL;
     marginal_histogram[i] = NULL;
+  }
+
+  if (index_parameter) {
+    index_interval_computation();
   }
 
   int_sequence = new int**[nb_sequence];
@@ -1027,6 +1029,7 @@ Sequences::Sequences(const Sequences &seq , bool *auxiliary)
 
 {
   register int i , j , k , m;
+  int blength;
 
 
   nb_sequence = seq.nb_sequence;
@@ -1079,8 +1082,9 @@ Sequences::Sequences(const Sequences &seq , bool *auxiliary)
   if (seq.index_parameter) {
     index_parameter = new int*[nb_sequence];
     for (i = 0;i < nb_sequence;i++) {
-      index_parameter[i] = new int[length[i]];
-      for (j = 0;j < length[i];j++) {
+      blength = (index_parameter_type == POSITION ? length[i] + 1 : length[i]);
+      index_parameter[i] = new int[blength];
+      for (j = 0;j < blength;j++) {
         index_parameter[i][j] = seq.index_parameter[i][j];
       }
     }
@@ -1184,6 +1188,7 @@ void Sequences::copy(const Sequences &seq)
 
 {
   register int i , j , k;
+  int blength;
 
 
   nb_sequence = seq.nb_sequence;
@@ -1236,8 +1241,9 @@ void Sequences::copy(const Sequences &seq)
   if (seq.index_parameter) {
     index_parameter = new int*[nb_sequence];
     for (i = 0;i < nb_sequence;i++) {
-      index_parameter[i] = new int[length[i]];
-      for (j = 0;j < length[i];j++) {
+      blength = (index_parameter_type == POSITION ? length[i] + 1 : length[i]);
+      index_parameter[i] = new int[blength];
+      for (j = 0;j < blength;j++) {
         index_parameter[i][j] = seq.index_parameter[i][j];
       }
     }
@@ -1471,6 +1477,7 @@ void Sequences::add_state_variable(const Sequences &seq)
 
 {
   register int i , j , k;
+  int blength;
 
 
   nb_sequence = seq.nb_sequence;
@@ -1523,8 +1530,9 @@ void Sequences::add_state_variable(const Sequences &seq)
   if (seq.index_parameter) {
     index_parameter = new int*[nb_sequence];
     for (i = 0;i < nb_sequence;i++) {
-      index_parameter[i] = new int[length[i]];
-      for (j = 0;j < length[i];j++) {
+      blength = (index_parameter_type == POSITION ? length[i] + 1 : length[i]);
+      index_parameter[i] = new int[blength];
+      for (j = 0;j < blength;j++) {
         index_parameter[i][j] = seq.index_parameter[i][j];
       }
     }
@@ -2009,8 +2017,14 @@ Vectors* Sequences::build_vectors(bool index_variable) const
   if (index_variable) {
     if (index_parameter) {
       vec->min_value[0] = index_parameter_distribution->offset;
-      vec->max_value[0] = index_parameter_distribution->nb_value - 1;
+      if (index_parameter_type == POSITION) {
+        vec->max_value_computation(0);
+      }
+      else {
+        vec->max_value[0] = index_parameter_distribution->nb_value - 1;
+      }
     }
+
     else {
       vec->min_value[0] = 0;
       vec->max_value[0] = max_length - 1;
@@ -2031,7 +2045,12 @@ Vectors* Sequences::build_vectors(bool index_variable) const
     }
 
     else {
-      vec->marginal_histogram[i + offset] = new Histogram(*marginal_histogram[i]);
+      if (marginal_histogram[i]) {
+        vec->marginal_histogram[i + offset] = new Histogram(*marginal_histogram[i]);
+      }
+      else {
+        vec->build_marginal_histogram(i + offset);
+      }
 
       vec->mean_computation(i + offset);
       vec->variance_computation(i + offset);
