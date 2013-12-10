@@ -67,6 +67,7 @@ extern int column_width(int nb_value , const double *value , double scale = 1.);
  *
  *  arguments : identificateur, parametres de localisation et de dispersion (Gauss ou von Mises)/
  *              de forme et d'echelle (gamma), probabilite pour 0 (zero-inflated gamma),
+ *              intercept, pente et parametre de dispersion (modele lineaire)
  *              unite (loi de von Mises).
  *
  *--------------------------------------------------------------*/
@@ -179,11 +180,26 @@ ContinuousParametric* continuous_parametric_parsing(StatError &error , ifstream 
   bool status = true , lstatus;
   register int i , j;
   int ident = I_DEFAULT;
-  double location = D_INF , dispersion = D_DEFAULT , zero_probability = D_DEFAULT;
+  union {
+    double shape;
+    double location;
+    double intercept;
+  };
+  union {
+    double scale;
+    double dispersion;
+  };
+  union {
+    double zero_probability;
+    double slope;
+  };
   ContinuousParametric *dist;
 
 
   dist = NULL;
+  location = D_INF;
+  dispersion = D_DEFAULT;
+  slope = D_INF;
 
   while (buffer.readLine(in_file , false)) {
     line++;
@@ -205,14 +221,14 @@ ContinuousParametric* continuous_parametric_parsing(StatError &error , ifstream 
       // test nom de la loi
 
       if (i == 0) {
-        for (j = GAMMA;j <= VON_MISES;j++) {
+        for (j = GAMMA;j <= LINEAR_MODEL;j++) {
           if (token == STAT_continuous_distribution_word[j]) {
             ident = j;
             break;
           }
         }
 
-        if (j == VON_MISES + 1) {
+        if (j == LINEAR_MODEL + 1) {
           status = false;
           error.update(STAT_parsing[STATP_DISTRIBUTION_NAME] , line , i + 1);
         }
@@ -227,7 +243,7 @@ ContinuousParametric* continuous_parametric_parsing(StatError &error , ifstream 
           switch ((i - 1) / 3) {
 
           // 1er parametre : parametre de forme (gamma), probabilite pour 0 (zero-inflated gamma),
-          // moyenne (Gauss), direction moyenne (von Mises)
+          // moyenne (Gauss), direction moyenne (von Mises), intercept (modele lineaire)
 
           case 0 : {
             if ((ident == GAMMA) && (token != STAT_word[STATW_SHAPE])) {
@@ -249,11 +265,16 @@ ContinuousParametric* continuous_parametric_parsing(StatError &error , ifstream 
               status = false;
               error.correction_update(STAT_parsing[STATP_PARAMETER_NAME] , STAT_word[STATW_MEAN_DIRECTION] , line , i + 1);
             }
+
+            if ((ident == LINEAR_MODEL) && (token != STAT_word[STATW_INTERCEPT])) {
+              status = false;
+              error.correction_update(STAT_parsing[STATP_PARAMETER_NAME] , STAT_word[STATW_INTERCEPT] , line , i + 1);
+            }
             break;
           }
 
           // 2eme parametre : parametre d'echelle (gamma), parametre de forme (zero-inflated gamma),
-          // ecart-type (Gauss), concentration (von Mises)
+          // ecart-type (Gauss), concentration (von Mises), pente (modele lineaire)
 
           case 1 : {
             if ((ident == GAMMA) && (token != STAT_word[STATW_SCALE])) {
@@ -275,15 +296,25 @@ ContinuousParametric* continuous_parametric_parsing(StatError &error , ifstream 
               status = false;
               error.correction_update(STAT_parsing[STATP_PARAMETER_NAME] , STAT_word[STATW_CONCENTRATION] , line , i + 1);
             }
+
+            if ((ident == LINEAR_MODEL) && (token != STAT_word[STATW_SLOPE])) {
+              status = false;
+              error.correction_update(STAT_parsing[STATP_PARAMETER_NAME] , STAT_word[STATW_SLOPE] , line , i + 1);
+            }
             break;
           }
 
-          // 3eme parametre : parametre d'echelle (zeo_inflated gamma)
+          // 3eme parametre : parametre d'echelle (zeo_inflated gamma), ecart-type (modele lineaire)
 
           case 2 : {
             if ((ident == ZERO_INFLATED_GAMMA) && (token != STAT_word[STATW_SCALE])) {
               status = false;
               error.correction_update(STAT_parsing[STATP_PARAMETER_NAME] , STAT_word[STATW_SCALE] , line , i + 1);
+            }
+
+            if ((ident == LINEAR_MODEL) && (token != STAT_word[STATW_STANDARD_DEVIATION])) {
+              status = false;
+              error.correction_update(STAT_parsing[STATP_PARAMETER_NAME] , STAT_word[STATW_STANDARD_DEVIATION] , line , i + 1);
             }
             break;
           }
@@ -311,31 +342,50 @@ ContinuousParametric* continuous_parametric_parsing(StatError &error , ifstream 
           // moyenne (Gauss), direction moyenne (von Mises)
 
           case 0 : {
-            if (ident == ZERO_INFLATED_GAMMA) {
+            if (ident == GAMMA) {
+              lstatus = locale.stringToNum(token , &shape);
+              if ((lstatus) && (shape < 0.)) {
+                lstatus = false;
+              }
+            }
+ 
+            else if (ident == ZERO_INFLATED_GAMMA) {
               lstatus = locale.stringToNum(token , &zero_probability);
               if ((lstatus) && ((zero_probability < 0.) || (zero_probability > 1.))) {
                 lstatus = false;
               }
             }
 
+            else if (ident == LINEAR_MODEL) {
+              lstatus = locale.stringToNum(token , &intercept);
+            }
+
             else {
               lstatus = locale.stringToNum(token , &location);
-              if ((lstatus) && (ident == GAMMA) && (location < 0.)) {
-                lstatus = false;
-              }
             }
             break;
           }
 
           // 2eme parametre : parametre d'echelle (gamma), parametre de forme (zero-inflated gamma),
-          // ecart-type (Gauss), concentration (von Mises)
+          // ecart-type (Gauss), concentration (von Mises), pente (modele lineaire)
 
           case 1 : {
-            if (ident == ZERO_INFLATED_GAMMA) {
-              lstatus = locale.stringToNum(token , &location);
-              if ((lstatus) && (location <= 0.)) {
+            if (ident == GAMMA) {
+              lstatus = locale.stringToNum(token , &scale);
+              if ((lstatus) && (scale <= 0.)) {
                 lstatus = false;
               }
+            }
+
+            else if (ident == ZERO_INFLATED_GAMMA) {
+              lstatus = locale.stringToNum(token , &shape);
+              if ((lstatus) && (shape <= 0.)) {
+                lstatus = false;
+              }
+            }
+
+            else if (ident == LINEAR_MODEL) {
+              lstatus = locale.stringToNum(token , &slope);
             }
 
             else {
@@ -347,10 +397,17 @@ ContinuousParametric* continuous_parametric_parsing(StatError &error , ifstream 
             break;
           }
 
-          // 3eme parametre : parametre d'echelle (zero-inflated gamma)
+          // 3eme parametre : parametre d'echelle (zero-inflated gamma), ecart-type (modele lineaire)
 
           case 2 : {
             if (ident == ZERO_INFLATED_GAMMA) {
+              lstatus = locale.stringToNum(token , &scale);
+              if ((lstatus) && (scale <= 0.)) {
+                lstatus = false;
+              }
+            }
+
+            else if (ident == LINEAR_MODEL) {
               lstatus = locale.stringToNum(token , &dispersion);
               if ((lstatus) && (dispersion <= 0.)) {
                 lstatus = false;
@@ -373,8 +430,8 @@ ContinuousParametric* continuous_parametric_parsing(StatError &error , ifstream 
     }
 
     if (i > 0) {
-      if (((ident != ZERO_INFLATED_GAMMA) && (i != 7)) ||
-          ((ident == ZERO_INFLATED_GAMMA) && (i != 10))) {
+      if ((((ident == GAMMA) || (ident == GAUSSIAN) || (ident == VON_MISES)) && (i != 7)) ||
+          (((ident == ZERO_INFLATED_GAMMA) || (ident == LINEAR_MODEL)) && (i != 10))) {
         status = false;
         error.update(STAT_parsing[STATP_FORMAT] , line);
       }
@@ -413,9 +470,9 @@ ostream& ContinuousParametric::ascii_parameter_print(ostream &os) const
   switch (ident) {
 
   case GAMMA : {
-    os << STAT_word[STATW_SHAPE] << " : " << location;
-    if (location > 0.) {
-      os << "   " << STAT_word[STATW_SCALE] << " : " << dispersion;
+    os << STAT_word[STATW_SHAPE] << " : " << shape;
+    if (shape > 0.) {
+      os << "   " << STAT_word[STATW_SCALE] << " : " << scale;
     }
     break;
   }
@@ -423,8 +480,8 @@ ostream& ContinuousParametric::ascii_parameter_print(ostream &os) const
   case ZERO_INFLATED_GAMMA : {
     os << STAT_word[STATW_ZERO_PROBABILITY] << " : " << zero_probability;
     if (zero_probability < 1.) {
-      os << "   " << STAT_word[STATW_SHAPE] << " : " << location
-         << "   " << STAT_word[STATW_SCALE] << " : " << dispersion;
+      os << "   " << STAT_word[STATW_SHAPE] << " : " << shape
+         << "   " << STAT_word[STATW_SCALE] << " : " << scale;
     }
     break;
   }
@@ -438,6 +495,13 @@ ostream& ContinuousParametric::ascii_parameter_print(ostream &os) const
   case VON_MISES : {
     os << STAT_word[STATW_MEAN_DIRECTION] << " : " << location << "   "
        << STAT_word[STATW_CONCENTRATION] << " : " << dispersion;
+    break;
+  }
+
+  case LINEAR_MODEL : {
+    os << STAT_word[STATW_INTERCEPT] << " : " << intercept << "   "
+       << STAT_word[STATW_SLOPE] << " : " << slope << "   "
+       << STAT_word[STATW_STANDARD_DEVIATION] << " : " << dispersion;
     break;
   }
   }
@@ -465,18 +529,18 @@ ostream& ContinuousParametric::ascii_characteristic_print(ostream &os , bool fil
   switch (ident) {
 
   case GAMMA : {
-    double variance = location * dispersion * dispersion;
+    double variance = shape * scale * scale;
 
-    os << STAT_label[STATL_MEAN] << ": " << location * dispersion << "   "
+    os << STAT_label[STATL_MEAN] << ": " << shape * scale << "   "
        << STAT_label[STATL_VARIANCE] << ": " << variance << "   "
        << STAT_label[STATL_STANDARD_DEVIATION] << ": " << sqrt(variance) << endl;
 
-    if (location > 0.) {
+    if (shape > 0.) {
       if (file_flag) {
         os << "# ";
       }
-      os << STAT_label[STATL_SKEWNESS_COEFF] << ": " << 2 / sqrt(location) << "   "
-         << STAT_label[STATL_KURTOSIS_COEFF] << ": " << 6 / location << endl;
+      os << STAT_label[STATL_SKEWNESS_COEFF] << ": " << 2 / sqrt(shape) << "   "
+         << STAT_label[STATL_KURTOSIS_COEFF] << ": " << 6 / shape << endl;
     }
     break;
   }
@@ -489,8 +553,8 @@ ostream& ContinuousParametric::ascii_characteristic_print(ostream &os , bool fil
       variance = 0.;
     }
     else {
-      mean = (1 - zero_probability) * location * dispersion;
-      variance = (1 - zero_probability) * location * dispersion * dispersion * (1 + location) - mean * mean;
+      mean = (1 - zero_probability) * shape * scale;
+      variance = (1 - zero_probability) * shape * scale * scale * (1 + shape) - mean * mean;
     }
 
     os << STAT_label[STATL_MEAN] << ": " <<  mean << "   "
@@ -577,11 +641,11 @@ ostream& ContinuousParametric::ascii_print(ostream &os , bool file_flag ,
 
     if (ident == GAMMA) {
       min_value = 0.;
-      if (location == 0.) {
+      if (shape == 0.) {
         max_value = 0.;
       }
       else {
-        max_value = location * dispersion;
+        max_value = shape * scale;
       }
     }
 
@@ -591,7 +655,7 @@ ostream& ContinuousParametric::ascii_print(ostream &os , bool file_flag ,
         max_value = 0.;
       }
       else {
-        max_value = location * dispersion;
+        max_value = shape * scale;
       }
     }
 
@@ -661,7 +725,7 @@ ostream& ContinuousParametric::ascii_print(ostream &os , bool file_flag ,
     switch (ident) {
 
     case GAMMA : {
-      if (location == 0.) {
+      if (shape == 0.) {
         dist_cumul = new double[1];
         frequency = new double[1];
 
@@ -670,7 +734,7 @@ ostream& ContinuousParametric::ascii_print(ostream &os , bool file_flag ,
       }
 
       else {
-        gamma_distribution<double> dist(location , dispersion);
+        gamma_distribution<double> dist(shape , scale);
 
         value = quantile(complement(dist , GAMMA_TAIL));
         while (max_value < value) {
@@ -707,7 +771,7 @@ ostream& ContinuousParametric::ascii_print(ostream &os , bool file_flag ,
       }
 
       else {
-        gamma_distribution<double> dist(location , dispersion);
+        gamma_distribution<double> dist(shape , scale);
 
         value = quantile(complement(dist , GAMMA_TAIL));
         while (max_value < value) {
@@ -896,9 +960,9 @@ ostream& ContinuousParametric::spreadsheet_parameter_print(ostream &os) const
   switch (ident) {
 
   case GAMMA : {
-    os << STAT_word[STATW_SHAPE] << "\t" << location;
-    if (location > 0.) {
-      os << "\t" << STAT_word[STATW_SCALE] << "\t" << dispersion;
+    os << STAT_word[STATW_SHAPE] << "\t" << shape;
+    if (shape > 0.) {
+      os << "\t" << STAT_word[STATW_SCALE] << "\t" << scale;
     }
     break;
   }
@@ -906,8 +970,8 @@ ostream& ContinuousParametric::spreadsheet_parameter_print(ostream &os) const
   case ZERO_INFLATED_GAMMA : {
     os << STAT_word[STATW_ZERO_PROBABILITY] << "\t" << zero_probability;
     if (zero_probability < 1.) {
-      os << "\t" << STAT_word[STATW_SHAPE] << "\t" << location
-         << "\t" << STAT_word[STATW_SCALE] << "\t" << dispersion;
+      os << "\t" << STAT_word[STATW_SHAPE] << "\t" << shape
+         << "\t" << STAT_word[STATW_SCALE] << "\t" << scale;
     }
     break;
   }
@@ -921,6 +985,13 @@ ostream& ContinuousParametric::spreadsheet_parameter_print(ostream &os) const
   case VON_MISES : {
     os << STAT_word[STATW_MEAN_DIRECTION] << "\t" << location << "\t"
        << STAT_word[STATW_CONCENTRATION] << "\t" << dispersion;
+    break;
+  }
+
+  case LINEAR_MODEL : {
+    os << STAT_word[STATW_INTERCEPT] << "\t" << intercept << "\t"
+       << STAT_word[STATW_SLOPE] << "\t" << slope << "\t"
+       << STAT_word[STATW_STANDARD_DEVIATION] << "\t" << dispersion;
     break;
   }
   }
@@ -942,15 +1013,15 @@ ostream& ContinuousParametric::spreadsheet_characteristic_print(ostream &os) con
   switch (ident) {
 
   case GAMMA : {
-    double variance = location * dispersion * dispersion;
+    double variance = shape * scale * scale;
 
-    os << STAT_label[STATL_MEAN] << "\t" << location * dispersion << "\t"
+    os << STAT_label[STATL_MEAN] << "\t" << shape * scale << "\t"
        << STAT_label[STATL_VARIANCE] << "\t" << variance << "\t"
        << STAT_label[STATL_STANDARD_DEVIATION] << "\t" << sqrt(variance) << endl;
 
-    if (location > 0.) {
-      os << STAT_label[STATL_SKEWNESS_COEFF] << "\t" << 2 / sqrt(location) << "\t"
-         << STAT_label[STATL_KURTOSIS_COEFF] << "\t" << 6 / location << endl;
+    if (shape > 0.) {
+      os << STAT_label[STATL_SKEWNESS_COEFF] << "\t" << 2 / sqrt(shape) << "\t"
+         << STAT_label[STATL_KURTOSIS_COEFF] << "\t" << 6 / shape << endl;
     }
     break;
   }
@@ -963,8 +1034,8 @@ ostream& ContinuousParametric::spreadsheet_characteristic_print(ostream &os) con
       variance = 0.;
     }
     else {
-      mean = (1 - zero_probability) * location * dispersion;
-      variance = (1 - zero_probability) * location * dispersion * dispersion * (1 + location) - mean * mean;
+      mean = (1 - zero_probability) * shape * scale;
+      variance = (1 - zero_probability) * shape * scale * scale * (1 + shape) - mean * mean;
     }
 
     os << STAT_label[STATL_MEAN] << "\t" <<  mean << "\t"
@@ -1036,11 +1107,11 @@ ostream& ContinuousParametric::spreadsheet_print(ostream &os , bool cumul_flag ,
 
     if (ident == GAMMA) {
       min_value = 0.;
-      if (location == 0.) {
+      if (shape == 0.) {
         max_value = 0.;
       }
       else {
-        max_value = location * dispersion;
+        max_value = shape * scale;
       }
     }
 
@@ -1050,7 +1121,7 @@ ostream& ContinuousParametric::spreadsheet_print(ostream &os , bool cumul_flag ,
         max_value = 0.;
       }
       else {
-        max_value = location * dispersion;
+        max_value = shape * scale;
       }
     }
 
@@ -1120,7 +1191,7 @@ ostream& ContinuousParametric::spreadsheet_print(ostream &os , bool cumul_flag ,
     switch (ident) {
 
     case GAMMA : {
-      if (location == 0.) {
+      if (shape == 0.) {
         dist_cumul = new double[1];
         frequency = new double[1];
 
@@ -1129,7 +1200,7 @@ ostream& ContinuousParametric::spreadsheet_print(ostream &os , bool cumul_flag ,
       }
 
       else {
-        gamma_distribution<double> dist(location , dispersion);
+        gamma_distribution<double> dist(shape , scale);
 
         value = quantile(complement(dist , GAMMA_TAIL));
         while (max_value < value) {
@@ -1166,7 +1237,7 @@ ostream& ContinuousParametric::spreadsheet_print(ostream &os , bool cumul_flag ,
       }
 
       else {
-        gamma_distribution<double> dist(location , dispersion);
+        gamma_distribution<double> dist(shape , scale);
 
         value = quantile(complement(dist , GAMMA_TAIL));
         while (max_value < value) {
@@ -1309,17 +1380,23 @@ ostream& ContinuousParametric::plot_title_print(ostream &os) const
 {
   os << STAT_continuous_distribution_letter[ident] << "(";
 
-  if (zero_probability != D_DEFAULT) {
-    os << zero_probability << ", ";
+  if (ident == GAMMA) {
+    os << shape;
+    if (shape > 0.) {
+      os << ", " << scale;
+    }
   }
-
-  if ((ident != ZERO_INFLATED_GAMMA) || ((ident == ZERO_INFLATED_GAMMA) && (zero_probability < 1.))) {
-    if ((location != D_INF) && (location != D_DEFAULT)) {
-      os << location;
+  else if (ident == ZERO_INFLATED_GAMMA) {
+    os << zero_probability;
+    if (zero_probability < 1.) {
+      os << ", " << shape << ", " << scale;
     }
-    if (dispersion != D_DEFAULT) {
-      os << ", " << dispersion;
-    }
+  }
+  else if (ident == LINEAR_MODEL) {
+    os << intercept << ", " << slope << ", " << dispersion;
+  }
+  else {
+    os << location << ", " << dispersion;
   }
   os << ")";
 
@@ -1365,7 +1442,7 @@ bool ContinuousParametric::plot_print(const char *path , const Histogram *histo1
     case GAMMA : {
       min_value = 0.;
 
-      if (location == 0.) {
+      if (shape == 0.) {
         max_value = 0.;
         frequency = new double[1];
         frequency[0] = scale;
@@ -1373,7 +1450,7 @@ bool ContinuousParametric::plot_print(const char *path , const Histogram *histo1
       }
 
       else {
-        gamma_distribution<double> dist(location , dispersion);
+        gamma_distribution<double> dist(shape , scale);
 
         max_value = quantile(complement(dist , GAMMA_TAIL));
         if ((histo1) && (histo1->max_value + histo1->step > max_value)) {
@@ -1421,7 +1498,7 @@ bool ContinuousParametric::plot_print(const char *path , const Histogram *histo1
       }
 
       else {
-        gamma_distribution<double> dist(location , dispersion);
+        gamma_distribution<double> dist(shape , scale);
 
         max_value = quantile(complement(dist , GAMMA_TAIL));
         if ((histo1) && (histo1->max_value + histo1->step > max_value)) {
@@ -1663,7 +1740,7 @@ void ContinuousParametric::plotable_write(SinglePlot &plot , const Histogram *hi
   case GAMMA : {
     min_value = 0.;
 
-    if (location == 0.) {
+    if (shape == 0.) {
       max_value = 0.;
       frequency = new double[1];
       frequency[0] = scale;
@@ -1671,7 +1748,7 @@ void ContinuousParametric::plotable_write(SinglePlot &plot , const Histogram *hi
     }
 
     else {
-      gamma_distribution<double> dist(location , dispersion);
+      gamma_distribution<double> dist(shape , scale);
 
       max_value = quantile(complement(dist , GAMMA_TAIL));
       if ((histo1) && (histo1->max_value + histo1->step > max_value)) {
@@ -1720,7 +1797,7 @@ void ContinuousParametric::plotable_write(SinglePlot &plot , const Histogram *hi
     }
 
     else {
-      gamma_distribution<double> dist(location , dispersion);
+      gamma_distribution<double> dist(shape , scale);
 
       max_value = quantile(complement(dist , GAMMA_TAIL));
       if ((histo1) && (histo1->max_value + histo1->step > max_value)) {
@@ -1920,7 +1997,7 @@ int ContinuousParametric::nb_parameter_computation() const
   switch (ident) {
 
   case GAMMA : {
-    if (location == 0.) {
+    if (shape == 0.) {
       nb_parameter = 1;
     }
     else {
@@ -1944,6 +2021,11 @@ int ContinuousParametric::nb_parameter_computation() const
 
   case GAUSSIAN : {
     nb_parameter = 2;
+    break;
+  }
+
+  case LINEAR_MODEL : {
+    nb_parameter = 3;
     break;
   }
 
@@ -2037,7 +2119,7 @@ double ContinuousParametric::mass_computation(double inf , double sup) const
       sup = inf;
     }
 
-    if (location == 0.) {
+    if (shape == 0.) {
       if (inf == 0.) {
         mass = 1.;
       }
@@ -2047,14 +2129,14 @@ double ContinuousParametric::mass_computation(double inf , double sup) const
     }
 
     else {
-      gamma_distribution<double> dist(location , dispersion);
+      gamma_distribution<double> dist(shape , scale);
 
       if (inf == sup) {
         mass = pdf(dist , MAX(inf , 1.e-12));  // bug boost C++
 
 #       ifdef DEBUG
-        if ((location == 1.) && (dispersion < 0.1) && (inf == 0.)) {
-          cout << "TEST: " << dispersion << ", " << mass << endl;
+        if ((shape == 1.) && (scale < 0.1) && (inf == 0.)) {
+          cout << "TEST: " << scale << ", " << mass << endl;
         }
 #       endif
 
@@ -2092,7 +2174,7 @@ double ContinuousParametric::mass_computation(double inf , double sup) const
     }
 
     else {
-      gamma_distribution<double> dist(location , dispersion);
+      gamma_distribution<double> dist(shape , scale);
 
       if (inf == 0.) {
         mass = zero_probability;
@@ -2110,7 +2192,8 @@ double ContinuousParametric::mass_computation(double inf , double sup) const
       if (mass > 1.) {
 
 #       ifdef MESSAGE
-        cout << "WARNING: " << inf << " " << sup << " " << mass << " | " << zero_probability << " " << location << " " << dispersion << endl;
+        cout << "WARNING: " << inf << " " << sup << " " << mass << " | "
+             << zero_probability << " " << shape << " " << scale << endl;
 #       endif
  
       }
@@ -2146,6 +2229,18 @@ double ContinuousParametric::mass_computation(double inf , double sup) const
 
     else {
       mass = von_mises_mass_computation(inf , sup);
+    }
+    break;
+  }
+
+  case LINEAR_MODEL : {
+    normal dist(0. , dispersion);
+
+    if (inf == sup) {
+      mass = pdf(dist , inf);
+    }
+    else {
+      mass = cdf(dist , sup) - cdf(dist , inf);
     }
     break;
   }
@@ -2263,14 +2358,14 @@ double** ContinuousParametric::q_q_plot_computation(int nb_value ,
   switch (ident) {
 
   case GAMMA : {
-    if (location == 0.) {
+    if (shape == 0.) {
       for (i = 0;i < nb_value - 1;i++) {
         qqplot[1][i] = 0.;
       }
     }
 
     else {
-      gamma_distribution<double> dist(location , dispersion);
+      gamma_distribution<double> dist(shape , scale);
 
       for (i = 0;i < nb_value - 1;i++) {
         qqplot[1][i] = quantile(dist , empirical_cdf[1][i]);
@@ -2287,7 +2382,7 @@ double** ContinuousParametric::q_q_plot_computation(int nb_value ,
     }
 
     else {
-      gamma_distribution<double> dist(location , dispersion);
+      gamma_distribution<double> dist(shape , scale);
 
       i = 0;
       while (empirical_cdf[1][i] <= zero_probability) {
@@ -2385,8 +2480,8 @@ double ContinuousParametric::sup_norm_distance_computation(ContinuousParametric 
   switch (ident) {
 
   case GAMMA : {
-    if ((location == 0.) || (dist.location == 0.)) {
-      if ((location == 0.) && (dist.location == 0.)) {
+    if ((shape == 0.) || (dist.shape == 0.)) {
+      if ((shape == 0.) && (dist.shape == 0.)) {
         distance = 0.;
       }
       else {
@@ -2395,7 +2490,7 @@ double ContinuousParametric::sup_norm_distance_computation(ContinuousParametric 
     }
 
     else {
-      gamma_distribution<double> dist1(location , dispersion) , dist2(dist.location , dist.dispersion);
+      gamma_distribution<double> dist1(shape , scale) , dist2(dist.shape , dist.scale);
 
       step = MIN(quantile(complement(dist1 , GAMMA_TAIL)) , quantile(complement(dist2 , GAMMA_TAIL))) / GAMMA_NB_STEP;
       distance = 0.;
@@ -2465,7 +2560,7 @@ double ContinuousParametric::sup_norm_distance_computation(ContinuousParametric 
     }
 
     else {
-      gamma_distribution<double> dist1(location , dispersion) , dist2(dist.location , dist.dispersion);
+      gamma_distribution<double> dist1(shape , scale) , dist2(dist.shape , dist.scale);
 
       step = MIN(quantile(complement(dist1 , GAMMA_TAIL)) , quantile(complement(dist2 , GAMMA_TAIL))) / GAMMA_NB_STEP;
       value = 0.;
@@ -2772,12 +2867,12 @@ double ContinuousParametric::simulation()
   switch (ident) {
 
   case GAMMA : {
-    if (location == 0.) {
+    if (shape == 0.) {
       value = 0.;
     }
 
     else {
-      gamma_distribution<double> dist(location , dispersion);
+      gamma_distribution<double> dist(shape , scale);
 
       value = quantile(dist , limit);
     }
@@ -2790,7 +2885,7 @@ double ContinuousParametric::simulation()
     }
 
     else if (zero_probability < 1.) {
-      gamma_distribution<double> dist(location , dispersion);
+      gamma_distribution<double> dist(shape , scale);
 
       value = quantile(dist , (limit - zero_probability) / (1. - zero_probability));
     }
@@ -2887,6 +2982,13 @@ double ContinuousParametric::simulation()
       break;
     }
     }
+    break;
+  }
+
+  case LINEAR_MODEL : {
+    normal dist(0. , dispersion);
+
+    value = quantile(dist , limit);
     break;
   }
   }
