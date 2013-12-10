@@ -103,6 +103,8 @@ enum {
   MEAN_CHANGE ,
   VARIANCE_CHANGE ,
   MEAN_VARIANCE_CHANGE ,
+  LINEAR_MODEL_CHANGE ,
+  INTERCEPT_SLOPE_CHANGE ,
   BAYESIAN_POISSON_CHANGE ,
   BAYESIAN_GAUSSIAN_CHANGE
 };
@@ -475,18 +477,18 @@ protected :
 
     std::ostream& profile_ascii_print(std::ostream &os , int index , int nb_segment ,
                                       double **profiles , const char *label ,
-                                      double **mean = NULL , long double **change_point = NULL ,
+                                      double **piecewise_function = NULL , long double **change_point = NULL ,
                                       long double **begin_conditonal_entropy = NULL ,
                                       long double **end_conditional_entropy = NULL ,
                                       long double **change_point_entropy = NULL) const;
     std::ostream& profile_spreadsheet_print(std::ostream &os , int index , int nb_segment ,
                                             double **profiles , const char *label ,
-                                            double **mean = NULL , long double **change_point = NULL ,
+                                            double **piecewise_function = NULL , long double **change_point = NULL ,
                                             long double **begin_conditonal_entropy = NULL ,
                                             long double **end_conditional_entropy = NULL ,
                                             long double **change_point_entropy = NULL) const;
     std::ostream& profile_plot_print(std::ostream &os , int index , int nb_segment ,
-                                     double **profiles , double **mean = NULL ,
+                                     double **profiles , double **piecewise_function = NULL ,
                                      long double **change_point = NULL ,
                                      long double **begin_conditonal_entropy = NULL ,
                                      long double **end_conditional_entropy = NULL ,
@@ -923,6 +925,9 @@ protected :
     template <typename Type>
     void von_mises_estimation(Type ***state_sequence_count , int variable ,
                               ContinuousParametricProcess *process , bool common_concentration) const;
+    template <typename Type>
+    void  linear_model_estimation(Type ***state_sequence_count , int variable ,
+                                  ContinuousParametricProcess *process) const;
 
     std::ostream& likelihood_write(std::ostream &os , int nb_model , double **likelihood ,
                                    const char *label , bool exhaustive = false ,
@@ -1146,7 +1151,7 @@ public :
 
 
 
-#include "continuous_parametric_estimation.hpp"
+#include "continuous_parametric_sequence_estimation.hpp"
 
 
 
