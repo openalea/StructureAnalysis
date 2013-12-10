@@ -82,7 +82,7 @@ double HiddenSemiMarkov::likelihood_computation(const MarkovianSequences &seq ,
 {
   register int i , j , k , m;
   int nb_value , length , **pioutput;
-  double likelihood = 0. , seq_likelihood , obs_product , **observation ,
+  double likelihood = 0. , seq_likelihood , obs_product , residual , **observation ,
          *norm , *state_norm , *forward1 , **state_in , **proutput;
   DiscreteParametric *occupancy;
 
@@ -167,7 +167,7 @@ double HiddenSemiMarkov::likelihood_computation(const MarkovianSequences &seq ,
 
               else {
                 if (((continuous_parametric_process[m]->ident == GAMMA) ||
-                     (continuous_parametric_process[m]->ident == ZERO_INFLATED_GAMMA)) && (seq.min_value[m] < seq.min_interval[m] / 2)) {
+                    (continuous_parametric_process[m]->ident == ZERO_INFLATED_GAMMA)) && (seq.min_value[m] < seq.min_interval[m] / 2)) {
                   switch (seq.type[m]) {
                   case INT_VALUE :
                     observation[j][k] *= continuous_parametric_process[m]->observation[k]->mass_computation(*pioutput[m] , *pioutput[m] + seq.min_interval[m]);
@@ -176,6 +176,23 @@ double HiddenSemiMarkov::likelihood_computation(const MarkovianSequences &seq ,
                     observation[j][k] *= continuous_parametric_process[m]->observation[k]->mass_computation(*proutput[m] , *proutput[m] + seq.min_interval[m]);
                     break;
                   }
+                }
+
+                else if (continuous_parametric_process[m]->ident == LINEAR_MODEL) {
+                  switch (seq.type[m]) {
+                  case INT_VALUE :
+                    residual = *pioutput[m] - (continuous_parametric_process[m]->observation[k]->intercept +
+                                continuous_parametric_process[m]->observation[k]->slope *
+                                (seq.index_parameter_type == IMPLICIT_TYPE ? j : seq.index_parameter[i][j]));
+                    break;
+                  case REAL_VALUE :
+                    residual = *proutput[m] - (continuous_parametric_process[m]->observation[k]->intercept +
+                                continuous_parametric_process[m]->observation[k]->slope *
+                                (seq.index_parameter_type == IMPLICIT_TYPE ? j : seq.index_parameter[i][j]));
+                    break;
+                  }
+
+                  observation[j][k] *= continuous_parametric_process[m]->observation[k]->mass_computation(residual - seq.min_interval[m] / 2 , residual + seq.min_interval[m] / 2);
                 }
 
                 else {
@@ -387,8 +404,8 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
   int max_nb_value , iter , nb_likelihood_decrease , offset , nb_value , *occupancy_nb_value ,
       *censored_occupancy_nb_value , **pioutput;
   double likelihood = D_INF , previous_likelihood , occupancy_likelihood , observation_likelihood ,
-         min_likelihood , obs_product , buff , sum , occupancy_mean , **observation , *norm ,
-         *state_norm , **forward , **state_in , *backward , **backward1 , *auxiliary ,
+         min_likelihood , obs_product , residual , buff , sum , occupancy_mean , **observation ,
+         *norm , *state_norm , **forward , **state_in , *backward , **backward1 , *auxiliary ,
          *ofrequency , *lfrequency , *occupancy_survivor , *censored_occupancy_survivor ,
          ***state_sequence_count , diff , variance , **mean_direction , global_mean_direction ,
          concentration , **proutput;
@@ -630,7 +647,8 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
 
     observation_reestim = new Reestimation<double>**[hsmarkov->nb_output_process];
     for (i = 0;i < hsmarkov->nb_output_process;i++) {
-      if (marginal_distribution[i]) {
+      if ((marginal_distribution[i]) && ((!(hsmarkov->continuous_parametric_process[i])) ||
+           (hsmarkov->continuous_parametric_process[i]->ident != LINEAR_MODEL))) {
         observation_reestim[i] = new Reestimation<double>*[hsmarkov->nb_state];
         for (j = 0;j < hsmarkov->nb_state;j++) {
           observation_reestim[i][j] = new Reestimation<double>(marginal_distribution[i]->nb_value);
@@ -658,7 +676,8 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
     }
 
     for (i = 0;i < hsmarkov->nb_output_process;i++) {
-      if (!marginal_distribution[i]) {
+      if ((!marginal_distribution[i]) || ((hsmarkov->continuous_parametric_process[i]) &&
+           (hsmarkov->continuous_parametric_process[i]->ident == LINEAR_MODEL))) {
         break;
       }
     }
@@ -797,7 +816,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
 
               else {
                 if (((hsmarkov->continuous_parametric_process[m]->ident == GAMMA) ||
-                     (hsmarkov->continuous_parametric_process[m]->ident == ZERO_INFLATED_GAMMA)) && (min_value[m] < min_interval[m] / 2)) {
+                    (hsmarkov->continuous_parametric_process[m]->ident == ZERO_INFLATED_GAMMA)) && (min_value[m] < min_interval[m] / 2)) {
                   switch (type[m]) {
                   case INT_VALUE :
                     observation[j][k] *= hsmarkov->continuous_parametric_process[m]->observation[k]->mass_computation(*pioutput[m] , *pioutput[m] + min_interval[m]);
@@ -806,6 +825,23 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
                     observation[j][k] *= hsmarkov->continuous_parametric_process[m]->observation[k]->mass_computation(*proutput[m] , *proutput[m] + min_interval[m]);
                     break;
                   }
+                }
+
+                else if (hsmarkov->continuous_parametric_process[m]->ident == LINEAR_MODEL) {
+                  switch (type[m]) {
+                  case INT_VALUE :
+                    residual = *pioutput[m] - (hsmarkov->continuous_parametric_process[m]->observation[k]->intercept +
+                                hsmarkov->continuous_parametric_process[m]->observation[k]->slope *
+                                (index_parameter_type == IMPLICIT_TYPE ? j : index_parameter[i][j]));
+                    break;
+                  case REAL_VALUE :
+                    residual = *proutput[m] - (hsmarkov->continuous_parametric_process[m]->observation[k]->intercept +
+                                hsmarkov->continuous_parametric_process[m]->observation[k]->slope *
+                                (index_parameter_type == IMPLICIT_TYPE ? j : index_parameter[i][j]));
+                    break;
+                  }
+
+                  observation[j][k] *= hsmarkov->continuous_parametric_process[m]->observation[k]->mass_computation(residual - min_interval[m] / 2 , residual + min_interval[m] / 2);
                 }
 
                 else {
@@ -1598,6 +1634,10 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
               von_mises_estimation(state_sequence_count , i ,
                                    hsmarkov->continuous_parametric_process[i] , common_dispersion);
               break;
+            case LINEAR_MODEL :
+              linear_model_estimation(state_sequence_count , i ,
+                                      hsmarkov->continuous_parametric_process[i]);
+              break;
             }
           }
         }
@@ -1841,7 +1881,8 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
         weight = NULL;
 
         for (i = 0;i < hsmarkov->nb_output_process;i++) {
-          if ((hsmarkov->discrete_parametric_process[i]) || (hsmarkov->continuous_parametric_process[i])) {
+          if ((hsmarkov->discrete_parametric_process[i]) || ((hsmarkov->continuous_parametric_process[i]) &&
+               (hsmarkov->continuous_parametric_process[i]->ident != LINEAR_MODEL))) {
             weight = seq->weight_computation();
             break;
           }
@@ -1859,7 +1900,8 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
             hsmarkov->discrete_parametric_process[i]->restoration_mixture = hsmarkov->discrete_parametric_process[i]->mixture_computation(hsmarkov->discrete_parametric_process[i]->restoration_weight);
           }
 
-          else if (hsmarkov->continuous_parametric_process[i]) {
+          else if ((hsmarkov->continuous_parametric_process[i]) &&
+                   (hsmarkov->continuous_parametric_process[i]->ident != LINEAR_MODEL)) {
             hsmarkov->continuous_parametric_process[i]->restoration_weight = new Distribution(*weight);
           }
         }
@@ -1933,7 +1975,8 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
       weight = NULL;
 
       for (i = 0;i < hsmarkov->nb_output_process;i++) {
-        if ((hsmarkov->discrete_parametric_process[i]) || (hsmarkov->continuous_parametric_process[i])) {
+        if ((hsmarkov->discrete_parametric_process[i]) || ((hsmarkov->continuous_parametric_process[i]) &&
+             (hsmarkov->continuous_parametric_process[i]->ident != LINEAR_MODEL))) {
           switch (hsmarkov->type) {
           case 'o' :
             weight = hsmarkov->state_process->weight_computation();
@@ -1952,7 +1995,8 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
           hsmarkov->discrete_parametric_process[i]->mixture = hsmarkov->discrete_parametric_process[i]->mixture_computation(hsmarkov->discrete_parametric_process[i]->weight);
         }
 
-        else if (hsmarkov->continuous_parametric_process[i]) {
+        else if ((hsmarkov->continuous_parametric_process[i]) &&
+                 (hsmarkov->continuous_parametric_process[i]->ident != LINEAR_MODEL)) {
           hsmarkov->continuous_parametric_process[i]->weight = new Distribution(*weight);
         }
       }
@@ -2170,7 +2214,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
   int max_nb_value , iter , nb_state_sequence , state_occupancy , nb_likelihood_decrease ,
       *occupancy_nb_value , *state_seq , *pstate , ***state_sequence_count , nb_element , **pioutput;
   double likelihood = D_INF , previous_likelihood , occupancy_likelihood , observation_likelihood ,
-         min_likelihood , obs_product , **observation , *norm , *state_norm , **forward ,
+         min_likelihood , obs_product , residual , **observation , *norm , *state_norm , **forward ,
          **state_in , *backward , *cumul_backward , *occupancy_survivor , *censored_occupancy_survivor ,
          diff , variance , **mean_direction , concentration , global_mean_direction , **proutput;
   Distribution *weight;
@@ -2385,7 +2429,8 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
 
     observation_reestim = new Reestimation<double>**[hsmarkov->nb_output_process];
     for (i = 0;i < hsmarkov->nb_output_process;i++) {
-      if (marginal_distribution[i]) {
+      if ((marginal_distribution[i]) && ((!(hsmarkov->continuous_parametric_process[i])) ||
+           (hsmarkov->continuous_parametric_process[i]->ident != LINEAR_MODEL))) {
         observation_reestim[i] = new Reestimation<double>*[hsmarkov->nb_state];
         for (j = 0;j < hsmarkov->nb_state;j++) {
           observation_reestim[i][j] = new Reestimation<double>(marginal_distribution[i]->nb_value);
@@ -2398,7 +2443,8 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
     }
 
     for (i = 0;i < hsmarkov->nb_output_process;i++) {
-      if (!marginal_distribution[i]) {
+      if ((!marginal_distribution[i]) || ((hsmarkov->continuous_parametric_process[i]) &&
+           (hsmarkov->continuous_parametric_process[i]->ident == LINEAR_MODEL))) {
         break;
       }
     }
@@ -2537,7 +2583,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
 
               else {
                 if (((hsmarkov->continuous_parametric_process[m]->ident == GAMMA) ||
-                     (hsmarkov->continuous_parametric_process[m]->ident == ZERO_INFLATED_GAMMA)) && (min_value[m] < min_interval[m] / 2)) {
+                    (hsmarkov->continuous_parametric_process[m]->ident == ZERO_INFLATED_GAMMA)) && (min_value[m] < min_interval[m] / 2)) {
                   switch (type[m]) {
                   case INT_VALUE :
                     observation[j][k] *= hsmarkov->continuous_parametric_process[m]->observation[k]->mass_computation(*pioutput[m] , *pioutput[m] + min_interval[m]);
@@ -2546,6 +2592,23 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
                     observation[j][k] *= hsmarkov->continuous_parametric_process[m]->observation[k]->mass_computation(*proutput[m] , *proutput[m] + min_interval[m]);
                     break;
                   }
+                }
+
+                else if (hsmarkov->continuous_parametric_process[m]->ident == LINEAR_MODEL) {
+                  switch (type[m]) {
+                  case INT_VALUE :
+                    residual = *pioutput[m] - (hsmarkov->continuous_parametric_process[m]->observation[k]->intercept +
+                                hsmarkov->continuous_parametric_process[m]->observation[k]->slope *
+                                (index_parameter_type == IMPLICIT_TYPE ? j : index_parameter[i][j]));
+                    break;
+                  case REAL_VALUE :
+                    residual = *proutput[m] - (hsmarkov->continuous_parametric_process[m]->observation[k]->intercept +
+                                hsmarkov->continuous_parametric_process[m]->observation[k]->slope *
+                                (index_parameter_type == IMPLICIT_TYPE ? j : index_parameter[i][j]));
+                    break;
+                  }
+
+                  observation[j][k] *= hsmarkov->continuous_parametric_process[m]->observation[k]->mass_computation(residual - min_interval[m] / 2 , residual + min_interval[m] / 2);
                 }
 
                 else {
@@ -3224,6 +3287,10 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
               von_mises_estimation(state_sequence_count , i ,
                                    hsmarkov->continuous_parametric_process[i] , common_dispersion);
               break;
+            case LINEAR_MODEL :
+              linear_model_estimation(state_sequence_count , i ,
+                                      hsmarkov->continuous_parametric_process[i]);
+              break;
             }
           }
         }
@@ -3451,7 +3518,8 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
         weight = NULL;
 
         for (i = 0;i < hsmarkov->nb_output_process;i++) {
-          if ((hsmarkov->discrete_parametric_process[i]) || (hsmarkov->continuous_parametric_process[i])) {
+          if ((hsmarkov->discrete_parametric_process[i]) || ((hsmarkov->continuous_parametric_process[i]) &&
+              (hsmarkov->continuous_parametric_process[i]->ident != LINEAR_MODEL))) {
             weight = seq->weight_computation();
             break;
           }
@@ -3467,7 +3535,8 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
             hsmarkov->discrete_parametric_process[i]->restoration_mixture = hsmarkov->discrete_parametric_process[i]->mixture_computation(hsmarkov->discrete_parametric_process[i]->restoration_weight);
           }
 
-          else if (hsmarkov->continuous_parametric_process[i]) {
+          else if ((hsmarkov->continuous_parametric_process[i]) &&
+                   (hsmarkov->continuous_parametric_process[i]->ident != LINEAR_MODEL)) {
             hsmarkov->continuous_parametric_process[i]->restoration_weight = new Distribution(*weight);
           }
         }
@@ -3541,7 +3610,8 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
       weight = NULL;
 
       for (i = 0;i < hsmarkov->nb_output_process;i++) {
-        if ((hsmarkov->discrete_parametric_process[i]) || (hsmarkov->continuous_parametric_process[i])) {
+        if ((hsmarkov->discrete_parametric_process[i]) || ((hsmarkov->continuous_parametric_process[i]) &&
+             (hsmarkov->continuous_parametric_process[i]->ident != LINEAR_MODEL))) {
           switch (hsmarkov->type) {
           case 'o' :
             weight = hsmarkov->state_process->weight_computation();
