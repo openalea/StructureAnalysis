@@ -447,9 +447,9 @@ ostream& ContinuousParametricProcess::ascii_print(ostream &os , Histogram **obse
       gamma_dist = new gamma_distribution<double>*[nb_state];
 
       for (i = 0;i < nb_state;i++) {
-        if (((ident == GAMMA) && (observation[i]->location > 0.)) ||
+        if (((ident == GAMMA) && (observation[i]->shape > 0.)) ||
             ((ident == ZERO_INFLATED_GAMMA) && (observation[i]->zero_probability < 1.))) {
-          gamma_dist[i] = new gamma_distribution<double>(observation[i]->location , observation[i]->dispersion);
+          gamma_dist[i] = new gamma_distribution<double>(observation[i]->shape , observation[i]->scale);
 
           value = quantile(complement(*gamma_dist[i] , GAMMA_TAIL));
           while (max_value < value) {
@@ -509,7 +509,7 @@ ostream& ContinuousParametricProcess::ascii_print(ostream &os , Histogram **obse
 
     case GAMMA : {
       for (i = 0;i < nb_state;i++) {
-        if (observation[i]->location == 0.) {
+        if (observation[i]->shape == 0.) {
           cumul[i][0] = 1.;
           frequency[i][0] = cumul[i][0];
 
@@ -1238,9 +1238,9 @@ ostream& ContinuousParametricProcess::spreadsheet_print(ostream &os , Histogram 
       gamma_dist = new gamma_distribution<double>*[nb_state];
 
       for (i = 0;i < nb_state;i++) {
-        if (((ident == GAMMA) && (observation[i]->location > 0.)) ||
+        if (((ident == GAMMA) && (observation[i]->shape > 0.)) ||
             ((ident == ZERO_INFLATED_GAMMA) && (observation[i]->zero_probability < 1.))) {
-          gamma_dist[i] = new gamma_distribution<double>(observation[i]->location , observation[i]->dispersion);
+          gamma_dist[i] = new gamma_distribution<double>(observation[i]->shape , observation[i]->scale);
 
           value = quantile(complement(*gamma_dist[i] , GAMMA_TAIL));
           while (max_value < value) {
@@ -1301,7 +1301,7 @@ ostream& ContinuousParametricProcess::spreadsheet_print(ostream &os , Histogram 
     switch (ident) {
 
     case GAMMA : {
-      if (observation[i]->location == 0.) {
+      if (observation[i]->shape == 0.) {
         cumul[i][0] = 1.;
         frequency[i][0] = cumul[i][0];
 
@@ -1503,8 +1503,8 @@ ostream& ContinuousParametricProcess::spreadsheet_print(ostream &os , Histogram 
       max_value = 0.;
 
       for (i = 0;i < nb_state;i++) {
-        if (observation[i]->location > 0.) {
-          gamma_dist[i] = new gamma_distribution<double>(observation[i]->location , observation[i]->dispersion);
+        if (observation[i]->shape > 0.) {
+          gamma_dist[i] = new gamma_distribution<double>(observation[i]->shape , observation[i]->scale);
 
           value = quantile(complement(*gamma_dist[i] , GAMMA_TAIL));
           if (value > max_value) {
@@ -1524,7 +1524,7 @@ ostream& ContinuousParametricProcess::spreadsheet_print(ostream &os , Histogram 
         os << value;
         for (j = 0;j < nb_state;j++) {
           os << "\t";
-          if (observation[i]->location > 0.) {
+          if (observation[i]->shape > 0.) {
             os << pdf(*gamma_dist[j] , value);
           }
         }
@@ -1545,7 +1545,7 @@ ostream& ContinuousParametricProcess::spreadsheet_print(ostream &os , Histogram 
 
       for (i = 0;i < nb_state;i++) {
         if (observation[i]->zero_probability < 1.) {
-          gamma_dist[i] = new gamma_distribution<double>(observation[i]->location , observation[i]->dispersion);
+          gamma_dist[i] = new gamma_distribution<double>(observation[i]->shape , observation[i]->scale);
 
           value = quantile(complement(*gamma_dist[i] , GAMMA_TAIL));
           if (value > max_value) {
@@ -2109,8 +2109,8 @@ bool ContinuousParametricProcess::plot_print(const char *prefix , const char *ti
       max_value = 0.;
 
       for (i = 0;i < nb_state;i++) {
-        if (observation[i]->location > 0.) {
-          gamma_dist[i] = new gamma_distribution<double>(observation[i]->location , observation[i]->dispersion);
+        if (observation[i]->shape > 0.) {
+          gamma_dist[i] = new gamma_distribution<double>(observation[i]->shape , observation[i]->scale);
 
           value = quantile(complement(*gamma_dist[i] , GAMMA_TAIL));
           if (value > max_value) {
@@ -2163,7 +2163,7 @@ bool ContinuousParametricProcess::plot_print(const char *prefix , const char *ti
         dist_max[i] = 0.;
         value = 0.;
 
-        if (observation[i]->location == 0.) {
+        if (observation[i]->shape == 0.) {
           frequency[i][0] = 1.;
           cumul[i][0] = frequency[i][0];
 
@@ -2195,7 +2195,7 @@ bool ContinuousParametricProcess::plot_print(const char *prefix , const char *ti
 
       for (i = 0;i < nb_state;i++) {
         if (observation[i]->zero_probability < 1.) {
-          gamma_dist[i] = new gamma_distribution<double>(observation[i]->location , observation[i]->dispersion);
+          gamma_dist[i] = new gamma_distribution<double>(observation[i]->shape , observation[i]->scale);
 
           value = quantile(complement(*gamma_dist[i] , GAMMA_TAIL));
           if (value > max_value) {
@@ -2978,8 +2978,8 @@ void ContinuousParametricProcess::plotable_write(MultiPlotSet &plot , int &index
     max_value = 0.;
 
     for (i = 0;i < nb_state;i++) {
-      if (observation[i]->location > 0.) {
-        gamma_dist[i] = new gamma_distribution<double>(observation[i]->location , observation[i]->dispersion);
+      if (observation[i]->shape > 0.) {
+        gamma_dist[i] = new gamma_distribution<double>(observation[i]->shape , observation[i]->scale);
 
         value = quantile(complement(*gamma_dist[i] , GAMMA_TAIL));
         if (value > max_value) {
@@ -3032,7 +3032,7 @@ void ContinuousParametricProcess::plotable_write(MultiPlotSet &plot , int &index
       dist_max[i] = 0.;
       value = 0.;
 
-      if (observation[i]->location == 0.) {
+      if (observation[i]->shape == 0.) {
         frequency[i][0] = 1.;
         cumul[i][0] = frequency[i][0];
 
@@ -3064,7 +3064,7 @@ void ContinuousParametricProcess::plotable_write(MultiPlotSet &plot , int &index
 
     for (i = 0;i < nb_state;i++) {
       if (observation[i]->zero_probability < 1.) {
-        gamma_dist[i] = new gamma_distribution<double>(observation[i]->location , observation[i]->dispersion);
+        gamma_dist[i] = new gamma_distribution<double>(observation[i]->shape , observation[i]->scale);
 
         value = quantile(complement(*gamma_dist[i] , GAMMA_TAIL));
         if (value > max_value) {
@@ -3815,7 +3815,7 @@ void ContinuousParametricProcess::init(int iident , double min_value , double ma
   if ((ident == GAMMA) || (ident == ZERO_INFLATED_GAMMA)) {
     cout << STAT_word[STATW_SCALE] << " | ";
     for (i = 0;i < nb_state;i++) {
-      cout << STAT_label[STATL_STATE] << " " << i << ": " << observation[i]->dispersion << endl;
+      cout << STAT_label[STATL_STATE] << " " << i << ": " << observation[i]->scale << endl;
     }
   }
   else if ((ident == GAUSSIAN) || (ident == VON_MISES)) {
