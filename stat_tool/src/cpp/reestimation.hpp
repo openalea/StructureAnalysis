@@ -1648,8 +1648,8 @@ void Reestimation<Type>::gamma_estimation(ContinuousParametric *dist , int iter)
 
 
   if (frequency[0] / nb_element > GAMMA_ZERO_FREQUENCY_THRESHOLD) {
-    dist->location = 0;
-    dist->dispersion = D_DEFAULT;
+    dist->shape = 0;
+    dist->scale = D_DEFAULT;
   }
 
   else {
@@ -1660,27 +1660,27 @@ void Reestimation<Type>::gamma_estimation(ContinuousParametric *dist , int iter)
       else {
         bvariance = variance;
       } */
-      dist->location = mean * mean / variance;
-      dist->dispersion = variance / mean;
+      dist->shape = mean * mean / variance;
+      dist->scale = variance / mean;
 
-      if ((dist->location >= GAMMA_SCALE_PARAMETER_THRESHOLD) &&
+      if ((dist->shape >= GAMMA_SCALE_PARAMETER_THRESHOLD) &&
           (nb_element < GAMMA_FREQUENCY_THRESHOLD)) {
         log_geometric_mean = log_geometric_mean_computation();
         i = 0;
 
 #       ifdef DEBUG
-        cout << "\n" << STAT_word[STATW_SHAPE] << " : " << dist->location << "   "
-             << STAT_word[STATW_SCALE] << " : " << dist->dispersion << endl;
+        cout << "\n" << STAT_word[STATW_SHAPE] << " : " << dist->shape << "   "
+             << STAT_word[STATW_SCALE] << " : " << dist->scale << endl;
 #       endif
 
         do {
-          dist->dispersion = exp(log_geometric_mean - digamma(dist->location));
-          dist->location = mean / dist->dispersion;
+          dist->scale = exp(log_geometric_mean - digamma(dist->shape));
+          dist->shape = mean / dist->scale;
           i++;
 
 #         ifdef DEBUG
-          cout << STAT_word[STATW_SHAPE] << " : " << dist->location  << "   "
-               << STAT_word[STATW_SCALE] << " : " << dist->dispersion << endl;
+          cout << STAT_word[STATW_SHAPE] << " : " << dist->shape  << "   "
+               << STAT_word[STATW_SCALE] << " : " << dist->scale << endl;
 #         endif
 
         }
@@ -1688,16 +1688,16 @@ void Reestimation<Type>::gamma_estimation(ContinuousParametric *dist , int iter)
 
         // approximations Johnson, Kotz & Balakrishnan, Continuous Univariate Distributions, vol. 1, 2nd ed., pp. 361-362
 
-/*        dist->location = mean / (2 * (mean - exp(log_geometric_mean))) - 1./12.;
+/*        dist->shape = mean / (2 * (mean - exp(log_geometric_mean))) - 1./12.;
         buff = log(mean) - log_geometric_mean;
-        dist->location = (1 + sqrt(1 + 4 * buff / 3)) / (4 * buff);
-        dist->dispersion = mean / dist->location; */
+        dist->shape = (1 + sqrt(1 + 4 * buff / 3)) / (4 * buff);
+        dist->scale = mean / dist->shape; */
       }
     }
 
     else {
-      dist->location = GAMMA_MIN_SHAPE_PARAMETER;
-      dist->dispersion = GAMMA_DEFAULT_SCALE_PARAMETER;
+      dist->shape = GAMMA_MIN_SHAPE_PARAMETER;
+      dist->scale = GAMMA_DEFAULT_SCALE_PARAMETER;
     }
   }
 }
@@ -1718,8 +1718,8 @@ void Reestimation<Type>::zero_inflated_gamma_estimation(ContinuousParametric *di
 {
   if (frequency[0] / nb_element > GAMMA_ZERO_FREQUENCY_THRESHOLD) {
     dist->zero_probability = 1.;
-    dist->location = D_DEFAULT;
-    dist->dispersion = D_DEFAULT;
+    dist->shape = D_DEFAULT;
+    dist->scale = D_DEFAULT;
   }
 
   else {
@@ -1750,27 +1750,27 @@ void Reestimation<Type>::zero_inflated_gamma_estimation(ContinuousParametric *di
 /*      if (sqrt(bvariance) < bmean * GAMMA_VARIATION_COEFF_THRESHOLD) {
         bvariance = bmean * bmean * GAMMA_VARIATION_COEFF_THRESHOLD * GAMMA_VARIATION_COEFF_THRESHOLD;
       } */
-      dist->location = bmean * bmean / bvariance;
-      dist->dispersion = bvariance / bmean;
+      dist->shape = bmean * bmean / bvariance;
+      dist->scale = bvariance / bmean;
 
-      if ((dist->location >= GAMMA_SCALE_PARAMETER_THRESHOLD) &&
+      if ((dist->shape >= GAMMA_SCALE_PARAMETER_THRESHOLD) &&
           (nb_element - frequency[0] < GAMMA_FREQUENCY_THRESHOLD)) {
         log_geometric_mean = log_geometric_mean_computation();
         i = 0;
 
 #       ifdef DEBUG
-        cout << "\n" << STAT_word[STATW_SHAPE] << " : " << dist->location << "   "
-             << STAT_word[STATW_SCALE] << " : " << dist->dispersion << endl;
+        cout << "\n" << STAT_word[STATW_SHAPE] << " : " << dist->shape << "   "
+             << STAT_word[STATW_SCALE] << " : " << dist->scale << endl;
 #       endif
 
         do {
-          dist->dispersion = exp(log_geometric_mean - digamma(dist->location));
-          dist->location = mean / dist->dispersion;
+          dist->scale = exp(log_geometric_mean - digamma(dist->shape));
+          dist->shape = mean / dist->scale;
           i++;
 
 #         ifdef DEBUG
-          cout << STAT_word[STATW_SHAPE] << " : " << dist->location  << "   "
-               << STAT_word[STATW_SCALE] << " : " << dist->dispersion << endl;
+          cout << STAT_word[STATW_SHAPE] << " : " << dist->shape  << "   "
+               << STAT_word[STATW_SCALE] << " : " << dist->scale << endl;
 #         endif
 
         }
@@ -1778,16 +1778,16 @@ void Reestimation<Type>::zero_inflated_gamma_estimation(ContinuousParametric *di
 
         // approximations Johnson, Kotz & Balakrishnan, Continuous Univariate Distributions, vol. 1, 2nd ed., pp. 361-362
 
-/*        dist->location = mean / (2 * (mean - exp(log_geometric_mean))) - 1./12.;
+/*        dist->shape = mean / (2 * (mean - exp(log_geometric_mean))) - 1./12.;
         buff = log(mean) - log_geometric_mean;
-        dist->location = (1 + sqrt(1 + 4 * buff / 3)) / (4 * buff);
-        dist->dispersion = mean / dist->location; */
+        dist->shape = (1 + sqrt(1 + 4 * buff / 3)) / (4 * buff);
+        dist->scale = mean / dist->shape; */
       }
     }
 
     else {
-      dist->location = GAMMA_MIN_SHAPE_PARAMETER;
-      dist->dispersion = GAMMA_DEFAULT_SCALE_PARAMETER;
+      dist->shape = GAMMA_MIN_SHAPE_PARAMETER;
+      dist->scale = GAMMA_DEFAULT_SCALE_PARAMETER;
     }
   }
 }
