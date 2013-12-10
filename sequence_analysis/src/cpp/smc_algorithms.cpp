@@ -1893,7 +1893,6 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , const FrequencyDistrib
               decimal_scale[i] = 1;
             }
 
- 
 #           ifdef MESSAGE
             cout << "\nScale: " << i + 1 << " " << decimal_scale[i] << endl;
 #           endif
@@ -2009,8 +2008,13 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , const FrequencyDistrib
             else if (smarkov->discrete_parametric_process[m]) {
               *pioutput[m]++ = smarkov->discrete_parametric_process[m]->observation[*pstate]->simulation();
             }
-            else {
+            else if (smarkov->continuous_parametric_process[m]->ident != LINEAR_MODEL) {
               *proutput[m]++ = round(smarkov->continuous_parametric_process[m]->observation[*pstate]->simulation() * decimal_scale[m]) / decimal_scale[m];
+            }
+            else {
+              *proutput[m]++ = smarkov->continuous_parametric_process[m]->observation[*pstate]->intercept +
+                               smarkov->continuous_parametric_process[m]->observation[*pstate]->slope * (j + k) +
+                               round(smarkov->continuous_parametric_process[m]->observation[*pstate]->simulation() * decimal_scale[m]) / decimal_scale[m];
             }
           }
         }
@@ -2077,7 +2081,8 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , const FrequencyDistrib
     restoration_weight = NULL;
 
     for (i = 0;i < smarkov->nb_output_process;i++) {
-      if ((smarkov->discrete_parametric_process[i]) || (smarkov->continuous_parametric_process[i])) {
+      if ((smarkov->discrete_parametric_process[i]) || ((smarkov->continuous_parametric_process[i]) &&
+           (smarkov->continuous_parametric_process[i]->ident != LINEAR_MODEL))) {
         weight = smarkov->state_process->weight_computation();
         restoration_weight = seq->weight_computation();
         break;
@@ -2092,7 +2097,8 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , const FrequencyDistrib
         smarkov->discrete_parametric_process[i]->restoration_mixture = smarkov->discrete_parametric_process[i]->mixture_computation(smarkov->discrete_parametric_process[i]->restoration_weight);
       }
 
-      else if (smarkov->continuous_parametric_process[i]) {
+      else if ((smarkov->continuous_parametric_process[i]) &&
+               (smarkov->continuous_parametric_process[i]->ident != LINEAR_MODEL)) {
         smarkov->continuous_parametric_process[i]->weight = new Distribution(*weight);
         smarkov->continuous_parametric_process[i]->restoration_weight = new Distribution(*restoration_weight);
       }
