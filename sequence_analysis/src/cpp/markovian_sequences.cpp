@@ -4582,6 +4582,24 @@ ostream& MarkovianSequences::ascii_write(ostream &os , bool exhaustive , bool co
       index_parameter_distribution->ascii_print(os , comment_flag);
     }
     os << endl;
+
+    if (index_interval) {
+      os << "\n";
+      if (comment_flag) {
+        os << "# ";
+      }
+      os << SEQ_label[SEQL_TIME_INTERVAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
+      index_interval->ascii_characteristic_print(os , false , comment_flag);
+
+      if (exhaustive) {
+        os << "\n";
+        if (comment_flag) {
+          os << "# ";
+        }
+        os << "   | " << SEQ_label[SEQL_TIME_INTERVAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
+        index_interval->ascii_print(os , comment_flag);
+      }
+    }
   }
 
   os << nb_variable << " " << STAT_word[nb_variable == 1 ? STATW_VARIABLE : STATW_VARIABLES] << endl;
