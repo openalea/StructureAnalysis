@@ -76,7 +76,7 @@ double HiddenVariableOrderMarkov::likelihood_computation(const MarkovianSequence
 {
   register int i , j , k , m;
   int nb_value , **pioutput;
-  double likelihood = 0. , seq_likelihood , *forward , *auxiliary , norm , **proutput;
+  double likelihood = 0. , seq_likelihood , residual , *forward , *auxiliary , norm , **proutput;
 
 
   // verification de la compatibilite entre le modele et les donnees
@@ -147,7 +147,7 @@ double HiddenVariableOrderMarkov::likelihood_computation(const MarkovianSequence
 
                 else {
                   if (((continuous_parametric_process[k]->ident == GAMMA) ||
-                       (continuous_parametric_process[k]->ident == ZERO_INFLATED_GAMMA)) && (seq.min_value[k] < seq.min_interval[k] / 2)) {
+                      (continuous_parametric_process[k]->ident == ZERO_INFLATED_GAMMA)) && (seq.min_value[k] < seq.min_interval[k] / 2)) {
                     switch (seq.type[k]) {
                     case INT_VALUE :
                       forward[j] *= continuous_parametric_process[k]->observation[state[j][0]]->mass_computation(*pioutput[k] , *pioutput[k] + seq.min_interval[k]);
@@ -156,6 +156,23 @@ double HiddenVariableOrderMarkov::likelihood_computation(const MarkovianSequence
                       forward[j] *= continuous_parametric_process[k]->observation[state[j][0]]->mass_computation(*proutput[k] , *proutput[k] + seq.min_interval[k]);
                       break;
                     }
+                  }
+
+                  else if (continuous_parametric_process[k]->ident == LINEAR_MODEL) {
+                    switch (seq.type[k]) {
+                    case INT_VALUE :
+                      residual = *pioutput[k] - (continuous_parametric_process[k]->observation[state[j][0]]->intercept +
+                                  continuous_parametric_process[k]->observation[state[j][0]]->slope *
+                                  (seq.index_parameter_type == IMPLICIT_TYPE ? 0 : seq.index_parameter[i][0]));
+                      break;
+                    case REAL_VALUE :
+                      residual = *proutput[k] - (continuous_parametric_process[k]->observation[state[j][0]]->intercept +
+                                  continuous_parametric_process[k]->observation[state[j][0]]->slope *
+                                  (seq.index_parameter_type == IMPLICIT_TYPE ? 0 : seq.index_parameter[i][0]));
+                      break;
+                    }
+
+                    forward[j] *= continuous_parametric_process[k]->observation[state[j][0]]->mass_computation(residual - seq.min_interval[k] / 2 , residual + seq.min_interval[k] / 2);
                   }
 
                   else {
@@ -197,7 +214,7 @@ double HiddenVariableOrderMarkov::likelihood_computation(const MarkovianSequence
 
                 else {
                   if (((continuous_parametric_process[k]->ident == GAMMA) ||
-                       (continuous_parametric_process[k]->ident == ZERO_INFLATED_GAMMA)) && (seq.min_value[k] < seq.min_interval[k] / 2)) {
+                      (continuous_parametric_process[k]->ident == ZERO_INFLATED_GAMMA)) && (seq.min_value[k] < seq.min_interval[k] / 2)) {
                     switch (seq.type[k]) {
                     case INT_VALUE :
                       forward[j] *= continuous_parametric_process[k]->observation[state[j][0]]->mass_computation(*pioutput[k] , *pioutput[k] + seq.min_interval[k]);
@@ -206,6 +223,23 @@ double HiddenVariableOrderMarkov::likelihood_computation(const MarkovianSequence
                       forward[j] *= continuous_parametric_process[k]->observation[state[j][0]]->mass_computation(*proutput[k] , *proutput[k] + seq.min_interval[k]);
                       break;
                     }
+                  }
+
+                  else if (continuous_parametric_process[k]->ident == LINEAR_MODEL) {
+                    switch (seq.type[k]) {
+                    case INT_VALUE :
+                      residual = *pioutput[k] - (continuous_parametric_process[k]->observation[state[j][0]]->intercept +
+                                  continuous_parametric_process[k]->observation[state[j][0]]->slope *
+                                  (seq.index_parameter_type == IMPLICIT_TYPE ? 0 : seq.index_parameter[i][0]));
+                      break;
+                    case REAL_VALUE :
+                      residual = *proutput[k] - (continuous_parametric_process[k]->observation[state[j][0]]->intercept +
+                                  continuous_parametric_process[k]->observation[state[j][0]]->slope *
+                                  (seq.index_parameter_type == IMPLICIT_TYPE ? 0 : seq.index_parameter[i][0]));
+                      break;
+                    }
+
+                    forward[j] *= continuous_parametric_process[k]->observation[state[j][0]]->mass_computation(residual - seq.min_interval[k] / 2 , residual + seq.min_interval[k] / 2);
                   }
 
                   else {
@@ -274,7 +308,7 @@ double HiddenVariableOrderMarkov::likelihood_computation(const MarkovianSequence
 
               else {
                 if (((continuous_parametric_process[m]->ident == GAMMA) ||
-                     (continuous_parametric_process[m]->ident == ZERO_INFLATED_GAMMA)) && (seq.min_value[m] < seq.min_interval[m] / 2)) {
+                    (continuous_parametric_process[m]->ident == ZERO_INFLATED_GAMMA)) && (seq.min_value[m] < seq.min_interval[m] / 2)) {
                   switch (seq.type[m]) {
                   case INT_VALUE :
                     auxiliary[k] *= continuous_parametric_process[m]->observation[state[k][0]]->mass_computation(*pioutput[m] , *pioutput[m] + seq.min_interval[m]);
@@ -283,6 +317,23 @@ double HiddenVariableOrderMarkov::likelihood_computation(const MarkovianSequence
                     auxiliary[k] *= continuous_parametric_process[m]->observation[state[k][0]]->mass_computation(*proutput[m] , *proutput[m] + seq.min_interval[m]);
                     break;
                   }
+                }
+
+                else if (continuous_parametric_process[m]->ident == LINEAR_MODEL) {
+                  switch (seq.type[m]) {
+                  case INT_VALUE :
+                    residual = *pioutput[m] - (continuous_parametric_process[m]->observation[state[k][0]]->intercept +
+                                continuous_parametric_process[m]->observation[state[k][0]]->slope *
+                                (seq.index_parameter_type == IMPLICIT_TYPE ? j : seq.index_parameter[i][j]));
+                    break;
+                  case REAL_VALUE :
+                    residual = *proutput[m] - (continuous_parametric_process[m]->observation[state[k][0]]->intercept +
+                                continuous_parametric_process[m]->observation[state[k][0]]->slope *
+                                (seq.index_parameter_type == IMPLICIT_TYPE ? j : seq.index_parameter[i][j]));
+                    break;
+                  }
+
+                  auxiliary[k] *= continuous_parametric_process[m]->observation[state[k][0]]->mass_computation(residual - seq.min_interval[m] / 2 , residual + seq.min_interval[m] / 2);
                 }
 
                 else {
@@ -410,7 +461,7 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_esti
   register int i , j , k , m;
   int nb_terminal , max_nb_value , iter , **pioutput;
   double likelihood = D_INF , previous_likelihood , observation_likelihood , min_likelihood ,
-         **forward , norm , **predicted , buff , *backward , *auxiliary , ***state_sequence_count ,
+         residual , **forward , norm , **predicted , buff , *backward , *auxiliary , ***state_sequence_count ,
          diff , variance , **mean_direction , global_mean_direction , concentration , **proutput;
   Distribution *weight;
   ChainReestimation<double> *chain_reestim;
@@ -560,7 +611,8 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_esti
 
     observation_reestim = new Reestimation<double>**[hmarkov->nb_output_process];
     for (i = 0;i < hmarkov->nb_output_process;i++) {
-      if (marginal_distribution[i]) {
+      if ((marginal_distribution[i]) && ((!(hmarkov->continuous_parametric_process[i])) ||
+           (hmarkov->continuous_parametric_process[i]->ident != LINEAR_MODEL))) {
         observation_reestim[i] = new Reestimation<double>*[hmarkov->nb_state];
         for (j = 0;j < hmarkov->nb_state;j++) {
           observation_reestim[i][j] = new Reestimation<double>(marginal_distribution[i]->nb_value);
@@ -588,7 +640,8 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_esti
     }
 
     for (i = 0;i < hmarkov->nb_output_process;i++) {
-      if (!marginal_distribution[i]) {
+      if ((!marginal_distribution[i]) || ((hmarkov->continuous_parametric_process[i]) &&
+           (hmarkov->continuous_parametric_process[i]->ident == LINEAR_MODEL))) {
         break;
       }
     }
@@ -691,7 +744,7 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_esti
 
                 else {
                   if (((hmarkov->continuous_parametric_process[k]->ident == GAMMA) ||
-                       (hmarkov->continuous_parametric_process[k]->ident == ZERO_INFLATED_GAMMA)) && (min_value[k] < min_interval[k] / 2)) {
+                      (hmarkov->continuous_parametric_process[k]->ident == ZERO_INFLATED_GAMMA)) && (min_value[k] < min_interval[k] / 2)) {
                     switch (type[k]) {
                     case INT_VALUE :
                       forward[0][j] *= hmarkov->continuous_parametric_process[k]->observation[hmarkov->state[j][0]]->mass_computation(*pioutput[k] , *pioutput[k] + min_interval[k]);
@@ -700,6 +753,23 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_esti
                       forward[0][j] *= hmarkov->continuous_parametric_process[k]->observation[hmarkov->state[j][0]]->mass_computation(*proutput[k] , *proutput[k] + min_interval[k]);
                       break;
                     }
+                  }
+
+                  else if (hmarkov->continuous_parametric_process[k]->ident == LINEAR_MODEL) {
+                    switch (type[k]) {
+                    case INT_VALUE :
+                      residual = *pioutput[k] - (hmarkov->continuous_parametric_process[k]->observation[hmarkov->state[j][0]]->intercept +
+                                  hmarkov->continuous_parametric_process[k]->observation[hmarkov->state[j][0]]->slope *
+                                  (index_parameter_type == IMPLICIT_TYPE ? 0 : index_parameter[i][0]));
+                      break;
+                    case REAL_VALUE :
+                      residual = *proutput[k] - (hmarkov->continuous_parametric_process[k]->observation[hmarkov->state[j][0]]->intercept +
+                                  hmarkov->continuous_parametric_process[k]->observation[hmarkov->state[j][0]]->slope *
+                                  (index_parameter_type == IMPLICIT_TYPE ? 0 : index_parameter[i][0]));
+                      break;
+                    }
+
+                    forward[0][j] *= hmarkov->continuous_parametric_process[k]->observation[hmarkov->state[j][0]]->mass_computation(residual - min_interval[k] / 2 , residual + min_interval[k] / 2);
                   }
 
                   else {
@@ -741,7 +811,7 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_esti
 
                 else {
                   if (((hmarkov->continuous_parametric_process[k]->ident == GAMMA) ||
-                       (hmarkov->continuous_parametric_process[k]->ident == ZERO_INFLATED_GAMMA)) && (min_value[k] < min_interval[k] / 2)) {
+                      (hmarkov->continuous_parametric_process[k]->ident == ZERO_INFLATED_GAMMA)) && (min_value[k] < min_interval[k] / 2)) {
                     switch (type[k]) {
                     case INT_VALUE :
                       forward[0][j] *= hmarkov->continuous_parametric_process[k]->observation[hmarkov->state[j][0]]->mass_computation(*pioutput[k] , *pioutput[k] + min_interval[k]);
@@ -750,6 +820,23 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_esti
                       forward[0][j] *= hmarkov->continuous_parametric_process[k]->observation[hmarkov->state[j][0]]->mass_computation(*proutput[k] , *proutput[k] + min_interval[k]);
                       break;
                     }
+                  }
+
+                  else if (hmarkov->continuous_parametric_process[k]->ident == LINEAR_MODEL) {
+                    switch (type[k]) {
+                    case INT_VALUE :
+                      residual = *pioutput[k] - (hmarkov->continuous_parametric_process[k]->observation[hmarkov->state[j][0]]->intercept +
+                                  hmarkov->continuous_parametric_process[k]->observation[hmarkov->state[j][0]]->slope *
+                                  (index_parameter_type == IMPLICIT_TYPE ? 0 : index_parameter[i][0]));
+                      break;
+                    case REAL_VALUE :
+                      residual = *proutput[k] - (hmarkov->continuous_parametric_process[k]->observation[hmarkov->state[j][0]]->intercept +
+                                  hmarkov->continuous_parametric_process[k]->observation[hmarkov->state[j][0]]->slope *
+                                  (index_parameter_type == IMPLICIT_TYPE ? 0 : index_parameter[i][0]));
+                      break;
+                    }
+
+                    forward[0][j] *= hmarkov->continuous_parametric_process[k]->observation[hmarkov->state[j][0]]->mass_computation(residual - min_interval[k] / 2 , residual + min_interval[k] / 2);
                   }
 
                   else {
@@ -821,7 +908,7 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_esti
 
               else {
                 if (((hmarkov->continuous_parametric_process[m]->ident == GAMMA) ||
-                     (hmarkov->continuous_parametric_process[m]->ident == ZERO_INFLATED_GAMMA)) && (min_value[m] < min_interval[m] / 2)) {
+                    (hmarkov->continuous_parametric_process[m]->ident == ZERO_INFLATED_GAMMA)) && (min_value[m] < min_interval[m] / 2)) {
                   switch (type[m]) {
                   case INT_VALUE :
                     forward[j][k] *= hmarkov->continuous_parametric_process[m]->observation[hmarkov->state[k][0]]->mass_computation(*pioutput[m] , *pioutput[m] + min_interval[m]);
@@ -830,6 +917,23 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_esti
                     forward[j][k] *= hmarkov->continuous_parametric_process[m]->observation[hmarkov->state[k][0]]->mass_computation(*proutput[m] , *proutput[m] + min_interval[m]);
                     break;
                   }
+                }
+
+                else if (hmarkov->continuous_parametric_process[m]->ident == LINEAR_MODEL) {
+                  switch (type[m]) {
+                  case INT_VALUE :
+                    residual = *pioutput[m] - (hmarkov->continuous_parametric_process[m]->observation[hmarkov->state[k][0]]->intercept +
+                                hmarkov->continuous_parametric_process[m]->observation[hmarkov->state[k][0]]->slope *
+                                (index_parameter_type == IMPLICIT_TYPE ? j : index_parameter[i][j]));
+                    break;
+                  case REAL_VALUE :
+                    residual = *proutput[m] - (hmarkov->continuous_parametric_process[m]->observation[hmarkov->state[k][0]]->intercept +
+                                hmarkov->continuous_parametric_process[m]->observation[hmarkov->state[k][0]]->slope *
+                                (index_parameter_type == IMPLICIT_TYPE ? j : index_parameter[i][j]));
+                    break;
+                  }
+
+                  forward[j][k] *= hmarkov->continuous_parametric_process[m]->observation[hmarkov->state[k][0]]->mass_computation(residual - min_interval[m] / 2 , residual + min_interval[m] / 2);
                 }
 
                 else {
@@ -1154,6 +1258,10 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_esti
               von_mises_estimation(state_sequence_count , i ,
                                    hmarkov->continuous_parametric_process[i] , common_dispersion);
               break;
+            case LINEAR_MODEL :
+              linear_model_estimation(state_sequence_count , i ,
+                                      hmarkov->continuous_parametric_process[i]);
+              break;
             }
           }
         }
@@ -1325,7 +1433,8 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_esti
         weight = NULL;
 
         for (i = 0;i < hmarkov->nb_output_process;i++) {
-          if ((hmarkov->discrete_parametric_process[i]) || (hmarkov->continuous_parametric_process[i])) {
+          if ((hmarkov->discrete_parametric_process[i]) || ((hmarkov->continuous_parametric_process[i]) &&
+               (hmarkov->continuous_parametric_process[i]->ident != LINEAR_MODEL))) {
             weight = seq->weight_computation();
             break;
           }
@@ -1341,7 +1450,8 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_esti
             hmarkov->discrete_parametric_process[i]->restoration_mixture = hmarkov->discrete_parametric_process[i]->mixture_computation(hmarkov->discrete_parametric_process[i]->restoration_weight);
           }
 
-          else if (hmarkov->continuous_parametric_process[i]) {
+          else if ((hmarkov->continuous_parametric_process[i]) &&
+                   (hmarkov->continuous_parametric_process[i]->ident != LINEAR_MODEL)) {
             hmarkov->continuous_parametric_process[i]->restoration_weight = new Distribution(*weight);
           }
         }
@@ -1420,7 +1530,8 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_esti
       weight = NULL;
 
       for (i = 0;i < hmarkov->nb_output_process;i++) {
-        if ((hmarkov->discrete_parametric_process[i]) || (hmarkov->continuous_parametric_process[i])) {
+        if ((hmarkov->discrete_parametric_process[i]) || ((hmarkov->continuous_parametric_process[i]) &&
+             (hmarkov->continuous_parametric_process[i]->ident != LINEAR_MODEL))) {
           switch (hmarkov->type) {
 
           case 'o' : {
@@ -1455,7 +1566,8 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_esti
           hmarkov->discrete_parametric_process[i]->mixture = hmarkov->discrete_parametric_process[i]->mixture_computation(hmarkov->discrete_parametric_process[i]->weight);
         }
 
-        else if (hmarkov->continuous_parametric_process[i]) {
+        else if ((hmarkov->continuous_parametric_process[i]) &&
+                 (hmarkov->continuous_parametric_process[i]->ident != LINEAR_MODEL)) {
           hmarkov->continuous_parametric_process[i]->weight = new Distribution(*weight);
         }
       }
@@ -1497,8 +1609,8 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_stoc
   int nb_terminal , iter , nb_state_sequence , memory , *state_seq , *pstate ,
       ***state_sequence_count , nb_element , **pioutput;
   double likelihood = D_INF , previous_likelihood , observation_likelihood , min_likelihood ,
-         **forward , norm , **predicted , *backward , *cumul_backward , diff , variance ,
-         **mean_direction , concentration , global_mean_direction , **proutput;
+         residual , **forward , norm , **predicted , *backward , *cumul_backward , diff ,
+         variance , **mean_direction , concentration , global_mean_direction , **proutput;
   Distribution *weight;
   ChainReestimation<double> *chain_reestim;
   Reestimation<double> ***observation_reestim;
@@ -1656,7 +1768,8 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_stoc
 
     observation_reestim = new Reestimation<double>**[hmarkov->nb_output_process];
     for (i = 0;i < hmarkov->nb_output_process;i++) {
-      if (marginal_distribution[i]) {
+      if ((marginal_distribution[i]) && ((!(hmarkov->continuous_parametric_process[i])) ||
+           (hmarkov->continuous_parametric_process[i]->ident != LINEAR_MODEL))) {
         observation_reestim[i] = new Reestimation<double>*[hmarkov->nb_state];
         for (j = 0;j < hmarkov->nb_state;j++) {
           observation_reestim[i][j] = new Reestimation<double>(marginal_distribution[i]->nb_value);
@@ -1669,7 +1782,8 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_stoc
     }
 
     for (i = 0;i < hmarkov->nb_output_process;i++) {
-      if (!marginal_distribution[i]) {
+      if ((!marginal_distribution[i]) || ((hmarkov->continuous_parametric_process[i]) &&
+           (hmarkov->continuous_parametric_process[i]->ident == LINEAR_MODEL))) {
         break;
       }
     }
@@ -1785,7 +1899,7 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_stoc
 
                 else {
                   if (((hmarkov->continuous_parametric_process[k]->ident == GAMMA) ||
-                       (hmarkov->continuous_parametric_process[k]->ident == ZERO_INFLATED_GAMMA)) && (min_value[k] < min_interval[k] / 2)) {
+                      (hmarkov->continuous_parametric_process[k]->ident == ZERO_INFLATED_GAMMA)) && (min_value[k] < min_interval[k] / 2)) {
                     switch (type[k]) {
                     case INT_VALUE :
                       forward[0][j] *= hmarkov->continuous_parametric_process[k]->observation[hmarkov->state[j][0]]->mass_computation(*pioutput[k] , *pioutput[k] + min_interval[k]);
@@ -1794,6 +1908,23 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_stoc
                       forward[0][j] *= hmarkov->continuous_parametric_process[k]->observation[hmarkov->state[j][0]]->mass_computation(*proutput[k] , *proutput[k] + min_interval[k]);
                       break;
                     }
+                  }
+
+                  else if (hmarkov->continuous_parametric_process[k]->ident == LINEAR_MODEL) {
+                    switch (type[k]) {
+                    case INT_VALUE :
+                      residual = *pioutput[k] - (hmarkov->continuous_parametric_process[k]->observation[hmarkov->state[j][0]]->intercept +
+                                  hmarkov->continuous_parametric_process[k]->observation[hmarkov->state[j][0]]->slope *
+                                  (index_parameter_type == IMPLICIT_TYPE ? 0 : index_parameter[i][0]));
+                      break;
+                    case REAL_VALUE :
+                      residual = *proutput[k] - (hmarkov->continuous_parametric_process[k]->observation[hmarkov->state[j][0]]->intercept +
+                                  hmarkov->continuous_parametric_process[k]->observation[hmarkov->state[j][0]]->slope *
+                                  (index_parameter_type == IMPLICIT_TYPE ? 0 : index_parameter[i][0]));
+                      break;
+                    }
+
+                    forward[0][j] *= hmarkov->continuous_parametric_process[k]->observation[hmarkov->state[j][0]]->mass_computation(residual - min_interval[k] / 2 , residual + min_interval[k] / 2);
                   }
 
                   else {
@@ -1835,7 +1966,7 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_stoc
 
                 else {
                   if (((hmarkov->continuous_parametric_process[k]->ident == GAMMA) ||
-                       (hmarkov->continuous_parametric_process[k]->ident == ZERO_INFLATED_GAMMA)) && (min_value[k] < min_interval[k] / 2)) {
+                      (hmarkov->continuous_parametric_process[k]->ident == ZERO_INFLATED_GAMMA)) && (min_value[k] < min_interval[k] / 2)) {
                     switch (type[k]) {
                     case INT_VALUE :
                       forward[0][j] *= hmarkov->continuous_parametric_process[k]->observation[hmarkov->state[j][0]]->mass_computation(*pioutput[k] , *pioutput[k] + min_interval[k]);
@@ -1844,6 +1975,23 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_stoc
                       forward[0][j] *= hmarkov->continuous_parametric_process[k]->observation[hmarkov->state[j][0]]->mass_computation(*proutput[k] , *proutput[k] + min_interval[k]);
                       break;
                     }
+                  }
+
+                  else if (hmarkov->continuous_parametric_process[k]->ident == LINEAR_MODEL) {
+                    switch (type[k]) {
+                    case INT_VALUE :
+                      residual = *pioutput[k] - (hmarkov->continuous_parametric_process[k]->observation[hmarkov->state[j][0]]->intercept +
+                                  hmarkov->continuous_parametric_process[k]->observation[hmarkov->state[j][0]]->slope *
+                                  (index_parameter_type == IMPLICIT_TYPE ? 0 : index_parameter[i][0]));
+                      break;
+                    case REAL_VALUE :
+                      residual = *proutput[k] - (hmarkov->continuous_parametric_process[k]->observation[hmarkov->state[j][0]]->intercept +
+                                  hmarkov->continuous_parametric_process[k]->observation[hmarkov->state[j][0]]->slope *
+                                  (index_parameter_type == IMPLICIT_TYPE ? 0 : index_parameter[i][0]));
+                      break;
+                    }
+
+                    forward[0][j] *= hmarkov->continuous_parametric_process[k]->observation[hmarkov->state[j][0]]->mass_computation(residual - min_interval[k] / 2 , residual + min_interval[k] / 2);
                   }
 
                   else {
@@ -1915,7 +2063,7 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_stoc
 
               else {
                 if (((hmarkov->continuous_parametric_process[m]->ident == GAMMA) ||
-                     (hmarkov->continuous_parametric_process[m]->ident == ZERO_INFLATED_GAMMA)) && (min_value[m] < min_interval[m] / 2)) {
+                    (hmarkov->continuous_parametric_process[m]->ident == ZERO_INFLATED_GAMMA)) && (min_value[m] < min_interval[m] / 2)) {
                   switch (type[m]) {
                   case INT_VALUE :
                     forward[j][k] *= hmarkov->continuous_parametric_process[m]->observation[hmarkov->state[k][0]]->mass_computation(*pioutput[m] , *pioutput[m] + min_interval[m]);
@@ -1924,6 +2072,23 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_stoc
                     forward[j][k] *= hmarkov->continuous_parametric_process[m]->observation[hmarkov->state[k][0]]->mass_computation(*proutput[m] , *proutput[m] + min_interval[m]);
                     break;
                   }
+                }
+
+                else if (hmarkov->continuous_parametric_process[m]->ident == LINEAR_MODEL) {
+                  switch (type[m]) {
+                  case INT_VALUE :
+                    residual = *pioutput[m] - (hmarkov->continuous_parametric_process[m]->observation[hmarkov->state[k][0]]->intercept +
+                                hmarkov->continuous_parametric_process[m]->observation[hmarkov->state[k][0]]->slope *
+                                (index_parameter_type == IMPLICIT_TYPE ? j : index_parameter[i][j]));
+                    break;
+                  case REAL_VALUE :
+                    residual = *proutput[m] - (hmarkov->continuous_parametric_process[m]->observation[hmarkov->state[k][0]]->intercept +
+                                hmarkov->continuous_parametric_process[m]->observation[hmarkov->state[k][0]]->slope *
+                                (index_parameter_type == IMPLICIT_TYPE ? j : index_parameter[i][j]));
+                    break;
+                  }
+
+                  forward[j][k] *= hmarkov->continuous_parametric_process[m]->observation[hmarkov->state[k][0]]->mass_computation(residual - min_interval[m] / 2 , residual + min_interval[m] / 2);
                 }
 
                 else {
@@ -2229,6 +2394,10 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_stoc
               von_mises_estimation(state_sequence_count , i ,
                                    hmarkov->continuous_parametric_process[i] , common_dispersion);
               break;
+            case LINEAR_MODEL :
+              linear_model_estimation(state_sequence_count , i ,
+                                      hmarkov->continuous_parametric_process[i]);
+              break;
             }
           }
         }
@@ -2400,7 +2569,8 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_stoc
         weight = NULL;
 
         for (i = 0;i < hmarkov->nb_output_process;i++) {
-          if ((hmarkov->discrete_parametric_process[i]) || (hmarkov->continuous_parametric_process[i])) {
+          if ((hmarkov->discrete_parametric_process[i]) || ((hmarkov->continuous_parametric_process[i]) &&
+               (hmarkov->continuous_parametric_process[i]->ident != LINEAR_MODEL))) {
             weight = seq->weight_computation();
             break;
           }
@@ -2416,7 +2586,8 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_stoc
             hmarkov->discrete_parametric_process[i]->restoration_mixture = hmarkov->discrete_parametric_process[i]->mixture_computation(hmarkov->discrete_parametric_process[i]->restoration_weight);
           }
 
-          else if (hmarkov->continuous_parametric_process[i]) {
+          else if ((hmarkov->continuous_parametric_process[i]) &&
+                   (hmarkov->continuous_parametric_process[i]->ident != LINEAR_MODEL)) {
             hmarkov->continuous_parametric_process[i]->restoration_weight = new Distribution(*weight);
           }
         }
@@ -2495,7 +2666,8 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_stoc
       weight = NULL;
 
       for (i = 0;i < hmarkov->nb_output_process;i++) {
-        if ((hmarkov->discrete_parametric_process[i]) || (hmarkov->continuous_parametric_process[i])) {
+        if ((hmarkov->discrete_parametric_process[i]) || ((hmarkov->continuous_parametric_process[i]) &&
+             (hmarkov->continuous_parametric_process[i]->ident != LINEAR_MODEL))) {
           switch (hmarkov->type) {
 
           case 'o' : {
@@ -2530,7 +2702,8 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_stoc
           hmarkov->discrete_parametric_process[i]->mixture = hmarkov->discrete_parametric_process[i]->mixture_computation(hmarkov->discrete_parametric_process[i]->weight);
         }
 
-        else if (hmarkov->continuous_parametric_process[i]) {
+        else if ((hmarkov->continuous_parametric_process[i]) &&
+                 (hmarkov->continuous_parametric_process[i]->ident != LINEAR_MODEL)) {
           hmarkov->continuous_parametric_process[i]->weight = new Distribution(*weight);
         }
       }
