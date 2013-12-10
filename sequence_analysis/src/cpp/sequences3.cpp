@@ -2298,10 +2298,10 @@ bool Sequences::plot_data_write(StatError &error , const char *prefix ,
                          << length_nb_sequence[length[k]] * (nb_variable + 1) + 1 << " : "
                          << length_nb_sequence[length[k]] * (nb_variable + 1) + j + 3;
                 if (nb_sequence <= PLOT_LEGEND_NB_SEQUENCE) {
-                  out_file << " title \"" << identifier[k] << "\" with linespoints";
+                  out_file << " title \"" << identifier[k] << "\" with lines";
                 }
                 else {
-                  out_file << " notitle with linespoints";
+                  out_file << " notitle with lines";
                 }
               }
 
@@ -2345,10 +2345,10 @@ bool Sequences::plot_data_write(StatError &error , const char *prefix ,
                 out_file << "\"" << label((data_file_name[length[k]].str()).c_str()) << "\" using "
                          << length_nb_sequence[length[k]] * nb_variable + j + 2;
                 if (nb_sequence <= PLOT_LEGEND_NB_SEQUENCE) {
-                  out_file << " title \"" << identifier[k] << "\" with linespoints";
+                  out_file << " title \"" << identifier[k] << "\" with lines";
                 }
                 else {
-                  out_file << " notitle with linespoints";
+                  out_file << " notitle with lines";
                 }
               }
 
