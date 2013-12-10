@@ -702,8 +702,7 @@ ostream& Regression::ascii_write(ostream &os , bool exhaustive) const
   int buff , width[5];
   long old_adjust;
   double t_value , residual_mean , residual_standard_deviation , *estimated_response ,
-         *presponse , *standard_residual , *presidual , *pstandard_residual , square_sum[3] ,
-         df[3] , mean_square[3] , standard_deviation[2];
+         *standard_residual , square_sum[3] , df[3] , mean_square[3] , standard_deviation[2];
   Test *test;
 
 
@@ -909,20 +908,15 @@ ostream& Regression::ascii_write(ostream &os , bool exhaustive) const
 
   if (exhaustive) {
     estimated_response = new double[nb_vector];
-
-    presponse = estimated_response;
     for (i = 0;i < nb_vector;i++) {
-      *presponse++ = point[vectors->int_vector[i][0] - min_value];
+      estimated_response[i] = point[vectors->int_vector[i][0] - min_value];
     }
 
     // calcul des residus standardises
 
     standard_residual = new double[nb_vector];
-
-    pstandard_residual = standard_residual;
-    presidual = residual;
     for (i = 0;i < nb_vector;i++) {
-      *pstandard_residual++ = *presidual++ / residual_standard_deviation;
+      standard_residual[i] = residual[i] / residual_standard_deviation;
     }
 
     // calcul des largeurs des colonnes
@@ -954,10 +948,6 @@ ostream& Regression::ascii_write(ostream &os , bool exhaustive) const
        << " | " << STAT_label[STATL_ESTIMATION] << " | " << STAT_label[STATL_RESIDUAL]
        << " | " << STAT_label[STATL_STANDARDIZED_RESIDUAL] << endl;
 
-    presponse = estimated_response;
-    presidual = residual;
-    pstandard_residual = standard_residual;
-
     for (i = 0;i < nb_vector;i++) {
       os << setw(width[0]) << vectors->int_vector[i][0];
       if (vectors->type[1] == INT_VALUE) {
@@ -966,9 +956,9 @@ ostream& Regression::ascii_write(ostream &os , bool exhaustive) const
       else {
         os << setw(width[1]) << vectors->real_vector[i][1];
       }
-      os << setw(width[2]) << *presponse++;
-      os << setw(width[3]) << *presidual++;
-      os << setw(width[4]) << *pstandard_residual++;
+      os << setw(width[2]) << estimated_response[i];
+      os << setw(width[3]) << residual[i];
+      os << setw(width[4]) << standard_residual[i];
       os << "   (" << vectors->identifier[i] << ")" << endl;
     }
 
@@ -1028,8 +1018,8 @@ bool Regression::spreadsheet_write(StatError &error , const char *path) const
 {
   bool status;
   register int i;
-  double t_value , residual_mean , residual_standard_deviation , *presidual ,
-         square_sum[3] , df[3] , mean_square[3] , standard_deviation[2];
+  double t_value , residual_mean , residual_standard_deviation , square_sum[3] ,
+         df[3] , mean_square[3] , standard_deviation[2];
   Test *test;
   ofstream out_file(path);
 
@@ -1222,7 +1212,6 @@ bool Regression::spreadsheet_write(StatError &error , const char *path) const
              << "\t" << STAT_label[STATL_ESTIMATION] << "\t" << STAT_label[STATL_RESIDUAL]
              << "\t" << STAT_label[STATL_STANDARDIZED_RESIDUAL] << endl;
 
-    presidual = residual;
     for (i = 0;i < nb_vector;i++) {
       out_file << vectors->int_vector[i][0] << "\t";
       if (vectors->type[1] == INT_VALUE) {
@@ -1231,8 +1220,8 @@ bool Regression::spreadsheet_write(StatError &error , const char *path) const
       else {
         out_file << vectors->real_vector[i][1] << "\t";
       }
-      out_file << point[vectors->int_vector[i][0] - min_value] << "\t" << *presidual << "\t"
-               << *presidual++ / residual_standard_deviation << "\t\t" << vectors->identifier[i] << endl;
+      out_file << point[vectors->int_vector[i][0] - min_value] << "\t" << residual[i] << "\t"
+               << residual[i] / residual_standard_deviation << "\t\t" << vectors->identifier[i] << endl;
     }
   }
 
@@ -1258,7 +1247,7 @@ bool Regression::plot_write(StatError &error , const char *prefix ,
   int **frequency;
   double residual_mean , residual_standard_deviation , min_standard_residual ,
          max_standard_residual , min_response , max_response , threshold ,
-         *standard_residual , *presidual , *pstandard_residual;
+         *standard_residual;
   ostringstream data_file_name[2];
 
 
@@ -1281,20 +1270,17 @@ bool Regression::plot_write(StatError &error , const char *prefix ,
     residual_standard_deviation = sqrt(residual_variance_computation(residual_mean));
 
     standard_residual = new double[nb_vector];
-    presidual = residual;
-    pstandard_residual = standard_residual;
     min_standard_residual = 0.;
     max_standard_residual = 0.;
 
     for (i = 0;i < nb_vector;i++) {
-      *pstandard_residual = *presidual++ / residual_standard_deviation;
-      if (*pstandard_residual < min_standard_residual) {
-        min_standard_residual = *pstandard_residual;
+      standard_residual[i] = residual[i] / residual_standard_deviation;
+      if (standard_residual[i] < min_standard_residual) {
+        min_standard_residual = standard_residual[i];
       }
-      if (*pstandard_residual > max_standard_residual) {
-        max_standard_residual = *pstandard_residual;
+      if (standard_residual[i] > max_standard_residual) {
+        max_standard_residual = standard_residual[i];
       }
-      pstandard_residual++;
     }
 
     data_file_name[1] << prefix << 1 << ".dat";
@@ -1457,8 +1443,7 @@ MultiPlotSet* Regression::get_plotable() const
   register int i;
   int xmin , nb_plot;
   double ymin , min_response , max_response , residual_mean , residual_standard_deviation ,
-         min_standard_residual , max_standard_residual , threshold , *standard_residual ,
-         *presidual , *pstandard_residual;
+         min_standard_residual , max_standard_residual , threshold , *standard_residual;
   ostringstream title , legend;
   MultiPlotSet *plot_set;
 
@@ -1543,20 +1528,17 @@ MultiPlotSet* Regression::get_plotable() const
   residual_standard_deviation = sqrt(residual_variance_computation(residual_mean));
 
   standard_residual = new double[nb_vector];
-  presidual = residual;
-  pstandard_residual = standard_residual;
   min_standard_residual = 0.;
   max_standard_residual = 0.;
 
   for (i = 0;i < nb_vector;i++) {
-    *pstandard_residual = *presidual++ / residual_standard_deviation;
-    if (*pstandard_residual < min_standard_residual) {
-      min_standard_residual = *pstandard_residual;
+    standard_residual[i] = residual[i] / residual_standard_deviation;
+    if (standard_residual[i] < min_standard_residual) {
+      min_standard_residual = standard_residual[i];
     }
-    if (*pstandard_residual > max_standard_residual) {
-      max_standard_residual = *pstandard_residual;
+    if (standard_residual[i] > max_standard_residual) {
+      max_standard_residual = standard_residual[i];
     }
-    pstandard_residual++;
   }
 
   normal dist;
@@ -1644,20 +1626,16 @@ void Regression::residual_computation()
 
 {
   register int i;
-  double *presidual;
 
-
-  presidual = residual;
 
   if (vectors->type[1] == INT_VALUE) {
     for (i = 0;i < nb_vector;i++) {
-      *presidual++ = vectors->int_vector[i][1] - point[vectors->int_vector[i][0] - min_value];
+      residual[i] = vectors->int_vector[i][1] - point[vectors->int_vector[i][0] - min_value];
     }
   }
-
   else {
     for (i = 0;i < nb_vector;i++) {
-      *presidual++ = vectors->real_vector[i][1] - point[vectors->int_vector[i][0] - min_value];
+      residual[i] = vectors->real_vector[i][1] - point[vectors->int_vector[i][0] - min_value];
     }
   }
 }
@@ -1673,14 +1651,12 @@ double Regression::residual_mean_computation() const
 
 {
   register int i;
-  double residual_mean , *presidual;
+  double residual_mean;
 
 
-  presidual = residual;
   residual_mean = 0.;
-
   for (i = 0;i < nb_vector;i++) {
-    residual_mean += *presidual++;
+    residual_mean += residual[i];
   }
   residual_mean /= nb_vector;
 
@@ -1700,18 +1676,15 @@ double Regression::residual_variance_computation(double residual_mean) const
 
 {
   register int i;
-  double residual_variance = D_DEFAULT , diff , *presidual;
+  double residual_variance = D_DEFAULT , diff;
 
 
   if (residual_df > 0.) {
-    presidual = residual;
     residual_variance = 0.;
-
     for (i = 0;i < nb_vector;i++) {
-      diff = *presidual++ - residual_mean;
+      diff = residual[i] - residual_mean;
       residual_variance += diff * diff;
     }
-
     residual_variance /= residual_df;
   }
 
@@ -1729,15 +1702,12 @@ double Regression::residual_square_sum_computation() const
 
 {
   register int i;
-  double residual_square_sum , *presidual;
+  double residual_square_sum;
 
 
-  presidual = residual;
   residual_square_sum = 0.;
-
   for (i = 0;i < nb_vector;i++) {
-    residual_square_sum += *presidual * *presidual;
-    presidual++;
+    residual_square_sum += residual[i] * residual[i];
   }
 
   return residual_square_sum;
