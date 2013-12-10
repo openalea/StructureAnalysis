@@ -55,6 +55,8 @@ const char *STAT_word[] = {
   "STANDARD_DEVIATION" ,
   "MEAN_DIRECTION" ,
   "CONCENTRATION" ,
+  "INTERCEPT" ,
+  "SLOPE" ,
 
   "MIXTURE" ,
   "CONVOLUTION" ,
@@ -118,7 +120,8 @@ const char *STAT_continuous_distribution_word[] = {
   "GAMMA" ,
   "ZERO_INFLATED_GAMMA" ,
   "GAUSSIAN" ,
-  "VON_MISES"
+  "VON_MISES" ,
+  "LINEAR_MODEL"
 };
 
 
@@ -126,7 +129,8 @@ const char *STAT_continuous_distribution_letter[] = {
   "Ga" ,
   "ZIGa" ,
   "G" ,
-  "VM"
+  "VM" ,
+  "LM"
 };
 
 
