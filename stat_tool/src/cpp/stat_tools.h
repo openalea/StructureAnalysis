@@ -117,7 +117,8 @@ enum {
   GAMMA ,
   ZERO_INFLATED_GAMMA ,
   GAUSSIAN ,
-  VON_MISES
+  VON_MISES ,
+  LINEAR_MODEL
 };
 
 enum {
@@ -860,11 +861,19 @@ class ContinuousParametric {  // loi de probabilite continue parametrique
 public :
 
     int ident;              // identificateur
-    double location;        // moyenne (GAUSSIAN), direction moyenne (VON_MISES),
-                            // parametre de forme (GAMMA)
-    double dispersion;      // ecart-type (GAUSSIAN), concentration (VON_MISES),
-                            // parametre d'echelle (GAMMA)
-    double zero_probability;  // probabilite pour 0 (ZERO_INFLATED_GAMMA)
+    union {
+      double shape;         // parametre de forme (GAMMA, ZERO_INFLATED_GAMMA)
+      double location;      // moyenne (GAUSSIAN), direction moyenne (VON_MISES),
+      double intercept;     // LINEAR_MODEL
+    };
+    union {
+      double scale;         // parametre d'echelle (GAMMA, ZERO_INFLATED_GAMMA)
+      double dispersion;    // ecart-type (GAUSSIAN), concentration (VON_MISES),
+    };
+    union {
+      double zero_probability;  // probabilite pour 0 (ZERO_INFLATED_GAMMA)
+      double slope;           // LINEAR_MODEL
+    };
     double min_value;       // valeur minimum
     double max_value;       // valeur maximum
     int unit;               // unite (degre/radian) pour la loi de von Mises
