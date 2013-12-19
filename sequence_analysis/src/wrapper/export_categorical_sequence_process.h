@@ -21,7 +21,7 @@
 #define __CLASS_SEQUENCE_ANALYSIS_NONPARAMETRIC_SEQUENCE_PROCESS__
 
 // Boost.Python Wrapper export function
-void class_nonparametric_sequence_process();
+void class_categorical_sequence_process();
 
 
 #endif
