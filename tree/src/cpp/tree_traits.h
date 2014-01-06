@@ -59,7 +59,7 @@ void traverse_tree( typename tree_traits<Tree>::vertex_descriptor v,
 {
   visitor.preorder(v, t);
   typename tree_traits<Tree>::children_iterator i, end;
-  tie(i, end) = t.children(v);
+  Tree_tie::tie(i, end) = t.children(v);
   if (i != end)
     {
     traverse_tree(*i++, t, visitor);

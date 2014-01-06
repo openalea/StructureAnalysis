@@ -40,6 +40,8 @@
 /* ----------------------------------------------------------------------- */
 
 #include <utility>
+namespace Tree_tie
+{
 
 /**
    \class refpair utility.h
@@ -73,7 +75,7 @@ struct refpair
 
 /// Creates a refpair.
 template< typename T, typename U >
-inline refpair<T, U> tie( T& x, U& y ) { return refpair<T, U>(x, y); }
+inline refpair<T, U> tie( T& x, U& y ) { return refpair<T, U>(x, y); }}
 
 
 #endif
