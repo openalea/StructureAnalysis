@@ -107,14 +107,14 @@ inline std::string  number ( char i ) {
 /// Transform all character of the string into lower character.
 inline std::string toLower(const std::string& c){
   std::string res(c);
-  for(std::string::iterator _it = res.begin(); _it != res.end(); _it++)*_it = tolower(*_it);
+    for(std::string::iterator _it = res.begin(); _it != res.end(); _it++)*_it = std::tolower(*_it);
   return res;
 }
 
 /// Transform all character of the string into upper character.
 inline std::string toUpper(const std::string& c){
   std::string res(c);
-  for(std::string::iterator _it = res.begin(); _it != res.end(); _it++)*_it = toupper(*_it);
+  for(std::string::iterator _it = res.begin(); _it != res.end(); _it++)*_it = std::toupper(*_it);
   return res;
 }
 
