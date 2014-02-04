@@ -114,29 +114,29 @@ VPTOOLS_BEGIN_NAMESPACE
  */
  #define CORPUS_SLIST(T,OBJ,SUPOBJ) \
  CORPUS(T,OBJ,SUPOBJ) \
- const_reference first() const { return Master::front(); } \
- const_reference last() const { const_iterator i = Master::end(); i--; return *i; } \
- reference removeFirst() { reference elt= Master::front(); Master::pop_front(); return elt; } \
- void append( const_reference a ) { Master::push_back(a ); } \
+ const_reference first() const { return this->front(); } \
+ const_reference last() const { const_iterator i = this->end(); i--; return *i; } \
+ reference removeFirst() { reference elt= this->front(); this->pop_front(); return elt; } \
+ void append( const_reference a ) { this->push_back(a ); } \
  inline void insert( const_reference a ) { Master::append(a); } \
- iterator insert_after(iterator pos, const value_type& x){ return Master::insert(pos,x); } \
+ iterator insert_after(iterator pos, const_reference x){ return Master::insert(pos,x); } \
  template<class InputIterator> \
  void insert_after(iterator pos, InputIterator f, InputIterator l){ Master::insert(pos,f,l); } \
  iterator previous(iterator pos){ pos--; return pos; } \
  void insertAt( size_t i, const_reference a ) \
         { if(i==0) { prepend(a); return; } \
-		iterator it= begin(); std::advance(it,i-1); insert_after(it,a);  } \
+		iterator it= this->begin(); std::advance(it,i-1); insert_after(it,a);  } \
  void removeIn(size_t b, size_t e) \
    { \
-   iterator it1= begin(); std::advance(it1,b); \
-   iterator it2= begin(); std::advance(it2,e+1); \
+   iterator it1= this->begin(); std::advance(it1,b); \
+   iterator it2= this->begin(); std::advance(it2,e+1); \
    this->erase(it1,it2); \
    } \
  void prepend( const_reference a ) { this->push_front(a); } \
  const_reference operator[](size_t n) const \
-   { const_iterator it= begin(); std::advance(it,n); return *it; } \
+   { const_iterator it= this->begin(); std::advance(it,n); return *it; } \
  reference operator[](size_t n) \
-   { iterator it= begin(); std::advance(it,n); return *it; }
+   { iterator it= this->begin(); std::advance(it,n); return *it; }
 //#endif
 
  #define CTOR_VAL_SLIST(T,OBJ) \
