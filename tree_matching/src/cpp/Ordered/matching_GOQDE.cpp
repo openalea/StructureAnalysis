@@ -48,14 +48,15 @@ const int EMPTY_CLASS=-1;
 
 
 class Min {
-  DistanceType value;
+  typedef int value_type;
+  value_type value;
 public:
-  Min(DistanceType v):value(v) {}
-  Min &operator<<(DistanceType v) {
+  Min(value_type v):value(v) {}
+  Min &operator<<(value_type v) {
     if (v<value) value=v;
     return *this;
   }
-  operator DistanceType() {
+  operator value_type() {
     return value;
   }
 };
@@ -151,10 +152,10 @@ void MatchingGoqde::computeDist(int li, int i, int lj, int j, int c1, int c2)
   int m1,m2;
   int fNum = fix(getKey1(li),getKey2(lj));
   
-  m1 = Min(li)<<L1[classRoot(1,i)]; 
+  m1 = Min(li) << L1[classRoot(1,i)]; 
   //cout<<"........m1 : "<<m1;
   
-  m2 = Min(lj)<<L2[classRoot(2,j)];  
+  m2 = Min(lj) << L2[classRoot(2,j)];  
   //cout<<" m2 : "<<m2<<endl; 
   
   //Calcul de FDist sans contrainte

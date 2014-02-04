@@ -23,8 +23,8 @@ public:
 
 
 //-----------------------------------------------------------------------------
-//Calcul de la distance entre deux forêts indexées par leurs racines en 
-//Remplissant récursivement le tableau fDist
+//Calcul de la distance entre deux forÃªts indexÃ©es par leurs racines en
+//Remplissant rÃ©cursivement le tableau fDist
 //-----------------------------------------------------------------------------
 void MSLSimilarity::computeForestsDistances(int input_vertex,int reference_vertex){
 
@@ -32,7 +32,7 @@ void MSLSimilarity::computeForestsDistances(int input_vertex,int reference_verte
   i= input_vertex;
   j= reference_vertex;   
   float max;
-  //Calcul récursif de la distance entre les forêts T1[L1[i]..i] et T2[L2[j]..j]  
+  //Calcul rÃ©cursif de la distance entre les forÃªts T1[L1[i]..i] et T2[L2[j]..j]
   int fNum = fix(i,j);
   fDist[fNum][0][0] = 0;
 
@@ -58,7 +58,7 @@ void MSLSimilarity::computeForestsDistances(int input_vertex,int reference_verte
 	  float dele = fDist[fNum][idx(L1[i],i1-1)][idx(L2[j],j1)] +  delLocalNode(T1,i1);
 	  float inse = fDist[fNum][idx(L1[i],i1)][idx(L2[j],j1-1)] +  insLocalNode(T2,j1);
 	  float match = fDist[fNum][idx(L1[i],i1-1)][idx(L2[j],j1-1)] + matchLocalNode(i1,j1);
-	  max = Max(dele)<<inse<<match<<0;
+	  max = Max(dele) << inse << match << 0.;
 	  
 	  fDist[fNum][idx(L1[i],i1)][idx(L2[j],j1)] = max;
 	  _dst1[i1][j1] = max;
@@ -75,7 +75,7 @@ void MSLSimilarity::computeForestsDistances(int input_vertex,int reference_verte
 	  float dele = fDist[fNum][idx(L1[i],i1-1)][idx(L2[j],j1)] + delLocalNode(T1,i1);
 	  float inse = fDist[fNum][idx(L1[i],i1)][idx(L2[j],j1-1)] +  insLocalNode (T2,j1);
 	  float match = fDist[fNum][idx(L1[i],L1[i1]-1)][idx(L2[j],L2[j1]-1)] + _dst1[i1][j1];
-	  max = Max(dele)<<inse<<match<<0;
+	  max = Max(dele) << inse << match << 0.;
 	  
 	  
 	  fDist[fNum][idx(L1[i],i1)][idx(L2[j],j1)] = max;

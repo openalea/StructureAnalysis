@@ -37,6 +37,7 @@
 #ifndef TYPED_EDGE_TREES_HPP
 #define TYPED_EDGE_TREES_HPP
 
+using Tree_tie::tie;
 
 /*****************************************************************
  *

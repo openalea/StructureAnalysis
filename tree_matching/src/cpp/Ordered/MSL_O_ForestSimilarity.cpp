@@ -22,8 +22,8 @@ public:
 
 
 //-----------------------------------------------------------------------------
-//Calcul de la distance entre deux forêts indexées par leurs racines en 
-//Remplissant récursivement le tableau fDist
+//Calcul de la distance entre deux forÃªts indexÃ©es par leurs racines en
+//Remplissant rÃ©cursivement le tableau fDist
 //-----------------------------------------------------------------------------
 void MSL_O_Similarity::computeForestsDistances(int input_vertex,int reference_vertex){
 
@@ -31,7 +31,7 @@ void MSL_O_Similarity::computeForestsDistances(int input_vertex,int reference_ve
   i= input_vertex;
   j= reference_vertex;   
   DistanceType max;
-  //Calcul récursif de la distance entre les forêts T1[L1[i]..i] et T2[L2[j]..j]  
+  //Calcul rÃ©cursif de la distance entre les forÃªts T1[L1[i]..i] et T2[L2[j]..j]
   int fNum = fix(i,j);
   fDist[fNum][0][0] = 0;
 
@@ -57,7 +57,7 @@ void MSL_O_Similarity::computeForestsDistances(int input_vertex,int reference_ve
 	  DistanceType dele = fDist[fNum][idx(L1[i],i1-1)][idx(L2[j],j1)] +  delLocalNode(T1,i1);
 	  DistanceType inse = fDist[fNum][idx(L1[i],i1)][idx(L2[j],j1-1)] +  insLocalNode(T2,j1);
 	  DistanceType match = fDist[fNum][idx(L1[i],i1-1)][idx(L2[j],j1-1)] + matchLocalNode(i1,j1);
-	  max = Max(dele)<<inse<<match<<0;
+	  max = Max(dele) << inse << match << 0.;
 	  
 	  fDist[fNum][idx(L1[i],i1)][idx(L2[j],j1)] = max;
 	  //_dst1[i1][j1] = max;
@@ -74,7 +74,7 @@ void MSL_O_Similarity::computeForestsDistances(int input_vertex,int reference_ve
 	  DistanceType dele = fDist[fNum][idx(L1[i],i1-1)][idx(L2[j],j1)] + delLocalNode(T1,i1);
 	  DistanceType inse = fDist[fNum][idx(L1[i],i1)][idx(L2[j],j1-1)] +  insLocalNode (T2,j1);
 	  DistanceType match = fDist[fNum][idx(L1[i],L1[i1]-1)][idx(L2[j],L2[j1]-1)] + fDist[fix(getKey1(i1),getKey2(j1))][idx(L1[i1],i1)][idx(L2[j1],j1)];//_dst1[i1][j1];
-	  max = Max(dele)<<inse<<match<<0;
+	  max = Max(dele) << inse << match << 0.;
 	  
 	  
 	  fDist[fNum][idx(L1[i],i1)][idx(L2[j],j1)] = max;

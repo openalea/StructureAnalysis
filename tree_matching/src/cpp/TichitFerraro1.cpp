@@ -26,7 +26,7 @@ TichitFerraro1::TichitFerraro1(MTG& mtg,TreeGraph& input, TreeGraph & reference,
   _mtg = &mtg;
   superGraph = new SuperGraph(input,reference);
   sequence = new Sequence();
-  _scale = scale; // représente l'echelle de comparaison : 0 = comparaison classique, 1 = cout indel utilise les complexes.
+  _scale = scale; // reprÃ©sente l'echelle de comparaison : 0 = comparaison classique, 1 = cout indel utilise les complexes.
   _flag = flag; // pour l'affichage du temps de calcul
   this->init();
 }
@@ -372,7 +372,7 @@ void TichitFerraro1::computeTreeDist(int ki, int kj)  {
         float dele = fDist[fNum][idx(L1[i],i1-1)][idx(L2[j],j1)] +  del(tree1[i1]) + delTreeHoriz(fNum,i1,j1) + delTreeVert(fNum,i1,j1);
         float inse = fDist[fNum][idx(L1[i],i1)][idx(L2[j],j1-1)] +  ins(tree2[j1]) + insTreeHoriz(fNum,i1,j1) + insTreeVert(fNum,i1,j1);;
         float match = fDist[fNum][idx(L1[i],i1-1)][idx(L2[j],j1-1)] + subst(tree1[i1],tree2[j1]) + matchTreeHoriz(fNum,i1,j1) +matchTreeVert(fNum,i1,j1);
-        float maxi = Max(dele)<<inse<<match<<0;
+        float maxi = Max(dele) << inse << match << 0.;
 
 	if(maxi>lsmax){
 	  lsmax = maxi;
@@ -407,7 +407,7 @@ void TichitFerraro1::computeTreeDist(int ki, int kj)  {
         float dele = fDist[fNum][idx(L1[i],i1-1)][idx(L2[j],j1)] +  del(tree1[i1]) + delForestHoriz(fNum,i,i1,j,j1) + delForestVert(fNum,i,i1,j,j1);
         float inse = fDist[fNum][idx(L1[i],i1)][idx(L2[j],j1-1)] +  ins(tree2[j1]) + insForestHoriz(fNum,i,i1,j,j1) + insForestVert(fNum,i,i1,j,j1);
         float match = fDist[fNum][idx(L1[i],L1[i1]-1)][idx(L2[j],L2[j1]-1)] + tDist[i1][j1];
-        float maxi = Max(dele)<<inse<<match<<0;
+        float maxi = Max(dele) << inse << match << 0.;
         fDist[fNum][idx(L1[i],i1)][idx(L2[j],j1)] = maxi;
         if (maxi == dele) {
           rootF1[fNum][idx(L1[i],i1)][idx(L2[j], j1)] = setRootF1(fNum,i,i1,j,j1);

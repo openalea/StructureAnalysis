@@ -37,6 +37,8 @@
 #ifndef GENERIC_TREE_TCC
 #define GENERIC_TREE_TCC
 
+using Tree_tie::tie;
+
 /*--------------------------------------------------------------*
  *
  *  Generic algorithm for subtree selection, using a tree,

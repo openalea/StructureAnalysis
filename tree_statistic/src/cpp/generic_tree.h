@@ -40,6 +40,8 @@
 #include "stat_tool/stat_tools.h"
 #include <deque>
 
+using Tree_tie::tie;
+
 namespace Stat_trees
 {
 

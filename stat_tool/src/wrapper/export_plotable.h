@@ -22,6 +22,8 @@
 #ifndef __CLASS_STAT_TOOL_PLOTABLE__
 #define __CLASS_STAT_TOOL_PLOTABLE__
 
+#include <boost/python.hpp>
+
 // Boost.Python Wrapper export function
 void class_plotable();
 
