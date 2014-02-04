@@ -72,9 +72,28 @@ VPTOOLS_BEGIN_NAMESPACE
  #define CORPUS_LIST(T,OBJ,SUPOBJ) \
  CORPUS(T,OBJ,SUPOBJ) \
  const_reference first() const { return this->front(); } \
- void removeFirst() { this->pop_front(); } \
- void append( const_reference a ) { this->push_back( a ); } \
+ const_reference last() const { const_iterator i = this->end(); i--; return *i; } \
+ reference removeFirst() { reference elt= this->front(); this->pop_front(); return elt; } \
+ void append( const_reference a ) { this->push_back(a); } \
  inline void insert( const_reference a ) { this->append(a); } \
+ iterator insert_after(iterator pos, const_reference x){ return Master::insert(pos,x); } \
+ template<class InputIterator> \
+ void insert_after(iterator pos, InputIterator f, InputIterator l){ Master::insert(pos,f,l); } \
+ iterator previous(iterator pos){ pos--; return pos; } \
+ void insertAt( size_t i, const_reference a ) \
+        { if(i==0) { prepend(a); return; } \
+		iterator it= this->begin(); std::advance(it,i-1); insert_after(it,a);  } \
+ void removeIn(size_t b, size_t e) \
+   { \
+   iterator it1= this->begin(); std::advance(it1,b); \
+   iterator it2= this->begin(); std::advance(it2,e+1); \
+   this->erase(it1,it2); \
+   } \
+ void prepend( const_reference a ) { this->push_front(a); } \
+ const_reference operator[](size_t n) const \
+   { const_iterator it= this->begin(); std::advance(it,n); return *it; } \
+ reference operator[](size_t n) \
+   { iterator it= this->begin(); std::advance(it,n); return *it; }
 
  #define CTOR_VAL_LIST(T,OBJ) \
  CTOR(T,OBJ)\
