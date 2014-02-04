@@ -63,12 +63,23 @@
 #endif
 /// Byte Order. If not defined (on windows for example), assign it to little endian
 #ifndef __BYTE_ORDER
+#ifdef __BYTE_ORDER__
+
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+    #define __BYTE_ORDER __LITTLE_ENDIAN
+#else
+    #define __BYTE_ORDER __BIG_ENDIAN
+#endif
+
+#else
 #ifdef _MSC_VER
 #pragma message("__BYTE_ORDER macro not defined. Use Little Endian by default.")
 #else
 #warning "__BYTE_ORDER macro not defined. Use Little Endian by default."
 #endif
 #define __BYTE_ORDER __LITTLE_ENDIAN
+#endif
+
 #endif
 
 /* ----------------------------------------------------------------------- */
@@ -243,7 +254,7 @@ public:
   const std::ofstream& getStream() const { return __stream; }
 
   /// Returns true if \e stream  is valid.
-  operator void *( ) const { return (__stream); }
+  operator bool( ) const { return (__stream); }
 
   /// Returns true if \e stream  is not valid.
   bool operator!( ) const { return (!__stream); }
@@ -396,7 +407,7 @@ public:
   const std::ifstream& getStream() const { return __stream; }
 
   /// Returns true if \e stream  is valid.
-  operator void *( ) const { return (__stream); }
+  operator bool( ) const { return (__stream); }
 
   /// Returns true if \e stream  is not valid.
   bool operator!( ) const { return (!__stream); }

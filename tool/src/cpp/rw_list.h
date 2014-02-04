@@ -65,9 +65,14 @@ VPTOOLS_BEGIN_NAMESPACE
 
 */
 
+#define CORPUS_IT_LIST(T,OBJ,SUPOBJ) \
+ CORPUS_IT(T,OBJ,SUPOBJ) \
+ void remove() \
+   { \
+   c->erase(*this); \
+   c->previous(*this); \
+   }
 
- #define CORPUS_IT_LIST(T,OBJ,SUPOBJ) \
- CORPUS_IT(T,OBJ,SUPOBJ)
 
  #define CORPUS_LIST(T,OBJ,SUPOBJ) \
  CORPUS(T,OBJ,SUPOBJ) \
