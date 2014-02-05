@@ -34,7 +34,7 @@
 #ifndef __util_tool_hash_h__
 #define __util_tool_hash_h__
 
-#include "tools_config.h"
+#include "config.h"
 
 /*! \file util_hash.h
     \brief Utility for hashing std::string.
@@ -67,7 +67,7 @@ struct tool_hashstr
   typedef tool_hash<const char*> hash_cstr;
 
   /// hash of the string.
-  size_t operator() (const std::string& s1) const
+  std:size_t operator() (const std::string& s1) const
     { return my_hasher(s1.c_str()); }
 
    hash_cstr my_hasher;

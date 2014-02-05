@@ -67,11 +67,11 @@ class rw_hash
 #endif
 {
 private:
-  size_t (*ptr)(const T&);
+  std::size_t (*ptr)(const T&);
 public:
   rw_hash() {}
-  rw_hash(size_t (*f)(const T&)) : ptr(f) {}
-  size_t operator()(const T& x) const { return ptr(x); }
+  rw_hash(std::size_t (*f)(const T&)) : ptr(f) {}
+  std::size_t operator()(const T& x) const { return ptr(x); }
 #ifdef WIN32_STL_EXTENSION
   bool operator()(const T& x,const T& y) const { return x < y; }
 #endif
