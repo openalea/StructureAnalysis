@@ -1,11 +1,11 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       PlantGL: The Plant Graphic Library
+ *       PlantGL: Plant Graphic Library
  *
- *       Copyright 2000-2010 UMR CIRAD/INRIA/INRA DAP 
+ *       Copyright 1995-2003 UMR Cirad/Inria/Inra Dap - Virtual Plant Team
  *
- *       File author(s): F. Boudon et al.
+ *       File author(s): F. Boudon
  *
  *  ----------------------------------------------------------------------------
  *
@@ -30,15 +30,41 @@
  */
 
 
-#ifndef __util_hashset_h__
-#define __util_hashset_h__
+#ifndef __util_tool_hashset_h__
+#define __util_tool_hashset_h__
 
 /*! \file util_hashset.h
     \brief Utility for hashset with std::string.
 */
 #include "config.h"
+#include "util_types.h"
 
-#ifdef GNU_STL_EXTENSION
+#ifdef USING_UNORDERED_MAP
+
+#ifdef GNU_TR1_STL_EXTENSION
+	#include <tr1/unordered_set>
+	#define tool_hash_set std::tr1::unordered_set
+
+	#ifndef tool_hash
+		#define tool_hash std::tr1::hash
+	#endif
+
+#else
+	#include <unordered_set>
+	#define tool_hash_set std::unordered_set
+
+	#ifndef tool_hash
+		#define tool_hash std::hash
+	#endif
+#endif
+
+
+typedef tool_hash_set<std::string> tool_hash_set_string ;
+typedef tool_hash_set<uint_t> tool_hash_set_uint32;
+
+#else
+
+#ifdef GNU_TR1_STL_EXTENSION
 	#include <ext/hash_set>
 #else
 	#if defined(__GNUC__)
@@ -46,6 +72,11 @@
 	#endif
 	#include <hash_set>
 #endif
+
+#ifndef tool_hash
+#define tool_hash STDEXT::hash
+#endif
+#define tool_hash_set STDEXT::hash_set
 
 #include "util_hash.h"
 
@@ -56,18 +87,17 @@
    \brief Class for using hash_set with string.
 */
 
-typedef STDEXT::hash_set<std::string, hashstr, eqstr> hash_set_string;
-
-typedef STDEXT::hash_set<uint_t,STDEXT::hash<uint_t>,std::equal_to<uint_t> > hash_set_uint32;
+typedef tool_hash_set<std::string, tool_hashstr, tool_eqstr> tool_hash_set_string;
+typedef tool_hash_set<uint_t,tool_hash<uint_t>,std::equal_to<uint_t> > tool_hash_set_uint32;
 
 #else
 
-typedef STDEXT::hash_set<std::string> hash_set_string ;
-
-typedef STDEXT::hash_set<uint_t> hash_set_uint32;
-
+typedef tool_hash_set<std::string> tool_hash_set_string ;
+typedef tool_hash_set<uint_t> tool_hash_set_uint32;
 
 
 #endif
 
 #endif
+
+#endif // __util_tool_hashset_h__

@@ -39,21 +39,9 @@
 
 #include "config.h"
 
-#ifdef RWOUT
 /* ----------------------------------------------------------------------- */
 
 #include <list>
-/*
-#ifdef GNU_STL_EXTENSION
-		#include <ext/slist>
-#else
-	#ifdef WIN32_STL_EXTENSION
-		#include <list>
-	#else
-		#include <slist>
-	#endif
-#endif
-*/
 #include "tools_namespace.h"
 #include "rw_macro.h"
 
@@ -82,32 +70,6 @@ VPTOOLS_BEGIN_NAMESPACE
    }
 
 
-/*
-#ifndef WIN32_STL_EXTENSION
- #define CORPUS_SLIST(T,OBJ,SUPOBJ) \
- CORPUS(T,OBJ,SUPOBJ) \
- const_reference first() const { return Master::front(); } \
- const_reference last() const { return *(this->previous(this->end())); } \
- reference removeFirst() { reference elt= this->front(); this->pop_front(); return elt; } \
- void append( const_reference a ) { this->insert_after( this->previous(this->end()), a ); } \
- inline void insert( const_reference a ) { this->append(a); } \
- void insertAt( size_t i, const_reference a ) \
-        { if(i==0) { this->prepend(a); return; } \
-		  iterator it= this->begin(); std::advance(it,i-1); this->insert_after(it,a); } \
- void removeIn(size_t b, size_t e) \
-   { \
-   iterator it1= this->begin(); std::advance(it1,b); \
-   iterator it2= this->begin(); std::advance(it2,e+1); \
-   this->erase(it1,it2); \
-   } \
- void prepend( const_reference a ) { this->push_front(a); } \
- const_reference operator[](size_t n) const \
-   { const_iterator it= this->begin(); std::advance(it,n); return *it; } \
- reference operator[](size_t n) \
-   { iterator it= this->begin(); std::advance(it,n); return *it; }
-
-#else
-*/
  /*
   Microsoft STL from VC7.1 does not have slist
   So we have to translate a normal list into RWTValSlist
@@ -118,7 +80,7 @@ VPTOOLS_BEGIN_NAMESPACE
  const_reference last() const { const_iterator i = this->end(); i--; return *i; } \
  reference removeFirst() { reference elt= this->front(); this->pop_front(); return elt; } \
  void append( const_reference a ) { this->push_back(a ); } \
- inline void insert( const_reference a ) { Master::append(a); } \
+ inline void insert( const_reference a ) { this->append(a); } \
  iterator insert_after(iterator pos, const_reference x){ return Master::insert(pos,x); } \
  template<class InputIterator> \
  void insert_after(iterator pos, InputIterator f, InputIterator l){ Master::insert(pos,f,l); } \
@@ -137,7 +99,6 @@ VPTOOLS_BEGIN_NAMESPACE
    { const_iterator it= this->begin(); std::advance(it,n); return *it; } \
  reference operator[](size_t n) \
    { iterator it= this->begin(); std::advance(it,n); return *it; }
-//#endif
 
  #define CTOR_VAL_SLIST(T,OBJ) \
  CTOR(T,OBJ) \
@@ -149,16 +110,8 @@ VPTOOLS_BEGIN_NAMESPACE
 //#ifdef WIN32_STL_EXTENSION
  DEF_RW(T,ValSList,std::list,SLIST,VAL)
  DEF_RW(T,PtrSList,std::list,SLIST,PTR)
-/*
-#elif defined GNU_STL_EXTENSION
- DEF_RW(T,ValSList,STDEXT::slist,SLIST,VAL)
- DEF_RW(T,PtrSList,STDEXT::slist,SLIST,PTR)
-#else
- DEF_RW(T,ValSList,std::slist,SLIST,VAL)
- DEF_RW(T,PtrSList,std::slist,SLIST,PTR)
-#endif
-*/
-/* ----------------------------------------------------------------------- */
+
+ /* ----------------------------------------------------------------------- */
 
 VPTOOLS_END_NAMESPACE
 
@@ -168,13 +121,6 @@ VPTOOLS_END_NAMESPACE
 #define RWTPtrSlistIterator VPTOOLS(PtrSListIt)
 
 /* ----------------------------------------------------------------------- */
-
-#else
-
-#include <rw/tvslist.h>
-#include <rw/tpslist.h>
-
-#endif
-
+  
 // __rw_slist_h
 #endif

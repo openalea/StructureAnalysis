@@ -57,17 +57,8 @@
 #include <set> // contains also multiset
 #include <map> // contains also multimap
 
-#ifdef GNU_STL_EXTENSION
-        #include <ext/slist>
-        #include <ext/hash_set>
-        #include <ext/hash_map>
-#else
-	#ifndef WIN32_STL_EXTENSION
-        #include <slist>
-	#endif
-        #include <hash_set> // contains also hash_multiset
-        #include <hash_map> // contains also hash_multimap
-#endif
+#include "util_hashset.h"
+#include "util_hashmap.h"
 
 #include <stack>
 #include <queue> // contains also priority_queue

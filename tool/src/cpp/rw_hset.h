@@ -44,14 +44,11 @@
 /* ----------------------------------------------------------------------- */
 
 #include "tools_namespace.h"
+
+#include "util_hashset.h"
 #include "rw_hash.h"
 #include "rw_defs.h"
 
-#ifdef GNU_STL_EXTENSION
-        #include <ext/hash_set>
-#else
-        #include <hash_set>
-#endif
 
 
 
@@ -72,9 +69,9 @@ VPTOOLS_BEGIN_NAMESPACE
 
 
 template < class T >
-struct ValHSet : public STDEXT::hash_set< T, rw_hash<T> >
+struct ValHSet : public tool_hash_set< T, rw_hash<T> >
 {
-  typedef STDEXT::hash_set< T, rw_hash<T> > Base;
+  typedef tool_hash_set< T, rw_hash<T> > Base;
   typedef typename Base::key_type key_type;
 
   ValHSet( size_t (*h)(const T&), size_t n= RWDEFAULT_CAPACITY ) 
@@ -92,9 +89,9 @@ struct ValHSet : public STDEXT::hash_set< T, rw_hash<T> >
 };
 
 template < class T >
-struct ValHSetIt : public STDEXT::hash_set<T, rw_hash<T> >::iterator
+struct ValHSetIt : public tool_hash_set<T, rw_hash<T> >::iterator
 {
-  typedef typename STDEXT::hash_set<T, rw_hash<T> >::iterator It;
+  typedef typename tool_hash_set<T, rw_hash<T> >::iterator It;
   typedef ValHSet<T> Container;
 
   Container* c;

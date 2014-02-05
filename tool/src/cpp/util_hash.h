@@ -1,11 +1,11 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       PlantGL: The Plant Graphic Library
+ *       PlantGL: Plant Graphic Library
  *
- *       Copyright 2000-2010 UMR CIRAD/INRIA/INRA DAP 
+ *       Copyright 1995-2003 UMR Cirad/Inria/Inra Dap - Virtual Plant Team
  *
- *       File author(s): F. Boudon et al.
+ *       File author(s): F. Boudon
  *
  *  ----------------------------------------------------------------------------
  *
@@ -31,16 +31,17 @@
 
 
 
-#ifndef __util_hash_h__
-#define __util_hash_h__
+#ifndef __util_tool_hash_h__
+#define __util_tool_hash_h__
 
-#include "config.h"
+#include "tools_config.h"
 
 /*! \file util_hash.h
     \brief Utility for hashing std::string.
 */
 
 #include <string>
+
 
 #ifndef WIN32_STL_EXTENSION
 
@@ -49,7 +50,7 @@
    \brief Comparison between 2 string.
 */
 
-struct eqstr
+struct tool_eqstr
 {
   /// Compare the 2 string.
   bool operator() (const std::string& s1, const std::string& s2) const
@@ -61,14 +62,15 @@ struct eqstr
    \strust hashstr
    \brief Find using a hasher a place for the string.
 */
-struct hashstr
+struct tool_hashstr
 {
+  typedef tool_hash<const char*> hash_cstr;
+
   /// hash of the string.
   size_t operator() (const std::string& s1) const
-    {
-    STDEXT::hash<const char*> my_hasher;
-    return my_hasher(s1.c_str());
-    }
+    { return my_hasher(s1.c_str()); }
+
+   hash_cstr my_hasher;
 };
 
 

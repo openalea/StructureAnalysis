@@ -67,11 +67,11 @@ VPTOOLS_BEGIN_NAMESPACE
 
 
 template < class Key, class T >
-struct ValHDict : public STDEXT::hash_map< Key, T, rw_hash<Key> >
+struct ValHDict : public tool_hash_map< Key, T, rw_hash<Key> >
 {
-  typedef STDEXT::hash_map< Key, T, rw_hash<Key> > Base;
+  typedef tool_hash_map< Key, T, rw_hash<Key> > Base;
   typedef typename Base::key_type key_type;
-#ifdef WIN32_STL_EXTENSION
+#ifdef STL_EXTENSION
   typedef typename Base::value_type data_type;
 #else
   typedef typename Base::data_type data_type;
@@ -80,7 +80,7 @@ struct ValHDict : public STDEXT::hash_map< Key, T, rw_hash<Key> >
 
 
   ValHDict( size_t (*h)(const Key&), size_t sz = RWDEFAULT_CAPACITY) :
-    STDEXT::hash_map< Key, T, rw_hash<Key> > (
+    tool_hash_map< Key, T, rw_hash<Key> > (
 #ifndef WIN32_STL_EXTENSION
 		sz,h
 #else
@@ -90,7 +90,7 @@ struct ValHDict : public STDEXT::hash_map< Key, T, rw_hash<Key> >
   size_t entries() { return this->size(); }
   bool contains( const key_type& k ) const
    { return ( this->count(k) != 0 ); }
-#ifndef WIN32_STL_EXTENSION
+#ifndef STL_EXTENSION
   void insertKeyAndValue( const key_type& k, const data_type& a )
     { this->operator[](k)= a; }
   bool findValue( const key_type& k, data_type& a ) const
@@ -104,11 +104,11 @@ struct ValHDict : public STDEXT::hash_map< Key, T, rw_hash<Key> >
     }
 #else
   void insertKeyAndValue( const key_type& k, const T& a )
-    { operator[](k)= a; }
+    { this->operator[](k)= a; }
   bool findValue( const key_type& k, T& a ) const
     {
-    const_iterator it= find(k);
-    if( it == end() )
+    const_iterator it= this->find(k);
+    if( it == this->end() )
       return false;
     assert(this->count(k));
     a= (*it).second;
@@ -119,9 +119,9 @@ struct ValHDict : public STDEXT::hash_map< Key, T, rw_hash<Key> >
 };
 
 template < class Key, class T >
-struct ValHDictIt : public STDEXT::hash_map< Key, T, rw_hash<Key> >::iterator
+struct ValHDictIt : public tool_hash_map< Key, T, rw_hash<Key> >::iterator
 {
-  typedef typename STDEXT::hash_map< Key, T, rw_hash<Key> >::iterator It;
+  typedef typename tool_hash_map< Key, T, rw_hash<Key> >::iterator It;
   typedef ValHDict<Key,T> Container;
 
   Container* c;

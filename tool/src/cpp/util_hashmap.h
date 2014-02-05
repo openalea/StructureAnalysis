@@ -1,11 +1,11 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       PlantGL: The Plant Graphic Library
+ *       PlantGL: Plant Graphic Library
  *
- *       Copyright 2000-2010 UMR CIRAD/INRIA/INRA DAP 
+ *       Copyright 1995-2003 UMR Cirad/Inria/Inra Dap - Virtual Plant Team
  *
- *       File author(s): F. Boudon et al.
+ *       File author(s): F. Boudon
  *
  *  ----------------------------------------------------------------------------
  *
@@ -30,8 +30,8 @@
  */
 
 
-#ifndef __util_hashmap_h__
-#define __util_hashmap_h__
+#ifndef __util_tool_hashmap_h__
+#define __util_tool_hashmap_h__
 
 #include "config.h"
 
@@ -39,7 +39,33 @@
     \brief Utility for hashmap with std::string.
 */
 
-#ifdef GNU_STL_EXTENSION
+#ifdef USING_UNORDERED_MAP
+
+#ifdef GNU_TR1_STL_EXTENSION
+	#include <tr1/unordered_map>
+	#define tool_hash_map std::tr1::unordered_map
+
+	#ifndef tool_hash
+		#define tool_hash std::tr1::hash
+	#endif
+
+#else
+	#include <unordered_map>
+	#define tool_hash_map std::unordered_map
+
+	#ifndef tool_hash
+		#define tool_hash std::hash
+	#endif
+#endif
+
+
+
+template <class T>
+struct tool_hash_map_string : public tool_hash_map<std::string, T >{};
+
+#else
+
+#ifdef GNU_TR1_STL_EXTENSION
 	#include <ext/hash_map>
 #else
 	#if defined(__GNUC__)
@@ -47,6 +73,11 @@
 	#endif
 	#include <hash_map>
 #endif
+
+#ifndef tool_hash
+#define tool_hash STDEXT::hash
+#endif
+#define tool_hash_map STDEXT::hash_map
 
 #include "util_hash.h"
 
@@ -58,14 +89,16 @@
 */
 
 template <class T>
-struct hash_map_string : public STDEXT::hash_map<std::string, T, hashstr, eqstr>
+struct tool_hash_map_string : public tool_hash_map<std::string, T, tool_hashstr, tool_eqstr>
 {};
 
 #else
 
 template <class T>
-struct hash_map_string : public STDEXT::hash_map<std::string, T >
+struct tool_hash_map_string : public tool_hash_map<std::string, T >
 {};
+
+#endif
 
 #endif
 

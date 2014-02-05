@@ -43,6 +43,6 @@
     \brief File for generic symbol table.
 */
 
-#define SymbolTable hash_map_string
+#define SymbolTable tool_hash_map_string
 
 #endif

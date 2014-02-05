@@ -43,7 +43,7 @@
 
 typedef float Rate;
 typedef RWTValVector<Rate>   RateVector;
-typedef RWTValSlist<int>    NumberList;
+typedef RWTValDlist<int>    NumberList;
 
 enum FileType { DAT=0, PLOT, PRINT };
 
