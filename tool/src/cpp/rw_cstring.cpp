@@ -55,13 +55,8 @@ istream& RWString::readLine(istream& s, bool skipWhite){
 
 size_t RWString::hash() const
 {
-#ifndef WIN32_STL_EXTENSION
- STDEXT::hash<const char*> my_hasher;
+ tool_hash<const char*> my_hasher;
  return my_hasher(c_str());
-#else
- STDEXT::hash_compare<const char*> my_hasher;
- return my_hasher(c_str());
-#endif
 }
 
 istream& RWString::readToDelim( istream& s, char delim)
