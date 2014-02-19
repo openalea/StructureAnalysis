@@ -139,7 +139,7 @@ histogram_type = {
                   }
 
 model_type = {
-              "Multinomial": ChangeType.MULTINOMIAL_CHANGE,
+              "Multinomial": ChangeType.CATEGORICAL_CHANGE,
               "Poisson": ChangeType.POISSON_CHANGE,
               "Ordinal": ChangeType.ORDINAL_GAUSSIAN_CHANGE,
               "Gaussian": ChangeType.GAUSSIAN_CHANGE,

@@ -18,7 +18,7 @@ __version__ = "$Id$"
 from openalea.stat_tool.error import *
 
 from openalea.stat_tool._stat_tool import _Compound
-from openalea.stat_tool._stat_tool import _Mixture
+from openalea.stat_tool._stat_tool import _DiscreteMixture
 from openalea.stat_tool._stat_tool import _Convolution
 from openalea.stat_tool._stat_tool import _DiscreteParametricModel
 from openalea.stat_tool._stat_tool import _Vectors
@@ -1064,7 +1064,7 @@ def MovingAverage(obj, itype, *args, **kargs):
     error.CheckType([obj], [[_Sequences, _MarkovianSequences,
                              _VariableOrderMarkovData, _SemiMarkovData,
                              _NonHomogeneousMarkovData]])
-    error.CheckType([itype], [[list, _DiscreteParametricModel, _Mixture,
+    error.CheckType([itype], [[list, _DiscreteParametricModel, _DiscreteMixture,
                                _Convolution, _Compound]])
     Variable = error.ParseKargs(kargs, "Variable", I_DEFAULT)
     Output = error.ParseKargs(kargs, "Output", "Trend", func_map)

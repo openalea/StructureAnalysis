@@ -19,7 +19,7 @@ __version__ = "$Id$"
 
 import os
 import openalea.stat_tool.interface as interface
-from openalea.stat_tool._stat_tool import _MixtureData
+from openalea.stat_tool._stat_tool import _DiscreteMixtureData
 from openalea.stat_tool._stat_tool import _CompoundData
 from openalea.stat_tool._stat_tool import _ConvolutionData
 from openalea.stat_tool._stat_tool import _DiscreteDistributionData

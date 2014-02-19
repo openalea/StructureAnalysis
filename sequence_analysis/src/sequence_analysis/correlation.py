@@ -18,9 +18,11 @@ __version__ = "$Id$"
 import openalea.stat_tool.interface as interface
 import openalea.stat_tool.error as error
 from openalea.stat_tool._stat_tool import I_DEFAULT
-from openalea.stat_tool._stat_tool import _DiscreteParametricModel, _Mixture, \
+from openalea.stat_tool._stat_tool import _DiscreteParametricModel, _DiscreteMixture, \
     _Convolution, _Compound
 
+# from openalea.stat_tool.mixture import Mixture
+    
 from openalea.sequence_analysis._sequence_analysis import _Correlation
 from openalea.sequence_analysis._sequence_analysis import _NonHomogeneousMarkovData
 from openalea.sequence_analysis._sequence_analysis import _HiddenVariableOrderMarkov
@@ -208,7 +210,7 @@ def ComputeWhiteNoiseCorrelation(obj, itype):
 
     error.CheckType([obj], [_Correlation])
     error.CheckType([itype], [[int, list, _DiscreteParametricModel,
-                              _Mixture, _Convolution, _Compound ]])
+                              _DiscreteMixture, _Convolution, _Compound ]])
 
     if isinstance(itype, int):
         obj.white_noise_correlation_order(itype)

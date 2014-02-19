@@ -52,7 +52,7 @@ from openalea.sequence_analysis._sequence_analysis import\
     _RenewalData,\
     _TimeEvents
 
-from openalea.stat_tool._stat_tool import _Mixture
+from openalea.stat_tool._stat_tool import _DiscreteMixture
 from openalea.stat_tool._stat_tool import _Compound
 from openalea.stat_tool._stat_tool import _FrequencyDistribution
 from openalea.stat_tool._stat_tool import _Convolution
@@ -158,7 +158,7 @@ def _estimate_renewal_count_data(obj, itype, **kargs):
 
     InitialInterEvent = kargs.get("InitialInterEvent", None)
     error.CheckType([InitialInterEvent], [[type(None), _DiscreteParametricModel,
-                                           _Mixture, _Convolution, _Compound]])
+                                           _DiscreteMixture, _Convolution, _Compound]])
 
     EquilibriumEstimator = error.ParseKargs(kargs, "EquilibriumEstimator",
                             'CompleteLikelihood', estimator_semi_markov_type)
@@ -232,7 +232,7 @@ def _estimate_renewal_interval_data(obj, **kargs):
     # distribution
     InitialInterEvent = kargs.get("InitialInterEvent", None)
     error.CheckType([InitialInterEvent], [[type(None), _DiscreteParametricModel,
-                                           _Mixture, _Convolution, _Compound]])
+                                           _DiscreteMixture, _Convolution, _Compound]])
     if isinstance(InitialInterEvent, _DiscreteParametricModel):
         InitialInterEvent = _DiscreteParametric(InitialInterEvent)
     else:

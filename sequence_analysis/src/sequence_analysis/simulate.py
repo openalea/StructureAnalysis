@@ -19,7 +19,7 @@ __version__ = "$Id$"
 from openalea.stat_tool.simulate import Simulate as SimulateDistribution
 
 from openalea.stat_tool._stat_tool import _FrequencyDistribution
-from openalea.stat_tool._stat_tool import _MixtureData
+from openalea.stat_tool._stat_tool import _DiscreteMixtureData
 from openalea.stat_tool._stat_tool import _ConvolutionData
 from openalea.stat_tool._stat_tool import _CompoundData
 
@@ -171,7 +171,7 @@ def Simulate(obj, *args, **kargs):
         :func:`~openalea.sequence_analysis.top_parameters.TopParameters`,
     """
 
-    _valid_dists = [_FrequencyDistribution, _MixtureData, \
+    _valid_dists = [_FrequencyDistribution, _DiscreteMixtureData, \
                               _ConvolutionData, _CompoundData]
 
     # standard distribution case
@@ -191,7 +191,7 @@ def Simulate(obj, *args, **kargs):
 
 
 
-        error.CheckType([args[1]], [[_FrequencyDistribution, _MixtureData, \
+        error.CheckType([args[1]], [[_FrequencyDistribution, _DiscreteMixtureData, \
                                      _ConvolutionData, _CompoundData, int]])
 
         if type(args[1]) in _valid_dists:
