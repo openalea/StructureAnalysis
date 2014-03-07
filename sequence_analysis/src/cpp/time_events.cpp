@@ -3,9 +3,9 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
@@ -601,7 +601,7 @@ DiscreteDistributionData* TimeEvents::extract(StatError &error , int histo_type 
     }
   }
 
-  else if (histo_type == MIXTURE) {
+  else if (histo_type == NB_EVENT_MIXTURE) {
     histo = new DiscreteDistributionData(*mixture);
   }
 
@@ -2590,7 +2590,7 @@ DiscreteDistributionData* RenewalData::extract(StatError &error , int histo_type
         status = false;
         ostringstream error_message;
         error_message << SEQ_label[SEQL_INTER_EVENT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
-                      << SEQ_error[SEQR_NOT_PRESENT];
+                      << STAT_error[STATR_NOT_PRESENT];
         error.update((error_message.str()).c_str());
       }
       break;
@@ -2609,7 +2609,7 @@ DiscreteDistributionData* RenewalData::extract(StatError &error , int histo_type
         status = false;
         ostringstream error_message;
         error_message << SEQ_label[SEQL_LENGTH_BIASED] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
-                      << SEQ_error[SEQR_NOT_PRESENT];
+                      << STAT_error[STATR_NOT_PRESENT];
         error.update((error_message.str()).c_str());
       }
       break;
@@ -2625,7 +2625,7 @@ DiscreteDistributionData* RenewalData::extract(StatError &error , int histo_type
       break;
     }
 
-    case MIXTURE : {
+    case NB_EVENT_MIXTURE : {
       phisto = mixture;
       break;
     }
@@ -2657,7 +2657,7 @@ DiscreteDistributionData* RenewalData::extract(StatError &error , int histo_type
         case FORWARD_RECURRENCE_TIME :
           pdist = renewal->forward;
           break;
-        case MIXTURE :
+        case NB_EVENT_MIXTURE :
           pdist = renewal->mixture;
           break;
         }
@@ -3887,7 +3887,7 @@ void RenewalData::build_index_event(int offset)
   int frequency[2];
 
 
-  index_event = new Curves(2 , htime->nb_value , true);
+  index_event = new Curves(2 , htime->nb_value , true , false , false);
   index_event->offset = offset;
 
   for (i = index_event->offset;i < index_event->length;i++) {
