@@ -3,9 +3,9 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
@@ -67,11 +67,14 @@ SequenceCharacteristics::SequenceCharacteristics(int inb_value)
   nb_value = inb_value;
 
   index_value = NULL;
+  explicit_index_value = NULL;
+
   first_occurrence = NULL;
   recurrence_time = NULL;
   sojourn_time = NULL;
   initial_run = NULL;
   final_run = NULL;
+
   nb_run = NULL;
   nb_occurrence = NULL;
 }
@@ -97,6 +100,13 @@ SequenceCharacteristics::SequenceCharacteristics(const SequenceCharacteristics &
   nb_value = characteristics.nb_value;
 
   index_value = new Curves(*(characteristics.index_value));
+
+  if (characteristics.explicit_index_value) {
+    explicit_index_value = new Curves(*(characteristics.explicit_index_value));
+  }
+  else {
+    explicit_index_value = NULL;
+  }
 
   first_occurrence = new FrequencyDistribution*[nb_value];
   for (i = 0;i < nb_value;i++) {
@@ -176,6 +186,13 @@ void SequenceCharacteristics::copy(const SequenceCharacteristics &characteristic
 
   index_value = new Curves(*(characteristics.index_value));
 
+  if (characteristics.explicit_index_value) {
+    explicit_index_value = new Curves(*(characteristics.explicit_index_value));
+  }
+  else {
+    explicit_index_value = NULL;
+  }
+
   first_occurrence = new FrequencyDistribution*[nb_value];
   for (i = 0;i < nb_value;i++) {
     first_occurrence[i] = new FrequencyDistribution(*(characteristics.first_occurrence[i]));
@@ -245,6 +262,7 @@ void SequenceCharacteristics::reverse(const SequenceCharacteristics &characteris
   nb_value = characteristics.nb_value;
 
   index_value = NULL;
+  explicit_index_value = NULL;
   first_occurrence = NULL;
 
   recurrence_time = new FrequencyDistribution*[nb_value];
@@ -329,6 +347,7 @@ void SequenceCharacteristics::remove()
 
 
   delete index_value;
+  delete explicit_index_value;
 
   if (first_occurrence) {
     for (i = 0;i < nb_value;i++) {
@@ -479,6 +498,21 @@ ostream& SequenceCharacteristics::ascii_print(ostream &os , int type ,
     os << " | " << STAT_label[STATL_FREQUENCY] << endl;
 
     index_value->ascii_print(os , comment_flag);
+
+    if (explicit_index_value) {
+      os << "\n";
+      if (comment_flag) {
+        os << "# ";
+      }
+      os << SEQ_label[SEQL_INDEX_PARAMETER];
+      for (i = 0;i < nb_value;i++) {
+        os << " | " << SEQ_label[SEQL_OBSERVED] << " "
+           << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << i;
+      }
+      os << " | " << STAT_label[STATL_FREQUENCY] << endl;
+
+      explicit_index_value->ascii_print(os , comment_flag);
+    }
   }
 
   for (i = 0;i < nb_value;i++) {
@@ -668,6 +702,29 @@ ostream& SequenceCharacteristics::spreadsheet_print(ostream &os , int type ,
 
   delete smoothed_curves;
 
+  if (explicit_index_value) {
+    os << "\n" << SEQ_label[SEQL_INDEX_PARAMETER];
+    for (i = 0;i < nb_value;i++) {
+      os << "\t" << SEQ_label[SEQL_OBSERVED] << " "
+         << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << i;
+    }
+    os << "\t" << STAT_label[STATL_FREQUENCY] << endl;
+    explicit_index_value->spreadsheet_print(os);
+
+    smoothed_curves = new Curves(*explicit_index_value , 's');
+
+    os << "\n" << SEQ_label[SEQL_SMOOTHED_OBSERVED_PROBABILITIES] << endl;
+    os << SEQ_label[SEQL_INDEX_PARAMETER];
+    for (i = 0;i < nb_value;i++) {
+      os << "\t" << SEQ_label[SEQL_OBSERVED] << " "
+         << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << i;
+    }
+    os << "\t" << STAT_label[STATL_FREQUENCY] << endl;
+    smoothed_curves->spreadsheet_print(os);
+
+    delete smoothed_curves;
+  }
+
   for (i = 0;i < nb_value;i++) {
     os << "\n" << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE]
        << " " << i << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
@@ -782,7 +839,7 @@ bool SequenceCharacteristics::plot_print(const char *prefix , const char *title 
   int index_length , nb_histo , histo_index;
   Curves *smoothed_curves;
   const FrequencyDistribution **phisto;
-  ostringstream data_file_name[2];
+  ostringstream data_file_name[3];
 
 
   // ecriture des fichiers de donnees
@@ -801,6 +858,11 @@ bool SequenceCharacteristics::plot_print(const char *prefix , const char *title 
   status = index_value->plot_print((data_file_name[0].str()).c_str() ,
                                    index_length , smoothed_curves);
   delete smoothed_curves;
+
+  if (explicit_index_value) {
+    data_file_name[2] << prefix << variable + 1 << 2 << ".dat";
+    status = explicit_index_value->plot_print((data_file_name[2].str()).c_str());
+  }
 
   if (status) {
     phisto = new const FrequencyDistribution*[1 + NB_OUTPUT * 6];
@@ -941,6 +1003,48 @@ bool SequenceCharacteristics::plot_print(const char *prefix , const char *title 
         out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
       }
       out_file << endl;
+
+      if (explicit_index_value) {
+        out_file << "set title \"";
+        if (title) {
+          out_file << title;
+          if (nb_variable > 1) {
+            out_file << " - ";
+          }
+        }
+        if (nb_variable > 1) {
+          out_file << STAT_label[STATL_VARIABLE] << " " << variable + 1;
+        }
+        out_file << "\"\n\n";
+
+        out_file << "set xlabel \"" << SEQ_label[SEQL_INDEX] << "\"" << endl;
+        if (explicit_index_value->index_parameter[explicit_index_value->length - 1] - explicit_index_value->index_parameter[0] < TIC_THRESHOLD) {
+          out_file << "set xtics 0,1" << endl;
+        }
+
+        out_file << "plot [" << explicit_index_value->index_parameter[0] << ":"
+                 << explicit_index_value->index_parameter[explicit_index_value->length - 1] << "] [0:1] ";
+        for (j = 0;j < nb_value;j++) {
+          out_file << "\"" << label((data_file_name[2].str()).c_str()) << "\" using 1:"
+                   << j + 2 << " title \"" << SEQ_label[SEQL_OBSERVED] << " "
+                   << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " "
+                   << j << "\" with linespoints";
+          if (j < nb_value - 1) {
+            out_file << ",\\";
+          }
+          out_file << endl;
+        }
+
+        if (explicit_index_value->index_parameter[explicit_index_value->length - 1] - explicit_index_value->index_parameter[0] < TIC_THRESHOLD) {
+          out_file << "set xtics autofreq" << endl;
+        }
+        out_file << "set xlabel" << endl;
+
+        if (i == 0) {
+          out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
+        }
+        out_file << endl;
+      }
 
       if (length_distribution.nb_value - 1 < TIC_THRESHOLD) {
         out_file << "set xtics 0,1" << endl;
@@ -1578,6 +1682,43 @@ void SequenceCharacteristics::plotable_write(MultiPlotSet &plot , int &index ,
 
   index_value->plotable_write(plot[index]);
   index++;
+
+  if (explicit_index_value) {
+
+    // vue : intensite fonction d'un parametre d'index explicite
+
+    plot.variable[index] = variable;
+    plot.viewpoint[index] = INTENSITY;
+
+    if (plot.nb_variable > 1) {
+      title.str("");
+      title << STAT_label[STATL_VARIABLE] << " " << variable + 1;
+      plot[index].title = title.str();
+    }
+
+    plot[index].xrange = Range(explicit_index_value->index_parameter[0] ,
+                               explicit_index_value->index_parameter[explicit_index_value->length - 1]);
+    plot[index].yrange = Range(0. , 1.);
+
+    if (explicit_index_value->index_parameter[explicit_index_value->length - 1] - explicit_index_value->index_parameter[0] < TIC_THRESHOLD) {
+      plot[index].xtics = 1;
+    }
+    plot[index].xlabel = SEQ_label[SEQL_INDEX];
+
+    plot[index].resize(nb_value);
+
+    for (i = 0;i < nb_value;i++) {
+      legend.str("");
+      legend << SEQ_label[SEQL_OBSERVED] << " "
+             << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << i;
+      plot[index][i].legend = legend.str();
+
+      plot[index][i].style = "linespoints";
+    }
+
+    explicit_index_value->plotable_write(plot[index]);
+    index++;
+  }
 
   // vue : loi empirique des longueurs des sequences
 
