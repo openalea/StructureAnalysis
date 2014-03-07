@@ -3,9 +3,9 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
@@ -46,6 +46,7 @@
 #include "tool/config.h"
 
 #include "stat_tools.h"
+#include "markovian.h"
 #include "vectors.h"
 #include "stat_label.h"
 
@@ -981,6 +982,7 @@ bool VectorDistance::ascii_write(StatError &error , const char *path ,
   bool status;
   ofstream out_file(path);
 
+
   error.init();
 
   if (!out_file) {
@@ -994,8 +996,6 @@ bool VectorDistance::ascii_write(StatError &error , const char *path ,
   }
 
   return status;
-
-
 }
 
 
