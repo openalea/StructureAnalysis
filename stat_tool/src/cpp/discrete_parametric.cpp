@@ -3,9 +3,9 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
@@ -362,7 +362,7 @@ DiscreteParametric& DiscreteParametric::operator=(const DiscreteParametric &dist
  *--------------------------------------------------------------*/
 
 DiscreteParametric* discrete_parametric_parsing(StatError &error , ifstream &in_file ,
-                                                int &line ,  int last_ident ,
+                                                int &line , int last_ident ,
                                                 double cumul_threshold , int min_inf_bound)
 
 {
@@ -1841,7 +1841,7 @@ bool DiscreteParametricModel::plot_write(StatError &error , const char *prefix ,
   }
 
   else {
-    status = Distribution::plot_write(error , prefix , 0 , 0 , title);
+    status = Distribution::plot_write(error , prefix , 0 , NULL , title);
   }
 
   return status;
@@ -2076,7 +2076,7 @@ MultiPlotSet* DiscreteParametricModel::get_plotable(const DiscreteDistributionDa
   else {
     StatError error;
 
-    plot_set = Distribution::get_plotable_distributions(error , 0 , 0);
+    plot_set = Distribution::get_plotable_distributions(error , 0 , NULL);
   }
 
   return plot_set;
