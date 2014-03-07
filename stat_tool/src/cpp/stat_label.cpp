@@ -3,9 +3,9 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
@@ -64,6 +64,8 @@ const char *STAT_word[] = {
   "DISTRIBUTION" ,
   "WEIGHT" ,
   "WEIGHTS" ,
+  "COMPONENTS" ,
+  "COMPONENT" ,
 
   "COMPOUND_DISTRIBUTION" ,
   "SUM_DISTRIBUTION" ,
@@ -91,8 +93,9 @@ const char *STAT_word[] = {
   "DISCRETE_PARAMETRIC" ,
   "CONTINUOUS_PARAMETRIC" ,
   "OBSERVATION_DISTRIBUTION" ,
+  "OBSERVATION_MODEL" ,
 
-  "OBSERVATION_PROBABILITIES" ,
+  "OBSERVATION_PROBABILITIES" ,   // pour compatibilite ascendante
 
   "OUTPUT"
 };
@@ -118,18 +121,18 @@ const char *STAT_discrete_distribution_letter[] = {
 
 const char *STAT_continuous_distribution_word[] = {
   "GAMMA" ,
-  "ZERO_INFLATED_GAMMA" ,
   "GAUSSIAN" ,
   "VON_MISES" ,
+  "ZERO_INFLATED_GAMMA" ,
   "LINEAR_MODEL"
 };
 
 
 const char *STAT_continuous_distribution_letter[] = {
   "Ga" ,
-  "ZIGa" ,
   "G" ,
   "VM" ,
+  "ZIGa" ,
   "LM"
 };
 
@@ -244,6 +247,7 @@ const char *STAT_label[] = {
   "deviance" ,
   "log-likelihood of the optimal classification" ,
   "maximum possible log-likelihood of the optimal classification" ,
+  "classification entropy",
   "free parameter" ,
   "free parameters" ,
   "penalyzed log-likelihood" ,
@@ -262,7 +266,12 @@ const char *STAT_label[] = {
   "curve" ,
   "mixture" ,
   "weight" ,
+  "component" ,
+  "categorical" ,
+  "discrete parametric" ,
   "distances between components" ,
+  "posterior assignment probability" ,
+  "assignment entropy" ,  
   "convolution" ,
   "compound" ,
   "sum" ,
@@ -284,6 +293,7 @@ const char *STAT_label[] = {
 
   "vector" ,
   "vectors" ,
+  "number of vectors" ,
   "variable" ,
   "identifier" ,
   "minimum value" ,
@@ -319,6 +329,7 @@ const char *STAT_label[] = {
   "residual" ,
   "standardized residual" ,
   "linear" ,
+  "linear model" ,
   "nonparametric" ,
   "regression" ,
   "estimation" ,
@@ -379,6 +390,8 @@ const char *STAT_label[] = {
   "theoretical" ,
   "restoration" ,
   "weights" ,
+  "distances between observation distributions" ,
+  "distances between observation distributions for consecutive states" ,
   "q-q plot"
 };
 
@@ -412,6 +425,9 @@ const char *STAT_parsing[] = {
   "bad number of distributions" ,
   "bad distribution index" ,
   "bad weight value" ,
+
+  "bad number of components" ,
+  "bad component index" ,
 
   "bad number of variables" ,
   "bad variable index" ,
@@ -474,9 +490,20 @@ const char *STAT_error[] = {
   "bad weight initialization step" ,
   "inferior bound: distribution flag incompatible with mixture flag" ,
 
+  "not present" ,
+  "bad output process index" ,
+  "bad output process type" ,
+  "optimal assignment not in the data" ,
+
+  "bad number of values per variable" ,
+  "bad number of output processes" ,
+  "bad number of outputs" ,
+  "bad minimum value: should be positive" ,
+
   "bad minimum value of known distribution" ,
   "bad mean of known distribution" ,
   "bad number of iterations" ,
+  "bad number of assignments" ,
   "bad penalty weight" ,
 
   "bad clustering step" ,
@@ -496,8 +523,6 @@ const char *STAT_error[] = {
   "bad scaling coefficient" ,
   "bad minimum value" ,
   "bad maximum value" ,
-
-  "not present" ,
 
   "marginal frequency distribution not built" ,
   "marginal histogram not built" ,
