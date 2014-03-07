@@ -144,7 +144,7 @@ public:
   {
     DiscreteMixture* ret;
     StatError error;
-    bool estimate[MIXTURE_NB_COMPONENT];
+    bool estimate[DISCRETE_MIXTURE_NB_COMPONENT];
 
     //Parse estimate list
     int nb_element = boost::python::len(estimate_tuple);
@@ -171,7 +171,7 @@ public:
     StatError error;
 
     int nb_component = boost::python::len(ident_list);
-    int ident[MIXTURE_NB_COMPONENT];
+    int ident[DISCRETE_MIXTURE_NB_COMPONENT];
 
     for (int i = 0; i < nb_component; i++)
       ident[i] = boost::python::extract<int>(ident_list[i]);
