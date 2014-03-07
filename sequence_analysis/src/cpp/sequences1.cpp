@@ -3,9 +3,9 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
@@ -40,9 +40,9 @@
 
 #include "stat_tool/stat_tools.h"
 #include "stat_tool/distribution.h"
-#include "stat_tool/vectors.h"
 #include "stat_tool/curves.h"
 #include "stat_tool/markovian.h"
+#include "stat_tool/vectors.h"
 #include "stat_tool/stat_label.h"
 
 #include "renewal.h"
@@ -1986,7 +1986,7 @@ Vectors* Sequences::build_vectors(bool index_variable) const
     }
   }
 
-  vec = new Vectors(cumul_length , 0 , nb_variable + offset , itype);
+  vec = new Vectors(cumul_length , NULL , nb_variable + offset , itype);
   delete [] itype;
 
   i = 0;
@@ -2023,11 +2023,15 @@ Vectors* Sequences::build_vectors(bool index_variable) const
       else {
         vec->max_value[0] = index_parameter_distribution->nb_value - 1;
       }
+
+      vec->min_interval[0] = index_interval->offset;
     }
 
     else {
       vec->min_value[0] = 0;
       vec->max_value[0] = max_length - 1;
+
+      vec->min_interval[0] = 1;
     }
 
     vec->build_marginal_frequency_distribution(0);
@@ -2055,6 +2059,8 @@ Vectors* Sequences::build_vectors(bool index_variable) const
       vec->mean_computation(i + offset);
       vec->variance_computation(i + offset);
     }
+
+    vec->min_interval_computation(i + offset);
   }
 
   vec->covariance_computation();
@@ -2124,7 +2130,7 @@ Vectors* Sequences::extract_vectors(StatError &error , int feature_type ,
           status = false;
           ostringstream error_message;
           error_message << STAT_label[STATL_VALUE] << " " << value << " "
-                        << SEQ_error[SEQR_NOT_PRESENT];
+                        << STAT_error[STATR_NOT_PRESENT];
           error.update((error_message.str()).c_str());
         }
       }
@@ -2386,7 +2392,7 @@ MarkovianSequences* Sequences::markovian_sequences(StatError &error) const
         status = false;
         ostringstream error_message;
         error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
-                      << SEQ_error[SEQR_POSITIVE_MIN_VALUE];
+                      << STAT_error[STATR_POSITIVE_MIN_VALUE];
         error.update((error_message.str()).c_str());
       }
 
