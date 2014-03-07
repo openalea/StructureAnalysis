@@ -3,9 +3,9 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
@@ -664,7 +664,7 @@ DiscreteParametricModel* Renewal::extract(StatError &error , int dist_type , int
     case FORWARD_RECURRENCE_TIME :
       pdist = forward;
       break;
-    case MIXTURE :
+    case NB_EVENT_MIXTURE :
       pdist = mixture;
       break;
     }
@@ -697,7 +697,7 @@ DiscreteParametricModel* Renewal::extract(StatError &error , int dist_type , int
         break;
       }
 
-      case MIXTURE : {
+      case NB_EVENT_MIXTURE : {
         phisto = renewal_data->mixture;
         break;
       }
