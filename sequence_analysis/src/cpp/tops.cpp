@@ -3,9 +3,9 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
@@ -790,7 +790,7 @@ bool TopParameters::plot_write(const char *prefix , const char *title ,
       }
 
       plot_print((data_file_name[nb_dist].str()).c_str() , nb_histo - 1 , pdist ,
-                 scale , 0 , nb_histo , phisto);
+                 scale , NULL , nb_histo , phisto);
     }
 
     // ecriture du fichier de commandes et du fichier d'impression
