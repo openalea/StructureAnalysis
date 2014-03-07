@@ -3,9 +3,9 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
@@ -47,14 +47,14 @@
  */
 
 
-const int MIXTURE_NB_COMPONENT = 100;   // nombre maximum de composantes
+const int DISCRETE_MIXTURE_NB_COMPONENT = 100;   // nombre maximum de composantes
 
-const double MIXTURE_PARAMETER = 20.;  // parametre initial pour une loi binomiale negative
+const double NEGATIVE_BINOMIAL_PARAMETER = 20.;  // parametre initial pour une loi binomiale negative
 const double MIN_WEIGHT_STEP = 0.1;    // pas minimum d'initialisation des poids
 const double MAX_WEIGHT_STEP = 0.5;    // pas maximum d'initialisation des poids
 const int MIXTURE_COEFF = 2;           // coefficient arrondi estimateur
-const double MIXTURE_LIKELIHOOD_DIFF = 1.e-5;  // seuil pour stopper les iterations EM
-const int MIXTURE_NB_ITER = 500;        // nombre maximum d'iterations EM
+const double DISCRETE_MIXTURE_LIKELIHOOD_DIFF = 1.e-5;  // seuil pour stopper les iterations EM
+const int DISCRETE_MIXTURE_NB_ITER = 500;        // nombre maximum d'iterations EM
 
 
 
@@ -124,11 +124,9 @@ public :
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(StatError &error , const char *path ,
-                     bool exhaustive = false) const;
+    bool ascii_write(StatError &error , const char *path , bool exhaustive = false) const;
     bool spreadsheet_write(StatError &error , const char *path) const;
-    bool plot_write(StatError &error , const char *prefix ,
-                    const char *title = NULL) const;
+    bool plot_write(StatError &error , const char *prefix , const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
     void computation(int min_nb_value = 1 , double cumul_threshold = CUMUL_THRESHOLD ,
@@ -162,9 +160,9 @@ class DiscreteMixtureData : public StatInterface , public FrequencyDistribution 
 
 private :
 
-    DiscreteMixture *mixture;       // pointeur sur un objet DiscreteMixture
+    DiscreteMixture *mixture;  // pointeur sur un objet DiscreteMixture
     int nb_component;       // nombre de composantes
-    FrequencyDistribution *weight;      // loi empirique des poids
+    FrequencyDistribution *weight;  // loi empirique des poids
     FrequencyDistribution **component;  // composantes empiriques
 
     void copy(const DiscreteMixtureData &mixt_histo , bool model_flag = true);
@@ -186,11 +184,9 @@ public :
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(StatError &error , const char *path ,
-                     bool exhaustive = false) const;
+    bool ascii_write(StatError &error , const char *path , bool exhaustive = false) const;
     bool spreadsheet_write(StatError &error , const char *path) const;
-    bool plot_write(StatError &error , const char *prefix ,
-                    const char *title = NULL) const;
+    bool plot_write(StatError &error , const char *prefix , const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
     double information_computation() const;
