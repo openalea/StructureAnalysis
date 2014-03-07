@@ -3,9 +3,9 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
@@ -436,35 +436,6 @@ ostream& Sequences::profile_spreadsheet_print(ostream &os , int index , int nb_s
       os << "\t" << identifier[index];
     }
     os << endl;
-
-    // pour les donnees manquantes
-
-    if ((index_parameter) && (index_interval->variance > 0.) && (i < length[index] - 1)) {
-      for (k = index_parameter[index][i] + index_interval->offset;k < index_parameter[index][i + 1];k += index_interval->offset) {
-        if (!change_point) {
-          os << int_sequence[index][0][i] << "\t";
-        }
-        for (j = 1;j < nb_variable;j++) {
-          if ((piecewise_function) && (piecewise_function[j])) {
-            os << piecewise_function[j][i] << "\t";
-          }
-          os << "\t";
-        }
-
-        os << k;
-        for (j = 0;j < nb_segment;j++) {
-          os << "\t" << profiles[i][j];
-        }
-
-        if (change_point) {
-          os << "\t";
-          for (j = 1;j < nb_segment;j++) {
-            os << "\t" << change_point[j][i];
-          }
-        }
-        os << endl;
-      }
-    }
   }
 
   if ((begin_conditonal_entropy) && (end_conditional_entropy) &&
@@ -523,27 +494,6 @@ ostream& Sequences::profile_spreadsheet_print(ostream &os , int index , int nb_s
         os << "\t" << identifier[index];
       }
       os << endl;
-
-      // pour les donnees manquantes
-
-      if ((index_parameter) && (index_interval->variance > 0.) && (i < length[index] - 1)) {
-        for (k = index_parameter[index][i] + index_interval->offset;k < index_parameter[index][i + 1];k += index_interval->offset) {
-          os << k;
-
-          for (j = 1;j < nb_segment;j++) {
-            os << "\t" << begin_conditonal_entropy[j][i];
-          }
-          os << "\t";
-          for (j = 1;j < nb_segment;j++) {
-            os << "\t" << end_conditional_entropy[j][i];
-          }
-          os << "\t";
-          for (j = 1;j < nb_segment;j++) {
-            os << "\t" << change_point_entropy[j][i];
-          }
-          os << endl;
-        }
-      }
     }
   }
 
@@ -2733,7 +2683,7 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
 
         profile_ascii_print(*os , index , nb_segment , backward_output ,
                             (output == CHANGE_POINT ? SEQ_label[SEQL_CHANGE_POINT] : SEQ_label[SEQL_SEGMENT]) ,
-                            0 , change_point , forward_partial_entropy ,
+                            NULL , change_point , forward_partial_entropy ,
                             backward_partial_entropy , change_point_entropy);
 
         *os << "\n" << SEQ_label[SEQL_POSSIBLE_SEGMENTATION_LIKELIHOOD] << ": " << rlikelihood << endl;
@@ -2757,7 +2707,7 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
 
         profile_spreadsheet_print(*os , index , nb_segment , backward_output ,
                                   (output == CHANGE_POINT ? SEQ_label[SEQL_CHANGE_POINT] : SEQ_label[SEQL_SEGMENT]) ,
-                                  0 , change_point , forward_partial_entropy ,
+                                  NULL , change_point , forward_partial_entropy ,
                                   backward_partial_entropy , change_point_entropy);
 
         *os << "\n" << SEQ_label[SEQL_POSSIBLE_SEGMENTATION_LIKELIHOOD] << "\t" << rlikelihood << endl;
@@ -2770,9 +2720,9 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
       }
 
       case 'g' : {
-        profile_plot_print(*os , index , nb_segment , backward_output , 0 , change_point ,
-                           forward_partial_entropy , backward_partial_entropy ,
-                           change_point_entropy);
+        profile_plot_print(*os , index , nb_segment , backward_output ,
+                           NULL , change_point , forward_partial_entropy ,
+                           backward_partial_entropy , change_point_entropy);
         break;
       }
 
