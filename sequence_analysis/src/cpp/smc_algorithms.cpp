@@ -3,9 +3,9 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
@@ -423,7 +423,7 @@ double SemiMarkov::likelihood_computation(const SemiMarkovData &seq) const
   // verification de la compatibilite entre le modele et les donnees
 
   if (nb_output_process + 1 == seq.nb_variable) {
-    if ((!(seq.marginal_distribution[0])) || (state_process->nb_value < seq.marginal_distribution[0]->nb_value)) {
+    if ((!(seq.marginal_distribution[0])) || (nb_state < seq.marginal_distribution[0]->nb_value)) {
       likelihood = D_INF;
     }
 
@@ -1103,7 +1103,7 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostrea
 
       if (marginal_distribution[1]->nb_value > NB_STATE) {
         status = false;
-        error.update(SEQ_error[SEQR_NB_OUTPUT]);
+        error.update(STAT_error[STATR_NB_OUTPUT]);
       }
 
 /*      if (!characteristics[1]) {
@@ -1729,7 +1729,7 @@ bool MarkovianSequences::comparison(StatError &error , ostream &os , int nb_mode
       status = false;
       ostringstream error_message;
       error_message << SEQ_label[SEQL_SEMI_MARKOV_CHAIN] << " " << i + 1 << ": "
-                    << SEQ_error[SEQR_NB_OUTPUT_PROCESS];
+                    << STAT_error[STATR_NB_OUTPUT_PROCESS];
       error.update((error_message.str()).c_str());
     }
 
@@ -1747,7 +1747,7 @@ bool MarkovianSequences::comparison(StatError &error , ostream &os , int nb_mode
           status = false;
           ostringstream error_message;
           error_message << SEQ_label[SEQL_SEMI_MARKOV_CHAIN] << " " << i + 1 << ": "
-                        << SEQ_error[SEQR_NB_OUTPUT];
+                        << STAT_error[STATR_NB_OUTPUT];
           error.update((error_message.str()).c_str());
         }
       }
@@ -1801,10 +1801,10 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , const FrequencyDistrib
                                        bool counting_flag , bool divergence_flag) const
 
 {
-  bool status = true;
+  bool status = true , hidden;
   register int i , j , k , m;
   int cumul_length , occupancy , *itype , *decimal_scale , *pstate , **pioutput;
-  double buff , min_location , **proutput;
+  double buff , min_location , likelihood , **proutput;
   Distribution *weight , *restoration_weight;
   SemiMarkov *smarkov;
   SemiMarkovData *seq;
@@ -1842,6 +1842,7 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , const FrequencyDistrib
     if (length_distribution.nb_value - 1 > COUNTING_MAX_LENGTH) {
       counting_flag = false;
     }
+    hidden = test_hidden(nb_output_process , categorical_process);
 
     // initialisations
 
@@ -2035,6 +2036,7 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , const FrequencyDistrib
             (smarkov->continuous_parametric_process[i]->ident == VON_MISES)) {
           for (j = 0;j < smarkov->nb_state;j++) {
             delete [] smarkov->continuous_parametric_process[i]->observation[j]->cumul;
+            smarkov->continuous_parametric_process[i]->observation[j]->cumul = NULL;
           }
         }
       }
@@ -2051,10 +2053,7 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , const FrequencyDistrib
       seq->max_value_computation(i);
 
       seq->build_marginal_frequency_distribution(i);
-
-      if (seq->type[i] == REAL_VALUE) {
-        seq->min_interval_computation(i);
-      }
+      seq->min_interval_computation(i);
     }
 
     seq->build_transition_count(smarkov);
@@ -2074,38 +2073,82 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , const FrequencyDistrib
 
       // calcul de la vraisemblance
 
-      seq->likelihood = smarkov->likelihood_computation(*seq);
-    }
+      likelihood = smarkov->likelihood_computation(*seq);
 
-    weight = NULL;
-    restoration_weight = NULL;
+      if (likelihood == D_INF) {
+        likelihood = smarkov->likelihood_computation(*seq , I_DEFAULT);
+      }
 
-    for (i = 0;i < smarkov->nb_output_process;i++) {
-      if ((smarkov->discrete_parametric_process[i]) || ((smarkov->continuous_parametric_process[i]) &&
-           (smarkov->continuous_parametric_process[i]->ident != LINEAR_MODEL))) {
-        weight = smarkov->state_process->weight_computation();
-        restoration_weight = seq->weight_computation();
+#     ifdef DEBUG
+      else {
+        cout << "\n" << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood
+             << " | " << smarkov->likelihood_computation(*seq , I_DEFAULT) << endl;
+      }
+#     endif
+
+      switch (hidden) {
+      case false :
+        seq->likelihood = likelihood;
+        break;
+      case true :
+        seq->restoration_likelihood = likelihood;
         break;
       }
     }
 
-    for (i = 0;i < smarkov->nb_output_process;i++) {
-      if (smarkov->discrete_parametric_process[i]) {
-        smarkov->discrete_parametric_process[i]->weight = new Distribution(*weight);
-        smarkov->discrete_parametric_process[i]->mixture = smarkov->discrete_parametric_process[i]->mixture_computation(smarkov->discrete_parametric_process[i]->weight);
-        smarkov->discrete_parametric_process[i]->restoration_weight = new Distribution(*restoration_weight);
-        smarkov->discrete_parametric_process[i]->restoration_mixture = smarkov->discrete_parametric_process[i]->mixture_computation(smarkov->discrete_parametric_process[i]->restoration_weight);
+    // calcul des melanges de lois d'observation (poids theoriques et poids deduits de la restauration)
+
+    if (hidden) {
+      weight = NULL;
+      restoration_weight = NULL;
+
+      for (i = 0;i < smarkov->nb_output_process;i++) {
+        if ((smarkov->categorical_process[i]) || (smarkov->discrete_parametric_process[i]) ||
+            ((smarkov->continuous_parametric_process[i]) &&
+             (smarkov->continuous_parametric_process[i]->ident != LINEAR_MODEL))) {
+          weight = smarkov->state_process->weight_computation();
+          restoration_weight = seq->weight_computation();
+          break;
+        }
       }
 
-      else if ((smarkov->continuous_parametric_process[i]) &&
-               (smarkov->continuous_parametric_process[i]->ident != LINEAR_MODEL)) {
-        smarkov->continuous_parametric_process[i]->weight = new Distribution(*weight);
-        smarkov->continuous_parametric_process[i]->restoration_weight = new Distribution(*restoration_weight);
+      for (i = 0;i < smarkov->nb_output_process;i++) {
+        if (smarkov->categorical_process[i]) {
+          delete smarkov->categorical_process[i]->weight;
+          delete smarkov->categorical_process[i]->mixture;
+          smarkov->categorical_process[i]->weight = new Distribution(*weight);
+          smarkov->categorical_process[i]->mixture = smarkov->categorical_process[i]->mixture_computation(smarkov->categorical_process[i]->weight);
+          delete smarkov->categorical_process[i]->restoration_weight;
+          delete smarkov->categorical_process[i]->restoration_mixture;
+          smarkov->categorical_process[i]->restoration_weight = new Distribution(*restoration_weight);
+          smarkov->categorical_process[i]->restoration_mixture = smarkov->categorical_process[i]->mixture_computation(smarkov->categorical_process[i]->restoration_weight);
+        }
+
+        else if (smarkov->discrete_parametric_process[i]) {
+          delete smarkov->discrete_parametric_process[i]->weight;
+          delete smarkov->discrete_parametric_process[i]->mixture;
+          smarkov->discrete_parametric_process[i]->weight = new Distribution(*weight);
+          smarkov->discrete_parametric_process[i]->mixture = smarkov->discrete_parametric_process[i]->mixture_computation(smarkov->discrete_parametric_process[i]->weight);
+
+          delete smarkov->discrete_parametric_process[i]->restoration_weight;
+          delete smarkov->discrete_parametric_process[i]->restoration_mixture;
+          smarkov->discrete_parametric_process[i]->restoration_weight = new Distribution(*restoration_weight);
+          smarkov->discrete_parametric_process[i]->restoration_mixture = smarkov->discrete_parametric_process[i]->mixture_computation(smarkov->discrete_parametric_process[i]->restoration_weight);
+        }
+
+        else if ((smarkov->continuous_parametric_process[i]) &&
+                 (smarkov->continuous_parametric_process[i]->ident != LINEAR_MODEL)) {
+          delete smarkov->continuous_parametric_process[i]->weight;
+          smarkov->continuous_parametric_process[i]->weight = new Distribution(*weight);
+
+          delete smarkov->continuous_parametric_process[i]->restoration_weight;
+          smarkov->continuous_parametric_process[i]->restoration_weight = new Distribution(*restoration_weight);
+        }
       }
+
+      delete weight;
+      delete restoration_weight;
     }
-
-    delete weight;
-    delete restoration_weight;
   }
 
   return seq;
@@ -2253,7 +2296,7 @@ DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , ostream &o
           status = false;
           ostringstream error_message;
           error_message << SEQ_label[SEQL_SEMI_MARKOV_CHAIN] << " " << i + 2 << ": "
-                        << SEQ_error[SEQR_NB_OUTPUT];
+                        << STAT_error[STATR_NB_OUTPUT];
           error.update((error_message.str()).c_str());
         }
       }
@@ -2264,7 +2307,7 @@ DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , ostream &o
         status = false;
         ostringstream error_message;
         error_message << SEQ_label[SEQL_SEMI_MARKOV_CHAIN] << " " << i + 2 << ": "
-                      << SEQ_error[SEQR_NB_OUTPUT];
+                      << STAT_error[STATR_NB_OUTPUT];
         error.update((error_message.str()).c_str());
       }
     }
