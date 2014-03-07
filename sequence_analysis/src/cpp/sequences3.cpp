@@ -3,9 +3,9 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id: sequences2.cpp 11060 2011-09-02 16:28:11Z guedon $
@@ -1007,7 +1007,7 @@ bool Sequences::ascii_write(StatError &error , const char *path ,
  *
  *  arguments : stream, format ('c' : column / 'l' : line / 'a' : array / 'p' : posterior),
  *              flag commentaire, probabilites a posteriori des sequences d'etats
- *              les plus probables, entropie des sequences d'etats, nombre de sequences d'etats
+ *              les plus probables, entropies des sequences d'etats, nombres de sequences d'etats
  *              (modeles markoviens caches), nombre de caracteres par ligne.
  *
  *--------------------------------------------------------------*/
@@ -1054,7 +1054,7 @@ ostream& Sequences::ascii_print(ostream &os , char format , bool comment_flag ,
       }
 
 #     else
-      std::ostringstream sos;
+      ostringstream sos;
 
       for (j = 0;j < length[i];j++) {
         if (index_parameter) {
@@ -1344,7 +1344,7 @@ ostream& Sequences::ascii_print(ostream &os , char format , bool comment_flag ,
       }
 
 #     else
-      std::ostringstream sos;
+      ostringstream sos;
 
       sos << "[";
       for (j = 0;j < length[i];j++) {
