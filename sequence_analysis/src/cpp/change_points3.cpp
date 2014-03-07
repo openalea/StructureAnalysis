@@ -3,12 +3,12 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id: change_points2.cpp 11914 2012-03-26 06:29:13Z guedon $
+ *       $Id: change_points3.cpp 11914 2012-03-26 06:29:13Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -3085,7 +3085,7 @@ bool Sequences::segment_profile_write(StatError &error , ostream &os , int iiden
           status = false;
           ostringstream error_message;
           error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
-                        << SEQ_error[SEQR_POSITIVE_MIN_VALUE];
+                        << STAT_error[STATR_POSITIVE_MIN_VALUE];
           error.update((error_message.str()).c_str());
         }
 
@@ -3312,7 +3312,7 @@ bool Sequences::segment_profile_plot_write(StatError &error , const char *prefix
           status = false;
           ostringstream error_message;
           error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
-                        << SEQ_error[SEQR_POSITIVE_MIN_VALUE];
+                        << STAT_error[STATR_POSITIVE_MIN_VALUE];
           error.update((error_message.str()).c_str());
         }
 
@@ -3491,7 +3491,7 @@ bool Sequences::segment_profile_plot_write(StatError &error , const char *prefix
                          << MAX(seq->max_value[k] , seq->min_value[k] + 1) << "] "
                          << "\"" << label((data_file_name[0].str()).c_str()) << "\" using " << 1 << " : " << j++
                          << " title \"" << SEQ_label[SEQL_SEQUENCE] << " " << iidentifier
-                         << "\" with " << (index_interval->variance > 0. ? "points" : "linespoints") << ",\\" << endl;
+                         << "\" with " << (index_interval->variance > index_interval->mean ? "points" : "linespoints") << ",\\" << endl;
                 out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\" using " << 1 << " : " << j++
                          << " title \"" << SEQ_label[SEQL_PIECEWISE_LINEAR_FUNCTION] << "\" with lines" << endl;
 
@@ -3975,7 +3975,7 @@ MultiPlotSet* Sequences::segment_profile_plotable_write(StatError &error , int i
           status = false;
           ostringstream error_message;
           error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
-                        << SEQ_error[SEQR_POSITIVE_MIN_VALUE];
+                        << STAT_error[STATR_POSITIVE_MIN_VALUE];
           error.update((error_message.str()).c_str());
         }
 
@@ -4435,7 +4435,7 @@ Sequences* Sequences::hierarchical_segmentation(StatError &error , ostream &os ,
           status = false;
           ostringstream error_message;
           error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
-                        << SEQ_error[SEQR_POSITIVE_MIN_VALUE];
+                        << STAT_error[STATR_POSITIVE_MIN_VALUE];
           error.update((error_message.str()).c_str());
         }
 
