@@ -3,9 +3,9 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
@@ -58,9 +58,18 @@ const int VARIANCE_ANALYSIS_NB_VALUE = 100;  // nombre maximum de niveaux pour l
 const int DISPLAY_CONDITIONAL_NB_VALUE = 100;  // nombre maximum de valeurs pour l'affichage
                                                // des lois conditionnelles
 const int PLOT_NB_VALUE = 30;          // seuil pour l'ecriture des frequences (sortie Gnuplot)
-const double PLOT_RANGE_RATIO = 4.;    // seuil pour l'affichage a partir de 0
 
 const int NB_SYMBOL = 50;              // nombre maximum de symboles
+
+const int MIN_NB_ASSIGNMENT = 1;   // nombre d'affectations des individus 1ere iteration de l'algorithme MCEM
+const int MAX_NB_ASSIGNMENT = 10;  // nombre d'affectations des individus  maximum pour l'algorithme MCEM
+const double NB_ASSIGNMENT_PARAMETER = 1.;  // parametre nombre d'affectations des individus pour l'algorithme MCEM
+
+enum {
+  INDEPENDENT ,
+  CONVOLUTION_FACTOR ,
+  SCALING_FACTOR
+};
 
 enum {
   ABSOLUTE_VALUE ,
@@ -80,15 +89,16 @@ class Regression;
 class Sequences;
 class TreeMatch;
 class VectorDistance;
-class Vectors;
 class MultivariateMixture;
+class Mixture;
 
 
 class Vectors : public StatInterface {  // vecteurs
 
     friend class Regression;
-    friend class Sequences;
     friend class MultivariateMixture;
+    friend class Mixture;
+    friend class Sequences;
 
     friend Vectors* vectors_ascii_read(StatError &error , const char *path);
     friend std::ostream& operator<<(std::ostream &os , const Vectors &vec)
@@ -102,6 +112,7 @@ protected :
     int *type;              // type de chaque variable (INT_VALUE/REAL_VALUE)
     double *min_value;      // valeurs minimums
     double *max_value;      // valeurs maximums
+    double *min_interval;   // intervalles minimums entre 2 valeurs
     FrequencyDistribution **marginal_distribution;  // lois marginales empiriques
     Histogram **marginal_histogram;  // histogrammes marginaux
     double *mean;           // vecteur moyenne
@@ -111,7 +122,7 @@ protected :
 
     void init(int inb_vector , int *iidentifier , int inb_variable , int *itype , bool init_flag);
     void copy(const Vectors &vec);
-    void add_response_variable(const Vectors &vec , int itype);
+    void add_state_variable(const Vectors &vec);
     void remove();
 
     void build_real_vector(int variable = I_DEFAULT);
@@ -120,16 +131,19 @@ protected :
                    int max_symbol , int *symbol);
     void cluster(const Vectors &vec , int variable , int nb_class , double *limit);
     void select_variable(const Vectors &vec , int *variable);
+    Vectors* remove_variable_1() const;
     Vectors* select_variable(int explanatory_variable , int response_variable) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive , bool comment_flag) const;
-    std::ostream& ascii_print(std::ostream &os , bool comment_flag) const;
+    std::ostream& ascii_print(std::ostream &os , bool comment_flag ,
+                              double *posterior_probability = NULL , double *entropy = NULL) const;
     bool plot_print(const char *path , double *standard_residual = NULL) const;
     void plotable_write(SinglePlot &plot , int variable1 , int variable2) const;
     void plotable_frequency_write(SinglePlot &plot , int variable1 , int variable2) const;
 
     void min_value_computation(int variable);
     void max_value_computation(int variable);
+
     void build_marginal_frequency_distribution(int variable);
     void build_marginal_histogram(int variable , double step = D_DEFAULT ,
                                   double imin_value = D_INF);
@@ -172,6 +186,23 @@ protected :
     bool variance_analysis_spreadsheet_write(StatError &error , const char *path ,
                                              int response_type , const Vectors **value_vec) const;
 
+    template <typename Type>
+    void gamma_estimation(Type **component_vector_count , int variable ,
+                          ContinuousParametricProcess *process , int iter) const;
+    template <typename Type>
+    void tied_gamma_estimation(Type **component_vector_count , int variable ,
+                               ContinuousParametricProcess *process , int iter) const;
+    template <typename Type>
+    void gaussian_estimation(Type **component_vector_count , int variable ,
+                             ContinuousParametricProcess *process) const;
+    template <typename Type>
+    void tied_gaussian_estimation(Type **component_vector_count , int variable ,
+                                  ContinuousParametricProcess *process ,
+                                  int variance_factor) const;
+    template <typename Type>
+    void von_mises_estimation(Type **component_vector_count , int variable ,
+                              ContinuousParametricProcess *process) const;
+
 public :
 
     Vectors();
@@ -184,9 +215,12 @@ public :
             int **iint_vector , double **ireal_vector);
     Vectors(const Vectors &vec , int variable , int itype);
     Vectors(const Vectors &vec , int inb_vector , int *index);
-    Vectors(const Vectors &vec , char transform = 'c' , int itype = I_DEFAULT);
+//    Vectors(const Vectors &vec , char transform = 'c' , int itype = I_DEFAULT);
+    Vectors(const Vectors &vec , char transform = 'c');
     ~Vectors();
     Vectors& operator=(const Vectors &vec);
+
+    void min_interval_computation(int variable);
 
     DiscreteDistributionData* extract(StatError &error , int variable) const;
 
@@ -223,22 +257,18 @@ public :
 
     std::ostream& line_write(std::ostream &os) const;
 
-    std::ostream& ascii_data_write(std::ostream &os , bool exhaustive = false ,
-                                   bool comment_flag = false) const;
-    bool ascii_data_write(StatError &error , const char *path , bool exhaustive = false) const;
+    virtual std::ostream& ascii_data_write(std::ostream &os , bool exhaustive = false) const;
+    virtual bool ascii_data_write(StatError &error , const char *path , bool exhaustive = false) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(StatError &error , const char *path ,
-                     bool exhaustive = false) const;
+    bool ascii_write(StatError &error , const char *path , bool exhaustive = false) const;
     bool spreadsheet_write(StatError &error , const char *path) const;
-    bool plot_write(StatError &error , const char *prefix ,
-                    const char *title = NULL) const;
+    bool plot_write(StatError &error , const char *prefix , const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
     bool select_step(StatError &error , int variable , double step ,
                      double imin_value = D_INF);
     int cumulative_distribution_function_computation(int variable , double **cdf) const;
-    double min_interval_computation(int variable) const;
 
     double mean_absolute_deviation_computation(int variable) const;
     double mean_absolute_difference_computation(int variable) const;
@@ -279,6 +309,29 @@ public :
     MultivariateMixture* mixture_estimation(StatError &error , std::ostream& os ,
                                             int nb_component , int nb_iter = I_DEFAULT ,
                                             bool *force_param = NULL) const;
+
+    Mixture* mixture_estimation(StatError &error , std::ostream &os , const Mixture &imixt ,
+                                bool known_component = false , bool common_dispersion = false ,
+                                int variance_factor = INDEPENDENT , bool assignment = true ,
+                                int nb_iter = I_DEFAULT) const;
+    Mixture* mixture_estimation(StatError &error , ostream &os , int nb_component ,
+                                int ident , double mean , double standard_deviation ,
+                                bool tied_location = true , int variance_factor = SCALING_FACTOR ,
+                                bool assignment = true , int nb_iter = I_DEFAULT) const;
+    Mixture* mixture_stochastic_estimation(StatError &error , std::ostream &os , const Mixture &imixt ,
+                                           bool known_component = false , bool common_dispersion = false ,
+                                           int variance_factor = INDEPENDENT ,
+                                           int min_nb_assignment = MIN_NB_ASSIGNMENT ,
+                                           int max_nb_assignment = MAX_NB_ASSIGNMENT ,
+                                           double parameter = NB_ASSIGNMENT_PARAMETER ,
+                                           bool assignment = true , int nb_iter = I_DEFAULT) const;
+    Mixture* mixture_stochastic_estimation(StatError &error , ostream &os , int nb_component ,
+                                           int ident , double mean , double standard_deviation ,
+                                           bool tied_location = true , int variance_factor = SCALING_FACTOR ,
+                                           int min_nb_assignment = MIN_NB_ASSIGNMENT ,
+                                           int max_nb_assignment = MAX_NB_ASSIGNMENT ,
+                                           double parameter = NB_ASSIGNMENT_PARAMETER ,
+                                           bool assignment = true , int nb_iter = I_DEFAULT) const;
 
     // acces membres de la classe
 
@@ -351,11 +404,9 @@ public :
 
     // fonctions pour la compatibilite avec la classe StatInterface
 
-    bool ascii_write(StatError &error , const char *path ,
-                     bool exhaustive = false) const;
+    bool ascii_write(StatError &error , const char *path , bool exhaustive = false) const;
     bool spreadsheet_write(StatError &error , const char *path) const;
-    bool plot_write(StatError &error , const char *prefix ,
-                    const char *title = NULL) const;
+    bool plot_write(StatError &error , const char *prefix , const char *title = NULL) const;
 
     double* max_symbol_distance_computation(int variable) const;
 
@@ -377,6 +428,9 @@ public :
 
 
 VectorDistance* vector_distance_ascii_read(StatError &error , const char *path);
+
+
+#include "continuous_parametric_estimation.hpp"
 
 
 
