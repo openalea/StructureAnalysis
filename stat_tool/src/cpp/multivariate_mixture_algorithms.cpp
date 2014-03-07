@@ -45,10 +45,11 @@
 #include "stat_tools.h"
 #include "distribution.h"
 #include "discrete_mixture.h"
+#include "markovian.h"
+// #include "mixture.h"
 #include "multivariate_mixture.h"
 #include "stat_label.h"
 #include "vectors.h"
-#include "markovian.h"
 #include "stat_tool/distribution_reestimation.hpp"
 
 using namespace std;
@@ -700,7 +701,7 @@ MultivariateMixture* Vectors::mixture_estimation(StatError &error, ostream& os,
 #     endif
 
     } // end do
-    while ((likelihood != D_INF) && (((nb_iter == I_DEFAULT) && (iter < MIXTURE_NB_ITER) &&
+    while ((likelihood != D_INF) && (((nb_iter == I_DEFAULT) && (iter < DISCRETE_MIXTURE_NB_ITER) &&
                       (((likelihood - previous_likelihood) / -likelihood > MVMIXTURE_LIKELIHOOD_DIFF) ||
                        (min_likelihood == D_INF) || (nb_likelihood_decrease == 1))) ||
                      ((nb_iter != I_DEFAULT) && (iter < nb_iter))));
@@ -966,7 +967,7 @@ MultivariateMixture* Vectors::mixture_estimation(StatError &error, std::ostream&
 
   error.init();
 
-  if ((nb_component < 2) || (nb_component > MIXTURE_NB_COMPONENT)) {
+  if ((nb_component < 2) || (nb_component > DISCRETE_MIXTURE_NB_COMPONENT)) {
     status= false;
     error.update(STAT_error[STATR_NB_DISTRIBUTION]);
   }
