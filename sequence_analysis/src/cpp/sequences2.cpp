@@ -3,9 +3,9 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
@@ -47,8 +47,6 @@
 #include "tool/config.h"
 
 #include "stat_tool/stat_tools.h"
-#include "stat_tool/distribution.h"
-#include "stat_tool/vectors.h"
 #include "stat_tool/curves.h"
 #include "stat_tool/markovian.h"
 #include "stat_tool/stat_label.h"
@@ -2960,7 +2958,7 @@ Sequences* Sequences::remove_run(StatError &error , int variable , int ivalue ,
         ostringstream error_message;
         error_message << STAT_label[STATL_VARIABLE] << " " << variable + 1 << ": "
                       << STAT_label[STATL_VALUE] << " " << ivalue << " "
-                      << SEQ_error[SEQR_NOT_PRESENT];
+                      << STAT_error[STATR_NOT_PRESENT];
         error.update((error_message.str()).c_str());
       }
     }
@@ -3435,7 +3433,7 @@ Sequences* Sequences::segmentation_extract(StatError &error , int variable ,
               ostringstream error_message;
               error_message << STAT_label[STATL_VARIABLE] << " " << variable + 1 << ": "
                             << STAT_label[STATL_VALUE] << " " << ivalue[i] << " "
-                            << SEQ_error[SEQR_NOT_PRESENT];
+                            << STAT_error[STATR_NOT_PRESENT];
               error.update((error_message.str()).c_str());
             }
 
@@ -4358,7 +4356,7 @@ Sequences* Sequences::sequence_normalization(StatError &error , int variable) co
         status = false;
         ostringstream error_message;
         error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
-                      << SEQ_error[SEQR_POSITIVE_MIN_VALUE];
+                      << STAT_error[STATR_POSITIVE_MIN_VALUE];
         error.update((error_message.str()).c_str());
       }
     }
@@ -6133,7 +6131,7 @@ Sequences* Sequences::recurrence_time_sequences(StatError &error , int variable 
         ostringstream error_message;
         error_message << STAT_label[STATL_VARIABLE] << " " << variable + 1 << ": "
                       << STAT_label[STATL_VALUE] << " " << value << " "
-                      << SEQ_error[SEQR_NOT_PRESENT];
+                      << STAT_error[STATR_NOT_PRESENT];
         error.update((error_message.str()).c_str());
       }
     }
@@ -7014,10 +7012,6 @@ void Sequences::build_marginal_histogram(int variable , double step , double imi
     double *prsequence;
 
 
-    if (imin_value == D_INF) {
-      imin_value = min_value[variable];
-    }
-
     // construction de l'histogramme
 
     if (step == D_DEFAULT) {
@@ -7029,6 +7023,10 @@ void Sequences::build_marginal_histogram(int variable , double step , double imi
 //           << " (" << min_value[variable] << ", " << max_value[variable] << ")"
 #     endif
 
+    }
+
+    if (imin_value == D_INF) {
+      imin_value = floor(min_value[variable] / step) * step;
     }
 
     if (marginal_histogram[variable]) {
@@ -7043,11 +7041,11 @@ void Sequences::build_marginal_histogram(int variable , double step , double imi
 
       marginal_histogram[variable]->nb_element = cumul_length;
       marginal_histogram[variable]->type = type[variable];
-      marginal_histogram[variable]->max_value = max_value[variable];
     }
 
     marginal_histogram[variable]->step = step;
     marginal_histogram[variable]->min_value = imin_value;
+    marginal_histogram[variable]->max_value = ceil(max_value[variable] / step) * step;
 
     // calcul des frequences
 
