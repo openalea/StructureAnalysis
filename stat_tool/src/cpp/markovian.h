@@ -3,9 +3,9 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
@@ -86,9 +86,20 @@ const int RADIAN_DECIMAL_SCALE = 1000;  // facteur pour determiner le nombre de 
 // const double SELF_TRANSITION = 0.9;    probabilite de rester dans un etat initiale
 
 enum {
+  MIXTURE ,
+  HIDDEN_MARKOV
+};
+
+enum {
   CATEGORICAL_PROCESS ,
   DISCRETE_PARAMETRIC ,
   CONTINUOUS_PARAMETRIC
+};
+
+enum {
+  EM ,
+  MCEM
+//  SAEM
 };
 
 enum {
@@ -198,6 +209,11 @@ public :
     int nb_state;           // nombre d'etats
     int nb_value;           // nombre de valeurs
     Distribution **observation;  // lois d'observation
+    Distribution *weight;   // poids theoriques des lois d'observation
+    Distribution *mixture;  // melange de lois d'observation
+    Distribution *restoration_weight;  // poids des lois d'observation
+                                       // deduits de la restoration
+    Distribution *restoration_mixture;  // melange de lois d'observation
 
     void copy(const CategoricalProcess &process);
     void remove();
@@ -211,23 +227,33 @@ public :
     CategoricalProcess& operator=(const CategoricalProcess &process);
 
     std::ostream& ascii_print(std::ostream &os , FrequencyDistribution **empirical_observation ,
-                              bool exhaustive , bool file_flag) const;
+                              FrequencyDistribution *marginal_distribution ,
+                              bool exhaustive , bool file_flag , int model = HIDDEN_MARKOV) const;
     std::ostream& spreadsheet_print(std::ostream &os ,
-                                    FrequencyDistribution **empirical_observation = NULL) const;
+                                    FrequencyDistribution **empirical_observation = NULL ,
+                                    FrequencyDistribution *marginal_distribution = NULL ,
+                                    int model = HIDDEN_MARKOV) const;
     bool plot_print(const char *prefix , const char *title , int process ,
-                    FrequencyDistribution **empirical_observation = NULL) const;
+                    FrequencyDistribution **empirical_observation = NULL ,
+                    FrequencyDistribution *marginal_distribution = NULL ,
+                    int model = HIDDEN_MARKOV) const;
+    void plotable_write(MultiPlotSet &plot , int &index , int process ,
+                        FrequencyDistribution **empirical_observation = NULL ,
+                        FrequencyDistribution *marginal_distribution = NULL ,
+                        int model = HIDDEN_MARKOV) const;
 
     bool test_hidden() const;
     void thresholding(double min_probability);
-    void state_permutation(int *permut) const; // permutation des etats - revoir avec J.B.
-
+    void state_permutation(int *permut) const;  // permutation des etats - revoir avec J.-B.
     int nb_parameter_computation(double min_probability) const;
+    Distribution* mixture_computation(Distribution *pweight);
     void init();
 };
 
 
 CategoricalProcess* categorical_observation_parsing(StatError &error , ifstream &in_file ,
-                                                    int &line , int nb_state , bool hidden);
+                                                    int &line , int nb_state ,
+                                                    int model , bool hidden);
 
 CategoricalProcess** old_categorical_observation_parsing(StatError &error , ifstream &in_file ,
                                                          int &line , int nb_state , int &nb_output_process);
@@ -259,28 +285,32 @@ public :
 
     std::ostream& ascii_print(std::ostream &os , FrequencyDistribution **empirical_observation ,
                               FrequencyDistribution *marginal_distribution ,
-                              bool exhaustive , bool file_flag) const;
+                              bool exhaustive , bool file_flag , int model = HIDDEN_MARKOV) const;
     std::ostream& spreadsheet_print(std::ostream &os ,
                                     FrequencyDistribution **empirical_observation = NULL ,
-                                    FrequencyDistribution *marginal_distribution = NULL) const;
+                                    FrequencyDistribution *marginal_distribution = NULL ,
+                                    int model = HIDDEN_MARKOV) const;
     bool plot_print(const char *prefix , const char *title , int process ,
                     FrequencyDistribution **empirical_observation = NULL ,
-                    FrequencyDistribution *marginal_distribution = NULL) const;
+                    FrequencyDistribution *marginal_distribution = NULL ,
+                    int model = HIDDEN_MARKOV) const;
     void plotable_write(MultiPlotSet &plot , int &index , int process ,
                         FrequencyDistribution **empirical_observation = NULL ,
-                        FrequencyDistribution *marginal_distribution = NULL) const;
+                        FrequencyDistribution *marginal_distribution = NULL ,
+                        int model = HIDDEN_MARKOV) const;
 
     void nb_value_computation();
-    Distribution* mixture_computation(Distribution *pweight);
-    void state_permutation(int *permut) const;  // permutation des etats - revoir avec J.B.
-
+    void state_permutation(int *permut) const;  // permutation des etats - revoir avec J.-B.
     int nb_parameter_computation() const;
+    double mean_computation(Distribution *pweight) const;
+    double variance_computation(Distribution *pweight , double mean = D_INF) const;
+    Distribution* mixture_computation(Distribution *pweight);
     void init();
 };
 
 
 DiscreteParametricProcess* discrete_observation_parsing(StatError &error , ifstream &in_file ,
-                                                        int &line , int nb_state ,
+                                                        int &line , int nb_state , int model ,
                                                         double cumul_threshold = OBSERVATION_THRESHOLD);
 
 
@@ -291,6 +321,14 @@ public :
 
     int nb_state;           // nombre d'etats
     int ident;              // identificateur des lois d'observation
+    union {
+      bool tied_scale;      // parametres d'echelle lies ou non (GAMMA)
+      bool tied_location;   // moyennes lies ou non (GAUSSIAN)
+    };
+    union {
+      bool tied_shape;      // parametres de forme lies ou non (GAMMA)
+      bool tied_dispersion; // parametres de dispersion lies ou non (GAUSSIAN / VON_MISES)
+    };
     int unit;               // unite (degre/radian) pour les lois de von Mises
     ContinuousParametric **observation;  // lois d'observation
     Distribution *weight;   // poids theorique des lois d'observation
@@ -311,26 +349,31 @@ public :
                               FrequencyDistribution **observation_distribution ,
                               Histogram *marginal_histogram ,
                               FrequencyDistribution *marginal_distribution ,
-                              bool exhaustive , bool file_flag) const;
+                              bool exhaustive , bool file_flag , int model = HIDDEN_MARKOV) const;
     std::ostream& spreadsheet_print(std::ostream &os ,
                                     Histogram **observation_histogram = NULL ,
                                     FrequencyDistribution **observation_distribution = NULL ,
                                     Histogram *marginal_histogram = NULL ,
-                                    FrequencyDistribution *marginal_distribution = NULL) const;
+                                    FrequencyDistribution *marginal_distribution = NULL ,
+                                    int model = HIDDEN_MARKOV) const;
     bool plot_print(const char *prefix , const char *title ,
                     int process , Histogram **observation_histogram = NULL ,
                     FrequencyDistribution **observation_distribution = NULL ,
                     Histogram *marginal_histogram = NULL ,
                     FrequencyDistribution *marginal_distribution = NULL ,
-                    int nb_value = I_DEFAULT , double **empirical_cdf = NULL) const;
+                    int nb_value = I_DEFAULT , double **empirical_cdf = NULL ,
+                    int model = HIDDEN_MARKOV) const;
     void plotable_write(MultiPlotSet &plot , int &index , int process ,
                         Histogram **observation_histogram = NULL ,
                         FrequencyDistribution **observation_distribution = NULL ,
                         Histogram *marginal_histogram = NULL ,
                         FrequencyDistribution *marginal_distribution = NULL ,
-                        int nb_value = I_DEFAULT , double **empirical_cdf = NULL) const;
+                        int nb_value = I_DEFAULT , double **empirical_cdf = NULL ,
+                        int model = HIDDEN_MARKOV) const;
 
     int nb_parameter_computation() const;
+    double mean_computation(Distribution *pweight) const;
+    double variance_computation(Distribution *pweight , double mean = D_INF) const;
     void select_unit(int iunit);
     void init(int iident , double min_value , double max_value ,
               double mean , double variance);
@@ -340,7 +383,8 @@ public :
 
 
 ContinuousParametricProcess* continuous_observation_parsing(StatError &error , ifstream &in_file ,
-                                                            int &line , int nb_state);
+                                                            int &line , int nb_state ,
+                                                            int model , int last_ident = VON_MISES);
 
 
 
