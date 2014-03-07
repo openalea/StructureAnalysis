@@ -3,9 +3,9 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
@@ -444,7 +444,7 @@ void MarkovianSequences::add_state_variable(const MarkovianSequences &seq , int 
  *  Constructeur par copie de la classe MarkovianSequences.
  *
  *  arguments : reference sur un objet MarkovianSequences, type de transformation ('c' : copie,
- *              'r' : inversion du sens de parcours, 'a' : addition d'une variable d'etat,
+ *              'r' : inversion du sens de parcours, 'a' : ajout d'une variable d'etat,
  *              'm' : suppression du parametre d'index, 'e' : parametre d'index rendu explicite),
  *              ajout/suppression des lois empiriques de temps de sejour initial.
  *
@@ -576,7 +576,7 @@ MarkovianSequences& MarkovianSequences::operator=(const MarkovianSequences &seq)
  *
  *  Initialisation de la 1ere variable.
  *
- *  argument : type de la 1ere variable (STATE / INT_VALUE).
+ *  argument : type de la 1ere variable (STATE / INT_VALUE / REAL_VALUE).
  *
  *--------------------------------------------------------------*/
 
@@ -669,7 +669,7 @@ DiscreteDistributionData* MarkovianSequences::extract(StatError &error , int typ
       status = false;
       ostringstream error_message;
       error_message << STAT_label[STATL_VALUE] << " " << value << " "
-                    << SEQ_error[SEQR_NOT_PRESENT];
+                    << STAT_error[STATR_NOT_PRESENT];
       error.update((error_message.str()).c_str());
     }
 
@@ -2312,7 +2312,7 @@ MarkovianSequences* MarkovianSequences::add_absorbing_run(StatError &error ,
 
     for (i = 0;i < seq->nb_sequence;i++) {
       for (j = 0;j < seq->nb_variable;j++) {
-        if ((seq->type[j] != REAL_VALUE) || (seq->type[j] != AUXILIARY)) {
+        if ((seq->type[j] != REAL_VALUE) && (seq->type[j] != AUXILIARY)) {
           for (k = 0;k < length[i];k++) {
             seq->int_sequence[i][j][k] = int_sequence[i][j][k];
           }
@@ -2406,7 +2406,7 @@ MarkovianSequences* MarkovianSequences::build_auxiliary_variable(DiscreteParamet
   bool *auxiliary;
   register int i , j , k , m;
   int *pstate;
-  double *pauxiliary;
+  double *pauxiliary , *mean;
   MarkovianSequences *seq;
 
 
@@ -2425,28 +2425,106 @@ MarkovianSequences* MarkovianSequences::build_auxiliary_variable(DiscreteParamet
 
   seq = new MarkovianSequences(*this , auxiliary);
 
-  for (i = 0;i < nb_sequence;i++) {
-    j = 0;
-    for (k = 1;k < nb_variable;k++) {
-      j++;
+  i = 0;
+  for (j = 1;j < nb_variable;j++) {
+    i++;
 
-      if ((discrete_process) && (discrete_process[k - 1])) {
-        j++;
-        pstate = seq->int_sequence[i][0];
-        pauxiliary = seq->real_sequence[i][j];
+    if ((discrete_process) && (discrete_process[j - 1])) {
+      i++;
+      for (k = 0;k < nb_sequence;k++) {
+        pstate = seq->int_sequence[k][0];
+        pauxiliary = seq->real_sequence[k][i];
 
-        for (m = 0;m < length[i];m++) {
-          *pauxiliary++ = discrete_process[k - 1]->observation[*pstate++]->mean;
+        for (m = 0;m < length[k];m++) {
+          *pauxiliary++ = discrete_process[j - 1]->observation[*pstate++]->mean;
+        }
+      }
+    }
+
+    else if ((continuous_process) && (continuous_process[j - 1])) {
+      i++;
+
+      if ((continuous_process[j - 1]->ident == GAMMA) || (continuous_process[j - 1]->ident == ZERO_INFLATED_GAMMA)) {
+        mean = new double [continuous_process[j - 1]->nb_state];
+
+        switch (continuous_process[j - 1]->ident) {
+
+        case GAMMA : {
+          for (k = 0;k < continuous_process[j - 1]->nb_state;k++) {
+            mean[k] = continuous_process[j - 1]->observation[k]->shape *
+                      continuous_process[j - 1]->observation[k]->scale;
+          }
+          break;
+        }
+
+        case ZERO_INFLATED_GAMMA : {
+          for (k = 0;k < continuous_process[j - 1]->nb_state;k++) {
+            if (continuous_process[j - 1]->observation[k]->zero_probability == 1.) {
+              mean[k] = 0.;
+            }
+            else {
+              mean[k] = (1 - continuous_process[j - 1]->observation[k]->zero_probability) *
+                        continuous_process[j - 1]->observation[k]->shape *
+                        continuous_process[j - 1]->observation[k]->scale;
+            }
+          }
+          break;
+        }
+        }
+
+        for (k = 0;k < nb_sequence;k++) {
+          pstate = seq->int_sequence[k][0];
+          pauxiliary = seq->real_sequence[k][i];
+
+          for (m = 0;m < length[k];m++) {
+            *pauxiliary++ = mean[*pstate++];
+          }
+        }
+
+        delete [] mean;
+      }
+
+      else if ((continuous_process[j - 1]->ident == GAUSSIAN) || (continuous_process[j - 1]->ident == VON_MISES)) {
+        for (k = 0;k < nb_sequence;k++) {
+          pstate = seq->int_sequence[k][0];
+          pauxiliary = seq->real_sequence[k][i];
+
+          for (m = 0;m < length[k];m++) {
+            *pauxiliary++ = continuous_process[j - 1]->observation[*pstate++]->location;
+          }
         }
       }
 
-      else if ((continuous_process) && (continuous_process[k - 1])) {
-        j++;
-        pstate = seq->int_sequence[i][0];
-        pauxiliary = seq->real_sequence[i][j];
+      else if (continuous_process[j - 1]->ident == LINEAR_MODEL) {
+        switch (index_parameter_type) {
 
-        for (m = 0;m < length[i];m++) {
-          *pauxiliary++ = continuous_process[k - 1]->observation[*pstate++]->location;
+        case IMPLICIT_TYPE : {
+          for (k = 0;k < nb_sequence;k++) {
+            pstate = seq->int_sequence[k][0];
+            pauxiliary = seq->real_sequence[k][i];
+
+            for (m = 0;m < length[k];m++) {
+              *pauxiliary++ = continuous_process[j - 1]->observation[*pstate]->intercept +
+                              continuous_process[j - 1]->observation[*pstate]->slope * m;
+              pstate++;
+            }
+          }
+          break;
+        }
+
+        case TIME : {
+          for (k = 0;k < nb_sequence;k++) {
+            pstate = seq->int_sequence[k][0];
+            pauxiliary = seq->real_sequence[k][i];
+
+            for (m = 0;m < length[k];m++) {
+              *pauxiliary++ = continuous_process[j - 1]->observation[*pstate]->intercept +
+                              continuous_process[j - 1]->observation[*pstate]->slope * index_parameter[k][m];
+              pstate++;
+            }
+          }
+          break;
+        }
         }
       }
     }
@@ -2845,7 +2923,7 @@ int MarkovianSequences::cumulative_distribution_function_computation(int variabl
  *
  *--------------------------------------------------------------*/
 
-void MarkovianSequences::min_interval_computation(int variable) const
+void MarkovianSequences::min_interval_computation(int variable)
 
 {
   if (marginal_distribution[variable]) {
@@ -2936,7 +3014,7 @@ void MarkovianSequences::min_interval_computation(int variable) const
           }
 /*          if (real_min - real_value > max_interval) {
             max_interval = real_min - real_value;
-	  } */
+          } */
           real_value = real_min;
         }
 
@@ -3286,7 +3364,7 @@ void MarkovianSequences::build_observation_histogram(int variable , int nb_state
   if ((!observation_histogram[variable]) || (step != observation_histogram[variable][0]->step)) {
     register int i , j;
     int *pstate , *pioutput;
-    double *proutput;
+    double imin_value , *proutput;
 
 
     // construction de l'histogramme
@@ -3294,10 +3372,11 @@ void MarkovianSequences::build_observation_histogram(int variable , int nb_state
     if (step == D_DEFAULT) {
       step = marginal_histogram[variable]->step;
     }
+    imin_value = floor(min_value[variable] / step) * step;
 
     if (observation_histogram[variable]) {
       for (i = 0;i < nb_state;i++) {
-        observation_histogram[variable][i]->nb_category = (int)floor((observation_histogram[variable][i]->max_value - observation_histogram[variable][i]->min_value) / step) + 1;
+        observation_histogram[variable][i]->nb_category = (int)floor((max_value[variable] - imin_value) / step) + 1;
 
         delete [] observation_histogram[variable][i]->frequency;
         observation_histogram[variable][i]->frequency = new int[observation_histogram[variable][i]->nb_category];
@@ -3308,12 +3387,10 @@ void MarkovianSequences::build_observation_histogram(int variable , int nb_state
       observation_histogram[variable] = new Histogram*[nb_state];
 
       for (i = 0;i < nb_state;i++) {
-        observation_histogram[variable][i] = new Histogram((int)floor((max_value[variable] - min_value[variable]) / step) + 1 , false);
+        observation_histogram[variable][i] = new Histogram((int)floor((max_value[variable] - imin_value) / step) + 1 , false);
 
         observation_histogram[variable][i]->nb_element = marginal_distribution[0]->frequency[i];
         observation_histogram[variable][i]->type = type[variable];
-        observation_histogram[variable][i]->min_value = min_value[variable];
-        observation_histogram[variable][i]->max_value = max_value[variable];
       }
 
       // calcul des valeurs minimums et maximums par etat
@@ -3367,6 +3444,8 @@ void MarkovianSequences::build_observation_histogram(int variable , int nb_state
 
     for (i = 0;i < nb_state;i++) {
       observation_histogram[variable][i]->step = step;
+      observation_histogram[variable][i]->min_value = imin_value;
+      observation_histogram[variable][i]->max_value = ceil(max_value[variable] / step) * step;
     }
 
     // calcul des frequences
@@ -3384,8 +3463,8 @@ void MarkovianSequences::build_observation_histogram(int variable , int nb_state
         pstate = int_sequence[i][0];
         pioutput = int_sequence[i][variable];
         for (j = 0;j < length[i];j++) {
-//          (observation_histogram[variable][*pstate++]->frequency[(int)((*pioutput++ - min_value[variable]) / step)])++;
-          (observation_histogram[variable][*pstate++]->frequency[(int)floor((*pioutput++ - min_value[variable]) / step)])++;
+//          (observation_histogram[variable][*pstate++]->frequency[(int)((*pioutput++ - imin_value) / step)])++;
+          (observation_histogram[variable][*pstate++]->frequency[(int)floor((*pioutput++ - imin_value) / step)])++;
         }
       }
       break;
@@ -3396,8 +3475,8 @@ void MarkovianSequences::build_observation_histogram(int variable , int nb_state
         pstate = int_sequence[i][0];
         proutput = real_sequence[i][variable];
         for (j = 0;j < length[i];j++) {
-//          (observation_histogram[variable][*pstate++]->frequency[(int)((*proutput++ - min_value[variable]) / step)]++;
-          (observation_histogram[variable][*pstate++]->frequency[(int)floor((*proutput++ - min_value[variable]) / step)])++;
+//          (observation_histogram[variable][*pstate++]->frequency[(int)((*proutput++ - imin_value) / step)]++;
+          (observation_histogram[variable][*pstate++]->frequency[(int)floor((*proutput++ - imin_value) / step)])++;
         }
       }
       break;
@@ -3575,7 +3654,7 @@ void MarkovianSequences::build_index_value(int variable)
   // creation d'un objet Curves
 
   characteristics[variable]->index_value = new Curves(marginal_distribution[variable]->nb_value ,
-                                                      max_length , true , false);
+                                                      max_length , true , false , false);
   frequency = new int[marginal_distribution[variable]->nb_value];
 
   // calcul des probabilites de chaque valeur en fonction de l'index
@@ -3602,6 +3681,80 @@ void MarkovianSequences::build_index_value(int variable)
   }
 
   delete [] frequency;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Extraction des probabilites de chaque valeur entiere en fonction de l'index
+ *  (pour une variable donnee).
+ *
+ *  argument : indice de la variable.
+ *
+ *--------------------------------------------------------------*/
+
+void MarkovianSequences::build_explicit_index_value(int variable)
+
+{
+  register int i , j , k , m;
+  int total , *frequency , *index;
+
+
+  // creation d'un objet Curves
+
+  i = 0;
+  for (j = index_parameter_distribution->offset;j < index_parameter_distribution->nb_value;j++) {
+    if (index_parameter_distribution->frequency[j] > 0) {
+      i++;
+    }
+  }
+  characteristics[variable]->explicit_index_value = new Curves(marginal_distribution[variable]->nb_value ,
+                                                               i , true , true , false);
+
+  frequency = new int[marginal_distribution[variable]->nb_value];
+  index = new int[nb_sequence];
+
+  // calcul des probabilites de chaque valeur en fonction de l'index explicite
+
+  for (i = 0;i < nb_sequence;i++) {
+    index[i] = 0;
+  }
+
+  i = 0;
+  for (j = index_parameter_distribution->offset;j < index_parameter_distribution->nb_value;j++) {
+    if (index_parameter_distribution->frequency[j] > 0) {
+      characteristics[variable]->explicit_index_value->index_parameter[i] = j;
+
+      for (k = 0;k < marginal_distribution[variable]->nb_value;k++) {
+        frequency[k] = 0;
+      }
+
+      for (k = 0;k < nb_sequence;k++) {
+        m = 0;
+        m = index[k];
+        while ((m < length[k] - 1) && (index_parameter[k][m] < j)) {
+          m++;
+        }
+        if (index_parameter[k][m] == j) {
+          index[k] = m;
+          frequency[int_sequence[k][variable][m]]++;
+        }
+      }
+
+      total = 0;
+      for (k = 0;k < marginal_distribution[variable]->nb_value;k++) {
+        total += frequency[k];
+      }
+      characteristics[variable]->explicit_index_value->frequency[i] = total;
+      for (k = 0;k < marginal_distribution[variable]->nb_value;k++) {
+        characteristics[variable]->explicit_index_value->point[k][i] = (double)frequency[k] / (double)total;
+      }
+      i++;
+    }
+  }
+
+  delete [] frequency;
+  delete [] index;
 }
 
 
@@ -4299,6 +4452,9 @@ void MarkovianSequences::build_characteristic(int variable , bool sojourn_time_f
         }
 
         build_index_value(i);
+        if (index_parameter) {
+          build_explicit_index_value(i);
+        }
 
         build_first_occurrence_frequency_distribution(i);
         build_recurrence_time_frequency_distribution(i);
@@ -4396,7 +4552,7 @@ bool MarkovianSequences::word_count(StatError &error , ostream &os , int variabl
           ostringstream error_message;
           error_message << STAT_label[STATL_VARIABLE] << " " << variable + 1 << ": "
                         << STAT_label[STATL_STATE] << " " << begin_state << " "
-                        << SEQ_error[SEQR_NOT_PRESENT];
+                        << STAT_error[STATR_NOT_PRESENT];
           error.update((error_message.str()).c_str());
         }
 
@@ -4407,7 +4563,7 @@ bool MarkovianSequences::word_count(StatError &error , ostream &os , int variabl
           ostringstream error_message;
           error_message << STAT_label[STATL_VARIABLE] << " " << variable + 1 << ": "
                         << STAT_label[STATL_STATE] << " " << end_state << " "
-                        << SEQ_error[SEQR_NOT_PRESENT];
+                        << STAT_error[STATR_NOT_PRESENT];
           error.update((error_message.str()).c_str());
         }
       }
@@ -4581,7 +4737,6 @@ ostream& MarkovianSequences::ascii_write(ostream &os , bool exhaustive , bool co
       os << "   | " << SEQ_label[SEQL_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
       index_parameter_distribution->ascii_print(os , comment_flag);
     }
-    os << endl;
 
     if (index_interval) {
       os << "\n";
@@ -4600,6 +4755,8 @@ ostream& MarkovianSequences::ascii_write(ostream &os , bool exhaustive , bool co
         index_interval->ascii_print(os , comment_flag);
       }
     }
+
+    os << "\n";
   }
 
   os << nb_variable << " " << STAT_word[nb_variable == 1 ? STATW_VARIABLE : STATW_VARIABLES] << endl;
@@ -5676,6 +5833,799 @@ MultiPlotSet* MarkovianSequences::get_plotable() const
   }
 
   return plot_set;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Ecriture d'un modele lineaire d'observation de type tendance ajuste au format tableur.
+ *
+ *  arguments : stream, variable, pointeur sur un processus d'observation continu.
+ *
+ *--------------------------------------------------------------*/
+
+ostream& MarkovianSequences::linear_model_spreadsheet_print(ostream &os , int variable ,
+                                                            ContinuousParametricProcess *process) const
+
+{
+  bool *used_sequence;
+  register int i , j , k , m , n , r;
+  int frequency , *index;
+
+
+  if (type[variable] == INT_VALUE) {
+    used_sequence = new bool[nb_sequence];
+  }
+  if (index_parameter_type == TIME) {
+    index = new int[nb_sequence];
+  }
+
+  os << "\n" << SEQ_label[SEQL_INDEX] << "\t" << STAT_label[STATL_OBSERVATION];
+  for (i = 0;i < process->nb_state;i++) {
+    os << "\t" << STAT_label[STATL_STATE] << " " << i << " " << STAT_label[STATL_LINEAR_MODEL];
+  }
+  if (type[variable] == INT_VALUE) {
+    os << "\t" << STAT_label[STATL_FREQUENCY];
+  }
+  os << endl;
+
+  for (i = 0;i < process->nb_state;i++) {
+    switch (index_parameter_type) {
+
+    case IMPLICIT_TYPE : {
+      switch (type[variable]) {
+
+      case INT_VALUE : {
+        for (j = 0;j < max_length;j++) {
+          for (k = 0;k < nb_sequence;k++) {
+            used_sequence[k] = false;
+          }
+          for (k = 0;k < nb_sequence;k++) {
+            if ((j < length[k]) && (int_sequence[k][0][j] == i) && (!used_sequence[k])) {
+              used_sequence[k] = true;
+              os << j << "\t" << int_sequence[k][variable][j];
+              for (m = 0;m <= i;m++) {
+                os << "\t";
+              }
+              os << process->observation[i]->intercept + process->observation[i]->slope * j;
+
+              frequency = 1;
+              for (m = k + 1;m < nb_sequence;m++) {
+                if ((j < length[m]) && (int_sequence[m][0][j] == i) &&
+                    (int_sequence[m][variable][j] == int_sequence[k][variable][j])) {
+                  used_sequence[m] = true;
+                  frequency++;
+                }
+              }
+              for (m = i;m < process->nb_state;m++) {
+                os << "\t";
+              }
+              os << frequency << endl;
+            }
+          }
+        }
+        break;
+      }
+
+      case REAL_VALUE : {
+        for (j = 0;j < max_length;j++) {
+          for (k = 0;k < nb_sequence;k++) {
+            if ((j < length[k]) && (int_sequence[k][0][j] == i)) {
+              os << j << "\t" << real_sequence[k][variable][j];
+              for (m = 0;m <= i;m++) {
+                os << "\t";
+              }
+              os << process->observation[i]->intercept + process->observation[i]->slope * j << endl;
+            }
+          }
+        }
+        break;
+      }
+      }
+      break;
+    }
+
+    case TIME : {
+      for (j = 0;j < nb_sequence;j++) {
+        index[j] = 0;
+      }
+
+      switch (type[variable]) {
+
+      case INT_VALUE : {
+        for (j = index_parameter_distribution->offset;j < index_parameter_distribution->nb_value;j++) {
+          if (index_parameter_distribution->frequency[j] > 0) {
+            for (k = 0;k < nb_sequence;k++) {
+              used_sequence[k] = false;
+            }
+            for (k = 0;k < nb_sequence;k++) {
+              m = index[k];
+              while ((m < length[k] - 1) && (index_parameter[k][m] < j)) {
+                m++;
+              }
+
+              if ((index_parameter[k][m] == j) && (int_sequence[k][0][m] == i) && (!used_sequence[k])) {
+                index[k] = m;
+                used_sequence[k] = true;
+                os << j << "\t" << int_sequence[k][variable][m];
+                for (n = 0;n <= i;n++) {
+                  os << "\t";
+                }
+                os << process->observation[i]->intercept + process->observation[i]->slope * j;
+
+                frequency = 1;
+                for (n = k + 1;n < nb_sequence;n++) {
+                  r = index[n];
+                  while ((r < length[n] - 1) && (index_parameter[n][r] < j)) {
+                    r++;
+                  }
+
+                  if ((index_parameter[n][r] == j) && (int_sequence[n][0][r] == i) &&
+                      (int_sequence[n][variable][r] == int_sequence[k][variable][m])) {
+                    index[n] = r;
+                    used_sequence[n] = true;
+                    frequency++;
+                  }
+                }
+
+                for (n = i;n < process->nb_state;n++) {
+                  os << "\t";
+                }
+                os << frequency << endl;
+              }
+            }
+          }
+        }
+        break;
+      }
+
+      case REAL_VALUE : {
+        for (j = index_parameter_distribution->offset;j < index_parameter_distribution->nb_value;j++) {
+          if (index_parameter_distribution->frequency[j] > 0) {
+            for (k = 0;k < nb_sequence;k++) {
+              m = index[k];
+              while ((m < length[k] - 1) && (index_parameter[k][m] < j)) {
+                m++;
+              }
+
+              if ((index_parameter[k][m] == j) && (int_sequence[k][0][m] == i)) {
+                index[k] = m;
+                os << j << "\t" << real_sequence[k][variable][m];
+                for (n = 0;n <= i;n++) {
+                  os << "\t";
+                }
+                os << process->observation[i]->intercept + process->observation[i]->slope * j << endl;
+              }
+            }
+          }
+        }
+        break;
+      }
+      }
+      break;
+    }
+    }
+  }
+
+  if (type[variable] == INT_VALUE) {
+    delete [] used_sequence;
+  }
+  if (index_parameter_type == TIME) {
+    delete [] index;
+  }
+
+  return os;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Sortie Gnuplot d'un modele lineaire d'observation de type tendance ajuste.
+ *
+ *  arguments : prefixe des fichiers, titre des figures, variable,
+ *              pointeur sur un processus d'observation continu.
+ *
+ *--------------------------------------------------------------*/
+
+bool MarkovianSequences::linear_model_plot_print(const char *prefix , const char *title , int variable ,
+                                                 ContinuousParametricProcess *process) const
+
+{
+  bool status = false;
+  register int i , j;
+  int *state_min_index_parameter , *state_max_index_parameter , *pstate;
+  double *state_min_value , *state_max_value;
+  ostringstream data_file_name[NB_STATE * 2 + 1];
+  ofstream *out_data_file[NB_STATE + 1];
+
+
+  // ecriture des fichier de donnees
+
+  state_min_index_parameter = new int[process->nb_state + 1];
+  state_max_index_parameter = new int[process->nb_state + 1];
+
+  switch (index_parameter_type) {
+
+  case IMPLICIT_TYPE : {
+    for (i = 0;i < process->nb_state;i++) {
+      state_min_index_parameter[i] = max_length - 1;
+      state_max_index_parameter[i] = 0;
+    }
+
+    for (i = 0;i < nb_sequence;i++) {
+      pstate = int_sequence[i][0];
+
+      for (j = 0;j < length[i];j++) {
+        if (j < state_min_index_parameter[*pstate]) {
+          state_min_index_parameter[*pstate] = j;
+        }
+        if (j > state_max_index_parameter[*pstate]) {
+          state_max_index_parameter[*pstate] = j;
+        }
+        pstate++;
+      }
+    }
+
+    state_min_index_parameter[process->nb_state] = 0;
+    state_max_index_parameter[process->nb_state] = max_length - 1;
+    break;
+  }
+
+  case TIME : {
+    for (i = 0;i < process->nb_state;i++) {
+      state_min_index_parameter[i] = index_parameter_distribution->nb_value - 1;
+      state_max_index_parameter[i] = index_parameter_distribution->offset;
+    }
+
+    for (i = 0;i < nb_sequence;i++) {
+      pstate = int_sequence[i][0];
+
+      for (j = 0;j < length[i];j++) {
+        if (index_parameter[i][j] < state_min_index_parameter[*pstate]) {
+          state_min_index_parameter[*pstate] = index_parameter[i][j];
+        }
+        if (index_parameter[i][j] > state_max_index_parameter[*pstate]) {
+          state_max_index_parameter[*pstate] = index_parameter[i][j];
+        }
+        pstate++;
+      }
+    }
+
+    state_min_index_parameter[process->nb_state] = index_parameter_distribution->offset;
+    state_max_index_parameter[process->nb_state] = index_parameter_distribution->nb_value - 1;
+    break;
+  }
+  }
+
+  state_min_value = new double[process->nb_state];
+  state_max_value = new double[process->nb_state];
+
+  for (i = 0;i < process->nb_state;i++) {
+    state_min_value[i] = max_value[variable];
+    state_max_value[i] = min_value[variable];
+  }
+
+  switch (type[variable]) {
+
+  case INT_VALUE : {
+    for (i = 0;i < nb_sequence;i++) {
+      pstate = int_sequence[i][0];
+
+      for (j = 0;j < length[i];j++) {
+        if (int_sequence[i][variable][j] < state_min_value[*pstate]) {
+          state_min_value[*pstate] = int_sequence[i][variable][j];
+        }
+        if (int_sequence[i][variable][j] > state_max_value[*pstate]) {
+          state_max_value[*pstate] = int_sequence[i][variable][j];
+        }
+        pstate++;
+      }
+    }
+    break;
+  }
+
+  case REAL_VALUE : {
+    for (i = 0;i < nb_sequence;i++) {
+      pstate = int_sequence[i][0];
+
+      for (j = 0;j < length[i];j++) {
+        if (real_sequence[i][variable][j] < state_min_value[*pstate]) {
+          state_min_value[*pstate] = real_sequence[i][variable][j];
+        }
+        if (real_sequence[i][variable][j] > state_max_value[*pstate]) {
+          state_max_value[*pstate] = real_sequence[i][variable][j];
+        }
+        pstate++;
+      }
+    }
+    break;
+  }
+  }
+
+  for (i = 0;i < process->nb_state;i++) {
+    data_file_name[i * 2] << prefix << variable << i * 2 << ".dat";
+    out_data_file[0]= new ofstream((data_file_name[i * 2].str()).c_str());
+
+    if (out_data_file) {
+      status = true;
+
+      *out_data_file[0] << state_min_index_parameter[i] << " "
+                        << process->observation[i]->intercept + process->observation[i]->slope * state_min_index_parameter[i] << endl;
+      *out_data_file[0] << state_max_index_parameter[i] << " "
+                        << process->observation[i]->intercept + process->observation[i]->slope * state_max_index_parameter[i] << endl;
+
+      out_data_file[0]->close();
+      delete out_data_file[0];
+    }
+  }
+
+  for (i = 0;i < process->nb_state;i++) {
+    data_file_name[i * 2 + 1] << prefix << variable << i * 2 + 1 << ".dat";
+    out_data_file[i] = new ofstream ((data_file_name[i * 2 + 1].str()).c_str());
+  }
+  data_file_name[process->nb_state * 2] << prefix << variable << process->nb_state * 2 << ".dat";
+  out_data_file[process->nb_state] = new ofstream ((data_file_name[process->nb_state * 2].str()).c_str());
+
+  if (out_data_file[process->nb_state]) {
+    switch (index_parameter_type) {
+
+    case IMPLICIT_TYPE : {
+      switch (type[variable]) {
+
+      case INT_VALUE : {
+        for (i = 0;i < nb_sequence;i++) {
+          pstate = int_sequence[i][0];
+          for (j = 0;j < length[i];j++) {
+            *out_data_file[*pstate++] << j << " " << int_sequence[i][variable][j] << endl;
+            *out_data_file[process->nb_state] << j << " " << int_sequence[i][variable][j] << endl;
+          }
+        }
+        break;
+      }
+
+      case REAL_VALUE : {
+        for (i = 0;i < nb_sequence;i++) {
+          pstate = int_sequence[i][0];
+          for (j = 0;j < length[i];j++) {
+            *out_data_file[*pstate++] << j << " " << real_sequence[i][variable][j] << endl;
+            *out_data_file[process->nb_state] << j << " " << real_sequence[i][variable][j] << endl;
+          }
+        }
+        break;
+      }
+      }
+      break;
+    }
+
+    case TIME : {
+      switch (type[variable]) {
+
+      case INT_VALUE : {
+        for (i = 0;i < nb_sequence;i++) {
+          pstate = int_sequence[i][0];
+          for (j = 0;j < length[i];j++) {
+            *out_data_file[*pstate++] << index_parameter[i][j] << " " << int_sequence[i][variable][j] << endl;
+            *out_data_file[process->nb_state] << index_parameter[i][j] << " " << int_sequence[i][variable][j] << endl;
+          }
+        }
+        break;
+      }
+
+      case REAL_VALUE : {
+        for (i = 0;i < nb_sequence;i++) {
+          pstate = int_sequence[i][0];
+          for (j = 0;j < length[i];j++) {
+            *out_data_file[*pstate++] << index_parameter[i][j] << " " << real_sequence[i][variable][j] << endl;
+            *out_data_file[process->nb_state] << index_parameter[i][j] << " " << real_sequence[i][variable][j] << endl;
+          }
+        }
+        break;
+      }
+      }
+      break;
+    }
+    }
+  }
+
+  for (i = 0;i <= process->nb_state;i++) {
+    out_data_file[i]->close();
+    delete out_data_file[i];
+  }
+
+  if (status) {
+
+    // ecriture du fichiers de commandes et du fichiers d'impression
+
+    for (i = 0;i < 2;i++) {
+      ostringstream file_name[2];
+
+      switch (i) {
+      case 0 :
+        file_name[0] << prefix << variable << ".plot";
+        break;
+      case 1 :
+        file_name[0] << prefix << variable << ".print";
+        break;
+      }
+
+      ofstream out_file((file_name[0].str()).c_str());
+
+      if (i == 1) {
+        out_file << "set terminal postscript" << endl;
+        file_name[1] << label(prefix) << process << ".ps";
+        out_file << "set output \"" << file_name[1].str() << "\"\n\n";
+      }
+
+      out_file << "set border 15 lw 0\n" << "set tics out\n" << "set xtics nomirror\n"
+               << "set title \"";
+      if (title) {
+        out_file << title << " - ";
+      }
+      out_file << STAT_label[STATL_OUTPUT_PROCESS] << " " << variable << "\"\n\n";
+
+      out_file << "set xlabel \"" << SEQ_label[SEQL_INDEX] << "\"" << endl;
+      out_file << "set ylabel \"" << STAT_label[STATL_OBSERVATION] << "\"" << endl;
+
+      for (j = 0;j < process->nb_state;j++) {
+        if (state_max_index_parameter[j] - state_min_index_parameter[j] < TIC_THRESHOLD) {
+          out_file << "set xtics " << state_min_index_parameter[j] << ",1" << endl;
+        }
+        if (state_max_value[j] - state_min_value[j] < TIC_THRESHOLD) {
+          out_file << "set ytics " << MIN(state_min_value[j] , 0) << ",1" << endl;
+        }
+
+        out_file << "plot [" << state_min_index_parameter[j] << ":" << state_max_index_parameter[j] << "] [";
+/*        if ((state_min_value[j] >= 0.) && (state_max_value[j] - state_min_value[j] > state_min_value[j] * PLOT_RANGE_RATIO)) {
+          out_file << 0;
+        }
+        else { */
+          out_file << state_min_value[j];
+//        }
+        out_file << ":" << MAX(state_max_value[j] , state_min_value[j] + 1) << "] \""
+                 << label((data_file_name[2 * j + 1].str()).c_str()) << "\" using 1:2 notitle with points,\\" << endl;
+        out_file << "\"" << label((data_file_name[2 * j].str()).c_str()) << "\" using 1:2 title \""
+                 << STAT_label[STATL_STATE] << " " << j << " " << STAT_label[STATL_OBSERVATION] << " "
+                 << STAT_label[STATL_MODEL] << "\" with lines" << endl;
+
+        if (state_max_index_parameter[j] - state_min_index_parameter[j] < TIC_THRESHOLD) {
+          out_file << "set xtics autofreq" << endl;
+        }
+        if (state_max_value[j] - state_min_value[j] < TIC_THRESHOLD) {
+          out_file << "set ytics autofreq" << endl;
+        }
+
+        if (i == 0) {
+          out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
+        }
+        out_file << endl;
+      }
+
+      if (state_max_index_parameter[process->nb_state] - state_min_index_parameter[process->nb_state] < TIC_THRESHOLD) {
+        out_file << "set xtics " << state_min_index_parameter[process->nb_state] << ",1" << endl;
+      }
+      if (max_value[variable] - min_value[variable] < TIC_THRESHOLD) {
+        out_file << "set ytics " << MIN(min_value[variable] , 0) << ",1" << endl;
+      }
+
+      out_file << "plot [" << state_min_index_parameter[process->nb_state] << ":" << state_max_index_parameter[process->nb_state] << "] [";
+/*      if ((min_value[variable] >= 0.) && (max_value[variable] - min_value[variable] > min_value[variable] * PLOT_RANGE_RATIO)) {
+        out_file << 0;
+      }
+      else { */
+        out_file << min_value[variable];
+//      }
+      out_file << ":" << MAX(max_value[variable] , min_value[variable] + 1) << "] \""
+               << label((data_file_name[2 * process->nb_state].str()).c_str()) << "\" using 1:2 notitle with points,\\" << endl;
+      for (j = 0;j < process->nb_state;j++) {
+        out_file << "\"" << label((data_file_name[2 * j].str()).c_str()) << "\" using 1:2 title \""
+                 << STAT_label[STATL_STATE] << " " << j << " " << STAT_label[STATL_OBSERVATION] << " "
+                 << STAT_label[STATL_MODEL] << "\" with lines";
+        if (j < process->nb_state - 1) {
+          out_file << ",\\";
+        }
+        out_file << endl;
+      }
+
+      if (state_max_index_parameter[process->nb_state] - state_min_index_parameter[process->nb_state] < TIC_THRESHOLD) {
+        out_file << "set xtics autofreq" << endl;
+      }
+      if (max_value[variable] - min_value[variable] < TIC_THRESHOLD) {
+        out_file << "set ytics autofreq" << endl;
+      }
+
+      out_file << "set xlabel" << endl;
+      out_file << "set ylabel" << endl;
+
+      if (i == 1) {
+        out_file << "\nset terminal x11" << endl;
+      }
+
+      out_file << "\npause 0 \"" << STAT_label[STATL_END] << "\"" << endl;
+    }
+  }
+
+  delete [] state_min_index_parameter;
+  delete [] state_max_index_parameter;
+  delete [] state_min_value;
+  delete [] state_max_value;
+
+  return status;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Sortie graphique d'un modele lineaire d'observation de type tendance ajuste.
+ *
+ *  arguments : prefixe des fichiers, indice du MultiPlot, variable,
+ *              pointeur sur un processus d'observation continu.
+ *
+ *--------------------------------------------------------------*/
+
+void MarkovianSequences::linear_model_plotable_write(MultiPlotSet &plot , int &index , int variable ,
+                                                     ContinuousParametricProcess *process) const
+
+{
+  bool status = false;
+  register int i , j;
+  int *state_min_index_parameter , *state_max_index_parameter , *pstate;
+  double *state_min_value , *state_max_value;
+  ostringstream title , legend;
+
+
+  // calcul des bornes
+
+  state_min_index_parameter = new int[process->nb_state + 1];
+  state_max_index_parameter = new int[process->nb_state + 1];
+
+  switch (index_parameter_type) {
+
+  case IMPLICIT_TYPE : {
+    for (i = 0;i < process->nb_state;i++) {
+      state_min_index_parameter[i] = max_length - 1;
+      state_max_index_parameter[i] = 0;
+    }
+
+    for (i = 0;i < nb_sequence;i++) {
+      pstate = int_sequence[i][0];
+
+      for (j = 0;j < length[i];j++) {
+        if (j < state_min_index_parameter[*pstate]) {
+          state_min_index_parameter[*pstate] = j;
+        }
+        if (j > state_max_index_parameter[*pstate]) {
+          state_max_index_parameter[*pstate] = j;
+        }
+        pstate++;
+      }
+    }
+
+    state_min_index_parameter[process->nb_state] = 0;
+    state_max_index_parameter[process->nb_state] = max_length - 1;
+    break;
+  }
+
+  case TIME : {
+    for (i = 0;i < process->nb_state;i++) {
+      state_min_index_parameter[i] = index_parameter_distribution->nb_value - 1;
+      state_max_index_parameter[i] = index_parameter_distribution->offset;
+    }
+
+    for (i = 0;i < nb_sequence;i++) {
+      pstate = int_sequence[i][0];
+
+      for (j = 0;j < length[i];j++) {
+        if (index_parameter[i][j] < state_min_index_parameter[*pstate]) {
+          state_min_index_parameter[*pstate] = index_parameter[i][j];
+        }
+        if (index_parameter[i][j] > state_max_index_parameter[*pstate]) {
+          state_max_index_parameter[*pstate] = index_parameter[i][j];
+        }
+        pstate++;
+      }
+    }
+
+    state_min_index_parameter[process->nb_state] = index_parameter_distribution->offset;
+    state_max_index_parameter[process->nb_state] = index_parameter_distribution->nb_value - 1;
+    break;
+  }
+  }
+
+  state_min_value = new double[process->nb_state];
+  state_max_value = new double[process->nb_state];
+
+  for (i = 0;i < process->nb_state;i++) {
+    state_min_value[i] = max_value[variable];
+    state_max_value[i] = min_value[variable];
+  }
+
+  switch (type[variable]) {
+
+  case INT_VALUE : {
+    for (i = 0;i < nb_sequence;i++) {
+      pstate = int_sequence[i][0];
+
+      for (j = 0;j < length[i];j++) {
+        if (int_sequence[i][variable][j] < state_min_value[*pstate]) {
+          state_min_value[*pstate] = int_sequence[i][variable][j];
+        }
+        if (int_sequence[i][variable][j] > state_max_value[*pstate]) {
+          state_max_value[*pstate] = int_sequence[i][variable][j];
+        }
+        pstate++;
+      }
+    }
+    break;
+  }
+
+  case REAL_VALUE : {
+    for (i = 0;i < nb_sequence;i++) {
+      pstate = int_sequence[i][0];
+
+      for (j = 0;j < length[i];j++) {
+        if (real_sequence[i][variable][j] < state_min_value[*pstate]) {
+          state_min_value[*pstate] = real_sequence[i][variable][j];
+        }
+        if (real_sequence[i][variable][j] > state_max_value[*pstate]) {
+          state_max_value[*pstate] = real_sequence[i][variable][j];
+        }
+        pstate++;
+      }
+    }
+    break;
+  }
+  }
+
+  plot.variable_nb_viewpoint[variable] = 1;
+
+  title.str("");
+  title << STAT_label[STATL_OUTPUT_PROCESS] << " " << variable;
+
+  // vue observations et fonction lineaire par etat
+
+  for (i = 0;i < process->nb_state;i++) {
+    plot[index + i].title = title.str();
+
+    plot[index + i].xrange = Range(state_min_index_parameter[i] , state_max_index_parameter[i]);
+    plot[index + i].yrange = Range(state_min_value[i] , MAX(state_max_value[i] , state_min_value[i] + 1));
+
+    if (state_max_index_parameter[i] - state_min_index_parameter[i] < TIC_THRESHOLD) {
+      plot[index + i].xtics = 1;
+    }
+    if (state_max_value[i] - state_min_value[i] < TIC_THRESHOLD) {
+      plot[index + i].ytics = 1;
+    }
+
+    plot[index + i].xlabel = SEQ_label[SEQL_INDEX];
+    plot[index + i].ylabel = STAT_label[STATL_OBSERVATION];
+
+    plot[index + i].resize(2);
+
+/*    legend.str("");
+    legend << STAT_label[STATL_STATE] << " " << i << " " << STAT_label[STATL_OBSERVATION];
+    plot[index + i][0].legend = legend.str(); */
+
+    legend.str("");
+    legend << STAT_label[STATL_STATE] << " " << i << " " << STAT_label[STATL_OBSERVATION] << " "
+           << STAT_label[STATL_MODEL];
+    plot[index + i][1].legend = legend.str();
+
+    plot[index + i][0].style = "points";
+    plot[index + i][1].style = "lines";
+  }
+
+  // vue observations et fonctions lineaires
+
+  plot[index + process->nb_state].title = title.str();
+
+  plot[index + process->nb_state].xrange = Range(state_min_index_parameter[process->nb_state] ,
+                                                 state_max_index_parameter[process->nb_state]);
+  plot[index + process->nb_state].yrange = Range(min_value[variable] , MAX(max_value[variable] , min_value[variable]));
+
+  if (state_max_index_parameter[process->nb_state] - state_min_index_parameter[process->nb_state] < TIC_THRESHOLD) {
+    plot[index + process->nb_state].xtics = 1;
+  }
+  if (max_value[variable] - min_value[variable] < TIC_THRESHOLD) {
+    plot[index + process->nb_state].ytics = 1;
+  }
+
+  plot[index + process->nb_state].xlabel = SEQ_label[SEQL_INDEX];
+  plot[index + process->nb_state].ylabel = STAT_label[STATL_OBSERVATION];
+
+  plot[index + process->nb_state].resize(process->nb_state + 1);
+
+/*  legend.str("");
+  legend << STAT_label[STATL_OBSERVATION];
+  plot[index + process->nb_state][0].legend = legend.str(); */
+
+  plot[index + process->nb_state][0].style = "points";
+
+  for (i = 0;i < process->nb_state;i++) {
+    legend.str("");
+    legend << STAT_label[STATL_STATE] << " " << i << " " << STAT_label[STATL_OBSERVATION] << " "
+           << STAT_label[STATL_MODEL];
+    plot[index + process->nb_state][i + 1].legend = legend.str();
+
+    plot[index + process->nb_state][i + 1].style = "lines";
+  }
+
+  switch (index_parameter_type) {
+
+  case IMPLICIT_TYPE : {
+    switch (type[variable]) {
+
+    case INT_VALUE : {
+      for (i = 0;i < nb_sequence;i++) {
+        pstate = int_sequence[i][0];
+        for (j = 0;j < length[i];j++) {
+          plot[index + *pstate++][0].add_point(j , int_sequence[i][variable][j]);
+          plot[index + process->nb_state][0].add_point(j , int_sequence[i][variable][j]);
+        }
+      }
+      break;
+    }
+
+    case REAL_VALUE : {
+      for (i = 0;i < nb_sequence;i++) {
+        pstate = int_sequence[i][0];
+        for (j = 0;j < length[i];j++) {
+          plot[index + *pstate++][0].add_point(j , real_sequence[i][variable][j]);
+          plot[index + process->nb_state][0].add_point(j , real_sequence[i][variable][j]);
+        }
+      }
+      break;
+    }
+    }
+    break;
+  }
+
+  case TIME : {
+    switch (type[variable]) {
+
+    case INT_VALUE : {
+      for (i = 0;i < nb_sequence;i++) {
+        pstate = int_sequence[i][0];
+        for (j = 0;j < length[i];j++) {
+          plot[index + *pstate++][0].add_point(index_parameter[i][j] , int_sequence[i][variable][j]);
+          plot[index + process->nb_state][0].add_point(index_parameter[i][j] , int_sequence[i][variable][j]);
+        }
+      }
+      break;
+    }
+
+    case REAL_VALUE : {
+      for (i = 0;i < nb_sequence;i++) {
+        pstate = int_sequence[i][0];
+        for (j = 0;j < length[i];j++) {
+          plot[index + *pstate++][0].add_point(index_parameter[i][j] , real_sequence[i][variable][j]);
+          plot[index + process->nb_state][0].add_point(index_parameter[i][j] , real_sequence[i][variable][j]);
+        }
+      }
+      break;
+    }
+    }
+    break;
+  }
+  }
+
+  for (i = 0;i < process->nb_state;i++) {
+    plot[index + i][1].add_point(state_min_index_parameter[i] , process->observation[i]->intercept +
+                                 process->observation[i]->slope * state_min_index_parameter[i]);
+    plot[index + i][1].add_point(state_max_index_parameter[i] , process->observation[i]->intercept +
+                                 process->observation[i]->slope * state_max_index_parameter[i]);
+
+    plot[index + process->nb_state][i + 1].add_point(state_min_index_parameter[i] , process->observation[i]->intercept +
+                                                     process->observation[i]->slope * state_min_index_parameter[i]);
+    plot[index + process->nb_state][i + 1].add_point(state_max_index_parameter[i] , process->observation[i]->intercept +
+                                                     process->observation[i]->slope * state_max_index_parameter[i]);
+  }
+
+  index += process->nb_state + 1;
+
+  delete [] state_min_index_parameter;
+  delete [] state_max_index_parameter;
+  delete [] state_min_value;
+  delete [] state_max_value;
 }
 
 
