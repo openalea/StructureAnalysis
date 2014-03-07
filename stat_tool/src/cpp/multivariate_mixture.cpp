@@ -45,8 +45,9 @@
 
 #include "stat_tools.h"
 #include "distribution.h"
-#include "markovian.h"
 #include "discrete_mixture.h"
+#include "markovian.h"
+// #include "mixture.h"
 #include "multivariate_mixture.h"
 #include "stat_label.h"
 
@@ -613,7 +614,7 @@ MultivariateMixture* multivariate_mixture_building(StatError &error , int nb_com
   mixt = NULL;
   error.init();
 
-  if ((nb_component < 2) || (nb_component > MIXTURE_NB_COMPONENT)) {
+  if ((nb_component < 2) || (nb_component > DISCRETE_MIXTURE_NB_COMPONENT)) {
     error.update(STAT_parsing[STATP_NB_DISTRIBUTION]);
   }
 
@@ -749,7 +750,7 @@ MultivariateMixture* multivariate_mixture_ascii_read(StatError &error , const ch
 
         case 0 : {
           lstatus = locale.stringToNum(token , &nb_component);
-          if ((lstatus) && ((nb_component < 2) || (nb_component > MIXTURE_NB_COMPONENT))) {
+          if ((lstatus) && ((nb_component < 2) || (nb_component > DISCRETE_MIXTURE_NB_COMPONENT))) {
             lstatus = false;
           }
 
@@ -1062,7 +1063,7 @@ MultivariateMixture* multivariate_mixture_ascii_read(StatError &error , const ch
              case true :
                {
                  np_observation[index-1]= categorical_observation_parsing(error, in_file, line,
-                                                                          nb_component, true);
+                                                                          nb_component, MIXTURE, true);
                  if (np_observation[index-1] == NULL)
                    status= false;
                  break;
@@ -1071,7 +1072,7 @@ MultivariateMixture* multivariate_mixture_ascii_read(StatError &error , const ch
              case false :
                {
                  p_observation[index-1]= discrete_observation_parsing(error, in_file, line,
-                                                                      nb_component,
+                                                                      nb_component, MIXTURE,
                                                                       cumul_threshold);
                  if (p_observation[index-1] == NULL)
                    status = false;
@@ -1233,7 +1234,7 @@ ostream& MultivariateMixture::ascii_write(ostream &os , const MultivariateMixtur
   int bnb_parameter;
   int *var_array = NULL;
   // double *scale;
-// const Distribution *ptComponent[MIXTURE_NB_COMPONENT];
+// const Distribution *ptComponent[DISCRETE_MIXTURE_NB_COMPONENT];
   FrequencyDistribution **observation= NULL;
   StatError error;
   Vectors *vect_data = NULL;
@@ -1281,7 +1282,7 @@ ostream& MultivariateMixture::ascii_write(ostream &os , const MultivariateMixtur
     if (npcomponent[var-1] == NULL)
       pcomponent[var-1]->ascii_print(os, observation, NULL, exhaustive, file_flag);
     else
-      npcomponent[var-1]->ascii_print(os, observation, exhaustive, file_flag);
+      npcomponent[var-1]->ascii_print(os, observation, NULL, exhaustive, file_flag);
 
     if (exhaustive) {
       /* for (i = 0;i < nb_component;i++) {
