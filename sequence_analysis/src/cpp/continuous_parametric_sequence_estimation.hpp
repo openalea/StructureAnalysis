@@ -3,12 +3,12 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id: continuous_distribution_estimation.cpp 12646 2012-08-03 08:12:47Z guedon $
+ *       $Id: continuous_distribution_sequence_estimation.hpp 12646 2012-08-03 08:12:47Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -61,7 +61,7 @@ extern double von_mises_concentration_computation(double mean_direction);
 
 /*--------------------------------------------------------------*
  *
- *  Estimation des parametres d'une loi gamma.
+ *  Estimation des parametres des lois gamma d'un processus d'observation.
  *
  *  arguments : comptage des etats, variable, pointeur sur un processus d'observation continu,
  *              iteration EM.
@@ -99,7 +99,9 @@ void MarkovianSequences::gamma_estimation(Type ***state_sequence_count , int var
           if (int_sequence[i][variable][j] == 0) {
             zero_mass[k] += state_sequence_count[i][j][k];
           }
-          mean[k] += state_sequence_count[i][j][k] * int_sequence[i][variable][j];
+          else {
+            mean[k] += state_sequence_count[i][j][k] * int_sequence[i][variable][j];
+          }
           state_frequency[k] += state_sequence_count[i][j][k];
         }
       }
@@ -114,7 +116,9 @@ void MarkovianSequences::gamma_estimation(Type ***state_sequence_count , int var
           if (real_sequence[i][variable][j] == 0.) {
             zero_mass[k] += state_sequence_count[i][j][k];
           }
-          mean[k] += state_sequence_count[i][j][k] * real_sequence[i][variable][j];
+          else {
+            mean[k] += state_sequence_count[i][j][k] * real_sequence[i][variable][j];
+          }
           state_frequency[k] += state_sequence_count[i][j][k];
         }
       }
@@ -195,7 +199,7 @@ void MarkovianSequences::gamma_estimation(Type ***state_sequence_count , int var
           }
 #         endif
 
-          if ((process->observation[i]->shape >= GAMMA_SCALE_PARAMETER_THRESHOLD) &&
+          if ((process->observation[i]->shape >= GAMMA_SHAPE_PARAMETER_THRESHOLD) &&
               (state_frequency[i] < GAMMA_FREQUENCY_THRESHOLD)) {
             log_geometric_mean = 0.;
             state_frequency[i] = 0.;
@@ -280,7 +284,7 @@ void MarkovianSequences::gamma_estimation(Type ***state_sequence_count , int var
 
 /*--------------------------------------------------------------*
  *
- *  Estimation des parametres d'une loi zero-inflated gamma.
+ *  Estimation des parametres des lois zero-inflated gamma d'un processus d'observation.
  *
  *  arguments : comptage des etats, variable, pointeur sur un processus d'observation continu,
  *              iteration EM.
@@ -417,7 +421,7 @@ void MarkovianSequences::zero_inflated_gamma_estimation(Type ***state_sequence_c
           }
 #         endif
 
-          if ((process->observation[i]->shape >= GAMMA_SCALE_PARAMETER_THRESHOLD) &&
+          if ((process->observation[i]->shape >= GAMMA_SHAPE_PARAMETER_THRESHOLD) &&
               (state_frequency[i] < GAMMA_FREQUENCY_THRESHOLD)) {
             log_geometric_mean = 0.;
 
@@ -498,16 +502,15 @@ void MarkovianSequences::zero_inflated_gamma_estimation(Type ***state_sequence_c
 
 /*--------------------------------------------------------------*
  *
- *  Estimation des parametres d'une loi gaussienne.
+ *  Estimation des parametres des lois gaussiennes d'un processus d'observation.
  *
- *  arguments : comptage des etats, variable, pointeur sur un processus d'observation continu,
- *              variance commune ou non.
+ *  arguments : comptage des etats, variable, pointeur sur un processus d'observation continu.
  *
  *--------------------------------------------------------------*/
 
 template <typename Type>
 void MarkovianSequences::gaussian_estimation(Type ***state_sequence_count , int variable ,
-                                             ContinuousParametricProcess *process , bool common_variance) const
+                                             ContinuousParametricProcess *process) const
 
 {
   register int i , j , k;
@@ -560,7 +563,7 @@ void MarkovianSequences::gaussian_estimation(Type ***state_sequence_count , int 
     }
   }
 
-  switch (common_variance) {
+  switch (process->tied_dispersion) {
 
   case false : {
     variance = new double[process->nb_state];
@@ -606,7 +609,7 @@ void MarkovianSequences::gaussian_estimation(Type ***state_sequence_count , int 
       }
 
       else {
-        process->observation[i]->dispersion = D_DEFAULT;
+        process->observation[i]->dispersion = 0.;
       }
     }
     break;
@@ -666,16 +669,15 @@ void MarkovianSequences::gaussian_estimation(Type ***state_sequence_count , int 
 
 /*--------------------------------------------------------------*
  *
- *  Estimation des parametres d'une loi de von Mises.
+ *  Estimation des parametres des lois de von Mises d'un processus d'observation.
  *
- *  arguments : comptage des etats, variable, pointeur sur un processus d'observation continu,
- *              parametre de concentration commun ou non.
+ *  arguments : comptage des etats, variable, pointeur sur un processus d'observation continu.
  *
  *--------------------------------------------------------------*/
 
 template <typename Type>
 void MarkovianSequences::von_mises_estimation(Type ***state_sequence_count , int variable ,
-                                              ContinuousParametricProcess *process , bool common_concentration) const
+                                              ContinuousParametricProcess *process) const
 
 {
   register int i , j , k;
@@ -765,7 +767,7 @@ void MarkovianSequences::von_mises_estimation(Type ***state_sequence_count , int
     }
   }
 
-  switch (common_concentration) {
+  switch (process->tied_dispersion) {
 
   case false : {
     for (i = 0;i < process->nb_state;i++) {
@@ -807,7 +809,8 @@ void MarkovianSequences::von_mises_estimation(Type ***state_sequence_count , int
 
 /*--------------------------------------------------------------*
  *
- *  Estimation des parametres d'un modele lineaire gaussien.
+ *  Estimation des parametres des modeles lineaires gaussiens de tendance
+ *  d'un processus d'observation.
  *
  *  arguments : comptage des etats, variable, pointeur sur un processus d'observation continu.
  *
@@ -819,7 +822,8 @@ void MarkovianSequences::linear_model_estimation(Type ***state_sequence_count , 
 
 {
   register int i , j , k;
-  double diff , *mean , *index_parameter_mean , *index_parameter_variance , *covariance , *residual_mean;
+  double diff , *mean , *index_parameter_mean , *index_parameter_variance , *covariance ,
+         *residual_mean , *residual_variance;
   Type *state_frequency;
 
 
@@ -1015,7 +1019,7 @@ void MarkovianSequences::linear_model_estimation(Type ***state_sequence_count , 
         for (j = 0;j < length[i];j++) {
           for (k = 0;k < process->nb_state;k++) {
             residual_mean[k] += state_sequence_count[i][j][k] * (int_sequence[i][variable][j] -
-                                 (process->observation[i]->intercept + process->observation[i]->slope * j));
+                                 (process->observation[k]->intercept + process->observation[k]->slope * j));
           }
         }
       }
@@ -1027,7 +1031,7 @@ void MarkovianSequences::linear_model_estimation(Type ***state_sequence_count , 
         for (j = 0;j < length[i];j++) {
           for (k = 0;k < process->nb_state;k++) {
             residual_mean[k] += state_sequence_count[i][j][k] * (int_sequence[i][variable][j] -
-                                 (process->observation[i]->intercept + process->observation[i]->slope * index_parameter[i][j]));
+                                 (process->observation[k]->intercept + process->observation[k]->slope * index_parameter[i][j]));
           }
         }
       }
@@ -1045,7 +1049,7 @@ void MarkovianSequences::linear_model_estimation(Type ***state_sequence_count , 
         for (j = 0;j < length[i];j++) {
           for (k = 0;k < process->nb_state;k++) {
             residual_mean[k] += state_sequence_count[i][j][k] * (real_sequence[i][variable][j] -
-                                 (process->observation[i]->intercept + process->observation[i]->slope * j));
+                                 (process->observation[k]->intercept + process->observation[k]->slope * j));
           }
         }
       }
@@ -1057,7 +1061,7 @@ void MarkovianSequences::linear_model_estimation(Type ***state_sequence_count , 
         for (j = 0;j < length[i];j++) {
           for (k = 0;k < process->nb_state;k++) {
             residual_mean[k] += state_sequence_count[i][j][k] * (real_sequence[i][variable][j] -
-                                 (process->observation[i]->intercept + process->observation[i]->slope * index_parameter[i][j]));
+                                 (process->observation[k]->intercept + process->observation[k]->slope * index_parameter[i][j]));
           }
         }
       }
@@ -1074,8 +1078,9 @@ void MarkovianSequences::linear_model_estimation(Type ***state_sequence_count , 
     }
   }
 
+  residual_variance = new double[process->nb_state];
   for (i = 0;i < process->nb_state;i++) {
-    process->observation[i]->dispersion = 0.;
+    residual_variance[i] = 0.;
   }
 
   switch (type[variable]) {
@@ -1087,9 +1092,9 @@ void MarkovianSequences::linear_model_estimation(Type ***state_sequence_count , 
       for (i = 0;i < nb_sequence;i++) {
         for (j = 0;j < length[i];j++) {
           for (k = 0;k < process->nb_state;k++) {
-            diff = int_sequence[i][variable][j] - (process->observation[i]->intercept +
-                    process->observation[i]->slope * j) - residual_mean[k];
-            process->observation[k]->dispersion += state_sequence_count[i][j][k] * diff * diff;
+            diff = int_sequence[i][variable][j] - (process->observation[k]->intercept +
+                    process->observation[k]->slope * j) - residual_mean[k];
+            residual_variance[k] += state_sequence_count[i][j][k] * diff * diff;
           }
         }
       }
@@ -1100,9 +1105,9 @@ void MarkovianSequences::linear_model_estimation(Type ***state_sequence_count , 
       for (i = 0;i < nb_sequence;i++) {
         for (j = 0;j < length[i];j++) {
           for (k = 0;k < process->nb_state;k++) {
-            diff = int_sequence[i][variable][j] - (process->observation[i]->intercept +
-                    process->observation[i]->slope * index_parameter[i][j]) - residual_mean[k];
-            process->observation[k]->dispersion += state_sequence_count[i][j][k] * diff * diff;
+            diff = int_sequence[i][variable][j] - (process->observation[k]->intercept +
+                    process->observation[k]->slope * index_parameter[i][j]) - residual_mean[k];
+            residual_variance[k] += state_sequence_count[i][j][k] * diff * diff;
           }
         }
       }
@@ -1119,9 +1124,9 @@ void MarkovianSequences::linear_model_estimation(Type ***state_sequence_count , 
       for (i = 0;i < nb_sequence;i++) {
         for (j = 0;j < length[i];j++) {
           for (k = 0;k < process->nb_state;k++) {
-            diff = real_sequence[i][variable][j] - (process->observation[i]->intercept +
-                    process->observation[i]->slope * j) - residual_mean[k];
-            process->observation[k]->dispersion += state_sequence_count[i][j][k] * diff * diff;
+            diff = real_sequence[i][variable][j] - (process->observation[k]->intercept +
+                    process->observation[k]->slope * j) - residual_mean[k];
+            residual_variance[k] += state_sequence_count[i][j][k] * diff * diff;
           }
         }
       }
@@ -1132,9 +1137,9 @@ void MarkovianSequences::linear_model_estimation(Type ***state_sequence_count , 
       for (i = 0;i < nb_sequence;i++) {
         for (j = 0;j < length[i];j++) {
           for (k = 0;k < process->nb_state;k++) {
-            diff = real_sequence[i][variable][j] - (process->observation[i]->intercept +
-                    process->observation[i]->slope * index_parameter[i][j]) - residual_mean[k];
-            process->observation[k]->dispersion += state_sequence_count[i][j][k] * diff * diff;
+            diff = real_sequence[i][variable][j] - (process->observation[k]->intercept +
+                    process->observation[k]->slope * index_parameter[i][j]) - residual_mean[k];
+            residual_variance[k] += state_sequence_count[i][j][k] * diff * diff;
           }
         }
       }
@@ -1147,17 +1152,29 @@ void MarkovianSequences::linear_model_estimation(Type ***state_sequence_count , 
 
   for (i = 0;i < process->nb_state;i++) {
     if (state_frequency[i] > 2) {
-//      process->observation[i]->dispersion /= state_frequency[i];
-      process->observation[i]->dispersion /= (state_frequency[i] - 2);
+//      process->observation[i]->dispersion = sqrt(residual_variance[i] / state_frequency[i]);
+      process->observation[i]->dispersion = sqrt(residual_variance[i] / (state_frequency[i] - 2));
     }
+    else {
+      process->observation[i]->dispersion = 0.;
+    }
+
+#   ifdef DEBUG
+    cout << "\n" << STAT_word[STATW_STATE] << " " << i << "   "
+         << STAT_word[STATW_INTERCEPT] << " : " << process->observation[i]->intercept << "   "
+         << STAT_word[STATW_SLOPE] << " : " << process->observation[i]->slope << "   "
+         << STAT_word[STATW_STANDARD_DEVIATION] << " : " << process->observation[i]->dispersion << endl;
+#   endif
+
   }
 
   delete [] state_frequency;
   delete [] mean;
   delete [] index_parameter_mean;
-  delete [] covariance;
   delete [] index_parameter_variance;
+  delete [] covariance;
   delete [] residual_mean;
+  delete [] residual_variance;
 }
 
 
