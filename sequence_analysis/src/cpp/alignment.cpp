@@ -3,9 +3,9 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
@@ -42,10 +42,10 @@
 #include <iostream>
 
 #include "stat_tool/stat_tools.h"
-#include "stat_tool/vectors.h"
-#include "stat_tool/distance_matrix.h"
 #include "stat_tool/curves.h"
 #include "stat_tool/markovian.h"
+#include "stat_tool/vectors.h"
+#include "stat_tool/distance_matrix.h"
 #include "stat_tool/stat_label.h"
 
 #include "sequences.h"
@@ -2844,7 +2844,7 @@ Sequences* Sequences::multiple_alignment(StatError &error , ostream &os ,
 
     // alignement des sequences 2 a 2
 
-    dist_matrix = alignment(error , 0 , ivector_dist , I_DEFAULT , I_DEFAULT ,
+    dist_matrix = alignment(error , NULL , ivector_dist , I_DEFAULT , I_DEFAULT ,
                             begin_free , end_free , indel_cost , indel_factor);
 
     if (dist_matrix) {
