@@ -3,9 +3,9 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
@@ -43,9 +43,9 @@
 #include <boost/math/distributions/normal.hpp>
 
 #include "stat_tool/stat_tools.h"
-#include "stat_tool/vectors.h"
 #include "stat_tool/curves.h"
 #include "stat_tool/markovian.h"
+#include "stat_tool/vectors.h"
 #include "stat_tool/stat_label.h"
 
 #include "sequences.h"
@@ -1588,7 +1588,7 @@ void Sequences::correlation_computation(Correlation &correl , int variable1 , in
 
     itype[0] = INT_VALUE;
     itype[1] = INT_VALUE;
-    vec = new Vectors(cumul_length , 0 , 2 , itype);
+    vec = new Vectors(cumul_length , NULL , 2 , itype);
 
     ppoint = correl.point[0];
     pfrequency = correl.frequency;
