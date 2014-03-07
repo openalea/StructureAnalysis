@@ -3,9 +3,9 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id: continuous_parametric.cpp 8175 2010-02-18 10:30:35Z guedon $
@@ -166,12 +166,13 @@ ContinuousParametric& ContinuousParametric::operator=(const ContinuousParametric
  *  Analyse du format d'un objet ContinuousParametric.
  *
  *  arguments : reference sur un objet StatError, stream,
- *              reference sur l'indice de la ligne lue.
+ *              reference sur l'indice de la ligne lue, identificateur
+ *              de la derniere loi dans la liste.
  *
  *--------------------------------------------------------------*/
 
 ContinuousParametric* continuous_parametric_parsing(StatError &error , ifstream &in_file ,
-                                                    int &line)
+                                                    int &line , int last_ident)
 
 {
   RWLocaleSnapshot locale("en");
@@ -221,14 +222,14 @@ ContinuousParametric* continuous_parametric_parsing(StatError &error , ifstream 
       // test nom de la loi
 
       if (i == 0) {
-        for (j = GAMMA;j <= LINEAR_MODEL;j++) {
+        for (j = GAMMA;j <= last_ident;j++) {
           if (token == STAT_continuous_distribution_word[j]) {
             ident = j;
             break;
           }
         }
 
-        if (j == LINEAR_MODEL + 1) {
+        if (j == last_ident + 1) {
           status = false;
           error.update(STAT_parsing[STATP_DISTRIBUTION_NAME] , line , i + 1);
         }
@@ -2145,13 +2146,6 @@ double ContinuousParametric::mass_computation(double inf , double sup) const
       else {
         mass = cdf(dist , sup) - cdf(dist , inf);
       }
-
-#     ifdef DEBUG
-      if (mass > 1.) {
-        mass = 1.;
-      }
-#     endif
-
     }
     break;
   }
@@ -2244,6 +2238,11 @@ double ContinuousParametric::mass_computation(double inf , double sup) const
     }
     break;
   }
+  }
+
+//  if (mass > 1.) {
+  if ((inf == sup) && (mass > 1.)) {
+    mass = 1.;
   }
 
   return mass;
