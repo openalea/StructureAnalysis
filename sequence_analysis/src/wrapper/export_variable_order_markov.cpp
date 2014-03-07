@@ -354,7 +354,7 @@ void class_variable_order_markov_data() {
   VariableOrderMarkov* get_markov() const { return markov; }
    VariableOrderChainData* get_chain_data() const { return chain_data; }
    double get_likelihood() const { return likelihood; }
-   double get_hidden_likelihood() const { return hidden_likelihood; }
+   double get_restoration_likelihood() const { return restoration_likelihood; }
    double get_posterior_probability(int index) const { return posterior_probability[index]; }
    */
 }
