@@ -3,9 +3,9 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
@@ -143,12 +143,10 @@ public :
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(StatError &error , const char *path ,
-                     bool exhaustive = false) const;
+    bool ascii_write(StatError &error , const char *path , bool exhaustive = false) const;
     std::ostream& spreadsheet_write(std::ostream &os) const;
     bool spreadsheet_write(StatError &error , const char *path) const;
-    bool plot_write(StatError &error , const char *prefix ,
-                    const char *title = NULL) const;
+    bool plot_write(StatError &error , const char *prefix , const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
     bool test_symmetry() const;
@@ -274,8 +272,7 @@ public :
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
     bool ascii_write(StatError &error , const char *path , bool exhaustive = false) const;
     bool spreadsheet_write(StatError &error , const char *path) const;
-    bool plot_write(StatError &error , const char *prefix ,
-                    const char *title = NULL) const;
+    bool plot_write(StatError &error , const char *prefix , const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
     void cluster_nb_pattern_computation();
@@ -342,8 +339,9 @@ public :
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
     bool ascii_write(StatError &error , const char *path , bool exhaustive = false) const;
     bool spreadsheet_write(StatError &error , const char *path) const;
-    bool plot_write(StatError &error , const char *prefix ,
-                    const char *title = NULL) const { return false; }
+    bool plot_write(StatError &error , const char *prefix , const char *title = NULL) const
+    { return false; }
+
     // acces membres de la classe
 
     DistanceMatrix* get_distance_matrix() { return distance_matrix; }
