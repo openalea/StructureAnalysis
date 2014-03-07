@@ -3,9 +3,9 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
@@ -91,11 +91,9 @@ public :
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(StatError &error , const char *path ,
-                     bool exhaustive = false) const;
+    bool ascii_write(StatError &error , const char *path , bool exhaustive = false) const;
     bool spreadsheet_write(StatError &error , const char *path) const;
-    bool plot_write(StatError &error , const char *prefix ,
-                    const char *title = NULL) const;
+    bool plot_write(StatError &error , const char *prefix , const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
     DiscreteDistributionData* simulation(StatError &error , int nb_element) const;
@@ -148,11 +146,9 @@ public :
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(StatError &error , const char *path ,
-                     bool exhaustive = false) const;
+    bool ascii_write(StatError &error , const char *path , bool exhaustive = false) const;
     bool spreadsheet_write(StatError &error , const char *path) const;
-    bool plot_write(StatError &error , const char *prefix ,
-                    const char *title = NULL) const;
+    bool plot_write(StatError &error , const char *prefix , const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
     DiscreteParametric* get_distribution() const { return distribution; }
