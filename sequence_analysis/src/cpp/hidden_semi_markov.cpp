@@ -3,9 +3,9 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
@@ -478,8 +478,6 @@ HiddenSemiMarkov* hidden_semi_markov_ascii_read(StatError &error , const char *p
                 // test mot cle OUTPUT_PROCESS
 
                 case 0 : {
-                  output_process_type = CATEGORICAL_PROCESS;
-
                   if (token == STAT_word[STATW_OUTPUT_PROCESS]) {
                     index++;
                   }
@@ -530,6 +528,7 @@ HiddenSemiMarkov* hidden_semi_markov_ascii_read(StatError &error , const char *p
                     output_process_type = CONTINUOUS_PARAMETRIC;
                   }
                   else {
+                    output_process_type = CATEGORICAL_PROCESS - 1;
                     status = false;
                     ostringstream correction_message;
                     correction_message << STAT_word[STATW_CATEGORICAL] << " or "
@@ -554,9 +553,11 @@ HiddenSemiMarkov* hidden_semi_markov_ascii_read(StatError &error , const char *p
 
                 case CATEGORICAL_PROCESS : {
                   categorical_observation[index - 1] = categorical_observation_parsing(error , in_file , line ,
-                                                                                       chain->nb_state , true);
-//                  categorical_observation[index - 1] = categorical_observation_parsing(error , in_file , line ,  pour les donnees de suivi de croissance manguier
-//                                                                                       chain->nb_state , false);
+                                                                                       chain->nb_state ,
+                                                                                       HIDDEN_MARKOV , true);
+/*                  categorical_observation[index - 1] = categorical_observation_parsing(error , in_file , line , pour les donnees de suivi de croissance manguier
+                                                                                       chain->nb_state ,
+                                                                                       HIDDEN_MARKOV , false); */
                   if (!categorical_observation[index - 1]) {
                     status = false;
                   }
@@ -566,6 +567,7 @@ HiddenSemiMarkov* hidden_semi_markov_ascii_read(StatError &error , const char *p
                 case DISCRETE_PARAMETRIC : {
                   discrete_parametric_observation[index - 1] = discrete_observation_parsing(error , in_file , line ,
                                                                                             chain->nb_state ,
+                                                                                            HIDDEN_MARKOV ,
                                                                                             cumul_threshold);
                   if (!discrete_parametric_observation[index - 1]) {
                     status = false;
@@ -575,7 +577,9 @@ HiddenSemiMarkov* hidden_semi_markov_ascii_read(StatError &error , const char *p
 
                 case CONTINUOUS_PARAMETRIC : {
                   continuous_parametric_observation[index - 1] = continuous_observation_parsing(error , in_file , line ,
-                                                                                                chain->nb_state);
+                                                                                                chain->nb_state ,
+                                                                                                HIDDEN_MARKOV ,
+                                                                                                LINEAR_MODEL);
                   if (!continuous_parametric_observation[index - 1]) {
                     status = false;
                   }
