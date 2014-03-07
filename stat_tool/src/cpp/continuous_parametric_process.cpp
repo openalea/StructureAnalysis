@@ -3,9 +3,9 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id: continuous_parametric_process.cpp 8176 2010-02-18 10:30:53Z guedon $
@@ -81,6 +81,8 @@ ContinuousParametricProcess::ContinuousParametricProcess(int inb_state)
 
   nb_state = inb_state;
   ident = I_DEFAULT;
+  tied_location = false;
+  tied_dispersion = false;
   unit = I_DEFAULT;
 
   if (nb_state > 0) {
@@ -115,6 +117,8 @@ ContinuousParametricProcess::ContinuousParametricProcess(int inb_state , Continu
 
   nb_state = inb_state;
   ident = pobservation[0]->ident;
+  tied_location = false;
+  tied_dispersion = false;
   unit = pobservation[0]->unit;
 
   observation = new ContinuousParametric*[nb_state];
@@ -143,6 +147,8 @@ void ContinuousParametricProcess::copy(const ContinuousParametricProcess &proces
 
   nb_state = process.nb_state;
   ident = process.ident;
+  tied_location = process.tied_location;
+  tied_dispersion = process.tied_dispersion;
   unit = process.unit;
 
   observation = new ContinuousParametric*[nb_state];
@@ -233,12 +239,14 @@ ContinuousParametricProcess& ContinuousParametricProcess::operator=(const Contin
  *  Analyse du format des lois d'observation.
  *
  *  arguments : reference sur un objet StatError, stream,
- *              reference sur l'indice de la ligne lue, nombre d'etats.
+ *              reference sur l'indice de la ligne lue, nombre d'etats,
+ *              type de modele, identificateur de la derniere loi dans la liste.
  *
  *--------------------------------------------------------------*/
 
 ContinuousParametricProcess* continuous_observation_parsing(StatError &error , ifstream &in_file ,
-                                                            int &line , int nb_state)
+                                                            int &line , int nb_state , int model ,
+                                                            int last_ident)
 
 {
   RWLocaleSnapshot locale("en");
@@ -277,18 +285,33 @@ ContinuousParametricProcess* continuous_observation_parsing(StatError &error , i
       while (!((token = next()).isNull())) {
         switch (j) {
 
-        // test mot cle STATE
+        // test mot cle COMPONENT / STATE
 
         case 0 : {
-          if (token != STAT_word[STATW_STATE]) {
-            status = false;
-            error.correction_update(STAT_parsing[STATP_KEY_WORD] ,
-                                    STAT_word[STATW_STATE] , line , j + 1);
+          switch (model) {
+
+          case MIXTURE : {
+            if (token != STAT_word[STATW_COMPONENT]) {
+              status = false;
+              error.correction_update(STAT_parsing[STATP_KEY_WORD] ,
+                                      STAT_word[STATW_COMPONENT] , line , j + 1);
+            }
+            break;
+          }
+
+          case HIDDEN_MARKOV : {
+            if (token != STAT_word[STATW_STATE]) {
+              status = false;
+              error.correction_update(STAT_parsing[STATP_KEY_WORD] ,
+                                      STAT_word[STATW_STATE] , line , j + 1);
+            }
+            break;
+          }
           }
           break;
         }
 
-        // test indice de l'etat
+        // test indice de la composante / de l'etat
 
         case 1 : {
           lstatus = locale.stringToNum(token , &index);
@@ -298,7 +321,15 @@ ContinuousParametricProcess* continuous_observation_parsing(StatError &error , i
 
           if (!lstatus) {
             status = false;
-            error.correction_update(STAT_parsing[STATP_STATE_INDEX] , i , line , j + 1);
+
+            switch (model) {
+            case MIXTURE :
+              error.correction_update(STAT_parsing[STATP_COMPONENT_INDEX] , i , line , j + 1);
+              break;
+            case HIDDEN_MARKOV :
+              error.correction_update(STAT_parsing[STATP_STATE_INDEX] , i , line , j + 1);
+              break;
+            }
           }
           break;
         }
@@ -306,7 +337,8 @@ ContinuousParametricProcess* continuous_observation_parsing(StatError &error , i
         // test mot cle OBSERVATION_DISTRIBUTION
 
         case 2 : {
-          if (token != STAT_word[STATW_OBSERVATION_DISTRIBUTION]) {
+          if ((token != STAT_word[STATW_OBSERVATION_DISTRIBUTION]) &&
+              (token != STAT_word[STATW_OBSERVATION_MODEL])) {
             status = false;
             error.correction_update(STAT_parsing[STATP_KEY_WORD] ,
                                     STAT_word[STATW_OBSERVATION_DISTRIBUTION] , line , j + 1);
@@ -324,7 +356,14 @@ ContinuousParametricProcess* continuous_observation_parsing(StatError &error , i
           error.update(STAT_parsing[STATP_FORMAT] , line);
         }
 
-        dist[i] = continuous_parametric_parsing(error , in_file , line);
+        switch (model) {
+        case MIXTURE :
+          dist[i] = continuous_parametric_parsing(error , in_file , line , VON_MISES);
+          break;
+        case HIDDEN_MARKOV :
+          dist[i] = continuous_parametric_parsing(error , in_file , line , last_ident);
+          break;
+        }
         if (!dist[i]) {
           status = false;
         }
@@ -374,7 +413,8 @@ ContinuousParametricProcess* continuous_observation_parsing(StatError &error , i
  *
  *  arguments : stream, pointeurs sur les histogrammes d'observation ou
  *              les lois d'observation empiriques et sur l'histogramme marginale ou
- *              la loi marginale empirique, flag niveau de detail, flag fichier.
+ *              la loi marginale empirique, flag niveau de detail,
+ *              flag fichier, type de modele.
  *
  *--------------------------------------------------------------*/
 
@@ -382,7 +422,7 @@ ostream& ContinuousParametricProcess::ascii_print(ostream &os , Histogram **obse
                                                   FrequencyDistribution **observation_distribution ,
                                                   Histogram *marginal_histogram ,
                                                   FrequencyDistribution *marginal_distribution ,
-                                                  bool exhaustive , bool file_flag) const
+                                                  bool exhaustive , bool file_flag , int model) const
 
 {
   register int i , j , k;
@@ -404,14 +444,16 @@ ostream& ContinuousParametricProcess::ascii_print(ostream &os , Histogram **obse
 
     if ((ident == GAMMA) || (ident == ZERO_INFLATED_GAMMA)) {
       if (marginal_histogram) {
-        switch (marginal_histogram->type) {
+        max_value = marginal_histogram->max_value;
+
+/*        switch (marginal_histogram->type) {
         case INT_VALUE :
           max_value = marginal_histogram->max_value;
           break;
         case REAL_VALUE :
           max_value = marginal_histogram->max_value + marginal_histogram->step;
           break;
-        }
+        } */
       }
 
       else {
@@ -421,7 +463,10 @@ ostream& ContinuousParametricProcess::ascii_print(ostream &os , Histogram **obse
 
     else if ((ident == GAUSSIAN) || (ident == VON_MISES)) {
       if (marginal_histogram) {
-        switch (marginal_histogram->type) {
+        min_value = marginal_histogram->min_value;
+        max_value = marginal_histogram->max_value;
+
+/*        switch (marginal_histogram->type) {
         case INT_VALUE :
           min_value = marginal_histogram->min_value;
           max_value = marginal_histogram->max_value;
@@ -430,7 +475,7 @@ ostream& ContinuousParametricProcess::ascii_print(ostream &os , Histogram **obse
           min_value = marginal_histogram->min_value - marginal_histogram->step / 2;
           max_value = marginal_histogram->max_value + marginal_histogram->step / 2;
           break;
-        }
+        } */
       }
 
       else {
@@ -537,7 +582,7 @@ ostream& ContinuousParametricProcess::ascii_print(ostream &os , Histogram **obse
       break;
     }
 
-    case  ZERO_INFLATED_GAMMA : {
+    case ZERO_INFLATED_GAMMA : {
       for (i = 0;i < nb_state;i++) {
         cumul[i][0] = observation[i]->zero_probability;
         frequency[i][0] = cumul[i][0];
@@ -598,8 +643,16 @@ ostream& ContinuousParametricProcess::ascii_print(ostream &os , Histogram **obse
   }
 
   for (i = 0;i < nb_state;i++) {
-    os << "\n" << STAT_word[STATW_STATE] << " " << i << " "
-       << STAT_word[STATW_OBSERVATION_DISTRIBUTION] << endl;
+    os << "\n";
+    switch (model) {
+    case MIXTURE :
+      os << STAT_word[STATW_COMPONENT];
+      break;
+    case HIDDEN_MARKOV :
+      os << STAT_word[STATW_STATE];
+      break;
+    }
+    os << " " << i << " " << STAT_word[STATW_OBSERVATION_DISTRIBUTION] << endl;
     observation[i]->ascii_parameter_print(os);
     observation[i]->ascii_characteristic_print(os , file_flag);
 
@@ -610,7 +663,15 @@ ostream& ContinuousParametricProcess::ascii_print(ostream &os , Histogram **obse
         if (file_flag) {
           os << "# ";
         }
-        os << STAT_label[STATL_STATE] << " " << i << " " << STAT_label[STATL_OBSERVATION] << " "
+        switch (model) {
+        case MIXTURE :
+          os << STAT_label[STATL_COMPONENT];
+          break;
+        case HIDDEN_MARKOV :
+          os << STAT_label[STATL_STATE];
+          break;
+        }
+        os << " " << i << " " << STAT_label[STATL_OBSERVATION] << " "
            << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
 
         if ((ident == GAMMA) || (ident == ZERO_INFLATED_GAMMA)) {
@@ -669,16 +730,32 @@ ostream& ContinuousParametricProcess::ascii_print(ostream &os , Histogram **obse
           if (file_flag) {
             os << "# ";
           }
-          os << "   | " << STAT_label[STATL_STATE] << " " << i << " "
-             << STAT_label[STATL_OBSERVATION] << " ";
+          os << "   | ";
+          switch (model) {
+          case MIXTURE :
+            os << STAT_label[STATL_COMPONENT];
+            break;
+          case HIDDEN_MARKOV :
+            os << STAT_label[STATL_STATE];
+            break;
+          }
+          os << " " << i << " " << STAT_label[STATL_OBSERVATION] << " ";
           if (observation_histogram) {
             os << STAT_label[STATL_HISTOGRAM];
           }
           else {
             os << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
           }
-          os << " | " << STAT_label[STATL_STATE] << " " << i << " "
-             << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION]
+          os << " | ";
+          switch (model) {
+          case MIXTURE :
+            os << STAT_label[STATL_COMPONENT];
+            break;
+          case HIDDEN_MARKOV :
+            os << STAT_label[STATL_STATE];
+            break;
+          }
+          os << " " << i << " " << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION]
              << " | " << STAT_label[STATL_CUMULATIVE] << " ";
           if (observation_histogram) {
             os << STAT_label[STATL_HISTOGRAM];
@@ -702,7 +779,7 @@ ostream& ContinuousParametricProcess::ascii_print(ostream &os , Histogram **obse
             os << setw(width[0]) << value;
 
             if ((observation_histogram) && (value >= observation_histogram[i]->min_value) &&
-                (value <= observation_histogram[i]->max_value)) {
+                (value < observation_histogram[i]->max_value)) {
               os << setw(width[1]) << observation_histogram[i]->frequency[++j];
             }
             else if ((observation_distribution) && (value >= observation_distribution[i]->offset) &&
@@ -717,7 +794,7 @@ ostream& ContinuousParametricProcess::ascii_print(ostream &os , Histogram **obse
             os << setw(width[2]) << frequency[i][k] * nb_element;
 
             if (((observation_histogram) && (value >= observation_histogram[i]->min_value) &&
-                 (value <= observation_histogram[i]->max_value)) ||
+                 (value < observation_histogram[i]->max_value)) ||
                 ((observation_distribution) && (value >= observation_distribution[i]->offset) &&
                  (value < observation_distribution[i]->nb_value))) {
               os << setw(width[3]) << observation_cumul[j];
@@ -740,7 +817,7 @@ ostream& ContinuousParametricProcess::ascii_print(ostream &os , Histogram **obse
   if (((marginal_histogram) || (marginal_distribution)) &&
       ((weight) || (restoration_weight))) {
     int nb_negative_step , offset;
-    double likelihood , information , *marginal_cumul;
+    double mean , variance , likelihood , information , *marginal_cumul;
     Distribution *mixture;
     FrequencyDistribution *clustered_histo;
     Test test(CHI2);
@@ -801,6 +878,12 @@ ostream& ContinuousParametricProcess::ascii_print(ostream &os , Histogram **obse
     cumul[nb_state] = new double[nb_step];
 
     if (weight) {
+      os << "\n";
+      if (file_flag) {
+        os << "# ";
+      }
+      os << STAT_label[STATL_MIXTURE] << " - "
+         << STAT_label[STATL_THEORETICAL] << " " << STAT_label[STATL_WEIGHTS] << ":";
 
       // calcul du melange
 
@@ -832,16 +915,29 @@ ostream& ContinuousParametricProcess::ascii_print(ostream &os , Histogram **obse
         }
 #       endif
 
-        os << "\n";
-        if (file_flag) {
-          os << "# ";
-        }
-        os << STAT_label[STATL_THEORETICAL] << " " << STAT_label[STATL_WEIGHTS] << ":";
-
         for (i = 0;i < nb_state;i++) {
           os << " " << weight->mass[i];
         }
         os << endl;
+
+        if (ident != VON_MISES) {
+          mean = mean_computation(weight);
+          variance = variance_computation(weight , mean);
+
+          if (file_flag) {
+            os << "# ";
+          }
+          os << STAT_label[STATL_MEAN] << ": " << mean << "   "
+             << STAT_label[STATL_VARIANCE] << ": " << variance << "   "
+             << STAT_label[STATL_STANDARD_DEVIATION] << ": " << sqrt(variance) << endl;
+
+          os << "\n";
+          if (file_flag) {
+            os << "# ";
+          }
+          os << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
+          marginal_distribution->ascii_characteristic_print(os , false , file_flag);
+        }
 
         likelihood = mixture->likelihood_computation(*clustered_histo);
 
@@ -895,8 +991,16 @@ ostream& ContinuousParametricProcess::ascii_print(ostream &os , Histogram **obse
           os << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
         }
         for (i = 0;i < nb_state;i++) {
-          os << " | " << STAT_label[STATL_STATE] << " " << i << " "
-             << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
+          os << " | ";
+          switch (model) {
+          case MIXTURE :
+            os << STAT_label[STATL_COMPONENT];
+            break;
+          case HIDDEN_MARKOV :
+            os << STAT_label[STATL_STATE];
+            break;
+          }
+          os << " " << i << " " << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
         }
         os << " | " << STAT_label[STATL_MIXTURE] << " | " << STAT_label[STATL_CUMULATIVE] << " ";
         if (marginal_histogram) {
@@ -924,7 +1028,7 @@ ostream& ContinuousParametricProcess::ascii_print(ostream &os , Histogram **obse
 
           if (marginal_histogram) {
             if ((value >= marginal_histogram->min_value) &&
-                (value <= marginal_histogram->max_value)) {
+                (value < marginal_histogram->max_value)) {
               os << setw(width[1]) << marginal_histogram->frequency[++i];
             }
             else {
@@ -949,7 +1053,7 @@ ostream& ContinuousParametricProcess::ascii_print(ostream &os , Histogram **obse
           os << setw(width[2]) << frequency[nb_state][j] * nb_element;
 
           if (((marginal_histogram) && (value >= marginal_histogram->min_value) &&
-               (value <= marginal_histogram->max_value)) ||
+               (value < marginal_histogram->max_value)) ||
               ((marginal_distribution) && (value >= marginal_distribution->offset) &&
                (value < marginal_distribution->nb_value))) {
             os << setw(width[3]) << marginal_cumul[i];
@@ -966,6 +1070,12 @@ ostream& ContinuousParametricProcess::ascii_print(ostream &os , Histogram **obse
     }
 
     if (restoration_weight) {
+      os << "\n";
+      if (file_flag) {
+        os << "# ";
+      }
+      os << STAT_label[STATL_MIXTURE] << " - "
+         << STAT_label[STATL_RESTORATION] << " " << STAT_label[STATL_WEIGHTS] << ":";
 
       // calcul du melange
 
@@ -984,16 +1094,29 @@ ostream& ContinuousParametricProcess::ascii_print(ostream &os , Histogram **obse
           mixture->mass[i - nb_negative_step + offset] = frequency[nb_state][i];
         }
 
-        os << "\n";
-        if (file_flag) {
-          os << "# ";
-        }
-        os << STAT_label[STATL_RESTORATION] << " " << STAT_label[STATL_WEIGHTS] << ":";
-
         for (i = 0;i < nb_state;i++) {
           os << " " << restoration_weight->mass[i];
         }
         os << endl;
+
+        if (ident != VON_MISES) {
+          mean = mean_computation(restoration_weight);
+          variance = variance_computation(restoration_weight , mean);
+
+          if (file_flag) {
+            os << "# ";
+          }
+          os << STAT_label[STATL_MEAN] << ": " << mean << "   "
+             << STAT_label[STATL_VARIANCE] << ": " << variance << "   "
+             << STAT_label[STATL_STANDARD_DEVIATION] << ": " << sqrt(variance) << endl;
+
+          os << "\n";
+          if (file_flag) {
+            os << "# ";
+          }
+          os << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
+          marginal_distribution->ascii_characteristic_print(os , false , file_flag);
+        }
 
         likelihood = mixture->likelihood_computation(*clustered_histo);
 
@@ -1047,8 +1170,16 @@ ostream& ContinuousParametricProcess::ascii_print(ostream &os , Histogram **obse
           os << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
         }
         for (i = 0;i < nb_state;i++) {
-          os << " | " << STAT_label[STATL_STATE] << " " << i << " "
-             << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
+          os << " | ";
+          switch (model) {
+          case MIXTURE :
+            os << STAT_label[STATL_COMPONENT];
+            break;
+          case HIDDEN_MARKOV :
+            os << STAT_label[STATL_STATE];
+            break;
+          }
+          os << " " << i << " " << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
         }
         os << " | " << STAT_label[STATL_MIXTURE] << " | " << STAT_label[STATL_CUMULATIVE] << " ";
         if (marginal_histogram) {
@@ -1076,7 +1207,7 @@ ostream& ContinuousParametricProcess::ascii_print(ostream &os , Histogram **obse
 
           if (marginal_histogram) {
             if ((value >= marginal_histogram->min_value) &&
-                (value <= marginal_histogram->max_value)) {
+                (value < marginal_histogram->max_value)) {
               os << setw(width[1]) << marginal_histogram->frequency[++i];
             }
             else {
@@ -1101,7 +1232,7 @@ ostream& ContinuousParametricProcess::ascii_print(ostream &os , Histogram **obse
           os << setw(width[2]) << frequency[nb_state][j] * nb_element;
 
           if (((marginal_histogram) && (value >= marginal_histogram->min_value) &&
-               (value <= marginal_histogram->max_value)) ||
+               (value < marginal_histogram->max_value)) ||
               ((marginal_distribution) && (value >= marginal_distribution->offset) &&
                (value < marginal_distribution->nb_value))) {
             os << setw(width[3]) << marginal_cumul[i];
@@ -1166,14 +1297,15 @@ ostream& ContinuousParametricProcess::ascii_print(ostream &os , Histogram **obse
  *
  *  arguments : stream, pointeurs sur les histogrammes d'observation ou
  *              les lois d'observation empiriques et sur l'histogramme marginale ou
- *              la loi marginale empirique.
+ *              la loi marginale empirique, type de modele.
  *
  *--------------------------------------------------------------*/
 
 ostream& ContinuousParametricProcess::spreadsheet_print(ostream &os , Histogram **observation_histogram ,
                                                         FrequencyDistribution **observation_distribution ,
                                                         Histogram *marginal_histogram ,
-                                                        FrequencyDistribution *marginal_distribution) const
+                                                        FrequencyDistribution *marginal_distribution ,
+                                                        int model) const
 
 {
   register int i , j , k;
@@ -1194,14 +1326,16 @@ ostream& ContinuousParametricProcess::spreadsheet_print(ostream &os , Histogram 
 
     if ((ident == GAMMA) || (ident == ZERO_INFLATED_GAMMA)) {
       if (marginal_histogram) {
-        switch (marginal_histogram->type) {
+        max_value = marginal_histogram->max_value;
+
+/*        switch (marginal_histogram->type) {
         case INT_VALUE :
           max_value = marginal_histogram->max_value;
           break;
         case REAL_VALUE :
           max_value = marginal_histogram->max_value + marginal_histogram->step;
           break;
-        }
+        } */
       }
 
       else {
@@ -1211,7 +1345,10 @@ ostream& ContinuousParametricProcess::spreadsheet_print(ostream &os , Histogram 
 
     else if ((ident == GAUSSIAN) || (ident == VON_MISES)) {
       if (marginal_histogram) {
-        switch (marginal_histogram->type) {
+        min_value = marginal_histogram->min_value;
+        max_value = marginal_histogram->max_value;
+
+/*        switch (marginal_histogram->type) {
 
         case INT_VALUE :
           min_value = marginal_histogram->min_value;
@@ -1221,7 +1358,7 @@ ostream& ContinuousParametricProcess::spreadsheet_print(ostream &os , Histogram 
           min_value = marginal_histogram->min_value - marginal_histogram->step / 2;
           max_value = marginal_histogram->max_value + marginal_histogram->step / 2;
           break;
-        }
+        } */
       }
 
       else {
@@ -1301,18 +1438,18 @@ ostream& ContinuousParametricProcess::spreadsheet_print(ostream &os , Histogram 
     switch (ident) {
 
     case GAMMA : {
-      if (observation[i]->shape == 0.) {
-        cumul[i][0] = 1.;
-        frequency[i][0] = cumul[i][0];
+      for (i = 0;i < nb_state;i++) {
+        if (observation[i]->shape == 0.) {
+          cumul[i][0] = 1.;
+          frequency[i][0] = cumul[i][0];
 
-        for (j = 1;j < nb_step;j++) {
-          cumul[i][j] = cumul[i][0];
-          frequency[i][j] = 0.;
+          for (j = 1;j < nb_step;j++) {
+            cumul[i][j] = cumul[i][0];
+            frequency[i][j] = 0.;
+          }
         }
-      }
 
-      else {
-        for (i = 0;i < nb_state;i++) {
+        else {
 //          value = step;
 //          cumul[i][0] = cdf(*gamma_dist[i] , value);
           value = step / 2;
@@ -1330,7 +1467,7 @@ ostream& ContinuousParametricProcess::spreadsheet_print(ostream &os , Histogram 
       break;
     }
 
-    case  ZERO_INFLATED_GAMMA : {
+    case ZERO_INFLATED_GAMMA : {
       for (i = 0;i < nb_state;i++) {
         cumul[i][0] = observation[i]->zero_probability;
         frequency[i][0] = cumul[i][0];
@@ -1389,16 +1526,33 @@ ostream& ContinuousParametricProcess::spreadsheet_print(ostream &os , Histogram 
   }
 
   for (i = 0;i < nb_state;i++) {
-    os << "\n" << STAT_word[STATW_STATE] << " " << i << "\t"
-       << STAT_word[STATW_OBSERVATION_DISTRIBUTION] << endl;
+    os << "\n";
+    switch (model) {
+    case MIXTURE :
+      os << STAT_word[STATW_COMPONENT];
+      break;
+    case HIDDEN_MARKOV :
+      os << STAT_word[STATW_STATE];
+      break;
+    }
+    os << " " << i << "\t" << STAT_word[STATW_OBSERVATION_DISTRIBUTION] << endl;
     observation[i]->spreadsheet_parameter_print(os);
     observation[i]->spreadsheet_characteristic_print(os);
 
     if (((observation_histogram) || (observation_distribution)) &&
         ((ident != ZERO_INFLATED_GAMMA) || ((ident == ZERO_INFLATED_GAMMA) && (observation[i]->zero_probability < 1.)))) {
       if (observation_distribution) {
-        os << "\n" << STAT_label[STATL_STATE] << " " << i << " "
-           << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
+        os << "\n";
+        switch (model) {
+        case MIXTURE :
+          os << STAT_label[STATL_COMPONENT];
+          break;
+        case HIDDEN_MARKOV :
+          os << STAT_label[STATL_STATE];
+          break;
+        }
+        os << " " << i << " " << STAT_label[STATL_OBSERVATION]
+           << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
 
         if ((ident == GAMMA) || (ident == ZERO_INFLATED_GAMMA)) {
           observation_distribution[i]->spreadsheet_characteristic_print(os , true);
@@ -1426,16 +1580,32 @@ ostream& ContinuousParametricProcess::spreadsheet_print(ostream &os , Histogram 
           observation_cumul = observation_distribution[i]->cumul_computation();
         }
 
-        os << "\n\t" << STAT_label[STATL_STATE] << " " << i << " "
-           << STAT_label[STATL_OBSERVATION];
+        os << "\n\t";
+        switch (model) {
+        case MIXTURE :
+          os << STAT_label[STATL_COMPONENT];
+          break;
+        case HIDDEN_MARKOV :
+          os << STAT_label[STATL_STATE];
+          break;
+        }
+        os << " " << i << " " << STAT_label[STATL_OBSERVATION];
         if (observation_histogram) {
           os << " " << STAT_label[STATL_HISTOGRAM];
         }
         else {
           os << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
         }
-        os << "\t" << STAT_label[STATL_STATE] << " " << i << " "
-           << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION]
+        os << "\t";
+        switch (model) {
+        case MIXTURE :
+          os << STAT_label[STATL_COMPONENT];
+          break;
+        case HIDDEN_MARKOV :
+          os << STAT_label[STATL_STATE];
+          break;
+        }
+        os << " " << i << " " << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION]
            << "\t" << STAT_label[STATL_CUMULATIVE] << " ";
         if (observation_histogram) {
           os << STAT_label[STATL_HISTOGRAM];
@@ -1459,7 +1629,7 @@ ostream& ContinuousParametricProcess::spreadsheet_print(ostream &os , Histogram 
           os << value << "\t";
 
           if ((observation_histogram) && (value >= observation_histogram[i]->min_value) &&
-              (value <= observation_histogram[i]->max_value)) {
+              (value < observation_histogram[i]->max_value)) {
             os << observation_histogram[i]->frequency[++j];
           }
           if ((observation_distribution) && (value >= observation_distribution[i]->offset) &&
@@ -1472,7 +1642,7 @@ ostream& ContinuousParametricProcess::spreadsheet_print(ostream &os , Histogram 
 
           os << "\t";
           if (((observation_histogram) && (value >= observation_histogram[i]->min_value) &&
-               (value <= observation_histogram[i]->max_value)) ||
+               (value < observation_histogram[i]->max_value)) ||
               ((observation_distribution) && (value >= observation_distribution[i]->offset) &&
                (value < observation_distribution[i]->nb_value))) {
             os << observation_cumul[j];
@@ -1491,8 +1661,16 @@ ostream& ContinuousParametricProcess::spreadsheet_print(ostream &os , Histogram 
   if ((!marginal_histogram) && (!marginal_distribution)) {
     os << "\n";
     for (i = 0;i < nb_state;i++) {
-      os << "\t" << STAT_label[STATL_STATE] << " " << i << " "
-         << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
+      os << "\t";
+      switch (model) {
+      case MIXTURE :
+        os << STAT_label[STATL_COMPONENT];
+        break;
+      case HIDDEN_MARKOV :
+        os << STAT_label[STATL_STATE];
+        break;
+      }
+      os << " " << i << " " << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
     }
     os << endl;
 
@@ -1671,7 +1849,7 @@ ostream& ContinuousParametricProcess::spreadsheet_print(ostream &os , Histogram 
   if (((marginal_histogram) || (marginal_distribution)) &&
       ((weight) || (restoration_weight))) {
     int nb_negative_step , offset;
-    double likelihood , information , *marginal_cumul;
+    double mean , variance , likelihood , information , *marginal_cumul;
     Distribution *mixture;
     FrequencyDistribution *clustered_histo;
     Test test(CHI2);
@@ -1717,6 +1895,12 @@ ostream& ContinuousParametricProcess::spreadsheet_print(ostream &os , Histogram 
     cumul[nb_state] = new double[nb_step];
 
     if (weight) {
+      os << "\n" << STAT_label[STATL_MIXTURE] << "\t"
+         << STAT_label[STATL_THEORETICAL] << " " << STAT_label[STATL_WEIGHTS];
+      for (i = 0;i < nb_state;i++) {
+        os << "\t" << weight->mass[i];
+      }
+      os << endl;
 
       // calcul du melange
 
@@ -1735,11 +1919,17 @@ ostream& ContinuousParametricProcess::spreadsheet_print(ostream &os , Histogram 
           mixture->mass[i - nb_negative_step + offset] = frequency[nb_state][i];
         }
 
-        os << "\n" << STAT_label[STATL_THEORETICAL] << " " << STAT_label[STATL_WEIGHTS];
-        for (i = 0;i < nb_state;i++) {
-          os << "\t" << weight->mass[i];
+        if (ident != VON_MISES) {
+          mean = mean_computation(weight);
+          variance = variance_computation(weight , mean);
+
+          os << STAT_label[STATL_MEAN] << "\t" << mean << "\t"
+             << STAT_label[STATL_VARIANCE] << "\t" << variance << "\t"
+             << STAT_label[STATL_STANDARD_DEVIATION] << "\t" << sqrt(variance) << endl;
+
+          os << "\n" << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
+          marginal_distribution->spreadsheet_characteristic_print(os);
         }
-        os << endl;
 
         likelihood = mixture->likelihood_computation(*clustered_histo);
 
@@ -1762,8 +1952,16 @@ ostream& ContinuousParametricProcess::spreadsheet_print(ostream &os , Histogram 
         os << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
       }
       for (i = 0;i < nb_state;i++) {
-        os << "\t" << STAT_label[STATL_STATE] << " " << i << " "
-           << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
+        os << "\t";
+        switch (model) {
+        case MIXTURE :
+          os << STAT_label[STATL_COMPONENT];
+          break;
+        case HIDDEN_MARKOV :
+          os << STAT_label[STATL_STATE];
+          break;
+        }
+        os << " " << i << " " << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
       }
       os << "\t" << STAT_label[STATL_MIXTURE] << "\t" << STAT_label[STATL_CUMULATIVE] << " ";
       if (marginal_histogram) {
@@ -1787,7 +1985,7 @@ ostream& ContinuousParametricProcess::spreadsheet_print(ostream &os , Histogram 
         os << value << "\t";
 
         if ((marginal_histogram) && (value >= marginal_histogram->min_value) &&
-            (value <= marginal_histogram->max_value)) {
+            (value < marginal_histogram->max_value)) {
           os << marginal_histogram->frequency[++i];
         }
         if ((marginal_distribution) && (value >= marginal_distribution->offset) &&
@@ -1803,7 +2001,7 @@ ostream& ContinuousParametricProcess::spreadsheet_print(ostream &os , Histogram 
 
         os << "\t";
         if (((marginal_histogram) &&(value >= marginal_histogram->min_value) &&
-             (value <= marginal_histogram->max_value)) ||
+             (value < marginal_histogram->max_value)) ||
             ((marginal_distribution) &&(value >= marginal_distribution->offset) &&
              (value < marginal_distribution->nb_value))) {
           os << marginal_cumul[i];
@@ -1816,6 +2014,12 @@ ostream& ContinuousParametricProcess::spreadsheet_print(ostream &os , Histogram 
     }
 
     if (restoration_weight) {
+      os << "\n" << STAT_label[STATL_MIXTURE] << "\t"
+         << STAT_label[STATL_RESTORATION] << " " << STAT_label[STATL_WEIGHTS];
+      for (i = 0;i < nb_state;i++) {
+        os << "\t" << restoration_weight->mass[i];
+      }
+      os << endl;
 
       // calcul du melange
 
@@ -1834,11 +2038,17 @@ ostream& ContinuousParametricProcess::spreadsheet_print(ostream &os , Histogram 
           mixture->mass[i - nb_negative_step + offset] = frequency[nb_state][i];
         }
 
-        os << "\n" << STAT_label[STATL_RESTORATION] << " " << STAT_label[STATL_WEIGHTS];
-        for (i = 0;i < nb_state;i++) {
-          os << "\t" << restoration_weight->mass[i];
+        if (ident != VON_MISES) {
+          mean = mean_computation(restoration_weight);
+          variance = variance_computation(restoration_weight , mean);
+
+          os << STAT_label[STATL_MEAN] << "\t" << mean << "\t"
+             << STAT_label[STATL_VARIANCE] << "\t" << variance << "\t"
+             << STAT_label[STATL_STANDARD_DEVIATION] << "\t" << sqrt(variance) << endl;
+
+          os << "\n" << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
+          marginal_distribution->spreadsheet_characteristic_print(os);
         }
-        os << endl;
 
         likelihood = mixture->likelihood_computation(*clustered_histo);
 
@@ -1861,8 +2071,16 @@ ostream& ContinuousParametricProcess::spreadsheet_print(ostream &os , Histogram 
         os << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
       }
       for (i = 0;i < nb_state;i++) {
-        os << "\t" << STAT_label[STATL_STATE] << " " << i << " "
-           << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
+        os << "\t";
+        switch (model) {
+        case MIXTURE :
+          os << STAT_label[STATL_COMPONENT];
+          break;
+        case HIDDEN_MARKOV :
+          os << STAT_label[STATL_STATE];
+          break;
+        }
+        os << " " << i << " " << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
       }
       os << "\t" << STAT_label[STATL_MIXTURE] << "\t" << STAT_label[STATL_CUMULATIVE] << " ";
       if (marginal_histogram) {
@@ -1886,7 +2104,7 @@ ostream& ContinuousParametricProcess::spreadsheet_print(ostream &os , Histogram 
         os << value << "\t";
 
         if ((marginal_histogram) && (value >= marginal_histogram->min_value) &&
-            (value <= marginal_histogram->max_value)) {
+            (value < marginal_histogram->max_value)) {
           os << marginal_histogram->frequency[++i];
         }
         if ((marginal_distribution) && (value >= marginal_distribution->offset) &&
@@ -1902,7 +2120,7 @@ ostream& ContinuousParametricProcess::spreadsheet_print(ostream &os , Histogram 
 
         os << "\t";
         if (((marginal_histogram) &&(value >= marginal_histogram->min_value) &&
-             (value <= marginal_histogram->max_value)) ||
+             (value < marginal_histogram->max_value)) ||
             ((marginal_distribution) &&(value >= marginal_distribution->offset) &&
              (value < marginal_distribution->nb_value))) {
           os << marginal_cumul[i];
@@ -2045,7 +2263,8 @@ bool q_q_plot_print(const char *path , int nb_value , double **qqplot)
  *              pointeurs sur les histogrammes d'observation ou
  *              les lois d'observation empiriques et sur l'histogramme marginale ou
  *              la loi marginale empirique, nombre de valeurs,
- *              pointeur sur la fonction de repartition empirique.
+ *              pointeur sur la fonction de repartition empirique,
+ *              type de modele.
  *
  *--------------------------------------------------------------*/
 
@@ -2054,7 +2273,7 @@ bool ContinuousParametricProcess::plot_print(const char *prefix , const char *ti
                                              FrequencyDistribution **observation_distribution ,
                                              Histogram *marginal_histogram ,
                                              FrequencyDistribution *marginal_distribution ,
-                                             int nb_value , double **empirical_cdf) const
+                                             int nb_value , double **empirical_cdf , int model) const
 
 {
   bool status = false;
@@ -2071,6 +2290,8 @@ bool ContinuousParametricProcess::plot_print(const char *prefix , const char *ti
   ofstream out_data_file((data_file_name[0].str()).c_str());
 
   if (out_data_file) {
+    status = true;
+
     frequency = new double*[nb_state + 2];
     frequency[nb_state] = NULL;
     frequency[nb_state + 1] = NULL;
@@ -2328,7 +2549,7 @@ bool ContinuousParametricProcess::plot_print(const char *prefix , const char *ti
       }
 
 #     ifdef DEBUG
-      cout << "\nTest: " << min_value << " " << max_value << " | " << step << endl;
+      cout << "\nTest: " << min_value << " " << max_value << " | " << endl;
 #     endif
 
       nb_step = (int)((max_value - min_value) / step) + 1;
@@ -2659,8 +2880,16 @@ bool ContinuousParametricProcess::plot_print(const char *prefix , const char *ti
             if ((observation_histogram) && (observation_histogram[j]->nb_element > 0)) {
               out_file << " using 1:2";
             }
-            out_file << " title \"" << STAT_label[STATL_STATE] << " " << j << " "
-                     << STAT_label[STATL_OBSERVATION] << " ";
+            out_file << " title \"";
+            switch (model) {
+            case MIXTURE :
+              out_file << STAT_label[STATL_COMPONENT];
+              break;
+            case HIDDEN_MARKOV :
+              out_file << STAT_label[STATL_STATE];
+              break;
+            }
+            out_file << " " << j << " " << STAT_label[STATL_OBSERVATION] << " ";
             if ((observation_histogram) && (observation_histogram[j]->nb_element > 0)) {
               out_file << STAT_label[STATL_HISTOGRAM] << "\" with histeps,\\" << endl;
             }
@@ -2670,9 +2899,16 @@ bool ContinuousParametricProcess::plot_print(const char *prefix , const char *ti
             }
           }
           out_file << "\"" << label((data_file_name[0].str()).c_str())
-                   << "\" using 1:" << j + 2
-                   << " title \"" << STAT_label[STATL_STATE] << " " << j << " "
-                   << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION] << " ";
+                   << "\" using 1:" << j + 2 << " title \"";
+          switch (model) {
+          case MIXTURE :
+            out_file << STAT_label[STATL_COMPONENT];
+            break;
+          case HIDDEN_MARKOV :
+            out_file << STAT_label[STATL_STATE];
+            break;
+          }
+          out_file << " " << j << " " << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION] << " ";
           observation[j]->plot_title_print(out_file);
           out_file << "\" with lines" << endl;
 
@@ -2695,8 +2931,16 @@ bool ContinuousParametricProcess::plot_print(const char *prefix , const char *ti
                  << MIN(max * YSCALE , 1.) << "] ";
         for (j = 0;j < nb_state;j++) {
           out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\" using 1:" << j + 2
-                   << " title \"" << STAT_label[STATL_STATE] << " " << j << " "
-                   << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION] << " ";
+                   << " title \"";
+          switch (model) {
+          case MIXTURE :
+            out_file << STAT_label[STATL_COMPONENT];
+            break;
+          case HIDDEN_MARKOV :
+            out_file << STAT_label[STATL_STATE];
+            break;
+          }
+          out_file << " " << j << " " << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION] << " ";
           observation[j]->plot_title_print(out_file);
           out_file << "\" with lines";
           if (j < nb_state - 1) {
@@ -2749,9 +2993,16 @@ bool ContinuousParametricProcess::plot_print(const char *prefix , const char *ti
           }
           for (j = 0;j < nb_state;j++) {
             out_file << "\"" << label((data_file_name[0].str()).c_str())
-                     << "\" using 1:" << nb_state + j + 2
-                     << " title \"" << STAT_label[STATL_STATE] << " " << j << " "
-                     << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION] << " ";
+                     << "\" using 1:" << nb_state + j + 2 << " title \"";
+            switch (model) {
+            case MIXTURE :
+              out_file << STAT_label[STATL_COMPONENT];
+              break;
+            case HIDDEN_MARKOV :
+              out_file << STAT_label[STATL_STATE];
+              break;
+            }
+            out_file << " " << j << " " << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION] << " ";
             observation[j]->plot_title_print(out_file);
             out_file << "\" with lines,\\" << endl;
           }
@@ -2826,9 +3077,16 @@ bool ContinuousParametricProcess::plot_print(const char *prefix , const char *ti
 
           for (j = 0;j < nb_state;j++) {
             out_file << "\"" << label((data_file_name[0].str()).c_str())
-                     << "\" using 1:" << dist_index + j
-                     << " title \"" << STAT_label[STATL_STATE] << " " << j << " "
-                     << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION] << " ";
+                     << "\" using 1:" << dist_index + j << " title \"";
+            switch (model) {
+            case MIXTURE :
+              out_file << STAT_label[STATL_COMPONENT];
+              break;
+            case HIDDEN_MARKOV :
+              out_file << STAT_label[STATL_STATE];
+              break;
+            }
+            out_file << " " << j << " " << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION] << " ";
             observation[j]->plot_title_print(out_file);
             out_file << "\" with lines,\\" << endl;
           }
@@ -2925,7 +3183,7 @@ void q_q_plotable_write(SinglePlot &plot , int nb_value , double **qqplot)
  *              pointeurs sur les histogrammes d'observation ou
  *              les lois d'observation empiriques et sur l'histogramme marginale ou
  *              la loi marginale empirique, nombre de valeurs,
- *              pointeur sur la fonction de repartition empirique.
+ *              pointeur sur la fonction de repartition empirique, type de modele.
  *
  *--------------------------------------------------------------*/
 
@@ -2934,7 +3192,7 @@ void ContinuousParametricProcess::plotable_write(MultiPlotSet &plot , int &index
                                                  FrequencyDistribution **observation_distribution ,
                                                  Histogram *marginal_histogram ,
                                                  FrequencyDistribution *marginal_distribution ,
-                                                 int nb_value , double **empirical_cdf) const
+                                                 int nb_value , double **empirical_cdf , int model) const
 
 {
   register int i , j , k;
@@ -3333,8 +3591,15 @@ void ContinuousParametricProcess::plotable_write(MultiPlotSet &plot , int &index
         plot[index].resize(2);
 
         legend.str("");
-        legend << STAT_label[STATL_STATE] << " " << i << " "
-               << STAT_label[STATL_OBSERVATION] << " ";
+        switch (model) {
+        case MIXTURE :
+          legend << STAT_label[STATL_COMPONENT];
+          break;
+        case HIDDEN_MARKOV :
+          legend << STAT_label[STATL_STATE];
+          break;
+        }
+        legend << " " << i << " " << STAT_label[STATL_OBSERVATION] << " ";
         if ((observation_histogram) && (observation_histogram[j]->nb_element > 0)) {
           legend << STAT_label[STATL_HISTOGRAM];
         }
@@ -3362,8 +3627,15 @@ void ContinuousParametricProcess::plotable_write(MultiPlotSet &plot , int &index
       }
 
       legend.str("");
-      legend << STAT_label[STATL_STATE] << " " << i << " "
-             << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
+      switch (model) {
+      case MIXTURE :
+        legend << STAT_label[STATL_COMPONENT];
+        break;
+      case HIDDEN_MARKOV :
+        legend << STAT_label[STATL_STATE];
+        break;
+      }
+      legend << " " << i << " " << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
       observation[i]->plot_title_print(legend);
       plot[index][j].legend = legend.str();
 
@@ -3398,8 +3670,15 @@ void ContinuousParametricProcess::plotable_write(MultiPlotSet &plot , int &index
 
     for (i = 0;i < nb_state;i++) {
       legend.str("");
-      legend << STAT_label[STATL_STATE] << " " << i << " "
-             << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
+      switch (model) {
+      case MIXTURE :
+        legend << STAT_label[STATL_COMPONENT];
+        break;
+      case HIDDEN_MARKOV :
+        legend << STAT_label[STATL_STATE];
+        break;
+      }
+      legend << " " << i << " " << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
       observation[i]->plot_title_print(legend);
       plot[index][i].legend = legend.str();
 
@@ -3481,8 +3760,15 @@ void ContinuousParametricProcess::plotable_write(MultiPlotSet &plot , int &index
 
       for (i = 0;i < nb_state;i++) {
         legend.str("");
-        legend << STAT_label[STATL_STATE] << " " << i << " "
-               << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
+        switch (model) {
+        case MIXTURE :
+          legend << STAT_label[STATL_COMPONENT];
+          break;
+        case HIDDEN_MARKOV :
+          legend << STAT_label[STATL_STATE];
+          break;
+        }
+        legend << " " << i << " " << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
         observation[i]->plot_title_print(legend);
         plot[index][i + 1].legend = legend.str();
 
@@ -3608,8 +3894,15 @@ void ContinuousParametricProcess::plotable_write(MultiPlotSet &plot , int &index
 
       for (i = 0;i < nb_state;i++) {
         legend.str("");
-        legend << STAT_label[STATL_STATE] << " " << i << " "
-               << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
+        switch (model) {
+        case MIXTURE :
+          legend << STAT_label[STATL_COMPONENT];
+          break;
+        case HIDDEN_MARKOV :
+          legend << STAT_label[STATL_STATE];
+          break;
+        }
+        legend << " " << i << " " << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
         observation[i]->plot_title_print(legend);
         plot[index][i + 1].legend = legend.str();
 
@@ -3704,7 +3997,7 @@ void ContinuousParametricProcess::plotable_write(MultiPlotSet &plot , int &index
 /*--------------------------------------------------------------*
  *
  *  Calcul du nombre de parametres independants d'un processus
- *  d'observation parametrique.
+ *  d'observation continu parametrique.
  *
  *--------------------------------------------------------------*/
 
@@ -3719,7 +4012,7 @@ int ContinuousParametricProcess::nb_parameter_computation() const
     nb_parameter += observation[i]->nb_parameter_computation();
   }
 
-  if ((ident == GAUSSIAN) || (ident == VON_MISES)) {
+/*  if ((ident == GAUSSIAN) || (ident == VON_MISES)) {
     for (i = 1;i < nb_state;i++) {
       if (observation[i]->dispersion != observation[0]->dispersion) {
         break;
@@ -3729,9 +4022,127 @@ int ContinuousParametricProcess::nb_parameter_computation() const
     if (i == nb_state) {
       nb_parameter -= (nb_state - 1);
     }
+  } */
+
+  if (tied_location) {
+    nb_parameter -= (nb_state - 1);
+  }
+  if (tied_dispersion) {
+    nb_parameter -= (nb_state - 1);
   }
 
   return nb_parameter;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de la moyenne d'un melange de lois d'observation continues parametriques.
+ *
+ *  argument : loi des poids.
+ *
+ *--------------------------------------------------------------*/
+
+double ContinuousParametricProcess::mean_computation(Distribution *pweight) const
+
+{
+  register int i;
+  double mean;
+
+
+  switch (ident) {
+
+  case GAMMA : {
+    mean = 0.;
+    for (i = 0;i < nb_state;i++) {
+      mean += pweight->mass[i] * observation[i]->shape * observation[i]->scale;
+    }
+    break;
+  }
+
+  case ZERO_INFLATED_GAMMA : {
+    mean = 0.;
+    for (i = 0;i < nb_state;i++) {
+      mean += pweight->mass[i] * (1 - observation[i]->zero_probability) *
+              observation[i]->shape * observation[i]->scale;
+    }
+    break;
+  }
+
+  case GAUSSIAN : {
+    mean = 0.;
+    for (i = 0;i < nb_state;i++) {
+      mean += pweight->mass[i] * observation[i]->location;
+    }
+    break;
+  }
+
+  default : {
+    mean = D_INF;
+    break;
+  }
+  }
+
+  return mean;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de la variance d'un melange de lois d'observation continues parametriques.
+ *
+ *  arguments : loi des poids, moyenne.
+ *
+ *--------------------------------------------------------------*/
+
+double ContinuousParametricProcess::variance_computation(Distribution *pweight , double mean) const
+
+{
+  register int i;
+  double variance;
+
+
+  if (mean == D_INF) {
+    mean = mean_computation(pweight);
+  }
+
+  switch (ident) {
+
+  case GAMMA : {
+    variance = -mean * mean;
+    for (i = 0;i < nb_state;i++) {
+      variance += pweight->mass[i] * (observation[i]->shape * observation[i]->scale * observation[i]->scale) *
+                  (1 + observation[i]->shape);
+    }
+    break;
+  }
+
+  case ZERO_INFLATED_GAMMA : {
+    variance = -mean * mean;
+    for (i = 0;i < nb_state;i++) {
+      variance += pweight->mass[i] * (1 - observation[i]->zero_probability) *
+                  (observation[i]->shape * observation[i]->scale * observation[i]->scale) *
+                  (1 + observation[i]->shape);
+    }
+    break;
+  }
+
+  case GAUSSIAN : {
+    variance = -mean * mean;
+    for (i = 0;i < nb_state;i++) {
+      variance += pweight->mass[i] * (observation[i]->dispersion * observation[i]->dispersion +
+                                      observation[i]->location * observation[i]->location);
+    }
+    break;
+  }
+
+  default : {
+    variance = D_DEFAULT;
+    break;
+  }
+  }
+
+  return variance;
 }
 
 
@@ -3785,7 +4196,7 @@ void ContinuousParametricProcess::init(int iident , double min_value , double ma
     break;
   }
 
-  case  ZERO_INFLATED_GAMMA : {
+  case ZERO_INFLATED_GAMMA : {
     for (i = 0;i < nb_state;i++) {
       observation[i] = new ContinuousParametric(ident , 1. , mean * (1. + MEAN_SHIFT_COEFF * (i - (double)(nb_state - 1) / 2) / (double)nb_state) ,
                                                 (double)(nb_state - i) / (double)(2 * nb_state));
