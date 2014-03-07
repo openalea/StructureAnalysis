@@ -3,9 +3,9 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
@@ -139,8 +139,8 @@ const double OCCUPANCY_THRESHOLD = 0.99999;  // seuil sur la fonction de reparti
                                              // pour borner une loi d'occupation d'un etat
 const double OCCUPANCY_MEAN = 10.;     // temps moyen d'occupation d'un etat
 
-const int POSTERIOR_PROBABILITY_NB_SEQUENCE = 300; // nombre maximum de sequences pour la sortie des probabilites
-                                                   // a posteriori des sequences d'etats les plus probables
+const int POSTERIOR_PROBABILITY_NB_SEQUENCE = 300;  // nombre maximum de sequences pour la sortie des probabilites
+                                                    // a posteriori des sequences d'etats les plus probables
 
 const int NB_STATE_SEQUENCE = 10;      // nombre de sequences d'etats calculees
 
@@ -282,18 +282,22 @@ public :
 
     std::ostream& ascii_print(std::ostream &os , int process ,
                               FrequencyDistribution **empirical_observation ,
+                              FrequencyDistribution *marginal_distribution ,
                               const SequenceCharacteristics *characteristics ,
                               bool exhaustive , bool file_flag , Forward **forward = NULL) const;
     std::ostream& spreadsheet_print(std::ostream &os , int process ,
                                     FrequencyDistribution **empirical_observation = NULL ,
+                                    FrequencyDistribution *marginal_distribution = NULL ,
                                     const SequenceCharacteristics *characteristics = NULL ,
                                     Forward **forward = NULL) const;
     bool plot_print(const char *prefix , const char *title , int process ,
                     FrequencyDistribution **empirical_observation = NULL ,
+                    FrequencyDistribution *marginal_distribution = NULL ,
                     const SequenceCharacteristics *characteristics = NULL ,
                     const FrequencyDistribution *hlength = NULL , Forward **forward = NULL) const;
     void plotable_write(MultiPlotSet &plot , int &index , int process ,
                         FrequencyDistribution **empirical_observation = NULL ,
+                        FrequencyDistribution *marginal_distribution = NULL ,
                         const SequenceCharacteristics *characteristics = NULL ,
                         const FrequencyDistribution *hlength = NULL , Forward **forward = NULL) const;
 };
@@ -344,8 +348,7 @@ public :
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
     bool ascii_write(StatError &error , const char *path , bool exhaustive) const;
     bool spreadsheet_write(StatError &error , const char *path) const;
-    bool plot_write(StatError &error , const char *prefix ,
-                    const char *title = NULL) const;
+    bool plot_write(StatError &error , const char *prefix , const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
     bool white_noise_correlation(StatError &error , int nb_point , double *filter ,
@@ -674,11 +677,9 @@ public :
     MultiPlotSet* get_plotable_data(StatError &error) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(StatError &error , const char *path ,
-                     bool exhaustive = false) const;
+    bool ascii_write(StatError &error , const char *path , bool exhaustive = false) const;
     bool spreadsheet_write(StatError &error , const char *path) const;
-    bool plot_write(StatError &error , const char *prefix ,
-                    const char *title = NULL) const;
+    bool plot_write(StatError &error , const char *prefix , const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
     int min_index_parameter_computation() const;
@@ -791,6 +792,7 @@ public :
 
     int nb_value;           // nombre de valeurs a partir de 0
     Curves *index_value;    // probabilites des valeurs en fonction de l'index
+    Curves *explicit_index_value;    // probabilites des valeurs en fonction de l'index explicite
     FrequencyDistribution **first_occurrence;  // lois empiriques du temps avant la premiere
                                                // occurrence d'une valeur
     FrequencyDistribution **recurrence_time;  // lois empiriques du temps de retour dans une valeur
@@ -882,6 +884,8 @@ protected :
     MarkovianSequences* build_auxiliary_variable(DiscreteParametricProcess **discrete_process ,
                                                  ContinuousParametricProcess **continuous_process) const;
 
+    MarkovianSequences* remove_variable_1() const;
+
     std::ostream& ascii_write(std::ostream &os , bool exhaustive , bool comment_flag) const;
     bool plot_print(const char *prefix , const char *title , int variable ,
                     int nb_variable) const;
@@ -889,7 +893,7 @@ protected :
 
     void state_variable_init(int itype = STATE);
 
-    void min_interval_computation(int variable) const;
+    void min_interval_computation(int variable);
 
     void transition_count_computation(const VariableOrderMarkovChainData &chain_data ,
                                       const VariableOrderMarkovChain &markov ,
@@ -903,6 +907,7 @@ protected :
     bool test_hidden(int variable) const;
 
     void build_index_value(int variable);
+    void build_explicit_index_value(int variable);
     void build_first_occurrence_frequency_distribution(int variable);
     void build_recurrence_time_frequency_distribution(int variable);
     void build_sojourn_time_frequency_distribution(int variable , int initial_run_flag = false);
@@ -913,6 +918,13 @@ protected :
                                                                   FrequencyDistribution **final_run ,
                                                                   FrequencyDistribution **single_run) const;
 
+    std::ostream& linear_model_spreadsheet_print(std::ostream &os , int variable ,
+                                                 ContinuousParametricProcess *process) const;
+    bool linear_model_plot_print(const char *prefix , const char *title , int variable ,
+                                 ContinuousParametricProcess *process) const;
+    void linear_model_plotable_write(MultiPlotSet &plot , int &index , int variable ,
+                                     ContinuousParametricProcess *process) const;
+
     template <typename Type>
     void gamma_estimation(Type ***state_sequence_count , int variable ,
                           ContinuousParametricProcess *process , int iter) const;
@@ -921,10 +933,10 @@ protected :
                                         ContinuousParametricProcess *process , int iter) const;
     template <typename Type>
     void gaussian_estimation(Type ***state_sequence_count , int variable ,
-                             ContinuousParametricProcess *process , bool common_variance) const;
+                             ContinuousParametricProcess *process) const;
     template <typename Type>
     void von_mises_estimation(Type ***state_sequence_count , int variable ,
-                              ContinuousParametricProcess *process , bool common_concentration) const;
+                              ContinuousParametricProcess *process) const;
     template <typename Type>
     void  linear_model_estimation(Type ***state_sequence_count , int variable ,
                                   ContinuousParametricProcess *process) const;
@@ -979,7 +991,6 @@ public :
                                         int *ivariable , bool keep = true) const;
     MarkovianSequences* merge_variable(StatError &error , int nb_sample ,
                                        const MarkovianSequences **iseq , int ref_sample = I_DEFAULT) const;
-    MarkovianSequences* remove_variable_1() const;
 
     MarkovianSequences* initial_run_computation(StatError &error) const;
     MarkovianSequences* add_absorbing_run(StatError &error ,
@@ -994,11 +1005,9 @@ public :
                           char format = 'c' , bool exhaustive = false) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(StatError &error , const char *path ,
-                     bool exhaustive = false) const;
+    bool ascii_write(StatError &error , const char *path , bool exhaustive = false) const;
     bool spreadsheet_write(StatError &error , const char *path) const;
-    bool plot_write(StatError &error , const char *prefix ,
-                    const char *title = NULL) const;
+    bool plot_write(StatError &error , const char *prefix , const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
     bool transition_count(StatError &error , std::ostream &os , int max_order ,
