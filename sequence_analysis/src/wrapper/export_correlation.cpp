@@ -2,9 +2,9 @@
  *
  *        VPlants.Sequence_analysis : VPlants Statistics module
  *
- *        Copyright 2006-2007 INRIA - CIRAD - INRA
+ *        Copyright 2006-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *        File author(s): Yann Guédon <yann.guedon@cirad.fr>
+ *        File author(s): Yann Guedon <yann.guedon@cirad.fr>
  *                        Thomas Cokelaer <Thomas.Cokelaer@inria.fr>
  *
  *        Distributed under the GPL 2.0 License.
@@ -20,11 +20,10 @@
 
 #include "wrapper_util.h"
 
-
 #include "stat_tool/stat_tools.h"
-#include "stat_tool/vectors.h"
 #include "stat_tool/curves.h"
 #include "stat_tool/markovian.h"
+#include "stat_tool/vectors.h"
 #include "stat_tool/stat_label.h"
 #include "sequence_analysis/sequences.h"
 #include "sequence_analysis/sequence_label.h"
@@ -42,9 +41,9 @@ using namespace boost::python;
 using namespace boost;
 using namespace sequence_analysis;
 
+
 #define WRAP CorrelationWrap
 class CorrelationWrap {
-
 
 public:
 
