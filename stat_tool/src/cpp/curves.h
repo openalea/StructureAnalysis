@@ -3,9 +3,9 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
@@ -78,6 +78,7 @@ public :
     int nb_curve;           // nombre de courbes
     int length;             // longueur des courbes
     int offset;             // abscisse des premiers points definis
+    int *index_parameter;   // parametres d'index explicites
     int *frequency;         // effectifs correspondant a chaque abscisse
     double **point;         // points des courbes
 
@@ -86,7 +87,8 @@ public :
     void remove();
 
     Curves();
-    Curves(int inb_curve , int ilength , bool frequency_flag = false , bool init_flag = true);
+    Curves(int inb_curve , int ilength , bool frequency_flag = false ,
+           bool index_parameter_flag = false , bool init_flag = true);
     Curves(const Curves &curves , char transform = 'c' , int max_frequency = MAX_FREQUENCY);
     Curves(const Distribution &dist);
     Curves(const FrequencyDistribution &histo);
