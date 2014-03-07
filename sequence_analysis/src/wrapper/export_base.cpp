@@ -2,9 +2,9 @@
  *
  *        VPlants.Stat_Tool : VPlants Statistics module
  *
- *        Copyright 2006-2007 INRIA - CIRAD - INRA
+ *        Copyright 2006-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *        File author(s): Yann Guédon <yann.guedon@cirad.fr>
+ *        File author(s): Yann Guedon <yann.guedon@cirad.fr>
  *                        Jean-Baptiste Durand <Jean-Baptiste.Durand@imag.fr>
  *                        Samuel Dufour-Kowalski <samuel.dufour@sophia.inria.fr>
  *                        Christophe Pradal <christophe.prada@cirad.fr>
@@ -20,16 +20,16 @@
  *
  *-----------------------------------------------------------------------------*/
 
+
 #include "wrapper_util.h"
 
 #include "stat_tool/stat_tools.h"
 #include "stat_tool/distribution.h"
-#include "stat_tool/distance_matrix.h"
-#include "stat_tool/vectors.h"
 #include "stat_tool/curves.h"
 #include "stat_tool/markovian.h"
+#include "stat_tool/vectors.h"
+#include "stat_tool/distance_matrix.h"
 #include "stat_tool/stat_label.h"
-
 
 #include "sequence_analysis/sequence_label.h"
 #include "sequence_analysis/sequences.h"
@@ -40,7 +40,6 @@
 #include "sequence_analysis/hidden_variable_order_markov.h"
 //#include "sequence_analysis/nonhomogeneous_markov.h"
 #include "sequence_analysis/renewal.h"
-
 
 
 #include <boost/python.hpp>
