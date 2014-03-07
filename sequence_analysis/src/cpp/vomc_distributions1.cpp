@@ -3,9 +3,9 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
@@ -1498,7 +1498,7 @@ Correlation* VariableOrderMarkovChain::state_autocorrelation_computation(StatErr
     status = false;
     ostringstream error_message;
     error_message << STAT_label[STATL_STATE] << " " << istate << " "
-                  << SEQ_error[SEQR_NOT_PRESENT];
+                  << STAT_error[STATR_NOT_PRESENT];
     error.update((error_message.str()).c_str());
   }
 
@@ -1716,13 +1716,13 @@ Correlation* VariableOrderMarkov::output_autocorrelation_computation(StatError &
 
   if (nb_output_process == 0) {
     status = false;
-    error.update(SEQ_error[SEQR_NB_OUTPUT_PROCESS]);
+    error.update(STAT_error[STATR_NB_OUTPUT_PROCESS]);
   }
 
   else {
     if ((variable < 1) || (variable > nb_output_process) || (!categorical_process[variable - 1])) {
       status = false;
-      error.update(SEQ_error[SEQR_OUTPUT_PROCESS_INDEX]);
+      error.update(STAT_error[STATR_OUTPUT_PROCESS_INDEX]);
     }
 
     else {
@@ -1732,7 +1732,7 @@ Correlation* VariableOrderMarkov::output_autocorrelation_computation(StatError &
         status = false;
         ostringstream error_message;
         error_message << STAT_label[STATL_OUTPUT] << " " << output << " "
-                      << SEQ_error[SEQR_NOT_PRESENT];
+                      << STAT_error[STATR_NOT_PRESENT];
         error.update((error_message.str()).c_str());
       }
     }
