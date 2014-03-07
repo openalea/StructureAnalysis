@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
@@ -507,7 +507,7 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream 
       switch (type) {
 
       case 's' : {
-        compound->expectation_step(*this , power_dist , sum_reestim , 0);
+        compound->expectation_step(*this , power_dist , sum_reestim , NULL);
 
         if (estimator != PENALIZED_LIKELIHOOD) {
           sum_reestim->distribution_estimation(compound->sum_distribution);
@@ -520,7 +520,7 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream 
       }
 
       case 'e' : {
-        compound->expectation_step(*this , power_dist , 0 , reestim);
+        compound->expectation_step(*this , power_dist , NULL , reestim);
 
         if (estimator != PENALIZED_LIKELIHOOD) {
           reestim->distribution_estimation(compound->distribution);
@@ -616,7 +616,7 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream 
           switch (type) {
 
           case 's' : {
-            compound->expectation_step(*this , power_dist , sum_reestim , 0);
+            compound->expectation_step(*this , power_dist , sum_reestim , NULL);
             compound_histo->sum_frequency_distribution->update(sum_reestim ,
                                                                (int)(sum_reestim->nb_element *
                                                                MAX(sqrt(sum_reestim->variance) , 1.) * COMPOUND_COEFF));
@@ -626,7 +626,7 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream 
           }
 
           case 'e' : {
-            compound->expectation_step(*this , power_dist , 0 , reestim);
+            compound->expectation_step(*this , power_dist , NULL , reestim);
             compound_histo->frequency_distribution->update(reestim ,
                                                            (int)(reestim->nb_element *
                                                            MAX(sqrt(reestim->variance) , 1.) * COMPOUND_COEFF));
