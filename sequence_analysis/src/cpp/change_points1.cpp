@@ -3,9 +3,9 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
@@ -1355,7 +1355,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
           status = false;
           ostringstream error_message;
           error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
-                        << SEQ_error[SEQR_POSITIVE_MIN_VALUE];
+                        << STAT_error[STATR_POSITIVE_MIN_VALUE];
           error.update((error_message.str()).c_str());
         }
 
@@ -2693,7 +2693,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int *nb_segm
           status = false;
           ostringstream error_message;
           error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
-                        << SEQ_error[SEQR_POSITIVE_MIN_VALUE];
+                        << STAT_error[STATR_POSITIVE_MIN_VALUE];
           error.update((error_message.str()).c_str());
         }
 
@@ -4426,7 +4426,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
           status = false;
           ostringstream error_message;
           error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
-                        << SEQ_error[SEQR_POSITIVE_MIN_VALUE];
+                        << STAT_error[STATR_POSITIVE_MIN_VALUE];
           error.update((error_message.str()).c_str());
         }
 
