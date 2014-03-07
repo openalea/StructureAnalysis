@@ -3,9 +3,9 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
@@ -168,7 +168,6 @@ const char *SEQ_label[] = {
   "words" ,
 
   "state probabilities" ,
-  "distances between observation distributions for consecutive states" ,
   "posterior state sequence probability" ,
   "posterior state sequence probability log ratio" ,
   "state begin" ,
@@ -217,7 +216,7 @@ const char *SEQ_label[] = {
   "position interval" ,
   "length" ,
   "sequence length" ,
-  "cumulated length" ,
+  "cumulative length" ,
   "shift" ,
 
   "alignment length" ,
@@ -314,6 +313,7 @@ const char *SEQ_error[] = {
   "time between two observation dates too short" ,
   "time between two observation dates too long" ,
 
+  "bad model structure" ,
   "single state component" ,
   "bad number of states" ,
   "missing state" ,
@@ -323,12 +323,8 @@ const char *SEQ_error[] = {
   "too many parameters" ,
   "overlap of values observed in the different states" ,
   "bad model type" ,
-  "bad number of values per variable" ,
-  "bad number of output processes" ,
-  "bad output process index" ,
   "bad output process type" ,
   "no parametric output process" ,
-  "bad number of outputs" ,
   "bad minimum number of state sequences" ,
   "bad number of state sequences" ,
   "average state occupancy too short" ,
@@ -340,7 +336,7 @@ const char *SEQ_error[] = {
   "bad sequence length" ,
   "sequence length too short" ,
   "sequence length too long" ,
-  "cumulated sequence length too long" ,
+  "cumulative sequence length too long" ,
   "states not represented" ,
   "failure in the computation of the optimal state sequences" ,
   "reference model" ,
@@ -353,13 +349,11 @@ const char *SEQ_error[] = {
   "bad index parameter" ,
   "bad variable indices" ,
   "bad variable lag" ,
-  "bad minimum value: should be positive" ,
   "bad date order" ,
   "bad begin index parameter" ,
   "bad end index parameter" ,
   "bad minimum sequence length" ,
   "bad maximum sequence length" ,
-  "not present" ,
   "bad maximum run length" ,
   "bad minimum index parameter" ,
   "bad maximum index parameter" ,
