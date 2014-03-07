@@ -3,9 +3,9 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
@@ -1997,7 +1997,7 @@ MultiPlotSet* Distribution::get_plotable() const
 {
   StatError error;
 
-  return get_plotable_distributions(error , 0 , 0);
+  return get_plotable_distributions(error , 0 , NULL);
 }
 
 
