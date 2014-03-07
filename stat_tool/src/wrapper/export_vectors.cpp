@@ -2,10 +2,10 @@
  *
  *        VPlants.Stat_Tool : VPlants Statistics module
  *
- *        Copyright 2006-2007 INRIA - CIRAD - INRA
+ *        Copyright 2006-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *        File author(s): Yann Guédon <yann.guedon@cirad.fr>
- *                        Jean-Baptiste Dur&& <Jean-Baptiste.Dur&&@imag.fr>
+ *        File author(s): Yann Guedon <yann.guedon@cirad.fr>
+ *                        Jean-Baptiste Durand <Jean-Baptiste.Durand@imag.fr>
  *                        Samuel Dufour-Kowalski <samuel.dufour@sophia.inria.fr>
  *                        Christophe Pradal <christophe.prada@cirad.fr>
  *                        Thomas Cokelaer <Thomas.Cokelaer@inria.fr>
@@ -20,15 +20,17 @@
  *
  *-----------------------------------------------------------------------------*/
 
+
 #include "wrapper_util.h"
 #include "export_base.h"
 
 #include "stat_tool/stat_tools.h"
 
+#include "stat_tool/distribution.h"
+#include "stat_tool/markovian.h"
 #include "stat_tool/vectors.h"
 #include "stat_tool/regression.h"
 #include "stat_tool/distance_matrix.h"
-#include "stat_tool/distribution.h"
 #include "stat_tool/multivariate_mixture.h"
 
 #include <boost/python.hpp>
@@ -37,10 +39,9 @@
 
 #include "boost_python_aliases.h"
 #include "export_base.h"
+
 using namespace boost::python;
 using namespace boost;
-
-
 
 
 // Vectors
@@ -439,7 +440,7 @@ public:
     std::stringstream s;
     std::string res;
 
-    d.ascii_data_write(s, exhaustive, true);
+    d.ascii_data_write(s, exhaustive);
     res = s.str();
 
     return res;
