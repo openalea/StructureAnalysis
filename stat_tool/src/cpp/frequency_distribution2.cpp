@@ -3,9 +3,9 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
@@ -1812,7 +1812,7 @@ MultiPlotSet* FrequencyDistribution::get_plotable() const
 {
   StatError error;
 
-  return get_plotable_frequency_distributions(error , 0 , 0);
+  return get_plotable_frequency_distributions(error , 0 , NULL);
 }
 
 
@@ -2299,7 +2299,7 @@ bool DiscreteDistributionData::plot_write(StatError &error , const char *prefix 
   }
 
   else {
-    status = FrequencyDistribution::plot_write(error , prefix , 0 , 0 , title);
+    status = FrequencyDistribution::plot_write(error , prefix , 0 , NULL , title);
   }
 
   return status;
@@ -2323,7 +2323,7 @@ MultiPlotSet* DiscreteDistributionData::get_plotable() const
   }
   else {
     StatError error;
-    plot_set = FrequencyDistribution::get_plotable_frequency_distributions(error , 0 , 0);
+    plot_set = FrequencyDistribution::get_plotable_frequency_distributions(error , 0 , NULL);
   }
 
   return plot_set;
