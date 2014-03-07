@@ -3,9 +3,9 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
@@ -361,8 +361,6 @@ HiddenVariableOrderMarkov* hidden_variable_order_markov_ascii_read(StatError &er
               // test mot cle OUTPUT_PROCESS
 
               case 0 : {
-                output_process_type = CATEGORICAL_PROCESS;
-
                 if (token == STAT_word[STATW_OUTPUT_PROCESS]) {
                   index++;
                 }
@@ -413,6 +411,7 @@ HiddenVariableOrderMarkov* hidden_variable_order_markov_ascii_read(StatError &er
                   output_process_type = CONTINUOUS_PARAMETRIC;
                 }
                 else {
+                  output_process_type = CATEGORICAL_PROCESS - 1;
                   status = false;
                   ostringstream correction_message;
                   correction_message << STAT_word[STATW_CATEGORICAL] << " or "
@@ -437,7 +436,8 @@ HiddenVariableOrderMarkov* hidden_variable_order_markov_ascii_read(StatError &er
 
               case CATEGORICAL_PROCESS : {
                 categorical_observation[index - 1] = categorical_observation_parsing(error , in_file , line ,
-                                                                                     ((Chain*)imarkov)->nb_state , true);
+                                                                                     ((Chain*)imarkov)->nb_state ,
+                                                                                     HIDDEN_MARKOV , true);
                 if (!categorical_observation[index - 1]) {
                   status = false;
                 }
@@ -447,7 +447,8 @@ HiddenVariableOrderMarkov* hidden_variable_order_markov_ascii_read(StatError &er
               case DISCRETE_PARAMETRIC : {
                 discrete_parametric_observation[index - 1] = discrete_observation_parsing(error , in_file , line ,
                                                                                           ((Chain*)imarkov)->nb_state ,
-                                                                                           cumul_threshold);
+                                                                                          HIDDEN_MARKOV ,
+                                                                                          cumul_threshold);
                 if (!discrete_parametric_observation[index - 1]) {
                   status = false;
                 }
@@ -456,7 +457,9 @@ HiddenVariableOrderMarkov* hidden_variable_order_markov_ascii_read(StatError &er
 
               case CONTINUOUS_PARAMETRIC : {
                 continuous_parametric_observation[index - 1] = continuous_observation_parsing(error , in_file , line ,
-                                                                                              ((Chain*)imarkov)->nb_state);
+                                                                                              ((Chain*)imarkov)->nb_state ,
+                                                                                              HIDDEN_MARKOV ,
+                                                                                              ZERO_INFLATED_GAMMA);
                 if (!continuous_parametric_observation[index - 1]) {
                   status = false;
                 }
