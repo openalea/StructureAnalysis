@@ -3,9 +3,9 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
@@ -62,8 +62,9 @@ extern char* label(const char *file_name);
  *  Ecriture d'un objet CategoricalSequenceProcess.
  *
  *  arguments : stream, indice du processus d'observation,
- *              pointeurs sur les lois d'observation empiriques et
- *              sur les caracteristiques des sequences observees,
+ *              pointeurs sur les lois d'observation empiriques,
+ *              la loi marginale empiriques et
+ *              les caracteristiques des sequences observees,
  *              flag niveau de detail, flag fichier ,
  *              pointeurs sur les lois de l'intervalle de temps residuel.
  *
@@ -71,14 +72,17 @@ extern char* label(const char *file_name);
 
 ostream& CategoricalSequenceProcess::ascii_print(ostream &os , int process ,
                                                  FrequencyDistribution **empirical_observation ,
+                                                 FrequencyDistribution *marginal_distribution ,
                                                  const SequenceCharacteristics *characteristics ,
-                                                 bool exhaustive , bool file_flag , Forward **forward) const
+                                                 bool exhaustive , bool file_flag ,
+                                                 Forward **forward) const
 
 {
   register int i , j;
   int buff , width[2];
   long old_adjust;
-  double *pmass;
+  double *pmass , scale[NB_STATE];
+  const Distribution *pobservation[NB_STATE];
 
 
   old_adjust = os.setf(ios::left , ios::adjustfield);
@@ -95,8 +99,7 @@ ostream& CategoricalSequenceProcess::ascii_print(ostream &os , int process ,
         pmass++;
       }
 
-      if ((empirical_observation) && (empirical_observation[i]->nb_element > 0) &&
-          (exhaustive)) {
+      if ((empirical_observation) && (empirical_observation[i]->nb_element > 0) && (exhaustive)) {
         os << "\n";
         if (file_flag) {
           os << "# ";
@@ -151,6 +154,136 @@ ostream& CategoricalSequenceProcess::ascii_print(ostream &os , int process ,
       }
     }
     os << endl;
+
+    if (marginal_distribution) {
+      double likelihood , information;
+      Test test(CHI2);
+
+
+      if ((weight) && (mixture)) {
+        os << "\n";
+        if (file_flag) {
+          os << "# ";
+        }
+        os << STAT_label[STATL_THEORETICAL] << " " << STAT_label[STATL_WEIGHTS] << ":";
+
+        for (i = 0;i < nb_state;i++) {
+          os << " " << weight->mass[i];
+        }
+        os << endl;
+
+        likelihood = mixture->likelihood_computation(*marginal_distribution);
+        information = marginal_distribution->information_computation();
+
+        os << "\n";
+        if (file_flag) {
+          os << "# ";
+        }
+        os << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   ("
+           << STAT_label[STATL_NORMALIZED] << ": " << likelihood / marginal_distribution->nb_element << ")" << endl;
+
+        if (file_flag) {
+          os << "# ";
+        }
+        os << STAT_label[STATL_MAX_LIKELIHOOD] << ": " << information << "   ("
+           << STAT_label[STATL_INFORMATION] << ": " << information / marginal_distribution->nb_element << ")" << endl;
+
+        if (file_flag) {
+          os << "# ";
+        }
+        os << STAT_label[STATL_DEVIANCE] << ": " << 2 * (information - likelihood) << endl;
+
+        mixture->chi2_fit(*marginal_distribution , test);
+        os << "\n";
+        test.ascii_print(os , file_flag);
+
+        if (exhaustive) {
+          for (i = 0;i < nb_state;i++) {
+            pobservation[i] = observation[i];
+            scale[i] = weight->mass[i] * marginal_distribution->nb_element;
+          }
+
+          os << "\n";
+          if (file_flag) {
+            os << "# ";
+          }
+          os << "   | " << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
+          for (i = 0;i < nb_state;i++) {
+            os << " | " << STAT_label[STATL_STATE] << " " << i << " " << STAT_label[STATL_OBSERVATION]
+               << " " << STAT_label[STATL_DISTRIBUTION];
+          }
+          os << " | " << STAT_label[STATL_MIXTURE] << " | " << STAT_label[STATL_CUMULATIVE]
+             << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << STAT_label[STATL_FUNCTION]
+             << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_MIXTURE]
+             << " " << STAT_label[STATL_FUNCTION] << endl;
+
+          mixture->ascii_print(os , nb_state , pobservation , scale ,
+                               file_flag , true , marginal_distribution);
+        }
+      }
+
+      if ((restoration_weight) && (restoration_mixture)) {
+        os << "\n";
+        if (file_flag) {
+          os << "# ";
+        }
+        os << STAT_label[STATL_RESTORATION] << " " << STAT_label[STATL_WEIGHTS] << ":";
+
+        for (i = 0;i < nb_state;i++) {
+          os << " " << restoration_weight->mass[i];
+        }
+        os << endl;
+
+        likelihood = restoration_mixture->likelihood_computation(*marginal_distribution);
+        information = marginal_distribution->information_computation();
+
+        os << "\n";
+        if (file_flag) {
+          os << "# ";
+        }
+        os << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   ("
+           << STAT_label[STATL_NORMALIZED] << ": " << likelihood / marginal_distribution->nb_element << ")" << endl;
+
+        if (file_flag) {
+          os << "# ";
+        }
+        os << STAT_label[STATL_MAX_LIKELIHOOD] << ": " << information << "   ("
+           << STAT_label[STATL_INFORMATION] << ": " << information / marginal_distribution->nb_element << ")" << endl;
+
+        if (file_flag) {
+          os << "# ";
+        }
+        os << STAT_label[STATL_DEVIANCE] << ": " << 2 * (information - likelihood) << endl;
+
+        restoration_mixture->chi2_fit(*marginal_distribution , test);
+        os << "\n";
+        test.ascii_print(os , file_flag);
+
+        if (exhaustive) {
+          for (i = 0;i < nb_state;i++) {
+            pobservation[i] = observation[i];
+            scale[i] = restoration_weight->mass[i] * marginal_distribution->nb_element;
+          }
+
+          os << "\n";
+          if (file_flag) {
+            os << "# ";
+          }
+          os << "   | " << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
+          for (i = 0;i < nb_state;i++) {
+            os << " | " << STAT_label[STATL_STATE] << " " << i << " " << STAT_label[STATL_OBSERVATION]
+               << " " << STAT_label[STATL_DISTRIBUTION];
+          }
+          os << " | " << STAT_label[STATL_MIXTURE] << " | " << STAT_label[STATL_CUMULATIVE]
+             << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << STAT_label[STATL_FUNCTION]
+             << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_MIXTURE]
+             << " " << STAT_label[STATL_FUNCTION] << endl;
+
+          restoration_mixture->ascii_print(os , nb_state , pobservation , scale ,
+                                           file_flag , true , marginal_distribution);
+        }
+      }
+    }
   }
 
   if (((index_value) || (characteristics)) && (exhaustive)) {
@@ -688,6 +821,7 @@ ostream& CategoricalSequenceProcess::ascii_print(ostream &os , int process ,
  *
  *  arguments : stream, indice du processus d'observation,
  *              pointeurs sur les lois d'observation empiriques,
+ *              la loi marginale empiriques empiriques,
  *              sur les caracteristiques des sequences observees et
  *              sur les lois de l'intervalle de temps residuel.
  *
@@ -695,12 +829,14 @@ ostream& CategoricalSequenceProcess::ascii_print(ostream &os , int process ,
 
 ostream& CategoricalSequenceProcess::spreadsheet_print(ostream &os , int process ,
                                                        FrequencyDistribution **empirical_observation ,
+                                                       FrequencyDistribution *marginal_distribution ,
                                                        const SequenceCharacteristics *characteristics ,
                                                        Forward **forward) const
 
 {
   register int i , j;
-  double *pmass;
+  double *pmass , scale[NB_STATE];
+  const Distribution *pobservation[NB_STATE];
   Curves *smoothed_curves;
 
 
@@ -723,6 +859,90 @@ ostream& CategoricalSequenceProcess::spreadsheet_print(ostream &os , int process
            << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION] << endl;
 
         observation[i]->spreadsheet_print(os , false , false , false , empirical_observation[i]);
+      }
+    }
+
+    if (marginal_distribution) {
+      double likelihood , information;
+      Test test(CHI2);
+
+
+      if ((weight) && (mixture)) {
+        os << "\n" << STAT_label[STATL_THEORETICAL] << " " << STAT_label[STATL_WEIGHTS];
+        for (i = 0;i < nb_state;i++) {
+          os << "\t" << weight->mass[i];
+        }
+        os << endl;
+
+        likelihood = mixture->likelihood_computation(*marginal_distribution);
+        information = marginal_distribution->information_computation();
+
+        os << "\n" << STAT_label[STATL_LIKELIHOOD] << "\t" << likelihood << "\t"
+           << STAT_label[STATL_NORMALIZED] << "\t" << likelihood / marginal_distribution->nb_element << endl;
+        os << STAT_label[STATL_MAX_LIKELIHOOD] << "\t" << information << "\t"
+           << STAT_label[STATL_INFORMATION] << "\t" << information / marginal_distribution->nb_element << endl;
+        os << STAT_label[STATL_DEVIANCE] << "\t" << 2 * (information - likelihood) << endl;
+
+        mixture->chi2_fit(*marginal_distribution , test);
+        os << "\n";
+        test.spreadsheet_print(os);
+
+        for (i = 0;i < nb_state;i++) {
+          pobservation[i] = observation[i];
+          scale[i] = weight->mass[i] * marginal_distribution->nb_element;
+        }
+
+        os << "\n\t" << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
+        for (i = 0;i < nb_state;i++) {
+          os << "\t" << STAT_label[STATL_STATE] << " " << i << " " << STAT_label[STATL_OBSERVATION]
+             << " " << STAT_label[STATL_DISTRIBUTION];
+        }
+        os << "\t" << STAT_label[STATL_MIXTURE] << "\t" << STAT_label[STATL_CUMULATIVE]
+           << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << STAT_label[STATL_FUNCTION]
+           << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_MIXTURE]
+           << " " << STAT_label[STATL_FUNCTION] << endl;
+
+        mixture->spreadsheet_print(os , nb_state , pobservation , scale , true ,
+                                   marginal_distribution);
+      }
+
+      if ((restoration_weight) && (restoration_mixture)) {
+        os << "\n" << STAT_label[STATL_RESTORATION] << " " << STAT_label[STATL_WEIGHTS];
+        for (i = 0;i < nb_state;i++) {
+          os << "\t" << restoration_weight->mass[i];
+        }
+        os << endl;
+
+        likelihood = restoration_mixture->likelihood_computation(*marginal_distribution);
+        information = marginal_distribution->information_computation();
+
+        os << "\n" << STAT_label[STATL_LIKELIHOOD] << "\t" << likelihood << "\t"
+           << STAT_label[STATL_NORMALIZED] << "\t" << likelihood / marginal_distribution->nb_element << endl;
+        os << STAT_label[STATL_MAX_LIKELIHOOD] << "\t" << information << "\t"
+           << STAT_label[STATL_INFORMATION] << "\t" << information / marginal_distribution->nb_element << endl;
+        os << STAT_label[STATL_DEVIANCE] << "\t" << 2 * (information - likelihood) << endl;
+
+        restoration_mixture->chi2_fit(*marginal_distribution , test);
+        os << "\n";
+        test.spreadsheet_print(os);
+
+        for (i = 0;i < nb_state;i++) {
+          pobservation[i] = observation[i];
+          scale[i] = restoration_weight->mass[i] * marginal_distribution->nb_element;
+        }
+
+        os << "\n\t" << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
+        for (i = 0;i < nb_state;i++) {
+          os << "\t" << STAT_label[STATL_STATE] << " " << i << " " << STAT_label[STATL_OBSERVATION]
+             << " " << STAT_label[STATL_DISTRIBUTION];
+        }
+        os << "\t" << STAT_label[STATL_MIXTURE] << "\t" << STAT_label[STATL_CUMULATIVE]
+           << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << STAT_label[STATL_FUNCTION]
+           << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_MIXTURE]
+           << " " << STAT_label[STATL_FUNCTION] << endl;
+
+        restoration_mixture->spreadsheet_print(os , nb_state , pobservation , scale , true ,
+                                               marginal_distribution);
       }
     }
   }
@@ -1170,14 +1390,16 @@ ostream& CategoricalSequenceProcess::spreadsheet_print(ostream &os , int process
  *  arguments : prefixe des fichiers, titre des figures,
  *              indice du processus d'observation,
  *              pointeurs sur les lois d'observation empiriques,
- *              sur les caracteristiques des sequences observees,
- *              sur la loi empirique des longueurs des sequences et
- *              sur les lois de l'intervalle de temps residuel.
+ *              la loi marginale empiriques,
+ *              les caracteristiques des sequences observees,
+ *              la loi empirique des longueurs des sequences et
+ *              les lois de l'intervalle de temps residuel.
  *
  *--------------------------------------------------------------*/
 
-bool CategoricalSequenceProcess::plot_print(const char *prefix , const char *title ,
-                                            int process , FrequencyDistribution **empirical_observation ,
+bool CategoricalSequenceProcess::plot_print(const char *prefix , const char *title , int process ,
+                                            FrequencyDistribution **empirical_observation ,
+                                            FrequencyDistribution *marginal_distribution ,
                                             const SequenceCharacteristics *characteristics ,
                                             const FrequencyDistribution *length_distribution ,
                                             Forward **forward) const
@@ -1196,8 +1418,6 @@ bool CategoricalSequenceProcess::plot_print(const char *prefix , const char *tit
   // ecriture des fichiers de donnees
 
   if ((index_value) || (characteristics)) {
-    data_file_name[0] << prefix << process << 0 << ".dat";
-
     if (characteristics) {
       index_length = characteristics->index_value->plot_length_computation();
       if (characteristics->index_value->frequency[index_length - 1] < MAX_FREQUENCY) {
@@ -1207,6 +1427,8 @@ bool CategoricalSequenceProcess::plot_print(const char *prefix , const char *tit
         smoothed_curves = NULL;
       }
     }
+
+    data_file_name[0] << prefix << process << 0 << ".dat";
 
     if (index_value) {
       if (characteristics) {
@@ -1229,12 +1451,10 @@ bool CategoricalSequenceProcess::plot_print(const char *prefix , const char *tit
   }
 
   if (status) {
-    data_file_name[1] << prefix << process << 1 << ".dat";
-
-    pdist = new const Distribution*[6 * nb_value + nb_state];
-    dist_nb_value = new int[6 * nb_value + nb_state];
-    scale = new double[6 * nb_value + nb_state];
-    phisto = new const FrequencyDistribution*[1 + 7 * nb_value + nb_state];
+    pdist = new const Distribution*[6 * nb_value + 3 * nb_state + 2];
+    dist_nb_value = new int[6 * nb_value + 3 * nb_state + 2];
+    scale = new double[6 * nb_value + 3 * nb_state + 2];
+    phisto = new const FrequencyDistribution*[7 * nb_value + nb_state + 3];
 
     nb_histo = 0;
     nb_dist = 0;
@@ -1411,15 +1631,44 @@ bool CategoricalSequenceProcess::plot_print(const char *prefix , const char *tit
         dist_nb_value[nb_dist] = observation[i]->nb_value;
 
         if ((empirical_observation) && (empirical_observation[i]->nb_element > 0)) {
-          phisto[nb_histo] = empirical_observation[i];
-          scale[nb_dist++] = phisto[nb_histo++]->nb_element;
+          phisto[nb_histo++] = empirical_observation[i];
+          scale[nb_dist++] = empirical_observation[i]->nb_element;
         }
         else {
           scale[nb_dist++] = 1.;
         }
       }
+
+      if (marginal_distribution) {
+        if ((weight) && (mixture)) {
+          for (i = 0;i < nb_state;i++) {
+            pdist[nb_dist] = observation[i];
+            dist_nb_value[nb_dist] = observation[i]->nb_value;
+            scale[nb_dist++] = weight->mass[i] * marginal_distribution->nb_element;
+          }
+
+          pdist[nb_dist] = mixture;
+          dist_nb_value[nb_dist] = mixture->nb_value;
+          phisto[nb_histo++] = marginal_distribution;
+          scale[nb_dist++] = marginal_distribution->nb_element;
+        }
+
+        if ((restoration_weight) && (restoration_mixture)) {
+          for (i = 0;i < nb_state;i++) {
+            pdist[nb_dist] = observation[i];
+            dist_nb_value[nb_dist] = observation[i]->nb_value;
+            scale[nb_dist++] = restoration_weight->mass[i] * marginal_distribution->nb_element;
+          }
+
+          pdist[nb_dist] = restoration_mixture;
+          dist_nb_value[nb_dist] = restoration_mixture->nb_value;
+          phisto[nb_histo++] = marginal_distribution;
+          scale[nb_dist++] = marginal_distribution->nb_element;
+        }
+      }
     }
 
+    data_file_name[1] << prefix << process << 1 << ".dat";
     status = ::plot_print((data_file_name[1].str()).c_str() , nb_dist , pdist , scale ,
                           dist_nb_value , nb_histo , phisto);
 
@@ -2524,7 +2773,88 @@ bool CategoricalSequenceProcess::plot_print(const char *prefix , const char *tit
             if ((i == 0) && (m < nb_state - 1)) {
               out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
             }
-            out_file << endl;
+          }
+
+          if (marginal_distribution) {
+            if ((weight) && (mixture)) {
+              if (i == 0) {
+                out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
+              }
+              out_file << endl;
+
+              out_file << "set title \"";
+              if (title) {
+                out_file << title << " - ";
+              }
+              out_file << STAT_label[STATL_OUTPUT_PROCESS] << " " << process << " - "
+                       << STAT_label[STATL_THEORETICAL] << " " << STAT_label[STATL_WEIGHTS] << "\"\n\n";
+
+              if (nb_value - 1 < TIC_THRESHOLD) {
+                out_file << "set xtics 0,1" << endl;
+              }
+
+              out_file << "plot [0:" << nb_value - 1 << "] [0:"
+                       << (int)(MAX(marginal_distribution->max , mixture->max * marginal_distribution->nb_element) * YSCALE) + 1
+                       << "] \"" << label((data_file_name[1].str()).c_str()) << "\" using " << j + 1
+                       << " title \"" << STAT_label[STATL_MARGINAL] << " "
+                       << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\" with impulses,\\" << endl;
+              j++;
+
+              for (m = 0;m < nb_state;m++) {
+                out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo + k + 1
+                         << " title \"" << STAT_label[STATL_STATE] << " " << m << " " << STAT_label[STATL_OBSERVATION]
+                         << " " << STAT_label[STATL_DISTRIBUTION] << "\" with linespoints,\\" << endl;
+                k++;
+              }
+
+              out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo + k + 1
+                       << " title \"" << STAT_label[STATL_MIXTURE] << "\" with linespoints" << endl;
+              k++;
+
+              if (nb_value - 1 < TIC_THRESHOLD) {
+                out_file << "set xtics autofreq" << endl;
+              }
+            }
+
+            if ((restoration_weight) && (restoration_mixture)) {
+              if (i == 0) {
+                out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
+              }
+              out_file << endl;
+
+              out_file << "set title \"";
+              if (title) {
+                out_file << title << " - ";
+              }
+              out_file << STAT_label[STATL_OUTPUT_PROCESS] << " " << process << " - "
+                       << STAT_label[STATL_RESTORATION] << " " << STAT_label[STATL_WEIGHTS] << "\"\n\n";
+
+              if (nb_value - 1 < TIC_THRESHOLD) {
+                out_file << "set xtics 0,1" << endl;
+              }
+
+              out_file << "plot [0:" << nb_value - 1 << "] [0:"
+                       << (int)(MAX(marginal_distribution->max , restoration_mixture->max * marginal_distribution->nb_element) * YSCALE) + 1
+                       << "] \"" << label((data_file_name[1].str()).c_str()) << "\" using " << j + 1
+                       << " title \"" << STAT_label[STATL_MARGINAL] << " "
+                       << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\" with impulses,\\" << endl;
+              j++;
+
+              for (m = 0;m < nb_state;m++) {
+                out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo + k + 1
+                         << " title \"" << STAT_label[STATL_STATE] << " " << m << " " << STAT_label[STATL_OBSERVATION]
+                         << " " << STAT_label[STATL_DISTRIBUTION] << "\" with linespoints,\\" << endl;
+                k++;
+              }
+
+              out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo + k + 1
+                       << " title \"" << STAT_label[STATL_MIXTURE] << "\" with linespoints" << endl;
+              k++;
+
+              if (nb_value - 1 < TIC_THRESHOLD) {
+                out_file << "set xtics autofreq" << endl;
+              }
+            }
           }
 
           if (i == 1) {
@@ -2553,14 +2883,16 @@ bool CategoricalSequenceProcess::plot_print(const char *prefix , const char *tit
  *  arguments : reference sur un objet MultiPlotSet, indice du MultiPlot,
  *              indice du processus d'observation,
  *              pointeurs sur les lois d'observation empiriques,
- *              sur les caracteristiques des sequences observees,
- *              sur la loi empirique des longueurs des sequences et
- *              sur les lois de l'intervalle de temps residuel.
+ *              la loi marginale empiriques,
+ *              les caracteristiques des sequences observees,
+ *              la loi empirique des longueurs des sequences et
+ *              les lois de l'intervalle de temps residuel.
  *
  *--------------------------------------------------------------*/
 
 void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index , int process ,
                                                 FrequencyDistribution **empirical_observation ,
+                                                FrequencyDistribution *marginal_distribution ,
                                                 const SequenceCharacteristics *characteristics ,
                                                 const FrequencyDistribution *length_distribution ,
                                                 Forward **forward) const
@@ -2672,6 +3004,15 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
     }
     else {
       nb_plot_set++;
+    }
+
+    if (marginal_distribution) {
+      if ((weight) && (mixture)) {
+        nb_plot_set++;
+      }
+      if ((restoration_weight) && (restoration_mixture)) {
+        nb_plot_set++;
+      }
     }
   } */
 
@@ -3675,6 +4016,110 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
       }
 
       index++;
+    }
+
+    if (marginal_distribution) {
+      if ((weight) && (mixture)) {
+
+        // vue : ajustement melange de lois d'observation
+
+        title.str("");
+        title << STAT_label[STATL_OUTPUT_PROCESS] << " " << process << " - "
+              << STAT_label[STATL_THEORETICAL] << " " << STAT_label[STATL_WEIGHTS];
+        plot[index].title = title.str();
+
+        plot[index].xrange = Range(0 , nb_value - 1);
+        if (nb_value - 1 < TIC_THRESHOLD) {
+          plot[index].xtics = 1;
+        }
+
+        plot[index].yrange = Range(0 , ceil(MAX(marginal_distribution->max ,
+                                                mixture->max * marginal_distribution->nb_element) * YSCALE));
+
+        plot[index].resize(nb_state + 2);
+
+        legend.str("");
+        legend << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
+        plot[index][0].legend = legend.str();
+
+        plot[index][0].style = "impulses";
+
+        marginal_distribution->plotable_frequency_write(plot[index][0]);
+
+        for (i = 0;i < nb_state;i++) {
+          legend.str("");
+          legend << STAT_label[STATL_STATE] << " " << i << " " << STAT_label[STATL_OBSERVATION] << " "
+                 << STAT_label[STATL_DISTRIBUTION];
+          observation[i]->plot_title_print(legend);
+          plot[index][i + 1].legend = legend.str();
+
+          plot[index][i + 1].style = "linespoints";
+
+          observation[i]->plotable_mass_write(plot[index][i + 1] ,
+                                              weight->mass[i] * marginal_distribution->nb_element);
+        }
+
+        plot[index][nb_state + 2].legend = STAT_label[STATL_MIXTURE];
+
+        plot[index][nb_state + 2].style = "linespoints";
+
+        mixture->plotable_mass_write(plot[index][nb_state + 2] ,
+                                     marginal_distribution->nb_element);
+
+        index++;
+      }
+
+      if ((restoration_weight) && (restoration_mixture)) {
+
+        // vue : ajustement melange de lois d'observation (poids issus de la restauration)
+
+        title.str("");
+        if (process > 0) {
+          title << STAT_label[STATL_OUTPUT_PROCESS] << " " << process;
+        }
+        title << STAT_label[STATL_RESTORATION] << " " << STAT_label[STATL_WEIGHTS];
+        plot[index].title = title.str();
+
+        plot[index].xrange = Range(0 , nb_value - 1);
+        if (nb_value - 1 < TIC_THRESHOLD) {
+          plot[index].xtics = 1;
+        }
+
+        plot[index].yrange = Range(0 , ceil(MAX(marginal_distribution->max ,
+                                                restoration_mixture->max * marginal_distribution->nb_element) * YSCALE));
+
+        plot[index].resize(nb_state + 2);
+
+        legend.str("");
+        legend << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
+        plot[index][0].legend = legend.str();
+
+        plot[index][0].style = "impulses";
+
+        marginal_distribution->plotable_frequency_write(plot[index][0]);
+
+        for (i = 0;i < nb_state;i++) {
+          legend.str("");
+          legend << STAT_label[STATL_STATE] << " " << i << " " << STAT_label[STATL_OBSERVATION] << " "
+                 << STAT_label[STATL_DISTRIBUTION];
+          observation[i]->plot_title_print(legend);
+          plot[index][i + 1].legend = legend.str();
+
+          plot[index][i + 1].style = "linespoints";
+
+          observation[i]->plotable_mass_write(plot[index][i + 1] ,
+                                              restoration_weight->mass[i] * marginal_distribution->nb_element);
+        }
+
+        plot[index][nb_state + 2].legend = STAT_label[STATL_MIXTURE];
+
+        plot[index][nb_state + 2].style = "linespoints";
+
+        restoration_mixture->plotable_mass_write(plot[index][nb_state + 2] ,
+                                                 marginal_distribution->nb_element);
+
+        index++;
+      }
     }
   }
 }
