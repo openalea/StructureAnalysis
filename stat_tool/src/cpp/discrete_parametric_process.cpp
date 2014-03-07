@@ -3,9 +3,9 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
@@ -78,7 +78,7 @@ DiscreteParametricProcess::DiscreteParametricProcess(int inb_state , int inb_val
     observation = new DiscreteParametric*[nb_state];
     if (nb_value > 0) {
       for (i = 0;i < nb_state;i++) {
-        observation[i] = new DiscreteParametric(UNIFORM, 0, nb_value , D_DEFAULT , D_DEFAULT);
+        observation[i] = new DiscreteParametric(UNIFORM , 0 , nb_value , D_DEFAULT , D_DEFAULT);
       }
     }
 
@@ -179,47 +179,6 @@ void DiscreteParametricProcess::copy(const DiscreteParametricProcess &process)
 
 /*--------------------------------------------------------------*
  *
- *  Application d'une permutation des etats. La validite de la 
- *  permutation doit etre verifiee par la procedure appelante.
- *
- *--------------------------------------------------------------*/
-
-void DiscreteParametricProcess::state_permutation(int *permut) const
-
-{
-  register int i;
-  DiscreteParametric **pobservation;
-
-
-  pobservation = new DiscreteParametric*[nb_state];
-
-  for (i = 0;i < nb_state;i++) {
-    pobservation[permut[i]] = observation[i];
-  }
-  for (i = 0;i < nb_state;i++) {
-    observation[i] = pobservation[i];
-  }
-  delete [] pobservation;
-}
-
-
-/*--------------------------------------------------------------*
- *
- *  Constructeur par copie de la classe DiscreteParametricProcess.
- *
- *  argument : reference sur un objet DiscreteParametricProcess.
- *
- *--------------------------------------------------------------*/
-
-/* DiscreteParametricProcess::DiscreteParametricProcess(const DiscreteParametricProcess &process)
-
-{
-  copy(process);
-} */
-
-
-/*--------------------------------------------------------------*
- *
  *  Destruction des champs d'un objet DiscreteParametricProcess.
  *
  *--------------------------------------------------------------*/
@@ -289,12 +248,13 @@ DiscreteParametricProcess& DiscreteParametricProcess::operator=(const DiscretePa
  *
  *  arguments : reference sur un objet StatError, stream,
  *              reference sur l'indice de la ligne lue, nombre d'etats,
- *              seuil sur la fonction de repartition.
+ *              type de modele, seuil sur la fonction de repartition.
  *
  *--------------------------------------------------------------*/
 
 DiscreteParametricProcess* discrete_observation_parsing(StatError &error , ifstream &in_file ,
-                                                        int &line , int nb_state , double cumul_threshold)
+                                                        int &line , int nb_state ,
+                                                        int model , double cumul_threshold)
 
 {
   RWLocaleSnapshot locale("en");
@@ -333,17 +293,33 @@ DiscreteParametricProcess* discrete_observation_parsing(StatError &error , ifstr
       while (!((token = next()).isNull())) {
         switch (j) {
 
-        // test mot cle STATE
+        // test mot cle COMPONENT / STATE
 
         case 0 : {
-          if (token != STAT_word[STATW_STATE]) {
-            status = false;
-            error.correction_update(STAT_parsing[STATP_KEY_WORD] , STAT_word[STATW_STATE] , line , j + 1);
+          switch (model) {
+
+          case MIXTURE : {
+            if (token != STAT_word[STATW_COMPONENT]) {
+              status = false;
+              error.correction_update(STAT_parsing[STATP_KEY_WORD] ,
+                                      STAT_word[STATW_COMPONENT] , line , j + 1);
+            }
+            break;
+          }
+
+          case HIDDEN_MARKOV : {
+            if (token != STAT_word[STATW_STATE]) {
+              status = false;
+              error.correction_update(STAT_parsing[STATP_KEY_WORD] ,
+                                      STAT_word[STATW_STATE] , line , j + 1);
+            }
+            break;
+          }
           }
           break;
         }
 
-        // test indice de l'etat
+        // test indice de la composante / de l'etat
 
         case 1 : {
           lstatus = locale.stringToNum(token , &index);
@@ -353,7 +329,15 @@ DiscreteParametricProcess* discrete_observation_parsing(StatError &error , ifstr
 
           if (!lstatus) {
             status = false;
-            error.correction_update(STAT_parsing[STATP_STATE_INDEX] , i , line , j + 1);
+
+            switch (model) {
+            case MIXTURE :
+              error.correction_update(STAT_parsing[STATP_COMPONENT_INDEX] , i , line , j + 1);
+              break;
+            case HIDDEN_MARKOV :
+              error.correction_update(STAT_parsing[STATP_STATE_INDEX] , i , line , j + 1);
+              break;
+            }
           }
           break;
         }
@@ -412,13 +396,13 @@ DiscreteParametricProcess* discrete_observation_parsing(StatError &error , ifstr
  *
  *  arguments : stream, pointeurs sur les lois d'observation et
  *              la loi marginale empiriques, flag niveau de detail,
- *              flag fichier.
+ *              flag fichier, type de modele.
  *
  *--------------------------------------------------------------*/
 
 ostream& DiscreteParametricProcess::ascii_print(ostream &os , FrequencyDistribution **empirical_observation ,
                                                 FrequencyDistribution *marginal_distribution ,
-                                                bool exhaustive , bool file_flag) const
+                                                bool exhaustive , bool file_flag , int model) const
 
 {
   register int i , j;
@@ -427,8 +411,16 @@ ostream& DiscreteParametricProcess::ascii_print(ostream &os , FrequencyDistribut
 
 
   for (i = 0;i < nb_state;i++) {
-    os << "\n" << STAT_word[STATW_STATE] << " " << i << " "
-       << STAT_word[STATW_OBSERVATION_DISTRIBUTION] << endl;
+    os << "\n";
+    switch (model) {
+    case MIXTURE :
+      os << STAT_word[STATW_COMPONENT];
+      break;
+    case HIDDEN_MARKOV :
+      os << STAT_word[STATW_STATE];
+      break;
+    }
+    os << " " << i << " " << STAT_word[STATW_OBSERVATION_DISTRIBUTION] << endl;
     observation[i]->ascii_print(os);
     observation[i]->ascii_parametric_characteristic_print(os , false , file_flag);
 
@@ -437,8 +429,16 @@ ostream& DiscreteParametricProcess::ascii_print(ostream &os , FrequencyDistribut
       if (file_flag) {
         os << "# ";
       }
-      os << STAT_label[STATL_STATE] << " " << i << " " << STAT_label[STATL_OBSERVATION] << " "
-         << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
+      switch (model) {
+      case MIXTURE :
+        os << STAT_label[STATL_COMPONENT];
+        break;
+      case HIDDEN_MARKOV :
+        os << STAT_label[STATL_STATE];
+        break;
+      }
+      os << " " << i << " " << STAT_label[STATL_OBSERVATION]
+         << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
       empirical_observation[i]->ascii_characteristic_print(os , false , file_flag);
 
       if (exhaustive) {
@@ -448,11 +448,28 @@ ostream& DiscreteParametricProcess::ascii_print(ostream &os , FrequencyDistribut
         }
         os << "  ";
         if (empirical_observation[i]->nb_element > 0) {
-          os << " | " << STAT_label[STATL_STATE] << " " << i << " "
-             << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
+          os << " | ";
+          switch (model) {
+          case MIXTURE :
+            os << STAT_label[STATL_COMPONENT];
+            break;
+          case HIDDEN_MARKOV :
+            os << STAT_label[STATL_STATE];
+            break;
+          }
+          os << " " << i << " " << STAT_label[STATL_OBSERVATION]
+             << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
         }
-        os << " | " << STAT_label[STATL_STATE] << " " << i << " "
-           << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
+        os << " | ";
+        switch (model) {
+        case MIXTURE :
+          os << STAT_label[STATL_COMPONENT];
+          break;
+        case HIDDEN_MARKOV :
+          os << STAT_label[STATL_STATE];
+          break;
+        }
+        os << " " << i << " " << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
         if (empirical_observation[i]->nb_element > 0) {
           os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
              << STAT_label[STATL_FUNCTION];
@@ -501,13 +518,29 @@ ostream& DiscreteParametricProcess::ascii_print(ostream &os , FrequencyDistribut
     }
     os << "  ";
     for (i = 0;i < nb_state;i++) {
-      os << " | " << STAT_label[STATL_STATE] << " " << i << " "
-         << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
+      os << " | ";
+      switch (model) {
+      case MIXTURE :
+        os << STAT_label[STATL_COMPONENT];
+        break;
+      case HIDDEN_MARKOV :
+        os << STAT_label[STATL_STATE];
+        break;
+      }
+      os << " " << i << " " << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
     }
     for (i = 0;i < nb_state;i++) {
-      os << " | " << STAT_label[STATL_STATE] << " " << i << " "
-         << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION] << " "
-         << STAT_label[STATL_FUNCTION];
+      os << " | "; 
+      switch (model) {
+      case MIXTURE :
+        os << STAT_label[STATL_COMPONENT];
+        break;
+      case HIDDEN_MARKOV :
+        os << STAT_label[STATL_STATE];
+        break;
+      }
+      os << " " << i << " "  << STAT_label[STATL_CUMULATIVE]
+         << " " << STAT_label[STATL_DISTRIBUTION] << " " << STAT_label[STATL_FUNCTION];
     }
     os << endl;
 
@@ -550,12 +583,22 @@ ostream& DiscreteParametricProcess::ascii_print(ostream &os , FrequencyDistribut
       if (file_flag) {
         os << "# ";
       }
-      os << STAT_label[STATL_THEORETICAL] << " " << STAT_label[STATL_WEIGHTS] << ":";
+      os << STAT_label[STATL_MIXTURE] << " - "
+         << STAT_label[STATL_THEORETICAL] << " " << STAT_label[STATL_WEIGHTS] << ":";
 
       for (i = 0;i < nb_state;i++) {
         os << " " << weight->mass[i];
       }
       os << endl;
+
+      mixture->ascii_characteristic_print(os , false , file_flag);
+
+      os << "\n";
+      if (file_flag) {
+        os << "# ";
+      }
+      os << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
+      marginal_distribution->ascii_characteristic_print(os , false , file_flag);
 
       likelihood = mixture->likelihood_computation(*marginal_distribution);
       information = marginal_distribution->information_computation();
@@ -594,8 +637,16 @@ ostream& DiscreteParametricProcess::ascii_print(ostream &os , FrequencyDistribut
         }
         os << "   | " << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
         for (i = 0;i < nb_state;i++) {
-          os << " | " << STAT_label[STATL_STATE] << " " << i << " "
-             << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
+          os << " | ";
+          switch (model) {
+          case MIXTURE :
+            os << STAT_label[STATL_COMPONENT];
+            break;
+          case HIDDEN_MARKOV :
+            os << STAT_label[STATL_STATE];
+            break;
+          }
+          os << " " << i << " " << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
         }
         os << " | " << STAT_label[STATL_MIXTURE] << " | " << STAT_label[STATL_CUMULATIVE]
            << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << STAT_label[STATL_FUNCTION]
@@ -612,12 +663,22 @@ ostream& DiscreteParametricProcess::ascii_print(ostream &os , FrequencyDistribut
       if (file_flag) {
         os << "# ";
       }
-      os << STAT_label[STATL_RESTORATION] << " " << STAT_label[STATL_WEIGHTS] << ":";
+      os << STAT_label[STATL_MIXTURE] << " - " 
+         << STAT_label[STATL_RESTORATION] << " " << STAT_label[STATL_WEIGHTS] << ":";
 
       for (i = 0;i < nb_state;i++) {
         os << " " << restoration_weight->mass[i];
       }
       os << endl;
+
+      restoration_mixture->ascii_characteristic_print(os , false , file_flag);
+
+      os << "\n";
+      if (file_flag) {
+        os << "# ";
+      }
+      os << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
+      marginal_distribution->ascii_characteristic_print(os , false , file_flag);
 
       likelihood = restoration_mixture->likelihood_computation(*marginal_distribution);
       information = marginal_distribution->information_computation();
@@ -656,8 +717,16 @@ ostream& DiscreteParametricProcess::ascii_print(ostream &os , FrequencyDistribut
         }
         os << "   | " << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
         for (i = 0;i < nb_state;i++) {
-          os << " | " << STAT_label[STATL_STATE] << " " << i << " "
-             << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
+          os << " | ";
+          switch (model) {
+          case MIXTURE :
+            os << STAT_label[STATL_COMPONENT];
+            break;
+          case HIDDEN_MARKOV :
+            os << STAT_label[STATL_STATE];
+            break;
+          }
+          os << " " << i << " " << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
         }
         os << " | " << STAT_label[STATL_MIXTURE] << " | " << STAT_label[STATL_CUMULATIVE]
            << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << STAT_label[STATL_FUNCTION]
@@ -679,12 +748,12 @@ ostream& DiscreteParametricProcess::ascii_print(ostream &os , FrequencyDistribut
  *  Ecriture d'un objet DiscreteParametricProcess au format tableur.
  *
  *  arguments : stream, pointeurs sur les lois d'observation et
- *              la loi marginale empiriques.
+ *              la loi marginale empiriques, type de modele.
  *
  *--------------------------------------------------------------*/
 
 ostream& DiscreteParametricProcess::spreadsheet_print(ostream &os , FrequencyDistribution **empirical_observation ,
-                                                      FrequencyDistribution *marginal_distribution) const
+                                                      FrequencyDistribution *marginal_distribution , int model) const
 
 {
   register int i , j;
@@ -693,23 +762,57 @@ ostream& DiscreteParametricProcess::spreadsheet_print(ostream &os , FrequencyDis
 
 
   for (i = 0;i < nb_state;i++) {
-    os << "\n" << STAT_word[STATW_STATE] << " " << i << "\t"
-       << STAT_word[STATW_OBSERVATION_DISTRIBUTION] << endl;
+    os << "\n";
+    switch (model) {
+    case MIXTURE :
+      os << STAT_word[STATW_COMPONENT];
+      break;
+    case HIDDEN_MARKOV :
+      os << STAT_word[STATW_STATE];
+      break;
+    }
+    os << " " << i << "\t"  << STAT_word[STATW_OBSERVATION_DISTRIBUTION] << endl;
     observation[i]->spreadsheet_print(os);
     observation[i]->spreadsheet_parametric_characteristic_print(os);
 
     if (empirical_observation) {
-      os << "\n" << STAT_label[STATL_STATE] << " " << i << " "
-         << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
+      os << "\n";
+      switch (model) {
+      case MIXTURE :
+        os << STAT_label[STATL_COMPONENT];
+        break;
+      case HIDDEN_MARKOV :
+        os << STAT_label[STATL_STATE];
+        break;
+      }
+      os << " " << i << " " << STAT_label[STATL_OBSERVATION]
+         << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
       empirical_observation[i]->spreadsheet_characteristic_print(os);
 
       os << "\n";
       if (empirical_observation[i]->nb_element > 0) {
-        os << "\t" << STAT_label[STATL_STATE] << " " << i << " "
-           << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
+        os << "\t";
+        switch (model) {
+        case MIXTURE :
+          os << STAT_label[STATL_COMPONENT];
+          break;
+        case HIDDEN_MARKOV :
+          os << STAT_label[STATL_STATE];
+          break;
+        }
+        os << " " << i << " " << STAT_label[STATL_OBSERVATION]
+           << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
       }
-      os << "\t" << STAT_label[STATL_STATE] << " " << i << " "
-         << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
+      os << "\t";
+      switch (model) {
+      case MIXTURE :
+        os << STAT_label[STATL_COMPONENT];
+        break;
+      case HIDDEN_MARKOV :
+        os << STAT_label[STATL_STATE];
+        break;
+      }
+      os << " " << i << " " << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
       if (empirical_observation[i]->nb_element > 0) {
         os << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
            << STAT_label[STATL_FUNCTION];
@@ -725,13 +828,29 @@ ostream& DiscreteParametricProcess::spreadsheet_print(ostream &os , FrequencyDis
   if (!empirical_observation) {
     os << "\n";
     for (i = 0;i < nb_state;i++) {
-      os << "\t" << STAT_label[STATL_STATE] << " " << i << " "
-         << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
+      os << "\t";
+      switch (model) {
+      case MIXTURE :
+        os << STAT_label[STATL_COMPONENT];
+        break;
+      case HIDDEN_MARKOV :
+        os << STAT_label[STATL_STATE];
+        break;
+      }
+      os << " " << i << " " << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
     }
     for (i = 0;i < nb_state;i++) {
-      os << "\t" << STAT_label[STATL_STATE] << " " << i << " "
-         << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION] << " "
-         << STAT_label[STATL_FUNCTION];
+      os << "\t";
+      switch (model) {
+      case MIXTURE :
+        os << STAT_label[STATL_COMPONENT];
+        break;
+      case HIDDEN_MARKOV :
+        os << STAT_label[STATL_STATE];
+        break;
+      }
+      os << " " << i << " " << STAT_label[STATL_CUMULATIVE]
+         << " " << STAT_label[STATL_DISTRIBUTION] << " " << STAT_label[STATL_FUNCTION];
     }
     os << endl;
 
@@ -761,11 +880,17 @@ ostream& DiscreteParametricProcess::spreadsheet_print(ostream &os , FrequencyDis
 
 
     if ((weight) && (mixture)) {
-      os << "\n" << STAT_label[STATL_THEORETICAL] << " " << STAT_label[STATL_WEIGHTS];
+      os << "\n" << STAT_label[STATL_MIXTURE] << "\t"
+         << STAT_label[STATL_THEORETICAL] << " " << STAT_label[STATL_WEIGHTS];
       for (i = 0;i < nb_state;i++) {
         os << "\t" << weight->mass[i];
       }
       os << endl;
+
+      mixture->spreadsheet_characteristic_print(os);
+
+      os << "\n" << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
+      marginal_distribution->spreadsheet_characteristic_print(os);
 
       likelihood = mixture->likelihood_computation(*marginal_distribution);
       information = marginal_distribution->information_computation();
@@ -787,8 +912,16 @@ ostream& DiscreteParametricProcess::spreadsheet_print(ostream &os , FrequencyDis
 
       os << "\n\t" << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
       for (i = 0;i < nb_state;i++) {
-        os << "\t" << STAT_label[STATL_STATE] << " " << i << " "
-           << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
+        os << "\t";
+        switch (model) {
+        case MIXTURE :
+          os << STAT_label[STATL_COMPONENT];
+          break;
+        case HIDDEN_MARKOV :
+          os << STAT_label[STATL_STATE];
+          break;
+        }
+        os << " " << i << " " << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
       }
       os << "\t" << STAT_label[STATL_MIXTURE] << "\t" << STAT_label[STATL_CUMULATIVE]
          << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << STAT_label[STATL_FUNCTION]
@@ -800,11 +933,17 @@ ostream& DiscreteParametricProcess::spreadsheet_print(ostream &os , FrequencyDis
     }
 
     if ((restoration_weight) && (restoration_mixture)) {
-      os << "\n" << STAT_label[STATL_RESTORATION] << " " << STAT_label[STATL_WEIGHTS];
+      os << "\n" << STAT_label[STATL_MIXTURE] << "\t"
+         << STAT_label[STATL_RESTORATION] << " " << STAT_label[STATL_WEIGHTS];
       for (i = 0;i < nb_state;i++) {
         os << "\t" << restoration_weight->mass[i];
       }
       os << endl;
+
+      restoration_mixture->spreadsheet_characteristic_print(os);
+
+      os << "\n" << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
+      marginal_distribution->spreadsheet_characteristic_print(os);
 
       likelihood = restoration_mixture->likelihood_computation(*marginal_distribution);
       information = marginal_distribution->information_computation();
@@ -826,8 +965,16 @@ ostream& DiscreteParametricProcess::spreadsheet_print(ostream &os , FrequencyDis
 
       os << "\n\t" << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
       for (i = 0;i < nb_state;i++) {
-        os << "\t" << STAT_label[STATL_STATE] << " " << i << " "
-           << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
+        os << "\t";
+        switch (model) {
+        case MIXTURE :
+          os << STAT_label[STATL_COMPONENT];
+          break;
+        case HIDDEN_MARKOV :
+          os << STAT_label[STATL_STATE];
+          break;
+        }
+        os << " " << i << " " << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
       }
       os << "\t" << STAT_label[STATL_MIXTURE] << "\t" << STAT_label[STATL_CUMULATIVE]
          << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << STAT_label[STATL_FUNCTION]
@@ -850,13 +997,13 @@ ostream& DiscreteParametricProcess::spreadsheet_print(ostream &os , FrequencyDis
  *  arguments : prefixe des fichiers, titre des figures,
  *              indice du processus d'observation,
  *              pointeurs sur les lois d'observation et
- *              la loi marginale empiriques.
+ *              la loi marginale empiriques, type de modele.
  *
  *--------------------------------------------------------------*/
 
 bool DiscreteParametricProcess::plot_print(const char *prefix , const char *title , int process ,
                                            FrequencyDistribution **empirical_observation ,
-                                           FrequencyDistribution *marginal_distribution) const
+                                           FrequencyDistribution *marginal_distribution , int model) const
 
 {
   bool status;
@@ -886,7 +1033,6 @@ bool DiscreteParametricProcess::plot_print(const char *prefix , const char *titl
   if (nb_dist > 0) {
     pdist = new const Distribution*[nb_dist];
     scale = new double[nb_dist + 1];
-
     phisto = new const FrequencyDistribution*[nb_dist];
 
     if (empirical_observation) {
@@ -922,7 +1068,6 @@ bool DiscreteParametricProcess::plot_print(const char *prefix , const char *titl
     }
 
     data_file_name[0] << prefix << process << ".dat";
-
     status = ::plot_print((data_file_name[0].str()).c_str() , nb_dist , pdist , scale ,
                           NULL , nb_dist , phisto);
   }
@@ -945,17 +1090,10 @@ bool DiscreteParametricProcess::plot_print(const char *prefix , const char *titl
     if (marginal_distribution) {
       if ((weight) && (mixture)) {
         for (j = 0;j < nb_state;j++) {
-          data_file_name[i] << prefix << process << i << ".dat";
-
           pdist[0] = observation[j];
+          scale[nb_dist] = weight->mass[j] * marginal_distribution->nb_element;
 
-          if (marginal_distribution) {
-            scale[nb_dist] = weight->mass[j] * marginal_distribution->nb_element;
-          }
-          else {
-            scale[nb_dist] = weight->mass[j];
-          }
-
+          data_file_name[i] << prefix << process << i << ".dat";
           ::plot_print((data_file_name[i].str()).c_str() , 1 , pdist , scale + nb_dist ,
                        NULL , 0 , NULL);
           i++;
@@ -964,17 +1102,10 @@ bool DiscreteParametricProcess::plot_print(const char *prefix , const char *titl
 
       if ((restoration_weight) && (restoration_mixture)) {
         for (j = 0;j < nb_state;j++) {
-          data_file_name[i] << prefix << process << i << ".dat";
-
           pdist[0] = observation[j];
+          scale[nb_dist] = restoration_weight->mass[j] * marginal_distribution->nb_element;
 
-          if (marginal_distribution) {
-            scale[nb_dist] = restoration_weight->mass[j] * marginal_distribution->nb_element;
-          }
-          else {
-            scale[nb_dist] = restoration_weight->mass[j];
-          }
-
+          data_file_name[i] << prefix << process << i << ".dat";
           ::plot_print((data_file_name[i].str()).c_str() , 1 , pdist , scale + nb_dist ,
                        NULL , 0 , NULL);
           i++;
@@ -1023,12 +1154,28 @@ bool DiscreteParametricProcess::plot_print(const char *prefix , const char *titl
             out_file << "plot [0:" << observation[k]->nb_value - 1 << "] [0:"
                      << (int)(MAX(empirical_observation[k]->max , observation[k]->max * scale[k]) * YSCALE) + 1
                      << "] \"" << label((data_file_name[0].str()).c_str()) << "\" using " << k + 1
-                     << " title \"" << STAT_label[STATL_STATE] << " " << k << " "
-                     << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
-                     << "\" with impulses,\\" << endl;
+                     << " title \"";
+            switch (model) {
+            case MIXTURE :
+              out_file << STAT_label[STATL_COMPONENT];
+              break;
+            case HIDDEN_MARKOV :
+              out_file << STAT_label[STATL_STATE];
+              break;
+            }
+            out_file << " " << k << " " << STAT_label[STATL_OBSERVATION]
+                     << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\" with impulses,\\" << endl;
             out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\" using " << nb_dist + k + 1
-                     << " title \"" << STAT_label[STATL_STATE] << " " << k << " "
-                     << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
+                     << " title \"";
+            switch (model) {
+            case MIXTURE :
+              out_file << STAT_label[STATL_COMPONENT];
+              break;
+            case HIDDEN_MARKOV :
+              out_file << STAT_label[STATL_STATE];
+              break;
+            }
+            out_file << " " << k << " " << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
             observation[k]->plot_title_print(out_file);
             out_file << "\" with linespoints" << endl;
           }
@@ -1037,8 +1184,16 @@ bool DiscreteParametricProcess::plot_print(const char *prefix , const char *titl
             out_file << "plot [0:" << observation[k]->nb_value - 1 << "] [0:"
                      << MIN(observation[k]->max * YSCALE , 1.) << "] \""
                      << label((data_file_name[0].str()).c_str()) << "\" using " << nb_dist + k + 1
-                     << " title \"" << STAT_label[STATL_STATE] << " " << k << " "
-                     << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
+                     << " title \"";
+            switch (model) {
+            case MIXTURE :
+              out_file << STAT_label[STATL_COMPONENT];
+              break;
+            case HIDDEN_MARKOV :
+              out_file << STAT_label[STATL_STATE];
+              break;
+            }
+            out_file << " " << k << " " << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
             observation[k]->plot_title_print(out_file);
             out_file << "\" with linespoints" << endl;
           }
@@ -1070,9 +1225,16 @@ bool DiscreteParametricProcess::plot_print(const char *prefix , const char *titl
                  << MIN(max * YSCALE , 1.) << "] ";
 
         for (k = 0;k < nb_state;k++) {
-          out_file << "\"" << label((data_file_name[j].str()).c_str()) << "\" title \""
-                   << STAT_label[STATL_STATE] << " " << k << " "
-                   << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
+          out_file << "\"" << label((data_file_name[j].str()).c_str()) << "\" title \"";
+          switch (model) {
+          case MIXTURE :
+            out_file << STAT_label[STATL_COMPONENT];
+            break;
+          case HIDDEN_MARKOV :
+            out_file << STAT_label[STATL_STATE];
+            break;
+          }
+          out_file << " " << k << " " << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
           observation[k]->plot_title_print(out_file);
           out_file << "\" with linespoints";
           if (k < nb_state - 1) {
@@ -1108,15 +1270,22 @@ bool DiscreteParametricProcess::plot_print(const char *prefix , const char *titl
 
           k++;
           out_file << "plot [0:" << nb_value - 1 << "] [0:"
-                   << (int)(MAX(marginal_distribution->max ,  mixture->max * marginal_distribution->nb_element) * YSCALE) + 1
+                   << (int)(MAX(marginal_distribution->max , mixture->max * marginal_distribution->nb_element) * YSCALE) + 1
                    << "] \"" << label((data_file_name[0].str()).c_str()) << "\" using " << k
                    << " title \"" << STAT_label[STATL_MARGINAL] << " "
                    << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\" with impulses,\\" << endl;
 
           for (m = 0;m < nb_state;m++) {
-            out_file << "\"" << label((data_file_name[j].str()).c_str()) << "\" title \""
-                     << STAT_label[STATL_STATE] << " " << m << " "
-                     << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
+            out_file << "\"" << label((data_file_name[j].str()).c_str()) << "\" title \"";
+            switch (model) {
+            case MIXTURE :
+              out_file << STAT_label[STATL_COMPONENT];
+              break;
+            case HIDDEN_MARKOV :
+              out_file << STAT_label[STATL_STATE];
+              break;
+            }
+            out_file << " " << m << " " << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
             observation[m]->plot_title_print(out_file);
             out_file << "\" with linespoints,\\" << endl;
             j++;
@@ -1149,15 +1318,22 @@ bool DiscreteParametricProcess::plot_print(const char *prefix , const char *titl
 
           k++;
           out_file << "plot [0:" << nb_value - 1 << "] [0:"
-                   << (int)(MAX(marginal_distribution->max ,  restoration_mixture->max * marginal_distribution->nb_element) * YSCALE) + 1
+                   << (int)(MAX(marginal_distribution->max , restoration_mixture->max * marginal_distribution->nb_element) * YSCALE) + 1
                    << "] \"" << label((data_file_name[0].str()).c_str()) << "\" using " << k
                    << " title \"" << STAT_label[STATL_MARGINAL] << " "
                    << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\" with impulses,\\" << endl;
 
           for (m = 0;m < nb_state;m++) {
-            out_file << "\"" << label((data_file_name[j].str()).c_str()) << "\" title \""
-                     << STAT_label[STATL_STATE] << " " << m << " "
-                     << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
+            out_file << "\"" << label((data_file_name[j].str()).c_str()) << "\" title \"";
+            switch (model) {
+            case MIXTURE :
+              out_file << STAT_label[STATL_COMPONENT];
+              break;
+            case HIDDEN_MARKOV :
+              out_file << STAT_label[STATL_STATE];
+              break;
+            }
+            out_file << " " << m << " " << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
             observation[m]->plot_title_print(out_file);
             out_file << "\" with linespoints,\\" << endl;
             j++;
@@ -1197,13 +1373,14 @@ bool DiscreteParametricProcess::plot_print(const char *prefix , const char *titl
  *  arguments : reference sur un objet MultiPlotSet, indice du MultiPlot,
  *              indice du processus d'observation,
  *              pointeurs sur les lois d'observation et
- *              la loi marginale empiriques.
+ *              la loi marginale empiriques, type de modele.
  *
  *--------------------------------------------------------------*/
 
 void DiscreteParametricProcess::plotable_write(MultiPlotSet &plot , int &index , int process ,
                                                FrequencyDistribution **empirical_observation ,
-                                               FrequencyDistribution *marginal_distribution) const
+                                               FrequencyDistribution *marginal_distribution ,
+                                               int model) const
 
 {
   register int i , j;
@@ -1238,8 +1415,15 @@ void DiscreteParametricProcess::plotable_write(MultiPlotSet &plot , int &index ,
         plot[index].resize(2);
 
         legend.str("");
-        legend << STAT_label[STATL_STATE] << " " << i << " "
-               << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
+        switch (model) {
+        case MIXTURE :
+          legend << STAT_label[STATL_COMPONENT];
+          break;
+        case HIDDEN_MARKOV :
+          legend << STAT_label[STATL_STATE];
+          break;
+        }
+        legend << " " << i << " " << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
         plot[index][0].legend = legend.str();
 
         plot[index][0].style = "impulses";
@@ -1257,8 +1441,15 @@ void DiscreteParametricProcess::plotable_write(MultiPlotSet &plot , int &index ,
       }
 
       legend.str("");
-      legend << STAT_label[STATL_STATE] << " " << i << " "
-             << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
+      switch (model) {
+      case MIXTURE :
+        legend << STAT_label[STATL_COMPONENT];
+        break;
+      case HIDDEN_MARKOV :
+        legend << STAT_label[STATL_STATE];
+        break;
+      }
+      legend << " " << i << " " << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
       observation[i]->plot_title_print(legend);
       plot[index][j].legend = legend.str();
 
@@ -1294,8 +1485,15 @@ void DiscreteParametricProcess::plotable_write(MultiPlotSet &plot , int &index ,
 
     for (i = 0;i < nb_state;i++) {
       legend.str("");
-      legend << STAT_label[STATL_STATE] << " " << i << " "
-             << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
+      switch (model) {
+      case MIXTURE :
+        legend << STAT_label[STATL_COMPONENT];
+        break;
+      case HIDDEN_MARKOV :
+        legend << STAT_label[STATL_STATE];
+        break;
+      }
+      legend << " " << i << " " << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
       observation[i]->plot_title_print(legend);
       plot[index][i].legend = legend.str();
 
@@ -1336,8 +1534,15 @@ void DiscreteParametricProcess::plotable_write(MultiPlotSet &plot , int &index ,
 
       for (i = 0;i < nb_state;i++) {
         legend.str("");
-        legend << STAT_label[STATL_STATE] << " " << i << " "
-               << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
+        switch (model) {
+        case MIXTURE :
+          legend << STAT_label[STATL_COMPONENT];
+          break;
+        case HIDDEN_MARKOV :
+          legend << STAT_label[STATL_STATE];
+          break;
+        }
+        legend << " " << i << " " << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
         observation[i]->plot_title_print(legend);
         plot[index][i + 1].legend = legend.str();
 
@@ -1395,7 +1600,7 @@ void DiscreteParametricProcess::plotable_write(MultiPlotSet &plot , int &index ,
 
     if ((restoration_weight) && (restoration_mixture)) {
 
-      // vue : ajustement melange de lois d'observation
+      // vue : ajustement melange de lois d'observation (poids deduits de la restauration)
 
       title.str("");
       if (process > 0) {
@@ -1424,8 +1629,15 @@ void DiscreteParametricProcess::plotable_write(MultiPlotSet &plot , int &index ,
 
       for (i = 0;i < nb_state;i++) {
         legend.str("");
-        legend << STAT_label[STATL_STATE] << " " << i << " "
-               << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
+        switch (model) {
+        case MIXTURE :
+          legend << STAT_label[STATL_COMPONENT];
+          break;
+        case HIDDEN_MARKOV :
+          legend << STAT_label[STATL_STATE];
+          break;
+        }
+        legend << " " << i << " " << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
         observation[i]->plot_title_print(legend);
         plot[index][i + 1].legend = legend.str();
 
@@ -1509,6 +1721,111 @@ void DiscreteParametricProcess::nb_value_computation()
 
 /*--------------------------------------------------------------*
  *
+ *  Application d'une permutation des etats. La validite de la 
+ *  permutation doit etre verifiee par la procedure appelante.
+ *
+ *--------------------------------------------------------------*/
+
+void DiscreteParametricProcess::state_permutation(int *permut) const
+
+{
+  register int i;
+  DiscreteParametric **pobservation;
+
+
+  pobservation = new DiscreteParametric*[nb_state];
+
+  for (i = 0;i < nb_state;i++) {
+    pobservation[permut[i]] = observation[i];
+  }
+  for (i = 0;i < nb_state;i++) {
+    observation[i] = pobservation[i];
+  }
+  delete [] pobservation;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul du nombre de parametres independants d'un processus
+ *  d'observation discret parametrique.
+ *
+ *--------------------------------------------------------------*/
+
+int DiscreteParametricProcess::nb_parameter_computation() const
+
+{
+  register int i;
+  int nb_parameter = 0;
+
+
+  for (i = 0;i < nb_state;i++) {
+    nb_parameter += observation[i]->nb_parameter_computation();
+    if (observation[i]->inf_bound == 0) {
+      nb_parameter--;
+    }
+  }
+
+  return nb_parameter;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de la moyenne d'un melange de lois d'observation discretes parametriques.
+ *
+ *  argument : loi des poids.
+ *
+ *--------------------------------------------------------------*/
+
+double DiscreteParametricProcess::mean_computation(Distribution *pweight) const
+
+{
+  register int i;
+  double mean;
+
+
+  mean = 0.;
+  for (i = 0;i < nb_state;i++) {
+    mean += pweight->mass[i] * observation[i]->parametric_mean_computation();
+  }
+
+  return mean;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de la variance d'un melange de lois d'observation discretes parametriques.
+ *
+ *  arguments : loi des poids, moyenne.
+ *
+ *--------------------------------------------------------------*/
+
+double DiscreteParametricProcess::variance_computation(Distribution *pweight , double mean) const
+
+{
+  register int i;
+  double variance , component_mean;
+
+
+  if (mean == D_INF) {
+    mean = mean_computation(pweight);
+  }
+
+  variance = -mean * mean;
+  for (i = 0;i < nb_state;i++) {
+    component_mean = observation[i]->parametric_mean_computation();
+    variance += pweight->mass[i] * (observation[i]->parametric_variance_computation() +
+                                    component_mean * component_mean);
+  }
+
+  return variance;
+}
+
+
+/*--------------------------------------------------------------*
+ *
  *  Calcul d'un melange de lois d'observation.
  *
  *  argument : loi des poids.
@@ -1546,32 +1863,12 @@ Distribution* DiscreteParametricProcess::mixture_computation(Distribution *pweig
   mixture->cumul_computation();
 
   mixture->max_computation();
-  mixture->mean_computation();
-  mixture->variance_computation();
+//  mixture->mean_computation();
+//  mixture->variance_computation();
+  mixture->mean = mean_computation(pweight);
+  mixture->variance = variance_computation(pweight , mixture->mean);
 
   return mixture;
-}
-
-
-/*--------------------------------------------------------------*
- *
- *  Calcul du nombre de parametres independants d'un processus
- *  d'observation parametrique.
- *
- *--------------------------------------------------------------*/
-
-int DiscreteParametricProcess::nb_parameter_computation() const
-
-{
-  register int i;
-  int nb_parameter = 0;
-
-
-  for (i = 0;i < nb_state;i++) {
-    nb_parameter += observation[i]->nb_parameter_computation();
-  }
-
-  return nb_parameter;
 }
 
 
