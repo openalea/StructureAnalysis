@@ -3,9 +3,9 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
@@ -80,7 +80,7 @@ void CategoricalSequenceProcess::create_characteristic(const Distribution &ileng
   if (index_value) {
     delete index_value;
   }
-  index_value = new Curves(nb_value , max_length , false , false);
+  index_value = new Curves(nb_value , max_length , false , false , false);
 
   if (!no_occurrence) {
     no_occurrence = new double[nb_value];
@@ -210,7 +210,7 @@ void CategoricalSequenceProcess::create_characteristic(const Distribution &ileng
   if (index_value) {
     delete index_value;
   }
-  index_value = new Curves(nb_value , max_length , false , false);
+  index_value = new Curves(nb_value , max_length , false , false , false);
 
   if (!no_occurrence) {
     no_occurrence = new double[nb_value];
