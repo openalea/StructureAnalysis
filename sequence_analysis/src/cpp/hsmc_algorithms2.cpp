@@ -3,9 +3,9 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
@@ -2039,7 +2039,7 @@ double HiddenSemiMarkov::forward_backward(const MarkovianSequences &seq , int in
 
     case 'p' : {
       seq.profile_plotable_write((*plot_set)[1] , index , nb_state , backward_output);
-      seq.entropy_profile_plotable_write((*plot_set)[2] , index , conditional_entropy , 0 ,
+      seq.entropy_profile_plotable_write((*plot_set)[2] , index , conditional_entropy , NULL ,
                                          marginal_entropy);
       seq.entropy_profile_plotable_write((*plot_set)[3] , index , partial_entropy);
       break;
@@ -3482,7 +3482,7 @@ void HiddenSemiMarkov::viterbi(SemiMarkovData &seq) const
 
 {
   seq.posterior_probability = new double[seq.nb_sequence];
-  seq.likelihood = viterbi(seq , seq.posterior_probability);
+  seq.restoration_likelihood = viterbi(seq , seq.posterior_probability);
 }
 
 
@@ -5010,7 +5010,7 @@ bool HiddenSemiMarkov::state_profile_write(StatError &error , ostream &os ,
   }
   else {
     status = false;
-    error.update(SEQ_error[SEQR_NB_OUTPUT_PROCESS]);
+    error.update(STAT_error[STATR_NB_OUTPUT_PROCESS]);
   }
 
   if (offset != I_DEFAULT) {
@@ -5029,7 +5029,7 @@ bool HiddenSemiMarkov::state_profile_write(StatError &error , ostream &os ,
             status = false;
             ostringstream error_message;
             error_message << STAT_label[STATL_VARIABLE] << " " << i + offset + 1 << ": "
-                          << SEQ_error[SEQR_POSITIVE_MIN_VALUE];
+                          << STAT_error[STATR_POSITIVE_MIN_VALUE];
             error.update((error_message.str()).c_str());
           }
 
@@ -5053,7 +5053,7 @@ bool HiddenSemiMarkov::state_profile_write(StatError &error , ostream &os ,
               status = false;
               ostringstream error_message;
               error_message << STAT_label[STATL_OUTPUT_PROCESS] << " " << i + 1 << ": "
-                            << SEQ_error[SEQR_NB_OUTPUT];
+                            << STAT_error[STATR_NB_OUTPUT];
               error.update((error_message.str()).c_str());
             }
           }
@@ -5313,7 +5313,7 @@ bool HiddenSemiMarkov::state_profile_plot_write(StatError &error , const char *p
   }
   else {
     status = false;
-    error.update(SEQ_error[SEQR_NB_OUTPUT_PROCESS]);
+    error.update(STAT_error[STATR_NB_OUTPUT_PROCESS]);
   }
 
   if (offset != I_DEFAULT) {
@@ -5332,7 +5332,7 @@ bool HiddenSemiMarkov::state_profile_plot_write(StatError &error , const char *p
             status = false;
             ostringstream error_message;
             error_message << STAT_label[STATL_VARIABLE] << " " << i + offset + 1 << ": "
-                          << SEQ_error[SEQR_POSITIVE_MIN_VALUE];
+                          << STAT_error[STATR_POSITIVE_MIN_VALUE];
             error.update((error_message.str()).c_str());
           }
 
@@ -5356,7 +5356,7 @@ bool HiddenSemiMarkov::state_profile_plot_write(StatError &error , const char *p
               status = false;
               ostringstream error_message;
               error_message << STAT_label[STATL_OUTPUT_PROCESS] << " " << i + 1 << ": "
-                            << SEQ_error[SEQR_NB_OUTPUT];
+                            << STAT_error[STATR_NB_OUTPUT];
               error.update((error_message.str()).c_str());
             }
           }
@@ -5741,7 +5741,7 @@ MultiPlotSet* HiddenSemiMarkov::state_profile_plotable_write(StatError &error ,
   }
   else {
     status = false;
-    error.update(SEQ_error[SEQR_NB_OUTPUT_PROCESS]);
+    error.update(STAT_error[STATR_NB_OUTPUT_PROCESS]);
   }
 
   if (offset != I_DEFAULT) {
@@ -5760,7 +5760,7 @@ MultiPlotSet* HiddenSemiMarkov::state_profile_plotable_write(StatError &error ,
             status = false;
             ostringstream error_message;
             error_message << STAT_label[STATL_VARIABLE] << " " << i + offset + 1 << ": "
-                          << SEQ_error[SEQR_POSITIVE_MIN_VALUE];
+                          << STAT_error[STATR_POSITIVE_MIN_VALUE];
             error.update((error_message.str()).c_str());
           }
 
@@ -5784,7 +5784,7 @@ MultiPlotSet* HiddenSemiMarkov::state_profile_plotable_write(StatError &error ,
               status = false;
               ostringstream error_message;
               error_message << STAT_label[STATL_OUTPUT_PROCESS] << " " << i + 1 << ": "
-                            << SEQ_error[SEQR_NB_OUTPUT];
+                            << STAT_error[STATR_NB_OUTPUT];
               error.update((error_message.str()).c_str());
             }
           }
@@ -6037,7 +6037,7 @@ SemiMarkovData* HiddenSemiMarkov::state_sequence_computation(StatError &error , 
 
   if (nb_output_process != iseq.nb_variable) {
     status = false;
-    error.update(SEQ_error[SEQR_NB_OUTPUT_PROCESS]);
+    error.update(STAT_error[STATR_NB_OUTPUT_PROCESS]);
   }
 
   else {
@@ -6056,7 +6056,7 @@ SemiMarkovData* HiddenSemiMarkov::state_sequence_computation(StatError &error , 
             status = false;
             ostringstream error_message;
             error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
-                          << SEQ_error[SEQR_POSITIVE_MIN_VALUE];
+                          << STAT_error[STATR_POSITIVE_MIN_VALUE];
             error.update((error_message.str()).c_str());
           }
 
@@ -6080,7 +6080,7 @@ SemiMarkovData* HiddenSemiMarkov::state_sequence_computation(StatError &error , 
               status = false;
               ostringstream error_message;
               error_message << STAT_label[STATL_OUTPUT_PROCESS] << " " << i + 1 << ": "
-                            << SEQ_error[SEQR_NB_OUTPUT];
+                            << STAT_error[STATR_NB_OUTPUT];
               error.update((error_message.str()).c_str());
             }
           }
@@ -6107,14 +6107,14 @@ SemiMarkovData* HiddenSemiMarkov::state_sequence_computation(StatError &error , 
     // extraction des caracteristiques des sequences et
     // calcul des lois caracteristiques du modele
 
-    if (seq->likelihood == D_INF) {
+    if (seq->restoration_likelihood == D_INF) {
       delete seq;
       seq = NULL;
       error.update(SEQ_error[SEQR_STATE_SEQUENCE_COMPUTATION_FAILURE]);
     }
 
     else {
-      seq->hidden_likelihood = likelihood_computation(iseq , seq->posterior_probability);
+      seq->likelihood = likelihood_computation(iseq , seq->posterior_probability);
 
 #     ifdef MESSAGE
       if (seq->nb_sequence <= POSTERIOR_PROBABILITY_NB_SEQUENCE) {
@@ -6225,7 +6225,7 @@ bool MarkovianSequences::comparison(StatError &error , ostream &os , int nb_mode
       status = false;
       ostringstream error_message;
       error_message << SEQ_label[SEQL_HIDDEN_SEMI_MARKOV_CHAIN] << " " << i + 1 << ": "
-                    << SEQ_error[SEQR_NB_OUTPUT_PROCESS];
+                    << STAT_error[STATR_NB_OUTPUT_PROCESS];
       error.update((error_message.str()).c_str());
     }
 
@@ -6245,7 +6245,7 @@ bool MarkovianSequences::comparison(StatError &error , ostream &os , int nb_mode
               status = false;
               ostringstream error_message;
               error_message << STAT_label[STATL_VARIABLE] << " " << j + 1 << ": "
-                            << SEQ_error[SEQR_POSITIVE_MIN_VALUE];
+                            << STAT_error[STATR_POSITIVE_MIN_VALUE];
               error.update((error_message.str()).c_str());
             }
 
@@ -6270,7 +6270,7 @@ bool MarkovianSequences::comparison(StatError &error , ostream &os , int nb_mode
                 ostringstream error_message;
                 error_message << SEQ_label[SEQL_HIDDEN_SEMI_MARKOV_CHAIN] << " " << i + 1 << ": "
                               << STAT_label[STATL_OUTPUT_PROCESS] << " " << j + 1 << ": "
-                              << SEQ_error[SEQR_NB_OUTPUT];
+                              << STAT_error[STATR_NB_OUTPUT];
                 error.update((error_message.str()).c_str());
               }
             }
@@ -6362,7 +6362,7 @@ SemiMarkovData* HiddenSemiMarkov::simulation(StatError &error ,
 
 {
   register int i;
-  MarkovianSequences *observ_seq;
+  MarkovianSequences *observed_seq;
   SemiMarkovData *seq;
 
 
@@ -6374,9 +6374,11 @@ SemiMarkovData* HiddenSemiMarkov::simulation(StatError &error ,
       seq->posterior_probability[i] = SemiMarkov::likelihood_computation(*seq , i);
     }
 
-    observ_seq = seq->remove_variable_1();
-    seq->hidden_likelihood = likelihood_computation(*observ_seq , seq->posterior_probability);
-    delete observ_seq;
+    observed_seq = seq->remove_variable_1();
+    seq->likelihood = likelihood_computation(*observed_seq , seq->posterior_probability);
+    delete observed_seq;
+
+    forward_backward(*seq);
   }
 
   return seq;
@@ -6398,7 +6400,7 @@ SemiMarkovData* HiddenSemiMarkov::simulation(StatError &error , int nb_sequence 
 
 {
   register int i;
-  MarkovianSequences *observ_seq;
+  MarkovianSequences *observed_seq;
   SemiMarkovData *seq;
 
 
@@ -6410,9 +6412,11 @@ SemiMarkovData* HiddenSemiMarkov::simulation(StatError &error , int nb_sequence 
       seq->posterior_probability[i] = SemiMarkov::likelihood_computation(*seq , i);
     }
 
-    observ_seq = seq->remove_variable_1();
-    seq->hidden_likelihood = likelihood_computation(*observ_seq , seq->posterior_probability);
-    delete observ_seq;
+    observed_seq = seq->remove_variable_1();
+    seq->likelihood = likelihood_computation(*observed_seq , seq->posterior_probability);
+    delete observed_seq;
+
+    forward_backward(*seq);
   }
 
   return seq;
@@ -6434,7 +6438,7 @@ SemiMarkovData* HiddenSemiMarkov::simulation(StatError &error , int nb_sequence 
 
 {
   register int i;
-  MarkovianSequences *observ_seq;
+  MarkovianSequences *observed_seq;
   SemiMarkovData *seq;
 
 
@@ -6446,9 +6450,11 @@ SemiMarkovData* HiddenSemiMarkov::simulation(StatError &error , int nb_sequence 
       seq->posterior_probability[i] = SemiMarkov::likelihood_computation(*seq , i);
     }
 
-    observ_seq = seq->remove_variable_1();
-    seq->hidden_likelihood = likelihood_computation(*observ_seq , seq->posterior_probability);
-    delete observ_seq;
+    observed_seq = seq->remove_variable_1();
+    seq->likelihood = likelihood_computation(*observed_seq , seq->posterior_probability);
+    delete observed_seq;
+
+    forward_backward(*seq);
   }
 
   return seq;
@@ -6500,7 +6506,7 @@ DistanceMatrix* HiddenSemiMarkov::divergence_computation(StatError &error , ostr
       status = false;
       ostringstream error_message;
       error_message << SEQ_label[SEQL_HIDDEN_SEMI_MARKOV_CHAIN] << " " << i + 2 << ": "
-                    << SEQ_error[SEQR_NB_OUTPUT_PROCESS];
+                    << STAT_error[STATR_NB_OUTPUT_PROCESS];
       error.update((error_message.str()).c_str());
     }
 
@@ -6512,7 +6518,7 @@ DistanceMatrix* HiddenSemiMarkov::divergence_computation(StatError &error , ostr
           ostringstream error_message;
           error_message << SEQ_label[SEQL_HIDDEN_SEMI_MARKOV_CHAIN] << " " << i + 2 << ": "
                         << STAT_label[STATL_OUTPUT_PROCESS] << " " << j << " "
-                        << SEQ_error[SEQR_NB_OUTPUT];
+                        << STAT_error[STATR_NB_OUTPUT];
           error.update((error_message.str()).c_str());
         }
 
