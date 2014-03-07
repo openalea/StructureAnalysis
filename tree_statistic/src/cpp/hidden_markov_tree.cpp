@@ -6886,7 +6886,8 @@ HiddenMarkovTree* Stat_trees::hidden_markov_tree_ascii_read(StatError& error,
                         case true :
                         {
                            np_observation[index-1]= categorical_observation_parsing(error, in_file, line,
-                                                                                    chain->nb_state, true);
+                                                                                    chain->nb_state,
+                                                                                    HIDDEN_MARKOV, true);
                            // ip_observation[index-1]= NULL;
                            if (np_observation[index-1] == NULL)
                               status= false;
@@ -6897,6 +6898,7 @@ HiddenMarkovTree* Stat_trees::hidden_markov_tree_ascii_read(StatError& error,
                         {
                            ip_observation[index-1]= discrete_observation_parsing(error, in_file, line,
                                                                                  chain->nb_state,
+                                                                                 HIDDEN_MARKOV,
                                                                                  cumul_threshold);
                            // np_observation[index-1]= NULL;
                            if (ip_observation[index-1] == NULL)
