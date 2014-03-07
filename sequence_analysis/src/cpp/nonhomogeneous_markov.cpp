@@ -3,9 +3,9 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id: markov.cpp 3257 2007-06-06 12:56:12Z dufourko $
@@ -998,7 +998,7 @@ DiscreteParametricModel* NonhomogeneousMarkov::extract(StatError &error , int ty
     status = false;
     ostringstream error_message;
     error_message << STAT_label[STATL_STATE] << " " << state << " "
-                  << SEQ_error[SEQR_NOT_PRESENT];
+                  << STAT_error[STATR_NOT_PRESENT];
     error.update((error_message.str()).c_str());
   }
 
@@ -1360,7 +1360,7 @@ ostream& NonhomogeneousMarkov::ascii_write(ostream &os , const NonhomogeneousMar
     }
   }
 
-  process->ascii_print(os , 0 , NULL , (seq ? seq->characteristics[0] : NULL) ,
+  process->ascii_print(os , 0 , NULL , NULL , (seq ? seq->characteristics[0] : NULL) ,
                        exhaustive , file_flag);
 
   if (seq) {
@@ -1541,7 +1541,7 @@ ostream& NonhomogeneousMarkov::spreadsheet_write(ostream &os , const Nonhomogene
     }
   }
 
-  process->spreadsheet_print(os , 0 , NULL , (seq ? seq->characteristics[0] : NULL));
+  process->spreadsheet_print(os , 0 , NULL , NULL , (seq ? seq->characteristics[0] : NULL));
 
   if (seq) {
     int nb_parameter = nb_parameter_computation();
@@ -1647,7 +1647,7 @@ bool NonhomogeneousMarkov::plot_write(const char *prefix , const char *title ,
 
 
   if (seq) {
-    status = process->plot_print(prefix , title , 0 , NULL ,
+    status = process->plot_print(prefix , title , 0 , NULL , NULL ,
                                  seq->characteristics[0] , seq->length_distribution);
   }
   else {
@@ -2184,7 +2184,8 @@ MultiPlotSet* NonhomogeneousMarkov::get_plotable(const NonhomogeneousMarkovData 
     }
   }
 
-  process->plotable_write(*plot_set , index , 0 , 0 , characteristics , length_distribution);
+  process->plotable_write(*plot_set , index , 0 , NULL , NULL ,
+                          characteristics , length_distribution);
 
   return plot_set;
 }
@@ -2375,7 +2376,7 @@ DiscreteDistributionData* NonhomogeneousMarkovData::extract(StatError &error , i
     status = false;
     ostringstream error_message;
     error_message << STAT_label[STATL_STATE] << " " << state << " "
-                  << SEQ_error[SEQR_NOT_PRESENT];
+                  << STAT_error[STATR_NOT_PRESENT];
     error.update((error_message.str()).c_str());
   }
 
