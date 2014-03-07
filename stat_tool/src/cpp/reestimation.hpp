@@ -3,9 +3,9 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
@@ -1663,7 +1663,7 @@ void Reestimation<Type>::gamma_estimation(ContinuousParametric *dist , int iter)
       dist->shape = mean * mean / variance;
       dist->scale = variance / mean;
 
-      if ((dist->shape >= GAMMA_SCALE_PARAMETER_THRESHOLD) &&
+      if ((dist->shape >= GAMMA_SHAPE_PARAMETER_THRESHOLD) &&
           (nb_element < GAMMA_FREQUENCY_THRESHOLD)) {
         log_geometric_mean = log_geometric_mean_computation();
         i = 0;
@@ -1753,7 +1753,7 @@ void Reestimation<Type>::zero_inflated_gamma_estimation(ContinuousParametric *di
       dist->shape = bmean * bmean / bvariance;
       dist->scale = bvariance / bmean;
 
-      if ((dist->shape >= GAMMA_SCALE_PARAMETER_THRESHOLD) &&
+      if ((dist->shape >= GAMMA_SHAPE_PARAMETER_THRESHOLD) &&
           (nb_element - frequency[0] < GAMMA_FREQUENCY_THRESHOLD)) {
         log_geometric_mean = log_geometric_mean_computation();
         i = 0;
