@@ -3,9 +3,9 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
@@ -115,9 +115,9 @@ enum {
 
 enum {
   GAMMA ,
-  ZERO_INFLATED_GAMMA ,
   GAUSSIAN ,
   VON_MISES ,
+  ZERO_INFLATED_GAMMA ,
   LINEAR_MODEL
 };
 
@@ -249,7 +249,7 @@ const double GAMMA_MIN_SHAPE_PARAMETER = 0.1;  // parametre de forme minimum de 
 const double GAMMA_DEFAULT_SCALE_PARAMETER = 1;  // parametre d'echelle par defaut de la loi gamma
 const double GAMMA_ZERO_FREQUENCY_THRESHOLD = 0.999;  // seuil sur la frequence relative de 0
                                                       // pour l'estimation des parametres de la loi gamma
-const double GAMMA_SCALE_PARAMETER_THRESHOLD = 3.;  // seuil sur la valeur du parametre d'echelle
+const double GAMMA_SHAPE_PARAMETER_THRESHOLD = 3.;  // seuil sur la valeur du parametre de forme
                                                     // pour l'estimation des parametres de la loi gamma
 const double GAMMA_FREQUENCY_THRESHOLD = 100.;  // seuil sur la frequence pour l'estimation des parametres de la loi gamma
 const double GAMMA_ITERATION_FACTOR = 0.5;  // facteur pour l'estimation des parametres de la loi gamma
@@ -303,6 +303,7 @@ const int TIC_THRESHOLD = 10;          // nombre de graduations minimum pour ech
 const double PLOT_MASS_THRESHOLD = 1.e-3;  // valeur minimale pour afficher un 0 apres la derniere
                                            // valeur possible (sortie graphique)
 const double YSCALE = 1.4;             // facteur d'echelle axe y (sortie graphique)
+const double PLOT_RANGE_RATIO = 4.;    // seuil pour l'affichage a partir de 0
 
 
 
@@ -927,9 +928,8 @@ public :
 };
 
 
-ContinuousParametric* continuous_parametric_parsing(StatError &error ,
-                                                    std::ifstream &in_file ,
-                                                    int &line);
+ContinuousParametric* continuous_parametric_parsing(StatError &error , std::ifstream &in_file ,
+                                                    int &line , int last_ident);
 
 
 
