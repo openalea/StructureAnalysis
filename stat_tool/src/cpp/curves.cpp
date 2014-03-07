@@ -3,9 +3,9 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
@@ -64,6 +64,7 @@ Curves::Curves()
   nb_curve = 0;
   length = 0;
   offset = 0;
+  index_parameter = NULL;
   frequency = NULL;
   point = NULL;
 }
@@ -73,12 +74,13 @@ Curves::Curves()
  *
  *  Constructeur de la classe Curves.
  *
- *  arguments : nombre de courbes, longueur des courbes,
- *              flag sur les frequences, flag initialisation.
+ *  arguments : nombre de courbes, longueur des courbes, flag sur les frequences,
+ *              flag sur les parametres d'index, flag initialisation.
  *
  *--------------------------------------------------------------*/
 
-Curves::Curves(int inb_curve , int ilength , bool frequency_flag , bool init_flag)
+Curves::Curves(int inb_curve , int ilength , bool frequency_flag ,
+               bool index_parameter_flag , bool init_flag)
 
 {
   register int i , j;
@@ -87,6 +89,13 @@ Curves::Curves(int inb_curve , int ilength , bool frequency_flag , bool init_fla
   nb_curve = inb_curve;
   length = ilength;
   offset = 0;
+
+  if (index_parameter_flag) {
+    index_parameter = new int[length];
+  }
+  else {
+    index_parameter = NULL;
+  }
 
   if (frequency_flag) {
     frequency = new int[length];
@@ -140,6 +149,7 @@ Curves::Curves(const Distribution &dist)
   }
 
   offset = 0;
+  index_parameter = NULL;
   frequency = NULL;
 
   point = new double*[2];
@@ -183,11 +193,13 @@ Curves::Curves(const FrequencyDistribution &histo)
   length = histo.nb_value;
   offset = 0;
 
+  index_parameter = NULL;
+  frequency = new int[length];
+
   point = new double*[2];
   for (i = 0;i < 2;i++) {
     point[i] = new double[length];
   }
-  frequency = new int[length];
 
   norm = histo.nb_element;
   for (i = 0;i < length;i++) {
@@ -216,6 +228,18 @@ void Curves::copy(const Curves &curves)
   nb_curve = curves.nb_curve;
   length = curves.length;
   offset = curves.offset;
+
+  if (curves.index_parameter) {
+    index_parameter = new int[length];
+
+    for (i = 0;i < length;i++) {
+      index_parameter[i] = curves.index_parameter[i];
+    }
+  }
+
+  else {
+    index_parameter = NULL;
+  }
 
   if (curves.frequency) {
     frequency = new int[length];
@@ -260,6 +284,18 @@ void Curves::smooth(const Curves &curves , int max_frequency)
   nb_curve = curves.nb_curve;
   length = curves.length;
   offset = curves.offset;
+
+  if (curves.index_parameter) {
+    index_parameter = new int[length];
+
+    for (i = 0;i < length;i++) {
+      index_parameter[i] = curves.index_parameter[i];
+    }
+  }
+
+  else {
+    index_parameter = NULL;
+  }
 
   frequency = new int[length];
 
@@ -357,6 +393,7 @@ Curves::Curves(const Curves &curves , char transform , int max_frequency)
 void Curves::remove()
 
 {
+  delete [] index_parameter;
   delete [] frequency;
 
   if (point) {
@@ -396,7 +433,6 @@ Curves& Curves::operator=(const Curves &curves)
 {
   if (&curves != this) {
     remove();
-
     copy(curves);
   }
 
@@ -436,7 +472,12 @@ ostream& Curves::ascii_print(ostream &os , bool file_flag , const Curves *curves
 
   width = new int[nb_column];
 
-  width[0] = column_width(length - 1);
+  if (index_parameter) {
+    width[0] = column_width(index_parameter[length - 1]);
+  }
+  else {
+    width[0] = column_width(length - 1);
+  }
 
   i = 1;
   for (j = 0;j < nb_curve;j++) {
@@ -459,7 +500,12 @@ ostream& Curves::ascii_print(ostream &os , bool file_flag , const Curves *curves
     if (file_flag) {
       os << "# ";
     }
-    os << setw(width[0]) << i;
+    if (index_parameter) {
+      os << setw(width[0]) << index_parameter[i];
+    }
+    else {
+      os << setw(width[0]) << i;
+    }
 
     j = 1;
     for (k = 0;k < nb_curve;k++) {
@@ -501,7 +547,12 @@ ostream& Curves::spreadsheet_print(ostream &os , const Curves *curves) const
 
 
   for (i = offset;i < length;i++) {
-    os << i;
+    if (index_parameter) {
+      os << index_parameter[i];
+    }
+    else {
+      os << i;
+    }
 
     for (j = 0;j < nb_curve;j++) {
       if ((curves) && (j < curves->nb_curve)) {
@@ -573,6 +624,9 @@ bool Curves::plot_print(const char *path , int ilength ,
     }
 
     for (i = 0;i < ilength;i++) {
+      if (index_parameter) {
+        out_file << index_parameter[i] << " ";
+      }
       for (j = 0;j < nb_curve;j++) {
         out_file << point[j][i] << " ";
       }
@@ -611,8 +665,16 @@ void Curves::plotable_write(int index , SinglePlot &plot) const
   register int i;
 
 
-  for (i = offset;i < length;i++) {
-    plot.add_point(i , point[index][i]);
+  if (index_parameter) {
+    for (i = offset;i < length;i++) {
+      plot.add_point(index_parameter[i] , point[index][i]);
+    }
+  }
+
+  else {
+    for (i = offset;i < length;i++) {
+      plot.add_point(i , point[index][i]);
+    }
   }
 }
 
@@ -631,9 +693,19 @@ void Curves::plotable_write(MultiPlot &plot) const
   register int i , j;
 
 
-  for (i = offset;i < length;i++) {
-    for (j = 0;j < nb_curve;j++) {
-      plot[j].add_point(i , point[j][i]);
+  if (index_parameter) {
+    for (i = offset;i < length;i++) {
+      for (j = 0;j < nb_curve;j++) {
+        plot[j].add_point(index_parameter[i] , point[j][i]);
+      }
+    }
+  }
+
+  else {
+    for (i = offset;i < length;i++) {
+      for (j = 0;j < nb_curve;j++) {
+        plot[j].add_point(i , point[j][i]);
+      }
     }
   }
 }
@@ -653,8 +725,16 @@ void Curves::plotable_frequency_write(SinglePlot &plot) const
   register int i;
 
 
-  for (i = offset;i < length;i++) {
-    plot.add_point(i , frequency[i]);
+  if (index_parameter) {
+    for (i = offset;i < length;i++) {
+      plot.add_point(index_parameter[i] , frequency[i]);
+    }
+  }
+
+  else {
+    for (i = offset;i < length;i++) {
+      plot.add_point(i , frequency[i]);
+    }
   }
 }
 
