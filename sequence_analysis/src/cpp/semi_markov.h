@@ -3,9 +3,9 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
@@ -193,11 +193,9 @@ public :
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(StatError &error , const char *path ,
-                     bool exhaustive = false) const;
+    bool ascii_write(StatError &error , const char *path , bool exhaustive = false) const;
     bool spreadsheet_write(StatError &error , const char *path) const;
-    bool plot_write(StatError &error , const char *prefix ,
-                    const char *title = NULL) const;
+    bool plot_write(StatError &error , const char *prefix , const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
     void characteristic_computation(int length , bool counting_flag , int variable = I_DEFAULT);
@@ -298,12 +296,12 @@ private :
 
     SemiMarkov *semi_markov;  // pointeur sur un objet SemiMarkov
     ChainData *chain_data;  // etats initaux et transitions
-    double likelihood;      // vraisemblance des sequences
-    double hidden_likelihood;  // vraisemblance de toutes les sequences possibles
+    double likelihood;      // vraisemblance des sequences observees
+    double restoration_likelihood;  // vraisemblance des sequences restaurees
     double sample_entropy;  // entropie des sequences d'etats
     double *posterior_probability;  // probabilite a posteriori de la sequence d'etats la plus probable
     double *entropy;        // entropie des sequences d'etats
-    double *nb_state_sequence;  // nombre des sequences d'etats
+    double *nb_state_sequence;  // nombre de sequences d'etats
 
     void copy(const SemiMarkovData &seq , bool model_flag = true);
 
@@ -331,11 +329,9 @@ public :
                           char format = 'c' , bool exhaustive = false) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(StatError &error , const char *path ,
-                     bool exhaustive = false) const;
+    bool ascii_write(StatError &error , const char *path , bool exhaustive = false) const;
     bool spreadsheet_write(StatError &error , const char *path) const;
-    bool plot_write(StatError &error , const char *prefix ,
-                    const char *title = NULL) const;
+    bool plot_write(StatError &error , const char *prefix , const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
     void build_transition_count(const SemiMarkov *smarkov = NULL);
@@ -345,7 +341,7 @@ public :
     SemiMarkov* get_semi_markov() const { return semi_markov; }
     ChainData* get_chain_data() const { return chain_data; }
     double get_likelihood() const { return likelihood; }
-    double get_hidden_likelihood() const { return hidden_likelihood; }
+    double get_restoration_likelihood() const { return restoration_likelihood; }
     double get_sample_entropy() const { return sample_entropy; }
     double get_posterior_probability(int index) const { return posterior_probability[index]; }
     double get_entropy(int index) const { return entropy[index]; }
