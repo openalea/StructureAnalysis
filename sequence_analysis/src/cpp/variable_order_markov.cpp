@@ -3,9 +3,9 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
@@ -3120,27 +3120,8 @@ void VariableOrderMarkov::copy(const VariableOrderMarkov &markov , bool data_fla
 
   if (markov.categorical_process) {
     categorical_process = new CategoricalSequenceProcess*[nb_output_process];
-  }
-  else {
-    categorical_process = NULL;
-  }
 
-  if (markov.discrete_parametric_process) {
-    discrete_parametric_process = new DiscreteParametricProcess*[nb_output_process];
-  }
-  else {
-    discrete_parametric_process = NULL;
-  }
-
-  if (markov.continuous_parametric_process) {
-    continuous_parametric_process = new ContinuousParametricProcess*[nb_output_process];
-  }
-  else {
-    continuous_parametric_process = NULL;
-  }
-
-  for (i = 0;i < nb_output_process;i++) {
-    if (markov.categorical_process) {
+    for (i = 0;i < nb_output_process;i++) {
       if (markov.categorical_process[i]) {
         categorical_process[i] = new CategoricalSequenceProcess(*(markov.categorical_process[i]));
       }
@@ -3148,8 +3129,16 @@ void VariableOrderMarkov::copy(const VariableOrderMarkov &markov , bool data_fla
         categorical_process[i] = NULL;
       }
     }
+  }
 
-    if (markov.discrete_parametric_process) {
+  else {
+    categorical_process = NULL;
+  }
+
+  if (markov.discrete_parametric_process) {
+    discrete_parametric_process = new DiscreteParametricProcess*[nb_output_process];
+
+    for (i = 0;i < nb_output_process;i++) {
       if (markov.discrete_parametric_process[i]) {
         discrete_parametric_process[i] = new DiscreteParametricProcess(*(markov.discrete_parametric_process[i]));
       }
@@ -3157,8 +3146,16 @@ void VariableOrderMarkov::copy(const VariableOrderMarkov &markov , bool data_fla
         discrete_parametric_process[i] = NULL;
       }
     }
+  }
 
-    if (markov.continuous_parametric_process) {
+  else {
+    discrete_parametric_process = NULL;
+  }
+
+  if (markov.continuous_parametric_process) {
+    continuous_parametric_process = new ContinuousParametricProcess*[nb_output_process];
+
+    for (i = 0;i < nb_output_process;i++) {
       if (markov.continuous_parametric_process[i]) {
         continuous_parametric_process[i] = new ContinuousParametricProcess(*(markov.continuous_parametric_process[i]));
       }
@@ -3166,6 +3163,10 @@ void VariableOrderMarkov::copy(const VariableOrderMarkov &markov , bool data_fla
         continuous_parametric_process[i] = NULL;
       }
     }
+  }
+
+  else {
+    continuous_parametric_process = NULL;
   }
 }
 
@@ -3292,7 +3293,7 @@ DiscreteParametricModel* VariableOrderMarkov::extract(StatError &error , int typ
   if (type == OBSERVATION) {
     if ((variable < 1) || (variable > nb_output_process)) {
       status = false;
-      error.update(SEQ_error[SEQR_OUTPUT_PROCESS_INDEX]);
+      error.update(STAT_error[STATR_OUTPUT_PROCESS_INDEX]);
     }
 
     else {
@@ -3300,7 +3301,7 @@ DiscreteParametricModel* VariableOrderMarkov::extract(StatError &error , int typ
         status = false;
         ostringstream error_message;
         error_message << STAT_label[STATL_STATE] << " " << value << " "
-                      << SEQ_error[SEQR_NOT_PRESENT];
+                      << STAT_error[STATR_NOT_PRESENT];
         error.update((error_message.str()).c_str());
       }
 
@@ -3308,8 +3309,15 @@ DiscreteParametricModel* VariableOrderMarkov::extract(StatError &error , int typ
         if (categorical_process[variable - 1]) {
           pdist = categorical_process[variable - 1]->observation[value];
         }
-        else {
+        else if (discrete_parametric_process[variable - 1]) {
           pparam = discrete_parametric_process[variable - 1]->observation[value];
+        }
+        else {
+          status = false;
+          ostringstream correction_message;
+          correction_message << STAT_label[STATL_CATEGORICAL] << " or "
+                             << STAT_label[STATL_DISCRETE_PARAMETRIC];
+          error.correction_update(STAT_error[STATR_OUTPUT_PROCESS_TYPE] , (correction_message.str()).c_str());
         }
       }
     }
@@ -3318,7 +3326,7 @@ DiscreteParametricModel* VariableOrderMarkov::extract(StatError &error , int typ
   else {
     if ((variable < 0) || (variable > nb_output_process)) {
       status = false;
-      error.update(SEQ_error[SEQR_OUTPUT_PROCESS_INDEX]);
+      error.update(STAT_error[STATR_OUTPUT_PROCESS_INDEX]);
     }
 
     else {
@@ -3342,7 +3350,7 @@ DiscreteParametricModel* VariableOrderMarkov::extract(StatError &error , int typ
         status = false;
         ostringstream error_message;
         error_message << STAT_label[variable == 0 ? STATL_STATE : STATL_OUTPUT] << " "
-                      << value << " " << SEQ_error[SEQR_NOT_PRESENT];
+                      << value << " " << STAT_error[STATR_NOT_PRESENT];
         error.update((error_message.str()).c_str());
       }
 
@@ -3648,7 +3656,8 @@ VariableOrderMarkov* variable_order_markov_ascii_read(StatError &error ,
             // analyse du format et lecture des lois d'observation
 
             observation = categorical_observation_parsing(error , in_file , line ,
-                                                          ((Chain*)imarkov)->nb_state , false);
+                                                          ((Chain*)imarkov)->nb_state ,
+                                                          HIDDEN_MARKOV , false);
             if (!observation) {
               status = false;
             }
@@ -3730,9 +3739,9 @@ ostream& VariableOrderMarkov::ascii_write(ostream &os , const VariableOrderMarko
   int buff , variable , max_memory_count , *memory_count , width[2];
   double standard_normal_value , half_confidence_interval , **distance;
   long old_adjust;
-  FrequencyDistribution **observation_dist = NULL;
-  Histogram **observation_histo = NULL;
-  SequenceCharacteristics *characteristics;
+  FrequencyDistribution *marginal_dist = NULL , **observation_dist = NULL;
+  Histogram *marginal_histo = NULL , **observation_histo = NULL;
+  SequenceCharacteristics *characteristics = NULL;
 
 
   old_adjust = os.setf(ios::left , ios::adjustfield);
@@ -3891,7 +3900,7 @@ ostream& VariableOrderMarkov::ascii_write(ostream &os , const VariableOrderMarko
     characteristics = NULL;
   }
 
-  state_process->ascii_print(os , 0 , NULL , characteristics ,
+  state_process->ascii_print(os , 0 , NULL , NULL , characteristics ,
                              exhaustive , file_flag);
 
   if (hidden) {
@@ -3987,11 +3996,20 @@ ostream& VariableOrderMarkov::ascii_write(ostream &os , const VariableOrderMarko
 
   // ecriture des lois associees a chaque processus d'observation
 
+  if (hidden) {
+    logic_transition = logic_transition_computation();
+
+    distance = new double*[nb_state];
+    for (i = 0;i < nb_state;i++) {
+      distance[i] = new double[nb_state];
+    }
+  }
+
   for (i = 0;i < nb_output_process;i++) {
     os << "\n" << STAT_word[STATW_OUTPUT_PROCESS];
 
     if (hidden) {
-      os << " " << i;
+      os << " " << i + 1;
 
       if (categorical_process[i]) {
         os << " : " << STAT_word[STATW_CATEGORICAL];
@@ -4018,30 +4036,19 @@ ostream& VariableOrderMarkov::ascii_write(ostream &os , const VariableOrderMarko
       if (seq->observation_distribution) {
         observation_dist = seq->observation_distribution[variable];
       }
+      marginal_dist = seq->marginal_distribution[variable];
+
       if (seq->observation_histogram) {
         observation_histo = seq->observation_histogram[variable];
       }
+      marginal_histo = seq->marginal_histogram[variable];
 
-      if (seq->characteristics[variable]) {
-        characteristics = seq->characteristics[variable];
-      }
-      else {
-        characteristics = NULL;
-      }
-    }
-
-    if (hidden) {
-      logic_transition = logic_transition_computation();
-
-      distance = new double*[nb_state];
-      for (j = 0;j < nb_state;j++) {
-        distance[j] = new double[nb_state];
-      }
+      characteristics = seq->characteristics[variable];
     }
 
     if (categorical_process[i]) {
-      categorical_process[i]->ascii_print(os , i , observation_dist , characteristics ,
-                                            exhaustive , file_flag);
+      categorical_process[i]->ascii_print(os , i , observation_dist , marginal_dist ,
+                                          characteristics , exhaustive , file_flag);
 
       if (hidden) {
         for (j = 0;j < nb_state;j++) {
@@ -4062,8 +4069,7 @@ ostream& VariableOrderMarkov::ascii_write(ostream &os , const VariableOrderMarko
     }
 
     else if (discrete_parametric_process[i]) {
-      discrete_parametric_process[i]->ascii_print(os , observation_dist ,
-                                                  (seq ? seq->marginal_distribution[variable] : NULL) ,
+      discrete_parametric_process[i]->ascii_print(os , observation_dist , marginal_dist ,
                                                   exhaustive , file_flag);
 
       if (hidden) {
@@ -4086,8 +4092,7 @@ ostream& VariableOrderMarkov::ascii_write(ostream &os , const VariableOrderMarko
 
     else {
       continuous_parametric_process[i]->ascii_print(os , observation_histo , observation_dist ,
-                                                    (seq ? seq->marginal_histogram[variable] : NULL) ,
-                                                    (seq ? seq->marginal_distribution[variable] : NULL) ,
+                                                    marginal_histo , marginal_dist ,
                                                     exhaustive , file_flag);
 
       if (hidden) {
@@ -4124,7 +4129,7 @@ ostream& VariableOrderMarkov::ascii_write(ostream &os , const VariableOrderMarko
       if (file_flag) {
         os << "# ";
       }
-      os << SEQ_label[SEQL_OBSERVATION_DISTRIBUTION_DISTANCE] << endl;
+      os << STAT_label[STATL_CONSECUTIVE_STATE_OBSERVATION_DISTRIBUTION_DISTANCE] << endl;
 
       for (j = 0;j < nb_state;j++) {
         if (file_flag) {
@@ -4140,22 +4145,24 @@ ostream& VariableOrderMarkov::ascii_write(ostream &os , const VariableOrderMarko
         }
         os << endl;
       }
-
-      for (j = 0;j < nb_state;j++) {
-        delete [] logic_transition[j];
-      }
-      delete [] logic_transition;
-
-      for (j = 0;j < nb_state;j++) {
-        delete [] distance[j];
-      }
-      delete [] distance;
     }
+  }
+
+  if (hidden) {
+    for (i = 0;i < nb_state;i++) {
+      delete [] logic_transition[i];
+    }
+    delete [] logic_transition;
+
+    for (i = 0;i < nb_state;i++) {
+      delete [] distance[i];
+    }
+    delete [] distance;
   }
 
   if (seq) {
     int nb_parameter = nb_parameter_computation(hidden ? MIN_PROBABILITY : 0.) , nb_transient_parameter;
-    double information , likelihood;
+    double information;
 
 
     // ecriture de la loi empirique des longueurs des sequences
@@ -4206,25 +4213,23 @@ ostream& VariableOrderMarkov::ascii_write(ostream &os , const VariableOrderMarko
     switch (hidden) {
 
     case false : {
-      likelihood = seq->likelihood;
-
       os << "\n";
       if (file_flag) {
         os << "# ";
       }
-      os << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   ("
-         << STAT_label[STATL_NORMALIZED] << ": " << likelihood / seq->cumul_length << ")" << endl;
+      os << STAT_label[STATL_LIKELIHOOD] << ": " << seq->likelihood << "   ("
+         << STAT_label[STATL_NORMALIZED] << ": " << seq->likelihood / seq->cumul_length << ")" << endl;
       break;
     }
 
     case true : {
-      if (seq->likelihood != D_INF) {
+      if (seq->restoration_likelihood != D_INF) {
         os << "\n";
         if (file_flag) {
           os << "# ";
         }
-        os << SEQ_label[SEQL_STATE_SEQUENCES_LIKELIHOOD] << ": " << seq->likelihood << "   ("
-           << STAT_label[STATL_NORMALIZED] << ": " << seq->likelihood / seq->cumul_length << ")" << endl;
+        os << SEQ_label[SEQL_STATE_SEQUENCES_LIKELIHOOD] << ": " << seq->restoration_likelihood << "   ("
+           << STAT_label[STATL_NORMALIZED] << ": " << seq->restoration_likelihood / seq->cumul_length << ")" << endl;
       }
 
       if (seq->sample_entropy != D_DEFAULT) {
@@ -4236,21 +4241,19 @@ ostream& VariableOrderMarkov::ascii_write(ostream &os , const VariableOrderMarko
            << STAT_label[STATL_NORMALIZED] << ": " << seq->sample_entropy / seq->cumul_length << ")" << endl;
       }
 
-      likelihood = seq->hidden_likelihood;
-
-      if (likelihood != D_INF) {
+      if (seq->likelihood != D_INF) {
         os << "\n";
         if (file_flag) {
           os << "# ";
         }
-        os << SEQ_label[SEQL_OBSERVED_SEQUENCES_LIKELIHOOD] << ": " << likelihood << "   ("
-           << STAT_label[STATL_NORMALIZED] << ": " << likelihood / seq->cumul_length << ")" << endl;
+        os << SEQ_label[SEQL_OBSERVED_SEQUENCES_LIKELIHOOD] << ": " << seq->likelihood << "   ("
+           << STAT_label[STATL_NORMALIZED] << ": " << seq->likelihood / seq->cumul_length << ")" << endl;
       }
       break;
     }
     }
 
-    if (likelihood != D_INF) {
+    if (seq->likelihood != D_INF) {
       if (type == 'o') {
         nb_transient_parameter = nb_transient_parameter_computation(hidden ? MIN_PROBABILITY : 0.);
 
@@ -4268,7 +4271,7 @@ ostream& VariableOrderMarkov::ascii_write(ostream &os , const VariableOrderMarko
       }
       os << nb_parameter << " " << STAT_label[nb_parameter == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS]
          << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[AIC] << "): "
-         << 2 * (likelihood - nb_parameter) << endl;
+         << 2 * (seq->likelihood - nb_parameter) << endl;
 
       if ((type == 'o') && (nb_transient_parameter > 0)) {
         if (file_flag) {
@@ -4276,7 +4279,7 @@ ostream& VariableOrderMarkov::ascii_write(ostream &os , const VariableOrderMarko
         }
         os << nb_transient_parameter + nb_parameter << " " << STAT_label[STATL_FREE_PARAMETERS]
            << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[AIC] << "): "
-           << 2 * (likelihood - nb_transient_parameter - nb_parameter) << endl;
+           << 2 * (seq->likelihood - nb_transient_parameter - nb_parameter) << endl;
       }
 
       if (nb_parameter < seq->cumul_length - 1) {
@@ -4286,7 +4289,7 @@ ostream& VariableOrderMarkov::ascii_write(ostream &os , const VariableOrderMarko
         }
         os << nb_parameter << " " << STAT_label[nb_parameter == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS]
            << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[AICc] << "): "
-           << 2 * (likelihood - (double)(nb_parameter * seq->cumul_length) /
+           << 2 * (seq->likelihood - (double)(nb_parameter * seq->cumul_length) /
                (double)(seq->cumul_length - nb_parameter - 1)) << endl;
       }
 
@@ -4297,7 +4300,7 @@ ostream& VariableOrderMarkov::ascii_write(ostream &os , const VariableOrderMarko
         }
         os << nb_transient_parameter + nb_parameter << " " << STAT_label[STATL_FREE_PARAMETERS]
            << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[AICc] << "): "
-           << 2 * (likelihood - (double)((nb_transient_parameter + nb_parameter) * seq->cumul_length) /
+           << 2 * (seq->likelihood - (double)((nb_transient_parameter + nb_parameter) * seq->cumul_length) /
                (double)(seq->cumul_length - nb_transient_parameter - nb_parameter - 1)) << endl;
       }
 
@@ -4307,7 +4310,7 @@ ostream& VariableOrderMarkov::ascii_write(ostream &os , const VariableOrderMarko
       }
       os << nb_parameter << " " << STAT_label[nb_parameter == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS]
          << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[BIC] << "): "
-         << 2 * likelihood - nb_parameter * log((double)seq->cumul_length) << endl;
+         << 2 * seq->likelihood - nb_parameter * log((double)seq->cumul_length) << endl;
 
       if ((type == 'o') && (nb_transient_parameter > 0)) {
         if (file_flag) {
@@ -4315,7 +4318,7 @@ ostream& VariableOrderMarkov::ascii_write(ostream &os , const VariableOrderMarko
         }
         os << nb_transient_parameter + nb_parameter << " " << STAT_label[STATL_FREE_PARAMETERS]
            << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[BIC] << "): "
-           << 2 * likelihood - (nb_transient_parameter + nb_parameter) * log((double)seq->cumul_length) << endl;
+           << 2 * seq->likelihood - (nb_transient_parameter + nb_parameter) * log((double)seq->cumul_length) << endl;
       }
 
       os << "\n";
@@ -4324,17 +4327,17 @@ ostream& VariableOrderMarkov::ascii_write(ostream &os , const VariableOrderMarko
       }
       os << nb_parameter + (type == 'o' ? nb_transient_parameter : 0) << " " << STAT_label[STATL_FREE_PARAMETERS]
          << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[BICc] << "): "
-         << 2 * likelihood - penalty_computation(hidden , (hidden ? MIN_PROBABILITY : 0.)) << endl;
+         << 2 * seq->likelihood - penalty_computation(hidden , (hidden ? MIN_PROBABILITY : 0.)) << endl;
     }
 
-    if ((hidden) && (seq->hidden_likelihood != D_INF)) {
+    if ((hidden) && (seq->likelihood != D_INF)) {
       os << "\n";
       if (file_flag) {
         os << "# ";
       }
       os << nb_parameter << " " << STAT_label[nb_parameter == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS]
          << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[ICL] << "): "
-         << 2 * (seq->hidden_likelihood - seq->sample_entropy) - nb_parameter * log((double)seq->cumul_length) << endl;
+         << 2 * (seq->likelihood - seq->sample_entropy) - nb_parameter * log((double)seq->cumul_length) << endl;
 
       if ((type == 'o') && (nb_transient_parameter > 0)) {
         if (file_flag) {
@@ -4342,7 +4345,7 @@ ostream& VariableOrderMarkov::ascii_write(ostream &os , const VariableOrderMarko
         }
         os << nb_transient_parameter + nb_parameter << " " << STAT_label[STATL_FREE_PARAMETERS]
            << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[ICL] << "): "
-           << 2 * (seq->hidden_likelihood - seq->sample_entropy) - (nb_transient_parameter + nb_parameter) * log((double)seq->cumul_length) << endl;
+           << 2 * (seq->likelihood - seq->sample_entropy) - (nb_transient_parameter + nb_parameter) * log((double)seq->cumul_length) << endl;
       }
 
       os << "\n";
@@ -4351,7 +4354,7 @@ ostream& VariableOrderMarkov::ascii_write(ostream &os , const VariableOrderMarko
       }
       os << nb_parameter + (type == 'o' ? nb_transient_parameter : 0) << " " << STAT_label[nb_parameter == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS]
          << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[ICLc] << "): "
-         << 2 * (seq->hidden_likelihood - seq->sample_entropy) - penalty_computation(hidden , MIN_PROBABILITY) << endl;
+         << 2 * (seq->likelihood - seq->sample_entropy) - penalty_computation(hidden , MIN_PROBABILITY) << endl;
     }
   }
 
@@ -4428,9 +4431,9 @@ ostream& VariableOrderMarkov::spreadsheet_write(ostream &os ,
   register int i , j , k;
   int variable;
   double **distance;
-  FrequencyDistribution **observation_dist = NULL;
-  Histogram **observation_histo = NULL;
-  SequenceCharacteristics *characteristics;
+  FrequencyDistribution *marginal_dist = NULL , **observation_dist = NULL;
+  Histogram *marginal_histo = NULL , **observation_histo = NULL;
+  SequenceCharacteristics *characteristics = NULL;
 
 
   switch (hidden) {
@@ -4471,7 +4474,7 @@ ostream& VariableOrderMarkov::spreadsheet_write(ostream &os ,
     characteristics = NULL;
   }
 
-  state_process->spreadsheet_print(os , 0 , NULL , characteristics);
+  state_process->spreadsheet_print(os , 0 , NULL , NULL , characteristics);
 
   // ecriture des lois associees a chaque processus d'observation
 
@@ -4480,11 +4483,20 @@ ostream& VariableOrderMarkov::spreadsheet_write(ostream &os ,
        << STAT_word[nb_output_process == 1 ? STATW_OUTPUT_PROCESS : STATW_OUTPUT_PROCESSES] << endl;
   }
 
+  if (hidden) {
+    logic_transition = logic_transition_computation();
+
+    distance = new double*[nb_state];
+    for (i = 0;i < nb_state;i++) {
+      distance[i] = new double[nb_state];
+    }
+  }
+
   for (i = 0;i < nb_output_process;i++) {
     os << "\n" << STAT_word[STATW_OUTPUT_PROCESS];
 
     if (hidden) {
-      os << "\t" << i;
+      os << "\t" << i + 1;
 
       if (categorical_process[i]) {
         os << "\t" << STAT_word[STATW_CATEGORICAL];
@@ -4511,29 +4523,19 @@ ostream& VariableOrderMarkov::spreadsheet_write(ostream &os ,
       if (seq->observation_distribution) {
         observation_dist = seq->observation_distribution[variable];
       }
+      marginal_dist = seq->marginal_distribution[variable];
+
       if (seq->observation_histogram) {
         observation_histo = seq->observation_histogram[variable];
       }
+      marginal_histo = seq->marginal_histogram[variable];
 
-      if (seq->characteristics[variable]) {
-        characteristics = seq->characteristics[variable];
-      }
-      else {
-        characteristics = NULL;
-      }
-    }
-
-    if (hidden) {
-      logic_transition = logic_transition_computation();
-
-      distance = new double*[nb_state];
-      for (j = 0;j < nb_state;j++) {
-        distance[j] = new double[nb_state];
-      }
+      characteristics = seq->characteristics[variable];
     }
 
     if (categorical_process[i]) {
-      categorical_process[i]->spreadsheet_print(os , i , observation_dist , characteristics);
+      categorical_process[i]->spreadsheet_print(os , i , observation_dist , marginal_dist ,
+                                                characteristics);
 
       if (hidden) {
         for (j = 0;j < nb_state;j++) {
@@ -4548,8 +4550,7 @@ ostream& VariableOrderMarkov::spreadsheet_write(ostream &os ,
     }
 
     else if (discrete_parametric_process[i]) {
-      discrete_parametric_process[i]->spreadsheet_print(os , observation_dist ,
-                                                        (seq ? seq->marginal_distribution[variable] : NULL));
+      discrete_parametric_process[i]->spreadsheet_print(os , observation_dist , marginal_dist);
 
       if (hidden) {
         for (j = 0;j < nb_state;j++) {
@@ -4565,8 +4566,7 @@ ostream& VariableOrderMarkov::spreadsheet_write(ostream &os ,
 
     else {
       continuous_parametric_process[i]->spreadsheet_print(os , observation_histo , observation_dist ,
-                                                          (seq ? seq->marginal_histogram[variable] : NULL) ,
-                                                          (seq ? seq->marginal_distribution[variable] : NULL));
+                                                          marginal_histo , marginal_dist);
 
       if (hidden) {
         for (j = 0;j < nb_state;j++) {
@@ -4581,7 +4581,7 @@ ostream& VariableOrderMarkov::spreadsheet_write(ostream &os ,
     }
 
     if (hidden) {
-      os << "\n" << SEQ_label[SEQL_OBSERVATION_DISTRIBUTION_DISTANCE] << endl;
+      os << "\n" << STAT_label[STATL_CONSECUTIVE_STATE_OBSERVATION_DISTRIBUTION_DISTANCE] << endl;
 
       for (j = 0;j < nb_state;j++) {
         for (k = 0;k < nb_state;k++) {
@@ -4592,22 +4592,24 @@ ostream& VariableOrderMarkov::spreadsheet_write(ostream &os ,
         }
         os << endl;
       }
-
-      for (j = 0;j < nb_state;j++) {
-        delete [] logic_transition[j];
-      }
-      delete [] logic_transition;
-
-      for (j = 0;j < nb_state;j++) {
-        delete [] distance[j];
-      }
-      delete [] distance;
     }
+  }
+
+  if (hidden) {
+    for (i = 0;i < nb_state;i++) {
+      delete [] logic_transition[i];
+    }
+    delete [] logic_transition;
+
+   for (i = 0;i < nb_state;i++) {
+     delete [] distance[i];
+    }
+    delete [] distance;
   }
 
   if (seq) {
     int nb_parameter = nb_parameter_computation(hidden ? MIN_PROBABILITY : 0.) , nb_transient_parameter;
-    double information , likelihood;
+    double information;
 
 
     // ecriture de la loi empirique des longueurs des sequences
@@ -4640,17 +4642,15 @@ ostream& VariableOrderMarkov::spreadsheet_write(ostream &os ,
     switch (hidden) {
 
     case false : {
-      likelihood = seq->likelihood;
-
-      os << "\n" << STAT_label[STATL_LIKELIHOOD] << "\t" << likelihood << "\t"
-         << STAT_label[STATL_NORMALIZED] << "\t" << likelihood / seq->cumul_length << endl;
+      os << "\n" << STAT_label[STATL_LIKELIHOOD] << "\t" << seq->likelihood << "\t"
+         << STAT_label[STATL_NORMALIZED] << "\t" << seq->likelihood / seq->cumul_length << endl;
       break;
     }
 
     case true : {
-      if (seq->likelihood != D_INF) {
-        os << "\n" << SEQ_label[SEQL_STATE_SEQUENCES_LIKELIHOOD] << "\t" << seq->likelihood << "\t"
-           << STAT_label[STATL_NORMALIZED] << "\t" << seq->likelihood / seq->cumul_length << endl;
+      if (seq->restoration_likelihood != D_INF) {
+        os << "\n" << SEQ_label[SEQL_STATE_SEQUENCES_LIKELIHOOD] << "\t" << seq->restoration_likelihood << "\t"
+           << STAT_label[STATL_NORMALIZED] << "\t" << seq->restoration_likelihood / seq->cumul_length << endl;
       }
 
       if (seq->sample_entropy != D_DEFAULT) {
@@ -4658,17 +4658,15 @@ ostream& VariableOrderMarkov::spreadsheet_write(ostream &os ,
            << STAT_label[STATL_NORMALIZED] << "\t" << seq->sample_entropy / seq->cumul_length << endl;
       }
 
-      likelihood = seq->hidden_likelihood;
-
-      if (likelihood != D_INF) {
-        os << "\n" << SEQ_label[SEQL_OBSERVED_SEQUENCES_LIKELIHOOD] << "\t" << likelihood << "\t"
-           << STAT_label[STATL_NORMALIZED] << "\t" << likelihood / seq->cumul_length << endl;
+      if (seq->likelihood != D_INF) {
+        os << "\n" << SEQ_label[SEQL_OBSERVED_SEQUENCES_LIKELIHOOD] << "\t" << seq->likelihood << "\t"
+           << STAT_label[STATL_NORMALIZED] << "\t" << seq->likelihood / seq->cumul_length << endl;
       }
       break;
     }
     }
 
-    if (likelihood != D_INF) {
+    if (seq->likelihood != D_INF) {
       if (type == 'o') {
         nb_transient_parameter = nb_transient_parameter_computation(hidden ? MIN_PROBABILITY : 0.);
 
@@ -4678,54 +4676,54 @@ ostream& VariableOrderMarkov::spreadsheet_write(ostream &os ,
 
       os << "\n" << nb_parameter << "\t" << STAT_label[nb_parameter == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS] << "\t"
          << "2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[AIC] << ")\t"
-         << 2 * (likelihood - nb_parameter) << endl;
+         << 2 * (seq->likelihood - nb_parameter) << endl;
       if ((type == 'o') && (nb_transient_parameter > 0)) {
         os << nb_transient_parameter + nb_parameter << "\t" << STAT_label[STATL_FREE_PARAMETERS] << "\t"
            << "2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[AIC] << ")\t"
-           << 2 * (likelihood - nb_transient_parameter - nb_parameter) << endl;
+           << 2 * (seq->likelihood - nb_transient_parameter - nb_parameter) << endl;
       }
 
       if (nb_parameter < seq->cumul_length - 1) {
         os << "\n" << nb_parameter << "\t" << STAT_label[nb_parameter == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS] << "\t"
            << "2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[AICc] << ")\t"
-           << 2 * (likelihood - (double)(nb_parameter * seq->cumul_length) /
+           << 2 * (seq->likelihood - (double)(nb_parameter * seq->cumul_length) /
                (double)(seq->cumul_length - nb_parameter - 1)) << endl;
       }
       if ((type == 'o') && (nb_transient_parameter > 0) &&
           (nb_transient_parameter + nb_parameter < seq->cumul_length - 1)) {
         os << nb_transient_parameter + nb_parameter << "\t" << STAT_label[STATL_FREE_PARAMETERS] << "\t"
            << "2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[AICc] << ")\t"
-           << 2 * (likelihood - (double)((nb_transient_parameter + nb_parameter) * seq->cumul_length) /
+           << 2 * (seq->likelihood - (double)((nb_transient_parameter + nb_parameter) * seq->cumul_length) /
                (double)(seq->cumul_length - nb_transient_parameter - nb_parameter - 1)) << endl;
       }
 
       os << "\n" << nb_parameter << "\t" << STAT_label[nb_parameter == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS] << "\t"
          << "2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[BIC] << ")\t"
-         << 2 * likelihood - nb_parameter * log((double)seq->cumul_length) << endl;
+         << 2 * seq->likelihood - nb_parameter * log((double)seq->cumul_length) << endl;
       if ((type == 'o') && (nb_transient_parameter > 0)) {
         os << nb_transient_parameter + nb_parameter << "\t" << STAT_label[STATL_FREE_PARAMETERS] << "\t"
            << "2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[BIC] << ")\t"
-           << 2 * likelihood - (nb_transient_parameter + nb_parameter) * log((double)seq->cumul_length) << endl;
+           << 2 * seq->likelihood - (nb_transient_parameter + nb_parameter) * log((double)seq->cumul_length) << endl;
       }
 
       os << "\n" << nb_parameter + (type == 'o' ? nb_transient_parameter : 0) << "\t" << STAT_label[STATL_FREE_PARAMETERS] << "\t"
          << "2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[BICc] << ")\t"
-         << 2 * likelihood - penalty_computation(hidden , (hidden ? MIN_PROBABILITY : 0.)) << endl;
+         << 2 * seq->likelihood - penalty_computation(hidden , (hidden ? MIN_PROBABILITY : 0.)) << endl;
     }
 
-    if ((hidden) && (seq->hidden_likelihood != D_INF)) {
+    if ((hidden) && (seq->likelihood != D_INF)) {
       os << "\n" << nb_parameter << "\t" << STAT_label[nb_parameter == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS] << "\t"
          << "2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[ICL] << ")\t"
-         << 2 * (seq->hidden_likelihood - seq->sample_entropy) - nb_parameter * log((double)seq->cumul_length) << endl;
+         << 2 * (seq->likelihood - seq->sample_entropy) - nb_parameter * log((double)seq->cumul_length) << endl;
       if ((type == 'o') && (nb_transient_parameter > 0)) {
         os << nb_transient_parameter + nb_parameter << "\t" << STAT_label[STATL_FREE_PARAMETERS] << "\t"
            << "2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[ICL] << ")\t"
-           << 2 * (seq->hidden_likelihood - seq->sample_entropy) - (nb_transient_parameter + nb_parameter) * log((double)seq->cumul_length) << endl;
+           << 2 * (seq->likelihood - seq->sample_entropy) - (nb_transient_parameter + nb_parameter) * log((double)seq->cumul_length) << endl;
       }
 
       os << "\n" << nb_parameter << "\t" << STAT_label[nb_parameter == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS] << "\t"
          << "2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[ICLc] << ")\t"
-         << 2 * (seq->hidden_likelihood - seq->sample_entropy) - penalty_computation(hidden , MIN_PROBABILITY) << endl;
+         << 2 * (seq->likelihood - seq->sample_entropy) - penalty_computation(hidden , MIN_PROBABILITY) << endl;
     }
   }
 
@@ -4782,9 +4780,9 @@ bool VariableOrderMarkov::plot_write(const char *prefix , const char *title ,
   register int i;
   int variable , nb_value = I_DEFAULT;
   double *empirical_cdf[2];
-  FrequencyDistribution *length_distribution = NULL , **observation_dist = NULL;
-  Histogram **observation_histo = NULL;
-  SequenceCharacteristics *characteristics;
+  FrequencyDistribution *length_distribution = NULL , *marginal_dist = NULL , **observation_dist = NULL;
+  Histogram *marginal_histo = NULL , **observation_histo = NULL;
+  SequenceCharacteristics *characteristics = NULL;
 
 
   if ((seq) && (seq->type[0] == STATE)) {
@@ -4795,7 +4793,7 @@ bool VariableOrderMarkov::plot_write(const char *prefix , const char *title ,
     characteristics = NULL;
   }
 
-  status = state_process->plot_print(prefix , title , 0 , NULL ,
+  status = state_process->plot_print(prefix , title , 0 , NULL , NULL ,
                                      characteristics , length_distribution);
 
   if (status) {
@@ -4817,16 +4815,14 @@ bool VariableOrderMarkov::plot_write(const char *prefix , const char *title ,
         if (seq->observation_distribution) {
           observation_dist = seq->observation_distribution[variable];
         }
+        marginal_dist = seq->marginal_distribution[variable];
+
         if (seq->observation_histogram) {
           observation_histo = seq->observation_histogram[variable];
         }
+        marginal_histo = seq->marginal_histogram[variable];
 
-        if (seq->characteristics[variable]) {
-          characteristics = seq->characteristics[variable];
-        }
-        else {
-          characteristics = NULL;
-        }
+        characteristics = seq->characteristics[variable];
 
         if (continuous_parametric_process[i]) {
           nb_value = seq->cumulative_distribution_function_computation(variable , empirical_cdf);
@@ -4835,17 +4831,17 @@ bool VariableOrderMarkov::plot_write(const char *prefix , const char *title ,
 
       if (categorical_process[i]) {
         categorical_process[i]->plot_print(prefix , title , i + 1 , observation_dist ,
-                                             characteristics , length_distribution);
+                                           marginal_dist , characteristics ,
+                                           length_distribution);
       }
       else if (discrete_parametric_process[i]) {
         discrete_parametric_process[i]->plot_print(prefix , title , i + 1 , observation_dist ,
-                                                   (seq ? seq->marginal_distribution[variable] : NULL));
+                                                   marginal_dist);
       }
       else {
         continuous_parametric_process[i]->plot_print(prefix , title , i + 1 ,
                                                      observation_histo , observation_dist ,
-                                                     (seq ? seq->marginal_histogram[variable] : NULL) ,
-                                                     (seq ? seq->marginal_distribution[variable] : NULL) ,
+                                                     marginal_histo , marginal_dist ,
                                                      nb_value , (seq ? empirical_cdf : NULL));
         if (seq) {
           delete [] empirical_cdf[0];
@@ -4898,9 +4894,9 @@ MultiPlotSet* VariableOrderMarkov::get_plotable(const VariableOrderMarkovData *s
 {
   register int i , j;
   int nb_plot_set , index_length , index , variable;
-  FrequencyDistribution *length_distribution = NULL , **observation_dist = NULL;
-  Histogram **observation_histo = NULL;
-  SequenceCharacteristics *characteristics;
+  FrequencyDistribution *length_distribution = NULL , *marginal_dist = NULL , **observation_dist = NULL;
+  Histogram *marginal_histo = NULL , **observation_histo = NULL;
+  SequenceCharacteristics *characteristics = NULL;
   MultiPlotSet *plot_set;
 
 
@@ -5015,12 +5011,7 @@ MultiPlotSet* VariableOrderMarkov::get_plotable(const VariableOrderMarkovData *s
         break;
       }
 
-      if (seq->characteristics[variable]) {
-        characteristics = seq->characteristics[variable];
-      }
-      else {
-        characteristics = NULL;
-      }
+      characteristics = seq->characteristics[variable];
     }
 
     if (categorical_process[i]) {
@@ -5121,6 +5112,17 @@ MultiPlotSet* VariableOrderMarkov::get_plotable(const VariableOrderMarkovData *s
       nb_plot_set++;
     }
 
+    if ((categorical_process[i]) && (seq->marginal_distribution[variable])) {
+      if ((categorical_process[i]->weight) &&
+          (categorical_process[i]->mixture)) {
+        nb_plot_set++;
+      }
+      if ((categorical_process[i]->restoration_weight) &&
+          (categorical_process[i]->restoration_mixture)) {
+        nb_plot_set++;
+      }
+    }
+
     if ((discrete_parametric_process[i]) && (seq->marginal_distribution[variable])) {
       if ((discrete_parametric_process[i]->weight) &&
           (discrete_parametric_process[i]->mixture)) {
@@ -5156,7 +5158,7 @@ MultiPlotSet* VariableOrderMarkov::get_plotable(const VariableOrderMarkovData *s
 
   index = 0;
   plot_set->variable_nb_viewpoint[0] = 0;
-  state_process->plotable_write(*plot_set , index , 0 , 0 , characteristics ,
+  state_process->plotable_write(*plot_set , index , 0 , NULL , NULL , characteristics ,
                                 length_distribution);
 
   if (seq) {
@@ -5177,32 +5179,30 @@ MultiPlotSet* VariableOrderMarkov::get_plotable(const VariableOrderMarkovData *s
       if (seq->observation_distribution) {
         observation_dist = seq->observation_distribution[variable];
       }
+      marginal_dist = seq->marginal_distribution[variable];
+
       if (seq->observation_histogram) {
         observation_histo = seq->observation_histogram[variable];
       }
+      marginal_histo = seq->marginal_histogram[variable];
 
-      if (seq->characteristics[variable]) {
-        characteristics = seq->characteristics[variable];
-      }
-      else {
-        characteristics = NULL;
-      }
+      characteristics = seq->characteristics[variable];
     }
 
     if (categorical_process[i]) {
       plot_set->variable_nb_viewpoint[i] = 0;
       categorical_process[i]->plotable_write(*plot_set , index , i + 1 , observation_dist ,
-                                               characteristics , length_distribution);
+                                             marginal_dist , characteristics ,
+                                             length_distribution);
     }
     else if (discrete_parametric_process[i]){
       discrete_parametric_process[i]->plotable_write(*plot_set , index , i + 1 , observation_dist ,
-                                                     (seq ? seq->marginal_distribution[variable] : NULL));
+                                                     marginal_dist);
     }
     else {
       continuous_parametric_process[i]->plotable_write(*plot_set , index , i + 1 ,
                                                        observation_histo , observation_dist ,
-                                                       (seq ? seq->marginal_histogram[variable] : NULL),
-                                                       (seq ? seq->marginal_distribution[variable] : NULL));
+                                                       marginal_histo , marginal_dist);
     }
   }
 
@@ -5434,7 +5434,7 @@ VariableOrderMarkovData::VariableOrderMarkovData()
   chain_data = NULL;
 
   likelihood = D_INF;
-  hidden_likelihood = D_INF;
+  restoration_likelihood = D_INF;
   sample_entropy = D_DEFAULT;
 
   posterior_probability = NULL;
@@ -5461,7 +5461,7 @@ VariableOrderMarkovData::VariableOrderMarkovData(const FrequencyDistribution &il
   chain_data = NULL;
 
   likelihood = D_INF;
-  hidden_likelihood = D_INF;
+  restoration_likelihood = D_INF;
   sample_entropy = D_DEFAULT;
 
   posterior_probability = NULL;
@@ -5487,7 +5487,7 @@ VariableOrderMarkovData::VariableOrderMarkovData(const MarkovianSequences &seq)
   chain_data = NULL;
 
   likelihood = D_INF;
-  hidden_likelihood = D_INF;
+  restoration_likelihood = D_INF;
   sample_entropy = D_DEFAULT;
 
   posterior_probability = NULL;
@@ -5516,7 +5516,7 @@ VariableOrderMarkovData::VariableOrderMarkovData(const MarkovianSequences &seq ,
   chain_data = NULL;
 
   likelihood = D_INF;
-  hidden_likelihood = D_INF;
+  restoration_likelihood = D_INF;
   sample_entropy = D_DEFAULT;
 
   posterior_probability = NULL;
@@ -5556,7 +5556,7 @@ void VariableOrderMarkovData::copy(const VariableOrderMarkovData &seq ,
   }
 
   likelihood = seq.likelihood;
-  hidden_likelihood = seq.hidden_likelihood;
+  restoration_likelihood = seq.restoration_likelihood;
   sample_entropy = seq.sample_entropy;
 
   if (seq.posterior_probability) {
@@ -5677,16 +5677,26 @@ DiscreteDistributionData* VariableOrderMarkovData::extract(StatError &error , in
         status = false;
         ostringstream error_message;
         error_message << STAT_label[STATL_STATE] << " " << value << " "
-                      << SEQ_error[SEQR_NOT_PRESENT];
+                      << STAT_error[STATR_NOT_PRESENT];
         error.update((error_message.str()).c_str());
       }
 
       else {
-        phisto = observation_distribution[variable][value];
-
-        if (phisto->nb_element == 0) {
+        if (!observation_distribution[variable]) {
           status = false;
-          error.update(STAT_error[STATR_EMPTY_SAMPLE]);
+          ostringstream error_message;
+          error_message << STAT_label[STATL_VARIABLE] << " " << variable + 1 << ": "
+                        << STAT_error[STATR_VARIABLE_TYPE];
+          error.correction_update((error_message.str()).c_str() , STAT_variable_word[INT_VALUE]);
+        }
+
+        else {
+          phisto = observation_distribution[variable][value];
+
+          if (phisto->nb_element == 0) {
+            status = false;
+            error.update(STAT_error[STATR_EMPTY_SAMPLE]);
+          }
         }
       }
     }
@@ -5713,7 +5723,7 @@ DiscreteDistributionData* VariableOrderMarkovData::extract(StatError &error , in
         status = false;
         ostringstream error_message;
         error_message << STAT_label[variable == 0 ? STATL_STATE : STATL_OUTPUT] << " "
-                      << value << " " << SEQ_error[SEQR_NOT_PRESENT];
+                      << value << " " << STAT_error[STATR_NOT_PRESENT];
         error.update((error_message.str()).c_str());
       }
 
