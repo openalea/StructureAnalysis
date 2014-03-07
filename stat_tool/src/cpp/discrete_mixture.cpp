@@ -3,9 +3,9 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
@@ -353,7 +353,7 @@ DiscreteMixture* discrete_mixture_building(StatError &error , int nb_component ,
   mixt = NULL;
   error.init();
 
-  if ((nb_component < 2) || (nb_component > MIXTURE_NB_COMPONENT)) {
+  if ((nb_component < 2) || (nb_component > DISCRETE_MIXTURE_NB_COMPONENT)) {
     error.update(STAT_parsing[STATP_NB_DISTRIBUTION]);
   }
 
@@ -400,7 +400,7 @@ DiscreteMixture* discrete_mixture_ascii_read(StatError &error , const char *path
   register int i , j;
   int line;
   long index , nb_component;
-  double cumul , weight[MIXTURE_NB_COMPONENT];
+  double cumul , weight[DISCRETE_MIXTURE_NB_COMPONENT];
   const DiscreteParametric **component;
   DiscreteMixture *mixt;
   ifstream in_file(path);
@@ -450,7 +450,7 @@ DiscreteMixture* discrete_mixture_ascii_read(StatError &error , const char *path
 
         case 1 : {
           lstatus = locale.stringToNum(token , &nb_component);
-          if ((lstatus) && ((nb_component < 2) || (nb_component > MIXTURE_NB_COMPONENT))) {
+          if ((lstatus) && ((nb_component < 2) || (nb_component > DISCRETE_MIXTURE_NB_COMPONENT))) {
             lstatus = false;
           }
 
@@ -675,8 +675,8 @@ ostream& DiscreteMixture::ascii_write(ostream &os , const DiscreteMixtureData *m
 {
   register int i , j;
   int bnb_parameter , buff , width;
-  double **sup_norm_dist , scale[MIXTURE_NB_COMPONENT];
-  const Distribution *pcomponent[MIXTURE_NB_COMPONENT];
+  double **sup_norm_dist , scale[DISCRETE_MIXTURE_NB_COMPONENT];
+  const Distribution *pcomponent[DISCRETE_MIXTURE_NB_COMPONENT];
   long old_adjust;
 
 
@@ -983,8 +983,8 @@ ostream& DiscreteMixture::spreadsheet_write(ostream &os , const DiscreteMixtureD
 {
   register int i , j;
   int bnb_parameter;
-  double **sup_norm_dist , scale[MIXTURE_NB_COMPONENT];
-  const Distribution *pcomponent[MIXTURE_NB_COMPONENT];
+  double **sup_norm_dist , scale[DISCRETE_MIXTURE_NB_COMPONENT];
+  const Distribution *pcomponent[DISCRETE_MIXTURE_NB_COMPONENT];
 
 
   os << STAT_word[STATW_MIXTURE] << "\t" << nb_component << "\t" << STAT_word[STATW_DISTRIBUTIONS] << endl;
@@ -1190,10 +1190,10 @@ bool DiscreteMixture::plot_write(const char *prefix , const char *title ,
   bool status;
   register int i , j , k;
   int nb_histo = 0;
-  double scale[MIXTURE_NB_COMPONENT + 2];
-  const Distribution *pdist[MIXTURE_NB_COMPONENT + 2];
-  const FrequencyDistribution *phisto[MIXTURE_NB_COMPONENT + 2];
-  ostringstream data_file_name[MIXTURE_NB_COMPONENT + 1];
+  double scale[DISCRETE_MIXTURE_NB_COMPONENT + 2];
+  const Distribution *pdist[DISCRETE_MIXTURE_NB_COMPONENT + 2];
+  const FrequencyDistribution *phisto[DISCRETE_MIXTURE_NB_COMPONENT + 2];
+  ostringstream data_file_name[DISCRETE_MIXTURE_NB_COMPONENT + 1];
 
 
   // ecriture des fichiers de donnees
@@ -1413,6 +1413,7 @@ MultiPlotSet* DiscreteMixture::get_plotable(const DiscreteMixtureData *mixt_hist
   int nb_plot_set , xmax;
   double scale;
   ostringstream title , legend;
+  MultiPlotSet *plot_set;
 
 
   // calcul du nombre de graphiques
@@ -1427,7 +1428,7 @@ MultiPlotSet* DiscreteMixture::get_plotable(const DiscreteMixtureData *mixt_hist
     }
   }
 
-  MultiPlotSet *plot_set = new MultiPlotSet(nb_plot_set);
+  plot_set = new MultiPlotSet(nb_plot_set);
   MultiPlotSet &plot = *plot_set;
 
   title.str("");
