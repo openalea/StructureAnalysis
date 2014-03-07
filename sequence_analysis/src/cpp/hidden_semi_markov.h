@@ -3,9 +3,9 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
@@ -129,8 +129,7 @@ public :
     HiddenSemiMarkov* thresholding(double min_probability = MIN_PROBABILITY) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(StatError &error , const char *path ,
-                     bool exhaustive = false) const;
+    bool ascii_write(StatError &error , const char *path , bool exhaustive = false) const;
     bool spreadsheet_write(StatError &error , const char *path) const;
 
     double likelihood_computation(const MarkovianSequences &seq , double *posterior_probability = NULL ,
