@@ -3,9 +3,9 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
@@ -38,8 +38,6 @@
 
 #include <math.h>
 #include <sstream>
-
-#include <boost/math/special_functions/digamma.hpp>
 
 #include "stat_tool/stat_tools.h"
 #include "stat_tool/curves.h"
@@ -384,7 +382,7 @@ double HiddenSemiMarkov::likelihood_computation(const MarkovianSequences &seq ,
  *  de sequences par l'algorithme EM.
  *
  *  arguments : reference sur un objet StatError, stream, semi-chaine de Markov cachee initiale,
- *              parametres de dispersion communs ou non (processus d'observation continus),
+ *              flag parametres de dispersion communs (processus d'observation continus),
  *              type d'estimateur pour la reestimation des lois d'occupation des etats,
  *              flags sur le calcul des lois de comptage et sur le calcul des sequences
  *              d'etats optimales, nombre d'iterations, methode de calcul de la moyenne
@@ -441,7 +439,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
   }
 
   if (!status) {
-    error.update(SEQ_error[SEQR_VARIABLE_NB_VALUE]);
+    error.update(STAT_error[STATR_VARIABLE_NB_VALUE]);
   }
 
   for (i = 0;i < nb_variable;i++) {
@@ -458,7 +456,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
 
   if (ihsmarkov.nb_output_process != nb_variable) {
     status = false;
-    error.update(SEQ_error[SEQR_NB_OUTPUT_PROCESS]);
+    error.update(STAT_error[STATR_NB_OUTPUT_PROCESS]);
   }
 
   else {
@@ -477,7 +475,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
             status = false;
             ostringstream error_message;
             error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
-                          << SEQ_error[SEQR_POSITIVE_MIN_VALUE];
+                          << STAT_error[STATR_POSITIVE_MIN_VALUE];
             error.update((error_message.str()).c_str());
           }
 
@@ -497,7 +495,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
               status = false;
               ostringstream error_message;
               error_message << STAT_label[STATL_OUTPUT_PROCESS] << " " << i + 1 << ": "
-                            << SEQ_error[SEQR_NB_OUTPUT];
+                            << STAT_error[STATR_NB_OUTPUT];
               error.update((error_message.str()).c_str());
             }
 
@@ -514,6 +512,13 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
             }
           }
         }
+      }
+
+      else if ((ihsmarkov.continuous_parametric_process[i]) &&
+               (ihsmarkov.continuous_parametric_process[i]->ident == LINEAR_MODEL) &&
+               (ihsmarkov.nb_component < ihsmarkov.nb_state)) {
+        status = false;
+        error.update(SEQ_error[SEQR_MODEL_STRUCTURE]);
       }
     }
   }
@@ -535,6 +540,14 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
     if (hsmarkov->type == 'e') {
       for (i = 0;i < hsmarkov->nb_state;i++) {
         hsmarkov->initial[i] = 1. / (double)hsmarkov->nb_state;
+      }
+    }
+
+    if (common_dispersion) {
+      for (i = 0;i < hsmarkov->nb_output_process;i++) {
+        if (hsmarkov->continuous_parametric_process[i]) {
+          hsmarkov->continuous_parametric_process[i]->tied_dispersion = true;
+        }
       }
     }
 
@@ -691,25 +704,25 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
         }
       }
     }
-
     else {
       state_sequence_count = NULL;
     }
 
-    mean_direction = NULL;
-
     for (i = 0;i < hsmarkov->nb_output_process;i++) {
-      if (hsmarkov->continuous_parametric_process[i]) {
+      if ((hsmarkov->continuous_parametric_process[i]) &&
+          (hsmarkov->continuous_parametric_process[i]->ident == VON_MISES)) {
         break;
       }
     }
 
-    if ((i < hsmarkov->nb_output_process) &&
-        (hsmarkov->continuous_parametric_process[i]->ident == VON_MISES)) {
+    if (i < hsmarkov->nb_output_process) {
       mean_direction = new double*[hsmarkov->nb_state];
       for (i = 0;i < hsmarkov->nb_state;i++) {
         mean_direction[i] = new double[4];
       }
+    }
+    else {
+      mean_direction = NULL;
     }
 
     pioutput = new int*[nb_variable];
@@ -842,6 +855,12 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
                   }
 
                   observation[j][k] *= hsmarkov->continuous_parametric_process[m]->observation[k]->mass_computation(residual - min_interval[m] / 2 , residual + min_interval[m] / 2);
+
+#                 ifdef DEBUG
+                  cout << STAT_label[STATL_STATE] << " " << k << "  " << SEQ_label[SEQL_SEQUENCE] << " " << i << "  "
+                       << SEQ_label[SEQL_INDEX] << " " << j << ": " << residual << " "
+                       << hsmarkov->continuous_parametric_process[m]->observation[k]->mass_computation(residual - min_interval[m] / 2 , residual + min_interval[m] / 2) << endl;
+#                 endif
                 }
 
                 else {
@@ -1628,11 +1647,11 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
               break;
             case GAUSSIAN :
               gaussian_estimation(state_sequence_count , i ,
-                                  hsmarkov->continuous_parametric_process[i] , common_dispersion);
+                                  hsmarkov->continuous_parametric_process[i]);
               break;
             case VON_MISES :
               von_mises_estimation(state_sequence_count , i ,
-                                   hsmarkov->continuous_parametric_process[i] , common_dispersion);
+                                   hsmarkov->continuous_parametric_process[i]);
               break;
             case LINEAR_MODEL :
               linear_model_estimation(state_sequence_count , i ,
@@ -1875,13 +1894,13 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
           }
         }
 
-        // calcul des lois d'observation parametriques et
-        // du melanges de lois d'observation parametriques (poids deduits de la restauration)
+        // calcul des melanges de lois d'observation (poids deduits de la restauration)
 
         weight = NULL;
 
         for (i = 0;i < hsmarkov->nb_output_process;i++) {
-          if ((hsmarkov->discrete_parametric_process[i]) || ((hsmarkov->continuous_parametric_process[i]) &&
+          if ((hsmarkov->categorical_process[i]) || (hsmarkov->discrete_parametric_process[i]) ||
+              ((hsmarkov->continuous_parametric_process[i]) &&
                (hsmarkov->continuous_parametric_process[i]->ident != LINEAR_MODEL))) {
             weight = seq->weight_computation();
             break;
@@ -1889,7 +1908,12 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
         }
 
         for (i = 0;i < hsmarkov->nb_output_process;i++) {
-          if (hsmarkov->discrete_parametric_process[i]) {
+          if (hsmarkov->categorical_process[i]) {
+            hsmarkov->categorical_process[i]->restoration_weight = new Distribution(*weight);
+            hsmarkov->categorical_process[i]->restoration_mixture = hsmarkov->categorical_process[i]->mixture_computation(hsmarkov->categorical_process[i]->restoration_weight);
+          }
+
+          else if (hsmarkov->discrete_parametric_process[i]) {
             for (j = 0;j < hsmarkov->nb_state;j++) {
               hsmarkov->discrete_parametric_process[i]->observation[j]->cumul_computation();
 //              hsmarkov->discrete_parametric_process[i]->observation[j]->computation(seq->observation_distribution[i + 1][j]->nb_value ,
@@ -1910,7 +1934,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
 
 #       ifdef MESSAGE
         if (seq->characteristics[0]) {
-          cout << "\n" << SEQ_label[SEQL_STATE_SEQUENCES_LIKELIHOOD] << ": " << seq->likelihood;
+          os << "\n" << SEQ_label[SEQL_STATE_SEQUENCES_LIKELIHOOD] << ": " << seq->restoration_likelihood;
 
           for (i = 0;i < nb_variable;i++) {
             if (type[i] == REAL_VALUE) {
@@ -1918,9 +1942,9 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
             }
           }
           if (i == nb_variable) {
-            cout << " | " << hsmarkov->SemiMarkov::likelihood_computation(*seq);
+            os << " | " << hsmarkov->SemiMarkov::likelihood_computation(*seq);
           }
-          cout << endl;
+          os << endl;
         }
 #       endif
 
@@ -1965,17 +1989,18 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
 
       // calcul de la vraisemblance et des lois caracteristiques du modele
 
-      seq->hidden_likelihood = hsmarkov->likelihood_computation(*this , seq->posterior_probability);
+      seq->likelihood = hsmarkov->likelihood_computation(*this , seq->posterior_probability);
 
       hsmarkov->component_computation();
       hsmarkov->characteristic_computation(*seq , counting_flag , I_DEFAULT , false);
 
-      // calcul du melange de lois d'observation parametriques (poids theoriques)
+      // calcul des melanges de lois d'observation (poids theoriques)
 
       weight = NULL;
 
       for (i = 0;i < hsmarkov->nb_output_process;i++) {
-        if ((hsmarkov->discrete_parametric_process[i]) || ((hsmarkov->continuous_parametric_process[i]) &&
+        if ((hsmarkov->categorical_process[i]) || (hsmarkov->discrete_parametric_process[i]) ||
+            ((hsmarkov->continuous_parametric_process[i]) &&
              (hsmarkov->continuous_parametric_process[i]->ident != LINEAR_MODEL))) {
           switch (hsmarkov->type) {
           case 'o' :
@@ -1990,7 +2015,12 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
       }
 
       for (i = 0;i < hsmarkov->nb_output_process;i++) {
-        if (hsmarkov->discrete_parametric_process[i]) {
+        if (hsmarkov->categorical_process[i]) {
+          hsmarkov->categorical_process[i]->weight = new Distribution(*weight);
+          hsmarkov->categorical_process[i]->mixture = hsmarkov->categorical_process[i]->mixture_computation(hsmarkov->categorical_process[i]->weight);
+        }
+
+        else if (hsmarkov->discrete_parametric_process[i]) {
           hsmarkov->discrete_parametric_process[i]->weight = new Distribution(*weight);
           hsmarkov->discrete_parametric_process[i]->mixture = hsmarkov->discrete_parametric_process[i]->mixture_computation(hsmarkov->discrete_parametric_process[i]->weight);
         }
@@ -2054,8 +2084,8 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
  *
  *  arguments : reference sur un objet StatError, stream, type de processus
  *              ('o' : ordinaire, 'e' : en equilibre), nombre d'etats de la chaine de Markov,
- *              flag sur la nature de la chaine de Markov,  temps moyen d'occupation d'un etat,
- *              parametres de dispersion communs ou non (processus d'observation continus),
+ *              flag sur la nature de la chaine de Markov, temps moyen d'occupation d'un etat,
+ *              flag parametres de dispersion communs (processus d'observation continus),
  *              type d'estimateur pour la reestimation des lois d'occupation des etats,
  *              flags sur le calcul des lois de comptage et sur le calcul des sequences d'etats optimales,
  *              nombre d'iterations, methode de calcul de la moyenne des lois d'occupation des etats
@@ -2191,7 +2221,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
  *  de sequences par l'algorithme MCEM.
  *
  *  arguments : reference sur un objet StatError, stream, semi-chaine de Markov cachee initiale,
- *              parametres de dispersion communs ou non (processus d'observation continus),
+ *              flag parametres de dispersion communs (processus d'observation continus),
  *              parametres pour le nombre de sequences d'etats simulees,
  *              type d'estimateur pour la reestimation des lois d'occupation des etats,
  *              flags sur le calcul des lois de comptage et sur le calcul
@@ -2245,7 +2275,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
   }
 
   if (!status) {
-    error.update(SEQ_error[SEQR_VARIABLE_NB_VALUE]);
+    error.update(STAT_error[STATR_VARIABLE_NB_VALUE]);
   }
 
   for (i = 0;i < nb_variable;i++) {
@@ -2262,7 +2292,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
 
   if (ihsmarkov.nb_output_process != nb_variable) {
     status = false;
-    error.update(SEQ_error[SEQR_NB_OUTPUT_PROCESS]);
+    error.update(STAT_error[STATR_NB_OUTPUT_PROCESS]);
   }
 
   else {
@@ -2281,7 +2311,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
             status = false;
             ostringstream error_message;
             error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
-                          << SEQ_error[SEQR_POSITIVE_MIN_VALUE];
+                          << STAT_error[STATR_POSITIVE_MIN_VALUE];
             error.update((error_message.str()).c_str());
           }
 
@@ -2301,7 +2331,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
               status = false;
               ostringstream error_message;
               error_message << STAT_label[STATL_OUTPUT_PROCESS] << " " << i + 1 << ": "
-                            << SEQ_error[SEQR_NB_OUTPUT];
+                            << STAT_error[STATR_NB_OUTPUT];
               error.update((error_message.str()).c_str());
             }
 
@@ -2319,17 +2349,24 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
           }
         }
       }
-    }
-  }
 
-  if ((nb_iter != I_DEFAULT) && (nb_iter < 1)) {
-    status = false;
-    error.update(STAT_error[STATR_NB_ITERATION]);
+      else if ((ihsmarkov.continuous_parametric_process[i]) &&
+               (ihsmarkov.continuous_parametric_process[i]->ident == LINEAR_MODEL) &&
+               (ihsmarkov.nb_component < ihsmarkov.nb_state)) {
+        status = false;
+        error.update(SEQ_error[SEQR_MODEL_STRUCTURE]);
+      }
+    }
   }
 
   if ((min_nb_state_sequence < 1) || (min_nb_state_sequence > max_nb_state_sequence)) {
     status = false;
     error.update(SEQ_error[SEQR_MIN_NB_STATE_SEQUENCE]);
+  }
+
+  if ((nb_iter != I_DEFAULT) && (nb_iter < 1)) {
+    status = false;
+    error.update(STAT_error[STATR_NB_ITERATION]);
   }
 
   if (status) {
@@ -2344,6 +2381,14 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
     if (hsmarkov->type == 'e') {
       for (i = 0;i < hsmarkov->nb_state;i++) {
         hsmarkov->initial[i] = 1. / (double)hsmarkov->nb_state;
+      }
+    }
+
+    if (common_dispersion) {
+      for (i = 0;i < hsmarkov->nb_output_process;i++) {
+        if (hsmarkov->continuous_parametric_process[i]) {
+          hsmarkov->continuous_parametric_process[i]->tied_dispersion = true;
+        }
       }
     }
 
@@ -2458,25 +2503,25 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
         }
       }
     }
-
     else {
       state_sequence_count = NULL;
     }
 
-    mean_direction = NULL;
-
     for (i = 0;i < hsmarkov->nb_output_process;i++) {
-      if (hsmarkov->continuous_parametric_process[i]) {
+      if ((hsmarkov->continuous_parametric_process[i]) &&
+          (hsmarkov->continuous_parametric_process[i]->ident == VON_MISES)) {
         break;
       }
     }
 
-    if ((i < hsmarkov->nb_output_process) &&
-        (hsmarkov->continuous_parametric_process[i]->ident == VON_MISES)) {
+    if (i < hsmarkov->nb_output_process) {
       mean_direction = new double*[hsmarkov->nb_state];
       for (i = 0;i < hsmarkov->nb_state;i++) {
         mean_direction[i] = new double[4];
       }
+    }
+    else {
+      mean_direction = NULL;
     }
 
     pioutput = new int*[nb_variable];
@@ -3281,11 +3326,11 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
               break;
             case GAUSSIAN :
               gaussian_estimation(state_sequence_count , i ,
-                                  hsmarkov->continuous_parametric_process[i] , common_dispersion);
+                                  hsmarkov->continuous_parametric_process[i]);
               break;
             case VON_MISES :
               von_mises_estimation(state_sequence_count , i ,
-                                   hsmarkov->continuous_parametric_process[i] , common_dispersion);
+                                   hsmarkov->continuous_parametric_process[i]);
               break;
             case LINEAR_MODEL :
               linear_model_estimation(state_sequence_count , i ,
@@ -3512,21 +3557,26 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
           }
         }
 
-        // calcul des lois d'observation parametriques et
-        // du melanges de lois d'observation parametriques (poids deduits de la restauration)
+        // calcul des melanges de lois d'observation (poids deduits de la restauration)
 
         weight = NULL;
 
         for (i = 0;i < hsmarkov->nb_output_process;i++) {
-          if ((hsmarkov->discrete_parametric_process[i]) || ((hsmarkov->continuous_parametric_process[i]) &&
-              (hsmarkov->continuous_parametric_process[i]->ident != LINEAR_MODEL))) {
+          if ((hsmarkov->categorical_process[i]) || (hsmarkov->discrete_parametric_process[i]) ||
+              ((hsmarkov->continuous_parametric_process[i]) &&
+               (hsmarkov->continuous_parametric_process[i]->ident != LINEAR_MODEL))) {
             weight = seq->weight_computation();
             break;
           }
         }
 
         for (i = 0;i < hsmarkov->nb_output_process;i++) {
-          if (hsmarkov->discrete_parametric_process[i]) {
+          if (hsmarkov->categorical_process[i]) {
+            hsmarkov->categorical_process[i]->restoration_weight = new Distribution(*weight);
+            hsmarkov->categorical_process[i]->restoration_mixture = hsmarkov->categorical_process[i]->mixture_computation(hsmarkov->categorical_process[i]->restoration_weight);
+          }
+
+          else if (hsmarkov->discrete_parametric_process[i]) {
             for (j = 0;j < hsmarkov->nb_state;j++) {
               hsmarkov->discrete_parametric_process[i]->observation[j]->cumul_computation();
             }
@@ -3545,7 +3595,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
 
 #       ifdef MESSAGE
         if (seq->characteristics[0]) {
-          cout << "\n" << SEQ_label[SEQL_STATE_SEQUENCES_LIKELIHOOD] << ": " << seq->likelihood;
+          os << "\n" << SEQ_label[SEQL_STATE_SEQUENCES_LIKELIHOOD] << ": " << seq->restoration_likelihood;
 
           for (i = 0;i < nb_variable;i++) {
             if (type[i] == REAL_VALUE) {
@@ -3553,9 +3603,9 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
             }
           }
           if (i == nb_variable) {
-            cout << " | " << hsmarkov->SemiMarkov::likelihood_computation(*seq);
+            os << " | " << hsmarkov->SemiMarkov::likelihood_computation(*seq);
           }
-          cout << endl;
+          os << endl;
         }
 #       endif
 
@@ -3600,17 +3650,18 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
 
       // calcul de la vraisemblance et des lois caracteristiques du modele
 
-      seq->hidden_likelihood = hsmarkov->likelihood_computation(*this , seq->posterior_probability);
+      seq->likelihood = hsmarkov->likelihood_computation(*this , seq->posterior_probability);
 
       hsmarkov->component_computation();
       hsmarkov->characteristic_computation(*seq , counting_flag , I_DEFAULT , false);
 
-      // calcul du melange de lois d'observation parametriques (poids theoriques)
+      // calcul des melanges de lois d'observation (poids theoriques)
 
       weight = NULL;
 
       for (i = 0;i < hsmarkov->nb_output_process;i++) {
-        if ((hsmarkov->discrete_parametric_process[i]) || ((hsmarkov->continuous_parametric_process[i]) &&
+        if ((hsmarkov->categorical_process[i]) || (hsmarkov->discrete_parametric_process[i]) ||
+            ((hsmarkov->continuous_parametric_process[i]) &&
              (hsmarkov->continuous_parametric_process[i]->ident != LINEAR_MODEL))) {
           switch (hsmarkov->type) {
           case 'o' :
@@ -3625,7 +3676,12 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
       }
 
       for (i = 0;i < hsmarkov->nb_output_process;i++) {
-        if (hsmarkov->discrete_parametric_process[i]) {
+        if (hsmarkov->categorical_process[i]) {
+          hsmarkov->categorical_process[i]->weight = new Distribution(*weight);
+          hsmarkov->categorical_process[i]->mixture = hsmarkov->categorical_process[i]->mixture_computation(hsmarkov->categorical_process[i]->weight);
+        }
+
+        else if (hsmarkov->discrete_parametric_process[i]) {
           hsmarkov->discrete_parametric_process[i]->weight = new Distribution(*weight);
           hsmarkov->discrete_parametric_process[i]->mixture = hsmarkov->discrete_parametric_process[i]->mixture_computation(hsmarkov->discrete_parametric_process[i]->weight);
         }
@@ -3687,7 +3743,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
  *  arguments : reference sur un objet StatError, stream, type de processus
  *              ('o' : ordinaire, 'e' : en equilibre), nombre d'etats de la chaine de Markov,
  *              flag sur la nature de la chaine de Markov, temps moyen d'occupation d'un etat,
- *              parametres de dispersion communs ou non (processus d'observation continus),
+ *              flag parametres de dispersion communs (processus d'observation continus),
  *              parametres pour le nombre de sequences d'etats simulees,
  *              type d'estimateur pour la reestimation des lois d'occupation des etats,
  *              flags sur le calcul des lois de comptage et sur le calcul
