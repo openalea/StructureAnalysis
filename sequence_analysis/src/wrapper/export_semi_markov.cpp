@@ -317,7 +317,7 @@ class_semi_markov_data()
     .def(init<SemiMarkovData, bool, char> ())
 
     .add_property("likelihood", &SemiMarkovData::get_likelihood, "returns likelihood")
-    .add_property("hidden_likelihood", &SemiMarkovData::get_hidden_likelihood, "returns hidden likelihood")
+    .add_property("restoration_likelihood", &SemiMarkovData::get_restoration_likelihood, "returns restoration likelihood")
 
     .def("get_posterior_probability", &SemiMarkovData::get_posterior_probability, args("index"))
 
