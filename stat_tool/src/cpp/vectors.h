@@ -91,6 +91,7 @@ class TreeMatch;
 class VectorDistance;
 class MultivariateMixture;
 class Mixture;
+class ContinuousParametricProcess;
 
 
 class Vectors : public StatInterface {  // vecteurs
