@@ -43,6 +43,7 @@
 #include "nodecost.h"
 //#include "mdtable.h"
 #include "stat_tool/stat_tools.h"
+#include "stat_tool/markovian.h"
 #include "stat_tool/vectors.h"
 
 
