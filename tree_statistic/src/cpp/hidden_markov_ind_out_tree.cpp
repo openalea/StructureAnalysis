@@ -1162,13 +1162,13 @@ Stat_trees::hidden_markov_ind_out_tree_ascii_read(StatError& error,
       if (size < 2)
       {
          status= false;
-         error.update(STAT_error[STATR_SMALL_TREE_SIZE]);
+         error.update(STAT_TREES_error[STATR_SMALL_TREE_SIZE]);
       }
 
       if (size > MAX_SIZE)
       {
          status= false;
-         error.update(STAT_error[STATR_BIG_TREE_SIZE]);
+         error.update(STAT_TREES_error[STATR_BIG_TREE_SIZE]);
       }
 
       while (buffer.readLine(in_file, false))
