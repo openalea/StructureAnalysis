@@ -5,7 +5,7 @@
  *
  *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id: mixture_algorithms.cpp 15033 2013-09-30 14:54:49Z guedon $
@@ -50,10 +50,55 @@ using namespace std;
 using namespace boost::math;
 
 
-extern double von_mises_concentration_computation(double mean_direction);
 extern void cumul_computation(int nb_value , const double *pmass , double *pcumul);
 extern int cumul_method(int nb_value , const double *cumul , double scale = 1.);
 
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul du parametre de concentration d'une loi de Von Mises
+ *  a partir de la direction moyenne (d'apres Mardia & Jupp, 2000; pp. 85-86).
+ *
+ *  argument : direction moyenne.
+ *
+ *--------------------------------------------------------------*/
+
+double von_mises_concentration_computation(double mean_direction)
+
+{
+  register int i;
+  double concentration , power[6];
+
+
+  if (mean_direction < 0.53) {
+    power[1] = mean_direction;
+    for (i = 2;i <= 5;i++) {
+      power[i] = power[i - 1] * mean_direction;
+    }
+
+    concentration = 2 * power[1] + power[3] + 5 * power[5] / 6;
+  }
+
+  else if (mean_direction < 0.85) {
+    concentration = -0.4 + 1.39 * mean_direction + 0.43 / (1. - mean_direction);
+  }
+
+  else {
+    power[1] = 1. - mean_direction;
+    for (i = 2;i <= 3;i++) {
+      power[i] = power[i - 1] * (1. - mean_direction);
+    }
+
+    concentration = 1. / (2 * power[1] - power[2] - power[3]);
+  }
+
+# ifdef DEBUG
+  cout << "mean direction: " << mean_direction << " | concentration : " << concentration << endl;
+# endif
+
+  return concentration;
+}
 
 
 /*--------------------------------------------------------------*
@@ -765,7 +810,8 @@ Mixture* Vectors::mixture_estimation(StatError &error , ostream &os , const Mixt
                 switch (mixt->continuous_parametric_process[i]->ident) {
                 case GAMMA :
                   tied_gamma_estimation(component_vector_count , i ,
-                                        mixt->continuous_parametric_process[i] , iter);
+                                        mixt->continuous_parametric_process[i] ,
+                                        variance_factor , iter);
                   break;
                 case GAUSSIAN :
                   tied_gaussian_estimation(component_vector_count , i ,
@@ -1000,16 +1046,15 @@ Mixture* Vectors::mixture_estimation(StatError &error , ostream &os , const Mixt
  *  arguments : reference sur un objet StatError, stream, nombre de composantes,
  *              identificateur des composantes (GAMMA / GAUSSIAN),
  *              moyenne et parametre de forme de la premiere composante (GAMMA) /
- *              moyenne et ecart-type de la premiere composante (GAUSSIAN),
- *              flag parametres d'echelle lies (GAMMA) / moyennes liees (GAUSSIAN),
- *              type de lien entre les variances des lois gaussiennes (CONVOLUTION_FACTOR / SCALING_FACTOR)
+ *              moyenne et ecart-type de la premiere composante (GAUSSIAN), flag moyennes liees,
+ *              type de lien entre les variances (CONVOLUTION_FACTOR / SCALING_FACTOR)
  *              flag sur le calcul des affectations optimales, nombre d'iterations.
  *
  *--------------------------------------------------------------*/
 
 Mixture* Vectors::mixture_estimation(StatError &error , ostream &os , int nb_component ,
                                      int ident , double mean , double standard_deviation ,
-                                     bool tied_location , int variance_factor ,
+                                     bool tied_mean , int variance_factor ,
                                      bool assignment , int nb_iter) const
 
 {
@@ -1025,14 +1070,7 @@ Mixture* Vectors::mixture_estimation(StatError &error , ostream &os , int nb_com
   }
 
   else {
-    switch (ident) {
-    case GAMMA :
-      imixt = new Mixture(nb_component , mean , standard_deviation , tied_location);
-      break;
-    case GAUSSIAN :
-      imixt = new Mixture(nb_component , mean , standard_deviation , tied_location , variance_factor);
-      break;
-    }
+    imixt = new Mixture(nb_component , ident , mean , standard_deviation , tied_mean , variance_factor);
 
     mixt = mixture_estimation(error , os , *imixt , false , false ,
                               variance_factor , assignment , nb_iter);
@@ -1517,7 +1555,8 @@ Mixture* Vectors::mixture_stochastic_estimation(StatError &error , ostream &os ,
                 switch (mixt->continuous_parametric_process[i]->ident) {
                 case GAMMA :
                   tied_gamma_estimation(component_vector_count , i ,
-                                        mixt->continuous_parametric_process[i] , iter);
+                                        mixt->continuous_parametric_process[i] ,
+                                        variance_factor , iter);
                   break;
                 case GAUSSIAN :
                   tied_gaussian_estimation(component_vector_count , i ,
@@ -1753,9 +1792,8 @@ Mixture* Vectors::mixture_stochastic_estimation(StatError &error , ostream &os ,
  *  arguments : reference sur un objet StatError, stream, nombre de composantes,
  *              identificateur des composantes (GAMMA / GAUSSIAN),
  *              moyenne et parametre de forme de la premiere composante (GAMMA) /
- *              moyenne et ecart-type de la premiere composante (GAUSSIAN),
- *              flag parametres d'echelle lies (GAMMA) / moyennes liees (GAUSSIAN),
- *              type de lien entre les variances des lois gaussiennes (CONVOLUTION_FACTOR / SCALING_FACTOR)
+ *              moyenne et ecart-type de la premiere composante (GAUSSIAN), flag moyennes liees,
+ *              type de lien entre les variances (CONVOLUTION_FACTOR / SCALING_FACTOR)
  *              parametres pour le nombre d'affectation des individus simulees,
  *              flag sur le calcul des affectations optimales, nombre d'iterations.
  *
@@ -1763,7 +1801,7 @@ Mixture* Vectors::mixture_stochastic_estimation(StatError &error , ostream &os ,
 
 Mixture* Vectors::mixture_stochastic_estimation(StatError &error , ostream &os , int nb_component ,
                                                 int ident , double mean , double standard_deviation ,
-                                                bool tied_location , int variance_factor ,
+                                                bool tied_mean , int variance_factor ,
                                                 int min_nb_assignment , int max_nb_assignment ,
                                                 double parameter , bool assignment , int nb_iter) const
 
@@ -1780,14 +1818,7 @@ Mixture* Vectors::mixture_stochastic_estimation(StatError &error , ostream &os ,
   }
 
   else {
-    switch (ident) {
-    case GAMMA :
-      imixt = new Mixture(nb_component , mean , standard_deviation , tied_location);
-      break;
-    case GAUSSIAN :
-      imixt = new Mixture(nb_component , mean , standard_deviation , tied_location , variance_factor);
-      break;
-    }
+    imixt = new Mixture(nb_component , ident , mean , standard_deviation , tied_mean , variance_factor);
 
     mixt = mixture_stochastic_estimation(error , os , *imixt , false , false , variance_factor ,
                                          min_nb_assignment , max_nb_assignment , parameter ,
