@@ -194,11 +194,11 @@ const char *STAT_TREES_parsing[] = {
 const char *STAT_TREES_error[] = {
   "bad number of states" , // SEQR_NB_STATE
   "bad number of values per variable" , // STATR_VARIABLE_NB_VALUE
-  "bad number of output processes" ,  // STATR_NB_OUTPUT_PROCESS
+//  "bad number of output processes" ,   STATR_NB_OUTPUT_PROCESS
   "bad number of integer output processes" ,  // STATR_NB_INT_OUTPUT_PROCESS
   "bad number of floating output processes" ,  // STATR_NB_REAL_OUTPUT_PROCESS
-  "bad output process index" ,  // STATR_OUTPUT_PROCESS_INDEX
-  "bad number of outputs" , // STATR_NB_OUTPUT
+//  "bad output process index" ,  STATR_OUTPUT_PROCESS_INDEX
+//  "bad number of outputs" ,  STATR_NB_OUTPUT
   "bad self-transition probability" , // STATR_SELF_TRANSITION
   "bad number of state trees", // STATR_NB_STATE_TREES
   "bad number of trees" , // STATR_NB_TREES
@@ -215,7 +215,7 @@ const char *STAT_TREES_error[] = {
   "tree cumulative number of children too high" ,
   "failure in the computation of the optimal state trees" ,
 
-  "not present" , // STATR_NOT_PRESENT
+//  "not present" ,  STATR_NOT_PRESENT
 
   "model not present" , // STATR_NO_MODEL
 
