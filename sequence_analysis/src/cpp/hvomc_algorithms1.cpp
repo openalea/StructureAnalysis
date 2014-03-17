@@ -54,6 +54,7 @@
 using namespace std;
 
 
+extern double von_mises_concentration_computation(double mean_direction);
 extern void cumul_computation(int nb_value , const double *pmass , double *pcumul);
 extern int cumul_method(int nb_value , const double *cumul , double scale = 1.);
 
@@ -336,52 +337,6 @@ double HiddenVariableOrderMarkov::likelihood_computation(const MarkovianSequence
   }
 
   return likelihood;
-}
-
-
-/*--------------------------------------------------------------*
- *
- *  Calcul du parametre de concentration d'une loi de Von Mises
- *  a partir de la direction moyenne (d'apres Mardia & Jupp, 2000; pp. 85-86).
- *
- *  argument : direction moyenne.
- *
- *--------------------------------------------------------------*/
-
-double von_mises_concentration_computation(double mean_direction)
-
-{
-  register int i;
-  double concentration , power[6];
-
-
-  if (mean_direction < 0.53) {
-    power[1] = mean_direction;
-    for (i = 2;i <= 5;i++) {
-      power[i] = power[i - 1] * mean_direction;
-    }
-
-    concentration = 2 * power[1] + power[3] + 5 * power[5] / 6;
-  }
-
-  else if (mean_direction < 0.85) {
-    concentration = -0.4 + 1.39 * mean_direction + 0.43 / (1. - mean_direction);
-  }
-
-  else {
-    power[1] = 1. - mean_direction;
-    for (i = 2;i <= 3;i++) {
-      power[i] = power[i - 1] * (1. - mean_direction);
-    }
-
-    concentration = 1. / (2 * power[1] - power[2] - power[3]);
-  }
-
-# ifdef DEBUG
-  cout << "mean direction: " << mean_direction << " | concentration : " << concentration << endl;
-# endif
-
-  return concentration;
 }
 
 
