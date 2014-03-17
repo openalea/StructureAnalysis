@@ -3739,7 +3739,7 @@ DiscreteParametricModel* HiddenMarkovTree::extract(StatError& error,
       if ((ivariable < 1) || (ivariable > _nb_ioutput_process))
       {
          status= false;
-         error.update(STAT_TREES_error[STATR_OUTPUT_PROCESS_INDEX]);
+         error.update(STAT_error[STATR_OUTPUT_PROCESS_INDEX]);
       }
       else
       {
@@ -3748,7 +3748,7 @@ DiscreteParametricModel* HiddenMarkovTree::extract(StatError& error,
             status= false;
             std::ostringstream error_message;
             error_message << STAT_label[STATL_STATE] << " " << value << " "
-                          << STAT_TREES_error[STATR_NOT_PRESENT];
+                          << STAT_error[STATR_NOT_PRESENT];
             error.update((error_message.str()).c_str());
          }
          else
@@ -3763,7 +3763,7 @@ DiscreteParametricModel* HiddenMarkovTree::extract(StatError& error,
       if ((ivariable < 0) || (ivariable > _nb_ioutput_process))
       {
          status= false;
-         error.update(STAT_TREES_error[STATR_OUTPUT_PROCESS_INDEX]);
+         error.update(STAT_error[STATR_OUTPUT_PROCESS_INDEX]);
       }
 
       else
@@ -3773,7 +3773,7 @@ DiscreteParametricModel* HiddenMarkovTree::extract(StatError& error,
             status= false;
             ostringstream error_message;
             error_message << STAT_label[variable == 0 ? STATL_STATE : STATL_OUTPUT] << " "
-                          << value << " " << STAT_TREES_error[STATR_NOT_PRESENT];
+                          << value << " " << STAT_error[STATR_NOT_PRESENT];
             error.update((error_message.str()).c_str());
          }
          else
@@ -6601,13 +6601,13 @@ HiddenMarkovTree* Stat_trees::hidden_markov_tree_ascii_read(StatError& error,
       if (size < 2)
       {
          status= false;
-         error.update(STAT_error[STATR_SMALL_TREE_SIZE]);
+         error.update(STAT_TREES_error[STATR_SMALL_TREE_SIZE]);
       }
 
       if (size > MAX_SIZE)
       {
          status= false;
-         error.update(STAT_error[STATR_BIG_TREE_SIZE]);
+         error.update(STAT_TREES_error[STATR_BIG_TREE_SIZE]);
       }
 
       while (buffer.readLine(in_file, false))
@@ -7212,7 +7212,7 @@ DiscreteDistributionData* HiddenMarkovTreeData::extract(StatError& error, int ty
                 status= false;
                 ostringstream error_message;
                 error_message << STAT_label[STATL_STATE] << " " << value << " "
-                              << STAT_TREES_error[STATR_NOT_PRESENT];
+                              << STAT_error[STATR_NOT_PRESENT];
                 error.update((error_message.str()).c_str());
              }
 
@@ -7323,7 +7323,7 @@ HiddenMarkovTree* HiddenMarkovTreeData::extract_model(StatError& error) const
       || (_nb_float != markov->_nb_doutput_process))
    {
       status = false;
-      error.update(STAT_TREES_error[STATR_NB_OUTPUT_PROCESS]);
+      error.update(STAT_error[STATR_NB_OUTPUT_PROCESS]);
    }
 
    if (status)
