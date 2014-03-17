@@ -192,7 +192,8 @@ protected :
                           ContinuousParametricProcess *process , int iter) const;
     template <typename Type>
     void tied_gamma_estimation(Type **component_vector_count , int variable ,
-                               ContinuousParametricProcess *process , int iter) const;
+                               ContinuousParametricProcess *process ,
+                               int variance_factor , int iter) const;
     template <typename Type>
     void gaussian_estimation(Type **component_vector_count , int variable ,
                              ContinuousParametricProcess *process) const;
