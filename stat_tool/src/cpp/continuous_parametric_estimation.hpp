@@ -5,7 +5,7 @@
  *
  *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id: continuous_distribution_estimation.hpp 12646 2012-08-03 08:12:47Z guedon $
@@ -233,7 +233,7 @@ void Vectors::gamma_estimation(Type **component_vector_count , int variable ,
               j++;
 
 #             ifdef DEBUG
-              cout << STAT_word[STATW_SHAPE] << " : " << process->observation[i]->shape  << "   "
+              cout << STAT_word[STATW_SHAPE] << " : " << process->observation[i]->shape << "   "
                    << STAT_word[STATW_SCALE] << " : " << process->observation[i]->scale << endl;
 #             endif
 
@@ -275,13 +275,14 @@ void Vectors::gamma_estimation(Type **component_vector_count , int variable ,
  *  parametres de forme et eventuellement parametres d'echelle lies.
  *
  *  arguments : comptage des etats, variable, pointeur sur un processus d'observation continue,
- *              iteration EM.
+ *              facteur pour la variance, iteration EM.
  *
  *--------------------------------------------------------------*/
 
 template <typename Type>
 void Vectors::tied_gamma_estimation(Type **component_vector_count , int variable ,
-                                    ContinuousParametricProcess *process , int iter) const
+                                    ContinuousParametricProcess *process ,
+                                    int variance_factor , int iter) const
 
 {
   register int i , j;
@@ -293,7 +294,7 @@ void Vectors::tied_gamma_estimation(Type **component_vector_count , int variable
   mean = new double[process->nb_state];
   factor = new double[process->nb_state];
 
-  switch (process->tied_scale) {
+  switch (process->tied_location) {
 
   case false : {
     for (i = 0;i < process->nb_state;i++) {
@@ -330,14 +331,33 @@ void Vectors::tied_gamma_estimation(Type **component_vector_count , int variable
       }
     }
 
-    factor[0] = 1.;
-    for (i = 1;i < process->nb_state;i++) {
-      if (component_frequency[i] > 0) {
-        factor[i] = (mean[i] * mean[i]) / (mean[0] * mean[0]);
+    switch (variance_factor) {
+
+    case CONVOLUTION_FACTOR : {
+      factor[0] = 1.;
+      for (i = 1;i < process->nb_state;i++) {
+        if (component_frequency[i] > 0) {
+          factor[i] = mean[i] / mean[0];
+        }
+        else {
+          factor[i] = 1.;
+        }
       }
-      else {
-        factor[i] = 1.;
+      break;
+    }
+
+    case SCALING_FACTOR : {
+      factor[0] = 1.;
+      for (i = 1;i < process->nb_state;i++) {
+        if (component_frequency[i] > 0) {
+          factor[i] = (mean[i] * mean[i]) / (mean[0] * mean[0]);
+        }
+        else {
+          factor[i] = 1.;
+        }
       }
+      break;
+    }
     }
 
     for (i = 1;i < process->nb_state;i++) {
@@ -383,9 +403,11 @@ void Vectors::tied_gamma_estimation(Type **component_vector_count , int variable
       mean[i] = mean[0] * factor[i];
     }
 
-    for (i = 1;i < process->nb_state;i++) {
-      factor[i] *= factor[i];
-//      factor[i] = factor[i - 1] * 4;
+    if (variance_factor == SCALING_FACTOR) {
+      for (i = 1;i < process->nb_state;i++) {
+        factor[i] *= factor[i];
+//        factor[i] = factor[i - 1] * 4;
+      }
     }
     break;
   }
@@ -419,32 +441,48 @@ void Vectors::tied_gamma_estimation(Type **component_vector_count , int variable
 //  variance /= component_frequency[0];
   variance /= (component_frequency[0] - process->nb_state);
 
-  switch (process->tied_scale) {
+  switch (variance_factor) {
 
-  case false : {
+  case CONVOLUTION_FACTOR : {
     process->observation[0]->shape = mean[0] * mean[0] / variance;
     process->observation[0]->scale = variance / mean[0];
 
     for (i = 1;i < process->nb_state;i++) {
-      process->observation[i]->shape = process->observation[0]->shape;
-//      factor[i] = sqrt(factor[i]);
-      factor[i] = mean[i] / mean[0];
-      process->observation[i]->scale = process->observation[0]->scale * factor[i];
+      process->observation[i]->shape = process->observation[0]->shape * factor[i];
+      process->observation[i]->scale = process->observation[0]->scale;
     }
     break;
   }
 
-  case true : {
-    process->observation[0]->shape = mean[0] * mean[0] / variance;
-    process->observation[0]->scale = variance / mean[0];
+  case SCALING_FACTOR : {
+    switch (process->tied_location) {
 
-    for (i = 1;i < process->nb_state;i++) {
-      process->observation[i]->shape = process->observation[0]->shape;
-//      factor[i] = sqrt(factor[i]);
-      factor[i] = factor[i - 1] * 2;
-      process->observation[i]->scale = process->observation[0]->scale * factor[i];
+    case false : {
+      process->observation[0]->shape = mean[0] * mean[0] / variance;
+      process->observation[0]->scale = variance / mean[0];
+
+      for (i = 1;i < process->nb_state;i++) {
+        process->observation[i]->shape = process->observation[0]->shape;
+//        factor[i] = sqrt(factor[i]);
+        factor[i] = mean[i] / mean[0];
+        process->observation[i]->scale = process->observation[0]->scale * factor[i];
+      }
+      break;
     }
 
+    case true : {
+      process->observation[0]->shape = mean[0] * mean[0] / variance;
+      process->observation[0]->scale = variance / mean[0];
+
+      for (i = 1;i < process->nb_state;i++) {
+        process->observation[i]->shape = process->observation[0]->shape;
+//        factor[i] = sqrt(factor[i]);
+        factor[i] = factor[i - 1] * 2;
+        process->observation[i]->scale = process->observation[0]->scale * factor[i];
+      }
+      break;
+    }
+    }
     break;
   }
   }
@@ -496,16 +534,78 @@ void Vectors::tied_gamma_estimation(Type **component_vector_count , int variable
       i++;
 
 #     ifdef MESSAGE
-      cout << STAT_word[STATW_SHAPE] << " : " << process->observation[0]->shape  << "   "
+      {
+        double buff , likelihood = 0.;
+
+
+        switch (type[variable]) {
+
+        case INT_VALUE : {
+          for (j = 0;j < nb_vector;j++) {
+            if (min_value[variable] < min_interval[variable] / 2) {
+              buff = process->observation[0]->mass_computation(int_vector[j][variable] , int_vector[j][variable] + min_interval[variable]);
+	    }
+            else {
+              buff = process->observation[0]->mass_computation(int_vector[j][variable] - min_interval[variable] / 2 , int_vector[j][variable] + min_interval[variable] / 2);
+	    }
+
+            if (buff > 0.) {
+              likelihood += log(buff);
+            }
+            else {
+              likelihood = D_INF;
+              break;
+            }
+          }
+          break;
+        }
+
+        case REAL_VALUE : {
+          for (j = 0;j < nb_vector;j++) {
+            if (min_value[variable] < min_interval[variable] / 2) {
+              buff = process->observation[0]->mass_computation(real_vector[j][variable] , real_vector[j][variable] + min_interval[variable]);
+            }
+            else {
+              buff = process->observation[0]->mass_computation(real_vector[j][variable] - min_interval[variable] / 2 , real_vector[j][variable] + min_interval[variable] / 2);
+	    }
+
+            if (buff > 0.) {
+              likelihood += log(buff);
+            }
+            else {
+              likelihood = D_INF;
+              break;
+            }
+          }
+          break;
+        }
+        }
+      }
+
+      cout << STAT_word[STATW_SHAPE] << " : " << process->observation[0]->shape << "   "
            << STAT_word[STATW_SCALE] << " : " << process->observation[0]->scale << endl;
 #     endif
 
     }
     while (i < MIN(GAMMA_ITERATION_FACTOR * iter , GAMMA_MAX_NB_ITERATION));
 
-    for (i = 1;i < process->nb_state;i++) {
-      process->observation[i]->shape = process->observation[0]->shape;
-      process->observation[i]->scale = process->observation[0]->scale * factor[i];
+    switch (variance_factor) {
+
+    case CONVOLUTION_FACTOR : {
+      for (i = 1;i < process->nb_state;i++) {
+        process->observation[i]->shape = process->observation[0]->shape * factor[i];
+        process->observation[i]->scale = process->observation[0]->scale;
+      }
+      break;
+    }
+
+    case SCALING_FACTOR : {
+      for (i = 1;i < process->nb_state;i++) {
+        process->observation[i]->shape = process->observation[0]->shape;
+        process->observation[i]->scale = process->observation[0]->scale * factor[i];
+      }
+      break;
+    }
     }
   }
 
