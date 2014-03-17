@@ -246,7 +246,7 @@ void MarkovianSequences::gamma_estimation(Type ***state_sequence_count , int var
               j++;
 
 #             ifdef DEBUG
-              cout << STAT_word[STATW_SHAPE] << " : " << process->observation[i]->shape  << "   "
+              cout << STAT_word[STATW_SHAPE] << " : " << process->observation[i]->shape << "   "
                    << STAT_word[STATW_SCALE] << " : " << process->observation[i]->scale << endl;
 #             endif
 
@@ -465,7 +465,7 @@ void MarkovianSequences::zero_inflated_gamma_estimation(Type ***state_sequence_c
               j++;
 
 #             ifdef DEBUG
-              cout << STAT_word[STATW_SHAPE] << " : " << process->observation[i]->shape  << "   "
+              cout << STAT_word[STATW_SHAPE] << " : " << process->observation[i]->shape << "   "
                    << STAT_word[STATW_SCALE] << " : " << process->observation[i]->scale << endl;
 #             endif
 
