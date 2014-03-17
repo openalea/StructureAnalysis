@@ -321,14 +321,8 @@ public :
 
     int nb_state;           // nombre d'etats
     int ident;              // identificateur des lois d'observation
-    union {
-      bool tied_scale;      // parametres d'echelle lies ou non (GAMMA)
-      bool tied_location;   // moyennes lies ou non (GAUSSIAN)
-    };
-    union {
-      bool tied_shape;      // parametres de forme lies ou non (GAMMA)
-      bool tied_dispersion; // parametres de dispersion lies ou non (GAUSSIAN / VON_MISES)
-    };
+    bool tied_location;     // moyennes lies ou non  (GAMMA / GAUSSIAN)
+    bool tied_dispersion;   // parametres de dispersion lies ou non (GAMMA / GAUSSIAN / VON_MISES)
     int unit;               // unite (degre/radian) pour les lois de von Mises
     ContinuousParametric **observation;  // lois d'observation
     Distribution *weight;   // poids theorique des lois d'observation
