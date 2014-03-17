@@ -5,7 +5,7 @@
  *
  *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id: mixture.cpp 15005 2013-09-30 14:23:12Z guedon $
@@ -132,61 +132,16 @@ Mixture::Mixture(int inb_component , int inb_output_process , int *nb_value)
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur de la classe Mixture (modele gamma univarié avec parametre de forme commun).
+ *  Constructeur de la classe Mixture (modele gamma ou gaussien univarié avec parametres lies).
  *
- *  arguments : nombre de composantes, moyenne, parametre de forme,
- *              flag parametres d'echelle liees.
- *
- *--------------------------------------------------------------*/
-
-Mixture::Mixture(int inb_component , double mean , double shape , bool tied_scale)
-
-{
-  register int i , j;
-  ContinuousParametric **observation;
-
-
-  mixture_data = NULL;
-
-  nb_component = inb_component;
-  weight = new DiscreteParametric(nb_component);
-
-  nb_output_process = 1;
-
-  categorical_process = new CategoricalProcess*[1];
-  discrete_parametric_process = new DiscreteParametricProcess*[1];
-  continuous_parametric_process = new ContinuousParametricProcess*[1];
-
-  categorical_process[0] = NULL;
-  discrete_parametric_process[0] = NULL;
-
-  observation = new ContinuousParametric*[nb_component];
-
-  i = 1;
-  for (j = 0;j < nb_component;j++) {
-    weight->mass[j] = 1 / (double)nb_component;
-    observation[j] = new ContinuousParametric(GAMMA , shape , i * mean / shape);
-    i *= 2;
-  }
-
-  continuous_parametric_process[0] = new ContinuousParametricProcess(nb_component , observation);
-  continuous_parametric_process[0]->tied_shape = true;
-  continuous_parametric_process[0]->tied_scale = tied_scale;
-
-  delete [] observation;
-}
-
-
-/*--------------------------------------------------------------*
- *
- *  Constructeur de la classe Mixture (modele gaussien univarié avec variances liees).
- *
- *  arguments : nombre de composantes, moyenne, ecart-type, flag moyennes liees,
+ *  arguments : nombre de composantes, identificateur des composantes (GAMMA / GAUSSIAN),
+ *              moyenne et parametre de forme de la premiere composante (GAMMA) /
+ *              moyenne et ecart-type de la premiere composante (GAUSSIAN), flag moyennes liees,
  *              type de lien entre les variances (CONVOLUTION_FACTOR / SCALING_FACTOR).
  *
  *--------------------------------------------------------------*/
 
-Mixture::Mixture(int inb_component , double mean , double standard_deviation ,
+Mixture::Mixture(int inb_component , int ident , double mean , double standard_deviation ,
                  bool tied_mean , int variance_factor)
 
 {
@@ -214,13 +169,31 @@ Mixture::Mixture(int inb_component , double mean , double standard_deviation ,
   for (j = 0;j < nb_component;j++) {
     weight->mass[j] = 1 / (double)nb_component;
 
-    switch (variance_factor) {
-    case CONVOLUTION_FACTOR :
-      observation[j] = new ContinuousParametric(GAUSSIAN , i * mean , sqrt((double)i) * standard_deviation);
+    switch (ident) {
+
+    case GAMMA : {
+      switch (variance_factor) {
+      case CONVOLUTION_FACTOR :
+        observation[j] = new ContinuousParametric(GAMMA , i * standard_deviation , mean / standard_deviation);
+        break;
+      case SCALING_FACTOR :
+        observation[j] = new ContinuousParametric(GAMMA , standard_deviation , i * mean / standard_deviation);
+        break;
+      }
       break;
-    case SCALING_FACTOR :
-      observation[j] = new ContinuousParametric(GAUSSIAN , i * mean , i * standard_deviation);
+    }
+
+    case GAUSSIAN : {
+      switch (variance_factor) {
+      case CONVOLUTION_FACTOR :
+        observation[j] = new ContinuousParametric(GAUSSIAN , i * mean , sqrt((double)i) * standard_deviation);
+        break;
+      case SCALING_FACTOR :
+        observation[j] = new ContinuousParametric(GAUSSIAN , i * mean , i * standard_deviation);
+        break;
+      }
       break;
+    }
     }
     i *= 2;
   }
