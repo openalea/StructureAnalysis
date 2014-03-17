@@ -5,7 +5,7 @@
  *
  *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id: mixture.h 14946 2013-09-30 12:29:22Z guedon $
@@ -111,8 +111,7 @@ public :
 
     Mixture();
     Mixture(int inb_component , int inb_output_process , int *nb_value);
-    Mixture(int inb_component , double mean , double shape , bool tied_scale);
-    Mixture(int inb_component , double mean , double standard_deviation ,
+    Mixture(int inb_component , int ident , double mean , double standard_deviation ,
             bool tied_mean , int variance_factor);
     Mixture(const Mixture &mixt , bool data_flag = true)
     { copy(mixt , data_flag); }
