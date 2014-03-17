@@ -245,7 +245,7 @@ HiddenMarkovIndOutTree::state_tree_computation(StatError& error,
         || (_nb_doutput_process != otrees._nb_float))
    {
       status= false;
-      error.update(STAT_TREES_error[STATR_NB_OUTPUT_PROCESS]);
+      error.update(STAT_error[STATR_NB_OUTPUT_PROCESS]);
    }
    else
    {
@@ -261,7 +261,7 @@ HiddenMarkovIndOutTree::state_tree_computation(StatError& error,
             status= false;
             ostringstream error_message;
             error_message << STAT_label[STATL_OUTPUT_PROCESS] << " " << var+1 << ": "
-                          << STAT_TREES_error[STATR_NB_OUTPUT];
+                          << STAT_error[STATR_NB_OUTPUT];
             error.update((error_message.str()).c_str());
          }
       }
@@ -2151,7 +2151,7 @@ HiddenMarkovTreeData::hidden_markov_ind_out_tree_estimation(StatError& error,
       }
 
    if (!status)
-      error.update(STAT_TREES_error[STATR_NB_OUTPUT]);
+      error.update(STAT_error[STATR_NB_OUTPUT]);
    else
    {
       if ((ihmarkov._nb_ioutput_process != _nb_integral)
@@ -2160,7 +2160,7 @@ HiddenMarkovTreeData::hidden_markov_ind_out_tree_estimation(StatError& error,
           // must match
       {
          status = false;
-         error.update(STAT_TREES_error[STATR_NB_OUTPUT_PROCESS]);
+         error.update(STAT_error[STATR_NB_OUTPUT_PROCESS]);
       }
       else
       {
@@ -2174,7 +2174,7 @@ HiddenMarkovTreeData::hidden_markov_ind_out_tree_estimation(StatError& error,
                status= false;
                ostringstream error_message;
                error_message << STAT_label[STATL_OUTPUT_PROCESS] << " " << var+1 << ": "
-                             << STAT_TREES_error[STATR_NB_OUTPUT] << "(";
+                             << STAT_error[STATR_NB_OUTPUT] << "(";
                if (ihmarkov.piprocess[var+1] != NULL)
                   error_message << ihmarkov.piprocess[var+1]->nb_value;
                else
