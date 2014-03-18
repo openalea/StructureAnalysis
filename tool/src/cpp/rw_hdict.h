@@ -89,7 +89,12 @@ struct ValHDict : public tool_hash_map< Key, T, rw_hash<Key> >
 		) {}
   size_t entries() { return this->size(); }
   bool contains( const key_type& k ) const
-   { return ( this->count(k) != 0 ); }
+   { 
+    const_iterator it= this->find(k);
+    if( it == this->end() )
+      return false;
+    return true;
+    }
 #ifndef STL_EXTENSION
   void insertKeyAndValue( const key_type& k, const data_type& a )
     { this->operator[](k)= a; }

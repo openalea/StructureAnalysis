@@ -55,8 +55,8 @@ istream& RWString::readLine(istream& s, bool skipWhite){
 
 size_t RWString::hash() const
 {
- tool_hash<const char*> my_hasher;
- return my_hasher(c_str());
+ tool_hash<std::string> my_hasher;
+ return my_hasher(*this);
 }
 
 istream& RWString::readToDelim( istream& s, char delim)
