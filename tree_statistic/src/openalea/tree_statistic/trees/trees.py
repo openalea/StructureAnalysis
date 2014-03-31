@@ -248,8 +248,14 @@ class Tree:
         return list(self.__attributes)
 
     def Depth(self):
-        """Return the tree depth."""
-        return self.__ctree.Depth()
+        """Return the tree depth.
+        
+        The depth of a vertex is the number of vertices along the path
+        between this vertex and the root vertex
+        (including both vertices, which may be confounded).
+        The depth of a tree is the maximal depth of its vertices."""
+        
+        return self.__ctree.Depth() + 1
 
     def Display(self, vids=True, attributes=True, mtg_vids=False):
         """
@@ -757,47 +763,56 @@ class Tree:
         return mtgs
     
     def __mtg_skip(self, key, tabulation, post_tabulation):
-        tab= "\t"
+        tab = "\t"
         # position in stream is supposed to be set before function call
-        stream="V"+str(key)
+        stream = "V"+str(key)
         # print the attributes in column self.Depth()+1
-        stream+="\t"*(self.__ctree.Order()-self.__ctree.Order(key)+1)
-        stream+=post_tabulation
-        value=self.Get(key) # attributes
+        stream += "\t"*(self.__ctree.Order()-self.__ctree.Order(key)+1)
+        stream += post_tabulation
+        value = self.Get(key) # attributes
         for var in range(len(value)-1):
-            stream+=str(value[var])+"\t"
-        stream+=str(value[len(value)-1])
+            stream += str(value[var])+"\t"
+        stream += str(value[len(value)-1])
         # print the children
-        children_it= self.__ctree.Children(key)
-        children=[] # list of children of vertex key
+        children_it = self.__ctree.Children(key)
+        children = [] # list of children of vertex key
         current_child=0
         try:
             while 1:
                 children.append(children_it.next())
         except StopIteration: pass
+        children_control = list(self.__ctree.Children(key))
+        assert str(children_control) == str(children)
         # commented lines are useful if we do not want to save the attribute
 ##        if len(children)>1:
         # tabulation+=tab
 ##        else:
 ##            tabulation=""
 ##        if len(children)>1:        
-        stream+="\n"
+        stream += "\n"
+        write_successor = None
         while current_child <= len(children)-1:
-            etype=self.EdgeType(key, children[current_child])
-            if etype=='<':
-                tmark="^"
+            # '<' child must be written last if any
+            etype = self.EdgeType(key, children[current_child])
+            if etype == '<':
+                write_successor = current_child
             else:
-                tmark=""
-                tabulation+=tab
-            stream+=tabulation + tmark + etype \
-                  +self.__mtg_skip(children[current_child], tabulation, 
-                                   post_tabulation)
-            current_child+=1
+                tmark = ""
+                tabulation += tab
             if etype=='+':
-                tabulation=tabulation[0:len(tabulation)-1]
-        tabulation=tabulation[0:len(tabulation)-1]
-
-
+                stream += tabulation + tmark + etype \
+                        +self.__mtg_skip(children[current_child], tabulation, 
+                                            post_tabulation)
+                tabulation = tabulation[0:len(tabulation)-1]
+            current_child += 1
+        # write "<" child
+        if not(write_successor is None):
+            etype = '<'
+            tmark = "^"
+            stream += tabulation + tmark + etype \
+                       +self.__mtg_skip(children[write_successor], tabulation, 
+                                        post_tabulation)
+        tabulation = tabulation[0:len(tabulation)-1] # may be do it before < child
 ##        while current_child <= len(children)-1:
 ##            stream+=tabulation+self.EdgeType(key, children[current_child]) \
 ##                  +self.__mtg_skip(children[current_child], tabulation, 

@@ -45,26 +45,26 @@ namespace Stat_trees
 {
 
 const char *STAT_TREES_word[] = {
-  "HIDDEN_MARKOV_TREE" ,               // STATW_HIDDEN_MARKOV_TREE
-  "EQUILIBRIUM_HIDDEN_MARKOV_TREE" ,   // STATW_EQUILIBRIUM_HIDDEN_MARKOV_TREE
-  "HIDDEN_MARKOV_INDEPENDENT_OUT_TREE" ,           // STATW_HIDDEN_MARKOV_IND_OUT_TREE
-  "EQUILIBRIUM_HIDDEN_MARKOV_INDEPENDENT_OUT_TREE" , // STATW_EQUILIBRIUM_IND_HIDDEN_MARKOV_OUT_TREE
-  "MARKOV_OUT_TREE" , // STATW_MARKOV_OUT_TREE ,
+  "HIDDEN_MARKOV_TREE" ,               // TREESTATW_HIDDEN_MARKOV_TREE
+  "EQUILIBRIUM_HIDDEN_MARKOV_TREE" ,   // TREESTATW_EQUILIBRIUM_HIDDEN_MARKOV_TREE
+  "HIDDEN_MARKOV_INDEPENDENT_OUT_TREE" ,           // TREESTATW_HIDDEN_MARKOV_IND_OUT_TREE
+  "EQUILIBRIUM_HIDDEN_MARKOV_INDEPENDENT_OUT_TREE" , // TREESTATW_EQUILIBRIUM_IND_HIDDEN_MARKOV_OUT_TREE
+  "MARKOV_OUT_TREE" , // TREESTATW_MARKOV_OUT_TREE ,
   "GENERATION_DISTRIBUTION" , //  STATW_GENERATION_DISTRIBUTION
-  "GENERATION " , // STATW_GENERATION
-  "GENERATION_PROCESS" , // STATW_GENERATION_PROCESS
-  "GENERATION_PROCESSES" , // STATW_GENERATION_PROCESSES
-  "PARENT_STATE" , // STATW_PARENT_STATE
-  "FACTOR" , // STATW_FACTOR
-  "EXTERNAL_FACTOR" , // STATW_EXTERNAL_FACTOR
-  "FACTORS" , // STATW_FACTORS
-  "EXTERNAL_FACTORS" , // STATW_EXTERNAL_FACTORS
-  "CHILD" , // STATW_CHILD
-  "CHILDREN", // STATW_CHILDREN
-  "ORDERED_CHILD" , // STATW_ORDERED_CHILD
-  "ORDERED_CHILDREN" , // STATW_ORDERED_CHILDREN
-  "VARIABLE_ORDER_MARKOV_CHAIN" , // STATW_VARIABLE_ORDER_MARKOV_CHAIN
-  "VARIABLE_ORDER_MARKOV_CHAINS" // STATW_VARIABLE_ORDER_MARKOV_CHAINS
+  "GENERATION " , // TREESTATW_GENERATION
+  "GENERATION_PROCESS" , // TREESTATW_GENERATION_PROCESS
+  "GENERATION_PROCESSES" , // TREESTATW_GENERATION_PROCESSES
+  "PARENT_STATE" , // TREESTATW_PARENT_STATE
+  "FACTOR" , // TREESTATW_FACTOR
+  "EXTERNAL_FACTOR" , // TREESTATW_EXTERNAL_FACTOR
+  "FACTORS" , // TREESTATW_FACTORS
+  "EXTERNAL_FACTORS" , // TREESTATW_EXTERNAL_FACTORS
+  "CHILD" , // TREESTATW_CHILD
+  "CHILDREN", // TREESTATW_CHILDREN
+  "ORDERED_CHILD" , // TREESTATW_ORDERED_CHILD
+  "ORDERED_CHILDREN" , // TREESTATW_ORDERED_CHILDREN
+  "VARIABLE_ORDER_MARKOV_CHAIN" , // TREESTATW_VARIABLE_ORDER_MARKOV_CHAIN
+  "VARIABLE_ORDER_MARKOV_CHAINS" // TREESTATW_VARIABLE_ORDER_MARKOV_CHAINS
 };
 
 
@@ -99,42 +99,42 @@ const char *STAT_TREES_multivariate_distribution_word[] = {
  */
 
 const char *STAT_MULTIVARIATE_label[] = {
-  "discrete multivariate distribution" ,  // STATL_DISCRETE_MULTIVARIATE_DISTRIBUTION
+  "discrete multivariate distribution" ,  // TREESTATL_DISCRETE_MULTIVARIATE_DISTRIBUTION
 };
 
 const char *STAT_MULTIVARIATE_PARSING_word[] = {
-  "COMPOUNDING_DISTRIBUTION" ,  // STATW_COMPOUNDING_DISTRIBUTION
+  "COMPOUNDING_DISTRIBUTION" ,  // TREESTATW_COMPOUNDING_DISTRIBUTION
 };
 
 const char *STAT_TREES_label[] = {
-  "log-likelihood of the state tree" ,  // STATL_STATE_TREE_LIKELIHOOD
+  "log-likelihood of the state tree" ,  // TREESTATL_STATE_TREE_LIKELIHOOD
   "log-likelihood of the state trees" , //  STATL_STATE_TREES_LIKELIHOOD
   "log-likelihood of the observed trees" , //  STATL_OBSERVED_TREES_LIKELIHOOD
-  "information of the trees in the iid case" , // STATL_TREES_IID_INFORMATION
+  "information of the trees in the iid case" , // TREESTATL_TREES_IID_INFORMATION
 
-  "smoothed" , // STATL_SMOOTHED
+  "smoothed" , // TREESTATL_SMOOTHED
   "observed" , //  STATL_OBSERVED
 
 
-  "probability of no-occurrence of state" , // STATL_STATE_NO_OCCURRENCE
+  "probability of no-occurrence of state" , // TREESTATL_STATE_NO_OCCURRENCE
   "probability of no-occurrence of output" , //   STATL_OUTPUT_NO_OCCURRENCE
-  "absorption probability of state" , // STATL_STATE_ABSORPTION
-  "absorption probability of output" , // STATL_OUTPUT_ABSORPTION
+  "absorption probability of state" , // TREESTATL_STATE_ABSORPTION
+  "absorption probability of output" , // TREESTATL_OUTPUT_ABSORPTION
 
   "path length (starting from root) up to the first occurrence of state" , //STATL_STATE_FIRST_OCCURRENCE_ROOT
-  "path length (starting from root) up to the first occurrence of output" , // STATL_OUTPUT_FIRST_OCCURRENCE_ROOT
-  "path length (starting from terminal node) up to the first occurrence of state" , // STATL_STATE_FIRST_OCCURRENCE_LEAVES
-  "path length (starting from terminal nodes) up to the first occurrence of output" , // STATL_OUTPUT_FIRST_OCCURRENCE_LEAVES
-  "sojourn size" , // STATL_SOJOURN_SIZE
-  "mixture of " , // STATL_MIXTURE_OF
+  "path length (starting from root) up to the first occurrence of output" , // TREESTATL_OUTPUT_FIRST_OCCURRENCE_ROOT
+  "path length (starting from terminal node) up to the first occurrence of state" , // TREESTATL_STATE_FIRST_OCCURRENCE_LEAVES
+  "path length (starting from terminal nodes) up to the first occurrence of output" , // TREESTATL_OUTPUT_FIRST_OCCURRENCE_LEAVES
+  "sojourn size" , // TREESTATL_SOJOURN_SIZE
+  "mixture of " , // TREESTATL_MIXTURE_OF
   "number of zones of state" ,
   "number of zones of output" ,
-  "number of occurrences of state" , // STATL_STATE_NB_OCCURRENCE
-  "number of occurrences of output" , // STATL_OUTPUT_NB_OCCURRENCE
+  "number of occurrences of state" , // TREESTATL_STATE_NB_OCCURRENCE
+  "number of occurrences of output" , // TREESTATL_OUTPUT_NB_OCCURRENCE
   "per tree" ,
   "per size" ,
-  "state probabilities" , // STATL_STATE_PROBABILITY
-  "distances between observation distributions for consecutive states" , // STATL_OBSERVATION_DISTRIBUTION_DISTANCE
+  "state probabilities" , // TREESTATL_STATE_PROBABILITY
+  "distances between observation distributions for consecutive states" , // TREESTATL_OBSERVATION_DISTRIBUTION_DISTANCE
   "posterior state probabilities" ,
   "posterior in state probabilities" ,
   "posterior out state probabilities" ,
@@ -149,7 +149,7 @@ const char *STAT_TREES_label[] = {
   "maximum posterior state probabilities" ,
   "maximum posterior in state probabilities" ,
   "maximum posterior out state probabilities" ,
-  "ambiguity" , // STATL_AMBIGUITY
+  "ambiguity" , // TREESTATL_AMBIGUITY
 
   "tree" ,
   "trees" ,
@@ -159,11 +159,11 @@ const char *STAT_TREES_label[] = {
   "cumulative size" ,
   "number of children" ,
   "cumulative number of children" ,
-  "time" , // STATL_TIME
+  "time" , // TREESTATL_TIME
 
-  "generation" , // STATL_GENERATION
-  "generation process" , // STATL_GENERATION_PROCESS
-  "parent" // STATL_PARENT
+  "generation" , // TREESTATL_GENERATION
+  "generation process" , // TREESTATL_GENERATION_PROCESS
+  "parent" // TREESTATL_PARENT
 };
 
 
@@ -174,13 +174,13 @@ const char *STAT_TREES_label[] = {
  */
 
 const char *STAT_TREES_parsing[] = {
-  "bad probability value", // STATP_BAD_PROBABILITY
-  "bad value for sum of (1-probabilities)" , // STATP_BAD_ONE_MINUS_PROBABILITIES
-  "bad number of ordered children" , // STATP_ORDERED_CHILDREN
-  "bad number of variable order Markov chains" , // STATP_NB_VOMC
-  "bad number of generation processes" , // STATP_NB_GENERATION_PROCESS
-  "bad number of children involved as factor in generation process" , // STATP_NB_CHILDREN_BRANCHING
-  "bad number of factors" // STATP_NB_FACTORS
+  "bad probability value", // TREESTATP_BAD_PROBABILITY
+  "bad value for sum of (1-probabilities)" , // TREESTATP_BAD_ONE_MINUS_PROBABILITIES
+  "bad number of ordered children" , // TREESTATP_ORDERED_CHILDREN
+  "bad number of variable order Markov chains" , // TREESTATP_NB_VOMC
+  "bad number of generation processes" , // TREESTATP_NB_GENERATION_PROCESS
+  "bad number of children involved as factor in generation process" , // TREESTATP_NB_CHILDREN_BRANCHING
+  "bad number of factors" // TREESTATP_NB_FACTORS
 };
 
 
@@ -193,20 +193,20 @@ const char *STAT_TREES_parsing[] = {
 
 const char *STAT_TREES_error[] = {
   "bad number of states" , // SEQR_NB_STATE
-  "bad number of values per variable" , // STATR_VARIABLE_NB_VALUE
+  "bad number of values per variable" , // TREESTATR_VARIABLE_NB_VALUE
 //  "bad number of output processes" ,   STATR_NB_OUTPUT_PROCESS
-  "bad number of integer output processes" ,  // STATR_NB_INT_OUTPUT_PROCESS
-  "bad number of floating output processes" ,  // STATR_NB_REAL_OUTPUT_PROCESS
-//  "bad output process index" ,  STATR_OUTPUT_PROCESS_INDEX
+  "bad number of integer output processes" ,  // TREESTATR_NB_INT_OUTPUT_PROCESS
+  "bad number of floating output processes" ,  // TREESTATR_NB_REAL_OUTPUT_PROCESS
+  "bad output process index" ,  // TREESTATR_OUTPUT_PROCESS_INDEX
 //  "bad number of outputs" ,  STATR_NB_OUTPUT
-  "bad self-transition probability" , // STATR_SELF_TRANSITION
-  "bad number of state trees", // STATR_NB_STATE_TREES
-  "bad number of trees" , // STATR_NB_TREES
+  "bad self-transition probability" , // TREESTATR_SELF_TRANSITION
+  "bad number of state trees", // TREESTATR_NB_STATE_TREES
+  "bad number of trees" , // TREESTATR_NB_TREES
   "bad tree identifier" ,
   "number of children too high" ,
   "number of children too low" ,
-  "bad number of children" , // STATR_TREE_NB_CHILDREN
-  "bad tree size" , // STATR_TREE_SIZE
+  "bad number of children" , // TREESTATR_TREE_NB_CHILDREN
+  "bad tree size" , // TREESTATR_TREE_SIZE
   "bad vertex identifier" ,
   "child IDs do not match" ,
   "tree size too small" ,
@@ -215,26 +215,26 @@ const char *STAT_TREES_error[] = {
   "tree cumulative number of children too high" ,
   "failure in the computation of the optimal state trees" ,
 
-//  "not present" ,  STATR_NOT_PRESENT
+  "not present" , // TREESTATR_NOT_PRESENT
 
-  "model not present" , // STATR_NO_MODEL
+  "model not present" , // TREESTATR_NO_MODEL
 
-  "vector does not define a permutation" , // STATR_NO_PERMUTATION
+  "vector does not define a permutation" , // TREESTATR_NO_PERMUTATION
 
-  "bad exponent for saem" , // STATR_SAEM_EXP
-  "bad estimation algorithm" , // STATR_EM_ALGORITHM
+  "bad exponent for saem" , // TREESTATR_SAEM_EXP
+  "bad estimation algorithm" , // TREESTATR_EM_ALGORITHM
 
-  "bad variable type" , // STATR_VARIABLE_TYPE
+  "bad variable type" , // TREESTATR_VARIABLE_TYPE
   "variable 1: bad variable type" , // STAR_VARIABLE_1_TYPE
-  "bad minimum tree size" , // STATR_MIN_TREE_SIZE
-  "bad maximum tree size" , // STATR_MAX_TREE_SIZE
-  "bad number of selected values" , // STATR_NB_SELECTED_VALUE
+  "bad minimum tree size" , // TREESTATR_MIN_TREE_SIZE
+  "bad maximum tree size" , // TREESTATR_MAX_TREE_SIZE
+  "bad number of selected values" , // TREESTATR_NB_SELECTED_VALUE
 
-  "state trees not in the data", // STATR_STATE_TREES
-  "characteristics not computed" , // STATR_CHARACTERISTICS_NOT_COMPUTED
-  "non-existing characteristic distribution" , // STATR_NON_EXISTING_CHARACTERISTIC_DISTRIBUTION
-  "bad configuration of factors in generation process" , // STATR_BAD_FACTORS
-  "object does not contain any generation process"  // STATR_NON_EXISTING_GENERATION_PROCESS
+  "state trees not in the data", // TREESTATR_STATE_TREES
+  "characteristics not computed" , // TREESTATR_CHARACTERISTICS_NOT_COMPUTED
+  "non-existing characteristic distribution" , // TREESTATR_NON_EXISTING_CHARACTERISTIC_DISTRIBUTION
+  "bad configuration of factors in generation process" , // TREESTATR_BAD_FACTORS
+  "object does not contain any generation process"  // TREESTATR_NON_EXISTING_GENERATION_PROCESS
 };
 
 }; // end namespace

@@ -1013,7 +1013,7 @@ public :
          if ((variable <= 0) ||
              (variable > reftree.get_nb_int() + reftree.get_nb_float()))
          {
-            error_message << STAT_TREES_error[STATR_OUTPUT_PROCESS_INDEX];
+            error_message << STAT_TREES_error[TREESTATR_OUTPUT_PROCESS_INDEX];
             throw_python_error(PyExc_IndexError, error_message);
          }
          else

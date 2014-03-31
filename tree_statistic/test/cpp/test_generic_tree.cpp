@@ -13,7 +13,8 @@
 #include <deque>
 #include <cstdlib>
 
-using namespace Stat_trees;
+using namespace Stat_trees; 
+using namespace Tree_tie;
 
 typedef Generic_tree<int> tree_int;
 

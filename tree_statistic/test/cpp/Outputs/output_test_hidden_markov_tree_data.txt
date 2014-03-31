@@ -1740,7 +1740,7 @@ log-likelihood of the observed trees: -90.8011   (normalized: -1.39694)
 14 free parameters   2 * penalyzed log-likelihood (ICLc): -317.94
 
 chi-square test (6 degrees of freedom)
-chi-square value: 9.31989e+08   critical probability: 0
+chi-square value: 9.69473e+08   critical probability: 0
 reference chi-square value: 12.5916   reference critical probability: 0.05
 reference chi-square value: 16.8119   reference critical probability: 0.01
 

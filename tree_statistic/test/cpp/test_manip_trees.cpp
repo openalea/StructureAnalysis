@@ -25,6 +25,7 @@
 #endif
 
 using namespace Stat_trees;
+using namespace Tree_tie;
 
 int main(void)
 {

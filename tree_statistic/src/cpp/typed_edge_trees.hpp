@@ -219,7 +219,7 @@ Typed_edge_one_int_tree* Typed_edge_int_fl_tree<Generic_Int_fl_container>::selec
    assert((variable >=0) && (variable < _nb_integral));
    utree= this->get_structure();
    res_tree= new Typed_edge_one_int_tree(*utree);
-   tie(it, end)= this->vertices();
+   Tree_tie::tie(it, end)= this->vertices();
    while ( it != end )
      {
        v.Int()= this->get(*it).Int(variable);
@@ -253,7 +253,7 @@ Generic_Int_fl_container* Typed_edge_int_fl_tree<Generic_Int_fl_container>::get_
     for(var= 0; var < _nb_float; var++)
         _min_value->Double(var)= FLT_MAX;
 
-    tie(it, end)= this->vertices();
+    Tree_tie::tie(it, end)= this->vertices();
     while (it < end)
     {
        v= this->get(*it);
@@ -284,7 +284,7 @@ Generic_Int_fl_container* Typed_edge_int_fl_tree<Generic_Int_fl_container>::get_
     for(var= 0; var < _nb_float; var++)
         _max_value->Double(var)= -FLT_MAX;
 
-    tie(it, end)= this->vertices();
+    Tree_tie::tie(it, end)= this->vertices();
     while (it < end)
     {
        v= this->get(*it);
@@ -317,7 +317,7 @@ void Typed_edge_int_fl_tree<Generic_Int_fl_container>::iid_simulation(Distributi
    vertex_iterator it, end;
    value v(_nb_integral, 0);
 
-   tie(it, end)= this->vertices();
+   Tree_tie::tie(it, end)= this->vertices();
    while ( it != end )
    {
        v= this->get(*it);
@@ -711,7 +711,7 @@ DiscreteDistributionData* Typed_edge_trees<Generic_Int_fl_container>::extract(St
         status= false;
         ostringstream error_message , correction_message;
         error_message << STAT_label[STATL_VARIABLE] << " " << variable+1 << ": "
-                      << STAT_TREES_error[STATR_VARIABLE_TYPE];
+                      << STAT_TREES_error[TREESTATR_VARIABLE_TYPE];
         correction_message << STAT_TREES_word[INT_VALUE] << " or " << STAT_TREES_word[STATE];
         error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
      }
@@ -767,7 +767,7 @@ Typed_edge_trees<Generic_Int_fl_container>::extract(StatError &error, int type,
          status= false;
          ostringstream error_message;
          error_message << STAT_label[variable == 0 ? STATL_STATE : STATL_OUTPUT] << " "
-                       << value << " " << STAT_TREES_error[STATR_NOT_PRESENT];
+                       << value << " " << STAT_TREES_error[TREESTATR_NOT_PRESENT];
          error.update((error_message.str()).c_str());
       }
 
@@ -818,7 +818,7 @@ Typed_edge_trees<Generic_Int_fl_container>::extract(StatError &error, int type,
          }
 
          if (!status)
-            error.update(STAT_TREES_error[STATR_CHARACTERISTICS_NOT_COMPUTED]);
+            error.update(STAT_TREES_error[TREESTATR_CHARACTERISTICS_NOT_COMPUTED]);
          else
          {
             if (phisto->nb_element == 0)
@@ -834,7 +834,7 @@ Typed_edge_trees<Generic_Int_fl_container>::extract(StatError &error, int type,
    else // the caracteristics have not been computed
    {
       status= false;
-      error.update(STAT_TREES_error[STATR_CHARACTERISTICS_NOT_COMPUTED]);
+      error.update(STAT_TREES_error[TREESTATR_CHARACTERISTICS_NOT_COMPUTED]);
    }
 
    return histo;
@@ -863,7 +863,7 @@ Typed_edge_trees<Generic_Int_fl_container>::build_vectors(StatError& error) cons
    if (_nb_integral == 0)
    {
       status= false;
-      error_message << STAT_TREES_error[STATR_NB_INT_OUTPUT_PROCESS] << " ";
+      error_message << STAT_TREES_error[TREESTATR_NB_INT_OUTPUT_PROCESS] << " ";
 
       error.correction_update((error_message.str()).c_str(), _nb_integral);
       error_message.str("");
@@ -885,7 +885,7 @@ Typed_edge_trees<Generic_Int_fl_container>::build_vectors(StatError& error) cons
       iidentifier= new int[size];
       for (t= 0; t < _nb_trees; t++)
       {
-         tie(it, end)= trees[t]->vertices();
+         Tree_tie::tie(it, end)= trees[t]->vertices();
          while(it < end)
          {
             ivectors[vector_id]= new int[_nb_integral];
@@ -951,7 +951,7 @@ Typed_edge_trees<Generic_Int_fl_container>::build_sequences(StatError& error,
    if (_nb_integral == 0)
    {
       status= false;
-      error_message << STAT_TREES_error[STATR_NB_INT_OUTPUT_PROCESS] << " ";
+      error_message << STAT_TREES_error[TREESTATR_NB_INT_OUTPUT_PROCESS] << " ";
 
       error.correction_update((error_message.str()).c_str(), _nb_integral);
       error_message.str("");
@@ -1035,7 +1035,7 @@ Typed_edge_trees<Generic_Int_fl_container>::build_sequences(StatError& error,
                      {
                         // check whether every other children are +
                         // and add a new sequence in this case
-                        tie(it, end) = trees[t]->children(parent_vertex);
+                        Tree_tie::tie(it, end) = trees[t]->children(parent_vertex);
                         children_count = 0;
                         no_successor = true;
                         reached_current_vertex = false;
@@ -1181,7 +1181,7 @@ Typed_edge_trees<Generic_Int_fl_container>::merge(StatError& error,
                status= false;
                error_message << STAT_label[STATL_SAMPLE] << " " << o+2 << ": "
                              << STAT_label[STATL_VARIABLE] << " " << var+1 << ": "
-                             << STAT_TREES_error[STATR_VARIABLE_TYPE];
+                             << STAT_TREES_error[TREESTATR_VARIABLE_TYPE];
 
                error.correction_update((error_message.str()).c_str(), STAT_TREES_type[_type[var]]);
                error_message.str("");
@@ -1264,7 +1264,7 @@ Typed_edge_trees<Generic_Int_fl_container>::shift(StatError& error,
          correction_message << STAT_TREES_type[INT_VALUE]
                             << " or " << STAT_TREES_type[TIME]
                             << " or " << STAT_TREES_type[STATE];
-         error.correction_update(STAT_TREES_error[STATR_VARIABLE_TYPE] , (correction_message.str()).c_str());
+         error.correction_update(STAT_TREES_error[TREESTATR_VARIABLE_TYPE] , (correction_message.str()).c_str());
       }
       else
       {
@@ -1293,7 +1293,7 @@ Typed_edge_trees<Generic_Int_fl_container>::shift(StatError& error,
 
       for(t= 0; t < _nb_trees; t++)
       {
-         tie(it, end)= (otrees->trees[t])->vertices();
+         Tree_tie::tie(it, end)= (otrees->trees[t])->vertices();
          while (it < end)
          {
             // translation of the variable
@@ -1349,7 +1349,7 @@ Typed_edge_trees<Generic_Int_fl_container>::shift(StatError& error,
          status= false;
          ostringstream correction_message;
          correction_message << STAT_TREES_type[REAL_VALUE];
-         error.correction_update(STAT_TREES_error[STATR_VARIABLE_TYPE] , (correction_message.str()).c_str());
+         error.correction_update(STAT_TREES_error[TREESTATR_VARIABLE_TYPE] , (correction_message.str()).c_str());
       }
       else
       {
@@ -1378,7 +1378,7 @@ Typed_edge_trees<Generic_Int_fl_container>::shift(StatError& error,
 
       for(t= 0; t < _nb_trees; t++)
       {
-         tie(it, end)= (otrees->trees[t])->vertices();
+         Tree_tie::tie(it, end)= (otrees->trees[t])->vertices();
          while (it < end)
          {
             // translation of the variable
@@ -1427,7 +1427,7 @@ Typed_edge_trees<Generic_Int_fl_container>::cluster(StatError &error,
          status= false;
          ostringstream correction_message;
          correction_message << STAT_TREES_type[INT_VALUE] << " or " << STAT_TREES_type[STATE];
-         error.correction_update(STAT_TREES_error[STATR_VARIABLE_TYPE], (correction_message.str()).c_str());
+         error.correction_update(STAT_TREES_error[TREESTATR_VARIABLE_TYPE], (correction_message.str()).c_str());
       }
    }
 
@@ -1481,7 +1481,7 @@ Typed_edge_trees<Generic_Int_fl_container>::transcode(StatError& error,
          status= false;
          ostringstream correction_message;
          correction_message << STAT_TREES_type[INT_VALUE] << " or " << STAT_TREES_type[STATE];
-         error.correction_update(STAT_TREES_error[STATR_VARIABLE_TYPE] , (correction_message.str()).c_str());
+         error.correction_update(STAT_TREES_error[TREESTATR_VARIABLE_TYPE] , (correction_message.str()).c_str());
       }
       else
       {
@@ -1580,7 +1580,7 @@ Typed_edge_trees<Generic_Int_fl_container>::cluster(StatError& error,
          status= false;
          ostringstream correction_message;
          correction_message << STAT_TREES_type[INT_VALUE] << " or " << STAT_TREES_type[STATE];
-         error.correction_update(STAT_TREES_error[STATR_VARIABLE_TYPE], (correction_message.str()).c_str());
+         error.correction_update(STAT_TREES_error[TREESTATR_VARIABLE_TYPE], (correction_message.str()).c_str());
       }
       else
          if ((nb_class < 2) || (nb_class >= _max_value.Int(variable)-_min_value.Int(variable)+1))
@@ -1662,7 +1662,7 @@ Typed_edge_trees<Generic_Int_fl_container>::cluster(StatError& error,
          status= false;
          ostringstream correction_message;
          correction_message << STAT_TREES_type[REAL_VALUE];
-         error.correction_update(STAT_TREES_error[STATR_VARIABLE_TYPE], (correction_message.str()).c_str());
+         error.correction_update(STAT_TREES_error[TREESTATR_VARIABLE_TYPE], (correction_message.str()).c_str());
       }
       else
          if (nb_class < 2)
@@ -1745,7 +1745,7 @@ Typed_edge_trees<Generic_Int_fl_container>::value_select(StatError& error,
       status= false;
       ostringstream correction_message;
       correction_message << STAT_TREES_type[REAL_VALUE];
-      error.correction_update(STAT_TREES_error[STATR_VARIABLE_TYPE] , (correction_message.str()).c_str());
+      error.correction_update(STAT_TREES_error[TREESTATR_VARIABLE_TYPE] , (correction_message.str()).c_str());
    }
    else
    {
@@ -1776,7 +1776,7 @@ Typed_edge_trees<Generic_Int_fl_container>::value_select(StatError& error,
 
       for(t= 0; t < _nb_trees; t++)
       {
-         tie(it, end)= trees[t]->vertices();
+         Tree_tie::tie(it, end)= trees[t]->vertices();
          while (it < end)
          {
             val= (trees[t]->get(*it)).Int(variable);
@@ -1845,7 +1845,7 @@ Typed_edge_trees<Generic_Int_fl_container>::value_select(StatError& error,
       status= false;
       ostringstream correction_message;
       correction_message << STAT_TREES_type[INT_VALUE];
-      error.correction_update(STAT_TREES_error[STATR_VARIABLE_TYPE], (correction_message.str()).c_str());
+      error.correction_update(STAT_TREES_error[TREESTATR_VARIABLE_TYPE], (correction_message.str()).c_str());
    }
    else
    {
@@ -1874,7 +1874,7 @@ Typed_edge_trees<Generic_Int_fl_container>::value_select(StatError& error,
 
       for(t= 0; t < _nb_trees; t++)
       {
-         tie(it, end)= trees[t]->vertices();
+         Tree_tie::tie(it, end)= trees[t]->vertices();
          while (it < end)
          {
             val= (trees[t]->get(*it)).Double(variable);
@@ -1932,7 +1932,7 @@ Typed_edge_trees<Generic_Int_fl_container>::select_individual(StatError& error,
    if ((inb_trees < 1) || (inb_trees > (keep ? _nb_trees : _nb_trees-1)))
    {
       status= false;
-      error.update(STAT_TREES_error[STATR_NB_TREES]);
+      error.update(STAT_TREES_error[TREESTATR_NB_TREES]);
    }
    else
    {
@@ -1959,7 +1959,7 @@ Typed_edge_trees<Generic_Int_fl_container>::select_individual(StatError& error,
          {
             status= false;
             ostringstream error_message;
-            error_message << iidentifier[t] << ": " << STAT_TREES_error[STATR_TREE_IDENTIFIER];
+            error_message << iidentifier[t] << ": " << STAT_TREES_error[TREESTATR_TREE_IDENTIFIER];
             error.update((error_message.str()).c_str());
          }
          else
@@ -1967,7 +1967,7 @@ Typed_edge_trees<Generic_Int_fl_container>::select_individual(StatError& error,
             {
                status= false;
                ostringstream error_message;
-               error_message << STAT_TREES_label[STATL_TREE] << " " << iidentifier[t] << " "
+               error_message << STAT_TREES_label[TREESTATL_TREE] << " " << iidentifier[t] << " "
                              << STAT_error[STATR_ALREADY_SELECTED];
                error.update((error_message.str()).c_str());
             }
@@ -2127,7 +2127,7 @@ Typed_edge_trees<Generic_Int_fl_container>::merge_variable(StatError& error,
    {
       status= false;
       error_message << STAT_label[STATL_SAMPLE] << " " << 1 << ": "
-                    << STAT_TREES_error[STATR_VARIABLE_1_TYPE];
+                    << STAT_TREES_error[TREESTATR_VARIABLE_1_TYPE];
       correction_message << STAT_TREES_type[INT_VALUE] << " or " << STAT_TREES_type[REAL_VALUE]
                          << " or " << STAT_TREES_type[STATE];
       error.correction_update((error_message.str()).c_str(), (correction_message.str()).c_str());
@@ -2139,7 +2139,7 @@ Typed_edge_trees<Generic_Int_fl_container>::merge_variable(StatError& error,
       {
          status= false;
          error_message << STAT_label[STATL_SAMPLE] << " " << s+2 << ": "
-                       << STAT_TREES_error[STATR_VARIABLE_1_TYPE];
+                       << STAT_TREES_error[TREESTATR_VARIABLE_1_TYPE];
          correction_message << STAT_TREES_type[STATE] << " or " << STAT_TREES_type[INT_VALUE]
                             << " or " << STAT_TREES_type[REAL_VALUE];
          error.correction_update((error_message.str()).c_str(), (correction_message.str()).c_str());
@@ -2151,7 +2151,7 @@ Typed_edge_trees<Generic_Int_fl_container>::merge_variable(StatError& error,
       {
          status= false;
          error_message << STAT_label[STATL_SAMPLE] << " " << s+2 << ": "
-                       << STAT_TREES_error[STATR_NB_TREES];
+                       << STAT_TREES_error[TREESTATR_NB_TREES];
          error.update((error_message.str()).c_str());
       }
       if (status)
@@ -2163,13 +2163,13 @@ Typed_edge_trees<Generic_Int_fl_container>::merge_variable(StatError& error,
             {
                status= false;
                error_message << STAT_label[STATL_SAMPLE] << " " << s+2 << ": "
-                             << STAT_TREES_label[STATL_TREE] << " " << t+1 << ": "
-                             << STAT_TREES_error[STATR_TREE_SIZE];
+                             << STAT_TREES_label[TREESTATL_TREE] << " " << t+1 << ": "
+                             << STAT_TREES_error[TREESTATR_TREE_SIZE];
                error.update((error_message.str()).c_str());
             }
             if (status)
             {
-               tie(it, end)= cstree->vertices();
+               Tree_tie::tie(it, end)= cstree->vertices();
                while(it < end)
                {
                   if ((status) &&
@@ -2177,25 +2177,25 @@ Typed_edge_trees<Generic_Int_fl_container>::merge_variable(StatError& error,
                   {
                      status= false;
                      error_message << STAT_label[STATL_SAMPLE] << " " << s+2 << ": "
-                                   << STAT_TREES_label[STATL_TREE] << " " << t+1 << ": "
-                                   << STAT_TREES_label[STATL_VERTEX] << " " << *it << ": "
-                                   << STAT_TREES_error[STATR_TREE_NB_CHILDREN];
+                                   << STAT_TREES_label[TREESTATL_TREE] << " " << t+1 << ": "
+                                   << STAT_TREES_label[TREESTATL_VERTEX] << " " << *it << ": "
+                                   << STAT_TREES_error[TREESTATR_TREE_NB_CHILDREN];
                      error.update((error_message.str()).c_str());
                   }
                   if (status)
                   {
-                     tie(chd_it, chd_end)= cstree->children(*it);
-                     tie(chs_it, chs_end)= trees[t]->children(*it);
+                     Tree_tie::tie(chd_it, chd_end)= cstree->children(*it);
+                     Tree_tie::tie(chs_it, chs_end)= trees[t]->children(*it);
                      while (chs_it < chs_end)
                      {
                         if (*chs_it != *chd_it)
                         {
                            status= false;
                            error_message << STAT_label[STATL_SAMPLE] << " " << s+2 << ": "
-                                         << STAT_TREES_label[STATL_TREE] << " " << t+1 << ": "
-                                         << STAT_TREES_label[STATL_VERTEX] << " " << *it << ": "
+                                         << STAT_TREES_label[TREESTATL_TREE] << " " << t+1 << ": "
+                                         << STAT_TREES_label[TREESTATL_VERTEX] << " " << *it << ": "
                                          << STAT_label[STATL_CHILD] << " " << *chs_it << ": "
-                                         << STAT_TREES_error[STATR_CHILD_ID];
+                                         << STAT_TREES_error[TREESTATR_CHILD_ID];
                            error.update((error_message.str()).c_str());
 
                         }
@@ -2287,7 +2287,7 @@ Typed_edge_trees<Generic_Int_fl_container>::merge_variable(StatError& error,
 #           endif
             for(var= 0; var < ptrees[s]->_nb_integral; var++)
             {
-               tie(it, end)= cstree->vertices();
+               Tree_tie::tie(it, end)= cstree->vertices();
                while (it < end)
                {
                   vsource= cstree->get(*it);
@@ -2300,7 +2300,7 @@ Typed_edge_trees<Generic_Int_fl_container>::merge_variable(StatError& error,
 
             for(var= 0; var < ptrees[s]->_nb_float; var++)
             {
-               tie(it, end)= cstree->vertices();
+               Tree_tie::tie(it, end)= cstree->vertices();
                while (it < end)
                {
                   vsource= cstree->get(*it);
@@ -2373,12 +2373,12 @@ Typed_edge_trees<Generic_Int_fl_container>::size_select(StatError& error,
          || (imin_size > imax_size))
    {
       status= false;
-      error.update(STAT_TREES_error[STATR_MIN_TREE_SIZE]);
+      error.update(STAT_TREES_error[TREESTATR_MIN_TREE_SIZE]);
    }
    if ((imax_size < hsize->offset) || (imax_size < imin_size))
    {
       status= false;
-      error.update(STAT_TREES_error[STATR_MAX_TREE_SIZE]);
+      error.update(STAT_TREES_error[TREESTATR_MAX_TREE_SIZE]);
    }
 
    if (status)
@@ -2446,7 +2446,7 @@ Typed_edge_trees<Generic_Int_fl_container>::select_subtrees(StatError& error,
    {
       status= false;
       ostringstream error_message;
-      error_message << itree << ": " << STAT_TREES_error[STATR_TREE_IDENTIFIER];
+      error_message << itree << ": " << STAT_TREES_error[TREESTATR_TREE_IDENTIFIER];
       error.update((error_message.str()).c_str());
    }
    else
@@ -2456,9 +2456,9 @@ Typed_edge_trees<Generic_Int_fl_container>::select_subtrees(StatError& error,
                {
                   status= false;
                   ostringstream error_message;
-                  error_message << STAT_TREES_label[STATL_TREE] << " " << t+1 << ": "
-                                << STAT_TREES_label[STATL_VERTEX] << " " << iindex << ": "
-                                << STAT_TREES_error[STATR_VERTEX_ID];
+                  error_message << STAT_TREES_label[TREESTATL_TREE] << " " << t+1 << ": "
+                                << STAT_TREES_label[TREESTATL_VERTEX] << " " << iindex << ": "
+                                << STAT_TREES_error[TREESTATR_VERTEX_ID];
                   error.update((error_message.str()).c_str());
                }
 
@@ -2547,7 +2547,7 @@ Typed_edge_trees<Generic_Int_fl_container>::segmentation_extract(StatError& erro
      ostringstream correction_message;
      correction_message << STAT_TREES_word[INT_VALUE] << " or "
                         << STAT_TREES_word[STATE];
-     error.correction_update(STAT_TREES_error[STATR_VARIABLE_1_TYPE] ,
+     error.correction_update(STAT_TREES_error[TREESTATR_VARIABLE_1_TYPE] ,
                              (correction_message.str()).c_str());
    }
    */
@@ -2561,7 +2561,7 @@ Typed_edge_trees<Generic_Int_fl_container>::segmentation_extract(StatError& erro
          status = false;
          ostringstream correction_message;
          correction_message << STAT_TREES_word[INT_VALUE] << " or " << STAT_TREES_word[STATE];
-         error.correction_update(STAT_TREES_error[STATR_VARIABLE_TYPE] , (correction_message.str()).c_str());
+         error.correction_update(STAT_TREES_error[TREESTATR_VARIABLE_TYPE] , (correction_message.str()).c_str());
       }
       else
       {
@@ -2590,7 +2590,7 @@ Typed_edge_trees<Generic_Int_fl_container>::segmentation_extract(StatError& erro
             if ((nb_value < 1) || (nb_value > (keep ? nb_present_value : nb_present_value - 1)))
             {
                status= false;
-               error.update(STAT_TREES_error[STATR_NB_SELECTED_VALUE]);
+               error.update(STAT_TREES_error[TREESTATR_NB_SELECTED_VALUE]);
             }
             else
             {
@@ -2610,7 +2610,7 @@ Typed_edge_trees<Generic_Int_fl_container>::segmentation_extract(StatError& erro
                      ostringstream error_message;
                      error_message << STAT_label[STATL_VARIABLE] << " " << variable + 1 << ": "
                                    << STAT_label[STATL_VALUE] << " " << ivalue[i] << " "
-                                   << STAT_TREES_error[STATR_NOT_PRESENT];
+                                   << STAT_TREES_error[TREESTATR_NOT_PRESENT];
                      error.update((error_message.str()).c_str());
                   }
                   else
@@ -2709,7 +2709,7 @@ Typed_edge_trees<Generic_Int_fl_container>::segmentation_extract(StatError& erro
             cval= (trees[t]->get(v)).Int(variable);
             // value within current zone
             current_zone= zone_id.front();
-            tie(it, end)= trees[t]->children(v);
+            Tree_tie::tie(it, end)= trees[t]->children(v);
             while (it < end)
             // handle every child vertex
             {
@@ -2847,7 +2847,7 @@ Typed_edge_trees<Generic_Int_fl_container>::difference(StatError &error,
             ostringstream correction_message;
             correction_message << STAT_TREES_word[INT_VALUE] << " or "
                                << STAT_TREES_word[STATE];
-            error.correction_update(STAT_TREES_error[STATR_VARIABLE_TYPE],
+            error.correction_update(STAT_TREES_error[TREESTATR_VARIABLE_TYPE],
                                     (correction_message.str()).c_str());
          }
       }
@@ -2864,7 +2864,7 @@ Typed_edge_trees<Generic_Int_fl_container>::difference(StatError &error,
 
       for(t= 0; t < _nb_trees; t++)
       {
-         tie(it, end)= (res->trees[t])->vertices();
+         Tree_tie::tie(it, end)= (res->trees[t])->vertices();
          while (it < end)
          {
             if ((res->trees[t])->is_root(*it))
@@ -2966,8 +2966,8 @@ Typed_edge_trees<Generic_Int_fl_container>::line_write(std::ostream& os) const
    const int cumul_size= cumul_size_computation();
 
    os << nb_variable << " " << STAT_word[nb_variable == 1 ? STATW_VARIABLE : STATW_VARIABLES] << "   "
-      << _nb_trees << " " << STAT_TREES_label[_nb_trees == 1 ? STATL_TREE : STATL_TREES] << "   "
-      << STAT_TREES_label[STATL_CUMULATIVE_SIZE] << ": " << cumul_size;
+      << _nb_trees << " " << STAT_TREES_label[_nb_trees == 1 ? TREESTATL_TREE : TREESTATL_TREES] << "   "
+      << STAT_TREES_label[TREESTATL_CUMULATIVE_SIZE] << ": " << cumul_size;
 
    return os;
 }
@@ -3051,7 +3051,7 @@ bool Typed_edge_trees<Generic_Int_fl_container>::plot_data_write(StatError& erro
    if (_nb_trees > PLOT_NB_TREES)
    {
       status = false;
-      error.update(STAT_error[STATR_NB_TREES]);
+      error.update(STAT_TREES_error[TREESTATR_NB_TREES]);
    }
    else
    {
@@ -3080,7 +3080,7 @@ bool Typed_edge_trees<Generic_Int_fl_container>::plot_data_write(StatError& erro
             max_index= 0;
             for(i= 0; i < _nb_trees; i++)
             {
-               tie(it, end)= trees[i]->vertices();
+               Tree_tie::tie(it, end)= trees[i]->vertices();
                if ((trees[i]->get(*(end-1))).Int(0) > max_index)
                   max_index= (trees[i]->get(*(end-1))).Int(0);
             }
@@ -3342,7 +3342,7 @@ ostream& Typed_edge_trees<Generic_Int_fl_container>::ascii_write(ostream& os,
    if (comment_flag)
       os << "# ";
 
-   os << STAT_TREES_label[STATL_TREE_SIZE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
+   os << STAT_TREES_label[TREESTATL_TREE_SIZE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
    hsize->ascii_characteristic_print(os, false, comment_flag);
 
    if (exhaustive)
@@ -3351,7 +3351,7 @@ ostream& Typed_edge_trees<Generic_Int_fl_container>::ascii_write(ostream& os,
       if (comment_flag)
          os << "# ";
 
-      os << "   | " << STAT_TREES_label[STATL_TREE_SIZE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
+      os << "   | " << STAT_TREES_label[TREESTATL_TREE_SIZE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
       hsize->ascii_print(os, comment_flag);
    }
 
@@ -3359,13 +3359,13 @@ ostream& Typed_edge_trees<Generic_Int_fl_container>::ascii_write(ostream& os,
    if (comment_flag)
       os << "# ";
 
-   os << STAT_TREES_label[STATL_CUMULATIVE_SIZE] << ": " << cumul_size << endl;
+   os << STAT_TREES_label[TREESTATL_CUMULATIVE_SIZE] << ": " << cumul_size << endl;
 
    os << "\n";
    if (comment_flag)
       os << "# ";
 
-   os << STAT_TREES_label[STATL_TREE_CHILDREN] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
+   os << STAT_TREES_label[TREESTATL_TREE_CHILDREN] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
    hnb_children->ascii_characteristic_print(os, false, comment_flag);
 
    if (exhaustive)
@@ -3374,7 +3374,7 @@ ostream& Typed_edge_trees<Generic_Int_fl_container>::ascii_write(ostream& os,
       if (comment_flag)
          os << "# ";
 
-      os << "   | " << STAT_TREES_label[STATL_TREE_CHILDREN] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
+      os << "   | " << STAT_TREES_label[TREESTATL_TREE_CHILDREN] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
       hnb_children->ascii_print(os, comment_flag);
    }
 
@@ -3382,7 +3382,7 @@ ostream& Typed_edge_trees<Generic_Int_fl_container>::ascii_write(ostream& os,
    if (comment_flag)
       os << "# ";
 
-   os << STAT_TREES_label[STATL_CUMULATIVE_CHILDREN] << ": " << cumul_children << endl;
+   os << STAT_TREES_label[TREESTATL_CUMULATIVE_CHILDREN] << ": " << cumul_children << endl;
 
    return os;
 }
@@ -3492,14 +3492,14 @@ bool Typed_edge_trees<Generic_Int_fl_container>::spreadsheet_write(StatError& er
                      << STAT_label[STATL_MAX_VALUE] << "\t" << _max_value.Int(var) << endl;
 
             out_file << "\n";
-            out_file << (_type[var] == TIME ? STAT_TREES_type[STATL_TIME] : STAT_label[STATL_VALUE]) << " "
+            out_file << STAT_label[STATL_VALUE] << " "
                      << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
 
             if (characteristics[var]->marginal_distribution != NULL)
             {
                (characteristics[var]->marginal_distribution)->spreadsheet_characteristic_print(out_file);
 
-                out_file << "\n\t" << (_type[var] == TIME ? STAT_TREES_type[STATL_TIME] : STAT_label[STATL_VALUE]) << " "
+                out_file << "\n\t" << STAT_label[STATL_VALUE] << " "
                          << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
                 (characteristics[var]->marginal_distribution)->spreadsheet_print(out_file);
             }
@@ -3527,27 +3527,27 @@ bool Typed_edge_trees<Generic_Int_fl_container>::spreadsheet_write(StatError& er
 
    out_file << "\n";
 
-   out_file << STAT_TREES_label[STATL_TREE_SIZE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
+   out_file << STAT_TREES_label[TREESTATL_TREE_SIZE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
    hsize->spreadsheet_characteristic_print(out_file);
 
-   out_file << "\n\t" << STAT_TREES_label[STATL_TREE_SIZE] << "\t" << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
+   out_file << "\n\t" << STAT_TREES_label[TREESTATL_TREE_SIZE] << "\t" << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
    hsize->spreadsheet_print(out_file);
 
    out_file << "\n";
 
-   out_file << STAT_TREES_label[STATL_CUMULATIVE_SIZE] << "\t" << cumul_size << endl;
+   out_file << STAT_TREES_label[TREESTATL_CUMULATIVE_SIZE] << "\t" << cumul_size << endl;
 
    out_file << "\n";
 
-   out_file << STAT_TREES_label[STATL_TREE_CHILDREN] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
+   out_file << STAT_TREES_label[TREESTATL_TREE_CHILDREN] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
    hnb_children->spreadsheet_characteristic_print(out_file);
 
-   out_file << "\n\t" << STAT_TREES_label[STATL_TREE_CHILDREN] << "\t" << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
+   out_file << "\n\t" << STAT_TREES_label[TREESTATL_TREE_CHILDREN] << "\t" << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
    hnb_children->spreadsheet_print(out_file);
 
    out_file << "\n";
 
-   out_file << STAT_TREES_label[STATL_CUMULATIVE_CHILDREN] << "\t" << cumul_children << endl;
+   out_file << STAT_TREES_label[TREESTATL_CUMULATIVE_CHILDREN] << "\t" << cumul_children << endl;
 
    return status;
 }
@@ -3573,7 +3573,7 @@ bool Typed_edge_trees<Generic_Int_fl_container>::plot_write(StatError& error,
    if (characteristics == NULL)
    {
       status= false;
-      error.update(STAT_TREES_error[STATR_CHARACTERISTICS_NOT_COMPUTED]);
+      error.update(STAT_TREES_error[TREESTATR_CHARACTERISTICS_NOT_COMPUTED]);
    }
    else
    {
@@ -3619,7 +3619,7 @@ MultiPlotSet* Typed_edge_trees<Generic_Int_fl_container>::get_plotable(StatError
    error.init();
 
    if (characteristics == NULL)
-      error.update(STAT_TREES_error[STATR_CHARACTERISTICS_NOT_COMPUTED]);
+      error.update(STAT_TREES_error[TREESTATR_CHARACTERISTICS_NOT_COMPUTED]);
    else
    {
       switch (plot_type)
@@ -3719,7 +3719,7 @@ double Typed_edge_trees<Generic_Int_fl_container>::mean_computation(int variable
          for(t= 0; t < _nb_trees; t++)
          {
             ctree= trees[t];
-            tie(it, end)= ctree->vertices();
+            Tree_tie::tie(it, end)= ctree->vertices();
             while (it < end)
                mean+= (ctree->get(*it++)).Int(variable);
          }
@@ -3762,7 +3762,7 @@ double Typed_edge_trees<Generic_Int_fl_container>::variance_computation(int vari
             for(t= 0; t < _nb_trees; t++)
             {
                ctree= trees[t];
-               tie(it, end)= ctree->vertices();
+               Tree_tie::tie(it, end)= ctree->vertices();
                while (it < end)
                {
                   diff= (ctree->get(*it++)).Int(variable) - mean;
@@ -3807,7 +3807,7 @@ double Typed_edge_trees<Generic_Int_fl_container>::skewness_computation(int vari
             for(t= 0; t < _nb_trees; t++)
             {
                ctree= trees[t];
-               tie(it, end)= ctree->vertices();
+               Tree_tie::tie(it, end)= ctree->vertices();
                while (it < end)
                {
                   diff= (ctree->get(*it++)).Int(variable) - mean;
@@ -3854,7 +3854,7 @@ double Typed_edge_trees<Generic_Int_fl_container>::kurtosis_computation(int vari
             for(t= 0; t < _nb_trees; t++)
             {
                ctree= trees[t];
-               tie(it, end)= ctree->vertices();
+               Tree_tie::tie(it, end)= ctree->vertices();
                while (it < end)
                {
                   diff= (ctree->get(*it++)).Int(variable) - mean;
@@ -4020,7 +4020,7 @@ Typed_edge_trees<Generic_Int_fl_container>::get_identifier_tree(int index)
    utree= trees[index]->get_structure();
    res= new Typed_edge_one_int_tree(*utree, v);
    delete utree;
-   tie(it, end)= res->vertices();
+   Tree_tie::tie(it, end)= res->vertices();
    while (it < end)
    {
       v.Int()= *it;
@@ -4573,7 +4573,7 @@ void Typed_edge_trees<Generic_Int_fl_container>::cluster(const Typed_edge_trees&
 
    for(t= 0; t < _nb_trees; t++)
    {
-      tie(it, end)= trees[t]->vertices();
+      Tree_tie::tie(it, end)= trees[t]->vertices();
       // clustering of the values for variable ivariable
       while (it < end)
       {
@@ -4608,7 +4608,7 @@ void Typed_edge_trees<Generic_Int_fl_container>::transcode(const Typed_edge_tree
 
    for(t= 0; t < _nb_trees; t++)
    {
-      tie(it, end)= (otrees.trees[t])->vertices();
+      Tree_tie::tie(it, end)= (otrees.trees[t])->vertices();
       while (it < end)
       {
          v= (otrees.trees[t])->get(*it);
@@ -4652,7 +4652,7 @@ void Typed_edge_trees<Generic_Int_fl_container>::select_variable(const Typed_edg
       delete utree;
       utree= NULL;
       // should ensure that the number of variables is correct
-      tie(it, end)= ctree->vertices();
+      Tree_tie::tie(it, end)= ctree->vertices();
       while(it < end)
       {
          vsource= ctree->get(*it);
@@ -4809,7 +4809,7 @@ bool Typed_edge_trees<Generic_Int_fl_container>::plot_print(const char * prefix,
             out_file << "plot [0:" << hsize->nb_value-1 << "] [0:"
                      << (int)(hsize->max*YSCALE)+1 << "] \""
                      << label((data_file_name.str()).c_str()) << "\" using 2 title \""
-                     << STAT_TREES_label[STATL_TREE_SIZE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
+                     << STAT_TREES_label[TREESTATL_TREE_SIZE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                      << "\" with impulses" << endl;
 
             if (hsize->nb_value-1 < TIC_THRESHOLD)
@@ -4856,7 +4856,7 @@ void Typed_edge_trees<Generic_Int_fl_container>::min_max_value_computation()
 
     for(t= 0; t < _nb_trees; t++)
     {
-         tie(it, end)= trees[t]->vertices();
+         Tree_tie::tie(it, end)= trees[t]->vertices();
          while (it < end)
          {
                  v= trees[t]->get(*it);
@@ -4934,7 +4934,7 @@ int Typed_edge_trees<Generic_Int_fl_container>::max_nb_children_computation()
       for(t= 0; t < _nb_trees; t++)
          if (trees[t] != NULL)
          {
-            tie(it, end)= trees[t]->vertices();
+            Tree_tie::tie(it, end)= trees[t]->vertices();
             while(it < end)
                max_nb_children= max(max_nb_children,
                                     trees[t]->get_nb_children(*it++));
@@ -4997,7 +4997,7 @@ int Typed_edge_trees<Generic_Int_fl_container>::cumul_nb_children_computation() 
    for(t= 0; t < _nb_trees; t++)
       if (trees[t] != NULL)
       {
-         tie(it, end)= trees[t]->vertices();
+         Tree_tie::tie(it, end)= trees[t]->vertices();
          while (it < end)
             res+= trees[t]->get_nb_children(*it++);
       }
@@ -5019,7 +5019,7 @@ void Typed_edge_trees<Generic_Int_fl_container>::build_nb_children_frequency_dis
    for(t= 0; t < _nb_trees; t++)
       if (trees[t] != NULL)
       {
-         tie(it, end)= trees[t]->vertices();
+         Tree_tie::tie(it, end)= trees[t]->vertices();
          while (it < end)
             (hnb_children->frequency[trees[t]->get_nb_children(*it++)])++;
       }

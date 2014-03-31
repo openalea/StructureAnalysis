@@ -150,7 +150,7 @@ struct generic_visitor
            curr_width-= 1;
            // current vertex need not be processed any more
 
-           tie(it, end)= t.children(v);
+           Tree_tie::tie(it, end)= t.children(v);
 
            while (it < end)
            {
@@ -175,7 +175,7 @@ struct generic_visitor
       typedef typename tree_traits<Tree>::children_iterator children_iterator;
       children_iterator it, end;
 
-      tie(it, end)= t.children(current_node);
+      Tree_tie::tie(it, end)= t.children(current_node);
       if (it == end)
          res.push_back(current_node);
       else

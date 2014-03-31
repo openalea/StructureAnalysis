@@ -64,7 +64,7 @@ Tree_wrapper_Parent(Tree& tree, typename tree_traits<Tree>::vertex_descriptor v)
    if ((v < 0) || (v > (int)tree.get_size()-1))
    {
       status= false;
-      error_message << STAT_TREES_error[STATR_VERTEX_ID] << ": "
+      error_message << STAT_TREES_error[TREESTATR_VERTEX_ID] << ": "
                     << v << endl;
    }
    if (v == tree.root())
@@ -326,7 +326,7 @@ public :
       if ((v < 0) || (v > (int)tree.get_size()-1))
       {
          status= false;
-         error_message << STAT_TREES_error[STATR_VERTEX_ID] << ": "
+         error_message << STAT_TREES_error[TREESTATR_VERTEX_ID] << ": "
                        << v << endl;
       }
       if (!status)
@@ -400,7 +400,7 @@ std::string Generic_tree_wrapper_Display1(Tree& tree,
    if ((v < 0) || (v > (int)tree.get_size()-1))
    {
       status= false;
-      error_message << STAT_TREES_error[STATR_VERTEX_ID] << ": "
+      error_message << STAT_TREES_error[TREESTATR_VERTEX_ID] << ": "
                     << v << endl;
    }
    if (!status)
@@ -616,7 +616,7 @@ void Tree_wrapper_Put(Default_tree& tree, Default_tree::key v, object o)
    if ((v < 0) || (v > (int)tree.get_size()-1))
    {
       status= false;
-      error_message << STAT_TREES_error[STATR_VERTEX_ID] << ": "
+      error_message << STAT_TREES_error[TREESTATR_VERTEX_ID] << ": "
                     << v << endl;
    }
 
@@ -666,7 +666,7 @@ int CharTree_wrapper_Depth1(Unlabelled_tree& tree, Unlabelled_tree::key v)
    if ((v < 0) || (v > (int)tree.get_size()-1))
    {
       status= false;
-      error_message << STAT_TREES_error[STATR_VERTEX_ID] << ": "
+      error_message << STAT_TREES_error[TREESTATR_VERTEX_ID] << ": "
                     << v << endl;
    }
    if (!status)
@@ -702,7 +702,7 @@ std::string CharTree_wrapper_Display1(Unlabelled_tree& tree, Default_tree::key v
    if ((v < 0) || (v > (int)tree.get_size()-1))
    {
       status= false;
-      error_message << STAT_TREES_error[STATR_VERTEX_ID] << ": "
+      error_message << STAT_TREES_error[TREESTATR_VERTEX_ID] << ": "
                     << v << endl;
    }
    if (!status)
@@ -786,7 +786,7 @@ public :
             }
             else
             {
-               error_message << STAT_TREES_error[Stat_trees::STATR_VARIABLE_TYPE];
+               error_message << STAT_TREES_error[TREESTATR_VARIABLE_TYPE];
                PyErr_SetString(PyExc_IndexError, (error_message.str()).c_str());
                throw_error_already_set();
             }
@@ -846,7 +846,7 @@ public :
                else
                {
                   error_message << STAT_label[STATL_VARIABLE] << " " << index
-                                << " " << STAT_TREES_error[Stat_trees::STATR_VARIABLE_TYPE]
+                                << " " << STAT_TREES_error[TREESTATR_VARIABLE_TYPE]
                                 << ": should be " << STAT_variable_word[INT_VALUE]
                                 << " or " << STAT_word[STATE]
                                 << " or " << STAT_word[POSITION]
@@ -870,7 +870,7 @@ public :
             {
                ostringstream error_message;
                error_message << STAT_label[STATL_VARIABLE] << " " << index
-                             << ": " << STAT_TREES_error[Stat_trees::STATR_VARIABLE_TYPE]
+                             << ": " << STAT_TREES_error[TREESTATR_VARIABLE_TYPE]
                              << ": should be " << STAT_variable_word[REAL_VALUE];
                error.update((error_message.str()).c_str());
                // PyErr_SetString(PyExc_IndexError, s.str());

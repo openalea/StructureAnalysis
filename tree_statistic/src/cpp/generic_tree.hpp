@@ -79,7 +79,7 @@ Tree* select_subtree(Tree& t,
       {
          // if !keep_flag, the vertices belonging to subtree
          // rooted at node v have to be ignored
-         tie(it, end)= t.children(csnode);
+         Tree_tie::tie(it, end)= t.children(csnode);
          while (it < end)
          {
             if ((keep_flag) || (*it != v))
@@ -112,7 +112,7 @@ Tree* select_subtree(Tree& t,
       {
          // if !keep_flag, the vertex belonging to subtree
          // rooted at node v have to be ignored
-         tie(it, end)= t.children(csnode);
+         Tree_tie::tie(it, end)= t.children(csnode);
          while (it < end)
          {
             if ((keep_flag) || (*it != v))
@@ -172,7 +172,7 @@ Generic_tree<Type>::Generic_tree(Unlabelled_tree& utree, const value& default_va
 
   this->_root= utree._root;
 
-  tie(it,end)= utree.vertices();
+  Tree_tie::tie(it,end)= utree.vertices();
   while( it != end )
     {
       this->add_vertex(default_value);
@@ -241,8 +241,8 @@ void Generic_tree<Type>::set_structure(Unlabelled_tree& utree,
   this->_children= utree._children;
   this->_parent= utree._parent;
 
-  tie(ch_it, ch_end)= utree.vertices();
-  tie(it, end)= this->vertices();
+  Tree_tie::tie(ch_it, ch_end)= utree.vertices();
+  Tree_tie::tie(it, end)= this->vertices();
   while (ch_it != ch_end)
   {
       this->put(*it++, default_value);
@@ -318,7 +318,7 @@ bool Generic_tree<Type>::is_edge(key parent, key child)
    children_iterator it, end;
    bool res= false;
 
-   tie(it, end)= this->children(parent);
+   Tree_tie::tie(it, end)= this->children(parent);
    while (it < end)
       if (*it++ == child)
          res= true;
@@ -352,7 +352,7 @@ void Generic_tree<Type>::display_skip(ostream& os,
    os << this->get(v) << endl;
    lineskip= 0;
    children_iterator i, end;
-   tie(i, end) = this->children(v);
+   Tree_tie::tie(i, end) = this->children(v);
    if (i != end)
    {
       int s= tabulation.size();
@@ -450,7 +450,7 @@ Unlabelled_tree::Unlabelled_tree(Generic_tree<Type>& gtree)
 
    _root= gtree._root;
 
-   tie(it,end)= gtree.vertices();
+   Tree_tie::tie(it,end)= gtree.vertices();
    while( it < end )
    {
       add_vertex(C_DEFAULT_CHAR);

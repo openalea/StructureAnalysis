@@ -3,17 +3,17 @@
 import sys, os
 import openalea.stat_tool as stat_tool
 import openalea.tree_statistic.trees as trees, openalea.tree_statistic.hmt as hmt
-inf_bound=1
-sup_bound=3
-probability= 0.6
-ident=stat_tool.DistributionIdentifierType.UNIFORM
-parameter=stat_tool.D_DEFAULT
-distrib= stat_tool.distribution._DiscreteParametricModel(ident, inf_bound, sup_bound, parameter, probability)
+inf_bound = 1
+sup_bound = 3
+probability = 0.6
+distrib = stat_tool.Uniform(inf_bound, sup_bound)
+distrib_binom = stat_tool.Binomial(inf_bound, sup_bound, probability)
+distrib_nbinom = stat_tool.NegativeBinomial(inf_bound, 4, probability)
 # Distribution used for the number of children and the tree attributes
 print distrib
-max_depth=3
-max_size=10
-nbtrees=4
+max_depth = 3
+max_size = 10
+nbtrees = 4
 # defining a set of trees
 tree_list=[]
 tv=trees.TreeValue([1., 0])
@@ -25,11 +25,11 @@ while n < nbtrees:
     n=n+1
     R.Simulate(distrib, max_size, max_depth)
     tmp_tree=trees.Tree(tv, R)
-    tree_list.append(trees.Tree(tmp_tree))    
-distrib_list=[]
+    tree_list.append(trees.Tree(tmp_tree))
+distrib_list = []
 for i in range(tmp_tree.NbInt()):
     distrib_list.append(distrib)
-    
+
 for n in range(len(tree_list)):
     tree_list[n].Simulate(distrib_list)
 # initializing a Trees object

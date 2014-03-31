@@ -209,7 +209,7 @@ int main(void)
             {
                if (t == 0)
                   cout << "state " << j << " : " << endl;
-               tie(it, end)= ptrees[t]->vertices();
+	       Tree_tie::tie(it, end)= ptrees[t]->vertices();
                while (it < end)
                {
                   default_value.Double(0)= downward_prob[t][j][*it];
@@ -268,7 +268,7 @@ int main(void)
             {
                if (t == 0)
                   cout << "child state " << j << " : " << endl;
-               tie(it, end)= ptrees[t]->vertices();
+               Tree_tie::tie(it, end)= ptrees[t]->vertices();
                while (it < end)
                {
                   for(i= 0; i < nb_states; i++)

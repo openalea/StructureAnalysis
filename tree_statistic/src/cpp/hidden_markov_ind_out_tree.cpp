@@ -255,7 +255,7 @@ HiddenMarkovTreeData* HiddenMarkovIndOutTree::extract_data(StatError& error) con
           || (_nb_doutput_process != markov_data->_nb_float))
       {
          status= false;
-         error.update(STAT_TREES_error[STATR_STATE_TREES]);
+         error.update(STAT_TREES_error[TREESTATR_STATE_TREES]);
       }
 
    if (status)
@@ -399,10 +399,10 @@ ostream& HiddenMarkovIndOutTree::ascii_write(ostream& os,
    switch (type)
    {
       case 'o' :
-         os << STAT_TREES_word[STATW_HIDDEN_MARKOV_IND_OUT_TREE] << endl;
+         os << STAT_TREES_word[TREESTATW_HIDDEN_MARKOV_IND_OUT_TREE] << endl;
          break;
       case 'e' :
-         os << STAT_TREES_word[STATW_EQUILIBRIUM_HIDDEN_MARKOV_IND_OUT_TREE] << endl;
+         os << STAT_TREES_word[TREESTATW_EQUILIBRIUM_HIDDEN_MARKOV_IND_OUT_TREE] << endl;
          break;
    }
 
@@ -432,10 +432,10 @@ ostream& HiddenMarkovIndOutTree::spreadsheet_write(ostream& os, const HiddenMark
    switch (type)
    {
       case 'o' :
-         os << STAT_TREES_word[STATW_HIDDEN_MARKOV_IND_OUT_TREE] << endl;
+         os << STAT_TREES_word[TREESTATW_HIDDEN_MARKOV_IND_OUT_TREE] << endl;
          break;
       case 'e' :
-         os << STAT_TREES_word[STATW_EQUILIBRIUM_HIDDEN_MARKOV_IND_OUT_TREE] << endl;
+         os << STAT_TREES_word[TREESTATW_EQUILIBRIUM_HIDDEN_MARKOV_IND_OUT_TREE] << endl;
          break;
    }
 
@@ -520,27 +520,27 @@ ostream& HiddenMarkovIndOutTree::spreadsheet_write(ostream& os, const HiddenMark
       // printing of the quantities for which the characteristic distributions
       // are invariant - if any
 
-      os << "\n" << STAT_label[STATL_TREE_SIZE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
+      os << "\n" << STAT_label[TREESTATL_TREE_SIZE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
       otrees->hsize->spreadsheet_characteristic_print(os);
 
-      os << "\n\t" << STAT_label[STATL_TREE_SIZE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
+      os << "\n\t" << STAT_label[TREESTATL_TREE_SIZE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
       otrees->hsize->spreadsheet_print(os);
 
       cumul_size= otrees->cumul_size_computation();
-      os << "\n" << STAT_label[STATL_CUMULATIVE_SIZE] << "\t" << cumul_size << endl;
+      os << "\n" << STAT_label[TREESTATL_CUMULATIVE_SIZE] << "\t" << cumul_size << endl;
 
       // printing of the tree information quantity in the iid case
 
       information= otrees->iid_information_computation();
 
-      os << "\n" << STAT_TREES_label[STATL_TREES_IID_INFORMATION] << "\t" << information << "\t"
+      os << "\n" << STAT_TREES_label[TREESTATL_TREES_IID_INFORMATION] << "\t" << information << "\t"
          << information / cumul_size << endl;
 
       // printing of the likelihood
 
       if (otrees->likelihood != D_INF)
       {
-         os << "\n" << STAT_label[STATL_STATE_TREES_LIKELIHOOD] << "\t" << otrees->likelihood << "\t"
+         os << "\n" << STAT_TREES_label[TREESTATL_STATE_TREES_LIKELIHOOD] << "\t" << otrees->likelihood << "\t"
             << STAT_label[STATL_NORMALIZED] << "\t" << otrees->likelihood / cumul_size << endl;
       }
 
@@ -548,7 +548,7 @@ ostream& HiddenMarkovIndOutTree::spreadsheet_write(ostream& os, const HiddenMark
 
       if (likelihood != D_INF)
       {
-         os << "\n" << STAT_label[STATL_OBSERVED_TREES_LIKELIHOOD] << "\t" << likelihood << "\t"
+         os << "\n" << STAT_TREES_label[TREESTATL_OBSERVED_TREES_LIKELIHOOD] << "\t" << likelihood << "\t"
             << STAT_label[STATL_NORMALIZED] << "\t" << likelihood / cumul_size << endl;
       }
 
@@ -869,7 +869,7 @@ HiddenMarkovIndOutTree::downward_partial_entropy_comparison(const HiddenMarkovTr
            << " (fast)" << endl;
    }
 
-   tie(it, end) = trees.get_tree_ptr(t)->vertices();
+   Tree_tie::tie(it, end) = trees.get_tree_ptr(t)->vertices();
 
    while(it < end)
    {
@@ -1162,13 +1162,13 @@ Stat_trees::hidden_markov_ind_out_tree_ascii_read(StatError& error,
       if (size < 2)
       {
          status= false;
-         error.update(STAT_TREES_error[STATR_SMALL_TREE_SIZE]);
+         error.update(STAT_TREES_error[TREESTATR_SMALL_TREE_SIZE]);
       }
 
       if (size > MAX_SIZE)
       {
          status= false;
-         error.update(STAT_TREES_error[STATR_BIG_TREE_SIZE]);
+         error.update(STAT_TREES_error[TREESTATR_BIG_TREE_SIZE]);
       }
 
       while (buffer.readLine(in_file, false))
@@ -1193,17 +1193,17 @@ Stat_trees::hidden_markov_ind_out_tree_ascii_read(StatError& error,
 
             if (i == 0)
             {
-               if (token == STAT_TREES_word[STATW_HIDDEN_MARKOV_IND_OUT_TREE])
+               if (token == STAT_TREES_word[TREESTATW_HIDDEN_MARKOV_IND_OUT_TREE])
                   type= 'o';
                else
-                  if (token == STAT_TREES_word[STATW_EQUILIBRIUM_HIDDEN_MARKOV_IND_OUT_TREE])
+                  if (token == STAT_TREES_word[TREESTATW_EQUILIBRIUM_HIDDEN_MARKOV_IND_OUT_TREE])
                      type= 'e';
                   else
                   {
                      status= false;
                      ostringstream correction_message;
-                     correction_message << STAT_TREES_word[STATW_HIDDEN_MARKOV_IND_OUT_TREE] << " or "
-                                        << STAT_TREES_word[STATW_EQUILIBRIUM_HIDDEN_MARKOV_IND_OUT_TREE];
+                     correction_message << STAT_TREES_word[TREESTATW_HIDDEN_MARKOV_IND_OUT_TREE] << " or "
+                                        << STAT_TREES_word[TREESTATW_EQUILIBRIUM_HIDDEN_MARKOV_IND_OUT_TREE];
                      error.correction_update(STAT_parsing[STATP_KEY_WORD], (correction_message.str()).c_str(), line);
                   }
             }

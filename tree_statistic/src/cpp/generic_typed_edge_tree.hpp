@@ -80,7 +80,7 @@ Tree* select_typed_edge_subtree(Tree& t,
       {
          // if !keep_flag, the vertices belonging to subtree
          // rooted at node v have to be ignored
-         tie(it, end)= t.children(csnode);
+         Tree_tie::tie(it, end)= t.children(csnode);
          while (it < end)
          {
             if ((keep_flag) || (*it != v))
@@ -113,7 +113,7 @@ Tree* select_typed_edge_subtree(Tree& t,
       {
          // if !keep_flag, the vertex belonging to subtree
          // rooted at node v have to be ignored
-         tie(it, end)= t.children(csnode);
+         Tree_tie::tie(it, end)= t.children(csnode);
          while (it < end)
          {
             if ((keep_flag) || (*it != v))
@@ -375,7 +375,7 @@ void Typed_edge_tree<Type>::display_skip(ostream& os,
    os << get(v) << endl;
    lineskip= 0;
    children_iterator i, end;
-   tie(i, end) = children(v);
+   Tree_tie::tie(i, end) = children(v);
    if (i != end)
    {
       int s= tabulation.size();

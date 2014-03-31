@@ -399,13 +399,13 @@ bool HiddenMarkovIndOutTree::state_profile(StatError& error,
    {
       // index cannot be I_DEFAULT in this context
       status= false;
-      error.update(STAT_TREES_error[STATR_TREE_IDENTIFIER]);
+      error.update(STAT_TREES_error[TREESTATR_TREE_IDENTIFIER]);
    }
 
    if (nb_state_trees < 2)
    {
      status= false;
-     error.update(STAT_TREES_error[STATR_NB_STATE_TREES]);
+     error.update(STAT_TREES_error[TREESTATR_NB_STATE_TREES]);
    }
 
    if ((status) && (root != I_DEFAULT))
@@ -413,7 +413,7 @@ bool HiddenMarkovIndOutTree::state_profile(StatError& error,
       if ((root < 0) || (root > trees.trees[index]->get_size()))
       {
         status= false;
-        error.update(STAT_TREES_error[STATR_VERTEX_ID]);
+        error.update(STAT_TREES_error[TREESTATR_VERTEX_ID]);
       }
       else
          iroot= root;
@@ -449,16 +449,16 @@ bool HiddenMarkovIndOutTree::state_profile(StatError& error,
 #        endif
 
          m= new ostringstream;
-         *m << "\n" << STAT_TREES_label[STATL_POSTERIOR_STATE_PROBABILITY] << "\n\n";
+         *m << "\n" << STAT_TREES_label[TREESTATL_POSTERIOR_STATE_PROBABILITY] << "\n\n";
 
          messages.push_back(m);
          m= new ostringstream;
          *m << "\n" << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood
-            << "\n" << STAT_TREES_label[STATL_STATE_TREE_LIKELIHOOD] << ": " << hidden_likelihood
+            << "\n" << STAT_TREES_label[TREESTATL_STATE_TREE_LIKELIHOOD] << ": " << hidden_likelihood
             << "   (" << exp(hidden_likelihood-likelihood) << ")" << endl;
 
 #        ifdef MESSAGE
-         *m << "\n" << STAT_TREES_label[STATL_NB_STATE_TREE] << ": " << nb_possible_state_trees << endl;
+         *m << "\n" << STAT_TREES_label[TREESTATL_NB_STATE_TREE] << ": " << nb_possible_state_trees << endl;
 #        endif
          messages.push_back(m);
          // delete smoothed_tree;
@@ -645,7 +645,7 @@ bool HiddenMarkovIndOutTree::tree_state_profile_plot_write(StatError &error,
    if ((identifier < 0 ) || (identifier >= otrees._nb_trees))
    {
      status = false;
-     error.update(STAT_TREES_error[STATR_TREE_IDENTIFIER]);
+     error.update(STAT_TREES_error[TREESTATR_TREE_IDENTIFIER]);
    }
 
    if (status)
@@ -733,7 +733,7 @@ bool HiddenMarkovIndOutTree::tree_state_profile_plot_write(StatError &error,
             if (title != NULL)
               out_file << title << " - ";
 
-            out_file << STAT_TREES_label[STATL_POSTERIOR_STATE_PROBABILITY] << "\"\n\n";
+            out_file << STAT_TREES_label[TREESTATL_POSTERIOR_STATE_PROBABILITY] << "\"\n\n";
 
             if ((int)path->size() - 1 < TIC_THRESHOLD)
                 out_file << "set xtics 0,1" << endl;
@@ -759,7 +759,7 @@ bool HiddenMarkovIndOutTree::tree_state_profile_plot_write(StatError &error,
             if (title != NULL)
                out_file << title << " - ";
 
-            out_file << STAT_TREES_label[STATL_MAX_POSTERIOR_STATE_PROBABILITY] << "\"\n\n";
+            out_file << STAT_TREES_label[TREESTATL_MAX_POSTERIOR_STATE_PROBABILITY] << "\"\n\n";
 
             out_file << "plot [0:" << path->size() - 1 << "] [0:"
                      << exp(state_likelihood - likelihood) << "] ";
@@ -785,10 +785,10 @@ bool HiddenMarkovIndOutTree::tree_state_profile_plot_write(StatError &error,
 
             out_file << "plot [0:" << path->size() - 1 << "] [0:" << max_marginal_entropy << "] "
                      << "\"" << label((data_file_name[0].str()).c_str()) << "\" using "
-                     << nb_state + 1 << " title \"" << STAT_TREES_label[STATL_CONDITIONAL_ENTROPY]
+                     << nb_state + 1 << " title \"" << STAT_TREES_label[TREESTATL_CONDITIONAL_ENTROPY]
                      << "\" with linespoints,\\" << endl;
             out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\" using "
-                     << nb_state + 2 << " title \"" << STAT_TREES_label[STATL_MARGINAL_ENTROPY]
+                     << nb_state + 2 << " title \"" << STAT_TREES_label[TREESTATL_MARGINAL_ENTROPY]
                      << "\" with linespoints" << endl;
 
             if (i == 0)
@@ -802,7 +802,7 @@ bool HiddenMarkovIndOutTree::tree_state_profile_plot_write(StatError &error,
 
             out_file << "plot [0:" << path->size() - 1 << "] [0:" << entropy << "] "
                      << "\"" << label((data_file_name[0].str()).c_str()) << "\" using "
-                     << nb_state + 3 << " title \"" << STAT_TREES_label[STATL_PARTIAL_STATE_TREE_ENTROPY]
+                     << nb_state + 3 << " title \"" << STAT_TREES_label[TREESTATL_PARTIAL_STATE_TREE_ENTROPY]
                      << "\" with linespoints" << endl;
 
             if ((int)path->size() - 1 < TIC_THRESHOLD)
@@ -869,28 +869,28 @@ HiddenMarkovTreeData* HiddenMarkovIndOutTree::simulation(StatError& error,
    // nb_element represents the number of observed trees
    {
       status= false;
-      error.update(STAT_TREES_error[STATR_NB_TREES]);
+      error.update(STAT_TREES_error[TREESTATR_NB_TREES]);
    }
    if (ihsize.offset < 2)
    {
       status= false;
-      error.update(STAT_TREES_error[STATR_SMALL_TREE_SIZE]);
+      error.update(STAT_TREES_error[TREESTATR_SMALL_TREE_SIZE]);
    }
    if (ihsize.nb_value-1 > MAX_SIZE)
    {
       status= false;
-      error.update(STAT_TREES_error[STATR_BIG_TREE_SIZE]);
+      error.update(STAT_TREES_error[TREESTATR_BIG_TREE_SIZE]);
    }
 
    if (ihnb_children.nb_element < 1)
    {
       status= false;
-      error.update(STAT_TREES_error[STATR_NB_TREES]);
+      error.update(STAT_TREES_error[TREESTATR_NB_TREES]);
    }
    if (ihnb_children.nb_value-1 > MAX_CHILDREN)
    {
       status= false;
-      error.update(STAT_TREES_error[STATR_WIDE_TREE]);
+      error.update(STAT_TREES_error[TREESTATR_WIDE_TREE]);
    }
 
    if (status)
@@ -902,7 +902,7 @@ HiddenMarkovTreeData* HiddenMarkovIndOutTree::simulation(StatError& error,
       if (cumul_size > CUMUL_SIZE)
       {
          status= false;
-         error.update(STAT_TREES_error[STATR_TREE_CUMULATIVE_SIZE]);
+         error.update(STAT_TREES_error[TREESTATR_TREE_CUMULATIVE_SIZE]);
       }
 
       cumul_nb_children= 0;
@@ -912,7 +912,7 @@ HiddenMarkovTreeData* HiddenMarkovIndOutTree::simulation(StatError& error,
       if (cumul_nb_children > CUMUL_NB_CHILDREN)
       {
          status= false;
-         error.update(STAT_TREES_error[STATR_TREE_CUMULATIVE_CHILDREN]);
+         error.update(STAT_TREES_error[TREESTATR_TREE_CUMULATIVE_CHILDREN]);
       }
    }
 
@@ -1053,28 +1053,28 @@ HiddenMarkovTreeData* HiddenMarkovIndOutTree::simulation(StatError& error,
    if ((isize < 1) || (isize > NB_TREES))
    {
       status= false;
-      error.update(STAT_TREES_error[STATR_NB_TREES]);
+      error.update(STAT_TREES_error[TREESTATR_NB_TREES]);
    }
    if (isize < 2)
    {
       status= false;
-      error.update(STAT_TREES_error[STATR_SMALL_TREE_SIZE]);
+      error.update(STAT_TREES_error[TREESTATR_SMALL_TREE_SIZE]);
    }
    if (isize > MAX_SIZE)
    {
       status= false;
-      error.update(STAT_TREES_error[STATR_BIG_TREE_SIZE]);
+      error.update(STAT_TREES_error[TREESTATR_BIG_TREE_SIZE]);
    }
 
    if (inb_children_max < 1)
    {
       status= false;
-      error.update(STAT_TREES_error[STATR_NARROW_TREE]);
+      error.update(STAT_TREES_error[TREESTATR_NARROW_TREE]);
    }
    if (inb_children_max > MAX_CHILDREN)
    {
       status= false;
-      error.update(STAT_TREES_error[STATR_WIDE_TREE]);
+      error.update(STAT_TREES_error[TREESTATR_WIDE_TREE]);
    }
 
   if (status) {
@@ -1122,7 +1122,7 @@ HiddenMarkovTreeData* HiddenMarkovIndOutTree::simulation(StatError& error,
    if ((inb_trees < 1) || (inb_trees > NB_TREES))
    {
       res= NULL;
-      error.update(STAT_TREES_error[STATR_NB_TREES]);
+      error.update(STAT_TREES_error[TREESTATR_NB_TREES]);
    }
    else
    {
@@ -1848,7 +1848,7 @@ double HiddenMarkovIndOutTree::upward_step_norm(const HiddenMarkovTreeData& tree
                {
                   upward_prob[t][j][cnode] = 1.;
                   state_entropy[t][j][cnode] = .0;
-                  tie(ch_it, ch_end) = current_tree->children(cnode);
+                  Tree_tie::tie(ch_it, ch_end) = current_tree->children(cnode);
                   while(ch_it < ch_end)
                   {
                      upward_prob[t][j][cnode] *= upward_parent_prob[t][j][*ch_it];
@@ -2206,7 +2206,7 @@ HiddenMarkovTreeData::hidden_markov_ind_out_tree_estimation(StatError& error,
        (algorithm == GIBBS_SAMPLING) || (algorithm == FORWARD_BACKWARD)))
    {
       status= false;
-      error.update(STAT_TREES_error[STATR_EM_ALGORITHM]);
+      error.update(STAT_TREES_error[TREESTATR_EM_ALGORITHM]);
    }
 
    if ((algorithm == VITERBI) || (algorithm == FORWARD_BACKWARD_SAMPLING) ||
@@ -2216,7 +2216,7 @@ HiddenMarkovTreeData::hidden_markov_ind_out_tree_estimation(StatError& error,
       {
          status= false;
          ostringstream error_message;
-         error_message << STAT_TREES_error[STATR_SAEM_EXP] << ": " << saem_exponent;
+         error_message << STAT_TREES_error[TREESTATR_SAEM_EXP] << ": " << saem_exponent;
          error.update((error_message.str()).c_str());
       }
       state_simulation= true;
@@ -2462,7 +2462,7 @@ HiddenMarkovTreeData::hidden_markov_ind_out_tree_estimation(StatError& error,
 
          for(t= 0; t < _nb_trees; t++)
          {
-            tie(it, end)= trees[t]->vertices();
+            Tree_tie::tie(it, end)= trees[t]->vertices();
             while (it < end)
             {
                v= trees[t]->get(*it);
@@ -2565,7 +2565,7 @@ HiddenMarkovTreeData::hidden_markov_ind_out_tree_estimation(StatError& error,
 
 #     ifdef MESSAGE
          os << STAT_label[STATL_ITERATION] << " " << iter << "   "
-            << STAT_TREES_label[STATL_OBSERVED_TREES_LIKELIHOOD] << ": " << likelihood << endl;
+            << STAT_TREES_label[TREESTATL_OBSERVED_TREES_LIKELIHOOD] << ": " << likelihood << endl;
 #     endif
 
 #     ifdef DEBUG
@@ -2807,7 +2807,7 @@ HiddenMarkovTreeData::hidden_markov_ind_out_tree_estimation(StatError& error,
                 }
 
 #       ifdef MESSAGE
-             cout << "\n" << STAT_TREES_label[STATL_STATE_TREES_LIKELIHOOD] << ": " << otrees->hidden_likelihood
+             cout << "\n" << STAT_TREES_label[TREESTATL_STATE_TREES_LIKELIHOOD] << ": " << otrees->hidden_likelihood
                   << " | " << hmarkovt->HiddenMarkovIndOutTree::state_likelihood_computation(*otrees) << endl;
 #       endif
 
@@ -2901,20 +2901,20 @@ HiddenMarkovTreeData::hidden_markov_ind_out_tree_estimation(StatError &error,
       ostringstream correction_message;
 
       status= false;
-      error.update(STAT_TREES_error[STATR_NB_REAL_OUTPUT_PROCESS]);
+      error.update(STAT_TREES_error[TREESTATR_NB_REAL_OUTPUT_PROCESS]);
       correction_message << " HMT with continuous values not implemented";
       error.update((correction_message.str()).c_str());
    }
    if ((nb_state < 2) || (nb_state > NB_STATE))
    {
       status= false;
-      error.update(STAT_TREES_error[STATR_NB_STATE]);
+      error.update(STAT_TREES_error[TREESTATR_NB_STATE]);
    }
    if ((self_transition != D_DEFAULT) &&
         ((self_transition <= 0.) || (self_transition >= 1.)))
    {
       status= false;
-      error.update(STAT_TREES_error[STATR_SELF_TRANSITION]);
+      error.update(STAT_TREES_error[TREESTATR_SELF_TRANSITION]);
    }
 
    if (status)
@@ -3053,7 +3053,7 @@ double HiddenMarkovIndOutTree::upward_downward(const HiddenMarkovTreeData& otree
                                                              entropy_algo);
 
          // hidden state restoration (smoothing)
-         tie(it, end)= current_tree->vertices();
+         Tree_tie::tie(it, end)= current_tree->vertices();
 
          while(it < end)
          {
@@ -3077,7 +3077,7 @@ double HiddenMarkovIndOutTree::upward_downward(const HiddenMarkovTreeData& otree
 #           ifdef MESSAGE
             if (os == NULL)
             {
-               cout << STAT_label[STATL_STATE] << " " << STAT_TREES_label[STATL_TREE] << " "
+               cout << STAT_label[STATL_STATE] << " " << STAT_TREES_label[TREESTATL_TREE] << " "
                     << t // tree.identifier[i]
                     << ": " << STAT_label[STATL_LIKELIHOOD] << ": " << D_INF << endl;
             }
@@ -3099,7 +3099,7 @@ double HiddenMarkovIndOutTree::upward_downward(const HiddenMarkovTreeData& otree
                 {
                    otrees.state_profile_ascii_print(*os, t, nb_state, downward_prob[t]);
 
-                   *os << "\n" << STAT_TREES_label[STATL_STATE_TREE_LIKELIHOOD] << ": " << tree_likelihood;
+                   *os << "\n" << STAT_TREES_label[TREESTATL_STATE_TREE_LIKELIHOOD] << ": " << tree_likelihood;
                    if (tree_likelihood != D_INF)
                       *os << "   (" << STAT_label[STATL_NORMALIZED] << ": " << tree_likelihood / current_tree->get_size() << ")";
                    *os << endl;
@@ -3110,7 +3110,7 @@ double HiddenMarkovIndOutTree::upward_downward(const HiddenMarkovTreeData& otree
                 {
                    otrees.state_profile_spreadsheet_print(*os, t, nb_state, downward_prob[t]);
 
-                   *os << "\n" << STAT_TREES_label[STATL_STATE_TREE_LIKELIHOOD] << "\t" << tree_likelihood;
+                   *os << "\n" << STAT_TREES_label[TREESTATL_STATE_TREE_LIKELIHOOD] << "\t" << tree_likelihood;
                    if (tree_likelihood != D_INF)
                       *os << "\t" << STAT_label[STATL_NORMALIZED] << "\t" << tree_likelihood / current_tree->get_size();
                    *os << endl;
@@ -3137,7 +3137,7 @@ double HiddenMarkovIndOutTree::upward_downward(const HiddenMarkovTreeData& otree
 
 /*
          // gini index computation
-         tie(it, end)= current_tree->vertices();
+         Tree_tie::tie(it, end)= current_tree->vertices();
          while(it < end)
          {
             for(j= 0; j < nb_state; j++)
@@ -3146,7 +3146,7 @@ double HiddenMarkovIndOutTree::upward_downward(const HiddenMarkovTreeData& otree
          }
 
          // information computation
-         tie(it, end)= current_tree->vertices();
+         Tree_tie::tie(it, end)= current_tree->vertices();
          while(it < end)
          {
             for(j= 0; j < nb_state; j++)
@@ -3464,7 +3464,7 @@ double HiddenMarkovIndOutTree::viterbi(const HiddenMarkovTreeData& trees,
             {
                if (map[t][j][cnode] != D_INF)
                {
-                  tie(ch_it, ch_end)= current_tree->children(cnode);
+                  Tree_tie::tie(ch_it, ch_end)= current_tree->children(cnode);
                   while(ch_it < ch_end)
                   {
                      if (map2[t][j][*ch_it] > D_INF)
@@ -3653,7 +3653,7 @@ long double HiddenMarkovIndOutTree::nb_state_trees(const HiddenMarkovTreeData& t
                   // number of state trees with root in state j
                   // rooted at vertex cnode
                   upward_prob[j][cnode]= 1;
-                  tie(ch_it, ch_end)= current_tree->children(cnode);
+                  Tree_tie::tie(ch_it, ch_end)= current_tree->children(cnode);
                   while(ch_it < ch_end)
                   {
                      // number of state trees with root in any state
@@ -3842,7 +3842,7 @@ HiddenMarkovIndOutTree::viterbi_upward_downward(const HiddenMarkovTreeData& tree
             {
                if (map_upward[t][j][cnode] != D_INF)
                {
-                  tie(ch_it, ch_end)= current_tree->children(cnode);
+                  Tree_tie::tie(ch_it, ch_end)= current_tree->children(cnode);
                   while(ch_it < ch_end)
                   {
                      if (map2_upward[t][j][*ch_it] > D_INF)
@@ -3933,7 +3933,7 @@ HiddenMarkovIndOutTree::viterbi_upward_downward(const HiddenMarkovTreeData& tree
                      pmap= cumul_transition[k][j] + output_cond[t][k][pnode]
                            + map_downward[t][k][pnode];
 
-                     tie(ch_it, ch_end)= current_tree->children(pnode);
+                     Tree_tie::tie(ch_it, ch_end)= current_tree->children(pnode);
                      // handle each brother of current vertex
                      while(ch_it < ch_end)
                      {
@@ -3994,11 +3994,11 @@ HiddenMarkovIndOutTree::viterbi_upward_downward(const HiddenMarkovTreeData& tree
          case 'a':
             {
                *m << "\n"
-                  << STAT_TREES_label[STATL_MAX_POSTERIOR_STATE_PROBABILITY] << "\n\n";
+                  << STAT_TREES_label[TREESTATL_MAX_POSTERIOR_STATE_PROBABILITY] << "\n\n";
 
                messages.push_back(m);
                m= new ostringstream;
-               *m << "\n" << STAT_TREES_label[STATL_STATE_TREE_LIKELIHOOD] << ": " << res[t]
+               *m << "\n" << STAT_TREES_label[TREESTATL_STATE_TREE_LIKELIHOOD] << ": " << res[t]
                   << "   (" << exp(res[t] - likelihood) << ")" << endl;
                messages.push_back(m);
                break;
@@ -4006,11 +4006,11 @@ HiddenMarkovIndOutTree::viterbi_upward_downward(const HiddenMarkovTreeData& tree
          case 's':
             {
                *m << "\n"
-                  << STAT_TREES_label[STATL_MAX_POSTERIOR_STATE_PROBABILITY] << "\n\n";
+                  << STAT_TREES_label[TREESTATL_MAX_POSTERIOR_STATE_PROBABILITY] << "\n\n";
 
                messages.push_back(m);
                m= new ostringstream;
-               *m << "\n" << STAT_TREES_label[STATL_STATE_TREE_LIKELIHOOD] << "\t" << res[t]
+               *m << "\n" << STAT_TREES_label[TREESTATL_STATE_TREE_LIKELIHOOD] << "\t" << res[t]
                   << "\t" << exp(res[t] - likelihood) << "\t" << endl;
                messages.push_back(m);
                break;
@@ -4028,7 +4028,7 @@ HiddenMarkovIndOutTree::viterbi_upward_downward(const HiddenMarkovTreeData& tree
                                        trees._nb_float+added_float_variables,
                                        trees.trees[t]->root(), 1);
          otrees[tid]->set_structure(*tmp_utree, i);
-         tie(it, end)= trees.trees[t]->vertices();
+         Tree_tie::tie(it, end)= trees.trees[t]->vertices();
          while (it < end)
          {
             s= trees.trees[t]->get(*it);
@@ -4257,7 +4257,7 @@ HiddenMarkovIndOutTree::generalized_viterbi_subtree(const HiddenMarkovTreeData& 
    otrees[0]= new Default_tree(_nb_integral, 0,
                                trees.trees[index]->root(), 1);
    otrees[0]->set_structure(*tmp_utree, i);
-   tie(it, end)= trees.trees[index]->vertices();
+   Tree_tie::tie(it, end)= trees.trees[index]->vertices();
    while (it < end)
    {
       if (tree2subtree[*it] == I_DEFAULT)
@@ -4493,7 +4493,7 @@ HiddenMarkovIndOutTree::generalized_viterbi(const HiddenMarkovTreeData& trees,
             nb_children= current_tree->get_nb_children(cnode);
 
             max_nb_state_trees[cnode]= nb_state;
-            tie(ch_it, ch_end)= current_tree->children(cnode);
+            Tree_tie::tie(ch_it, ch_end)= current_tree->children(cnode);
                while(ch_it < ch_end)
                   max_nb_state_trees[cnode]*= max_nb_state_trees[*ch_it++];
             if (nb_state_trees > max_nb_state_trees[cnode])
@@ -4544,7 +4544,7 @@ HiddenMarkovIndOutTree::generalized_viterbi(const HiddenMarkovTreeData& trees,
 
             if (nb_children > 0)
             {
-               tie(ch_it, ch_end)= current_tree->children(cnode);
+               Tree_tie::tie(ch_it, ch_end)= current_tree->children(cnode);
                // correspondence between children iterator and
                // vertex ids
                ch_id= 0;
@@ -4845,7 +4845,7 @@ HiddenMarkovIndOutTree::generalized_viterbi(const HiddenMarkovTreeData& trees,
          otrees[tid]= new Default_tree(_nb_integral, 0,
                                        trees.trees[t]->root(), 1);
          otrees[tid]->set_structure(*tmp_utree, i);
-         tie(it, end)= trees.trees[t]->vertices();
+         Tree_tie::tie(it, end)= trees.trees[t]->vertices();
          while (it < end)
          {
             for(var= 0; var < _nb_integral; var++)
@@ -5206,7 +5206,7 @@ HiddenMarkovIndOutTree::gibbs_state_simulation(const HiddenMarkovTreeData& trees
       for(j= 0; j < nb_state; j++)
       {
          stated[j]= output_cond[t][j][cnode];
-         tie(ch_it, ch_end)= current_tree->children(cnode);
+         Tree_tie::tie(ch_it, ch_end)= current_tree->children(cnode);
          while(ch_it < ch_end)
          {
             state_c= state_tree->get(*ch_it++);
@@ -5250,7 +5250,7 @@ HiddenMarkovIndOutTree::gibbs_state_simulation(const HiddenMarkovTreeData& trees
          for(j= 0; j < nb_state; j++)
          {
             stated[j]= output_cond[t][j][cnode];
-            tie(ch_it, ch_end)= current_tree->children(cnode);
+            Tree_tie::tie(ch_it, ch_end)= current_tree->children(cnode);
             while(ch_it < ch_end)
             {
                state_c= state_tree->get(*ch_it++);
@@ -5368,7 +5368,7 @@ double HiddenMarkovIndOutTree::state_likelihood_computation(const HiddenMarkovTr
    {
       current_tree= otrees.trees[t];
       current_state_tree= otrees.state_trees[t];
-      tie(it, end)= current_tree->vertices();
+      Tree_tie::tie(it, end)= current_tree->vertices();
       while (it < end)
       {
           state= (current_state_tree->get(*it)).Int();
@@ -5447,7 +5447,7 @@ HiddenMarkovIndOutTree::marginal_entropy_computation(const HiddenMarkovTreeData&
    current_tree= otrees.trees[t];
    if (marginal_entropy == NULL)
       marginal_entropy= new double[current_tree->get_size()];
-   tie(it, end)= current_tree->vertices();
+   Tree_tie::tie(it, end)= current_tree->vertices();
    while(it < end)
    {
       marginal_entropy[*it]= .0;
@@ -5618,7 +5618,7 @@ HiddenMarkovIndOutTree::local_entropy_computation(const HiddenMarkovTreeData& tr
 
                if (current_tree->get_nb_children(cnode) > 0)
                {
-                  tie(ch_it, ch_end)= current_tree->children(cnode);
+                  Tree_tie::tie(ch_it, ch_end)= current_tree->children(cnode);
                   while(ch_it < ch_end)
                      partial_conditional_entropy[tr][cnode] = partial_conditional_entropy[tr][cnode]
                         + partial_conditional_entropy[tr][*ch_it++];
@@ -5673,7 +5673,7 @@ double HiddenMarkovIndOutTree::upward_partial_entropy_computation(const HiddenMa
    if (partial_entropy == NULL)
       partial_entropy= new double[current_tree->get_size()];
 
-   tie(it, end)= current_tree->vertices();
+   Tree_tie::tie(it, end)= current_tree->vertices();
    while(it < end)
    {
       partial_entropy[*it]= .0;
@@ -5855,7 +5855,7 @@ HiddenMarkovIndOutTree::alt_downward_partial_entropy_computation(const HiddenMar
       partial_entropy= new double[current_size];
 
    parent_prob= new double_array_2d[current_size];
-   tie(it, end)= current_tree->vertices();
+   Tree_tie::tie(it, end)= current_tree->vertices();
    while(it < end)
       parent_prob[*it++]= NULL;
 
@@ -5864,7 +5864,7 @@ HiddenMarkovIndOutTree::alt_downward_partial_entropy_computation(const HiddenMar
    pruned_entropy= new double*[current_size];
    total_pb_entropy= new double[current_size];
 
-   tie(it, end)= current_tree->vertices();
+   Tree_tie::tie(it, end)= current_tree->vertices();
    // computation of parent_prob, parent_entropy, pb_entropy and total_pb_entropy
    while(it < end)
    {
@@ -5885,7 +5885,7 @@ HiddenMarkovIndOutTree::alt_downward_partial_entropy_computation(const HiddenMar
             {
                parent_prob[*it][i][j]= output_cond_prob[t][i][parent_vertex]
                   * transition[i][j] * marginal_prob[t][i][parent_vertex];
-               tie(ch_it, ch_end)= current_tree->children(parent_vertex);
+               Tree_tie::tie(ch_it, ch_end)= current_tree->children(parent_vertex);
                while(ch_it < ch_end)
                {
                   if (*ch_it != *it)
@@ -5902,7 +5902,7 @@ HiddenMarkovIndOutTree::alt_downward_partial_entropy_computation(const HiddenMar
                   parent_entropy[*it][j]-= parent_prob[*it][i][j] * log(parent_prob[*it][i][j]);
             }
             pb_entropy[*it][j]= parent_entropy[*it][j];
-            tie(ch_it, ch_end)= current_tree->children(parent_vertex);
+            Tree_tie::tie(ch_it, ch_end)= current_tree->children(parent_vertex);
             while(ch_it < ch_end)
             {
                if (*ch_it != *it)
@@ -5918,7 +5918,7 @@ HiddenMarkovIndOutTree::alt_downward_partial_entropy_computation(const HiddenMar
                total_pb_entropy[*it]-= downward_prob[t][i][parent_vertex]
                   * log(downward_prob[t][i][parent_vertex]);
 
-         tie(ch_it, ch_end)= current_tree->children(parent_vertex);
+         Tree_tie::tie(ch_it, ch_end)= current_tree->children(parent_vertex);
          while(ch_it < ch_end)
          {
             if (*ch_it != *it)
@@ -5999,7 +5999,7 @@ HiddenMarkovIndOutTree::alt_downward_partial_entropy_computation(const HiddenMar
    } // end for u
 
    // deallocation
-   tie(it, end)= current_tree->vertices();
+   Tree_tie::tie(it, end)= current_tree->vertices();
    while(it < end)
    {
       for(i= 0; i < nb_state; i++)
@@ -6333,7 +6333,7 @@ HiddenMarkovIndOutTree::fast_downward_partial_entropy_computation(const HiddenMa
                if (nb_children > 0)
                {
                   // add partial_entropy for brother vertices
-                  tie(ch_it, ch_end)= current_tree->children(parent_vertex);
+                  Tree_tie::tie(ch_it, ch_end)= current_tree->children(parent_vertex);
                   while(ch_it < ch_end)
                   {
                      if (*ch_it != cnode)
@@ -6434,7 +6434,7 @@ HiddenMarkovIndOutTree::upward_conditional_entropy_computation(const HiddenMarko
                max_state_combination= (int)pow((double)nb_state,
                                                (double)nb_children);
 
-               tie(ch_it, ch_end)= current_tree->children(cnode);
+               Tree_tie::tie(ch_it, ch_end)= current_tree->children(cnode);
                // correspondence between children iterator and
                // vertex ids
                ch_id= 0;
@@ -6469,7 +6469,7 @@ HiddenMarkovIndOutTree::upward_conditional_entropy_computation(const HiddenMarko
                   // factor in the joint probability of the parent and children states
                   // that does not depend on the current state
                   base_jointp= 1.;
-                  tie(ch_it, ch_end)= current_tree->children(cnode);
+                  Tree_tie::tie(ch_it, ch_end)= current_tree->children(cnode);
                   while(ch_it < ch_end)
                   {
                      if (base_jointp > 0)
@@ -6488,7 +6488,7 @@ HiddenMarkovIndOutTree::upward_conditional_entropy_computation(const HiddenMarko
                   {
                      // joint probability of the parent and children states
                      jointp[j]= base_jointp * downward_prob[t][j][cnode];
-                     tie(ch_it, ch_end)= current_tree->children(cnode);
+                     Tree_tie::tie(ch_it, ch_end)= current_tree->children(cnode);
                      while(ch_it < ch_end)
                      {
                         if (jointp[j] > 0)
@@ -6720,7 +6720,7 @@ HiddenMarkovIndOutTree::downward_conditional_entropy_computation(const HiddenMar
                   state_entropy[t][i][cnode]= conditional_entropy[t][i][cnode];
                   if (current_tree->get_nb_children(cnode) > 0)
                   {
-                     tie(ch_it, ch_end)= current_tree->children(cnode);
+                     Tree_tie::tie(ch_it, ch_end)= current_tree->children(cnode);
                      while(ch_it < ch_end)
                      {
                         for(j= 0; j < nb_state; j++)
@@ -6780,7 +6780,7 @@ double HiddenMarkovIndOutTree::state_likelihood_computation(const HiddenMarkovTr
 
          current_tree= otrees.trees[t];
          current_state_tree= otrees.state_trees[t];
-         tie(it, end)= current_tree->vertices();
+         Tree_tie::tie(it, end)= current_tree->vertices();
          while (it < end)
          {
              state= (current_state_tree->get(*it)).Int();

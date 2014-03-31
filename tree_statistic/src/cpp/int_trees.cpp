@@ -134,7 +134,7 @@ void Int_trees::iid_simulation(const Distribution& distrib)
    {
        for(t= 0; t < _nb_trees; t++)
        {
-          tie(it, end)= trees[t]->vertices();
+          Tree_tie::tie(it, end)= trees[t]->vertices();
           while ( it != end )
           {
              for(i= 0; i < _nb_integral; i++)

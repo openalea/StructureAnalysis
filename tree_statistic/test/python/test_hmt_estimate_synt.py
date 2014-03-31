@@ -111,6 +111,9 @@ print OBS1
 # S.Plot("Observation", variable=0)
 # State profiles
 EH.Display(ViewPoint="StateProfile", TreeId=1, NbStateTrees=4)
+# compute entropy values
+print EH.EntropyComputation()
+print EH.EntropyComputation(0)
 # parameter estimation from the simulated trees
 # initialization from a self-transition probability
 # forcing parametric estimation

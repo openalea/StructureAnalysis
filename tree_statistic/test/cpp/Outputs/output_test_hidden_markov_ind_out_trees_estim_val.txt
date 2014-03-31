@@ -14,7 +14,7 @@ recurrent class: states 0 1
 
 2 OUTPUT_PROCESSES
 
-OUTPUT_PROCESS 1 : PARAMETRIC
+OUTPUT_PROCESS 1 : DISCRETE_PARAMETRIC
 
 STATE 0 OBSERVATION_DISTRIBUTION
 BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.1
@@ -28,7 +28,7 @@ distances between observation distributions for consecutive states
 _  1  
 1  _  
 
-OUTPUT_PROCESS 2 : PARAMETRIC
+OUTPUT_PROCESS 2 : DISCRETE_PARAMETRIC
 
 STATE 0 OBSERVATION_DISTRIBUTION
 BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.3
@@ -59,7 +59,7 @@ recurrent class: states 0 1
 
 2 OUTPUT_PROCESSES
 
-OUTPUT_PROCESS 1 : PARAMETRIC
+OUTPUT_PROCESS 1 : DISCRETE_PARAMETRIC
 
 STATE 0 OBSERVATION_DISTRIBUTION
 BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.3
@@ -73,7 +73,7 @@ distances between observation distributions for consecutive states
 _         0.891043  
 0.891043  _         
 
-OUTPUT_PROCESS 2 : PARAMETRIC
+OUTPUT_PROCESS 2 : DISCRETE_PARAMETRIC
 
 STATE 0 OBSERVATION_DISTRIBUTION
 BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.7
@@ -137,18 +137,18 @@ number of occurrences of state 1 per size 26 tree distribution
 
 2 OUTPUT_PROCESSES
 
-OUTPUT_PROCESS 1 : PARAMETRIC
+OUTPUT_PROCESS 1 : DISCRETE_PARAMETRIC
 
 STATE 0 OBSERVATION_DISTRIBUTION
-BINOMIAL   INF_BOUND : 0   SUP_BOUND : 614   PROBABILITY : 0.145778
-mean: 89.5077   variance: 76.4595   standard deviation: 8.74411
+BINOMIAL   INF_BOUND : 0   SUP_BOUND : 614   PROBABILITY : 0.145777
+mean: 89.5068   variance: 76.4588   standard deviation: 8.74407
 
 state 0 observation frequency distribution - sample size: 521
 mean: 89.5086   variance: 83.7735   standard deviation: 9.15279
 
 STATE 1 OBSERVATION_DISTRIBUTION
 BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.500653
-mean: 450.588   variance: 225   standard deviation: 15
+mean: 450.587   variance: 225   standard deviation: 15
 
 state 1 observation frequency distribution - sample size: 519
 mean: 450.588   variance: 229.679   standard deviation: 15.1552
@@ -157,7 +157,7 @@ distances between observation distributions for consecutive states
 _  1  
 1  _  
 
-OUTPUT_PROCESS 2 : PARAMETRIC
+OUTPUT_PROCESS 2 : DISCRETE_PARAMETRIC
 
 STATE 0 OBSERVATION_DISTRIBUTION
 BINOMIAL   INF_BOUND : 9   SUP_BOUND : 862   PROBABILITY : 0.305724
@@ -186,21 +186,21 @@ information of the trees in the iid case: -9296.88 (-8.93931)
 
 log-likelihood of the state trees: -8596.41   (normalized: -8.26578)
 
-state tree entropy: 1.33227e-15   (normalized: 1.28103e-18)
+state tree entropy: -4.28546e-14   (normalized: -4.12064e-17)
 
 log-likelihood of the observed trees: -8596.41   (normalized: -8.26578)
 
-14 free parameters   2 * penalyzed log-likelihood (AIC): -17220.8
+11 free parameters   2 * penalyzed log-likelihood (AIC): -17214.8
 
-14 free parameters   2 * penalyzed log-likelihood (AICc): -17221.2
+11 free parameters   2 * penalyzed log-likelihood (AICc): -17215.1
 
-14 free parameters   2 * penalyzed log-likelihood (BIC): -17290.1
+11 free parameters   2 * penalyzed log-likelihood (BIC): -17269.2
 
-14 free parameters   2 * penalyzed log-likelihood (BICc): -nan
+11 free parameters   2 * penalyzed log-likelihood (BICc): -nan
 
-14 free parameters   2 * penalyzed log-likelihood (ICL): -17290.1
+11 free parameters   2 * penalyzed log-likelihood (ICL): -17269.2
 
-14 free parameters   2 * penalyzed log-likelihood (ICLc): -nan
+11 free parameters   2 * penalyzed log-likelihood (ICLc): -nan
 iteration 1   log-likelihood of the observed trees: -16768.5
 iteration 2   log-likelihood of the observed trees: -13742.5
 iteration 3   log-likelihood of the observed trees: -13637.7
@@ -253,18 +253,18 @@ number of occurrences of state 1 per size 26 tree distribution
 
 2 OUTPUT_PROCESSES
 
-OUTPUT_PROCESS 1 : PARAMETRIC
+OUTPUT_PROCESS 1 : DISCRETE_PARAMETRIC
 
 STATE 0 OBSERVATION_DISTRIBUTION
-NEGATIVE_BINOMIAL   INF_BOUND : 289   PARAMETER : 385.724   PROBABILITY : 0.704761
-mean: 450.587   variance: 229.28   standard deviation: 15.142
+NEGATIVE_BINOMIAL   INF_BOUND : 289   PARAMETER : 385.729   PROBABILITY : 0.704764
+mean: 450.587   variance: 229.279   standard deviation: 15.142
 
 state 0 observation frequency distribution - sample size: 519
 mean: 450.588   variance: 229.679   standard deviation: 15.1552
 
 STATE 1 OBSERVATION_DISTRIBUTION
-NEGATIVE_BINOMIAL   INF_BOUND : 38   PARAMETER : 82.6404   PROBABILITY : 0.616043
-mean: 89.5068   variance: 83.609   standard deviation: 9.1438
+NEGATIVE_BINOMIAL   INF_BOUND : 38   PARAMETER : 82.6351   PROBABILITY : 0.616028
+mean: 89.5068   variance: 83.6112   standard deviation: 9.14392
 
 state 1 observation frequency distribution - sample size: 521
 mean: 89.5086   variance: 83.7735   standard deviation: 9.15279
@@ -273,7 +273,7 @@ distances between observation distributions for consecutive states
 _  1  
 1  _  
 
-OUTPUT_PROCESS 2 : PARAMETRIC
+OUTPUT_PROCESS 2 : DISCRETE_PARAMETRIC
 
 STATE 0 OBSERVATION_DISTRIBUTION
 BINOMIAL   INF_BOUND : 0   SUP_BOUND : 905   PROBABILITY : 0.894524
@@ -300,20 +300,20 @@ cumulative size: 1040
 
 information of the trees in the iid case: -9296.88 (-8.93931)
 
-log-likelihood of the state trees: -8593.5   (normalized: -8.26299)
+log-likelihood of the state trees: -8593.5   (normalized: -8.26298)
 
-state tree entropy: 6.55032e-15   (normalized: 6.29838e-18)
+state tree entropy: -4.28546e-14   (normalized: -4.12064e-17)
 
-log-likelihood of the observed trees: -8593.5   (normalized: -8.26299)
+log-likelihood of the observed trees: -8593.5   (normalized: -8.26298)
 
-14 free parameters   2 * penalyzed log-likelihood (AIC): -17215
+13 free parameters   2 * penalyzed log-likelihood (AIC): -17213
 
-14 free parameters   2 * penalyzed log-likelihood (AICc): -17215.4
+13 free parameters   2 * penalyzed log-likelihood (AICc): -17213.4
 
-14 free parameters   2 * penalyzed log-likelihood (BIC): -17284.3
+13 free parameters   2 * penalyzed log-likelihood (BIC): -17277.3
 
-14 free parameters   2 * penalyzed log-likelihood (BICc): -nan
+13 free parameters   2 * penalyzed log-likelihood (BICc): -nan
 
-14 free parameters   2 * penalyzed log-likelihood (ICL): -17284.3
+13 free parameters   2 * penalyzed log-likelihood (ICL): -17277.3
 
-14 free parameters   2 * penalyzed log-likelihood (ICLc): -nan
+13 free parameters   2 * penalyzed log-likelihood (ICLc): -nan

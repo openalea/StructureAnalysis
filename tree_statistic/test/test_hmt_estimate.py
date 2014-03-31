@@ -195,6 +195,16 @@ def test_state_variable_hmt_estimate():
     msg = "Failed to estimate HMT with observed state variable"
     assert EH2, msg
 
+def test_extract_marginal_hmt_data():
+    """Extract marginal histogram from HiddenMarkovTreeData"""
+    msg = "Failed to raise exception for incorrect HMT variable"
+    EH = T.Estimate("HIDDEN_MARKOV_TREE", 3, "IRREDUCIBLE", 0.9, 50)
+    S = T.ComputeStateTrees(EH, "Viterbi")
+    H = S.ExtractHistogram("Value", variable=1)
+    msg = "Failed to extract marginal histogram from HiddenMarkovTreeData"
+    assert H, msg
+    H.plot()
+
 if __name__ == "__main__":
     hmt_name, mtg_name, T, HInit = init()
     test_estimate_init_hmt()
@@ -210,3 +220,4 @@ if __name__ == "__main__":
     test_bad_hmt_init_failure()
     test_state_variable_hmt_estimate()
     test_bad_variable_hmt_estimate()
+    test_extract_marginal_hmt_data()

@@ -84,6 +84,7 @@ int main(void)
          cout << error; */
 
       // read and print a hidden Markov out tree (error ?)
+
       hmot = Stat_trees::hidden_markov_ind_out_tree_ascii_read(error, hmotpath2);
       cout << error;
 

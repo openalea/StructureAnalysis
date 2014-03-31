@@ -8,12 +8,11 @@ import openalea.tree_statistic.trees as trees
 import openalea.stat_tool as stat_tool
 from nose import with_setup
 
-
 def init():
     return setup_func()
 
 def setup_func():
-    global T, tv, nb_trees, tree_list, mtg_name
+    global nb_trees, tree_list, tv, T, mtg_name
     # build some random initial tree
     stat_tool.plot.DISABLE_PLOT = True
     inf_bound = 0
@@ -42,12 +41,9 @@ def setup_func():
     T = trees.Trees(tree_list)
     nb_trees = nbtrees
     mtg_name = "data/sample_mtg_forest.mtg"
-
-    return T, tv, nb_trees, tree_list, mtg_name
-
-
-@with_setup(setup_func)
-
+    # return nb_trees, tree_list, tv, T, mtg_name
+    return mtg_name
+    
 def check_mtg_mapping(mtg_t):
     """Check consistency between tree vertices
     and mapping betweeen mtg vertices and tree vertices"""
@@ -67,6 +63,8 @@ def check_mtg_mapping(mtg_t):
                 msg = "Inconsistency in mapping and inverse mapping"
                 msg += " in tree: " + str(t)
                 assert tmapinv[tmap[i]] != i, msg
+
+@with_setup(setup_func)
 
 def test_mtg_build():
     """constructor from a MTG"""
@@ -213,7 +211,7 @@ def test_extract_mtg():
     assert len(g.vertices(scale=1)) == T.NbTrees(), msg2
     
 if __name__ == "__main__":
-    T, tv, nb_trees, tree_list, mtg_name = init()
+    nb_trees, tree_list, tv, T, mtg_name = init()
     test_mtg_build()
     test_tree_size()
     test_cluster()
