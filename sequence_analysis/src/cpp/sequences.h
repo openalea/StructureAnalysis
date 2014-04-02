@@ -218,6 +218,8 @@ const int POINTWISE_AVERAGE_NB_SEQUENCE = 250;  // nombre maximum de sequences e
                                                 // pour la sortie fichier
 const int ABSORBING_RUN_LENGTH = 5;    // longueur par defaut de la serie finale absorbante
 const int MAX_ABSORBING_RUN_LENGTH = 20;  // longueur maximum de la serie finale absorbante
+const double ABSORBING_RUN_STANDARD_DEVIATION_FACTOR = 10.;  // facteur pour definir l'ecart-type
+                                                             // des series finales absorbantes reelles
 
 
 
