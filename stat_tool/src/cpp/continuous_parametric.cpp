@@ -86,6 +86,8 @@ ContinuousParametric::ContinuousParametric(int iident , double ilocation , doubl
   max_value = D_DEFAULT;
 
   unit = iunit;
+  slope_standard_deviation = D_DEFAULT;
+  sample_size = 0;
   cumul = NULL;
 }
 
@@ -111,6 +113,8 @@ void ContinuousParametric::copy(const ContinuousParametric &dist)
   max_value = dist.max_value;
 
   unit = dist.unit;
+  slope_standard_deviation = dist.slope_standard_deviation;
+  sample_size = dist.sample_size;
 
   if (dist.cumul) {
     register int i;
@@ -459,11 +463,11 @@ ContinuousParametric* continuous_parametric_parsing(StatError &error , ifstream 
  *
  *  Ecriture des parametres d'une loi continue.
  *
- *  argument : stream.
+ *  arguments : stream, flag commentaire.
  *
  *--------------------------------------------------------------*/
 
-ostream& ContinuousParametric::ascii_parameter_print(ostream &os) const
+ostream& ContinuousParametric::ascii_parameter_print(ostream &os , bool file_flag) const
 
 {
   os << STAT_continuous_distribution_word[ident] << "   ";
@@ -500,9 +504,25 @@ ostream& ContinuousParametric::ascii_parameter_print(ostream &os) const
   }
 
   case LINEAR_MODEL : {
+    Test test(STUDENT , false , sample_size , I_DEFAULT , D_DEFAULT);
+
+    test.critical_probability = ref_critical_probability[0];
+    test.t_value_computation();
+
     os << STAT_word[STATW_INTERCEPT] << " : " << intercept << "   "
-       << STAT_word[STATW_SLOPE] << " : " << slope << "   "
-       << STAT_word[STATW_STANDARD_DEVIATION] << " : " << dispersion;
+       << STAT_word[STATW_SLOPE] << " : " << slope;
+
+    if ((!file_flag) && (slope_standard_deviation > 0.)) {
+      os << "   (" << slope - test.value * slope_standard_deviation << ", "
+         << slope + test.value * slope_standard_deviation << ")";
+    }
+
+    os << "   " << STAT_word[STATW_STANDARD_DEVIATION] << " : " << dispersion;
+
+    if ((file_flag) && (slope_standard_deviation > 0.)) {
+      os << "   # " << slope - test.value * slope_standard_deviation << ", "
+         << slope + test.value * slope_standard_deviation;
+    }
     break;
   }
   }
@@ -990,9 +1010,21 @@ ostream& ContinuousParametric::spreadsheet_parameter_print(ostream &os) const
   }
 
   case LINEAR_MODEL : {
+    Test test(STUDENT , false , sample_size , I_DEFAULT , D_DEFAULT);
+
+    test.critical_probability = ref_critical_probability[0];
+    test.t_value_computation();
+
     os << STAT_word[STATW_INTERCEPT] << "\t" << intercept << "\t"
-       << STAT_word[STATW_SLOPE] << "\t" << slope << "\t"
-       << STAT_word[STATW_STANDARD_DEVIATION] << "\t" << dispersion;
+       << STAT_word[STATW_SLOPE] << "\t" << slope;
+
+    if (slope_standard_deviation > 0.) {
+      os << "\t" << slope - test.value * slope_standard_deviation << "\t"
+         << slope + test.value * slope_standard_deviation;
+    }
+
+    os << "\t" << STAT_word[STATW_STANDARD_DEVIATION] << "\t" << dispersion;
+
     break;
   }
   }
