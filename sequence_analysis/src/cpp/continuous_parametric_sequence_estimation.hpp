@@ -75,7 +75,6 @@ void MarkovianSequences::gamma_estimation(Type ***state_sequence_count , int var
 {
   register int i , j , k;
   double diff , log_geometric_mean , *zero_mass , *mean , *variance;
-//  double buff;
   Type *state_frequency;
 
 
@@ -189,8 +188,14 @@ void MarkovianSequences::gamma_estimation(Type ***state_sequence_count , int var
 /*          if (sqrt(variance[i]) < mean[i] * GAMMA_VARIATION_COEFF_THRESHOLD) {
             variance[i] = mean[i] * mean[i] * GAMMA_VARIATION_COEFF_THRESHOLD * GAMMA_VARIATION_COEFF_THRESHOLD;
           } */
-          process->observation[i]->shape = mean[i] * mean[i] / variance[i];
-          process->observation[i]->scale = variance[i] / mean[i];
+
+//          process->observation[i]->shape = mean[i] * mean[i] / variance[i];
+//          process->observation[i]->scale = variance[i] / mean[i];
+
+          // Hawang & Huang (2012), Ann. Inst. Statist. Math. 54(4), 840-847
+
+          process->observation[i]->shape = mean[i] * mean[i] / variance[i] - 1. / (double)state_frequency[i];
+          process->observation[i]->scale = mean[i] / process->observation[i]->shape;
 
 #         ifdef DEBUG    // essai pour eviter les très petits parametres de forme
           if ((process->observation[i]->shape < 1.) && (mean[i] < 5.)) {
@@ -232,7 +237,7 @@ void MarkovianSequences::gamma_estimation(Type ***state_sequence_count , int var
             }
 
             log_geometric_mean /= state_frequency[i];
-            j = 0;
+/*            j = 0;   a revoir
 
 #           ifdef DEBUG
             cout << "\n" << STAT_word[STATW_STATE] << " " << i << "   "
@@ -251,14 +256,14 @@ void MarkovianSequences::gamma_estimation(Type ***state_sequence_count , int var
 #             endif
 
             }
-            while (j < MIN(GAMMA_ITERATION_FACTOR * iter , GAMMA_MAX_NB_ITERATION));
+            while (j < MIN(GAMMA_ITERATION_FACTOR * iter , GAMMA_MAX_NB_ITERATION)); */
 
             // approximations Johnson, Kotz & Balakrishnan, Continuous Univariate Distributions, vol. 1, 2nd ed., pp. 361-362
 
-/*            process->observation[i]->shape = mean[i] / (2 * (mean[i] - exp(log_geometric_mean))) - 1./12.;
-            buff = log(mean[i]) - log_geometric_mean;
-            process->observation[i]->shape = (1 + sqrt(1 + 4 * buff / 3)) / (4 * buff);
-            process->observation[i]->scale = mean[i] / process->observation[i]->shape; */
+//            process->observation[i]->shape = mean[i] / (2 * (mean[i] - exp(log_geometric_mean))) - 1./12.;
+            diff = log(mean[i]) - log_geometric_mean;
+            process->observation[i]->shape = (1 + sqrt(1 + 4 * diff / 3)) / (4 * diff);
+            process->observation[i]->scale = mean[i] / process->observation[i]->shape;
           }
         }
 
@@ -298,7 +303,6 @@ void MarkovianSequences::zero_inflated_gamma_estimation(Type ***state_sequence_c
 {
   register int i , j , k;
   double diff , log_geometric_mean , *zero_mass , *mean , *variance;
-//  double buff;
   Type *state_frequency;
 
 
@@ -410,8 +414,14 @@ void MarkovianSequences::zero_inflated_gamma_estimation(Type ***state_sequence_c
 /*          if (sqrt(variance[i]) < mean[i] * GAMMA_VARIATION_COEFF_THRESHOLD) {
             variance[i] = mean[i] * mean[i] * GAMMA_VARIATION_COEFF_THRESHOLD * GAMMA_VARIATION_COEFF_THRESHOLD;
           } */
-          process->observation[i]->shape = mean[i] * mean[i] / variance[i];
-          process->observation[i]->scale = variance[i] / mean[i];
+
+//          process->observation[i]->shape = mean[i] * mean[i] / variance[i];
+//          process->observation[i]->scale = variance[i] / mean[i];
+
+          // Hawang & Huang (2012), Ann. Inst. Statist. Math. 54(4), 840-847
+
+          process->observation[i]->shape = mean[i] * mean[i] / variance[i] - 1. / (double)state_frequency[i];
+          process->observation[i]->scale = mean[i] / process->observation[i]->shape;
 
 #         ifdef DEBUG    // essai pour eviter la bimodalite
           if ((iter > 5) && (process->observation[i]->zero_probability > 0.5) &&
@@ -451,7 +461,7 @@ void MarkovianSequences::zero_inflated_gamma_estimation(Type ***state_sequence_c
             }
 
             log_geometric_mean /= state_frequency[i];
-            j = 0;
+/*            j = 0;   a revoir
 
 #           ifdef DEBUG
             cout << "\n" << STAT_word[STATW_STATE] << " " << i << "   "
@@ -470,14 +480,14 @@ void MarkovianSequences::zero_inflated_gamma_estimation(Type ***state_sequence_c
 #             endif
 
             }
-            while (j < MIN(GAMMA_ITERATION_FACTOR * iter , GAMMA_MAX_NB_ITERATION));
+            while (j < MIN(GAMMA_ITERATION_FACTOR * iter , GAMMA_MAX_NB_ITERATION)); */
 
             // approximations Johnson, Kotz & Balakrishnan, Continuous Univariate Distributions, vol. 1, 2nd ed., pp. 361-362
 
-/*            process->observation[i]->shape = mean[i] / (2 * (mean[i] - exp(log_geometric_mean))) - 1./12.;
-            buff = log(mean[i]) - log_geometric_mean;
-            process->observation[i]->shape = (1 + sqrt(1 + 4 * buff / 3)) / (4 * buff);
-            process->observation[i]->scale = mean[i] / process->observation[i]->shape; */
+//            process->observation[i]->shape = mean[i] / (2 * (mean[i] - exp(log_geometric_mean))) - 1./12.;
+            diff = log(mean[i]) - log_geometric_mean;
+            process->observation[i]->shape = (1 + sqrt(1 + 4 * diff / 3)) / (4 * diff);
+            process->observation[i]->scale = mean[i] / process->observation[i]->shape;
           }
         }
 
@@ -606,10 +616,6 @@ void MarkovianSequences::gaussian_estimation(Type ***state_sequence_count , int 
         if (process->observation[i]->dispersion / process->observation[i]->location < GAUSSIAN_MIN_VARIATION_COEFF) {
           process->observation[i]->dispersion = process->observation[i]->location * GAUSSIAN_MIN_VARIATION_COEFF;
         }
-      }
-
-      else {
-        process->observation[i]->dispersion = 0.;
       }
     }
     break;
@@ -823,7 +829,7 @@ void MarkovianSequences::linear_model_estimation(Type ***state_sequence_count , 
 {
   register int i , j , k;
   double diff , *mean , *index_parameter_mean , *index_parameter_variance , *covariance ,
-         *residual_mean , *residual_variance;
+         *residual_mean , *residual_square_sum , *residual_variance;
   Type *state_frequency;
 
 
@@ -1005,8 +1011,10 @@ void MarkovianSequences::linear_model_estimation(Type ***state_sequence_count , 
   }
 
   residual_mean = new double[process->nb_state];
+  residual_square_sum = new double[process->nb_state];
   for (i = 0;i < process->nb_state;i++) {
     residual_mean[i] = 0.;
+    residual_square_sum[i] = 0.;
   }
 
   switch (type[variable]) {
@@ -1018,8 +1026,10 @@ void MarkovianSequences::linear_model_estimation(Type ***state_sequence_count , 
       for (i = 0;i < nb_sequence;i++) {
         for (j = 0;j < length[i];j++) {
           for (k = 0;k < process->nb_state;k++) {
-            residual_mean[k] += state_sequence_count[i][j][k] * (int_sequence[i][variable][j] -
-                                 (process->observation[k]->intercept + process->observation[k]->slope * j));
+            diff = state_sequence_count[i][j][k] * (int_sequence[i][variable][j] -
+                    (process->observation[k]->intercept + process->observation[k]->slope * j));
+            residual_mean[k] += diff;
+            residual_square_sum[k] += diff * diff;
           }
         }
       }
@@ -1030,8 +1040,10 @@ void MarkovianSequences::linear_model_estimation(Type ***state_sequence_count , 
       for (i = 0;i < nb_sequence;i++) {
         for (j = 0;j < length[i];j++) {
           for (k = 0;k < process->nb_state;k++) {
-            residual_mean[k] += state_sequence_count[i][j][k] * (int_sequence[i][variable][j] -
-                                 (process->observation[k]->intercept + process->observation[k]->slope * index_parameter[i][j]));
+            diff = state_sequence_count[i][j][k] * (int_sequence[i][variable][j] -
+                    (process->observation[k]->intercept + process->observation[k]->slope * index_parameter[i][j]));
+            residual_mean[k] += diff;
+            residual_square_sum[k] += diff * diff;
           }
         }
       }
@@ -1048,8 +1060,10 @@ void MarkovianSequences::linear_model_estimation(Type ***state_sequence_count , 
       for (i = 0;i < nb_sequence;i++) {
         for (j = 0;j < length[i];j++) {
           for (k = 0;k < process->nb_state;k++) {
-            residual_mean[k] += state_sequence_count[i][j][k] * (real_sequence[i][variable][j] -
-                                 (process->observation[k]->intercept + process->observation[k]->slope * j));
+            diff = state_sequence_count[i][j][k] * (real_sequence[i][variable][j] -
+                    (process->observation[k]->intercept + process->observation[k]->slope * j));
+            residual_mean[k] += diff;
+            residual_square_sum[k] += diff * diff;
           }
         }
       }
@@ -1060,8 +1074,10 @@ void MarkovianSequences::linear_model_estimation(Type ***state_sequence_count , 
       for (i = 0;i < nb_sequence;i++) {
         for (j = 0;j < length[i];j++) {
           for (k = 0;k < process->nb_state;k++) {
-            residual_mean[k] += state_sequence_count[i][j][k] * (real_sequence[i][variable][j] -
-                                 (process->observation[k]->intercept + process->observation[k]->slope * index_parameter[i][j]));
+            diff = state_sequence_count[i][j][k] * (real_sequence[i][variable][j] -
+                    (process->observation[k]->intercept + process->observation[k]->slope * index_parameter[i][j]));
+            residual_mean[k] += diff;
+            residual_square_sum[k] += diff * diff;
           }
         }
       }
@@ -1075,6 +1091,16 @@ void MarkovianSequences::linear_model_estimation(Type ***state_sequence_count , 
   for (i = 0;i < process->nb_state;i++) {
     if (state_frequency[i] > 0) {
       residual_mean[i] /= state_frequency[i];
+    }
+
+    if (state_frequency[i] > 2) {
+      residual_square_sum[i] /= (state_frequency[i] - 2);
+      process->observation[i]->slope_standard_deviation = sqrt(residual_square_sum[i] / index_parameter_variance[i]);
+      process->observation[i]->sample_size = state_frequency[i] - 2;
+    }
+    else {
+      process->observation[i]->slope_standard_deviation = 0;
+      process->observation[i]->sample_size = 0;
     }
   }
 
@@ -1154,13 +1180,14 @@ void MarkovianSequences::linear_model_estimation(Type ***state_sequence_count , 
     if (state_frequency[i] > 2) {
 //      process->observation[i]->dispersion = sqrt(residual_variance[i] / state_frequency[i]);
       process->observation[i]->dispersion = sqrt(residual_variance[i] / (state_frequency[i] - 2));
-    }
-    else {
-      process->observation[i]->dispersion = 0.;
+      if (process->observation[i]->dispersion / mean[variable] < GAUSSIAN_MIN_VARIATION_COEFF) {
+        process->observation[i]->dispersion = mean[variable] * GAUSSIAN_MIN_VARIATION_COEFF;
+      }
     }
 
 #   ifdef DEBUG
-    cout << "\n" << STAT_word[STATW_STATE] << " " << i << "   "
+    cout << "\n" << STAT_label[STATL_VARIABLE] << " " << variable << "   "
+         << STAT_word[STATW_STATE] << " " << i << "   "
          << STAT_word[STATW_INTERCEPT] << " : " << process->observation[i]->intercept << "   "
          << STAT_word[STATW_SLOPE] << " : " << process->observation[i]->slope << "   "
          << STAT_word[STATW_STANDARD_DEVIATION] << " : " << process->observation[i]->dispersion << endl;
@@ -1174,6 +1201,7 @@ void MarkovianSequences::linear_model_estimation(Type ***state_sequence_count , 
   delete [] index_parameter_variance;
   delete [] covariance;
   delete [] residual_mean;
+  delete [] residual_square_sum;
   delete [] residual_variance;
 }
 
