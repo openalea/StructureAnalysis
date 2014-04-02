@@ -2231,6 +2231,7 @@ MarkovianSequences* MarkovianSequences::add_absorbing_run(StatError &error ,
   bool status = true , initial_run_flag;
   register int i , j , k;
   int end_value , *ilength;
+  double mean , variance , *deviation;
   MarkovianSequences *seq;
 
 
@@ -2308,6 +2309,16 @@ MarkovianSequences* MarkovianSequences::add_absorbing_run(StatError &error ,
       }
     }
 
+    deviation = new double[nb_variable];
+
+    for (i = 0;i < nb_variable;i++) {
+      if ((type[i] == REAL_VALUE) || (type[i] == AUXILIARY)) {
+        mean = mean_computation(i);
+        variance = variance_computation(i , mean);
+        deviation[i] = sqrt(variance) / ABSORBING_RUN_STANDARD_DEVIATION_FACTOR;
+      }
+    }
+
     // copie des sequences avec ajout series finales absorbantes
 
     for (i = 0;i < seq->nb_sequence;i++) {
@@ -2346,24 +2357,22 @@ MarkovianSequences* MarkovianSequences::add_absorbing_run(StatError &error ,
             seq->real_sequence[i][j][k] = real_sequence[i][j][k];
           }
 
-          if ((min_value[j] > 0.) || (max_value[j] < 0.)) {
-            end_value = 0;
-          }
-          else {
-            if (ceil(max_value[j]) > max_value[j]) {
-              end_value = ceil(max_value[j]);
-            }
-            else {
-              end_value = max_value[j] + 1;
+          if (min_value[j] >= 5 * deviation[j]) {
+            for (k = length[i];k < seq->length[i];k++) {
+              seq->real_sequence[i][j][k] = min_value[j] - (k % 2 + 4) * deviation[j];
             }
           }
 
-          for (k = length[i];k < seq->length[i];k++) {
-            seq->real_sequence[i][j][k] = end_value;
+          else {
+            for (k = length[i];k < seq->length[i];k++) {
+              seq->real_sequence[i][j][k] = max_value[j] + (k % 2 + 4) * deviation[j];
+            }
           }
         }
       }
     }
+
+    delete [] deviation;
 
     for (i = 0;i < seq->nb_variable;i++) {
       seq->min_value_computation(i);
