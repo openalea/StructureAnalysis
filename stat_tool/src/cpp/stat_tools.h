@@ -878,6 +878,8 @@ public :
     double min_value;       // valeur minimum
     double max_value;       // valeur maximum
     int unit;               // unite (degre/radian) pour la loi de von Mises
+    double slope_standard_deviation;  // LINEAR_MODEL
+    double sample_size;     // LINEAR_MODEL
     double *cumul;          // fonction de repartition (loi de von Mises)
 
     void copy(const ContinuousParametric &dist);
@@ -890,7 +892,7 @@ public :
     ~ContinuousParametric();
     ContinuousParametric& operator=(const ContinuousParametric&);
 
-    std::ostream& ascii_parameter_print(std::ostream &os) const;
+    std::ostream& ascii_parameter_print(std::ostream &os , bool file_flag = false) const;
     std::ostream& ascii_characteristic_print(std::ostream &os ,
                                              bool file_flag = false) const;
     std::ostream& ascii_print(std::ostream &os , bool file_flag = false ,
