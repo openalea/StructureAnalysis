@@ -1298,7 +1298,7 @@ ostream& SemiMarkov::ascii_write(ostream &os , const SemiMarkovData *seq ,
       for (j = 0;j < nb_state;j++) {
         os << "\n" << STAT_word[STATW_STATE] << " " << j << " "
            << STAT_word[STATW_OBSERVATION_MODEL] << endl;
-        continuous_parametric_process[i]->observation[j]->ascii_parameter_print(os);
+        continuous_parametric_process[i]->observation[j]->ascii_parameter_print(os , file_flag);
       }
     }
 
