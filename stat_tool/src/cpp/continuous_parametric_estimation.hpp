@@ -74,7 +74,6 @@ void Vectors::gamma_estimation(Type **component_vector_count , int variable ,
 {
   register int i , j;
   double diff , log_geometric_mean , *zero_mass , *mean , *variance;
-//  double buff;
   Type *component_frequency;
 
 
@@ -180,8 +179,14 @@ void Vectors::gamma_estimation(Type **component_vector_count , int variable ,
 /*          if (sqrt(variance[i]) < mean[i] * GAMMA_VARIATION_COEFF_THRESHOLD) {
             variance[i] = mean[i] * mean[i] * GAMMA_VARIATION_COEFF_THRESHOLD * GAMMA_VARIATION_COEFF_THRESHOLD;
           } */
-          process->observation[i]->shape = mean[i] * mean[i] / variance[i];
-          process->observation[i]->scale = variance[i] / mean[i];
+
+//          process->observation[i]->shape = mean[i] * mean[i] / variance[i];
+//          process->observation[i]->scale = variance[i] / mean[i];
+
+          // Hawang & Huang (2012), Ann. Inst. Statist. Math. 54(4), 840-847
+
+          process->observation[i]->shape = mean[i] * mean[i] / variance[i] - 1. / (double)component_frequency[i];
+          process->observation[i]->scale = mean[i] / process->observation[i]->shape;
 
 #         ifdef DEBUG    // essai pour eviter les très petits parametres de forme
           if ((process->observation[i]->shape < 1.) && (mean[i] < 5.)) {
@@ -219,7 +224,7 @@ void Vectors::gamma_estimation(Type **component_vector_count , int variable ,
             }
 
             log_geometric_mean /= component_frequency[i];
-            j = 0;
+/*            j = 0;   a revoir
 
 #           ifdef DEBUG
             cout << "\n" << STAT_word[STATW_COMPONENT] << " " << i << "   "
@@ -238,14 +243,14 @@ void Vectors::gamma_estimation(Type **component_vector_count , int variable ,
 #             endif
 
             }
-            while (j < MIN(GAMMA_ITERATION_FACTOR * iter , GAMMA_MAX_NB_ITERATION));
+            while (j < MIN(GAMMA_ITERATION_FACTOR * iter , GAMMA_MAX_NB_ITERATION)); */
 
             // approximations Johnson, Kotz & Balakrishnan, Continuous Univariate Distributions, vol. 1, 2nd ed., pp. 361-362
 
-/*            process->observation[i]->shape = mean[i] / (2 * (mean[i] - exp(log_geometric_mean))) - 1./12.;
-            buff = log(mean[i]) - log_geometric_mean;
-            process->observation[i]->shape = (1 + sqrt(1 + 4 * buff / 3)) / (4 * buff);
-            process->observation[i]->scale = mean[i] / process->observation[i]->shape; */
+//            process->observation[i]->shape = mean[i] / (2 * (mean[i] - exp(log_geometric_mean))) - 1./12.;
+            diff = log(mean[i]) - log_geometric_mean;
+            process->observation[i]->shape = (1 + sqrt(1 + 4 * diff / 3)) / (4 * diff);
+            process->observation[i]->scale = mean[i] / process->observation[i]->shape;
           }
         }
 
@@ -458,8 +463,13 @@ void Vectors::tied_gamma_estimation(Type **component_vector_count , int variable
     switch (process->tied_location) {
 
     case false : {
-      process->observation[0]->shape = mean[0] * mean[0] / variance;
-      process->observation[0]->scale = variance / mean[0];
+//      process->observation[0]->shape = mean[0] * mean[0] / variance;
+//      process->observation[0]->scale = variance / mean[0];
+
+      // Hawang & Huang (2012), Ann. Inst. Statist. Math. 54(4), 840-847
+
+      process->observation[0]->shape = mean[0] * mean[0] / variance - 1. / (double)component_frequency[0];
+      process->observation[0]->scale = mean[0] / process->observation[0]->shape;
 
       for (i = 1;i < process->nb_state;i++) {
         process->observation[i]->shape = process->observation[0]->shape;
@@ -487,11 +497,13 @@ void Vectors::tied_gamma_estimation(Type **component_vector_count , int variable
   }
   }
 
-//  if (process->observation[0]->shape >= GAMMA_SHAPE_PARAMETER_THRESHOLD) {
   if ((process->observation[0]->shape >= GAMMA_SHAPE_PARAMETER_THRESHOLD) &&
       (component_frequency[0] < GAMMA_FREQUENCY_THRESHOLD)) {
     log_geometric_mean = 0.;
-    component_frequency[0] = 0.;
+//    component_frequency[0] = 0.;
+    for (i = 0;i < process->nb_state;i++) {
+      component_frequency[i] = 0.;
+    }
 
     switch (type[variable]) {
 
@@ -499,8 +511,10 @@ void Vectors::tied_gamma_estimation(Type **component_vector_count , int variable
       for (i = 0;i < nb_vector;i++) {
         for (j = 0;j < process->nb_state;j++) {
           if (int_vector[i][variable] > 0) {
-            log_geometric_mean += component_vector_count[i][j] * log(int_vector[i][variable] / factor[j]);
-            component_frequency[0] += component_vector_count[i][j];
+//            log_geometric_mean += component_vector_count[i][j] * log(int_vector[i][variable] / factor[j]);
+//            component_frequency[0] += component_vector_count[i][j];
+            log_geometric_mean += component_vector_count[i][j] * log(int_vector[i][variable]);
+            component_frequency[j] += component_vector_count[i][j];
           }
         }
       }
@@ -511,8 +525,10 @@ void Vectors::tied_gamma_estimation(Type **component_vector_count , int variable
       for (i = 0;i < nb_vector;i++) {
         for (j = 0;j < process->nb_state;j++) {
           if (real_vector[i][variable] > 0.) {
-            log_geometric_mean += component_vector_count[i][j] * log(real_vector[i][variable] / factor[j]);
-            component_frequency[0] += component_vector_count[i][j];
+//            log_geometric_mean += component_vector_count[i][j] * log(real_vector[i][variable] / factor[j]);
+//            component_frequency[0] += component_vector_count[i][j];
+            log_geometric_mean += component_vector_count[i][j] * log(real_vector[i][variable]);
+            component_frequency[j] += component_vector_count[i][j];
           }
         }
       }
@@ -520,74 +536,54 @@ void Vectors::tied_gamma_estimation(Type **component_vector_count , int variable
     }
     }
 
+    for (i = 1;i < process->nb_state;i++) {
+      log_geometric_mean -= component_frequency[i] * log(factor[i]);
+      component_frequency[0] += component_frequency[i];
+    }
     log_geometric_mean /= component_frequency[0];
-    i = 0;
 
 #   ifdef MESSAGE
     cout << "\n" << STAT_word[STATW_SHAPE] << " : " << process->observation[0]->shape << "   "
          << STAT_word[STATW_SCALE] << " : " << process->observation[0]->scale << endl;
 #   endif
 
-    do {
+    // approximations Johnson, Kotz & Balakrishnan, Continuous Univariate Distributions, vol. 1, 2nd ed., pp. 361-362
+
+//    process->observation[0]->shape = mean[0] / (2 * (mean[0] - exp(log_geometric_mean))) - 1./12.;
+    diff = log(mean[0]) - log_geometric_mean;
+    process->observation[0]->shape = (1 + sqrt(1 + 4 * diff / 3)) / (4 * diff);
+
+#   ifdef DEBUG
+    cout << STAT_word[STATW_SHAPE] << " : " << process->observation[0]->shape << endl;
+#   endif
+
+    i = 0;
+
+/*    do {
       process->observation[0]->scale = exp(log_geometric_mean - digamma(process->observation[0]->shape));
       process->observation[0]->shape = mean[0] / process->observation[0]->scale;
       i++;
+    }
+    while (i < MIN(GAMMA_ITERATION_FACTOR * iter , GAMMA_MAX_NB_ITERATION)); */
 
-#     ifdef MESSAGE
-      {
-        double buff , likelihood = 0.;
+    do {
+      process->observation[0]->shape = process->observation[0]->shape * (log(process->observation[0]->shape) -
+                                        digamma(process->observation[0]->shape)) / diff;
+      i++;
 
-
-        switch (type[variable]) {
-
-        case INT_VALUE : {
-          for (j = 0;j < nb_vector;j++) {
-            if (min_value[variable] < min_interval[variable] / 2) {
-              buff = process->observation[0]->mass_computation(int_vector[j][variable] , int_vector[j][variable] + min_interval[variable]);
-	    }
-            else {
-              buff = process->observation[0]->mass_computation(int_vector[j][variable] - min_interval[variable] / 2 , int_vector[j][variable] + min_interval[variable] / 2);
-	    }
-
-            if (buff > 0.) {
-              likelihood += log(buff);
-            }
-            else {
-              likelihood = D_INF;
-              break;
-            }
-          }
-          break;
-        }
-
-        case REAL_VALUE : {
-          for (j = 0;j < nb_vector;j++) {
-            if (min_value[variable] < min_interval[variable] / 2) {
-              buff = process->observation[0]->mass_computation(real_vector[j][variable] , real_vector[j][variable] + min_interval[variable]);
-            }
-            else {
-              buff = process->observation[0]->mass_computation(real_vector[j][variable] - min_interval[variable] / 2 , real_vector[j][variable] + min_interval[variable] / 2);
-	    }
-
-            if (buff > 0.) {
-              likelihood += log(buff);
-            }
-            else {
-              likelihood = D_INF;
-              break;
-            }
-          }
-          break;
-        }
-        }
-      }
-
-      cout << STAT_word[STATW_SHAPE] << " : " << process->observation[0]->shape << "   "
-           << STAT_word[STATW_SCALE] << " : " << process->observation[0]->scale << endl;
+#     ifdef DEBUG
+      cout << STAT_word[STATW_SHAPE] << " : " << process->observation[0]->shape << endl;
 #     endif
 
     }
     while (i < MIN(GAMMA_ITERATION_FACTOR * iter , GAMMA_MAX_NB_ITERATION));
+
+    process->observation[0]->scale = mean[0] / process->observation[0]->shape;
+
+#   ifdef DEBUG
+    cout << "\n" << STAT_word[STATW_SHAPE] << " : " << process->observation[0]->shape << "   "
+         << STAT_word[STATW_SCALE] << " : " << process->observation[0]->scale << endl;
+#   endif
 
     switch (variance_factor) {
 
@@ -713,10 +709,6 @@ void Vectors::gaussian_estimation(Type **component_vector_count , int variable ,
         if (process->observation[i]->dispersion / process->observation[i]->location < GAUSSIAN_MIN_VARIATION_COEFF) {
           process->observation[i]->dispersion = process->observation[i]->location * GAUSSIAN_MIN_VARIATION_COEFF;
         }
-      }
-
-      else {
-        process->observation[i]->dispersion = D_DEFAULT;
       }
     }
     break;
