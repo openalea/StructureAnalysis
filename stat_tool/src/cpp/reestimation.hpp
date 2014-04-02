@@ -1643,8 +1643,8 @@ void Reestimation<Type>::gamma_estimation(ContinuousParametric *dist , int iter)
 
 {
   register int i;
-  double log_geometric_mean;
-//  double bvariance , buff;
+  double log_geometric_mean , diff;
+//  double bvariance;
 
 
   if (frequency[0] / nb_element > GAMMA_ZERO_FREQUENCY_THRESHOLD) {
@@ -1660,13 +1660,18 @@ void Reestimation<Type>::gamma_estimation(ContinuousParametric *dist , int iter)
       else {
         bvariance = variance;
       } */
-      dist->shape = mean * mean / variance;
-      dist->scale = variance / mean;
+//      dist->shape = mean * mean / variance;
+//      dist->scale = variance / mean;
+
+      // Hawang & Huang (2012), Ann. Inst. Statist. Math. 54(4), 840-847
+
+      dist->shape = mean * mean / variance - 1. / (double)nb_element;
+      dist->scale = mean / dist->shape;
 
       if ((dist->shape >= GAMMA_SHAPE_PARAMETER_THRESHOLD) &&
           (nb_element < GAMMA_FREQUENCY_THRESHOLD)) {
         log_geometric_mean = log_geometric_mean_computation();
-        i = 0;
+/*        i = 0;   a revoir
 
 #       ifdef DEBUG
         cout << "\n" << STAT_word[STATW_SHAPE] << " : " << dist->shape << "   "
@@ -1684,14 +1689,14 @@ void Reestimation<Type>::gamma_estimation(ContinuousParametric *dist , int iter)
 #         endif
 
         }
-        while (i < MIN(GAMMA_ITERATION_FACTOR * iter , GAMMA_MAX_NB_ITERATION));
+        while (i < MIN(GAMMA_ITERATION_FACTOR * iter , GAMMA_MAX_NB_ITERATION)); */
 
         // approximations Johnson, Kotz & Balakrishnan, Continuous Univariate Distributions, vol. 1, 2nd ed., pp. 361-362
 
-/*        dist->shape = mean / (2 * (mean - exp(log_geometric_mean))) - 1./12.;
-        buff = log(mean) - log_geometric_mean;
-        dist->shape = (1 + sqrt(1 + 4 * buff / 3)) / (4 * buff);
-        dist->scale = mean / dist->shape; */
+//        dist->shape = mean / (2 * (mean - exp(log_geometric_mean))) - 1./12.;
+        diff = log(mean) - log_geometric_mean;
+        dist->shape = (1 + sqrt(1 + 4 * diff / 3)) / (4 * diff);
+        dist->scale = mean / dist->shape;
       }
     }
 
@@ -1725,7 +1730,6 @@ void Reestimation<Type>::zero_inflated_gamma_estimation(ContinuousParametric *di
   else {
     register int i;
     double bmean , bvariance , diff , log_geometric_mean;
-//    double buff;
 
 
     dist->zero_probability = frequency[0] / nb_element;
@@ -1750,13 +1754,18 @@ void Reestimation<Type>::zero_inflated_gamma_estimation(ContinuousParametric *di
 /*      if (sqrt(bvariance) < bmean * GAMMA_VARIATION_COEFF_THRESHOLD) {
         bvariance = bmean * bmean * GAMMA_VARIATION_COEFF_THRESHOLD * GAMMA_VARIATION_COEFF_THRESHOLD;
       } */
-      dist->shape = bmean * bmean / bvariance;
-      dist->scale = bvariance / bmean;
+//      dist->shape = bmean * bmean / bvariance;
+//      dist->scale = bvariance / bmean;
+
+      // Hawang & Huang (2012), Ann. Inst. Statist. Math. 54(4), 840-847
+
+      dist->shape = bmean * bmean / bvariance - 1. / (double)(nb_element - frequency[0]);
+      dist->scale = bmean / dist->shape;
 
       if ((dist->shape >= GAMMA_SHAPE_PARAMETER_THRESHOLD) &&
           (nb_element - frequency[0] < GAMMA_FREQUENCY_THRESHOLD)) {
         log_geometric_mean = log_geometric_mean_computation();
-        i = 0;
+/*        i = 0;   a revoir
 
 #       ifdef DEBUG
         cout << "\n" << STAT_word[STATW_SHAPE] << " : " << dist->shape << "   "
@@ -1765,7 +1774,7 @@ void Reestimation<Type>::zero_inflated_gamma_estimation(ContinuousParametric *di
 
         do {
           dist->scale = exp(log_geometric_mean - digamma(dist->shape));
-          dist->shape = mean / dist->scale;
+          dist->shape = bmean / dist->scale;
           i++;
 
 #         ifdef DEBUG
@@ -1774,14 +1783,14 @@ void Reestimation<Type>::zero_inflated_gamma_estimation(ContinuousParametric *di
 #         endif
 
         }
-        while (i < MIN(GAMMA_ITERATION_FACTOR * iter , GAMMA_MAX_NB_ITERATION));
+        while (i < MIN(GAMMA_ITERATION_FACTOR * iter , GAMMA_MAX_NB_ITERATION)); */
 
         // approximations Johnson, Kotz & Balakrishnan, Continuous Univariate Distributions, vol. 1, 2nd ed., pp. 361-362
 
-/*        dist->shape = mean / (2 * (mean - exp(log_geometric_mean))) - 1./12.;
-        buff = log(mean) - log_geometric_mean;
-        dist->shape = (1 + sqrt(1 + 4 * buff / 3)) / (4 * buff);
-        dist->scale = mean / dist->shape; */
+//        dist->shape = bmean / (2 * (bmean - exp(log_geometric_mean))) - 1./12.;
+        diff = log(bmean) - log_geometric_mean;
+        dist->shape = (1 + sqrt(1 + 4 * diff / 3)) / (4 * diff);
+        dist->scale = bmean / dist->shape;
       }
     }
 
