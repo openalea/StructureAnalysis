@@ -878,12 +878,14 @@ ostream& ContinuousParametricProcess::ascii_print(ostream &os , Histogram **obse
     cumul[nb_state] = new double[nb_step];
 
     if (weight) {
-      os << "\n";
-      if (file_flag) {
-        os << "# ";
+      if ((marginal_distribution) || (exhaustive)) {
+        os << "\n";
+        if (file_flag) {
+          os << "# ";
+        }
+        os << STAT_label[STATL_MIXTURE] << " - "
+           << STAT_label[STATL_THEORETICAL] << " " << STAT_label[STATL_WEIGHTS] << ":";
       }
-      os << STAT_label[STATL_MIXTURE] << " - "
-         << STAT_label[STATL_THEORETICAL] << " " << STAT_label[STATL_WEIGHTS] << ":";
 
       // calcul du melange
 
@@ -1070,12 +1072,14 @@ ostream& ContinuousParametricProcess::ascii_print(ostream &os , Histogram **obse
     }
 
     if (restoration_weight) {
-      os << "\n";
-      if (file_flag) {
-        os << "# ";
+      if ((marginal_distribution) || (exhaustive)) {
+        os << "\n";
+        if (file_flag) {
+          os << "# ";
+        }
+        os << STAT_label[STATL_MIXTURE] << " - "
+           << STAT_label[STATL_RESTORATION] << " " << STAT_label[STATL_WEIGHTS] << ":";
       }
-      os << STAT_label[STATL_MIXTURE] << " - "
-         << STAT_label[STATL_RESTORATION] << " " << STAT_label[STATL_WEIGHTS] << ":";
 
       // calcul du melange
 
@@ -2278,7 +2282,7 @@ bool ContinuousParametricProcess::plot_print(const char *prefix , const char *ti
 {
   bool status = false;
   register int i , j , k;
-  int min_interval , nb_step , dist_index , file_index;
+  int min_interval , nb_step , dist_index;
   double value , min_value , max_value , step , buff , max , *scale , *dist_max ,
          **cumul , **frequency , **qqplot;
   gamma_distribution<double> **gamma_dist;
@@ -2749,37 +2753,32 @@ bool ContinuousParametricProcess::plot_print(const char *prefix , const char *ti
       value += step;
     }
 
-    i = 1;
     if (observation_histogram) {
-      for (j = 0;j < nb_state;j++) {
-        if (observation_histogram[j]->nb_element > 0) {
-          data_file_name[i] << prefix << process << i << ".dat";
-          observation_histogram[j]->plot_print((data_file_name[i].str()).c_str());
-          i++;
+      for (i = 0;i < nb_state;i++) {
+        if (observation_histogram[i]->nb_element > 0) {
+          data_file_name[i + 1] << prefix << process << i + 1 << ".dat";
+          observation_histogram[i]->plot_print((data_file_name[i + 1].str()).c_str());
         }
       }
     }
 
     if (observation_distribution) {
-      for (j = 0;j < nb_state;j++) {
-        if (observation_distribution[j]->nb_element > 0) {
-          data_file_name[i] << prefix << process << i << ".dat";
-          observation_distribution[j]->plot_print((data_file_name[i].str()).c_str());
-          i++;
+      for (i = 0;i < nb_state;i++) {
+        if (observation_distribution[i]->nb_element > 0) {
+          data_file_name[i + 1] << prefix << process << i + 1 << ".dat";
+          observation_distribution[i]->plot_print((data_file_name[i + 1].str()).c_str());
         }
       }
     }
 
     if (marginal_histogram) {
-      data_file_name[i] << prefix << process << i << ".dat";
-      marginal_histogram->plot_print((data_file_name[i].str()).c_str());
-      i++;
+      data_file_name[nb_state + 1] << prefix << process << nb_state + 1 << ".dat";
+      marginal_histogram->plot_print((data_file_name[nb_state + 1].str()).c_str());
     }
 
     if (marginal_distribution) {
-      data_file_name[i] << prefix << process << i << ".dat";
-      marginal_distribution->plot_print((data_file_name[i].str()).c_str());
-      i++;
+      data_file_name[nb_state + 1] << prefix << process << nb_state + 1 << ".dat";
+      marginal_distribution->plot_print((data_file_name[nb_state + 1].str()).c_str());
     }
 
     if (empirical_cdf) {
@@ -2806,9 +2805,8 @@ bool ContinuousParametricProcess::plot_print(const char *prefix , const char *ti
         qqplot = q_q_plot_computation(min_value , step , cumul[nb_state] ,
                                       nb_value - 1 , empirical_cdf);
 
-        data_file_name[i] << prefix << process << i << ".dat";
-        q_q_plot_print((data_file_name[i].str()).c_str() , nb_value - 1 , qqplot);
-        i++;
+        data_file_name[nb_state + 2] << prefix << process << nb_state + 2 << ".dat";
+        q_q_plot_print((data_file_name[nb_state + 2].str()).c_str() , nb_value - 1 , qqplot);
       }
 
       if (restoration_weight) {
@@ -2824,8 +2822,8 @@ bool ContinuousParametricProcess::plot_print(const char *prefix , const char *ti
         qqplot = q_q_plot_computation(min_value , step , cumul[nb_state + 1] ,
                                       nb_value - 1 , empirical_cdf);
 
-        data_file_name[i] << prefix << process << i << ".dat";
-        q_q_plot_print((data_file_name[i].str()).c_str() , nb_value - 1 , qqplot);
+        data_file_name[nb_state + 3] << prefix << process << nb_state + 3 << ".dat";
+        q_q_plot_print((data_file_name[nb_state + 3].str()).c_str() , nb_value - 1 , qqplot);
       }
     }
 
@@ -3068,11 +3066,9 @@ bool ContinuousParametricProcess::plot_print(const char *prefix , const char *ti
 
           if (weight) {
             dist_index = 2 * nb_state + 3;
-            file_index = nb_state + 3;
           }
           else {
             dist_index = nb_state + 2;
-            file_index = nb_state + 2;
           }
 
           for (j = 0;j < nb_state;j++) {
@@ -3103,7 +3099,7 @@ bool ContinuousParametricProcess::plot_print(const char *prefix , const char *ti
 
           out_file << "plot [" << min_value << ":" << max_value << "] ["
                    << min_value << ":" << max_value << "] \""
-                   << label((data_file_name[file_index].str()).c_str())
+                   << label((data_file_name[nb_state + 3].str()).c_str())
                    << "\" using 1:2 notitle with points" << endl;
 
           out_file << "unset grid" << endl;
