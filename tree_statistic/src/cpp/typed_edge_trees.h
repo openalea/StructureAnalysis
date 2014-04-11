@@ -354,7 +354,8 @@ public :
    Vectors* build_vectors(StatError& error) const;
    // should be a constructor of Vectors ?
    /** Extract all sequences from \e self along paths*/
-   Sequences* build_sequences(StatError& error, bool all_paths= true) const;
+   Sequences* build_sequences(StatError& error, bool all_paths= true,
+                              bool auto_axis= false) const;
 
     // Distributions of the tree-characteristics
     // ?    Vectors* extract_vectors(StatError &error, int type, int variable = I_DEFAULT,

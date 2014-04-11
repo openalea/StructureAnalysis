@@ -6634,7 +6634,7 @@ HiddenMarkovTree* Stat_trees::hidden_markov_tree_ascii_read(StatError& error,
             {
                tree_ident= token;
                if (token == STAT_TREES_word[TREESTATW_HIDDEN_MARKOV_IND_OUT_TREE])
-                   // || (token == STAT_TREES_word[STATW_HIDDEN_MARKOV_IN_TREE]))
+                   // || (token == STAT_TREES_word[TREESTATW_HIDDEN_MARKOV_IN_TREE]))
                   type= 'o';
                else
                   if (token == STAT_TREES_word[TREESTATW_EQUILIBRIUM_HIDDEN_MARKOV_IND_OUT_TREE])

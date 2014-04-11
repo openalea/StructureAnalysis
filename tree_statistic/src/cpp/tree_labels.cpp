@@ -63,6 +63,7 @@ const char *STAT_TREES_word[] = {
   "CHILDREN", // TREESTATW_CHILDREN
   "ORDERED_CHILD" , // TREESTATW_ORDERED_CHILD
   "ORDERED_CHILDREN" , // TREESTATW_ORDERED_CHILDREN
+  "VALUE" , // TREESTATW_VALUE
   "VARIABLE_ORDER_MARKOV_CHAIN" , // TREESTATW_VARIABLE_ORDER_MARKOV_CHAIN
   "VARIABLE_ORDER_MARKOV_CHAINS" // TREESTATW_VARIABLE_ORDER_MARKOV_CHAINS
 };
@@ -174,13 +175,15 @@ const char *STAT_TREES_label[] = {
  */
 
 const char *STAT_TREES_parsing[] = {
-  "bad probability value", // TREESTATP_BAD_PROBABILITY
-  "bad value for sum of (1-probabilities)" , // TREESTATP_BAD_ONE_MINUS_PROBABILITIES
-  "bad number of ordered children" , // TREESTATP_ORDERED_CHILDREN
-  "bad number of variable order Markov chains" , // TREESTATP_NB_VOMC
-  "bad number of generation processes" , // TREESTATP_NB_GENERATION_PROCESS
-  "bad number of children involved as factor in generation process" , // TREESTATP_NB_CHILDREN_BRANCHING
-  "bad number of factors" // TREESTATP_NB_FACTORS
+  "bad probability value", // TREETREESTATP_BAD_PROBABILITY
+  "bad value for sum of (1-probabilities)" , // TREETREESTATP_BAD_ONE_MINUS_PROBABILITIES
+  "bad number of ordered children" , // TREETREESTATP_ORDERED_CHILDREN
+  "bad number of variable order Markov chains" , // TREETREESTATP_NB_VOMC
+  "bad number of generation processes" , // TREETREESTATP_NB_GENERATION_PROCESS
+  "bad number of children involved as factor in generation process" , // TREETREESTATP_NB_CHILDREN_BRANCHING
+  "bad number of factors" // TREETREESTATP_NB_FACTORS
+  "bad value of factor" , // TREESTATP_FACTOR_VALUE
+  "bad number of values for factor" // TREESTATP_NB_FACTOR_VALUES
 };
 
 

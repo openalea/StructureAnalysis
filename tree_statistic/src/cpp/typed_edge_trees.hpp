@@ -923,7 +923,8 @@ Typed_edge_trees<Generic_Int_fl_container>::build_vectors(StatError& error) cons
 
 template<typename Generic_Int_fl_container> Sequences*
 Typed_edge_trees<Generic_Int_fl_container>::build_sequences(StatError& error,
-                                                            bool all_paths) const
+                                                            bool all_paths,
+                                                            bool auto_axis) const
 {
    typedef typename generic_visitor<tree_type>::vertex_array vertex_array;
 
@@ -935,12 +936,12 @@ Typed_edge_trees<Generic_Int_fl_container>::build_sequences(StatError& error,
    int *itype= NULL, *ilength= NULL;
    int ***isequence= NULL; // isequence[identifier][variable][index]
    int *iidentifier= NULL;
-   std::vector<int**> vsequence;
-   std::vector<int> videntifier;
-   std::vector<int> vlength;
+   std::vector<int**> vsequence; // set of sequences
+   std::vector<int> videntifier; // sequence identifiers
+   std::vector<int> vlength; // sequence sizes
    ostringstream error_message;
    std::vector<vertex_array> leaf_set;
-   std::vector<key> branched_vertices;
+   std::vector<key> branched_vertices; // current sequence ids
    vertex_array leaves;
    generic_visitor<tree_type> visitor;
    children_iterator it, end;
@@ -1006,35 +1007,39 @@ Typed_edge_trees<Generic_Int_fl_container>::build_sequences(StatError& error,
             }
             else
             {
-               // current sequence
+               // create a new sequence starting from leaf
+               // upwards to root
                branched_vertices.resize(0);
                branched_vertices.push_back(current_vertex);
-               cut= false;
+               cut = false; // end current sequence?
                while (!(trees[t]->is_root(current_vertex) || cut))
                {
-                  parent_vertex= trees[t]->parent(current_vertex);
+                  parent_vertex = trees[t]->parent(current_vertex);
                   // cut at each "+" edge (+ is 0)
                   cut= !trees[t]->edge_type(parent_vertex, current_vertex);
 
-                  if (!cut)
+                  if (!cut) // "<" edge: never cut
                   {
-                     current_vertex= parent_vertex;
+                     current_vertex = parent_vertex;
                      branched_vertices.push_back(current_vertex);
                   }
-                  else
+                  else // "+" edge: check auto_axis
                   {
-                     if (trees[t]->get_nb_children(parent_vertex)==1)
+                     if ((auto_axis) && (trees[t]->get_nb_children(parent_vertex)==1))
                      // sympodial branching: current_vertex is considered
-                     // as a successor
+                     // as a successor in auto_axis (one "+" child)
                      {
-                        current_vertex= parent_vertex;
+                        current_vertex = parent_vertex;
                         branched_vertices.push_back(current_vertex);
                         cut = false;
                      }
                      else
                      {
-                        // check whether every other children are +
-                        // and add a new sequence in this case
+                        // several children or !auto_axis
+                        // every "+" children is already in another sequence
+                        // If there is a "<" child, its parent is in the same sequence
+                        // otherwise parent vertex must end a new sequence
+                        // (added when reaching last "+" child)
                         Tree_tie::tie(it, end) = trees[t]->children(parent_vertex);
                         children_count = 0;
                         no_successor = true;
@@ -1055,24 +1060,10 @@ Typed_edge_trees<Generic_Int_fl_container>::build_sequences(StatError& error,
                         {
                            // parent vertex is deconnected from all other paths
                            leaf_set[t].push_back(parent_vertex);
-                           nb_sequences+=1;
+                           nb_sequences += 1;
                         }
                      }
                   }
-
-                  /* if (!cut)
-                  {
-                     current_vertex= parent_vertex;
-                     branched_vertices.push_back(current_vertex);
-                  }
-                  else
-                     if (trees[t]->get_nb_children(parent_vertex)==1)
-                     // parent_vertex is considered as a leaf vertex
-                     // in the sense of axial trees
-                     {
-                        leaf_set[t].push_back(parent_vertex);
-                        nb_sequences+=1;
-                     } */
                }
                // current sequence is finished
                // add sequence length to vlength
@@ -2809,7 +2800,8 @@ Typed_edge_trees<Generic_Int_fl_container>::segmentation_extract(StatError& erro
 /*****************************************************************
  *
  *  Difference between parent and children values using StatError
- *  object and variable index.
+ *  object and variable index. If exactly one variable is used,
+ *  a tree containing that variable only is returned.
  *
  **/
 

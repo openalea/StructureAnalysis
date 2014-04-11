@@ -191,17 +191,77 @@ def test_build_vectors():
     assert (vec.nb_vector == T.Size()), msg
 
 def test_build_sequences():
-    """Extract non-redundant sequences from a tree"""
-    msg = "Bad number of items: "
+    """Extract non-redundant sequences from a tree.
+       Cut trees at '+' edges"""
     mtg_t = test_mtg_build()
-    seq = mtg_t.BuildPySequences(False)
-    assert seq
-    nb_items = seq.build_vectors(True).nb_vector
-    msg += str(nb_items)
-    msg += " - should be :"
-    msg += str(mtg_t.Size())
-    assert (nb_items == mtg_t.Size()), msg
+    from openalea.tree_statistic.trees import etrees
+    for t in range(mtg_t.NbTrees()):
+        msg = "Bad number of items in tree " + str(t)
+        msg += ": "
+        Tr = etrees.Tree(mtg_t.Tree(t))
+        T = etrees.Trees([Tr])
+        seq = T.BuildPySequences(False, False)
+        assert seq
+        nb_items = seq.build_vectors(True).nb_vector
+        msg += str(nb_items)
+        msg += " - should be :"
+        msg += str(T.Size())
+        assert (nb_items == T.Size()), msg
+        e = [v for v in Tr.Postorder() if not(Tr.IsRoot(v)) \
+            and Tr.EdgeType(Tr.Parent(v), v) == "+"]
+        nb_seq = len(e) + 1
+        msg = "Bad number of sequences in tree " + str(t)
+        msg += ": " + str(len(seq))
+        msg += " - should be: " + str(nb_seq)
+        assert len(seq) == nb_seq, msg
 
+def test_build_auto_axis_sequences():
+    """Extract non-redundant sequences from a tree.
+       Cut trees at '+' edges. Unique children are
+       considered as '<' in every case."""
+    mtg_t = test_mtg_build()
+    from openalea.tree_statistic.trees import etrees
+    for t in range(mtg_t.NbTrees()):
+        msg = "Bad number of items in tree " + str(t)
+        msg += ": "
+        Tr = etrees.Tree(mtg_t.Tree(t))
+        T = etrees.Trees([Tr])
+        seq = T.BuildPySequences(False, True)
+        assert seq
+        nb_items = seq.build_vectors(True).nb_vector
+        msg += str(nb_items)
+        msg += " - should be :"
+        msg += str(T.Size())
+        assert (nb_items == T.Size()), msg
+        e = [v for v in Tr.Postorder() if not(Tr.IsRoot(v)) and \
+            (Tr.EdgeType(Tr.Parent(v), v) == "+") and \
+            (Tr.NbChildren(Tr.Parent(v)) > 1)]
+        nb_seq = len(e) + 1
+        msg = "Bad number of sequences in tree " + str(t)
+        msg += ": " + str(len(seq))
+        msg += " - should be: " + str(nb_seq)
+        assert len(seq) == nb_seq, msg
+
+def test_build_redundant_sequences():
+    """Extract redundant sequences from a tree.
+       Follow every path from a leaf to root vertex."""
+    mtg_t = test_mtg_build()
+    from openalea.tree_statistic.trees import etrees
+    for t in range(mtg_t.NbTrees()):
+        msg = "Bad number of items in tree " + str(t)
+        msg += ": "
+        Tr = etrees.Tree(mtg_t.Tree(t))
+        T = etrees.Trees([Tr])
+        seq = T.BuildPySequences(True)
+        assert seq
+        e = [v for v in Tr.Postorder() if 
+             Tr.NbChildren(v) == 0]
+        nb_seq = len(e)
+        msg = "Bad number of sequences in tree " + str(t)
+        msg += ": " + str(len(seq))
+        msg += " - should be: " + str(nb_seq)
+        assert len(seq) == nb_seq, msg
+        
 def test_extract_mtg():
     """Extract an MTG object from a trees"""
     msg1 = "Extraction of MTG failed"
@@ -211,7 +271,8 @@ def test_extract_mtg():
     assert len(g.vertices(scale=1)) == T.NbTrees(), msg2
     
 if __name__ == "__main__":
-    nb_trees, tree_list, tv, T, mtg_name = init()
+    # nb_trees, tree_list, tv, T, mtg_name = init()
+    mtg_name = init()
     test_mtg_build()
     test_tree_size()
     test_cluster()
@@ -223,4 +284,6 @@ if __name__ == "__main__":
     test_merge_failure()
     test_build_vectors()
     test_build_sequences()
+    test_build_auto_axis_sequences()
+    test_build_redundant_sequences()
     test_extract_mtg()
