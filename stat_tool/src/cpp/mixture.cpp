@@ -1107,7 +1107,7 @@ ostream& Mixture::ascii_write(ostream &os , const MixtureData *vec ,
       case STATE :
         variable = i + 1;
         break;
-      case INT_VALUE :
+      default :
         variable = i;
         break;
       }
@@ -1432,7 +1432,7 @@ ostream& Mixture::spreadsheet_write(ostream &os , const MixtureData *vec) const
       case STATE :
         variable = i + 1;
         break;
-      case INT_VALUE :
+      default :
         variable = i;
         break;
       }
@@ -1696,7 +1696,7 @@ bool Mixture::plot_write(const char *prefix , const char *title ,
         case STATE :
           variable = i + 1;
           break;
-        case INT_VALUE :
+        default :
           variable = i;
           break;
         }
@@ -1796,7 +1796,7 @@ MultiPlotSet* Mixture::get_plotable(const MixtureData *vec) const
       case STATE :
         variable = i + 1;
         break;
-      case INT_VALUE :
+      default :
         variable = i;
         break;
       }
@@ -1889,7 +1889,7 @@ MultiPlotSet* Mixture::get_plotable(const MixtureData *vec) const
       case STATE :
         variable = i + 1;
         break;
-      case INT_VALUE :
+      default :
         variable = i;
         break;
       }
