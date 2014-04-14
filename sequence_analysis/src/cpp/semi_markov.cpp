@@ -1308,7 +1308,7 @@ ostream& SemiMarkov::ascii_write(ostream &os , const SemiMarkovData *seq ,
         case STATE :
           variable = i + 1;
           break;
-        case INT_VALUE :
+        default :
           variable = i;
           break;
         }
@@ -1327,7 +1327,7 @@ ostream& SemiMarkov::ascii_write(ostream &os , const SemiMarkovData *seq ,
       }
 
       if (categorical_process[i]) {
-        categorical_process[i]->ascii_print(os , i , observation_dist , marginal_dist ,
+        categorical_process[i]->ascii_print(os , i + 1 , observation_dist , marginal_dist ,
                                             characteristics , exhaustive , file_flag);
 
         if (hidden) {
@@ -1751,7 +1751,7 @@ ostream& SemiMarkov::spreadsheet_write(ostream &os , const SemiMarkovData *seq ,
       case STATE :
         variable = i + 1;
         break;
-      case INT_VALUE :
+      default :
         variable = i;
         break;
       }
@@ -1774,7 +1774,7 @@ ostream& SemiMarkov::spreadsheet_write(ostream &os , const SemiMarkovData *seq ,
         characteristics = seq->characteristics[variable];
 
         if (categorical_process[i]) {
-          categorical_process[i]->spreadsheet_print(os , i , observation_dist , marginal_dist ,
+          categorical_process[i]->spreadsheet_print(os , i + 1 , observation_dist , marginal_dist ,
                                                     characteristics);
 
           if (hidden) {
@@ -2018,7 +2018,7 @@ bool SemiMarkov::plot_write(const char *prefix , const char *title ,
         case STATE :
           variable = i + 1;
           break;
-        case INT_VALUE :
+        default :
           variable = i;
           break;
         }
@@ -2226,7 +2226,7 @@ MultiPlotSet* SemiMarkov::get_plotable(const SemiMarkovData *seq) const
       case STATE :
         variable = i + 1;
         break;
-      case INT_VALUE :
+      default :
         variable = i;
         break;
       }
@@ -2391,7 +2391,7 @@ MultiPlotSet* SemiMarkov::get_plotable(const SemiMarkovData *seq) const
       case STATE :
         variable = i + 1;
         break;
-      case INT_VALUE :
+      default :
         variable = i;
         break;
       }
