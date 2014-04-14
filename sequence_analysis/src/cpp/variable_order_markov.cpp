@@ -4028,7 +4028,7 @@ ostream& VariableOrderMarkov::ascii_write(ostream &os , const VariableOrderMarko
       case STATE :
         variable = i + 1;
         break;
-      case INT_VALUE :
+      default :
         variable = i;
         break;
       }
@@ -4047,7 +4047,7 @@ ostream& VariableOrderMarkov::ascii_write(ostream &os , const VariableOrderMarko
     }
 
     if (categorical_process[i]) {
-      categorical_process[i]->ascii_print(os , i , observation_dist , marginal_dist ,
+      categorical_process[i]->ascii_print(os , i + 1 , observation_dist , marginal_dist ,
                                           characteristics , exhaustive , file_flag);
 
       if (hidden) {
@@ -4515,7 +4515,7 @@ ostream& VariableOrderMarkov::spreadsheet_write(ostream &os ,
       case STATE :
         variable = i + 1;
         break;
-      case INT_VALUE :
+      default :
         variable = i;
         break;
       }
@@ -4534,7 +4534,7 @@ ostream& VariableOrderMarkov::spreadsheet_write(ostream &os ,
     }
 
     if (categorical_process[i]) {
-      categorical_process[i]->spreadsheet_print(os , i , observation_dist , marginal_dist ,
+      categorical_process[i]->spreadsheet_print(os , i + 1 , observation_dist , marginal_dist ,
                                                 characteristics);
 
       if (hidden) {
@@ -4807,7 +4807,7 @@ bool VariableOrderMarkov::plot_write(const char *prefix , const char *title ,
         case STATE :
           variable = i + 1;
           break;
-        case INT_VALUE :
+        default :
           variable = i;
           break;
         }
@@ -5006,7 +5006,7 @@ MultiPlotSet* VariableOrderMarkov::get_plotable(const VariableOrderMarkovData *s
       case STATE :
         variable = i + 1;
         break;
-      case INT_VALUE :
+      default :
         variable = i;
         break;
       }
@@ -5171,7 +5171,7 @@ MultiPlotSet* VariableOrderMarkov::get_plotable(const VariableOrderMarkovData *s
       case STATE :
         variable = i + 1;
         break;
-      case INT_VALUE :
+      default :
         variable = i;
         break;
       }
