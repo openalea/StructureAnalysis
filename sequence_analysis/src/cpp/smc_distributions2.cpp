@@ -1197,10 +1197,10 @@ void SemiMarkov::characteristic_computation(const SemiMarkovData &seq , bool cou
         categorical_process[i]->create_characteristic(dlength , true , counting_flag);
 
         switch (seq.type[0]) {
-        case INT_VALUE :
-          seq_variable = i - 1;
-          break;
         case STATE :
+          seq_variable = i + 1;
+          break;
+        default :
           seq_variable = i;
           break;
         }
