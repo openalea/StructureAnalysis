@@ -6237,23 +6237,24 @@ Sequences* Sequences::sojourn_time_sequences(StatError &error , int variable) co
     // calcul des sequences de temps de sejour
 
     if ((index_parameter_type == TIME) && (index_interval->variance > 0.)) {  // pour les suivis de croissance manguier
-      for (i = 0;i < nb_sequence;i++) {
+      for (i = 0;i < nb_sequence;i++) {                                       // et les pousses d'arabidopsis
         pstate = seq->int_sequence[i][0];
         psequence = seq->int_sequence[i][1];
-        begin_run = 0;
+        begin_run = index_parameter_distribution->offset;
+//        begin_run = 0;
         ilength = 0;
 
         for (j = 0;j < length[i] - 1;j++) {
           if (int_sequence[i][variable][j + 1] != int_sequence[i][variable][j]) {
             *pstate++ = int_sequence[i][variable][j];
-            *psequence++ = index_parameter[i][j + 1] - begin_run - 1;
+            *psequence++ = index_parameter[i][j + 1] - begin_run;
             begin_run = index_parameter[i][j + 1];
             ilength++;
           }
         }
 
         *pstate = int_sequence[i][variable][length[i] - 1];
-        *psequence = index_parameter[i][j] - begin_run;
+        *psequence = index_parameter[i][j] + 1 - begin_run;
 
         seq->length[i] = ilength + 1;
       }
