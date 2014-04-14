@@ -1392,6 +1392,13 @@ void Sequences::reverse(const Sequences &seq)
         *pindex_param = end_position;
       }
 
+      else if (index_parameter_type == TIME) {
+        cindex_param = seq.index_parameter[i] + length[i] - 1;
+        for (j = 0;j < length[i];j++) {
+          *pindex_param++ = index_parameter_distribution->nb_value - *cindex_param--;
+        }
+      }
+
       else {
         cindex_param = seq.index_parameter[i] + length[i] - 1;
         for (j = 0;j < length[i];j++) {
