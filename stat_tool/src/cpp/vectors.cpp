@@ -482,21 +482,15 @@ Vectors::Vectors(const Vectors &vec , int inb_vector , int *index)
     min_value_computation(i);
     max_value_computation(i);
 
-    switch (type[i]) {
-
-    case STATE:
-    case INT_VALUE : {
+    if (type[i] != REAL_VALUE) {
       build_marginal_frequency_distribution(i);
-      break;
     }
 
-    case REAL_VALUE : {
-      build_marginal_histogram(i);
+    else  {
+      build_marginal_histogram(i , vec.marginal_histogram[i]->step);
 
       mean_computation(i);
       variance_computation(i);
-      break;
-    }
     }
 
     min_interval_computation(i);
