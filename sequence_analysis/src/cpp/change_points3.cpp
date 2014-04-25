@@ -94,7 +94,9 @@ double Sequences::N_segmentation(int index , int nb_segment , int *model_type ,
               *contrast , likelihood_cumul , posterior_probability_cumul;
 
 # ifdef MESSAGE
+  int *change_point;
   double sum2;
+  long double norm;
 # endif
 
 
@@ -851,6 +853,11 @@ double Sequences::N_segmentation(int index , int nb_segment , int *model_type ,
      << nb_segmentation_forward[length[index] - 1][nb_segment - 1] << " (" << buff << ")" << endl;
 
   os.precision(6);
+
+  if (((model_type[0] == MEAN_CHANGE) || (model_type[0] == INTERCEPT_SLOPE_CHANGE)) &&
+      (format == 's') && (nb_segment == 2) && (inb_segmentation >= length[index] - 1)) {
+    change_point = new int[length[index]];
+  }
 # endif
 
   // restauration
@@ -1263,12 +1270,61 @@ double Sequences::N_segmentation(int index , int nb_segment , int *model_type ,
           os << endl;
         }
       }
+
+      if (((model_type[0] == MEAN_CHANGE) || (model_type[0] == INTERCEPT_SLOPE_CHANGE)) &&
+          (nb_segment == 2) && (inb_segmentation >= length[index] - 1)) {
+        psegment = int_sequence[index][0] + 1;
+        for (j = 1;j < length[index];j++) {
+          if (*psegment != *(psegment - 1)) {
+            change_point[i] = j;
+            break;
+          }
+          psegment++;
+        }
+      }
       break;
     }
     }
 #   endif
 
   }
+
+# ifdef MESSAGE
+  if (((model_type[0] == MEAN_CHANGE) || (model_type[0] == INTERCEPT_SLOPE_CHANGE)) &&
+      (format == 's') && (nb_segment == 2) && (inb_segmentation >= length[index] - 1)) {
+    norm = 0.;
+    for (i = 0;i < length[index] - 1;i++) {
+      norm += exp(forward[length[index] - 1][nb_segment - 1][i]);
+    }
+
+    os << "\n" << SEQ_label[SEQL_POSTERIOR_CHANGE_POINT_PROBABILITY] << "\n\n";
+
+    if (index_parameter) {
+      for (i = 1;i < length[index];i++) {
+        for (j = 0;j < length[index] - 1;j++) {
+          if (change_point[j] == i) {
+            os << index_parameter[index][i] << "\t"
+               << exp(forward[length[index] - 1][nb_segment - 1][j]) / norm << endl;
+            break;
+          }
+        }
+      }
+    }
+
+    else {
+      for (i = 1;i < length[index];i++) {
+        for (j = 0;j < length[index] - 1;j++) {
+          if (change_point[j] == i) {
+            os << i << "\t" << exp(forward[length[index] - 1][nb_segment - 1][j]) / norm << endl;
+            break;
+          }
+        }
+      }
+    }
+
+    delete [] change_point;
+  }
+# endif
 
 # ifdef DEBUG
   if (((likelihood != D_INF) && (likelihood_cumul / exp(likelihood) > 0.8)) ||
@@ -5145,10 +5201,20 @@ Sequences* Sequences::hierarchical_segmentation(StatError &error , ostream &os ,
       os << "\n" << nb_segment << " " << SEQ_label[SEQL_SEGMENTS] << ":";
       os << " " << likelihood[nb_segment] << " " << penalty[nb_segment]
          << " " << penalized_likelihood[nb_segment] << " ||";
-      for (i = 0;i <= nb_segment;i++) {
-        os << " " << change_point[nb_segment][i];
+
+      if (seq->index_parameter) {
+        for (i = 0;i < nb_segment;i++) {
+          os << " " << seq->index_parameter[0][change_point[nb_segment][i]];
+        }
+        os << endl;
       }
-      os << endl;
+
+      else {
+        for (i = 0;i <= nb_segment;i++) {
+          os << " " << change_point[nb_segment][i];
+        }
+        os << endl;
+      }
 #     endif
 
     }
@@ -6075,12 +6141,31 @@ Sequences* Sequences::hierarchical_segmentation(StatError &error , ostream &os ,
 
 #     ifdef MESSAGE
       if (begin_change_point < split_change_point) {
-        cout << "\nBegin merge: " << change_point[nb_segment][segment_index - 1] << " " << begin_change_point << " " << split_change_point
-             << " | " << begin_contrast[begin_change_point - 1] << " " << begin_contrast[begin_change_point] << "\n" << endl;
+        if (index_parameter) {
+          cout << "\nBegin merge: " << seq->index_parameter[0][change_point[nb_segment][segment_index - 1]]
+               << " " << seq->index_parameter[0][begin_change_point] << " " << seq->index_parameter[0][split_change_point]
+               << " | " << begin_contrast[begin_change_point - 1] << " " << begin_contrast[begin_change_point] << "\n" << endl;
+        }
+
+        else {
+          cout << "\nBegin merge: " << change_point[nb_segment][segment_index - 1] << " "
+               << begin_change_point << " " << split_change_point
+               << " | " << begin_contrast[begin_change_point - 1] << " " << begin_contrast[begin_change_point] << "\n" << endl;
+        }
       }
+
       if (end_change_point > split_change_point) {
-        cout << "\nEnd merge: " << split_change_point << " " << end_change_point << " " << change_point[nb_segment][segment_index + 1]
-             << " | " << end_contrast[end_change_point] << " " << end_contrast[end_change_point - 1] << "\n" << endl;
+        if ((index_parameter) && (segment_index < nb_segment - 1)) {
+          cout << "\nEnd merge: " << seq->index_parameter[0][split_change_point] << " " << seq->index_parameter[0][end_change_point]
+               << " " << seq->index_parameter[0][change_point[nb_segment][segment_index + 1]]
+               << " | " << end_contrast[end_change_point] << " " << end_contrast[end_change_point - 1] << "\n" << endl;
+        }
+
+        else {
+          cout << "\nEnd merge: " << split_change_point << " " << end_change_point
+               << " " << change_point[nb_segment][segment_index + 1]
+               << " | " << end_contrast[end_change_point] << " " << end_contrast[end_change_point - 1] << "\n" << endl;
+        }
       }
 #     endif
 
@@ -6292,16 +6377,26 @@ Sequences* Sequences::hierarchical_segmentation(StatError &error , ostream &os ,
                                            log((double)((seq->nb_variable - 1) * seq->length[0])) - penalty[nb_segment];
 
 #       ifdef MESSAGE
-        os << nb_segment << " " << SEQ_label[SEQL_SEGMENTS] << ":";
-        os << " " << likelihood[nb_segment] << " " << penalty[nb_segment]
+        os << nb_segment << " " << SEQ_label[SEQL_SEGMENTS] << ":"
+           << " " << likelihood[nb_segment] << " " << penalty[nb_segment]
            << " " << penalized_likelihood[nb_segment] << " ||";
         os << " " << segment_index << " " << split_change_point
            << " | " << begin_change_point << " " << change_point[nb_segment][segment_index + 1]
            << " | " << end_change_point << " " << change_point[nb_segment][segment_index - 1] << " ||";
-        for (i = 0;i <= nb_segment;i++) {
-          os << " " << change_point[nb_segment][i];
+
+        if (seq->index_parameter) {
+          for (i = 0;i < nb_segment;i++) {
+            os << " " << seq->index_parameter[0][change_point[nb_segment][i]];
+          }
+          os << endl;
         }
-        os << endl;
+
+        else {
+          for (i = 0;i <= nb_segment;i++) {
+            os << " " << change_point[nb_segment][i];
+          }
+          os << endl;
+        }
 #       endif
 
       }
