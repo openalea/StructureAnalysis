@@ -2125,7 +2125,7 @@ double Sequences::segmentation(int *nb_segment , int *model_type , double **rank
 
           else if (model_type[k - 1] == POISSON_CHANGE) {
             factorial[k][j] = 0.;
-            for (m = 2;m <= int_sequence[i][k][m];m++) {
+            for (m = 2;m <= int_sequence[i][k][j];m++) {
               factorial[k][j] += log((double)m);
             }
 
