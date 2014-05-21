@@ -683,7 +683,7 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
   hyperparam = new double*[nb_variable];
 
   for (i = 1;i < nb_variable;i++) {
-    if ((model_type[i - 1] == CATEGORICAL_CHANGE) &&
+    if (((model_type[i - 1] == CATEGORICAL_CHANGE) || (model_type[0] == MULTIVARIATE_CATEGORICAL_CHANGE)) &&
         (marginal_distribution[i]->nb_value > max_nb_value)) {
       max_nb_value = marginal_distribution[i]->nb_value;
     }
@@ -843,7 +843,26 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
 
     // calcul des log-vraisemblances des segments
 
-    if (model_type[0] == MULTIVARIATE_POISSON_CHANGE) {
+    if (model_type[0] == MULTIVARIATE_CATEGORICAL_CHANGE) {
+      for (j = 0;j < max_nb_value;j++) {
+        frequency[j] = 0;
+      }
+
+      for (j = i;j >= 0;j--) {
+        for (k = 1;k < nb_variable;k++) {
+          frequency[int_sequence[index][k][j]]++;
+        }
+
+        contrast[j] = 0.;
+        for (k = 0;k < max_nb_value;k++) {
+          if (frequency[k] > 0) {
+            contrast[j] += frequency[k] * log((double)frequency[k] / (double)((nb_variable - 1) * (i - j + 1)));
+          }
+        }
+      }
+    }
+
+    else if (model_type[0] == MULTIVARIATE_POISSON_CHANGE) {
       for (j = 1;j < nb_variable;j++) {
         factorial[j][i] = 0.;
         for (k = 2;k <= int_sequence[index][j][i];k++) {
@@ -1346,7 +1365,26 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
 
       // calcul des log-vraisemblances des segments
 
-      if (model_type[0] == MULTIVARIATE_POISSON_CHANGE) {
+      if (model_type[0] == MULTIVARIATE_CATEGORICAL_CHANGE) {
+        for (j = 0;j < max_nb_value;j++) {
+          frequency[j] = 0;
+        }
+
+        for (j = i;j < length[index];j++) {
+          for (k = 1;k < nb_variable;k++) {
+            frequency[int_sequence[index][k][j]]++;
+          }
+
+          contrast[j] = 0.;
+          for (k = 0;k < max_nb_value;k++) {
+            if (frequency[k] > 0) {
+              contrast[j] += frequency[k] * log((double)frequency[k] / (double)((nb_variable - 1) * (j - i + 1)));
+            }
+          }
+        }
+      }
+
+      else if (model_type[0] == MULTIVARIATE_POISSON_CHANGE) {
         sum = 0.;
         factorial_sum = 0.;
         for (j = i;j < length[index];j++) {
@@ -2121,7 +2159,26 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
 
       // calcul des log-vraisemblances des segments
 
-      if (model_type[0] == MULTIVARIATE_POISSON_CHANGE) {
+      if (model_type[0] == MULTIVARIATE_CATEGORICAL_CHANGE) {
+        for (j = 0;j < max_nb_value;j++) {
+          frequency[j] = 0;
+        }
+
+        for (j = i;j >= 0;j--) {
+          for (k = 1;k < nb_variable;k++) {
+            frequency[int_sequence[index][k][j]]++;
+          }
+
+          contrast[j] = 0.;
+          for (k = 0;k < max_nb_value;k++) {
+            if (frequency[k] > 0) {
+              contrast[j] += frequency[k] * log((double)frequency[k] / (double)((nb_variable - 1) * (i - j + 1)));
+            }
+          }
+        }
+      }
+
+      else if (model_type[0] == MULTIVARIATE_POISSON_CHANGE) {
         sum = 0.;
         factorial_sum = 0.;
         for (j = i;j >= 0;j--) {
@@ -2926,7 +2983,7 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *mo
   hyperparam = new double*[nb_variable];
 
   for (i = 1;i < nb_variable;i++) {
-    if ((model_type[i - 1] == CATEGORICAL_CHANGE) &&
+    if (((model_type[i - 1] == CATEGORICAL_CHANGE) || (model_type[0] == MULTIVARIATE_CATEGORICAL_CHANGE)) &&
         (marginal_distribution[i]->nb_value > max_nb_value)) {
       max_nb_value = marginal_distribution[i]->nb_value;
     }
@@ -3058,7 +3115,26 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *mo
 
     // calcul des log-vraisemblances des segments
 
-    if (model_type[0] == MULTIVARIATE_POISSON_CHANGE) {
+    if (model_type[0] == MULTIVARIATE_CATEGORICAL_CHANGE) {
+      for (j = 0;j < max_nb_value;j++) {
+        frequency[j] = 0;
+      }
+
+      for (j = i;j >= 0;j--) {
+        for (k = 1;k < nb_variable;k++) {
+          frequency[int_sequence[index][k][j]]++;
+        }
+
+        contrast[j] = 0.;
+        for (k = 0;k < max_nb_value;k++) {
+          if (frequency[k] > 0) {
+            contrast[j] += frequency[k] * log((double)frequency[k] / (double)((nb_variable - 1) * (i - j + 1)));
+          }
+        }
+      }
+    }
+
+    else if (model_type[0] == MULTIVARIATE_POISSON_CHANGE) {
       for (j = 1;j < nb_variable;j++) {
         factorial[j][i] = 0.;
         for (k = 2;k <= int_sequence[index][j][i];k++) {
@@ -3494,7 +3570,26 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *mo
 
         // calcul des log-vraisemblances des segments
 
-        if (model_type[0] == MULTIVARIATE_POISSON_CHANGE) {
+        if (model_type[0] == MULTIVARIATE_CATEGORICAL_CHANGE) {
+          for (m = 0;m < max_nb_value;m++) {
+            frequency[m] = 0;
+          }
+
+          for (m = j;m >= k;m--) {
+            for (n = 1;n < nb_variable;n++) {
+              frequency[int_sequence[index][n][m]]++;
+            }
+
+            contrast[m] = 0.;
+            for (n = 0;n < max_nb_value;n++) {
+              if (frequency[n] > 0) {
+                contrast[m] += frequency[n] * log((double)frequency[n] / (double)((nb_variable - 1) * (j - m + 1)));
+              }
+            }
+          }
+        }
+
+        else if (model_type[0] == MULTIVARIATE_POISSON_CHANGE) {
           sum = 0.;
           factorial_sum = 0.;
           for (m = j;m >= k;m--) {
