@@ -518,7 +518,7 @@ Sequences* sequences_ascii_read(StatError &error , const char *path , bool old_f
                 lstatus = locale.stringToNum(token , &int_value);
                 if ((lstatus) && (((k == 0) && (((index_parameter_type == TIME) || (index_parameter_type == POSITION) ||
                         (index_parameter_type == POSITION_INTERVAL)) && (int_value < 0)) ||
-                      ((index_parameter_type == TIME_INTERVAL) && (int_value <= 0)))  ||
+                      ((index_parameter_type == TIME_INTERVAL) && (int_value <= 0))) ||
                      ((k == 1) && (type[k - 1] == NB_INTERNODE) && (int_value < 0)))) {
                   lstatus = false;
                 }
