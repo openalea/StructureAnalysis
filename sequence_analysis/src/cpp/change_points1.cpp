@@ -212,7 +212,7 @@ int Sequences::nb_parameter_computation(int index , int nb_segment , int *model_
 {
   bool *used_output;
   register int i , j , k;
-  int nb_parameter , *psegment;
+  int nb_parameter , max_nb_value , *psegment;
 
 
   used_output = new bool[NB_OUTPUT];
@@ -220,7 +220,57 @@ int Sequences::nb_parameter_computation(int index , int nb_segment , int *model_
 //  nb_parameter = 0;
   nb_parameter = nb_segment - 1;
 
-  if ((model_type[0] == MULTIVARIATE_POISSON_CHANGE) || (model_type[0] == MULTIVARIATE_GEOMETRIC_0_CHANGE)) {
+  if (model_type[0] == MULTIVARIATE_CATEGORICAL_CHANGE) {
+    max_nb_value = 0;
+    for (i = 1;i < nb_variable;i++) {
+      if (marginal_distribution[i]->nb_value > max_nb_value) {
+        max_nb_value = marginal_distribution[i]->nb_value;
+      }
+    }
+
+    psegment = int_sequence[index][0] + 1;
+
+    for (i = 0;i < max_nb_value;i++) {
+      used_output[i] = false;
+    }
+
+    used_output[int_sequence[index][1][0]] = true;
+    for (i = 2;i < nb_variable;i++) {
+      if (!used_output[int_sequence[index][i][0]]) {
+        nb_parameter++;
+        used_output[int_sequence[index][i][0]] = true;
+      }
+    }
+
+    for (i = 1;i < length[index];i++) {
+      if (*psegment != *(psegment - 1)) {
+        for (j = 0;j < max_nb_value;j++) {
+          used_output[j] = false;
+        }
+
+        used_output[int_sequence[index][1][i]] = true;
+        for (j = 2;j < nb_variable;j++) {
+          if (!used_output[int_sequence[index][j][i]]) {
+            nb_parameter++;
+            used_output[int_sequence[index][j][i]] = true;
+          }
+        }
+      }
+
+      else {
+        for (j = 1;j < nb_variable;j++) {
+          if (!used_output[int_sequence[index][j][i]]) {
+            nb_parameter++;
+            used_output[int_sequence[index][j][i]] = true;
+          }
+        }
+      }
+
+      psegment++;
+    }
+  }
+
+  else if ((model_type[0] == MULTIVARIATE_POISSON_CHANGE) || (model_type[0] == MULTIVARIATE_GEOMETRIC_0_CHANGE)) {
     nb_parameter += nb_segment;
   }
   else if (model_type[0] == MEAN_CHANGE) {
@@ -304,10 +354,9 @@ double Sequences::one_segment_likelihood(int index , int *model_type , double **
 
   max_nb_value = 0;
   for (i = 1;i < nb_variable;i++) {
-    if (model_type[i - 1] == CATEGORICAL_CHANGE) {
-      if (marginal_distribution[i]->nb_value > max_nb_value) {
-        max_nb_value = marginal_distribution[i]->nb_value;
-      }
+    if (((model_type[i - 1] == CATEGORICAL_CHANGE) || (model_type[0] == MULTIVARIATE_CATEGORICAL_CHANGE)) &&
+        (marginal_distribution[i]->nb_value > max_nb_value)) {
+      max_nb_value = marginal_distribution[i]->nb_value;
     }
   }
 
@@ -341,7 +390,25 @@ double Sequences::one_segment_likelihood(int index , int *model_type , double **
     likelihood = 0.;
   }
 
-  if (model_type[0] == MULTIVARIATE_POISSON_CHANGE) {
+  if (model_type[0] == MULTIVARIATE_CATEGORICAL_CHANGE) {
+    for (i = 0;i < max_nb_value;i++) {
+      frequency[i] = 0;
+    }
+
+    for (i = 0;i < length[index];i++) {
+      for (j = 1;j < nb_variable;j++) {
+        frequency[int_sequence[index][j][i]]++;
+      }
+    }
+
+    for (i = 0;i < max_nb_value;i++) {
+      if (frequency[i] > 0) {
+        likelihood += frequency[i] * log((double)frequency[i] / (double)((nb_variable - 1) * length[index]));
+      }
+    }
+  }
+
+  else if (model_type[0] == MULTIVARIATE_POISSON_CHANGE) {
     sum = 0.;
     factorial_sum = 0.;
     for (i = 0;i < length[index];i++) {
@@ -707,7 +774,7 @@ Sequences* Sequences::segmentation_output(int *nb_segment , int *model_type , os
       if ((model_type[i - 1] == POISSON_CHANGE) || (model_type[0] == MULTIVARIATE_POISSON_CHANGE) ||
           (model_type[i - 1] == GEOMETRIC_0_CHANGE) || (model_type[i - 1] == GEOMETRIC_1_CHANGE) ||
           (model_type[0] == MULTIVARIATE_GEOMETRIC_0_CHANGE) || (model_type[i - 1] == GAUSSIAN_CHANGE) ||
-          (model_type[i - 1] == LINEAR_MODEL_CHANGE) ||  (model_type[0] == MEAN_CHANGE) ||
+          (model_type[i - 1] == LINEAR_MODEL_CHANGE) || (model_type[0] == MEAN_CHANGE) ||
           (model_type[0] == MEAN_VARIANCE_CHANGE) || (model_type[0] == INTERCEPT_SLOPE_CHANGE) ||
           (model_type[i - 1] == BAYESIAN_POISSON_CHANGE) || (model_type[i - 1] == BAYESIAN_GAUSSIAN_CHANGE)) {
         piecewise_function[i] = true;
@@ -1335,10 +1402,10 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
   } */
 
   for (i = 0;i < nb_variable;i++) {
-    if ((model_type[i] == CATEGORICAL_CHANGE) || (model_type[i] == POISSON_CHANGE) ||
-        (model_type[0] == MULTIVARIATE_POISSON_CHANGE) ||  (model_type[i] == GEOMETRIC_0_CHANGE) ||
-        (model_type[i] == GEOMETRIC_1_CHANGE) || (model_type[0] == MULTIVARIATE_GEOMETRIC_0_CHANGE) ||
-        (model_type[i] == ORDINAL_GAUSSIAN_CHANGE)) {
+    if ((model_type[i] == CATEGORICAL_CHANGE) || (model_type[0] == MULTIVARIATE_CATEGORICAL_CHANGE) ||
+        (model_type[i] == POISSON_CHANGE) || (model_type[0] == MULTIVARIATE_POISSON_CHANGE) ||
+        (model_type[i] == GEOMETRIC_0_CHANGE) || (model_type[i] == GEOMETRIC_1_CHANGE) ||
+        (model_type[0] == MULTIVARIATE_GEOMETRIC_0_CHANGE) || (model_type[i] == ORDINAL_GAUSSIAN_CHANGE)) {
       if ((type[i] != INT_VALUE) && (type[i] != STATE)) {
         status = false;
         ostringstream error_message , correction_message;
@@ -1489,7 +1556,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
     max_nb_value = 0;
 
     for (i = 0;i < nb_variable;i++) {
-      if ((model_type[i] == CATEGORICAL_CHANGE) &&
+      if (((model_type[i] == CATEGORICAL_CHANGE) || (model_type[0] == MULTIVARIATE_CATEGORICAL_CHANGE)) &&
           (marginal_distribution[i]->nb_value > max_nb_value)) {
         max_nb_value = marginal_distribution[i]->nb_value;
       }
@@ -1551,7 +1618,28 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
       segmentation_likelihood = 0.;
     }
 
-    if (model_type[0] == MULTIVARIATE_POISSON_CHANGE) {
+    if (model_type[0] == MULTIVARIATE_CATEGORICAL_CHANGE) {
+      for (i = 0;i < nb_segment;i++) {
+        for (j = 0;j < max_nb_value;j++) {
+          frequency[j] = 0;
+        }
+
+        for (j = change_point[i];j < change_point[i + 1];j++) {
+          for (k = 0;k < nb_variable;k++) {
+            frequency[int_sequence[index][k][j]]++;
+          }
+        }
+
+        for (j = 0;j < max_nb_value;j++) {
+          if (frequency[j] > 0) {
+            segmentation_likelihood += frequency[j] * log((double)frequency[j] /
+                                        (double)(nb_variable * (change_point[i + 1] - change_point[i])));
+          }
+        }
+      }
+    }
+
+    else if (model_type[0] == MULTIVARIATE_POISSON_CHANGE) {
       for (i = 0;i < nb_segment;i++) {
         sum = 0.;
         factorial_sum = 0.;
@@ -1950,7 +2038,7 @@ double Sequences::segmentation(int *nb_segment , int *model_type , double **rank
   hyperparam = new double*[nb_variable];
 
   for (i = 1;i < nb_variable;i++) {
-    if ((model_type[i - 1] == CATEGORICAL_CHANGE) &&
+    if (((model_type[i - 1] == CATEGORICAL_CHANGE) || (model_type[0] == MULTIVARIATE_CATEGORICAL_CHANGE)) &&
         (marginal_distribution[i]->nb_value > max_nb_value)) {
       max_nb_value = marginal_distribution[i]->nb_value;
     }
@@ -2046,7 +2134,26 @@ double Sequences::segmentation(int *nb_segment , int *model_type , double **rank
 
       // calcul des log-vraisemblances des segments
 
-      if (model_type[0] == MULTIVARIATE_POISSON_CHANGE) {
+      if (model_type[0] == MULTIVARIATE_CATEGORICAL_CHANGE) {
+        for (k = 0;k < max_nb_value;k++) {
+          frequency[k] = 0;
+        }
+
+        for (k = j;k >= 0;k--) {
+          for (m = 1;m < nb_variable;m++) {
+            frequency[int_sequence[i][m][k]]++;
+          }
+
+          contrast[k] = 0.;
+          for (m = 0;m < max_nb_value;m++) {
+            if (frequency[m] > 0) {
+              contrast[k] += frequency[m] * log((double)frequency[m] / (double)((nb_variable - 1) * (j - k + 1)));
+            }
+          }
+        }
+      }
+
+      else  if (model_type[0] == MULTIVARIATE_POISSON_CHANGE) {
         for (k = 1;k < nb_variable;k++) {
           factorial[k][j] = 0.;
           for (m = 2;m <= int_sequence[i][k][j];m++) {
@@ -2525,7 +2632,36 @@ double Sequences::segmentation(int *nb_segment , int *model_type , double **rank
 //        nb_parameter[j] = 0;
         nb_parameter[j] = j;
 
-        if ((model_type[0] == MULTIVARIATE_POISSON_CHANGE) || (model_type[0] == MULTIVARIATE_GEOMETRIC_0_CHANGE)) {
+        if (model_type[0] == MULTIVARIATE_CATEGORICAL_CHANGE) {
+          k = length[i] - 1;
+
+          for (m = j;m >= 0;m--) {
+            for (n = 0;n < max_nb_value;n++) {
+              used_output[n] = false;
+            }
+
+            used_output[int_sequence[i][1][k]] = true;
+            for (n = 2;n < nb_variable;n++) {
+              if (!used_output[int_sequence[i][n][k]]) {
+                nb_parameter[j]++;
+                used_output[int_sequence[i][n][k]] = true;
+              }
+            }
+
+            for (n = k - 1;n > k - optimal_length[k][m];n--) {
+              for (r = 1;r < nb_variable;r++) {
+                if (!used_output[int_sequence[i][r][n]]) {
+                  nb_parameter[j]++;
+                  used_output[int_sequence[i][r][n]] = true;
+                }
+              }
+            }
+
+            k -= optimal_length[k][m];
+          }
+        }
+
+        else if ((model_type[0] == MULTIVARIATE_POISSON_CHANGE) || (model_type[0] == MULTIVARIATE_GEOMETRIC_0_CHANGE)) {
           nb_parameter[j] += j + 1;
         }
         else if (model_type[0] == MEAN_CHANGE) {
@@ -2889,7 +3025,7 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
   hyperparam = new double*[nb_variable];
 
   for (i = 1;i < nb_variable;i++) {
-    if ((model_type[i - 1] == CATEGORICAL_CHANGE) &&
+    if (((model_type[i - 1] == CATEGORICAL_CHANGE) || (model_type[0] == MULTIVARIATE_CATEGORICAL_CHANGE)) &&
         (marginal_distribution[i]->nb_value > max_nb_value)) {
       max_nb_value = marginal_distribution[i]->nb_value;
     }
@@ -3025,7 +3161,26 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
 
     // calcul des log-vraisemblances des segments
 
-    if (model_type[0] == MULTIVARIATE_POISSON_CHANGE) {
+    if (model_type[0] == MULTIVARIATE_CATEGORICAL_CHANGE) {
+      for (j = 0;j < max_nb_value;j++) {
+        frequency[j] = 0;
+      }
+
+      for (j = i;j >= 0;j--) {
+        for (k = 1;k < nb_variable;k++) {
+          frequency[int_sequence[index][k][j]]++;
+        }
+
+        contrast[j] = 0.;
+        for (k = 0;k < max_nb_value;k++) {
+          if (frequency[k] > 0) {
+            contrast[j] += frequency[k] * log((double)frequency[k] / (double)((nb_variable - 1) * (i - j + 1)));
+          }
+        }
+      }
+    }
+
+    else if (model_type[0] == MULTIVARIATE_POISSON_CHANGE) {
       for (j = 1;j < nb_variable;j++) {
         factorial[j][i] = 0.;
         for (k = 2;k <= int_sequence[index][j][i];k++) {
@@ -3510,7 +3665,26 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
 
       // calcul des log-vraisemblances des segments
 
-      if (model_type[0] == MULTIVARIATE_POISSON_CHANGE) {
+      if (model_type[0] == MULTIVARIATE_CATEGORICAL_CHANGE) {
+        for (j = 0;j < max_nb_value;j++) {
+          frequency[j] = 0;
+        }
+
+        for (j = i;j < length[index];j++) {
+          for (k = 1;k < nb_variable;k++) {
+            frequency[int_sequence[index][k][j]]++;
+          }
+
+          contrast[j] = 0.;
+          for (k = 0;k < max_nb_value;k++) {
+            if (frequency[k] > 0) {
+              contrast[j] += frequency[k] * log((double)frequency[k] / (double)((nb_variable - 1) * (j - i + 1)));
+            }
+          }
+        }
+      }
+
+      else if (model_type[0] == MULTIVARIATE_POISSON_CHANGE) {
         sum = 0.;
         factorial_sum = 0.;
         for (j = i;j < length[index];j++) {
@@ -4406,10 +4580,11 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
   }
 
   for (i = 0;i < nb_variable;i++) {
-    if ((model_type[i] == CATEGORICAL_CHANGE) || (model_type[i] == POISSON_CHANGE) ||
-        (model_type[0] == MULTIVARIATE_POISSON_CHANGE) ||  (model_type[i] == GEOMETRIC_0_CHANGE) ||
-        (model_type[i] == GEOMETRIC_1_CHANGE) || (model_type[0] == MULTIVARIATE_GEOMETRIC_0_CHANGE) ||
-        (model_type[i] == ORDINAL_GAUSSIAN_CHANGE) || (model_type[i] == BAYESIAN_POISSON_CHANGE)) {
+    if ((model_type[i] == CATEGORICAL_CHANGE) || (model_type[0] == MULTIVARIATE_CATEGORICAL_CHANGE) ||
+        (model_type[i] == POISSON_CHANGE) || (model_type[0] == MULTIVARIATE_POISSON_CHANGE) ||
+        (model_type[i] == GEOMETRIC_0_CHANGE) || (model_type[i] == GEOMETRIC_1_CHANGE) ||
+        (model_type[0] == MULTIVARIATE_GEOMETRIC_0_CHANGE) || (model_type[i] == ORDINAL_GAUSSIAN_CHANGE) ||
+        (model_type[i] == BAYESIAN_POISSON_CHANGE)) {
       if ((type[i] != INT_VALUE) && (type[i] != STATE)) {
         status = false;
         ostringstream error_message , correction_message;
