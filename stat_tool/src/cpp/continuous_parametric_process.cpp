@@ -2181,15 +2181,15 @@ ostream& ContinuousParametricProcess::spreadsheet_print(ostream &os , Histogram 
  *
  *  Calcul d'un q-q plot.
  *
- *  arguments : valeur minimum, pas, pointeurs sur
+ *  arguments : valeur minimum, pas, nombre de pas, pointeurs sur
  *              la fonction de repartition theorique, nombre de valeurs,
  *              pointeurs sur la fonction de repartition empirique.
  *
  *--------------------------------------------------------------*/
 
 double** q_q_plot_computation(double min_value , double step ,
-                              double *theoretical_cdf , int nb_value ,
-                              double **empirical_cdf)
+                              int nb_step , double *theoretical_cdf ,
+                              int nb_value , double **empirical_cdf)
 
 {
   register int i , j;
@@ -2207,7 +2207,7 @@ double** q_q_plot_computation(double min_value , double step ,
   value = min_value;
   i = 0;
   for (j = 0;j < nb_value;j++) {
-    while (theoretical_cdf[i] < empirical_cdf[1][j]) {
+    while ((i < nb_step) && (theoretical_cdf[i] < empirical_cdf[1][j])) {
       i++;
       value += step;
     }
@@ -2802,7 +2802,7 @@ bool ContinuousParametricProcess::plot_print(const char *prefix , const char *ti
         cout << endl;
 #       endif
 
-        qqplot = q_q_plot_computation(min_value , step , cumul[nb_state] ,
+        qqplot = q_q_plot_computation(min_value , step , nb_step , cumul[nb_state] ,
                                       nb_value - 1 , empirical_cdf);
 
         data_file_name[nb_state + 2] << prefix << process << nb_state + 2 << ".dat";
@@ -2819,7 +2819,7 @@ bool ContinuousParametricProcess::plot_print(const char *prefix , const char *ti
           }
         }
 
-        qqplot = q_q_plot_computation(min_value , step , cumul[nb_state + 1] ,
+        qqplot = q_q_plot_computation(min_value , step , nb_step , cumul[nb_state + 1] ,
                                       nb_value - 1 , empirical_cdf);
 
         data_file_name[nb_state + 3] << prefix << process << nb_state + 3 << ".dat";
@@ -3828,7 +3828,7 @@ void ContinuousParametricProcess::plotable_write(MultiPlotSet &plot , int &index
 
       plot[index][1].style = "points";
 
-      qqplot = q_q_plot_computation(min_value , step , cumul[nb_state] ,
+      qqplot = q_q_plot_computation(min_value , step , nb_step , cumul[nb_state] ,
                                     nb_value - 1 , empirical_cdf);
       q_q_plotable_write(plot[index][1] , nb_value - 1 , qqplot);
       index++;
@@ -3952,7 +3952,7 @@ void ContinuousParametricProcess::plotable_write(MultiPlotSet &plot , int &index
 
       plot[index][1].style = "points";
 
-      qqplot = q_q_plot_computation(min_value , step , cumul[nb_state] ,
+      qqplot = q_q_plot_computation(min_value , step , nb_step , cumul[nb_state] ,
                                     nb_value - 1 , empirical_cdf);
       q_q_plotable_write(plot[index][1] , nb_value - 1 , qqplot);
       index++;
