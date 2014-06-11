@@ -57,7 +57,7 @@ const double MIN_PROBABILITY = 1.e-5;  // probabilite minimum
 const double THRESHOLDING_FACTOR = 0.8;  // facteur pour le seuillage des probabilites
 const int NB_PARAMETER = 100000;       // nombre maximum de parametres d'une chaine de Markov
 const int NB_OUTPUT_PROCESS = 10;      // nombre maximum de processus d'observation
-const int NB_OUTPUT = 12;              // nombre maximum d'observations par etat (cas non-parametrique)
+const int NB_OUTPUT = 20;              // nombre maximum d'observations par etat (cas non-parametrique)
 const double OBSERVATION_THRESHOLD = 0.999;  // seuil sur la fonction de repartition pour borner
                                              // une loi d'observation discrete parametrique
 
