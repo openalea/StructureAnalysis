@@ -215,19 +215,25 @@ int Sequences::nb_parameter_computation(int index , int nb_segment , int *model_
   int nb_parameter , max_nb_value , *psegment;
 
 
-  used_output = new bool[NB_OUTPUT];
+  max_nb_value = 0;
+  for (i = 1;i < nb_variable;i++) {
+    if (((model_type[i - 1] == CATEGORICAL_CHANGE) || (model_type[0] == MULTIVARIATE_CATEGORICAL_CHANGE)) &&
+        (marginal_distribution[i]->nb_value > max_nb_value)) {
+      max_nb_value = marginal_distribution[i]->nb_value;
+    }
+  }
+
+  if (max_nb_value > 0) {
+    used_output = new bool[max_nb_value];
+  }
+  else {
+    used_output = NULL;
+  }
 
 //  nb_parameter = 0;
   nb_parameter = nb_segment - 1;
 
   if (model_type[0] == MULTIVARIATE_CATEGORICAL_CHANGE) {
-    max_nb_value = 0;
-    for (i = 1;i < nb_variable;i++) {
-      if (marginal_distribution[i]->nb_value > max_nb_value) {
-        max_nb_value = marginal_distribution[i]->nb_value;
-      }
-    }
-
     psegment = int_sequence[index][0] + 1;
 
     for (i = 0;i < max_nb_value;i++) {
@@ -1385,6 +1391,8 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
          segmentation_likelihood , segment_penalty , penalized_likelihood , *mean ,
          *segment_variance , **rank;
   long double square_sum , index_parameter_square_sum , mix_square_sum , *residual;
+  const FrequencyDistribution **pmarginal;
+  FrequencyDistribution *marginal;
   Sequences *iseq , *seq , *oseq;
 
 
@@ -1475,6 +1483,34 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
                          << STAT_variable_word[REAL_VALUE];
       error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
     }
+  }
+
+  if (model_type[0] == MULTIVARIATE_CATEGORICAL_CHANGE) {
+    pmarginal = new const FrequencyDistribution*[nb_variable];
+
+    for (i = 0;i < nb_variable;i++) {
+      pmarginal[i] = marginal_distribution[i];
+    }
+    marginal = new FrequencyDistribution(nb_variable , pmarginal);
+
+    if ((marginal->nb_value < 2) || (marginal->nb_value > NB_OUTPUT)) {
+      status = false;
+      error.update(STAT_error[STATR_NB_VALUE]);
+    }
+
+    else {
+      for (i = 0;i < marginal->nb_value;i++) {
+        if (marginal->frequency[i] == 0) {
+          status = false;
+          ostringstream error_message;
+          error_message << STAT_error[STATR_MISSING_VALUE] << " " << i;
+          error.update((error_message.str()).c_str());
+        }
+      }
+    }
+
+    delete [] pmarginal;
+    delete marginal;
   }
 
   for (i = 0;i < nb_sequence;i++) {
@@ -2084,8 +2120,11 @@ double Sequences::segmentation(int *nb_segment , int *model_type , double **rank
     optimal_length[i] = new int[max_nb_segment];
   }
 
-  if (nb_parameter) {
-    used_output = new bool[NB_OUTPUT];
+  if ((nb_parameter) && (max_nb_value > 0)) {
+    used_output = new bool[max_nb_value];
+  }
+  else {
+    used_output = NULL;
   }
 
   segmentation_likelihood = 0.;
@@ -2766,9 +2805,7 @@ double Sequences::segmentation(int *nb_segment , int *model_type , double **rank
   }
   delete [] optimal_length;
 
-  if (nb_parameter) {
-    delete [] used_output;
-  }
+  delete [] used_output;
 
   return segmentation_likelihood;
 }
@@ -2792,6 +2829,8 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int *nb_segm
   register int i , j;
   int index = I_DEFAULT , nb_parameter , *psegment;
   double segmentation_likelihood , segment_penalty , penalized_likelihood , **rank;
+  const FrequencyDistribution **pmarginal;
+  FrequencyDistribution *marginal;
   Sequences *seq , *iseq , *oseq;
 
 
@@ -2882,6 +2921,34 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int *nb_segm
                          << STAT_variable_word[REAL_VALUE];
       error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
     }
+  }
+
+  if (model_type[0] == MULTIVARIATE_CATEGORICAL_CHANGE) {
+    pmarginal = new const FrequencyDistribution*[nb_variable];
+
+    for (i = 0;i < nb_variable;i++) {
+      pmarginal[i] = marginal_distribution[i];
+    }
+    marginal = new FrequencyDistribution(nb_variable , pmarginal);
+
+    if ((marginal->nb_value < 2) || (marginal->nb_value > NB_OUTPUT)) {
+      status = false;
+      error.update(STAT_error[STATR_NB_VALUE]);
+    }
+
+    else {
+      for (i = 0;i < marginal->nb_value;i++) {
+        if (marginal->frequency[i] == 0) {
+          status = false;
+          ostringstream error_message;
+          error_message << STAT_error[STATR_MISSING_VALUE] << " " << i;
+          error.update((error_message.str()).c_str());
+        }
+      }
+    }
+
+    delete [] pmarginal;
+    delete marginal;
   }
 
   if (iidentifier != I_DEFAULT) {
@@ -4557,6 +4624,8 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
   double max_likelihood[3] , *segmentation_likelihood , *segment_penalty , *slope_penalty ,
          **penalized_likelihood , *likelihood , *uniform_entropy , *segmentation_divergence , **rank;
   long double *segmentation_entropy , *first_order_entropy , *change_point_entropy , *marginal_entropy;
+  const FrequencyDistribution **pmarginal;
+  FrequencyDistribution *marginal;
   Sequences *iseq , *seq , *oseq;
 
 
@@ -4648,6 +4717,34 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
                          << STAT_variable_word[REAL_VALUE];
       error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
     }
+  }
+
+  if (model_type[0] == MULTIVARIATE_CATEGORICAL_CHANGE) {
+    pmarginal = new const FrequencyDistribution*[nb_variable];
+
+    for (i = 0;i < nb_variable;i++) {
+      pmarginal[i] = marginal_distribution[i];
+    }
+    marginal = new FrequencyDistribution(nb_variable , pmarginal);
+
+    if ((marginal->nb_value < 2) || (marginal->nb_value > NB_OUTPUT)) {
+      status = false;
+      error.update(STAT_error[STATR_NB_VALUE]);
+    }
+
+    else {
+      for (i = 0;i < marginal->nb_value;i++) {
+        if (marginal->frequency[i] == 0) {
+          status = false;
+          ostringstream error_message;
+          error_message << STAT_error[STATR_MISSING_VALUE] << " " << i;
+          error.update((error_message.str()).c_str());
+        }
+      }
+    }
+
+    delete [] pmarginal;
+    delete marginal;
   }
 
   for (i = 0;i < nb_sequence;i++) {
