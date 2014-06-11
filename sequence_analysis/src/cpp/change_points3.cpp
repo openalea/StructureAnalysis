@@ -3162,6 +3162,8 @@ bool Sequences::segment_profile_write(StatError &error , ostream &os , int iiden
   register int i , j;
   int index = I_DEFAULT;
   double likelihood = D_INF , segmentation_likelihood , **rank;
+  const FrequencyDistribution **pmarginal;
+  FrequencyDistribution *marginal;
   Sequences *seq;
 
 
@@ -3246,6 +3248,34 @@ bool Sequences::segment_profile_write(StatError &error , ostream &os , int iiden
                          << STAT_variable_word[REAL_VALUE];
       error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
     }
+  }
+
+  if (model_type[0] == MULTIVARIATE_CATEGORICAL_CHANGE) {
+    pmarginal = new const FrequencyDistribution*[nb_variable];
+
+    for (i = 0;i < nb_variable;i++) {
+      pmarginal[i] = marginal_distribution[i];
+    }
+    marginal = new FrequencyDistribution(nb_variable , pmarginal);
+
+    if ((marginal->nb_value < 2) || (marginal->nb_value > NB_OUTPUT)) {
+      status = false;
+      error.update(STAT_error[STATR_NB_VALUE]);
+    }
+
+    else {
+      for (i = 0;i < marginal->nb_value;i++) {
+        if (marginal->frequency[i] == 0) {
+          status = false;
+          ostringstream error_message;
+          error_message << STAT_error[STATR_MISSING_VALUE] << " " << i;
+          error.update((error_message.str()).c_str());
+        }
+      }
+    }
+
+    delete [] pmarginal;
+    delete marginal;
   }
 
   if (iidentifier != I_DEFAULT) {
@@ -3388,6 +3418,8 @@ bool Sequences::segment_profile_plot_write(StatError &error , const char *prefix
   register int i , j , k;
   int index;
   double likelihood = D_INF , segmentation_likelihood , **rank;
+  const FrequencyDistribution **pmarginal;
+  FrequencyDistribution *marginal;
   Sequences *seq;
   ostringstream data_file_name[2];
   ofstream *out_data_file;
@@ -3474,6 +3506,34 @@ bool Sequences::segment_profile_plot_write(StatError &error , const char *prefix
                          << STAT_variable_word[REAL_VALUE];
       error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
     }
+  }
+
+  if (model_type[0] == MULTIVARIATE_CATEGORICAL_CHANGE) {
+    pmarginal = new const FrequencyDistribution*[nb_variable];
+
+    for (i = 0;i < nb_variable;i++) {
+      pmarginal[i] = marginal_distribution[i];
+    }
+    marginal = new FrequencyDistribution(nb_variable , pmarginal);
+
+    if ((marginal->nb_value < 2) || (marginal->nb_value > NB_OUTPUT)) {
+      status = false;
+      error.update(STAT_error[STATR_NB_VALUE]);
+    }
+
+    else {
+      for (i = 0;i < marginal->nb_value;i++) {
+        if (marginal->frequency[i] == 0) {
+          status = false;
+          ostringstream error_message;
+          error_message << STAT_error[STATR_MISSING_VALUE] << " " << i;
+          error.update((error_message.str()).c_str());
+        }
+      }
+    }
+
+    delete [] pmarginal;
+    delete marginal;
   }
 
   for (i = 0;i < nb_sequence;i++) {
@@ -4051,6 +4111,8 @@ MultiPlotSet* Sequences::segment_profile_plotable_write(StatError &error , int i
   register int i , j , k;
   int index , nb_plot_set;
   double likelihood = D_INF , segmentation_likelihood , **rank;
+  const FrequencyDistribution **pmarginal;
+  FrequencyDistribution *marginal;
   Sequences *seq;
   ostringstream title , legend;
   MultiPlotSet *plot_set;
@@ -4138,6 +4200,34 @@ MultiPlotSet* Sequences::segment_profile_plotable_write(StatError &error , int i
                          << STAT_variable_word[REAL_VALUE];
       error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
     }
+  }
+
+  if (model_type[0] == MULTIVARIATE_CATEGORICAL_CHANGE) {
+    pmarginal = new const FrequencyDistribution*[nb_variable];
+
+    for (i = 0;i < nb_variable;i++) {
+      pmarginal[i] = marginal_distribution[i];
+    }
+    marginal = new FrequencyDistribution(nb_variable , pmarginal);
+
+    if ((marginal->nb_value < 2) || (marginal->nb_value > NB_OUTPUT)) {
+      status = false;
+      error.update(STAT_error[STATR_NB_VALUE]);
+    }
+
+    else {
+      for (i = 0;i < marginal->nb_value;i++) {
+        if (marginal->frequency[i] == 0) {
+          status = false;
+          ostringstream error_message;
+          error_message << STAT_error[STATR_MISSING_VALUE] << " " << i;
+          error.update((error_message.str()).c_str());
+        }
+      }
+    }
+
+    delete [] pmarginal;
+    delete marginal;
   }
 
   for (i = 0;i < nb_sequence;i++) {
