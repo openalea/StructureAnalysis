@@ -41,7 +41,6 @@
 #include <cstring>
 
 #include "tool/config.h"
-#include "tool/util_math.h"
 
 #include "stat_tools.h"
 #include "distance_matrix.h"
