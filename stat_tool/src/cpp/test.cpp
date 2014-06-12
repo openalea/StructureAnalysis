@@ -41,8 +41,6 @@
 #include <boost/math/distributions/fisher_f.hpp>
 #include <boost/math/distributions/students_t.hpp>
 
-#include "tool/util_math.h"
-
 #include "stat_tools.h"
 #include "stat_label.h"
 
