@@ -575,6 +575,8 @@ Typed_edge_trees<Generic_Int_fl_container>::Typed_edge_trees(int inb_integral,
          build_characteristics();
          build_size_frequency_distribution();
          build_nb_children_frequency_distribution();
+         delete [] size;
+         size= NULL;
       }
       else
       {

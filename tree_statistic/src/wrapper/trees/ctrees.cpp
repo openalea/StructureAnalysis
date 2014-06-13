@@ -370,7 +370,7 @@ std::string Trees_wrapper_ascii_write(const Trees& reftree,
 }
 
 void Trees_wrapper_build_sequences(const Trees& reftree, const char* prefix,
-                                   bool all_paths= true)
+                                   bool all_paths= true, bool auto_axis= false)
 {
    ostringstream error_message;
    bool status= true;
@@ -378,7 +378,7 @@ void Trees_wrapper_build_sequences(const Trees& reftree, const char* prefix,
    Sequences* seq= NULL;
 
 
-   seq= reftree.build_sequences(error, all_paths);
+   seq= reftree.build_sequences(error, all_paths, auto_axis);
    if (seq == NULL)
       status= false;
 
@@ -396,7 +396,8 @@ void Trees_wrapper_build_sequences(const Trees& reftree, const char* prefix,
 }
 
 Sequences* Trees_wrapper_build_py_sequences(const Trees& reftree,
-                                            bool all_paths= true)
+                                            bool all_paths = true,
+                                            bool auto_axis = true)
 {
    ostringstream error_message;
    bool status= true;
@@ -404,7 +405,7 @@ Sequences* Trees_wrapper_build_py_sequences(const Trees& reftree,
    Sequences* seq= NULL;
 
 
-   seq= reftree.build_sequences(error, all_paths);
+   seq= reftree.build_sequences(error, all_paths, auto_axis);
    if (seq == NULL)
       status= false;
    if (!status)
@@ -1128,12 +1129,12 @@ BOOST_PYTHON_MODULE(ctrees)
                            "First-order differentiation of Trees.")
         .def("Display", &Trees_wrapper_ascii_write)
         .def("BuildSequences", &Trees_wrapper_build_sequences,
-                               "BuildSequences(self) -> void \n\n"
+                               "BuildSequences(self, bool, bool) -> void \n\n"
                                "Build sequences from trees and print them"
                                "into a file.")
         .def("BuildPySequences", &Trees_wrapper_build_py_sequences,
                                  return_value_policy< manage_new_object >(),
-                                 "BuildPySequences(self) -> void \n\n"
+                                 "BuildPySequences(self, bool, bool) -> void \n\n"
                                  "Build sequences from trees into a "
                                  "sequence_analysis.Sequence object.")
         .def("BuildVectors", &Trees_wrapper_build_vectors_path,

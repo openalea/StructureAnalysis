@@ -92,7 +92,7 @@ def test_types():
     msg = "Type lengths do not match"
     print(T.Types())
     assert len(T.Types()) == len(tv), msg
-
+        
 def test_display():
     print(T.Display(Detail=1))
     print(T.Display(Detail=2))

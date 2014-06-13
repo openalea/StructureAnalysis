@@ -267,10 +267,13 @@ protected :
    /// number of double (parametric) observation processes
    int _nb_doutput_process;
    /// non-parametric observation processes
+   /// npprocess[0]: (hidden) state process
    CategoricalTreeProcess **npprocess;
    /// integer parametric observation processes
+   /// pirocess[0]: unused (NULL)
    DiscreteParametricProcess **piprocess;
    /// double (i.e. floating) parametric observation processes
+   /// pdrocess[0]: unused (NULL)
    DiscreteParametricProcess **pdprocess;
 
    /* HiddenMarkovTree(const Chain * pchain, int inb_nonparam, int inb_param,

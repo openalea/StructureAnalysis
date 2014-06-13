@@ -761,11 +761,14 @@ HiddenMarkovIndOutTree::get_fast_downward_partial_entropy(const HiddenMarkovTree
    entropy = local_entropy_computation(trees, t, downward_prob,
                                        downward_pair_prob, conditional_prob,
                                        conditional_entropy, partial_conditional_entropy);
-
+   // conditional_prob[tree][parent_state][state][vertex]
+   // conditional_entropy[tree][vertex]
+   // partial_conditional_entropy[tree][vertex]
 
    res = fast_downward_partial_entropy_computation(trees, t, conditional_entropy,
                                                    partial_conditional_entropy,
                                                    partial_entropy);
+   // partial_entropy[tree][vertex]
    for(tr = 0; tr < nb_trees; tr++)
    {
      if (conditional_prob[tr] != NULL)
@@ -778,13 +781,13 @@ HiddenMarkovIndOutTree::get_fast_downward_partial_entropy(const HiddenMarkovTree
               {
                  if (conditional_prob[tr][i][j] != NULL)
                  {
-                    delete conditional_prob[tr][i][j];
+                    delete [] conditional_prob[tr][i][j];
                     conditional_prob[tr][i][j] = NULL;
                  }
               }
               if (conditional_prob[tr][i] != NULL)
               {
-                 delete conditional_prob[tr][i];
+                 delete [] conditional_prob[tr][i];
                  conditional_prob[tr][i] = NULL;
               }
            }
@@ -802,7 +805,7 @@ HiddenMarkovIndOutTree::get_fast_downward_partial_entropy(const HiddenMarkovTree
      }
      if (conditional_prob[tr] != NULL)
      {
-        delete conditional_prob[tr];
+        delete [] conditional_prob[tr];
         conditional_prob[tr] = NULL;
      }
    }
@@ -839,8 +842,8 @@ HiddenMarkovIndOutTree::downward_partial_entropy_comparison(const HiddenMarkovTr
    double_array_4d fast_conditional_prob = NULL;
    double_array_2d fast_conditional_entropy = NULL, partial_conditional_entropy = NULL,
                    fast_partial_entropy = NULL;
-   double_array_2d conditional_entropy = NULL;
-   double_array_3d state_entropy = NULL, state_conditional_entropy = NULL;
+   double_array_2d expected_conditional_entropy = NULL;
+   double_array_3d conditional_entropy = NULL, state_entropy = NULL;
    double_array_4d conditional_prob = NULL;
 
 
@@ -854,13 +857,13 @@ HiddenMarkovIndOutTree::downward_partial_entropy_comparison(const HiddenMarkovTr
                                                         fast_partial_entropy);
 
    downward_conditional_entropy_computation(trees, marginal_prob, downward_prob, upward_prob,
-                                            upward_parent_prob, conditional_entropy,
-                                            state_conditional_entropy, conditional_prob,
+                                            upward_parent_prob, expected_conditional_entropy,
+                                            conditional_entropy, conditional_prob,
                                             state_entropy, t);
 
    entropy2 = alt_downward_partial_entropy_computation(trees, t, output_cond_prob, marginal_prob,
                                                        upward_parent_prob, downward_prob,
-                                                       state_entropy, state_conditional_entropy,
+                                                       state_entropy, conditional_entropy,
                                                        conditional_prob, partial_entropy);
    if (abs(entropy1 - entropy2) > tol)
    {
@@ -873,11 +876,11 @@ HiddenMarkovIndOutTree::downward_partial_entropy_comparison(const HiddenMarkovTr
 
    while(it < end)
    {
-      if (abs(fast_conditional_entropy[t][*it] - conditional_entropy[t][*it]) > tol)
+      if (abs(fast_conditional_entropy[t][*it] - expected_conditional_entropy[t][*it]) > tol)
       {
          res = false;
          cout << "Local contributions to entropy differ at vertex " << *it
-              << ": " << conditional_entropy[t][*it] << " / " << fast_conditional_entropy[t][*it]
+              << ": " << expected_conditional_entropy[t][*it] << " / " << fast_conditional_entropy[t][*it]
               << " (fast)" << endl;
       }
 
@@ -907,7 +910,7 @@ HiddenMarkovIndOutTree::downward_partial_entropy_comparison(const HiddenMarkovTr
             cout << "Consistency error for total entropy at leaf " << *it << ": "
                  << leaf_entropy << " / " << entropy1 << "(fast)" << endl;
 
-         leaf_entropy = conditional_entropy[t][*it] + partial_entropy[*it];
+         leaf_entropy = expected_conditional_entropy[t][*it] + partial_entropy[*it];
          if (abs(leaf_entropy - entropy2) > tol)
             cout << "Consistency error for total entropy at leaf " << *it << ": "
                  << leaf_entropy << " / " << entropy2 << endl;
@@ -928,13 +931,13 @@ HiddenMarkovIndOutTree::downward_partial_entropy_comparison(const HiddenMarkovTr
                {
                   if (conditional_prob[tr][i][j] != NULL)
                   {
-                     delete conditional_prob[tr][i][j];
+                     delete [] conditional_prob[tr][i][j];
                      conditional_prob[tr][i][j] = NULL;
                   }
                }
                if (conditional_prob[tr][i] != NULL)
                {
-                  delete conditional_prob[tr][i];
+                  delete [] conditional_prob[tr][i];
                   conditional_prob[tr][i] = NULL;
                }
             }
@@ -950,13 +953,13 @@ HiddenMarkovIndOutTree::downward_partial_entropy_comparison(const HiddenMarkovTr
                {
                   if (fast_conditional_prob[tr][i][j] != NULL)
                   {
-                     delete fast_conditional_prob[tr][i][j];
+                     delete [] fast_conditional_prob[tr][i][j];
                      fast_conditional_prob[tr][i][j] = NULL;
                   }
                }
                if (fast_conditional_prob[tr][i] != NULL)
                {
-                  delete fast_conditional_prob[tr][i];
+                  delete [] fast_conditional_prob[tr][i];
                   fast_conditional_prob[tr][i] = NULL;
                }
             }
@@ -968,19 +971,8 @@ HiddenMarkovIndOutTree::downward_partial_entropy_comparison(const HiddenMarkovTr
          {
             if (state_entropy[tr][i] != NULL)
             {
-               delete state_entropy[tr][i];
+               delete [] state_entropy[tr][i];
                state_entropy[tr][i] = NULL;
-            }
-         }
-      }
-      if (state_conditional_entropy[tr] != NULL)
-      {
-         for(i = 0; i < nb_state; i++)
-         {
-            if (state_conditional_entropy[tr][i] != NULL)
-            {
-               delete state_conditional_entropy[tr][i];
-               state_conditional_entropy[tr][i] = NULL;
             }
          }
       }
@@ -998,8 +990,21 @@ HiddenMarkovIndOutTree::downward_partial_entropy_comparison(const HiddenMarkovTr
       }
       if (conditional_entropy[tr] != NULL)
       {
+         for(i = 0; i < nb_state; i++)
+         {
+            if (conditional_entropy[tr][i] != NULL)
+            {
+               delete [] conditional_entropy[tr][i];
+               conditional_entropy[tr][i] = NULL;
+            }
+         }
         delete [] conditional_entropy[tr];
         conditional_entropy[tr] = NULL;
+      }
+      if (expected_conditional_entropy[tr] != NULL)
+      {
+        delete [] expected_conditional_entropy[tr];
+        expected_conditional_entropy[tr] = NULL;
       }
       if (partial_conditional_entropy[tr] != NULL)
       {
@@ -1010,11 +1015,6 @@ HiddenMarkovIndOutTree::downward_partial_entropy_comparison(const HiddenMarkovTr
       {
         delete [] state_entropy[tr];
         state_entropy[tr] = NULL;
-      }
-      if (state_conditional_entropy[tr] != NULL)
-      {
-        delete [] state_conditional_entropy[tr];
-        state_conditional_entropy[tr] = NULL;
       }
       if (conditional_prob[tr] != NULL)
       {
@@ -1028,13 +1028,13 @@ HiddenMarkovIndOutTree::downward_partial_entropy_comparison(const HiddenMarkovTr
       }
    }
 
+   delete [] expected_conditional_entropy;
    delete [] fast_partial_entropy;
    delete [] partial_entropy;
    delete [] fast_conditional_entropy;
    delete [] conditional_entropy;
    delete [] partial_conditional_entropy;
    delete [] state_entropy;
-   delete [] state_conditional_entropy;
    delete [] conditional_prob;
    delete [] fast_conditional_prob;
 

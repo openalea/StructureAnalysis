@@ -3513,8 +3513,9 @@ HiddenMarkovTree::HiddenMarkovTree(char itype, int inb_state,
       }
 
    pdprocess= new DiscreteParametricProcess*[_nb_doutput_process+1];
+   pdprocess[0]= NULL;
    for(i= 0; i < _nb_doutput_process; i++)
-      pdprocess[i]= new DiscreteParametricProcess(nb_state, (int)(*nb_value++ * SAMPLE_NB_VALUE_COEFF));
+      pdprocess[i+1]= new DiscreteParametricProcess(nb_state, (int)(*nb_value++ * SAMPLE_NB_VALUE_COEFF));
 
    delete [] fparam;
    fparam= NULL;
@@ -3948,7 +3949,7 @@ void HiddenMarkovTree::state_permutation(StatError& error,
    register int i, j;
    bool status= true;
    // each element of check_perm must be used exactly once
-   bool * const check_perm= new bool[nb_state];
+   bool * check_perm= new bool[nb_state];
    double* pinitial= NULL;
    double** ptransition= NULL;
 
@@ -3965,6 +3966,8 @@ void HiddenMarkovTree::state_permutation(StatError& error,
       else
          check_perm[perm[i]]= true;
    }
+   delete [] check_perm;
+   check_perm= NULL;
 
    if (!status)
       error.update(STAT_TREES_error[TREESTATR_NO_PERMUTATION]);
@@ -4405,7 +4408,7 @@ CategoricalTreeProcess* HiddenMarkovTree::get_categorical_process(int variable) 
    if (npprocess != NULL)
    {
       assert((variable > 0) && (variable <= _nb_ioutput_process));
-      // I believe npprocess[0] points to the (hidden) state process
+      // npprocess[0] points to the (hidden) state process
       if (npprocess[variable] != NULL)
          res= new CategoricalTreeProcess(*(npprocess[variable]));
    }
@@ -4426,7 +4429,7 @@ DiscreteParametricProcess* HiddenMarkovTree::get_iparametric_process(int variabl
    if (piprocess != NULL)
    {
       assert((variable > 0) && (variable <= _nb_ioutput_process));
-      // I believe npprocess[0] points to the (hidden) state process
+      // piprocess[0] == NULL
       if (piprocess[variable] != NULL)
          res= new DiscreteParametricProcess(*(piprocess[variable]));
    }
@@ -4446,8 +4449,8 @@ DiscreteParametricProcess* HiddenMarkovTree::get_dparametric_process(int variabl
 
    if (pdprocess != NULL)
    {
-      assert((variable >= 0) && (variable < _nb_doutput_process));
-      // I believe npprocess[0] points to the (hidden) state process
+      assert((variable > 0) && (variable <= _nb_doutput_process));
+      // pdprocess[0] == NULL
       if (pdprocess[variable] != NULL)
          res= new DiscreteParametricProcess(*(pdprocess[variable]));
    }
@@ -4791,9 +4794,10 @@ void HiddenMarkovTree::copy(const HiddenMarkovTree& markov, bool data_flag,
 
    if (markov.pdprocess != NULL)
    {
-      pdprocess= new DiscreteParametricProcess*[_nb_doutput_process];
+      pdprocess= new DiscreteParametricProcess*[_nb_doutput_process+1];
+      pdprocess[0]= NULL;
       for(i= 0; i < _nb_doutput_process; i++)
-         pdprocess[i]= new DiscreteParametricProcess(*(markov.pdprocess[i]));
+         pdprocess[i+1]= new DiscreteParametricProcess(*(markov.pdprocess[i+1]));
    }
    else
       pdprocess= NULL;
@@ -4838,14 +4842,13 @@ void HiddenMarkovTree::remove()
 
    if (pdprocess != NULL)
    {
-      for(i= 0; i < _nb_doutput_process; i++)
+      for(i= 0; i <= _nb_doutput_process; i++)
       {
          if (pdprocess[i] != NULL)
             delete pdprocess[i];
          pdprocess[i]= NULL;
       }
-      if (_nb_doutput_process > 0)
-         delete [] pdprocess;
+      delete [] pdprocess;
       pdprocess= NULL;
    }
 }
@@ -6015,9 +6018,9 @@ void HiddenMarkovTree::log_computation()
 
    for(i= 0; i < _nb_doutput_process; i++)
    {
-      ::log_computation(pdprocess[i]->nb_value,
-                        pdprocess[i]->observation[j]->mass,
-                        pdprocess[i]->observation[j]->cumul);
+      ::log_computation(pdprocess[i+1]->nb_value,
+                        pdprocess[i+1]->observation[j]->mass,
+                        pdprocess[i+1]->observation[j]->cumul);
    }
 
 
@@ -6970,6 +6973,7 @@ HiddenMarkovTreeData::HiddenMarkovTreeData()
  , entropy(NULL)
  , state_trees(NULL)
  , observation_distribution(NULL)
+ , observation_histogram(NULL)
  , state_characteristics(NULL)
 {}
 
@@ -7001,6 +7005,7 @@ HiddenMarkovTreeData::HiddenMarkovTreeData(int inb_integral,
  , entropy(NULL)
  , state_trees(NULL)
  , observation_distribution(NULL)
+ , observation_histogram(NULL)
  , state_characteristics(NULL)
 {
    typedef Typed_edge_one_int_tree::value value;
@@ -7053,6 +7058,7 @@ HiddenMarkovTreeData::HiddenMarkovTreeData(int inb_integral,
  , entropy(NULL)
  , state_trees(NULL)
  , observation_distribution(NULL)
+ , observation_histogram(NULL)
  , state_characteristics(NULL)
 {}
 
@@ -7077,6 +7083,7 @@ HiddenMarkovTreeData::HiddenMarkovTreeData(int inb_trees,
  , entropy(NULL)
  , state_trees(NULL)
  , observation_distribution(NULL)
+ , observation_histogram(NULL)
  , state_characteristics(NULL)
 {}
 
@@ -7098,6 +7105,7 @@ HiddenMarkovTreeData::HiddenMarkovTreeData(const Trees& otrees)
  , entropy(NULL)
  , state_trees(NULL)
  , observation_distribution(NULL)
+ , observation_histogram(NULL)
  , state_characteristics(NULL)
 {}
 
@@ -7123,6 +7131,7 @@ HiddenMarkovTreeData::HiddenMarkovTreeData(const HiddenMarkovTreeData& trees,
  , entropy(NULL)
  , state_trees(NULL)
  , observation_distribution(NULL)
+ , observation_histogram(NULL)
  , state_characteristics(NULL)
 { copy(trees , model_flag, characteristic_flag); }
 
@@ -8884,11 +8893,35 @@ void HiddenMarkovTreeData::remove()
       observation_distribution = NULL;
    }
 
+   if (observation_histogram != NULL)
+   {
+      for(var = 0; var < _nb_float; var++)
+      {
+         if (observation_histogram[var] != NULL)
+         {
+            for(j = 0; j < state_characteristics->marginal_distribution->nb_value; j++)
+            {
+               if (observation_histogram[var][j] != NULL)
+               {
+                  delete observation_histogram[var][j];
+                  observation_histogram[var][j] = NULL;
+               }
+            }
+            delete [] observation_histogram[var];
+         }
+         observation_histogram[var] = NULL;
+      }
+      delete [] observation_histogram;
+      observation_histogram = NULL;
+   }
+
    if (state_characteristics != NULL)
    {
       delete state_characteristics;
       state_characteristics = NULL;
    }
+
+   // delete observation_histogram?
 
    // A posterior call to Trees::remove() is required...
 }
@@ -8982,6 +9015,27 @@ void HiddenMarkovTreeData::copy(const HiddenMarkovTreeData& trees,
       }
       else
          observation_distribution = NULL;
+
+      if (trees.observation_histogram != NULL)
+      {
+         observation_histogram = new ptHistogram_array[_nb_integral];
+         for(var = 0; var < _nb_integral; var++)
+            if (trees.observation_histogram[var] != NULL)
+            {
+               observation_histogram[var]= new Histogram*[state_characteristics->marginal_distribution->nb_value];
+               for(j = 0; j < state_characteristics->marginal_distribution->nb_value; j++)
+               {
+                  if (trees.observation_histogram[var][j] != NULL)
+                     observation_histogram[var][j] = new Histogram(*(trees.observation_distribution[var][j]));
+                  else
+                     observation_histogram[var][j] = NULL;
+               }
+            }
+            else
+               observation_histogram[var] = NULL;
+      }
+      else
+         observation_histogram = NULL;
    }
    else
    {

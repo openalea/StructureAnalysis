@@ -59,7 +59,7 @@ def test_hmt_simulate():
     assert(THMT.Tree(0).Get(31)[1]==0), msg2
     assert(THMT.Tree(0).Get(7)[1] in [6, 7]), msg3
     return T, THMT
-
+    
 def test_extract_model():
     """Extract model part of HiddenMarkovTreeData"""
     T, THMT = test_hmt_simulate()

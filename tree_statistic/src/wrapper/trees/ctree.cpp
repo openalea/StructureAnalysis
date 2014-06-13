@@ -91,7 +91,7 @@ private :
 
 public :
 
-   Tree_iterator(Tree& tree) { tie(it, end)= tree.vertices(); }
+   Tree_iterator(Tree& tree) { Tree_tie::tie(it, end)= tree.vertices(); }
    ~Tree_iterator() {}
    Tree_iterator iter() { return *this; }
    key next()
@@ -335,7 +335,7 @@ public :
          throw_error_already_set();
       }
       else
-          tie(it, end)= tree.children(v);
+          Tree_tie::tie(it, end)= tree.children(v);
    }
    ~Children_iterator() {}
    Children_iterator iter() { return *this; }

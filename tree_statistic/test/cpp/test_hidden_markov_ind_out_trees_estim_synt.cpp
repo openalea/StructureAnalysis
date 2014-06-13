@@ -38,7 +38,8 @@ int main(void)
    typedef generic_visitor<hmtd_tree_type> visitor;
    typedef visitor::vertex_array vertex_array;
 
-   register int t, j, i, nb_states, nb_trees= 5;
+   int t;
+   register int j, i, nb_states, nb_trees= 5;
    bool plot_ok= false;
    const int size= 15, nb_children_max= 2,
              nb_iterations= 5;
@@ -63,7 +64,9 @@ int main(void)
    hmtd_tree_type **ptrees= NULL;
    observed_trees *merged_trees= NULL;
    std::vector<HiddenMarkovTreeData*> tree_list;
-   hmtd_tree_type ctree;
+   hmtd_tree_type *ctree= NULL;
+   Typed_edge_one_int_tree *citree= NULL;
+   Unlabelled_typed_edge_tree *cstree= NULL;
    // const char * hsmcpath= "./laricio_3.hsc";
    double_array_3d state_marginal= NULL, output_cond= NULL,
           upward_prob= NULL, upward_parent_prob= NULL,
@@ -104,15 +107,17 @@ int main(void)
 
       // print indices for 1st tree
       cout << "Indices for tree number 0:" << endl;
-      ctree= *(hmtd->get_tree(0));
-      va= v.get_breadthorder(ctree);
+      ctree= hmtd->get_tree(0);
+      va= v.get_breadthorder(*ctree);
       for(u= 0; u < va.size(); u++)
       {
-         current_value= ctree.get(va[u]);
+         current_value= ctree->get(va[u]);
          current_value.Int(0)= va[u];
-         ctree.put(va[u], current_value);
+         ctree->put(va[u], current_value);
       }
-      ctree.display(cout, 0);
+      ctree->display(cout, 0);
+      delete ctree;
+      ctree= NULL;
 
       if (hmtd != NULL)
       {
@@ -122,13 +127,19 @@ int main(void)
          cout << "Simulated trees : " << endl;
          for(t= 0; t < nb_trees; t++)
          {
-            ctree= *(hmtd->get_tree(t));
-            ctree.display(cout, 0);
+            ctree= hmtd->get_tree(t);
+            ctree->display(cout, 0);
+            delete ctree;
+            ctree= NULL;
          }
 
          cout << endl << "Simulated hidden trees : " << endl;
          for (t= 0; t < nb_trees; t++)
-            (hmtd->get_state_tree(t))->display(cout, 0);
+         {
+            citree= hmtd->get_state_tree(t);
+            citree->display(cout, 0);
+            delete citree;
+         }
          cout << endl;
 
          // compute the state marginal distributions
@@ -148,8 +159,11 @@ int main(void)
          {
             if (t == 0)
                cout << "Marginal distributions for tree number " << t+1  << " : " << endl;
-            ptrees[t]= new hmtd_tree_type(*((hmtd->get_state_tree(t))->get_structure()),
-                                     default_value);
+            citree= hmtd->get_state_tree(t);
+            cstree= citree->get_structure();
+            ptrees[t]= new hmtd_tree_type(*cstree, default_value);
+            delete cstree;
+            delete citree;
             va= v.get_breadthorder(*(ptrees[t]));
             sum_state_marginal[t]= new double[va.size()];
             for(j= 0; j < hmot->get_nb_state(); j++)
@@ -209,7 +223,7 @@ int main(void)
             {
                if (t == 0)
                   cout << "state " << j << " : " << endl;
-	       Tree_tie::tie(it, end)= ptrees[t]->vertices();
+           Tree_tie::tie(it, end)= ptrees[t]->vertices();
                while (it < end)
                {
                   default_value.Double(0)= downward_prob[t][j][*it];
@@ -500,6 +514,7 @@ int main(void)
          {
             for(j= 0; j < nb_states; j++)
             {
+               delete [] output_cond[t][j];
                delete [] state_marginal[t][j];
                delete [] upward_prob[t][j];
                delete [] upward_parent_prob[t][j];
@@ -547,6 +562,10 @@ int main(void)
          delete [] downward_pair_prob;
          delete [] state_entropy;
          delete [] state_entropy2;
+         delete [] conditional_prob;
+         delete [] conditional_upward_entropy;
+         delete [] conditional_downward_entropy;
+         delete [] conditional_downward_entropy2;
          delete [] downward_partial_entropy1;
          delete [] downward_partial_entropy2;
          delete hmtd;

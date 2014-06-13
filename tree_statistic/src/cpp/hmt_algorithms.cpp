@@ -939,9 +939,6 @@ HiddenMarkovTreeData* HiddenMarkovIndOutTree::simulation(StatError& error,
 
       res->markov = markov; // res->markov is a HiddenMarkovIndOutTree
 
-      /* res->markov= new HiddenMarkovIndOutTree(*this, false, false);
-
-      markov= res->markov; */ // *markov is a HiddenMarkovIndOutTree
       markov->create_cumul();
       markov->cumul_computation();
       // N.B. : Chain::create_cumul(), etc.
@@ -1005,7 +1002,6 @@ HiddenMarkovTreeData* HiddenMarkovIndOutTree::simulation(StatError& error,
 
       res->min_max_value_computation();
 
-      // res->chain_data= new ChainData(*res, 0, 1); // 1 == markov->order
       res->chain_data= new ChainData(type, 0, 1);
       res->build_characteristics();
       res->build_size_frequency_distribution();
@@ -1192,7 +1188,7 @@ HiddenMarkovTreeData* HiddenMarkovIndOutTree::simulation(const Trees& otrees,
    v.reset(_nb_ioutput_process, _nb_doutput_process);
    default_base_tree->add_vertex(v);
 
-   tmp_utree = new Unlabelled_typed_edge_tree;
+   // tmp_utree = new Unlabelled_typed_edge_tree;
    t_otrees = new tree_type*[numTrees];
    t_trees = new tree_type*[numTrees];
 
@@ -1208,7 +1204,10 @@ HiddenMarkovTreeData* HiddenMarkovIndOutTree::simulation(const Trees& otrees,
        tmp_utree = NULL;
    }
 
-   new_otrees = new Trees(numTrees,itype,t_trees);
+   delete default_base_tree;
+
+   new_otrees = new Trees(numTrees, itype, t_trees);
+
    //end
 
    for(int i=0; i < numTrees; i++)
@@ -1224,6 +1223,10 @@ HiddenMarkovTreeData* HiddenMarkovIndOutTree::simulation(const Trees& otrees,
    }
 
    res = new HiddenMarkovTreeData(numTrees, itype, new_otrees->trees);
+   delete [] itype;
+
+   delete new_otrees;
+   new_otrees = NULL;
 
    //initialize states
    ivalue default_value;
@@ -1239,7 +1242,7 @@ HiddenMarkovTreeData* HiddenMarkovIndOutTree::simulation(const Trees& otrees,
    for(int i= 0; i < res->get_nb_trees(); i++)
    {
       res->state_trees[i] = new Typed_edge_one_int_tree;
-      utree = res->get_tree(i)->get_structure();
+      utree = res->get_tree_ptr(i)->get_structure();
       res->state_trees[i]->set_structure(*utree, default_value);
       delete utree;
    }//end init states
@@ -3178,10 +3181,19 @@ double HiddenMarkovIndOutTree::upward_downward(const HiddenMarkovTreeData& otree
             output_cond[t][j]= NULL;
             delete [] upward_prob[t][j];
             upward_prob[t][j]= NULL;
+            for(i= 0; i < nb_state; i++)
+            {
+               delete [] downward_pair_prob[t][j][i];
+               downward_pair_prob[t][j][i]= NULL;
+            }
+            delete [] downward_pair_prob[t][j];
+            downward_pair_prob[t][j]= NULL;
             delete [] upward_parent_prob[t][j];
             upward_parent_prob[t][j]= NULL;
             delete [] state_entropy[t][j];
             state_entropy[t][j]= NULL;
+            delete [] downward_prob[t][j];
+            downward_prob[t][j]= NULL;
          }
 
          delete [] state_marginal[t];
@@ -3190,15 +3202,22 @@ double HiddenMarkovIndOutTree::upward_downward(const HiddenMarkovTreeData& otree
          output_cond[t]= NULL;
          delete [] upward_prob[t];
          upward_prob[t]= NULL;
+         delete [] downward_pair_prob[t];
+         downward_pair_prob[t]= NULL;
          delete [] upward_parent_prob[t];
          upward_parent_prob[t]= NULL;
          delete [] state_entropy[t];
          state_entropy[t]= NULL;
+         delete [] conditional_entropy[t];
+         conditional_entropy[t]= NULL;
+         delete [] downward_prob[t];
+         downward_prob[t]= NULL;
       }
 
    delete [] conditional_entropy;
    conditional_entropy= NULL;
-
+   delete [] downward_prob;
+   downward_prob= NULL;
    delete [] partial_entropy;
    partial_entropy= NULL;
    delete [] state_marginal;
@@ -3207,6 +3226,8 @@ double HiddenMarkovIndOutTree::upward_downward(const HiddenMarkovTreeData& otree
    output_cond= NULL;
    delete [] upward_prob;
    upward_prob= NULL;
+   delete [] downward_pair_prob;
+   downward_pair_prob= NULL;
    delete [] upward_parent_prob;
    upward_parent_prob= NULL;
    delete [] state_entropy;
@@ -3562,16 +3583,19 @@ double HiddenMarkovIndOutTree::viterbi(const HiddenMarkovTreeData& trees,
             delete [] map[t][j];
             delete [] map2[t][j];
             delete [] optimal_states[t][j];
+            delete [] output_cond[t][j];
          }
          delete [] map[t];
          delete [] map2[t];
          delete [] optimal_states[t];
+         delete [] output_cond[t];
       }
    // end for t
    delete [] res;
    delete [] map;
    delete [] map2;
    delete [] optimal_states;
+   delete [] output_cond;
 #  ifdef DEBUG
    delete [] debug_t;
    cout << "Computation of the state tree likelihood : "
@@ -3988,7 +4012,7 @@ HiddenMarkovIndOutTree::viterbi_upward_downward(const HiddenMarkovTreeData& tree
             }
          } // end downward step
 
-         m= new ostringstream;
+         // m= new ostringstream;
          switch (format)
          {
          case 'a':
@@ -4054,10 +4078,15 @@ HiddenMarkovIndOutTree::viterbi_upward_downward(const HiddenMarkovTreeData& tree
 
          for(j= 0; j < nb_state; j++)
          {
+            delete [] output_cond[t][j];
+            // delete [] ratio[t][j];
+            // ratio still needed
             delete [] map_upward[t][j];
             delete [] map_downward[t][j];
             delete [] map2_upward[t][j];
          }
+         delete [] output_cond[t];
+         // delete [] ratio[t];
          delete [] map_upward[t];
          delete [] map_downward[t];
          delete [] map2_upward[t];
@@ -4112,21 +4141,22 @@ HiddenMarkovIndOutTree::viterbi_upward_downward(const HiddenMarkovTreeData& tree
       otrees[0]= NULL;
    }
 
-   for(t= 0; t < inb_trees; t++)
+   for(t= 0; t < nb_trees; t++)
       if ((index == I_DEFAULT) || (index == t))
       {
          for(j= 0; j < nb_state; j++)
          {
-            delete ratio[t][j];
+            delete [] ratio[t][j];
             ratio[t][j]= NULL;
          }
-         delete ratio[t];
+         delete [] ratio[t];
          ratio[t]= NULL;
       }
 
    delete [] otrees;
    otrees= NULL;
 
+   delete [] output_cond;
    delete [] res;
    delete [] map_upward;
    delete [] map_downward;
@@ -6026,6 +6056,8 @@ HiddenMarkovIndOutTree::alt_downward_partial_entropy_computation(const HiddenMar
    pb_entropy= NULL;
    delete [] pruned_entropy;
    pruned_entropy= NULL;
+   delete [] total_pb_entropy;
+   total_pb_entropy= NULL;
 
    entropy3= state_entropy[t][0][current_tree->root()];
    // partial_entropy[current_tree->root()];;
@@ -6187,13 +6219,13 @@ HiddenMarkovIndOutTree::downward_conditional_partial_entropy_computation(const H
                {
                   if (conditional_prob[tr][i][j] != NULL)
                   {
-                     delete conditional_prob[tr][i][j];
+                     delete [] conditional_prob[tr][i][j];
                      conditional_prob[tr][i][j] = NULL;
                   }
                }
                if (conditional_prob[tr][i] != NULL)
                {
-                  delete conditional_prob[tr][i];
+                  delete [] conditional_prob[tr][i];
                   conditional_prob[tr][i] = NULL;
                }
             }
@@ -6201,7 +6233,7 @@ HiddenMarkovIndOutTree::downward_conditional_partial_entropy_computation(const H
       }
       if (conditional_prob[tr] != NULL)
       {
-         delete conditional_prob[tr];
+         delete [] conditional_prob[tr];
          conditional_prob[tr] = NULL;
       }
    }
@@ -6753,6 +6785,7 @@ HiddenMarkovIndOutTree::downward_conditional_entropy_computation(const HiddenMar
          } // end for u
          res += entropyt;
       } // end for t
+
    return res;
 }
 

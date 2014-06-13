@@ -1503,19 +1503,22 @@ class Trees(object):
         """Return the name of the tree attributes."""
         return list(self.__attributes)
 
-    def BuildSequences(self, MaximalSequences=True):
+    def BuildSequences(self, MaximalSequences=True, AutoAxis=False):
         """Extract Sequences from the Trees, 
             cutting or not sequences after branching.
 
         :Usage:
 
-            BuildSequences(self, MaximalSequences=False)
+            BuildSequences(self, MaximalSequences=False, AutoAxis=False)
+            BuildSequences(self, MaximalSequences=True)
 
         :Parameters:
 
           `MaximalSequences` (bool) - if True, all paths between
             the root vertex and the leaf vertices are added.
             If False, the sequences are cut at "+" branchings.
+          `AutoAxis` (bool) - if True, children with no brothers
+            are considered as "<" (no effect if MaximalSequences is True)
 
         :Returns:
             A :ref:`openalea.aml.Sequences` instance is returned.
@@ -1539,7 +1542,7 @@ class Trees(object):
                 import random
                 prefix+=str(random.randint(1,9))                
         try:
-            self.__ctrees.BuildSequences(file_name, MaximalSequences)
+            self.__ctrees.BuildSequences(file_name, MaximalSequences, AutoAxis)
         except _errors.StatTreeError, error:
             os.remove(file_name)
             raise _errors.StatTreeError(error)
@@ -1549,30 +1552,32 @@ class Trees(object):
             os.remove(file_name)            
             return res
 
-    def BuildPySequences(self, MaximalSequences=True):
+    def BuildPySequences(self, MaximalSequences=True, AutoAxis=False):
         """Extract Sequences from the Trees,
             cutting or not sequences after branching.
 
         :Usage:
 
-            BuildSequences(self, MaximalSequences=False)
+            BuildPySequences(self, MaximalSequences=False, AutoAxis=False)
+            BuildPySequences(self, MaximalSequences=True)
 
         :Parameters:
 
           `MaximalSequences` (bool) - if True, all paths between
             the root vertex and the leaf vertices are added.
             If False, the sequences are cut at "+" branchings.
+          `AutoAxis` (bool) - if True, children with no brothers
+            are considered as "<" (no effect if MaximalSequences is True)
 
         :Returns:
             A :ref:`openalea.sequence_analysis.sequences._MarkovianSequences`
             instance is returned.
             If MaximalSequences is False, a new sequence is added each time
-            a + parent is encountered, unless this parent has only one child
-            (in which case this child is considered as <)
+            a + parent is encountered
         """
         import os
         import openalea.sequence_analysis as sequence_analysis
-        res = self.__ctrees.BuildPySequences(MaximalSequences)
+        res = self.__ctrees.BuildPySequences(MaximalSequences, AutoAxis)
         return res.markovian_sequences()
 
     def BuildVectors(self):
@@ -1654,17 +1659,31 @@ class Trees(object):
         return res
 
     def Difference(self, variable=None):
-        """First-order differentiation of trees."""
+        """First-order differentiation of trees.
+        
+        :Parameters:
+
+          * `variable` (int) - variable to differentiate
+          
+        :Returns:
+            If variable is None, a tree with the same number of variable
+                as self is returned, with each variable differentiated.
+                Otherwise a tree with one variable only is returned, 
+                with that variable differentiated.
+        """
         if (variable is None):
-            cvariable=stat_tool.I_DEFAULT
+            cvariable = stat_tool.I_DEFAULT
         else:
-            cvariable=self._valid_cvariable(variable)+1
+            cvariable = self._valid_cvariable(variable) + 1
         try:
             cdiff = self.__ctrees.Difference(cvariable)
         except _errors.StatTreeError, error:
             replaced = self.__replacestr(str(error), "variable")
             raise _errors.StatTreeError(replaced)
-        diff = Trees(cdiff, self.__types, self.__attributes)
+        if variable is None:
+            diff = Trees(cdiff, self.__types, self.__attributes)
+        else:
+            diff = Trees(cdiff, [self.__types[variable]], [self.__attributes[variable]])
         self._copy_vid_conversion(diff)
         self._copy_tid_conversion(diff)
         return diff

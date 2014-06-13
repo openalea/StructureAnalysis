@@ -15,6 +15,9 @@ if lenv['compiler'] == 'mingw':
                "-s"]
     lenv.AppendUnique(LINKFLAGS=LINKFLAGS)
 
+# Uncomment if needed
+# CPPFLAGS=["-g"]
+# lenv.AppendUnique(CPPFLAGS=CPPFLAGS)
 
 py_dir = '../openalea/tree_statistic'
 

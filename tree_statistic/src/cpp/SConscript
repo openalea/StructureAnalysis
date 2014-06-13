@@ -25,6 +25,11 @@ env.ALEAIncludes("tree_statistic", includes)
 if env['debug']:
    # env.Append(CPPDEFINES= ['DEBUG'])
    env.AppendUnique(LIBS=['efence'])
+
+# Uncomment if needed
+# CPPFLAGS=["-g"]
+# env.AppendUnique(CPPFLAGS=CPPFLAGS)
+
 # optional
 
 # env.AppendUnique(LIBS=['eigen2'])
