@@ -1888,6 +1888,8 @@ void FrequencyDistribution::update(const Reestimation<double> *reestim , int inb
   max_computation();
   mean_computation();
   variance_computation();
+
+  delete [] real_frequency;
 }
 
 

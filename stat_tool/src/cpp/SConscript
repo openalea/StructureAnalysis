@@ -26,6 +26,21 @@ sources = lib_env.ALEAGlob('*.cpp')
 lib_env.AppendUnique(CPPDEFINES=['MESSAGE'])
 lib_env.AppendUnique(LIBS=['vptool'])
 
+my_debug = True
+
+if env['debug']:
+    lib_env.Append(CPPDEFINES= ['DEBUG'])
+
+if my_debug:   
+    lib_env.AppendUnique(LIBS=['efence'])
+    CPPFLAGS=["-g"]
+    lib_env.AppendUnique(CPPFLAGS=CPPFLAGS)
+    if '-DNDEBUG' in lib_env._dict['CCFLAGS']:
+        lib_env._dict['CCFLAGS'] = []
+    if '-DNDEBUG' in lib_env._dict['CXXFLAGS']:
+        lib_env._dict['CXXFLAGS'] = []
+        
+
 inc = lib_env.ALEAIncludes( "stat_tool", includes )
 lib = lib_env.ALEALibrary( "vpstat_tool", sources )
 
