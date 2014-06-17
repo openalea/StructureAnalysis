@@ -4012,7 +4012,7 @@ HiddenMarkovIndOutTree::viterbi_upward_downward(const HiddenMarkovTreeData& tree
             }
          } // end downward step
 
-         // m= new ostringstream;
+         m= new ostringstream;
          switch (format)
          {
          case 'a':
