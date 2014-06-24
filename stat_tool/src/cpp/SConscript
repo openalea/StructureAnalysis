@@ -26,7 +26,7 @@ sources = lib_env.ALEAGlob('*.cpp')
 lib_env.AppendUnique(CPPDEFINES=['MESSAGE'])
 lib_env.AppendUnique(LIBS=['vptool'])
 
-my_debug = True
+my_debug = False
 
 if env['debug']:
     lib_env.Append(CPPDEFINES= ['DEBUG'])
