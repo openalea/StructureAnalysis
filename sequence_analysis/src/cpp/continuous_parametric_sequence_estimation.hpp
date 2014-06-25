@@ -86,7 +86,7 @@ void MarkovianSequences::gamma_estimation(Type ***state_sequence_count , int var
   for (i = 0;i < process->nb_state;i++) {
     zero_mass[i] = 0.;
     mean[i] = 0.;
-    state_frequency[i] = 0.;
+    state_frequency[i] = 0;
   }
 
   switch (type[variable]) {
@@ -207,7 +207,7 @@ void MarkovianSequences::gamma_estimation(Type ***state_sequence_count , int var
           if ((process->observation[i]->shape >= GAMMA_SHAPE_PARAMETER_THRESHOLD) &&
               (state_frequency[i] < GAMMA_FREQUENCY_THRESHOLD)) {
             log_geometric_mean = 0.;
-            state_frequency[i] = 0.;
+            state_frequency[i] = 0;
 
             switch (type[variable]) {
 
@@ -314,7 +314,7 @@ void MarkovianSequences::zero_inflated_gamma_estimation(Type ***state_sequence_c
   for (i = 0;i < process->nb_state;i++) {
     zero_mass[i] = 0.;
     mean[i] = 0.;
-    state_frequency[i] = 0.;
+    state_frequency[i] = 0;
   }
 
   switch (type[variable]) {
@@ -533,7 +533,7 @@ void MarkovianSequences::gaussian_estimation(Type ***state_sequence_count , int 
 
   for (i = 0;i < process->nb_state;i++) {
     mean[i] = 0.;
-    state_frequency[i] = 0.;
+    state_frequency[i] = 0;
   }
 
   switch (type[variable]) {
@@ -701,7 +701,7 @@ void MarkovianSequences::von_mises_estimation(Type ***state_sequence_count , int
     mean_direction[i][0] = 0.;
     mean_direction[i][1] = 0.;
 
-    state_frequency[i] = 0.;
+    state_frequency[i] = 0;
   }
 
   switch (type[variable]) {
@@ -840,7 +840,7 @@ void MarkovianSequences::linear_model_estimation(Type ***state_sequence_count , 
   for (i = 0;i < process->nb_state;i++) {
     mean[i] = 0.;
     index_parameter_mean[i] = 0.;
-    state_frequency[i] = 0.;
+    state_frequency[i] = 0;
   }
 
   switch (type[variable]) {
@@ -1180,13 +1180,13 @@ void MarkovianSequences::linear_model_estimation(Type ***state_sequence_count , 
     if (state_frequency[i] > 2) {
 //      process->observation[i]->dispersion = sqrt(residual_variance[i] / state_frequency[i]);
       process->observation[i]->dispersion = sqrt(residual_variance[i] / (state_frequency[i] - 2));
-      if (process->observation[i]->dispersion / mean[variable] < GAUSSIAN_MIN_VARIATION_COEFF) {
-        process->observation[i]->dispersion = mean[variable] * GAUSSIAN_MIN_VARIATION_COEFF;
+      if (process->observation[i]->dispersion / mean[i] < GAUSSIAN_MIN_VARIATION_COEFF) {
+        process->observation[i]->dispersion = mean[i] * GAUSSIAN_MIN_VARIATION_COEFF;
       }
     }
 
 #   ifdef DEBUG
-    cout << "\n" << STAT_label[STATL_VARIABLE] << " " << variable << "   "
+    cout << "\n" << STAT_label[STATL_VARIABLE] << " " << variable + 1 << "   "
          << STAT_word[STATW_STATE] << " " << i << "   "
          << STAT_word[STATW_INTERCEPT] << " : " << process->observation[i]->intercept << "   "
          << STAT_word[STATW_SLOPE] << " : " << process->observation[i]->slope << "   "
