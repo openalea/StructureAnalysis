@@ -85,7 +85,7 @@ void Vectors::gamma_estimation(Type **component_vector_count , int variable ,
   for (i = 0;i < process->nb_state;i++) {
     zero_mass[i] = 0.;
     mean[i] = 0.;
-    component_frequency[i] = 0.;
+    component_frequency[i] = 0;
   }
 
   switch (type[variable]) {
@@ -198,7 +198,7 @@ void Vectors::gamma_estimation(Type **component_vector_count , int variable ,
           if ((process->observation[i]->shape >= GAMMA_SHAPE_PARAMETER_THRESHOLD) &&
               (component_frequency[i] < GAMMA_FREQUENCY_THRESHOLD)) {
             log_geometric_mean = 0.;
-            component_frequency[i] = 0.;
+            component_frequency[i] = 0;
 
             switch (type[variable]) {
 
@@ -304,7 +304,7 @@ void Vectors::tied_gamma_estimation(Type **component_vector_count , int variable
   case false : {
     for (i = 0;i < process->nb_state;i++) {
       mean[i] = 0.;
-      component_frequency[i] = 0.;
+      component_frequency[i] = 0;
     }
 
     switch (type[variable]) {
@@ -502,7 +502,7 @@ void Vectors::tied_gamma_estimation(Type **component_vector_count , int variable
     log_geometric_mean = 0.;
 //    component_frequency[0] = 0.;
     for (i = 0;i < process->nb_state;i++) {
-      component_frequency[i] = 0.;
+      component_frequency[i] = 0;
     }
 
     switch (type[variable]) {
@@ -634,7 +634,7 @@ void Vectors::gaussian_estimation(Type **component_vector_count , int variable ,
 
   for (i = 0;i < process->nb_state;i++) {
     mean[i] = 0.;
-    component_frequency[i] = 0.;
+    component_frequency[i] = 0;
   }
 
   switch (type[variable]) {
@@ -792,7 +792,7 @@ void Vectors::tied_gaussian_estimation(Type **component_vector_count , int varia
   case false : {
     for (i = 0;i < process->nb_state;i++) {
       mean[i] = 0.;
-      component_frequency[i] = 0.;
+      component_frequency[i] = 0;
     }
 
     switch (type[variable]) {
@@ -979,7 +979,7 @@ void Vectors::von_mises_estimation(Type **component_vector_count , int variable 
     mean_direction[i][0] = 0.;
     mean_direction[i][1] = 0.;
 
-    component_frequency[i] = 0.;
+    component_frequency[i] = 0;
   }
 
   switch (type[variable]) {
