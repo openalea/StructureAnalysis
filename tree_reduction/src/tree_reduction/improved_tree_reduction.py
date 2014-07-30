@@ -7,173 +7,9 @@ from vplants.self_similarity.cst import *
 from vplants.self_similarity.mtg2graph import *
 from vplants.tree_reduction.graph import *
 from vplants.tree_reduction.functions import *
+from vplants.tree_reduction.dag_examples import *
 from openalea.container.graph import *
 import string
-
-
-
-"""   dichotomic tree
-def test1():
-    edges=[(1,2),(2,3),(3,4),(4,5),(5,6),(6,7),(7,8),(8,9),(9,10),(10,11),(11,12),(12,13),(13,14),(14,15),(15,16),(16,17),(17,18),(18,19),(19,20)]
-    edges_weight={0:2,1:2,2:2,3:2,4:2,5:2,6:2,7:2,8:2,9:2,10:2,11:2,12:2,13:2,14:2,15:2,16:2,17:2,18:2}
-    root = 1
-    g = from_edges(root, edges, edges_weight)
-    assert g.nb_vertices() == 20
-    assert g.nb_edges() == 19
-    return g"""
-
-""" multiscale plant"""
-def test1():
-    edges=[(1,2),(2,3),(3,4),(4,5),(5,6),(6,7),(6,12),(7,8),(8,9),(9,10),(10,11),(12,13),(13,14),(14,15),(15,8)]
-    edges_weight={0:1,1:1,2:1,3:1,4:1,5:1,6:1,7:1,8:1,9:1,10:1,11:1,12:1,13:1,14:2}
-    root = 1
-    g = from_edges(root, edges, edges_weight)
-    assert g.nb_vertices() == 15
-    assert g.nb_edges() == 15
-    return g
-
-
-""" intersected paths of figure 7
-def test1():
-    edges=[(1,2),(1,4),(2,3),(2,4),(3,4),(3,6),(4,6),(4,5),(5,6)]
-    edges_weight={0:1,1:1,2:1,3:1,4:1,5:1,6:1,7:1,8:2}
-    root = 1
-    g = from_edges(root, edges, edges_weight)
-    assert g.nb_vertices() == 6
-    assert g.nb_edges() == 9
-    return g"""
-
-""" linear paths
-def test1():
-    edges=[(1,2),(2,3),(3,4),(4,5),(5,6),(6,7),(7,8),(8,9)]
-    edges_weight={0:1,1:1,2:1,3:1,4:1,5:1,6:1,7:1}
-    root = 1
-    g = from_edges(root, edges, edges_weight)
-    assert g.nb_vertices() == 9
-    assert g.nb_edges() == 8
-    return g"""
-
-""" first example
-def test1():
-    edges=[(1,2),(1,3),(1,4),(2,3),(2,5),(3,4),(3,5),(4,5)]
-    edges_weight={0:1,1:2,2:1,3:1,4:1,5:1,6:1,7:1}
-    root = 1
-    g = from_edges(root, edges, edges_weight)
-    assert g.nb_vertices() == 5
-    assert g.nb_edges() == 8
-    return g"""
-
-""" perfectly included paths of figure 7
-def test1():
-    edges=[(1,2),(1,8),(2,3),(2,8),(3,4),(3,7),(4,5),(4,8),(5,6),(5,8),(6,7),(6,9),(7,9),(8,9)]
-    edges_weight={0:1,1:1,2:1,3:1,4:1,5:1,6:1,7:1,8:1,9:1,10:1,11:1,12:2,13:1}
-    root = 1
-    g = from_edges(root, edges, edges_weight)
-    assert g.nb_vertices() == 9
-    assert g.nb_edges() == 14
-    return g"""
-
-""" perfectly included paths2
-def test1():
-    edges=[(1,2),(1,8),(2,3),(2,8),(3,4),(3,7),(4,5),(4,8),(5,6),(5,8),(6,7),(6,9),(7,9),(8,9),(10,1),(10,11),(11,2)]
-    edges_weight={0:1,1:1,2:1,3:1,4:1,5:1,6:1,7:1,8:1,9:1,10:1,11:1,12:2,13:1,14:1,15:1,16:1}
-    root = 10
-    g = from_edges(root, edges, edges_weight)
-    assert g.nb_vertices() == 11
-    assert g.nb_edges() == 17
-    return g"""
-
-"""   rice panicle
-def test1():
-    edges=[(1,2),(2,3),(2,4),(3,5),(4,6),(4,7),(5,8),(5,9),(6,10),(7,11),(7,12),(8,13),(9,20),(9,25),(10,106),(11,53),(12,64),(12,74),(13,14),(14,15),(15,16),(16,17),(17,18),(18,19),(19,100),(20,21),(20,28),(21,22),(22,23),(23,24),(24,94),(24,101),(25,26),(26,27),(27,28),(28,104),(29,30),(30,31),(31,32),(32,33),(33,34),(34,35),(35,93),(35,89),(36,37),(36,45),(37,38),(38,39),(39,40),(40,41),(41,42),(42,43),(42,101),(43,44),(43,93),(44,93),(45,46),(46,47),(47,48),(48,49),(49,50),(50,51),(51,52),(51,90),(52,89),(52,90),(53,28),(53,54),(54,55),(54,104),(55,56),(56,57),(57,58),(58,59),(59,60),(59,101),(60,61),(60,93),(61,62),(61,93),(62,63),(62,88),(63,87),(63,101),(64,65),(65,66),(65,28),(66,67),(67,68),(68,69),(69,70),(70,71),(70,93),(71,72),(71,99),(72,73),(72,99),(73,87),(73,88),(74,75),(75,76),(76,77),(77,78),(78,79),(79,80),(80,81),(81,82),(81,100),(82,83),(82,98),(83,84),(83,90),(84,85),(84,90),(85,86),(85,88),(86,101),(86,100),(87,101),(87,103),(88,93),(88,102),(89,90),(89,91),(90,88),(90,102),(91,92),(91,102),(93,101),(93,104),(94,95),(94,93),(95,96),(95,99),(96,97),(96,98),(97,98),(97,100),(98,100),(98,102),(99,102),(99,87),(100,93),(100,103),(101,102),(101,104),(102,103),(102,104),(103,104),(104,105)]
-    edges_weight={0:1,1:1,2:1,3:1,4:1,5:1,6:1,7:1,8:1,9:1,10:1,11:1,12:1,13:1,14:1,15:1,16:1,17:1,18:1,19:1,20:1,21:1,22:1,23:1,24:1,25:1,26:1,27:1,28:1,29:1,30:1,31:1,32:1,33:1,34:1,35:1,36:1,37:1,38:1,39:1,40:1,41:1,42:1,43:1,44:1,45:1,46:1,47:1,48:1,49:1,50:1,51:1,52:1,53:1,54:1,55:1,56:1,57:1,58:1,59:1,60:1,61:1,62:1,63:1,64:1,65:1,66:1,67:1,68:1,69:1,70:1,71:1,72:1,73:1,74:1,75:1,76:1,77:1,78:1,79:1,80:1,81:1,82:1,83:1,84:1,85:1,86:1,87:1,88:1,89:1,90:1,91:1,92:1,93:1,94:1,95:1,96:1,97:1,98:1,99:1,100:1,101:1,102:1,103:1,104:1,105:1,106:1,107:1,108:1,109:1,110:1,111:1,112:1,113:1,114:1,115:1,116:1,117:1,118:1,119:1,120:1,121:1,122:1,123:1,124:1,125:1,126:1,127:1,128:1,129:1,130:1,131:1,132:1,133:1,134:1,135:1,136:1,137:1,138:1,139:1,140:1,141:1,142:1,143:1,144:1,145:1,146:1,147:1,148:1,149:1}
-    root = 1
-    g = from_edges(root, edges, edges_weight)
-    assert g.nb_vertices() == 106
-    assert g.nb_edges() == 150
-    return g"""
-
-
-"""   NEST of rice panicle
-def test1():
-    edges=[(1,2),(2,3),(2,7),(3,4),(3,5),(4,5),(4,8),(5,6),(5,9),(6,7),(7,8),(7,13),(8,9),(8,11),(9,10),(9,20),(10,11),(10,23),(11,12),(12,13),(13,14),(13,19),(14,15),(14,18),(15,16),(15,18),(16,17),(16,18),(17,18),(18,19),(19,20),(20,21),(20,23),(21,22),(21,24),(22,23),(22,24),(23,24),(24,25)]
-    edges_weight={0:1,1:1,2:1,3:1,4:1,5:1,6:1,7:1,8:1,9:1,10:1,11:1,12:1,13:1,14:1,15:1,16:1,17:1,18:1,19:1,20:1,21:1,22:1,23:1,24:1,25:1,26:1,27:1,28:1,29:1,30:1,31:1,32:1,33:1,34:1,35:1,36:1,37:1,38:1}
-    root = 1
-    g = from_edges(root, edges, edges_weight)
-    assert g.nb_vertices() == 25
-    assert g.nb_edges() == 39
-    return g"""
-
-"""    T0
-def test1():
-    edges=[(1,2) ,(1,4) ,(2,3) ,(2,4) ,(3,4) ,(4,5),(4,7) ,(5,6) ,(5,7) ,(6,7) ,(7,8) ,(7,10) ,(8,9) ,(8,10) ,(9,10) ,(10,11)]
-    edges_weight={0:1,1:1,2:1,3:1,4:2,5:1,6:1,7:1,8:1,9:2,10:1,11:1,12:1,13:1,14:2,15:1}
-    root = 1
-    g = from_edges(root, edges, edges_weight)
-    assert g.nb_vertices() == 11
-    assert g.nb_edges() == 16
-    return g"""
-
-"""    T1
-def test1():
-    edges=[(1,2),(1,4),(2,3),(2,4),(3,4),(4,5),(4,7),(5,6),(5,7),(6,7),(7,8),(7,10),(8,9),(8,10),(9,10),(10,11),(10,12),(11,12),(12,13),(12,14),(13,14),(14,15),(14,16),(15,16),(16,17)]
-    edges_weight={0:1,1:1,2:1,3:1,4:2,5:1,6:1,7:1,8:1,9:2,10:1,11:1,12:1,13:1,14:2,15:1,16:1,17:2,18:1,19:1,20:2,21:1,22:1,23:2,24:1}
-    root = 1
-    g = from_edges(root, edges, edges_weight)
-    assert g.nb_vertices() == 17
-    assert g.nb_edges() == 25
-    return g"""
-
-"""    T2
-def test1():
-    edges=[(1,2),(1,10),(2,3),(2,10),(3,4),(3,10),(4,5),(4,7),(5,6),(5,7),(6,7),(7,8),(7,10),(8,9),(8,10),(9,10),(10,11),(10,12),(11,12),(12,13),(12,14),(13,14),(14,15),(14,16),(15,16),(16,17)]
-    edges_weight={0:1,1:1,2:1,3:1,4:1,5:1,6:1,7:1,8:1,9:1,10:2,11:1,12:1,13:1,14:1,15:2,16:1,17:1,18:2,19:1,20:1,21:2,22:1,23:1,24:2,25:1}
-    root = 1
-    g = from_edges(root, edges, edges_weight)
-    assert g.nb_vertices() == 17
-    assert g.nb_edges() == 26
-    return g"""
-
-"""    T3
-def test1():
-    edges=[(1,2),(1,13),(2,3),(3,4),(3,13),(4,5),(5,6),(6,13),(6,7),(7,8),(7,13),(8,9),(9,10),(9,13),(10,11),(11,12),(11,13),(12,13)]
-    edges_weight={0:1,1:1,2:3,3:1,4:1,5:3,6:1,7:1,8:3,9:1,10:1,11:3,12:1,13:1,14:3,15:1,16:1,17:3}
-    root = 1
-    g = from_edges(root, edges, edges_weight)
-    assert g.nb_vertices() == 13
-    assert g.nb_edges() == 18
-    return g"""
-
-"""    palmier
-def test1():
-    edges=[(1,2),(2,3),(3,4),(4,5),(5,6),(6,7),(6,10),(7,8),(7,11),(8,9),(8,12),(9,13),(10,11),(11,12),(12,13)]
-    edges_weight={0:1,1:1,2:1,3:1,4:1,5:1,6:2,7:1,8:2,9:1,10:2,11:3,12:1,13:1,14:1}
-    root = 1
-    g = from_edges(root, edges, edges_weight)
-    assert g.nb_vertices() == 13
-    assert g.nb_edges() == 15
-    return g"""
-
-"""    Borchet and Honda model
-def test1():
-    edges=[(1,2),(2,3),(2,14),(3,4),(3,14),(4,5),(4,14),(5,6),(5,14),(6,7),(6,14),(7,8),(7,14),(8,9),(8,14),(9,10),(9,14),(10,11),(10,14),(11,12),(11,14),(12,13),(12,15),(13,16),(14,15),(14,17),(15,16),(15,17),(16,17)]
-    edges_weight={0:1,1:1,2:1,3:1,4:1,5:1,6:1,7:1,8:1,9:1,10:1,11:1,12:1,13:1,14:1,15:1,16:1,17:1,18:1,19:1,20:1,21:1,22:1,23:2,24:1,25:1,26:1,27:1,28:2}
-    root = 1
-    g = from_edges(root, edges, edges_weight)
-    assert g.nb_vertices() == 17
-    assert g.nb_edges() == 29
-    return g"""
-
-""" arbre vide
-def test1():
-    edges=[]
-    edges_weight={}
-    root = 1
-    g = from_edges(root, edges, edges_weight)
-    assert g.nb_vertices() == 0
-    assert g.nb_edges() == 0
-    return g"""
-
 
 def taille_arbre(g,vid):
     if descendents(vid, g)==[]:
@@ -766,7 +602,7 @@ def reduceindep(g,node,edge,val,NBsupE,V,E,RE,FE,PE,path):
             if node[vid2-1] not in m:
                 m.append(node[vid2-1])
         P.append(m)
-    print 'path',P
+    """print 'path',P"""
 
     """create the return edge"""
     RE[(P[0][len(P[0])-2],P[0][0])]=val[(P[0][len(P[0])-2],P[0][len(P[0])-1])]
@@ -869,7 +705,7 @@ def reduceincl(g,node,edge,val,NBsupE,V,E,RE,FE,PE,seq):
                 if node[vid2-1] not in m:
                     m.append(node[vid2-1])
             P.append(m)
-        print 'path',P
+        """print 'path',P"""
         
         """create the return edge"""
         RE[(P[0][len(P[0])-2],P[0][0])]=val[(P[0][len(P[0])-2],P[0][len(P[0])-1])]
@@ -963,8 +799,8 @@ def reduceincl(g,node,edge,val,NBsupE,V,E,RE,FE,PE,seq):
 
 if(__name__ == "__main__"):
     
-    """mtg_filename = './example_MTG.mtg'
-    mtg_filename = './fractal00.mtg'
+    """mtg_filename = './example_MTG.mtg'"""
+    """mtg_filename = './fractalT0.mtg'
 
     g = MTG(mtg_filename)
 
@@ -975,7 +811,7 @@ if(__name__ == "__main__"):
     dag_exact = tree_reduction(tree)
     print is_linear(dag_exact)
     
-    dag_linearization(dag_exact)
+    #dag_linearization(dag_exact)
     
     tree_rec = tree_reconstruction(tree)
     
@@ -1063,10 +899,10 @@ if(__name__ == "__main__"):
                 j+=1
         if vrai:
             INC.append(MQPPRTINCL[i])
-    MQPPRTINCL=INC
-    print 'MQPPRTINDEP',MQPPRTINDEP
+    MQPPRTINCL=INC 
+    """print 'MQPPRTINDEP',MQPPRTINDEP
     print 'MQPPOVERL',MQPPRTOVERL
-    print 'MQPPINCL',MQPPRTINCL
+    print 'MQPPINCL',MQPPRTINCL"""
     List=quotient_graph(G,list_node,edge,val,MQPPRTINDEP,MQPPRTINCL)
     V=List[0]
     E=List[1]
@@ -1086,14 +922,14 @@ if(__name__ == "__main__"):
     TN=len(list_node)
     Tedge=len(val.keys())
     initial=TN+Tedge
-    print initial
+    print 'taille init',initial
     TV=len(V)
     TE=len(E.keys())
     TRE=len(RE.keys())
     TFE=len(FE.keys())
     TPE=len(PE.keys())
     final=TV+TE+TRE+TFE+TPE
-    print final
+    """print final"""
     if (initial>0):
         gain=initial-final
         print 'the gain',gain

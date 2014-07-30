@@ -13,7 +13,7 @@ __revision__ = "$Id$"
 name = 'VPlants.tree_reduction'
 namespace = 'vplants'
 pkg_name = 'vplants.tree_reduction'
-version = '0.6.2'
+version = '1.0.0'
 description = 'tree reduction.'
 long_description = """"""
 author = 'Farah Ben-naoum'
@@ -21,8 +21,8 @@ author_email = ''
 url = 'http://openalea.gforge.inria.fr'
 license = 'Cecill-C'
 
-packages = [ namespace+"."+pkg for pkg in find_packages('src') if 'openalea' not in pkg]
-
+packages = [ namespace+"."+pkg for pkg in find_packages('src') if 'vplants' not in pkg]
+print pkg_name
 setup(
     name=name,
     version=version,
@@ -37,7 +37,7 @@ setup(
     zip_safe = False,
 
     packages = packages,
-    package_dir={ pkg_name : pj('src','tree_reduction'), '' : 'src' },
+    package_dir={pkg_name : pj('src','tree_reduction'), '' : 'src' },
 
     # Dependencies
     install_requires = ['openalea.deploy'],
