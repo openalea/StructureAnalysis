@@ -42,7 +42,7 @@
   // Constructeur
   // -------------
 Matching::Matching(const TreeGraphPtr& input,const TreeGraphPtr& reference,const NodeCostPtr& nodeDistance, MDTableType mdtable_type  ):
-  T1(input), T2(reference), ND(nodeDistance)//,_distances(input,reference,nodeDistance)
+  T1(input), T2(reference), ND(nodeDistance), _distances(0) //,_distances(input,reference,nodeDistance)
 {
   _mdtable_type = mdtable_type;
   if (_mdtable_type == STD)
@@ -59,6 +59,8 @@ Matching::Matching(const TreeGraphPtr& input,const TreeGraphPtr& reference,const
   // -------------
 Matching::~Matching()
 {
+    if(_distances) delete _distances;
+
 }
 
 // ----------------------------------------------------------------------------------

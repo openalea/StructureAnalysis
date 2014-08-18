@@ -110,11 +110,12 @@ public :
 protected :
   TreeGraphPtr T1;
   TreeGraphPtr T2;
-  MatchingDistanceTable* _distances;
+  MatchingDistanceTable * _distances;
   ChoiceTable _choices;
   NodeCostPtr ND;
   MatchPath _restrMapp;
   VertexVector _restrMappList;
+  
   int M(int,int);
 
   MDTableType _mdtable_type;
