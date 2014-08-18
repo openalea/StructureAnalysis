@@ -69,6 +69,7 @@ void export_Matching() {
     .def( "getDistanceTable", &py_getDistanceTable,"Get DistanceTable Between Trees")
     .def( "getList", &py_getList,"Get Matching  list between Trees",(bp::arg("index1"))=0,(bp::arg("index2")=0))
     .def( "getChoiceTable", &Matching::getChoiceTable,"Get Choice List",return_internal_reference<>())
+    .add_property("verbose",make_getter(&Matching::verbose),make_setter(&Matching::verbose))
 	;
 
 }

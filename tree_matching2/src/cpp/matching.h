@@ -107,6 +107,8 @@ public :
 
   inline const ChoiceTable& getChoiceTable() const { return _choices; }
 
+  bool verbose;
+
 protected :
   TreeGraphPtr T1;
   TreeGraphPtr T2;
@@ -115,7 +117,7 @@ protected :
   NodeCostPtr ND;
   MatchPath _restrMapp;
   VertexVector _restrMappList;
-  
+
   int M(int,int);
 
   MDTableType _mdtable_type;

@@ -46,6 +46,7 @@ def test_matching():
   node_cost = MyNodeCost()
   # Standard option = 0
   m = Matching(tree1,tree1,node_cost,0)
+  m.verbose = False
   # Compact option = 1
   val = m.match()
   print 'match =',val
@@ -63,6 +64,7 @@ def test_extmatching():
   node_cost = MyNodeCost()
   # Standard option = 0
   m = ExtMatching(tree1,tree2,node_cost,0)
+  m.verbose = False
   # Compact option = 1
   val = m.match()
   print 'match =',val

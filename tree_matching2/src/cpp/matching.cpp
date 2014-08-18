@@ -42,7 +42,7 @@
   // Constructeur
   // -------------
 Matching::Matching(const TreeGraphPtr& input,const TreeGraphPtr& reference,const NodeCostPtr& nodeDistance, MDTableType mdtable_type  ):
-  T1(input), T2(reference), ND(nodeDistance), _distances(0) //,_distances(input,reference,nodeDistance)
+  T1(input), T2(reference), ND(nodeDistance), _distances(0), verbose(true) //,_distances(input,reference,nodeDistance)
 {
   _mdtable_type = mdtable_type;
   if (_mdtable_type == STD)
@@ -404,7 +404,7 @@ void Matching::ForestList(int input_vertex,int reference_vertex,Sequence& sequen
 DistanceType Matching::match()
 {
 	DistanceType D=0;
-	cerr << "\x0d" << "Already computed : 0% matched ...                                   " << flush;
+	if(verbose) cerr << "\x0d" << "Already computed : 0% matched ...                                   " << flush;
 	if ((!T1->isNull())&&(!T2->isNull()))
 	{
 		const int size1 = T1->getNbVertex();
@@ -431,7 +431,7 @@ DistanceType Matching::match()
 		      DistanceType d =distanceBetweenTree(input_vertex,reference_vertex);
 		    }
 		  if (int(100. - 100*input_vertex/size1)%5 == 0)
-		    cerr << "\x0d" << "Already computed : "<<int(100. - 100*input_vertex/size1) <<"% " <<" matched ...                                   " << flush;
+		    if(verbose)cerr << "\x0d" << "Already computed : "<<int(100. - 100*input_vertex/size1) <<"% " <<" matched ...                                   " << flush;
 		  if (_mdtable_type == COMPACT)
 		    for (int i=0;i<T1->getNbChild(input_vertex);i++){
 		      _distances->closeDistancesVector(T1->child(input_vertex,i));
@@ -450,7 +450,7 @@ DistanceType Matching::match()
 			D=_distances->inputTreeToEmpty(0);
 		}
 	}
-	cerr<<"\x0d"<<endl;
+	if(verbose)cerr<<"\x0d"<<endl;
 	return(D);
 }
 
