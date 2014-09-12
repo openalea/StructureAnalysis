@@ -278,7 +278,7 @@ bool Typed_edge_tree<Type>::add_edge(key parent,
 template <typename Type>
 bool Typed_edge_tree<Type>::edge_type(key parent, key child)
 {
-   assert(is_edge(parent, child));
+   assert(this->is_edge(parent, child));
    return edge_types[child];
 }
 
@@ -292,7 +292,7 @@ bool Typed_edge_tree<Type>::edge_type(key parent, key child)
 template <typename Type>
 bool Typed_edge_tree<Type>::set_edge_type(key parent, key child, bool type)
 {
-   const bool res = is_edge(parent, child);
+   const bool res = this->is_edge(parent, child);
 
    if (res)
       edge_types[child] = type;
