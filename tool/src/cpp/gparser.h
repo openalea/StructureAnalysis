@@ -176,6 +176,9 @@ public:
   /// current token in the current stream
   const char* currentTokenString() {return _plexer->YYText();}
 
+  /// return the output stream.
+  std::ostream* outputStream() const {return _po;}
+
   /// the symbol table is a hash map associating strings and values of type T.
   SymbolTable<T>* smbTable() {return _pst;}
 
@@ -189,7 +192,7 @@ public:
 
 };
 
-typedef std::pair<void*, void*> ParserPair;
+typedef std::pair<void*, GENERIC_LEXER*> ParserPair;
 
 template <class T>
 bool GenericParser<T>::parse(GENERIC_LEXER* plexer,
@@ -324,14 +327,14 @@ bool GenericParser<T>::handleError(std::string msg, int yychar, const char* toke
 
 #define PARSER(p, type) GenericParser<type>& p = \
                           *(GenericParser<type> *) (((ParserPair*)parser)->first)
-#define SMBTABLE(p, type, t) SymbolTable<type>& t = *(p._pst)
+#define SMBTABLE(p, type, t) SymbolTable<type>& t = *(p._smbTable())
 
 #define parser(p)      PARSER(p, SMB_TABLE_TYPE)
 #define smbtable(p, t) SMBTABLE(p, SMB_TABLE_TYPE, t)
 #define lexer(l)       GENERIC_LEXER& l = *(GENERIC_LEXER*)(((ParserPair*)parser)->second)
 
 // parser output stream
-#define postream(p) (*(p._po))
+#define postream(p) (*(p.outputStream()))
 
 /* if defined, this means that we are in a multiple parser and it is
    up to the user to define its corresponding function prefix_yyerror */
@@ -344,18 +347,18 @@ bool GenericParser<T>::handleError(std::string msg, int yychar, const char* toke
 // of the tokens.
 
 #ifdef YYTNAME
-#define yyerror(_msg) {				\
+#define yyerror(parser, _msg) {				\
         yyerrok;\
         yyclearin;\
-        parser(p);\
+        GenericParser<SMB_TABLE_TYPE> p = *(GenericParser<SMB_TABLE_TYPE> *)parser; \
         if (!(p.handleError(std::string(_msg), yychar, yytname[YYTRANSLATE((yychar>=0?yychar:-yychar))]))) YYABORT;\
         postream(p) << std::endl; }
 #endif
 #else
-#define yyerror(_msg){ 				\
+#define yyerror(parser, _msg){ 				\
         yyerrok;\
         yyclearin;\
-        parser(p);\
+        GenericParser<SMB_TABLE_TYPE> p = *(GenericParser<SMB_TABLE_TYPE> *)parser; \
         if (!(p.handleError(std::string(_msg), yychar, ""))) YYABORT;\
         postream(p) << std::endl; }
 
