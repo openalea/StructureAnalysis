@@ -207,9 +207,9 @@ public:
  returns 0 if reaches end-of-file.
  The TRUE type of lvalp is YYSTYPE.
 */
-inline int yylex(void* lvalp, void* _lexer) {
+inline int yylex(void* lvalp, GENERIC_LEXER * _lexer) {
 
-  int token = ((GENERIC_LEXER*)_lexer)->yylex(lvalp); // returns 0 if reaches end-of-file
+  int token = _lexer->yylex(lvalp); // returns 0 if reaches end-of-file
 
   return token;
 
