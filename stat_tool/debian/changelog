@@ -1,3 +1,15 @@
+vplants-stattool (1.2.0~ppa2) trusty; urgency=medium
+
+  * Port to bison 3 
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Mon, 13 Oct 2014 17:41:32 +0200
+
+vplants-stattool (1.2.0~ppa1) trusty; urgency=medium
+
+  * Port to Trusty  
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Thu, 02 Oct 2014 06:35:16 +0200
+
 vplants-stattool (1.0.1~ppa13) quantal; urgency=low
 
   * Port to quantal

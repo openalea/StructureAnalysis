@@ -65,7 +65,7 @@ DistanceType LocalMatchPath::edgeCost(int input_vertex,int reference_vertex)
 // Tarjan, avec les ameliorations de 
 // Edmons et Karp
 // -----------------------------------------
-Boolean LocalMatchPath::findPath(VertexVector& VertexOnThePath,EdgeList& EdgeOnThePath)
+AmlBoolean LocalMatchPath::findPath(VertexVector& VertexOnThePath,EdgeList& EdgeOnThePath)
 {
 // On numerote les sommets
   int source=0;
@@ -79,7 +79,7 @@ Boolean LocalMatchPath::findPath(VertexVector& VertexOnThePath,EdgeList& EdgeOnT
 // Le sommet courant est la source
   int current_vertex=source;
   
-  vector<Boolean> heap_index(nbVertex,0);
+  vector<AmlBoolean> heap_index(nbVertex,0);
   
   // Chaque sommet est value
   // On initialise la valeur de tous les sommets avec +l'infini
@@ -94,7 +94,7 @@ Boolean LocalMatchPath::findPath(VertexVector& VertexOnThePath,EdgeList& EdgeOnT
 
   int item_pos;
   DistanceType tmp_dist;
-  Boolean path_found=0;
+  AmlBoolean path_found=0;
   
   do
     {
@@ -227,7 +227,7 @@ DistanceType LocalMatchPath::maxCostFlow(VertexVector& map_list)
    }
   //_max_distance =_max_distance+1.;
 
-  Boolean path=1;
+  AmlBoolean path=1;
   for (int f=1;(f<=flow_max)&&(path);f++)
   {
 // On cherche le plus court chemin avec les poids de EDMONS AND KARP

@@ -410,7 +410,7 @@ DistanceType ExtendedMatchingDistanceTable::getCCost(int vertex1 ,int vertex2) c
 	return(cost);
 }
 
-Boolean ExtendedMatchingDistanceTable::sameComplex(TreeNode* tree_node1,TreeNode* tree_node2) const
+AmlBoolean ExtendedMatchingDistanceTable::sameComplex(TreeNode* tree_node1,TreeNode* tree_node2) const
 {
   if ( tree_node1->getComplex() == tree_node2->getComplex())
   {

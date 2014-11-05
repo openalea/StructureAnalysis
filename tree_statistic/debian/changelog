@@ -1,3 +1,15 @@
+vplants-treestatistic (1.2.0~ppa2) trusty; urgency=medium
+
+  * Bison 3 
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Tue, 14 Oct 2014 08:38:08 +0200
+
+vplants-treestatistic (1.2.0~ppa1) trusty; urgency=medium
+
+  * Port to Trusty  
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Thu, 02 Oct 2014 06:35:54 +0200
+
 vplants-treestatistic (1.0.1~ppa11) precise; urgency=low
 
   * Port to Precise 

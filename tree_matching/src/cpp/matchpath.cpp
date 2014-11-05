@@ -191,7 +191,7 @@ MatchPath::~MatchPath()
 // Cette fonction vérifie si un arc est saturé
 // ------------------------------------------
 
-Boolean MatchPath::saturated(int flow_edge)
+AmlBoolean MatchPath::saturated(int flow_edge)
 {
   int ni=_inputList->size();
   int nj=_referenceList->size();
@@ -243,19 +243,19 @@ int MatchPath::capacity(int flow_edge)
 // ---------------------------------------------
 // Verifie si le flot de l'arc flow_edge est nul
 // ---------------------------------------------
-Boolean MatchPath::empty(int flow_edge)
+AmlBoolean MatchPath::empty(int flow_edge)
 {
   assert(flow_edge!=-1);
   return(flow[flow_edge]==MINDIST);
 } 
 
-Boolean MatchPath::reverse(int residual_edge)
+AmlBoolean MatchPath::reverse(int residual_edge)
 {
   assert(residual_edge!=-1);
   return((residual_edge%2)==1);
 }
 
-Boolean MatchPath::direct(int residual_edge)
+AmlBoolean MatchPath::direct(int residual_edge)
 {
   assert(residual_edge!=-1);
   return((residual_edge%2)==0);
@@ -288,7 +288,7 @@ int MatchPath::edgeComponents(int input_vertex,int reference_vertex)
 // Tarjan, avec les ameliorations de 
 // Edmons et Karp
 // -----------------------------------------
-Boolean MatchPath::findPath(VertexVector& VertexOnThePath,EdgeList& EdgeOnThePath)
+AmlBoolean MatchPath::findPath(VertexVector& VertexOnThePath,EdgeList& EdgeOnThePath)
 {
 // On numerote les sommets
   int source=0;
@@ -302,7 +302,7 @@ Boolean MatchPath::findPath(VertexVector& VertexOnThePath,EdgeList& EdgeOnThePat
 // Le sommet courant est la source
   int current_vertex=source;
   
-  vector<Boolean> heap_index(nbVertex,0);
+  vector<AmlBoolean> heap_index(nbVertex,0);
   
   // Chaque sommet est value
   // On initialise la valeur de tous les sommets avec +l'infini
@@ -317,7 +317,7 @@ Boolean MatchPath::findPath(VertexVector& VertexOnThePath,EdgeList& EdgeOnThePat
 
   int item_pos;
   DistanceType tmp_dist;
-  Boolean path_found=0;
+  AmlBoolean path_found=0;
   
   do
     {
@@ -401,7 +401,7 @@ Boolean MatchPath::findPath(VertexVector& VertexOnThePath,EdgeList& EdgeOnThePat
 // Tarjan, avec les ameliorations de 
 // Edmons et Karp et avec les composantes connexes
 // -----------------------------------------
-Boolean MatchPath::findPathWithComponents(VertexVector& VertexOnThePath,EdgeList& EdgeOnThePath)
+AmlBoolean MatchPath::findPathWithComponents(VertexVector& VertexOnThePath,EdgeList& EdgeOnThePath)
 {
 // On numerote les sommets
   int source=0;
@@ -415,7 +415,7 @@ Boolean MatchPath::findPathWithComponents(VertexVector& VertexOnThePath,EdgeList
 // Le sommet courant est la source
   int current_vertex=source;
   
-  vector<Boolean> heap_index(nbVertex,0);
+  vector<AmlBoolean> heap_index(nbVertex,0);
   
   // Chaque sommet est value
  // On initialise la valeur de tous les sommets avec +l'infini
@@ -436,7 +436,7 @@ Boolean MatchPath::findPathWithComponents(VertexVector& VertexOnThePath,EdgeList
   int item_pos;
   DistanceType tmp_dist;
   int tmp_comp;
-  Boolean path_found=0;
+  AmlBoolean path_found=0;
   
   do
     {
@@ -570,7 +570,7 @@ DistanceType MatchPath::minCostFlow(VertexVector& map_list)
 // Le flot maximum est le max de ni, nj.
   DistanceType flow_max=D_MAX(ni,nj);
 
-  Boolean path=1;
+  AmlBoolean path=1;
    	
   for (int f=1;(f<=flow_max)&&(path);f++)
   {
@@ -650,7 +650,7 @@ DistanceType MatchPath::minCostFlowWithComponents(VertexVector& map_list)
 // Le flot maximum est le max de ni, nj.
   DistanceType flow_max=D_MAX(ni,nj);
 
-  Boolean path=1;
+  AmlBoolean path=1;
    	
   for (int f=1;(f<=flow_max)&&(path);f++)
   {

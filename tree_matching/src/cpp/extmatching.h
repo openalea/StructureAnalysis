@@ -96,7 +96,7 @@ private :
   VertexVector _restrMappIPFAndRPFList;
   VertexVector _restrMappIMFAndRMFList;
   int M(int,int);
-  Boolean sameComplex(TreeNode* ,TreeNode* );
+  AmlBoolean sameComplex(TreeNode* ,TreeNode* );
   int Lat(ChoiceList* L, int vertex);
 };
 

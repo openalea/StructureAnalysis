@@ -1,3 +1,15 @@
+vplants-sequenceanalysis (1.2.0~ppa2) trusty; urgency=medium
+
+  * Port to bison 3 
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Mon, 13 Oct 2014 17:42:34 +0200
+
+vplants-sequenceanalysis (1.2.0~ppa1) trusty; urgency=medium
+
+  * Port to Trusty  
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Thu, 02 Oct 2014 06:35:23 +0200
+
 vplants-sequenceanalysis (1.0.1~ppa13) quantal; urgency=low
 
   * Idem for quantal 

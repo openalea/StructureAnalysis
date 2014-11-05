@@ -9,21 +9,18 @@ ALEASolution = config.ALEASolution
 options = Variables(['../options.py', 'options.py'], ARGUMENTS)
 
 # Dependencies
-common_tools = ['vplants.mtg', 'vplants.tool','vplants.plantgl',
-                'vplants.amlobj', 'vplants.stat_tool','boost_python', 'qt4']
+common_tools = ['vplants.mtg', 'vplants.tool', 'vplants.plantgl',
+                'vplants.amlobj', 'vplants.stat_tool', 'boost_python', 'qt4']
 
-tools = ['alea','install'] + common_tools
+tools = ['alea', 'install'] + common_tools
 
 env = ALEASolution(options, tools)
-env.Append( CPPPATH = pj( '$build_includedir','tree_matching' ) )
+env.Append(CPPPATH=pj('$build_includedir', 'tree_matching'))
 
 prefix = env['build_prefix']
 
 # Build stage
-SConscript(pj(prefix,"src/cpp/SConscript"),
+SConscript(pj(prefix, "src/cpp/SConscript"),
            exports='env')
-
-SConscript( pj(prefix,"src/wrapper/SConscript"),
-            exports={"env":env} )
 
 Default("build")

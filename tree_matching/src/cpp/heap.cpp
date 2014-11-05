@@ -224,7 +224,7 @@ ItemType Heap::quickDeleteMin()
     }
 }
 
-Boolean Heap::order()
+AmlBoolean Heap::order()
 {
   int i;
   for (i=nbItem();i>0;i--)
@@ -234,7 +234,7 @@ Boolean Heap::order()
   return(TRUE);
 }
 
-Boolean Heap::quickInsert(KeyType key,ItemType object)
+AmlBoolean Heap::quickInsert(KeyType key,ItemType object)
 {
   Item* new_item=new Item(key,object);
 

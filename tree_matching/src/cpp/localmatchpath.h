@@ -45,7 +45,7 @@
 class LocalMatchPath : public MatchPath
 {
   public :
-     Boolean findPath(VertexVector&,EdgeList& );
+     AmlBoolean findPath(VertexVector&,EdgeList& );
      DistanceType maxCostFlow(VertexVector&);
      DistanceType edgeCost(int ,int );
      DistanceType length(int,int,int);

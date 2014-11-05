@@ -38,13 +38,14 @@
 #ifndef SB_WEIGTHED_NODE_COST_HEADER
 #define SB_WEIGTHED_NODE_COST_HEADER
 
+#include "stat_tool/stat_tools.h"
+#include "stat_tool/markovian.h"
+#include "stat_tool/vectors.h"
+
 #include "definitions.h"
 #include "treenode.h"
 #include "nodecost.h"
 //#include "mdtable.h"
-#include "stat_tool/stat_tools.h"
-#include "stat_tool/markovian.h"
-#include "stat_tool/vectors.h"
 
 const DistanceType NOTDEF=-1.0;
 

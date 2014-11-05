@@ -72,8 +72,8 @@ class MatchPath
     void link(int, DistanceTable&, IntTable&);
     // Recherche le plus court chemin au sens du cout ameliore de
     // Edmons et Karp
-    Boolean findPath(VertexVector&,EdgeList& );
-    Boolean findPathWithComponents(VertexVector&,EdgeList& );
+    AmlBoolean findPath(VertexVector&,EdgeList& );
+    AmlBoolean findPathWithComponents(VertexVector&,EdgeList& );
     // Resout le probleme de flot de cout minimum avec l'algorithme de
     // Busacker et Gowen ameliore par Edmons et Karp
     DistanceType minCostFlow(VertexVector&); //Au lieu de FlowType ...
@@ -82,10 +82,10 @@ class MatchPath
     // Functions used to get the edges' cost
     DistanceType length(int,int,int);
     int connected_component(int,int,int);
-    Boolean saturated(int);
-    Boolean empty(int);
-    Boolean reverse(int );
-    Boolean direct(int );
+    AmlBoolean saturated(int);
+    AmlBoolean empty(int);
+    AmlBoolean reverse(int );
+    AmlBoolean direct(int );
     void initCost();
     // Useful function to simulate the flowgraph structure
     int next_edge(int,int);

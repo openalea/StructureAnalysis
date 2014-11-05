@@ -227,7 +227,7 @@ void TreeMatchExtract::plot_statistics(const char* prefix_file_name)
 	for (itree=0;itree<nb_tree;itree++) 
 	{  
 	  int nb_elem=_newOrder.entries();
-	  Boolean inserted=FALSE;
+	  AmlBoolean inserted=FALSE;
 	  for (int n=0;n<nb_elem;n++)
 	  {
 	     if ((!inserted)&&(average_distance[itree]<average_distance[_newOrder.at(n)]))
@@ -562,7 +562,7 @@ void TreeMatchExtract::plot_statistic(const char* prefix_file_name,int inp_tree,
 EditOperation TreeMatchExtract::editOp(Sequence* s, VId vertex, int side)
 {
   s->reset();
-  Boolean contains=FALSE;
+  AmlBoolean contains=FALSE;
   DistanceType cost=0.0; 
   do
   {

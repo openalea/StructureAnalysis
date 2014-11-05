@@ -27,7 +27,7 @@ scons_parameters = ["build_prefix=" + build_prefix]
 install_requires = [binary_deps('vplants.tool')]
 if sys.platform.startswith('win'):
     install_requires += [binary_deps("boost")]
-
+install_requires = []
 setup_requires = install_requires + ['openalea.deploy']
 
 

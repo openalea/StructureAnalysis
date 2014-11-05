@@ -524,7 +524,7 @@ TreeGraph::TreeGraph( )
 }
 
 
-TreeGraph::TreeGraph(MTG& mtg,VId root,TreeType type,EType edge_type,Boolean valued,NodeFunctionList* functions)
+TreeGraph::TreeGraph(MTG& mtg,VId root,TreeType type,EType edge_type,AmlBoolean valued,NodeFunctionList* functions)
 {
   // MAKING OF THE TREE
   _mtg=&mtg;
@@ -595,7 +595,7 @@ void TreeGraph::printNodedClass() const
 
 /* Making of tree Graphs on a given complex */
 
-TreeGraph::TreeGraph(MTG& mtg,VId root,TreeType type,Boolean valued,NodeFunctionList* functions)
+TreeGraph::TreeGraph(MTG& mtg,VId root,TreeType type,AmlBoolean valued,NodeFunctionList* functions)
 {
   // MAKING OF THE TREE	
   _mtg=&mtg; 
@@ -619,7 +619,7 @@ _numPostfix=0;
   _nbVertex=_number;
 }
 
-TreeGraph::TreeGraph(MTG& mtg,VIdList* vlist, TreeType type ,EType edge_type,Boolean valued,NodeFunctionList* functions){
+TreeGraph::TreeGraph(MTG& mtg,VIdList* vlist, TreeType type ,EType edge_type,AmlBoolean valued,NodeFunctionList* functions){
   // MAKING OF THE TREE
   _mtg=&mtg;
   _degree=1;
@@ -665,7 +665,7 @@ TreeGraph::TreeGraph(MTG& mtg,VIdList* vlist, TreeType type ,EType edge_type,Boo
 }
 
 
-TreeGraph::TreeGraph(MTG& mtg,VId root,int MAX_ORDER,Boolean valued,NodeFunctionList* functions)
+TreeGraph::TreeGraph(MTG& mtg,VId root,int MAX_ORDER,AmlBoolean valued,NodeFunctionList* functions)
 {
   // MAKING OF THE TREE
   _mtg=&mtg;
@@ -687,7 +687,7 @@ _numPostfix=0;
   _nbVertex=_number+1;
 }
 
-TreeGraph::TreeGraph(char* fich_name, MTG& mtg, VId root, Boolean valued,NodeFunctionList* functions)
+TreeGraph::TreeGraph(char* fich_name, MTG& mtg, VId root, AmlBoolean valued,NodeFunctionList* functions)
 {
   string line;
   ifstream inFile(fich_name,ios::in);

@@ -77,12 +77,12 @@ class TreeGraph
   typedef const TreeNode* const_iterator;
     /** Constructor */
     TreeGraph();
-    TreeGraph(MTG& ,VId ,TreeType,EType,Boolean valued=FALSE,NodeFunctionList* funcions=NULL);
-    TreeGraph(MTG& ,VIdList* ,TreeType,EType,Boolean valued=FALSE,NodeFunctionList* funcions=NULL);
+    TreeGraph(MTG& ,VId ,TreeType,EType,AmlBoolean valued=FALSE,NodeFunctionList* funcions=NULL);
+    TreeGraph(MTG& ,VIdList* ,TreeType,EType,AmlBoolean valued=FALSE,NodeFunctionList* funcions=NULL);
     
-    TreeGraph(MTG& ,VId ,TreeType,Boolean valued=FALSE,NodeFunctionList* funcions=NULL);
-    TreeGraph(MTG& ,VId ,int,Boolean valued=FALSE,NodeFunctionList* functions=NULL);
-    TreeGraph(char* fich_name, MTG&, VId root, Boolean valued=FALSE,NodeFunctionList* functions=NULL);
+    TreeGraph(MTG& ,VId ,TreeType,AmlBoolean valued=FALSE,NodeFunctionList* funcions=NULL);
+    TreeGraph(MTG& ,VId ,int,AmlBoolean valued=FALSE,NodeFunctionList* functions=NULL);
+    TreeGraph(char* fich_name, MTG&, VId root, AmlBoolean valued=FALSE,NodeFunctionList* functions=NULL);
   
   TreeGraph(TreeGraph*,int);
 
@@ -194,7 +194,7 @@ class TreeGraph
   std::vector<int> _class;
   int _order;
   EType _edge;
-  Boolean _valued;
+  AmlBoolean _valued;
   NodeFunctionList* _functions;
   int depth(int );
   NodeTable _outNodeTable;

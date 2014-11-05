@@ -86,9 +86,9 @@ class Heap  :public VectorOfItem
   Item* at(size_type size) const;
 
 // Special functions for pathgraph use only 
-        Boolean quickInsert(KeyType,ItemType);
+        AmlBoolean quickInsert(KeyType,ItemType);
 	ItemType quickDeleteMin();
-	Boolean order();	
+	AmlBoolean order();	
 
 	private :
 

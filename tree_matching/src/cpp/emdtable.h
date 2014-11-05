@@ -96,7 +96,7 @@ class ExtendedMatchingDistanceTable
   DistanceTable _plusForestDistTable;
   DistanceTable _imfrfDistTable;
   DistanceTable _ifrmfDistTable;
-  Boolean sameComplex(TreeNode* ,TreeNode* ) const;
+  AmlBoolean sameComplex(TreeNode* ,TreeNode* ) const;
 
 };
 
