@@ -578,10 +578,15 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
                                                                                    min_inf_bound , false);
               }
 
-              else {
+              else { // if (k == 0) {
                 mixt_histo->component[k]->Reestimation<int>::parametric_estimation(mixt->component[k] ,
                                                                                    min_inf_bound , true);
               }
+
+/*              else {   pour yerba mate
+                mixt_histo->component[k]->Reestimation<int>::parametric_estimation(mixt->component[k] ,
+                                                                                   1 , true);
+	      } */
             }
           }
 
@@ -768,8 +773,9 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
  *
  *  arguments : reference sur un objet StatError, stream, nombres minimum et
  *              maximum de composantes, identificateur des composantes, borne inferieure minimum
- *              du melange, flag sur la borne inferieure du melange, flag sur
- *              les bornes inferieures des composantes, type de penalisation (AIC(c)/BIC(c)),
+ *              du melange, flag sur la borne inferieure du melange,
+ *              flag sur les bornes inferieures des composantes,
+ *              critere de selection du nombre de composantes (AIC(c)/BIC(c)),
  *              pas pour l'initialisation des poids.
  *
  *--------------------------------------------------------------*/
@@ -777,7 +783,7 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
 DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &error , std::ostream &os ,
                                                                     int min_nb_component , int max_nb_component ,
                                                                     int *ident , int min_inf_bound , bool mixt_flag ,
-                                                                    bool component_flag , int penalty_type ,
+                                                                    bool component_flag , int criterion ,
                                                                     double weight_step) const
 
 {
@@ -811,7 +817,7 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
 
     // calcul du terme de penalisation
 
-    switch (penalty_type) {
+    switch (criterion) {
     case AIC :
       penalty = 1.;
       break;
@@ -830,7 +836,7 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
         likelihood[min_nb_component] = dist->likelihood_computation(*this);
         nb_parameter[min_nb_component] = dist->nb_parameter_computation();
 
-        if ((likelihood[min_nb_component] != D_INF) && (penalty_type == BICc)) {
+        if ((likelihood[min_nb_component] != D_INF) && (criterion == BICc)) {
           penalized_likelihood[min_nb_component] = likelihood[min_nb_component] -
                                                    0.5 * nb_parameter[min_nb_component] * log((double)nb_element);
         }
@@ -855,7 +861,7 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
         likelihood[min_nb_component] = mixt->Distribution::likelihood_computation(*this);
         nb_parameter[min_nb_component] = mixt->nb_parameter_computation();
 
-        if ((likelihood[min_nb_component] != D_INF) && (penalty_type == BICc)) {
+        if ((likelihood[min_nb_component] != D_INF) && (criterion == BICc)) {
           penalized_likelihood[min_nb_component] = likelihood[min_nb_component] -
                                                    0.5 * mixt->penalty_computation();
         }
@@ -863,7 +869,7 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
     }
 
     if (likelihood[min_nb_component] != D_INF) {
-      if (penalty_type == AICc) {
+      if (criterion == AICc) {
         if (nb_parameter[min_nb_component] < nb_element - 1) {
           penalized_likelihood[min_nb_component] = likelihood[min_nb_component] -
                                                    (double)(nb_parameter[min_nb_component] * nb_element) /
@@ -874,7 +880,7 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
         }
       }
 
-      else if (penalty_type != BICc) {
+      else if (criterion != BICc) {
         penalized_likelihood[min_nb_component] = likelihood[min_nb_component] -
                                                  nb_parameter[min_nb_component] * penalty;
       }
@@ -897,7 +903,7 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
         likelihood[i] = pmixt->Distribution::likelihood_computation(*this);
         nb_parameter[i] = pmixt->nb_parameter_computation();
 
-        if (penalty_type == AICc) {
+        if (criterion == AICc) {
           if (nb_parameter[i] < nb_element - 1) {
             penalized_likelihood[i] = likelihood[i] - (double)(nb_parameter[i] * nb_element) /
                                       (double)(nb_element - nb_parameter[i] - 1);
@@ -907,7 +913,7 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
           }
         }
 
-        else if (penalty_type == BICc) {
+        else if (criterion == BICc) {
           penalized_likelihood[i] = likelihood[i] - 0.5 * pmixt->penalty_computation();
         }
 
@@ -947,7 +953,7 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
              << "   2 * " << STAT_label[STATL_LIKELIHOOD] << ": " << 2 * likelihood[i] << "   "
              << nb_parameter[i] << " " << STAT_label[STATL_FREE_PARAMETERS]
              << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("
-             << STAT_criterion_word[penalty_type] << "): " << 2 * penalized_likelihood[i] << "   "
+             << STAT_criterion_word[criterion] << "): " << 2 * penalized_likelihood[i] << "   "
              << STAT_label[STATL_WEIGHT] << ": " << weight[i] / norm << endl;
         }
       }
