@@ -165,7 +165,10 @@ const char *STAT_criterion_word[] = {
   "BIC" ,
   "BICc" ,
   "ICL" ,
-  "ICLc"
+  "ICLc" ,
+  "mBIC" ,
+  "log-likelihood slope" ,
+  "segmentation log-likelihood slope"
 };
 
 
