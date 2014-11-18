@@ -159,7 +159,8 @@ enum {
   DIVISION_RESIDUAL ,
   STANDARDIZED_RESIDUAL ,
   SEGMENTATION_ENTROPY ,
-  SEGMENTATION_DIVERGENCE
+  SEGMENTATION_DIVERGENCE ,
+  LOG_LIKELIHOOD_SLOPE
 };
 
 enum {
@@ -202,7 +203,9 @@ enum {
 };
 
 const double ROUNDOFF_ERROR = 1.e-10;  // erreur sur une somme de doubles
+const int PENALTY_SHAPE_SCALING_FACTOR = 100;  // facteur d'echelle pour l'affichage des pentes de log-vraisemblances
 const int NB_SEGMENTATION = 10;        // nombre de segmentations calculees
+const int SLOPE_NB_SEGMENT = 5;        // nombre minimum de points pour calculer la pente des vraisemblances
 
 enum {
   APPROXIMATED ,
@@ -733,7 +736,8 @@ public :
                             int *model_type , int iidentifier = I_DEFAULT ,
                             int output = SEQUENCE) const;
     Sequences* segmentation(StatError &error , std::ostream &os , int iidentifier ,
-                            int max_nb_segment , int *model_type ,
+                            int max_nb_segment , int *model_type , int criterion = LIKELIHOOD_SLOPE ,
+                            int min_nb_segment = 0 , int penalty_shape_type = 2 ,
                             int output = SEQUENCE) const;
 
     Sequences* hierarchical_segmentation(StatError &error , std::ostream &os , int iidentifier ,
@@ -1062,7 +1066,7 @@ public :
                                                           bool counting_flag = true) const;
 
     VariableOrderMarkov* lumpability_estimation(StatError &error , std::ostream &os , int *symbol ,
-                                                int penalty_type = BIC , int order = 1 ,
+                                                int criterion = BIC , int order = 1 ,
                                                 bool counting_flag = true) const;
 
     SemiMarkov* semi_markov_estimation(StatError &error , std::ostream &os , char model_type ,
