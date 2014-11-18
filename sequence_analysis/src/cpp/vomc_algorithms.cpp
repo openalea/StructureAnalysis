@@ -4098,13 +4098,13 @@ double VariableOrderMarkov::likelihood_correction(const VariableOrderMarkovData 
  *  d'un echantillon de sequences.
  *
  *  arguments : reference sur un objet StatError, stream,
- *              table de transcodage des symboles, type de penalisation (AIC(c)/BIC),
+ *              table de transcodage des symboles, critere de selection (AIC(c)/BIC),
  *              ordre de la chaine de Markov, flag sur le calcul des lois de comptage.
  *
  *--------------------------------------------------------------*/
 
 VariableOrderMarkov* MarkovianSequences::lumpability_estimation(StatError &error , ostream &os ,
-                                                                int *symbol , int penalty_type ,
+                                                                int *symbol , int criterion ,
                                                                 int order , bool counting_flag) const
 
 {
@@ -4187,7 +4187,7 @@ VariableOrderMarkov* MarkovianSequences::lumpability_estimation(StatError &error
 
       // calcul du terme de compensation
 
-      switch (penalty_type) {
+      switch (criterion) {
       case AIC :
         penalty = 1.;
         break;
@@ -4201,7 +4201,7 @@ VariableOrderMarkov* MarkovianSequences::lumpability_estimation(StatError &error
       likelihood[1] = markov->markov_data->likelihood -
                       markov->likelihood_correction(*(markov->markov_data));
 
-      if (penalty_type == AICc) {
+      if (criterion == AICc) {
         if (nb_parameter[1] < cumul_length - 1) {
           penalized_likelihood[1] = likelihood[1] - (double)(nb_parameter[1] * cumul_length) /
                                     (double)(cumul_length - nb_parameter[1] - 1);
@@ -4267,7 +4267,7 @@ VariableOrderMarkov* MarkovianSequences::lumpability_estimation(StatError &error
                                 lumped_markov->categorical_process[0]->nb_parameter_computation(0.);
           lumped_likelihood = lumped_markov->likelihood_computation(*(lumped_markov->markov_data->chain_data));
 
-          if (penalty_type == AICc) {
+          if (criterion == AICc) {
             if (lumped_nb_parameter < cumul_length - 1) {
               lumped_penalized_likelihood = lumped_likelihood - (double)(lumped_nb_parameter * cumul_length) /
                                             (double)(cumul_length - lumped_nb_parameter - 1);
@@ -4286,7 +4286,7 @@ VariableOrderMarkov* MarkovianSequences::lumpability_estimation(StatError &error
              << 2 * lumped_likelihood << "   " << lumped_nb_parameter << " "
              << STAT_label[lumped_nb_parameter == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS]
              << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("
-             << STAT_criterion_word[penalty_type] << "): " << 2 * lumped_penalized_likelihood << endl;
+             << STAT_criterion_word[criterion] << "): " << 2 * lumped_penalized_likelihood << endl;
 
           os << "\n" << STAT_word[STATW_OBSERVATION_PROBABILITIES] << endl;
 
@@ -4323,7 +4323,7 @@ VariableOrderMarkov* MarkovianSequences::lumpability_estimation(StatError &error
             }
           }
 
-          if (penalty_type == AICc) {
+          if (criterion == AICc) {
             if (lumped_nb_parameter < cumul_length - 1) {
               lumped_penalized_likelihood = lumped_likelihood - (double)(lumped_nb_parameter * cumul_length) /
                                             (double)(cumul_length - lumped_nb_parameter - 1);
@@ -4341,7 +4341,7 @@ VariableOrderMarkov* MarkovianSequences::lumpability_estimation(StatError &error
              << "   2 * " << STAT_label[STATL_LIKELIHOOD] << ": " << 2 * lumped_likelihood << "   "
              << lumped_nb_parameter << " " << STAT_label[lumped_nb_parameter == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS]
              << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("
-             << STAT_criterion_word[penalty_type] << "): " << 2 * lumped_penalized_likelihood << endl;
+             << STAT_criterion_word[criterion] << "): " << 2 * lumped_penalized_likelihood << endl;
 
           // 3eme propriete d'aggregation (classique)
 
@@ -4408,7 +4408,7 @@ VariableOrderMarkov* MarkovianSequences::lumpability_estimation(StatError &error
             }
           }
 
-          if (penalty_type == AICc) {
+          if (criterion == AICc) {
             if (lumped_nb_parameter < cumul_length - 1) {
               lumped_penalized_likelihood = lumped_likelihood - (double)(lumped_nb_parameter * cumul_length) /
                                             (double)(cumul_length - lumped_nb_parameter - 1);
@@ -4426,7 +4426,7 @@ VariableOrderMarkov* MarkovianSequences::lumpability_estimation(StatError &error
              << "   2 * " << STAT_label[STATL_LIKELIHOOD] << ": " << 2 * lumped_likelihood << "   "
              << lumped_nb_parameter << " " << STAT_label[lumped_nb_parameter == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS]
              << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("
-             << STAT_criterion_word[penalty_type] << "): " << 2 * lumped_penalized_likelihood << endl;
+             << STAT_criterion_word[criterion] << "): " << 2 * lumped_penalized_likelihood << endl;
 
           for (i = 0;i < seq->marginal_distribution[0]->nb_value;i++) {
             for (j = 0;j < seq->marginal_distribution[1]->nb_value;j++) {
@@ -4443,7 +4443,7 @@ VariableOrderMarkov* MarkovianSequences::lumpability_estimation(StatError &error
         likelihood[0] = lumped_markov->markov_data->likelihood -
                         lumped_markov->likelihood_correction(*(lumped_markov->markov_data));
 
-        if (penalty_type == AICc) {
+        if (criterion == AICc) {
           if (nb_parameter[0] < cumul_length - 1) {
             penalized_likelihood[0] = likelihood[0] - (double)(nb_parameter[0] * cumul_length) /
                                       (double)(cumul_length - nb_parameter[0] - 1);
@@ -4493,7 +4493,7 @@ VariableOrderMarkov* MarkovianSequences::lumpability_estimation(StatError &error
                << "   2 * " << STAT_label[STATL_LIKELIHOOD] << ": " << 2 * likelihood[i] << "   "
                << nb_parameter[i] << " " << STAT_label[nb_parameter[i] == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS]
                << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("
-               << STAT_criterion_word[penalty_type] << "): " << 2 * penalized_likelihood[i] << endl;
+               << STAT_criterion_word[criterion] << "): " << 2 * penalized_likelihood[i] << endl;
 //               << "   " << STAT_label[STATL_WEIGHT] << ": " << weight[i] / norm << endl;
           }
         }
