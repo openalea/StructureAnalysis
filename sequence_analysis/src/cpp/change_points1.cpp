@@ -4606,23 +4606,129 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
 
 /*--------------------------------------------------------------*
  *
+ *  Heuristique de la pente : estimation de la pente des log-vraisemblances
+ *  fonction du nombre de segments.
+ *
+ *  arguments : nombres de segments minimum et maximum, type de forme de la penalite,
+ *              longueur de la sequence, pointeur sur les formes de la penalite et
+ *              sur les vraisemblances, references sur l'intercept,
+ *              la pente, l'ecart type associe et l'ecart type residuel.
+ *
+ *--------------------------------------------------------------*/
+
+void log_likelihood_slope(int min_nb_segment , int max_nb_segment , int penalty_shape_type ,
+                          int length , double *penalty_shape , double *likelihood ,
+                          double &intercept , double &slope , double &slope_standard_deviation ,
+                          double &residual_standard_deviation)
+
+{
+  register int i;
+  int nb_model;
+  double diff , likelihood_mean , penalty_shape_mean , penalty_shape_variance , covariance ,
+         residual_mean , residual_square_sum;
+
+
+  nb_model = max_nb_segment - min_nb_segment + 1;
+
+  likelihood_mean = 0.;
+  for (i = min_nb_segment;i <= max_nb_segment;i++) {
+    likelihood_mean += likelihood[i];
+  }
+  likelihood_mean /= nb_model;
+
+  switch (penalty_shape_type) {
+
+  case 0 : {
+    penalty_shape_mean = (double)(min_nb_segment + max_nb_segment) / 2.;
+    penalty_shape_variance = (double)(nb_model * (nb_model * nb_model - 1)) / 12.;
+
+#   ifdef DEBUG
+    double buff = 0.;
+    for (i = min_nb_segment;i <= max_nb_segment;i++) {
+      diff = i - penalty_shape_mean;
+      buff += diff * diff;
+    }
+
+    cout << "TEST: " << penalty_shape_variance << " | " << buff << endl;
+#   endif
+
+    break;
+  }
+
+  default : {
+    penalty_shape_mean = 0.;
+    for (i = min_nb_segment;i <= max_nb_segment;i++) {
+      penalty_shape_mean += penalty_shape[i];
+    }
+    penalty_shape_mean /= nb_model;
+
+    penalty_shape_variance = 0.;
+    for (i = min_nb_segment;i <= max_nb_segment;i++) {
+      diff = penalty_shape[i] - penalty_shape_mean;
+      penalty_shape_variance += diff * diff;
+    }
+    break;
+  }
+  }
+
+  covariance = 0.;
+  for (i = min_nb_segment;i <= max_nb_segment;i++) {
+    covariance += (likelihood[i] - likelihood_mean) * (penalty_shape[i] - penalty_shape_mean);
+  }
+
+  slope = covariance / penalty_shape_variance;
+  intercept = likelihood_mean - slope * penalty_shape_mean;
+
+  residual_mean = 0.;
+  residual_square_sum = 0.;
+  for (i = min_nb_segment;i <= max_nb_segment;i++) {
+    diff = likelihood[i] - (intercept + slope * penalty_shape[i]);
+    residual_mean += diff;
+    residual_square_sum += diff * diff;
+  }
+  residual_mean /= nb_model;
+
+  if (nb_model > 2) {
+    residual_square_sum /= (nb_model - 2);
+    slope_standard_deviation = sqrt(residual_square_sum / penalty_shape_variance);
+  }
+
+  residual_standard_deviation = 0.;
+  for (i = min_nb_segment;i <= max_nb_segment;i++) {
+    diff = likelihood[i] - (intercept + slope * penalty_shape[i]) - residual_mean;
+    residual_standard_deviation += diff * diff;
+  }
+  if (nb_model > 2) {
+    residual_standard_deviation = sqrt(residual_standard_deviation / (nb_model - 2));
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
  *  Segmentation optimale d'une sequence.
  *
- *  arguments : reference sur un objet StatError, stream,
- *              identificateur de la sequence, nombre de segments maximum,
- *              types des modeles, sortie (sequence, entropies ou divergences).
+ *  arguments : reference sur un objet StatError, stream, identificateur de la sequence,
+ *              nombre de segments maximum, types des modeles, critere de selection
+ *              du nombre de segments, nombre de segments minimum et
+ *              forme de la penalite pour l'heuristique de la pente,
+ *              sortie (sequence, entropies ou divergences).
  *
  *--------------------------------------------------------------*/
 
 Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentifier ,
-                                   int max_nb_segment , int *model_type , int output) const
+                                   int max_nb_segment , int *model_type , int criterion ,
+                                   int min_nb_segment , int penalty_shape_type , int output) const
 
 {
   bool status = true , bayesian;
   register int i , j;
-  int index , nb_segment , *nb_parameter , inb_segment[1] , ilength[4] , itype[1];
-  double max_likelihood[3] , *segmentation_likelihood , *segment_penalty , *slope_penalty ,
-         **penalized_likelihood , *likelihood , *uniform_entropy , *segmentation_divergence , **rank;
+  int index , nb_segment , inb_sequence , *nb_parameter , inb_segment[1] , ilength[4] , itype[1];
+  double buff , segmentation_intercept , segmentation_slope , segmentation_slope_standard_deviation ,
+         segmentation_residual_standard_deviation , intercept , slope , slope_standard_deviation ,
+         residual_standard_deviation , scaling_factor , max_likelihood[4] , *segmentation_likelihood ,
+         *segment_penalty , *penalty_shape , **penalized_likelihood , *likelihood , *uniform_entropy ,
+         *segmentation_divergence , **rank;
   long double *segmentation_entropy , *first_order_entropy , *change_point_entropy , *marginal_entropy;
   const FrequencyDistribution **pmarginal;
   FrequencyDistribution *marginal;
@@ -4642,10 +4748,29 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
     error.correction_update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE] , SEQ_index_parameter_word[TIME]);
   } */
 
-  if (((model_type[0] == MEAN_CHANGE) || (model_type[0] == INTERCEPT_SLOPE_CHANGE)) &&
-      (output != SEQUENCE)) {
-    status = false;
-    error.correction_update(SEQ_error[SEQR_FORBIDDEN_OUTPUT] , SEQ_label[SEQL_SEQUENCE]);
+  if ((model_type[0] == MEAN_CHANGE) || (model_type[0] == INTERCEPT_SLOPE_CHANGE)) {
+    if ((output != SEQUENCE) && (output != LOG_LIKELIHOOD_SLOPE)) {
+      status = false;
+      ostringstream correction_message;
+      correction_message << SEQ_label[SEQL_SEQUENCE] << " or "
+                         << STAT_criterion_word[LOG_LIKELIHOOD_SLOPE];
+      error.correction_update(SEQ_error[SEQR_FORBIDDEN_OUTPUT] , (correction_message.str()).c_str());
+    }
+
+    if (criterion == LIKELIHOOD_SLOPE) {
+      criterion = SEGMENTATION_LIKELIHOOD_SLOPE;
+    }
+    if (criterion == ICL) {
+      criterion = mBIC;
+    }
+
+/*    if ((criterion == LIKELIHOOD_SLOPE) || (criterion == ICL)) {
+      status = false;
+      ostringstream correction_message;
+      correction_message << STAT_criterion_word[SEGMENTATION_LIKELIHOOD_SLOPE] << " or "
+                         << STAT_criterion_word[mBIC];
+      error.correction_update(SEQ_error[SEQR_FORBIDDEN_CRITERION] , (correction_message.str()).c_str());
+    } */
   }
 
   for (i = 0;i < nb_variable;i++) {
@@ -4759,9 +4884,19 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
     error.update(SEQ_error[SEQR_SEQUENCE_IDENTIFIER]);
   }
 
-  else if ((max_nb_segment < 2) || (max_nb_segment > length[index] / 2)) {
-    status = false;
-    error.update(SEQ_error[SEQR_MAX_NB_SEGMENT]);
+  else {
+    if ((max_nb_segment < 2) || (max_nb_segment > length[index] / 2)) {
+      status = false;
+      error.update(SEQ_error[SEQR_MAX_NB_SEGMENT]);
+    }
+
+    if (min_nb_segment == 0) {
+      min_nb_segment = MIN(max_nb_segment / 2 , max_nb_segment - SLOPE_NB_SEGMENT);
+    }
+    else if ((min_nb_segment < 2) || (min_nb_segment + SLOPE_NB_SEGMENT > max_nb_segment)) {
+      status = false;
+      error.update(SEQ_error[SEQR_MIN_NB_SEGMENT]);
+    }
   }
 
   if (status) {
@@ -4797,7 +4932,6 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
       bayesian = false;
 
       segment_penalty = new double[max_nb_segment + 2];
-      slope_penalty = new double[max_nb_segment + 1];
 
       penalized_likelihood = new double*[4];
       for (i = 0;i < 4;i++) {
@@ -4817,8 +4951,67 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
 
     inb_segment[0] = max_nb_segment + 1;
 
+    penalty_shape = new double[max_nb_segment + 1];
+
+    switch (penalty_shape_type) {
+
+    case 0 : {
+      for (i = 1;i <= max_nb_segment;i++) {
+        penalty_shape[i] = i;
+      }
+      break;
+    }
+
+    case 1 : {
+      for (i = 1;i <= max_nb_segment;i++) {
+        penalty_shape[i] = i - (double)(i * (i - 1)) / (double)(2 * seq->length[0]);
+      }
+      break;
+    }
+
+    case 2 : {
+      buff = 1.;
+      for (i = 1;i <= max_nb_segment;i++) {
+        penalty_shape[i] = log(buff);
+        buff *= (double)seq->length[0] / (double)i;
+      }
+      break;
+    }
+
+    case 3 : {
+      for (i = 1;i <= max_nb_segment;i++) {
+        penalty_shape[i] = i - (double)(i * (i - 1)) / (double)seq->length[0];
+      }
+      break;
+    }
+
+    case 4 : {
+      buff = 1.;
+      for (i = 1;i <= max_nb_segment;i++) {
+        penalty_shape[i] = log(buff);
+        buff *= (double)(seq->length[0] - i) / (double)i;
+      }
+      break;
+    }
+    }
+
+#   ifdef MESSAGE
+    if (penalty_shape_type != 0) {
+      os << "\nPenalty shape: ";
+      for (i = 1;i <= max_nb_segment;i++) {
+        os << " " << penalty_shape[i];
+      }
+      os << endl;
+    }
+#   endif
+
     seq->segmentation(inb_segment , model_type , rank , segmentation_likelihood + 1 ,
                       nb_parameter + 1 , (bayesian ? NULL : segment_penalty + 1));
+
+    log_likelihood_slope(min_nb_segment , max_nb_segment , penalty_shape_type , seq->length[0] ,
+                         penalty_shape , segmentation_likelihood , segmentation_intercept , segmentation_slope ,
+                         segmentation_slope_standard_deviation , segmentation_residual_standard_deviation);
+
     if ((model_type[0] != MEAN_CHANGE) && (model_type[0] != INTERCEPT_SLOPE_CHANGE)) {
       seq->forward_backward(0 , max_nb_segment , model_type , rank ,
                             likelihood + 1 , segmentation_entropy + 1 ,
@@ -4829,14 +5022,27 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
       for (i = 2;i <= max_nb_segment;i++) {
         segmentation_divergence[i] = uniform_entropy[i] - segmentation_entropy[i];
       }
+
+      log_likelihood_slope(min_nb_segment , max_nb_segment , penalty_shape_type , seq->length[0] ,
+                           penalty_shape , likelihood , intercept , slope ,
+                           slope_standard_deviation , residual_standard_deviation);
+
+#     ifdef MESSAGE
+      if (penalty_shape_type != 0) {
+        os << "\nTEST, " << STAT_criterion_word[LIKELIHOOD_SLOPE] << ": " << slope << " | "
+           << (likelihood[max_nb_segment] - likelihood[max_nb_segment - 1]) /
+              (penalty_shape[max_nb_segment] - penalty_shape[max_nb_segment - 1]) << endl;
+      }
+#     endif
+
     }
 
     switch (bayesian) {
 
     case false : {
 
-      // calcul des vraisemblances penalisees au sens d'ICL, du BIC, du BIC modifie
-      // (Zhang & Siegmund, 2007) et du critere de Lavielle (2005)
+      // calcul des vraisemblances penalisees au sens d'ICL, de l'heuristique de pente
+      // du BIC modifie (Zhang & Siegmund, 2007)
 
 //      segmentation_likelihood[1] = seq->one_segment_likelihood(0 , model_type , rank);
 //      nb_parameter[1] = seq->nb_parameter_computation(0 , 1 , model_type);
@@ -4847,16 +5053,19 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
                                      log((double)((seq->nb_variable - 1) * seq->length[0]));
         max_likelihood[0] = penalized_likelihood[0][1];
 
+        penalized_likelihood[1][1] = 2 * (likelihood[1] - 2 * penalty_shape[1] * slope);
+        max_likelihood[1] = penalized_likelihood[1][1];
+
         nb_segment = 1;
       }
 
       if (segmentation_likelihood[1] != D_INF) {
-        penalized_likelihood[1][1] = 2 * segmentation_likelihood[1] - nb_parameter[1] *
-                                     log((double)((seq->nb_variable - 1) * seq->length[0]));
-        max_likelihood[1] = penalized_likelihood[1][1];
-
-        penalized_likelihood[2][1] = penalized_likelihood[1][1] - segment_penalty[1];
+        penalized_likelihood[2][1] = 2 * segmentation_likelihood[1] - nb_parameter[1] *
+                                     log((double)((seq->nb_variable - 1) * seq->length[0])) - segment_penalty[1];
         max_likelihood[2] = penalized_likelihood[2][1];
+
+        penalized_likelihood[3][1] = 2 * (segmentation_likelihood[1] - 2 * penalty_shape[1] * segmentation_slope);
+        max_likelihood[3] = penalized_likelihood[3][1];
 
         if ((model_type[0] == MEAN_CHANGE) || (model_type[0] == INTERCEPT_SLOPE_CHANGE)) {
           nb_segment = 1;
@@ -4873,21 +5082,6 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
 //      segmentation_likelihood[2] = seq->segmentation(inb_segment , model_type , rank);
 //      nb_parameter[2] = seq->nb_parameter_computation(0 , 2 , model_type);
 
-      if ((segmentation_likelihood[1] != D_INF) && (segmentation_likelihood[2] != D_INF)) {
-        slope_penalty[1] = (segmentation_likelihood[2] - segmentation_likelihood[1]) /
-                           MAX(nb_parameter[2] - nb_parameter[1] - 1 , 1);
-      }
-      else {
-        slope_penalty[1] = D_INF;
-      }
-
-      if ((segmentation_likelihood[1] != D_INF) && (slope_penalty[1] != D_INF)) {
-        penalized_likelihood[3][1] = 2 * (segmentation_likelihood[1] - nb_parameter[1] * slope_penalty[1]);
-      }
-      else {
-        penalized_likelihood[3][1] = D_INF;
-      }
-
       for (i = 2;i <= max_nb_segment;i++) {
 //        inb_segment[0] = i + 1;
 //        segmentation_likelihood[i + 1] = seq->segmentation(inb_segment , model_type , rank);
@@ -4899,21 +5093,35 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
                                        log((double)((seq->nb_variable - 1) * seq->length[0]));
           if (penalized_likelihood[0][i] > max_likelihood[0]) {
             max_likelihood[0] = penalized_likelihood[0][i];
-            nb_segment = i;
+            if (criterion == ICL) {
+              nb_segment = i;
+            }
+          }
+
+          penalized_likelihood[1][i] = 2 * (likelihood[i] - 2 * penalty_shape[i] * slope);
+          if (penalized_likelihood[1][i] > max_likelihood[1]) {
+            max_likelihood[1] = penalized_likelihood[1][i];
+            if (criterion == LIKELIHOOD_SLOPE) {
+              nb_segment = i;
+            }
           }
         }
 
         if (segmentation_likelihood[i] != D_INF) {
-          penalized_likelihood[1][i] = 2 * segmentation_likelihood[i] - nb_parameter[i] *
-                                       log((double)((seq->nb_variable - 1) * seq->length[0]));
-          if (penalized_likelihood[1][i] > max_likelihood[1]) {
-            max_likelihood[1] = penalized_likelihood[1][i];
-          }
-
-          penalized_likelihood[2][i] = penalized_likelihood[1][i] - segment_penalty[i];
+          penalized_likelihood[2][i] = 2 * segmentation_likelihood[i] - nb_parameter[i] *
+                                       log((double)((seq->nb_variable - 1) * seq->length[0])) - segment_penalty[i];
           if (penalized_likelihood[2][i] > max_likelihood[2]) {
             max_likelihood[2] = penalized_likelihood[2][i];
-            if ((model_type[0] == MEAN_CHANGE) || (model_type[0] == INTERCEPT_SLOPE_CHANGE)) {
+            if (criterion == mBIC) {
+              nb_segment = i;
+            }
+          }
+
+          penalized_likelihood[3][i] = 2 * (segmentation_likelihood[i] -
+                                        2 * penalty_shape[i] * segmentation_slope);
+          if (penalized_likelihood[3][i] > max_likelihood[3]) {
+            max_likelihood[3] = penalized_likelihood[3][i];
+            if (criterion == SEGMENTATION_LIKELIHOOD_SLOPE) {
               nb_segment = i;
             }
           }
@@ -4923,22 +5131,6 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
              (likelihood[i] == D_INF)) || (segmentation_likelihood[i] == D_INF)) {
           max_nb_segment = i - 1;
           break;
-        }
-
-        if ((segmentation_likelihood[i] != D_INF) && (segmentation_likelihood[i + 1] != D_INF)) {
-          slope_penalty[i] = (segmentation_likelihood[i + 1] - segmentation_likelihood[i]) /
-                             MAX(nb_parameter[i + 1] - nb_parameter[i] - 1 , 1);
-        }
-        else {
-          slope_penalty[i] = D_INF;
-        }
-
-        if ((segmentation_likelihood[i] != D_INF) && (slope_penalty[i] != D_INF)) {
-          penalized_likelihood[3][i] = 2 * (segmentation_likelihood[i] - (nb_parameter[i] - nb_segment - 1) *
-                                       slope_penalty[i]);
-        }
-        else {
-          penalized_likelihood[3][i] = D_INF;
         }
       }
       break;
@@ -4980,9 +5172,10 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
     if (nb_segment > 0) {
 
 #     ifdef MESSAGE
-      int width[18];
+      int width[20];
       long old_adjust;
-      double norm , *posterior_probability , **weight , *normalized_likelihood , *curvature;
+      double norm , *posterior_probability , **weight;
+      Test *test;
 
 
       if ((model_type[0] != MEAN_CHANGE) && (model_type[0] != INTERCEPT_SLOPE_CHANGE)) {
@@ -4998,13 +5191,10 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
       switch (bayesian) {
 
       case false : {
-        weight = new double*[3];
-        for (i = 0;i < 3;i++) {
+        weight = new double*[4];
+        for (i = 0;i < 4;i++) {
           weight[i] = new double[max_nb_segment + 1];
         }
-
-        normalized_likelihood = new double[max_nb_segment + 2];
-        curvature = new double[max_nb_segment + 1];
         break;
       }
 
@@ -5015,41 +5205,67 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
       }
       }
 
-      norm = 0.;
-      for (i = 1;i <= max_nb_segment;i++) {
-        weight[0][i] = exp((penalized_likelihood[0][i] - max_likelihood[0]) / 2);
-        norm += weight[0][i];
-      }
-      for (i = 1;i <= max_nb_segment;i++) {
-        weight[0][i] /= norm;
+      if ((model_type[0] != MEAN_CHANGE) && (model_type[0] != INTERCEPT_SLOPE_CHANGE)) {
+        norm = 0.;
+        for (i = 1;i <= max_nb_segment;i++) {
+          weight[0][i] = exp((penalized_likelihood[0][i] - max_likelihood[0]) / 2);
+          norm += weight[0][i];
+        }
+        for (i = 1;i <= max_nb_segment;i++) {
+          weight[0][i] /= norm;
+        }
       }
 
       if (!bayesian) {
-        norm = 0.;
-        for (i = 1;i <= max_nb_segment;i++) {
-          weight[1][i] = exp((penalized_likelihood[1][i] - max_likelihood[1]) / 2);
-          norm += weight[1][i];
-        }
-        for (i = 1;i <= max_nb_segment;i++) {
-          weight[1][i] /= norm;
-        }
-
-        norm = 0.;
-        for (i = 1;i <= max_nb_segment;i++) {
-          weight[2][i] = exp((penalized_likelihood[2][i] - max_likelihood[2]) / 2);
-          norm += weight[2][i];
-        }
-        for (i = 1;i <= max_nb_segment;i++) {
-          weight[2][i] /= norm;
+        if ((model_type[0] != MEAN_CHANGE) && (model_type[0] != INTERCEPT_SLOPE_CHANGE)) {
+          norm = 0.;
+          for (i = 1;i <= max_nb_segment;i++) {
+            weight[1][i] = exp((penalized_likelihood[1][i] - max_likelihood[1]) / 2);
+            norm += weight[1][i];
+          }
+          for (i = 1;i <= max_nb_segment;i++) {
+            weight[1][i] /= norm;
+          }
         }
 
-        for (i = 1;i <= max_nb_segment + 1;i++) {
-          normalized_likelihood[i] = (segmentation_likelihood[max_nb_segment + 1] - segmentation_likelihood[i]) * max_nb_segment /
-                                     (segmentation_likelihood[max_nb_segment + 1] - segmentation_likelihood[1]) + 1;
+        for (i = 2;i < 4;i++) {
+          norm = 0.;
+          for (j = 1;j <= max_nb_segment;j++) {
+            weight[i][j] = exp((penalized_likelihood[i][j] - max_likelihood[i]) / 2);
+            norm += weight[i][j];
+          }
+          for (j = 1;j <= max_nb_segment;j++) {
+            weight[i][j] /= norm;
+          }
         }
-        for (i = 2;i <= max_nb_segment;i++) {
-          curvature[i] = normalized_likelihood[i + 1] - 2 * normalized_likelihood[i] + normalized_likelihood[i - 1];
+      }
+
+      if (max_nb_segment > min_nb_segment + 1) {
+        if ((model_type[0] != MEAN_CHANGE) && (model_type[0] != INTERCEPT_SLOPE_CHANGE)) {
+          test = new Test(STUDENT , false , max_nb_segment - min_nb_segment - 1 , I_DEFAULT , D_DEFAULT);
+          test->critical_probability = ref_critical_probability[0];
+          test->t_value_computation();
+
+          os << STAT_criterion_word[LIKELIHOOD_SLOPE] << ": "
+             << slope - test->value * slope_standard_deviation << ", "
+             << slope + test->value * slope_standard_deviation << " | "
+             << STAT_label[STATL_RESIDUAL] << " " << STAT_label[STATL_STANDARD_DEVIATION] << ": "
+             << residual_standard_deviation << endl;
+
+          delete test;
         }
+
+        test = new Test(STUDENT , false , max_nb_segment - min_nb_segment - 1 , I_DEFAULT , D_DEFAULT);
+        test->critical_probability = ref_critical_probability[0];
+        test->t_value_computation();
+
+        os << STAT_criterion_word[SEGMENTATION_LIKELIHOOD_SLOPE] << ": "
+           << segmentation_slope - test->value * segmentation_slope_standard_deviation << ", "
+           << segmentation_slope + test->value * segmentation_slope_standard_deviation << " | "
+           << STAT_label[STATL_RESIDUAL] << " " << STAT_label[STATL_STANDARD_DEVIATION] << ": "
+           << segmentation_residual_standard_deviation << endl;
+
+        delete test;
       }
 
       old_adjust = os.flags(ios::adjustfield);
@@ -5070,11 +5286,12 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
         width[12] = column_width(max_nb_segment , weight[0] + 1) + ASCII_SPACE;
 
         if (!bayesian) {
-//          width[13] = column_width(max_nb_segment , penalized_likelihood[1] + 1) + ASCII_SPACE;
-//          width[14] = column_width(max_nb_segment , weight[1] + 1) + ASCII_SPACE;
+          width[13] = column_width(max_nb_segment , penalized_likelihood[1] + 1) + ASCII_SPACE;
+          width[14] = column_width(max_nb_segment , weight[1] + 1) + ASCII_SPACE;
           width[15] = column_width(max_nb_segment , penalized_likelihood[2] + 1) + ASCII_SPACE;
           width[16] = column_width(max_nb_segment , weight[2] + 1) + ASCII_SPACE;
-//          width[17] = column_width(max_nb_segment - 1 , curvature + 2) + ASCII_SPACE;
+          width[17] = column_width(max_nb_segment , penalized_likelihood[3] + 1) + ASCII_SPACE;
+          width[18] = column_width(max_nb_segment , weight[3] + 1) + ASCII_SPACE;
         }
 
         os << "\n" << SEQ_label[SEQL_NB_SEGMENT] << " | 2 * " << STAT_label[STATL_LIKELIHOOD]
@@ -5090,9 +5307,9 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
            << " | "  << STAT_criterion_word[ICL] << " - "  << STAT_label[STATL_WEIGHT];
 
         if (!bayesian) {
-//             << " | "  << STAT_criterion_word[BIC] << " - "  << STAT_label[STATL_WEIGHT]
-          os << " | Modified " << STAT_criterion_word[BIC] << " - "  << STAT_label[STATL_WEIGHT];
-//             << " | Lavielle criterion (standardized curvature)";
+          os << " | " << STAT_criterion_word[LIKELIHOOD_SLOPE] << " - "  << STAT_label[STATL_WEIGHT]
+             << " | " << STAT_criterion_word[mBIC] << " - "  << STAT_label[STATL_WEIGHT]
+             << " | " << STAT_criterion_word[SEGMENTATION_LIKELIHOOD_SLOPE] << " - "  << STAT_label[STATL_WEIGHT];
         }
         os << endl;
 
@@ -5113,11 +5330,12 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
            << setw(width[12]) << weight[0][1];
 
         if (!bayesian) {
-//             << setw(width[13]) << penalized_likelihood[1][1]
-//             << setw(width[14]) << weight[1][1]
-          os << setw(width[15]) << penalized_likelihood[2][1]
-             << setw(width[16]) << weight[2][1];
-//             << setw(width[17]) << " ";
+          os << setw(width[13]) << penalized_likelihood[1][1]
+             << setw(width[14]) << weight[1][1]
+             << setw(width[15]) << penalized_likelihood[2][1]
+             << setw(width[16]) << weight[2][1]
+             << setw(width[17]) << penalized_likelihood[3][1]
+             << setw(width[18]) << weight[3][1];
         }
         os << endl;
 
@@ -5137,11 +5355,12 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
              << setw(width[12]) << weight[0][i];
 
           if (!bayesian) {
-//               << setw(width[13]) << penalized_likelihood[1][i]
-//               << setw(width[14]) << weight[1][i]
-            os << setw(width[15]) << penalized_likelihood[2][i]
-               << setw(width[16]) << weight[2][i];
-//               << setw(width[17]) << curvature[i];
+            os << setw(width[13]) << penalized_likelihood[1][i]
+               << setw(width[14]) << weight[1][i]
+               << setw(width[15]) << penalized_likelihood[2][i]
+               << setw(width[16]) << weight[2][i]
+               << setw(width[17]) << penalized_likelihood[3][i]
+               << setw(width[18]) << weight[3][i];
           }
           os << endl;
         }
@@ -5152,17 +5371,15 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
         width[0] = column_width(max_nb_segment) + ASCII_SPACE;
         width[1] = column_width(max_nb_segment , segmentation_likelihood + 1 , 2.) + ASCII_SPACE;
         width[10] = column_width(nb_parameter[max_nb_segment]) + ASCII_SPACE;
-//        width[13] = column_width(max_nb_segment , penalized_likelihood[1] + 1) + ASCII_SPACE;
-//        width[14] = column_width(max_nb_segment , weight[1] + 1) + ASCII_SPACE;
         width[15] = column_width(max_nb_segment , penalized_likelihood[2] + 1) + ASCII_SPACE;
         width[16] = column_width(max_nb_segment , weight[2] + 1) + ASCII_SPACE;
-//        width[17] = column_width(max_nb_segment - 1 , curvature + 2) + ASCII_SPACE;
+        width[17] = column_width(max_nb_segment , penalized_likelihood[3] + 1) + ASCII_SPACE;
+        width[18] = column_width(max_nb_segment , weight[3] + 1) + ASCII_SPACE;
 
         os << "\n" << SEQ_label[SEQL_NB_SEGMENT] << " | 2 * " << STAT_label[STATL_LIKELIHOOD]
            << " | " << STAT_label[STATL_FREE_PARAMETERS]
-//           << " | "  << STAT_criterion_word[BIC] << " - "  << STAT_label[STATL_WEIGHT]
-           << " | Modified " << STAT_criterion_word[BIC] << " - "  << STAT_label[STATL_WEIGHT]
-//           << " | Lavielle criterion (standardized curvature)"
+           << " | " << STAT_criterion_word[mBIC] << " - "  << STAT_label[STATL_WEIGHT]
+           << " | " << STAT_criterion_word[SEGMENTATION_LIKELIHOOD_SLOPE] << " - "  << STAT_label[STATL_WEIGHT]
            << endl;
 
         os.setf(ios::left , ios::adjustfield);
@@ -5170,22 +5387,20 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
         os << setw(width[0]) << 1
            << setw(width[1]) << 2 * segmentation_likelihood[1]
            << setw(width[10]) << nb_parameter[1]
-//           << setw(width[13]) << penalized_likelihood[1][1]
-//           << setw(width[14]) << weight[1][1]
            << setw(width[15]) << penalized_likelihood[2][1]
            << setw(width[16]) << weight[2][1]
-//           << setw(width[17]) << " "
+           << setw(width[17]) << penalized_likelihood[3][1]
+           << setw(width[18]) << weight[3][1]
            << endl;
 
         for (i = 2;i <= max_nb_segment;i++) {
           os << setw(width[0]) << i
              << setw(width[1]) << 2 * segmentation_likelihood[i]
              << setw(width[10]) << nb_parameter[i]
-//             << setw(width[13]) << penalized_likelihood[1][i]
-//             << setw(width[14]) << weight[1][i]
              << setw(width[15]) << penalized_likelihood[2][i]
              << setw(width[16]) << weight[2][i]
-//             << setw(width[17]) << curvature[i]
+             << setw(width[17]) << penalized_likelihood[3][i]
+             << setw(width[18]) << weight[3][i]
              << endl;
         }
         os << endl;
@@ -5219,30 +5434,15 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
         }
         for (i = 1;i <= max_nb_segment;i++) {
           weight[0][i] /= norm;
-        } */
-
-/*        for (i = 1;i <= max_nb_segment;i++) {
-          os << "\n" << i << " " << (i == 1 ? SEQ_label[SEQL_SEGMENT] : SEQ_label[SEQL_SEGMENTS])
-             << "   2 * " << STAT_label[STATL_LIKELIHOOD] << ": " << 2 * segmentation_likelihood[i] << "   "
-             << nb_parameter[i] << " " << STAT_label[nb_parameter[i] == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS]
-             << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << STAT_criterion_word[ICL] << "): "
-             << penalized_likelihood[0][i] << "   " << STAT_label[STATL_WEIGHT] << ": " << weight[0][i] << endl;
         }
 
         for (i = 1;i <= max_nb_segment;i++) {
           os << "\n" << i << " " << (i == 1 ? SEQ_label[SEQL_SEGMENT] : SEQ_label[SEQL_SEGMENTS])
              << "   2 * " << STAT_label[STATL_LIKELIHOOD] << ": " << 2 * segmentation_likelihood[i] << "   "
              << nb_parameter[i] << " " << STAT_label[nb_parameter[i] == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS]
-             << "   " << SEQ_label[SEQL_PENALTY] << ": " << slope_penalty[i] << "\n"
-             << "2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " (" << "Lavielle criterion" << "): "
-             << penalized_likelihood[3][i] << "   " << normalized_likelihood[i];
-          if (i > 1) {
-            os << "   " << "curvature" << ": " << curvature[i];
-//             << segmentation_likelihood[i - 1] - 2 * segmentation_likelihood[i] + segmentation_likelihood[i + 1];
-          }
-          os << endl;
+             << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << STAT_criterion_word[ICL] << "): "
+             << penalized_likelihood[0][i] << "   " << STAT_label[STATL_WEIGHT] << ": " << weight[0][i] << endl;
         }
-
         os << endl;
       } */
 
@@ -5253,12 +5453,9 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
       switch (bayesian) {
 
       case false : {
-        for (i = 0;i < 3;i++) {
+        for (i = 0;i < 4;i++) {
           delete [] weight[i];
         }
-
-        delete [] normalized_likelihood;
-        delete [] curvature;
         break;
       }
 
@@ -5340,6 +5537,63 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
         oseq->build_marginal_histogram(0);
         break;
       }
+
+      case LOG_LIKELIHOOD_SLOPE : {
+        if ((model_type[0] != MEAN_CHANGE) && (model_type[0] != INTERCEPT_SLOPE_CHANGE)) {
+          inb_sequence = 2;
+        }
+        else {
+          inb_sequence = 1;
+        }
+
+        for (i = 0;i < inb_sequence;i++) {
+          ilength[i] = max_nb_segment;
+        }
+        itype[0] = REAL_VALUE;
+        itype[1] = AUXILIARY;
+
+        oseq = new Sequences(inb_sequence , NULL , ilength , NULL , TIME , 2 , itype);
+
+        switch (penalty_shape_type) {
+        case 0 :
+          scaling_factor = 1;
+          break;
+        case 1 :
+          scaling_factor = seq->length[0];
+          break;
+        case 2 :
+          scaling_factor = PENALTY_SHAPE_SCALING_FACTOR;
+          break;
+        case 3 :
+          scaling_factor = seq->length[0];
+          break;
+        case 4 :
+          scaling_factor = PENALTY_SHAPE_SCALING_FACTOR;
+          break;
+        }
+
+        for (i = 1;i <= max_nb_segment;i++) {
+          oseq->index_parameter[0][i - 1] = (int)::round(penalty_shape[i] * scaling_factor);
+          oseq->real_sequence[0][0][i - 1] = segmentation_likelihood[i];
+          oseq->real_sequence[0][1][i - 1] = segmentation_intercept + segmentation_slope * penalty_shape[i];
+          if ((model_type[0] != MEAN_CHANGE) && (model_type[0] != INTERCEPT_SLOPE_CHANGE)) {
+            oseq->index_parameter[1][i - 1] = (int)::round(penalty_shape[i] * scaling_factor);
+            oseq->real_sequence[1][0][i - 1] = likelihood[i];
+            oseq->real_sequence[1][1][i - 1] = intercept + slope * penalty_shape[i];
+          }
+        }
+
+        oseq->build_index_parameter_frequency_distribution();
+        oseq->index_interval_computation();
+
+        oseq->min_value_computation(0);
+        oseq->max_value_computation(0);
+        oseq->min_value_computation(1);
+        oseq->max_value_computation(1);
+
+        oseq->build_marginal_histogram(0);
+        break;
+      }
       }
 
 #     ifdef DEBUG
@@ -5356,6 +5610,8 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
       error.update(SEQ_error[SEQR_SEGMENTATION_FAILURE]);
     }
 
+    delete [] penalty_shape;
+
     for (i = 1;i < seq->nb_variable;i++) {
       delete [] rank[i];
     }
@@ -5370,7 +5626,6 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
 
     case false : {
       delete [] segment_penalty;
-      delete [] slope_penalty;
 
       for (i = 0;i < 4;i++) {
         delete [] penalized_likelihood[i];
