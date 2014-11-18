@@ -175,7 +175,10 @@ enum {
   BIC ,
   BICc ,
   ICL ,
-  ICLc
+  ICLc ,
+  mBIC ,
+  LIKELIHOOD_SLOPE ,
+  SEGMENTATION_LIKELIHOOD_SLOPE
 };
 
 enum {
@@ -806,7 +809,7 @@ public :
     DiscreteMixture* discrete_mixture_estimation(StatError &error , std::ostream &os , int min_nb_component ,
                                                  int max_nb_component , int *ident , int min_inf_bound = 0 ,
                                                  bool mixt_flag = true , bool component_flag = true ,
-                                                 int penalty_type = BICc , double weight_step = 0.1) const;
+                                                 int criterion = BICc , double weight_step = 0.1) const;
 
     Convolution* convolution_estimation(StatError &error , std::ostream &os , const DiscreteParametric &known_dist ,
                                         const DiscreteParametric &unknown_dist , int estimator = LIKELIHOOD ,
