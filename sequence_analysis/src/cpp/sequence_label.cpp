@@ -387,6 +387,7 @@ const char *SEQ_error[] = {
 
   "forbidden output" ,
   "bad number of segments" ,
+  "bad minimum number of segments" ,
   "bad maximum number of segments" ,
   "bad change point" ,
   "segmentation failure" ,
