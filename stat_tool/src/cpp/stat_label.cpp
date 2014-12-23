@@ -184,7 +184,7 @@ const char *STAT_variable_word[] = {
   "REAL" ,
   "STATE" ,
   "VALUE" ,         // pour compatibilite ascendante
-  "NB_INTERNODE" ,
+//  "NB_INTERNODE" ,
   "AUXILIARY"
 };
 
