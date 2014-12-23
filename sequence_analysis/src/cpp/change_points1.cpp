@@ -4995,7 +4995,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
     }
     }
 
-#   ifdef MESSAGE
+#   ifdef DEBUG
     if (penalty_shape_type != 0) {
       os << "\nPenalty shape: ";
       for (i = 1;i <= max_nb_segment;i++) {
@@ -5246,9 +5246,9 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
           test->critical_probability = ref_critical_probability[0];
           test->t_value_computation();
 
-          os << STAT_criterion_word[LIKELIHOOD_SLOPE] << ": "
+          os << STAT_criterion_word[LIKELIHOOD_SLOPE] << ": " << slope << " ("
              << slope - test->value * slope_standard_deviation << ", "
-             << slope + test->value * slope_standard_deviation << " | "
+             << slope + test->value * slope_standard_deviation << ") | "
              << STAT_label[STATL_RESIDUAL] << " " << STAT_label[STATL_STANDARD_DEVIATION] << ": "
              << residual_standard_deviation << endl;
 
@@ -5259,9 +5259,9 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
         test->critical_probability = ref_critical_probability[0];
         test->t_value_computation();
 
-        os << STAT_criterion_word[SEGMENTATION_LIKELIHOOD_SLOPE] << ": "
+        os << STAT_criterion_word[SEGMENTATION_LIKELIHOOD_SLOPE] << ": " << segmentation_slope << " ("
            << segmentation_slope - test->value * segmentation_slope_standard_deviation << ", "
-           << segmentation_slope + test->value * segmentation_slope_standard_deviation << " | "
+           << segmentation_slope + test->value * segmentation_slope_standard_deviation << ") | "
            << STAT_label[STATL_RESIDUAL] << " " << STAT_label[STATL_STANDARD_DEVIATION] << ": "
            << segmentation_residual_standard_deviation << endl;
 
@@ -5539,6 +5539,18 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
       }
 
       case LOG_LIKELIHOOD_SLOPE : {
+
+#       ifdef DEBUG
+        os << "\n";
+        for (i = 1;i <= max_nb_segment;i++) {
+          os << i << "\t" << penalty_shape[i];
+          if ((model_type[0] != MEAN_CHANGE) && (model_type[0] != INTERCEPT_SLOPE_CHANGE)) {
+            os << "\t" << likelihood[i] << "\t" << intercept + slope * penalty_shape[i];
+          }
+          os << "\t" << segmentation_likelihood[i] << "\t" << segmentation_intercept + segmentation_slope * penalty_shape[i] << endl;
+        }
+#       endif
+
         if ((model_type[0] != MEAN_CHANGE) && (model_type[0] != INTERCEPT_SLOPE_CHANGE)) {
           inb_sequence = 2;
         }
