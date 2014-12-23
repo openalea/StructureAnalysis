@@ -262,7 +262,7 @@ Sequences* Sequences::merge(StatError &error , int nb_sample , const Sequences *
 
     phisto = new const FrequencyDistribution*[nb_sample];
 
-    // copie des parametres d'index
+    // copy of index parameters
 
     if (seq->index_parameter) {
       i = 0;
@@ -281,8 +281,9 @@ Sequences* Sequences::merge(StatError &error , int nb_sample , const Sequences *
       seq->index_parameter_distribution = new FrequencyDistribution(nb_sample , phisto);
     }
 
-    if ((seq->index_parameter_type == TIME) || ((seq->index_parameter_type == POSITION) &&
-         (seq->type[0] != NB_INTERNODE))) {
+//    if ((seq->index_parameter_type == TIME) || ((seq->index_parameter_type == POSITION) &&
+//         (seq->type[0] != NB_INTERNODE))) {
+    if ((seq->index_parameter_type == TIME) || (seq->index_parameter_type == POSITION)) {
       for (i = 0;i < nb_sample;i++) {
         phisto[i] = pseq[i]->index_interval;
       }
@@ -974,7 +975,7 @@ void Sequences::transcode(const Sequences &seq , int ivariable , int min_symbol 
   int variable , offset;
 
 
-  // copie des parametres d'index
+  // copy of index parameters
 
   if (seq.index_parameter_distribution) {
     index_parameter_distribution = new FrequencyDistribution(*(seq.index_parameter_distribution));
@@ -1664,7 +1665,7 @@ Sequences* Sequences::round(StatError &error , int variable , int mode) const
                         index_parameter_type , nb_variable , itype);
     delete [] itype;
 
-    // copie des parametres d'index
+    // copy of index parameters
 
     if (index_parameter_distribution) {
       seq->index_parameter_distribution = new FrequencyDistribution(*index_parameter_distribution);
@@ -2210,7 +2211,7 @@ void Sequences::select_variable(const Sequences &seq , int *variable)
   register int i , j , k;
 
 
-  // copie des parametres d'index
+  // copy of index parameters
 
   if (seq.index_parameter_distribution) {
     index_parameter_distribution = new FrequencyDistribution(*(seq.index_parameter_distribution));
@@ -2554,7 +2555,7 @@ Sequences* Sequences::merge_variable(StatError &error , int nb_sample ,
                         index_parameter_type , inb_variable , itype);
     delete [] itype;
 
-    // copie des parametres d'index
+    // copy of index parameters
 
     if (index_parameter_distribution) {
       seq->index_parameter_distribution = new FrequencyDistribution(*index_parameter_distribution);
@@ -2687,7 +2688,7 @@ Sequences* Sequences::shift_variable(StatError &error , int variable , int lag) 
     seq = new Sequences(inb_sequence , iidentifier , ilength , vertex_identifier ,
                         index_parameter_type , nb_variable , type , false);
 
-    // copie des identificateurs des vertex
+    // copy of vertex identifiers
 
     if (vertex_identifier) {
       for (i = 0;i < seq->nb_sequence;i++) {
@@ -2706,7 +2707,7 @@ Sequences* Sequences::shift_variable(StatError &error , int variable , int lag) 
       }
     }
 
-    // copie des parametres d'index
+    // copy of index parameters
 
     if (index_parameter) {
       for (i = 0;i < seq->nb_sequence;i++) {
@@ -3019,7 +3020,7 @@ Sequences* Sequences::remove_run(StatError &error , int variable , int ivalue ,
     seq = new Sequences(inb_sequence , iidentifier , ilength , vertex_identifier ,
                         index_parameter_type , nb_variable , type , false);
 
-    // copie des identificateurs des vertex
+    // copy of vertex identifiers
 
     if (vertex_identifier) {
       for (i = 0;i < seq->nb_sequence;i++) {
@@ -3040,7 +3041,7 @@ Sequences* Sequences::remove_run(StatError &error , int variable , int ivalue ,
       }
     }
 
-    // copie des parametres d'index
+    // copy of index parameters
 
     if (index_parameter) {
       for (i = 0;i < seq->nb_sequence;i++) {
@@ -3249,7 +3250,7 @@ Sequences* Sequences::index_parameter_extract(StatError &error , int min_index_p
       seq = new Sequences(inb_sequence , iidentifier , ilength , vertex_identifier ,
                           index_parameter_type , nb_variable , type , false);
 
-      // copie des identificateurs des vertex
+      // copy of vertex identifiers
 
       if (vertex_identifier) {
         for (i = 0;i < seq->nb_sequence;i++) {
@@ -3261,7 +3262,7 @@ Sequences* Sequences::index_parameter_extract(StatError &error , int min_index_p
         }
       }
 
-      // copie des parametres d'index
+      // copy of index parameters
 
       if (index_parameter) {
         for (i = 0;i < seq->nb_sequence;i++) {
@@ -3599,7 +3600,7 @@ Sequences* Sequences::segmentation_extract(StatError &error , int variable ,
     seq = new Sequences(inb_sequence , NULL , sequence_length , vertex_identifier ,
                         index_parameter_type , nb_variable - 1 , itype , false);
 
-    // copie des identificateurs des vertex
+    // copy of vertex identifiers
 
     if (vertex_identifier) {
       i = -1;
@@ -3627,7 +3628,7 @@ Sequences* Sequences::segmentation_extract(StatError &error , int variable ,
       }
     }
 
-    // copie des parametres d'index
+    // copy of index parameters
 
     if (index_parameter) {
       i = -1;
@@ -3855,7 +3856,7 @@ Sequences* Sequences::cumulate(StatError &error , int variable) const
     seq = new Sequences(nb_sequence , identifier , length , vertex_identifier ,
                         index_parameter_type , inb_variable , itype);
 
-    // copie des parametres d'index
+    // copy of index parameters
 
     if (index_parameter_distribution) {
       seq->index_parameter_distribution = new FrequencyDistribution(*index_parameter_distribution);
@@ -3914,13 +3915,11 @@ Sequences* Sequences::cumulate(StatError &error , int variable) const
  *  Differenciation au 1er ordre des sequences.
  *
  *  arguments : reference sur un objet StatError, indice de la variable,
- *              premier element de la sequence garde ou pas,
- *              normalisation (relative growth rate).
+ *              premier element de la sequence garde ou pas.
  *
  *--------------------------------------------------------------*/
 
-Sequences* Sequences::difference(StatError &error , int variable ,
-                                 bool first_element , bool normalization) const
+Sequences* Sequences::difference(StatError &error , int variable , bool first_element) const
 
 {
   bool status = true;
@@ -3987,8 +3986,8 @@ Sequences* Sequences::difference(StatError &error , int variable ,
       inb_variable = 1;
     }
 
-    if (((index_parameter_type != IMPLICIT_TYPE) && ((index_interval->mean != 1.) ||
-          (index_interval->variance > 0.))) || (normalization)) {
+    if ((index_parameter_type != IMPLICIT_TYPE) && ((index_interval->mean != 1.) ||
+         (index_interval->variance > 0.))) {
       itype = new int[inb_variable];
       for (i = 0;i < inb_variable;i++) {
         itype[i] = REAL_VALUE;
@@ -4010,12 +4009,12 @@ Sequences* Sequences::difference(StatError &error , int variable ,
     if (!first_element) {
       delete [] ilength;
     }
-    if (((index_parameter_type != IMPLICIT_TYPE) && ((index_interval->mean != 1.) ||
-          (index_interval->variance > 0.))) || (normalization)) {
+    if ((index_parameter_type != IMPLICIT_TYPE) && ((index_interval->mean != 1.) ||
+         (index_interval->variance > 0.))) {
       delete [] itype;
     }
 
-    // copie des identificateurs des vertex
+    // copy of vertex identifiers
 
     if (vertex_identifier) {
       for (i = 0;i < seq->nb_sequence;i++) {
@@ -4033,7 +4032,7 @@ Sequences* Sequences::difference(StatError &error , int variable ,
       }
     }
 
-    // copie des parametres index
+    // copy of index parameters
 
     if (index_parameter) {
       for (i = 0;i < seq->nb_sequence;i++) {
@@ -4081,114 +4080,40 @@ Sequences* Sequences::difference(StatError &error , int variable ,
             if (type[k] != REAL_VALUE) {
               cisequence = int_sequence[i][k];
 
-              switch (normalization) {
-
-              case false : {
-                if (first_element) {
-                  if (*cindex_param > 0) {
-                    *prsequence++ = (double)*cisequence / (double)*cindex_param;
-                  }
-                  else {
-                    *prsequence++ = D_DEFAULT;
-                  }
+              if (first_element) {
+                if (*cindex_param > 0) {
+                  *prsequence++ = (double)*cisequence / (double)*cindex_param;
                 }
-
-                for (m = 0;m < length[i] - 1;m++) {
-                  *prsequence++ = (double)(*(cisequence + 1) - *cisequence) /
-                                  (double)(*(cindex_param + 1) - *cindex_param);
-                  cindex_param++;
-                  cisequence++;
+                else {
+                  *prsequence++ = D_DEFAULT;
                 }
-                break;
               }
 
-              case true : {
-                if (first_element) {
-                  if (*cisequence != 0.) {
-                    if (*cindex_param > 0) {
-                      *prsequence++ = 2. / (double)*cindex_param;
-                    }
-                    else {
-                      *prsequence++ = D_DEFAULT;
-                    }
-                  }
-
-                  else {
-                    *prsequence++ = 0.;
-                  }
-                }
-
-                for (m = 0;m < length[i] - 1;m++) {
-                  if (*cisequence + *(cisequence + 1) != 0) {
-                    *prsequence++ = 2 * (double)(*(cisequence + 1) - *cisequence) /
-                                    (double)((*(cindex_param + 1) - *cindex_param) *
-                                             (*cisequence + *(cisequence + 1)));
-                  }
-                  else {
-                    *prsequence++ = 0.;
-                  }
-                  cindex_param++;
-                  cisequence++;
-                }
-                break;
-              }
+              for (m = 0;m < length[i] - 1;m++) {
+                *prsequence++ = (double)(*(cisequence + 1) - *cisequence) /
+                                (double)(*(cindex_param + 1) - *cindex_param);
+                cindex_param++;
+                cisequence++;
               }
             }
 
             else {
               crsequence = real_sequence[i][k];
 
-              switch (normalization) {
-
-              case false : {
-                if (first_element) {
-                  if (*cindex_param > 0) {
-                    *prsequence++ = *crsequence / *cindex_param;
-                  }
-                  else {
-                    *prsequence++ = D_DEFAULT;
-                  }
+              if (first_element) {
+                if (*cindex_param > 0) {
+                  *prsequence++ = *crsequence / *cindex_param;
                 }
-
-                for (m = 0;m < length[i] - 1;m++) {
-                  *prsequence++ = (*(crsequence + 1) - *crsequence) /
-                                  (*(cindex_param + 1) - *cindex_param);
-                  cindex_param++;
-                  crsequence++;
+                else {
+                  *prsequence++ = D_DEFAULT;
                 }
-                break;
               }
 
-              case true : {
-                if (first_element) {
-                  if (*crsequence != 0.) {
-                    if (*cindex_param > 0) {
-                      *prsequence++ = 2. / (double)*cindex_param;
-                    }
-                    else {
-                      *prsequence++ = D_DEFAULT;
-                    }
-                  }
-
-                  else {
-                    *prsequence++ = 0.;
-                  }
-                }
-
-                for (m = 0;m < length[i] - 1;m++) {
-                  if (*crsequence + *(crsequence + 1) != 0.) {
-                    *prsequence++ =  2 * (*(crsequence + 1) - *crsequence) /
-                                     ((*(cindex_param + 1) - *cindex_param) *
-                                      (*crsequence + *(crsequence + 1)));
-                  }
-                  else {
-                    *prsequence++ = 0.;
-                  }
-                  cindex_param++;
-                  crsequence++;
-                }
-                break;
-              }
+              for (m = 0;m < length[i] - 1;m++) {
+                *prsequence++ = (*(crsequence + 1) - *crsequence) /
+                                (*(cindex_param + 1) - *cindex_param);
+                cindex_param++;
+                crsequence++;
               }
             }
 
@@ -4204,47 +4129,15 @@ Sequences* Sequences::difference(StatError &error , int variable ,
         for (k = 0;k < nb_variable;k++) {
           if ((variable == I_DEFAULT) || (variable == k)) {
             if (type[k] != REAL_VALUE) {
+              pisequence = seq->int_sequence[i][j];
               cisequence = int_sequence[i][k];
 
-              switch (normalization) {
-
-              case false : {
-                pisequence = seq->int_sequence[i][j];
-
-                if (first_element) {
-                  *pisequence++ = *cisequence;
-                }
-                for (m = 0;m < length[i] - 1;m++) {
-                  *pisequence++ = *(cisequence + 1) - *cisequence;
-                  cisequence++;
-                }
-                break;
+              if (first_element) {
+                *pisequence++ = *cisequence;
               }
-
-              case true : {
-                prsequence = seq->real_sequence[i][j];
-
-                if (first_element) {
-                  if (*cisequence != 0.) {
-                    *prsequence++ = 2.;
-                  }
-                  else {
-                    *prsequence++ = 0.;
-                  }
-                }
-
-                for (m = 0;m < length[i] - 1;m++) {
-                  if (*cisequence + *(cisequence + 1) != 0) {
-                    *prsequence++ = 2 * (double)(*(cisequence + 1) - *cisequence) /
-                                    (double)(*cisequence + *(cisequence + 1));
-                  }
-                  else {
-                    *prsequence++ = 0.;
-                  }
-                  cisequence++;
-                }
-                break;
-              }
+              for (m = 0;m < length[i] - 1;m++) {
+                *pisequence++ = *(cisequence + 1) - *cisequence;
+                cisequence++;
               }
             }
 
@@ -4252,45 +4145,224 @@ Sequences* Sequences::difference(StatError &error , int variable ,
               prsequence = seq->real_sequence[i][j];
               crsequence = real_sequence[i][k];
 
-              switch (normalization) {
-
-              case false : {
-                if (first_element) {
-                  *prsequence++ = *crsequence;
-                }
-                for (m = 0;m < length[i] - 1;m++) {
-                  *prsequence++ = *(crsequence + 1) - *crsequence;
-                  crsequence++;
-                }
-                break;
+              if (first_element) {
+                *prsequence++ = *crsequence;
               }
-
-              case true : {
-                if (first_element) {
-                  if (*crsequence != 0.) {
-                    *prsequence++ = 2.;
-                  }
-                  else {
-                    *prsequence++ = 0.;
-                  }
-                }
-
-                for (m = 0;m < length[i] - 1;m++) {
-                  if (*crsequence + *(crsequence + 1) != 0.) {
-                    *prsequence++ = 2 * (*(crsequence + 1) - *crsequence) /
-                                    (*crsequence + *(crsequence + 1));
-                  }
-                  else {
-                    *prsequence++ = 0.;
-                  }
-                  crsequence++;
-                }
-                break;
-              }
+              for (m = 0;m < length[i] - 1;m++) {
+                *prsequence++ = *(crsequence + 1) - *crsequence;
+                crsequence++;
               }
             }
 
             j++;
+          }
+        }
+      }
+    }
+
+    for (i = 0;i < seq->nb_variable;i++) {
+      seq->min_value_computation(i);
+      seq->max_value_computation(i);
+
+      seq->build_marginal_frequency_distribution(i);
+    }
+  }
+
+  return seq;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Computation of relative growth rates on the basis of cumulative dimensions.
+ *
+ *  arguments : reference on an object StatError, growth factor for
+ *              computing the first relative growth rate.
+ *
+ *--------------------------------------------------------------*/
+
+Sequences* Sequences::relative_growth_rate(StatError &error , double growth_factor) const
+
+{
+  bool status = true , begin;
+  register int i , j , k;
+  int *itype , *pindex_param , *cindex_param , *pisequence , *cisequence;
+  double *prsequence , *crsequence;
+  Sequences *seq;
+
+
+  seq = NULL;
+  error.init();
+
+  if (index_parameter_type == POSITION) {
+    status = increasing_index_parameter_checking(error , true , SEQ_label[SEQL_SEQUENCE]);
+  }
+
+  for (i = 0;i < nb_variable;i++) {
+    if ((type[i] != INT_VALUE) && (type[i] != STATE) && (type[i] != REAL_VALUE)) {
+      status = false;
+      ostringstream error_message , correction_message;
+      error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
+                    << STAT_error[STATR_VARIABLE_TYPE];
+      correction_message << STAT_variable_word[INT_VALUE] << " or "
+                         << STAT_variable_word[STATE] << " or "
+                         << STAT_variable_word[REAL_VALUE];
+      error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
+    }
+
+/*    else {
+      lstatus = increasing_sequence_checking(error , i , false , SEQ_label[SEQL_SEQUENCE] ,
+                                             STAT_label[STATL_VALUE]);
+      if (!lstatus) {
+        status = false;
+      }
+    } */
+
+    else if (min_value[i] < 0.) {
+      status = false;
+      ostringstream error_message;
+      error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
+                    << STAT_error[STATR_POSITIVE_MIN_VALUE];
+      error.update((error_message.str()).c_str());
+    }
+  }
+
+  if (status) {
+    itype = new int[nb_variable];
+    for (i = 0;i < nb_variable;i++) {
+      itype[i] = REAL_VALUE;
+    }
+
+    seq = new Sequences(nb_sequence , identifier , length , vertex_identifier ,
+                        index_parameter_type , nb_variable , itype);
+    delete [] itype;
+
+    // copy of index parameters
+
+    if (index_parameter) {
+      for (i = 0;i < seq->nb_sequence;i++) {
+        for (j = 0;j < (seq->index_parameter_type == POSITION ? seq->length[i] + 1 : seq->length[i]);j++) {
+          seq->index_parameter[i][j] = index_parameter[i][j];
+        }
+      }
+    }
+
+    if (index_parameter_distribution) {
+      seq->index_parameter_distribution = new FrequencyDistribution(*index_parameter_distribution);
+    }
+    if (index_interval) {
+      seq->index_interval = new FrequencyDistribution(*index_interval);
+    }
+
+    // computaton of relative growth rate
+
+    if ((index_parameter_type != IMPLICIT_TYPE) && ((index_interval->mean != 1.) ||
+         (index_interval->variance > 0.))) {
+      for (i = 0;i < nb_sequence;i++) {
+        for (j = 0;j < nb_variable;j++) {
+          prsequence = seq->real_sequence[i][j];
+          cindex_param = index_parameter[i] + 1;
+          begin = true;
+
+          if (type[j] != REAL_VALUE) {
+            cisequence = int_sequence[i][j] + 1;
+            *prsequence++ = 0.;
+
+            for (k = 1;k < length[i];k++) {
+              if ((*cisequence > 0) && (*(cisequence - 1) > 0)) {
+                *prsequence = (log(*cisequence) - log(*(cisequence - 1))) /
+                              (*cindex_param - *(cindex_param - 1));
+
+                if (begin) {
+                  begin = false;
+                  *(prsequence - 1) = *prsequence * growth_factor;
+                }
+                prsequence++;
+              }
+
+              else {
+                *prsequence++ = 0.;
+              }
+              cindex_param++;
+              cisequence++;
+            }
+          }
+
+          else {
+            crsequence = real_sequence[i][j] + 1;
+            *prsequence++ = 0.;
+
+            for (k = 1;k < length[i];k++) {
+              if ((*crsequence > 0.) && (*(crsequence - 1) > 0.)) {
+                *prsequence = (log(*crsequence) - log(*(crsequence - 1))) /
+                              (*cindex_param - *(cindex_param - 1));
+
+                if (begin) {
+                  begin = false;
+                  *(prsequence - 1) = *prsequence * growth_factor;
+                }
+                prsequence++;
+              }
+
+              else {
+                *prsequence++ = 0.;
+              }
+              cindex_param++;
+              crsequence++;
+            }
+          }
+        }
+      }
+    }
+
+    else {
+      for (i = 0;i < nb_sequence;i++) {
+        for (j = 0;j < nb_variable;j++) {
+          prsequence = seq->real_sequence[i][j];
+          begin = true;
+
+          if (type[j] != REAL_VALUE) {
+            cisequence = int_sequence[i][j] + 1;
+            *prsequence++ = 0.;
+
+            for (k = 1;k < length[i];k++) {
+              if ((*cisequence > 0) && (*(cisequence - 1) > 0)) {
+                *prsequence = log(*cisequence) - log(*(cisequence - 1));
+
+                if (begin) {
+                  begin = false;
+                  *(prsequence - 1) = *prsequence * growth_factor;
+                }
+                prsequence++;
+              }
+
+              else {
+                *prsequence++ = 0.;
+              }
+              cisequence++;
+            }
+          }
+
+          else {
+            crsequence = real_sequence[i][j] + 1;
+            *prsequence++ = 0.;
+
+            for (k = 1;k < length[i];k++) {
+              if ((*crsequence > 0.) && (*(crsequence - 1) > 0.)) {
+                *prsequence = log(*crsequence) - log(*(crsequence - 1));
+
+                if (begin) {
+                  begin = false;
+                  *(prsequence - 1) = *prsequence * growth_factor;
+                }
+                prsequence++;
+              }
+
+              else {
+                *prsequence++ = 0.;
+              }
+              crsequence++;
+            }
           }
         }
       }
@@ -4381,7 +4453,7 @@ Sequences* Sequences::sequence_normalization(StatError &error , int variable) co
                         index_parameter_type , nb_variable , itype);
     delete [] itype;
 
-    // copie des parametres d'index
+    // copy of index parameters
 
     if (index_parameter_distribution) {
       seq->index_parameter_distribution = new FrequencyDistribution(*index_parameter_distribution);
@@ -4567,7 +4639,7 @@ Sequences* Sequences::moving_average(StatError &error , int nb_point , double *f
     }
     delete [] itype;
 
-    // copie des identificateurs de vertex
+    // copy of vertex identifiers
 
     if (vertex_identifier) {
       for (i = 0;i < seq->nb_sequence;i++) {
@@ -4585,7 +4657,7 @@ Sequences* Sequences::moving_average(StatError &error , int nb_point , double *f
       }
     }
 
-    // copie des parametres index
+    // copy of index parameters
 
     if (index_parameter) {
       for (i = 0;i < seq->nb_sequence;i++) {
@@ -5378,7 +5450,7 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular ,
         }
       }
 
-      // copie des parametres d'index
+      // copy of index parameters
 
       for (i = 0;i < nb_sequence;i++) {
         for (j = 0;j < length[i];j++) {
@@ -6737,8 +6809,9 @@ void Sequences::build_index_parameter_frequency_distribution()
 void Sequences::index_interval_computation()
 
 {
-  if ((index_parameter_type == TIME) || ((index_parameter_type == POSITION) &&
-       (type[0] != NB_INTERNODE))) {
+//  if ((index_parameter_type == TIME) || ((index_parameter_type == POSITION) &&
+//       (type[0] != NB_INTERNODE))) {
+  if ((index_parameter_type == TIME) || (index_parameter_type == POSITION)) {
     register int i , j;
 
 
