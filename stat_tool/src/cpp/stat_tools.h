@@ -197,7 +197,7 @@ enum {
   REAL_VALUE ,                         // observation reelle
   STATE ,                              // etat
   OLD_INT_VALUE ,                      // pour compatibilite ascendante
-  NB_INTERNODE ,                       // nombre d'entrenoeuds axe porte
+//  NB_INTERNODE ,                        nombre d'entrenoeuds axe porte
   AUXILIARY                            // variable auxiliaire (lissage/moyenne par segment)
 };
 
