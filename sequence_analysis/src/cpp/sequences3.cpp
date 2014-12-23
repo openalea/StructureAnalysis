@@ -308,9 +308,11 @@ Sequences* sequences_ascii_read(StatError &error , const char *path , bool old_f
             }
 
             else {
-              for (j = INT_VALUE;j <= NB_INTERNODE;j++) {
+//              for (j = INT_VALUE;j <= NB_INTERNODE;j++) {
+              for (j = INT_VALUE;j <= OLD_INT_VALUE;j++) {
                 if (token == STAT_variable_word[j]) {
-                  if ((j == NB_INTERNODE) && ((read_line != offset) || ((read_line == offset) &&
+//                  if ((j == NB_INTERNODE) && ((read_line != offset) || ((read_line == offset) &&
+                  if ((j == OLD_INT_VALUE) && ((read_line != offset) || ((read_line == offset) &&
                         (index_parameter_type != POSITION) && (index_parameter_type != POSITION_INTERVAL)))) {
                     status = false;
                     error.update(STAT_parsing[STATP_VARIABLE_TYPE] , line , i + 1);
@@ -334,7 +336,8 @@ Sequences* sequences_ascii_read(StatError &error , const char *path , bool old_f
               }
             }
 
-            if (j == NB_INTERNODE + 1) {
+//            if (j == NB_INTERNODE + 1) {
+            if (j == OLD_INT_VALUE + 1) {
               status = false;
               error.update(STAT_parsing[STATP_KEY_WORD] , line , i + 1);
             }
@@ -364,9 +367,12 @@ Sequences* sequences_ascii_read(StatError &error , const char *path , bool old_f
       }
 
       else {
-        if ((((index_parameter_type == TIME) || (index_parameter_type == TIME_INTERVAL)) && (read_line < offset + 1)) ||
-            (((index_parameter_type == POSITION) || (index_parameter_type == POSITION_INTERVAL)) &&
-             ((read_line < offset + 1) || ((read_line > offset + 1) && (type[0] == NB_INTERNODE))))) {
+//        if ((((index_parameter_type == TIME) || (index_parameter_type == TIME_INTERVAL)) && (read_line < offset + 1)) ||
+//            (((index_parameter_type == POSITION) || (index_parameter_type == POSITION_INTERVAL)) &&
+//             ((read_line < offset + 1) || ((read_line > offset + 1) && (type[0] == NB_INTERNODE))))) {
+        if (((index_parameter_type == TIME) || (index_parameter_type == TIME_INTERVAL) ||
+             (index_parameter_type == POSITION) || (index_parameter_type == POSITION_INTERVAL)) &&
+             (read_line < offset + 1)) {
           status = false;
           error.update(STAT_parsing[STATP_VARIABLE_TYPE]);
         }
@@ -518,8 +524,8 @@ Sequences* sequences_ascii_read(StatError &error , const char *path , bool old_f
                 lstatus = locale.stringToNum(token , &int_value);
                 if ((lstatus) && (((k == 0) && (((index_parameter_type == TIME) || (index_parameter_type == POSITION) ||
                         (index_parameter_type == POSITION_INTERVAL)) && (int_value < 0)) ||
-                      ((index_parameter_type == TIME_INTERVAL) && (int_value <= 0))) ||
-                     ((k == 1) && (type[k - 1] == NB_INTERNODE) && (int_value < 0)))) {
+                      ((index_parameter_type == TIME_INTERVAL) && (int_value <= 0))))) {
+//                     ((k == 1) && (type[k - 1] == NB_INTERNODE) && (int_value < 0)))) {
                   lstatus = false;
                 }
 
@@ -719,8 +725,9 @@ Sequences* sequences_ascii_read(StatError &error , const char *path , bool old_f
       if (seq->index_parameter) {
         seq->build_index_parameter_frequency_distribution();
       }
-      if ((seq->index_parameter_type == TIME) || ((seq->index_parameter_type == POSITION) &&
-          (seq->type[0] != NB_INTERNODE))) {
+//      if ((seq->index_parameter_type == TIME) || ((seq->index_parameter_type == POSITION) &&
+//          (seq->type[0] != NB_INTERNODE))) {
+      if ((seq->index_parameter_type == TIME) || (seq->index_parameter_type == POSITION)) {
         seq->index_interval_computation();
       }
 
