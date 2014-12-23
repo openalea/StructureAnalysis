@@ -59,11 +59,11 @@ const char *SEQ_word[] = {
 
   "OCCUPANCY_DISTRIBUTION" ,
 
-  "INDEX_PARAMETER" ,
+  "INDEX_PARAMETER"
 
-  "TOP_PARAMETERS" ,
-  "AXILLARY_PROBABILITY" ,
-  "RHYTHM_RATIO"
+//  "TOP_PARAMETERS" ,
+//  "AXILLARY_PROBABILITY" ,
+//  "RHYTHM_RATIO"
 };
 
 
@@ -254,11 +254,11 @@ const char *SEQ_label[] = {
   "maximum segment likelihood" ,
   "maximum posterior change-point probabilities" ,
   "maximum posterior segment probabilities" ,
-  "ambiguity" ,
+  "ambiguity"
 
-  "top" ,
-  "tops" ,
-  "number of internode"
+//  "top" ,
+//  "tops" ,
+//  "number of internode"
 };
 
 
@@ -392,18 +392,18 @@ const char *SEQ_error[] = {
   "bad change point" ,
   "segmentation failure" ,
   "bad number of segmentations" ,
-  "bad change-point model" ,
+  "bad change-point model"
 
-  "bad position" ,
-  "bad number of internodes" ,
-  "bad top identifier" ,
-  "bad main axe number of internodes: should be greater than the last position" ,
-  "bad minimum position" ,
-  "bad maximum position" ,
-  "bad neighborhood" ,
-  "not enough neighbors" ,
-  "equality of growth probabilities not possible" ,
-  "bad number of tops" ,
-  "bad number of trials" ,
-  "bad number of axillary shoots per node"
+//  "bad position" ,
+//  "bad number of internodes" ,
+//  "bad top identifier" ,
+//  "bad main axe number of internodes: should be greater than the last position" ,
+//  "bad minimum position" ,
+//  "bad maximum position" ,
+//  "bad neighborhood" ,
+//  "not enough neighbors" ,
+//  "equality of growth probabilities not possible" ,
+//  "bad number of tops" ,
+//  "bad number of trials" ,
+//  "bad number of axillary shoots per node"
 };
