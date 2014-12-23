@@ -941,7 +941,7 @@ MarkovianSequences* MarkovianSequences::merge(StatError &error , int nb_sample ,
 
     phisto = new const FrequencyDistribution*[nb_sample];
 
-    // copie des parametres d'index
+    // copy of index parameters
 
     if (index_parameter_type == TIME) {
       i = 0;
@@ -2108,7 +2108,7 @@ MarkovianSequences* MarkovianSequences::merge_variable(StatError &error , int nb
                                  index_parameter_type , inb_variable , itype);
     delete [] itype;
 
-    // copie des parametres d'index
+    // copy of index parameters
 
     if (index_parameter_distribution) {
       seq->index_parameter_distribution = new FrequencyDistribution(*index_parameter_distribution);
@@ -2278,7 +2278,7 @@ MarkovianSequences* MarkovianSequences::add_absorbing_run(StatError &error ,
                                  index_parameter_type , nb_variable , type , false);
     delete [] ilength;
 
-    // copie des identificateurs de vertex
+    // copy of vertex identifiers
 
     if (vertex_identifier) {
       for (i = 0;i < seq->nb_sequence;i++) {
@@ -2291,7 +2291,7 @@ MarkovianSequences* MarkovianSequences::add_absorbing_run(StatError &error ,
       }
     }
 
-    // copie des parametres d'index
+    // copy of index parameters
 
     if (index_parameter) {
       for (i = 0;i < seq->nb_sequence;i++) {
