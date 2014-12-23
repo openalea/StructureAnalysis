@@ -47,7 +47,7 @@
 
 #include "renewal.h"
 #include "sequences.h"
-#include "tops.h"
+// #include "tops.h"
 #include "sequence_label.h"
 
 using namespace std;
@@ -167,7 +167,7 @@ Sequences::Sequences(int inb_sequence , int inb_variable)
  *  arguments : nombre de sequences, identificateurs des sequences,
  *              longueurs des sequences, identificateurs des vertex d'un MTG associe,
  *              type de parametre d'index, nombre de variables, type de chaque variable,
- *              flag copie des identificateurs de vertex, flag initialisation.
+ *              flag copy of vertex identifiers, flag initialization.
  *
  *--------------------------------------------------------------*/
 
@@ -413,8 +413,9 @@ Sequences::Sequences(int inb_sequence , int *iidentifier , int *ilength ,
 
     build_index_parameter_frequency_distribution();
 
-    if ((index_parameter_type == TIME) || ((index_parameter_type == POSITION) &&
-        (type[0] != NB_INTERNODE))) {
+//    if ((index_parameter_type == TIME) || ((index_parameter_type == POSITION) &&
+//        (type[0] != NB_INTERNODE))) {
+    if ((index_parameter_type == TIME) || (index_parameter_type == POSITION)) {
       index_interval_computation();
     }
   }
@@ -2281,7 +2282,8 @@ Vectors* Sequences::extract_vectors(StatError &error , int feature_type ,
 
       else {
         for (i = 0;i < nb_sequence;i++) {
-          vec->int_vector[i][0] = -1;
+//          vec->int_vector[i][0] = -1;
+          vec->int_vector[i][0] = 0;
           if (int_sequence[i][variable][0] == value) {
             begin_run = 0;
           }
@@ -2423,67 +2425,6 @@ MarkovianSequences* Sequences::markovian_sequences(StatError &error) const
 
 /*--------------------------------------------------------------*
  *
- *  Construction d'un objet Tops a partir d'un objet Sequences.
- *
- *  argument : reference sur un objet StatError.
- *
- *--------------------------------------------------------------*/
-
-Tops* Sequences::tops(StatError &error) const
-
-{
-  bool status = true;
-  register int i;
-  Tops *tops;
-
-
-  tops = NULL;
-  error.init();
-
-  if (index_parameter_type != POSITION) {
-    status = false;
-    error.correction_update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE] , SEQ_index_parameter_word[POSITION]);
-  }
-
-  if (nb_variable != 1) {
-    status = false;
-    error.correction_update(STAT_error[STATR_NB_VARIABLE] , 1);
-  }
-
-  else {
-    if (type[0] != NB_INTERNODE) {
-      status = false;
-      error.correction_update(STAT_error[STATR_VARIABLE_TYPE] , STAT_variable_word[NB_INTERNODE]);
-    }
-
-    else if (!marginal_distribution[0]) {
-      status = false;
-      error.update(STAT_error[STATR_MARGINAL_FREQUENCY_DISTRIBUTION]);
-    }
-  }
-
-  if (status) {
-    for (i = 0;i < nb_sequence;i++) {
-      if (index_parameter[i][0] == 0) {
-        status = false;
-        ostringstream error_message;
-        error_message << SEQ_label[SEQL_SEQUENCE] << " " << i + 1 << ": "
-                      << SEQ_parsing[SEQP_POSITION];
-        error.update((error_message.str()).c_str());
-      }
-    }
-  }
-
-  if (status) {
-    tops = new Tops(*this);
-  }
-
-  return tops;
-}
-
-
-/*--------------------------------------------------------------*
- *
  *  Verification du caractere (strictement) croissant des parametres d'index.
  *
  *  arguments : reference sur un objet StatError, flag croissance strict ou non,
@@ -2620,8 +2561,9 @@ bool Sequences::check(StatError &error , const char *pattern_label)
     if (index_parameter) {
       build_index_parameter_frequency_distribution();
     }
-    if ((index_parameter_type == TIME) || ((index_parameter_type == POSITION) &&
-         (type[0] != NB_INTERNODE))) {
+//    if ((index_parameter_type == TIME) || ((index_parameter_type == POSITION) &&
+//         (type[0] != NB_INTERNODE))) {
+    if ((index_parameter_type == TIME) || (index_parameter_type == POSITION)) {
       index_interval_computation();
     }
   }
