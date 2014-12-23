@@ -53,6 +53,7 @@ const int SEQUENCE_NB_VARIABLE = 30;   // nombre maximum de variables observees
 
 const int PLOT_NB_SEQUENCE = 200;      // nombre maximum de sequences visualisees (sortie Gnuplot)
 const int PLOT_LEGEND_NB_SEQUENCE = 15;  // nombre maximum de sequences identifiees (sortie Gnuplot)
+const double GROWTH_FACTOR = 1.;       // growth factor for computing the first relative growth rate
 
 enum {
   IMPLICIT_TYPE ,                      // parametre d'index implicite
@@ -402,7 +403,7 @@ protected :
     FrequencyDistribution *index_interval;  // intervalles entre parametres d'index explicites
     int **index_parameter;  // parametres d'index explicites
     int nb_variable;        // nombre de variables
-    int *type;              // type de chaque variable (INT_VALUE/REAL_VALUE/STATE/NB_INTERNODE)
+    int *type;              // type de chaque variable (INT_VALUE/REAL_VALUE/STATE)
     double *min_value;      // valeurs minimums
     double *max_value;      // valeurs maximums
     FrequencyDistribution **marginal_distribution;  // lois marginales empiriques
@@ -593,7 +594,6 @@ public :
                              int value = I_DEFAULT) const;
 
     MarkovianSequences* markovian_sequences(StatError &error) const;
-    Tops* tops(StatError &error) const;
 
     bool check(StatError &error , const char *pattern_label);
 
@@ -652,7 +652,8 @@ public :
 
     Sequences* cumulate(StatError &error , int variable = I_DEFAULT) const;
     Sequences* difference(StatError &error , int variable = I_DEFAULT ,
-                          bool first_element = false , bool normalization = false) const;
+                          bool first_element = false) const;
+    Sequences* relative_growth_rate(StatError &error , double growth_factor = GROWTH_FACTOR) const;
     Sequences* sequence_normalization(StatError &error , int variable = I_DEFAULT) const;
     Sequences* moving_average(StatError &error , int nb_point , double *filter ,
                               int variable = I_DEFAULT , bool begin_end = false ,
