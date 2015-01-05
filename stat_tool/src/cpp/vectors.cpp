@@ -3478,7 +3478,7 @@ ostream& Vectors::ascii_write(ostream &os , bool exhaustive , bool comment_flag)
       }
     }
 
-#   ifdef DEBUG
+/* #   ifdef DEBUG
     if (comment_flag) {
       os << "# ";
     }
@@ -3514,7 +3514,7 @@ ostream& Vectors::ascii_write(ostream &os , bool exhaustive , bool comment_flag)
 
       delete [] real_value;
     }
-#   endif
+#   endif */
 
   }
 
