@@ -49,7 +49,7 @@ Int_fl_container* wrapper_init1(object tree_value)
          res->Double(float_index++)= extract<double>(values[index]);
       else
       {
-         if ((type==INT_VALUE) || (type==STATE) || (type==NB_INTERNODE))
+         if ((type==INT_VALUE) || (type==STATE))
             res->Int(int_index++)= extract<int>(values[index]);
          else
          {
