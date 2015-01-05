@@ -3707,7 +3707,7 @@ double Typed_edge_trees<Generic_Int_fl_container>::mean_computation(int variable
       mean= (characteristics[variable]->marginal_distribution)->mean;
    else
    {
-      if ((_type[variable] == INT_VALUE) || (_type[variable] == NB_INTERNODE))
+      if (_type[variable] == INT_VALUE)
       {
          mean= 0.;
          for(t= 0; t < _nb_trees; t++)
@@ -3749,7 +3749,7 @@ double Typed_edge_trees<Generic_Int_fl_container>::variance_computation(int vari
       variance= (characteristics[variable]->marginal_distribution)->variance;
    else
    {
-      if ((_type[variable] == INT_VALUE) || (_type[variable] == NB_INTERNODE))
+      if (_type[variable] == INT_VALUE)
       {
          variance= 0.;
          if (cumul_size > 1)
@@ -3794,7 +3794,7 @@ double Typed_edge_trees<Generic_Int_fl_container>::skewness_computation(int vari
       skewness= (characteristics[variable]->marginal_distribution)->skewness_computation();
    else
    {
-      if ((_type[variable] == INT_VALUE) || (_type[variable] == NB_INTERNODE))
+      if (_type[variable] == INT_VALUE)
       {
          skewness= 0.;
          if ((cumul_size > 2) && (variance > 0.))
@@ -3839,7 +3839,7 @@ double Typed_edge_trees<Generic_Int_fl_container>::kurtosis_computation(int vari
       kurtosis= (characteristics[variable]->marginal_distribution)->kurtosis_computation();
    else
    {
-      if ((_type[variable] == INT_VALUE) || (_type[variable] == NB_INTERNODE))
+      if (_type[variable] == INT_VALUE)
       {
          kurtosis= 0.;
          if ((cumul_size < 2) || (variance == 0.))
