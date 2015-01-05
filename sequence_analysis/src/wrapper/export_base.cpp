@@ -33,12 +33,12 @@
 
 #include "sequence_analysis/sequence_label.h"
 #include "sequence_analysis/sequences.h"
-#include "sequence_analysis/tops.h"
+// #include "sequence_analysis/tops.h"
 #include "sequence_analysis/semi_markov.h"
 #include "sequence_analysis/hidden_semi_markov.h"
 #include "sequence_analysis/variable_order_markov.h"
 #include "sequence_analysis/hidden_variable_order_markov.h"
-//#include "sequence_analysis/nonhomogeneous_markov.h"
+// #include "sequence_analysis/nonhomogeneous_markov.h"
 #include "sequence_analysis/renewal.h"
 
 
@@ -250,7 +250,7 @@ const int MAX_ABSORBING_RUN_LENGTH = 20;  // longueur maximum de la serie finale
      .value("REAL_VALUE", REAL_VALUE)
      .value("STATE", STATE)
      .value("OLD_INT_VALUE", OLD_INT_VALUE)
-     .value("NB_INTERNODE", NB_INTERNODE)
+//     .value("NB_INTERNODE", NB_INTERNODE)
      .value("AUXILIARY", AUXILIARY)
      .export_values();
 
@@ -320,10 +320,10 @@ const int MAX_ABSORBING_RUN_LENGTH = 20;  // longueur maximum de la serie finale
    /*
 const double MIN_RHYTHM_RATIO = 0.33;  // rapport de rythme minimum
 */
-   scope().attr("MIN_RHYTHM_RATIO") = MIN_RHYTHM_RATIO;
-   scope().attr("TOP_MIN_PROBABILITY") = TOP_MIN_PROBABILITY;
-   scope().attr("DEFAULT_MAX_POSITION") = DEFAULT_MAX_POSITION;
-   scope().attr("MAX_POSITION") = MAX_POSITION;
+//   scope().attr("MIN_RHYTHM_RATIO") = MIN_RHYTHM_RATIO;
+//   scope().attr("TOP_MIN_PROBABILITY") = TOP_MIN_PROBABILITY;
+//   scope().attr("DEFAULT_MAX_POSITION") = DEFAULT_MAX_POSITION;
+//   scope().attr("MAX_POSITION") = MAX_POSITION;
 /*
 const int PLOT_NB_AXILLARY = 10;       // nombre maximum de lois du nombre d'entrenoeuds
                                        // axes portes affichees (sortie Gnuplot)
