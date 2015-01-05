@@ -821,27 +821,26 @@ DistanceMatrix* Vectors::comparison(StatError &error , const VectorDistance &ive
           }
         }
       }
+    }
 
-#     ifdef DEBUG
-      double *variable_distance;
+#   ifdef DEBUG
+    double *variable_distance;
 
-      variable_distance = new double[nb_variable];
+    variable_distance = new double[nb_variable];
+    for (i = 0;i < nb_variable;i++) {
+      variable_distance[i] = 0.;
+    }
+
+    cout << *vector_dist;
+    if (vector_dist->distance_type == ABSOLUTE_VALUE) {
       for (i = 0;i < nb_variable;i++) {
-        variable_distance[i] = 0.;
-      }
-
-      cout << *vector_dist;
-      if (vector_dist->distance_type == ABSOLUTE_VALUE) {
-        for (i = 0;i < nb_variable;i++) {
-          if (vector_dist->variable_type[i] == NUMERIC) {
-            cout << "\n" << STAT_label[STATL_VARIABLE] << " " << i << "   mean absolute difference: "
-                 << mean_absolute_difference_computation(i) << endl;
-          }
+        if (vector_dist->variable_type[i] == NUMERIC) {
+          cout << "\n" << STAT_label[STATL_VARIABLE] << " " << i << "   mean absolute difference: "
+               << mean_absolute_difference_computation(i) << endl;
         }
       }
-#     endif
-
     }
+#   endif
 
     dist_matrix = new DistanceMatrix(nb_vector , STAT_label[STATL_VECTOR] , identifier);
 
