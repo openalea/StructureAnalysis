@@ -31,7 +31,7 @@
 
 #include "sequence_analysis/renewal.h"
 #include "sequence_analysis/sequences.h"
-#include "sequence_analysis/tops.h"
+// #include "sequence_analysis/tops.h"
 #include "sequence_analysis/sequence_label.h"
 
 #include <boost/python.hpp>
