@@ -452,7 +452,7 @@ Default_tree* Tree_wrapper_init1(Default_tree::key root,
          cvalue.Double(float_index++)= extract<double>(values[index]);
       else
       {
-         if ((type==INT_VALUE) || (type==STATE) || (type==NB_INTERNODE))
+         if ((type==INT_VALUE) || (type==STATE))
             cvalue.Int(int_index++)= extract<int>(values[index]);
          else
          {
@@ -836,7 +836,7 @@ public :
          if (x.check())
          {
             if ((types[index] == INT_VALUE) || (types[index] == STATE)
-                || (types[index] == POSITION) || (types[index] == NB_INTERNODE))
+                || (types[index] == POSITION))
                values[index]= x();
             else
             {
@@ -849,8 +849,7 @@ public :
                                 << " " << STAT_TREES_error[TREESTATR_VARIABLE_TYPE]
                                 << ": should be " << STAT_variable_word[INT_VALUE]
                                 << " or " << STAT_word[STATE]
-                                << " or " << STAT_word[POSITION]
-                                << " or " << STAT_word[NB_INTERNODE];
+                                << " or " << STAT_word[POSITION];
 
                   PyErr_SetString(PyExc_IndexError, (error_message.str()).c_str());
                   throw_error_already_set();
