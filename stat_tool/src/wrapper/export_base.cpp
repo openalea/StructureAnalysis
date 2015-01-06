@@ -285,7 +285,7 @@ void class_constant()
   .value("REAL_VALUE", REAL_VALUE)
   .value("STATE", STATE)
   .value("OLD_INT_VALUE", OLD_INT_VALUE)
-  .value("NB_INTERNODE", NB_INTERNODE)
+//  .value("NB_INTERNODE", NB_INTERNODE)
   .value("AUXILIARY", AUXILIARY)
   .export_values()
   ;
