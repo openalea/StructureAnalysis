@@ -110,9 +110,12 @@ def vectorORarray(data, return_data=False):
     Function checking if the provided `data` is a vector of value or a square matrix (array)
     """
     # -- Identifying case where numpy.array are 1D vectors:
-    if isinstance(data,list) or isinstance(data,tuple) or (isinstance(data,ndarray) and (((data.shape[0] == 1) and (data.shape[1] > 1)) or ((data.shape[1] == 1) and (data.shape[0] > 1)))):
+    if isinstance(data,ndarray) and (len(data.shape)==1) or ((data.shape[0] == 1) and (data.shape[1] > 1)) or ((data.shape[1] == 1) and (data.shape[0] > 1)))
+        data = data.tolist()
+
+    if isinstance(data,list) or isinstance(data,tuple):
         if return_data:
-            return 'vector', data.tolist()
+            return 'vector', data
         else:
             return 'vector'
 
