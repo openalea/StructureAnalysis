@@ -364,7 +364,7 @@ class mvpd_matrix:
         if self._nb_var != 0:
             for i in xrange(self._nb_var):
                 self.add_variable(variable_list[i], variable_names[i], variable_types[i], variable_units[i])
-            print 'Done integrating variables {} as separate NON-standardised pairwise distance matrices.'.format(variable_names)
+            print "Done integrating variables {} as separate NON-standardised pairwise distance matrices.".format(variable_names)
 
         # -- If the weigths are also provided, we can compute the multi-variate pairwise distance matrix rigth now:
         if len(variable_weights) > 0:
@@ -387,7 +387,7 @@ class mvpd_matrix:
         """
         # NEED to check if we already have a pairwise distance matrix and if the data to add have the adequate number of observations!!
         if len(self._distance_matrix_dict.keys())!=0:
-            if vectorORarray(var_data) == 'vector':
+            if vectorORarray(var_data) == "vector":
                 nb_values = len(var_data)
             else:
                 nb_values = var_data.shape[0]
@@ -411,12 +411,12 @@ class mvpd_matrix:
         self._nb_values = self._distance_matrix_dict.values()[0].shape[0]
         
         if MAD_outliers_thres is not None:
-            if vectorORarray(var_data) != 'vector':
-                raise TypeError('To detect outliers, on the basis of their MeanAbsDev, you need to provide the data as a vector of values!')
+            if vectorORarray(var_data) != "vector":
+                raise TypeError("To detect outliers, on the basis of their MeanAbsDev, you need to provide the data as a vector of values!")
             else:
                 self._outliers_index_dict[var_name] = mad_based_outlier(var_data, MAD_outliers_thres)
 
-        return 'Done adding and creating the pairwise distance matrix for variable '{}'.'.format(var_name)
+        return "Done adding and creating the pairwise distance matrix for variable '{}'.".format(var_name)
 
 
     def remove_pairwise_distance_matrix(self, var_id):
@@ -425,7 +425,7 @@ class mvpd_matrix:
         """
         self._distance_matrix_dict.pop(var_id)
         self._distance_matrix_info.pop(var_id)
-        return 'Done.'
+        return "Done."
 
 
     def create_mvpd_matrix(self, variable_names, variable_weights, ignore_outliers = False, delete_outliers = False, return_data = False):
@@ -456,9 +456,9 @@ class mvpd_matrix:
         if ((not ignore_outliers) and (not delete_outliers)):
             outliers_management = None
         elif ignore_outliers:
-            outliers_management = 'ignored'
+            outliers_management = "ignored"
         else:
-            outliers_management = 'deleted'
+            outliers_management = "deleted"
 
         # -- Shortcut when asking for the same result:
         if variable_weights == self._global_distance_weights and variable_names == self._global_distance_variables and ids == self._global_distance_ids and self._outliers == outliers_management:
@@ -549,9 +549,9 @@ class mvpd_matrix:
         # -- Creating the list of vertices:
         if ids is None:
             ids = self._global_distance_ids
-        elif ids == 'lineaged':
+        elif ids == "lineaged":
             ids = [k for k in self._global_distance_ids if k in self.graph.lineaged_vertex(False)]
-        elif ids == 'fully lineaged':
+        elif ids == "fully lineaged":
             ids = [k for k in self._global_distance_ids if k in self.graph.lineaged_vertex(True)]
         else:
             assert isinstance(ids, list)
