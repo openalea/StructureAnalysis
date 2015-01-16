@@ -363,7 +363,7 @@ class mvpd_matrix:
         # -- If a list of variable observations, names and type are provided, we compute the NON-standardized pairwise distance matrix
         if self._nb_var != 0:
             for i in xrange(self._nb_var):
-                self.add_variable(variable_list[i], variable_names[i], variables_types[i], variables_units[i])
+                self.add_variable(variable_list[i], variable_names[i], variable_types[i], variable_units[i])
             print 'Done integrating variables {} as separate NON-standardised pairwise distance matrices.'.format(variable_names)
 
         # -- If the weigths are also provided, we can compute the multi-variate pairwise distance matrix rigth now:
