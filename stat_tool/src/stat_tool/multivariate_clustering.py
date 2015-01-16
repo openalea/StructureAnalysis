@@ -110,7 +110,8 @@ def vectorORarray(data, return_data=False):
     Function checking if the provided `data` is a vector of value or a square matrix (array)
     """
     # -- Identifying case where numpy.array are 1D vectors:
-    if isinstance(data,ndarray) and (((data.shape[0] == 1) and (data.shape[1] > 1)) or ((data.shape[1] == 1) and (data.shape[0] > 1))):
+    if isinstance(data,list) or isinstance(data,tuple) or
+     (isinstance(data,ndarray) and (((data.shape[0] == 1) and (data.shape[1] > 1)) or ((data.shape[1] == 1) and (data.shape[0] > 1)))):
         if return_data:
             return 'vector', data.tolist()
         else:
@@ -398,9 +399,9 @@ class mvpd_matrix:
 
         # - We make sure self._distance_matrix_dict can receive the pairwise distance matrix with the name `var_name`:
         if self._distance_matrix_dict.has_key(var_name):
-            raise KeyError("You already have a property named {}".format(var_name))
+            raise KeyError("You already have a property named '{}'".format(var_name))
 
-        print("Computing the pairwise distance matrix for the variable {}...".format(var_name))
+        print("Computing the pairwise distance matrix for the variable '{}'...".format(var_name))
         if vectorORarray(var_data) == 'vector':
             self._distance_matrix_dict[var_name] = distance_matrix_from_vector(var_data, var_type)
         else:
@@ -416,7 +417,7 @@ class mvpd_matrix:
             else:
                 self._outliers_index_dict[var_name] = mad_based_outlier(var_data, MAD_outliers_thres)
 
-        return 'Done adding and creating the pairwise distance matrix for variable {}.'.format(var_name)
+        return 'Done adding and creating the pairwise distance matrix for variable '{}'.'.format(var_name)
 
 
     def remove_pairwise_distance_matrix(self, var_id):
