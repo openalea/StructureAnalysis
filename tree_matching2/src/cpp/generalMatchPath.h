@@ -57,13 +57,13 @@ class TREEMATCH_API GeneralMatchPath : public MatchPath
   public :
     //Constructor
     GeneralMatchPath();
-    GeneralMatchPath(const NodeList& ,const NodeList&, const VertexArray, const VertexArray);
+    GeneralMatchPath(const NodeList& ,const NodeList&, const VertexArray, const VertexArray, const CapacityVector src2ni_capacities = CapacityVector(0));
     //Destructor
     virtual ~GeneralMatchPath();
 
     // Cree un graphe de flot a partir de deux listes de noeuds,
     // une contenant les noeuds initiaux et l'autre les noeuds de reference
-    void make(const NodeList& ,const NodeList& , const VertexArray, const VertexArray);
+    void make(const NodeList& ,const NodeList& , const VertexArray, const VertexArray, const CapacityVector src2ni_capacities = CapacityVector(0));
 
 
     void link(int, MatchingDistanceTable*);
@@ -73,7 +73,8 @@ class TREEMATCH_API GeneralMatchPath : public MatchPath
 
     // Resout le probleme de flot de cout minimum avec l'algorithme de
     // Busacker et Gowen ameliore par Edmons et Karp
-   DistanceType minCostFlow(VertexVector&); //Au lieu de FlowType ...
+    DistanceType minCostFlow(VertexVector&); //Au lieu de FlowType ...
+
     // Functions used to get the edges' cost
     DistanceType length(int,int,int);
     bool saturated(int);
@@ -81,6 +82,7 @@ class TREEMATCH_API GeneralMatchPath : public MatchPath
     bool reverse(int );
     bool direct(int );
     void initCost();
+
     // Useful function to simulate the flowgraph structure
     int next_edge(int,int);
     int next_vertex(int,int);
@@ -88,6 +90,8 @@ class TREEMATCH_API GeneralMatchPath : public MatchPath
     int who(int );
     int capacity(int);
     bool is_saturated();
+
+    void setCapacityToSourceEdge(int ni, int capacity) { assert(ni < _inputList.size()); _capacityList[ni] = capacity; }
 
 
 	// call the evaluator. Still can be redefined.
@@ -98,9 +102,11 @@ class TREEMATCH_API GeneralMatchPath : public MatchPath
  
 
   protected :
+
     MatchEdgeCostPtr   _edgecostEvaluator;
     NodeList*          _inputList;     //Liste des noeuds de l'ensemble initial
     NodeList*          _referenceList; //Liste des noeuds de l'ensemble de reference
+    CapacityVector     _capacityList;
     CapacityVector     flow; // Vecteur flot
     VertexArray       _inputSuccessors; // Vecteur qui indique avec quels 
                                          // elements du deuxieme ensemble les 

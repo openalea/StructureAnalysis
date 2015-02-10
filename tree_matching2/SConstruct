@@ -11,7 +11,7 @@ options = Variables(['../options.py', 'options.py'], ARGUMENTS)
 # Dependencies
 common_tools = ['boost_python']
 
-tools = ['alea', 'install'] + common_tools
+tools = ['install'] + common_tools
 
 env = ALEASolution(options, tools)
 env.Append(CPPPATH=pj('$build_includedir', 'tree_matching2'))

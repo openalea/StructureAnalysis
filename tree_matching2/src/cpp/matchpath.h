@@ -123,7 +123,7 @@ class TREEMATCH_API MatchPath
 
     // Resout le probleme de flot de cout minimum avec l'algorithme de
     // Busacker et Gowen ameliore par Edmons et Karp
-   DistanceType minCostFlow(VertexVector&); //Au lieu de FlowType ...
+    DistanceType minCostFlow(VertexVector&); //Au lieu de FlowType ...
     // Functions used to get the edges' cost
     DistanceType length(int,int,int);
     bool saturated(int);

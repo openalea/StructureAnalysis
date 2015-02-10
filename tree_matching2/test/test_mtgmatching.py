@@ -49,3 +49,6 @@ def test_mtgextmatching():
     matching = m.getList()
     totcost = m.getDBT()
 
+if __name__ == '__main__':
+    test_mtgmatching()
+

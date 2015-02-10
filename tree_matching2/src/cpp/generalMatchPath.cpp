@@ -49,10 +49,13 @@
 GeneralMatchPath::GeneralMatchPath():
   _inputList(0), _referenceList(0)  {} 
 
-GeneralMatchPath::GeneralMatchPath(const NodeList& input_list,const NodeList& reference_list, const VertexArray inputSuccessors, const VertexArray referencePredecessors):
+GeneralMatchPath::GeneralMatchPath(const NodeList& input_list,        const NodeList& reference_list, 
+                                   const VertexArray inputSuccessors, const VertexArray referencePredecessors, 
+                                   const CapacityVector src2ni_capacities ):
+
   _inputList(0), _referenceList(0), _inputSuccessors(0), _referencePredecessors(0){
   //cerr<<"Initialisation GeneralMatch Path"<<endl;
-  make(input_list,reference_list,inputSuccessors,referencePredecessors);
+  make(input_list,reference_list,inputSuccessors,referencePredecessors, src2ni_capacities);
   int deg_max = I_MAX(input_list.size(),reference_list.size());
   // le degre max correspond aux noeuds vides
   // Une optimissation doit etre possible sur le vecteur flow (a revoir)
@@ -77,11 +80,14 @@ void GeneralMatchPath::link(int deg_max,MatchingDistanceTable* mdtable)
 // d'alignement restreint.
 // ---------------------------------------------------------
 		
-void GeneralMatchPath::make(const NodeList& input_list,const NodeList& reference_list, const VertexArray inputSuccessors, const VertexArray referencePredecessors)
+void GeneralMatchPath::make(const NodeList& input_list, const NodeList& reference_list, 
+                            const VertexArray inputSuccessors, const VertexArray referencePredecessors, 
+                            const CapacityVector src2ni_capacities)
 {
   //cerr<<"make"<<endl;
   if(_inputList) delete _inputList;
   _inputList= new NodeList(input_list);
+
   if(_referenceList) delete _referenceList;
   _referenceList=new NodeList(reference_list);
 
@@ -104,6 +110,23 @@ void GeneralMatchPath::make(const NodeList& input_list,const NodeList& reference
 
   nbEdge = ni +(ni+1)*(nj+1) +nj+2;
   //cerr << "Nb edges = "<<nbEdge<<endl;
+
+  // FBSR Addon: We try to explicitly define the capacities in order to make them definable by the user.
+  _capacityList = CapacityVector(nbEdge,1);
+  _capacityList[ni]          = nj;    // correspond au noeud vide connecte aux refs
+  _capacityList[nbEdge-1]    = ni;    // correspond au noeud vide connecte aux input
+  _capacityList[nbEdge-nj-2] = std::min(ni,nj); // correspond à la connection entre les deux noeuds vides
+  
+  CapacityVector::iterator itacap = _capacityList.begin(); 
+
+  if (src2ni_capacities.size() == ni){
+    for (CapacityVector::const_iterator itcap = src2ni_capacities.begin(); itcap != src2ni_capacities.end(); ++itcap, ++itacap)
+        *itacap = *itcap;
+  }
+  else if (src2ni_capacities.size() >  0){
+    printf("Cannot use capacities. Wrong number of elements. Expected %i. Received %lu.", ni, src2ni_capacities.size());
+  }
+
 
   flow = CapacityVector(flow.size(),0);
   cost = CostVector(cost.size(),0.0);
@@ -131,6 +154,9 @@ GeneralMatchPath::~GeneralMatchPath()
 
 bool GeneralMatchPath::saturated(int flow_edge)
 {
+  return flow[flow_edge] == capacity(flow_edge);
+
+  /*  
   int ni=_inputList->size();
   int nj=_referenceList->size();
   if (flow_edge == ni ) 
@@ -142,6 +168,7 @@ bool GeneralMatchPath::saturated(int flow_edge)
   
  
   return(flow[flow_edge]==1); // tous les autres arcs sont de capacites 1
+  */
 }
 
 
@@ -151,6 +178,11 @@ bool GeneralMatchPath::saturated(int flow_edge)
 
 int GeneralMatchPath::capacity(int flow_edge)
 {
+  
+  // FBSR Addon: We use the explicitly defined capacity vector
+   return _capacityList[flow_edge];
+
+  /*  
   int ni=_inputList->size();
   int nj=_referenceList->size();
   if (flow_edge == ni ) 
@@ -161,6 +193,7 @@ int GeneralMatchPath::capacity(int flow_edge)
     return std::min(ni,nj); // correspond a l'arc entre les deux noeud vide
 
   return 1;
+  */
 }
 
 
@@ -379,7 +412,12 @@ DistanceType GeneralMatchPath::minCostFlow(VertexVector& map_list)
   // Le flot maximum est le max de ni, nj.
   //DistanceType flow_max=D_MAX(ni,nj);
   //DistanceType flow_min=D_MAX(ni,nj);
-  DistanceType flow_max=ni+nj;
+  DistanceType nicapsum = 0;
+  for(int capid = 0; capid < ni; ++capid) { 
+    nicapsum += _capacityList[capid]; 
+  }
+
+  DistanceType flow_max=nicapsum+nj;
 
   bool path = true ;
   int last_percentage = -1;

@@ -44,14 +44,24 @@ class PyGeneralMatchPath : public GeneralMatchPath, public bp::wrapper<GeneralMa
 {
 public:
 
-	//Constructor
+    //Constructor
   PyGeneralMatchPath(boost::python::object in_list,  boost::python::object ref_list, boost::python::object in_successor, boost::python::object ref_predecessor) :  
-	  GeneralMatchPath( extract_vec<int>(in_list)(),
+      GeneralMatchPath( extract_vec<int>(in_list)(),
                         extract_vec<int>(ref_list)(),
                         extract_vec<std::vector<int>, extract_vec<int> >(in_successor)(),
                         extract_vec<std::vector<int>, extract_vec<int> >(ref_predecessor)()), 
-	  bp::wrapper<GeneralMatchPath>() 
-  { cerr<<"Constructor"<<endl ;    }
+      bp::wrapper<GeneralMatchPath>() 
+  {   }
+
+    //Constructor
+  PyGeneralMatchPath(boost::python::object in_list,  boost::python::object ref_list, boost::python::object in_successor, boost::python::object ref_predecessor, boost::python::object in_capacities) :  
+      GeneralMatchPath( extract_vec<int>(in_list)(),
+                        extract_vec<int>(ref_list)(),
+                        extract_vec<std::vector<int>, extract_vec<int> >(in_successor)(),
+                        extract_vec<std::vector<int>, extract_vec<int> >(ref_predecessor)(),
+                        extract_vec<int>(in_capacities)()), 
+      bp::wrapper<GeneralMatchPath>() 
+  {   }
 
   virtual ~PyGeneralMatchPath() {}
 
@@ -77,7 +87,6 @@ public:
 
 
   boost::python::object py_minCostFlow(){
-    cerr<<"Min Cost Flow"<<endl;
     VertexVector map_list;
     map_list.resize(this->nbVertex,-1);
     DistanceType dist = this->minCostFlow(map_list);
@@ -106,7 +115,8 @@ void export_GeneralMatchPath() {
 	  ("GeneralMatchPath", init<boost::python::object,
                                 boost::python::object,
                                 boost::python::object,
-                                boost::python::object>("Constructor of GeneralMatchPath"))
+                                boost::python::object,
+                                optional<boost::python::object> >("Constructor of GeneralMatchPath"))
 	  .def( "bipartiteMatching", &PyGeneralMatchPath::py_minCostFlow,"Get the list of mapped vertices")
 	  .def("edgeCost", &GeneralMatchPath::edgeCost, &PyGeneralMatchPath::default_edgeCost)
 	;

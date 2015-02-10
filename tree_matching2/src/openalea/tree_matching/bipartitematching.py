@@ -107,7 +107,7 @@ def filter_perfect_matches(set1,set2, edges, nonmatchingset1cost, nonmatchingset
 
     
 class BipartiteMatching:
-    def __init__(self, set1, set2, possiblematching, nonmatchingset1cost, nonmatchingset2cost, filter = True):
+    def __init__(self, set1, set2, possiblematching, nonmatchingset1cost, nonmatchingset2cost, set1capacity = None, filter = True):
         """ Built with the ids of the two sets and the possible matching between them (list of triplet (id1,id2,cost).
             nonmatchingset1cost is an ordered list containing the costs to not match an element of set 1. Same with set2 and nonmatchingset2cost.  """
                     
@@ -166,7 +166,10 @@ class BipartiteMatching:
         # Initialize the Cpp structure
         class GeneralMatchPathWrapper(GeneralMatchPath):
             def __init__(self,ni,nj,inconnect,outconnect,edges_cost):
-                GeneralMatchPath.__init__(self,range(ni),range(nj),inconnect,outconnect)
+                if set1capacity:
+                    GeneralMatchPath.__init__(self,range(ni),range(nj),inconnect,outconnect, set1capacity)
+                else:
+                    GeneralMatchPath.__init__(self,range(ni),range(nj),inconnect,outconnect)
                 self.edges_cost = edges_cost
                
             def edgeCost(self,a,b):
