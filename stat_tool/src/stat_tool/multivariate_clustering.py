@@ -910,6 +910,7 @@ class ClustererChecker:
         self._nb_clusters = len(self._clusters_ids)
         self._nb_ids_by_clusters = dict( [ (q, self._clustering.count(q)) for q in self._clusters_ids] )
         self._ids_by_clusters = dict( [(q, [mvpd_matrix._global_distance_ids[k] for k in [i for i,j in enumerate(self._clustering) if j==q]]) for q in self._clusters_ids] )
+        self._sorted_ids_by_clusters = self.sorted_ids_by_clusters()
 
         # - Reformat inherited (usefull) info :
         self.info_clustering = {'method': mvpd_matrix._method,
@@ -1249,6 +1250,36 @@ class ClustererChecker:
         return vertex_distance2center
 
 
+    def ids_in_cluster(self,cluster_id):
+        """
+        Return a dictionary which keys are cluster ids and values are dictance-to-center sorted individuals.
+        """
+        return self._ids_by_clusters[cluster_id]
+
+    def ids_by_clusters(self):
+        """
+        Return a dictionary which keys are cluster ids and values are dictance-to-center sorted individuals.
+        """
+        return self._ids_by_clusters
+
+    def sorted_ids_by_clusters(self, return_distance=False):
+        """
+        Return a dictionary which keys are cluster ids and values are dictance-to-center sorted individuals.
+        """
+        vtx2center = self.vertex2clusters_distance()
+        sorted_ids_by_clusters, sorted_dist_by_clusters = {}, {}
+        for clust, ids in self._ids_by_clusters.iteritems():
+            dist2center = [vtx2center[i][clust] for i in ids]
+            sorted_ids_by_clusters[clust] = [ids[i] for i in np.argsort(dist2center)]
+            sorted_dist_by_clusters[clust] = sorted(dist2center)
+
+        self._sorted_ids_by_clusters = sorted_ids_by_clusters
+        if return_distance:
+            return self._sorted_ids_by_clusters, sorted_dist_by_clusters
+        else:
+            return self._sorted_ids_by_clusters
+
+
     def plot_vertex_distance2cluster_center(self, cluster_names=None, print_clustering_name=True, n_colors=None, savefig=None):
         """
         Plot the distance between a vertex and the center of its group.
@@ -1259,8 +1290,8 @@ class ClustererChecker:
 
         :WARNING: `distance_matrix` and `clustering` should obviously ordered the same way!
         """
-        vtx2center = self.vertex_distance2cluster_center()
-        index_q = {}
+        sorted_ids_by_clusters, sorted_dist_by_clusters = self.sorted_ids_by_clusters(True)
+
         # - Tricks to extend the colormap manually:
         if n_colors is None:
             n_colors = len(self._clusters_ids)
@@ -1272,14 +1303,11 @@ class ClustererChecker:
         colors_rgba = cmap(colors_i)
 
         fig = plt.figure(figsize=(10,5))
-        for n,q in enumerate(self._clusters_ids):
-            index_q[q] = [i for i,j in enumerate(self._clustering) if j==q]
-            vector = [vtx2center[i] for i in index_q[q]]
-            vector.sort()
+        for clust_id, distances in sorted_dist_by_clusters.iteritems():
             if cluster_names is None:
-                plt.plot( vector, '.-', label = "Cluster "+str(self._clusters_ids[n]), figure=fig, color=tuple(colors_rgba[n]))
+                plt.plot( distances, '.-', label = "Cluster "+str(self._clusters_ids[clust_id]), figure=fig, color=tuple(colors_rgba[clust_id]) )
             else:
-                plt.plot( vector, '.-', label = str(cluster_names[n]), figure=fig, color=tuple(colors_rgba[n]))
+                plt.plot( distances, '.-', label = str(cluster_names[clust_id]), figure=fig, color=tuple(colors_rgba[clust_id]) )
             if print_clustering_name:
                 plt.title(self.clustering_name)
             else:
@@ -1287,7 +1315,7 @@ class ClustererChecker:
 
             plt.xlabel("Ranked elements")
             plt.ylabel("Distance to cluster center")
-            plt.axis([0,max(self._nb_ids_by_clusters.values()), min(vtx2center.values()), max(vtx2center.values())])
+            plt.axis([0,max(self._nb_ids_by_clusters.values()), 0, max(max(sorted_dist_by_clusters.values()))])
 
         plt.legend(ncol=3, framealpha=0.7, fontsize='small')
         plt.tight_layout()
