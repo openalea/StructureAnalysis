@@ -517,7 +517,7 @@ ostream& Clusters::ascii_write(ostream &os , bool exhaustive) const
     for (i = 0;i < distance_matrix->label_size - 1;i++) {
       os << " ";
     }
-    os << setw(width[0]) << " " << "  | " << STAT_label[STATL_INTRA] << "-" << STAT_label[STATL_CLUSTER] << " "
+    os << setw(width[0]) << " " << "  | " << STAT_label[STATL_WITHIN] << "-" << STAT_label[STATL_CLUSTER] << " "
        << STAT_label[STATL_DISTANCE] << " | " << STAT_label[STATL_NEIGHBOR] << " " << STAT_label[STATL_CLUSTER]
        << " | " << STAT_label[STATL_NEIGHBOR] << " " << STAT_label[STATL_CLUSTER] << " " << STAT_label[STATL_DISTANCE]
        << " | " << STAT_label[STATL_MOST_DISTANT] << " " << distance_matrix->label << " | "
@@ -596,16 +596,16 @@ ostream& Clusters::ascii_write(ostream &os , bool exhaustive) const
   // (iv) de la distance entre les formes les plus proches entre ce groupe et un autre (separation)
 
   os << "\n        " << setw(width[0]) << " " << " | "
-     << STAT_label[STATL_INTRA] << "-" << STAT_label[STATL_CLUSTER] << " " << STAT_label[STATL_DISTANCE] << " | "
-     << STAT_label[STATL_INTER] << "-" << STAT_label[STATL_CLUSTER] << " " << STAT_label[STATL_DISTANCE] << " | "
+     << STAT_label[STATL_WITHIN] << "-" << STAT_label[STATL_CLUSTER] << " " << STAT_label[STATL_DISTANCE] << " | "
+     << STAT_label[STATL_BETWEEN] << "-" << STAT_label[STATL_CLUSTER] << " " << STAT_label[STATL_DISTANCE] << " | "
      << STAT_label[STATL_DIAMETER] << " | " << STAT_label[STATL_SEPARATION] << endl;
 
   for (i = 0;i < nb_cluster;i++) {
     os << STAT_label[STATL_CLUSTER] << " " << setw(width[0]) << i + 1 << " "
        << setw(width[1]) << normalized_cluster_distance[i][i]
-       << setw(width[1]) << inter_cluster_distance_computation(i)
-       << setw(width[2]) << max_intra_cluster_distance_computation(normalized_pattern_distance , i)
-       << setw(width[2]) << min_inter_cluster_distance_computation(normalized_pattern_distance , i) << endl;
+       << setw(width[1]) << between_cluster_distance_computation(i)
+       << setw(width[2]) << max_within_cluster_distance_computation(normalized_pattern_distance , i)
+       << setw(width[2]) << min_between_cluster_distance_computation(normalized_pattern_distance , i) << endl;
   }
 
   for (i = 0;i < nb_cluster;i++) {
@@ -774,7 +774,7 @@ bool Clusters::spreadsheet_write(StatError &error , const char *path) const
     // (ii) le groupe voisin, (iii) la forme la plus distante a l'interieur du groupe,
     // (iv) la forme d'un autre groupe la plus proche
 
-    out_file << "\n\t" << STAT_label[STATL_INTRA] << "-" << STAT_label[STATL_CLUSTER] << " " << STAT_label[STATL_DISTANCE]
+    out_file << "\n\t" << STAT_label[STATL_WITHIN] << "-" << STAT_label[STATL_CLUSTER] << " " << STAT_label[STATL_DISTANCE]
              << "\t" << STAT_label[STATL_NEIGHBOR] << " " << STAT_label[STATL_CLUSTER] << "\t"
              << STAT_label[STATL_NEIGHBOR] << " " << STAT_label[STATL_CLUSTER] << " " << STAT_label[STATL_DISTANCE]
              << "\t" << STAT_label[STATL_MOST_DISTANT] << " " << distance_matrix->label << "\t"
@@ -839,16 +839,16 @@ bool Clusters::spreadsheet_write(StatError &error , const char *path) const
     // (iii) de la distance entre les formes les plus distantes a l'interieur du groupe (diametre),
     // (iv) de la distance entre les formes les plus proches entre ce groupe et un autre (separation)
 
-    out_file << "\n\t" << STAT_label[STATL_INTRA] << "-" << STAT_label[STATL_CLUSTER] << " " << STAT_label[STATL_DISTANCE]
-             << "\t"  << STAT_label[STATL_INTER] << "-" << STAT_label[STATL_CLUSTER] << " " << STAT_label[STATL_DISTANCE]
+    out_file << "\n\t" << STAT_label[STATL_WITHIN] << "-" << STAT_label[STATL_CLUSTER] << " " << STAT_label[STATL_DISTANCE]
+             << "\t"  << STAT_label[STATL_BETWEEN] << "-" << STAT_label[STATL_CLUSTER] << " " << STAT_label[STATL_DISTANCE]
              << "\t" << STAT_label[STATL_DIAMETER] << "\t" << STAT_label[STATL_SEPARATION] << endl;
 
     for (i = 0;i < nb_cluster;i++) {
       out_file << STAT_label[STATL_CLUSTER] << " " << i + 1
                << "\t" << normalized_cluster_distance[i][i]
-               << "\t" << inter_cluster_distance_computation(i)
-               << "\t" << max_intra_cluster_distance_computation(normalized_pattern_distance , i)
-               << "\t" << min_inter_cluster_distance_computation(normalized_pattern_distance , i) << endl;
+               << "\t" << between_cluster_distance_computation(i)
+               << "\t" << max_within_cluster_distance_computation(normalized_pattern_distance , i)
+               << "\t" << min_between_cluster_distance_computation(normalized_pattern_distance , i) << endl;
     }
 
     for (i = 0;i < nb_cluster;i++) {
@@ -1533,15 +1533,15 @@ int Clusters::most_distant_pattern_selection(double **normalized_distance , int 
 {
   register int i;
   int pattern = ipattern;
-  double max_intra_cluster_distance;
+  double max_within_cluster_distance;
 
 
   if (cluster_nb_pattern[assignment[ipattern]] > 1) {
-    max_intra_cluster_distance = 0.;
+    max_within_cluster_distance = 0.;
     for (i = 0;i < nb_pattern;i++) {
       if ((assignment[i] == assignment[ipattern]) &&
-          (normalized_distance[ipattern][i] > max_intra_cluster_distance)) {
-        max_intra_cluster_distance = normalized_distance[ipattern][i];
+          (normalized_distance[ipattern][i] > max_within_cluster_distance)) {
+        max_within_cluster_distance = normalized_distance[ipattern][i];
         pattern = i;
       }
     }
@@ -1564,14 +1564,14 @@ int Clusters::neighbor_pattern_selection(double **normalized_distance , int ipat
 {
   register int i;
   int pattern;
-  double min_inter_cluster_distance;
+  double min_between_cluster_distance;
 
 
-  min_inter_cluster_distance = -D_INF;
+  min_between_cluster_distance = -D_INF;
   for (i = 0;i < nb_pattern;i++) {
     if ((assignment[i] != assignment[ipattern]) &&
-        (normalized_distance[ipattern][i] < min_inter_cluster_distance)) {
-      min_inter_cluster_distance = normalized_distance[ipattern][i];
+        (normalized_distance[ipattern][i] < min_between_cluster_distance)) {
+      min_between_cluster_distance = normalized_distance[ipattern][i];
       pattern = i;
     }
   }
@@ -1593,14 +1593,14 @@ int Clusters::neighbor_pattern_cluster_selection(double **normalized_distance , 
 {
   register int i;
   int cluster;
-  double min_inter_cluster_distance;
+  double min_between_cluster_distance;
 
 
-  min_inter_cluster_distance = -D_INF;
+  min_between_cluster_distance = -D_INF;
   for (i = 0;i < nb_cluster;i++) {
     if ((i != assignment[pattern]) &&
-        (normalized_distance[pattern][i] < min_inter_cluster_distance)) {
-      min_inter_cluster_distance = normalized_distance[pattern][i];
+        (normalized_distance[pattern][i] < min_between_cluster_distance)) {
+      min_between_cluster_distance = normalized_distance[pattern][i];
       cluster = i;
     }
   }
@@ -1617,29 +1617,29 @@ int Clusters::neighbor_pattern_cluster_selection(double **normalized_distance , 
  *
  *--------------------------------------------------------------*/
 
-double Clusters::max_intra_cluster_distance_computation(double **normalized_distance , int cluster) const
+double Clusters::max_within_cluster_distance_computation(double **normalized_distance , int cluster) const
 
 {
   register int i , j;
-  double max_intra_cluster_distance;
+  double max_within_cluster_distance;
 
 
-  max_intra_cluster_distance = 0.;
+  max_within_cluster_distance = 0.;
 
   if (cluster_nb_pattern[cluster] > 1) {
     for (i = 0;i < nb_pattern - 1;i++) {
       if (assignment[i] == cluster) {
         for (j = i + 1;j < nb_pattern;j++) {
           if ((assignment[j] == cluster) &&
-              (normalized_distance[i][j] > max_intra_cluster_distance)) {
-            max_intra_cluster_distance = normalized_distance[i][j];
+              (normalized_distance[i][j] > max_within_cluster_distance)) {
+            max_within_cluster_distance = normalized_distance[i][j];
           }
         }
       }
     }
   }
 
-  return max_intra_cluster_distance;
+  return max_within_cluster_distance;
 }
 
 
@@ -1651,27 +1651,27 @@ double Clusters::max_intra_cluster_distance_computation(double **normalized_dist
  *
  *--------------------------------------------------------------*/
 
-double Clusters::min_inter_cluster_distance_computation(double **normalized_distance , int cluster) const
+double Clusters::min_between_cluster_distance_computation(double **normalized_distance , int cluster) const
 
 {
   register int i , j;
-  double min_inter_cluster_distance;
+  double min_between_cluster_distance;
 
 
-  min_inter_cluster_distance = -D_INF;
+  min_between_cluster_distance = -D_INF;
 
   for (i = 0;i < nb_pattern;i++) {
     if (assignment[i] == cluster) {
       for (j = 0;j < nb_pattern;j++) {
         if ((assignment[j] != cluster) &&
-            (normalized_distance[i][j] < min_inter_cluster_distance)) {
-          min_inter_cluster_distance = normalized_distance[i][j];
+            (normalized_distance[i][j] < min_between_cluster_distance)) {
+          min_between_cluster_distance = normalized_distance[i][j];
         }
       }
     }
   }
 
-  return min_inter_cluster_distance;
+  return min_between_cluster_distance;
 }
 
 
@@ -1743,7 +1743,7 @@ bool Clusters::isolation_property(double **normalized_distance , int cluster , c
  *
  *--------------------------------------------------------------*/
 
-double Clusters::inter_cluster_distance_computation(int cluster) const
+double Clusters::between_cluster_distance_computation(int cluster) const
 
 {
   register int i;
@@ -1831,8 +1831,8 @@ ostream& Clusters::global_distance_ascii_print(ostream &os)
     inter_distance /= inter_length;
   }
 
-  os << "\n" << STAT_label[STATL_INTRA] << "-" << STAT_label[STATL_CLUSTER] << " " << STAT_label[STATL_DISTANCE]
-     << ": " << intra_distance << "   " << STAT_label[STATL_INTER] << "-" << STAT_label[STATL_CLUSTER]
+  os << "\n" << STAT_label[STATL_WITHIN] << "-" << STAT_label[STATL_CLUSTER] << " " << STAT_label[STATL_DISTANCE]
+     << ": " << intra_distance << "   " << STAT_label[STATL_BETWEEN] << "-" << STAT_label[STATL_CLUSTER]
      << " " << STAT_label[STATL_DISTANCE] << ": " << inter_distance;
   if ((intra_distance != -D_INF) && (intra_length > 0) && (inter_distance != -D_INF) && (inter_length > 0)) {
     os << "   " << STAT_label[STATL_RATIO] << ": " << intra_distance / inter_distance << "\n";
