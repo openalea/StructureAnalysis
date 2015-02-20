@@ -1307,16 +1307,16 @@ ostream& Mixture::ascii_write(ostream &os , const MixtureData *vec ,
       os << nb_parameter << " " << STAT_label[nb_parameter == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS]
          << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[BIC] << "): "
          << 2 * vec->likelihood - nb_parameter * log((double)vec->nb_vector) << endl;
-    }
 
-    os << "\n";
-    if (file_flag) {
-      os << "# ";
+      os << "\n";
+      if (file_flag) {
+        os << "# ";
+      }
+      os << nb_parameter << " " << STAT_label[nb_parameter == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS]
+         << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[ICL] << "): "
+//         << 2 * vec->restoration_likelihood - nb_parameter * log((double)vec->nb_vector) << endl;
+         << 2 * (vec->likelihood - vec->sample_entropy) - nb_parameter * log((double)vec->nb_vector) << endl;
     }
-    os << nb_parameter << " " << STAT_label[nb_parameter == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS]
-       << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[ICL] << "): "
-//       << 2 * vec->restoration_likelihood - nb_parameter * log((double)vec->nb_vector) << endl;
-       << 2 * (vec->likelihood - vec->sample_entropy) - nb_parameter * log((double)vec->nb_vector) << endl;
   }
 
   os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
@@ -1555,12 +1555,12 @@ ostream& Mixture::spreadsheet_write(ostream &os , const MixtureData *vec) const
       os << "\n" << nb_parameter << "\t" << STAT_label[nb_parameter == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS] << "\t"
          << "2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[BIC] << ")\t"
          << 2 * vec->likelihood - nb_parameter * log((double)vec->nb_vector) << endl;
-    }
 
-    os << "\n" << nb_parameter << "\t" << STAT_label[nb_parameter == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS] << "\t"
-       << "2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[ICL] << ")\t"
-//       << 2 * vec->restoration_likelihood - nb_parameter * log((double)vec->nb_vector) << endl;
-       << 2 * (vec->likelihood - vec->sample_entropy) - nb_parameter * log((double)vec->nb_vector) << endl;
+      os << "\n" << nb_parameter << "\t" << STAT_label[nb_parameter == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS] << "\t"
+         << "2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[ICL] << ")\t"
+//         << 2 * vec->restoration_likelihood - nb_parameter * log((double)vec->nb_vector) << endl;
+         << 2 * (vec->likelihood - vec->sample_entropy) - nb_parameter * log((double)vec->nb_vector) << endl;
+    }
   }
 
   return os;
