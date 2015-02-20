@@ -3783,7 +3783,7 @@ Sequences* Sequences::segmentation_extract(StatError &error , int variable ,
           global_variance /= (seq->cumul_length - 1);
 
           cout << "\n" << STAT_label[STATL_VARIABLE] << " " << i + 1 << " - "
-               << "avergage difference: " <<  average_diff << " | "
+               << "average difference: " <<  average_diff << " | "
                << "within-individual variance: " << individual_variance << " | "
                << "global variance: " << global_variance << " | "
                << individual_variance / global_variance;
