@@ -206,7 +206,7 @@ enum {
 const double ROUNDOFF_ERROR = 1.e-10;  // erreur sur une somme de doubles
 const int PENALTY_SHAPE_SCALING_FACTOR = 100;  // facteur d'echelle pour l'affichage des pentes de log-vraisemblances
 const int NB_SEGMENTATION = 10;        // nombre de segmentations calculees
-const int SLOPE_NB_SEGMENT = 5;        // nombre minimum de points pour calculer la pente des vraisemblances
+const int SLOPE_NB_SEGMENT_RANGE = 9;  // nombre minimum de points pour calculer la pente des vraisemblances
 
 enum {
   APPROXIMATED ,
