@@ -3606,6 +3606,18 @@ ostream& Vectors::ascii_write(ostream &os , bool exhaustive , bool comment_flag)
   // test du caractere significatif des coefficients de correlation
 
   if (nb_vector > 2) {
+#   ifdef DEBUG
+    double value = fabs(correlation[0][1]) * sqrt(nb_vector - 2) / sqrt(1 - correlation[0][1] * correlation[0][1]);
+
+    test = new Test(STUDENT , false , nb_vector - 2 , I_DEFAULT , value);
+    test->t_critical_probability_computation();
+
+    os << "\n" << test->value << "   " << STAT_label[STATL_CRITICAL_PROBABILITY]
+       << ": " << test->critical_probability << endl;
+
+    delete test;
+#   endif
+
     test = new Test(STUDENT , false , nb_vector - 2 , I_DEFAULT , D_DEFAULT);
 
     for (i = 0;i < NB_CRITICAL_PROBABILITY;i++) {
