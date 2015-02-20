@@ -1343,6 +1343,16 @@ double Sequences::N_segmentation(int index , int nb_segment , int *model_type ,
 
     delete [] change_point;
   }
+
+  if (((model_type[0] == MEAN_CHANGE) || (model_type[0] == INTERCEPT_SLOPE_CHANGE)) &&
+       (nb_segment > 2) && (inb_segmentation >= nb_segmentation_forward[length[index] - 1][nb_segment - 1])) {
+    norm = 0.;
+    for (i = 0;i < nb_segmentation_forward[length[index] - 1][nb_segment - 1];i++) {
+      norm += exp(forward[length[index] - 1][nb_segment - 1][i]);
+    }
+
+    os << SEQ_label[SEQL_POSTERIOR_PROBABILITY] << ": " << exp(forward[length[index] - 1][nb_segment - 1][0]) / norm << endl;
+  }
 # endif
 
 # ifdef DEBUG
