@@ -416,7 +416,7 @@ double SemiMarkov::likelihood_computation(const SemiMarkovData &seq) const
 {
   register int i , j;
   int nb_value;
-  double buff , likelihood;
+  double buff , likelihood = 0.;
   FrequencyDistribution **initial_run , **final_run , **single_run;
 
 
