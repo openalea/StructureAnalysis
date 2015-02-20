@@ -76,10 +76,10 @@ Dendrogram::Dendrogram()
   child = NULL;
 
   child_distance = NULL;
-  intra_cluster_distance = NULL;
-  inter_cluster_distance = NULL;
-  max_intra_cluster_distance = NULL;
-  min_inter_cluster_distance = NULL;
+  within_cluster_distance = NULL;
+  between_cluster_distance = NULL;
+  max_within_cluster_distance = NULL;
+  min_between_cluster_distance = NULL;
 }
 
 
@@ -131,19 +131,19 @@ Dendrogram::Dendrogram(const DistanceMatrix &dist_matrix , int iscale)
     child_distance[i] = D_DEFAULT;
   }
 
-  intra_cluster_distance = new double[nb_cluster];
+  within_cluster_distance = new double[nb_cluster];
   for (i = 0;i < distance_matrix->nb_row;i++) {
-    intra_cluster_distance[i] = 0.;
+    within_cluster_distance[i] = 0.;
   }
 
-  inter_cluster_distance = new double[nb_cluster - 1];
+  between_cluster_distance = new double[nb_cluster - 1];
 
-  max_intra_cluster_distance = new double[nb_cluster];
+  max_within_cluster_distance = new double[nb_cluster];
   for (i = 0;i < distance_matrix->nb_row;i++) {
-    max_intra_cluster_distance[i] = 0.;
+    max_within_cluster_distance[i] = 0.;
   }
 
-  min_inter_cluster_distance = new double[nb_cluster - 1];
+  min_between_cluster_distance = new double[nb_cluster - 1];
 }
 
 
@@ -201,24 +201,24 @@ void Dendrogram::copy(const Dendrogram &dendrogram)
     child_distance[i] = dendrogram.child_distance[i];
   }
 
-  intra_cluster_distance = new double[nb_cluster];
+  within_cluster_distance = new double[nb_cluster];
   for (i = 0;i < nb_cluster;i++) {
-    intra_cluster_distance[i] = dendrogram.intra_cluster_distance[i];
+    within_cluster_distance[i] = dendrogram.within_cluster_distance[i];
   }
 
-  inter_cluster_distance = new double[nb_cluster - 1];
+  between_cluster_distance = new double[nb_cluster - 1];
   for (i = 0;i < nb_cluster - 1;i++) {
-    inter_cluster_distance[i] = dendrogram.inter_cluster_distance[i];
+    between_cluster_distance[i] = dendrogram.between_cluster_distance[i];
   }
 
-  max_intra_cluster_distance = new double[nb_cluster];
+  max_within_cluster_distance = new double[nb_cluster];
   for (i = 0;i < nb_cluster;i++) {
-    max_intra_cluster_distance[i] = dendrogram.max_intra_cluster_distance[i];
+    max_within_cluster_distance[i] = dendrogram.max_within_cluster_distance[i];
   }
 
-  min_inter_cluster_distance = new double[nb_cluster - 1];
+  min_between_cluster_distance = new double[nb_cluster - 1];
   for (i = 0;i < nb_cluster - 1;i++) {
-    min_inter_cluster_distance[i] = dendrogram.min_inter_cluster_distance[i];
+    min_between_cluster_distance[i] = dendrogram.min_between_cluster_distance[i];
   }
 }
 
@@ -256,10 +256,10 @@ void Dendrogram::remove()
   delete distance_matrix;
 
   delete [] child_distance;
-  delete [] intra_cluster_distance;
-  delete [] inter_cluster_distance;
-  delete [] max_intra_cluster_distance;
-  delete [] min_inter_cluster_distance;
+  delete [] within_cluster_distance;
+  delete [] between_cluster_distance;
+  delete [] max_within_cluster_distance;
+  delete [] min_between_cluster_distance;
 }
 
 
@@ -350,7 +350,7 @@ double* Dendrogram::distance_ordering() const
     distance = child_distance;
     break;
   case DIAMETER :
-    distance = max_intra_cluster_distance;
+    distance = max_within_cluster_distance;
     break;
   }
 
@@ -412,22 +412,22 @@ ostream& Dendrogram::ascii_write(ostream &os , bool exhaustive) const
   if (scale == CHILD_CLUSTER_DISTANCE) {
     width[2] = width[1];
   }
-  buff = column_width(distance_matrix->nb_row - 1 , intra_cluster_distance + distance_matrix->nb_row);
+  buff = column_width(distance_matrix->nb_row - 1 , within_cluster_distance + distance_matrix->nb_row);
   if (buff > width[1]) {
     width[1] = buff;
   }
-  buff = column_width(distance_matrix->nb_row - 2 , inter_cluster_distance + distance_matrix->nb_row);
+  buff = column_width(distance_matrix->nb_row - 2 , between_cluster_distance + distance_matrix->nb_row);
   if (buff > width[1]) {
     width[1] = buff;
   }
-  buff = column_width(distance_matrix->nb_row - 1 , max_intra_cluster_distance + distance_matrix->nb_row);
+  buff = column_width(distance_matrix->nb_row - 1 , max_within_cluster_distance + distance_matrix->nb_row);
   if (scale == DIAMETER) {
     width[2] = buff;
   }
   if (buff > width[1]) {
     width[1] = buff;
   }
-  buff = column_width(distance_matrix->nb_row - 2 , min_inter_cluster_distance + distance_matrix->nb_row);
+  buff = column_width(distance_matrix->nb_row - 2 , min_between_cluster_distance + distance_matrix->nb_row);
   if (buff > width[1]) {
     width[1] = buff;
   }
@@ -439,22 +439,22 @@ ostream& Dendrogram::ascii_write(ostream &os , bool exhaustive) const
   // entre ce groupe et un autre (separation), (vi) de la composition du groupe
 
   os << "\n        | " << STAT_label[STATL_CHILD] << " "  << STAT_label[STATL_CLUSTER] << " "
-     << STAT_label[STATL_DISTANCE] << " | " << STAT_label[STATL_INTRA] << "-" << STAT_label[STATL_CLUSTER] << " "
-     << STAT_label[STATL_DISTANCE] << " | " << STAT_label[STATL_INTER] << "-" << STAT_label[STATL_CLUSTER] << " "
+     << STAT_label[STATL_DISTANCE] << " | " << STAT_label[STATL_WITHIN] << "-" << STAT_label[STATL_CLUSTER] << " "
+     << STAT_label[STATL_DISTANCE] << " | " << STAT_label[STATL_BETWEEN] << "-" << STAT_label[STATL_CLUSTER] << " "
      << STAT_label[STATL_DISTANCE] << " | " << STAT_label[STATL_DIAMETER] << " | " << STAT_label[STATL_SEPARATION]
      << " | " << STAT_label[STATL_COMPOSITION] << endl;
   for (i = distance_matrix->nb_row;i < 2 * distance_matrix->nb_row - 1;i++) {
     os << STAT_label[STATL_STEP] << setw(width[0]) << i + 1 - distance_matrix->nb_row
        << setw(width[1]) << child_distance[i]
-       << setw(width[1]) << intra_cluster_distance[i];
+       << setw(width[1]) << within_cluster_distance[i];
     if (i < 2 * distance_matrix->nb_row - 2) {
-      os << setw(width[1]) << inter_cluster_distance[i]
-         << setw(width[1]) << max_intra_cluster_distance[i]
-         << setw(width[1]) << min_inter_cluster_distance[i];
+      os << setw(width[1]) << between_cluster_distance[i]
+         << setw(width[1]) << max_within_cluster_distance[i]
+         << setw(width[1]) << min_between_cluster_distance[i];
     }
     else {
       os << setw(width[1]) << " "
-         << setw(width[1]) << max_intra_cluster_distance[i]
+         << setw(width[1]) << max_within_cluster_distance[i]
          << setw(width[1]) << " ";
     }
     os << "   ";
@@ -512,7 +512,7 @@ ostream& Dendrogram::ascii_write(ostream &os , bool exhaustive) const
     distance = child_distance;
     break;
   case DIAMETER :
-    distance = max_intra_cluster_distance;
+    distance = max_within_cluster_distance;
     break;
   }
 
@@ -678,19 +678,19 @@ bool Dendrogram::spreadsheet_write(StatError &error , const char *path) const
     // entre ce groupe et un autre (separation), (vi) de la composition du groupe
 
     out_file << "\n\t" << STAT_label[STATL_CHILD] << " " << STAT_label[STATL_CLUSTER] << " "
-             << STAT_label[STATL_DISTANCE] << "\t" << STAT_label[STATL_INTRA] << "-" << STAT_label[STATL_CLUSTER] << " "
-             << STAT_label[STATL_DISTANCE] << "\t" << STAT_label[STATL_INTER] << "-" << STAT_label[STATL_CLUSTER] << " "
+             << STAT_label[STATL_DISTANCE] << "\t" << STAT_label[STATL_WITHIN] << "-" << STAT_label[STATL_CLUSTER] << " "
+             << STAT_label[STATL_DISTANCE] << "\t" << STAT_label[STATL_BETWEEN] << "-" << STAT_label[STATL_CLUSTER] << " "
              << STAT_label[STATL_DISTANCE] << "\t" << STAT_label[STATL_DIAMETER] << "\t" << STAT_label[STATL_SEPARATION]
              << "\t" << STAT_label[STATL_COMPOSITION] << endl;
     for (i = distance_matrix->nb_row;i < 2 * distance_matrix->nb_row - 1;i++) {
       out_file << STAT_label[STATL_STEP] << " " << i + 1 - distance_matrix->nb_row << "\t"
-               << child_distance[i] << "\t" << intra_cluster_distance[i] << "\t";
+               << child_distance[i] << "\t" << within_cluster_distance[i] << "\t";
       if (i < 2 * distance_matrix->nb_row - 2) {
-        out_file << inter_cluster_distance[i] << "\t" << max_intra_cluster_distance[i] << "\t"
-                 << min_inter_cluster_distance[i] << "\t";
+        out_file << between_cluster_distance[i] << "\t" << max_within_cluster_distance[i] << "\t"
+                 << min_between_cluster_distance[i] << "\t";
       }
       else {
-        out_file << "\t" << max_intra_cluster_distance[i] << "\t\t";
+        out_file << "\t" << max_within_cluster_distance[i] << "\t\t";
       }
       for (j = 0;j < cluster_nb_pattern[i];j++) {
         out_file  << "\t" << distance_matrix->row_identifier[cluster_pattern[i][j]];
@@ -796,7 +796,7 @@ double Dendrogram::coefficient_computation(int iscale) const
     distance = child_distance;
     break;
   case DIAMETER :
-    distance = max_intra_cluster_distance;
+    distance = max_within_cluster_distance;
     break;
   }
 
@@ -827,7 +827,7 @@ Dendrogram* DistanceMatrix::agglomerative_hierarchical_clustering(int algorithm 
   register int i , j , k;
   int index , index1 , index2 , icluster , *pattern_index , **cluster_pattern;
   double min_distance , *cumul_distance , **normalized_cluster_distance ,
-         **normalized_pattern_distance , **max_inter_cluster_distance;
+         **normalized_pattern_distance , **max_between_cluster_distance;
   DistanceMatrix *dist_matrix;
   Clusters *clusters;
   Dendrogram *dendrogram;
@@ -890,9 +890,9 @@ Dendrogram* DistanceMatrix::agglomerative_hierarchical_clustering(int algorithm 
   }
 
   if (criterion == FARTHEST_NEIGHBOR) {
-    max_inter_cluster_distance = new double*[nb_row];
+    max_between_cluster_distance = new double*[nb_row];
     for (i = 0;i < nb_row;i++) {
-      max_inter_cluster_distance[i] = new double[nb_row];
+      max_between_cluster_distance[i] = new double[nb_row];
     }
   }
 
@@ -959,24 +959,24 @@ Dendrogram* DistanceMatrix::agglomerative_hierarchical_clustering(int algorithm 
         case FARTHEST_NEIGHBOR : {
           for (j = 0;j < nb_row - i;j++) {
             for (k = 0;k < nb_row - i;k++) {
-              max_inter_cluster_distance[j][k] = 0.;
+              max_between_cluster_distance[j][k] = 0.;
             }
           }
 
           for (j = 0;j < nb_row - 1;j++) {
             for (k = j + 1;k < nb_row;k++) {
               if((clusters->assignment[j] != clusters->assignment[k]) &&
-                 (normalized_pattern_distance[j][k] > max_inter_cluster_distance[clusters->assignment[j]][clusters->assignment[k]])) {
-                max_inter_cluster_distance[clusters->assignment[j]][clusters->assignment[k]] = normalized_pattern_distance[j][k];
+                 (normalized_pattern_distance[j][k] > max_between_cluster_distance[clusters->assignment[j]][clusters->assignment[k]])) {
+                max_between_cluster_distance[clusters->assignment[j]][clusters->assignment[k]] = normalized_pattern_distance[j][k];
               }
             }
           }
 
           for (j = 0;j < nb_row - i - 1;j++) {
             for (k = j + 1;k < nb_row - i;k++) {
-              max_inter_cluster_distance[j][k] = MAX(max_inter_cluster_distance[j][k] , max_inter_cluster_distance[k][j]);
-              if (max_inter_cluster_distance[j][k] < min_distance) {
-                min_distance = max_inter_cluster_distance[j][k];
+              max_between_cluster_distance[j][k] = MAX(max_between_cluster_distance[j][k] , max_between_cluster_distance[k][j]);
+              if (max_between_cluster_distance[j][k] < min_distance) {
+                min_distance = max_between_cluster_distance[j][k];
                 index1 = j;
                 index2 = k;
               }
@@ -1103,9 +1103,9 @@ Dendrogram* DistanceMatrix::agglomerative_hierarchical_clustering(int algorithm 
       }
     }
 
-    dendrogram->intra_cluster_distance[nb_row + i] = normalized_cluster_distance[index1][index1];
+    dendrogram->within_cluster_distance[nb_row + i] = normalized_cluster_distance[index1][index1];
     if (i < nb_row - 2) {
-      dendrogram->inter_cluster_distance[nb_row + i] = clusters->inter_cluster_distance_computation(index1);
+      dendrogram->between_cluster_distance[nb_row + i] = clusters->between_cluster_distance_computation(index1);
     }
 
     icluster = clusters->assignment[cluster_pattern[index2][0]];
@@ -1150,9 +1150,9 @@ Dendrogram* DistanceMatrix::agglomerative_hierarchical_clustering(int algorithm 
 
     // calcul du diametre et de la separation du groupe
 
-    dendrogram->max_intra_cluster_distance[nb_row + i] = clusters->max_intra_cluster_distance_computation(normalized_pattern_distance , clusters->assignment[cluster_pattern[index1][0]]);
+    dendrogram->max_within_cluster_distance[nb_row + i] = clusters->max_within_cluster_distance_computation(normalized_pattern_distance , clusters->assignment[cluster_pattern[index1][0]]);
     if (i < nb_row - 2) {
-      dendrogram->min_inter_cluster_distance[nb_row + i] = clusters->min_inter_cluster_distance_computation(normalized_pattern_distance , clusters->assignment[cluster_pattern[index1][0]]);
+      dendrogram->min_between_cluster_distance[nb_row + i] = clusters->min_between_cluster_distance_computation(normalized_pattern_distance , clusters->assignment[cluster_pattern[index1][0]]);
     }
   }
 
@@ -1181,9 +1181,9 @@ Dendrogram* DistanceMatrix::agglomerative_hierarchical_clustering(int algorithm 
 
   if (criterion == FARTHEST_NEIGHBOR) {
     for (i = 0;i < nb_row;i++) {
-      delete [] max_inter_cluster_distance[i];
+      delete [] max_between_cluster_distance[i];
     }
-    delete [] max_inter_cluster_distance;
+    delete [] max_between_cluster_distance;
   }
 
   if (algorithm == ORDERING) {
@@ -1252,7 +1252,7 @@ Dendrogram* DistanceMatrix::divisive_hierarchical_clustering() const
 
   for (i = nb_row - 2;i >= 0;i--) {
     if (i == nb_row - 2) {
-      dendrogram->max_intra_cluster_distance[nb_row + i] = clusters->max_intra_cluster_distance_computation(normalized_distance , 0);
+      dendrogram->max_within_cluster_distance[nb_row + i] = clusters->max_within_cluster_distance_computation(normalized_distance , 0);
       icluster = 0;
       for (j = 0;j < clusters->nb_pattern;j++) {
         cluster_index[j] = j;
@@ -1265,16 +1265,16 @@ Dendrogram* DistanceMatrix::divisive_hierarchical_clustering() const
 
       // recherche du groupe de diametre maximum
 
-      dendrogram->max_intra_cluster_distance[nb_row + i] = 0.;
+      dendrogram->max_within_cluster_distance[nb_row + i] = 0.;
       for (j = 0;j <= nb_row - i - 2;j++) {
-        distance = clusters->max_intra_cluster_distance_computation(normalized_distance , j);
-        if (distance > dendrogram->max_intra_cluster_distance[nb_row + i]) {
-          dendrogram->max_intra_cluster_distance[nb_row + i] = distance;
+        distance = clusters->max_within_cluster_distance_computation(normalized_distance , j);
+        if (distance > dendrogram->max_within_cluster_distance[nb_row + i]) {
+          dendrogram->max_within_cluster_distance[nb_row + i] = distance;
           icluster = j;
         }
       }
 
-      if (dendrogram->max_intra_cluster_distance[nb_row + i] == 0.) {
+      if (dendrogram->max_within_cluster_distance[nb_row + i] == 0.) {
         bnb_pattern = 1;
         for (j = 0;j <= nb_row - i - 2;j++) {
           if (clusters->cluster_nb_pattern[j] > bnb_pattern) {
@@ -1284,13 +1284,13 @@ Dendrogram* DistanceMatrix::divisive_hierarchical_clustering() const
         }
       }
 
-      dendrogram->min_inter_cluster_distance[nb_row + i] = clusters->min_inter_cluster_distance_computation(normalized_distance , icluster);
+      dendrogram->min_between_cluster_distance[nb_row + i] = clusters->min_between_cluster_distance_computation(normalized_distance , icluster);
 
 #     ifdef DEBUG
       cout << "\nCluster to be splitted: " << icluster << endl;
 #     endif
 
-      if (dendrogram->max_intra_cluster_distance[nb_row + i] > 0.) {
+      if (dendrogram->max_within_cluster_distance[nb_row + i] > 0.) {
 
         // extraction de la matrice des distances correspondant au groupe selectionne
 
@@ -1310,18 +1310,18 @@ Dendrogram* DistanceMatrix::divisive_hierarchical_clustering() const
 
     clusters->cluster_distance_computation_1();
 
-    dendrogram->intra_cluster_distance[nb_row + i] = clusters->distance[icluster][icluster];
+    dendrogram->within_cluster_distance[nb_row + i] = clusters->distance[icluster][icluster];
     if ((clusters->distance[icluster][icluster] != -D_INF) && (clusters->length[icluster][icluster] > 1)) {
-      dendrogram->intra_cluster_distance[nb_row + i] /= clusters->length[icluster][icluster];
+      dendrogram->within_cluster_distance[nb_row + i] /= clusters->length[icluster][icluster];
     }
     if (i < nb_row - 2) {
-      dendrogram->inter_cluster_distance[nb_row + i] = clusters->inter_cluster_distance_computation(icluster);
+      dendrogram->between_cluster_distance[nb_row + i] = clusters->between_cluster_distance_computation(icluster);
     }
 
     dendrogram->cluster_nb_pattern[nb_row + i] = clusters->cluster_nb_pattern[icluster];
     dendrogram->cluster_pattern[nb_row + i] = new int[dendrogram->cluster_nb_pattern[nb_row + i]];
 
-    if (dendrogram->max_intra_cluster_distance[nb_row + i] > 0.) {
+    if (dendrogram->max_within_cluster_distance[nb_row + i] > 0.) {
       step_clusters = new Clusters(*step_dist_matrix , 2);
 
       // recherche de la forme la plus excentree appartenant au groupe selectionne
