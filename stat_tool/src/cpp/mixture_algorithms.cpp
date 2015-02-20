@@ -164,7 +164,7 @@ double Mixture::classification_likelihood_computation(const MixtureData &vec) co
 {
   register int i , j;
   int nb_value;
-  double buff , likelihood;
+  double buff , likelihood = 0.;
 
 
   // verification de la compatibilite entre le modele et les donnees
@@ -272,7 +272,7 @@ double Mixture::likelihood_computation(const Vectors &vec , int index) const
 {
   register int i , j , k;
   int nb_value;
-  double likelihood , norm , component_proba;
+  double likelihood = 0. , norm , component_proba;
 
 
   // verification de la compatibilite entre le modele et les donnees
