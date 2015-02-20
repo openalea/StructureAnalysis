@@ -243,10 +243,10 @@ private :
     int neighbor_pattern_selection(double **normalized_distance , int ipattern) const;
     int neighbor_pattern_cluster_selection(double **normalized_distance , int pattern) const;
 
-    double max_intra_cluster_distance_computation(double **normalized_distance , int cluster) const;
-    double min_inter_cluster_distance_computation(double **normalized_distance , int cluster) const;
+    double max_within_cluster_distance_computation(double **normalized_distance , int cluster) const;
+    double min_between_cluster_distance_computation(double **normalized_distance , int cluster) const;
     bool isolation_property(double **normalized_distance , int cluster , char type = 'c') const;
-    double inter_cluster_distance_computation(int cluster) const;
+    double between_cluster_distance_computation(int cluster) const;
     std::ostream& global_distance_ascii_print(std::ostream &os);
 
     void prototype_initialization_1();
@@ -313,10 +313,10 @@ private :
     int *parent;            // noeuds parent
     int **child;            // noeuds fils
     double *child_distance;  // distances entre les deux groupes fusionnes
-    double *intra_cluster_distance;  // distances intra-groupe
-    double *inter_cluster_distance;  // distances inter-groupe
-    double *max_intra_cluster_distance;  // diametres
-    double *min_inter_cluster_distance;  // separations
+    double *within_cluster_distance;  // distances intra-groupe
+    double *between_cluster_distance;  // distances inter-groupe
+    double *max_within_cluster_distance;  // diametres
+    double *min_between_cluster_distance;  // separations
 
     void copy(const Dendrogram &dendrogram);
     void remove();
@@ -352,10 +352,10 @@ public :
     int get_parent(int cluster) const { return parent[cluster]; }
     int get_child(int cluster , int index) const { return child[cluster][index]; }
     double get_child_distance(int cluster) const { return child_distance[cluster]; }
-    double get_intra_cluster_distance(int cluster) const { return intra_cluster_distance[cluster]; }
-    double get_inter_cluster_distance(int cluster) const { return inter_cluster_distance[cluster]; }
-    double get_max_intra_cluster_distance(int cluster) const { return max_intra_cluster_distance[cluster]; }
-    double get_min_inter_cluster_distance(int cluster) const { return min_inter_cluster_distance[cluster]; }
+    double get_within_cluster_distance(int cluster) const { return within_cluster_distance[cluster]; }
+    double get_between_cluster_distance(int cluster) const { return between_cluster_distance[cluster]; }
+    double get_max_within_cluster_distance(int cluster) const { return max_within_cluster_distance[cluster]; }
+    double get_min_between_cluster_distance(int cluster) const { return min_between_cluster_distance[cluster]; }
 };
 
 
