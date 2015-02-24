@@ -31,22 +31,23 @@ from scipy.sparse import csr_matrix
 from openalea.container.temporal_graph_analysis import translate_keys_Image2Graph, add_graph_vertex_property_from_dictionary
 
 
-def distance_matrix_from_vector(data, variable_types, no_dist_index = []):
+def distance_matrix_from_vector(data, var_type, no_dist_index = []):
     """
     Function creating a distance matrix based on a vector (list) of values.
     Each values are attached to an individual.
 
     :Parameters:
      - `data` (list) - vector (list) of values
-     - `variable_types` (str) - type of variable
+     - `var_type` (str) - type of variable
 
     :Returns:
      - `dist_mat` (np.array) - distance matrix
     """
+    implemented_var_types = ["numeric", "ordinal"]
     N = len(data)
     dist_mat = np.zeros( shape = [N,N], dtype=float )
 
-    if variable_types == "Numeric":
+    if var_type.lower() == "numeric":
         for i in xrange(N):
             for j in xrange(i+1,N):# we skip when i=j because in that case the distance is 0.
                 if data[i] is None or data[j] is None or i in no_dist_index or j in no_dist_index:
@@ -54,7 +55,7 @@ def distance_matrix_from_vector(data, variable_types, no_dist_index = []):
                 else:
                     dist_mat[i,j] = dist_mat[j,i] = abs(data[i]-data[j])
 
-    if variable_types == "Ordinal":
+    elif var_type.lower() == "ordinal":
         rank = data.argsort() # In case of ordinal variables, observed values are replaced by ranked values.
         for i in xrange(N):
             for j in xrange(i+1,N): # we skip when i=j because in that case the distance is 0.
@@ -63,6 +64,8 @@ def distance_matrix_from_vector(data, variable_types, no_dist_index = []):
                 else:
                     dist_mat[i,j] = dist_mat[j,i] = abs(rank[i]-rank[j])
 
+    else:
+        raise ValueError("Unknown variable type '{}'... should either be {}".format(var_type, implemented_var_types))
     return dist_mat
 
 
@@ -126,62 +129,31 @@ def vectorORarray(data, return_data=False):
             return 'array'
 
 
-def standardisation(data, norm = 'L1', variable_types = None, outliers_index = []):
-    """
-    :Parameters:
-     - `data` (np.array|list) - pairwise distance matrix (if np.array) or vector of values (if list or 1D array);
-     - `norm` (str) - define which standarisation metric to apply to the data, takes value in ["L1", "L2"];
-    :Optional:
-     - `variable_types` (str) - used only if a vector of values is provided for `data`, takes value in ["Numeric", "Ordinal", "Interval"];
-     - `outliers_index` (list) - list gathering the (previously detected) outliers position (index) in `data`;
-
-    :Returns:
-     - `standard_mat` (np.array) - standardized distance matrix
-    """
-
-    if (norm.upper() != 'L1') and (norm.upper() != 'L2'):
-        raise ValueError("Undefined standardisation metric")
-
-    # -- Identifying case where numpy.array are 1D vectors:
-    if isinstance(data,ndarray) and (((data.shape[0] == 1) and (data.shape[1] > 1)) or ((data.shape[1] == 1) and (data.shape[0] > 1))):
-        data.tolist()
-
-    # -- Creating the pairwise distance matrix if not provided in `data`:
-    if isinstance(data,list):
-        if isinstance(data[0],list) and len(data)==len(data[0]):
-            data = np.array(data)
-        elif not isinstance(data[0],list):
-            distance_matrix = distance_matrix_from_vector(data, variable_types)
-        else:
-            raise ValueError("Can not convert the provided data.")
-
-    if isinstance(data,ndarray) and (data.shape[0]==data.shape[1]) and ((data.shape[0]!=1)and(data.shape[1]!=1)):
-        distance_matrix = data
-
-    # -- We create a copy of the `distance_matrix``as it should also contain the outliers values in the final pairwise distance matrix
-    # (the ouliers are indeed removed only for the dispersion/standardisation measure computation).
-    dist_mat = copy.copy(distance_matrix)
-
-    # -- Handling outliers by setting their value to np.nan (will exclude them of standardisation value computation).
-    if outliers_index != []:
-        dist_mat[outliers_index,:] = dist_mat[:,outliers_index] = np.nan
-
-    # -- Now we can start the standardisation:
+def missing_values(dist_mat):
     nan_index = np.isnan(dist_mat)
     if True in nan_index:
         nb_missing_values = len(np.where(nan_index is True)[0])
     else:
         nb_missing_values = 0.
+    return nb_missing_values
 
-    N = distance_matrix.shape[0]
-    if norm.upper() == "L1":
-        absd = np.nansum(np.nansum(abs(dist_mat))) / (N*(N-1)-nb_missing_values)
-        return distance_matrix / absd
+def matrix_outliers2nan(dist_mat, outliers_index):
+    dist_mat[outliers_index,:] = dist_mat[:,outliers_index] = np.nan
+    return dist_mat
 
-    if norm.upper() == "L2":
-        sd = np.nansum(np.nansum(dist_mat**2)) / (N*(N-1)-nb_missing_values)
-        return distance_matrix / sd
+def vector_outliers2nan(vect, outliers_index):
+    vect[outliers_index] = np.nan
+    return vect
 
+def standardisation_L1(dist_mat):
+    N = dist_mat.shape[0]
+    nb_missing_values = missing_values(dist_mat)
+    return np.nansum(np.nansum(abs(dist_mat))) / (N*(N-1)-nb_missing_values)
+
+def standardisation_L2(dist_mat):
+    N = dist_mat.shape[0]
+    nb_missing_values = missing_values(dist_mat)
+    return np.nansum(np.nansum(dist_mat**2)) / (N*(N-1)-nb_missing_values)
 
 def create_weight_matrix(N,weight,standard_distance_matrix):
     tmp_w_mat = np.zeros( shape = [N,N], dtype=float )
@@ -439,7 +411,7 @@ class mvpd_matrix:
     The sum of weight must equal to one!
     We handle missing data by automatically re-weighting according to the presence or absence of data for each cmobined information.
     """
-    def __init__(self, variable_list=[], variable_names=[], variable_types=[], variable_weights=[], variable_units=[], standardisation_method='L1'):
+    def __init__(self, variable_list=[], variable_names=[], variable_types=[], variable_weights=[], variable_units=[], standardisation_method='L1', standardize_over=None):
         """
         Initialisation of the multivariate pairwise distance matrix object. The default standardisation method is to use the L1 metric.
         All '__init__' parameters can remain empty, but in such case you will have to add variables using 'self.add_variables'.
@@ -497,7 +469,7 @@ class mvpd_matrix:
 
         # -- If the weigths are also provided, we can compute the multi-variate pairwise distance matrix rigth now:
         if len(variable_weights) > 0:
-            self.create_mvpd_matrix(variable_names, variable_weights)
+            self.create_mvpd_matrix(variable_names, variable_weights, standardize_over)
 
         # -------------- DONE!
 
@@ -569,20 +541,59 @@ class mvpd_matrix:
         self._distance_matrix_info.pop(var_id)
         return "Done."
 
+    def _standardisation(self, data, norm = 'L1', variable_types = None, outliers_index = []):
+        """
+        :Parameters:
+         - `data` (np.array|list) - pairwise distance matrix (if np.array) or vector of values (if list or 1D array);
+         - `norm` (str) - define which standarisation metric to apply to the data, takes value in ["L1", "L2"];
+        :Optional:
+         - `variable_types` (str) - used only if a vector of values is provided for `data`, takes value in ["Numeric", "Ordinal", "Interval"];
+         - `outliers_index` (list) - list gathering the (previously detected) outliers position (index) in `data`;
 
-    def create_mvpd_matrix(self, variable_names, variable_weights, ignore_outliers = False, delete_outliers = False, return_data = False):
+        :Returns:
+         - `standard_mat` (np.array) - standardized distance matrix
+        """
+        vOa, data = vectorORarray(data, True)
+        if vOa == 'vector':
+            distance_matrix = distance_matrix_from_vector(data, variable_types)
+        elif vOa == 'array':
+            distance_matrix = data
+        else:
+            raise ValueError("Can not convert the provided data.")
+
+        # -- We create a copy of the `distance_matrix``as it should also contain the outliers values in the final pairwise distance matrix
+        # (the ouliers are indeed removed only for the dispersion/standardisation measure computation).
+        dist_mat = copy.copy(distance_matrix)
+        # -- Handling outliers by setting their value to np.nan (will exclude them of standardisation value computation).
+        if outliers_index != []:
+            dist_mat[outliers_index,:] = dist_mat[:,outliers_index] = np.nan
+
+        # -- Now we can start the standardisation:
+        if norm.upper() == "L1":
+            absd = standardisation_L1(dist_mat)
+            return distance_matrix / absd
+        elif norm.upper() == "L2":
+            sd = standardisation_L2(dist_mat)
+            return distance_matrix / sd
+        else:
+            raise ValueError("Wrong type of standardisation metric, choose 'L1' or 'L2'.")
+
+    def create_mvpd_matrix(self, variable_names, variable_weights, standardize_over=None, ignore_outliers = False, delete_outliers = False, return_data = False):
         """
         Funtion creating the global weighted distance matrix.
-        Provided `variable_names` should exist in `self._distance_matrix_dict`
+        Provided `variable_names` should exist in `self._distance_matrix_dict`.
+        Outliers can be computed when adding a vertex using MAD estimator.
+        When using `standardize_over`, remember that the list index start at O !!
 
         :Parameters:
          - `variable_names` (list) - list of variables names to combine; the names should be keys in `self._distance_matrix_dict`;
          - `variable_weights` (list) - list of weightss used to create the global weighted distance matrix (MUST sum to 1!);
-         - `ignore_outliers` (bool) - if True ignore outliers when computing standardisation value. Outliers are computed when adding a vertex
-         - `delete_outliers` (bool) - if True 'delete outliers' (values set to np.nan) of pairwise distance matrix. Outliers are computed when adding a vertex
-         - `return_data` (bool) - if true the function return the sorted ids list `ids` & a dictionary of pairwise distance matrix `global_matrix`
+         - `standardize_over` (list) - variables index (as given in variable_names) to be used simultaneously for standardisation value computation;
+         - `ignore_outliers` (bool) - if True ignore outliers when computing standardisation value;
+         - `delete_outliers` (bool) - if True 'delete outliers' (values set to np.nan) of pairwise distance matrix;
+         - `return_data` (bool) - if true the function return the sorted ids list `ids` & a dictionary of pairwise distance matrix `global_matrix`.
         """
-        print "Computing the multi-variate pairwise distance matrix..."
+        print "# -- Computing the multi-variate pairwise distance matrix..."
         if isinstance(variable_names,str):
             variable_names = [variable_names]
         if isinstance(variable_weights,int) or isinstance(variable_weights,float):
@@ -596,18 +607,18 @@ class mvpd_matrix:
                 raise KeyError("'{}' is not in the dictionary `self._distance_matrix_dict`".format(var_name))
 
         if ((not ignore_outliers) and (not delete_outliers)):
-            outliers_management = None
+            self._outliers_management = None
         elif ignore_outliers:
-            outliers_management = "ignored"
+            self._outliers_management = "ignored"
         else:
-            outliers_management = "deleted"
+            self._outliers_management = "deleted"
 
         # -- Shortcut when asking for the same result:
         if variable_weights == self._global_distance_weights and variable_names == self._global_distance_variables and ids == self._global_distance_ids and self._outliers == outliers_management:
             if return_data:
                 return self._global_distance_ids, self._global_distance_matrix
             else:
-                print "The global pairwise distance matrix was already computed!"
+                print "- The global pairwise distance matrix was already computed!"
                 return None
         else: # Otherwise, clean any possible clustering:
             self._method = None
@@ -617,27 +628,32 @@ class mvpd_matrix:
             self._clusterings_dict = None
 
         # By default we use all the given observations of the variables:
-        ids = range(self._nb_values)
-        ##SHOULD BE MODIFIED according to the way outliers should be handdled !!
+        ids = range(self._nb_values) ## SHOULD BE MODIFIED according to the way outliers should be handdled !!
 
         # -- Standardization step:
         standard_distance_matrix = {}
         mat_topo_dist_standard = []
         nb_var = 0
+        if standardize_over is not None:
+            self._standardize_over_variables(standardize_over, variable_names)
+            print "- Found the following standardisation values: {}".format(self._standardisation_values)
+
+        nb_std_var = 0
         for n, var_name in enumerate(variable_names):
             # reduce the matrix to the list of selected ids `ids`
             distance_matrix = self._distance_matrix_dict[var_name][ids,:][:,ids]
-            # managing outliers if asked for:
-            outliers_index = []
-            if (ignore_outliers or delete_outliers):
-                try:
-                    outliers_index = self._outliers_index_dict[var_name]
-                except:
-                    print "No outliers defined for property '{}' !".format(var_name)
-            if delete_outliers:
-                distance_matrix[outliers_index,:] = distance_matrix[:,outliers_index] = np.nan
+            # handle case where outliers need to be deleted of the distance matrix:
+            if self._outliers_management == "deleted":
+                distance_matrix = self._outliers_handler(distance_matrix, var_name)
+            elif self._outliers_management == "ignored":
+                outliers_index = outliers_index = self._outliers_index_dict[var_name]
+            else:
+                outliers_index = []
             # now we can compute the standardised version of the pairwise distance matrix:
-            standard_distance_matrix[var_name] = standardisation(distance_matrix, self.standardisation_method, outliers_index)
+            if ((standardize_over is not None) and (n in standardize_over)):
+                standard_distance_matrix[var_name] = distance_matrix/self._standardisation_values[n]
+            else:
+                standard_distance_matrix[var_name] = self._standardisation(distance_matrix, self.standardisation_method, outliers_index)
             nb_var += 1
 
         # -- Checking for a simple case: to 'combine' only ONE pairwise distance matrix (no re-weighting to do !)
@@ -665,12 +681,50 @@ class mvpd_matrix:
         self._global_distance_ids = ids
         self._global_distance_weights = variable_weights
         self._global_distance_variables = variable_names
-        self._outliers_management = outliers_management
 
         if return_data:
             return ids, global_matrix
         else:
             print "...done !"
+
+    def _standardize_over_variables(self, standardize_over, variable_names):
+        self._standardisation_values = {}
+        if isinstance(standardize_over, list) and isinstance(standardize_over[0], int):
+            standardize_over = [standardize_over]
+        for var_list in standardize_over:
+            print "Computing common standarisation value for variables {}...".format(var_list)
+            big_vector = []
+            for var_id in var_list:
+                var_name = variable_names[var_id]
+                big_vector.extend(self._outliers_handler(self._var_data_dict[var_name], var_name))
+            # Now that we have created the 'big_vector' we can compute the common standardisation value:
+            dist_mat = distance_matrix_from_vector(big_vector, self._distance_matrix_info[var_name][0])
+            if self.standardisation_method.upper() == "L1":
+                std_val = standardisation_L1(dist_mat)
+            elif self.standardisation_method.upper() == "L2":
+                std_val = standardisation_L2(dist_mat)
+            else:
+                raise ValueError("Wrong type of standardisation metric, choose 'L1' or 'L2'.")
+
+            self._standardisation_values.update(dict([(var_id, std_val) for var_id in var_list]))
+        return "Done."
+
+
+    def _outliers_handler(self, data, var_name):
+        if self._outliers_management is None: 
+            outliers_index = []
+        else:
+            try:
+                outliers_index = self._outliers_index_dict[var_name]
+            except:
+                print "No outliers defined for property '{}'... skipping that part.".format(var_name)
+
+        if (vectorORarray(data)=='array'):
+            return matrix_outliers2nan(data, outliers_index)
+        elif (vectorORarray(data)=='vector'):
+            return vector_outliers2nan(data, outliers_index)
+        else:
+            return "`data` type not understood!"
 
 
     def cluster(self, n_clusters, method = "ward"):
