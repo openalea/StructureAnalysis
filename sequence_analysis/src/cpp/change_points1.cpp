@@ -4915,6 +4915,10 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
       else if (criterion == SEGMENTATION_LIKELIHOOD_SLOPE) {
         criterion = mBIC;
       }
+
+      if (output == LOG_LIKELIHOOD_SLOPE) {
+        output = SEQUENCE;
+      }
     }
 
     iseq = new Sequences(*this , 1 , &index);
