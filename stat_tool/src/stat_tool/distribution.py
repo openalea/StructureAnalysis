@@ -155,7 +155,7 @@ def Binomial(inf_bound, sup_bound=I_DEFAULT, \
 
     param = D_DEFAULT
 
-    return _DiscreteParametricModel(BINOMIAL, \
+    return _DiscreteParametricModel(BINOMIAL,
         inf_bound, sup_bound, param, proba)
 
 
@@ -313,6 +313,5 @@ def ToHistogram(dist):
         :func:`~openalea.stat_tool.distribution.ToDistribution`
     """
     return dist.extract_data()
-
 
 
