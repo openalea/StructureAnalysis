@@ -16,7 +16,7 @@
 """This module helps to use clustering and standardization methods on graphs."""
 
 __license__ = "Cecill-C"
-__revision__ = " $Id: graph_clusterer.py 17387 2014-08-31 18:28:14Z jlegra02 $ "
+__revision__ = ""
 
 import warnings, numpy as np, copy, math
 from numpy import ndarray
@@ -24,12 +24,8 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import gzip, cPickle as pickle
 
-from openalea.container.temporal_graph_analysis import exist_relative_at_rank
 from sklearn.cluster import SpectralClustering, Ward, DBSCAN
 from sklearn import metrics
-from scipy.sparse import csr_matrix
-from openalea.container.temporal_graph_analysis import translate_keys_Image2Graph, add_graph_vertex_property_from_dictionary
-
 
 def distance_matrix_from_vector(data, var_type, no_dist_index = []):
     """
