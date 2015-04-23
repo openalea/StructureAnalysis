@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -43,8 +43,9 @@
 
 #include "plotable.h"
 
-using namespace plotable;
 
+
+namespace stat_tool {
 
 
 /****************************************************************
@@ -53,13 +54,12 @@ using namespace plotable;
  */
 
 
-const int MAX_FREQUENCY = 50;          // effectif maximum pour lisser les courbes
-const int MAX_RANGE = 2;               // demi-largeur maximum de la fenetre de lissage
+  const int MAX_FREQUENCY = 50;          // effectif maximum pour lisser les courbes
+  const int MAX_RANGE = 2;               // demi-largeur maximum de la fenetre de lissage
 
-const int PLOT_NB_CURVE = 12;          // nombre maximum des courbes (sortie Gnuplot)
-const int PLOT_MIN_FREQUENCY = 10;     // effectif minimum pour afficher les points
-                                       // des courbes (sortie Gnuplot)
-
+  const int PLOT_NB_CURVE = 12;          // nombre maximum des courbes (sortie Gnuplot)
+  const int PLOT_MIN_FREQUENCY = 10;     // effectif minimum pour afficher les points
+                                         // des courbes (sortie Gnuplot)
 
 
 
@@ -69,11 +69,11 @@ const int PLOT_MIN_FREQUENCY = 10;     // effectif minimum pour afficher les poi
  */
 
 
-class Curves {          // famille de courbes avec effectif
+  class Curves {          // famille de courbes avec effectif
 
     friend std::ostream& operator<<(std::ostream& , const Curves&);
 
-public :
+  public :
 
     int nb_curve;           // nombre de courbes
     int length;             // longueur des courbes
@@ -101,7 +101,7 @@ public :
     int plot_length_computation() const;
     bool plot_print(const char *path , int ilength = I_DEFAULT ,
                     const Curves *curves_0 = NULL , const Curves *curves_1 = NULL) const;
-    bool plot_print_standard_residual(const char *path , double *standard_residual = NULL) const;
+    bool plot_print_standard_residual(const char *path , double *standard_residual = NULL) const;  // sequence_analysis
     void plotable_write(int index , SinglePlot &plot) const;
     void plotable_write(MultiPlot &plot) const;
     void plotable_frequency_write(SinglePlot &plot) const;
@@ -110,7 +110,10 @@ public :
     int nb_element_computation() const;
     double mean_computation(int index) const;
     double total_square_sum_computation(int index , double mean) const;
-};
+  };
+
+
+};  // namespace stat_tool
 
 
 
