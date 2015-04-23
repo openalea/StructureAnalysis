@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -40,9 +40,11 @@
 #include <sstream>
 
 #include "stat_tool/stat_tools.h"
-#include "stat_tool/distance_matrix.h"
 #include "stat_tool/curves.h"
+#include "stat_tool/distribution.h"
 #include "stat_tool/markovian.h"
+#include "stat_tool/vectors.h"
+#include "stat_tool/distance_matrix.h"
 #include "stat_tool/stat_label.h"
 
 #include "sequences.h"
@@ -51,13 +53,10 @@
 #include "sequence_label.h"
 
 using namespace std;
+using namespace stat_tool;
 
 
-extern void cumul_computation(int nb_value , const double *pmass , double *pcumul);
-extern int cumul_method(int nb_value , const double *cumul , double scale = 1.);
-extern void log_computation(int nb_value , const double *pmass , double *plog);
-
-extern char* label(const char *file_name);
+namespace sequence_analysis {
 
 
 
@@ -2837,7 +2836,7 @@ double HiddenSemiMarkov::forward_backward_sampling(const MarkovianSequences &seq
     for (i = 0;i < nb_state_sequence;i++) {
       j = seq.length[index] - 1;
       pstate = seq.int_sequence[index][0] + j;
-      ::cumul_computation(nb_state , forward1[j] , cumul_backward);
+      stat_tool::cumul_computation(nb_state , forward1[j] , cumul_backward);
       *pstate = cumul_method(nb_state , cumul_backward);
 
       do {
@@ -2902,7 +2901,7 @@ double HiddenSemiMarkov::forward_backward_sampling(const MarkovianSequences &seq
             }
           }
 
-          ::cumul_computation(k - 1 , backward + 1 , cumul_backward);
+          stat_tool::cumul_computation(k - 1 , backward + 1 , cumul_backward);
           state_occupancy = 1 + cumul_method(k - 1 , cumul_backward);
 
 #         ifdef DEBUG
@@ -2930,7 +2929,7 @@ double HiddenSemiMarkov::forward_backward_sampling(const MarkovianSequences &seq
         for (k = 0;k < nb_state;k++) {
           backward[k] = transition[k][*pstate] * forward1[j][k] / state_in[j][*pstate];
         }
-        ::cumul_computation(nb_state , backward , cumul_backward);
+        stat_tool::cumul_computation(nb_state , backward , cumul_backward);
         *--pstate = cumul_method(nb_state , cumul_backward);
 
 #       ifdef DEBUG
@@ -3061,24 +3060,24 @@ void HiddenSemiMarkov::log_computation()
       occupancy = state_process->sojourn_time[i];
 
       if (occupancy->mass[occupancy->offset] > 0.) {
-        ::log_computation(occupancy->nb_value , occupancy->mass , occupancy->mass);
+        stat_tool::log_computation(occupancy->nb_value , occupancy->mass , occupancy->mass);
 
         pcumul = occupancy->cumul;
         for (j = 0;j < occupancy->nb_value;j++) {
           *pcumul = 1. - *pcumul;
           pcumul++;
         }
-        ::log_computation(occupancy->nb_value , occupancy->cumul , occupancy->cumul);
+        stat_tool::log_computation(occupancy->nb_value , occupancy->cumul , occupancy->cumul);
 
         if (type == 'e') {
-          ::log_computation(forward[i]->nb_value , forward[i]->mass , forward[i]->mass);
+          stat_tool::log_computation(forward[i]->nb_value , forward[i]->mass , forward[i]->mass);
 
           pcumul = forward[i]->cumul;
           for (j = 0;j < forward[i]->nb_value;j++) {
             *pcumul = 1. - *pcumul;
             pcumul++;
           }
-          ::log_computation(forward[i]->nb_value , forward[i]->cumul , forward[i]->cumul);
+          stat_tool::log_computation(forward[i]->nb_value , forward[i]->cumul , forward[i]->cumul);
         }
       }
     }
@@ -3093,8 +3092,9 @@ void HiddenSemiMarkov::log_computation()
 
     else if (discrete_parametric_process[i]) {
       for (j = 0;j < nb_state;j++) {
-        ::log_computation(discrete_parametric_process[i]->nb_value , discrete_parametric_process[i]->observation[j]->mass ,
-                          discrete_parametric_process[i]->observation[j]->cumul);
+        stat_tool::log_computation(discrete_parametric_process[i]->nb_value ,
+                                   discrete_parametric_process[i]->observation[j]->mass ,
+                                   discrete_parametric_process[i]->observation[j]->cumul);
       }
     }
   }
@@ -6809,3 +6809,6 @@ DistanceMatrix* HiddenSemiMarkov::divergence_computation(StatError &error , ostr
 
   return dist_matrix;
 }
+
+
+};  // namespace sequence_analysis
