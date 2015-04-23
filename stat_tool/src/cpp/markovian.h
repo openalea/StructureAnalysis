@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -45,73 +45,77 @@
 
 
 
+namespace stat_tool {
+
+
+
 /****************************************************************
  *
  *  Constantes :
  */
 
 
-const int NB_STATE = 100;              // nombre maximum d'etats d'une chaine de Markov
-const int ORDER = 8;                   // ordre maximum d'une chaine de Markov
-const double MIN_PROBABILITY = 1.e-5;  // probabilite minimum
-const double THRESHOLDING_FACTOR = 0.8;  // facteur pour le seuillage des probabilites
-const int NB_PARAMETER = 100000;       // nombre maximum de parametres d'une chaine de Markov
-const int NB_OUTPUT_PROCESS = 10;      // nombre maximum de processus d'observation
-const int NB_OUTPUT = 25;              // nombre maximum d'observations par etat (cas categoriel)
-const double OBSERVATION_THRESHOLD = 0.999;  // seuil sur la fonction de repartition pour borner
-                                             // une loi d'observation discrete parametrique
+  const int NB_STATE = 100;              // nombre maximum d'etats d'une chaine de Markov
+  const int ORDER = 8;                   // ordre maximum d'une chaine de Markov
+  const double MIN_PROBABILITY = 1.e-5;  // probabilite minimum
+  const double THRESHOLDING_FACTOR = 0.8;  // facteur pour le seuillage des probabilites
+  const int NB_PARAMETER = 100000;       // nombre maximum de parametres d'une chaine de Markov
+  const int NB_OUTPUT_PROCESS = 10;      // nombre maximum de processus d'observation
+  const int NB_OUTPUT = 25;              // nombre maximum d'observations par etat (cas categoriel)
+  const double OBSERVATION_THRESHOLD = 0.999;  // seuil sur la fonction de repartition pour borner
+                                               // une loi d'observation discrete parametrique
 
-const double ACCESSIBILITY_THRESHOLD = 1.e-6;  // seuil pour stopper l'algorithme
-                                               // de calcul de l'accessibilite des etats
-const int ACCESSIBILITY_LENGTH = 100;  // longueur maximum de sequence pour l'algorithme
-                                       // de calcul de l'accessibilite des etats
+  const double ACCESSIBILITY_THRESHOLD = 1.e-6;  // seuil pour stopper l'algorithme
+                                                 // de calcul de l'accessibilite des etats
+  const int ACCESSIBILITY_LENGTH = 100;  // longueur maximum de sequence pour l'algorithme
+                                         // de calcul de l'accessibilite des etats
 
-const double NOISE_PROBABILITY = 0.05;  // perturbation des probabilites d'observation
-const double MEAN_SHIFT_COEFF = 0.1;   // coefficient pour decaler les lois d'observations
-                                       // continus parametriques
+  const double NOISE_PROBABILITY = 0.05;  // perturbation des probabilites d'observation
+  const double MEAN_SHIFT_COEFF = 0.1;   // coefficient pour decaler les lois d'observations
+                                         // continus parametriques
 
-const int MIN_NB_ELEMENT = 10;         // taille minimum de l'echantillon construit par arrondi
-const int OBSERVATION_COEFF = 10;      // coefficient arrondi estimateur pour les lois
-                                       // d'observation parametriques
+  const int MIN_NB_ELEMENT = 10;         // taille minimum de l'echantillon construit par arrondi
+  const int OBSERVATION_COEFF = 10;      // coefficient arrondi estimateur pour les lois
+                                         // d'observation parametriques
 
-const int GAMMA_MAX_NB_DECIMAL = 6;     // nombre maximum de decimales pour la simulation
-                                        // d'une loi gamma
-const int GAUSSIAN_MAX_NB_DECIMAL = 6;  // nombre maximum de decimales pour la simulation
-                                        // d'une loi gaussienne
-const int DEGREE_DECIMAL_SCALE = 10;   // facteur pour determiner le nombre de decimales
-                                       // pour la simulation d'une loi de Von Mises en degrees
-const int RADIAN_DECIMAL_SCALE = 1000;  // facteur pour determiner le nombre de decimales
-                                        // pour la simulation d'une loi de Von Mises en radians
+  const int GAMMA_MAX_NB_DECIMAL = 6;     // nombre maximum de decimales pour la simulation
+                                          // d'une loi gamma
+  const int GAUSSIAN_MAX_NB_DECIMAL = 6;  // nombre maximum de decimales pour la simulation
+                                          // d'une loi gaussienne
+  const int DEGREE_DECIMAL_SCALE = 10;   // facteur pour determiner le nombre de decimales
+                                         // pour la simulation d'une loi de Von Mises en degrees
+  const int RADIAN_DECIMAL_SCALE = 1000;  // facteur pour determiner le nombre de decimales
+                                          // pour la simulation d'une loi de Von Mises en radians
 
-// const double SELF_TRANSITION = 0.9;    probabilite de rester dans un etat initiale
+  // const double SELF_TRANSITION = 0.9;    probabilite de rester dans un etat initiale
 
-enum {
-  MIXTURE ,
-  HIDDEN_MARKOV
-};
+  enum {
+    MIXTURE ,
+    HIDDEN_MARKOV
+  };
 
-enum {
-  CATEGORICAL_PROCESS ,
-  DISCRETE_PARAMETRIC ,
-  CONTINUOUS_PARAMETRIC
-};
+  enum {
+    CATEGORICAL_PROCESS ,
+    DISCRETE_PARAMETRIC ,
+    CONTINUOUS_PARAMETRIC
+  };
 
-enum {
-  EM ,
-  MCEM
-//  SAEM
-};
+  enum {
+    EM ,
+    MCEM
+//    SAEM
+  };
 
-enum {
-  FORWARD ,
-  FORWARD_BACKWARD ,
-  VITERBI ,
-//  VITERBI_FORWARD_BACKWARD ,
-  GENERALIZED_VITERBI ,
-  FORWARD_BACKWARD_SAMPLING ,
-  GIBBS_SAMPLING ,
-  FORWARD_DYNAMIC_PROGRAMMING
-};
+  enum {
+    FORWARD ,
+    FORWARD_BACKWARD ,
+    VITERBI ,
+//    VITERBI_FORWARD_BACKWARD ,
+    GENERALIZED_VITERBI ,
+    FORWARD_BACKWARD_SAMPLING ,
+    GIBBS_SAMPLING ,
+    FORWARD_DYNAMIC_PROGRAMMING
+  };
 
 
 
@@ -121,14 +125,15 @@ enum {
  */
 
 
-class ChainData;
+  class ChainData;
 
-class Chain {           // chaine de Markov
+
+  class Chain {           // chaine de Markov
 
     friend std::ostream& operator<<(std::ostream &os , const Chain &chain)
     { return chain.ascii_print(os , true); }
 
-public :
+  public :
 
     char type;              // 'o' : ordinaire, 'e' : en equilibre
     int nb_state;           // nombre d'etats
@@ -180,16 +185,16 @@ public :
 
     double likelihood_computation(const ChainData &chain_data , bool initial_flag = true) const;
     void chi2_fit(const ChainData &chain_data , Test &test) const;
-};
+  };
 
 
-Chain* chain_parsing(StatError &error , ifstream &in_file , int &line , char type);
+  Chain* chain_parsing(StatError &error , ifstream &in_file , int &line , char type);
 
 
 
-class ChainData : public ChainReestimation<int> {  // structure de donnees correspondant a
-                                                   // une chaine de Markov
-public :
+  class ChainData : public ChainReestimation<int> {  // structure de donnees correspondant a
+                                                     // une chaine de Markov
+  public :
 
     ChainData(char itype , int inb_state , int inb_row , bool init_flag = false)
     :ChainReestimation<int>(itype , inb_state , inb_row , init_flag) {}
@@ -198,13 +203,13 @@ public :
     int nb_parameter_computation() const;
 
     void estimation(Chain &chain) const;
-};
+  };
 
 
 
-class CategoricalProcess {  // processus d'observation categoriel
+  class CategoricalProcess {  // processus d'observation categoriel
 
-public :
+  public :
 
     int nb_state;           // nombre d'etats
     int nb_value;           // nombre de valeurs
@@ -248,21 +253,21 @@ public :
     int nb_parameter_computation(double min_probability) const;
     Distribution* mixture_computation(Distribution *pweight);
     void init();
-};
+  };
 
 
-CategoricalProcess* categorical_observation_parsing(StatError &error , ifstream &in_file ,
-                                                    int &line , int nb_state ,
-                                                    int model , bool hidden);
+  CategoricalProcess* categorical_observation_parsing(StatError &error , ifstream &in_file ,
+                                                      int &line , int nb_state ,
+                                                      int model , bool hidden);
 
-CategoricalProcess** old_categorical_observation_parsing(StatError &error , ifstream &in_file ,
-                                                         int &line , int nb_state , int &nb_output_process);
+  CategoricalProcess** old_categorical_observation_parsing(StatError &error , ifstream &in_file ,
+                                                           int &line , int nb_state , int &nb_output_process);
 
 
 
-class DiscreteParametricProcess {  // processus d'observation discret parametrique
+  class DiscreteParametricProcess {  // processus d'observation discret parametrique
 
-public :
+  public :
 
     int nb_state;           // nombre d'etats
     int nb_value;           // nombre de valeurs
@@ -306,18 +311,18 @@ public :
     double variance_computation(Distribution *pweight , double mean = D_INF) const;
     Distribution* mixture_computation(Distribution *pweight);
     void init();
-};
+  };
 
 
-DiscreteParametricProcess* discrete_observation_parsing(StatError &error , ifstream &in_file ,
-                                                        int &line , int nb_state , int model ,
-                                                        double cumul_threshold = OBSERVATION_THRESHOLD);
+  DiscreteParametricProcess* discrete_observation_parsing(StatError &error , ifstream &in_file ,
+                                                          int &line , int nb_state , int model ,
+                                                          double cumul_threshold = OBSERVATION_THRESHOLD);
 
 
 
-class ContinuousParametricProcess {  // processus d'observation continu parametrique
+  class ContinuousParametricProcess {  // processus d'observation continu parametrique
 
-public :
+  public :
 
     int nb_state;           // nombre d'etats
     int ident;              // identificateur des lois d'observation
@@ -373,13 +378,19 @@ public :
               double mean , double variance);
 
     std::ostream& interval_computation(std::ostream &os);
-};
+  };
 
 
-ContinuousParametricProcess* continuous_observation_parsing(StatError &error , ifstream &in_file ,
-                                                            int &line , int nb_state ,
-                                                            int model , int last_ident = VON_MISES);
+  ContinuousParametricProcess* continuous_observation_parsing(StatError &error , ifstream &in_file ,
+                                                              int &line , int nb_state ,
+                                                              int model , int last_ident = VON_MISES);
 
+
+  void log_computation(int nb_value , const double *pmass , double *plog);
+  double von_mises_concentration_computation(double mean_direction);
+
+
+};  // namespace stat_tool
 
 
 
