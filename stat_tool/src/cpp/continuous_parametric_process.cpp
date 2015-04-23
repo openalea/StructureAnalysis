@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -55,10 +55,8 @@ using namespace std;
 using namespace boost::math;
 
 
-extern int column_width(int value);
-extern int column_width(double min_value , double max_value);
-extern int column_width(int nb_value , const double *value , double scale = 1.);
-extern char* label(const char *file_name);
+namespace stat_tool {
+
 
 const static double bilateral_tail[7] = {0.05, 0.025, 0.01, 0.005, 0.0025, 0.001, 0.0005};
 const static double posterior_threshold[7] = {0.25, 0.1, 0.05, 0.025, 0.01, 0.005, 0.0025};
@@ -4595,3 +4593,6 @@ ostream& ContinuousParametricProcess::interval_computation(ostream &os)
 
   return os;
 }
+
+
+};  // namespace stat_tool
