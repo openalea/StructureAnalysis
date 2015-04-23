@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -43,6 +43,7 @@
 
 #include "stat_tool/stat_tools.h"
 #include "stat_tool/curves.h"
+#include "stat_tool/distribution.h"
 #include "stat_tool/markovian.h"
 #include "stat_tool/vectors.h"
 #include "stat_tool/distance_matrix.h"
@@ -53,11 +54,10 @@
 #include "tool/config.h"
 
 using namespace std;
+using namespace stat_tool;
 
 
-extern int column_width(int value);
-extern int column_width(int min_value , int max_value);
-extern int column_width(int nb_value , const double *value , double scale = 1.);
+namespace sequence_analysis {
 
 
 
@@ -408,8 +408,8 @@ double Sequences::indel_distance_computation(const VectorDistance &vector_dist ,
   double ldistance , distance = 0.;
 
 
-  for (i = 0;i < vector_dist.nb_variable;i++) {
-    switch (vector_dist.variable_type[i]) {
+  for (i = 0;i < vector_dist.get_nb_variable();i++) {
+    switch (vector_dist.get_variable_type(i)) {
 
     case SYMBOLIC : {
       if (!max_symbol_distance[i]) {
@@ -438,22 +438,22 @@ double Sequences::indel_distance_computation(const VectorDistance &vector_dist ,
     }
 
     case CIRCULAR : {
-      ldistance = MIN(max_value[i] - min_value[i] , vector_dist.period[i] / 2.);
+      ldistance = MIN(max_value[i] - min_value[i] , vector_dist.get_period(i) / 2.);
       break;
     }
     }
 
-    switch (vector_dist.distance_type) {
+    switch (vector_dist.get_distance_type()) {
     case ABSOLUTE_VALUE :
-      distance += vector_dist.weight[i] * fabs(ldistance) / vector_dist.dispersion[i];
+      distance += vector_dist.get_weight(i) * fabs(ldistance) / vector_dist.get_dispersion(i);
       break;
     case QUADRATIC :
-      distance += vector_dist.weight[i] * ldistance * ldistance / vector_dist.dispersion[i];
+      distance += vector_dist.get_weight(i) * ldistance * ldistance / vector_dist.get_dispersion(i);
       break;
     }
   }
 
-  if (vector_dist.distance_type == QUADRATIC) {
+  if (vector_dist.get_distance_type() == QUADRATIC) {
     distance = sqrt(distance);
   }
 
@@ -479,8 +479,8 @@ double Sequences::indel_distance_computation(const VectorDistance &vector_dist ,
   double ldistance , distance = 0.;
 
 
-  for (i = 0;i < vector_dist.nb_variable;i++) {
-    switch (vector_dist.variable_type[i]) {
+  for (i = 0;i < vector_dist.get_nb_variable();i++) {
+    switch (vector_dist.get_variable_type(i)) {
 
     case SYMBOLIC : {
       if (!max_symbol_distance[i]) {
@@ -513,24 +513,24 @@ double Sequences::indel_distance_computation(const VectorDistance &vector_dist ,
     case CIRCULAR : {
       ldistance = MAX(int_sequence[index][i][position] - (int)min_value[i] ,
                       (int)max_value[i] - int_sequence[index][i][position]);
-      if (ldistance > vector_dist.period[i] / 2.) {
-        ldistance = vector_dist.period[i] / 2.;
+      if (ldistance > vector_dist.get_period(i) / 2.) {
+        ldistance = vector_dist.get_period(i) / 2.;
       }
       break;
     }
     }
 
-    switch (vector_dist.distance_type) {
+    switch (vector_dist.get_distance_type()) {
     case ABSOLUTE_VALUE :
-      distance += vector_dist.weight[i] * fabs(ldistance) / vector_dist.dispersion[i];
+      distance += vector_dist.get_weight(i) * fabs(ldistance) / vector_dist.get_dispersion(i);
       break;
     case QUADRATIC :
-      distance += vector_dist.weight[i] * ldistance * ldistance / vector_dist.dispersion[i];
+      distance += vector_dist.get_weight(i) * ldistance * ldistance / vector_dist.get_dispersion(i);
       break;
     }
   }
 
-  if (vector_dist.distance_type == QUADRATIC) {
+  if (vector_dist.get_distance_type() == QUADRATIC) {
     distance = sqrt(distance);
   }
 
@@ -562,15 +562,16 @@ double Sequences::substitution_distance_computation(const VectorDistance &vector
     test_seq = this;
   }
 
-  for (i = 0;i < vector_dist.nb_variable;i++) {
-    switch (vector_dist.variable_type[i]) {
+  for (i = 0;i < vector_dist.get_nb_variable();i++) {
+    switch (vector_dist.get_variable_type(i)) {
 
     case SYMBOLIC : {
-      if (!vector_dist.symbol_distance[i]) {
+      if (!vector_dist.get_symbol_distance(i)) {
         ldistance = (int_sequence[ref_index][i][ref_position] == test_seq->int_sequence[test_index][i][test_position] ? 0. : 1.);
       }
       else {
-        ldistance = vector_dist.symbol_distance[i][int_sequence[ref_index][i][ref_position]][test_seq->int_sequence[test_index][i][test_position]];
+        ldistance = vector_dist.get_symbol_distance(i , int_sequence[ref_index][i][ref_position] ,
+                                                    test_seq->int_sequence[test_index][i][test_position]);
       }
       break;
     }
@@ -593,29 +594,29 @@ double Sequences::substitution_distance_computation(const VectorDistance &vector
     case CIRCULAR : {
       if (int_sequence[ref_index][i][ref_position] <= test_seq->int_sequence[test_index][i][test_position]) {
         ldistance = MIN(test_seq->int_sequence[test_index][i][test_position] - int_sequence[ref_index][i][ref_position] ,
-                        int_sequence[ref_index][i][ref_position] + vector_dist.period[i] -
+                        int_sequence[ref_index][i][ref_position] + vector_dist.get_period(i) -
                         test_seq->int_sequence[test_index][i][test_position]);
       }
       else {
         ldistance = MIN(int_sequence[ref_index][i][ref_position] - test_seq->int_sequence[test_index][i][test_position] ,
-                        test_seq->int_sequence[test_index][i][test_position] + vector_dist.period[i] -
+                        test_seq->int_sequence[test_index][i][test_position] + vector_dist.get_period(i) -
                         int_sequence[ref_index][i][ref_position]);
       }
       break;
     }
     }
 
-    switch (vector_dist.distance_type) {
+    switch (vector_dist.get_distance_type()) {
     case ABSOLUTE_VALUE :
-      distance += vector_dist.weight[i] * fabs(ldistance) / vector_dist.dispersion[i];
+      distance += vector_dist.get_weight(i) * fabs(ldistance) / vector_dist.get_dispersion(i);
       break;
     case QUADRATIC :
-      distance += vector_dist.weight[i] * ldistance * ldistance / vector_dist.dispersion[i];
+      distance += vector_dist.get_weight(i) * ldistance * ldistance / vector_dist.get_dispersion(i);
       break;
     }
   }
 
-  if (vector_dist.distance_type == QUADRATIC) {
+  if (vector_dist.get_distance_type() == QUADRATIC) {
     distance = sqrt(distance);
   }
 
@@ -674,14 +675,14 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , const Vect
     error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
   }
 
-  if (ivector_dist.nb_variable != nb_variable) {
+  if (ivector_dist.get_nb_variable() != nb_variable) {
     status = false;
     error.update(STAT_error[STATR_NB_VARIABLE]);
   }
 
   else {
     for (i = 0;i < nb_variable;i++) {
-      if (ivector_dist.variable_type[i] != NUMERIC) {
+      if (ivector_dist.get_variable_type(i) != NUMERIC) {
         if ((type[i] != INT_VALUE) && (type[i] != STATE)) {
           status = false;
           ostringstream error_message , correction_message;
@@ -700,9 +701,9 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , const Vect
           error.update((error_message.str()).c_str());
         }
 
-        if ((ivector_dist.variable_type[i] == SYMBOLIC) &&
+        if ((ivector_dist.get_variable_type(i) == SYMBOLIC) &&
             ((min_value[i] < 0) || (max_value[i] >= NB_SYMBOL) ||
-             ((ivector_dist.symbol_distance[i]) && (ivector_dist.nb_value[i] != max_value[i] + 1)))) {
+             ((ivector_dist.get_symbol_distance(i)) && (ivector_dist.get_nb_value(i) != max_value[i] + 1)))) {
           status = false;
           ostringstream error_message;
           error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
@@ -710,8 +711,8 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , const Vect
           error.update((error_message.str()).c_str());
         }
 
-        if ((ivector_dist.variable_type[i] == CIRCULAR) &&
-            (max_value[i] - min_value[i] >= ivector_dist.period[i])) {
+        if ((ivector_dist.get_variable_type(i) == CIRCULAR) &&
+            (max_value[i] - min_value[i] >= ivector_dist.get_period(i))) {
           status = false;
           ostringstream error_message;
           error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
@@ -805,14 +806,14 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , const Vect
     max_symbol_distance = new double*[nb_variable];
 
     for (i = 0;i < nb_variable;i++) {
-      if ((vector_dist->variable_type[i] == SYMBOLIC) && (vector_dist->symbol_distance[i])) {
+      if ((vector_dist->get_variable_type(i) == SYMBOLIC) && (vector_dist->get_symbol_distance(i))) {
         max_symbol_distance[i] = vector_dist->max_symbol_distance_computation(i);
       }
       else {
         max_symbol_distance[i] = 0;
       }
 
-      if (vector_dist->variable_type[i] == ORDINAL) {
+      if (vector_dist->get_variable_type(i) == ORDINAL) {
         rank[i] = marginal_distribution[i]->rank_computation();
       }
       else {
@@ -826,17 +827,17 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , const Vect
       }
 
       else {
-        switch (vector_dist->distance_type) {
+        switch (vector_dist->get_distance_type()) {
         case ABSOLUTE_VALUE :
-          vector_dist->dispersion[i] = mean_absolute_difference_computation(i);
+          vector_dist->dispersion_update(i , mean_absolute_difference_computation(i));
           break;
         case QUADRATIC :
-          vector_dist->dispersion[i] = 2 * variance_computation(i , mean_computation(i));
+          vector_dist->dispersion_update(i , 2 * variance_computation(i , mean_computation(i)));
           break;
         }
 
-        if (vector_dist->dispersion[i] == 0.) {
-          vector_dist->dispersion[i] = 1.;
+        if (vector_dist->get_dispersion(i) == 0.) {
+          vector_dist->dispersion_update(i , 1.);
         }
       }
     }
@@ -2871,14 +2872,14 @@ Sequences* Sequences::multiple_alignment(StatError &error , ostream &os ,
       max_symbol_distance = new double*[nb_variable];
 
       for (i = 0;i < nb_variable;i++) {
-        if ((vector_dist->variable_type[i] == SYMBOLIC) && (vector_dist->symbol_distance[i])) {
+        if ((vector_dist->get_variable_type(i) == SYMBOLIC) && (vector_dist->get_symbol_distance(i))) {
           max_symbol_distance[i] = vector_dist->max_symbol_distance_computation(i);
         }
         else {
           max_symbol_distance[i] = 0;
         }
 
-        if (vector_dist->variable_type[i] == ORDINAL) {
+        if (vector_dist->get_variable_type(i) == ORDINAL) {
           rank[i] = marginal_distribution[i]->rank_computation();
         }
         else {
@@ -2892,17 +2893,17 @@ Sequences* Sequences::multiple_alignment(StatError &error , ostream &os ,
         }
 
         else {
-          switch (vector_dist->distance_type) {
+          switch (vector_dist->get_distance_type()) {
           case ABSOLUTE_VALUE :
-            vector_dist->dispersion[i] = mean_absolute_difference_computation(i);
+            vector_dist->dispersion_update(i , mean_absolute_difference_computation(i));
             break;
           case QUADRATIC :
-            vector_dist->dispersion[i] = 2 * variance_computation(i , mean_computation(i));
+            vector_dist->dispersion_update(i ,  2 * variance_computation(i , mean_computation(i)));
             break;
           }
 
-          if (vector_dist->dispersion[i] == 0.) {
-            vector_dist->dispersion[i] = 1.;
+          if (vector_dist->get_dispersion(i) == 0.) {
+            vector_dist->dispersion_update(i , 1.);
           }
         }
       }
@@ -2940,10 +2941,10 @@ Sequences* Sequences::multiple_alignment(StatError &error , ostream &os ,
       // alignement multiple des sequences
 
       for (i = nb_sequence;i < 2 * nb_sequence - 1;i++) {
-        clustered_seq[i] = clustered_seq[dendrogram->child[i][0]]->multiple_alignment(*(clustered_seq[dendrogram->child[i][1]]) ,
-                                                                                      *vector_dist , rank ,
-                                                                                      max_symbol_distance , begin_free ,
-                                                                                      end_free , indel_cost , indel_factor);
+        clustered_seq[i] = clustered_seq[dendrogram->get_child(i , 0)]->multiple_alignment(*(clustered_seq[dendrogram->get_child(i , 1)]) ,
+                                                                                           *vector_dist , rank ,
+                                                                                           max_symbol_distance , begin_free ,
+                                                                                           end_free , indel_cost , indel_factor);
 
 #       ifdef DEBUG
         if (i < 2 * nb_sequence - 2) {
@@ -3010,3 +3011,6 @@ Sequences* Sequences::multiple_alignment(StatError &error , ostream &os ,
 
   return seq;
 }
+
+
+};  // namespace sequence_analysis
