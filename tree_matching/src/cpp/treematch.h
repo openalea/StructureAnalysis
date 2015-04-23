@@ -159,7 +159,7 @@ class TreeMatch
              AMString matching_type,
              AMString ordered_type,
              int self_similarity,
-             const VectorDistance &ivect,
+             const stat_tool::VectorDistance &ivect,
              double coeff);
 
   TreeMatch( MTG& mtg,
@@ -168,7 +168,7 @@ class TreeMatch
              AMString matching_type,
              AMString ordered_type,
              int self_similarity,
-             const VectorDistance &ivect,
+             const stat_tool::VectorDistance &ivect,
              double coeff,NodeCost& Nd,int scale);
 
   ~TreeMatch();
@@ -313,9 +313,9 @@ class TreeMatch
 
   TreeGraph* getTree(int ) const;
 
-  DistanceMatrix* getMatrix();
+  stat_tool::DistanceMatrix* getMatrix();
 
-  DistanceMatrix* getSelfSimilarityMatrix();
+  stat_tool::DistanceMatrix* getSelfSimilarityMatrix();
 
   DistanceType getDistance(int,int) const ;
   DistanceType getTime(int,int) const {
@@ -385,7 +385,7 @@ class TreeMatch
     char*               _fileName;
     int                 _nbTree;
     DistanceType        _InsDelCostCoeff;
-    VectorDistance      _vectorDist;
+    stat_tool::VectorDistance _vectorDist;
     ValueVector         _dispersion;
     ValueVector         _maxValue;
     ValueVector         _minValue;
