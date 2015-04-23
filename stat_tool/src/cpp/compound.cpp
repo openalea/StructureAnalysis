@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -49,7 +49,7 @@
 using namespace std;
 
 
-extern char* label(const char *file_name);
+namespace stat_tool {
 
 
 
@@ -782,8 +782,8 @@ bool Compound::plot_write(const char *prefix , const char *title ,
       scale[2] = 1.;
     }
 
-    status = ::plot_print((data_file_name.str()).c_str() , 3 , pdist , scale ,
-                          NULL , nb_histo , phisto);
+    status = stat_tool::plot_print((data_file_name.str()).c_str() , 3 , pdist , scale ,
+                                   NULL , nb_histo , phisto);
   }
 
   else {
@@ -791,8 +791,8 @@ bool Compound::plot_write(const char *prefix , const char *title ,
     scale[1] = 1.;
     scale[2] = 1.;
 
-    status = ::plot_print((data_file_name.str()).c_str() , 3 , pdist , scale ,
-                          NULL , 0 , NULL);
+    status = stat_tool::plot_print((data_file_name.str()).c_str() , 3 , pdist , scale ,
+                                   NULL , 0 , NULL);
   }
 
   // ecriture du fichier de commandes et du fichier d'impression
@@ -1511,3 +1511,6 @@ MultiPlotSet* CompoundData::get_plotable() const
 
   return plot_set;
 }
+
+
+};  // namespace stat_tool
