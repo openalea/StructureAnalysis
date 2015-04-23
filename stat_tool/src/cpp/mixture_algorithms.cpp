@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -50,8 +50,7 @@ using namespace std;
 using namespace boost::math;
 
 
-extern void cumul_computation(int nb_value , const double *pmass , double *pcumul);
-extern int cumul_method(int nb_value , const double *cumul , double scale = 1.);
+namespace stat_tool {
 
 
 
@@ -2157,3 +2156,6 @@ MixtureData* Mixture::simulation(StatError &error , int nb_vector) const
 
   return vec;
 }
+
+
+};  // namespace stat_tool
