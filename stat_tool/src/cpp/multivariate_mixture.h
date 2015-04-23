@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): J.-B. Durand (jean-baptiste.durand@imag.fr) and
  *                       Y. Guedon (yann.guedon@cirad.fr)
@@ -35,34 +35,38 @@
  *  ----------------------------------------------------------------------------
  */
 
+
+
 #ifndef MVMIXTURE_H
 #define MVMIXTURE_H
 
-#include "markovian.h"
+
+
+namespace stat_tool {
+
+
 
 /****************************************************************
  *
  *  Constantes :
  */
 
-const double MVMIXTURE_LIKELIHOOD_DIFF = 1.e-6;
+  const double MVMIXTURE_LIKELIHOOD_DIFF = 1.e-6;
+
+
 
 /****************************************************************
  *
  *  Definition des classes :
  */
 
-#include "vectors.h"
 
-class FrequencyDistribution;
-class MultivariateMixtureData;
-class DiscreteParametricProcess;
-class CategoricalProcess;
+  class MultivariateMixtureData;
 
-// melange de lois multivariees
-// a variables independantes
 
-class MultivariateMixture : public StatInterface {
+  // melange de lois multivariees a variables independantes
+
+  class MultivariateMixture : public StatInterface {
 
     friend class FrequencyDistribution;
     friend class Vectors;
@@ -76,7 +80,7 @@ class MultivariateMixture : public StatInterface {
     friend std::ostream& operator<<(std::ostream &os , const MultivariateMixture &mixt)
     { return mixt.ascii_write(os , mixt.mixture_data , false , false); }
 
-private :
+  private :
 
     MultivariateMixtureData *mixture_data;  // pointeur sur un objet MultivariateMixtureData
     int nb_component;       // nombre de composantes
@@ -93,7 +97,7 @@ private :
     std::ostream& spreadsheet_write(std::ostream &os , const MultivariateMixtureData *mixt_data) const;
     bool plot_write(const char *prefix , const char *title ,
                     const MultivariateMixtureData *mixt_data) const;
-    plotable::MultiPlotSet* get_plotable(const MultivariateMixtureData *mixt_data) const;
+    MultiPlotSet* get_plotable(const MultivariateMixtureData *mixt_data) const;
 
     int nb_parameter_computation(double min_probability) const;
     double penalty_computation() const;
@@ -117,7 +121,7 @@ private :
     /** Initialization of EM algorithm */
     void init();
 
-public :
+  public :
 
     MultivariateMixture();
     MultivariateMixture(int inb_component , double *pweight , int inb_variable,
@@ -156,7 +160,7 @@ public :
     bool spreadsheet_write(StatError &error , const char *path) const;
     bool plot_write(StatError &error , const char *prefix ,
                     const char *title = 0) const;
-    plotable::MultiPlotSet* get_plotable() const;
+    MultiPlotSet* get_plotable() const;
 
     double likelihood_computation(const Vectors &mixt_data,
                                   bool log_computation=false) const;
@@ -180,21 +184,21 @@ public :
     CategoricalProcess* get_categorical_process(int variable) const;
     DiscreteParametric* get_parametric_component(int variable, int index) const;
     Distribution* get_categorical_component(int variable, int index) const;
-};
+  };
 
 
-MultivariateMixture* multivariate_mixture_building(StatError &error , int nb_component ,
-                                                   int nb_variable, double *weight,
-                                                   DiscreteParametricProcess **ppcomponent,
-                                                   CategoricalProcess **pnpcomponent);
-MultivariateMixture* multivariate_mixture_ascii_read(StatError &error , const char *path ,
-                                                     double cumul_threshold = CUMUL_THRESHOLD);
+  MultivariateMixture* multivariate_mixture_building(StatError &error , int nb_component ,
+                                                     int nb_variable, double *weight,
+                                                     DiscreteParametricProcess **ppcomponent,
+                                                     CategoricalProcess **pnpcomponent);
+  MultivariateMixture* multivariate_mixture_ascii_read(StatError &error , const char *path ,
+                                                       double cumul_threshold = CUMUL_THRESHOLD);
 
 
 
-// structure de donnees correspondant
- // a un melange
-class MultivariateMixtureData : public Vectors {
+  // structure de donnees correspondant
+  // a un melange
+  class MultivariateMixtureData : public Vectors {
 
     friend class FrequencyDistribution;
     friend class MultivariateMixture;
@@ -203,7 +207,7 @@ class MultivariateMixtureData : public Vectors {
     friend std::ostream& operator<<(std::ostream &os , const MultivariateMixtureData &mixt_data)
     { return mixt_data.ascii_write(os , false); }
 
-private :
+  private :
 
     MultivariateMixture *mixture;       // pointeur sur un objet MultivariateMixture
     int nb_component;          // nombre de composantes
@@ -217,7 +221,7 @@ private :
     /** Permutation of the states of \e self.*/
     void state_permutation(int *perm);
 
-public :
+  public :
 
     MultivariateMixtureData();
     MultivariateMixtureData(const Vectors &vec, int inb_component);
@@ -238,7 +242,7 @@ public :
     bool spreadsheet_write(StatError &error , const char *path) const;
     bool plot_write(StatError &error , const char *prefix ,
                     const char *title = 0) const;
-    plotable::MultiPlotSet* get_plotable() const;
+    MultiPlotSet* get_plotable() const;
 
     double information_computation() const;
 
@@ -248,7 +252,11 @@ public :
     int get_nb_component() const { return nb_component; }
     FrequencyDistribution* get_weight() const { return weight; }
     FrequencyDistribution* get_component(int variable, int index) const { return component[variable][index]; }
-};
+  };
+
+
+};  // namespace stat_tool
+
 
 
 #endif
