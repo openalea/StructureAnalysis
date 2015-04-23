@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -38,6 +38,10 @@
 
 #ifndef CHAIN_REESTIMATION_C
 #define CHAIN_REESTIMATION_C
+
+
+
+namespace stat_tool {
 
 
 
@@ -269,6 +273,9 @@ ostream& ChainReestimation<Type>::print(ostream &os) const
 
   return os;
 }
+
+
+};  // namespace stat_tool
 
 
 
