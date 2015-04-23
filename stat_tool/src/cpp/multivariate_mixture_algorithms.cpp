@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): J.-B. Durand (jean-baptiste.durand@imag.fr) and
  *                       Y. Guedon (yann.guedon@cirad.fr)
@@ -42,17 +42,22 @@
 #include <iomanip>
 #include <assert.h>
 
+#include <boost/scoped_array.hpp>
+
 #include "stat_tools.h"
 #include "distribution.h"
 #include "discrete_mixture.h"
 #include "markovian.h"
-// #include "mixture.h"
+#include "vectors.h"
 #include "multivariate_mixture.h"
 #include "stat_label.h"
-#include "vectors.h"
+
 #include "stat_tool/distribution_reestimation.hpp"
 
 using namespace std;
+
+
+namespace stat_tool {
 
 
 
@@ -953,7 +958,6 @@ MultivariateMixture* Vectors::mixture_estimation(StatError &error, ostream& os,
  *  non de lois d'observation parametriques (pour chaque variable)
  *
  *--------------------------------------------------------------*/
-#include <boost/scoped_array.hpp>
 
 MultivariateMixture* Vectors::mixture_estimation(StatError &error, std::ostream& os ,
                                                  int nb_component, int nb_iter,
@@ -1252,3 +1256,6 @@ MultivariateMixtureData* MultivariateMixture::cluster(StatError &error,  const V
   return clusters_vec;
 
 }
+
+
+};  // namespace stat_tool
