@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -41,7 +41,13 @@
 
 
 
-class DiscreteParametricModel : public StatInterface , public DiscreteParametric {  // loi discrete parametrique
+namespace stat_tool {
+
+
+  class DiscreteDistributionData;
+
+
+  class DiscreteParametricModel : public StatInterface , public DiscreteParametric {  // loi discrete parametrique
 
     friend class Distribution;  // Hack pour Windows
     friend class FrequencyDistribution;
@@ -53,7 +59,7 @@ class DiscreteParametricModel : public StatInterface , public DiscreteParametric
     friend std::ostream& operator<<(std::ostream &os , const DiscreteParametricModel &dist)
     { return dist.ascii_write(os , dist.frequency_distribution , false , false); }
 
-private :
+  private :
 
     DiscreteDistributionData *frequency_distribution;  // pointeur sur un objet DiscreteDistributionData
 
@@ -64,7 +70,7 @@ private :
                     const DiscreteDistributionData *histo) const;
     MultiPlotSet* get_plotable(const DiscreteDistributionData *histo) const;
 
-public :
+  public :
 
     DiscreteParametricModel(int inb_value = 0 , int iident = CATEGORICAL ,
                      int iinf_bound = I_DEFAULT , int isup_bound = I_DEFAULT ,
@@ -99,28 +105,28 @@ public :
     DiscreteDistributionData* simulation(StatError &error , int nb_element) const;
 
     DiscreteDistributionData* get_frequency_distribution() const { return frequency_distribution; }
-};
+  };
 
 
-DiscreteParametricModel* discrete_parametric_ascii_read(StatError &error , const char *path ,
+  DiscreteParametricModel* discrete_parametric_ascii_read(StatError &error , const char *path ,
                                                         double cumul_threshold = CUMUL_THRESHOLD);
 
 
 
-class DiscreteDistributionData : public StatInterface , public FrequencyDistribution {  // loi discrete empirique
+  class DiscreteDistributionData : public StatInterface , public FrequencyDistribution {  // loi discrete empirique
 
     friend class DiscreteParametricModel;
 
     friend std::ostream& operator<<(std::ostream &os , const DiscreteDistributionData &histo)
     { return histo.ascii_write(os); }
 
-private :
+  private :
 
     DiscreteParametricModel *distribution;  // pointeur sur un objet DiscreteParametricModel
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive , bool file_flag) const;
 
-public :
+  public :
 
     DiscreteDistributionData(int inb_value = 0)
     :FrequencyDistribution(inb_value) { distribution = NULL; }
@@ -152,7 +158,10 @@ public :
     MultiPlotSet* get_plotable() const;
 
     DiscreteParametric* get_distribution() const { return distribution; }
-};
+  };
+
+
+};  // namespace stat_tool
 
 
 
