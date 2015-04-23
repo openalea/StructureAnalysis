@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -46,19 +46,20 @@
 
 #include "stat_tool/stat_tools.h"
 #include "stat_tool/curves.h"
+#include "stat_tool/distribution.h"
 #include "stat_tool/markovian.h"
+#include "stat_tool/vectors.h"
+#include "stat_tool/distance_matrix.h"
 
 #include "sequences.h"
 #include "sequence_label.h"
 
 using namespace std;
 using namespace boost::math;
+using namespace stat_tool;
 
 
-extern int column_width(int value);
-extern int column_width(int nb_value , const double *value , double scale = 1.);
-
-extern char* label(const char *file_name);
+namespace sequence_analysis {
 
 
 #if defined (SYSTEM_IS__CYGWIN)
@@ -6703,3 +6704,6 @@ Sequences* Sequences::hierarchical_segmentation(StatError &error , ostream &os ,
 
   return seq;
 }
+
+
+};  // namespace sequence_analysis
