@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -43,9 +43,11 @@
 #include "tool/config.h"
 
 #include "stat_tool/stat_tools.h"
-#include "stat_tool/distance_matrix.h"
 #include "stat_tool/curves.h"
+#include "stat_tool/distribution.h"
 #include "stat_tool/markovian.h"
+#include "stat_tool/vectors.h"
+#include "stat_tool/distance_matrix.h"
 #include "stat_tool/stat_label.h"
 
 #include "sequences.h"
@@ -54,16 +56,10 @@
 #include "sequence_label.h"
 
 using namespace std;
+using namespace stat_tool;
 
 
-extern void cumul_computation(int nb_value , const double *pmass , double *pcumul);
-extern int cumul_method(int nb_value , const double *cumul , double scale = 1.);
-extern void log_computation(int nb_value , const double *pmass , double *plog);
-
-extern int column_width(int value);
-extern int column_width(int nb_value , const double *value , double scale = 1.);
-
-extern char* label(const char *file_name);
+namespace sequence_analysis {
 
 
 
@@ -2454,7 +2450,7 @@ double HiddenVariableOrderMarkov::forward_backward_sampling(const MarkovianSeque
     for (i = 0;i < nb_state_sequence;i++) {
       j = seq.length[index] - 1;
       pstate = seq.int_sequence[index][0] + j;
-      ::cumul_computation(nb_row - 1 , forward[j] + 1 , cumul_backward);
+      stat_tool::cumul_computation(nb_row - 1 , forward[j] + 1 , cumul_backward);
       memory = 1 + cumul_method(nb_row - 1 , cumul_backward);
       *pstate = state[memory][0];
 
@@ -2474,7 +2470,7 @@ double HiddenVariableOrderMarkov::forward_backward_sampling(const MarkovianSeque
         }
 #       endif
 
-        ::cumul_computation(nb_memory[memory] , backward , cumul_backward);
+        stat_tool::cumul_computation(nb_memory[memory] , backward , cumul_backward);
         memory = previous[memory][cumul_method(nb_memory[memory] , cumul_backward)];
         *--pstate = state[memory][0];
       }
@@ -2589,8 +2585,9 @@ void HiddenVariableOrderMarkov::log_computation()
 
     else if (discrete_parametric_process[i]) {
       for (j = 0;j < nb_state;j++) {
-        ::log_computation(discrete_parametric_process[i]->nb_value , discrete_parametric_process[i]->observation[j]->mass ,
-                          discrete_parametric_process[i]->observation[j]->cumul);
+        stat_tool::log_computation(discrete_parametric_process[i]->nb_value ,
+                                   discrete_parametric_process[i]->observation[j]->mass ,
+                                   discrete_parametric_process[i]->observation[j]->cumul);
       }
     }
   }
@@ -5865,3 +5862,6 @@ DistanceMatrix* HiddenVariableOrderMarkov::divergence_computation(StatError &err
 
   return dist_matrix;
 }
+
+
+};  // namespace sequence_analysis
