@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -47,8 +47,7 @@
 using namespace std;
 
 
-extern int column_width(int value);
-extern int column_width(int nb_value , const double *value , double scale = 1.);
+namespace stat_tool {
 
 
 
@@ -892,3 +891,6 @@ double Curves::total_square_sum_computation(int index , double mean) const
 
   return total_square_sum;
 }
+
+
+};  // namespace stat_tool
