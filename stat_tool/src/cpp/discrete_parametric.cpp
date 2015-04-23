@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -50,7 +50,9 @@
 using namespace std;
 
 
-extern char* label(const char *file_name);
+namespace stat_tool {
+
+
 extern bool cumul_matching_plot_print(const char *path , int nb_cumul , int *offset ,
                                       int *nb_value , double **cumul);
 
@@ -2094,3 +2096,6 @@ MultiPlotSet* DiscreteParametricModel::get_plotable() const
 {
   return get_plotable(frequency_distribution);
 }
+
+
+};  // namespace stat_tool
