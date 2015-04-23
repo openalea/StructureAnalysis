@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -52,8 +52,8 @@
 
 using namespace std;
 
-extern int column_width(int value);
-extern int column_width(int nb_value , const double *value , double scale = 1.);
+
+namespace stat_tool {
 
 
 
@@ -1048,6 +1048,21 @@ double* VectorDistance::max_symbol_distance_computation(int variable) const
 
 /*--------------------------------------------------------------*
  *
+ *  Mise a jour de la quantite de standardisation.
+ *
+ *  arguments : indice de la variable, dispersion.
+ *
+ *--------------------------------------------------------------*/
+
+void VectorDistance::dispersion_update(int variable , double idispersion) const
+
+{
+  dispersion[variable] = idispersion;
+}
+
+
+/*--------------------------------------------------------------*
+ *
  *  Calcul de la quantite de standardisation.
  *
  *  arguments : indice de la variable, loi marginale empirique, rangs.
@@ -1220,3 +1235,6 @@ void VectorDistance::dispersion_computation(int variable , const FrequencyDistri
 # endif
 
 }
+
+
+};  // namespace stat_tool
