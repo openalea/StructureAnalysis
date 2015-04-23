@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -52,8 +52,7 @@
 using namespace std;
 
 
-extern int column_width(int nb_value , const double *value , double scale = 1.);
-extern char* label(const char *file_name);
+namespace stat_tool {
 
 
 
@@ -1221,8 +1220,8 @@ bool DiscreteMixture::plot_write(const char *prefix , const char *title ,
       }
     }
 
-    status = ::plot_print((data_file_name[0].str()).c_str() , nb_component + 2 , pdist ,
-                          scale , NULL , nb_histo , phisto);
+    status = stat_tool::plot_print((data_file_name[0].str()).c_str() , nb_component + 2 , pdist ,
+                                   scale , NULL , nb_histo , phisto);
   }
 
   else {
@@ -1242,8 +1241,8 @@ bool DiscreteMixture::plot_write(const char *prefix , const char *title ,
         scale[0] = weight->mass[i];
       }
 
-      ::plot_print((data_file_name[i + 1].str()).c_str() , 1 , pdist ,
-                   scale , NULL , 0 , NULL);
+      stat_tool::plot_print((data_file_name[i + 1].str()).c_str() , 1 , pdist ,
+                            scale , NULL , 0 , NULL);
     }
 
     // ecriture du fichier de commandes et du fichier d'impression
@@ -2060,3 +2059,6 @@ MultiPlotSet* DiscreteMixtureData::get_plotable() const
 
   return plot_set;
 }
+
+
+};  // namespace stat_tool
