@@ -20,6 +20,7 @@
  *
  *-----------------------------------------------------------------------------*/
 
+
 #include <boost/python.hpp>
 #include <boost/python/detail/api_placeholder.hpp>
 #include <boost/python/make_constructor.hpp>
@@ -29,9 +30,9 @@
 #include "export_plotable.h"
 #include "stat_tool/plotable.h"
 
-using namespace plotable;
 using namespace std;
 using namespace boost::python;
+using namespace stat_tool;
 
 
 void class_plotable()
