@@ -13,9 +13,12 @@
  *
  *        OpenAlea WebSite : http://openalea.gforge.inria.fr
  *
- *        $Id: export_compound.cpp 6168 2009-04-01 16:42:29Z cokelaer $
+ *        $Id: export_chain_reestimation.cpp 6168 2009-04-01 16:42:29Z cokelaer $
  *
  *-----------------------------------------------------------------------------*/
+
+
+
 #include <stdio.h>
 #include "wrapper_util.h"
 #include "export_base.h"
@@ -29,6 +32,8 @@
 #include <boost/shared_ptr.hpp>
 
 using namespace boost::python;
+using namespace stat_tool;
+
 
 class ChainReestimationWrap
 {
