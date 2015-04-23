@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -41,20 +41,24 @@
 
 
 
+namespace stat_tool {
+
+
+
 /****************************************************************
  *
  *  Constantes :
  */
 
 
-const int MIXTURE_NB_COMPONENT = NB_STATE;  // nombre maximum de composantes
+  const int MIXTURE_NB_COMPONENT = NB_STATE;  // nombre maximum de composantes
 
-const double MIXTURE_LIKELIHOOD_DIFF = 1.e-6;  // seuil pour stopper les iterations EM
-const int MIXTURE_NB_ITER = 500;        // nombre maximum d'iterations EM
-const int POSTERIOR_PROBABILITY_NB_VECTOR = 300;  // nombre maximum de vecteurs pour la sortie des probabilites
-                                                  // a posteriori des affectations les plus probables
+  const double MIXTURE_LIKELIHOOD_DIFF = 1.e-6;  // seuil pour stopper les iterations EM
+  const int MIXTURE_NB_ITER = 500;        // nombre maximum d'iterations EM
+  const int POSTERIOR_PROBABILITY_NB_VECTOR = 300;  // nombre maximum de vecteurs pour la sortie des probabilites
+                                                    // a posteriori des affectations les plus probables
 
-const int MIXTURE_NB_VECTOR = 50000;   // nombre maximum d'individus pour la simulation
+  const int MIXTURE_NB_VECTOR = 50000;   // nombre maximum d'individus pour la simulation
 
 
 
@@ -64,10 +68,10 @@ const int MIXTURE_NB_VECTOR = 50000;   // nombre maximum d'individus pour la sim
  */
 
 
-class MixtureData;
+  class MixtureData;
 
 
-class Mixture : public StatInterface {  // melange multivarie de lois
+  class Mixture : public StatInterface {  // melange multivarie de lois
 
     friend class Vectors;
     friend class MixtureData;
@@ -77,7 +81,7 @@ class Mixture : public StatInterface {  // melange multivarie de lois
     friend std::ostream& operator<<(std::ostream &os , const Mixture &mixt)
     { return mixt.ascii_write(os , mixt.mixture_data); }
 
-private :
+  private :
 
     MixtureData *mixture_data;  // pointeur sur un objet MixtureData
     int nb_component;       // nombre de composantes
@@ -107,7 +111,7 @@ private :
     int nb_parameter_computation(double min_probability = 0.) const;
     void individual_assignment(MixtureData &vec , bool assignment = true) const;
 
-public :
+  public :
 
     Mixture();
     Mixture(int inb_component , int inb_output_process , int *nb_value);
@@ -154,16 +158,16 @@ public :
     { return continuous_parametric_process; }
     ContinuousParametricProcess* get_continuous_parametric_process(int variable) const
     { return continuous_parametric_process[variable]; }
-};
+  };
 
 
-Mixture* mixture_ascii_read(StatError &error , const char *path ,
-                            double cumul_threshold = CUMUL_THRESHOLD);
+  Mixture* mixture_ascii_read(StatError &error , const char *path ,
+                              double cumul_threshold = CUMUL_THRESHOLD);
 
 
 
-class MixtureData : public Vectors {  // structure de donnees correspondant
-                                      // a un melange multivarie
+  class MixtureData : public Vectors {  // structure de donnees correspondant
+                                        // a un melange multivarie
 
     friend class Vectors;
     friend class Mixture;
@@ -171,7 +175,7 @@ class MixtureData : public Vectors {  // structure de donnees correspondant
     friend std::ostream& operator<<(std::ostream &os , const MixtureData &vec)
     { return vec.ascii_write(os , false); }
 
-private :
+  private :
 
     Mixture *mixture;       // pointeur sur un objet Mixture
 //    int explanatory_variable;  variable explicative categorielle pour les poids
@@ -189,7 +193,7 @@ private :
 
     void observation_frequency_distribution_computation(int variable , int nb_component);
 
-public :
+  public :
 
     MixtureData();
     MixtureData(int inb_vector , int inb_variable , int *itype , bool init_flag = false);
@@ -239,7 +243,10 @@ public :
     double get_sample_entropy() const { return sample_entropy; }
     double get_posterior_probability(int index) const { return posterior_probability[index]; }
     double get_entropy(int index) const { return entropy[index]; }
-};
+  };
+
+
+};  // namespace stat_tool
 
 
 
