@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -38,6 +38,10 @@
 
 #ifndef DISTRIBUTION_REESTIMATION_HPP
 #define DISTRIBUTION_REESTIMATION_HPP
+
+
+
+namespace stat_tool {
 
 
 template <typename Type>
@@ -129,6 +133,10 @@ void reestimation(int nb_value , Type *reestim , double *pmass ,
     }
   }
 }
+
+
+};  // namespace stat_tool
+
 
 
 #endif
