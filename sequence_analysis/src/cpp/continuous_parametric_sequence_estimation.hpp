@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -46,16 +46,23 @@
 
 #include "stat_tool/stat_tools.h"
 #include "stat_tool/curves.h"
+#include "stat_tool/distribution.h"
 #include "stat_tool/markovian.h"
+#include "stat_tool/vectors.h"
+#include "stat_tool/distance_matrix.h"
 #include "stat_tool/stat_label.h"
 
 #include "sequences.h"
 
 using namespace std;
 using namespace boost::math;
+using namespace stat_tool;
 
 
-extern double von_mises_concentration_computation(double mean_direction);
+namespace sequence_analysis {
+
+
+// extern double von_mises_concentration_computation(double mean_direction);
 
 
 
@@ -828,7 +835,7 @@ void MarkovianSequences::linear_model_estimation(Type ***state_sequence_count , 
 
 {
   register int i , j , k;
-  double diff , *mean , *index_parameter_mean , *index_parameter_variance , *covariance ,
+  double diff , *mean , *index_parameter_mean , *variance , *index_parameter_variance , *covariance ,
          *residual_mean , *residual_square_sum , *residual_variance;
   Type *state_frequency;
 
@@ -902,11 +909,40 @@ void MarkovianSequences::linear_model_estimation(Type ***state_sequence_count , 
     }
   }
 
+  variance = new double[process->nb_state];
   index_parameter_variance = new double[process->nb_state];
   covariance = new double[process->nb_state];
   for (i = 0;i < process->nb_state;i++) {
+    variance[i] = 0.;
     index_parameter_variance[i] = 0.;
     covariance[i] = 0.;
+  }
+
+  switch (type[variable]) {
+
+  case INT_VALUE : {
+    for (i = 0;i < nb_sequence;i++) {
+      for (j = 0;j < length[i];j++) {
+        for (k = 0;k < process->nb_state;k++) {
+          diff = int_sequence[i][variable][j] - mean[k];
+          variance[k] += state_sequence_count[i][j][k] * diff * diff;
+        }
+      }
+    }
+    break;
+  }
+
+  case REAL_VALUE : {
+    for (i = 0;i < nb_sequence;i++) {
+      for (j = 0;j < length[i];j++) {
+        for (k = 0;k < process->nb_state;k++) {
+          diff = real_sequence[i][variable][j] - mean[k];
+          variance[k] += state_sequence_count[i][j][k] * diff * diff;
+        }
+      }
+    }
+    break;
+  }
   }
 
   switch (index_parameter_type) {
@@ -1003,6 +1039,7 @@ void MarkovianSequences::linear_model_estimation(Type ***state_sequence_count , 
     if (state_frequency[i] > 0) {
       process->observation[i]->slope = covariance[i] / index_parameter_variance[i];
       process->observation[i]->intercept = mean[i] - process->observation[i]->slope * index_parameter_mean[i];
+      process->observation[i]->correlation = covariance[i] / sqrt(variance[i] * index_parameter_variance[i]);
     }
     else {
       process->observation[i]->slope = D_INF;
@@ -1198,12 +1235,16 @@ void MarkovianSequences::linear_model_estimation(Type ***state_sequence_count , 
   delete [] state_frequency;
   delete [] mean;
   delete [] index_parameter_mean;
+  delete [] variance;
   delete [] index_parameter_variance;
   delete [] covariance;
   delete [] residual_mean;
   delete [] residual_square_sum;
   delete [] residual_variance;
 }
+
+
+};  // namespace sequence_analysis
 
 
 
