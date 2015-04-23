@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -44,8 +44,10 @@
 
 #include "stat_tool/stat_tools.h"
 #include "stat_tool/curves.h"
+#include "stat_tool/distribution.h"
 #include "stat_tool/markovian.h"
 #include "stat_tool/vectors.h"
+#include "stat_tool/distance_matrix.h"
 #include "stat_tool/stat_label.h"
 
 #include "sequences.h"
@@ -54,11 +56,10 @@
 
 using namespace std;
 using namespace boost::math;
+using namespace stat_tool;
 
 
-extern int column_width(int value);
-extern int column_width(int nb_value , const double *value , double scale = 1.);
-extern char* label(const char *file_name);
+namespace sequence_analysis {
 
 
 
@@ -1581,14 +1582,15 @@ void Sequences::correlation_computation(Correlation &correl , int variable1 , in
   else {
     register int i , j , k;
     int max_lag = correl.length - 1 , nb_vector , *pisequence1 , *pisequence2 ,
-        *pfrequency , itype[2];
+        *pfrequency , **int_vector;
     double *ppoint;
     Vectors *vec;
 
 
-    itype[0] = INT_VALUE;
-    itype[1] = INT_VALUE;
-    vec = new Vectors(cumul_length , NULL , 2 , itype);
+    int_vector = new int*[cumul_length];
+    for (i = 0;i < cumul_length;i++) {
+      int_vector[i] = new int[2];
+    }
 
     ppoint = correl.point[0];
     pfrequency = correl.frequency;
@@ -1603,23 +1605,16 @@ void Sequences::correlation_computation(Correlation &correl , int variable1 , in
           pisequence1 = int_sequence[j][variable1];
           pisequence2 = int_sequence[j][variable2] + i;
           for (k = 0;k < length[j] - i;k++) {
-            vec->int_vector[nb_vector][0] = *pisequence1++;
-            vec->int_vector[nb_vector][1] = *pisequence2++;
+            int_vector[nb_vector][0] = *pisequence1++;
+            int_vector[nb_vector][1] = *pisequence2++;
             nb_vector++;
           }
         }
       }
 
-      vec->nb_vector = nb_vector;
       *pfrequency = nb_vector;
 
-      for (j = 0;j < 2;j++) {
-        vec->min_value_computation(j);
-        vec->max_value_computation(j);
-
-        delete vec->marginal_distribution[j];
-        vec->build_marginal_frequency_distribution(j);
-      }
+      vec = new Vectors(nb_vector , NULL , 2 , int_vector);
 
       // calcul du coefficient de correlation
 
@@ -1632,6 +1627,8 @@ void Sequences::correlation_computation(Correlation &correl , int variable1 , in
         break;
       }
 
+      delete vec;
+
 //      if (*pfrequency++ <= CORRELATION_MIN_FREQUENCY) {
       if (*pfrequency++ <= cumul_length * FREQUENCY_RATIO) {
         correl.length = i + 1;
@@ -1639,7 +1636,10 @@ void Sequences::correlation_computation(Correlation &correl , int variable1 , in
       }
     }
 
-    delete vec;
+    for (i = 0;i < cumul_length;i++) {
+      delete [] int_vector[i];
+    }
+    delete [] int_vector;
   }
 }
 
@@ -2047,3 +2047,6 @@ Correlation* Sequences::partial_autocorrelation_computation(StatError &error , i
 
   return partial_correl;
 }
+
+
+};  // namespace sequence_analysis
