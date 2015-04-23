@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -41,23 +41,27 @@
 
 
 
+namespace stat_tool {
+
+
+
 /****************************************************************
  *
  *  Constantes :
  */
 
 
-const int REGRESSION_NB_VECTOR = 10000;  // nombre maximum de vecteurs pour la
-                                         // regression non-parametrique
-const int NEIGHBORHOOD = 3;            // voisinage minimum sur les valeurs
-                                       // de la variable explicative
+  const int REGRESSION_NB_VECTOR = 10000;  // nombre maximum de vecteurs pour la
+                                           // regression non-parametrique
+  const int NEIGHBORHOOD = 3;            // voisinage minimum sur les valeurs
+                                         // de la variable explicative
 
-enum {
-  STAT_LINEAR ,
-  STAT_LOGISTIC ,
-  STAT_MONOMOLECULAR ,
-  STAT_NONPARAMETRIC
-};
+  enum {
+    STAT_LINEAR ,
+    STAT_LOGISTIC ,
+    STAT_MONOMOLECULAR ,
+    STAT_NONPARAMETRIC
+  };
 
 
 
@@ -67,9 +71,9 @@ enum {
  */
 
 
-class RegressionKernel {  // noyau de regression
+  class RegressionKernel {  // noyau de regression
 
-public :
+  public :
 
     int ident;              // identificateur de la fonction de regression
     int min_value;          // valeur minimum
@@ -101,20 +105,21 @@ public :
     void computation();
     double min_computation() const;
     double max_computation() const;
-};
+  };
 
 
 
-class Vectors;
+  class Vectors;
 
-class Regression : public StatInterface , public RegressionKernel {  // fonction de regression
+
+  class Regression : public StatInterface , public RegressionKernel {  // fonction de regression
 
     friend class Vectors;
 
     friend std::ostream& operator<<(std::ostream &os , const Regression &regression)
     { return regression.ascii_write(os); }
 
-private :
+  private :
 
     Vectors *vectors;       // pointeur sur un objet Vectors
     int nb_vector;          // nombre de vecteurs
@@ -129,7 +134,7 @@ private :
     double residual_variance_computation(double residual_mean) const;
     double residual_square_sum_computation() const;
     
-public :
+  public :
 
     Regression();
     Regression(int iident , int explanatory_variable , int response_variable , const Vectors &vec);
@@ -150,7 +155,10 @@ public :
     Vectors* get_vectors() const { return vectors; }
     int get_nb_vector() const { return nb_vector; }
     double get_residual(int ivec) const { return residual[ivec]; }
-};
+  };
+
+
+};  // namespace stat_tool
 
 
 
