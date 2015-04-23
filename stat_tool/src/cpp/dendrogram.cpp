@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -47,8 +47,9 @@
 using namespace std;
 
 
-extern int column_width(int value);
-extern int column_width(int nb_value , const double *value , double scale = 1.);
+namespace stat_tool {
+
+
 extern int cumul_computation(int nb_row , int nb_column , int **value);
 extern double cumul_distance_computation(int dim , double *distance);
 extern int* pattern_sort(int nb_pattern , double *distance , int nb_sorted_pattern = I_DEFAULT);
@@ -902,7 +903,7 @@ Dendrogram* DistanceMatrix::agglomerative_hierarchical_clustering(int algorithm 
     // tri par distance moyenne croissante aux autres formes
 
     for (i = 0;i < nb_row;i++) {
-      cumul_distance[i] = ::cumul_distance_computation(nb_column , dist_matrix->distance[i]);
+      cumul_distance[i] = stat_tool::cumul_distance_computation(nb_column , dist_matrix->distance[i]);
       if (cumul_distance[i] != -D_INF) {
         cumul_distance[i] /= cumul_computation(1 , nb_column , dist_matrix->length + i);
       }
@@ -1329,7 +1330,7 @@ Dendrogram* DistanceMatrix::divisive_hierarchical_clustering() const
       max_cumul_distance = 0.;
 
       for (j = 0;j < step_dist_matrix->nb_row;j++) {
-        cumul_distance[j] = ::cumul_distance_computation(step_dist_matrix->nb_column , step_dist_matrix->distance[j]);
+        cumul_distance[j] = stat_tool::cumul_distance_computation(step_dist_matrix->nb_column , step_dist_matrix->distance[j]);
         if (cumul_distance[j] != -D_INF) {
           cumul_distance[j] /= cumul_computation(1 , step_dist_matrix->nb_column , step_dist_matrix->length + j);
         }
@@ -1496,3 +1497,6 @@ bool DistanceMatrix::hierarchical_clustering(StatError &error , ostream &os ,
 
   return status;
 }
+
+
+};  // namespace stat_tool
