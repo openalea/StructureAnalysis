@@ -3,12 +3,12 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id: markov.cpp 3257 2007-06-06 12:56:12Z dufourko $
+ *       $Id: nonhomogeneous_markov.cpp 3257 2007-06-06 12:56:12Z dufourko $
  *
  *       Forum for V-Plants developers: amldevlp@cirad.fr
  *
@@ -46,10 +46,12 @@
 #include "tool/config.h"
 
 #include "stat_tool/stat_tools.h"
-#include "stat_tool/distribution.h"
 #include "stat_tool/regression.h"
 #include "stat_tool/curves.h"
+#include "stat_tool/distribution.h"
 #include "stat_tool/markovian.h"
+#include "stat_tool/vectors.h"
+#include "stat_tool/distance_matrix.h"
 #include "stat_tool/stat_label.h"
 
 #include "sequences.h"
@@ -59,9 +61,54 @@
 using namespace std;
 
 
-extern int column_width(int value);
-extern int column_width(int nb_value , const double *value , double scale = 1.);
-extern char* label(const char *file_name);
+namespace stat_tool {
+
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Ecriture d'une courbe et des residus standardises correspondants au format Gnuplot.
+ *
+ *  arguments : path, pointeur sur les residus standardises.
+ *
+ *--------------------------------------------------------------*/
+
+bool Curves::plot_print_standard_residual(const char *path , double *standard_residual) const
+
+{
+  bool status = false;
+  register int i;
+  ofstream out_file(path);
+
+
+  if (out_file) {
+    status = true;
+
+    // ecriture des reponses observees et des residus standardises
+
+    for (i = 0;i < length;i++) {
+      if (frequency[i] > 0) {
+        out_file << i << " " << point[0][i];
+        if (standard_residual) {
+          out_file << " " << standard_residual[i];
+        }
+        out_file << " " << frequency[i] << endl;
+      }
+    }
+  }
+
+  return status;
+}
+
+
+};  // namespace stat_tool
+
+
+
+using namespace stat_tool;
+
+
+namespace sequence_analysis {
 
 
 
@@ -727,42 +774,6 @@ bool Function::plot_print(const char *path , double residual_standard_deviation)
                  << " " << -point[i] / residual_standard_deviation;
       }
       out_file << endl;
-    }
-  }
-
-  return status;
-}
-
-
-/*--------------------------------------------------------------*
- *
- *  Ecriture d'une courbe et des residus standardises correspondants au format Gnuplot.
- *
- *  arguments : path, pointeur sur les residus standardises.
- *
- *--------------------------------------------------------------*/
-
-bool Curves::plot_print_standard_residual(const char *path , double *standard_residual) const
-
-{
-  bool status = false;
-  register int i;
-  ofstream out_file(path);
-
-
-  if (out_file) {
-    status = true;
-
-    // ecriture des reponses observees et des residus standardises
-
-    for (i = 0;i < length;i++) {
-      if (frequency[i] > 0) {
-        out_file << i << " " << point[0][i];
-        if (standard_residual) {
-          out_file << " " << standard_residual[i];
-        }
-        out_file << " " << frequency[i] << endl;
-      }
     }
   }
 
@@ -2643,3 +2654,6 @@ MultiPlotSet* NonhomogeneousMarkovData::get_plotable() const
 
   return plot_set;
 }
+
+
+};  // namespace sequence_analysis
