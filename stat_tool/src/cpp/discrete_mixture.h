@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -41,20 +41,24 @@
 
 
 
+namespace stat_tool {
+
+
+
 /****************************************************************
  *
  *  Constantes :
  */
 
 
-const int DISCRETE_MIXTURE_NB_COMPONENT = 100;   // nombre maximum de composantes
+  const int DISCRETE_MIXTURE_NB_COMPONENT = 100;   // nombre maximum de composantes
 
-const double NEGATIVE_BINOMIAL_PARAMETER = 20.;  // parametre initial pour une loi binomiale negative
-const double MIN_WEIGHT_STEP = 0.1;    // pas minimum d'initialisation des poids
-const double MAX_WEIGHT_STEP = 0.5;    // pas maximum d'initialisation des poids
-const int MIXTURE_COEFF = 2;           // coefficient arrondi estimateur
-const double DISCRETE_MIXTURE_LIKELIHOOD_DIFF = 1.e-5;  // seuil pour stopper les iterations EM
-const int DISCRETE_MIXTURE_NB_ITER = 500;        // nombre maximum d'iterations EM
+  const double NEGATIVE_BINOMIAL_PARAMETER = 20.;  // parametre initial pour une loi binomiale negative
+  const double MIN_WEIGHT_STEP = 0.1;    // pas minimum d'initialisation des poids
+  const double MAX_WEIGHT_STEP = 0.5;    // pas maximum d'initialisation des poids
+  const int MIXTURE_COEFF = 2;           // coefficient arrondi estimateur
+  const double DISCRETE_MIXTURE_LIKELIHOOD_DIFF = 1.e-5;  // seuil pour stopper les iterations EM
+  const int DISCRETE_MIXTURE_NB_ITER = 500;        // nombre maximum d'iterations EM
 
 
 
@@ -64,11 +68,10 @@ const int DISCRETE_MIXTURE_NB_ITER = 500;        // nombre maximum d'iterations 
  */
 
 
-class FrequencyDistribution;
-class DiscreteMixtureData;
+  class DiscreteMixtureData;
 
 
-class DiscreteMixture : public StatInterface , public Distribution {  // melange de lois discretes discretes
+  class DiscreteMixture : public StatInterface , public Distribution {  // melange de lois discretes
 
     friend class FrequencyDistribution;
     friend class DiscreteMixtureData;
@@ -80,7 +83,7 @@ class DiscreteMixture : public StatInterface , public Distribution {  // melange
     friend std::ostream& operator<<(std::ostream &os , const DiscreteMixture &mixt)
     { return mixt.ascii_write(os , mixt.mixture_data , false , false); }
 
-private :
+  private :
 
     DiscreteMixtureData *mixture_data;  // pointeur sur un objet DiscreteMixtureData
     int nb_component;       // nombre de composantes
@@ -107,7 +110,7 @@ private :
                              int min_inf_bound) const;
     bool component_order_test() const;
 
-public :
+  public :
 
     DiscreteMixture();
     DiscreteMixture(int inb_component , double *pweight , const DiscreteParametric **pcomponent);
@@ -140,25 +143,25 @@ public :
     int get_nb_component() const { return nb_component; }
     DiscreteParametric* get_weight() const { return weight; }
     DiscreteParametric* get_component(int index) const { return component[index]; }
-};
+  };
 
 
-DiscreteMixture* discrete_mixture_building(StatError &error , int nb_component , double *weight ,
-                                           const DiscreteParametric **component);
-DiscreteMixture* discrete_mixture_ascii_read(StatError &error , const char *path ,
-                                             double cumul_threshold = CUMUL_THRESHOLD);
+  DiscreteMixture* discrete_mixture_building(StatError &error , int nb_component , double *weight ,
+                                             const DiscreteParametric **component);
+  DiscreteMixture* discrete_mixture_ascii_read(StatError &error , const char *path ,
+                                               double cumul_threshold = CUMUL_THRESHOLD);
 
 
 
-class DiscreteMixtureData : public StatInterface , public FrequencyDistribution {  // structure de donnees correspondant
-                                                                                   // a un melange de lois discretes
+  class DiscreteMixtureData : public StatInterface , public FrequencyDistribution {  // structure de donnees correspondant
+                                                                                     // a un melange de lois discretes
     friend class FrequencyDistribution;
     friend class DiscreteMixture;
 
     friend std::ostream& operator<<(std::ostream &os , const DiscreteMixtureData &mixt_histo)
     { return mixt_histo.ascii_write(os , false); }
 
-private :
+  private :
 
     DiscreteMixture *mixture;  // pointeur sur un objet DiscreteMixture
     int nb_component;       // nombre de composantes
@@ -168,7 +171,7 @@ private :
     void copy(const DiscreteMixtureData &mixt_histo , bool model_flag = true);
     void remove();
 
-public :
+  public :
 
     DiscreteMixtureData();
     DiscreteMixtureData(const FrequencyDistribution &histo , int inb_component);
@@ -197,7 +200,10 @@ public :
     int get_nb_component() const { return nb_component; }
     FrequencyDistribution* get_weight() const { return weight; }
     FrequencyDistribution* get_component(int index) const { return component[index]; }
-};
+  };
+
+
+};  // namespace stat_tool
 
 
 
