@@ -21,6 +21,7 @@
  *-----------------------------------------------------------------------------*/
 
 
+
 #include "wrapper_util.h"
 #include "export_base.h"
 
@@ -42,6 +43,7 @@
 
 using namespace boost::python;
 using namespace boost;
+using namespace stat_tool;
 
 
 // Vectors
@@ -201,7 +203,7 @@ public:
         error = true;
       }
     if (!error){
-        vec = new Vectors(nb_vector, identifier, nb_variable, types, int_vector, float_vector);
+      vec = new Vectors(nb_vector, identifier, nb_variable, types, int_vector, float_vector, false);
     }
 
 
