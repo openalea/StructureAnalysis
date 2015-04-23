@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -47,13 +47,10 @@
 #include "markovian.h"
 #include "stat_label.h"
 
-
 using namespace std;
 
 
-extern int column_width(int nb_value , const double *value , double scale = 1.);
-extern void cumul_computation(int nb_value , const double *pmass , double *pcumul);
-extern void log_computation(int nb_value , const double *pmass , double *plog);
+namespace stat_tool {
 
 
 
@@ -844,10 +841,10 @@ void Chain::cumul_computation()
     register int i;
 
 
-    ::cumul_computation((type == 'o' ? nb_state : nb_row) , initial , cumul_initial);
+    stat_tool::cumul_computation((type == 'o' ? nb_state : nb_row) , initial , cumul_initial);
 
     for (i = 0;i < nb_row;i++) {
-      ::cumul_computation(nb_state , transition[i] , cumul_transition[i]);
+      stat_tool::cumul_computation(nb_state , transition[i] , cumul_transition[i]);
     }
   }
 }
@@ -866,10 +863,10 @@ void Chain::log_computation()
     register int i;
 
 
-    ::log_computation((type == 'o' ? nb_state : nb_row) , initial , cumul_initial);
+    stat_tool::log_computation((type == 'o' ? nb_state : nb_row) , initial , cumul_initial);
 
     for (i = 0;i < nb_row;i++) {
-      ::log_computation(nb_state , transition[i] , cumul_transition[i]);
+      stat_tool::log_computation(nb_state , transition[i] , cumul_transition[i]);
     }
   }
 }
@@ -888,3 +885,6 @@ ChainData::ChainData(const ChainData &chain_data)
 {
   copy(chain_data);
 }
+
+
+};  // namespace stat_tool
