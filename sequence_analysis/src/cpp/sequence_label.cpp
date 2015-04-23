@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -34,6 +34,9 @@
  *  ----------------------------------------------------------------------------
  */
 
+
+
+namespace sequence_analysis {
 
 
 /****************************************************************
@@ -407,3 +410,6 @@ const char *SEQ_error[] = {
 //  "bad number of trials" ,
 //  "bad number of axillary shoots per node"
 };
+
+
+};  // namespace sequence_analysis
