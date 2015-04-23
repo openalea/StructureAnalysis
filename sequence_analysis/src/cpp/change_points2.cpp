@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -46,55 +46,29 @@
 
 #include "stat_tool/stat_tools.h"
 #include "stat_tool/curves.h"
+#include "stat_tool/distribution.h"
 #include "stat_tool/markovian.h"
+#include "stat_tool/vectors.h"
+#include "stat_tool/distance_matrix.h"
 
 #include "sequences.h"
 #include "sequence_label.h"
 
 using namespace std;
 using namespace boost::math;
+using namespace stat_tool;
 
 
-extern int column_width(int value);
-extern int column_width(int min_value , int max_value);
-extern int column_width(int nb_value , const double *value , double scale = 1.);
+namespace sequence_analysis {
 
-extern void cumul_computation(int nb_value , const double *pmass , double *pcumul);
-extern int cumul_method(int nb_value , const double *cumul , double scale = 1.);
+
+extern int column_width(int nb_value , const long double *value);
 
 
 #if defined (SYSTEM_IS__CYGWIN)
 #define expl exp
 #endif
 
-
-
-/*--------------------------------------------------------------*
- *
- *  Calcul de la largeur d'une colonne de reels.
- *
- *  arguments : nombre de valeurs, pointeur sur des valeurs reelles.
- *
- *--------------------------------------------------------------*/
-
-int column_width(int nb_value , const long double *value)
-
-{
-  register int i;
-  int width , max_width = 0;
-
-
-  for (i = 0;i < nb_value;i++) {
-    ostringstream ostring;
-    ostring << *value++;
-    width = (ostring.str()).size();
-    if (width > max_width) {
-      max_width = width;
-    }
-  }
-
-  return max_width;
-}
 
 
 /*--------------------------------------------------------------*/
@@ -134,10 +108,10 @@ ostream& Sequences::profile_ascii_print(ostream &os , int index , int nb_segment
   }
   for (i = start;i < nb_variable;i++) {
     if (type[i] != REAL_VALUE) {
-      width[i] = column_width((int)min_value[i] , (int)max_value[i]);
+      width[i] = stat_tool::column_width((int)min_value[i] , (int)max_value[i]);
     }
     else {
-      width[i] = column_width(length[index] , real_sequence[index][i]);
+      width[i] = stat_tool::column_width(length[index] , real_sequence[index][i]);
     }
     if (i > start) {
       width[i] += ASCII_SPACE;
@@ -145,27 +119,27 @@ ostream& Sequences::profile_ascii_print(ostream &os , int index , int nb_segment
   }
 
   if (index_parameter) {
-    width[nb_variable] = column_width(index_parameter_distribution->nb_value - 1) + ASCII_SPACE;
+    width[nb_variable] = stat_tool::column_width(index_parameter_distribution->nb_value - 1) + ASCII_SPACE;
   }
   else {
-    width[nb_variable] = column_width(max_length) + ASCII_SPACE;
+    width[nb_variable] = stat_tool::column_width(max_length) + ASCII_SPACE;
   }
 
   width[nb_variable + 1] = 0;
   for (i = 0;i < length[index];i++) {
-    buff = column_width(nb_segment , profiles[i]);
+    buff = stat_tool::column_width(nb_segment , profiles[i]);
     if (buff > width[nb_variable + 1]) {
       width[nb_variable + 1] = buff;
     }
   }
   width[nb_variable + 1] += ASCII_SPACE;
 
-  width[nb_variable + 2] = column_width(nb_sequence);
+  width[nb_variable + 2] = stat_tool::column_width(nb_sequence);
 
   if (piecewise_function) {
     for (i = 1;i < nb_variable;i++) {
       if (piecewise_function[i]) {
-        width[nb_variable + 2 + i] = column_width(length[index] , piecewise_function[i]) + ASCII_SPACE;
+        width[nb_variable + 2 + i] = stat_tool::column_width(length[index] , piecewise_function[i]) + ASCII_SPACE;
       }
     }
   }
@@ -3943,7 +3917,7 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *mo
           for (m = j;m >= k;m--) {
             backward[m] = contrast[m] * forward[m - 1][k - 1] / forward[j][k];
           }
-          ::cumul_computation(j - k , backward + k , cumul_backward);
+          stat_tool::cumul_computation(j - k , backward + k , cumul_backward);
           segment_length = j - (k + cumul_method(j - k , cumul_backward)) + 1;
 
 #         ifdef MESSAGE
@@ -4347,3 +4321,6 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *mo
 
   return likelihood;
 }
+
+
+};  // namespace sequence_analysis
