@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -51,6 +51,9 @@
 
 using namespace std;
 using namespace boost::math;
+
+
+namespace stat_tool {
 
 
 
@@ -1800,6 +1803,9 @@ void Reestimation<Type>::zero_inflated_gamma_estimation(ContinuousParametric *di
     }
   }
 }
+
+
+};  // namespace stat_tool
 
 
 
