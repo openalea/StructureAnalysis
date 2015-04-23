@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -52,6 +52,9 @@
 
 using namespace std;
 using namespace boost::math;
+
+
+namespace stat_tool {
 
 
 extern double von_mises_concentration_computation(double mean_direction);
@@ -1085,6 +1088,9 @@ void Vectors::von_mises_estimation(Type **component_vector_count , int variable 
 
   delete [] component_frequency;
 }
+
+
+};  // namespace stat_tool
 
 
 
