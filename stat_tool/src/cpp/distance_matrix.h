@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -41,32 +41,35 @@
 
 
 
+namespace stat_tool {
+
+
 /****************************************************************
  *
  *  Constantes :
  */
 
-const int ASCII_NB_INDIVIDUAL = 10;    // nombre d'individus maximum pour afficher sous forme
-                                       // de resultats d'alignement
-const double PLOT_YMARGIN = 0.1;       // marge en Y pour l'affichage des distances
+  const int ASCII_NB_INDIVIDUAL = 10;    // nombre d'individus maximum pour afficher sous forme
+                                         // de resultats d'alignement
+  const double PLOT_YMARGIN = 0.1;       // marge en Y pour l'affichage des distances
 
-const double DISTANCE_ROUNDNESS = 1.e-12;  // arrondi sur une distance
+  const double DISTANCE_ROUNDNESS = 1.e-12;  // arrondi sur une distance
 
-const int GLOBAL_NB_ITER = 20;         // nombre d'iterations ou les groupes
-                                       // sont recalculees globalement
-const int PARTITIONING_NB_ITER_1 = 50;  // nombre maximum d'iterations
-const int PARTITIONING_NB_ITER_2 = 20;  // nombre maximum d'iterations
+  const int GLOBAL_NB_ITER = 20;         // nombre d'iterations ou les groupes
+                                         // sont recalculees globalement
+  const int PARTITIONING_NB_ITER_1 = 50;  // nombre maximum d'iterations
+  const int PARTITIONING_NB_ITER_2 = 20;  // nombre maximum d'iterations
 
-enum {
-  NEAREST_NEIGHBOR ,
-  FARTHEST_NEIGHBOR ,
-  AVERAGING
-};
+  enum {
+    NEAREST_NEIGHBOR ,
+    FARTHEST_NEIGHBOR ,
+    AVERAGING
+  };
 
-enum {
-  CHILD_CLUSTER_DISTANCE ,
-  DIAMETER
-};
+  enum {
+    CHILD_CLUSTER_DISTANCE ,
+    DIAMETER
+  };
 
 
 
@@ -75,12 +78,10 @@ enum {
  *  Definition de la classe :
  */
 
-class Sequences;
-class Clusters;
-class Dendrogram;
-class DistanceMatrix;
+  class Clusters;
+  class Dendrogram;
 
-class DistanceMatrix : public StatInterface {  // matrice des distances
+  class DistanceMatrix : public StatInterface {  // matrice des distances
 
     friend class Clusters;
     friend class Dendrogram;
@@ -88,7 +89,7 @@ class DistanceMatrix : public StatInterface {  // matrice des distances
     friend std::ostream& operator<<(std::ostream &os , const DistanceMatrix &dist_matrix)
     { return dist_matrix.ascii_write(os); }
 
-protected :
+  protected :
 
     int nb_row;             // nombre de lignes
     int nb_column;          // nombre de colonnes
@@ -119,7 +120,7 @@ protected :
 
     MultiPlotSet* get_plotable(StatError &error) const;
 
-public :
+  public :
 
     DistanceMatrix();
     DistanceMatrix(int nb_pattern , const char *ilabel , int *pattern_identifier = NULL);
@@ -211,18 +212,18 @@ public :
     { if (nb_substitution != NULL) return true; else return false; }
     bool is_transposition()
     { if (nb_transposition != NULL) return true; else return false; }
-};
+  };
 
 
 
-class Clusters : public DistanceMatrix {  // resultats du clustering par partitionnement
+  class Clusters : public DistanceMatrix {  // resultats du clustering par partitionnement
 
     friend class DistanceMatrix;
 
     friend std::ostream& operator<<(std::ostream &os , const Clusters &clusters)
     { return clusters.ascii_write(os); }
 
-private :
+  private :
 
     DistanceMatrix *distance_matrix;  // pointeur sur un objet DistanceMatrix
     int nb_pattern;         // nombre de formes
@@ -256,7 +257,7 @@ private :
     void algorithmic_step_1();
     void algorithmic_step_2();
 
-public :
+  public :
 
     Clusters();
     Clusters(const DistanceMatrix &dist_matrix , int inb_cluster);
@@ -291,19 +292,18 @@ public :
     { return pattern_distance[pattern][cluster]; }
     int get_pattern_length(int pattern , int cluster) const
     { return pattern_length[pattern][cluster]; }
-};
+  };
 
 
 
-class Dendrogram : public StatInterface {  // resultats du clustering hierarchique
+  class Dendrogram : public StatInterface {  // resultats du clustering hierarchique
 
     friend class DistanceMatrix;
-    friend class Sequences;
 
     friend std::ostream& operator<<(std::ostream &os , const Dendrogram &dendrogram)
     { return dendrogram.ascii_write(os); }
 
-private :
+  private :
 
     DistanceMatrix *distance_matrix;  // pointeur sur un objet DistanceMatrix
     int scale;              // echelle pour representer les distances entre groupes
@@ -325,7 +325,7 @@ private :
     double coefficient_computation(int iscale = I_DEFAULT) const;
     void tree_computation();
 
-public :
+  public :
 
     Dendrogram();
     Dendrogram(const DistanceMatrix &dist_matrix , int iscale);
@@ -356,7 +356,10 @@ public :
     double get_between_cluster_distance(int cluster) const { return between_cluster_distance[cluster]; }
     double get_max_within_cluster_distance(int cluster) const { return max_within_cluster_distance[cluster]; }
     double get_min_between_cluster_distance(int cluster) const { return min_between_cluster_distance[cluster]; }
-};
+  };
+
+
+};  // namespace stat_tool
 
 
 
