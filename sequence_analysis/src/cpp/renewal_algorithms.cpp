@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -42,8 +42,11 @@
 #include "tool/config.h"
 
 #include "stat_tool/stat_tools.h"
-#include "stat_tool/distribution.h"
 #include "stat_tool/curves.h"
+#include "stat_tool/distribution.h"
+#include "stat_tool/markovian.h"
+#include "stat_tool/vectors.h"
+#include "stat_tool/distance_matrix.h"
 #include "stat_tool/stat_label.h"
 
 #include "renewal.h"
@@ -51,7 +54,756 @@
 
 using namespace std;
 
-extern int column_width(int value);
+
+
+namespace stat_tool {
+
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de la vraisemblance des donnees d'intervalles de temps.
+ *
+ *  arguments : loi de l'intervalle de temps residuel, lois empiriques des intervalles
+ *              de temps complets, censures a gauche, a droite et
+ *              de la longueur de la periode d'observation dans le cas 0 evenement.
+ *
+ *--------------------------------------------------------------*/
+
+double DiscreteParametric::renewal_likelihood_computation(const Forward &forward_dist ,
+                                                          const FrequencyDistribution &within ,
+                                                          const FrequencyDistribution &backward ,
+                                                          const FrequencyDistribution &forward ,
+                                                          const FrequencyDistribution *no_event) const
+
+{
+  double likelihood , buff;
+  FrequencyDistribution *histo;
+
+
+  likelihood = likelihood_computation(within);
+
+  if (likelihood != D_INF) {
+    histo = new FrequencyDistribution(backward , 's' , 1);
+    buff = survivor_likelihood_computation(*histo);
+    delete histo;
+
+    if (buff != D_INF) {
+      likelihood += buff;
+      buff = forward_dist.likelihood_computation(forward);
+
+      if (buff != D_INF) {
+        likelihood += buff;
+
+        if (no_event) {
+          histo = new FrequencyDistribution(*no_event , 's' , 1);
+          buff = forward_dist.survivor_likelihood_computation(*histo);
+          delete histo;
+
+          if (buff != D_INF) {
+            likelihood += buff;
+          }
+          else {
+            likelihood = D_INF;
+          }
+        }
+      }
+
+      else {
+        likelihood = D_INF;
+      }
+    }
+
+    else {
+      likelihood = D_INF;
+    }
+  }
+
+  return likelihood;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul des quantites de reestimation correspondant a la loi inter-evenement
+ *  (estimateur EM d'un processus de renouvellement en equilibre a partir
+ *   de donnees d'intervalles de temps).
+ *
+ *  arguments : lois empiriques des intervalles de temps complets, censures a gauche,
+ *              a droite et de la longueur de la periode d'observation dans le cas 0 evenement,
+ *              pointeurs sur les quantites de reestimation de la loi inter-evenement et
+ *              de la loi biaisee par la longueur.
+ *
+ *--------------------------------------------------------------*/
+
+void DiscreteParametric::expectation_step(const FrequencyDistribution &within ,
+                                          const FrequencyDistribution &backward ,
+                                          const FrequencyDistribution &forward ,
+                                          const FrequencyDistribution *no_event ,
+                                          Reestimation<double> *inter_event_reestim ,
+                                          Reestimation<double> *length_bias_reestim , int iter) const
+
+{
+  register int i , j;
+  int reestim_offset , reestim_nb_value , *pfrequency;
+  double sum , *ifrequency , *lfrequency , *pmass , *pcumul , *norm;
+
+
+  // initialisations
+
+  ifrequency = inter_event_reestim->frequency;
+  lfrequency = length_bias_reestim->frequency;
+  for (i = 0;i < inter_event_reestim->alloc_nb_value;i++) {
+    *ifrequency++ = 0.;
+    *lfrequency++ = 0.;
+  }
+
+  // calcul des quantites de reestimation de la loi inter-evenement
+
+  ifrequency = inter_event_reestim->frequency + within.offset;
+  pfrequency = within.frequency + within.offset;
+  for (i = within.offset;i < within.nb_value;i++) {
+    *ifrequency++ += *pfrequency++;
+  }
+
+  pfrequency = backward.frequency + backward.offset;
+  pcumul = cumul + backward.offset;
+  ifrequency = inter_event_reestim->frequency + backward.offset + 1;
+  pmass = mass + backward.offset + 1;
+  sum = 0.;
+
+  for (i = backward.offset;i < backward.nb_value;i++) {
+    sum += *pfrequency++ / (1. - *pcumul++);
+    *ifrequency++ += *pmass++ * sum;
+  }
+  for (i = backward.nb_value;i < nb_value - 1;i++) {
+    *ifrequency++ += *pmass++ * sum;
+  }
+
+  // calcul des quantites de reestimation de la loi biaisee par la longueur
+
+  pfrequency = forward.frequency + forward.offset;
+  pcumul = cumul + forward.offset - 1;
+  lfrequency = length_bias_reestim->frequency + forward.offset;
+  pmass = mass + forward.offset;
+  sum = 0.;
+
+  for (i = forward.offset;i < forward.nb_value;i++) {
+    sum += *pfrequency++ / (1. - *pcumul++);
+    *lfrequency++ += *pmass++ * sum;
+  }
+  for (i = forward.nb_value;i < nb_value;i++) {
+    *lfrequency++ += *pmass++ * sum;
+  }
+
+  if (no_event) {
+    norm = new double[no_event->nb_value];
+
+    for (i = no_event->offset;i < no_event->nb_value;i++) {
+      if (no_event->frequency[i] > 0) {
+        pmass = mass + i + 1;
+        norm[i] = 0.;
+        for (j = i + 1;j < nb_value;j++) {
+          norm[i] += (j - i) * *pmass++;
+        }
+      }
+    }
+
+    lfrequency = length_bias_reestim->frequency + no_event->offset + 1;
+    pmass = mass + no_event->offset + 1;
+    for (i = no_event->offset + 1;i < nb_value;i++) {
+      pfrequency = no_event->frequency + no_event->offset;
+      sum = 0.;
+      for (j = no_event->offset;j < MIN(i , no_event->nb_value);j++) {
+        if ((*pfrequency > 0) && (norm[j] > 0.)) {
+          sum += *pfrequency * (i - j) / norm[j];
+        }
+        pfrequency++;
+      }
+
+      *lfrequency++ += *pmass++ * sum;
+    }
+
+    delete [] norm;
+  }
+
+  reestim_offset = 1;
+  reestim_nb_value = inter_event_reestim->alloc_nb_value;
+
+  ifrequency = inter_event_reestim->frequency + inter_event_reestim->alloc_nb_value;
+  lfrequency = length_bias_reestim->frequency + inter_event_reestim->alloc_nb_value;
+  while ((*--ifrequency == 0) && (*--lfrequency == 0) && (reestim_nb_value > 2)) {
+    reestim_nb_value--;
+  }
+  inter_event_reestim->nb_value = reestim_nb_value;
+  length_bias_reestim->nb_value = reestim_nb_value;
+
+  ifrequency = inter_event_reestim->frequency + reestim_offset;
+  lfrequency = length_bias_reestim->frequency + reestim_offset;
+  while ((*ifrequency++ == 0) && (*lfrequency++ == 0) && (reestim_offset < reestim_nb_value - 1)) {
+    reestim_offset++;
+  }
+  inter_event_reestim->offset = reestim_offset;
+  length_bias_reestim->offset = reestim_offset;
+
+  inter_event_reestim->nb_element_computation();
+  length_bias_reestim->nb_element_computation();
+
+# ifdef DEBUG
+  if ((iter < 10) || ((iter < 100) && (iter % 10 == 0)) ||
+      ((iter < 1000) && (iter % 100 == 0)) || (iter % 1000 == 0)) {
+    inter_event_reestim->max_computation();
+    inter_event_reestim->mean_computation();
+    inter_event_reestim->variance_computation();
+
+    length_bias_reestim->max_computation();
+    length_bias_reestim->mean_computation();
+    length_bias_reestim->variance_computation();
+
+    cout << "\nquantites de reestimation loi inter_evenement :" << *inter_event_reestim << endl;
+    cout << "\nquantites de reestimation loi biaisee par la longueur :" << *length_bias_reestim << endl;
+  }
+# endif
+
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de la moyenne d'une loi par bissection d'intervalle.
+ *
+ *  arguments : pointeurs sur les quantites de reestimation de la loi et
+ *              de la loi biaisee par la longueur.
+ *
+ *--------------------------------------------------------------*/
+
+double interval_bisection(Reestimation<double> *distribution_reestim ,
+                          Reestimation<double> *length_bias_reestim)
+
+{
+  register int i;
+  double ratio , inf_ratio , sup_ratio , mean , inf_mean , sup_mean , *dfrequency , *lfrequency;
+
+# ifdef DEBUG
+  int iter = 0;
+# endif
+
+
+  // initialisations : calculs des 2 premieres valeurs
+
+  dfrequency = distribution_reestim->frequency + distribution_reestim->offset;
+  lfrequency = length_bias_reestim->frequency + distribution_reestim->offset;
+  inf_ratio = 0.;
+  sup_ratio = 0.;
+  inf_mean = distribution_reestim->offset;
+  sup_mean = distribution_reestim->nb_value - 1;
+
+  for (i = distribution_reestim->offset;i < distribution_reestim->nb_value;i++) {
+    inf_ratio += (*dfrequency + *lfrequency) * i /
+                 (distribution_reestim->nb_element * sup_mean + length_bias_reestim->nb_element * i);
+    sup_ratio += (*dfrequency++ + *lfrequency++) * i /
+                 (distribution_reestim->nb_element * inf_mean + length_bias_reestim->nb_element * i);
+  }
+
+  do {
+    dfrequency = distribution_reestim->frequency + distribution_reestim->offset;
+    lfrequency = length_bias_reestim->frequency + distribution_reestim->offset;
+    ratio = 0.;
+    mean = (inf_mean + sup_mean) / 2.;
+
+    for (i = distribution_reestim->offset;i < distribution_reestim->nb_value;i++) {
+      ratio += (*dfrequency++ + *lfrequency++) * i /
+               (distribution_reestim->nb_element * mean + length_bias_reestim->nb_element * i);
+    }
+
+#   ifdef DEBUG
+    cout << STAT_label[STATL_ITERATION] << " " << iter++ << ": " << mean << " " << ratio << endl;
+#   endif
+
+    if (ratio < 1.) {
+      inf_ratio = ratio;
+      sup_mean = mean;
+    }
+    else {
+      sup_ratio = ratio;
+      inf_mean = mean;
+    }
+  }
+  while (sup_ratio - inf_ratio > BISECTION_RATIO_THRESHOLD);
+
+  mean = (inf_mean + sup_mean) / 2.;
+
+# ifdef DEBUG
+  cout << STAT_label[STATL_MEAN] << ": " << mean << " " << ratio << endl;
+# endif
+
+  return mean;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Estimation des parametres d'un processus de renouvellement en equilibre
+ *  par l'algorithme EM a partir de donnees d'intervalles de temps.
+ *
+ *  arguments : reference sur un objet StatError, stream, lois empiriques des intervalles
+ *              de temps censures a gauche, a droite et de la longueur
+ *              de la periode d'observation dans le cas 0 evenement,
+ *              reference sur la loi inter-evenement initiale, type d'estimateur
+ *              (vraisemblance ou vraisemblance penalisee), nombre d'iterations,
+ *              methode de calcul de la moyenne de la loi inter-evenement,
+ *              poids de la penalisation, type de penalisation,
+ *              type de gestion des effets de bord (zero a l'exterieur du support ou
+ *              prolongation de la loi), moyenne de la loi inter-evenement.
+ *
+ *--------------------------------------------------------------*/
+
+DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , ostream &os ,
+                                                           const FrequencyDistribution &backward ,
+                                                           const FrequencyDistribution &forward ,
+                                                           const FrequencyDistribution *no_event ,
+                                                           const DiscreteParametric &iinter_event ,
+                                                           int estimator , int nb_iter ,
+                                                           int mean_computation_method , double weight ,
+                                                           int penalty_type , int outside ,
+                                                           double iinter_event_mean) const
+
+{
+  using namespace sequence_analysis;
+
+  bool status = true;
+  register int i;
+  int inb_value , max_nb_value;
+  double likelihood , previous_likelihood , inter_event_mean , *penalty;
+  DiscreteParametricModel *inter_event;
+  Forward *forward_dist;
+  Reestimation<double> *inter_event_reestim , *length_bias_reestim;
+  FrequencyDistribution *backward_forward;
+  const FrequencyDistribution *phisto[2];
+
+
+  inter_event = NULL;
+  error.init();
+
+  if (nb_element < NB_COMPLETE_INTERVAL) {
+    status = false;
+    error.update(SEQ_error[SEQR_NB_COMPLETE_INTERVAL_TOO_SMALL]);
+  }
+
+  if (offset == 0) {
+    status = false;
+    error.update(SEQ_error[SEQR_COMPLETE_MIN_VALUE]);
+  }
+  if (forward.offset == 0) {
+    status = false;
+    error.update(SEQ_error[SEQR_FORWARD_MIN_VALUE]);
+  }
+  if ((no_event) && (no_event->offset == 0)) {
+    status = false;
+    error.update(SEQ_error[SEQR_NO_EVENT_MIN_VALUE]);
+  }
+
+  if ((nb_iter != I_DEFAULT) && (nb_iter < 1)) {
+    status = false;
+    error.update(STAT_error[STATR_NB_ITERATION]);
+  }
+
+  if ((weight != D_DEFAULT) && (weight <= 0.)) {
+    status = false;
+    error.update(STAT_error[STATR_PENALTY_WEIGHT]);
+  }
+
+  if ((mean_computation_method == ESTIMATED) && (iinter_event_mean == D_DEFAULT)) {
+    status = false;
+    error.update(SEQ_error[SEQR_MEAN_COMPUTATION_METHOD]);
+  }
+
+  inb_value = nb_value;
+  if (backward.nb_value + 1 > inb_value) {
+    inb_value = backward.nb_value + 1;
+  }
+  if (forward.nb_value > inb_value) {
+    inb_value = forward.nb_value;
+  }
+
+  if ((no_event) && (no_event->nb_value > inb_value)) {
+    max_nb_value = no_event->nb_value;
+  }
+  else {
+    max_nb_value = inb_value;
+  }
+
+  if ((iinter_event.offset > offset) || (iinter_event.nb_value < max_nb_value)) {
+    status = false;
+    error.update(SEQ_error[SEQR_INTER_EVENT_SUPPORT]);
+  }
+
+  if (status) {
+    phisto[0] = new FrequencyDistribution(backward , 's' , 1);
+    phisto[1] = &forward;
+    backward_forward = new FrequencyDistribution(2 , phisto);
+    delete phisto[0];
+
+#   ifdef MESSAGE
+    {
+      int max_nb_element , width[2];
+      long old_adjust;
+
+
+      old_adjust = os.setf(ios::right , ios::adjustfield);
+
+      width[0] = column_width(max_nb_value - 1);
+
+      max_nb_element = nb_element;
+      if (backward_forward->nb_element > max_nb_element) {
+        max_nb_element = backward_forward->nb_element;
+      }
+      if ((no_event) && (no_event->nb_element > max_nb_element)) {
+        max_nb_element = no_event->nb_element;
+      }
+      width[1] = column_width(max_nb_element) + ASCII_SPACE;
+
+      os << "\n   | " << SEQ_label[SEQL_OBSERVATION_INTER_EVENT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
+         << " | " << SEQ_label[SEQL_BACKWARD] << "/" << SEQ_label[SEQL_FORWARD]
+         << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
+      if (no_event) {
+        os << " | no-event " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
+      }
+      os << endl;
+
+      for (i = 0;i < max_nb_value;i++) {
+        os << setw(width[0]) << i;
+
+        if (i < nb_value) {
+          os << setw(width[1]) << frequency[i];
+        }
+        else {
+          os << setw(width[1]) << " ";
+        }
+
+        if (i < backward_forward->nb_value) {
+          os << setw(width[1]) << backward_forward->frequency[i];
+        }
+        else {
+          os << setw(width[1]) << " ";
+        }
+
+        if (no_event) {
+          if (i < no_event->nb_value) {
+            os << setw(width[1]) << no_event->frequency[i];
+          }
+          else {
+            os << setw(width[1]) << " ";
+          }
+        }
+
+        os << "    |  ";
+        if (i < backward.nb_value) {
+          os << setw(width[1]) << backward.frequency[i];
+        }
+        else {
+          os << setw(width[1]) << " ";
+        }
+
+        if (i < forward.nb_value) {
+          os << setw(width[1]) << forward.frequency[i];
+        }
+        else {
+          os << setw(width[1]) << " ";
+        }
+
+        os << endl;
+      }
+      os << endl;
+
+      os << setw(width[0]) << " "
+         << setw(width[1]) << nb_element
+         << setw(width[1]) << backward_forward->nb_element;
+      if (no_event) {
+        os << setw(width[1]) << no_event->nb_element;
+      }
+      os << "    |  " << setw(width[1]) << backward.nb_element
+         << setw(width[1]) << forward.nb_element << "\n" << endl;
+
+      os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
+    }
+#   endif
+
+    // creation de la loi inter-evenement
+
+    inter_event = new DiscreteParametricModel(iinter_event , this);
+    inter_event->init(CATEGORICAL , I_DEFAULT , I_DEFAULT , D_DEFAULT , D_DEFAULT);
+    forward_dist = new Forward(*inter_event);
+
+    if (estimator == PENALIZED_LIKELIHOOD) {
+      penalty = new double[inter_event->nb_value];
+
+      if (weight == D_DEFAULT) {
+        if (penalty_type != ENTROPY) {
+          weight = RENEWAL_DIFFERENCE_WEIGHT;
+        }
+        else {
+          weight = RENEWAL_ENTROPY_WEIGHT;
+        }
+      }
+
+      if (no_event) {
+        weight *= (nb_element + backward.nb_element + forward.nb_element + no_event->nb_element);
+      }
+      else {
+        weight *= (nb_element + backward.nb_element + forward.nb_element);
+      }
+    }
+
+    inter_event_reestim = new Reestimation<double>(inter_event->nb_value);
+    length_bias_reestim = new Reestimation<double>(inter_event->nb_value);
+
+    likelihood = D_INF;
+    i = 0;
+
+    do {
+      i++;
+
+      inter_event->expectation_step(*this , backward , forward , no_event ,
+                                    inter_event_reestim , length_bias_reestim , i);
+
+      switch (estimator) {
+
+      case LIKELIHOOD : {
+        switch (mean_computation_method) {
+        case ESTIMATED :
+          inter_event_mean = iinter_event_mean;
+          break;
+        case COMPUTED :
+          inter_event_mean = interval_bisection(inter_event_reestim , length_bias_reestim);
+          break;
+        case ONE_STEP_LATE :
+          inter_event_mean = inter_event->mean;
+          break;
+        }
+
+        inter_event_reestim->equilibrium_process_estimation(length_bias_reestim , inter_event ,
+                                                            inter_event_mean);
+        break;
+      }
+
+      case PENALIZED_LIKELIHOOD : {
+        switch (mean_computation_method) {
+        case ESTIMATED :
+          inter_event_mean = iinter_event_mean;
+          break;
+        case ONE_STEP_LATE :
+          inter_event_mean = inter_event->mean;
+          break;
+        }
+
+        inter_event_reestim->penalized_likelihood_equilibrium_process_estimation(length_bias_reestim ,
+                                                                                 inter_event , inter_event_mean ,
+                                                                                 weight , penalty_type , penalty ,
+                                                                                 outside);
+        break;
+      }
+      }
+
+      forward_dist->computation(*inter_event);
+      previous_likelihood = likelihood;
+      likelihood = inter_event->renewal_likelihood_computation(*forward_dist , *this , backward ,
+                                                               forward , no_event);
+
+#     ifdef MESSAGE
+      if ((i < 10) || ((i < 100) && (i % 10 == 0)) || ((i < 1000) && (i % 100 == 0)) || (i % 1000 == 0)) {
+        os << STAT_label[STATL_ITERATION] << " " << i << "   "
+           << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
+           << STAT_label[STATL_SMOOTHNESS] << ": " << inter_event->second_difference_norm_computation();
+        if (estimator == PENALIZED_LIKELIHOOD) {
+          os << "   cumul: " << inter_event->cumul[inter_event->nb_value - 1];
+        }
+
+        if ((no_event) && (no_event->offset + 1 == no_event->nb_value) && (backward_forward->nb_value > nb_value) &&
+            ((forward.nb_element + no_event->nb_element) * (1. - inter_event->cumul[inb_value - 2]) > 0.)) {
+          if (mean_computation_method == ESTIMATED) {
+            inter_event_mean = iinter_event_mean;
+          }
+          else {
+            inter_event_mean = inter_event->mean;
+          }
+
+          os << "   smaller upper bound: "
+             << inb_value - 1 + (no_event->nb_element * inter_event_mean) /
+                                ((forward.nb_element + no_event->nb_element) * (1. - inter_event->cumul[inb_value - 2]));
+        }
+
+/*        if (backward_forward->nb_value > nb_value) {
+          register int j;
+          double term = forward.nb_element * (backward_forward->nb_value - 1) /
+                        inter_event->mean + nb_element + backward.nb_element;
+          if (no_event) {
+            term += no_event->nb_element * (backward_forward->nb_value - 1) / inter_event->mean;
+          }
+          for (j = backward_forward->offset;j < backward_forward->nb_value;j++) {
+            term -= backward_forward->frequency[j] / (1. - inter_event->cumul[j - 1]);
+          }
+
+          os << " |   " << term;
+        } */
+
+        os << endl;
+      }
+#     endif
+
+    }
+    while ((likelihood != D_INF) && (((nb_iter == I_DEFAULT) && (i < RENEWAL_NB_ITER) &&
+             ((likelihood - previous_likelihood) / -likelihood > RENEWAL_LIKELIHOOD_DIFF)) ||
+            ((nb_iter != I_DEFAULT) && (i < nb_iter))));
+
+    if (likelihood != D_INF) {
+
+#     ifdef MESSAGE
+      os << "\n" << i << " " << STAT_label[STATL_ITERATIONS] << "   "
+         << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
+         << STAT_label[STATL_SMOOTHNESS] << ": " << inter_event->second_difference_norm_computation();
+      if (estimator == PENALIZED_LIKELIHOOD) {
+        os << "   cumul: " << inter_event->cumul[inter_event->nb_value - 1];
+      }
+
+      if ((no_event) && (no_event->offset + 1 == no_event->nb_value) && (backward_forward->nb_value > nb_value) &&
+          ((forward.nb_element + no_event->nb_element) * (1. - inter_event->cumul[inb_value - 2]) > 0.)) {
+        if (mean_computation_method == ESTIMATED) {
+          inter_event_mean = iinter_event_mean;
+        }
+        else {
+          inter_event_mean = inter_event->mean;
+        }
+
+        os << "   smaller upper bound: "
+           << inb_value - 1 + (no_event->nb_element * inter_event_mean) /
+                              ((forward.nb_element + no_event->nb_element) * (1. - inter_event->cumul[inb_value - 2]));
+      }
+      os << endl;
+#     endif
+
+    }
+
+    else {
+      delete inter_event;
+      inter_event = NULL;
+      error.update(STAT_error[STATR_ESTIMATION_FAILURE]);
+    }
+
+    delete backward_forward;
+
+    delete forward_dist;
+    if (estimator == PENALIZED_LIKELIHOOD) {
+      delete [] penalty;
+    }
+
+    delete inter_event_reestim;
+    delete length_bias_reestim;
+  }
+
+  return inter_event;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Estimation des parametres d'un processus de renouvellement en equilibre
+ *  par l'algorithme EM a partir de donnees d'intervalles de temps.
+ *
+ *  arguments : reference sur un objet StatError, stream, lois empiriques des intervalles
+ *              de temps censures a gauche, a droite et de la longueur de la periode
+ *              d'observation dans le cas 0 evenement, type d'estimateur
+ *              (vraisemblance ou vraisemblance penalisee), nombre d'iterations,
+ *              methode de calcul de la moyenne de la loi inter-evenement,
+ *              poids de la penalisation, type de penalisation,
+ *              type de gestion des effets de bord (zero a l'exterieur du support ou
+ *              prolongation de la loi).
+ *
+ *--------------------------------------------------------------*/
+
+DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , ostream &os ,
+                                                           const FrequencyDistribution &backward ,
+                                                           const FrequencyDistribution &forward ,
+                                                           const FrequencyDistribution *no_event ,
+                                                           int estimator , int nb_iter ,
+                                                           int mean_computation_method , double weight ,
+                                                           int penalty_type , int outside) const
+
+{
+  using namespace sequence_analysis;
+
+  register int i;
+  int nb_histo , *pfrequency;
+  double *pmass;
+  DiscreteParametric *iinter_event;
+  DiscreteParametricModel *inter_event;
+  FrequencyDistribution *interval;
+  const FrequencyDistribution *phisto[4];
+
+
+  nb_histo = 3;
+  phisto[0] = this;
+  phisto[1] = new FrequencyDistribution(backward , 's' , 1);
+  phisto[2] = &forward;
+  if (no_event) {
+    nb_histo++;
+    phisto[3] = new FrequencyDistribution(*no_event , 's' , 1);
+  }
+
+  interval = new FrequencyDistribution(nb_histo , phisto);
+  delete phisto[1];
+  if (no_event) {
+    delete phisto[3];
+  }
+
+  iinter_event = new DiscreteParametric((int)(interval->nb_value * MAX_VALUE_COEFF));
+
+  iinter_event->offset = interval->offset;
+
+  pmass = iinter_event->mass;
+  for (i = 0;i < interval->offset;i++) {
+    *pmass++ = 0.;
+  }
+
+  pfrequency = interval->frequency + interval->offset;
+  for (i = interval->offset;i < interval->nb_value;i++) {
+    *pmass++ = (double)*pfrequency++ / (double)(interval->nb_element + 1);
+  }
+
+  for (i = interval->nb_value;i < iinter_event->nb_value - 1;i++) {
+    *pmass++ = 0.;
+  }
+  *pmass = 1. / (double)(interval->nb_element + 1);
+
+  iinter_event->cumul_computation();
+
+  iinter_event->max = (double)max / (double)(interval->nb_element + 1);
+  iinter_event->mean_computation();
+  iinter_event->variance_computation();
+
+  delete interval;
+
+# ifdef DEBUG
+  iinter_event->ascii_print(cout);
+# endif
+
+  inter_event = estimation(error , os , backward , forward , no_event ,
+                           *iinter_event , estimator , nb_iter , mean_computation_method ,
+                           weight , penalty_type , outside);
+  delete iinter_event;
+
+  return inter_event;
+}
+
+
+};  // namespace stat_tool
+
+
+
+using namespace stat_tool;
+
+
+namespace sequence_analysis {
 
 
 
@@ -250,79 +1002,6 @@ void Renewal::expectation_step(const TimeEvents &timev ,
   cout << "\nquantites de reestimation loi inter_evenement :" << *inter_event_reestim << endl;
 # endif
 
-}
-
-
-/*--------------------------------------------------------------*
- *
- *  Calcul de la moyenne d'une loi par bissection d'intervalle.
- *
- *  arguments : pointeurs sur les quantites de reestimation de la loi et
- *              de la loi biaisee par la longueur.
- *
- *--------------------------------------------------------------*/
-
-double interval_bisection(Reestimation<double> *distribution_reestim ,
-                          Reestimation<double> *length_bias_reestim)
-
-{
-  register int i;
-  double ratio , inf_ratio , sup_ratio , mean , inf_mean , sup_mean , *dfrequency , *lfrequency;
-
-# ifdef DEBUG
-  int iter = 0;
-# endif
-
-
-  // initialisations : calculs des 2 premieres valeurs
-
-  dfrequency = distribution_reestim->frequency + distribution_reestim->offset;
-  lfrequency = length_bias_reestim->frequency + distribution_reestim->offset;
-  inf_ratio = 0.;
-  sup_ratio = 0.;
-  inf_mean = distribution_reestim->offset;
-  sup_mean = distribution_reestim->nb_value - 1;
-
-  for (i = distribution_reestim->offset;i < distribution_reestim->nb_value;i++) {
-    inf_ratio += (*dfrequency + *lfrequency) * i /
-                 (distribution_reestim->nb_element * sup_mean + length_bias_reestim->nb_element * i);
-    sup_ratio += (*dfrequency++ + *lfrequency++) * i /
-                 (distribution_reestim->nb_element * inf_mean + length_bias_reestim->nb_element * i);
-  }
-
-  do {
-    dfrequency = distribution_reestim->frequency + distribution_reestim->offset;
-    lfrequency = length_bias_reestim->frequency + distribution_reestim->offset;
-    ratio = 0.;
-    mean = (inf_mean + sup_mean) / 2.;
-
-    for (i = distribution_reestim->offset;i < distribution_reestim->nb_value;i++) {
-      ratio += (*dfrequency++ + *lfrequency++) * i /
-               (distribution_reestim->nb_element * mean + length_bias_reestim->nb_element * i);
-    }
-
-#   ifdef DEBUG
-    cout << STAT_label[STATL_ITERATION] << " " << iter++ << ": " << mean << " " << ratio << endl;
-#   endif
-
-    if (ratio < 1.) {
-      inf_ratio = ratio;
-      sup_mean = mean;
-    }
-    else {
-      sup_ratio = ratio;
-      inf_mean = mean;
-    }
-  }
-  while (sup_ratio - inf_ratio > BISECTION_RATIO_THRESHOLD);
-
-  mean = (inf_mean + sup_mean) / 2.;
-
-# ifdef DEBUG
-  cout << STAT_label[STATL_MEAN] << ": " << mean << " " << ratio << endl;
-# endif
-
-  return mean;
 }
 
 
@@ -946,665 +1625,6 @@ Renewal* TimeEvents::estimation(StatError &error , ostream &os , char type ,
 
 /*--------------------------------------------------------------*
  *
- *  Calcul de la vraisemblance des donnees d'intervalles de temps.
- *
- *  arguments : loi de l'intervalle de temps residuel, lois empiriques des intervalles
- *              de temps complets, censures a gauche, a droite et
- *              de la longueur de la periode d'observation dans le cas 0 evenement.
- *
- *--------------------------------------------------------------*/
-
-double DiscreteParametric::renewal_likelihood_computation(const Forward &forward_dist ,
-                                                          const FrequencyDistribution &within ,
-                                                          const FrequencyDistribution &backward ,
-                                                          const FrequencyDistribution &forward ,
-                                                          const FrequencyDistribution *no_event) const
-
-{
-  double likelihood , buff;
-  FrequencyDistribution *histo;
-
-
-  likelihood = likelihood_computation(within);
-
-  if (likelihood != D_INF) {
-    histo = new FrequencyDistribution(backward , 's' , 1);
-    buff = survivor_likelihood_computation(*histo);
-    delete histo;
-
-    if (buff != D_INF) {
-      likelihood += buff;
-      buff = forward_dist.likelihood_computation(forward);
-
-      if (buff != D_INF) {
-        likelihood += buff;
-
-        if (no_event) {
-          histo = new FrequencyDistribution(*no_event , 's' , 1);
-          buff = forward_dist.survivor_likelihood_computation(*histo);
-          delete histo;
-
-          if (buff != D_INF) {
-            likelihood += buff;
-          }
-          else {
-            likelihood = D_INF;
-          }
-        }
-      }
-
-      else {
-        likelihood = D_INF;
-      }
-    }
-
-    else {
-      likelihood = D_INF;
-    }
-  }
-
-  return likelihood;
-}
-
-
-/*--------------------------------------------------------------*
- *
- *  Calcul des quantites de reestimation correspondant a la loi inter-evenement
- *  (estimateur EM d'un processus de renouvellement en equilibre a partir
- *   de donnees d'intervalles de temps).
- *
- *  arguments : lois empiriques des intervalles de temps complets, censures a gauche,
- *              a droite et de la longueur de la periode d'observation dans le cas 0 evenement,
- *              pointeurs sur les quantites de reestimation de la loi inter-evenement et
- *              de la loi biaisee par la longueur.
- *
- *--------------------------------------------------------------*/
-
-void DiscreteParametric::expectation_step(const FrequencyDistribution &within ,
-                                          const FrequencyDistribution &backward ,
-                                          const FrequencyDistribution &forward ,
-                                          const FrequencyDistribution *no_event ,
-                                          Reestimation<double> *inter_event_reestim ,
-                                          Reestimation<double> *length_bias_reestim , int iter) const
-
-{
-  register int i , j;
-  int reestim_offset , reestim_nb_value , *pfrequency;
-  double sum , *ifrequency , *lfrequency , *pmass , *pcumul , *norm;
-
-
-  // initialisations
-
-  ifrequency = inter_event_reestim->frequency;
-  lfrequency = length_bias_reestim->frequency;
-  for (i = 0;i < inter_event_reestim->alloc_nb_value;i++) {
-    *ifrequency++ = 0.;
-    *lfrequency++ = 0.;
-  }
-
-  // calcul des quantites de reestimation de la loi inter-evenement
-
-  ifrequency = inter_event_reestim->frequency + within.offset;
-  pfrequency = within.frequency + within.offset;
-  for (i = within.offset;i < within.nb_value;i++) {
-    *ifrequency++ += *pfrequency++;
-  }
-
-  pfrequency = backward.frequency + backward.offset;
-  pcumul = cumul + backward.offset;
-  ifrequency = inter_event_reestim->frequency + backward.offset + 1;
-  pmass = mass + backward.offset + 1;
-  sum = 0.;
-
-  for (i = backward.offset;i < backward.nb_value;i++) {
-    sum += *pfrequency++ / (1. - *pcumul++);
-    *ifrequency++ += *pmass++ * sum;
-  }
-  for (i = backward.nb_value;i < nb_value - 1;i++) {
-    *ifrequency++ += *pmass++ * sum;
-  }
-
-  // calcul des quantites de reestimation de la loi biaisee par la longueur
-
-  pfrequency = forward.frequency + forward.offset;
-  pcumul = cumul + forward.offset - 1;
-  lfrequency = length_bias_reestim->frequency + forward.offset;
-  pmass = mass + forward.offset;
-  sum = 0.;
-
-  for (i = forward.offset;i < forward.nb_value;i++) {
-    sum += *pfrequency++ / (1. - *pcumul++);
-    *lfrequency++ += *pmass++ * sum;
-  }
-  for (i = forward.nb_value;i < nb_value;i++) {
-    *lfrequency++ += *pmass++ * sum;
-  }
-
-  if (no_event) {
-    norm = new double[no_event->nb_value];
-
-    for (i = no_event->offset;i < no_event->nb_value;i++) {
-      if (no_event->frequency[i] > 0) {
-        pmass = mass + i + 1;
-        norm[i] = 0.;
-        for (j = i + 1;j < nb_value;j++) {
-          norm[i] += (j - i) * *pmass++;
-        }
-      }
-    }
-
-    lfrequency = length_bias_reestim->frequency + no_event->offset + 1;
-    pmass = mass + no_event->offset + 1;
-    for (i = no_event->offset + 1;i < nb_value;i++) {
-      pfrequency = no_event->frequency + no_event->offset;
-      sum = 0.;
-      for (j = no_event->offset;j < MIN(i , no_event->nb_value);j++) {
-        if ((*pfrequency > 0) && (norm[j] > 0.)) {
-          sum += *pfrequency * (i - j) / norm[j];
-        }
-        pfrequency++;
-      }
-
-      *lfrequency++ += *pmass++ * sum;
-    }
-
-    delete [] norm;
-  }
-
-  reestim_offset = 1;
-  reestim_nb_value = inter_event_reestim->alloc_nb_value;
-
-  ifrequency = inter_event_reestim->frequency + inter_event_reestim->alloc_nb_value;
-  lfrequency = length_bias_reestim->frequency + inter_event_reestim->alloc_nb_value;
-  while ((*--ifrequency == 0) && (*--lfrequency == 0) && (reestim_nb_value > 2)) {
-    reestim_nb_value--;
-  }
-  inter_event_reestim->nb_value = reestim_nb_value;
-  length_bias_reestim->nb_value = reestim_nb_value;
-
-  ifrequency = inter_event_reestim->frequency + reestim_offset;
-  lfrequency = length_bias_reestim->frequency + reestim_offset;
-  while ((*ifrequency++ == 0) && (*lfrequency++ == 0) && (reestim_offset < reestim_nb_value - 1)) {
-    reestim_offset++;
-  }
-  inter_event_reestim->offset = reestim_offset;
-  length_bias_reestim->offset = reestim_offset;
-
-  inter_event_reestim->nb_element_computation();
-  length_bias_reestim->nb_element_computation();
-
-# ifdef DEBUG
-  if ((iter < 10) || ((iter < 100) && (iter % 10 == 0)) ||
-      ((iter < 1000) && (iter % 100 == 0)) || (iter % 1000 == 0)) {
-    inter_event_reestim->max_computation();
-    inter_event_reestim->mean_computation();
-    inter_event_reestim->variance_computation();
-
-    length_bias_reestim->max_computation();
-    length_bias_reestim->mean_computation();
-    length_bias_reestim->variance_computation();
-
-    cout << "\nquantites de reestimation loi inter_evenement :" << *inter_event_reestim << endl;
-    cout << "\nquantites de reestimation loi biaisee par la longueur :" << *length_bias_reestim << endl;
-  }
-# endif
-
-}
-
-
-/*--------------------------------------------------------------*
- *
- *  Estimation des parametres d'un processus de renouvellement en equilibre
- *  par l'algorithme EM a partir de donnees d'intervalles de temps.
- *
- *  arguments : reference sur un objet StatError, stream, lois empiriques des intervalles
- *              de temps censures a gauche, a droite et de la longueur
- *              de la periode d'observation dans le cas 0 evenement,
- *              reference sur la loi inter-evenement initiale, type d'estimateur
- *              (vraisemblance ou vraisemblance penalisee), nombre d'iterations,
- *              methode de calcul de la moyenne de la loi inter-evenement,
- *              poids de la penalisation, type de penalisation,
- *              type de gestion des effets de bord (zero a l'exterieur du support ou
- *              prolongation de la loi), moyenne de la loi inter-evenement.
- *
- *--------------------------------------------------------------*/
-
-DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , ostream &os ,
-                                                           const FrequencyDistribution &backward ,
-                                                           const FrequencyDistribution &forward ,
-                                                           const FrequencyDistribution *no_event ,
-                                                           const DiscreteParametric &iinter_event ,
-                                                           int estimator , int nb_iter ,
-                                                           int mean_computation_method , double weight ,
-                                                           int penalty_type , int outside ,
-                                                           double iinter_event_mean) const
-
-{
-  bool status = true;
-  register int i;
-  int inb_value , max_nb_value;
-  double likelihood , previous_likelihood , inter_event_mean , *penalty;
-  DiscreteParametricModel *inter_event;
-  Forward *forward_dist;
-  Reestimation<double> *inter_event_reestim , *length_bias_reestim;
-  FrequencyDistribution *backward_forward;
-  const FrequencyDistribution *phisto[2];
-
-
-  inter_event = NULL;
-  error.init();
-
-  if (nb_element < NB_COMPLETE_INTERVAL) {
-    status = false;
-    error.update(SEQ_error[SEQR_NB_COMPLETE_INTERVAL_TOO_SMALL]);
-  }
-
-  if (offset == 0) {
-    status = false;
-    error.update(SEQ_error[SEQR_COMPLETE_MIN_VALUE]);
-  }
-  if (forward.offset == 0) {
-    status = false;
-    error.update(SEQ_error[SEQR_FORWARD_MIN_VALUE]);
-  }
-  if ((no_event) && (no_event->offset == 0)) {
-    status = false;
-    error.update(SEQ_error[SEQR_NO_EVENT_MIN_VALUE]);
-  }
-
-  if ((nb_iter != I_DEFAULT) && (nb_iter < 1)) {
-    status = false;
-    error.update(STAT_error[STATR_NB_ITERATION]);
-  }
-
-  if ((weight != D_DEFAULT) && (weight <= 0.)) {
-    status = false;
-    error.update(STAT_error[STATR_PENALTY_WEIGHT]);
-  }
-
-  if ((mean_computation_method == ESTIMATED) && (iinter_event_mean == D_DEFAULT)) {
-    status = false;
-    error.update(SEQ_error[SEQR_MEAN_COMPUTATION_METHOD]);
-  }
-
-  inb_value = nb_value;
-  if (backward.nb_value + 1 > inb_value) {
-    inb_value = backward.nb_value + 1;
-  }
-  if (forward.nb_value > inb_value) {
-    inb_value = forward.nb_value;
-  }
-
-  if ((no_event) && (no_event->nb_value > inb_value)) {
-    max_nb_value = no_event->nb_value;
-  }
-  else {
-    max_nb_value = inb_value;
-  }
-
-  if ((iinter_event.offset > offset) || (iinter_event.nb_value < max_nb_value)) {
-    status = false;
-    error.update(SEQ_error[SEQR_INTER_EVENT_SUPPORT]);
-  }
-
-  if (status) {
-    phisto[0] = new FrequencyDistribution(backward , 's' , 1);
-    phisto[1] = &forward;
-    backward_forward = new FrequencyDistribution(2 , phisto);
-    delete phisto[0];
-
-#   ifdef MESSAGE
-    {
-      int max_nb_element , width[2];
-      long old_adjust;
-
-
-      old_adjust = os.setf(ios::right , ios::adjustfield);
-
-      width[0] = column_width(max_nb_value - 1);
-
-      max_nb_element = nb_element;
-      if (backward_forward->nb_element > max_nb_element) {
-        max_nb_element = backward_forward->nb_element;
-      }
-      if ((no_event) && (no_event->nb_element > max_nb_element)) {
-        max_nb_element = no_event->nb_element;
-      }
-      width[1] = column_width(max_nb_element) + ASCII_SPACE;
-
-      os << "\n   | " << SEQ_label[SEQL_OBSERVATION_INTER_EVENT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
-         << " | " << SEQ_label[SEQL_BACKWARD] << "/" << SEQ_label[SEQL_FORWARD]
-         << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
-      if (no_event) {
-        os << " | no-event " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
-      }
-      os << endl;
-
-      for (i = 0;i < max_nb_value;i++) {
-        os << setw(width[0]) << i;
-
-        if (i < nb_value) {
-          os << setw(width[1]) << frequency[i];
-        }
-        else {
-          os << setw(width[1]) << " ";
-        }
-
-        if (i < backward_forward->nb_value) {
-          os << setw(width[1]) << backward_forward->frequency[i];
-        }
-        else {
-          os << setw(width[1]) << " ";
-        }
-
-        if (no_event) {
-          if (i < no_event->nb_value) {
-            os << setw(width[1]) << no_event->frequency[i];
-          }
-          else {
-            os << setw(width[1]) << " ";
-          }
-        }
-
-        os << "    |  ";
-        if (i < backward.nb_value) {
-          os << setw(width[1]) << backward.frequency[i];
-        }
-        else {
-          os << setw(width[1]) << " ";
-        }
-
-        if (i < forward.nb_value) {
-          os << setw(width[1]) << forward.frequency[i];
-        }
-        else {
-          os << setw(width[1]) << " ";
-        }
-
-        os << endl;
-      }
-      os << endl;
-
-      os << setw(width[0]) << " "
-         << setw(width[1]) << nb_element
-         << setw(width[1]) << backward_forward->nb_element;
-      if (no_event) {
-        os << setw(width[1]) << no_event->nb_element;
-      }
-      os << "    |  " << setw(width[1]) << backward.nb_element
-         << setw(width[1]) << forward.nb_element << "\n" << endl;
-
-      os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
-    }
-#   endif
-
-    // creation de la loi inter-evenement
-
-    inter_event = new DiscreteParametricModel(iinter_event , this);
-    inter_event->init(CATEGORICAL , I_DEFAULT , I_DEFAULT , D_DEFAULT , D_DEFAULT);
-    forward_dist = new Forward(*inter_event);
-
-    if (estimator == PENALIZED_LIKELIHOOD) {
-      penalty = new double[inter_event->nb_value];
-
-      if (weight == D_DEFAULT) {
-        if (penalty_type != ENTROPY) {
-          weight = RENEWAL_DIFFERENCE_WEIGHT;
-        }
-        else {
-          weight = RENEWAL_ENTROPY_WEIGHT;
-        }
-      }
-
-      if (no_event) {
-        weight *= (nb_element + backward.nb_element + forward.nb_element + no_event->nb_element);
-      }
-      else {
-        weight *= (nb_element + backward.nb_element + forward.nb_element);
-      }
-    }
-
-    inter_event_reestim = new Reestimation<double>(inter_event->nb_value);
-    length_bias_reestim = new Reestimation<double>(inter_event->nb_value);
-
-    likelihood = D_INF;
-    i = 0;
-
-    do {
-      i++;
-
-      inter_event->expectation_step(*this , backward , forward , no_event ,
-                                    inter_event_reestim , length_bias_reestim , i);
-
-      switch (estimator) {
-
-      case LIKELIHOOD : {
-        switch (mean_computation_method) {
-        case ESTIMATED :
-          inter_event_mean = iinter_event_mean;
-          break;
-        case COMPUTED :
-          inter_event_mean = interval_bisection(inter_event_reestim , length_bias_reestim);
-          break;
-        case ONE_STEP_LATE :
-          inter_event_mean = inter_event->mean;
-          break;
-        }
-
-        inter_event_reestim->equilibrium_process_estimation(length_bias_reestim , inter_event ,
-                                                            inter_event_mean);
-        break;
-      }
-
-      case PENALIZED_LIKELIHOOD : {
-        switch (mean_computation_method) {
-        case ESTIMATED :
-          inter_event_mean = iinter_event_mean;
-          break;
-        case ONE_STEP_LATE :
-          inter_event_mean = inter_event->mean;
-          break;
-        }
-
-        inter_event_reestim->penalized_likelihood_equilibrium_process_estimation(length_bias_reestim ,
-                                                                                 inter_event , inter_event_mean ,
-                                                                                 weight , penalty_type , penalty ,
-                                                                                 outside);
-        break;
-      }
-      }
-
-      forward_dist->computation(*inter_event);
-      previous_likelihood = likelihood;
-      likelihood = inter_event->renewal_likelihood_computation(*forward_dist , *this , backward ,
-                                                               forward , no_event);
-
-#     ifdef MESSAGE
-      if ((i < 10) || ((i < 100) && (i % 10 == 0)) || ((i < 1000) && (i % 100 == 0)) || (i % 1000 == 0)) {
-        os << STAT_label[STATL_ITERATION] << " " << i << "   "
-           << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
-           << STAT_label[STATL_SMOOTHNESS] << ": " << inter_event->second_difference_norm_computation();
-        if (estimator == PENALIZED_LIKELIHOOD) {
-          os << "   cumul: " << inter_event->cumul[inter_event->nb_value - 1];
-        }
-
-        if ((no_event) && (no_event->offset + 1 == no_event->nb_value) && (backward_forward->nb_value > nb_value) &&
-            ((forward.nb_element + no_event->nb_element) * (1. - inter_event->cumul[inb_value - 2]) > 0.)) {
-          if (mean_computation_method == ESTIMATED) {
-            inter_event_mean = iinter_event_mean;
-          }
-          else {
-            inter_event_mean = inter_event->mean;
-          }
-
-          os << "   smaller upper bound: "
-             << inb_value - 1 + (no_event->nb_element * inter_event_mean) /
-                                ((forward.nb_element + no_event->nb_element) * (1. - inter_event->cumul[inb_value - 2]));
-        }
-
-/*        if (backward_forward->nb_value > nb_value) {
-          register int j;
-          double term = forward.nb_element * (backward_forward->nb_value - 1) /
-                        inter_event->mean + nb_element + backward.nb_element;
-          if (no_event) {
-            term += no_event->nb_element * (backward_forward->nb_value - 1) / inter_event->mean;
-          }
-          for (j = backward_forward->offset;j < backward_forward->nb_value;j++) {
-            term -= backward_forward->frequency[j] / (1. - inter_event->cumul[j - 1]);
-          }
-
-          os << " |   " << term;
-        } */
-
-        os << endl;
-      }
-#     endif
-
-    }
-    while ((likelihood != D_INF) && (((nb_iter == I_DEFAULT) && (i < RENEWAL_NB_ITER) &&
-             ((likelihood - previous_likelihood) / -likelihood > RENEWAL_LIKELIHOOD_DIFF)) ||
-            ((nb_iter != I_DEFAULT) && (i < nb_iter))));
-
-    if (likelihood != D_INF) {
-
-#     ifdef MESSAGE
-      os << "\n" << i << " " << STAT_label[STATL_ITERATIONS] << "   "
-         << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
-         << STAT_label[STATL_SMOOTHNESS] << ": " << inter_event->second_difference_norm_computation();
-      if (estimator == PENALIZED_LIKELIHOOD) {
-        os << "   cumul: " << inter_event->cumul[inter_event->nb_value - 1];
-      }
-
-      if ((no_event) && (no_event->offset + 1 == no_event->nb_value) && (backward_forward->nb_value > nb_value) &&
-          ((forward.nb_element + no_event->nb_element) * (1. - inter_event->cumul[inb_value - 2]) > 0.)) {
-        if (mean_computation_method == ESTIMATED) {
-          inter_event_mean = iinter_event_mean;
-        }
-        else {
-          inter_event_mean = inter_event->mean;
-        }
-
-        os << "   smaller upper bound: "
-           << inb_value - 1 + (no_event->nb_element * inter_event_mean) /
-                              ((forward.nb_element + no_event->nb_element) * (1. - inter_event->cumul[inb_value - 2]));
-      }
-      os << endl;
-#     endif
-
-    }
-
-    else {
-      delete inter_event;
-      inter_event = NULL;
-      error.update(STAT_error[STATR_ESTIMATION_FAILURE]);
-    }
-
-    delete backward_forward;
-
-    delete forward_dist;
-    if (estimator == PENALIZED_LIKELIHOOD) {
-      delete [] penalty;
-    }
-
-    delete inter_event_reestim;
-    delete length_bias_reestim;
-  }
-
-  return inter_event;
-}
-
-
-/*--------------------------------------------------------------*
- *
- *  Estimation des parametres d'un processus de renouvellement en equilibre
- *  par l'algorithme EM a partir de donnees d'intervalles de temps.
- *
- *  arguments : reference sur un objet StatError, stream, lois empiriques des intervalles
- *              de temps censures a gauche, a droite et de la longueur de la periode
- *              d'observation dans le cas 0 evenement, type d'estimateur
- *              (vraisemblance ou vraisemblance penalisee), nombre d'iterations,
- *              methode de calcul de la moyenne de la loi inter-evenement,
- *              poids de la penalisation, type de penalisation,
- *              type de gestion des effets de bord (zero a l'exterieur du support ou
- *              prolongation de la loi).
- *
- *--------------------------------------------------------------*/
-
-DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , ostream &os ,
-                                                           const FrequencyDistribution &backward ,
-                                                           const FrequencyDistribution &forward ,
-                                                           const FrequencyDistribution *no_event ,
-                                                           int estimator , int nb_iter ,
-                                                           int mean_computation_method , double weight ,
-                                                           int penalty_type , int outside) const
-
-{
-  register int i;
-  int nb_histo , *pfrequency;
-  double *pmass;
-  DiscreteParametric *iinter_event;
-  DiscreteParametricModel *inter_event;
-  FrequencyDistribution *interval;
-  const FrequencyDistribution *phisto[4];
-
-
-  nb_histo = 3;
-  phisto[0] = this;
-  phisto[1] = new FrequencyDistribution(backward , 's' , 1);
-  phisto[2] = &forward;
-  if (no_event) {
-    nb_histo++;
-    phisto[3] = new FrequencyDistribution(*no_event , 's' , 1);
-  }
-
-  interval = new FrequencyDistribution(nb_histo , phisto);
-  delete phisto[1];
-  if (no_event) {
-    delete phisto[3];
-  }
-
-  iinter_event = new DiscreteParametric((int)(interval->nb_value * MAX_VALUE_COEFF));
-
-  iinter_event->offset = interval->offset;
-
-  pmass = iinter_event->mass;
-  for (i = 0;i < interval->offset;i++) {
-    *pmass++ = 0.;
-  }
-
-  pfrequency = interval->frequency + interval->offset;
-  for (i = interval->offset;i < interval->nb_value;i++) {
-    *pmass++ = (double)*pfrequency++ / (double)(interval->nb_element + 1);
-  }
-
-  for (i = interval->nb_value;i < iinter_event->nb_value - 1;i++) {
-    *pmass++ = 0.;
-  }
-  *pmass = 1. / (double)(interval->nb_element + 1);
-
-  iinter_event->cumul_computation();
-
-  iinter_event->max = (double)max / (double)(interval->nb_element + 1);
-  iinter_event->mean_computation();
-  iinter_event->variance_computation();
-
-  delete interval;
-
-# ifdef DEBUG
-  iinter_event->ascii_print(cout);
-# endif
-
-  inter_event = estimation(error , os , backward , forward , no_event ,
-                           *iinter_event , estimator , nb_iter , mean_computation_method ,
-                           weight , penalty_type , outside);
-  delete iinter_event;
-
-  return inter_event;
-}
-
-
-/*--------------------------------------------------------------*
- *
  *  Estimation des parametres d'un processus de renouvellement en equilibre
  *  par l'algorithme EM a partir de donnees d'intervalles de temps.
  *
@@ -2218,3 +2238,6 @@ void RenewalIterator::simulation(int ilength , char type)
     }
   }
 }
+
+
+};  // namespace sequence_analysis
