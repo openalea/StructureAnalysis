@@ -20,6 +20,8 @@
  *
  *-----------------------------------------------------------------------------*/
 
+
+
 #include "export_markovian.h"
 #include "wrapper_util.h"
 
@@ -32,7 +34,7 @@
 
 using namespace boost::python;
 using namespace boost;
-
+using namespace stat_tool;
 
 
 
