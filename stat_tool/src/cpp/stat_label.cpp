@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -34,6 +34,9 @@
  *  ----------------------------------------------------------------------------
  */
 
+
+
+namespace stat_tool {
 
 
 /****************************************************************
@@ -572,3 +575,6 @@ const char *STAT_error[] = {
   "non-symmetrical distribution" ,
   "unproper distribution"
 };
+
+
+};  // namespace stat_tool
