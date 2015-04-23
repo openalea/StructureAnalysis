@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -39,10 +39,11 @@
 #include <sstream>
 
 #include "stat_tool/stat_tools.h"
-#include "stat_tool/distribution.h"
 #include "stat_tool/curves.h"
+#include "stat_tool/distribution.h"
 #include "stat_tool/markovian.h"
 #include "stat_tool/vectors.h"
+#include "stat_tool/distance_matrix.h"
 #include "stat_tool/stat_label.h"
 
 #include "renewal.h"
@@ -51,9 +52,10 @@
 #include "sequence_label.h"
 
 using namespace std;
+using namespace stat_tool;
 
 
-extern bool identifier_checking(StatError &error , int nb_individual , int *individual_identifier);
+namespace sequence_analysis {
 
 
 
@@ -1957,7 +1959,8 @@ Vectors* Sequences::build_vectors(bool index_variable) const
 
 {
   register int i , j , k , m;
-  int offset , *itype;
+  int offset , *itype , **int_vector;
+  double **real_vector;
   Vectors *vec;
 
 
@@ -1994,27 +1997,34 @@ Vectors* Sequences::build_vectors(bool index_variable) const
     }
   }
 
-  vec = new Vectors(cumul_length , NULL , nb_variable + offset , itype);
-  delete [] itype;
+  int_vector = new int*[cumul_length];
+  for (i = 0;i < cumul_length;i++) {
+    int_vector[i] = new int[nb_variable + offset];
+  }
+
+  real_vector = new double*[cumul_length];
+  for (i = 0;i < cumul_length;i++) {
+    real_vector[i] = new double[nb_variable + offset];
+  }
 
   i = 0;
   for (j = 0;j < nb_sequence;j++) {
     for (k = 0;k < length[j];k++) {
       if (index_variable) {
         if (index_parameter) {
-          vec->int_vector[i][0] = index_parameter[j][k];
+          int_vector[i][0] = index_parameter[j][k];
         }
         else {
-          vec->int_vector[i][0] = k;
+          int_vector[i][0] = k;
         }
       }
 
       for (m = 0;m < nb_variable;m++) {
         if ((type[m] != REAL_VALUE) && (type[m] != AUXILIARY)) {
-          vec->int_vector[i][m + offset] = int_sequence[j][m][k];
+          int_vector[i][m + offset] = int_sequence[j][m][k];
         }
         else {
-          vec->real_vector[i][m + offset] = real_sequence[j][m][k];
+          real_vector[i][m + offset] = real_sequence[j][m][k];
         }
       }
 
@@ -2022,56 +2032,18 @@ Vectors* Sequences::build_vectors(bool index_variable) const
     }
   }
 
-  if (index_variable) {
-    if (index_parameter) {
-      vec->min_value[0] = index_parameter_distribution->offset;
-      if (index_parameter_type == POSITION) {
-        vec->max_value_computation(0);
-      }
-      else {
-        vec->max_value[0] = index_parameter_distribution->nb_value - 1;
-      }
+  vec = new Vectors(cumul_length , NULL , nb_variable + offset , itype , int_vector , real_vector);
+  delete [] itype;
 
-      vec->min_interval[0] = index_interval->offset;
-    }
-
-    else {
-      vec->min_value[0] = 0;
-      vec->max_value[0] = max_length - 1;
-
-      vec->min_interval[0] = 1;
-    }
-
-    vec->build_marginal_frequency_distribution(0);
+  for (i = 0;i < cumul_length;i++) {
+    delete [] int_vector[i];
   }
+  delete [] int_vector;
 
-  for (i = 0;i < nb_variable;i++) {
-    vec->min_value[i + offset] = min_value[i];
-    vec->max_value[i + offset] = max_value[i];
-
-    if (marginal_distribution[i]) {
-      vec->marginal_distribution[i + offset] = new FrequencyDistribution(*marginal_distribution[i]);
-
-      vec->mean[i + offset] = vec->marginal_distribution[i + offset]->mean;
-      vec->covariance[i + offset][i + offset] = vec->marginal_distribution[i + offset]->variance;
-    }
-
-    else {
-      if (marginal_histogram[i]) {
-        vec->marginal_histogram[i + offset] = new Histogram(*marginal_histogram[i]);
-      }
-      else {
-        vec->build_marginal_histogram(i + offset);
-      }
-
-      vec->mean_computation(i + offset);
-      vec->variance_computation(i + offset);
-    }
-
-    vec->min_interval_computation(i + offset);
+  for (i = 0;i < cumul_length;i++) {
+    delete [] real_vector[i];
   }
-
-  vec->covariance_computation();
+  delete [] real_vector;
 
   return vec;
 }
@@ -2092,7 +2064,8 @@ Vectors* Sequences::extract_vectors(StatError &error , int feature_type ,
 {
   bool status = true;
   register int i , j;
-  int begin_run , count , itype[1];
+  int begin_run , count , itype[1] , **int_vector;
+  double **real_vector;
   Vectors *vec;
 
 
@@ -2158,26 +2131,34 @@ Vectors* Sequences::extract_vectors(StatError &error , int feature_type ,
       break;
     }
 
-    vec = new Vectors(nb_sequence , identifier , 1 , itype);
+    int_vector = new int*[nb_sequence];
+    for (i = 0;i < nb_sequence;i++) {
+      int_vector[i] = new int[1];
+    }
+
+    real_vector = new double*[nb_sequence];
+    for (i = 0;i < nb_sequence;i++) {
+      real_vector[i] = new double[1];
+    }
 
     switch (feature_type) {
 
     case LENGTH : {
       if (index_parameter_type == POSITION) {
         for (i = 0;i < nb_sequence;i++) {
-          vec->int_vector[i][0] = index_parameter[i][length[i]];
+          int_vector[i][0] = index_parameter[i][length[i]];
         }
       }
 
       else if ((index_parameter_type == TIME) && (index_interval->variance > 0.)) {
         for (i = 0;i < nb_sequence;i++) {
-          vec->int_vector[i][0] = index_parameter[i][length[i] - 1];
+          int_vector[i][0] = index_parameter[i][length[i] - 1];
         }
       }
 
       else {
         for (i = 0;i < nb_sequence;i++) {
-          vec->int_vector[i][0] = length[i];
+          int_vector[i][0] = length[i];
         }
       }
       break;
@@ -2186,18 +2167,18 @@ Vectors* Sequences::extract_vectors(StatError &error , int feature_type ,
     case SEQUENCE_CUMUL : {
       if (type[variable] != REAL_VALUE) {
         for (i = 0;i < nb_sequence;i++) {
-          vec->int_vector[i][0] = 0;
+          int_vector[i][0] = 0;
           for (j = 0;j < length[i];j++) {
-            vec->int_vector[i][0] += int_sequence[i][variable][j];
+            int_vector[i][0] += int_sequence[i][variable][j];
           }
         }
       }
 
       else {
         for (i = 0;i < nb_sequence;i++) {
-          vec->real_vector[i][0] = 0.;
+          real_vector[i][0] = 0.;
           for (j = 0;j < length[i];j++) {
-            vec->real_vector[i][0] += real_sequence[i][variable][j];
+            real_vector[i][0] += real_sequence[i][variable][j];
           }
         }
       }
@@ -2207,21 +2188,21 @@ Vectors* Sequences::extract_vectors(StatError &error , int feature_type ,
     case SEQUENCE_MEAN : {
       if (type[variable] != REAL_VALUE) {
         for (i = 0;i < nb_sequence;i++) {
-          vec->real_vector[i][0] = 0.;
+          real_vector[i][0] = 0.;
           for (j = 0;j < length[i];j++) {
-            vec->real_vector[i][0] += int_sequence[i][variable][j];
+            real_vector[i][0] += int_sequence[i][variable][j];
           }
-          vec->real_vector[i][0] /= length[i];
+          real_vector[i][0] /= length[i];
         }
       }
 
       else {
         for (i = 0;i < nb_sequence;i++) {
-          vec->real_vector[i][0] = 0.;
+          real_vector[i][0] = 0.;
           for (j = 0;j < length[i];j++) {
-            vec->real_vector[i][0] += real_sequence[i][variable][j];
+            real_vector[i][0] += real_sequence[i][variable][j];
           }
-          vec->real_vector[i][0] /= length[i];
+          real_vector[i][0] /= length[i];
         }
       }
       break;
@@ -2230,10 +2211,10 @@ Vectors* Sequences::extract_vectors(StatError &error , int feature_type ,
     case FIRST_OCCURRENCE : {
       if (index_parameter_type != IMPLICIT_TYPE) {
         for (i = 0;i < nb_sequence;i++) {
-          vec->int_vector[i][0] = -1;
+          int_vector[i][0] = -1;
           for (j = 0;j < length[i];j++) {
             if (int_sequence[i][variable][j] == value) {
-              vec->int_vector[i][0] = index_parameter[i][j];
+              int_vector[i][0] = index_parameter[i][j];
               break;
             }
           }
@@ -2242,10 +2223,10 @@ Vectors* Sequences::extract_vectors(StatError &error , int feature_type ,
 
       else {
         for (i = 0;i < nb_sequence;i++) {
-          vec->int_vector[i][0] = -1;
+          int_vector[i][0] = -1;
           for (j = 0;j < length[i];j++) {
             if (int_sequence[i][variable][j] == value) {
-              vec->int_vector[i][0] = j;
+              int_vector[i][0] = j;
               break;
             }
           }
@@ -2257,7 +2238,7 @@ Vectors* Sequences::extract_vectors(StatError &error , int feature_type ,
     case SOJOURN_TIME : {
       if ((index_parameter_type == TIME) && (index_interval->variance > 0.)) {  // pour les suivis de croissance manguier
         for (i = 0;i < nb_sequence;i++) {
-          vec->int_vector[i][0] = -1;
+          int_vector[i][0] = -1;
           if (int_sequence[i][variable][0] == value) {
             begin_run = 0;
           }
@@ -2268,22 +2249,22 @@ Vectors* Sequences::extract_vectors(StatError &error , int feature_type ,
                 begin_run = index_parameter[i][j + 1];
               }
               else if (int_sequence[i][variable][j] == value) {
-                vec->int_vector[i][0] = index_parameter[i][j + 1] - begin_run - 1;
+                int_vector[i][0] = index_parameter[i][j + 1] - begin_run - 1;
                 break;
               }
             }
           }
 
           if ((j == length[i] - 1) && (int_sequence[i][variable][length[i] - 1] == value)) {
-            vec->int_vector[i][0] = index_parameter[i][j] - begin_run;
+            int_vector[i][0] = index_parameter[i][j] - begin_run;
           }
         }
       }
 
       else {
         for (i = 0;i < nb_sequence;i++) {
-//          vec->int_vector[i][0] = -1;
-          vec->int_vector[i][0] = 0;
+//          int_vector[i][0] = -1;
+          int_vector[i][0] = 0;
           if (int_sequence[i][variable][0] == value) {
             begin_run = 0;
           }
@@ -2294,14 +2275,14 @@ Vectors* Sequences::extract_vectors(StatError &error , int feature_type ,
                 begin_run = j + 1;
               }
               else if (int_sequence[i][variable][j] == value) {
-                vec->int_vector[i][0] = j + 1 - begin_run;
+                int_vector[i][0] = j + 1 - begin_run;
                 break;
               }
             }
           }
 
           if ((j == length[i] - 1) && (int_sequence[i][variable][length[i] - 1] == value)) {
-            vec->int_vector[i][0] = length[i] - begin_run;
+            int_vector[i][0] = length[i] - begin_run;
           }
         }
       }
@@ -2321,7 +2302,7 @@ Vectors* Sequences::extract_vectors(StatError &error , int feature_type ,
           }
         }
 
-        vec->int_vector[i][0] = count;
+        int_vector[i][0] = count;
       }
       break;
     }
@@ -2335,15 +2316,23 @@ Vectors* Sequences::extract_vectors(StatError &error , int feature_type ,
           }
         }
 
-        vec->int_vector[i][0] = count;
+        int_vector[i][0] = count;
       }
       break;
     }
     }
 
-    vec->min_value_computation(0);
-    vec->max_value_computation(0);
-    vec->build_marginal_frequency_distribution(0);
+    vec = new Vectors(nb_sequence , identifier , 1 , itype , int_vector , real_vector);
+
+    for (i = 0;i < nb_sequence;i++) {
+     delete [] int_vector[i];
+    }
+    delete [] int_vector;
+
+    for (i = 0;i < nb_sequence;i++) {
+      delete [] real_vector[i];
+    }
+    delete [] real_vector;
   }
 
   return vec;
@@ -2849,3 +2838,6 @@ RenewalData* Sequences::extract_renewal_data(StatError &error , int variable ,
 
   return timev;
 }
+
+
+};  // namespace sequence_analysis
