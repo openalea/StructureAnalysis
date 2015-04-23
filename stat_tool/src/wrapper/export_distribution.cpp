@@ -20,6 +20,8 @@
  *
  *-----------------------------------------------------------------------------*/
 
+
+
 #include "wrapper_util.h"
 #include "export_distribution.h"
 
@@ -36,6 +38,8 @@
 
 using namespace boost::python;
 using namespace boost;
+using namespace stat_tool;
+
 
 #include "boost_python_aliases.h"
 
