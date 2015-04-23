@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -45,19 +45,23 @@
 
 
 
+namespace stat_tool {
+
+
+
 /****************************************************************
  *
  *  Constantes :
  */
 
 
-const double CUMUL_THRESHOLD = 0.999;  // seuil sur la fonction de repartition
-                                       // pour borner une loi
+  const double CUMUL_THRESHOLD = 0.999;  // seuil sur la fonction de repartition
+                                         // pour borner une loi
 
-const double BISECTION_RATIO_THRESHOLD = 1.e-8;  // seuil pour stopper la recherche
-                                                 // par bissection d'intervalle
-const int BISECTION_NB_ITER = 100;     // nombre d'iterations maximum pour la methode
-                                       // de bissection d'intervalle
+  const double BISECTION_RATIO_THRESHOLD = 1.e-8;  // seuil pour stopper la recherche
+                                                   // par bissection d'intervalle
+  const int BISECTION_NB_ITER = 100;     // nombre d'iterations maximum pour la methode
+                                         // de bissection d'intervalle
 
 
 
@@ -67,18 +71,18 @@ const int BISECTION_NB_ITER = 100;     // nombre d'iterations maximum pour la me
  */
 
 
-class Distribution;
-class DiscreteParametric;
-class ContinuousParametric;
+  class Distribution;
+  class DiscreteParametric;
+  class ContinuousParametric;
 
 
-template <typename Type>
-class Reestimation {    // loi empirique a frequences entieres ou reelles (estimateur EM)
+  template <typename Type>
+  class Reestimation {    // loi empirique a frequences entieres ou reelles (estimateur EM)
 
     friend std::ostream& operator<<(std::ostream &os , const Reestimation<Type> &histo)
     { return histo.print(os); }
 
-public :
+  public :
 
     int nb_value;           // nombre de valeurs a partir de 0
     int alloc_nb_value;     // nombre de valeurs alloues
@@ -156,7 +160,14 @@ public :
 
     void gamma_estimation(ContinuousParametric *dist , int iter) const;
     void zero_inflated_gamma_estimation(ContinuousParametric *dist , int iter) const;
-};
+  };
+
+
+  double interval_bisection(Reestimation<double> *distribution_reestim ,
+                            Reestimation<double> *length_bias_reestim);
+
+
+};  // namespace stat_tool
 
 
 
