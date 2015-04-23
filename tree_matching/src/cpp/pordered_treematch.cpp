@@ -42,6 +42,7 @@
 VPTOOLS_USING(Timer)
 
 using namespace std;
+using namespace stat_tool;
 
 TreeMatch_PO::TreeMatch_PO()
 {
