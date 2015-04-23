@@ -3,12 +3,12 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id: sequences2.cpp 11060 2011-09-02 16:28:11Z guedon $
+ *       $Id: sequences3.cpp 11060 2011-09-02 16:28:11Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -47,19 +47,20 @@
 
 #include "stat_tool/stat_tools.h"
 #include "stat_tool/curves.h"
+#include "stat_tool/distribution.h"
 #include "stat_tool/markovian.h"
+#include "stat_tool/vectors.h"
+#include "stat_tool/distance_matrix.h"
 #include "stat_tool/stat_label.h"
 
 #include "sequences.h"
 #include "sequence_label.h"
 
 using namespace std;
+using namespace stat_tool;
 
 
-extern int column_width(int value);
-extern int column_width(int min_value , int max_value);
-extern int column_width(int nb_value , const double *value , double scale = 1.);
-extern char* label(const char *file_name);
+namespace sequence_analysis {
 
 
 
@@ -2579,3 +2580,6 @@ MultiPlotSet* Sequences::get_plotable_data(StatError &error) const
 
   return plot_set;
 }
+
+
+};  // namespace sequence_analysis
