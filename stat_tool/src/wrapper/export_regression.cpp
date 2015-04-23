@@ -15,9 +15,10 @@
  *
  *        OpenAlea WebSite : http://openalea.gforge.inria.fr
  *
- *        $Id: export_vectors.cpp 6274 2009-04-23 13:54:16Z cokelaer $
+ *        $Id: export_regression.cpp 6274 2009-04-23 13:54:16Z cokelaer $
  *
  *-----------------------------------------------------------------------------*/
+
 
 
 #include "wrapper_util.h"
@@ -40,6 +41,7 @@
 
 using namespace boost::python;
 using namespace boost;
+using namespace stat_tool;
 
 
 #define WRAP RegressionKernelWrap
