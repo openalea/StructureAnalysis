@@ -70,7 +70,7 @@ class WeightedNodeCost : public NodeCost
 
     /** Constructs a NodeCost with the type /e type and with a VectorDistance, a dispersion, a maximum and minimum values.and a product coefficient for indel cost. */
     WeightedNodeCost(NodeCostType,
-		     const VectorDistance&,
+		     const stat_tool::VectorDistance&,
 		     const ValueVector&,
 		     const ValueVector&,
 		     const ValueVector&,DistanceType);
@@ -87,7 +87,7 @@ class WeightedNodeCost : public NodeCost
   private :
     WeightList       _weights;
     DistanceType     _InsDelCost;
-    VectorDistance   _vectDist;
+    stat_tool::VectorDistance   _vectDist;
     ValueVector      _dispersion;
     ValueVector      _maxValue;
     ValueVector      _minValue;
