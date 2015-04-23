@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -41,40 +41,44 @@
 
 
 
+namespace stat_tool {
+
+
+
 /****************************************************************
  *
  *  Constantes :
  */
 
 
-const int VECTOR_NB_VARIABLE = 60;     // nombre maximum de variables
-const int DISTANCE_NB_VECTOR = 2000;   // nombre maximum de vecteurs pour le calcul
-                                       // d'une matrice des distances
-const int CONTINGENCY_NB_VALUE = 100;  // nombre maximum de valeurs pour le calcul
-                                       // d'un tableau de contingence
-const int DISPLAY_CONTINGENCY_NB_VALUE = 20;  // nombre maximum de valeurs pour l'affichage
-                                              // d'un tableau de contingence
-const int VARIANCE_ANALYSIS_NB_VALUE = 100;  // nombre maximum de niveaux pour l'analyse de variance
-const int DISPLAY_CONDITIONAL_NB_VALUE = 100;  // nombre maximum de valeurs pour l'affichage
-                                               // des lois conditionnelles
-const int PLOT_NB_VALUE = 30;          // seuil pour l'ecriture des frequences (sortie Gnuplot)
+  const int VECTOR_NB_VARIABLE = 60;     // nombre maximum de variables
+  const int DISTANCE_NB_VECTOR = 2000;   // nombre maximum de vecteurs pour le calcul
+                                         // d'une matrice des distances
+  const int CONTINGENCY_NB_VALUE = 100;  // nombre maximum de valeurs pour le calcul
+                                         // d'un tableau de contingence
+  const int DISPLAY_CONTINGENCY_NB_VALUE = 20;  // nombre maximum de valeurs pour l'affichage
+                                                // d'un tableau de contingence
+  const int VARIANCE_ANALYSIS_NB_VALUE = 100;  // nombre maximum de niveaux pour l'analyse de variance
+  const int DISPLAY_CONDITIONAL_NB_VALUE = 100;  // nombre maximum de valeurs pour l'affichage
+                                                 // des lois conditionnelles
+  const int PLOT_NB_VALUE = 30;          // seuil pour l'ecriture des frequences (sortie Gnuplot)
 
-const int NB_SYMBOL = 50;              // nombre maximum de symboles
+  const int NB_SYMBOL = 50;              // nombre maximum de symboles
 
-const int MIN_NB_ASSIGNMENT = 1;   // nombre d'affectations des individus 1ere iteration de l'algorithme MCEM
-const int MAX_NB_ASSIGNMENT = 10;  // nombre d'affectations des individus  maximum pour l'algorithme MCEM
-const double NB_ASSIGNMENT_PARAMETER = 1.;  // parametre nombre d'affectations des individus pour l'algorithme MCEM
+  const int MIN_NB_ASSIGNMENT = 1;   // nombre d'affectations des individus 1ere iteration de l'algorithme MCEM
+  const int MAX_NB_ASSIGNMENT = 10;  // nombre d'affectations des individus  maximum pour l'algorithme MCEM
+  const double NB_ASSIGNMENT_PARAMETER = 1.;  // parametre nombre d'affectations des individus pour l'algorithme MCEM
 
-enum {
-  INDEPENDENT ,
-  CONVOLUTION_FACTOR ,
-  SCALING_FACTOR
-};
+  enum {
+    INDEPENDENT ,
+    CONVOLUTION_FACTOR ,
+    SCALING_FACTOR
+  };
 
-enum {
-  ABSOLUTE_VALUE ,
-  QUADRATIC
-};
+  enum {
+    ABSOLUTE_VALUE ,
+    QUADRATIC
+  };
 
 
 
@@ -84,28 +88,25 @@ enum {
  */
 
 
-class DistanceMatrix;
-class Regression;
-class Sequences;
-class TreeMatch;
-class VectorDistance;
-class MultivariateMixture;
-class Mixture;
-class ContinuousParametricProcess;
+  class ContinuousParametricProcess;
+  class DistanceMatrix;
+  class MultivariateMixture;
+  class Mixture;
+  class Regression;
+  class VectorDistance;
 
 
-class Vectors : public StatInterface {  // vecteurs
+  class Vectors : public StatInterface {  // vecteurs
 
     friend class Regression;
     friend class MultivariateMixture;
     friend class Mixture;
-    friend class Sequences;
 
     friend Vectors* vectors_ascii_read(StatError &error , const char *path);
     friend std::ostream& operator<<(std::ostream &os , const Vectors &vec)
     { return vec.ascii_write(os); }
 
-protected :
+  protected :
 
     int nb_vector;          // nombre de vecteurs
     int *identifier;        // identificateurs des vecteurs
@@ -164,9 +165,6 @@ protected :
     bool rank_correlation_ascii_write(StatError &error , const char *path , int correlation_type ,
                                       double **correlation) const;
 
-    double spearman_rank_single_correlation_computation() const;
-    double kendall_rank_single_correlation_computation() const;
-
     int** joint_frequency_computation(int variable1 , int variable2) const;
 
     std::ostream& contingency_table_ascii_write(std::ostream &os , int variable1 , int variable2 ,
@@ -205,7 +203,7 @@ protected :
     void von_mises_estimation(Type **component_vector_count , int variable ,
                               ContinuousParametricProcess *process) const;
 
-public :
+  public :
 
     Vectors();
     Vectors (int inb_vector , int *iidentifier , int inb_variable , int *itype ,
@@ -214,7 +212,7 @@ public :
     Vectors(int inb_vector , int *iidentifier , int inb_variable , int **iint_vector);  // interface AML
     Vectors(int inb_vector , int *iidentifier , int inb_variable , double **ireal_vector);  // interface AML
     Vectors(int inb_vector , int *iidentifier , int inb_variable , int *itype ,
-            int **iint_vector , double **ireal_vector);
+            int **iint_vector , double **ireal_vector , bool variable_index = true);
     Vectors(const Vectors &vec , int variable , int itype);
     Vectors(const Vectors &vec , int inb_vector , int *index);
 //    Vectors(const Vectors &vec , char transform = 'c' , int itype = I_DEFAULT);
@@ -278,6 +276,9 @@ public :
     double kurtosis_computation(int variable) const;
 
     double* mean_direction_computation(int variable , int unit) const;
+
+    double spearman_rank_single_correlation_computation() const;
+    double kendall_rank_single_correlation_computation() const;
 
     bool rank_correlation_computation(StatError &error , std::ostream &os ,
                                       int correlation_type , const char *path = NULL) const;
@@ -354,26 +355,23 @@ public :
     { return int_vector[ivec][variable]; }
     double get_real_vector(int ivec , int variable) const
     { return real_vector[ivec][variable]; }
-};
+  };
 
 
-Vectors* vectors_ascii_read(StatError &error , const char *path);
+  Vectors* vectors_ascii_read(StatError &error , const char *path);
 
 
 
-class VectorDistance : public StatInterface {  // parametres de definition
-                                               // d'une distance entre vecteurs
+  class VectorDistance : public StatInterface {  // parametres de definition
+                                                 // d'une distance entre vecteurs
 
     friend class Vectors;
-    friend class Sequences;
-
-    friend class TreeMatch;
 
     friend VectorDistance* vector_distance_ascii_read(StatError &error , const char *path);
     friend std::ostream& operator<<(std::ostream &os , const VectorDistance &param)
     { return param.ascii_write(os); }
 
-private :
+  private :
 
     int nb_variable;        // nombre de variables
     int distance_type;      // type de distance (ABSOLUTE_VALUE/QUADRATIC)
@@ -387,7 +385,7 @@ private :
     void copy(const VectorDistance &param);
     void remove();
 
-public :
+  public :
 
     VectorDistance();
     VectorDistance(int inb_variable , int *ivariable_type , double *iweight ,
@@ -412,6 +410,7 @@ public :
 
     double* max_symbol_distance_computation(int variable) const;
 
+    void dispersion_update(int variable , double idispersion) const;
     void dispersion_computation(int variable , const FrequencyDistribution *marginal_distribution ,
                                 double *rank = NULL) const;
 
@@ -423,13 +422,27 @@ public :
     double get_weight(int variable) const { return weight[variable]; }
     double get_dispersion(int variable) const { return dispersion[variable]; }
     int get_nb_value(int variable) const { return nb_value[variable]; }
+    double** get_symbol_distance(int variable) const { return symbol_distance[variable]; }
     double get_symbol_distance(int variable , int symbol1 , int symbol2) const
     { return symbol_distance[variable][symbol1][symbol2]; }
     int get_period(int variable) const { return period[variable]; }
-};
+  };
 
 
-VectorDistance* vector_distance_ascii_read(StatError &error , const char *path);
+  VectorDistance* vector_distance_ascii_read(StatError &error , const char *path);
+
+  bool identifier_checking(StatError &error , int nb_individual , int *identifier);
+  bool selected_identifier_checking(StatError &error , int nb_individual , int *identifier ,
+                                    int nb_selected_individual , int *selected_identifier ,
+                                    const char *data_label);
+  int* identifier_select(int nb_individual , int *identifier , int nb_selected_individual ,
+                         int *selected_identifier , bool keep);
+  int* select_variable(int nb_variable , int nb_selected_variable ,
+                       int *selected_variable , bool keep);
+
+
+
+};  // namespace stat_tool
 
 
 #include "continuous_parametric_estimation.hpp"
