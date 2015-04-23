@@ -3,12 +3,12 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id: markov.h 3257 2007-06-06 12:56:12Z dufourko $
+ *       $Id: nonhomogeneous_markov.h 3257 2007-06-06 12:56:12Z dufourko $
  *
  *       Forum for V-Plants developers:
  *
@@ -41,22 +41,26 @@
 
 
 
+namespace sequence_analysis {
+
+
+
 /****************************************************************
  *
  *  Constantes :
  */
 
 
-const double START_RATIO = 0.03;       // proportion de l'echantillon pour l'initialisation
-                                       // des parametres (debut)
-const double END_RATIO = 0.1;          // proportion de l'echantillon pour l'initialisation
-                                       // des parametres (fin)
-const int REGRESSION_NB_ELEMENT = 100;  // taille minimum de l'echantillon pour
-                                        // la regression non-lineare
-const double GRADIENT_DESCENT_COEFF = 1.;  // coefficient algorithme de gradient
-const double RESIDUAL_SQUARE_SUM_DIFF = 1.e-6;  // seuil pour stopper les iterations
-                                                // de l'algorithme de gradient
-const int REGRESSION_NB_ITER = 1000;   // nombre d'iterations pour la regression non-lineaire
+  const double START_RATIO = 0.03;       // proportion de l'echantillon pour l'initialisation
+                                         // des parametres (debut)
+  const double END_RATIO = 0.1;          // proportion de l'echantillon pour l'initialisation
+                                         // des parametres (fin)
+  const int REGRESSION_NB_ELEMENT = 100;  // taille minimum de l'echantillon pour
+                                          // la regression non-lineare
+  const double GRADIENT_DESCENT_COEFF = 1.;  // coefficient algorithme de gradient
+  const double RESIDUAL_SQUARE_SUM_DIFF = 1.e-6;  // seuil pour stopper les iterations
+                                                  // de l'algorithme de gradient
+  const int REGRESSION_NB_ITER = 1000;   // nombre d'iterations pour la regression non-lineaire
 
 
 
@@ -66,9 +70,9 @@ const int REGRESSION_NB_ITER = 1000;   // nombre d'iterations pour la regression
  */
 
 
-class Function : public RegressionKernel {  // fonction d'evolution des probabilites
-                                            // de rester dans un etat
-public :
+  class Function : public stat_tool::RegressionKernel {  // fonction d'evolution des probabilites
+                                                         // de rester dans un etat
+  public :
 
     double *residual;       // residus
     int *frequency;         // effectifs correspondant a chaque index
@@ -84,8 +88,8 @@ public :
     Function& operator=(const Function &function);
 
     std::ostream& ascii_print(std::ostream &os , bool exhaustive , bool file_flag ,
-                              const Curves *curves = NULL) const;
-    std::ostream& spreadsheet_print(std::ostream &os , const Curves *curves = NULL) const;
+                              const stat_tool::Curves *curves = NULL) const;
+    std::ostream& spreadsheet_print(std::ostream &os , const stat_tool::Curves *curves = NULL) const;
     bool plot_print(const char *path , double residual_standard_deviation = D_DEFAULT) const;
 
     double regression_square_sum_computation(double self_transition_mean) const;
@@ -93,25 +97,28 @@ public :
     double residual_mean_computation() const;
     double residual_variance_computation(double residual_mean) const;
     double residual_square_sum_computation() const;
-};
+  };
 
 
-Function* function_parsing(StatError &error , std::ifstream &in_file , int &line ,
-                           int length , double min = 0. , double max = 1.);
+  Function* function_parsing(stat_tool::StatError &error , std::ifstream &in_file , int &line ,
+                             int length , double min = 0. , double max = 1.);
 
 
 
-class NonhomogeneousMarkov : public StatInterface , protected Chain {  // chaine de Markov non-homogene
+  class NonhomogeneousMarkovData;
+
+
+  class NonhomogeneousMarkov : public stat_tool::StatInterface , protected stat_tool::Chain {  // chaine de Markov non-homogene
 
     friend class MarkovianSequences;
     friend class NonhomogeneousMarkovData;
 
-    friend NonhomogeneousMarkov* nonhomogeneous_markov_ascii_read(StatError &error , const char *path ,
-                                                                  int length);
+    friend NonhomogeneousMarkov* nonhomogeneous_markov_ascii_read(stat_tool::StatError &error ,
+                                                                  const char *path , int length);
     friend std::ostream& operator<<(std::ostream &os , const NonhomogeneousMarkov &markov)
     { return markov.ascii_write(os , markov.markov_data); }
 
-protected :
+  protected :
 
     NonhomogeneousMarkovData *markov_data;  // pointeur sur un objet NonhomogeneousMarkovData
     bool *homogeneity;      // homogeneite des etats
@@ -128,37 +135,37 @@ protected :
     std::ostream& spreadsheet_write(std::ostream &os , const NonhomogeneousMarkovData *seq) const;
     bool plot_write(const char *prefix , const char *title ,
                     const NonhomogeneousMarkovData *seq) const;
-    MultiPlotSet* get_plotable(const NonhomogeneousMarkovData *seq) const;
+    stat_tool::MultiPlotSet* get_plotable(const NonhomogeneousMarkovData *seq) const;
 
     int nb_parameter_computation() const;
 
-    void transition_update(int state , int index , Chain &index_chain) const;
+    void transition_update(int state , int index , stat_tool::Chain &index_chain) const;
     void index_state_distribution();
     void state_no_occurrence_probability(int state , double increment = LEAVE_INCREMENT);
     void state_first_occurrence_distribution(int state , int min_nb_value = 1 ,
                                              double cumul_threshold = CUMUL_THRESHOLD);
     void state_nb_pattern_mixture(int state , char pattern);
 
-public :
+  public :
 
     NonhomogeneousMarkov();
     NonhomogeneousMarkov(int inb_state , int *ident);
-    NonhomogeneousMarkov(const Chain *pchain , const Function **pself_transition , int length);
+    NonhomogeneousMarkov(const stat_tool::Chain *pchain , const Function **pself_transition , int length);
     NonhomogeneousMarkov(const NonhomogeneousMarkov &markov , bool data_flag = true ,
                          bool characteristic_flag = true)
-    :Chain(markov) { copy(markov , data_flag , characteristic_flag); }
+    :stat_tool::Chain(markov) { copy(markov , data_flag , characteristic_flag); }
     ~NonhomogeneousMarkov();
     NonhomogeneousMarkov& operator=(const NonhomogeneousMarkov &markov);
 
-    DiscreteParametricModel* extract(StatError &error , int type , int state) const;
+    DiscreteParametricModel* extract(stat_tool::StatError &error , int type , int state) const;
 
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(StatError &error , const char *path , bool exhaustive = false) const;
-    bool spreadsheet_write(StatError &error , const char *path) const;
-    bool plot_write(StatError &error , const char *prefix , const char *title = NULL) const;
-    MultiPlotSet* get_plotable() const;
+    bool ascii_write(stat_tool::StatError &error , const char *path , bool exhaustive = false) const;
+    bool spreadsheet_write(stat_tool::StatError &error , const char *path) const;
+    bool plot_write(stat_tool::StatError &error , const char *prefix , const char *title = NULL) const;
+    stat_tool::MultiPlotSet* get_plotable() const;
 
     void characteristic_computation(int length , bool counting_flag);
     void characteristic_computation(const NonhomogeneousMarkovData &seq , bool counting_flag ,
@@ -167,11 +174,12 @@ public :
     double likelihood_computation(const MarkovianSequences &seq ,
                                   int index = I_DEFAULT) const;
 
-    NonhomogeneousMarkovData* simulation(StatError &error , const FrequencyDistribution &hlength ,
+    NonhomogeneousMarkovData* simulation(stat_tool::StatError &error ,
+                                         const stat_tool::FrequencyDistribution &hlength ,
                                          bool counting_flag = true) const;
-    NonhomogeneousMarkovData* simulation(StatError &error , int nb_sequence , int length ,
-                                         bool counting_flag = true) const;
-    NonhomogeneousMarkovData* simulation(StatError &error , int nb_sequence ,
+    NonhomogeneousMarkovData* simulation(stat_tool::StatError &error , int nb_sequence ,
+                                         int length , bool counting_flag = true) const;
+    NonhomogeneousMarkovData* simulation(stat_tool::StatError &error , int nb_sequence ,
                                          const MarkovianSequences &iseq ,
                                          bool counting_flag = true) const;
 
@@ -181,16 +189,16 @@ public :
     bool get_homogeneity(int state) const { return homogeneity[state]; }
     Function* get_self_transition(int state) const { return self_transition[state]; }
     CategoricalSequenceProcess* get_process() const { return process; }
-};
+  };
 
 
-NonhomogeneousMarkov* nonhomogeneous_markov_ascii_read(StatError &error , const char *path ,
-                                                       int length = DEFAULT_LENGTH);
+  NonhomogeneousMarkov* nonhomogeneous_markov_ascii_read(stat_tool::StatError &error , const char *path ,
+                                                         int length = DEFAULT_LENGTH);
 
 
 
-class NonhomogeneousMarkovData : public MarkovianSequences {  // structure de donnees correspondant
-                                                              // a une chaine de Markov non-homogene
+  class NonhomogeneousMarkovData : public MarkovianSequences {  // structure de donnees correspondant
+                                                                // a une chaine de Markov non-homogene
 
     friend class MarkovianSequences;
     friend class NonhomogeneousMarkov;
@@ -198,18 +206,18 @@ class NonhomogeneousMarkovData : public MarkovianSequences {  // structure de do
     friend std::ostream& operator<<(std::ostream &os , const NonhomogeneousMarkovData &seq)
     { return seq.ascii_write(os , false); }
 
-private :
+  private :
 
     NonhomogeneousMarkov *markov;  // pointeur sur un objet NonhomogeneousMarkov
-    ChainData *chain_data;  // etats initaux et transitions
+    stat_tool::ChainData *chain_data;  // etats initaux et transitions
     double likelihood;      // vraisemblance des sequences
 
     void copy(const NonhomogeneousMarkovData &seq , bool model_flag = true);
 
-public :
+  public :
 
     NonhomogeneousMarkovData();
-    NonhomogeneousMarkovData(const FrequencyDistribution &ihlength);
+    NonhomogeneousMarkovData(const stat_tool::FrequencyDistribution &ihlength);
     NonhomogeneousMarkovData(const MarkovianSequences &seq);
     NonhomogeneousMarkovData(const NonhomogeneousMarkovData &seq , bool model_flag = true ,
                              char transform = 'c')
@@ -217,24 +225,27 @@ public :
     ~NonhomogeneousMarkovData();
     NonhomogeneousMarkovData& operator=(const NonhomogeneousMarkovData &seq);
 
-    DiscreteDistributionData* extract(StatError &error , int type , int state) const;
-    NonhomogeneousMarkovData* remove_index_parameter(StatError &error) const;
-    NonhomogeneousMarkovData* explicit_index_parameter(StatError &error) const;
+    stat_tool::DiscreteDistributionData* extract(stat_tool::StatError &error , int type , int state) const;
+    NonhomogeneousMarkovData* remove_index_parameter(stat_tool::StatError &error) const;
+    NonhomogeneousMarkovData* explicit_index_parameter(stat_tool::StatError &error) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(StatError &error , const char *path , bool exhaustive = false) const;
-    bool spreadsheet_write(StatError &error , const char *path) const;
-    bool plot_write(StatError &error , const char *prefix , const char *title = NULL) const;
-    MultiPlotSet* get_plotable() const;
+    bool ascii_write(stat_tool::StatError &error , const char *path , bool exhaustive = false) const;
+    bool spreadsheet_write(stat_tool::StatError &error , const char *path) const;
+    bool plot_write(stat_tool::StatError &error , const char *prefix , const char *title = NULL) const;
+    stat_tool::MultiPlotSet* get_plotable() const;
 
     void build_transition_count();
 
     // acces membres de la classe
 
     NonhomogeneousMarkov* get_markov() const { return markov; }
-    ChainData* get_chain_data() const { return chain_data; }
+    stat_tool::ChainData* get_chain_data() const { return chain_data; }
     double get_likelihood() const { return likelihood; }
-};
+  };
+
+
+};  // namespace sequence_analysis
 
 
 
