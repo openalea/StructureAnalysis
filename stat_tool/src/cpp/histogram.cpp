@@ -3,12 +3,12 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id: distribution.cpp 8644 2010-04-14 13:09:28Z guedon $
+ *       $Id: histogram.cpp 8644 2010-04-14 13:09:28Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -48,7 +48,7 @@
 using namespace std;
 
 
-extern int column_width(int value);
+namespace stat_tool {
 
 
 
@@ -427,3 +427,6 @@ double* Histogram::cumul_computation() const
 
   return cumul;
 }
+
+
+};  // namespace stat_tool
