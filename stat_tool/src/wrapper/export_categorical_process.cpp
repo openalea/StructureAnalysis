@@ -14,12 +14,13 @@
  *
  *        OpenAlea WebSite : http://openalea.gforge.inria.fr
  *
- *        $Id: export_tops.cpp 6169 2009-04-01 16:42:59Z cokelaer $
+ *        $Id: export_categorical_process.cpp 6169 2009-04-01 16:42:59Z cokelaer $
  *
  *-----------------------------------------------------------------------------*/
 
-#include "wrapper_util.h"
 
+
+#include "wrapper_util.h"
 
 #include "stat_tool/stat_tools.h"
 #include "stat_tool/markovian.h"
