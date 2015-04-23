@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -43,6 +43,9 @@
 #include "stat_label.h"
 
 using namespace std;
+
+
+namespace stat_tool {
 
 
 
@@ -523,3 +526,6 @@ ConvolutionData* Convolution::simulation(StatError &error , int nb_element) cons
 
   return convol_histo;
 }
+
+
+};  // namespace stat_tool
