@@ -40,6 +40,8 @@
 #include <math.h>
 #include "Tools/timer.h"
 
+using namespace stat_tool;
+
 #ifdef SYSTEM_IS__Linux
 // AML2
 // Apparament, il y a un probleme avec la fonction truncate,
