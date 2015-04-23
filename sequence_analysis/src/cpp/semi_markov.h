@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -41,24 +41,28 @@
 
 
 
+namespace sequence_analysis {
+
+
+
 /****************************************************************
  *
  *  Constantes :
  */
 
 
-const int LEAVE_LENGTH = 10000;         // longueur maximum pour le calcul de
-                                        // la probabilite de quitter un etat
+  const int LEAVE_LENGTH = 10000;         // longueur maximum pour le calcul de
+                                          // la probabilite de quitter un etat
 
-const double OCCUPANCY_LIKELIHOOD_DIFF = 1.e-5;  // seuil pour stopper les iterations EM
-const int OCCUPANCY_NB_ITER = 10000;   // nombre maximum d'iterations EM
-const int OCCUPANCY_COEFF = 10;        // coefficient arrondi estimateur pour les lois
-                                       // d'occupation des etats
+  const double OCCUPANCY_LIKELIHOOD_DIFF = 1.e-5;  // seuil pour stopper les iterations EM
+  const int OCCUPANCY_NB_ITER = 10000;   // nombre maximum d'iterations EM
+  const int OCCUPANCY_COEFF = 10;        // coefficient arrondi estimateur pour les lois
+                                         // d'occupation des etats
 
-enum {
-  MARKOVIAN ,
-  SEMI_MARKOVIAN
-};
+  enum {
+    MARKOVIAN ,
+    SEMI_MARKOVIAN
+  };
 
 
 
@@ -68,9 +72,9 @@ enum {
  */
 
 
-class SemiMarkovChain : public Chain {  // semi-chaine de Markov
+  class SemiMarkovChain : public stat_tool::Chain {  // semi-chaine de Markov
 
-public :
+  public :
 
     int *state_subtype;     //  MARKOVIAN/SEMI_MARKOVIAN
     CategoricalSequenceProcess *state_process;  // processus d'etat
@@ -81,7 +85,7 @@ public :
 
     SemiMarkovChain();
     SemiMarkovChain(char itype , int inb_state);
-    SemiMarkovChain(const Chain *pchain , const CategoricalSequenceProcess *poccupancy);
+    SemiMarkovChain(const stat_tool::Chain *pchain , const CategoricalSequenceProcess *poccupancy);
     SemiMarkovChain(const SemiMarkovChain &smarkov , int param = I_DEFAULT)
     :Chain(smarkov) { copy(smarkov , param); }
     ~SemiMarkovChain();
@@ -100,38 +104,41 @@ public :
     void state_recurrence_time_distribution(int state , int min_nb_value = 1 ,
                                             double cumul_threshold = OCCUPANCY_THRESHOLD);
     void state_nb_pattern_mixture(int state , char pattern);
-};
+  };
 
 
 
-class SemiMarkov : public StatInterface , protected SemiMarkovChain {  // semi-chaine de Markov
+  class SemiMarkovData;
+
+
+  class SemiMarkov : public stat_tool::StatInterface , protected SemiMarkovChain {  // semi-chaine de Markov
 
     friend class MarkovianSequences;
     friend class SemiMarkovIterator;
     friend class SemiMarkovData;
 
-    friend SemiMarkov* semi_markov_ascii_read(StatError &error , const char *path ,
+    friend SemiMarkov* semi_markov_ascii_read(stat_tool::StatError &error , const char *path ,
                                               int length, bool counting_flag ,
                                               double cumul_threshold );
     friend std::ostream& operator<<(std::ostream &os , const SemiMarkov &smarkov)
     { return smarkov.ascii_write(os , smarkov.semi_markov_data); }
 
-protected :
+  protected :
 
     int nb_iterator;        // nombre d'iterateurs pointant sur l'objet
     SemiMarkovData *semi_markov_data;  // pointeur sur un objet SemiMarkovData
     int nb_output_process;  // nombre de processus d'observation
     CategoricalSequenceProcess **categorical_process;  // processus d'observation categoriels
-    DiscreteParametricProcess **discrete_parametric_process;  // processus d'observation discrets parametriques
-    ContinuousParametricProcess **continuous_parametric_process;  // processus d'observation continus parametriques
+    stat_tool::DiscreteParametricProcess **discrete_parametric_process;  // processus d'observation discrets parametriques
+    stat_tool::ContinuousParametricProcess **continuous_parametric_process;  // processus d'observation continus parametriques
 
-    SemiMarkov(const Chain *pchain , const CategoricalSequenceProcess *poccupancy ,
-               int inb_output_process , CategoricalProcess **pobservation ,
+    SemiMarkov(const stat_tool::Chain *pchain , const CategoricalSequenceProcess *poccupancy ,
+               int inb_output_process , stat_tool::CategoricalProcess **pobservation ,
                int length , bool counting_flag);
-    SemiMarkov(const Chain *pchain , const CategoricalSequenceProcess *poccupancy ,
-               int inb_output_process , CategoricalProcess **categorical_observation ,
-               DiscreteParametricProcess **discrete_parametric_observation ,
-               ContinuousParametricProcess **continuous_parametric_observation ,
+    SemiMarkov(const stat_tool::Chain *pchain , const CategoricalSequenceProcess *poccupancy ,
+               int inb_output_process , stat_tool::CategoricalProcess **categorical_observation ,
+               stat_tool::DiscreteParametricProcess **discrete_parametric_observation ,
+               stat_tool::ContinuousParametricProcess **continuous_parametric_observation ,
                int length , bool counting_flag);
 
     void copy(const SemiMarkov &smarkov , bool data_flag = true ,
@@ -145,7 +152,7 @@ protected :
                                     bool hidden = false) const;
     bool plot_write(const char *prefix , const char *title ,
                     const SemiMarkovData *seq) const;
-    MultiPlotSet* get_plotable(const SemiMarkovData *seq) const;
+    stat_tool::MultiPlotSet* get_plotable(const SemiMarkovData *seq) const;
 
     int nb_parameter_computation(double min_probability = 0.) const;
     double penalty_computation(bool hidden , double min_probability = 0.) const;
@@ -168,12 +175,12 @@ protected :
     void output_nb_run_mixture(int variable , int output);
     void output_nb_occurrence_mixture(int variable , int output);
 
-public :
+  public :
 
     SemiMarkov();
     SemiMarkov(char itype , int inb_state , int inb_output_process , int *nb_value);
-    SemiMarkov(const Chain *pchain , const CategoricalSequenceProcess *poccupancy ,
-               const CategoricalProcess *pobservation , int length ,
+    SemiMarkov(const stat_tool::Chain *pchain , const CategoricalSequenceProcess *poccupancy ,
+               const stat_tool::CategoricalProcess *pobservation , int length ,
                bool counting_flag);
     SemiMarkov(const SemiMarkov &smarkov , bool data_flag = true ,
                int param = I_DEFAULT)
@@ -182,21 +189,21 @@ public :
     ~SemiMarkov();
     SemiMarkov& operator=(const SemiMarkov &smarkov);
 
-    DiscreteParametricModel* extract(StatError &error , int type ,
+    DiscreteParametricModel* extract(stat_tool::StatError &error , int type ,
                                      int variable , int value) const;
-    DiscreteParametricModel* extract(StatError &error , int state ,
+    DiscreteParametricModel* extract(stat_tool::StatError &error , int state ,
                                      int frequency_distribution_type = FINAL_RUN) const;
-    SemiMarkovData* extract_data(StatError &error) const;
+    SemiMarkovData* extract_data(stat_tool::StatError &error) const;
 
     SemiMarkov* thresholding(double min_probability = MIN_PROBABILITY) const;
 
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(StatError &error , const char *path , bool exhaustive = false) const;
-    bool spreadsheet_write(StatError &error , const char *path) const;
-    bool plot_write(StatError &error , const char *prefix , const char *title = NULL) const;
-    MultiPlotSet* get_plotable() const;
+    bool ascii_write(stat_tool::StatError &error , const char *path , bool exhaustive = false) const;
+    bool spreadsheet_write(stat_tool::StatError &error , const char *path) const;
+    bool plot_write(stat_tool::StatError &error , const char *prefix , const char *title = NULL) const;
+    stat_tool::MultiPlotSet* get_plotable() const;
 
     void characteristic_computation(int length , bool counting_flag , int variable = I_DEFAULT);
     void characteristic_computation(const SemiMarkovData &seq , bool counting_flag ,
@@ -205,23 +212,23 @@ public :
     double likelihood_computation(const MarkovianSequences &seq , int index) const;
     double likelihood_computation(const SemiMarkovData &seq) const;
 
-    SemiMarkovData* simulation(StatError &error , const FrequencyDistribution &hlength ,
+    SemiMarkovData* simulation(stat_tool::StatError &error , const FrequencyDistribution &hlength ,
                                bool counting_flag = true , bool divergence_flag = false) const;
-    SemiMarkovData* simulation(StatError &error , int nb_sequence , int length ,
+    SemiMarkovData* simulation(stat_tool::StatError &error , int nb_sequence , int length ,
                                bool counting_flag = true) const;
-    SemiMarkovData* simulation(StatError &error , int nb_sequence ,
+    SemiMarkovData* simulation(stat_tool::StatError &error , int nb_sequence ,
                                const MarkovianSequences &iseq , bool counting_flag = true) const;
 
-    DistanceMatrix* divergence_computation(StatError &error , std::ostream &os , int nb_model ,
-                                           const SemiMarkov **ismarkov ,
-                                           FrequencyDistribution **hlength ,
-                                           const char *path = NULL) const;
-    DistanceMatrix* divergence_computation(StatError &error , std::ostream &os , int nb_model ,
-                                           const SemiMarkov **smarkov , int nb_sequence ,
-                                           int length , const char *path = NULL) const;
-    DistanceMatrix* divergence_computation(StatError &error , std::ostream &os , int nb_model ,
-                                           const SemiMarkov **smarkov , int nb_sequence ,
-                                           const MarkovianSequences **seq , const char *path = NULL) const;
+    stat_tool::DistanceMatrix* divergence_computation(stat_tool::StatError &error , std::ostream &os , int nb_model ,
+                                                      const SemiMarkov **ismarkov ,
+                                                      stat_tool::FrequencyDistribution **hlength ,
+                                                      const char *path = NULL) const;
+    stat_tool::DistanceMatrix* divergence_computation(stat_tool::StatError &error , std::ostream &os , int nb_model ,
+                                                      const SemiMarkov **smarkov , int nb_sequence ,
+                                                      int length , const char *path = NULL) const;
+    stat_tool::DistanceMatrix* divergence_computation(stat_tool::StatError &error , std::ostream &os , int nb_model ,
+                                                      const SemiMarkov **smarkov , int nb_sequence ,
+                                                      const MarkovianSequences **seq , const char *path = NULL) const;
 
     // acces membres de la classe
 
@@ -232,26 +239,26 @@ public :
     const { return categorical_process; }
     CategoricalSequenceProcess* get_categorical_process(int variable)
     const { return categorical_process[variable]; }
-    DiscreteParametricProcess** get_discrete_parametric_process() const
+    stat_tool::DiscreteParametricProcess** get_discrete_parametric_process() const
     { return discrete_parametric_process; }
-    DiscreteParametricProcess* get_discrete_parametric_process(int variable) const
+    stat_tool::DiscreteParametricProcess* get_discrete_parametric_process(int variable) const
     { return discrete_parametric_process[variable]; }
-    ContinuousParametricProcess** get_continuous_parametric_process() const
+    stat_tool::ContinuousParametricProcess** get_continuous_parametric_process() const
     { return continuous_parametric_process; }
-    ContinuousParametricProcess* get_continuous_parametric_process(int variable) const
+    stat_tool::ContinuousParametricProcess* get_continuous_parametric_process(int variable) const
     { return continuous_parametric_process[variable]; }
-};
+  };
 
 
-SemiMarkov* semi_markov_ascii_read(StatError &error , const char *path ,
-                                   int length = DEFAULT_LENGTH , bool counting_flag = true ,
-                                   double cumul_threshold = OCCUPANCY_THRESHOLD);
+  SemiMarkov* semi_markov_ascii_read(stat_tool::StatError &error , const char *path ,
+                                     int length = DEFAULT_LENGTH , bool counting_flag = true ,
+                                     double cumul_threshold = OCCUPANCY_THRESHOLD);
 
 
 
-class SemiMarkovIterator {  // iterateur semi-chaine de Markov
+  class SemiMarkovIterator {  // iterateur semi-chaine de Markov
 
-private :
+  private :
 
     SemiMarkov *semi_markov;  // pointeur sur un objet SemiMarkov
     int state;              // etat
@@ -260,7 +267,7 @@ private :
 
     void copy(const SemiMarkovIterator &it);
 
-public :
+  public :
 
     SemiMarkovIterator(SemiMarkov *ismarkov);
     SemiMarkovIterator(const SemiMarkovIterator &iter)
@@ -278,12 +285,12 @@ public :
     int get_occupancy() const { return occupancy; }
     int get_counter() const { return counter; }
     int get_nb_variable() const { return (semi_markov ? semi_markov->nb_output_process + 1 : 0); }
-};
+  };
 
 
 
-class SemiMarkovData : public MarkovianSequences {  // structure de donnees correspondant
-                                                    // a une semi-chaine de Markov
+  class SemiMarkovData : public MarkovianSequences {  // structure de donnees correspondant
+                                                      // a une semi-chaine de Markov
 
     friend class MarkovianSequences;
     friend class SemiMarkov;
@@ -292,10 +299,10 @@ class SemiMarkovData : public MarkovianSequences {  // structure de donnees corr
     friend std::ostream& operator<<(std::ostream &os , const SemiMarkovData &seq)
     { return seq.ascii_write(os , false); }
 
-private :
+  private :
 
     SemiMarkov *semi_markov;  // pointeur sur un objet SemiMarkov
-    ChainData *chain_data;  // etats initaux et transitions
+    stat_tool::ChainData *chain_data;  // etats initaux et transitions
     double likelihood;      // vraisemblance des sequences observees
     double restoration_likelihood;  // vraisemblance des sequences restaurees
     double sample_entropy;  // entropie des sequences d'etats
@@ -305,10 +312,10 @@ private :
 
     void copy(const SemiMarkovData &seq , bool model_flag = true);
 
-public :
+  public :
 
     SemiMarkovData();
-    SemiMarkovData(const FrequencyDistribution &ihlength , int inb_variable ,
+    SemiMarkovData(const stat_tool::FrequencyDistribution &ihlength , int inb_variable ,
                    int *itype , bool init_flag = false);
     SemiMarkovData(const MarkovianSequences &seq);
     SemiMarkovData(const MarkovianSequences &seq , char transform , bool initial_run_flag);
@@ -317,36 +324,39 @@ public :
     ~SemiMarkovData();
     SemiMarkovData& operator=(const SemiMarkovData &seq);
 
-    DiscreteDistributionData* extract(StatError &error , int type ,
+    DiscreteDistributionData* extract(stat_tool::StatError &error , int type ,
                                       int variable , int value) const;
-    SemiMarkovData* remove_index_parameter(StatError &error) const;
-    SemiMarkovData* explicit_index_parameter(StatError &error) const;
-    MarkovianSequences* build_auxiliary_variable(StatError &error) const;
+    SemiMarkovData* remove_index_parameter(stat_tool::StatError &error) const;
+    SemiMarkovData* explicit_index_parameter(stat_tool::StatError &error) const;
+    MarkovianSequences* build_auxiliary_variable(stat_tool::StatError &error) const;
 
     std::ostream& ascii_data_write(std::ostream &os , char format = 'c' ,
                                    bool exhaustive = false) const;
-    bool ascii_data_write(StatError &error , const char *path ,
+    bool ascii_data_write(stat_tool::StatError &error , const char *path ,
                           char format = 'c' , bool exhaustive = false) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(StatError &error , const char *path , bool exhaustive = false) const;
-    bool spreadsheet_write(StatError &error , const char *path) const;
-    bool plot_write(StatError &error , const char *prefix , const char *title = NULL) const;
-    MultiPlotSet* get_plotable() const;
+    bool ascii_write(stat_tool::StatError &error , const char *path , bool exhaustive = false) const;
+    bool spreadsheet_write(stat_tool::StatError &error , const char *path) const;
+    bool plot_write(stat_tool::StatError &error , const char *prefix , const char *title = NULL) const;
+    stat_tool::MultiPlotSet* get_plotable() const;
 
     void build_transition_count(const SemiMarkov *smarkov = NULL);
 
     // acces membres de la classe
 
     SemiMarkov* get_semi_markov() const { return semi_markov; }
-    ChainData* get_chain_data() const { return chain_data; }
+    stat_tool::ChainData* get_chain_data() const { return chain_data; }
     double get_likelihood() const { return likelihood; }
     double get_restoration_likelihood() const { return restoration_likelihood; }
     double get_sample_entropy() const { return sample_entropy; }
     double get_posterior_probability(int index) const { return posterior_probability[index]; }
     double get_entropy(int index) const { return entropy[index]; }
     double get_nb_state_sequence(int index) const { return nb_state_sequence[index]; }
-};
+  };
+
+
+};  // namespace sequence_analysis
 
 
 
