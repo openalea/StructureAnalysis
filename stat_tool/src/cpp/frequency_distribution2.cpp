@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -53,11 +53,11 @@
 using namespace std;
 
 
-extern int column_width(int value);
-extern int column_width(int nb_value , const double *value , double scale = 1.);
+namespace stat_tool {
+
+
 extern bool cumul_matching_plot_print(const char *path , int nb_cumul , int *offset ,
                                       int *nb_value , double **cumul);
-extern char* label(const char *file_name);
 
 
 
@@ -2328,3 +2328,6 @@ MultiPlotSet* DiscreteDistributionData::get_plotable() const
 
   return plot_set;
 }
+
+
+};  // namespace stat_tool
