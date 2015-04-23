@@ -114,7 +114,7 @@ class TreeMatch_O : public TreeMatch
 	       AMString mapping_type,
 	       AMString mapping,
 	       AMString scale_type,
-	       const VectorDistance &ivect,
+	       const stat_tool::VectorDistance &ivect,
 	       double coeff);
     
 
@@ -128,7 +128,7 @@ class TreeMatch_O : public TreeMatch
 
   //Fonctions de ordered_matching_extract
 
-//   DistanceMatrix* getMatrix();
+//   stat_tool::DistanceMatrix* getMatrix();
 //   SLArray* getList(int i_tree,int r_tree);
 //   DistanceType getDist(int i_tree,int r_tree);
 //   DistanceType getTime(int inp_tree,int ref_tree) const;
@@ -170,7 +170,7 @@ class TreeMatch_O : public TreeMatch
 //   char*               _fileName;
 //   int                 _nbTree;
 //   DistanceType        _InsDelCostCoeff;
-//   VectorDistance      _vectorDist;
+//   stat_tool::VectorDistance _vectorDist;
 //   ValueVector         _dispersion;
 //   ValueVector         _maxValue;
 //   ValueVector         _minValue;
