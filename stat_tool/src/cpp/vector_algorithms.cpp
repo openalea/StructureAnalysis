@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -51,8 +51,7 @@
 using namespace std;
 
 
-extern int column_width(int value);
-extern int column_width(int nb_value , const double *value , double scale = 1.);
+namespace stat_tool {
 
 
 
@@ -2218,3 +2217,6 @@ bool Vectors::variance_analysis(StatError &error , ostream &os , int class_varia
 
   return status;
 }
+
+
+};  // namespace stat_tool
