@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -42,9 +42,11 @@
 #include <boost/math/distributions/normal.hpp>
 
 #include "stat_tool/stat_tools.h"
-#include "stat_tool/distance_matrix.h"
 #include "stat_tool/curves.h"
+#include "stat_tool/distribution.h"
 #include "stat_tool/markovian.h"
+#include "stat_tool/vectors.h"
+#include "stat_tool/distance_matrix.h"
 #include "stat_tool/stat_label.h"
 
 #include "sequences.h"
@@ -55,9 +57,348 @@ using namespace std;
 using namespace boost::math;
 
 
-extern double interval_bisection(Reestimation<double> *distribution_reestim ,
-                                 Reestimation<double> *length_bias_reestim);
-extern int cumul_method(int nb_value , const double *cumul , double scale = 1.);
+namespace stat_tool {
+
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de la vraisemblance des temps de sejour dans un etat pour
+ *  une semi-chaine de Markov ordinaire.
+ *
+ *  arguments : lois empiriques des temps de sejour complets et censures a droite.
+ *
+ *--------------------------------------------------------------*/
+
+double DiscreteParametric::state_occupancy_likelihood_computation(const FrequencyDistribution &sojourn_time ,
+                                                                  const FrequencyDistribution &final_run) const
+
+{
+  double likelihood , buff;
+
+
+  likelihood = likelihood_computation(sojourn_time);
+
+  if (likelihood != D_INF) {
+    buff = survivor_likelihood_computation(final_run);
+
+    if (buff != D_INF) {
+      likelihood += buff;
+    }
+    else {
+      likelihood = D_INF;
+    }
+  }
+
+  return likelihood;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de la vraisemblance des temps de sejour dans un etat pour
+ *  une semi-chaine de Markov en equilibre.
+ *
+ *  arguments : loi de l'intervalle de temps residuel, lois empiriques des temps
+ *              de sejour complets, censures a droite, a gauche et
+ *              de la longueur des sequences dans le cas d'un seul etat visite.
+ *
+ *--------------------------------------------------------------*/
+
+double DiscreteParametric::state_occupancy_likelihood_computation(const Forward &forward ,
+                                                                  const FrequencyDistribution &sojourn_time ,
+                                                                  const FrequencyDistribution &final_run ,
+                                                                  const FrequencyDistribution &initial_run ,
+                                                                  const FrequencyDistribution &single_run) const
+
+{
+  double likelihood , buff;
+
+
+  likelihood = likelihood_computation(sojourn_time);
+
+  if (likelihood != D_INF) {
+    buff = survivor_likelihood_computation(final_run);
+
+    if (buff != D_INF) {
+      likelihood += buff;
+      buff = forward.likelihood_computation(initial_run);
+
+      if (buff != D_INF) {
+        likelihood += buff;
+        buff = forward.survivor_likelihood_computation(single_run);
+
+        if (buff != D_INF) {
+          likelihood += buff;
+        }
+        else {
+          likelihood = D_INF;
+        }
+      }
+
+      else {
+        likelihood = D_INF;
+      }
+    }
+
+    else {
+      likelihood = D_INF;
+    }
+  }
+
+  return likelihood;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul des quantites de reestimation correspondant a la loi d'occupation d'un etat
+ *  (estimateur EM d'une semi-chaine de Markov ordinaire).
+ *
+ *  arguments : lois empiriques des temps de sejour complets et censures a droite,
+ *              pointeurs sur les quantites de reestimation de la loi d'occupation de l'etat.
+ *
+ *--------------------------------------------------------------*/
+
+void DiscreteParametric::expectation_step(const FrequencyDistribution &sojourn_time ,
+                                          const FrequencyDistribution &final_run ,
+                                          Reestimation<double> *occupancy_reestim , int iter) const
+
+{
+  register int i;
+  int *pfrequency;
+  double sum , *ofrequency , *pmass , *pcumul;
+
+
+  // initialisations
+
+  ofrequency = occupancy_reestim->frequency;
+  for (i = 0;i < occupancy_reestim->alloc_nb_value;i++) {
+    *ofrequency++ = 0.;
+  }
+
+  // calcul des quantites de reestimation de la loi d'occupation de l'etat
+
+  ofrequency = occupancy_reestim->frequency + sojourn_time.offset;
+  pfrequency = sojourn_time.frequency + sojourn_time.offset;
+  for (i = sojourn_time.offset;i < sojourn_time.nb_value;i++) {
+    *ofrequency++ += *pfrequency++;
+  }
+
+  pfrequency = final_run.frequency + final_run.offset;
+  pcumul = cumul + final_run.offset - 1;
+  ofrequency = occupancy_reestim->frequency + final_run.offset;
+  pmass = mass + final_run.offset;
+  sum = 0.;
+
+  for (i = final_run.offset;i < final_run.nb_value;i++) {
+    sum += *pfrequency++ / (1. - *pcumul++);
+    *ofrequency++ += *pmass++ * sum;
+  }
+  for (i = final_run.nb_value;i < nb_value;i++) {
+    *ofrequency++ += *pmass++ * sum;
+  }
+
+  occupancy_reestim->nb_value_computation();
+  occupancy_reestim->offset_computation();
+  occupancy_reestim->nb_element_computation();
+
+# ifdef DEBUG
+  if ((iter < 10) || ((iter < 100) && (iter % 10 == 0)) ||
+      ((iter < 1000) && (iter % 100 == 0)) || (iter % 1000 == 0)) {
+    occupancy_reestim->max_computation();
+    occupancy_reestim->mean_computation();
+    occupancy_reestim->variance_computation();
+
+    cout << "\nquantites de reestimation loi d'occupation de l'etat :" << *occupancy_reestim << endl;
+  }
+# endif
+
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul des quantites de reestimation correspondant a la loi d'occupation d'un etat
+ *  (estimateur EM d'une semi-chaine de Markov en equilibre).
+ *
+ *  arguments : lois empiriques des temps de sejour complets, censures a droite, a gauche et
+ *              de la longueur des sequences dans le cas d'un seul etat visite,
+ *              pointeurs sur les quantites de reestimation de la loi d'occupation de l'etat et
+ *              de la loi biaisee par la longueur, combinaison ou non des quantites de reestimation,
+ *              methode de calcul de la moyenne de la loi d'occupation de l'etat.
+ *
+ *--------------------------------------------------------------*/
+
+void DiscreteParametric::expectation_step(const FrequencyDistribution &sojourn_time ,
+                                          const FrequencyDistribution &final_run ,
+                                          const FrequencyDistribution &initial_run ,
+                                          const FrequencyDistribution &single_run ,
+                                          Reestimation<double> *occupancy_reestim ,
+                                          Reestimation<double> *length_bias_reestim , int iter ,
+                                          bool combination , int mean_computation_method) const
+
+{
+  register int i , j;
+  int reestim_offset , reestim_nb_value , *pfrequency;
+  double sum , occupancy_mean , *ofrequency , *lfrequency , *pmass , *pcumul , *norm;
+
+
+  // initialisations
+
+  ofrequency = occupancy_reestim->frequency;
+  lfrequency = length_bias_reestim->frequency;
+  for (i = 0;i < occupancy_reestim->alloc_nb_value;i++) {
+    *ofrequency++ = 0.;
+    *lfrequency++ = 0.;
+  }
+
+  // calcul des quantites de reestimation de la loi d'occupation de l'etat
+
+  ofrequency = occupancy_reestim->frequency + sojourn_time.offset;
+  pfrequency = sojourn_time.frequency + sojourn_time.offset;
+  for (i = sojourn_time.offset;i < sojourn_time.nb_value;i++) {
+    *ofrequency++ += *pfrequency++;
+  }
+
+  if (final_run.nb_element > 0) {
+    pfrequency = final_run.frequency + final_run.offset;
+    pcumul = cumul + final_run.offset - 1;
+    ofrequency = occupancy_reestim->frequency + final_run.offset;
+    pmass = mass + final_run.offset;
+    sum = 0.;
+
+    for (i = final_run.offset;i < final_run.nb_value;i++) {
+      sum += *pfrequency++ / (1. - *pcumul++);
+      *ofrequency++ += *pmass++ * sum;
+    }
+    for (i = final_run.nb_value;i < nb_value;i++) {
+      *ofrequency++ += *pmass++ * sum;
+    }
+  }
+
+  // calcul des quantites de reestimation de la loi biaisee par la longueur
+
+  if (initial_run.nb_element > 0) {
+    pfrequency = initial_run.frequency + initial_run.offset;
+    pcumul = cumul + initial_run.offset - 1;
+    lfrequency = length_bias_reestim->frequency + initial_run.offset;
+    pmass = mass + initial_run.offset;
+    sum = 0.;
+
+    for (i = initial_run.offset;i < initial_run.nb_value;i++) {
+      sum += *pfrequency++ / (1. - *pcumul++);
+      *lfrequency++ += *pmass++ * sum;
+    }
+    for (i = initial_run.nb_value;i < nb_value;i++) {
+      *lfrequency++ += *pmass++ * sum;
+    }
+  }
+
+  if (single_run.nb_element > 0) {
+    norm = new double[single_run.nb_value];
+
+    for (i = single_run.offset;i < single_run.nb_value;i++) {
+      if (single_run.frequency[i] > 0) {
+        pmass = mass + i;
+        norm[i] = 0.;
+        for (j = i;j < nb_value;j++) {
+          norm[i] += (j + 1 - i) * *pmass++;
+        }
+      }
+    }
+
+    lfrequency = length_bias_reestim->frequency + single_run.offset;
+    pmass = mass + single_run.offset;
+    for (i = single_run.offset;i < nb_value;i++) {
+      pfrequency = single_run.frequency + single_run.offset;
+      sum = 0.;
+      for (j = single_run.offset;j <= MIN(i , single_run.nb_value - 1);j++) {
+        if ((*pfrequency > 0) && (norm[j] > 0.)) {
+          sum += *pfrequency * (i + 1 - j) / norm[j];
+               }
+        pfrequency++;
+      }
+
+      *lfrequency++ += *pmass++ * sum;
+    }
+
+    delete [] norm;
+  }
+
+  reestim_offset = 1;
+  reestim_nb_value = occupancy_reestim->alloc_nb_value;
+
+  ofrequency = occupancy_reestim->frequency + occupancy_reestim->alloc_nb_value;
+  lfrequency = length_bias_reestim->frequency + occupancy_reestim->alloc_nb_value;
+  while ((*--ofrequency == 0) && (*--lfrequency == 0) && (reestim_nb_value > 2)) {
+    reestim_nb_value--;
+  }
+  occupancy_reestim->nb_value = reestim_nb_value;
+  length_bias_reestim->nb_value = reestim_nb_value;
+
+  ofrequency = occupancy_reestim->frequency + reestim_offset;
+  lfrequency = length_bias_reestim->frequency + reestim_offset;
+  while ((*ofrequency++ == 0) && (*lfrequency++ == 0) && (reestim_offset < reestim_nb_value - 1)) {
+    reestim_offset++;
+  }
+  occupancy_reestim->offset = reestim_offset;
+  length_bias_reestim->offset = reestim_offset;
+
+  occupancy_reestim->nb_element_computation();
+  length_bias_reestim->nb_element_computation();
+
+# ifdef DEBUG
+  if ((iter < 10) || ((iter < 100) && (iter % 10 == 0)) ||
+      ((iter < 1000) && (iter % 100 == 0)) || (iter % 1000 == 0)) {
+    occupancy_reestim->max_computation();
+    occupancy_reestim->mean_computation();
+    occupancy_reestim->variance_computation();
+
+    length_bias_reestim->max_computation();
+    length_bias_reestim->mean_computation();
+    length_bias_reestim->variance_computation();
+
+    cout << "\nquantites de reestimation loi d'occupation de l'etat :" << *occupancy_reestim << endl;
+    cout << "\nquantites de reestimation loi biaisee par la longueur :" << *length_bias_reestim << endl;
+  }
+# endif
+
+  if (combination) {
+    switch (mean_computation_method) {
+    case COMPUTED :
+      occupancy_mean = interval_bisection(occupancy_reestim , length_bias_reestim);
+      break;
+    case ONE_STEP_LATE :
+      occupancy_mean = mean;
+      break;
+    }
+
+#   ifdef DEBUG
+    cout << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_MEAN] << ": " << occupancy_mean << endl;
+#   endif
+
+    occupancy_reestim->equilibrium_process_combination(length_bias_reestim , occupancy_mean);
+
+#   ifdef DEBUG
+    if ((iter < 10) || ((iter < 100) && (iter % 10 == 0)) ||
+        ((iter < 1000) && (iter % 100 == 0)) || (iter % 1000 == 0)) {
+      cout << "\nquantites de reestimation loi d'occupation de l'etat :" << *occupancy_reestim << endl;
+    }
+#   endif
+
+  }
+}
+
+
+};  // namespace stat_tool
+
+
+
+using namespace stat_tool;
+
+
+namespace sequence_analysis {
 
 
 
@@ -681,336 +1022,6 @@ void SemiMarkovData::build_transition_count(const SemiMarkov *smarkov)
   chain_data = new ChainData('o' , marginal_distribution[0]->nb_value ,
                              marginal_distribution[0]->nb_value);
   transition_count_computation(*chain_data , smarkov);
-}
-
-
-/*--------------------------------------------------------------*
- *
- *  Calcul de la vraisemblance des temps de sejour dans un etat pour
- *  une semi-chaine de Markov ordinaire.
- *
- *  arguments : lois empiriques des temps de sejour complets et censures a droite.
- *
- *--------------------------------------------------------------*/
-
-double DiscreteParametric::state_occupancy_likelihood_computation(const FrequencyDistribution &sojourn_time ,
-                                                                  const FrequencyDistribution &final_run) const
-
-{
-  double likelihood , buff;
-
-
-  likelihood = likelihood_computation(sojourn_time);
-
-  if (likelihood != D_INF) {
-    buff = survivor_likelihood_computation(final_run);
-
-    if (buff != D_INF) {
-      likelihood += buff;
-    }
-    else {
-      likelihood = D_INF;
-    }
-  }
-
-  return likelihood;
-}
-
-
-/*--------------------------------------------------------------*
- *
- *  Calcul de la vraisemblance des temps de sejour dans un etat pour
- *  une semi-chaine de Markov en equilibre.
- *
- *  arguments : loi de l'intervalle de temps residuel, lois empiriques des temps
- *              de sejour complets, censures a droite, a gauche et
- *              de la longueur des sequences dans le cas d'un seul etat visite.
- *
- *--------------------------------------------------------------*/
-
-double DiscreteParametric::state_occupancy_likelihood_computation(const Forward &forward ,
-                                                                  const FrequencyDistribution &sojourn_time ,
-                                                                  const FrequencyDistribution &final_run ,
-                                                                  const FrequencyDistribution &initial_run ,
-                                                                  const FrequencyDistribution &single_run) const
-
-{
-  double likelihood , buff;
-
-
-  likelihood = likelihood_computation(sojourn_time);
-
-  if (likelihood != D_INF) {
-    buff = survivor_likelihood_computation(final_run);
-
-    if (buff != D_INF) {
-      likelihood += buff;
-      buff = forward.likelihood_computation(initial_run);
-
-      if (buff != D_INF) {
-        likelihood += buff;
-        buff = forward.survivor_likelihood_computation(single_run);
-
-        if (buff != D_INF) {
-          likelihood += buff;
-        }
-        else {
-          likelihood = D_INF;
-        }
-      }
-
-      else {
-        likelihood = D_INF;
-      }
-    }
-
-    else {
-      likelihood = D_INF;
-    }
-  }
-
-  return likelihood;
-}
-
-
-/*--------------------------------------------------------------*
- *
- *  Calcul des quantites de reestimation correspondant a la loi d'occupation d'un etat
- *  (estimateur EM d'une semi-chaine de Markov ordinaire).
- *
- *  arguments : lois empiriques des temps de sejour complets et censures a droite,
- *              pointeurs sur les quantites de reestimation de la loi d'occupation de l'etat.
- *
- *--------------------------------------------------------------*/
-
-void DiscreteParametric::expectation_step(const FrequencyDistribution &sojourn_time ,
-                                          const FrequencyDistribution &final_run ,
-                                          Reestimation<double> *occupancy_reestim , int iter) const
-
-{
-  register int i;
-  int *pfrequency;
-  double sum , *ofrequency , *pmass , *pcumul;
-
-
-  // initialisations
-
-  ofrequency = occupancy_reestim->frequency;
-  for (i = 0;i < occupancy_reestim->alloc_nb_value;i++) {
-    *ofrequency++ = 0.;
-  }
-
-  // calcul des quantites de reestimation de la loi d'occupation de l'etat
-
-  ofrequency = occupancy_reestim->frequency + sojourn_time.offset;
-  pfrequency = sojourn_time.frequency + sojourn_time.offset;
-  for (i = sojourn_time.offset;i < sojourn_time.nb_value;i++) {
-    *ofrequency++ += *pfrequency++;
-  }
-
-  pfrequency = final_run.frequency + final_run.offset;
-  pcumul = cumul + final_run.offset - 1;
-  ofrequency = occupancy_reestim->frequency + final_run.offset;
-  pmass = mass + final_run.offset;
-  sum = 0.;
-
-  for (i = final_run.offset;i < final_run.nb_value;i++) {
-    sum += *pfrequency++ / (1. - *pcumul++);
-    *ofrequency++ += *pmass++ * sum;
-  }
-  for (i = final_run.nb_value;i < nb_value;i++) {
-    *ofrequency++ += *pmass++ * sum;
-  }
-
-  occupancy_reestim->nb_value_computation();
-  occupancy_reestim->offset_computation();
-  occupancy_reestim->nb_element_computation();
-
-# ifdef DEBUG
-  if ((iter < 10) || ((iter < 100) && (iter % 10 == 0)) ||
-      ((iter < 1000) && (iter % 100 == 0)) || (iter % 1000 == 0)) {
-    occupancy_reestim->max_computation();
-    occupancy_reestim->mean_computation();
-    occupancy_reestim->variance_computation();
-
-    cout << "\nquantites de reestimation loi d'occupation de l'etat :" << *occupancy_reestim << endl;
-  }
-# endif
-
-}
-
-
-/*--------------------------------------------------------------*
- *
- *  Calcul des quantites de reestimation correspondant a la loi d'occupation d'un etat
- *  (estimateur EM d'une semi-chaine de Markov en equilibre).
- *
- *  arguments : lois empiriques des temps de sejour complets, censures a droite, a gauche et
- *              de la longueur des sequences dans le cas d'un seul etat visite,
- *              pointeurs sur les quantites de reestimation de la loi d'occupation de l'etat et
- *              de la loi biaisee par la longueur, combinaison ou non des quantites de reestimation,
- *              methode de calcul de la moyenne de la loi d'occupation de l'etat.
- *
- *--------------------------------------------------------------*/
-
-void DiscreteParametric::expectation_step(const FrequencyDistribution &sojourn_time ,
-                                          const FrequencyDistribution &final_run ,
-                                          const FrequencyDistribution &initial_run ,
-                                          const FrequencyDistribution &single_run ,
-                                          Reestimation<double> *occupancy_reestim ,
-                                          Reestimation<double> *length_bias_reestim , int iter ,
-                                          bool combination , int mean_computation_method) const
-
-{
-  register int i , j;
-  int reestim_offset , reestim_nb_value , *pfrequency;
-  double sum , occupancy_mean , *ofrequency , *lfrequency , *pmass , *pcumul , *norm;
-
-
-  // initialisations
-
-  ofrequency = occupancy_reestim->frequency;
-  lfrequency = length_bias_reestim->frequency;
-  for (i = 0;i < occupancy_reestim->alloc_nb_value;i++) {
-    *ofrequency++ = 0.;
-    *lfrequency++ = 0.;
-  }
-
-  // calcul des quantites de reestimation de la loi d'occupation de l'etat
-
-  ofrequency = occupancy_reestim->frequency + sojourn_time.offset;
-  pfrequency = sojourn_time.frequency + sojourn_time.offset;
-  for (i = sojourn_time.offset;i < sojourn_time.nb_value;i++) {
-    *ofrequency++ += *pfrequency++;
-  }
-
-  if (final_run.nb_element > 0) {
-    pfrequency = final_run.frequency + final_run.offset;
-    pcumul = cumul + final_run.offset - 1;
-    ofrequency = occupancy_reestim->frequency + final_run.offset;
-    pmass = mass + final_run.offset;
-    sum = 0.;
-
-    for (i = final_run.offset;i < final_run.nb_value;i++) {
-      sum += *pfrequency++ / (1. - *pcumul++);
-      *ofrequency++ += *pmass++ * sum;
-    }
-    for (i = final_run.nb_value;i < nb_value;i++) {
-      *ofrequency++ += *pmass++ * sum;
-    }
-  }
-
-  // calcul des quantites de reestimation de la loi biaisee par la longueur
-
-  if (initial_run.nb_element > 0) {
-    pfrequency = initial_run.frequency + initial_run.offset;
-    pcumul = cumul + initial_run.offset - 1;
-    lfrequency = length_bias_reestim->frequency + initial_run.offset;
-    pmass = mass + initial_run.offset;
-    sum = 0.;
-
-    for (i = initial_run.offset;i < initial_run.nb_value;i++) {
-      sum += *pfrequency++ / (1. - *pcumul++);
-      *lfrequency++ += *pmass++ * sum;
-    }
-    for (i = initial_run.nb_value;i < nb_value;i++) {
-      *lfrequency++ += *pmass++ * sum;
-    }
-  }
-
-  if (single_run.nb_element > 0) {
-    norm = new double[single_run.nb_value];
-
-    for (i = single_run.offset;i < single_run.nb_value;i++) {
-      if (single_run.frequency[i] > 0) {
-        pmass = mass + i;
-        norm[i] = 0.;
-        for (j = i;j < nb_value;j++) {
-          norm[i] += (j + 1 - i) * *pmass++;
-        }
-      }
-    }
-
-    lfrequency = length_bias_reestim->frequency + single_run.offset;
-    pmass = mass + single_run.offset;
-    for (i = single_run.offset;i < nb_value;i++) {
-      pfrequency = single_run.frequency + single_run.offset;
-      sum = 0.;
-      for (j = single_run.offset;j <= MIN(i , single_run.nb_value - 1);j++) {
-        if ((*pfrequency > 0) && (norm[j] > 0.)) {
-          sum += *pfrequency * (i + 1 - j) / norm[j];
-               }
-        pfrequency++;
-      }
-
-      *lfrequency++ += *pmass++ * sum;
-    }
-
-    delete [] norm;
-  }
-
-  reestim_offset = 1;
-  reestim_nb_value = occupancy_reestim->alloc_nb_value;
-
-  ofrequency = occupancy_reestim->frequency + occupancy_reestim->alloc_nb_value;
-  lfrequency = length_bias_reestim->frequency + occupancy_reestim->alloc_nb_value;
-  while ((*--ofrequency == 0) && (*--lfrequency == 0) && (reestim_nb_value > 2)) {
-    reestim_nb_value--;
-  }
-  occupancy_reestim->nb_value = reestim_nb_value;
-  length_bias_reestim->nb_value = reestim_nb_value;
-
-  ofrequency = occupancy_reestim->frequency + reestim_offset;
-  lfrequency = length_bias_reestim->frequency + reestim_offset;
-  while ((*ofrequency++ == 0) && (*lfrequency++ == 0) && (reestim_offset < reestim_nb_value - 1)) {
-    reestim_offset++;
-  }
-  occupancy_reestim->offset = reestim_offset;
-  length_bias_reestim->offset = reestim_offset;
-
-  occupancy_reestim->nb_element_computation();
-  length_bias_reestim->nb_element_computation();
-
-# ifdef DEBUG
-  if ((iter < 10) || ((iter < 100) && (iter % 10 == 0)) ||
-      ((iter < 1000) && (iter % 100 == 0)) || (iter % 1000 == 0)) {
-    occupancy_reestim->max_computation();
-    occupancy_reestim->mean_computation();
-    occupancy_reestim->variance_computation();
-
-    length_bias_reestim->max_computation();
-    length_bias_reestim->mean_computation();
-    length_bias_reestim->variance_computation();
-
-    cout << "\nquantites de reestimation loi d'occupation de l'etat :" << *occupancy_reestim << endl;
-    cout << "\nquantites de reestimation loi biaisee par la longueur :" << *length_bias_reestim << endl;
-  }
-# endif
-
-  if (combination) {
-    switch (mean_computation_method) {
-    case COMPUTED :
-      occupancy_mean = interval_bisection(occupancy_reestim , length_bias_reestim);
-      break;
-    case ONE_STEP_LATE :
-      occupancy_mean = mean;
-      break;
-    }
-
-#   ifdef DEBUG
-    cout << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_MEAN] << ": " << occupancy_mean << endl;
-#   endif
-
-    occupancy_reestim->equilibrium_process_combination(length_bias_reestim , occupancy_mean);
-
-#   ifdef DEBUG
-    if ((iter < 10) || ((iter < 100) && (iter % 10 == 0)) ||
-        ((iter < 1000) && (iter % 100 == 0)) || (iter % 1000 == 0)) {
-      cout << "\nquantites de reestimation loi d'occupation de l'etat :" << *occupancy_reestim << endl;
-    }
-#   endif
-
-  }
 }
 
 
@@ -2837,3 +2848,6 @@ int** SemiMarkovIterator::simulation(int length , bool initialization)
 
   return int_seq;
 }
+
+
+};  // namespace sequence_analysis
