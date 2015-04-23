@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -40,13 +40,20 @@
 
 #include "stat_tool/stat_tools.h"
 #include "stat_tool/curves.h"
+#include "stat_tool/distribution.h"
 #include "stat_tool/markovian.h"
+#include "stat_tool/vectors.h"
+#include "stat_tool/distance_matrix.h"
 
 #include "sequences.h"
 #include "variable_order_markov.h"
 #include "sequence_label.h"
 
 using namespace std;
+using namespace stat_tool;
+
+
+namespace sequence_analysis {
 
 
 
@@ -1911,3 +1918,6 @@ Correlation* VariableOrderMarkovData::output_autocorrelation_computation(StatErr
 
   return correl;
 }
+
+
+};  // namespace sequence_analysis
