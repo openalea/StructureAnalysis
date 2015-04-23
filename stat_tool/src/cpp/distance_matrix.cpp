@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -50,9 +50,7 @@
 using namespace std;
 
 
-extern int column_width(int value);
-extern int column_width(int nb_value , const double *value , double scale = 1.);
-extern char* label(const char *file_name);
+namespace stat_tool {
 
 
 
@@ -1569,7 +1567,7 @@ ostream& DistanceMatrix::ascii_write(ostream &os , bool exhaustive) const
     cumul_length = new int[nb_row];
 
     for (i = 0;i < nb_row;i++) {
-      cumul_distance[i] = ::cumul_distance_computation(nb_column , distance[i]);
+      cumul_distance[i] = stat_tool::cumul_distance_computation(nb_column , distance[i]);
 
       if (cumul_distance[i] == -D_INF) {
         distance_vector[i] = -D_INF;
@@ -1693,21 +1691,21 @@ ostream& DistanceMatrix::ascii_write(ostream &os , bool exhaustive) const
         os << ")";
 
         if ((deletion_distance) && (insertion_distance)) {
-          cumul_deletion_distance = ::cumul_distance_computation(nb_column , deletion_distance[index[i]]);
-          cumul_insertion_distance = ::cumul_distance_computation(nb_column , insertion_distance[index[i]]);
+          cumul_deletion_distance = stat_tool::cumul_distance_computation(nb_column , deletion_distance[index[i]]);
+          cumul_insertion_distance = stat_tool::cumul_distance_computation(nb_column , insertion_distance[index[i]]);
           os << " = " << cumul_deletion_distance / cumul_length[index[i]]
              << " (" << cumul_nb_deletion << " d) + "
              << cumul_insertion_distance / cumul_length[index[i]]
              << " (" << cumul_nb_insertion << " i) + 0 (" << cumul_nb_match << " m)";
 
           if (substitution_distance) {
-            cumul_substitution_distance = ::cumul_distance_computation(nb_column , substitution_distance[index[i]]);
+            cumul_substitution_distance = stat_tool::cumul_distance_computation(nb_column , substitution_distance[index[i]]);
             os << " + " << cumul_substitution_distance / cumul_length[index[i]]
                << " (" << cumul_nb_substitution << " s)";
           }
 
           if (transposition_distance) {
-            cumul_transposition_distance = ::cumul_distance_computation(nb_column , transposition_distance[index[i]]);
+            cumul_transposition_distance = stat_tool::cumul_distance_computation(nb_column , transposition_distance[index[i]]);
             os << " + " << cumul_transposition_distance / cumul_length[index[i]]
                << " (" << cumul_nb_transposition << " t)";
           }
@@ -1900,7 +1898,7 @@ ostream& DistanceMatrix::spreadsheet_write(ostream &os) const
     cumul_length = new int[nb_row];
 
     for (i = 0;i < nb_row;i++) {
-      cumul_distance[i] = ::cumul_distance_computation(nb_column , distance[i]);
+      cumul_distance[i] = stat_tool::cumul_distance_computation(nb_column , distance[i]);
 
       if (cumul_distance[i] == -D_INF) {
         distance_vector[i] = -D_INF;
@@ -1994,21 +1992,21 @@ ostream& DistanceMatrix::spreadsheet_write(ostream &os) const
         os << ")";
 
         if ((deletion_distance) && (insertion_distance)) {
-          cumul_deletion_distance = ::cumul_distance_computation(nb_column , deletion_distance[index[i]]);
-          cumul_insertion_distance = ::cumul_distance_computation(nb_column , insertion_distance[index[i]]);
+          cumul_deletion_distance = stat_tool::cumul_distance_computation(nb_column , deletion_distance[index[i]]);
+          cumul_insertion_distance = stat_tool::cumul_distance_computation(nb_column , insertion_distance[index[i]]);
           os << "\t" << cumul_deletion_distance / cumul_length[index[i]]
              << " (" << cumul_nb_deletion << " d)\t"
              << cumul_insertion_distance / cumul_length[index[i]]
              << " (" << cumul_nb_insertion << " i)\t0 (" << cumul_nb_match << " m)";
 
           if (substitution_distance) {
-            cumul_substitution_distance = ::cumul_distance_computation(nb_column , substitution_distance[index[i]]);
+            cumul_substitution_distance = stat_tool::cumul_distance_computation(nb_column , substitution_distance[index[i]]);
             os << "\t" << cumul_substitution_distance / cumul_length[index[i]]
                << " (" << cumul_nb_substitution << " s)";
           }
 
           if (transposition_distance) {
-            cumul_transposition_distance = ::cumul_distance_computation(nb_column , transposition_distance[index[i]]);
+            cumul_transposition_distance = stat_tool::cumul_distance_computation(nb_column , transposition_distance[index[i]]);
             os << "\t" << cumul_transposition_distance / cumul_length[index[i]]
                << " (" << cumul_nb_transposition << " s)";
           }
@@ -2160,7 +2158,7 @@ bool DistanceMatrix::plot_write(StatError &error , const char *prefix ,
 
     else if (nb_row == nb_column) {
       for (i = 0;i < nb_row;i++) {
-        plot_distance[i] = ::cumul_distance_computation(nb_column , distance[i]);
+        plot_distance[i] = stat_tool::cumul_distance_computation(nb_column , distance[i]);
         if (plot_distance[i] != -D_INF) {
           plot_distance[i] /= cumul_computation(1 , nb_column , length + i);
         }
@@ -2215,7 +2213,7 @@ bool DistanceMatrix::plot_write(StatError &error , const char *prefix ,
 
           if (i == 1) {
             out_file << "set terminal postscript" << endl;
-            file_name[1] << ::label(prefix) << ".ps";
+            file_name[1] << stat_tool::label(prefix) << ".ps";
             out_file << "set output \"" << file_name[1].str() << "\"\n\n";
           }
 
@@ -2245,7 +2243,7 @@ bool DistanceMatrix::plot_write(StatError &error , const char *prefix ,
           out_file << "plot [1:" << plot_nb_pattern << "] ["
                    << plot_distance[index[0]] * (1. - PLOT_YMARGIN) << ":"
                    << plot_distance[index[plot_nb_pattern - 1]] * (1. + PLOT_YMARGIN) << "] \""
-                   << ::label((data_file_name.str()).c_str()) << "\" title \"";
+                   << stat_tool::label((data_file_name.str()).c_str()) << "\" title \"";
           if (nb_row == 1) {
             out_file << STAT_label[STATL_REFERENCE] << " " << label << " " << row_identifier[0];
           }
@@ -2333,7 +2331,7 @@ MultiPlotSet* DistanceMatrix::get_plotable(StatError &error) const
 
     else if (nb_row == nb_column) {
       for (i = 0;i < nb_row;i++) {
-        plot_distance[i] = ::cumul_distance_computation(nb_column , distance[i]);
+        plot_distance[i] = stat_tool::cumul_distance_computation(nb_column , distance[i]);
         if (plot_distance[i] != -D_INF) {
           plot_distance[i] /= cumul_computation(1 , nb_column , length + i);
         }
@@ -2629,3 +2627,6 @@ double DistanceMatrix::cumul_distance_computation(bool *row_flag , bool *column_
 
   return cumul_distance;
 }
+
+
+};  // namespace stat_tool
