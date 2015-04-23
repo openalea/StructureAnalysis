@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -57,11 +57,7 @@
 using namespace std;
 
 
-extern int column_width(int value);
-extern int column_width(int min_value , int max_value);
-extern int column_width(double min_value , double max_value);
-extern int column_width(int nb_value , const double *value , double scale = 1.);
-extern char* label(const char *file_name);
+namespace stat_tool {
 
 
 
@@ -268,12 +264,12 @@ Vectors::Vectors(int inb_vector , int *iidentifier , int inb_variable ,
  *
  *  arguments : nombre de vecteurs, identificateurs des vecteurs,
  *              nombre de variables, type de chaque variable,
- *              variables entieres, variables reelles.
+ *              variables entieres, variables reelles, indexation variable.
  *
  *--------------------------------------------------------------*/
 
-Vectors::Vectors(int inb_vector , int *iidentifier , int inb_variable ,
-                 int *itype , int **iint_vector , double **ireal_vector)
+Vectors::Vectors(int inb_vector , int *iidentifier , int inb_variable , int *itype ,
+                 int **iint_vector , double **ireal_vector , bool variable_index)
 
 {
   register int i , j , k , m;
@@ -281,22 +277,45 @@ Vectors::Vectors(int inb_vector , int *iidentifier , int inb_variable ,
 
   init(inb_vector , iidentifier , inb_variable , itype , false);
 
-  i = 0;
-  j = 0;
-  for (k = 0;k < nb_variable;k++) {
-    if (type[k] != REAL_VALUE) {
-      for (m = 0;m < nb_vector;m++) {
-        int_vector[m][k] = iint_vector[m][i];
-      }
-      i++;
-    }
+  switch (variable_index) {
 
-    else {
-      for (m = 0;m < nb_vector;m++) {
-        real_vector[m][k] = ireal_vector[m][j];
+  case false : {
+    i = 0;
+    j = 0;
+    for (k = 0;k < nb_variable;k++) {
+      if (type[k] != REAL_VALUE) {
+        for (m = 0;m < nb_vector;m++) {
+          int_vector[m][k] = iint_vector[m][i];
+        }
+        i++;
       }
-      j++;
+
+      else {
+        for (m = 0;m < nb_vector;m++) {
+          real_vector[m][k] = ireal_vector[m][j];
+        }
+        j++;
+      }
     }
+    break;
+  }
+
+  case true : {
+    for (i = 0;i < nb_variable;i++) {
+      if (type[i] != REAL_VALUE) {
+        for (j = 0;j < nb_vector;j++) {
+          int_vector[j][i] = iint_vector[j][i];
+        }
+      }
+
+      else {
+        for (j = 0;j < nb_vector;j++) {
+          real_vector[j][i] = ireal_vector[j][i];
+        }
+      }
+    }
+    break;
+  }
   }
 
   for (i = 0;i < nb_variable;i++) {
@@ -2852,7 +2871,7 @@ Vectors* Vectors::select_variable(StatError &error , int inb_variable ,
   }
 
   if (status) {
-    variable = ::select_variable(nb_variable , inb_variable , ivariable , keep);
+    variable = stat_tool::select_variable(nb_variable , inb_variable , ivariable , keep);
 
     bnb_variable = (keep ? inb_variable : nb_variable - inb_variable);
 
@@ -5432,3 +5451,6 @@ double* Vectors::mean_direction_computation(int variable , int unit) const
 
   return mean_direction;
 }
+
+
+};  // namespace stat_tool
