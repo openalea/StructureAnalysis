@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -41,22 +41,26 @@
 
 
 
+namespace stat_tool {
+
+
+
 /****************************************************************
  *
  *  Constantes :
  */
 
 
-const double COMPOUND_THRESHOLD = 0.99999;  // seuil sur la fonction de repartition
-                                            // pour borner une loi
+  const double COMPOUND_THRESHOLD = 0.99999;  // seuil sur la fonction de repartition
+                                              // pour borner une loi
 
-const double COMPOUND_INIT_PROBABILITY = 0.001;  // seuil pour l'initialisation de la probabilite
-const double COMPOUND_LIKELIHOOD_DIFF = 1.e-5;  // seuil pour stopper les iterations EM
-const int COMPOUND_NB_ITER = 10000;    // nombre maximum d'iterations EM
-const double COMPOUND_DIFFERENCE_WEIGHT = 0.5;  // poids par defaut de la penalisation
-                                                // (cas des differences 1ere ou 2nde)
-const double COMPOUND_ENTROPY_WEIGHT = 0.1;  // poids par defaut de la penalisation (cas de l'entropie)
-const int COMPOUND_COEFF = 10;         // coefficient arrondi estimateur
+  const double COMPOUND_INIT_PROBABILITY = 0.001;  // seuil pour l'initialisation de la probabilite
+  const double COMPOUND_LIKELIHOOD_DIFF = 1.e-5;  // seuil pour stopper les iterations EM
+  const int COMPOUND_NB_ITER = 10000;    // nombre maximum d'iterations EM
+  const double COMPOUND_DIFFERENCE_WEIGHT = 0.5;  // poids par defaut de la penalisation
+                                                  // (cas des differences 1ere ou 2nde)
+  const double COMPOUND_ENTROPY_WEIGHT = 0.1;  // poids par defaut de la penalisation (cas de l'entropie)
+  const int COMPOUND_COEFF = 10;         // coefficient arrondi estimateur
 
 
 
@@ -66,11 +70,10 @@ const int COMPOUND_COEFF = 10;         // coefficient arrondi estimateur
  */
 
 
-class FrequencyDistribution;
-class CompoundData;
+  class CompoundData;
 
 
-class Compound : public StatInterface , public Distribution {  // loi composee
+  class Compound : public StatInterface , public Distribution {  // loi composee
 
     friend class FrequencyDistribution;
     friend class CompoundData;
@@ -80,7 +83,7 @@ class Compound : public StatInterface , public Distribution {  // loi composee
     friend std::ostream& operator<<(std::ostream &os , const Compound &compound)
     { return compound.ascii_write(os , compound.compound_data , false , false); }
 
-private :
+  private :
 
     CompoundData *compound_data;  // pointeur sur un objet CompoundData
     DiscreteParametric *sum_distribution;  // loi de la somme
@@ -100,7 +103,7 @@ private :
     void expectation_step(const FrequencyDistribution &histo , DiscreteParametric **power_dist ,
                           Reestimation<double> *sum_reestim , Reestimation<double> *reestim) const;
 
-public :
+  public :
 
     Compound();
     Compound(const DiscreteParametric &sum_dist , const DiscreteParametric &dist ,
@@ -131,23 +134,23 @@ public :
     CompoundData* get_compound_data() const { return compound_data; }
     DiscreteParametric* get_sum_distribution() const { return sum_distribution; }
     DiscreteParametric* get_distribution() const { return distribution; }
-};
+  };
 
 
-Compound* compound_ascii_read(StatError &error , const char *path ,
-                              double cumul_threshold = COMPOUND_THRESHOLD);
+  Compound* compound_ascii_read(StatError &error , const char *path ,
+                                double cumul_threshold = COMPOUND_THRESHOLD);
 
 
 
-class CompoundData : public StatInterface , public FrequencyDistribution {  // structure de donnees correspondant
-                                                                            // a une loi composee
+  class CompoundData : public StatInterface , public FrequencyDistribution {  // structure de donnees correspondant
+                                                                              // a une loi composee
     friend class FrequencyDistribution;
     friend class Compound;
 
     friend std::ostream& operator<<(std::ostream &os , const CompoundData &compound_histo)
     { return compound_histo.ascii_write(os , false); }
 
-private :
+  private :
 
     Compound *compound;     // pointeur sur un objet Compound
     FrequencyDistribution *sum_frequency_distribution;   // loi empirique de la somme
@@ -155,7 +158,7 @@ private :
 
     void copy(const CompoundData &compound_histo , bool model_flag = true);
 
-public :
+  public :
 
     CompoundData();
     CompoundData(const FrequencyDistribution &histo , const Compound &icompound);
@@ -180,7 +183,10 @@ public :
     Compound* get_compound() const { return compound; }
     FrequencyDistribution* get_sum_frequency_distribution() const { return sum_frequency_distribution; }
     FrequencyDistribution* get_frequency_distribution() const { return frequency_distribution; }
-};
+  };
+
+
+};  // namespace stat_tool
 
 
 
