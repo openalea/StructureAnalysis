@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -43,6 +43,9 @@
 #include "stat_label.h"
 
 using namespace std;
+
+
+namespace stat_tool {
 
 
 
@@ -208,3 +211,6 @@ void StatError::correction_update(const char *ilabel , int correction ,
     nb_error++;
   }
 }
+
+
+};  // namespace stat_tool
