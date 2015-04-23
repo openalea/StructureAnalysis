@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -41,7 +41,10 @@
 
 #include "stat_tool/stat_tools.h"
 #include "stat_tool/curves.h"
+#include "stat_tool/distribution.h"
 #include "stat_tool/markovian.h"
+#include "stat_tool/vectors.h"
+#include "stat_tool/distance_matrix.h"
 #include "stat_tool/stat_label.h"
 
 #include "stat_tool/distribution_reestimation.hpp"   // probleme compilateur C++ Windows
@@ -53,13 +56,10 @@
 
 using namespace std;
 using namespace boost::math;
+using namespace stat_tool;
 
 
-extern double interval_bisection(Reestimation<double> *distribution_reestim ,
-                                 Reestimation<double> *length_bias_reestim);
-extern double von_mises_concentration_computation(double mean_direction);
-extern void cumul_computation(int nb_value , const double *pmass , double *pcumul);
-extern int cumul_method(int nb_value , const double *cumul , double scale = 1.);
+namespace sequence_analysis {
 
 
 
@@ -3693,6 +3693,17 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
 
       delete weight;
 
+      // mise a jour des tailles d'echantillons pour les intervalles de confiance sur les pentes et
+      // les coefficients de correlation
+
+      for (i = 0;i < hsmarkov->nb_output_process;i++) {
+        if (hsmarkov->continuous_parametric_process[i]->ident == LINEAR_MODEL) {
+          for (j = 0;j < hsmarkov->nb_state;j++) {
+            hsmarkov->continuous_parametric_process[i]->observation[j]->sample_size /= nb_state_sequence;
+          }
+        }
+      }
+
 #     ifdef MESSAGE
       if ((state_sequence) && (seq->nb_sequence <= POSTERIOR_PROBABILITY_NB_SEQUENCE)) {
         os << "\n" << SEQ_label[SEQL_POSTERIOR_STATE_SEQUENCE_PROBABILITY] << endl;
@@ -3875,3 +3886,6 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
 
   return hsmarkov;
 }
+
+
+};  // namespace sequence_analysis
