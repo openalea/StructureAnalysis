@@ -39,8 +39,11 @@
 
 #include <math.h>
 #include "tool/timer.h"
+
 VPTOOLS_USING(Timer)
+
 using namespace std;
+using namespace stat_tool;
 
 TreeMatch_O::TreeMatch_O()
 {
