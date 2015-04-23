@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -35,6 +35,7 @@
  */
 
 
+
 #include <iomanip>
 
 #include "tool/rw_tokenizer.h"
@@ -48,9 +49,9 @@
 
 using namespace std;
 
-extern int column_width(int);
-extern int column_width(int nb_value , const double *value , double scale = 1.);
-extern char* label(const char*);
+
+namespace stat_tool {
+
 
 
 /*--------------------------------------------------------------*
@@ -1318,8 +1319,8 @@ bool CategoricalProcess::plot_print(const char *prefix , const char *title , int
     }
 
     data_file_name << prefix << process << ".dat";
-    status = ::plot_print((data_file_name.str()).c_str(), nb_dist , pdist ,
-                          scale , dist_nb_value , nb_histo , phisto);
+    status = stat_tool::plot_print((data_file_name.str()).c_str(), nb_dist , pdist ,
+                                   scale , dist_nb_value , nb_histo , phisto);
 
     if (status) {
 
@@ -2127,3 +2128,6 @@ void CategoricalProcess::init()
   delete [] active_output;
   delete [] state_nb_value;
 }
+
+
+};  // namespace stat_tool
