@@ -4,7 +4,7 @@
  *
  *        Copyright 2006-2007 INRIA - CIRAD - INRA
  *
- *        File author(s): Yann Guédon <yann.guedon@cirad.fr>
+ *        File author(s): Yann Guedon <yann.guedon@cirad.fr>
  *                        Thomas cokelaer <Thomas.Cokelaer@cirad.fr>
  *
  *        Distributed under the GPL 2.0 License.
@@ -13,9 +13,12 @@
  *
  *        OpenAlea WebSite : http://openalea.gforge.inria.fr
  *
- *        $Id: export_compound.cpp 6168 2009-04-01 16:42:29Z cokelaer $
+ *        $Id: export_chain.cpp 6168 2009-04-01 16:42:29Z cokelaer $
  *
  *-----------------------------------------------------------------------------*/
+
+
+
 #include <stdio.h>
 #include "wrapper_util.h"
 #include "export_base.h"
@@ -29,6 +32,9 @@
 #include <boost/shared_ptr.hpp>
 
 using namespace boost::python;
+using namespace stat_tool;
+
+
 
 class ChainWrap
 {
