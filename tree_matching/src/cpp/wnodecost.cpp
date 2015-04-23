@@ -37,7 +37,11 @@
 
 #include"wnodecost.h"
 
-WeightedNodeCost::WeightedNodeCost(NodeCostType type ,const VectorDistance& ivect,const ValueVector& dispersion,const ValueVector& max,const ValueVector& min,DistanceType indelcoeff)
+using namespace stat_tool;
+
+
+WeightedNodeCost::WeightedNodeCost(NodeCostType type, const VectorDistance& ivect, const ValueVector& dispersion,
+                                   const ValueVector& max, const ValueVector& min, DistanceType indelcoeff)
 
 {
   _type=type;
