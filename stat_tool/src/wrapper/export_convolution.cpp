@@ -20,6 +20,7 @@
  *
  *-----------------------------------------------------------------------------*/
 
+
 #include "wrapper_util.h"
 
 #include "stat_tool/stat_tools.h"
@@ -35,7 +36,7 @@
 
 using namespace boost::python;
 using namespace boost;
-
+using namespace stat_tool;
 
 
 
