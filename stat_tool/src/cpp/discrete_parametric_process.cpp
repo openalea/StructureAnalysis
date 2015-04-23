@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -51,10 +51,7 @@
 using namespace std;
 
 
-extern int column_width(int value);
-extern int column_width(int nb_value , const double *value , double scale = 1.);
-
-extern char* label(const char *file_name);
+namespace stat_tool {
 
 
 
@@ -1069,8 +1066,8 @@ bool DiscreteParametricProcess::plot_print(const char *prefix , const char *titl
     }
 
     data_file_name[0] << prefix << process << ".dat";
-    status = ::plot_print((data_file_name[0].str()).c_str() , nb_dist , pdist , scale ,
-                          NULL , nb_dist , phisto);
+    status = stat_tool::plot_print((data_file_name[0].str()).c_str() , nb_dist , pdist , scale ,
+                                   NULL , nb_dist , phisto);
   }
 
   else {
@@ -1095,8 +1092,8 @@ bool DiscreteParametricProcess::plot_print(const char *prefix , const char *titl
           scale[nb_dist] = weight->mass[j] * marginal_distribution->nb_element;
 
           data_file_name[i] << prefix << process << i << ".dat";
-          ::plot_print((data_file_name[i].str()).c_str() , 1 , pdist , scale + nb_dist ,
-                       NULL , 0 , NULL);
+          stat_tool::plot_print((data_file_name[i].str()).c_str() , 1 , pdist , scale + nb_dist ,
+                                NULL , 0 , NULL);
           i++;
         }
       }
@@ -1107,8 +1104,8 @@ bool DiscreteParametricProcess::plot_print(const char *prefix , const char *titl
           scale[nb_dist] = restoration_weight->mass[j] * marginal_distribution->nb_element;
 
           data_file_name[i] << prefix << process << i << ".dat";
-          ::plot_print((data_file_name[i].str()).c_str() , 1 , pdist , scale + nb_dist ,
-                       NULL , 0 , NULL);
+          stat_tool::plot_print((data_file_name[i].str()).c_str() , 1 , pdist , scale + nb_dist ,
+                                NULL , 0 , NULL);
           i++;
         }
       }
@@ -1901,3 +1898,6 @@ void DiscreteParametricProcess::init()
     }
   }
 }
+
+
+};  // namespace stat_tool
