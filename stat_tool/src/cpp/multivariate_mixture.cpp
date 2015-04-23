@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): J.-B. Durand (jean-baptiste.durand@imag.fr) and
  *                       Y. Guedon (yann.guedon@cirad.fr)
@@ -47,16 +47,16 @@
 #include "distribution.h"
 #include "discrete_mixture.h"
 #include "markovian.h"
-// #include "mixture.h"
+#include "vectors.h"
 #include "multivariate_mixture.h"
 #include "stat_label.h"
 
 using namespace std;
 
 
-extern char* label(const char *file_name);
+namespace stat_tool {
 
-extern int cumul_method(int nb_value, const double *cumul, double scale= 1.);
+
 
 /*--------------------------------------------------------------*
  *
@@ -2599,3 +2599,5 @@ MultiPlotSet* MultivariateMixtureData::get_plotable() const
   return set;
 }
 
+
+};  // namespace stat_tool
