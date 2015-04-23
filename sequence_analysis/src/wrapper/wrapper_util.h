@@ -30,6 +30,9 @@
 #include "stat_tool/stat_tools.h"
 
 
+using namespace stat_tool;
+
+
 namespace sequence_analysis
 {
   namespace wrap_util
