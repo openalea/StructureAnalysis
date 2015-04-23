@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -55,9 +55,7 @@ using namespace std;
 using namespace boost::math;
 
 
-extern int column_width(int value);
-extern int column_width(double min_value , double max_value);
-extern int column_width(int nb_value , const double *value , double scale = 1.);
+namespace stat_tool {
 
 
 
@@ -88,6 +86,7 @@ ContinuousParametric::ContinuousParametric(int iident , double ilocation , doubl
   unit = iunit;
   slope_standard_deviation = D_DEFAULT;
   sample_size = 0;
+  correlation = D_DEFAULT;
   cumul = NULL;
 }
 
@@ -115,6 +114,7 @@ void ContinuousParametric::copy(const ContinuousParametric &dist)
   unit = dist.unit;
   slope_standard_deviation = dist.slope_standard_deviation;
   sample_size = dist.sample_size;
+  correlation = dist.correlation;
 
   if (dist.cumul) {
     register int i;
@@ -506,11 +506,11 @@ ostream& ContinuousParametric::ascii_parameter_print(ostream &os , bool file_fla
   case LINEAR_MODEL : {
     Test test(STUDENT , false , sample_size , I_DEFAULT , D_DEFAULT);
 
-    test.critical_probability = ref_critical_probability[0];
-    test.t_value_computation();
-
     os << STAT_word[STATW_INTERCEPT] << " : " << intercept << "   "
        << STAT_word[STATW_SLOPE] << " : " << slope;
+
+    test.critical_probability = ref_critical_probability[0];
+    test.t_value_computation();
 
     if ((!file_flag) && (slope_standard_deviation > 0.)) {
       os << "   (" << slope - test.value * slope_standard_deviation << ", "
@@ -523,6 +523,15 @@ ostream& ContinuousParametric::ascii_parameter_print(ostream &os , bool file_fla
       os << "   # " << slope - test.value * slope_standard_deviation << ", "
          << slope + test.value * slope_standard_deviation;
     }
+
+    os << "\n";
+    if (file_flag) {
+      os << "# ";
+    }
+    os << STAT_label[STATL_CORRELATION_COEFF] << ": " << correlation << "   "
+       << STAT_label[STATL_LIMIT_CORRELATION_COEFF] << ": -/+"
+       << test.value / sqrt(test.value * test.value + sample_size) << "   "
+       << STAT_label[STATL_CRITICAL_PROBABILITY] << ": " << test.critical_probability;
     break;
   }
   }
@@ -1012,19 +1021,22 @@ ostream& ContinuousParametric::spreadsheet_parameter_print(ostream &os) const
   case LINEAR_MODEL : {
     Test test(STUDENT , false , sample_size , I_DEFAULT , D_DEFAULT);
 
-    test.critical_probability = ref_critical_probability[0];
-    test.t_value_computation();
-
     os << STAT_word[STATW_INTERCEPT] << "\t" << intercept << "\t"
        << STAT_word[STATW_SLOPE] << "\t" << slope;
+
+    test.critical_probability = ref_critical_probability[0];
+    test.t_value_computation();
 
     if (slope_standard_deviation > 0.) {
       os << "\t" << slope - test.value * slope_standard_deviation << "\t"
          << slope + test.value * slope_standard_deviation;
     }
 
-    os << "\t" << STAT_word[STATW_STANDARD_DEVIATION] << "\t" << dispersion;
-
+    os << "\t" << STAT_word[STATW_STANDARD_DEVIATION] << "\t" << dispersion
+       << "\n" << STAT_label[STATL_CORRELATION_COEFF] << "\t" << correlation
+       << "\t" << STAT_label[STATL_LIMIT_CORRELATION_COEFF] << "\t" << "-/+"
+       << test.value / sqrt(test.value * test.value + sample_size)
+       << "\t" << STAT_label[STATL_CRITICAL_PROBABILITY] << "\t" << test.critical_probability;
     break;
   }
   }
@@ -3026,3 +3038,6 @@ double ContinuousParametric::simulation()
 
   return value;
 }
+
+
+};  // namespace stat_tool
