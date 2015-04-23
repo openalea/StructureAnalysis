@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -44,6 +44,9 @@
 #include "stat_label.h"
 
 using namespace std;
+
+
+namespace stat_tool {
 
 
 
@@ -780,7 +783,7 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
  *
  *--------------------------------------------------------------*/
 
-DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &error , std::ostream &os ,
+DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &error , ostream &os ,
                                                                     int min_nb_component , int max_nb_component ,
                                                                     int *ident , int min_inf_bound , bool mixt_flag ,
                                                                     bool component_flag , int criterion ,
@@ -1039,3 +1042,6 @@ DiscreteMixtureData* DiscreteMixture::simulation(StatError &error , int nb_eleme
 
   return mixt_histo;
 }
+
+
+};  // namespace stat_tool
