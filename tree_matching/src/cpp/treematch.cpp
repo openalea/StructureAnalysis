@@ -39,8 +39,12 @@
 #include "treenode.h"
 #include <math.h>
 #include "tool/timer.h"
+
 using namespace std;
+using namespace stat_tool;
+
 VPTOOLS_USING(Timer)
+
 
 TreeMatch::TreeMatch()
 {
