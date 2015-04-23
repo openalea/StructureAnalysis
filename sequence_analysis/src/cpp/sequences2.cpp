@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -48,7 +48,10 @@
 
 #include "stat_tool/stat_tools.h"
 #include "stat_tool/curves.h"
+#include "stat_tool/distribution.h"
 #include "stat_tool/markovian.h"
+#include "stat_tool/vectors.h"
+#include "stat_tool/distance_matrix.h"
 #include "stat_tool/stat_label.h"
 
 #include "sequences.h"
@@ -56,18 +59,10 @@
 
 using namespace std;
 using namespace boost::math;
+using namespace stat_tool;
 
 
-extern bool selected_identifier_checking(StatError &error , int nb_individual , int *identifier ,
-                                         int nb_selected_individual , int *selected_identifier ,
-                                         const char *data_label);
-extern int* identifier_select(int nb_individual , int *identifier , int nb_selected_individual ,
-                              int *selected_identifier , bool keep);
-extern int* select_variable(int nb_variable , int nb_selected_variable ,
-                            int *selected_variable , bool keep);
-
-extern int column_width(int value);
-extern int column_width(int nb_value , const double *value , double scale = 1.);
+namespace sequence_analysis {
 
 
 
@@ -7594,3 +7589,6 @@ double* Sequences::mean_direction_computation(int variable , int unit) const
 
   return mean_direction;
 }
+
+
+};  // namespace sequence_analysis
