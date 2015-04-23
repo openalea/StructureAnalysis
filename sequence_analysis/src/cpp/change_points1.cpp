@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -46,19 +46,49 @@
 
 #include "stat_tool/stat_tools.h"
 #include "stat_tool/curves.h"
+#include "stat_tool/distribution.h"
 #include "stat_tool/markovian.h"
+#include "stat_tool/vectors.h"
+#include "stat_tool/distance_matrix.h"
 
 #include "sequences.h"
 #include "sequence_label.h"
 
 using namespace std;
 using namespace boost::math;
+using namespace stat_tool;
 
 
-extern int column_width(int value);
-extern int column_width(int nb_value , const double *value , double scale = 1.);
-extern int column_width(int nb_value , const long double *value);
+namespace sequence_analysis {
 
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de la largeur d'une colonne de reels.
+ *
+ *  arguments : nombre de valeurs, pointeur sur des valeurs reelles.
+ *
+ *--------------------------------------------------------------*/
+
+int column_width(int nb_value , const long double *value)
+
+{
+  register int i;
+  int width , max_width = 0;
+
+
+  for (i = 0;i < nb_value;i++) {
+    ostringstream ostring;
+    ostring << *value++;
+    width = (ostring.str()).size();
+    if (width > max_width) {
+      max_width = width;
+    }
+  }
+
+  return max_width;
+}
 
 
 /*--------------------------------------------------------------*
@@ -674,9 +704,10 @@ Sequences* Sequences::segmentation_output(int *nb_segment , int *model_type , os
   bool *piecewise_function;
   register int i , j , k , m , n;
   int max_nb_segment , *change_point , *psegment , *seq_index_parameter = NULL;
-  double diff , response_mean , index_parameter_mean , index_parameter_variance , covariance ,
-         residual_mean , residual_square_sum , *change_point_amplitude , *global_variance ,
-         *segment_variance , **mean , **variance , **intercept , **slope , **slope_standard_deviation;
+  double diff , response_mean , index_parameter_mean , response_variance , index_parameter_variance ,
+         covariance , residual_mean , residual_square_sum , *change_point_amplitude , *global_variance ,
+         *segment_variance , **mean , **variance , **intercept , **slope , **slope_standard_deviation ,
+         **correlation;
   Test *test;
   Sequences *seq;
 
@@ -716,6 +747,7 @@ Sequences* Sequences::segmentation_output(int *nb_segment , int *model_type , os
     intercept = new double*[nb_variable];
     slope = new double*[nb_variable];
     slope_standard_deviation = new double*[nb_variable];
+    correlation = new double*[nb_variable];
 
     for (i = 1;i < nb_variable;i++) {
       if ((model_type[i - 1] == POISSON_CHANGE) || (model_type[0] == MULTIVARIATE_POISSON_CHANGE) ||
@@ -745,12 +777,14 @@ Sequences* Sequences::segmentation_output(int *nb_segment , int *model_type , os
         intercept[i] = new double[nb_segment[0]];
         slope[i] = new double[nb_segment[0]];
         slope_standard_deviation[i] = new double[nb_segment[0]];
+        correlation[i] = new double[nb_segment[0]];
       }
 
       else {
         intercept[i] = NULL;
         slope[i] = NULL;
         slope_standard_deviation[i] = NULL;
+        correlation[i] = NULL;
       }
     }
 
@@ -927,6 +961,20 @@ Sequences* Sequences::segmentation_output(int *nb_segment , int *model_type , os
             }
             index_parameter_mean /= (change_point[k + 1] - change_point[k]);
 
+            response_variance = 0.;
+            if (type[j] != REAL_VALUE) {
+              for (m = change_point[k];m < change_point[k + 1];m++) {
+                diff = int_sequence[i][j][m] - response_mean;
+                response_variance += diff * diff;
+              }
+            }
+            else {
+              for (m = change_point[k];m < change_point[k + 1];m++) {
+                diff = real_sequence[i][j][m] - response_mean;
+                response_variance += diff * diff;
+              }
+            }
+
             index_parameter_variance = 0.;
             for (m = change_point[k];m < change_point[k + 1];m++) {
               diff = seq_index_parameter[m] - index_parameter_mean;
@@ -947,6 +995,7 @@ Sequences* Sequences::segmentation_output(int *nb_segment , int *model_type , os
 
             slope[j][k] = covariance / index_parameter_variance;
             intercept[j][k] = response_mean - slope[j][k] * index_parameter_mean;
+            correlation[j][k] = covariance / sqrt(response_variance * index_parameter_variance);
 
             residual_mean = 0.;
             residual_square_sum = 0.;
@@ -1132,8 +1181,9 @@ Sequences* Sequences::segmentation_output(int *nb_segment , int *model_type , os
             os << STAT_label[STATL_VARIABLE] << " " << j << "   ";
           }
           os << SEQ_label[SEQL_SEGMENT] << " " << STAT_label[STATL_INTERCEPT] << ", "
-             << STAT_label[STATL_SLOPE] << ", " << STAT_label[STATL_RESIDUAL] << " "
-             << STAT_label[STATL_STANDARD_DEVIATION] << ": ";
+             << STAT_label[STATL_SLOPE] << ", " << STAT_label[STATL_CORRELATION_COEFF] << " ("
+             << STAT_label[STATL_LIMIT_CORRELATION_COEFF] << "), "
+             << STAT_label[STATL_RESIDUAL] << " " << STAT_label[STATL_STANDARD_DEVIATION] << ": ";
           for (k = 0;k < nb_segment[i];k++) {
             test = new Test(STUDENT , false , change_point[k + 1] - change_point[k] - 2 , I_DEFAULT , D_DEFAULT);
             test->critical_probability = ref_critical_probability[0];
@@ -1145,6 +1195,8 @@ Sequences* Sequences::segmentation_output(int *nb_segment , int *model_type , os
                  << slope[j][k] + test->value * slope_standard_deviation[j][k] << ") ";
 //               << "slope_standard_deviation: " << slope_standard_deviation[j][k] << " "
             }
+            os << correlation[j][k] << " (-/+"
+               << test->value / sqrt(test->value * test->value + change_point[k + 1] - change_point[k] - 2) << ") ";
             os << sqrt(variance[j][k]);
 
             delete test;
@@ -1313,11 +1365,13 @@ Sequences* Sequences::segmentation_output(int *nb_segment , int *model_type , os
       delete [] intercept[i];
       delete [] slope[i];
       delete [] slope_standard_deviation[i];
+      delete [] correlation[i];
     }
     delete [] variance;
     delete [] intercept;
     delete [] slope;
     delete [] slope_standard_deviation;
+    delete [] correlation;
 
     if (index_parameter_type == IMPLICIT_TYPE) {
       delete [] seq_index_parameter;
@@ -5313,30 +5367,30 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
       old_adjust = os.flags(ios::adjustfield);
 
       if ((model_type[0] != MEAN_CHANGE) && (model_type[0] != INTERCEPT_SLOPE_CHANGE)) {
-        width[0] = column_width(max_nb_segment) + ASCII_SPACE;
-        width[1] = column_width(max_nb_segment , segmentation_likelihood + 1 , 2.) + ASCII_SPACE;
-        width[2] = column_width(max_nb_segment , likelihood + 1 , 2.) + ASCII_SPACE;
-        width[3] = column_width(max_nb_segment , posterior_probability + 1) + ASCII_SPACE;
+        width[0] = stat_tool::column_width(max_nb_segment) + ASCII_SPACE;
+        width[1] = stat_tool::column_width(max_nb_segment , segmentation_likelihood + 1 , 2.) + ASCII_SPACE;
+        width[2] = stat_tool::column_width(max_nb_segment , likelihood + 1 , 2.) + ASCII_SPACE;
+        width[3] = stat_tool::column_width(max_nb_segment , posterior_probability + 1) + ASCII_SPACE;
         width[4] = column_width(max_nb_segment - 1 , segmentation_entropy + 2) + ASCII_SPACE;
         width[5] = column_width(max_nb_segment - 1 , first_order_entropy + 2) + ASCII_SPACE;
         width[6] = column_width(max_nb_segment - 1 , change_point_entropy + 2) + ASCII_SPACE;
-        width[7] = column_width(max_nb_segment - 1 , uniform_entropy + 2) + ASCII_SPACE;
-        width[8] = column_width(max_nb_segment - 1 , segmentation_divergence + 2) + ASCII_SPACE;
+        width[7] = stat_tool::column_width(max_nb_segment - 1 , uniform_entropy + 2) + ASCII_SPACE;
+        width[8] = stat_tool::column_width(max_nb_segment - 1 , segmentation_divergence + 2) + ASCII_SPACE;
 //        width[9] = column_width(max_nb_segment - 1 , marginal_entropy + 2) + ASCII_SPACE
-        width[10] = column_width(nb_parameter[max_nb_segment]) + ASCII_SPACE;
-        width[11] = column_width(max_nb_segment , penalized_likelihood[0] + 1) + ASCII_SPACE;
-        width[12] = column_width(max_nb_segment , weight[0] + 1) + ASCII_SPACE;
+        width[10] = stat_tool::column_width(nb_parameter[max_nb_segment]) + ASCII_SPACE;
+        width[11] = stat_tool::column_width(max_nb_segment , penalized_likelihood[0] + 1) + ASCII_SPACE;
+        width[12] = stat_tool::column_width(max_nb_segment , weight[0] + 1) + ASCII_SPACE;
 
         if (!bayesian) {
           if (max_nb_segment - min_nb_segment >= SLOPE_NB_SEGMENT_RANGE) {
-            width[13] = column_width(max_nb_segment , penalized_likelihood[1] + 1) + ASCII_SPACE;
-            width[14] = column_width(max_nb_segment , weight[1] + 1) + ASCII_SPACE;
+            width[13] = stat_tool::column_width(max_nb_segment , penalized_likelihood[1] + 1) + ASCII_SPACE;
+            width[14] = stat_tool::column_width(max_nb_segment , weight[1] + 1) + ASCII_SPACE;
           }
-          width[15] = column_width(max_nb_segment , penalized_likelihood[2] + 1) + ASCII_SPACE;
-          width[16] = column_width(max_nb_segment , weight[2] + 1) + ASCII_SPACE;
+          width[15] = stat_tool::column_width(max_nb_segment , penalized_likelihood[2] + 1) + ASCII_SPACE;
+          width[16] = stat_tool::column_width(max_nb_segment , weight[2] + 1) + ASCII_SPACE;
           if (max_nb_segment - min_nb_segment >= SLOPE_NB_SEGMENT_RANGE) {
-            width[17] = column_width(max_nb_segment , penalized_likelihood[3] + 1) + ASCII_SPACE;
-            width[18] = column_width(max_nb_segment , weight[3] + 1) + ASCII_SPACE;
+            width[17] = stat_tool::column_width(max_nb_segment , penalized_likelihood[3] + 1) + ASCII_SPACE;
+            width[18] = stat_tool::column_width(max_nb_segment , weight[3] + 1) + ASCII_SPACE;
           }
         }
 
@@ -5426,14 +5480,14 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
       }
 
       else {
-        width[0] = column_width(max_nb_segment) + ASCII_SPACE;
-        width[1] = column_width(max_nb_segment , segmentation_likelihood + 1 , 2.) + ASCII_SPACE;
-        width[10] = column_width(nb_parameter[max_nb_segment]) + ASCII_SPACE;
-        width[15] = column_width(max_nb_segment , penalized_likelihood[2] + 1) + ASCII_SPACE;
-        width[16] = column_width(max_nb_segment , weight[2] + 1) + ASCII_SPACE;
+        width[0] = stat_tool::column_width(max_nb_segment) + ASCII_SPACE;
+        width[1] = stat_tool::column_width(max_nb_segment , segmentation_likelihood + 1 , 2.) + ASCII_SPACE;
+        width[10] = stat_tool::column_width(nb_parameter[max_nb_segment]) + ASCII_SPACE;
+        width[15] = stat_tool::column_width(max_nb_segment , penalized_likelihood[2] + 1) + ASCII_SPACE;
+        width[16] = stat_tool::column_width(max_nb_segment , weight[2] + 1) + ASCII_SPACE;
         if (max_nb_segment - min_nb_segment >= SLOPE_NB_SEGMENT_RANGE) {
-          width[17] = column_width(max_nb_segment , penalized_likelihood[3] + 1) + ASCII_SPACE;
-          width[18] = column_width(max_nb_segment , weight[3] + 1) + ASCII_SPACE;
+          width[17] = stat_tool::column_width(max_nb_segment , penalized_likelihood[3] + 1) + ASCII_SPACE;
+          width[18] = stat_tool::column_width(max_nb_segment , weight[3] + 1) + ASCII_SPACE;
         }
 
         os << "\n" << SEQ_label[SEQL_NB_SEGMENT] << " | 2 * " << STAT_label[STATL_LIKELIHOOD]
@@ -5734,3 +5788,6 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
 
   return oseq;
 }
+
+
+};  // namespace sequence_analysis
