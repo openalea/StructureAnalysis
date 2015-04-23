@@ -20,6 +20,8 @@
  *
  *-----------------------------------------------------------------------------*/
 
+
+
 #include "wrapper_util.h"
 #include "export_base.h"
 
@@ -33,6 +35,8 @@
 #include "boost_python_aliases.h"
 
 using namespace boost::python;
+using namespace stat_tool;
+
 
 // DistanceMatrix
 
