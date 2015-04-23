@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -46,8 +46,11 @@
 #include "tool/rw_locale.h"
 
 #include "stat_tool/stat_tools.h"
-#include "stat_tool/distribution.h"
 #include "stat_tool/curves.h"
+#include "stat_tool/distribution.h"
+#include "stat_tool/markovian.h"
+#include "stat_tool/vectors.h"
+#include "stat_tool/distance_matrix.h"
 #include "stat_tool/stat_label.h"
 
 #include "renewal.h"
@@ -55,9 +58,10 @@
 #include "tool/config.h"
 
 using namespace std;
+using namespace stat_tool;
 
-extern int column_width(int value);
-extern char* label(const char *file_name);
+
+namespace sequence_analysis {
 
 
 
@@ -380,6 +384,69 @@ TimeEvents::TimeEvents(int inb_class)
   htime = NULL;
   hnb_event = NULL;
   mixture = NULL;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Construction d'un objet TimeEvents a partir d'un objet FrequencyDistribution.
+ *
+ *  arguments : reference sur un objet FrequencyDistribution, temps d'observation.
+ *
+ *--------------------------------------------------------------*/
+
+TimeEvents::TimeEvents(FrequencyDistribution &inb_event, int itime)
+
+{
+  register int i;
+  int *ptime , *pnb_event , *pfrequency;
+
+
+  nb_class = 0;
+  for (i = inb_event.offset;i < inb_event.nb_value;i++) {
+    if (inb_event.frequency[i] > 0) {
+      nb_class++;
+    }
+  }
+
+  time = new int[nb_class];
+  nb_event = new int[nb_class];
+  frequency = new int[nb_class];
+
+  nb_element = inb_event.nb_element;
+
+  // constitution des echantillons
+
+  ptime = time;
+  pnb_event = nb_event;
+  pfrequency = frequency;
+
+  for (i = inb_event.offset;i < inb_event.nb_value;i++) {
+    if (inb_event.frequency[i] > 0) {
+      *ptime++ = itime;
+      *pnb_event++ = i;
+      *pfrequency++ = inb_event.frequency[i];
+    }
+  }
+
+  // construction des lois empiriques
+
+  htime = new FrequencyDistribution(itime + 1);
+
+  htime->frequency[itime] = inb_event.nb_element;
+  htime->offset = itime;
+  htime->nb_element = inb_event.nb_element;
+  htime->max = inb_event.nb_element;
+  htime->mean = itime;
+  htime->variance = 0.;
+
+  hnb_event = new FrequencyDistribution*[itime + 1];
+  for (i = 0;i < itime;i++) {
+    hnb_event[i] = NULL;
+  }
+  hnb_event[itime] = new FrequencyDistribution(inb_event);
+
+  mixture = new FrequencyDistribution(inb_event);
 }
 
 
@@ -837,23 +904,22 @@ TimeEvents* TimeEvents::nb_event_select(StatError &error , int min_nb_event ,
  *
  *  Construction d'un objet TimeEvents a partir d'un objet FrequencyDistribution.
  *
- *  arguments : reference sur un objet StatError, temps d'observation.
+ *  arguments : references sur un objet StatError et sur un objet FrequencyDistribution,
+ *              temps d'observation.
  *
  *--------------------------------------------------------------*/
 
-TimeEvents* FrequencyDistribution::build_time_events(StatError &error , int itime) const
+TimeEvents* build_time_events(StatError &error , FrequencyDistribution &nb_event , int itime)
 
 {
   bool status = true;
-  register int i;
-  int nb_class , *ptime , *pnb_event , *pfrequency , *hfrequency;
   TimeEvents *timev;
 
 
   timev = NULL;
   error.init();
 
-  if (itime / (nb_value - 1) < MIN_INTER_EVENT) {
+  if (itime / (nb_event.nb_value - 1) < MIN_INTER_EVENT) {
     status = false;
     error.update(SEQ_error[SEQR_SHORT_OBSERVATION_TIME]);
   }
@@ -863,52 +929,7 @@ TimeEvents* FrequencyDistribution::build_time_events(StatError &error , int itim
   }
 
   if (status) {
-    hfrequency = frequency + offset;
-    nb_class = 0;
-    for (i = offset;i < nb_value;i++) {
-      if (*hfrequency++ > 0) {
-        nb_class++;
-      }
-    }
-
-    timev = new TimeEvents(nb_class);
-
-    timev->nb_element = nb_element;
-
-    // constitution des echantillons
-
-    ptime = timev->time;
-    pnb_event = timev->nb_event;
-    pfrequency = timev->frequency;
-    hfrequency = frequency + offset;
-
-    for (i = offset;i < nb_value;i++) {
-      if (*hfrequency > 0) {
-        *ptime++ = itime;
-        *pnb_event++ = i;
-        *pfrequency++ = *hfrequency;
-      }
-      hfrequency++;
-    }
-
-    // construction des lois empiriques
-
-    timev->htime = new FrequencyDistribution(itime + 1);
-
-    timev->htime->frequency[itime] = nb_element;
-    timev->htime->offset = itime;
-    timev->htime->nb_element = nb_element;
-    timev->htime->max = nb_element;
-    timev->htime->mean = itime;
-    timev->htime->variance = 0.;
-
-    timev->hnb_event = new FrequencyDistribution*[itime + 1];
-    for (i = 0;i < itime;i++) {
-      timev->hnb_event[i] = NULL;
-    }
-    timev->hnb_event[itime] = new FrequencyDistribution(*this);
-
-    timev->mixture = new FrequencyDistribution(*this);
+    timev = new TimeEvents(nb_event , itime);
   }
 
   return timev;
@@ -3905,3 +3926,6 @@ void RenewalData::build_index_event(int offset)
     index_event->point[1][i] = (double)frequency[1] / (double)index_event->frequency[i];
   }
 }
+
+
+};  // namespace sequence_analysis
