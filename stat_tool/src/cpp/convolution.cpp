@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -51,7 +51,7 @@
 using namespace std;
 
 
-extern char* label(const char *file_name);
+namespace stat_tool {
 
 
 
@@ -900,8 +900,8 @@ bool Convolution::plot_write(const char *prefix , const char *title ,
       scale[i + 2] = convol_histo->frequency_distribution[i]->nb_element;
     }
 
-    status = ::plot_print((data_file_name[0].str()).c_str() , nb_distribution + 2 , pdist ,
-                          scale , NULL , nb_distribution + 1 , phisto);
+    status = stat_tool::plot_print((data_file_name[0].str()).c_str() , nb_distribution + 2 , pdist ,
+                                   scale , NULL , nb_distribution + 1 , phisto);
   }
 
   else {
@@ -1579,3 +1579,6 @@ MultiPlotSet* ConvolutionData::get_plotable() const
 
   return plot_set;
 }
+
+
+};  // namespace stat_tool
