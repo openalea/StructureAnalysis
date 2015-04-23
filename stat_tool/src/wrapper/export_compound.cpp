@@ -17,6 +17,8 @@
  *
  *----------------------------------------------------------------------------*/
 
+
+
 #include <stdio.h>
 #include "wrapper_util.h"
 #include "export_base.h"
@@ -34,6 +36,8 @@
 
 using namespace boost::python;
 using namespace boost;
+using namespace stat_tool;
+
 
 class CompoundWrap
 {
