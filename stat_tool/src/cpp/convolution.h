@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -41,23 +41,27 @@
 
 
 
+namespace stat_tool {
+
+
+
 /****************************************************************
  *
  *  Constantes :
  */
 
 
-const int CONVOLUTION_NB_DISTRIBUTION = 10;  // nombre maximum de lois elementaires
-const double CONVOLUTION_THRESHOLD = 0.9999;  // seuil sur la fonction de repartition
+  const int CONVOLUTION_NB_DISTRIBUTION = 10;  // nombre maximum de lois elementaires
+  const double CONVOLUTION_THRESHOLD = 0.9999;  // seuil sur la fonction de repartition
                                               // pour borner une loi
 
-const double CONVOLUTION_INIT_PROBABILITY = 0.001;  // seuil pour l'initialisation de la probabilite
-const double CONVOLUTION_LIKELIHOOD_DIFF = 1.e-5;  // seuil pour stopper les iterations EM
-const int CONVOLUTION_NB_ITER = 10000;  // nombre maximum d'iterations EM
-const double CONVOLUTION_DIFFERENCE_WEIGHT = 0.5;  // poids par defaut de la penalisation
+  const double CONVOLUTION_INIT_PROBABILITY = 0.001;  // seuil pour l'initialisation de la probabilite
+  const double CONVOLUTION_LIKELIHOOD_DIFF = 1.e-5;  // seuil pour stopper les iterations EM
+  const int CONVOLUTION_NB_ITER = 10000;  // nombre maximum d'iterations EM
+  const double CONVOLUTION_DIFFERENCE_WEIGHT = 0.5;  // poids par defaut de la penalisation
                                                    // (cas des differences 1ere ou 2nde)
-const double CONVOLUTION_ENTROPY_WEIGHT = 0.1;  // poids par defaut de la penalisation (cas de l'entropie)
-const int CONVOLUTION_COEFF = 10;      // coefficient arrondi estimateur
+  const double CONVOLUTION_ENTROPY_WEIGHT = 0.1;  // poids par defaut de la penalisation (cas de l'entropie)
+  const int CONVOLUTION_COEFF = 10;      // coefficient arrondi estimateur
 
 
 
@@ -67,12 +71,11 @@ const int CONVOLUTION_COEFF = 10;      // coefficient arrondi estimateur
  */
 
 
-class FrequencyDistribution;
-class ConvolutionData;
+  class ConvolutionData;
 
 
-class Convolution : public StatInterface , public Distribution {  // produit de convolution
-                                                                  // de lois discretes
+  class Convolution : public StatInterface , public Distribution {  // produit de convolution
+                                                                    // de lois discretes
     friend class FrequencyDistribution;
     friend class ConvolutionData;
 
@@ -83,7 +86,7 @@ class Convolution : public StatInterface , public Distribution {  // produit de 
     friend std::ostream& operator<<(std::ostream &os , const Convolution &convol)
     { return convol.ascii_write(os , convol.convolution_data , false , false); }
 
-private :
+  private :
 
     ConvolutionData *convolution_data;  // pointeur sur un objet ConvolutionData
     int nb_distribution;    // nombre de lois elementaires
@@ -102,7 +105,7 @@ private :
     void expectation_step(const FrequencyDistribution &histo , const Distribution **partial_convol ,
                           Reestimation<double> **reestim) const;
 
-public :
+  public :
 
     Convolution();
     Convolution(int nb_dist , const DiscreteParametric **pdist);
@@ -127,30 +130,30 @@ public :
                      bool *dist_flag = NULL);
     ConvolutionData* simulation(StatError &error , int nb_element) const;
 
-//     // acces membres de la classe
+    // acces membres de la classe
 
     ConvolutionData* get_convolution_data() const { return convolution_data; }
     int get_nb_distribution() const { return nb_distribution; }
     DiscreteParametric* get_distribution(int index) const { return distribution[index]; }
-};
+  };
 
 
-Convolution* convolution_building(StatError &error , int nb_dist ,
-                                  const DiscreteParametric **dist);
-Convolution* convolution_ascii_read(StatError &error , const char *path ,
-                                    double cumul_threshold = CONVOLUTION_THRESHOLD);
+  Convolution* convolution_building(StatError &error , int nb_dist ,
+                                    const DiscreteParametric **dist);
+  Convolution* convolution_ascii_read(StatError &error , const char *path ,
+                                      double cumul_threshold = CONVOLUTION_THRESHOLD);
 
 
 
-class ConvolutionData : public StatInterface , public FrequencyDistribution {  // structure de donnees correspondant
-                                                                               // a un produit de convolution de lois discretes
+  class ConvolutionData : public StatInterface , public FrequencyDistribution {  // structure de donnees correspondant
+                                                                                 // a un produit de convolution de lois discretes
     friend class FrequencyDistribution;
     friend class Convolution;
 
     friend std::ostream& operator<<(std::ostream &os , const ConvolutionData &convol_histo)
     { return convol_histo.ascii_write(os , false); }
 
-private :
+  private :
 
     Convolution *convolution;  // pointeur sur un objet Convolution
     int nb_distribution;       // nombre de lois elementaires empiriques
@@ -159,7 +162,7 @@ private :
     void copy(const ConvolutionData &convol_histo , bool model_flag = true);
     void remove();
 
-public :
+  public :
 
     ConvolutionData();
     ConvolutionData(const FrequencyDistribution &histo , int nb_dist);
@@ -184,7 +187,10 @@ public :
     Convolution* get_convolution() const { return convolution; }
     int get_nb_distribution() const { return nb_distribution; }
     FrequencyDistribution* get_frequency_distribution(int index) const { return frequency_distribution[index]; }
-};
+  };
+
+
+};  // namespace stat_tool
 
 
 
