@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -49,9 +49,9 @@
 using namespace std;
 
 
-extern int column_width(int value);
-extern int column_width(int nb_value , const double *value , double scale = 1.);
-extern char* label(const char *file_name);
+namespace stat_tool {
+
+
 extern int cumul_computation(int nb_row , int nb_column , int **value);
 extern double cumul_distance_computation(int dim , double *distance);
 extern int* pattern_sort(int nb_pattern , double *distance , int nb_sorted_pattern = I_DEFAULT);
@@ -1007,7 +1007,7 @@ bool Clusters::plot_write(StatError &error , const char *prefix ,
 
         if (i == 1) {
           out_file << "set terminal postscript" << endl;
-          file_name[1] << ::label(prefix) << ".ps";
+          file_name[1] << stat_tool::label(prefix) << ".ps";
           out_file << "set output \"" << file_name[1].str() << "\"\n\n";
         }
 
@@ -1040,7 +1040,7 @@ bool Clusters::plot_write(StatError &error , const char *prefix ,
         j = 0;
         for (k = 0;k < nb_cluster;k++) {
           if (plot_nb_pattern[k] > 1) {
-            out_file << "\"" << ::label((data_file_name[j].str()).c_str())
+            out_file << "\"" << stat_tool::label((data_file_name[j].str()).c_str())
                      << "\" using 1:2 title \"" << STAT_label[STATL_CLUSTER] << " " << k + 1
                      << "\" with linespoints";
 
@@ -1861,13 +1861,13 @@ void Clusters::prototype_initialization_1()
   cumul_distance = new double[distance_matrix->nb_row];
 
   for (i = 0;i < distance_matrix->nb_row;i++) {
-    cumul_distance[i] = ::cumul_distance_computation(distance_matrix->nb_column , distance_matrix->distance[i]);
+    cumul_distance[i] = stat_tool::cumul_distance_computation(distance_matrix->nb_column , distance_matrix->distance[i]);
     if (cumul_distance[i] != -D_INF) {
       cumul_distance[i] /= cumul_computation(1 , distance_matrix->nb_column , distance_matrix->length + i);
     }
   }
 
-  index = ::pattern_sort(distance_matrix->nb_row , cumul_distance);
+  index = stat_tool::pattern_sort(distance_matrix->nb_row , cumul_distance);
 
   for (i = 0;i < nb_cluster;i++) {
     assignment[index[(int)round((double)(i * distance_matrix->nb_row) / (double)nb_cluster)]] = i;
@@ -1910,13 +1910,13 @@ void Clusters::prototype_initialization_2()
   cumul_distance = new double[distance_matrix->nb_row];
 
   for (i = 0;i < distance_matrix->nb_row;i++) {
-    cumul_distance[i] = ::cumul_distance_computation(distance_matrix->nb_column , distance_matrix->distance[i]);
+    cumul_distance[i] = stat_tool::cumul_distance_computation(distance_matrix->nb_column , distance_matrix->distance[i]);
     if (cumul_distance[i] != -D_INF) {
       cumul_distance[i] /= cumul_computation(1 , distance_matrix->nb_column , distance_matrix->length + i);
     }
   }
 
-  index = ::pattern_sort(distance_matrix->nb_row , cumul_distance , 1);
+  index = stat_tool::pattern_sort(distance_matrix->nb_row , cumul_distance , 1);
 
   prototype[0] = index[0];
   assignment[prototype[0]] = 0;
@@ -2289,7 +2289,7 @@ void Clusters::algorithmic_step_2()
               }
               prototype_distance[nb_cluster] = normalized_distance[k][i];
 
-              index = ::pattern_sort(nb_cluster + 1 , prototype_distance , 2);
+              index = stat_tool::pattern_sort(nb_cluster + 1 , prototype_distance , 2);
 
               if (((index[0] == j) && (index[1] == nb_cluster)) || ((index[0] == nb_cluster) && (index[1] == j))) {
                 swap_distance[i][j] += normalized_distance[k][i] - normalized_distance[k][prototype[j]];
@@ -2671,3 +2671,6 @@ Clusters* DistanceMatrix::partitioning(StatError &error , ostream &os , int nb_c
 
   return clusters;
 }
+
+
+};  // namespace stat_tool
