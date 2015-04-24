@@ -8,6 +8,7 @@
 
 // Using =======================================================================
 using namespace boost::python;
+using namespace stat_tool;
 using namespace tree_statistic;
 
 // Declarations ================================================================

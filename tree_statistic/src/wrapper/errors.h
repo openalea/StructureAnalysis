@@ -29,7 +29,7 @@ namespace tree_statistic
          throw_error_already_set();
      };
      /** Throw exception StatTreeError with a message */
-     inline void throw_stat_tree_error(StatError &error)
+     inline void throw_stat_tree_error(stat_tool::StatError &error)
      {
          ostringstream error_message;
 

@@ -61,7 +61,7 @@
 #include <iomanip>
 
 extern char* stat_tool::label(const char*);
-extern void log_computation(int nb_value, const double *pmass, double *plog);
+extern void  stat_tool::log_computation(int nb_value, const double *pmass, double *plog);
 extern int stat_tool::column_width(int);
 extern int stat_tool::column_width(int nb_value , const double *value , double scale);
 
@@ -698,7 +698,7 @@ void CategoricalTreeProcess::copy_Distribution_array(stat_tool::Distribution**& 
  **
 
 ostream& CategoricalTreeProcess::ascii_print(ostream &os, int process,
-                                             stat_tool::FrequencyDistribution** empirical_observation,
+                                             FrequencyDistribution** empirical_observation,
                                              const TreeCharacteristics* characteristics,
                                              bool exhaustive, bool file_flag) const
 {
@@ -1270,7 +1270,7 @@ ostream& CategoricalTreeProcess::ascii_print(ostream &os, int process,
 }
 
 ostream& CategoricalTreeProcess::spreadsheet_print(ostream &os, int process,
-                                                   stat_tool::FrequencyDistribution** empirical_observation,
+                                                   FrequencyDistribution** empirical_observation,
                                                    const TreeCharacteristics* characteristics) const
 {
 #ifdef __GNUC__
@@ -1292,9 +1292,9 @@ ostream& CategoricalTreeProcess::spreadsheet_print(ostream &os, int process,
 
 bool CategoricalTreeProcess::plot_print(const char * prefix, const char * title,
                                         int process,
-                                        stat_tool::FrequencyDistribution** empirical_observation,
+                                        FrequencyDistribution** empirical_observation,
                                         const TreeCharacteristics * characteristics,
-                                        const stat_tool::FrequencyDistribution * hsize) const
+                                        const FrequencyDistribution * hsize) const
 {
    bool status= false, start;
    register int val, i, j= 0, k= 0;
@@ -1303,7 +1303,7 @@ bool CategoricalTreeProcess::plot_print(const char * prefix, const char * title,
    double *scale;
    // Curves *smoothed_curves =NULL;
    const  stat_tool::Distribution **pdist;
-   const stat_tool::FrequencyDistribution **phisto;
+   const FrequencyDistribution **phisto;
    ostringstream data_file_name[2];
 
    // data file printing
@@ -2533,9 +2533,9 @@ bool CategoricalTreeProcess::plot_print(const char * prefix, const char * title,
  **/
 
 MultiPlotSet* CategoricalTreeProcess::plotable_write(MultiPlotSet &plot, int &index,
-                                                     int process, stat_tool::FrequencyDistribution * const * empirical_observation,
+                                                     int process, FrequencyDistribution * const * empirical_observation,
                                                      const TreeCharacteristics * characteristics,
-                                                     const stat_tool::FrequencyDistribution * hsize) const
+                                                     const FrequencyDistribution * hsize) const
 {
    register int val, i, j, var;
    int dist_nb_value;
@@ -3379,9 +3379,9 @@ MultiPlotSet* CategoricalTreeProcess::plotable_write(MultiPlotSet &plot, int &in
  *
  **/
 
-unsigned int CategoricalTreeProcess::nb_plot_set_computation(int process, stat_tool::FrequencyDistribution * const * empirical_observation,
+unsigned int CategoricalTreeProcess::nb_plot_set_computation(int process, FrequencyDistribution * const * empirical_observation,
                                                              const TreeCharacteristics * characteristics,
-                                                             const stat_tool::FrequencyDistribution * hsize) const
+                                                             const FrequencyDistribution * hsize) const
 {
    unsigned int nb_plot_set = 0;
    register int val;
@@ -3728,7 +3728,7 @@ stat_tool::DiscreteParametricModel* HiddenMarkovTree::extract(StatError& error,
     stat_tool::Distribution *pdist;
    // DiscreteParametric *pparam;
    stat_tool::DiscreteParametricModel *dist;
-   stat_tool::FrequencyDistribution *phisto;
+   FrequencyDistribution *phisto;
 
 
    dist= NULL;
@@ -4162,7 +4162,7 @@ void HiddenMarkovTree::characteristic_computation(const HiddenMarkovTreeData& tr
       register int i, j, k;
       int nb_value;
       double *memory= NULL;
-      stat_tool::FrequencyDistribution dsize;
+      FrequencyDistribution dsize;
 
       if (tree.hsize != NULL)
          dsize= *(tree.hsize);
@@ -4876,7 +4876,7 @@ ostream& HiddenMarkovTree::ascii_write(ostream& os,
    int nb_output_process = _nb_ioutput_process+_nb_doutput_process;
    bool **logic_transition = NULL;
    double **distance = NULL;
-   stat_tool::FrequencyDistribution **observation = NULL, *marginal = NULL;
+   FrequencyDistribution **observation = NULL, *marginal = NULL;
    TreeCharacteristics *characteristics = NULL;
 
    // printing of the Markov tree parameters
@@ -5316,7 +5316,7 @@ ostream& HiddenMarkovTree::spreadsheet_write(ostream& os, const HiddenMarkovTree
        nb_output_process = _nb_ioutput_process+_nb_doutput_process;
    bool **logic_transition = NULL;
    double **distance = NULL;
-   stat_tool::FrequencyDistribution **observation = NULL;
+   FrequencyDistribution **observation = NULL;
    TreeCharacteristics *characteristics = NULL;
 
    switch (type)
@@ -5555,7 +5555,7 @@ bool HiddenMarkovTree::plot_write(const char * prefix, const char * title,
    bool status;
    register int i;
    int variable= 0; //, cumul_size, nb_output_process= _nb_ioutput_process+_nb_doutput_process;
-   stat_tool::FrequencyDistribution *hsize= NULL, **observation= NULL;
+   FrequencyDistribution *hsize= NULL, **observation= NULL;
    TreeCharacteristics *characteristics= NULL;
 
    if ((otrees != NULL) && (otrees->_type[0] == STATE))
@@ -7169,7 +7169,7 @@ HiddenMarkovTreeData& HiddenMarkovTreeData::operator=(const HiddenMarkovTreeData
 
 /*****************************************************************
  *
- *  stat_tool::FrequencyDistribution* extraction for Hidden_markov_data class,
+ *  FrequencyDistribution* extraction for Hidden_markov_data class,
  *  using a StatError object, the kind of frequency distribution,
  *  the considered variable or state and value
  *  (case of observation frequency distributions)
@@ -7182,7 +7182,7 @@ stat_tool::DiscreteDistributionData* HiddenMarkovTreeData::extract(StatError& er
 {
    bool status= true;
     stat_tool::Distribution *pdist= NULL;
-   stat_tool::FrequencyDistribution *phisto= NULL;
+   FrequencyDistribution *phisto= NULL;
    stat_tool::DiscreteDistributionData *histo= NULL;
 
    error.init();
@@ -7370,7 +7370,7 @@ DiscreteMixtureData* HiddenMarkovTreeData::extract_marginal(StatError& error,
    int ivariable = I_DEFAULT;
    bool status = true, mixture = false;
    double *pweight = NULL;
-   stat_tool::FrequencyDistribution *pstate_marginal = NULL; // state_marginal
+   FrequencyDistribution *pstate_marginal = NULL; // state_marginal
    stat_tool::DiscreteDistributionData *phisto = NULL, // marginal histogram
                             *pstate_marginal_ddd = NULL; // state_marginal
    DiscreteMixtureData *histo = NULL;
@@ -7839,12 +7839,12 @@ HiddenMarkovTreeData::ptFrequencyDistribution_array HiddenMarkovTreeData::get_ob
    return res;
 }
 
-stat_tool::FrequencyDistribution* HiddenMarkovTreeData::get_observation(int variable,
+FrequencyDistribution* HiddenMarkovTreeData::get_observation(int variable,
                                                              int state) const
 {  // frequency distributions corresponding to the conditional observation distributions
    // for one given state and one given variable
    // register int j;
-   stat_tool::FrequencyDistribution *res= NULL;
+   FrequencyDistribution *res= NULL;
 
    if (observation_distribution != NULL)
    {

@@ -55,7 +55,7 @@ extern char* label(const char*);
 extern int* stat_tool::identifier_select(int nb_pattern , int* pattern_identifier,
                               int selected_nb_pattern, int* selected_identifier,
                               bool keep);
-extern int* select_variable(int nb_variable, int selected_nb_variable,
+extern int* stat_tool::select_variable(int nb_variable, int selected_nb_variable,
                             int* selected_variable, bool keep);
 
 namespace Stat_trees

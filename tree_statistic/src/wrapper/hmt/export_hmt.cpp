@@ -45,6 +45,8 @@
 
 // Using =======================================================================
 using namespace boost::python;
+using namespace stat_tool;
+using namespace sequence_analysis;
 using namespace Stat_trees;
 using namespace tree_statistic;
 

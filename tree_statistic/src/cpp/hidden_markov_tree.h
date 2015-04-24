@@ -37,9 +37,9 @@
 #ifndef HIDDEN_MARKOV_TREE_H
 #define HIDDEN_MARKOV_TREE_H
 
-class Distribution;
-class DiscreteParametricModel;
-class DiscreteDistributionData;
+// class Distribution;
+// class DiscreteParametricModel;
+// class DiscreteDistributionData;
 
 namespace Stat_trees
 {

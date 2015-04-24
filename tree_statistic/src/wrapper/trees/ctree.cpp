@@ -26,6 +26,7 @@
 
 // Using =======================================================================
 using namespace boost::python;
+using namespace sequence_analysis;
 using namespace Stat_trees;
 
 // Declarations ================================================================
