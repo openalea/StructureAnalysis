@@ -49,6 +49,7 @@
 #include <iostream>
 #include <cstdlib>
 
+using namespace stat_tool;
 using namespace Stat_trees;
 
 /*****************************************************************
@@ -740,7 +741,7 @@ bool TreeCharacteristics::plot_print(const char * prefix,
       if (i == 1)
       {
          out_file << "set terminal postscript" << endl;
-         file_name[1] << label(prefix) << variable + 1 << 1 << ".ps";
+         file_name[1] << stat_tool::label(prefix) << variable + 1 << 1 << ".ps";
          out_file << "set output \"" << file_name[1].str() << "\"\n\n";
       }
 
@@ -759,7 +760,7 @@ bool TreeCharacteristics::plot_print(const char * prefix,
       out_file << "\"\n\n";
 
       for (j = 0;j < nb_values;j++) {
-        out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\" using "
+        out_file << "\"" << stat_tool::label((data_file_name[0].str()).c_str()) << "\" using "
                  << j + 1 << " title \"" << STAT_TREES_label[TREESTATL_OBSERVED] << " "
                  << STAT_label[type == STATE ? STATL_STATE : STATL_OUTPUT] << " "
                  << j << "\" with linespoints";
@@ -783,7 +784,7 @@ bool TreeCharacteristics::plot_print(const char * prefix,
 
       out_file << "plot [0:" << hsize.nb_value - 1 << "] [0:"
                << (int)(hsize.max * YSCALE) + 1 << "] \""
-               << label((data_file_name[1].str()).c_str()) << "\" using 1 title \""
+               << stat_tool::label((data_file_name[1].str()).c_str()) << "\" using 1 title \""
                << STAT_TREES_label[TREESTATL_TREE_SIZE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                << "\" with impulses" << endl;
 
@@ -829,7 +830,7 @@ bool TreeCharacteristics::plot_print(const char * prefix,
          if (i == 1)
          {
             out_file << "set terminal postscript" << endl;
-            file_name[1] << label(prefix) << variable+1 << 1 << ".ps";
+            file_name[1] << stat_tool::label(prefix) << variable+1 << 1 << ".ps";
             out_file << "set output \"" << file_name[1].str() << "\"\n\n";
          }
 
@@ -874,7 +875,7 @@ bool TreeCharacteristics::plot_print(const char * prefix,
 
             out_file << "plot [0:" << MAX(first_occurrence_root[val]->nb_value-1 , 1) << "] [0:"
                        << (int)(first_occurrence_root[val]->max*YSCALE)+1 << "] \""
-                       << label((data_file_name[1].str()).c_str()) << "\" using " << j++
+                       << stat_tool::label((data_file_name[1].str()).c_str()) << "\" using " << j++
                        << " title \"" << STAT_TREES_label[type == STATE ? TREESTATL_STATE_FIRST_OCCURRENCE_ROOT : TREESTATL_OUTPUT_FIRST_OCCURRENCE_ROOT]
                        << " " << val << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\" with impulses" << endl;
 
@@ -916,7 +917,7 @@ bool TreeCharacteristics::plot_print(const char * prefix,
          if (i == 1)
          {
             out_file << "set terminal postscript" << endl;
-            file_name[1] << label(prefix) << variable+1 << 2 << ".ps";
+            file_name[1] << stat_tool::label(prefix) << variable+1 << 2 << ".ps";
             out_file << "set output \"" << file_name[1].str() << "\"\n\n";
          }
 
@@ -961,7 +962,7 @@ bool TreeCharacteristics::plot_print(const char * prefix,
 
             out_file << "plot [0:" << MAX(first_occurrence_leaves[val]->nb_value-1 , 1) << "] [0:"
                        << (int)(first_occurrence_leaves[val]->max*YSCALE)+1 << "] \""
-                       << label((data_file_name[1].str()).c_str()) << "\" using " << j++
+                       << stat_tool::label((data_file_name[1].str()).c_str()) << "\" using " << j++
                        << " title \"" << STAT_TREES_label[type == STATE ? TREESTATL_STATE_FIRST_OCCURRENCE_LEAVES : TREESTATL_OUTPUT_FIRST_OCCURRENCE_LEAVES]
                        << " " << val << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\" with impulses" << endl;
 
@@ -1003,7 +1004,7 @@ bool TreeCharacteristics::plot_print(const char * prefix,
          if (i == 1)
          {
             out_file << "set terminal postscript" << endl;
-            file_name[1] << label(prefix) << variable+1 << 3 << ".ps";
+            file_name[1] << stat_tool::label(prefix) << variable+1 << 3 << ".ps";
             out_file << "set output \"" << file_name[1].str() << "\"\n\n";
          }
 
@@ -1049,7 +1050,7 @@ bool TreeCharacteristics::plot_print(const char * prefix,
 
                out_file << "plot [0:" << sojourn_size[val]->nb_value-1 << "] [0:"
                         << (int)(sojourn_size[val]->max*YSCALE)+1 << "] \""
-                        << label((data_file_name[1].str()).c_str()) << "\" using " << j++
+                        << stat_tool::label((data_file_name[1].str()).c_str()) << "\" using " << j++
                         << " title \"" << STAT_label[type == STATE ? STATL_STATE : STATL_OUTPUT] << " " << val
                         << " " << STAT_TREES_label[TREESTATL_SOJOURN_SIZE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                         << "\" with impulses" << endl;
@@ -1092,7 +1093,7 @@ bool TreeCharacteristics::plot_print(const char * prefix,
          if (i == 1)
          {
             out_file << "set terminal postscript" << endl;
-            file_name[1] << label(prefix) << variable + 1 << 4 << ".ps";
+            file_name[1] << stat_tool::label(prefix) << variable + 1 << 4 << ".ps";
             out_file << "set output \"" << file_name[1].str() << "\"\n\n";
          }
 
@@ -1127,7 +1128,7 @@ bool TreeCharacteristics::plot_print(const char * prefix,
 
            out_file << "plot [0:" << nb_zones[val]->nb_value-1 << "] [0:"
                     << (int)(nb_zones[val]->max * YSCALE) + 1 << "] \""
-                    << label((data_file_name[1].str()).c_str()) << "\" using " << j++
+                    << stat_tool::label((data_file_name[1].str()).c_str()) << "\" using " << j++
                     << " title \"" << STAT_TREES_label[type == STATE ? TREESTATL_STATE_NB_ZONES : TREESTATL_OUTPUT_NB_ZONES]
                     << " " << val << " " << STAT_TREES_label[TREESTATL_PER_TREE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                     << "\" with impulses" << endl;
@@ -1151,7 +1152,7 @@ bool TreeCharacteristics::plot_print(const char * prefix,
 
            out_file << "plot [0:" << nb_occurrences[val]->nb_value-1 << "] [0:"
                     << (int)(nb_occurrences[val]->max*YSCALE)+1 << "] \""
-                    << label((data_file_name[1].str()).c_str()) << "\" using " << j++
+                    << stat_tool::label((data_file_name[1].str()).c_str()) << "\" using " << j++
                     << " title \"" << STAT_TREES_label[type == STATE ? TREESTATL_STATE_NB_OCCURRENCES : TREESTATL_OUTPUT_NB_OCCURRENCES]
                     << " " << val << " " << STAT_TREES_label[TREESTATL_PER_TREE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                     << "\" with impulses" << endl;
@@ -1176,7 +1177,7 @@ bool TreeCharacteristics::plot_print(const char * prefix,
 
          out_file << "plot [0:" << hsize.nb_value - 1 << "] [0:"
                   << (int)(hsize.max*YSCALE)+1 << "] \""
-                  << label((data_file_name[1].str()).c_str()) << "\" using 1 title \""
+                  << stat_tool::label((data_file_name[1].str()).c_str()) << "\" using 1 title \""
                   << STAT_TREES_label[TREESTATL_TREE_SIZE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                   << "\" with impulses" << endl;
 
@@ -1294,7 +1295,7 @@ MultiPlotSet* TreeCharacteristics::get_plotable(int plot_type,
          if (i == 1)
          {
             out_file << "set terminal postscript" << endl;
-            file_name[1] << label(prefix) << variable+1 << 2 << ".ps";
+            file_name[1] << stat_tool::label(prefix) << variable+1 << 2 << ".ps";
             out_file << "set output \"" << file_name[1].str() << "\"\n\n";
          }
 
@@ -1339,7 +1340,7 @@ MultiPlotSet* TreeCharacteristics::get_plotable(int plot_type,
 
             out_file << "plot [0:" << MAX(first_occurrence_leaves[val]->nb_value-1 , 1) << "] [0:"
                        << (int)(first_occurrence_leaves[val]->max*YSCALE)+1 << "] \""
-                       << label((data_file_name[1].str()).c_str()) << "\" using " << j++
+                       << stat_tool::label((data_file_name[1].str()).c_str()) << "\" using " << j++
                        << " title \"" << STAT_TREES_label[type == STATE ? TREESTATL_STATE_FIRST_OCCURRENCE_LEAVES : TREESTATL_OUTPUT_FIRST_OCCURRENCE_LEAVES]
                        << " " << val << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\" with impulses" << endl;
 
@@ -1381,7 +1382,7 @@ MultiPlotSet* TreeCharacteristics::get_plotable(int plot_type,
          if (i == 1)
          {
             out_file << "set terminal postscript" << endl;
-            file_name[1] << label(prefix) << variable+1 << 3 << ".ps";
+            file_name[1] << stat_tool::label(prefix) << variable+1 << 3 << ".ps";
             out_file << "set output \"" << file_name[1].str() << "\"\n\n";
          }
 
@@ -1427,7 +1428,7 @@ MultiPlotSet* TreeCharacteristics::get_plotable(int plot_type,
 
                out_file << "plot [0:" << sojourn_size[val]->nb_value-1 << "] [0:"
                         << (int)(sojourn_size[val]->max*YSCALE)+1 << "] \""
-                        << label((data_file_name[1].str()).c_str()) << "\" using " << j++
+                        << stat_tool::label((data_file_name[1].str()).c_str()) << "\" using " << j++
                         << " title \"" << STAT_label[type == STATE ? STATL_STATE : STATL_OUTPUT] << " " << val
                         << " " << STAT_TREES_label[TREESTATL_SOJOURN_SIZE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                         << "\" with impulses" << endl;
@@ -1470,7 +1471,7 @@ MultiPlotSet* TreeCharacteristics::get_plotable(int plot_type,
          if (i == 1)
          {
             out_file << "set terminal postscript" << endl;
-            file_name[1] << label(prefix) << variable + 1 << 4 << ".ps";
+            file_name[1] << stat_tool::label(prefix) << variable + 1 << 4 << ".ps";
             out_file << "set output \"" << file_name[1].str() << "\"\n\n";
          }
 
@@ -1505,7 +1506,7 @@ MultiPlotSet* TreeCharacteristics::get_plotable(int plot_type,
 
            out_file << "plot [0:" << nb_zones[val]->nb_value-1 << "] [0:"
                     << (int)(nb_zones[val]->max * YSCALE) + 1 << "] \""
-                    << label((data_file_name[1].str()).c_str()) << "\" using " << j++
+                    << stat_tool::label((data_file_name[1].str()).c_str()) << "\" using " << j++
                     << " title \"" << STAT_TREES_label[type == STATE ? TREESTATL_STATE_NB_ZONES : TREESTATL_OUTPUT_NB_ZONES]
                     << " " << val << " " << STAT_TREES_label[TREESTATL_PER_TREE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                     << "\" with impulses" << endl;
@@ -1529,7 +1530,7 @@ MultiPlotSet* TreeCharacteristics::get_plotable(int plot_type,
 
            out_file << "plot [0:" << nb_occurrences[val]->nb_value-1 << "] [0:"
                     << (int)(nb_occurrences[val]->max*YSCALE)+1 << "] \""
-                    << label((data_file_name[1].str()).c_str()) << "\" using " << j++
+                    << stat_tool::label((data_file_name[1].str()).c_str()) << "\" using " << j++
                     << " title \"" << STAT_TREES_label[type == STATE ? TREESTATL_STATE_NB_OCCURRENCES : TREESTATL_OUTPUT_NB_OCCURRENCES]
                     << " " << val << " " << STAT_TREES_label[TREESTATL_PER_TREE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                     << "\" with impulses" << endl;
@@ -1554,7 +1555,7 @@ MultiPlotSet* TreeCharacteristics::get_plotable(int plot_type,
 
          out_file << "plot [0:" << hsize.nb_value - 1 << "] [0:"
                   << (int)(hsize.max*YSCALE)+1 << "] \""
-                  << label((data_file_name[1].str()).c_str()) << "\" using 1 title \""
+                  << stat_tool::label((data_file_name[1].str()).c_str()) << "\" using 1 title \""
                   << STAT_TREES_label[TREESTATL_TREE_SIZE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                   << "\" with impulses" << endl;
 

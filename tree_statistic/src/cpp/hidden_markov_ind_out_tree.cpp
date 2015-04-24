@@ -45,7 +45,7 @@
 #include "stat_tool/stat_tools.h"
 #include "stat_tool/curves.h"
 #include "stat_tool/markovian.h"
-#include "stat_tool/distribution.h"   // definition of DiscreteParametricModel class
+#include "stat_tool/distribution.h"   // definition of stat_tool::DiscreteParametricModel class
 #include "stat_tool/vectors.h"
 #include "stat_tool/discrete_mixture.h"
 #include "sequence_analysis/sequences.h"
@@ -57,8 +57,9 @@
 #include "tree_labels.h"
 // #include <sstream>
 
-extern int cumul_method(int nb_value, const double *cumul, double scale= 1.);
+extern int stat_tool::cumul_method(int nb_value, const double *cumul, double scale);
 
+using namespace stat_tool;
 using namespace Stat_trees;
 
 /*****************************************************************

@@ -46,7 +46,7 @@
 #include "stat_tool/stat_tools.h"
 #include "stat_tool/curves.h"
 #include "stat_tool/markovian.h"
-#include "stat_tool/distribution.h"   // definition of DiscreteParametricModel class
+#include "stat_tool/distribution.h"   // definition of stat_tool::DiscreteParametricModel class
 #include "stat_tool/vectors.h"
 #include "stat_tool/discrete_mixture.h"
 #include "sequence_analysis/sequences.h"
@@ -60,11 +60,12 @@
 #include <sstream>
 #include <iomanip>
 
-extern char* label(const char*);
+extern char* stat_tool::label(const char*);
 extern void log_computation(int nb_value, const double *pmass, double *plog);
-extern int column_width(int);
-extern int column_width(int nb_value , const double *value , double scale = 1.);
+extern int stat_tool::column_width(int);
+extern int stat_tool::column_width(int nb_value , const double *value , double scale);
 
+using namespace stat_tool;
 using namespace Stat_trees;
 
 /*****************************************************************
@@ -102,7 +103,7 @@ CategoricalTreeProcess::CategoricalTreeProcess(int inb_state,
 
 /*
 CategoricalTreeProcess::CategoricalTreeProcess(int inb_state,
-                                               Distribution** occupancy)
+                                               stat_tool::Distribution** occupancy)
  :  nb_state(inb_state)
  ,  nb_value(inb_state)
  ,  size(NULL)
@@ -121,7 +122,7 @@ CategoricalTreeProcess::CategoricalTreeProcess(int inb_state,
    sojourn_size= new (Distribution*)[nb_state];
    for (i= 0; i < nb_state; i++) {
      if (occupancy[i]) {
-       sojourn_size[i] = new Distribution(*occupancy[i]);
+       sojourn_size[i] = new stat_tool::Distribution(*occupancy[i]);
      }
      else {
        sojourn_size[i]= NULL;
@@ -260,18 +261,18 @@ double CategoricalTreeProcess::get_double_characteristic(double* d, int value) c
    return res;
 }
 
-Distribution** CategoricalTreeProcess::get_ptptDistribution_characteristic(Distribution** d) const
+stat_tool::Distribution** CategoricalTreeProcess::get_ptptDistribution_characteristic(stat_tool::Distribution** d) const
 {
-   Distribution **res= NULL;
+   stat_tool::Distribution **res= NULL;
    int v;
 
    if (d != NULL)
    {
-      res= new Distribution*[nb_value];
+      res= new stat_tool::Distribution*[nb_value];
       for(v= 0; v < nb_value; v++)
       {
          if (d[v] != NULL)
-            res[v]= new Distribution(*(d[v]));
+            res[v]= new stat_tool::Distribution(*(d[v]));
          else
             res[v]= NULL;
       }
@@ -279,26 +280,26 @@ Distribution** CategoricalTreeProcess::get_ptptDistribution_characteristic(Distr
    return res;
 }
 
-Distribution* CategoricalTreeProcess::get_ptDistribution_characteristic(Distribution** d,
+stat_tool::Distribution* CategoricalTreeProcess::get_ptDistribution_characteristic(stat_tool::Distribution** d,
                                                                         int value) const
 {
-   Distribution *res= NULL;
+    stat_tool::Distribution *res= NULL;
 
    if (d != NULL)
    {
       assert(value < nb_value);
       if (d[value] != NULL)
-         res= new Distribution(*(d[value]));
+         res= new stat_tool::Distribution(*(d[value]));
    }
    return res;
 }
 
-Distribution* CategoricalTreeProcess::get_size() const
+stat_tool::Distribution* CategoricalTreeProcess::get_size() const
 {
-   Distribution *res= NULL;
+    stat_tool::Distribution *res= NULL;
 
    if (size != NULL)
-      res= new Distribution(*size);
+      res= new stat_tool::Distribution(*size);
 
    return res;
 }
@@ -312,34 +313,34 @@ double CategoricalTreeProcess::get_leave(int value) const
 double CategoricalTreeProcess::get_absorption(int value) const
 { return get_double_characteristic(absorption, value); }
 
-Distribution** CategoricalTreeProcess::get_first_occurrence_root() const
+stat_tool::Distribution** CategoricalTreeProcess::get_first_occurrence_root() const
 { return get_ptptDistribution_characteristic(first_occurrence_root); }
 
-Distribution* CategoricalTreeProcess::get_first_occurrence_root(int value) const
+stat_tool::Distribution* CategoricalTreeProcess::get_first_occurrence_root(int value) const
 { return get_ptDistribution_characteristic(first_occurrence_root, value); }
 
-Distribution** CategoricalTreeProcess::get_first_occurrence_leaves() const
+stat_tool::Distribution** CategoricalTreeProcess::get_first_occurrence_leaves() const
 { return get_ptptDistribution_characteristic(first_occurrence_leaves); }
 
-Distribution* CategoricalTreeProcess::get_first_occurrence_leaves(int value) const
+stat_tool::Distribution* CategoricalTreeProcess::get_first_occurrence_leaves(int value) const
 { return get_ptDistribution_characteristic(first_occurrence_leaves, value); }
 
-Distribution** CategoricalTreeProcess::get_sojourn_size() const
+stat_tool::Distribution** CategoricalTreeProcess::get_sojourn_size() const
 { return get_ptptDistribution_characteristic(sojourn_size); }
 
-Distribution* CategoricalTreeProcess::get_sojourn_size(int value) const
+stat_tool::Distribution* CategoricalTreeProcess::get_sojourn_size(int value) const
 { return get_ptDistribution_characteristic(sojourn_size, value); }
 
-Distribution** CategoricalTreeProcess::get_nb_zones() const
+stat_tool::Distribution** CategoricalTreeProcess::get_nb_zones() const
 { return get_ptptDistribution_characteristic(nb_zones); }
 
-Distribution* CategoricalTreeProcess::get_nb_zones(int value) const
+stat_tool::Distribution* CategoricalTreeProcess::get_nb_zones(int value) const
 { return get_ptDistribution_characteristic(nb_zones, value); }
 
-Distribution** CategoricalTreeProcess::get_nb_occurrences() const
+stat_tool::Distribution** CategoricalTreeProcess::get_nb_occurrences() const
 { return get_ptptDistribution_characteristic(nb_occurrences); }
 
-Distribution* CategoricalTreeProcess::get_nb_occurrences(int value) const
+stat_tool::Distribution* CategoricalTreeProcess::get_nb_occurrences(int value) const
 { return get_ptDistribution_characteristic(nb_occurrences, value); }
 
 
@@ -360,7 +361,7 @@ void CategoricalTreeProcess::copy(const CategoricalTreeProcess& process,
    {
 
      if (process.size != NULL)
-        size= new Distribution(*(process.size));
+        size= new stat_tool::Distribution(*(process.size));
      else
        size= NULL;
 
@@ -407,7 +408,7 @@ void CategoricalTreeProcess::copy(const CategoricalTreeProcess& process,
 
 /*****************************************************************
  *
- *  Deallocation of the double and Distribution* arrays
+ *  Deallocation of the double and stat_tool::Distribution* arrays
  *  for CategoricalTreeProcess' characteristic distributions
  *
  **/
@@ -422,11 +423,11 @@ void CategoricalTreeProcess::remove_double_array(double*& d)
 
 /*****************************************************************
  *
- *  Deallocation of arrays of pointers on Distributions
+ *  Deallocation of arrays of pointers on stat_tool::Distributions
  *
  **/
 
-void CategoricalTreeProcess::remove_Distribution_array(Distribution**& d,
+void CategoricalTreeProcess::remove_Distribution_array(stat_tool::Distribution**& d,
                                                        int inb_value)
 {
    int i;
@@ -480,12 +481,12 @@ void CategoricalTreeProcess::remove()
 
 /*****************************************************************
  *
- *  Allocation of Distribution* arrays for
+ *  Allocation of stat_tool::Distribution* arrays for
  *  CategoricalTreeProcess class
  *
  **/
 
-void CategoricalTreeProcess::init_Distribution_array(Distribution**& d,
+void CategoricalTreeProcess::init_Distribution_array(stat_tool::Distribution**& d,
                                                      int inb_value)
 {
    int i;
@@ -493,10 +494,10 @@ void CategoricalTreeProcess::init_Distribution_array(Distribution**& d,
    if (d != NULL)
       remove_Distribution_array(d, nb_value);
 
-   d= new Distribution*[inb_value];
+   d= new stat_tool::Distribution*[inb_value];
 
    for(i= 0; i < nb_value; i++)
-       d[i] = new Distribution(NB_VALUE);
+       d[i] = new stat_tool::Distribution(NB_VALUE);
 }
 
 void CategoricalTreeProcess::init_occupancy(const CategoricalTreeProcess& process,
@@ -514,7 +515,7 @@ void CategoricalTreeProcess::init_occupancy(const CategoricalTreeProcess& proces
    leave= NULL;
    first_occurrence_root= NULL;
    first_occurrence_leaves= NULL;
-   sojourn_size= new Distribution*[nb_value];
+   sojourn_size= new stat_tool::Distribution*[nb_value];
 
 
    absorption= new double[nb_value];
@@ -522,7 +523,7 @@ void CategoricalTreeProcess::init_occupancy(const CategoricalTreeProcess& proces
    {
       absorption[i]= process.absorption[i];
       if (process.sojourn_size[i] != NULL)
-         sojourn_size[i]= new Distribution(*(process.sojourn_size[i]),
+         sojourn_size[i]= new stat_tool::Distribution(*(process.sojourn_size[i]),
                                            'c', occupancy_nb_value);
       else
          sojourn_size[i]= NULL;
@@ -541,7 +542,7 @@ void CategoricalTreeProcess::init_occupancy(const CategoricalTreeProcess& proces
  *
  **/
 
-void CategoricalTreeProcess::create_characteristic(const Distribution& isize,
+void CategoricalTreeProcess::create_characteristic(const stat_tool::Distribution& isize,
                                                    bool sojourn_size_flag,
                                                    bool counting_flag)
 {
@@ -552,7 +553,7 @@ void CategoricalTreeProcess::create_characteristic(const Distribution& isize,
    if (size != NULL)
       delete size;
 
-   size= new Distribution(isize);
+   size= new stat_tool::Distribution(isize);
 
    if (no_occurrence == NULL)
       no_occurrence= new double[nb_value];
@@ -567,10 +568,10 @@ void CategoricalTreeProcess::create_characteristic(const Distribution& isize,
             delete first_occurrence_root[i];
    }
    else
-      first_occurrence_root= new Distribution*[nb_value];
+      first_occurrence_root= new stat_tool::Distribution*[nb_value];
 
    for(i= 0; i < nb_value; i++)
-      first_occurrence_root[i]=new Distribution(max_size+1); //(NB_VALUE);
+      first_occurrence_root[i]=new stat_tool::Distribution(max_size+1); //(NB_VALUE);
 
    if (first_occurrence_leaves != NULL)
    {
@@ -579,10 +580,10 @@ void CategoricalTreeProcess::create_characteristic(const Distribution& isize,
             delete first_occurrence_leaves[i];
    }
    else
-      first_occurrence_leaves= new Distribution*[nb_value];
+      first_occurrence_leaves= new stat_tool::Distribution*[nb_value];
 
    for(i= 0; i < nb_value; i++)
-      first_occurrence_leaves[i]=new Distribution(max_size+1); //(NB_VALUE);
+      first_occurrence_leaves[i]=new stat_tool::Distribution(max_size+1); //(NB_VALUE);
 
    if (leave == NULL)
       leave= new double[nb_value];
@@ -605,10 +606,10 @@ void CategoricalTreeProcess::create_characteristic(const Distribution& isize,
               delete sojourn_size[i];
      }
      else
-        sojourn_size= new Distribution*[nb_value];
+        sojourn_size= new stat_tool::Distribution*[nb_value];
 
      for(i= 0; i < nb_value; i++)
-       sojourn_size[i]=new Distribution(max_size+1); //(NB_VALUE);
+       sojourn_size[i]=new stat_tool::Distribution(max_size+1); //(NB_VALUE);
    }
 
    if (counting_flag)
@@ -620,11 +621,11 @@ void CategoricalTreeProcess::create_characteristic(const Distribution& isize,
                delete nb_zones[i];
       }
       else
-         nb_zones= new Distribution*[nb_value];
+         nb_zones= new stat_tool::Distribution*[nb_value];
 
       for(i= 0; i < nb_value; i++)
       {
-         nb_zones[i]=new Distribution((max_size % 2 == 0 ?
+         nb_zones[i]=new stat_tool::Distribution((max_size % 2 == 0 ?
                                        max_size / 2 : max_size / 2 + 1) + 1);
       }
 
@@ -635,17 +636,17 @@ void CategoricalTreeProcess::create_characteristic(const Distribution& isize,
               delete nb_occurrences[i];
      }
      else
-        nb_occurrences= new Distribution*[nb_value];
+        nb_occurrences= new stat_tool::Distribution*[nb_value];
 
      for(i= 0; i < nb_value; i++)
-        nb_occurrences[i]=new Distribution(max_size+1);
+        nb_occurrences[i]=new stat_tool::Distribution(max_size+1);
    }
 }
 
 
 /*****************************************************************
  *
- *  Copy of double or Distribution* arrays for
+ *  Copy of double or stat_tool::Distribution* arrays for
  *  CategoricalTreeProcess class
  *
  **/
@@ -667,19 +668,19 @@ void CategoricalTreeProcess::copy_double_array(double*& dest,
       dest= NULL;
 }
 
-void CategoricalTreeProcess::copy_Distribution_array(Distribution**& dest,
-                                                     Distribution** const source,
+void CategoricalTreeProcess::copy_Distribution_array(stat_tool::Distribution**& dest,
+                                                     stat_tool::Distribution** const source,
                                                      int inb_value)
 {
    int i;
 
    if (source != NULL)
    {
-      dest= new Distribution*[inb_value];
+      dest= new stat_tool::Distribution*[inb_value];
 
       for(i= 0; i < inb_value; i++)
          if (source[i] != NULL)
-            dest[i]= new Distribution(*(source[i]));
+            dest[i]= new stat_tool::Distribution(*(source[i]));
          else
             dest[i]= NULL;
    }
@@ -694,10 +695,10 @@ void CategoricalTreeProcess::copy_Distribution_array(Distribution**& dest,
  *  empirical observation distributions, tree characteristics
  *  and flags on the level of detail and on the file use
  *
- **/
+ **
 
 ostream& CategoricalTreeProcess::ascii_print(ostream &os, int process,
-                                             FrequencyDistribution** empirical_observation,
+                                             stat_tool::FrequencyDistribution** empirical_observation,
                                              const TreeCharacteristics* characteristics,
                                              bool exhaustive, bool file_flag) const
 {
@@ -738,12 +739,12 @@ ostream& CategoricalTreeProcess::ascii_print(ostream &os, int process,
 
       // column width computation
 
-      width[0]= column_width(nb_state-1);
+      width[0]= stat_tool::column_width(nb_state-1);
 
       width[1]= 0;
       for(i= 0; i < nb_state; i++)
       {
-         buff= column_width(observation[i]->nb_value, observation[i]->mass);
+         buff= stat_tool::column_width(observation[i]->nb_value, observation[i]->mass);
          if (buff > width[1])
             width[1] = buff;
       }
@@ -1269,7 +1270,7 @@ ostream& CategoricalTreeProcess::ascii_print(ostream &os, int process,
 }
 
 ostream& CategoricalTreeProcess::spreadsheet_print(ostream &os, int process,
-                                                   FrequencyDistribution** empirical_observation,
+                                                   stat_tool::FrequencyDistribution** empirical_observation,
                                                    const TreeCharacteristics* characteristics) const
 {
 #ifdef __GNUC__
@@ -1291,9 +1292,9 @@ ostream& CategoricalTreeProcess::spreadsheet_print(ostream &os, int process,
 
 bool CategoricalTreeProcess::plot_print(const char * prefix, const char * title,
                                         int process,
-                                        FrequencyDistribution** empirical_observation,
+                                        stat_tool::FrequencyDistribution** empirical_observation,
                                         const TreeCharacteristics * characteristics,
-                                        const FrequencyDistribution * hsize) const
+                                        const stat_tool::FrequencyDistribution * hsize) const
 {
    bool status= false, start;
    register int val, i, j= 0, k= 0;
@@ -1301,8 +1302,8 @@ bool CategoricalTreeProcess::plot_print(const char * prefix, const char * title,
        dist_index, plot_index, *dist_nb_value, *index_dist; //index_length ,
    double *scale;
    // Curves *smoothed_curves =NULL;
-   const Distribution **pdist;
-   const FrequencyDistribution **phisto;
+   const  stat_tool::Distribution **pdist;
+   const stat_tool::FrequencyDistribution **phisto;
    ostringstream data_file_name[2];
 
    // data file printing
@@ -1316,7 +1317,7 @@ bool CategoricalTreeProcess::plot_print(const char * prefix, const char * title,
 
    // the 6, 7, etc. would have to be changed
    // list of the successive distributions to be printed
-   pdist= new const Distribution*[6 * nb_value + nb_state];
+   pdist= new const stat_tool::Distribution*[6 * nb_value + nb_state];
    dist_nb_value= new int[6 * nb_value + nb_state];
    // scales for printing distributions and frequency distributions together
    scale= new double[6 * nb_value + nb_state];
@@ -1553,7 +1554,7 @@ bool CategoricalTreeProcess::plot_print(const char * prefix, const char * title,
          if (i == 1)
          {
             out_file << "set terminal postscript" << endl;
-            file_name[1] << label(prefix) << process << 1 << ".ps";
+            file_name[1] << stat_tool::label(prefix) << process << 1 << ".ps";
             out_file << "set output \"" << file_name[1].str() << "\"\n\n";
          }
 
@@ -1581,7 +1582,7 @@ bool CategoricalTreeProcess::plot_print(const char * prefix, const char * title,
                 j= 0;
                 for (k = 0;k < nb_value;k++) {
                   j++;
-                  out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\" using "
+                  out_file << "\"" << stat_tool::label((data_file_name[0].str()).c_str()) << "\" using "
                            << (index_value ? 2 * nb_value : nb_value) + k + 1
                            << " title \"" << SEQ_label[SEQL_OBSERVED] << " "
                            << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " "
@@ -1589,7 +1590,7 @@ bool CategoricalTreeProcess::plot_print(const char * prefix, const char * title,
                   if (index_value) {
                     j++;
                     out_file << ",\\" << endl;
-                    out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\" using "
+                    out_file << "\"" << stat_tool::label((data_file_name[0].str()).c_str()) << "\" using "
                              << k + 1 << " title \"" << SEQ_label[SEQL_THEORETICAL] << " "
                              << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " "
                              << k << "\" with linespoints";
@@ -1642,14 +1643,14 @@ bool CategoricalTreeProcess::plot_print(const char * prefix, const char * title,
             j= 0;
             for (k = 0;k < nb_value;k++) {
               j++;
-              out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\" using "
+              out_file << "\"" << stat_tool::label((data_file_name[0].str()).c_str()) << "\" using "
                        << (index_value ? nb_value : 0) + k + 1 << " title \"" << SEQ_label[SEQL_OBSERVED] << " "
                        << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " "
                        << k << "\" with linespoints";
               if (index_value) {
                 j++;
                 out_file << ",\\" << endl;
-                out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\" using "
+                out_file << "\"" << stat_tool::label((data_file_name[0].str()).c_str()) << "\" using "
                          << k + 1 << " title \"" << SEQ_label[SEQL_THEORETICAL] << " "
                          << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " "
                          << k << "\" with linespoints";
@@ -1689,7 +1690,7 @@ bool CategoricalTreeProcess::plot_print(const char * prefix, const char * title,
 
             out_file << "plot [0:" << hlength->nb_value - 1 << "] [0:"
                      << (int)(hlength->max * YSCALE) + 1 << "] \""
-                     << label((data_file_name[1].str()).c_str()) << "\" using 1 title \""
+                     << stat_tool::label((data_file_name[1].str()).c_str()) << "\" using 1 title \""
                      << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                      << "\" with impulses" << endl;
 
@@ -1725,7 +1726,7 @@ bool CategoricalTreeProcess::plot_print(const char * prefix, const char * title,
             out_file << "plot [0:" << index_value->length - 1 << "] [0:1] ";
 
             for (j = 0;j < nb_value;j++) {
-              out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\" using "
+              out_file << "\"" << stat_tool::label((data_file_name[0].str()).c_str()) << "\" using "
                        << j + 1 << " title \"" << SEQ_label[SEQL_THEORETICAL] << " "
                        << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " "
                        << j << "\" with linespoints";
@@ -1771,7 +1772,7 @@ bool CategoricalTreeProcess::plot_print(const char * prefix, const char * title,
          if (i == 1)
          {
             out_file << "set terminal postscript" << endl;
-            file_name[1] << label(prefix) << process << 1 << ".ps";
+            file_name[1] << stat_tool::label(prefix) << process << 1 << ".ps";
             out_file << "set output \"" << file_name[1].str() << "\"\n\n";
          }
 
@@ -1818,10 +1819,10 @@ bool CategoricalTreeProcess::plot_print(const char * prefix, const char * title,
                {
                   out_file << "plot [0:" << MAX(dist_nb_value[k], 2)-1 << "] [0:"
                            << (int)(MAX(phisto[j]->max, pdist[k]->max*scale[k]) * YSCALE)+1
-                           << "] \"" << label((data_file_name[1].str()).c_str()) << "\" using " << j+1
+                           << "] \"" << stat_tool::label((data_file_name[1].str()).c_str()) << "\" using " << j+1
                            << " title \"" << STAT_TREES_label[process == 0 ? TREESTATL_STATE_FIRST_OCCURRENCE_ROOT : TREESTATL_OUTPUT_FIRST_OCCURRENCE_ROOT]
                            << " " << val << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\" with impulses,\\" << endl;
-                  out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo+k+1
+                  out_file << "\"" << stat_tool::label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo+k+1
                            << " title \"" << STAT_TREES_label[process == 0 ? TREESTATL_STATE_FIRST_OCCURRENCE_ROOT : TREESTATL_OUTPUT_FIRST_OCCURRENCE_ROOT]
                            << " " << val << " " << STAT_label[STATL_DISTRIBUTION] << "\" with linespoints" << endl;
                   j++;
@@ -1831,7 +1832,7 @@ bool CategoricalTreeProcess::plot_print(const char * prefix, const char * title,
                {
                   out_file << "plot [0:" << MAX(dist_nb_value[k], 2)-1 << "] [0:"
                            << MIN(pdist[k]->max*YSCALE , 1.) << "] \""
-                           << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo+k+1
+                           << stat_tool::label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo+k+1
                            << " title \"" << STAT_TREES_label[process == 0 ? TREESTATL_STATE_FIRST_OCCURRENCE_ROOT : TREESTATL_OUTPUT_FIRST_OCCURRENCE_ROOT]
                            << " " << val << " " << STAT_label[STATL_DISTRIBUTION] << "\" with linespoints" << endl;
                }
@@ -1861,7 +1862,7 @@ bool CategoricalTreeProcess::plot_print(const char * prefix, const char * title,
 
                out_file << "plot [0:" << MAX(phisto[j]->nb_value, 2)-1 << "] [0:"
                         << (int)(phisto[j]->max * YSCALE)+1 << "] \""
-                        << label((data_file_name[1].str()).c_str()) << "\" using " << j+1
+                        << stat_tool::label((data_file_name[1].str()).c_str()) << "\" using " << j+1
                         << " title \"" << STAT_TREES_label[process == 0 ? TREESTATL_STATE_FIRST_OCCURRENCE_ROOT : TREESTATL_OUTPUT_FIRST_OCCURRENCE_ROOT]
                         << " " << val << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\" with impulses" << endl;
 
@@ -1910,7 +1911,7 @@ bool CategoricalTreeProcess::plot_print(const char * prefix, const char * title,
             if (i == 1)
             {
                out_file << "set terminal postscript" << endl;
-               file_name[1] << label(prefix) << process << plot_index << ".ps";
+               file_name[1] << stat_tool::label(prefix) << process << plot_index << ".ps";
                out_file << "set output \"" << file_name[1].str() << "\"\n\n";
             }
 
@@ -1959,11 +1960,11 @@ bool CategoricalTreeProcess::plot_print(const char * prefix, const char * title,
                {
                   out_file << "plot [0:" << dist_nb_value[k] - 1 << "] [0:"
                            << (int)(MAX(phisto[j]->max, pdist[k]->max*scale[k])*YSCALE)+1
-                           << "] \"" << label((data_file_name[1].str()).c_str()) << "\" using " << j+1
+                           << "] \"" << stat_tool::label((data_file_name[1].str()).c_str()) << "\" using " << j+1
                            << " title \"" << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << val
                            << " " << STAT_TREES_label[process == 0 ? TREESTATL_STATE_FIRST_OCCURRENCE_LEAVES : TREESTATL_OUTPUT_FIRST_OCCURRENCE_LEAVES] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                            << "\" with impulses,\\" << endl;
-                  out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo+k+1
+                  out_file << "\"" << stat_tool::label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo+k+1
                            << " title \"" << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << val
                            << " " << STAT_TREES_label[process == 0 ? TREESTATL_STATE_FIRST_OCCURRENCE_LEAVES : TREESTATL_OUTPUT_FIRST_OCCURRENCE_LEAVES] << " " << STAT_label[STATL_DISTRIBUTION];
                   first_occurrence_leaves[val]->plot_title_print(out_file);
@@ -1975,7 +1976,7 @@ bool CategoricalTreeProcess::plot_print(const char * prefix, const char * title,
                {
                   out_file << "plot [0:" << dist_nb_value[k]-1 << "] [0:"
                            << MIN(pdist[k]->max*YSCALE, 1.) << "] \""
-                           << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo+k+1
+                           << stat_tool::label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo+k+1
                            << " title \"" << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << val
                            << " " << STAT_TREES_label[process == 0 ? TREESTATL_STATE_FIRST_OCCURRENCE_LEAVES : TREESTATL_OUTPUT_FIRST_OCCURRENCE_LEAVES] << " " << STAT_label[STATL_DISTRIBUTION];
                   first_occurrence_leaves[val]->plot_title_print(out_file);
@@ -2007,7 +2008,7 @@ bool CategoricalTreeProcess::plot_print(const char * prefix, const char * title,
 
                   out_file << "plot [0:" << phisto[j]->nb_value-1 << "] [0:"
                            << (int)(phisto[j]->max*YSCALE)+1 << "] \""
-                           << label((data_file_name[1].str()).c_str()) << "\" using " << j+1
+                           << stat_tool::label((data_file_name[1].str()).c_str()) << "\" using " << j+1
                            << " title \"" << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << val
                            << " " << STAT_TREES_label[process == 0 ? TREESTATL_STATE_FIRST_OCCURRENCE_LEAVES : TREESTATL_OUTPUT_FIRST_OCCURRENCE_LEAVES] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                            << "\" with impulses" << endl;
@@ -2054,7 +2055,7 @@ bool CategoricalTreeProcess::plot_print(const char * prefix, const char * title,
             if (i == 1)
             {
                out_file << "set terminal postscript" << endl;
-               file_name[1] << label(prefix) << process << plot_index << ".ps";
+               file_name[1] << stat_tool::label(prefix) << process << plot_index << ".ps";
                out_file << "set output \"" << file_name[1].str() << "\"\n\n";
             }
 
@@ -2101,11 +2102,11 @@ bool CategoricalTreeProcess::plot_print(const char * prefix, const char * title,
                {
                   out_file << "plot [0:" << dist_nb_value[k] - 1 << "] [0:"
                            << (int)(MAX(phisto[j]->max, pdist[k]->max*scale[k])*YSCALE)+1
-                           << "] \"" << label((data_file_name[1].str()).c_str()) << "\" using " << j+1
+                           << "] \"" << stat_tool::label((data_file_name[1].str()).c_str()) << "\" using " << j+1
                            << " title \"" << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << val
                            << " " << STAT_TREES_label[TREESTATL_SOJOURN_SIZE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                            << "\" with impulses,\\" << endl;
-                  out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo+k+1
+                  out_file << "\"" << stat_tool::label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo+k+1
                            << " title \"" << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << val
                            << " " << STAT_TREES_label[TREESTATL_SOJOURN_SIZE] << " " << STAT_label[STATL_DISTRIBUTION];
                   sojourn_size[val]->plot_title_print(out_file);
@@ -2117,7 +2118,7 @@ bool CategoricalTreeProcess::plot_print(const char * prefix, const char * title,
                {
                   out_file << "plot [0:" << dist_nb_value[k]-1 << "] [0:"
                            << MIN(pdist[k]->max*YSCALE, 1.) << "] \""
-                           << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo+k+1
+                           << stat_tool::label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo+k+1
                            << " title \"" << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << val
                            << " " << STAT_TREES_label[TREESTATL_SOJOURN_SIZE] << " " << STAT_label[STATL_DISTRIBUTION];
                   sojourn_size[val]->plot_title_print(out_file);
@@ -2148,7 +2149,7 @@ bool CategoricalTreeProcess::plot_print(const char * prefix, const char * title,
 
                   out_file << "plot [0:" << phisto[j]->nb_value-1 << "] [0:"
                            << (int)(phisto[j]->max*YSCALE)+1 << "] \""
-                           << label((data_file_name[1].str()).c_str()) << "\" using " << j+1
+                           << stat_tool::label((data_file_name[1].str()).c_str()) << "\" using " << j+1
                            << " title \"" << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << val
                            << " " << STAT_TREES_label[TREESTATL_SOJOURN_SIZE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                            << "\" with impulses" << endl;
@@ -2195,7 +2196,7 @@ bool CategoricalTreeProcess::plot_print(const char * prefix, const char * title,
             if (i == 1)
             {
                out_file << "set terminal postscript" << endl;
-               file_name[1] << label(prefix) << process << plot_index << ".ps";
+               file_name[1] << stat_tool::label(prefix) << process << plot_index << ".ps";
                out_file << "set output \"" << file_name[1].str() << "\"\n\n";
             }
 
@@ -2240,11 +2241,11 @@ bool CategoricalTreeProcess::plot_print(const char * prefix, const char * title,
                   {
                      out_file << "plot [0:" << dist_nb_value[k]-1 << "] [0:"
                               << (int)(MAX(phisto[j]->max, pdist[k]->max * scale[k])*YSCALE)+1
-                              << "] \"" << label((data_file_name[1].str()).c_str()) << "\" using " << j+1
+                              << "] \"" << stat_tool::label((data_file_name[1].str()).c_str()) << "\" using " << j+1
                               << " title \"" << STAT_TREES_label[process == 0 ? TREESTATL_STATE_NB_ZONES : TREESTATL_OUTPUT_NB_ZONES]
                               << " " << val << " " << STAT_TREES_label[TREESTATL_PER_TREE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                               << "\" with impulses,\\" << endl;
-                     out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo+k+1;
+                     out_file << "\"" << stat_tool::label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo+k+1;
                      if ((size != NULL) && (size->variance == 0.))
                      {
                         out_file << " title \"" << STAT_TREES_label[process == 0 ? TREESTATL_STATE_NB_ZONES : TREESTATL_OUTPUT_NB_ZONES]
@@ -2266,7 +2267,7 @@ bool CategoricalTreeProcess::plot_print(const char * prefix, const char * title,
                   {
                      out_file << "plot [0:" << dist_nb_value[k]-1 << "] [0:"
                               << MIN(pdist[k]->max*YSCALE, 1.) << "] \""
-                              << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo+k+1
+                              << stat_tool::label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo+k+1
                               << " title \"" << STAT_TREES_label[process == 0 ? TREESTATL_STATE_NB_ZONES : TREESTATL_OUTPUT_NB_ZONES]
                               << " " << val << " " << STAT_TREES_label[TREESTATL_PER_TREE] << " " << length->offset << " "
                               << STAT_TREES_label[TREESTATL_TREE] << " " << STAT_label[STATL_DISTRIBUTION]
@@ -2296,7 +2297,7 @@ bool CategoricalTreeProcess::plot_print(const char * prefix, const char * title,
 
                      out_file << "plot [0:" << phisto[j]->nb_value-1 << "] [0:"
                               << (int)(phisto[j]->max*YSCALE)+1 << "] \""
-                              << label((data_file_name[1].str()).c_str()) << "\" using " << j+1
+                              << stat_tool::label((data_file_name[1].str()).c_str()) << "\" using " << j+1
                               << " title \"" << STAT_TREES_label[process == 0 ? TREESTATL_STATE_NB_ZONES : TREESTATL_OUTPUT_NB_ZONES]
                               << " " << val << " " << STAT_TREES_label[TREESTATL_PER_TREE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                               << "\" with impulses" << endl;
@@ -2328,11 +2329,11 @@ bool CategoricalTreeProcess::plot_print(const char * prefix, const char * title,
                     {
                        out_file << "plot [0:" << dist_nb_value[k]-1 << "] [0:"
                                 << (int)(MAX(phisto[j]->max, pdist[k]->max * scale[k])*YSCALE)+1
-                                << "] \"" << label((data_file_name[1].str()).c_str()) << "\" using " << j+1
+                                << "] \"" << stat_tool::label((data_file_name[1].str()).c_str()) << "\" using " << j+1
                                 << " title \"" << STAT_TREES_label[process == 0 ? TREESTATL_STATE_NB_OCCURRENCES : TREESTATL_OUTPUT_NB_OCCURRENCES]
                                 << " " << val << " " << STAT_TREES_label[TREESTATL_PER_TREE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                                 << "\" with impulses,\\" << endl;
-                       out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo+k+1;
+                       out_file << "\"" << stat_tool::label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo+k+1;
                        if ((size != NULL) && (size->variance == 0.))
                        {
                          out_file << " title \"" << STAT_TREES_label[process == 0 ? TREESTATL_STATE_NB_OCCURRENCES : TREESTATL_OUTPUT_NB_OCCURRENCES]
@@ -2354,7 +2355,7 @@ bool CategoricalTreeProcess::plot_print(const char * prefix, const char * title,
                     {
                        out_file << "plot [0:" << dist_nb_value[k]-1 << "] [0:"
                                 << MIN(pdist[k]->max*YSCALE, 1.) << "] \""
-                                << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo+k+1
+                                << stat_tool::label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo+k+1
                                 << " title \"" << STAT_TREES_label[process == 0 ? TREESTATL_STATE_NB_OCCURRENCES : TREESTATL_OUTPUT_NB_OCCURRENCES]
                                 << " " << val << " " << STAT_TREES_label[TREESTATL_PER_TREE] << " " << length->offset << " "
                                 << STAT_TREES_label[TREESTATL_TREE] << " " << STAT_label[STATL_DISTRIBUTION]
@@ -2379,7 +2380,7 @@ bool CategoricalTreeProcess::plot_print(const char * prefix, const char * title,
 
                        out_file << "plot [0:" << phisto[j]->nb_value-1 << "] [0:"
                                 << (int)(phisto[j]->max*YSCALE)+1 << "] \""
-                                << label((data_file_name[1].str()).c_str()) << "\" using " << j+1
+                                << stat_tool::label((data_file_name[1].str()).c_str()) << "\" using " << j+1
                                 << " title \"" << STAT_TREES_label[process == 0 ? TREESTATL_STATE_NB_OCCURRENCES : TREESTATL_OUTPUT_NB_OCCURRENCES]
                                 << " " << val << " " << STAT_TREES_label[TREESTATL_PER_TREE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                                 << "\" with impulses" << endl;
@@ -2407,7 +2408,7 @@ bool CategoricalTreeProcess::plot_print(const char * prefix, const char * title,
 
                   out_file << "plot [0:" << hsize->nb_value - 1 << "] [0:"
                            << (int)(hsize->max*YSCALE)+1 << "] \""
-                           << label((data_file_name[1].str()).c_str()) << "\" using 1 title \""
+                           << stat_tool::label((data_file_name[1].str()).c_str()) << "\" using 1 title \""
                            << STAT_TREES_label[TREESTATL_TREE_SIZE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                            << "\" with impulses" << endl;
 
@@ -2450,7 +2451,7 @@ bool CategoricalTreeProcess::plot_print(const char * prefix, const char * title,
             if (i == 1)
             {
                out_file << "set terminal postscript" << endl;
-               file_name[1] << label(prefix) << process << 0 << ".ps";
+               file_name[1] << stat_tool::label(prefix) << process << 0 << ".ps";
                out_file << "set output \"" << file_name[1].str() << "\"\n\n";
             }
 
@@ -2474,11 +2475,11 @@ bool CategoricalTreeProcess::plot_print(const char * prefix, const char * title,
                {
                   out_file << "plot [0:" << dist_nb_value[k]-1 << "] [0:"
                            << (int)(MAX(phisto[j]->max, pdist[k]->max * scale[k])*YSCALE)+1
-                           << "] \"" << label((data_file_name[1].str()).c_str()) << "\" using " << j+1
+                           << "] \"" << stat_tool::label((data_file_name[1].str()).c_str()) << "\" using " << j+1
                            << " title \"" << STAT_label[STATL_STATE] << " " << val << " "
                            << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                            << "\" with impulses,\\" << endl;
-                  out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo+k+1
+                  out_file << "\"" << stat_tool::label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo+k+1
                            << " title \"" << STAT_label[STATL_STATE] << " " << val << " "
                            << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION]
                            << "\" with linespoints" << endl;
@@ -2488,7 +2489,7 @@ bool CategoricalTreeProcess::plot_print(const char * prefix, const char * title,
                {
                   out_file << "plot [0:" << dist_nb_value[k]-1 << "] [0:"
                            << MIN(pdist[k]->max*YSCALE, 1.) << "] \""
-                           << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo+k+1
+                           << stat_tool::label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo+k+1
                            << " title \"" << STAT_label[STATL_STATE] << " " << val << " "
                            << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION]
                            << "\" with linespoints" << endl;
@@ -2532,9 +2533,9 @@ bool CategoricalTreeProcess::plot_print(const char * prefix, const char * title,
  **/
 
 MultiPlotSet* CategoricalTreeProcess::plotable_write(MultiPlotSet &plot, int &index,
-                                                     int process, FrequencyDistribution * const * empirical_observation,
+                                                     int process, stat_tool::FrequencyDistribution * const * empirical_observation,
                                                      const TreeCharacteristics * characteristics,
-                                                     const FrequencyDistribution * hsize) const
+                                                     const stat_tool::FrequencyDistribution * hsize) const
 {
    register int val, i, j, var;
    int dist_nb_value;
@@ -2887,7 +2888,7 @@ MultiPlotSet* CategoricalTreeProcess::plotable_write(MultiPlotSet &plot, int &in
             if (i == 1)
             {
                out_file << "set terminal postscript" << endl;
-               file_name[1] << label(prefix) << process << plot_index << ".ps";
+               file_name[1] << stat_tool::label(prefix) << process << plot_index << ".ps";
                out_file << "set output \"" << file_name[1].str() << "\"\n\n";
             }
 
@@ -2936,11 +2937,11 @@ MultiPlotSet* CategoricalTreeProcess::plotable_write(MultiPlotSet &plot, int &in
                {
                   out_file << "plot [0:" << dist_nb_value[k] - 1 << "] [0:"
                            << (int)(MAX(phisto[j]->max, pdist[k]->max*scale[k])*YSCALE)+1
-                           << "] \"" << label((data_file_name[1].str()).c_str()) << "\" using " << j+1
+                           << "] \"" << stat_tool::label((data_file_name[1].str()).c_str()) << "\" using " << j+1
                            << " title \"" << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << val
                            << " " << STAT_TREES_label[process == 0 ? TREESTATL_STATE_FIRST_OCCURRENCE_LEAVES : TREESTATL_OUTPUT_FIRST_OCCURRENCE_LEAVES] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                            << "\" with impulses,\\" << endl;
-                  out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo+k+1
+                  out_file << "\"" << stat_tool::label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo+k+1
                            << " title \"" << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << val
                            << " " << STAT_TREES_label[process == 0 ? TREESTATL_STATE_FIRST_OCCURRENCE_LEAVES : TREESTATL_OUTPUT_FIRST_OCCURRENCE_LEAVES] << " " << STAT_label[STATL_DISTRIBUTION];
                   first_occurrence_leaves[val]->plot_title_print(out_file);
@@ -2952,7 +2953,7 @@ MultiPlotSet* CategoricalTreeProcess::plotable_write(MultiPlotSet &plot, int &in
                {
                   out_file << "plot [0:" << dist_nb_value[k]-1 << "] [0:"
                            << MIN(pdist[k]->max*YSCALE, 1.) << "] \""
-                           << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo+k+1
+                           << stat_tool::label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo+k+1
                            << " title \"" << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << val
                            << " " << STAT_TREES_label[process == 0 ? TREESTATL_STATE_FIRST_OCCURRENCE_LEAVES : TREESTATL_OUTPUT_FIRST_OCCURRENCE_LEAVES] << " " << STAT_label[STATL_DISTRIBUTION];
                   first_occurrence_leaves[val]->plot_title_print(out_file);
@@ -2984,7 +2985,7 @@ MultiPlotSet* CategoricalTreeProcess::plotable_write(MultiPlotSet &plot, int &in
 
                   out_file << "plot [0:" << phisto[j]->nb_value-1 << "] [0:"
                            << (int)(phisto[j]->max*YSCALE)+1 << "] \""
-                           << label((data_file_name[1].str()).c_str()) << "\" using " << j+1
+                           << stat_tool::label((data_file_name[1].str()).c_str()) << "\" using " << j+1
                            << " title \"" << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << val
                            << " " << STAT_TREES_label[process == 0 ? TREESTATL_STATE_FIRST_OCCURRENCE_LEAVES : TREESTATL_OUTPUT_FIRST_OCCURRENCE_LEAVES] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                            << "\" with impulses" << endl;
@@ -3031,7 +3032,7 @@ MultiPlotSet* CategoricalTreeProcess::plotable_write(MultiPlotSet &plot, int &in
             if (i == 1)
             {
                out_file << "set terminal postscript" << endl;
-               file_name[1] << label(prefix) << process << plot_index << ".ps";
+               file_name[1] << stat_tool::label(prefix) << process << plot_index << ".ps";
                out_file << "set output \"" << file_name[1].str() << "\"\n\n";
             }
 
@@ -3078,11 +3079,11 @@ MultiPlotSet* CategoricalTreeProcess::plotable_write(MultiPlotSet &plot, int &in
                {
                   out_file << "plot [0:" << dist_nb_value[k] - 1 << "] [0:"
                            << (int)(MAX(phisto[j]->max, pdist[k]->max*scale[k])*YSCALE)+1
-                           << "] \"" << label((data_file_name[1].str()).c_str()) << "\" using " << j+1
+                           << "] \"" << stat_tool::label((data_file_name[1].str()).c_str()) << "\" using " << j+1
                            << " title \"" << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << val
                            << " " << STAT_TREES_label[TREESTATL_SOJOURN_SIZE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                            << "\" with impulses,\\" << endl;
-                  out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo+k+1
+                  out_file << "\"" << stat_tool::label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo+k+1
                            << " title \"" << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << val
                            << " " << STAT_TREES_label[TREESTATL_SOJOURN_SIZE] << " " << STAT_label[STATL_DISTRIBUTION];
                   sojourn_size[val]->plot_title_print(out_file);
@@ -3094,7 +3095,7 @@ MultiPlotSet* CategoricalTreeProcess::plotable_write(MultiPlotSet &plot, int &in
                {
                   out_file << "plot [0:" << dist_nb_value[k]-1 << "] [0:"
                            << MIN(pdist[k]->max*YSCALE, 1.) << "] \""
-                           << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo+k+1
+                           << stat_tool::label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo+k+1
                            << " title \"" << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << val
                            << " " << STAT_TREES_label[TREESTATL_SOJOURN_SIZE] << " " << STAT_label[STATL_DISTRIBUTION];
                   sojourn_size[val]->plot_title_print(out_file);
@@ -3125,7 +3126,7 @@ MultiPlotSet* CategoricalTreeProcess::plotable_write(MultiPlotSet &plot, int &in
 
                   out_file << "plot [0:" << phisto[j]->nb_value-1 << "] [0:"
                            << (int)(phisto[j]->max*YSCALE)+1 << "] \""
-                           << label((data_file_name[1].str()).c_str()) << "\" using " << j+1
+                           << stat_tool::label((data_file_name[1].str()).c_str()) << "\" using " << j+1
                            << " title \"" << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << val
                            << " " << STAT_TREES_label[TREESTATL_SOJOURN_SIZE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                            << "\" with impulses" << endl;
@@ -3172,7 +3173,7 @@ MultiPlotSet* CategoricalTreeProcess::plotable_write(MultiPlotSet &plot, int &in
             if (i == 1)
             {
                out_file << "set terminal postscript" << endl;
-               file_name[1] << label(prefix) << process << plot_index << ".ps";
+               file_name[1] << stat_tool::label(prefix) << process << plot_index << ".ps";
                out_file << "set output \"" << file_name[1].str() << "\"\n\n";
             }
 
@@ -3217,11 +3218,11 @@ MultiPlotSet* CategoricalTreeProcess::plotable_write(MultiPlotSet &plot, int &in
                   {
                      out_file << "plot [0:" << dist_nb_value[k]-1 << "] [0:"
                               << (int)(MAX(phisto[j]->max, pdist[k]->max * scale[k])*YSCALE)+1
-                              << "] \"" << label((data_file_name[1].str()).c_str()) << "\" using " << j+1
+                              << "] \"" << stat_tool::label((data_file_name[1].str()).c_str()) << "\" using " << j+1
                               << " title \"" << STAT_TREES_label[process == 0 ? TREESTATL_STATE_NB_ZONES : TREESTATL_OUTPUT_NB_ZONES]
                               << " " << val << " " << STAT_TREES_label[TREESTATL_PER_TREE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                               << "\" with impulses,\\" << endl;
-                     out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo+k+1;
+                     out_file << "\"" << stat_tool::label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo+k+1;
                      // uncomment if a distribution for the size is added
                      out_file << " title \"" << STAT_TREES_label[TREESTATL_MIXTURE_OF]
                               << STAT_TREES_label[process == 0 ? TREESTATL_STATE_NB_ZONES : TREESTATL_OUTPUT_NB_ZONES]
@@ -3253,7 +3254,7 @@ MultiPlotSet* CategoricalTreeProcess::plotable_write(MultiPlotSet &plot, int &in
 
                      out_file << "plot [0:" << phisto[j]->nb_value-1 << "] [0:"
                               << (int)(phisto[j]->max*YSCALE)+1 << "] \""
-                              << label((data_file_name[1].str()).c_str()) << "\" using " << j+1
+                              << stat_tool::label((data_file_name[1].str()).c_str()) << "\" using " << j+1
                               << " title \"" << STAT_TREES_label[process == 0 ? TREESTATL_STATE_NB_ZONES : TREESTATL_OUTPUT_NB_ZONES]
                               << " " << val << " " << STAT_TREES_label[TREESTATL_PER_TREE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                               << "\" with impulses" << endl;
@@ -3285,11 +3286,11 @@ MultiPlotSet* CategoricalTreeProcess::plotable_write(MultiPlotSet &plot, int &in
                     {
                        out_file << "plot [0:" << dist_nb_value[k]-1 << "] [0:"
                                 << (int)(MAX(phisto[j]->max, pdist[k]->max * scale[k])*YSCALE)+1
-                                << "] \"" << label((data_file_name[1].str()).c_str()) << "\" using " << j+1
+                                << "] \"" << stat_tool::label((data_file_name[1].str()).c_str()) << "\" using " << j+1
                                 << " title \"" << STAT_TREES_label[process == 0 ? TREESTATL_STATE_NB_OCCURRENCES : TREESTATL_OUTPUT_NB_OCCURRENCES]
                                 << " " << val << " " << STAT_TREES_label[TREESTATL_PER_TREE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                                 << "\" with impulses,\\" << endl;
-                       out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo+k+1;
+                       out_file << "\"" << stat_tool::label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo+k+1;
                        out_file << " title \"" << STAT_TREES_label[TREESTATL_MIXTURE_OF]
                                 << STAT_TREES_label[process == 0 ? TREESTATL_STATE_NB_OCCURRENCES : TREESTATL_OUTPUT_NB_OCCURRENCES]
                                 << " " << val << " " << STAT_TREES_label[TREESTATL_PER_TREE] << " " << STAT_label[STATL_DISTRIBUTION];
@@ -3316,7 +3317,7 @@ MultiPlotSet* CategoricalTreeProcess::plotable_write(MultiPlotSet &plot, int &in
 
                        out_file << "plot [0:" << phisto[j]->nb_value-1 << "] [0:"
                                 << (int)(phisto[j]->max*YSCALE)+1 << "] \""
-                                << label((data_file_name[1].str()).c_str()) << "\" using " << j+1
+                                << stat_tool::label((data_file_name[1].str()).c_str()) << "\" using " << j+1
                                 << " title \"" << STAT_TREES_label[process == 0 ? TREESTATL_STATE_NB_OCCURRENCES : TREESTATL_OUTPUT_NB_OCCURRENCES]
                                 << " " << val << " " << STAT_TREES_label[TREESTATL_PER_TREE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                                 << "\" with impulses" << endl;
@@ -3344,7 +3345,7 @@ MultiPlotSet* CategoricalTreeProcess::plotable_write(MultiPlotSet &plot, int &in
 
                   out_file << "plot [0:" << hsize->nb_value - 1 << "] [0:"
                            << (int)(hsize->max*YSCALE)+1 << "] \""
-                           << label((data_file_name[1].str()).c_str()) << "\" using 1 title \""
+                           << stat_tool::label((data_file_name[1].str()).c_str()) << "\" using 1 title \""
                            << STAT_TREES_label[TREESTATL_TREE_SIZE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                            << "\" with impulses" << endl;
 
@@ -3378,9 +3379,9 @@ MultiPlotSet* CategoricalTreeProcess::plotable_write(MultiPlotSet &plot, int &in
  *
  **/
 
-unsigned int CategoricalTreeProcess::nb_plot_set_computation(int process, FrequencyDistribution * const * empirical_observation,
+unsigned int CategoricalTreeProcess::nb_plot_set_computation(int process, stat_tool::FrequencyDistribution * const * empirical_observation,
                                                              const TreeCharacteristics * characteristics,
-                                                             const FrequencyDistribution * hsize) const
+                                                             const stat_tool::FrequencyDistribution * hsize) const
 {
    unsigned int nb_plot_set = 0;
    register int val;
@@ -3716,7 +3717,7 @@ HiddenMarkovTree* HiddenMarkovTree::HiddenMarkovTreeCopy(bool data_flag,
  *
  **/
 
-DiscreteParametricModel* HiddenMarkovTree::extract(StatError& error,
+stat_tool::DiscreteParametricModel* HiddenMarkovTree::extract(StatError& error,
                                                    int type,
                                                    int ivariable,
                                                    int value) const
@@ -3724,10 +3725,10 @@ DiscreteParametricModel* HiddenMarkovTree::extract(StatError& error,
    bool status= true;
    int hvariable= 0;
    int variable= ivariable;
-   Distribution *pdist;
+    stat_tool::Distribution *pdist;
    // DiscreteParametric *pparam;
-   DiscreteParametricModel *dist;
-   FrequencyDistribution *phisto;
+   stat_tool::DiscreteParametricModel *dist;
+   stat_tool::FrequencyDistribution *phisto;
 
 
    dist= NULL;
@@ -3869,7 +3870,7 @@ DiscreteParametricModel* HiddenMarkovTree::extract(StatError& error,
       }
 
       if (pdist != NULL)
-        dist= new DiscreteParametricModel(*pdist, phisto);
+        dist= new stat_tool::DiscreteParametricModel(*pdist, phisto);
    }
 
    return dist;
@@ -4161,7 +4162,7 @@ void HiddenMarkovTree::characteristic_computation(const HiddenMarkovTreeData& tr
       register int i, j, k;
       int nb_value;
       double *memory= NULL;
-      Distribution dsize;
+      stat_tool::FrequencyDistribution dsize;
 
       if (tree.hsize != NULL)
          dsize= *(tree.hsize);
@@ -4518,7 +4519,7 @@ void HiddenMarkovTree::characteristic_computation(int size,
          ((!(npprocess[0]->size != NULL)) || (dsize != *(npprocess[0]->size))))
      {
         computation[0]= true;
-        npprocess[0]->create_characteristic((Distribution)dsize, false, counting_flag);
+        npprocess[0]->create_characteristic((stat_tool::Distribution)dsize, false, counting_flag);
 
         if (memory == NULL)
         {
@@ -4875,7 +4876,7 @@ ostream& HiddenMarkovTree::ascii_write(ostream& os,
    int nb_output_process = _nb_ioutput_process+_nb_doutput_process;
    bool **logic_transition = NULL;
    double **distance = NULL;
-   FrequencyDistribution **observation = NULL, *marginal = NULL;
+   stat_tool::FrequencyDistribution **observation = NULL, *marginal = NULL;
    TreeCharacteristics *characteristics = NULL;
 
    // printing of the Markov tree parameters
@@ -4999,10 +5000,10 @@ ostream& HiddenMarkovTree::ascii_write(ostream& os,
             }
          }
 
-         width[0] = column_width(nb_state , distance[0]);
+         width[0] = stat_tool::column_width(nb_state , distance[0]);
          for(j = 1; j < nb_state; j++)
          {
-            buff = column_width(nb_state , distance[j]);
+            buff = stat_tool::column_width(nb_state , distance[j]);
             if (buff > width[0])
                       width[0] = buff;
          }
@@ -5085,10 +5086,10 @@ ostream& HiddenMarkovTree::ascii_write(ostream& os,
          }
          if (pdprocess[i] != NULL)
          {
-            width[0] = column_width(nb_state , distance[0]);
+            width[0] = stat_tool::column_width(nb_state , distance[0]);
             for(j = 1; j < nb_state; j++)
             {
-               buff = column_width(nb_state , distance[j]);
+               buff = stat_tool::column_width(nb_state , distance[j]);
                if (buff > width[0])
                          width[0] = buff;
             }
@@ -5315,7 +5316,7 @@ ostream& HiddenMarkovTree::spreadsheet_write(ostream& os, const HiddenMarkovTree
        nb_output_process = _nb_ioutput_process+_nb_doutput_process;
    bool **logic_transition = NULL;
    double **distance = NULL;
-   FrequencyDistribution **observation = NULL;
+   stat_tool::FrequencyDistribution **observation = NULL;
    TreeCharacteristics *characteristics = NULL;
 
    switch (type)
@@ -5554,7 +5555,7 @@ bool HiddenMarkovTree::plot_write(const char * prefix, const char * title,
    bool status;
    register int i;
    int variable= 0; //, cumul_size, nb_output_process= _nb_ioutput_process+_nb_doutput_process;
-   FrequencyDistribution *hsize= NULL, **observation= NULL;
+   stat_tool::FrequencyDistribution *hsize= NULL, **observation= NULL;
    TreeCharacteristics *characteristics= NULL;
 
    if ((otrees != NULL) && (otrees->_type[0] == STATE))
@@ -7168,21 +7169,21 @@ HiddenMarkovTreeData& HiddenMarkovTreeData::operator=(const HiddenMarkovTreeData
 
 /*****************************************************************
  *
- *  FrequencyDistribution extraction for Hidden_markov_data class,
+ *  stat_tool::FrequencyDistribution* extraction for Hidden_markov_data class,
  *  using a StatError object, the kind of frequency distribution,
  *  the considered variable or state and value
  *  (case of observation frequency distributions)
  *
  **/
 
-DiscreteDistributionData* HiddenMarkovTreeData::extract(StatError& error, int type,
+stat_tool::DiscreteDistributionData* HiddenMarkovTreeData::extract(StatError& error, int type,
                                                         int variable, int value) const
 
 {
    bool status= true;
-   Distribution *pdist= NULL;
-   FrequencyDistribution *phisto= NULL;
-   DiscreteDistributionData *histo= NULL;
+    stat_tool::Distribution *pdist= NULL;
+   stat_tool::FrequencyDistribution *phisto= NULL;
+   stat_tool::DiscreteDistributionData *histo= NULL;
 
    error.init();
 
@@ -7246,7 +7247,7 @@ DiscreteDistributionData* HiddenMarkovTreeData::extract(StatError& error, int ty
                pdist= markov->piprocess[variable]->observation[value];
 
             if (pdist != NULL)
-               histo= new DiscreteDistributionData(*phisto, pdist);
+               histo= new stat_tool::DiscreteDistributionData(*phisto, pdist);
             // else
             //     there might be something with a Param*
 
@@ -7289,7 +7290,7 @@ DiscreteDistributionData* HiddenMarkovTreeData::extract(StatError& error, int ty
          }
 
          if (pdist != NULL)
-            histo= new DiscreteDistributionData(*phisto, pdist);
+            histo= new stat_tool::DiscreteDistributionData(*phisto, pdist);
          // else
          //     there might be something with a Param*
 
@@ -7369,14 +7370,14 @@ DiscreteMixtureData* HiddenMarkovTreeData::extract_marginal(StatError& error,
    int ivariable = I_DEFAULT;
    bool status = true, mixture = false;
    double *pweight = NULL;
-   FrequencyDistribution *pstate_marginal = NULL; // state_marginal
-   DiscreteDistributionData *phisto = NULL, // marginal histogram
+   stat_tool::FrequencyDistribution *pstate_marginal = NULL; // state_marginal
+   stat_tool::DiscreteDistributionData *phisto = NULL, // marginal histogram
                             *pstate_marginal_ddd = NULL; // state_marginal
    DiscreteMixtureData *histo = NULL;
    DiscreteMixture *pmixt = NULL;
    // DiscreteParametric **pcomp = NULL;
    const DiscreteParametric **pcomp = new const DiscreteParametric*[_nb_states];
-   // DiscreteParametricModel *pm = NULL;
+   // stat_tool::DiscreteParametricModel *pm = NULL;
 
    error.init();
 
@@ -7838,12 +7839,12 @@ HiddenMarkovTreeData::ptFrequencyDistribution_array HiddenMarkovTreeData::get_ob
    return res;
 }
 
-FrequencyDistribution* HiddenMarkovTreeData::get_observation(int variable,
+stat_tool::FrequencyDistribution* HiddenMarkovTreeData::get_observation(int variable,
                                                              int state) const
 {  // frequency distributions corresponding to the conditional observation distributions
    // for one given state and one given variable
    // register int j;
-   FrequencyDistribution *res= NULL;
+   stat_tool::FrequencyDistribution *res= NULL;
 
    if (observation_distribution != NULL)
    {

@@ -41,6 +41,7 @@
 #include "generic_typed_edge_tree.h"
 #include <deque>
 
+using namespace stat_tool;
 using namespace Stat_trees;
 
 /*****************************************************************

@@ -81,20 +81,20 @@ protected :
    bool plot_write(const char * prefix, const char * title,
                    const HiddenMarkovTreeData * otrees) const;
 
-   void state_no_occurrence_probability(int state, double increment=LEAVE_INCREMENT);
+   void state_no_occurrence_probability(int state, double increment=sequence_analysis::LEAVE_INCREMENT);
    void state_first_occurrence_root_distribution(int state, int min_nb_value=1,
                                                  double cumul_threshold=CUMUL_THRESHOLD);
    void state_first_occurrence_leaves_distribution(int state, int min_nb_value=1,
                                                    double cumul_threshold=CUMUL_THRESHOLD);
    void state_leave_probability(const double * memory, int state,
-                                double increment=LEAVE_INCREMENT);
+                                double increment=sequence_analysis::LEAVE_INCREMENT);
    void state_sojourn_size_distribution(const double * memory, int state,
                                         int min_nb_value=1,
                                         double cumul_threshold=CUMUL_THRESHOLD);
    void state_nb_pattern_mixture(int state, char pattern);
 
    void output_no_occurrence_probability(int variable, int output,
-                                         double increment=LEAVE_INCREMENT);
+                                         double increment=sequence_analysis::LEAVE_INCREMENT);
    void output_first_occurrence_root_distribution(int variable, int output,
                                                   int min_nb_value=1,
                                                   double cumul_threshold=CUMUL_THRESHOLD);
@@ -103,7 +103,7 @@ protected :
                                                     double cumul_threshold=CUMUL_THRESHOLD);
    void output_leave_probability(const double * memory,
                                  int variable, int output,
-                                 double increment=LEAVE_INCREMENT);
+                                 double increment=sequence_analysis::LEAVE_INCREMENT);
    void output_sojourn_size_distribution(const double * memory, int variable,
                                          int output, int min_nb_value=1 ,
                                          double cumul_threshold=CUMUL_THRESHOLD);
@@ -396,8 +396,8 @@ public :
    HiddenMarkovIndOutTree(const Chain * pchain,
                        int inb_ioutput_process, int inb_doutput_process,
                        CategoricalProcess** categorical_observation,
-                       DiscreteParametricProcess** iparametric_observation,
-                       DiscreteParametricProcess** dparametric_observation,
+                       stat_tool::DiscreteParametricProcess** iparametric_observation,
+                       stat_tool::DiscreteParametricProcess** dparametric_observation,
                        int size, bool counting_flag);
    HiddenMarkovIndOutTree(const HiddenMarkovIndOutTree& markov, bool data_flag=true,
                        bool characteristic_flag=true);
@@ -465,8 +465,8 @@ public :
                                       const char *title=NULL,
                                       int entropy_algo=UPWARD) const;
 
-   HiddenMarkovTreeData* simulation(StatError& error, const FrequencyDistribution& ihsize,
-                                    const FrequencyDistribution& ihnb_children,
+   HiddenMarkovTreeData* simulation(StatError& error, const stat_tool::FrequencyDistribution& ihsize,
+                                    const stat_tool::FrequencyDistribution& ihnb_children,
                                     bool counting_flag=true,
                                     // bool divergence_flag=true) const;
                                     bool divergence_flag=false) const;
@@ -561,7 +561,7 @@ public :
                                                           const char * path,
                                                           int size=I_DEFAULT_TREE_SIZE,
                                                           bool counting_flag=true,
-                                                          double cumul_threshold=OCCUPANCY_THRESHOLD);
+                                                          double cumul_threshold=sequence_analysis::OCCUPANCY_THRESHOLD);
 };
 
 #endif

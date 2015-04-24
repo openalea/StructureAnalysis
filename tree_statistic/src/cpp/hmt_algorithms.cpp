@@ -42,7 +42,7 @@
 #include "stat_tool/curves.h"
 #include "stat_tool/markovian.h"
 #include "stat_tool/distribution_reestimation.hpp"
-#include "stat_tool/distribution.h"   // definition of DiscreteParametricModel class
+#include "stat_tool/distribution.h"   // definition of stat_tool::DiscreteParametricModel class
 #include "stat_tool/vectors.h"
 #include "stat_tool/discrete_mixture.h"
 
@@ -59,9 +59,10 @@
 #include <iomanip>
 
 // for simulation; see stat_tool
-extern int cumul_method(int nb_value, const double *cumul, double scale= 1.);
-extern char* label(const char*);
+extern int stat_tool::cumul_method(int nb_value, const double *cumul, double scale);
+extern char* stat_tool::label(const char*);
 
+using namespace stat_tool;
 using namespace Stat_trees;
 
 /*****************************************************************
@@ -724,7 +725,7 @@ bool HiddenMarkovIndOutTree::tree_state_profile_plot_write(StatError &error,
             if (i == 1)
             {
                out_file << "set terminal postscript" << endl;
-               file_name[1] << label(prefix) << ".ps";
+               file_name[1] << stat_tool::label(prefix) << ".ps";
                out_file << "set output \"" << file_name[1].str() << "\"\n\n";
             }
 
@@ -741,7 +742,7 @@ bool HiddenMarkovIndOutTree::tree_state_profile_plot_write(StatError &error,
             out_file << "plot [0:" << path->size() - 1 << "] [0:1] ";
             for(j= 0; j < nb_state; j++)
             {
-               out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\" using "
+               out_file << "\"" << stat_tool::label((data_file_name[0].str()).c_str()) << "\" using "
                         << j + 1 << " title \"" << STAT_label[STATL_STATE] << " "
                         << j << "\" with linespoints";
                if (j < nb_state - 1)
@@ -765,7 +766,7 @@ bool HiddenMarkovIndOutTree::tree_state_profile_plot_write(StatError &error,
                      << exp(state_likelihood - likelihood) << "] ";
             for(j= 0; j < nb_state; j++)
             {
-               out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using "
+               out_file << "\"" << stat_tool::label((data_file_name[1].str()).c_str()) << "\" using "
                         << j + 1 << " title \"" << STAT_label[STATL_STATE] << " "
                         << j << "\" with linespoints";
                if (j < nb_state - 1)
@@ -784,10 +785,10 @@ bool HiddenMarkovIndOutTree::tree_state_profile_plot_write(StatError &error,
             out_file << "\n\n";
 
             out_file << "plot [0:" << path->size() - 1 << "] [0:" << max_marginal_entropy << "] "
-                     << "\"" << label((data_file_name[0].str()).c_str()) << "\" using "
+                     << "\"" << stat_tool::label((data_file_name[0].str()).c_str()) << "\" using "
                      << nb_state + 1 << " title \"" << STAT_TREES_label[TREESTATL_CONDITIONAL_ENTROPY]
                      << "\" with linespoints,\\" << endl;
-            out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\" using "
+            out_file << "\"" << stat_tool::label((data_file_name[0].str()).c_str()) << "\" using "
                      << nb_state + 2 << " title \"" << STAT_TREES_label[TREESTATL_MARGINAL_ENTROPY]
                      << "\" with linespoints" << endl;
 
@@ -801,7 +802,7 @@ bool HiddenMarkovIndOutTree::tree_state_profile_plot_write(StatError &error,
             out_file << "\n\n";
 
             out_file << "plot [0:" << path->size() - 1 << "] [0:" << entropy << "] "
-                     << "\"" << label((data_file_name[0].str()).c_str()) << "\" using "
+                     << "\"" << stat_tool::label((data_file_name[0].str()).c_str()) << "\" using "
                      << nb_state + 3 << " title \"" << STAT_TREES_label[TREESTATL_PARTIAL_STATE_TREE_ENTROPY]
                      << "\" with linespoints" << endl;
 
@@ -950,7 +951,7 @@ HiddenMarkovTreeData* HiddenMarkovIndOutTree::simulation(StatError& error,
          state_tree= res->state_trees[t];
          tree= res->trees[t];
 
-         state_v.Int()= cumul_method(markov->nb_state, markov->cumul_initial);
+         state_v.Int()= stat_tool::cumul_method(markov->nb_state, markov->cumul_initial);
          state_tree->put(state_tree->root(), state_v);
          // simulation of the root state
 
@@ -979,7 +980,7 @@ HiddenMarkovTreeData* HiddenMarkovIndOutTree::simulation(StatError& error,
             parent_key= state_tree->parent(va[node]);
             parent_state= (state_tree->get(parent_key)).Int();
 
-            state_v.Int()= cumul_method(markov->nb_state, markov->cumul_transition[parent_state]);
+            state_v.Int()= stat_tool::cumul_method(markov->nb_state, markov->cumul_transition[parent_state]);
             state_tree->put(va[node], state_v);
             // simulation of current state
 
@@ -1260,7 +1261,7 @@ HiddenMarkovTreeData* HiddenMarkovIndOutTree::simulation(const Trees& otrees,
        state_tree = res->state_trees[t];
        tree = res->trees[t];
        // simulation of the root state
-       state_v.Int() = cumul_method(markov->nb_state, markov->cumul_initial);
+       state_v.Int() = stat_tool::cumul_method(markov->nb_state, markov->cumul_initial);
        state_tree->put(state_tree->root(), state_v); //save the value of simulated state
 
        // simulation of the root observation
@@ -1290,7 +1291,7 @@ HiddenMarkovTreeData* HiddenMarkovIndOutTree::simulation(const Trees& otrees,
             parent_state = (state_tree->get(parent_key)).Int();
 
             // simulation of current state
-            state_v.Int()= cumul_method(markov->nb_state, markov->cumul_transition[parent_state]);
+            state_v.Int()= stat_tool::cumul_method(markov->nb_state, markov->cumul_transition[parent_state]);
             state_tree->put(va[node], state_v);
 
             for(var = 0; var < markov->_nb_ioutput_process; var++)
@@ -2894,7 +2895,7 @@ HiddenMarkovTreeData::hidden_markov_ind_out_tree_estimation(StatError &error,
    // note: length of force_param must be checked before call
    bool status= true; //, fparam= !(force_param==NULL);
    register int var;
-   int nb_value[SEQUENCE_NB_VARIABLE];
+   int nb_value[sequence_analysis::SEQUENCE_NB_VARIABLE];
    HiddenMarkovIndOutTree *ihmt=NULL, *hmt= NULL;
 
    error.init();
@@ -5029,7 +5030,7 @@ HiddenMarkovIndOutTree::sstate_simulation(const HiddenMarkovTreeData& trees,
          cumul_stated[0]= downward_prob[t][0][cnode];
          for(j= 1; j < nb_state; j++)
             cumul_stated[j]= cumul_stated[j-1]+downward_prob[t][j][cnode];
-         state_v.Int()= cumul_method(nb_state, cumul_stated);
+         state_v.Int()= stat_tool::cumul_method(nb_state, cumul_stated);
          state_tree->put(cnode, state_v);
 
          // completed likelihood
@@ -5058,7 +5059,7 @@ HiddenMarkovIndOutTree::sstate_simulation(const HiddenMarkovTreeData& trees,
                for(j= 0; j < nb_state; j++)
                   cumul_stated[j]= cumul_stated[j]
                                    / downward_prob[t][pstate][pnode];
-               state_v.Int()= cumul_method(nb_state, cumul_stated);
+               state_v.Int()= stat_tool::cumul_method(nb_state, cumul_stated);
                state_tree->put(cnode, state_v);
                state_likelihood+= log(transition[pstate][state_v.Int()])
                                   + log(output_cond[t][state_v.Int()][cnode]);
@@ -5213,7 +5214,7 @@ HiddenMarkovIndOutTree::gibbs_state_simulation(const HiddenMarkovTreeData& trees
             cumul_stated[0]= state_marginal[t][0][cnode];
             for(j= 1; j < nb_state; j++)
                cumul_stated[j]= cumul_stated[j-1] + state_marginal[t][j][cnode];
-            state_v.Int()= cumul_method(nb_state, cumul_stated);
+            state_v.Int()= stat_tool::cumul_method(nb_state, cumul_stated);
             state_tree->put(cnode, state_v);
          }
       }
@@ -5260,7 +5261,7 @@ HiddenMarkovIndOutTree::gibbs_state_simulation(const HiddenMarkovTreeData& trees
             cumul_stated[j]= cumul_stated[j-1]+stated[j];
       }
 
-      state_v.Int()= cumul_method(nb_state, cumul_stated);
+      state_v.Int()= stat_tool::cumul_method(nb_state, cumul_stated);
       state_tree->put(cnode, state_v);
 
       // completed likelihood
@@ -5305,7 +5306,7 @@ HiddenMarkovIndOutTree::gibbs_state_simulation(const HiddenMarkovTreeData& trees
                cumul_stated[j]= cumul_stated[j-1]+stated[j];
          }
 
-         state_v.Int()= cumul_method(nb_state, cumul_stated);
+         state_v.Int()= stat_tool::cumul_method(nb_state, cumul_stated);
          state_tree->put(cnode, state_v);
 
          state_likelihood+= log(transition[pstate][state_v.Int()])

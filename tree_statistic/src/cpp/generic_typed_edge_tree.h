@@ -176,7 +176,7 @@ public:
    template<typename Type> Unlabelled_typed_edge_tree(Generic_tree<Type>& gtree);
    /** Return the structure of a typed-edge tree */
    template<typename Type> Unlabelled_typed_edge_tree(Typed_edge_tree<Type>& gtree);
-   Unlabelled_typed_edge_tree(const Distribution& distrib,
+   Unlabelled_typed_edge_tree(const stat_tool::Distribution& distrib,
                               int max_size= I_DEFAULT_TREE_SIZE,
                               int max_depth= I_DEFAULT_TREE_DEPTH);
    ~Unlabelled_typed_edge_tree();
@@ -212,10 +212,10 @@ public:
 
    /** print tree */
    void display(ostream& os, key v);
-   void simulation(const Distribution& distrib,
+   void simulation(const stat_tool::Distribution& distrib,
                    int max_size= I_DEFAULT_TREE_SIZE,
                    int max_depth= I_DEFAULT_TREE_DEPTH);
-   void simulation(const FrequencyDistribution& hist,
+   void simulation(const stat_tool::FrequencyDistribution& hist,
                    int max_size= I_DEFAULT_TREE_SIZE,
                    int max_depth= I_DEFAULT_TREE_DEPTH);
 

@@ -41,7 +41,7 @@
 #include "generic_typed_edge_tree.h"
 #include "stat_tool/stat_tools.h"
 #include "stat_tool/stat_label.h"
-#include "stat_tool/curves.h"    // definition of Curves class for Sequences
+#include "stat_tool/curves.h"    // definition of Curves class for sequence_analysis::Sequences
 #include "stat_tool/markovian.h" // definition of constants
 #include "sequence_analysis/sequences.h" // definition of constants
 #include "tree_labels.h"
@@ -52,7 +52,7 @@
 #include <limits.h>
 
 extern char* label(const char*);
-extern int* identifier_select(int nb_pattern , int* pattern_identifier,
+extern int* stat_tool::identifier_select(int nb_pattern , int* pattern_identifier,
                               int selected_nb_pattern, int* selected_identifier,
                               bool keep);
 extern int* select_variable(int nb_variable, int selected_nb_variable,
@@ -145,7 +145,7 @@ public :
 
     typedef typename generic_visitor<tree_type>::vertex_array vertex_array;
 
-    typedef Distribution** pt_Distribution_array;
+    typedef stat_tool::Distribution** pt_Distribution_array;
 
     Typed_edge_int_fl_tree(key root= 0,
                 int n= 1,
@@ -235,7 +235,7 @@ protected :
    /// these variables come after that of integer type;
    int _nb_float;
    /// type of each of those variables
-   /// (INT_VALUE / REAL_VALUE/ TIME / POSITION / NB_INTERNODE )
+   /// (INT_VALUE / REAL_VALUE/ sequence_analysis::TIME / sequence_analysis::POSITION / NB_INTERNODE )
    /// ending with the floating variables
    int_array _type;
    /// minimal value of each variable
@@ -254,9 +254,9 @@ protected :
    // - if any - to determine]
    // [frequency distributions of those quantities]
    /// frequency distribution of the tree size
-   FrequencyDistribution *hsize;
+   stat_tool::FrequencyDistribution *hsize;
    /// frequency distribution of the number of children
-   FrequencyDistribution *hnb_children;
+   stat_tool::FrequencyDistribution *hnb_children;
 
    /// observed trees
    pt_tree_type_array trees;
@@ -337,27 +337,27 @@ public :
                     bool frequency_distribution_flag= true);
    Typed_edge_trees(int inb_integral,
                     int inb_float,
-                    const FrequencyDistribution& ihsize,
-                    const FrequencyDistribution& ihnb_children,
+                    const stat_tool::FrequencyDistribution& ihsize,
+                    const stat_tool::FrequencyDistribution& ihnb_children,
                     bool no_child_flag= false,
                     bool init_flag= true);
    Typed_edge_trees(const Typed_edge_trees& otrees, int inb_trees, int_array index);
    virtual ~Typed_edge_trees();
    observed_trees& operator=(const observed_trees& otrees);
 
-   DiscreteDistributionData* extract(StatError& error, int variable) const;
+   stat_tool::DiscreteDistributionData* extract(StatError& error, int variable) const;
 
    /** Extract the frequency distribution of characteristic distribution from \e self*/
-   DiscreteDistributionData* extract(StatError& error, int type,
+   stat_tool::DiscreteDistributionData* extract(StatError& error, int type,
                                      int variable, int value) const;
    /** Extract all vertex values from \e self*/
    Vectors* build_vectors(StatError& error) const;
    // should be a constructor of Vectors ?
    /** Extract all sequences from \e self along paths*/
-   Sequences* build_sequences(StatError& error, bool all_paths= true,
+   sequence_analysis::Sequences* build_sequences(StatError& error, bool all_paths= true,
                               bool auto_axis= false) const;
 
-    // Distributions of the tree-characteristics
+    // stat_tool::Distributions of the tree-characteristics
     // ?    Vectors* extract_vectors(StatError &error, int type, int variable = I_DEFAULT,
     //                         int value = I_DEFAULT) const;
 
@@ -406,7 +406,7 @@ public :
                                              int itree= I_DEFAULT, bool keep= true) const;
    // would be more interesting with true vertex and tree identifiers
 
-//     Sequences* extract_sequences(int* tree_list) const;
+//     sequence_analysis::Sequences* extract_sequences(int* tree_list) const;
 //     // extraction of all possible (for instance discrete) sequences from the list of trees tree_list
 //     // starting from tree root
 
@@ -424,13 +424,13 @@ public :
 //     // Typed_edge_trees* moving_average(StatError &error, ostream& os, int nb_point, double *filter,
 //     //                          int variable = I_DEFAULT, bool begin_end = false,
 //     //                          int output = TREND, const char *path = 0, char format = 's') const;
-//     // Typed_edge_trees* moving_average(StatError &error, ostream& os, const Distribution &dist,
+//     // Typed_edge_trees* moving_average(StatError &error, ostream& os, const stat_tool::Distribution &dist,
 //     //                         int variable = I_DEFAULT, bool begin_end = false,
 //     //                         int output = TREND, const char *path = 0, char format = 's') const;
 //     // somewhat tricky in the case of oriented trees : postponed or cancelled
 
 //     Typed_edge_trees* transform_position(StatError &error, int step) const;
-//     // Discretization of a variable with type POSITION
+//     // Discretization of a variable with type sequence_analysis::POSITION
 
 //     // Typed_edge_trees* scaling(StatError &error, int variable, int scaling_coeff) const;
 //     // not most useful, unless we want to use 'moving_average' in the case of a discrete
@@ -514,8 +514,8 @@ public :
    pt_One_int_tree_array get_identifier_trees();
    Typed_edge_one_int_tree* get_identifier_tree(int index);
 
-   virtual DiscreteDistributionData* extract_size() const;
-   virtual DiscreteDistributionData* extract_nb_children() const;
+   virtual stat_tool::DiscreteDistributionData* extract_size() const;
+   virtual stat_tool::DiscreteDistributionData* extract_nb_children() const;
    // access to the frequency distributions of topological indicators
 
    /** Return the maximal value for each variable of \e self*/
@@ -524,7 +524,7 @@ public :
    Generic_Int_fl_container get_min_value() const;
    /** return the number of values of a variable with finite values*/
    int get_nb_values(int variable) const;
-   FrequencyDistribution* get_marginal(int variable) const;
+   stat_tool::FrequencyDistribution* get_marginal(int variable) const;
    int get_nb_trees() const;
     // ? int get_identifier(int itree) const { return identifier[itree]; }
 
@@ -543,11 +543,11 @@ public :
    // ? Tree_curves** get_index_value() const;
    // ? Curves* get_depth_value(int variable) const;
    // ? Curves** get_depth_value() const;
-   FrequencyDistribution* get_first_occurrence_root(int variable, int value) const;
-   FrequencyDistribution* get_first_occurrence_leaves(int variable, int value) const;
-   FrequencyDistribution* get_sojourn_size(int variable, int value) const;
-   FrequencyDistribution* get_nb_zones(int variable, int value) const;
-   FrequencyDistribution* get_nb_occurrence(int variable, int value) const;
+   stat_tool::FrequencyDistribution* get_first_occurrence_root(int variable, int value) const;
+   stat_tool::FrequencyDistribution* get_first_occurrence_leaves(int variable, int value) const;
+   stat_tool::FrequencyDistribution* get_sojourn_size(int variable, int value) const;
+   stat_tool::FrequencyDistribution* get_nb_zones(int variable, int value) const;
+   stat_tool::FrequencyDistribution* get_nb_occurrence(int variable, int value) const;
 
    /** Return the set of trees (a new instance is allocated) */
    pt_tree_type_array get_trees() const;
@@ -580,7 +580,7 @@ class TreeCharacteristics
 
 public :
 
-   typedef FrequencyDistribution** ptFrequencyDistribution_array;
+   typedef stat_tool::FrequencyDistribution** ptFrequencyDistribution_array;
    typedef Histogram** ptHistogram_array;
 
 protected :
@@ -593,8 +593,8 @@ protected :
    int _max_value;
    /// number of trees used for the frequency distributions
    int _nb_trees;
-   /// FrequencyDistribution of the (marginal) discrete observation distribution
-   FrequencyDistribution *marginal_distribution;
+   /// stat_tool::FrequencyDistribution of the (marginal) discrete observation distribution
+   stat_tool::FrequencyDistribution *marginal_distribution;
    /// Histogram of the (marginal) continuous observation distribution
    Histogram *marginal_histogram;
    // ?  Tree_curves *index_value;   // empirical probability of each value, as
@@ -636,7 +636,7 @@ protected :
    // ? void build_index_value();
    // ? void build_depth_value();
 
-   FrequencyDistribution* get_characteristic(int value, ptFrequencyDistribution_array h) const;
+   stat_tool::FrequencyDistribution* get_characteristic(int value, ptFrequencyDistribution_array h) const;
 
    // check whether given characteristic is present
    bool is_characteristic(int charac) const;
@@ -660,13 +660,13 @@ protected :
                                    bool exhaustive,
                                    bool file_flag) const;
 
-   std::ostream& ascii_print(std::ostream& os, int type, const FrequencyDistribution& hsize,
+   std::ostream& ascii_print(std::ostream& os, int type, const stat_tool::FrequencyDistribution& hsize,
                              bool exhaustive, bool comment_flag) const;
-   std::ostream& spreadsheet_print(std::ostream& os, int type, const FrequencyDistribution& hsize) const;
+   std::ostream& spreadsheet_print(std::ostream& os, int type, const stat_tool::FrequencyDistribution& hsize) const;
 
   /** Gnuplot output of \e self*/
    bool plot_print(const char * prefix, const char * title, int variable,
-                   int nb_variables, int type, const FrequencyDistribution& hsize) const;
+                   int nb_variables, int type, const stat_tool::FrequencyDistribution& hsize) const;
 
   /** Graphical output of \e self*/
   MultiPlotSet* get_plotable(int plot_type,
@@ -708,12 +708,12 @@ public :
    //  { return index_value; }
    // ? Curves* get_depth_value() const
    //  { return depth_value; }
-   FrequencyDistribution* get_marginal_distribution() const;
-   FrequencyDistribution* get_first_occurrence_root(int value) const;
-   FrequencyDistribution* get_first_occurrence_leaves(int value) const;
-   FrequencyDistribution* get_sojourn_size(int value) const;
-   FrequencyDistribution* get_nb_zones(int value) const;
-   FrequencyDistribution* get_nb_occurrences(int value) const;
+   stat_tool::FrequencyDistribution* get_marginal_distribution() const;
+   stat_tool::FrequencyDistribution* get_first_occurrence_root(int value) const;
+   stat_tool::FrequencyDistribution* get_first_occurrence_leaves(int value) const;
+   stat_tool::FrequencyDistribution* get_sojourn_size(int value) const;
+   stat_tool::FrequencyDistribution* get_nb_zones(int value) const;
+   stat_tool::FrequencyDistribution* get_nb_occurrences(int value) const;
 
    int get_nb_value_first_occurrence_root(int value) const;
    int get_nb_value_sojourn_size(int value) const;

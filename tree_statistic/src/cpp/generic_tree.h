@@ -66,10 +66,10 @@ const int I_DEFAULT_INF_BOUND= 0;              // default minumum number of chil
 const int I_DEFAULT_SUP_BOUND= 2;              // default maximum number of children
 const int I_DEFAULT_MAX_CHILDREN= I_DEFAULT_SUP_BOUND;
 const double D_DEFAULT_PROBABILITY= 0.5;       // parameter value for default distribution
-const int I_DEFAULT_IDENT= BINOMIAL;           // default type of distribution
-const double D_DEFAULT_PARAMETER= D_DEFAULT;   // cf. Distribution()
+  const int I_DEFAULT_IDENT= stat_tool::BINOMIAL;           // default type of distribution
+const double D_DEFAULT_PARAMETER= stat_tool::D_DEFAULT;   // cf. stat_tool::Distribution()
 const char C_DEFAULT_CHAR= '*';                // default label for char trees
-const DiscreteParametric P_DEFAULT_DISTRIBUTION(I_DEFAULT_SUP_BOUND-I_DEFAULT_INF_BOUND+1,
+const stat_tool::DiscreteParametric P_DEFAULT_DISTRIBUTION(I_DEFAULT_SUP_BOUND-I_DEFAULT_INF_BOUND+1,
                                                 I_DEFAULT_IDENT,
                                                 I_DEFAULT_INF_BOUND,
                                                 I_DEFAULT_SUP_BOUND,
@@ -354,16 +354,16 @@ public:
    Unlabelled_tree(const Unlabelled_tree& utree);
    /** Return the structure of a tree */
    template<typename Type> Unlabelled_tree(Generic_tree<Type>& gtree);
-   Unlabelled_tree(const Distribution& distrib,
+   Unlabelled_tree(const stat_tool::Distribution& distrib,
                    int max_size= I_DEFAULT_TREE_SIZE,
                    int max_depth= I_DEFAULT_TREE_DEPTH);
    ~Unlabelled_tree();
    Unlabelled_tree& operator=(const Unlabelled_tree &tree);
 
-   void simulation(const Distribution& distrib,
+   void simulation(const stat_tool::Distribution& distrib,
                    int max_size= I_DEFAULT_TREE_SIZE,
                    int max_depth= I_DEFAULT_TREE_DEPTH);
-   void simulation(const FrequencyDistribution& hist,
+   void simulation(const stat_tool::FrequencyDistribution& hist,
                    int max_size= I_DEFAULT_TREE_SIZE,
                    int max_depth= I_DEFAULT_TREE_DEPTH);
 
@@ -386,13 +386,13 @@ public:
    typedef typename tree_traits<Tree>::vertex_descriptor vid;
    typedef typename tree_traits<Tree>::children_iterator ch_it;
 
-   Distribution* _distribution;
+   stat_tool::Distribution* _distribution;
    int _max_size;
    int _max_depth;
    std::deque<vid> _leaves;
    // deque of the next leaves to process
 
-   Random_unlabelled_tree_generator(const Distribution& distrib= P_DEFAULT_DISTRIBUTION,
+   Random_unlabelled_tree_generator(const stat_tool::Distribution& distrib= P_DEFAULT_DISTRIBUTION,
                                     int max_size= I_DEFAULT_TREE_SIZE,
                                     int max_depth= I_DEFAULT_TREE_DEPTH);
 

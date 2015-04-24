@@ -113,12 +113,12 @@ class CategoricalTreeProcess : public CategoricalProcess
 private :
 
    /// distribution of the tree size
-   Distribution *size;
-   // Distribution *nb_children;            // [distributions of the quantities for
+   stat_tool::Distribution *size;
+   // stat_tool::Distribution *nb_children;            // [distributions of the quantities for
                                             // which the characteristic distributions
                                             // are not invariant - to determine]
    /// distribution of the tree depth
-   Distribution *depth;
+   stat_tool::Distribution *depth;
    /// probability of non occurrence of a given value
    double *no_occurrence;
    /// probability of leaving a given value
@@ -127,76 +127,76 @@ private :
    double *absorption;
    /// distribution of the path length before the first occurrence
    /// of a given value, starting from the root
-   Distribution **first_occurrence_root;
+   stat_tool::Distribution **first_occurrence_root;
    /// distribution of path length before the first occurrence
    /// of a given value, starting from all the terminal vertices
-   Distribution **first_occurrence_leaves;
+   stat_tool::Distribution **first_occurrence_leaves;
    /// distribution of the sizes of the homogeneous zones
    /// for a given value of the variable
-   Distribution **sojourn_size;
+   stat_tool::Distribution **sojourn_size;
    /// distribution of the number of homogeneous zones in the tree
    /// for a given value of the variable
-   Distribution **nb_zones;
+   stat_tool::Distribution **nb_zones;
    /// distribution of the occurrence number for a given
    /// value of the variable in the whole tree
-   Distribution **nb_occurrences;
-   // N.B. check whether these Distributions are DiscreteParametric or not
+   stat_tool::Distribution **nb_occurrences;
+   // N.B. check whether these stat_tool::Distributions are stat_tool::DiscreteParametric or not
 
-   void create_characteristic(const Distribution& hsize, bool sojourn_time_flag= true,
+   void create_characteristic(const stat_tool::Distribution& hsize, bool sojourn_time_flag= true,
                               bool counting_flag= true);
 
    void copy(const CategoricalTreeProcess& process, bool characteristic_flag= true);
 
    void copy_double_array(double*& dest, const double* source, int inb_value);
-   void copy_Distribution_array(Distribution**& dest,
-                                Distribution** const source,
+   void copy_Distribution_array(stat_tool::Distribution**& dest,
+                                stat_tool::Distribution** const source,
                                 int inb_value);
    void remove();
    void remove_double_array(double*& d);
-   /** Deallocate arrays of pointers on Distributions */
-   void remove_Distribution_array(Distribution**& d, int inb_value);
+   /** Deallocate arrays of pointers on stat_tool::Distributions */
+   void remove_Distribution_array(stat_tool::Distribution**& d, int inb_value);
 
-   void init_Distribution_array(Distribution**& d, int inb_value);
+   void init_Distribution_array(stat_tool::Distribution**& d, int inb_value);
    void init_occupancy(const CategoricalTreeProcess& process, int occupancy_nb_value);
 
    /** Permutation of the states of \e self */
    void state_permutation(int* perm) const;
 
    double get_double_characteristic(double* d, int value) const;
-   Distribution** get_ptptDistribution_characteristic(Distribution** d) const;
-   Distribution* get_ptDistribution_characteristic(Distribution** d,
+   stat_tool::Distribution** get_ptptDistribution_characteristic(stat_tool::Distribution** d) const;
+   stat_tool::Distribution* get_ptDistribution_characteristic(stat_tool::Distribution** d,
                                                    int value) const;
 
    std::ostream& ascii_print(std::ostream &os, int process,
-                             FrequencyDistribution** empirical_observation,
+                             stat_tool::FrequencyDistribution** empirical_observation,
                              const TreeCharacteristics* characteristics ,
                              bool exhaustive, bool file_flag) const;
    std::ostream& spreadsheet_print(std::ostream &os, int process,
-                                   FrequencyDistribution** empirical_observation= NULL,
+                                   stat_tool::FrequencyDistribution** empirical_observation= NULL,
                                    const TreeCharacteristics* characteristics= NULL) const;
 
    /** Gnuplot output of \e self*/
    bool plot_print(const char * prefix, const char * title, int process,
-                   FrequencyDistribution** empirical_observation= NULL,
+                   stat_tool::FrequencyDistribution** empirical_observation= NULL,
                    const TreeCharacteristics * characteristics= NULL,
-                   const FrequencyDistribution * hsize= NULL) const;
+                   const stat_tool::FrequencyDistribution * hsize= NULL) const;
 
    /** Matplotlib output of CategoricalTreeProcess */
    MultiPlotSet* plotable_write(MultiPlotSet &plot, int &index,
-                                int process, FrequencyDistribution * const * empirical_observation = NULL,
+                                int process, stat_tool::FrequencyDistribution * const * empirical_observation = NULL,
                                 const TreeCharacteristics * characteristics = NULL,
-                                const FrequencyDistribution * hsize = NULL) const;
+                                const stat_tool::FrequencyDistribution * hsize = NULL) const;
 
    /** Return the number of views (i.e. the size) in Matplotlib output */
-   unsigned int nb_plot_set_computation(int process, FrequencyDistribution * const * empirical_observation = NULL,
+   unsigned int nb_plot_set_computation(int process, stat_tool::FrequencyDistribution * const * empirical_observation = NULL,
                                         const TreeCharacteristics * characteristics = NULL,
-                                        const FrequencyDistribution * hsize = NULL) const;
+                                        const stat_tool::FrequencyDistribution * hsize = NULL) const;
 
 public :
 
    CategoricalTreeProcess(int inb_state= 0, int inb_value= 0,
                           int observation_flag= false);
-   // CategoricalTreeProcess(int inb_state , Distribution **occupancy);
+   // CategoricalTreeProcess(int inb_state , stat_tool::Distribution **occupancy);
    CategoricalTreeProcess(const CategoricalProcess& process);
    CategoricalTreeProcess(const CategoricalTreeProcess& process ,
                           char manip= 'c', int param= true);
@@ -205,8 +205,8 @@ public :
 
    // access to class members
 
-   Distribution* get_size() const;
-   // Distribution* get_nb_children() const; etc.  // [quantities for which the characteristic
+   stat_tool::Distribution* get_size() const;
+   // stat_tool::Distribution* get_nb_children() const; etc.  // [quantities for which the characteristic
                                                    // distributions are invariant - if any -
                                                    // to determine]
    double get_no_occurrence(int value) const;
@@ -216,16 +216,16 @@ public :
    /** Permutation of the state of \e self*/
    void state_permutation(StatError& error, int* perm) const;
 
-   Distribution** get_first_occurrence_root() const;
-   Distribution* get_first_occurrence_root(int value) const;
-   Distribution** get_first_occurrence_leaves() const;
-   Distribution* get_first_occurrence_leaves(int value) const;
-   Distribution** get_sojourn_size() const;
-   Distribution* get_sojourn_size(int value) const;
-   Distribution** get_nb_zones() const;
-   Distribution* get_nb_zones(int value) const;
-   Distribution** get_nb_occurrences() const;
-   Distribution* get_nb_occurrences(int value) const;
+   stat_tool::Distribution** get_first_occurrence_root() const;
+   stat_tool::Distribution* get_first_occurrence_root(int value) const;
+   stat_tool::Distribution** get_first_occurrence_leaves() const;
+   stat_tool::Distribution* get_first_occurrence_leaves(int value) const;
+   stat_tool::Distribution** get_sojourn_size() const;
+   stat_tool::Distribution* get_sojourn_size(int value) const;
+   stat_tool::Distribution** get_nb_zones() const;
+   stat_tool::Distribution* get_nb_zones(int value) const;
+   stat_tool::Distribution** get_nb_occurrences() const;
+   stat_tool::Distribution* get_nb_occurrences(int value) const;
 };
 
 bool test_hidden(int nb_output_process, CategoricalTreeProcess **process);
@@ -271,10 +271,10 @@ protected :
    CategoricalTreeProcess **npprocess;
    /// integer parametric observation processes
    /// pirocess[0]: unused (NULL)
-   DiscreteParametricProcess **piprocess;
+   stat_tool::DiscreteParametricProcess **piprocess;
    /// double (i.e. floating) parametric observation processes
    /// pdrocess[0]: unused (NULL)
-   DiscreteParametricProcess **pdprocess;
+   stat_tool::DiscreteParametricProcess **pdprocess;
 
    /* HiddenMarkovTree(const Chain * pchain, int inb_nonparam, int inb_param,
                      CategoricalProcess** pobservation, int size);
@@ -316,20 +316,20 @@ protected :
    void log_computation();
 
    // virtual functions common to all hidden_markov_trees ?
-   virtual void state_no_occurrence_probability(int state, double increment= LEAVE_INCREMENT);
+   virtual void state_no_occurrence_probability(int state, double increment= sequence_analysis::LEAVE_INCREMENT);
    virtual void state_first_occurrence_root_distribution(int state, int min_nb_value= 1,
                                                  double cumul_threshold= CUMUL_THRESHOLD);
    virtual void state_first_occurrence_leaves_distribution(int state, int min_nb_value= 1,
                                                    double cumul_threshold= CUMUL_THRESHOLD);
    virtual void state_leave_probability(const double * memory, int state,
-                                        double increment= LEAVE_INCREMENT);
+                                        double increment= sequence_analysis::LEAVE_INCREMENT);
    virtual void state_sojourn_size_distribution(const double * memory, int state,
                                                 int min_nb_value= 1,
                                                 double cumul_threshold= CUMUL_THRESHOLD);
    virtual void state_nb_pattern_mixture(int state, char pattern);
 
    virtual void output_no_occurrence_probability(int variable, int output,
-                                         double increment= LEAVE_INCREMENT);
+                                         double increment= sequence_analysis::LEAVE_INCREMENT);
    virtual void output_first_occurrence_root_distribution(int variable, int output,
                                                   int min_nb_value= 1,
                                                   double cumul_threshold= CUMUL_THRESHOLD);
@@ -338,7 +338,7 @@ protected :
                                                     double cumul_threshold= CUMUL_THRESHOLD);
    virtual void output_leave_probability(const double * memory,
                                  int variable, int output,
-                                 double increment= LEAVE_INCREMENT);
+                                 double increment= sequence_analysis::LEAVE_INCREMENT);
    virtual void output_sojourn_size_distribution(const double * memory, int variable,
                                          int output, int min_nb_value= 1 ,
                                          double cumul_threshold= CUMUL_THRESHOLD);
@@ -499,8 +499,8 @@ public :
    HiddenMarkovTree(const Chain * pchain,
                     int ich_order, int inb_ioutput_process, int inb_doutput_process,
                     CategoricalProcess** categorical_observation,
-                    DiscreteParametricProcess** iparametric_observation,
-                    DiscreteParametricProcess** dparametric_observation,
+                    stat_tool::DiscreteParametricProcess** iparametric_observation,
+                    stat_tool::DiscreteParametricProcess** dparametric_observation,
                     int size, bool counting_flag);
    HiddenMarkovTree(const HiddenMarkovTree& markov, bool data_flag= true,
                     bool characteristic_flag= true);
@@ -511,7 +511,7 @@ public :
    virtual HiddenMarkovTree* HiddenMarkovTreeCopy(bool data_flag = true,
                                                   bool characteristic_flag = true) const;
 
-   DiscreteParametricModel* extract(StatError& error, int type,
+   stat_tool::DiscreteParametricModel* extract(StatError& error, int type,
                                     int variable, int value) const;
 
    /** Return the data part of a HiddenMarkovTree,
@@ -600,17 +600,17 @@ public :
    bool is_parametric(int ivariable) const;
    CategoricalTreeProcess** get_categorical_process() const;
    CategoricalTreeProcess* get_categorical_process(int variable) const;
-   DiscreteParametricProcess** get_iparametric_process() const;
-   DiscreteParametricProcess* get_iparametric_process(int variable) const;
-   DiscreteParametricProcess** get_dparametric_process() const;
-   DiscreteParametricProcess* get_dparametric_process(int variable) const;
+   stat_tool::DiscreteParametricProcess** get_iparametric_process() const;
+   stat_tool::DiscreteParametricProcess* get_iparametric_process(int variable) const;
+   stat_tool::DiscreteParametricProcess** get_dparametric_process() const;
+   stat_tool::DiscreteParametricProcess* get_dparametric_process(int variable) const;
 };
 
 HiddenMarkovTree* hidden_markov_tree_ascii_read(StatError& error,
                                                 const char * path,
                                                 int size= I_DEFAULT_TREE_SIZE,
                                                 bool counting_flag= true,
-                                                double cumul_threshold= OCCUPANCY_THRESHOLD);
+                                                double cumul_threshold= sequence_analysis::OCCUPANCY_THRESHOLD);
 /**
    \class HiddenMarkovTreeData
    \brief set of tree-structured data potentially associated with
@@ -640,7 +640,7 @@ public :
    typedef tree_type::children_iterator children_iterator;
    typedef tree_type::vertex_iterator vertex_iterator;
 
-   typedef FrequencyDistribution*** ptFrequencyDistribution_array_2d;
+   typedef stat_tool::FrequencyDistribution*** ptFrequencyDistribution_array_2d;
    typedef TreeCharacteristics::ptFrequencyDistribution_array ptFrequencyDistribution_array;
    typedef Histogram*** ptHistogram_array_2d;
    typedef TreeCharacteristics::ptHistogram_array ptHistogram_array;
@@ -670,7 +670,7 @@ private :
    /// hidden trees
    ptOne_int_tree_set state_trees;
 
-   /// FrequencyDistribution corresponding to the conditional observation distribution,
+   /// stat_tool::FrequencyDistribution corresponding to the conditional observation distribution,
    /// depending on the considered observed (integral) variable
    /// and on the value of the state variable
    ptFrequencyDistribution_array_2d observation_distribution;
@@ -735,8 +735,8 @@ public :
    HiddenMarkovTreeData();
    HiddenMarkovTreeData(int inb_integral,
                         int inb_float,
-                        const FrequencyDistribution& ihsize,
-                        const FrequencyDistribution& ihnb_children,
+                        const stat_tool::FrequencyDistribution& ihsize,
+                        const stat_tool::FrequencyDistribution& ihnb_children,
                         bool no_child_flag,
                         bool init_flag);
    HiddenMarkovTreeData(int inb_integral, int inb_float, int inb_trees);
@@ -750,7 +750,7 @@ public :
    ~HiddenMarkovTreeData();
    HiddenMarkovTreeData& operator=(const HiddenMarkovTreeData& trees);
 
-   DiscreteDistributionData* extract(StatError& error, int type,
+   stat_tool::DiscreteDistributionData* extract(StatError& error, int type,
                                      int variable, int value) const;
 
    /** Return the model part of a HiddenMarkovTreeData,
@@ -833,7 +833,7 @@ public :
 
    ptFrequencyDistribution_array_2d get_observation() const;
    ptFrequencyDistribution_array get_observation(int variable) const;
-   FrequencyDistribution* get_observation(int variable, int state) const;
+   stat_tool::FrequencyDistribution* get_observation(int variable, int state) const;
 
    TreeCharacteristics* get_state_characteristics() const;
    // access to the characteristic quantity distributions

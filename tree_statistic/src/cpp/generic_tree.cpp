@@ -40,6 +40,7 @@
 #include "stat_tool/stat_tools.h"
 #include "generic_tree.h"
 
+using namespace stat_tool;
 using namespace Stat_trees;
 
 /*--------------------------------------------------------------*

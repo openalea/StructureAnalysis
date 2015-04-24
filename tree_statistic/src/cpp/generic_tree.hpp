@@ -468,7 +468,7 @@ Unlabelled_tree::Unlabelled_tree(Generic_tree<Type>& gtree)
  *--------------------------------------------------------------*/
 
 template <class Tree>
-Random_unlabelled_tree_generator<Tree>::Random_unlabelled_tree_generator(const Distribution& distrib,
+Random_unlabelled_tree_generator<Tree>::Random_unlabelled_tree_generator(const stat_tool::Distribution& distrib,
                                                                          int max_size,
                                                                          int max_depth) :
     _curr_width(0),
@@ -476,7 +476,7 @@ Random_unlabelled_tree_generator<Tree>::Random_unlabelled_tree_generator(const D
     _max_size(max_size),
     _max_depth(max_depth),
     _leaves()
-{ _distribution= new Distribution(distrib); }
+{ _distribution= new stat_tool::Distribution(distrib); }
 
 
 /*--------------------------------------------------------------*
@@ -492,7 +492,7 @@ Random_unlabelled_tree_generator<Tree>::Random_unlabelled_tree_generator(const R
   _nb_children= rutg._nb_children;
   _max_size= rutg._nb_children;
   _max_depth= rutg._max_depth;
-  _distribution= new Distribution(*(rutg._distribution));
+  _distribution= new stat_tool::Distribution(*(rutg._distribution));
 }
 
 /*--------------------------------------------------------------*

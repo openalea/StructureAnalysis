@@ -305,7 +305,7 @@ Generic_Int_fl_container* Typed_edge_int_fl_tree<Generic_Int_fl_container>::get_
 /*****************************************************************
  *
  *  Random determination of the integral variables for
- *  Typed_edge_int_fl_tree class using a set of Distributions (one for
+ *  Typed_edge_int_fl_tree class using a set of stat_tool::Distributions (one for
  *  each integral variable)
  *
  **/
@@ -505,8 +505,8 @@ Typed_edge_trees<Generic_Int_fl_container>::Typed_edge_trees(int inb_trees,
 template<typename Generic_Int_fl_container>
 Typed_edge_trees<Generic_Int_fl_container>::Typed_edge_trees(int inb_integral,
                                                              int inb_float,
-                                                             const FrequencyDistribution& ihsize,
-                                                             const FrequencyDistribution& ihnb_children,
+                                                             const stat_tool::FrequencyDistribution& ihsize,
+                                                             const stat_tool::FrequencyDistribution& ihnb_children,
                                                              bool no_child_flag,
                                                              bool init_flag)
  : _nb_integral(inb_integral)
@@ -552,7 +552,7 @@ Typed_edge_trees<Generic_Int_fl_container>::Typed_edge_trees(int inb_integral,
 
       trees= new Typed_edge_int_fl_tree<Generic_Int_fl_container>*[_nb_trees];
 
-      hnb_children= new FrequencyDistribution(ihnb_children);
+      hnb_children= new stat_tool::FrequencyDistribution(ihnb_children);
 
       if (init_flag)
       {
@@ -582,7 +582,7 @@ Typed_edge_trees<Generic_Int_fl_container>::Typed_edge_trees(int inb_integral,
       {
          for(t= 0; t < _nb_trees; t++)
             trees[t]= NULL;
-         hsize= new FrequencyDistribution(ihsize);
+         hsize= new stat_tool::FrequencyDistribution(ihsize);
       }
    }
 }
@@ -747,8 +747,8 @@ Typed_edge_trees<Generic_Int_fl_container>::extract(StatError &error, int type,
                                                     int variable, int value) const
 {
    bool status= true;
-   // Distribution *pdist= NULL;
-   FrequencyDistribution *phisto= NULL;
+   // stat_tool::Distribution *pdist= NULL;
+   stat_tool::FrequencyDistribution *phisto= NULL;
    DiscreteDistributionData *histo= NULL;
 
    error.init();
@@ -923,7 +923,7 @@ Typed_edge_trees<Generic_Int_fl_container>::build_vectors(StatError& error) cons
  *
  **/
 
-template<typename Generic_Int_fl_container> Sequences*
+template<typename Generic_Int_fl_container> sequence_analysis::Sequences*
 Typed_edge_trees<Generic_Int_fl_container>::build_sequences(StatError& error,
                                                             bool all_paths,
                                                             bool auto_axis) const
@@ -947,7 +947,7 @@ Typed_edge_trees<Generic_Int_fl_container>::build_sequences(StatError& error,
    vertex_array leaves;
    generic_visitor<tree_type> visitor;
    children_iterator it, end;
-   Sequences *res= NULL;
+   sequence_analysis::Sequences *res= NULL;
 
    error.init();
 
@@ -1097,7 +1097,7 @@ Typed_edge_trees<Generic_Int_fl_container>::build_sequences(StatError& error,
          iidentifier[s]= videntifier[s];
       }
 
-      res= new Sequences(nb_sequences, iidentifier, ilength, IMPLICIT_TYPE,
+      res= new sequence_analysis::Sequences(nb_sequences, iidentifier, ilength, sequence_analysis::IMPLICIT_TYPE,
                          _nb_integral, itype[0], isequence);
 
       for (s= 0; s < nb_sequences; s++)
@@ -1249,13 +1249,13 @@ Typed_edge_trees<Generic_Int_fl_container>::shift(StatError& error,
    {
       variable--;
 
-      if ((_type[variable] != INT_VALUE) && (_type[variable] != TIME)
+      if ((_type[variable] != INT_VALUE) && (_type[variable] != sequence_analysis::TIME)
           && (_type[variable] != STATE))
       {
          status= false;
          ostringstream correction_message;
          correction_message << STAT_TREES_type[INT_VALUE]
-                            << " or " << STAT_TREES_type[TIME]
+                            << " or " << STAT_TREES_type[sequence_analysis::TIME]
                             << " or " << STAT_TREES_type[STATE];
          error.correction_update(STAT_TREES_error[TREESTATR_VARIABLE_TYPE] , (correction_message.str()).c_str());
       }
@@ -1744,7 +1744,7 @@ Typed_edge_trees<Generic_Int_fl_container>::value_select(StatError& error,
    {
       variable--;
 
-      if (_type[variable] != POSITION)
+      if (_type[variable] != sequence_analysis::POSITION)
       {
          if ((imin_value > _max_value.Int(variable))
                || (imin_value > imax_value))
@@ -1972,7 +1972,7 @@ Typed_edge_trees<Generic_Int_fl_container>::select_individual(StatError& error,
 
    if (status)
    {
-      index= identifier_select(_nb_trees, identifier, inb_trees, iidentifier, keep);
+      index= stat_tool::identifier_select(_nb_trees, identifier, inb_trees, iidentifier, keep);
       otrees= new observed_trees(*this, (keep ? inb_trees : _nb_trees-inb_trees), index);
       delete [] index;
    }
@@ -2063,7 +2063,7 @@ Typed_edge_trees<Generic_Int_fl_container>::select_variable(StatError& error,
       }
       /*
       if ((bnb_variable == 1)
-            && ((itype[0] == TIME) || (itype[0] == POSITION)))
+            && ((itype[0] == sequence_analysis::TIME) || (itype[0] == sequence_analysis::POSITION)))
       {
          status= false;
          error.update(STAT_error[STATR_NB_SELECTED_VARIABLE]);
@@ -2252,11 +2252,11 @@ Typed_edge_trees<Generic_Int_fl_container>::merge_variable(StatError& error,
       res= new observed_trees(inb_integral, inb_float, NULL, _nb_trees, true);
 
       if (hsize != NULL)
-         res->hsize= new FrequencyDistribution(*hsize);
+         res->hsize= new stat_tool::FrequencyDistribution(*hsize);
       else
          res->hsize= NULL;
       if (hnb_children != NULL)
-         res->hnb_children= new FrequencyDistribution(*hnb_children);
+         res->hnb_children= new stat_tool::FrequencyDistribution(*hnb_children);
       else
          res->hnb_children= NULL;
 
@@ -2514,7 +2514,7 @@ Typed_edge_trees<Generic_Int_fl_container>::segmentation_extract(StatError& erro
    key *clist= NULL;
    value tvalue;
    value *ptvalue= new value(_nb_integral-1, _nb_float);
-   FrequencyDistribution *marginal= NULL;
+   stat_tool::FrequencyDistribution *marginal= NULL;
    std::deque<std::deque<key> > zones;
    std::deque<key> node_list, zone_id;
    // set of the homogeneous zones
@@ -3069,7 +3069,7 @@ bool Typed_edge_trees<Generic_Int_fl_container>::plot_data_write(StatError& erro
 
          size_nb_trees= new int[hsize->nb_value];
 
-         if ((_type[0] == TIME) || (_type[0] == POSITION))
+         if ((_type[0] == sequence_analysis::TIME) || (_type[0] == sequence_analysis::POSITION))
          {
             max_index= 0;
             for(i= 0; i < _nb_trees; i++)
@@ -3106,13 +3106,13 @@ bool Typed_edge_trees<Generic_Int_fl_container>::plot_data_write(StatError& erro
             if (i == 1)
             {
                out_file << "set terminal postscript" << endl;
-               file_name[1] << label(prefix) << ".ps";
+               file_name[1] << stat_tool::label(prefix) << ".ps";
                out_file << "set output \"" << file_name[1].str() << "\"\n\n";
             }
 
             out_file << "set border 15 lw 0\n" << "set tics out\n" << "set xtics nomirror\n";
 
-            for(j= ((_type[0] == TIME) || (_type[0] == POSITION) ? 1 : 0); j < _nb_integral; j++)
+            for(j= ((_type[0] == sequence_analysis::TIME) || (_type[0] == sequence_analysis::POSITION) ? 1 : 0); j < _nb_integral; j++)
             {
                for(k= 0; k < hsize->nb_value; k++)
                   size_nb_trees[k]= 0;
@@ -3121,11 +3121,11 @@ bool Typed_edge_trees<Generic_Int_fl_container>::plot_data_write(StatError& erro
                if (title)
                {
                   out_file << title;
-                  if (_nb_integral > ((_type[0] == TIME) || (_type[0] == POSITION) ? 2 : 1))
+                  if (_nb_integral > ((_type[0] == sequence_analysis::TIME) || (_type[0] == sequence_analysis::POSITION) ? 2 : 1))
                      out_file << " - ";
                }
 
-               if ((_type[0] == TIME) || (_type[0] == POSITION))
+               if ((_type[0] == sequence_analysis::TIME) || (_type[0] == sequence_analysis::POSITION))
                {
                   if (_nb_integral > 2)
                      out_file << STAT_label[STATL_VARIABLE] << " " << j;
@@ -3143,7 +3143,7 @@ bool Typed_edge_trees<Generic_Int_fl_container>::plot_data_write(StatError& erro
 
                   for(k= 0; k < _nb_trees; k++)
                   {
-                     out_file << "\"" << label((data_file_name[this->size[k]].str()).c_str()) << "\" using "
+                     out_file << "\"" << stat_tool::label((data_file_name[this->size[k]].str()).c_str()) << "\" using "
                               << size_nb_trees[trees[k]->get_size()]*_nb_integral+1 << " : "
                               << size_nb_trees[trees[k]->get_size()]*_nb_integral+j+1;
                      if (_nb_trees <= PLOT_TITLE_NB_TREES)
@@ -3165,7 +3165,7 @@ bool Typed_edge_trees<Generic_Int_fl_container>::plot_data_write(StatError& erro
                   if (_max_value.Int(j)-_min_value.Int(j) < TIC_THRESHOLD)
                      out_file << "set ytics autofreq" << endl;
                }
-               else // (_type[0] != TIME) && (_type[0] != POSITION)
+               else // (_type[0] != sequence_analysis::TIME) && (_type[0] != sequence_analysis::POSITION)
                {
                   if (_nb_integral > 1)
                      out_file << STAT_label[STATL_VARIABLE] << " " << j + 1;
@@ -3182,7 +3182,7 @@ bool Typed_edge_trees<Generic_Int_fl_container>::plot_data_write(StatError& erro
                            << ":" << MAX(_max_value.Int(j), _min_value.Int(j)+1) << "] ";
                   for(k= 0; k < _nb_trees; k++)
                   {
-                     out_file << "\"" << label((data_file_name[this->size[k]].str()).c_str()) << "\" using "
+                     out_file << "\"" << stat_tool::label((data_file_name[this->size[k]].str()).c_str()) << "\" using "
                               << size_nb_trees[trees[k]->get_size()]*_nb_trees+j+1;
                      if (_nb_trees <= PLOT_TITLE_NB_TREES)
                         out_file << " title \"" << k // identifier[k]
@@ -3479,7 +3479,7 @@ bool Typed_edge_trees<Generic_Int_fl_container>::spreadsheet_write(StatError& er
          out_file << "\n" << STAT_word[STATW_VARIABLE] << "\t" << var+1 << "\t"
                   << STAT_TREES_type[_type[var]];
 
-         if (_type[var] != POSITION)
+         if (_type[var] != sequence_analysis::POSITION)
          {
             out_file << "\t\t";
             out_file << STAT_label[STATL_MIN_VALUE] << "\t" << _min_value.Int(var) << "\t\t"
@@ -3608,7 +3608,7 @@ MultiPlotSet* Typed_edge_trees<Generic_Int_fl_container>::get_plotable(StatError
 {
    bool characteristics_computed;
    MultiPlotSet *plotset= NULL;
-   FrequencyDistribution **charac= NULL;
+   stat_tool::FrequencyDistribution **charac= NULL;
 
    error.init();
 
@@ -4100,14 +4100,14 @@ int Typed_edge_trees<Generic_Int_fl_container>::get_nb_values(int variable) cons
  **/
 
 template<typename Generic_Int_fl_container>
-FrequencyDistribution* Typed_edge_trees<Generic_Int_fl_container>::get_marginal(int variable) const
+stat_tool::FrequencyDistribution* Typed_edge_trees<Generic_Int_fl_container>::get_marginal(int variable) const
 {
-   FrequencyDistribution *res;
+   stat_tool::FrequencyDistribution *res;
 
    if (characteristics != NULL)
       if (characteristics[variable] != NULL)
          if (characteristics[variable]->get_marginal_distribution() != NULL)
-            res= new FrequencyDistribution(*(characteristics[variable]->get_marginal_distribution()));
+            res= new stat_tool::FrequencyDistribution(*(characteristics[variable]->get_marginal_distribution()));
 
    return res;
 }
@@ -4200,71 +4200,71 @@ bool Typed_edge_trees<Generic_Int_fl_container>::is_characteristic(int variable,
  **/
 
 template<typename Generic_Int_fl_container>
-FrequencyDistribution* Typed_edge_trees<Generic_Int_fl_container>::get_first_occurrence_root(int variable,
+stat_tool::FrequencyDistribution* Typed_edge_trees<Generic_Int_fl_container>::get_first_occurrence_root(int variable,
                                                                                              int value) const
 {
-   FrequencyDistribution *res;
+   stat_tool::FrequencyDistribution *res;
 
    if (characteristics != NULL)
       if (characteristics[variable] != NULL)
          if (characteristics[variable]->first_occurrence_root != NULL)
-            res= new FrequencyDistribution(*(characteristics[variable]->get_first_occurrence_root(value)));
+            res= new stat_tool::FrequencyDistribution(*(characteristics[variable]->get_first_occurrence_root(value)));
 
    return res;
 }
 
 template<typename Generic_Int_fl_container>
-FrequencyDistribution* Typed_edge_trees<Generic_Int_fl_container>::get_first_occurrence_leaves(int variable,
+stat_tool::FrequencyDistribution* Typed_edge_trees<Generic_Int_fl_container>::get_first_occurrence_leaves(int variable,
                                                                                                int value) const
 {
-   FrequencyDistribution *res;
+   stat_tool::FrequencyDistribution *res;
 
    if (characteristics != NULL)
       if (characteristics[variable] != NULL)
          if (characteristics[variable]->first_occurrence_leaves != NULL)
-            res= new FrequencyDistribution(*(characteristics[variable]->get_first_occurrence_leaves(value)));
+            res= new stat_tool::FrequencyDistribution(*(characteristics[variable]->get_first_occurrence_leaves(value)));
 
    return res;
 }
 
 template<typename Generic_Int_fl_container>
-FrequencyDistribution* Typed_edge_trees<Generic_Int_fl_container>::get_sojourn_size(int variable,
+stat_tool::FrequencyDistribution* Typed_edge_trees<Generic_Int_fl_container>::get_sojourn_size(int variable,
                                                                                     int value) const
 {
-   FrequencyDistribution *res;
+   stat_tool::FrequencyDistribution *res;
 
    if (characteristics != NULL)
       if (characteristics[variable] != NULL)
          if (characteristics[variable]->sojourn_size != NULL)
-            res= new FrequencyDistribution(*(characteristics[variable]->get_sojourn_size(value)));
+            res= new stat_tool::FrequencyDistribution(*(characteristics[variable]->get_sojourn_size(value)));
 
    return res;
 }
 
 template<typename Generic_Int_fl_container>
-FrequencyDistribution* Typed_edge_trees<Generic_Int_fl_container>::get_nb_zones(int variable,
+stat_tool::FrequencyDistribution* Typed_edge_trees<Generic_Int_fl_container>::get_nb_zones(int variable,
                                                                                 int value) const
 {
-   FrequencyDistribution *res;
+   stat_tool::FrequencyDistribution *res;
 
    if (characteristics != NULL)
       if (characteristics[variable] != NULL)
          if (characteristics[variable]->nb_zones != NULL)
-            res= new FrequencyDistribution(*(characteristics[variable]->get_nb_zones(value)));
+            res= new stat_tool::FrequencyDistribution(*(characteristics[variable]->get_nb_zones(value)));
 
    return res;
 }
 
 template<typename Generic_Int_fl_container>
-FrequencyDistribution* Typed_edge_trees<Generic_Int_fl_container>::get_nb_occurrence(int variable,
+stat_tool::FrequencyDistribution* Typed_edge_trees<Generic_Int_fl_container>::get_nb_occurrence(int variable,
                                                                                      int value) const
 {
-   FrequencyDistribution *res;
+   stat_tool::FrequencyDistribution *res;
 
    if (this->characteristics != NULL)
       if (this->characteristics[variable] != NULL)
          if (this->characteristics[variable]->nb_occurrence != NULL)
-            res= new FrequencyDistribution(*(this->characteristics[variable]->get_nb_occurrence(value)));
+            res= new stat_tool::FrequencyDistribution(*(this->characteristics[variable]->get_nb_occurrence(value)));
 
    return res;
 }
@@ -4485,12 +4485,12 @@ void Typed_edge_trees<Generic_Int_fl_container>::copy(const Typed_edge_trees& ot
    }
 
    if (otrees.hsize != NULL)
-      hsize= new FrequencyDistribution(*(otrees.hsize));
+      hsize= new stat_tool::FrequencyDistribution(*(otrees.hsize));
    else
       hsize= NULL;
 
    if (otrees.hnb_children != NULL)
-      hnb_children= new FrequencyDistribution(*(otrees.hnb_children));
+      hnb_children= new stat_tool::FrequencyDistribution(*(otrees.hnb_children));
    else
       hnb_children= NULL;
 
@@ -4664,7 +4664,7 @@ void Typed_edge_trees<Generic_Int_fl_container>::select_variable(const Typed_edg
 
    for(var= 0; var < _nb_integral; var++)
    {
-      if (_type[var] != POSITION)
+      if (_type[var] != sequence_analysis::POSITION)
       {
         _min_value.Int(var)= otrees._min_value.Int(variable[var]);
         _max_value.Int(var)= otrees._max_value.Int(variable[var]);
@@ -4684,10 +4684,10 @@ void Typed_edge_trees<Generic_Int_fl_container>::select_variable(const Typed_edg
    _max_depth= otrees._max_depth;
 
    if (otrees.hsize != NULL)
-      hsize= new FrequencyDistribution(*otrees.hsize);
+      hsize= new stat_tool::FrequencyDistribution(*otrees.hsize);
 
    if (otrees.hnb_children != NULL)
-      hnb_children= new FrequencyDistribution(*otrees.hnb_children);
+      hnb_children= new stat_tool::FrequencyDistribution(*otrees.hnb_children);
 
 }
 
@@ -4708,7 +4708,7 @@ bool Typed_edge_trees<Generic_Int_fl_container>::plot_print(const char * prefix,
 {
    bool status= false;
    register int i;
-   const FrequencyDistribution *phisto[1];
+   const stat_tool::FrequencyDistribution *phisto[1];
    ostringstream data_file_name;
 
    // print the data file
@@ -4757,9 +4757,9 @@ bool Typed_edge_trees<Generic_Int_fl_container>::plot_print(const char * prefix,
                out_file << "set terminal postscript" << endl;
 
                if (nb_variables == 1)
-                  file_name[1] << label(prefix) << ".ps";
+                  file_name[1] << stat_tool::label(prefix) << ".ps";
                else
-                  file_name[1] << label(prefix) << variable+1 << ".ps";
+                  file_name[1] << stat_tool::label(prefix) << variable+1 << ".ps";
                out_file << "set output \"" << file_name[1].str() << "\"\n\n";
             }
 
@@ -4778,7 +4778,7 @@ bool Typed_edge_trees<Generic_Int_fl_container>::plot_print(const char * prefix,
 
             out_file << "plot [0:" << MAX(characteristics[variable]->marginal_distribution->nb_value-1 , 1) << "] [0:"
                      << (int)(characteristics[variable]->marginal_distribution->max * YSCALE)+1 << "] \""
-                     << label((data_file_name.str()).c_str()) << "\" using 1 title \""
+                     << stat_tool::label((data_file_name.str()).c_str()) << "\" using 1 title \""
                      << STAT_label[STATL_VARIABLE] << " " << variable+1 << " - "
                      << STAT_label[_type[variable] == STATE ? STATL_STATE : STATL_OUTPUT] << " "
                      << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\" with impulses" << endl;
@@ -4802,7 +4802,7 @@ bool Typed_edge_trees<Generic_Int_fl_container>::plot_print(const char * prefix,
 
             out_file << "plot [0:" << hsize->nb_value-1 << "] [0:"
                      << (int)(hsize->max*YSCALE)+1 << "] \""
-                     << label((data_file_name.str()).c_str()) << "\" using 2 title \""
+                     << stat_tool::label((data_file_name.str()).c_str()) << "\" using 2 title \""
                      << STAT_TREES_label[TREESTATL_TREE_SIZE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                      << "\" with impulses" << endl;
 
@@ -4969,7 +4969,7 @@ void Typed_edge_trees<Generic_Int_fl_container>::build_size_frequency_distributi
    if (hsize != NULL)
       delete hsize;
 
-   hsize= new FrequencyDistribution(_max_size+1);
+   hsize= new stat_tool::FrequencyDistribution(_max_size+1);
    hsize->nb_element= _nb_trees;
    for(t= 0; t < _nb_trees; t++)
       (hsize->frequency[trees[t]->get_size()])++;
@@ -5008,7 +5008,7 @@ void Typed_edge_trees<Generic_Int_fl_container>::build_nb_children_frequency_dis
    if (hnb_children != NULL)
       delete hnb_children;
 
-   hnb_children= new FrequencyDistribution(max_nb_children_computation()+1);
+   hnb_children= new stat_tool::FrequencyDistribution(max_nb_children_computation()+1);
    hnb_children->nb_element= nb_vertices;
    for(t= 0; t < _nb_trees; t++)
       if (trees[t] != NULL)

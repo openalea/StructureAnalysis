@@ -94,14 +94,14 @@ public :
                       int* itype,
                       pt_tree_type_array otrees);
    Int_trees(int inb_integral,
-             const FrequencyDistribution& ihsize,
-             const FrequencyDistribution& ihnb_children,
+             const stat_tool::FrequencyDistribution& ihsize,
+             const stat_tool::FrequencyDistribution& ihnb_children,
              bool no_child_flag= false,
              bool init_flag= true);
 
    virtual ~Int_trees();
 
-   void iid_simulation(const Distribution& distrib);
+   void iid_simulation(const stat_tool::Distribution& distrib);
 
 };
 };
