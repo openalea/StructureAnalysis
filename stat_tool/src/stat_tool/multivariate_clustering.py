@@ -18,7 +18,7 @@
 __license__ = "Cecill-C"
 __revision__ = ""
 
-import warnings, numpy as np, copy, math
+import warnings, numpy as np, copy, math, time
 from numpy import ndarray
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
@@ -75,7 +75,6 @@ def mad_based_outlier(points, thresh=3.5):
     where $K$ is a constant scale factor, which depends on the distribution.
     """
     isdict = False
-    from numpy import ndarray
     if isinstance(points, dict):
         keys, points = points.keys(), points.values()
         isdict = True
@@ -378,8 +377,6 @@ def load_mvpd(fname):
     """
     Save the object on disk under `fname`.
     """
-    import cPickle as pickle, gzip, time
-
     print "Trying to open the mvpd_matrix file {}...".format(fname)
     t_start = time.time()
     with open(fname, 'rb') as input:
@@ -834,8 +831,6 @@ class mvpd_matrix:
          - clustering_method (str): clustering methods to be applyed, must be "Ward" or "Spectral"
          - clustering_range (list): range of clusters to consider.
         """
-        from sklearn import metrics
-        from sklearn.cluster import spectral_clustering, Ward
         clustering_labels={}
         sil = {}
         assert k_min>1
@@ -868,8 +863,6 @@ class mvpd_matrix:
          - clustering_method (str): clustering methods to be applyed, must be "Ward" or "Spectral"
          - clustering_range (list): range of clusters to consider.
         """
-        from sklearn import metrics
-        from sklearn.cluster import spectral_clustering, Ward
         clustering_labels, w, N = {}, {}, {}
         CH, sil = {}, {}
         assert k_min>=1
