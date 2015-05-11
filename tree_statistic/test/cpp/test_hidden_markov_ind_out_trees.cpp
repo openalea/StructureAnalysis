@@ -23,6 +23,8 @@
 #include "tree_statistic/hidden_markov_tree.h"
 #include "tree_statistic/hidden_markov_ind_out_tree.h"
 
+using namespace stat_tool;
+using namespace sequence_analysis;
 using namespace Stat_trees;
 
 int main(void)

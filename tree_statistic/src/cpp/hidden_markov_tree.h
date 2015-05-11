@@ -93,7 +93,7 @@ enum {
           and that of the distribution of characteristic quantities
 */
 
-class CategoricalTreeProcess : public CategoricalProcess
+class CategoricalTreeProcess : public stat_tool::CategoricalProcess
 {  // a collection of categorical distributions, mainly used for
    // the representation of emission distributions given
    // a state variable (e.g. a hidden state)
@@ -169,11 +169,12 @@ private :
 
    std::ostream& ascii_print(std::ostream &os, int process,
                              stat_tool::FrequencyDistribution** empirical_observation,
-                             const TreeCharacteristics* characteristics ,
+                             const TreeCharacteristics * characteristics,
                              bool exhaustive, bool file_flag) const;
+
    std::ostream& spreadsheet_print(std::ostream &os, int process,
                                    stat_tool::FrequencyDistribution** empirical_observation= NULL,
-                                   const TreeCharacteristics* characteristics= NULL) const;
+                                   const TreeCharacteristics * characteristics= NULL) const;
 
    /** Gnuplot output of \e self*/
    bool plot_print(const char * prefix, const char * title, int process,

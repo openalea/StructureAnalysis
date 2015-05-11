@@ -24,6 +24,8 @@
 #define random rand
 #endif
 
+using namespace stat_tool;
+using namespace sequence_analysis;
 using namespace Stat_trees;
 using namespace Tree_tie;
 

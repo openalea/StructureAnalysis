@@ -695,12 +695,13 @@ void CategoricalTreeProcess::copy_Distribution_array(stat_tool::Distribution**& 
  *  empirical observation distributions, tree characteristics
  *  and flags on the level of detail and on the file use
  *
- **
+ **/
 
-ostream& CategoricalTreeProcess::ascii_print(ostream &os, int process,
-                                             FrequencyDistribution** empirical_observation,
-                                             const TreeCharacteristics* characteristics,
-                                             bool exhaustive, bool file_flag) const
+ostream& CategoricalTreeProcess::ascii_print(ostream& os, int process, 
+                                             FrequencyDistribution** empirical_observation, 
+                                             const TreeCharacteristics * characteristics, 
+					     bool exhaustive, bool file_flag) const
+
 {
    bool no_characteristic_print = false;
    register int i , j;
@@ -1271,7 +1272,7 @@ ostream& CategoricalTreeProcess::ascii_print(ostream &os, int process,
 
 ostream& CategoricalTreeProcess::spreadsheet_print(ostream &os, int process,
                                                    FrequencyDistribution** empirical_observation,
-                                                   const TreeCharacteristics* characteristics) const
+                                                   const TreeCharacteristics * characteristics) const
 {
 #ifdef __GNUC__
    #warning CategoricalTreeProcess::spreadsheet_print not implemented
