@@ -40,6 +40,8 @@
 #define MIXTURE_H
 
 
+#include "vectors.h"
+
 
 namespace stat_tool {
 
