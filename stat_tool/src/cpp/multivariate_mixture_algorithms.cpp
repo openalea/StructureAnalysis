@@ -44,11 +44,6 @@
 
 #include <boost/scoped_array.hpp>
 
-#include "stat_tools.h"
-#include "distribution.h"
-#include "discrete_mixture.h"
-#include "markovian.h"
-#include "vectors.h"
 #include "multivariate_mixture.h"
 #include "stat_label.h"
 
