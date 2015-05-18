@@ -25,14 +25,12 @@
 #include "export_base.h"
 #include "wrapper_util.h"
 
-#include "stat_tool/stat_tools.h"
+// #include "stat_tool/stat_tools.h"
 
 // related to the enumerates
-#include "stat_tool/regression.h"
-#include "stat_tool/markovian.h"
-#include "stat_tool/vectors.h"
 #include "stat_tool/distribution.h"
 #include "stat_tool/distance_matrix.h"
+#include "stat_tool/regression.h"
 
 #include <boost/python.hpp>
 #include <boost/python/detail/api_placeholder.hpp>
