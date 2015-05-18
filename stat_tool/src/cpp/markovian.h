@@ -40,9 +40,8 @@
 #define MARKOVIAN_H
 
 
-
+#include "stat_tools.h"
 #include "chain_reestimation.h"
-
 
 
 namespace stat_tool {
