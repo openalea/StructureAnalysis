@@ -44,8 +44,6 @@
 #include "tool/rw_locale.h"
 #include "tool/config.h"
 
-#include "stat_tools.h"
-#include "distribution.h"
 #include "discrete_mixture.h"
 #include "stat_label.h"
 
