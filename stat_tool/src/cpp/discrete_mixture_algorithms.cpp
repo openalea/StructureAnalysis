@@ -38,8 +38,6 @@
 
 #include <math.h>
 
-#include "stat_tools.h"
-#include "distribution.h"
 #include "discrete_mixture.h"
 #include "stat_label.h"
 
