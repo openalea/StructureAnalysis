@@ -25,7 +25,6 @@
 #include "export_markovian.h"
 #include "wrapper_util.h"
 
-#include "stat_tool/stat_tools.h"
 #include "stat_tool/markovian.h"
 
 #include <boost/python.hpp>
