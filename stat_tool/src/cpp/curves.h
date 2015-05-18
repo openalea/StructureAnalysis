@@ -40,9 +40,7 @@
 #define CURVES_H
 
 
-
-#include "plotable.h"
-
+#include "stat_tools.h"
 
 
 namespace stat_tool {
