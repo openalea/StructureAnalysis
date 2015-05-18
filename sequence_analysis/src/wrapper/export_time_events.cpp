@@ -4,7 +4,7 @@
  *
  *        Copyright 2006-2007 INRIA - CIRAD - INRA
  *
- *        File author(s): Yann Guédon <yann.guedon@cirad.fr>
+ *        File author(s): Yann Guedon <yann.guedon@cirad.fr>
  *                        Thomas Cokelaer <Thomas.Cokelaer@inria.fr>
  *
  *        Distributed under the GPL 2.0 License.
@@ -21,13 +21,6 @@
 
 #include "wrapper_util.h"
 
-
-#include "stat_tool/stat_tools.h"
-#include "stat_tool/curves.h"
-#include "stat_tool/distribution.h"
-#include "stat_tool/markovian.h"
-#include "stat_tool/vectors.h"
-#include "stat_tool/distance_matrix.h"
 #include "stat_tool/stat_label.h"
 
 #include "sequence_analysis/sequences.h"
