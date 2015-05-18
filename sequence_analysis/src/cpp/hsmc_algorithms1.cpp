@@ -39,18 +39,10 @@
 #include <math.h>
 #include <sstream>
 
-#include "stat_tool/stat_tools.h"
-#include "stat_tool/curves.h"
-#include "stat_tool/distribution.h"
-#include "stat_tool/markovian.h"
-#include "stat_tool/vectors.h"
-#include "stat_tool/distance_matrix.h"
 #include "stat_tool/stat_label.h"
 
 #include "stat_tool/distribution_reestimation.hpp"   // probleme compilateur C++ Windows
 
-#include "sequences.h"
-#include "semi_markov.h"
 #include "hidden_semi_markov.h"
 #include "sequence_label.h"
 
@@ -1440,7 +1432,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
               }
 
 #             ifdef DEBUG
-              cout << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_MEAN] << ": "
+              cout << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_MEAN] << ": "
                    << occupancy_mean << endl;
 #             endif
 
