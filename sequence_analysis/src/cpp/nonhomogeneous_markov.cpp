@@ -45,66 +45,12 @@
 #include "tool/rw_locale.h"
 #include "tool/config.h"
 
-#include "stat_tool/stat_tools.h"
-#include "stat_tool/regression.h"
-#include "stat_tool/curves.h"
-#include "stat_tool/distribution.h"
-#include "stat_tool/markovian.h"
-#include "stat_tool/vectors.h"
-#include "stat_tool/distance_matrix.h"
 #include "stat_tool/stat_label.h"
 
-#include "sequences.h"
 #include "nonhomogeneous_markov.h"
 #include "sequence_label.h"
 
 using namespace std;
-
-
-namespace stat_tool {
-
-
-
-/*--------------------------------------------------------------*
- *
- *  Ecriture d'une courbe et des residus standardises correspondants au format Gnuplot.
- *
- *  arguments : path, pointeur sur les residus standardises.
- *
- *--------------------------------------------------------------*/
-
-bool Curves::plot_print_standard_residual(const char *path , double *standard_residual) const
-
-{
-  bool status = false;
-  register int i;
-  ofstream out_file(path);
-
-
-  if (out_file) {
-    status = true;
-
-    // ecriture des reponses observees et des residus standardises
-
-    for (i = 0;i < length;i++) {
-      if (frequency[i] > 0) {
-        out_file << i << " " << point[0][i];
-        if (standard_residual) {
-          out_file << " " << standard_residual[i];
-        }
-        out_file << " " << frequency[i] << endl;
-      }
-    }
-  }
-
-  return status;
-}
-
-
-};  // namespace stat_tool
-
-
-
 using namespace stat_tool;
 
 
