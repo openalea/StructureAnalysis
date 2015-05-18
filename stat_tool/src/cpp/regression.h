@@ -40,6 +40,8 @@
 #define REGRESSION_H
 
 
+#include "vectors.h"
+
 
 namespace stat_tool {
 
@@ -107,9 +109,6 @@ namespace stat_tool {
     double max_computation() const;
   };
 
-
-
-  class Vectors;
 
 
   class Regression : public StatInterface , public RegressionKernel {  // fonction de regression
