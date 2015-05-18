@@ -40,6 +40,8 @@
 #define VARIABLE_ORDER_MARKOV_H
 
 
+#include "sequences.h"
+
 
 namespace Stat_trees {
   class MarkovOutTree;
