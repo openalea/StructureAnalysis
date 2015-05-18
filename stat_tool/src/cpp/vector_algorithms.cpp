@@ -42,10 +42,7 @@
 
 #include "tool/config.h"
 
-#include "stat_tools.h"
-#include "markovian.h"
 #include "vectors.h"
-#include "distance_matrix.h"
 #include "stat_label.h"
 
 using namespace std;
