@@ -45,12 +45,6 @@
 #include "tool/rw_locale.h"
 #include "tool/config.h"
 
-#include "stat_tool/stat_tools.h"
-#include "stat_tool/curves.h"
-#include "stat_tool/distribution.h"
-#include "stat_tool/markovian.h"
-#include "stat_tool/vectors.h"
-#include "stat_tool/distance_matrix.h"
 #include "stat_tool/stat_label.h"
 
 #include "sequences.h"
@@ -2288,7 +2282,7 @@ bool Sequences::plot_data_write(StatError &error , const char *prefix ,
             }
 
             out_file << "plot [" << min_index_parameter << ":" << max_index_parameter << "] ["
-                     << MIN(min , 0) << ":" << MAX(max , min + 1) << "] ";
+                     << MIN(min , 0) << ":" << max * YSCALE << "] ";
             for (k = 0;k < nb_sequence;k++) {
               out_file << "\"" << label((data_file_name[length[k]].str()).c_str()) << "\" using "
                        << length_nb_sequence[length[k]] * (nb_variable + 1) + 1 << " : "
@@ -2337,7 +2331,7 @@ bool Sequences::plot_data_write(StatError &error , const char *prefix ,
             }
 
             out_file << "plot [0:" << max_length - 1 << "] [" << MIN(min , 0)
-                     << ":" << MAX(max , min + 1) << "] ";
+                     << ":" << max * YSCALE << "] ";
             for (k = 0;k < nb_sequence;k++) {
               out_file << "\"" << label((data_file_name[length[k]].str()).c_str()) << "\" using "
                        << length_nb_sequence[length[k]] * nb_variable + j + 1;
@@ -2467,7 +2461,7 @@ MultiPlotSet* Sequences::get_plotable_data(StatError &error) const
           }
         }
 
-        plot[i].yrange = Range(MIN(min , 0) , MAX(max , min + 1));
+        plot[i].yrange = Range(MIN(min , 0) , max * YSCALE);
         if (max - min < TIC_THRESHOLD) {
           plot[i].ytics = 1;
         }
