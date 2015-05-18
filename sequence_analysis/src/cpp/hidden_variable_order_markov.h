@@ -40,6 +40,8 @@
 #define HIDDEN_VARIABLE_ORDER_MARKOV_H
 
 
+#include "variable_order_markov.h"
+
 
 namespace sequence_analysis {
 
