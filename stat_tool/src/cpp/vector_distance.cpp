@@ -45,8 +45,6 @@
 #include "tool/rw_locale.h"
 #include "tool/config.h"
 
-#include "stat_tools.h"
-#include "markovian.h"
 #include "vectors.h"
 #include "stat_label.h"
 
