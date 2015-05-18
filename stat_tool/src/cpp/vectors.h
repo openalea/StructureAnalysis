@@ -40,6 +40,11 @@
 #define VECTORS_H
 
 
+#include "stat_tools.h"
+#include "distribution.h"
+#include "distance_matrix.h"
+#include "markovian.h"
+
 
 namespace stat_tool {
 
@@ -88,8 +93,6 @@ namespace stat_tool {
  */
 
 
-  class ContinuousParametricProcess;
-  class DistanceMatrix;
   class MultivariateMixture;
   class Mixture;
   class Regression;
