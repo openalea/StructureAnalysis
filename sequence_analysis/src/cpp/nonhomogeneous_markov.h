@@ -40,6 +40,9 @@
 #define NONHOMOGENEOUS_MARKOV_H
 
 
+#include "stat_tool/regression.h"
+#include "sequences.h"
+
 
 namespace sequence_analysis {
 
