@@ -22,17 +22,10 @@
 
 #include "wrapper_util.h"
 
-#include "stat_tool/stat_tools.h"
-#include "stat_tool/curves.h"
-#include "stat_tool/distribution.h"
-#include "stat_tool/markovian.h"
-#include "stat_tool/vectors.h"
-#include "stat_tool/distance_matrix.h"
 #include "stat_tool/stat_label.h"
 
 #include "sequence_analysis/sequences.h"
 #include "sequence_analysis/renewal.h"
-// #include "sequence_analysis/tops.h"
 #include "sequence_analysis/sequence_label.h"
 
 #include <boost/python.hpp>
