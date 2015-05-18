@@ -23,8 +23,6 @@
 
 #include "wrapper_util.h"
 
-#include "stat_tool/stat_tools.h"
-#include "stat_tool/distribution.h"
 #include "stat_tool/convolution.h"
 
 #include <boost/python.hpp>
