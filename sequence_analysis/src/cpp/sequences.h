@@ -40,6 +40,11 @@
 #define SEQUENCES_H
 
 
+#include "stat_tool/curves.h"
+#include "stat_tool/distribution.h"
+#include "stat_tool/markovian.h"
+#include "stat_tool/vectors.h"
+
 
 namespace sequence_analysis {
 
