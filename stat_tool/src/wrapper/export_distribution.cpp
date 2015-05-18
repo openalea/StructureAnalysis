@@ -25,9 +25,7 @@
 #include "wrapper_util.h"
 #include "export_distribution.h"
 
-#include "stat_tool/stat_tools.h"
 #include "stat_tool/distribution.h"
-
 
 #include <boost/python.hpp>
 // definition of boost::python::len
