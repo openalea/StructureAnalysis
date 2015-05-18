@@ -23,9 +23,7 @@
 #include "wrapper_util.h"
 #include "export_base.h"
 
-#include "stat_tool/stat_tools.h"
 #include "stat_tool/compound.h"
-#include "stat_tool/distribution.h"
 
 #include <boost/python.hpp>
 #include <boost/python/detail/api_placeholder.hpp>
