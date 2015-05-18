@@ -46,9 +46,6 @@
 #include "tool/rw_locale.h"
 #include "tool/config.h"
 
-#include "stat_tools.h"
-#include "distribution.h"
-#include "markovian.h"
 #include "vectors.h"
 #include "stat_label.h"
 
@@ -4220,14 +4217,14 @@ bool Vectors::plot_write(StatError &error , const char *prefix ,
             else {
               out_file << "plot [" << min_value[j];
             }
-            out_file << ":" << MAX(max_value[j] , min_value[j] + 1) << "] [";
+            out_file << ":" << max_value[j] * YSCALE << "] [";
             if ((min_value[k] >= 0.) && (max_value[k] - min_value[k] > min_value[k] * PLOT_RANGE_RATIO)) {
               out_file << 0;
             }
             else {
               out_file << min_value[k];
             }
-            out_file << ":" << MAX(max_value[k] , min_value[k] + 1) << "] \""
+            out_file << ":" << max_value[k] * YSCALE << "] \""
                      << label((data_file_name[0].str()).c_str()) << "\" using "
                      << j + 1 << ":" << k + 1 << " notitle with points" << endl;
 
@@ -4434,7 +4431,7 @@ MultiPlotSet* Vectors::get_plotable() const
         else {
           xmin = min_value[j];
         }
-        plot[i].xrange = Range(xmin , MAX(max_value[j] , min_value[j] + 1));
+        plot[i].xrange = Range(xmin , max_value[j] * YSCALE);
 
         if ((min_value[k] >= 0.) && (max_value[k] - min_value[k] > min_value[k] * PLOT_RANGE_RATIO)) {
           ymin = 0.;
@@ -4442,7 +4439,7 @@ MultiPlotSet* Vectors::get_plotable() const
         else {
           ymin = min_value[k];
         }
-        plot[i].yrange = Range(ymin , MAX(max_value[k] , min_value[k] + 1));
+        plot[i].yrange = Range(ymin , max_value[k] * YSCALE);
 
         if (max_value[j] - min_value[j] < TIC_THRESHOLD) {
           plot[i].xtics = 1;
