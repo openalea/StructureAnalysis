@@ -43,7 +43,6 @@
 #include "tool/rw_cstring.h"
 #include "tool/rw_locale.h"
 
-#include "stat_tools.h"
 #include "distribution.h"
 #include "stat_label.h"
 
