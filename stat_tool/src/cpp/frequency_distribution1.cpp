@@ -43,7 +43,6 @@
 
 #include "tool/config.h"
 
-#include "stat_tools.h"
 #include "distribution.h"
 #include "curves.h"
 #include "stat_label.h"
