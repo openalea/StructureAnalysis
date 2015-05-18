@@ -44,18 +44,12 @@
 #include "tool/rw_tokenizer.h"
 #include "tool/rw_cstring.h"
 #include "tool/rw_locale.h"
+#include "tool/config.h"
 
-#include "stat_tool/stat_tools.h"
-#include "stat_tool/curves.h"
-#include "stat_tool/distribution.h"
-#include "stat_tool/markovian.h"
-#include "stat_tool/vectors.h"
-#include "stat_tool/distance_matrix.h"
 #include "stat_tool/stat_label.h"
 
 #include "renewal.h"
 #include "sequence_label.h"
-#include "tool/config.h"
 
 using namespace std;
 using namespace stat_tool;
@@ -2735,7 +2729,7 @@ ostream& RenewalData::ascii_write(ostream &os , bool exhaustive , bool file_flag
     if (file_flag) {
       os << "# ";
     }
-    os << SEQ_label[SEQL_OBSERVATION_INTER_EVENT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
+    os << STAT_label[STATL_OBSERVATION_INTER_EVENT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
     within->ascii_characteristic_print(os , false , file_flag);
   }
 
@@ -2753,7 +2747,7 @@ ostream& RenewalData::ascii_write(ostream &os , bool exhaustive , bool file_flag
     if (file_flag) {
       os << "# ";
     }
-    os << SEQ_label[SEQL_BACKWARD] << " " << SEQ_label[SEQL_RECURRENCE_TIME] << " "
+    os << STAT_label[STATL_BACKWARD] << " " << SEQ_label[SEQL_RECURRENCE_TIME] << " "
        << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
     backward->ascii_characteristic_print(os , false , file_flag);
 
@@ -2761,7 +2755,7 @@ ostream& RenewalData::ascii_write(ostream &os , bool exhaustive , bool file_flag
     if (file_flag) {
       os << "# ";
     }
-    os << SEQ_label[SEQL_FORWARD] << " " << SEQ_label[SEQL_RECURRENCE_TIME] << " "
+    os << STAT_label[STATL_FORWARD] << " " << SEQ_label[SEQL_RECURRENCE_TIME] << " "
        << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
     forward->ascii_characteristic_print(os , false , file_flag);
 
@@ -2800,12 +2794,12 @@ ostream& RenewalData::ascii_write(ostream &os , bool exhaustive , bool file_flag
     if (inter_event) {
       os << " | " << SEQ_label[SEQL_INTER_EVENT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
     }
-    os << " | " << SEQ_label[SEQL_OBSERVATION_INTER_EVENT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
+    os << " | " << STAT_label[STATL_OBSERVATION_INTER_EVENT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
     if (length_bias) {
       os << " | " << SEQ_label[SEQL_LENGTH_BIASED] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
     }
-    os << " | " << SEQ_label[SEQL_BACKWARD] << " " << SEQ_label[SEQL_RECURRENCE_TIME]
-       << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " | " << SEQ_label[SEQL_FORWARD]
+    os << " | " << STAT_label[STATL_BACKWARD] << " " << SEQ_label[SEQL_RECURRENCE_TIME]
+       << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " | " << STAT_label[STATL_FORWARD]
        << " " << SEQ_label[SEQL_RECURRENCE_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
 
     for (i = 0;i < nb_value;i++) {
@@ -3005,18 +2999,18 @@ ostream& RenewalData::spreadsheet_write(ostream &os) const
        << sqrt(inter_event->variance) / inter_event->mean << endl;
   }
 
-  os << "\n" << SEQ_label[SEQL_OBSERVATION_INTER_EVENT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
+  os << "\n" << STAT_label[STATL_OBSERVATION_INTER_EVENT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
   within->spreadsheet_characteristic_print(os);
 
   if (length_bias) {
     os << "\n" << SEQ_label[SEQL_LENGTH_BIASED] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
     length_bias->spreadsheet_characteristic_print(os);
   }
-  os << "\n" << SEQ_label[SEQL_BACKWARD] << " " << SEQ_label[SEQL_RECURRENCE_TIME] << " "
+  os << "\n" << STAT_label[STATL_BACKWARD] << " " << SEQ_label[SEQL_RECURRENCE_TIME] << " "
      << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
   backward->spreadsheet_characteristic_print(os);
 
-  os << "\n" << SEQ_label[SEQL_FORWARD] << " " << SEQ_label[SEQL_RECURRENCE_TIME] << " "
+  os << "\n" << STAT_label[STATL_FORWARD] << " " << SEQ_label[SEQL_RECURRENCE_TIME] << " "
      << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
   forward->spreadsheet_characteristic_print(os);
 
@@ -3035,12 +3029,12 @@ ostream& RenewalData::spreadsheet_write(ostream &os) const
   if (inter_event) {
     os << "\t" << SEQ_label[SEQL_INTER_EVENT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
   }
-  os << "\t" << SEQ_label[SEQL_OBSERVATION_INTER_EVENT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
+  os << "\t" << STAT_label[STATL_OBSERVATION_INTER_EVENT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
   if (length_bias) {
     os << " \t" << SEQ_label[SEQL_LENGTH_BIASED] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
   }
-  os << "\t" << SEQ_label[SEQL_BACKWARD] << " " << SEQ_label[SEQL_RECURRENCE_TIME]
-     << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t" << SEQ_label[SEQL_FORWARD]
+  os << "\t" << STAT_label[STATL_BACKWARD] << " " << SEQ_label[SEQL_RECURRENCE_TIME]
+     << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t" << STAT_label[STATL_FORWARD]
      << " " << SEQ_label[SEQL_RECURRENCE_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
 
   for (i = 0;i < nb_value;i++) {
@@ -3286,7 +3280,7 @@ bool RenewalData::plot_write(StatError &error , const char *prefix ,
           out_file << "plot [0:" << within->nb_value - 1 << "] [0:"
                    << (int)(within->max * YSCALE) + 1 << "] \""
                    << label((data_file_name[0].str()).c_str()) << "\" using " << j++
-                   << " title \"" << SEQ_label[SEQL_OBSERVATION_INTER_EVENT] << " "
+                   << " title \"" << STAT_label[STATL_OBSERVATION_INTER_EVENT] << " "
                    << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\" with impulses" << endl;
 
           if (within->nb_value - 1 < TIC_THRESHOLD) {
@@ -3339,7 +3333,7 @@ bool RenewalData::plot_write(StatError &error , const char *prefix ,
         out_file << "plot [0:" << backward->nb_value - 1 << "] [0:"
                  << (int)(backward->max * YSCALE) + 1 << "] \""
                  << label((data_file_name[0].str()).c_str()) << "\" using " << j++
-                 << " title \"" << SEQ_label[SEQL_BACKWARD] << " "
+                 << " title \"" << STAT_label[STATL_BACKWARD] << " "
                  << SEQ_label[SEQL_RECURRENCE_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                  << "\" with impulses" << endl;
 
@@ -3365,7 +3359,7 @@ bool RenewalData::plot_write(StatError &error , const char *prefix ,
         out_file << "plot [0:" << forward->nb_value - 1 << "] [0:"
                  << (int)(forward->max * YSCALE) + 1 << "] \""
                  << label((data_file_name[0].str()).c_str()) << "\" using " << j++
-                 << " title \"" << SEQ_label[SEQL_FORWARD] << " "
+                 << " title \"" << STAT_label[STATL_FORWARD] << " "
                  << SEQ_label[SEQL_RECURRENCE_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                  << "\" with impulses" << endl;
 
@@ -3565,7 +3559,7 @@ MultiPlotSet* RenewalData::get_plotable() const
 
       if (within->nb_element > 0) {
         legend.str("");
-        legend << SEQ_label[SEQL_OBSERVATION_INTER_EVENT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
+        legend << STAT_label[STATL_OBSERVATION_INTER_EVENT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
         plot[i][1].legend = legend.str();
 
         plot[i][1].style = "impulses";
@@ -3623,7 +3617,7 @@ MultiPlotSet* RenewalData::get_plotable() const
       j = 0;
       if (within->nb_element > 0) {
         legend.str("");
-        legend << SEQ_label[SEQL_OBSERVATION_INTER_EVENT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
+        legend << STAT_label[STATL_OBSERVATION_INTER_EVENT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
         plot[i][j].legend = legend.str();
 
         plot[i][j].style = "impulses";
@@ -3668,7 +3662,7 @@ MultiPlotSet* RenewalData::get_plotable() const
     plot[i].resize(2);
 
     legend.str("");
-    legend << SEQ_label[SEQL_BACKWARD] << " " << SEQ_label[SEQL_RECURRENCE_TIME] << " "
+    legend << STAT_label[STATL_BACKWARD] << " " << SEQ_label[SEQL_RECURRENCE_TIME] << " "
            << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
     plot[i][0].legend = legend.str();
 
@@ -3677,7 +3671,7 @@ MultiPlotSet* RenewalData::get_plotable() const
     backward->plotable_frequency_write(plot[i][0]);
 
     legend.str("");
-    legend << SEQ_label[SEQL_FORWARD] << " " << SEQ_label[SEQL_RECURRENCE_TIME] << " "
+    legend << STAT_label[STATL_FORWARD] << " " << SEQ_label[SEQL_RECURRENCE_TIME] << " "
            << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
     plot[i][1].legend = legend.str();
 
