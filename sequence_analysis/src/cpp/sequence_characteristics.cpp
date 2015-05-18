@@ -38,12 +38,6 @@
 
 #include <sstream>
 
-#include "stat_tool/stat_tools.h"
-#include "stat_tool/curves.h"
-#include "stat_tool/distribution.h"
-#include "stat_tool/markovian.h"
-#include "stat_tool/vectors.h"
-#include "stat_tool/distance_matrix.h"
 #include "stat_tool/stat_label.h"
 
 #include "sequences.h"
@@ -565,7 +559,7 @@ ostream& SequenceCharacteristics::ascii_print(ostream &os , int type ,
       os << "# ";
     }
     os << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << i << " "
-       << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
+       << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
     sojourn_time[i]->ascii_characteristic_print(os , false , comment_flag);
 
     if ((sojourn_time[i]->nb_element > 0) && (exhaustive)) {
@@ -574,7 +568,7 @@ ostream& SequenceCharacteristics::ascii_print(ostream &os , int type ,
         os << "# ";
       }
       os << "   | " << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << i << " "
-         << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
+         << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
       sojourn_time[i]->ascii_print(os , comment_flag);
     }
 
@@ -585,7 +579,7 @@ ostream& SequenceCharacteristics::ascii_print(ostream &os , int type ,
       }
       os << SEQ_label[SEQL_INITIAL_RUN] << " - "
          << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << i << " "
-         << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
+         << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
       initial_run[i]->ascii_characteristic_print(os , false , comment_flag);
 
       if ((initial_run[i]->nb_element > 0) && (exhaustive)) {
@@ -595,7 +589,7 @@ ostream& SequenceCharacteristics::ascii_print(ostream &os , int type ,
         }
         os << "   | " << SEQ_label[SEQL_INITIAL_RUN] << " - "
            << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << i << " "
-           << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
+           << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
         initial_run[i]->ascii_print(os , comment_flag);
       }
     }
@@ -606,7 +600,7 @@ ostream& SequenceCharacteristics::ascii_print(ostream &os , int type ,
     }
     os << SEQ_label[SEQL_FINAL_RUN] << " - "
        << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << i << " "
-       << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
+       << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
     final_run[i]->ascii_characteristic_print(os , false , comment_flag);
 
     if ((final_run[i]->nb_element > 0) && (exhaustive)) {
@@ -616,7 +610,7 @@ ostream& SequenceCharacteristics::ascii_print(ostream &os , int type ,
       }
       os << "   | " << SEQ_label[SEQL_FINAL_RUN] << " - "
          << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << i << " "
-         << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
+         << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
       final_run[i]->ascii_print(os , comment_flag);
     }
   }
@@ -755,38 +749,38 @@ ostream& SequenceCharacteristics::spreadsheet_print(ostream &os , int type ,
 
   for (i = 0;i < nb_value;i++) {
     os << "\n" << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << i << " "
-       << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
+       << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
     sojourn_time[i]->spreadsheet_characteristic_print(os);
 
     if (sojourn_time[i]->nb_element > 0) {
       os << "\n\t" << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << i << " "
-         << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
+         << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
       sojourn_time[i]->spreadsheet_print(os);
     }
 
     if (initial_run) {
       os << "\n" << SEQ_label[SEQL_INITIAL_RUN] << " - "
          << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << i << " "
-         << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
+         << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
       initial_run[i]->spreadsheet_characteristic_print(os);
 
       if (initial_run[i]->nb_element > 0) {
         os << "\n\t" << SEQ_label[SEQL_INITIAL_RUN] << " - "
            << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << i << " "
-           << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
+           << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
         initial_run[i]->spreadsheet_print(os);
       }
     }
 
     os << "\n" << SEQ_label[SEQL_FINAL_RUN] << " - "
        << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << i << " "
-       << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
+       << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
     final_run[i]->spreadsheet_characteristic_print(os);
 
     if (final_run[i]->nb_element > 0) {
       os << "\n\t" << SEQ_label[SEQL_FINAL_RUN] << " - "
          << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << i << " "
-         << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
+         << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
       final_run[i]->spreadsheet_print(os);
     }
   }
@@ -1310,7 +1304,7 @@ bool SequenceCharacteristics::plot_print(const char *prefix , const char *title 
                    << (int)(sojourn_time[k]->max * YSCALE) + 1 << "] \""
                    << label((data_file_name[1].str()).c_str()) << "\" using " << j++
                    << " title \"" << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << k
-                   << " " << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
+                   << " " << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                    << "\" with impulses" << endl;
 
           if (sojourn_time[k]->nb_value - 1 < TIC_THRESHOLD) {
@@ -1344,7 +1338,7 @@ bool SequenceCharacteristics::plot_print(const char *prefix , const char *title 
                    << label((data_file_name[1].str()).c_str()) << "\" using " << j++
                    << " title \"" << SEQ_label[SEQL_INITIAL_RUN] << " - "
                    << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << k
-                   << " " << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
+                   << " " << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                    << "\" with impulses" << endl;
 
           if (initial_run[k]->nb_value - 1 < TIC_THRESHOLD) {
@@ -1378,7 +1372,7 @@ bool SequenceCharacteristics::plot_print(const char *prefix , const char *title 
                    << label((data_file_name[1].str()).c_str()) << "\" using " << j++
                    << " title \"" << SEQ_label[SEQL_FINAL_RUN] << " - "
                    << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << k
-                   << " " << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
+                   << " " << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                    << "\" with impulses" << endl;
 
           if (final_run[k]->nb_value - 1 < TIC_THRESHOLD) {
@@ -1980,7 +1974,7 @@ void SequenceCharacteristics::plotable_write(MultiPlotSet &plot , int &index ,
   if (plot.nb_variable > 1) {
     title << STAT_label[STATL_VARIABLE] << " " << variable + 1 << " - ";
   }
-  title << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTIONS];
+  title << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTIONS];
   plot[index].title = title.str();
 
   // calcul du temps maximum et de la frequence maximum
@@ -2071,7 +2065,7 @@ void SequenceCharacteristics::plotable_write(MultiPlotSet &plot , int &index ,
 
       legend.str("");
       legend << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " "
-             << i << " " << SEQ_label[SEQL_SOJOURN_TIME] << " "
+             << i << " " << STAT_label[STATL_SOJOURN_TIME] << " "
              << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
       plot[index][0].legend = legend.str();
 
@@ -2109,7 +2103,7 @@ void SequenceCharacteristics::plotable_write(MultiPlotSet &plot , int &index ,
       legend.str("");
       legend << SEQ_label[SEQL_INITIAL_RUN] << " - "
              << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " "
-             << i << " " << SEQ_label[SEQL_SOJOURN_TIME] << " "
+             << i << " " << STAT_label[STATL_SOJOURN_TIME] << " "
              << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
       plot[index][0].legend = legend.str();
 
@@ -2145,7 +2139,7 @@ void SequenceCharacteristics::plotable_write(MultiPlotSet &plot , int &index ,
       legend.str("");
       legend << SEQ_label[SEQL_FINAL_RUN] << " - "
              << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " "
-             << i << " " << SEQ_label[SEQL_SOJOURN_TIME] << " "
+             << i << " " << STAT_label[STATL_SOJOURN_TIME] << " "
              << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
       plot[index][0].legend = legend.str();
 
