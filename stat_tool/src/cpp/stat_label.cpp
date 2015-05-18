@@ -286,6 +286,11 @@ const char *STAT_label[] = {
   "survival probability" ,
   "frequency" ,
 
+  "backward" ,
+  "forward" ,
+  "inter-event time within the observation period" ,
+  "sojourn time" ,
+
   "frequency distribution" ,
   "frequency distributions" ,
   "histogram" ,
@@ -489,6 +494,13 @@ const char *STAT_error[] = {
   "distribution range of values incompatible with frequency distribution range of values" ,
   "bad minimum inferior bound" ,
   "estimation failure" ,
+
+  "number of complete intervals too small" ,
+  "complete time interval: bad minimum value" ,
+  "forward recurrence time interval: bad minimum value" ,
+  "no event observation period: bad minimum value" ,
+  "bad inter-event mean computation method" ,
+  "initial inter-event distribution support incompatible with data" ,
 
   "bad distribution index" ,
   "bad frequency distribution index" ,
