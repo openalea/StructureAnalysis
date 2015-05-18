@@ -40,7 +40,6 @@
 
 #include "tool/config.h"
 
-#include "stat_tools.h"
 #include "curves.h"
 #include "stat_label.h"
 
@@ -890,6 +889,42 @@ double Curves::total_square_sum_computation(int index , double mean) const
   }
 
   return total_square_sum;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Ecriture d'une courbe et des residus standardises correspondants au format Gnuplot.
+ *
+ *  arguments : path, pointeur sur les residus standardises.
+ *
+ *--------------------------------------------------------------*/
+
+bool Curves::plot_print_standard_residual(const char *path , double *standard_residual) const
+
+{
+  bool status = false;
+  register int i;
+  ofstream out_file(path);
+
+
+  if (out_file) {
+    status = true;
+
+    // ecriture des reponses observees et des residus standardises
+
+    for (i = 0;i < length;i++) {
+      if (frequency[i] > 0) {
+        out_file << i << " " << point[0][i];
+        if (standard_residual) {
+          out_file << " " << standard_residual[i];
+        }
+        out_file << " " << frequency[i] << endl;
+      }
+    }
+  }
+
+  return status;
 }
 
 
