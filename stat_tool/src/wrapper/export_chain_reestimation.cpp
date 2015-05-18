@@ -23,7 +23,6 @@
 #include "wrapper_util.h"
 #include "export_base.h"
 
-#include "stat_tool/stat_tools.h"
 #include "stat_tool/markovian.h"
 
 #include <boost/python.hpp>
