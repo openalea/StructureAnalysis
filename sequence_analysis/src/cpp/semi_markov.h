@@ -40,6 +40,8 @@
 #define SEMI_MARKOV_H
 
 
+#include "sequences.h"
+
 
 namespace sequence_analysis {
 
