@@ -45,7 +45,6 @@
 #include "plotable.h"
 
 
-
 namespace stat_tool {
 
 
@@ -245,6 +244,14 @@ namespace stat_tool {
   const double MAX_SURFACE = 3.;         // surface maximum pour appliquer la methode du rejet
   const int DIST_NB_ELEMENT = 1000000;   // taille maximum de l'echantillon pour la simulation
 
+  const int NB_COMPLETE_INTERVAL = 3;    // nombre minimum d'intervalles de temps complets
+  const double RENEWAL_LIKELIHOOD_DIFF = 1.e-5;  // seuil pour stopper les iterations EM
+  const int RENEWAL_NB_ITER = 10000;     // nombre maximum d'iterations EM
+  const double RENEWAL_DIFFERENCE_WEIGHT = 0.5;  // poids par defaut de la penalisation
+                                               // (cas des differences 1ere ou 2nde)
+  const double RENEWAL_ENTROPY_WEIGHT = 0.05;  // poids par defaut de la penalisation (cas de l'entropie)
+  const double MAX_VALUE_COEFF = 10.;    // coefficient pour deduire la valeur maximum de la loi inter-evenement
+
   const double GAMMA_TAIL = 1.e-3;       // traine de la loi Gamma
   const int GAMMA_NB_STEP = 1000;        // nombre de pas pour le calcul de la loi Gamma
   const int GAMMA_NB_SUB_STEP = 10;      // nombre de pas pour le calcul de la loi Gamma
@@ -306,7 +313,7 @@ namespace stat_tool {
                                          // automatique (sortie graphique)
   const double PLOT_MASS_THRESHOLD = 1.e-3;  // valeur minimale pour afficher un 0 apres la derniere
                                              // valeur possible (sortie graphique)
-  const double YSCALE = 1.4;             // facteur d'echelle axe y (sortie graphique)
+  const double YSCALE = 1.2;             // facteur d'echelle axe y (sortie graphique)
   const double PLOT_RANGE_RATIO = 4.;    // seuil pour l'affichage a partir de 0
 
 
@@ -611,7 +618,7 @@ namespace stat_tool {
                      double cumul_threshold = CUMUL_THRESHOLD);
     int simulation() const;
 
-    double renewal_likelihood_computation(const Forward &forward_dist ,  // sequence_analysis
+    double renewal_likelihood_computation(const Forward &forward_dist ,
                                           const FrequencyDistribution &within ,
                                           const FrequencyDistribution &backward ,
                                           const FrequencyDistribution &forward ,
@@ -625,7 +632,7 @@ namespace stat_tool {
 
     void reestimation(const Reestimation<double> *reestim , int nb_estim = 1);
 
-    double state_occupancy_likelihood_computation(const FrequencyDistribution &sojourn_time ,  // sequence_analysis
+    double state_occupancy_likelihood_computation(const FrequencyDistribution &sojourn_time ,
                                                   const FrequencyDistribution &final_run) const;
     double state_occupancy_likelihood_computation(const Forward &forward ,  // sequence_analysis
                                                   const FrequencyDistribution &sojourn_time ,
@@ -635,7 +642,7 @@ namespace stat_tool {
     void expectation_step(const FrequencyDistribution &sojourn_time ,  // sequence_analysis
                           const FrequencyDistribution &final_run ,
                           Reestimation<double> *occupancy_reestim , int iter) const;
-    void expectation_step(const FrequencyDistribution &sojourn_time ,  // sequence_analysis
+    void expectation_step(const FrequencyDistribution &sojourn_time ,
                           const FrequencyDistribution &final_run ,
                           const FrequencyDistribution &initial_run ,
                           const FrequencyDistribution &single_run ,
@@ -829,7 +836,7 @@ namespace stat_tool {
                                   int nb_iter = I_DEFAULT , double weight = D_DEFAULT ,
                                   int penalty_type = SECOND_DIFFERENCE , int outside = ZERO) const;
 
-    DiscreteParametricModel* estimation(StatError &error , std::ostream &os ,  // sequence_analysis
+    DiscreteParametricModel* estimation(StatError &error , std::ostream &os ,
                                         const FrequencyDistribution &backward ,
                                         const FrequencyDistribution &forward ,
                                         const FrequencyDistribution *no_event ,
@@ -838,7 +845,7 @@ namespace stat_tool {
                                         int mean_computation_method = COMPUTED , double weight = D_DEFAULT ,
                                         int penalty_type = SECOND_DIFFERENCE , int outside = ZERO ,
                                         double iinter_event_mean = D_DEFAULT) const;
-    DiscreteParametricModel* estimation(StatError &error , std::ostream &os ,  // sequence_analysis
+    DiscreteParametricModel* estimation(StatError &error , std::ostream &os ,
                                         const FrequencyDistribution &backward ,
                                         const FrequencyDistribution &forward ,
                                         const FrequencyDistribution *no_event ,
