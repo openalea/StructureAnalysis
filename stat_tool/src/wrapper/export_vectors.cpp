@@ -26,7 +26,6 @@
 #include "export_base.h"
 
 #include "stat_tool/regression.h"
-#include "stat_tool/distance_matrix.h"
 #include "stat_tool/multivariate_mixture.h"
 
 #include <boost/python.hpp>
