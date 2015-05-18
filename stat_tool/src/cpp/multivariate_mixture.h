@@ -41,6 +41,9 @@
 #define MVMIXTURE_H
 
 
+#include "vectors.h"
+#include "discrete_mixture.h"
+
 
 namespace stat_tool {
 
