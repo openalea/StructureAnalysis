@@ -40,6 +40,8 @@
 #define DISTANCE_MATRIX_H
 
 
+#include "stat_tools.h"
+
 
 namespace stat_tool {
 
@@ -80,6 +82,7 @@ namespace stat_tool {
 
   class Clusters;
   class Dendrogram;
+
 
   class DistanceMatrix : public StatInterface {  // matrice des distances
 
