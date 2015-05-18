@@ -40,6 +40,9 @@
 #define RENEWAL_H
 
 
+#include "stat_tool/curves.h"
+#include "stat_tool/distribution.h"
+
 
 namespace sequence_analysis {
 
@@ -78,16 +81,9 @@ namespace sequence_analysis {
   const double MIN_NB_EVENT = 0.4;       // nombre d'evenements moyen minimum
   const double MIN_INTER_EVENT = 1.;     // temps moyen minimum entre 2 evenements
   const double RENEWAL_INIT_PROBABILITY = 0.001;  // seuil pour l'initialisation de la probabilite
-  const double RENEWAL_LIKELIHOOD_DIFF = 1.e-5;  // seuil pour stopper les iterations EM
-  const int RENEWAL_NB_ITER = 10000;     // nombre maximum d'iterations EM
-  const double RENEWAL_DIFFERENCE_WEIGHT = 0.5;  // poids par defaut de la penalisation
-                                               // (cas des differences 1ere ou 2nde)
-  const double RENEWAL_ENTROPY_WEIGHT = 0.05;  // poids par defaut de la penalisation (cas de l'entropie)
   const int RENEWAL_COEFF = 10;          // coefficient arrondi estimateur
 
-  const int NB_COMPLETE_INTERVAL = 3;    // nombre minimum d'intervalles de temps complets
   const double MEAN_COEFF = 2.;          // coefficient sur la moyenne pour compenser le biais par la longueur
-  const double MAX_VALUE_COEFF = 10.;    // coefficient pour deduire la valeur maximum de la loi inter-evenement
 
   const int RENEWAL_NB_ELEMENT = 1000000;  // taille maximum de l'echantillon pour la simulation
 
