@@ -39,7 +39,6 @@
 #include <math.h>
 #include <sstream>
 
-#include "stat_tools.h"
 #include "markovian.h"
 #include "stat_label.h"
 
