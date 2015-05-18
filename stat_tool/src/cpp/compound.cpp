@@ -41,8 +41,6 @@
 #include "tool/rw_tokenizer.h"
 #include "tool/rw_cstring.h"
 
-#include "stat_tools.h"
-#include "distribution.h"
 #include "compound.h"
 #include "stat_label.h"
 
