@@ -38,9 +38,6 @@
 
 #include <math.h>
 
-#include "stat_tools.h"
-#include "markovian.h"
-#include "vectors.h"
 #include "mixture.h"
 #include "stat_label.h"
 
