@@ -43,9 +43,7 @@
 #include <boost/math/distributions/normal.hpp>
 
 #include "tool/config.h"
-#include "stat_tools.h"
-#include "markovian.h"
-#include "vectors.h"
+
 #include "regression.h"
 #include "stat_label.h"
 
