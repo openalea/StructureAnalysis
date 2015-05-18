@@ -46,10 +46,6 @@
 #include "tool/rw_locale.h"
 #include "tool/config.h"
 
-#include "stat_tools.h"
-#include "distribution.h"
-#include "markovian.h"
-#include "vectors.h"
 #include "mixture.h"
 #include "stat_label.h"
 
