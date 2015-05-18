@@ -40,6 +40,9 @@
 #define COMPOUND_H
 
 
+#include "stat_tools.h"
+#include "distribution.h"
+
 
 namespace stat_tool {
 
