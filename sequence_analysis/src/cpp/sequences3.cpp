@@ -2264,6 +2264,10 @@ bool Sequences::plot_data_write(StatError &error , const char *prefix ,
 
           min = min_value[j];
           max = max_value[j];
+
+          if (max == min) {
+            max = min + 1;
+          }
           if ((j + 1 < nb_variable) && (type[j + 1] == AUXILIARY)) {
             if (min_value[j + 1] < min) {
               min = min_value[j + 1];
@@ -2452,6 +2456,10 @@ MultiPlotSet* Sequences::get_plotable_data(StatError &error) const
 
         min = min_value[j];
         max = max_value[j];
+
+        if (max == min) {
+          max = min + 1;
+        }
         if ((j + 1 < nb_variable) && (type[j + 1] == AUXILIARY)) {
           if (min_value[j + 1] < min) {
             min = min_value[j + 1];
