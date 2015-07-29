@@ -1289,12 +1289,12 @@ ostream& DistanceMatrix::line_write(ostream &os) const
  *  Ecriture des proprietes d'une matrice de distances.
  *
  *  arguments : pointeur sur les distances mormalisees, stream,
- *              format de sortie ('a' : ASCII, 's' : Spreadsheet).
+ *              format de sortie (ASCII/SPREADSHEET).
  *
  *--------------------------------------------------------------*/
 
 ostream& DistanceMatrix::property_print(double **normalized_distance ,
-                                        ostream &os , char format) const
+                                        ostream &os , output_format format) const
 
 {
   bool status = true;
@@ -1328,12 +1328,12 @@ ostream& DistanceMatrix::property_print(double **normalized_distance ,
             nb_symmetry++;
 
             switch (format) {
-            case 'a' :
+            case ASCII :
               os << label << " " << row_identifier[i] << ", "
                  << label << " " << row_identifier[j] << ": "
                  << STAT_error[STATR_SYMMETRY] << endl;
               break;
-            case 's' :
+            case SPREADSHEET :
               os << label << " " << row_identifier[i] << "\t"
                  << label << " " << row_identifier[j] << "\t"
                  << STAT_error[STATR_SYMMETRY] << endl;
@@ -1345,11 +1345,11 @@ ostream& DistanceMatrix::property_print(double **normalized_distance ,
     }
 
     switch (format) {
-    case 'a' :
+    case ASCII :
       os << "\n" << STAT_label[STATL_SYMMETRY_RATE] << ": "
          << (double)(nb_combination - nb_symmetry) / (double)nb_combination << endl;
       break;
-    case 's' :
+    case SPREADSHEET :
       os << "\n" << STAT_label[STATL_SYMMETRY_RATE] << "\t"
          << (double)(nb_combination - nb_symmetry) / (double)nb_combination << endl;
       break;
@@ -1375,13 +1375,13 @@ ostream& DistanceMatrix::property_print(double **normalized_distance ,
                 nb_triangle_inequality++;
 
                 switch (format) {
-                case 'a' :
+                case ASCII :
                   os << label << " " << row_identifier[i] << ", "
                      << label << " " << row_identifier[k] << ", "
                      << label << " " << row_identifier[j] << ": "
                      << STAT_error[STATR_TRIANGLE_INEQUALITY] << endl;
                   break;
-                case 's' :
+                case SPREADSHEET :
                   os << label << " " << row_identifier[i] << "\t"
                      << label << " " << row_identifier[k] << "\t"
                      << label << " " << row_identifier[j] << "\t"
@@ -1395,11 +1395,11 @@ ostream& DistanceMatrix::property_print(double **normalized_distance ,
       }
 
       switch (format) {
-      case 'a' :
+      case ASCII :
         os << "\n" << STAT_label[STATL_TRIANGLE_INEQUALITY_RATE] << ": "
            << (double)(nb_combination - nb_triangle_inequality) / (double)nb_combination << endl;
         break;
-      case 's' :
+      case SPREADSHEET :
         os << "\n" << STAT_label[STATL_TRIANGLE_INEQUALITY_RATE] << "\t"
            << (double)(nb_combination - nb_triangle_inequality) / (double)nb_combination << endl;
         break;
@@ -1644,7 +1644,7 @@ ostream& DistanceMatrix::ascii_write(ostream &os , bool exhaustive) const
 
   if ((nb_row > 1) && (nb_row == nb_column)) {
     if (exhaustive) {
-      property_print(normalized_distance , os , 'a');
+      property_print(normalized_distance , os , ASCII);
     }
 
     os << "\n" << STAT_label[STATL_CUMUL_DISTANCE] << " " << STAT_label[STATL_REFERENCE] << " " << label << endl;
