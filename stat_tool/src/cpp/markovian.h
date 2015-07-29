@@ -88,31 +88,38 @@ namespace stat_tool {
 
   // const double SELF_TRANSITION = 0.9;    probabilite de rester dans un etat initiale
 
-  enum {
+  enum state_type {
+    TRANSIENT ,
+    RECURRENT ,
+    ABSORBING
+  };
+
+  enum model_type {
     MIXTURE ,
     HIDDEN_MARKOV
   };
 
-  enum {
+  enum observation_process {
     CATEGORICAL_PROCESS ,
     DISCRETE_PARAMETRIC ,
-    CONTINUOUS_PARAMETRIC
+    CONTINUOUS_PARAMETRIC ,
+    DEFAULT_PROCESS
   };
 
-  enum {
-    EM ,
-    MCEM
-//    SAEM
+  enum count_pattern {
+    RUN ,
+    OCCURRENCE
   };
 
-  enum {
+  enum latent_structure_algorithm {
+    NO_LATENT_STRUCTURE ,
     FORWARD ,
-    FORWARD_BACKWARD ,
+//    FORWARD_BACKWARD ,
     VITERBI ,
 //    VITERBI_FORWARD_BACKWARD ,
     GENERALIZED_VITERBI ,
     FORWARD_BACKWARD_SAMPLING ,
-    GIBBS_SAMPLING ,
+//    GIBBS_SAMPLING ,
     FORWARD_DYNAMIC_PROGRAMMING
   };
 
@@ -134,7 +141,7 @@ namespace stat_tool {
 
   public :
 
-    char type;              // 'o' : ordinaire, 'e' : en equilibre
+    process_type type;      // ORDINARY/EQUILIBRIUM
     int nb_state;           // nombre d'etats
     int nb_row;             // nombre de lignes de la matrice
                             // des probabilites de transition
@@ -142,8 +149,7 @@ namespace stat_tool {
     int nb_component;       // nombre de classes
     int *component_nb_state;  // nombre d'etats par classe
     int **component;        // classes
-    char *state_type;       // types des etats ('r' : recurrent,
-                            // 't' : transitoire, 'a' : absorbant)
+    state_type *stype;      // types des etats (TRANSIENT/RECURRENT/ABSORBING)
     double *initial;        // probabilites initiales
     double *cumul_initial;  // fonction de repartition correspondant
                             // au probabilites initiales
@@ -155,11 +161,13 @@ namespace stat_tool {
     void copy(const Chain&);
     void remove();
 
-    Chain(char itype = 'o' , int inb_state = 0 , bool init_flag = true);
-    Chain(char itype , int inb_state , int inb_row , bool init_flag);
+    Chain(process_type itype = ORDINARY , int inb_state = 0 , bool init_flag = true);
+    Chain(process_type itype , int inb_state , int inb_row , bool init_flag);
     Chain(const Chain &chain) { copy(chain); }
     ~Chain();
     Chain& operator=(const Chain &chain);
+
+    static Chain* parsing(StatError &error , ifstream &in_file , int &line , process_type type);
 
     std::ostream& ascii_print(std::ostream &os , bool file_flag = false) const;
     std::ostream& spreadsheet_print(std::ostream &os) const;
@@ -187,15 +195,12 @@ namespace stat_tool {
   };
 
 
-  Chain* chain_parsing(StatError &error , ifstream &in_file , int &line , char type);
-
-
 
   class ChainData : public ChainReestimation<int> {  // structure de donnees correspondant a
                                                      // une chaine de Markov
   public :
 
-    ChainData(char itype , int inb_state , int inb_row , bool init_flag = false)
+    ChainData(process_type itype , int inb_state , int inb_row , bool init_flag = false)
     :ChainReestimation<int>(itype , inb_state , inb_row , init_flag) {}
     ChainData(const ChainData &chain_data);
 
@@ -230,21 +235,27 @@ namespace stat_tool {
     ~CategoricalProcess();
     CategoricalProcess& operator=(const CategoricalProcess &process);
 
+    static CategoricalProcess* parsing(StatError &error , ifstream &in_file ,
+                                       int &line , int nb_state ,
+                                       model_type model , bool hidden);
+    static CategoricalProcess** old_parsing(StatError &error , ifstream &in_file ,
+                                            int &line , int nb_state , int &nb_output_process);
+
     std::ostream& ascii_print(std::ostream &os , FrequencyDistribution **empirical_observation ,
                               FrequencyDistribution *marginal_distribution ,
-                              bool exhaustive , bool file_flag , int model = HIDDEN_MARKOV) const;
+                              bool exhaustive , bool file_flag , model_type model = HIDDEN_MARKOV) const;
     std::ostream& spreadsheet_print(std::ostream &os ,
                                     FrequencyDistribution **empirical_observation = NULL ,
                                     FrequencyDistribution *marginal_distribution = NULL ,
-                                    int model = HIDDEN_MARKOV) const;
+                                    model_type model = HIDDEN_MARKOV) const;
     bool plot_print(const char *prefix , const char *title , int process ,
                     FrequencyDistribution **empirical_observation = NULL ,
                     FrequencyDistribution *marginal_distribution = NULL ,
-                    int model = HIDDEN_MARKOV) const;
+                    model_type model = HIDDEN_MARKOV) const;
     void plotable_write(MultiPlotSet &plot , int &index , int process ,
                         FrequencyDistribution **empirical_observation = NULL ,
                         FrequencyDistribution *marginal_distribution = NULL ,
-                        int model = HIDDEN_MARKOV) const;
+                        model_type model = HIDDEN_MARKOV) const;
 
     bool test_hidden() const;
     void thresholding(double min_probability);
@@ -253,14 +264,6 @@ namespace stat_tool {
     Distribution* mixture_computation(Distribution *pweight);
     void init();
   };
-
-
-  CategoricalProcess* categorical_observation_parsing(StatError &error , ifstream &in_file ,
-                                                      int &line , int nb_state ,
-                                                      int model , bool hidden);
-
-  CategoricalProcess** old_categorical_observation_parsing(StatError &error , ifstream &in_file ,
-                                                           int &line , int nb_state , int &nb_output_process);
 
 
 
@@ -287,21 +290,25 @@ namespace stat_tool {
     ~DiscreteParametricProcess();
     DiscreteParametricProcess& operator=(const DiscreteParametricProcess &process);
 
+    static DiscreteParametricProcess* parsing(StatError &error , ifstream &in_file ,
+                                              int &line , int nb_state , model_type model ,
+                                              double cumul_threshold = OBSERVATION_THRESHOLD);
+
     std::ostream& ascii_print(std::ostream &os , FrequencyDistribution **empirical_observation ,
                               FrequencyDistribution *marginal_distribution ,
-                              bool exhaustive , bool file_flag , int model = HIDDEN_MARKOV) const;
+                              bool exhaustive , bool file_flag , model_type model = HIDDEN_MARKOV) const;
     std::ostream& spreadsheet_print(std::ostream &os ,
                                     FrequencyDistribution **empirical_observation = NULL ,
                                     FrequencyDistribution *marginal_distribution = NULL ,
-                                    int model = HIDDEN_MARKOV) const;
+                                    model_type model = HIDDEN_MARKOV) const;
     bool plot_print(const char *prefix , const char *title , int process ,
                     FrequencyDistribution **empirical_observation = NULL ,
                     FrequencyDistribution *marginal_distribution = NULL ,
-                    int model = HIDDEN_MARKOV) const;
+                    model_type model = HIDDEN_MARKOV) const;
     void plotable_write(MultiPlotSet &plot , int &index , int process ,
                         FrequencyDistribution **empirical_observation = NULL ,
                         FrequencyDistribution *marginal_distribution = NULL ,
-                        int model = HIDDEN_MARKOV) const;
+                        model_type model = HIDDEN_MARKOV) const;
 
     void nb_value_computation();
     void state_permutation(int *permut) const;  // permutation des etats - revoir avec J.-B.
@@ -313,21 +320,16 @@ namespace stat_tool {
   };
 
 
-  DiscreteParametricProcess* discrete_observation_parsing(StatError &error , ifstream &in_file ,
-                                                          int &line , int nb_state , int model ,
-                                                          double cumul_threshold = OBSERVATION_THRESHOLD);
-
-
 
   class ContinuousParametricProcess {  // processus d'observation continu parametrique
 
   public :
 
     int nb_state;           // nombre d'etats
-    int ident;              // identificateur des lois d'observation
+    continuous_parametric ident;  // identificateur des lois d'observation
     bool tied_location;     // moyennes lies ou non  (GAMMA / GAUSSIAN)
     bool tied_dispersion;   // parametres de dispersion lies ou non (GAMMA / GAUSSIAN / VON_MISES)
-    int unit;               // unite (degre/radian) pour les lois de von Mises
+    angle_unit unit;        // unite (degre/radian) pour les lois de von Mises
     ContinuousParametric **observation;  // lois d'observation
     Distribution *weight;   // poids theorique des lois d'observation
     Distribution *restoration_weight;  // poids des lois d'observation
@@ -343,46 +345,45 @@ namespace stat_tool {
     ~ContinuousParametricProcess();
     ContinuousParametricProcess& operator=(const ContinuousParametricProcess &process);
 
+    static ContinuousParametricProcess* parsing(StatError &error , ifstream &in_file ,
+                                                int &line , int nb_state , model_type model ,
+                                                continuous_parametric last_ident = VON_MISES);
+
     std::ostream& ascii_print(std::ostream &os , Histogram **observation_histogram ,
                               FrequencyDistribution **observation_distribution ,
                               Histogram *marginal_histogram ,
                               FrequencyDistribution *marginal_distribution ,
-                              bool exhaustive , bool file_flag , int model = HIDDEN_MARKOV) const;
+                              bool exhaustive , bool file_flag , model_type model = HIDDEN_MARKOV) const;
     std::ostream& spreadsheet_print(std::ostream &os ,
                                     Histogram **observation_histogram = NULL ,
                                     FrequencyDistribution **observation_distribution = NULL ,
                                     Histogram *marginal_histogram = NULL ,
                                     FrequencyDistribution *marginal_distribution = NULL ,
-                                    int model = HIDDEN_MARKOV) const;
+                                    model_type model = HIDDEN_MARKOV) const;
     bool plot_print(const char *prefix , const char *title ,
                     int process , Histogram **observation_histogram = NULL ,
                     FrequencyDistribution **observation_distribution = NULL ,
                     Histogram *marginal_histogram = NULL ,
                     FrequencyDistribution *marginal_distribution = NULL ,
                     int nb_value = I_DEFAULT , double **empirical_cdf = NULL ,
-                    int model = HIDDEN_MARKOV) const;
+                    model_type model = HIDDEN_MARKOV) const;
     void plotable_write(MultiPlotSet &plot , int &index , int process ,
                         Histogram **observation_histogram = NULL ,
                         FrequencyDistribution **observation_distribution = NULL ,
                         Histogram *marginal_histogram = NULL ,
                         FrequencyDistribution *marginal_distribution = NULL ,
                         int nb_value = I_DEFAULT , double **empirical_cdf = NULL ,
-                        int model = HIDDEN_MARKOV) const;
+                        model_type model = HIDDEN_MARKOV) const;
 
     int nb_parameter_computation() const;
     double mean_computation(Distribution *pweight) const;
     double variance_computation(Distribution *pweight , double mean = D_INF) const;
-    void select_unit(int iunit);
-    void init(int iident , double min_value , double max_value ,
+    void select_unit(angle_unit iunit);
+    void init(continuous_parametric iident , double min_value , double max_value ,
               double mean , double variance);
 
     std::ostream& interval_computation(std::ostream &os);
   };
-
-
-  ContinuousParametricProcess* continuous_observation_parsing(StatError &error , ifstream &in_file ,
-                                                              int &line , int nb_state ,
-                                                              int model , int last_ident = VON_MISES);
 
 
   void log_computation(int nb_value , const double *pmass , double *plog);
