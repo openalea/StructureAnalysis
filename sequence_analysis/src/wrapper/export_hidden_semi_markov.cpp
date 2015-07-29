@@ -57,7 +57,7 @@ public:
     StatError error;
     HiddenSemiMarkov *hidden_semi_markov = NULL;
 
-    hidden_semi_markov = hidden_semi_markov_ascii_read(error, filename, length,
+    hidden_semi_markov = HiddenSemiMarkov::ascii_read(error, filename, length,
         counting_flag, cumul_threshold, old_format);
     if (!hidden_semi_markov)
       {
@@ -167,7 +167,7 @@ public:
 
  static MultiPlotSet*
   state_profile_plotable_write(const HiddenSemiMarkov &p,
-      int identifier, int output)
+      int identifier, state_profile output)
   {
     StatError error;
     MultiPlotSet* ret = p.state_profile_plotable_write(error, identifier, output);
@@ -178,7 +178,7 @@ public:
 
   static MultiPlotSet*
   state_profile_plotable_write2(const HiddenSemiMarkov &p,
-      const MarkovianSequences &iseq,int identifier, int output)
+      const MarkovianSequences &iseq,int identifier, state_profile output)
   {
     StatError error;
     MultiPlotSet* ret = p.state_profile_plotable_write(error, iseq,
@@ -224,9 +224,9 @@ void class_hidden_semi_markov() {
 
 /*
  *
-    HiddenSemiMarkov(const Chain *pchain , const NonparametricSequenceProcess *poccupancy ,             int inb_output_process , NonparametricProcess **pobservation ,    int length , bool counting_flag)  :SemiMarkov(pchain , poccupancy , inb_output_process , pobservation , length ,  counting_flag) {}
-    HiddenSemiMarkov(const Chain *pchain , const NonparametricSequenceProcess *poccupancy ,          int inb_output_process , NonparametricProcess **nonparametric_observation ,    DiscreteParametricProcess **parametric_observation , int length , bool counting_flag)    :SemiMarkov(pchain , poccupancy , inb_output_process , nonparametric_observation ,     parametric_observation , length , counting_flag) {}
-    HiddenSemiMarkov(const HiddenSemiMarkov &hsmarkov , bool data_flag = true ,     int param = I_DEFAULT)
+    HiddenSemiMarkov(const Chain *pchain , const NonparametricSequenceProcess *poccupancy , int inb_output_process , NonparametricProcess **pobservation ,    int length , bool counting_flag)  :SemiMarkov(pchain , poccupancy , inb_output_process , pobservation , length ,  counting_flag) {}
+    HiddenSemiMarkov(const Chain *pchain , const NonparametricSequenceProcess *poccupancy , int inb_output_process , NonparametricProcess **nonparametric_observation , DiscreteParametricProcess **parametric_observation , int length , bool counting_flag) :SemiMarkov(pchain , poccupancy , inb_output_process , nonparametric_observation , parametric_observation , length , counting_flag) {}
+    HiddenSemiMarkov(const HiddenSemiMarkov &hsmarkov , bool data_flag = true , int param = I_DEFAULT)
 
     bool spreadsheet_write(StatError &error , const char *path) const;
 
@@ -236,13 +236,13 @@ void class_hidden_semi_markov() {
 
     double likelihood_computation(const MarkovianSequences &seq , double *posterior_probability = 0 ,  int index = I_DEFAULT) const;
 
-    bool state_profile_write(StatError &error , std::ostream &os , const MarkovianSequences &iseq ,   int identifier = I_DEFAULT , int output = SSTATE ,  char format = 'a' , int state_sequence = GENERALIZED_VITERBI ,  int nb_state_sequence = NB_STATE_SEQUENCE) const;
-    bool state_profile_write(StatError &error , const char *path , const MarkovianSequences &iseq ,  int identifier = I_DEFAULT , int output = SSTATE ,  char format = 'a' , int state_sequence = GENERALIZED_VITERBI , int nb_state_sequence = NB_STATE_SEQUENCE) const;
-    bool state_profile_ascii_write(StatError &error , std::ostream &os , int identifier ,int output = SSTATE , int state_sequence = GENERALIZED_VITERBI ,int nb_state_sequence = NB_STATE_SEQUENCE) const;
-    bool state_profile_write(StatError &error , const char *path ,  int identifier = I_DEFAULT , int output = SSTATE , char format = 'a' , int state_sequence = GENERALIZED_VITERBI ,  int nb_state_sequence = NB_STATE_SEQUENCE) const;
+    bool state_profile_write(StatError &error , std::ostream &os , const MarkovianSequences &iseq ,   int identifier = I_DEFAULT , state_profile output = SSTATE ,  output_format format = ASCII , int state_sequence = GENERALIZED_VITERBI ,  int nb_state_sequence = NB_STATE_SEQUENCE) const;
+    bool state_profile_write(StatError &error , const char *path , const MarkovianSequences &iseq ,  int identifier = I_DEFAULT , state_profile output = SSTATE ,  output_format format = ASCII , int state_sequence = GENERALIZED_VITERBI , int nb_state_sequence = NB_STATE_SEQUENCE) const;
+    bool state_profile_ascii_write(StatError &error , std::ostream &os , int identifier ,state_profile output = SSTATE , int state_sequence = GENERALIZED_VITERBI ,int nb_state_sequence = NB_STATE_SEQUENCE) const;
+    bool state_profile_write(StatError &error , const char *path ,  int identifier = I_DEFAULT , state_profile output = SSTATE , output_format format = ASCII , int state_sequence = GENERALIZED_VITERBI ,  int nb_state_sequence = NB_STATE_SEQUENCE) const;
 
-    bool state_profile_plot_write(StatError &error , const char *prefix , const MarkovianSequences &iseq , int identifier ,int output = SSTATE , const char *title = 0) const;
-    bool state_profile_plot_write(StatError &error , const char *prefix , int identifier ,   int output = SSTATE , const char *title = 0) const;
+    bool state_profile_plot_write(StatError &error , const char *prefix , const MarkovianSequences &iseq , int identifier ,state_profile output = SSTATE , const char *title = 0) const;
+    bool state_profile_plot_write(StatError &error , const char *prefix , int identifier , state_profile output = SSTATE , const char *title = 0) const;
 
     SemiMarkovData* state_sequence_computation(StatError &error , ostream &os , const MarkovianSequences &seq , bool characteristic_flag = true) const;
 */
