@@ -62,7 +62,7 @@ namespace sequence_analysis {
  *
  *--------------------------------------------------------------*/
 
-NbEvent::NbEvent(char itype , int itime , int inb_value , int iident ,
+NbEvent::NbEvent(process_type itype , int itime , int inb_value , discrete_parametric iident ,
                  int iinf_bound , int isup_bound , double iparameter , double iprobability)
 :DiscreteParametric(inb_value , iident , iinf_bound , isup_bound , iparameter , iprobability)
 
@@ -80,17 +80,17 @@ NbEvent::NbEvent(char itype , int itime , int inb_value , int iident ,
  *
  *--------------------------------------------------------------*/
 
-NbEvent::NbEvent(char itype , int itime , DiscreteParametric &inter_event)
+NbEvent::NbEvent(process_type itype , int itime , DiscreteParametric &inter_event)
 
 {
   type = itype;
   time = itime;
 
   switch (type) {
-  case 'o' :
+  case ORDINARY :
     Distribution::init(time / inter_event.offset + 1);
     break;
-  case 'e' :
+  case EQUILIBRIUM :
     Distribution::init((time - 1) / inter_event.offset + 2);
     break;
   }
@@ -103,10 +103,10 @@ NbEvent::NbEvent(char itype , int itime , DiscreteParametric &inter_event)
   probability = inter_event.probability;
 
   switch (type) {
-  case 'o' :
+  case ORDINARY :
     ordinary_computation(inter_event);
     break;
-  case 'e' :
+  case EQUILIBRIUM :
     computation(inter_event);
     break;
   }
@@ -122,7 +122,7 @@ NbEvent::NbEvent(char itype , int itime , DiscreteParametric &inter_event)
  *--------------------------------------------------------------*/
 
 NbEvent::NbEvent(const NbEvent &nb_event , int ialloc_nb_value)
-:DiscreteParametric(nb_event , 'c' , ialloc_nb_value)
+:DiscreteParametric(nb_event , DISTRIBUTION_COPY , ialloc_nb_value)
 
 {
   type = nb_event.type;
@@ -132,14 +132,14 @@ NbEvent::NbEvent(const NbEvent &nb_event , int ialloc_nb_value)
 
 /*--------------------------------------------------------------*
  *
- *  Initialisation du type ('o' : ordinaire, 'e' : en equilibre)
+ *  Initialisation du type (ORDINARY/EQUILIBRIUM)
  *  d'un processus de renouvellement.
  *
  *  argument : type.
  *
  *--------------------------------------------------------------*/
 
-void Renewal::type_init(int itype)
+void Renewal::type_init(process_type itype)
 
 {
   if (itype != type) {
@@ -193,7 +193,7 @@ void Renewal::init(int inf_bound , int sup_bound , double parameter , double pro
  *
  *--------------------------------------------------------------*/
 
-void Renewal::init(int ident , int inf_bound , int sup_bound ,
+void Renewal::init(discrete_parametric ident , int inf_bound , int sup_bound ,
                    double parameter , double probability)
 
 {
@@ -225,7 +225,7 @@ Renewal::Renewal()
   nb_iterator = 0;
   renewal_data = NULL;
 
-  type = 'v';
+  type = ORDINARY;
 
   time = NULL;
 
@@ -253,7 +253,7 @@ Renewal::Renewal()
  *
  *--------------------------------------------------------------*/
 
-Renewal::Renewal(char itype , const FrequencyDistribution &htime ,
+Renewal::Renewal(process_type itype , const FrequencyDistribution &htime ,
                  const DiscreteParametric &iinter_event)
 
 {
@@ -268,7 +268,8 @@ Renewal::Renewal(char itype , const FrequencyDistribution &htime ,
 
   time = new Distribution(htime);
 
-  inter_event = new DiscreteParametric(iinter_event , 'c' , (int)(iinter_event.nb_value * NB_VALUE_COEFF));
+  inter_event = new DiscreteParametric(iinter_event , DISTRIBUTION_COPY ,
+                                       (int)(iinter_event.nb_value * NB_VALUE_COEFF));
   length_bias = new LengthBias(inter_event->alloc_nb_value , inter_event->ident ,
                                inter_event->inf_bound , inter_event->sup_bound ,
                                inter_event->parameter , inter_event->probability);
@@ -287,10 +288,10 @@ Renewal::Renewal(char itype , const FrequencyDistribution &htime ,
   for (i = time->offset;i < time->nb_value;i++) {
     if (time->mass[i] > 0.) {
       switch (type) {
-      case 'o' :
+      case ORDINARY :
         nb_value = i / inter_event->offset + 1;
         break;
-      case 'e' :
+      case EQUILIBRIUM :
         nb_value = (i - 1) / inter_event->offset + 2;
         break;
       }
@@ -326,7 +327,7 @@ Renewal::Renewal(char itype , const FrequencyDistribution &htime ,
  *
  *--------------------------------------------------------------*/
 
-Renewal::Renewal(char itype , const Distribution &itime ,
+Renewal::Renewal(process_type itype , const Distribution &itime ,
                  const DiscreteParametric &iinter_event)
 
 {
@@ -341,7 +342,7 @@ Renewal::Renewal(char itype , const Distribution &itime ,
 
   time = new Distribution(itime);
 
-  inter_event = new DiscreteParametric(iinter_event , 'n');
+  inter_event = new DiscreteParametric(iinter_event , NORMALIZATION);
   length_bias = new LengthBias(*inter_event);
   backward = new Backward(inter_event->nb_value - 1 , inter_event->ident ,
                           inter_event->inf_bound , inter_event->sup_bound ,
@@ -356,10 +357,10 @@ Renewal::Renewal(char itype , const Distribution &itime ,
   for (i = time->offset;i < time->nb_value;i++) {
     if (time->mass[i] > 0.) {
       switch (type) {
-      case 'o' :
+      case ORDINARY :
         nb_value = i / inter_event->offset + 1;
         break;
-      case 'e' :
+      case EQUILIBRIUM :
         nb_value = (i - 1) / inter_event->offset + 2;
         break;
       }
@@ -405,9 +406,9 @@ Renewal::Renewal(const RenewalData &irenewal_data , const DiscreteParametric &ii
 
   nb_iterator = 0;
   renewal_data = new RenewalData(irenewal_data);
-  renewal_data->type = 'e';
+  renewal_data->type = EQUILIBRIUM;
 
-  type = 'e';
+  type = EQUILIBRIUM;
 
   time = new Distribution(*(renewal_data->htime));
 
@@ -426,10 +427,10 @@ Renewal::Renewal(const RenewalData &irenewal_data , const DiscreteParametric &ii
   for (i = time->offset;i < time->nb_value;i++) {
     if (time->mass[i] > 0.) {
       switch (type) {
-      case 'o' :
+      case ORDINARY :
         nb_value = i / inter_event->offset + 1;
         break;
-      case 'e' :
+      case EQUILIBRIUM :
         nb_value = (i - 1) / inter_event->offset + 2;
         break;
       }
@@ -626,7 +627,8 @@ Renewal& Renewal::operator=(const Renewal &renew)
  *
  *--------------------------------------------------------------*/
 
-DiscreteParametricModel* Renewal::extract(StatError &error , int dist_type , int itime) const
+DiscreteParametricModel* Renewal::extract(StatError &error , renewal_distribution dist_type ,
+                                          int itime) const
 
 {
   Distribution *pdist;
@@ -726,13 +728,13 @@ DiscreteParametricModel* Renewal::extract(StatError &error , int dist_type , int
  *  Construction d'un objet Renewal a partir d'une loi inter-evenement.
  *
  *  arguments : reference sur un objet StatError, reference sur la loi inter-evenement,
- *              type du processus ('o' : ordinaire, 'e' : en equilibre),
+ *              type du processus (ORDINARY/EQUILIBRIUM),
  *              temps d'observation.
  *
  *--------------------------------------------------------------*/
 
-Renewal* renewal_building(StatError &error , const DiscreteParametric &inter_event ,
-                          char type , int time)
+Renewal* Renewal::building(StatError &error , const DiscreteParametric &inter_event ,
+                           process_type type , int time)
 
 {
   bool status = true;
@@ -769,14 +771,14 @@ Renewal* renewal_building(StatError &error , const DiscreteParametric &inter_eve
  *  Construction d'un objet Renewal a partir d'un fichier.
  *
  *  arguments : reference sur un objet StatError, path,
- *              type du processus ('o' : ordinaire, 'e' : en equilibre),
+ *              type du processus (ORDINARY/EQUILIBRIUM),
  *              temps d'observation, seuil sur la fonction de repartition
  *              de la loi inter-evenement.
  *
  *--------------------------------------------------------------*/
 
-Renewal* renewal_ascii_read(StatError &error , const char *path ,
-                            char type , int time , double cumul_threshold)
+Renewal* Renewal::ascii_read(StatError &error , const char *path ,
+                             process_type type , int time , double cumul_threshold)
 
 {
   RWLocaleSnapshot locale("en");
@@ -800,7 +802,7 @@ Renewal* renewal_ascii_read(StatError &error , const char *path ,
     status = true;
     line = 0;
 
-    inter_event = discrete_parametric_parsing(error , in_file , line ,
+    inter_event = DiscreteParametric::parsing(error , in_file , line ,
                                               NEGATIVE_BINOMIAL , cumul_threshold , 1);
 
     if (!inter_event) {
