@@ -179,7 +179,7 @@ MarkovianSequences::MarkovianSequences(const MarkovianSequences &seq , bool *aux
  *
  *--------------------------------------------------------------*/
 
-void MarkovianSequences::copy(const MarkovianSequences &seq , int param)
+void MarkovianSequences::copy(const MarkovianSequences &seq , initial_run param)
 
 {
   bool initial_run_flag;
@@ -354,7 +354,7 @@ void MarkovianSequences::reverse(const MarkovianSequences &seq)
 
   for (i = 0;i < nb_variable;i++) {
     if (seq.characteristics[i]) {
-      characteristics[i] = new SequenceCharacteristics(*(seq.characteristics[i]), 'r');
+      characteristics[i] = new SequenceCharacteristics(*(seq.characteristics[i]) , REVERSE);
 
       build_index_value(i);
       build_first_occurrence_frequency_distribution(i);
@@ -380,7 +380,7 @@ void MarkovianSequences::reverse(const MarkovianSequences &seq)
  *
  *--------------------------------------------------------------*/
 
-void MarkovianSequences::add_state_variable(const MarkovianSequences &seq , int param)
+void MarkovianSequences::add_state_variable(const MarkovianSequences &seq , initial_run param)
 
 {
   bool initial_run_flag;
@@ -436,35 +436,34 @@ void MarkovianSequences::add_state_variable(const MarkovianSequences &seq , int 
  *
  *  Constructeur par copie de la classe MarkovianSequences.
  *
- *  arguments : reference sur un objet MarkovianSequences, type de transformation ('c' : copie,
- *              'r' : inversion du sens de parcours, 'a' : ajout d'une variable d'etat,
- *              'm' : suppression du parametre d'index, 'e' : parametre d'index rendu explicite),
+ *  arguments : reference sur un objet MarkovianSequences, type de transformation,
  *              ajout/suppression des lois empiriques de temps de sejour initial.
  *
  *--------------------------------------------------------------*/
 
-MarkovianSequences::MarkovianSequences(const MarkovianSequences &seq , char transform , int param)
+MarkovianSequences::MarkovianSequences(const MarkovianSequences &seq , sequence_transformation transform ,
+                                       initial_run param)
 
 {
   switch (transform) {
-  case 'c' :
+  case SEQUENCE_COPY :
     Sequences::copy(seq);
     copy(seq , param);
     break;
-  case 'r' :
+  case REVERSE :
     Sequences::reverse(seq);
     reverse(seq);
     break;
-  case 'a' :
+  case ADD_STATE_VARIABLE :
     Sequences::add_state_variable(seq);
     add_state_variable(seq , param);
     break;
-  case 'm' :
-    Sequences::remove_index_parameter(seq);
+  case EXPLICIT_INDEX_PARAMETER :
+    Sequences::explicit_index_parameter(seq);
     copy(seq);
     break;
-  case 'e' :
-    Sequences::explicit_index_parameter(seq);
+  case REMOVE_INDEX_PARAMETER :
+    Sequences::remove_index_parameter(seq);
     copy(seq);
     break;
   default :
@@ -573,7 +572,7 @@ MarkovianSequences& MarkovianSequences::operator=(const MarkovianSequences &seq)
  *
  *--------------------------------------------------------------*/
 
-void MarkovianSequences::state_variable_init(int itype)
+void MarkovianSequences::state_variable_init(variable_nature itype)
 
 {
   register int i , j;
@@ -633,7 +632,7 @@ void MarkovianSequences::state_variable_init(int itype)
  *
  *--------------------------------------------------------------*/
 
-DiscreteDistributionData* MarkovianSequences::extract(StatError &error , int type ,
+DiscreteDistributionData* MarkovianSequences::extract(StatError &error , process_distribution type ,
                                                       int variable , int value) const
 
 {
@@ -767,17 +766,17 @@ MarkovianSequences* MarkovianSequences::merge(StatError &error , int nb_sample ,
   error.init();
 
   for (i = 0;i < nb_sample;i++) {
-    if (iseq[i]->index_parameter_type != index_parameter_type) {
+    if (iseq[i]->index_param_type != index_param_type) {
       status = false;
       ostringstream error_message;
       error_message << STAT_label[STATL_SAMPLE] << " " << i + 2 << ": "
                     << SEQ_error[SEQR_INDEX_PARAMETER_TYPE];
 
-      if (index_parameter_type == IMPLICIT_TYPE) {
+      if (index_param_type == IMPLICIT_TYPE) {
         error.update((error_message.str()).c_str());
       }
       else {
-        error.correction_update((error_message.str()).c_str() , SEQ_index_parameter_word[index_parameter_type]);
+        error.correction_update((error_message.str()).c_str() , SEQ_index_parameter_word[index_param_type]);
       }
     }
   }
@@ -921,7 +920,7 @@ MarkovianSequences* MarkovianSequences::merge(StatError &error , int nb_sample ,
     }
 
     seq = new MarkovianSequences(inb_sequence , iidentifier , ilength , ivertex_identifier ,
-                                 index_parameter_type , nb_variable , type);
+                                 index_param_type , nb_variable , type);
     delete [] iidentifier;
     delete [] ilength;
 
@@ -936,7 +935,7 @@ MarkovianSequences* MarkovianSequences::merge(StatError &error , int nb_sample ,
 
     // copy of index parameters
 
-    if (index_parameter_type == TIME) {
+    if (index_param_type == TIME) {
       i = 0;
       for (j = 0;j < nb_sample;j++) {
         for (k = 0;k < pseq[j]->nb_sequence;k++) {
@@ -1146,7 +1145,7 @@ MarkovianSequences* MarkovianSequences::merge(StatError &error , int nb_sample ,
  *--------------------------------------------------------------*/
 
 MarkovianSequences* MarkovianSequences::cluster(StatError &error , int variable ,
-                                                int step , int mode) const
+                                                int step , rounding mode) const
 
 {
   bool status = true;
@@ -1212,20 +1211,21 @@ MarkovianSequences* MarkovianSequences::cluster(StatError &error , int variable 
 
 /*--------------------------------------------------------------*
  *
- *  Transcodage des symboles d'une variable entiere.
+ *  Transcodage des categories d'une variable entiere.
  *
  *  arguments : reference sur un objet StatError, indice de la variable,
- *              table de transcodage des symboles, flag pour ajouter une variable.
+ *              table de transcodage des categories, flag pour ajouter une variable.
  *
  *--------------------------------------------------------------*/
 
 MarkovianSequences* MarkovianSequences::transcode(StatError &error , int ivariable ,
-                                                  int *symbol , bool add_flag) const
+                                                  int *category , bool add_flag) const
 
 {
   bool status = true , *presence;
   register int i;
-  int variable , offset , min_symbol , max_symbol , *itype;
+  int variable , offset , min_category , max_category;
+  variable_nature *itype;
   MarkovianSequences *seq;
 
 
@@ -1256,49 +1256,49 @@ MarkovianSequences* MarkovianSequences::transcode(StatError &error , int ivariab
     }
 
     if (status) {
-      min_symbol = marginal_distribution[ivariable]->nb_value;
-      max_symbol = 0;
+      min_category = marginal_distribution[ivariable]->nb_value;
+      max_category = 0;
 
       for (i = 0;i < marginal_distribution[ivariable]->nb_value - marginal_distribution[ivariable]->offset;i++) {
-        if ((symbol[i] < 0) || (symbol[i] >= (add_flag ? marginal_distribution[ivariable]->nb_value - 1 : marginal_distribution[ivariable]->nb_value))) {
+        if ((category[i] < 0) || (category[i] >= (add_flag ? marginal_distribution[ivariable]->nb_value - 1 : marginal_distribution[ivariable]->nb_value))) {
           status = false;
           ostringstream error_message;
-          error_message << STAT_label[STATL_SYMBOL] << " " << symbol[i] << " "
+          error_message << STAT_label[STATL_CATEGORY] << " " << category[i] << " "
                         << STAT_error[STATR_NOT_ALLOWED];
           error.update((error_message.str()).c_str());
         }
 
         else {
-          if (symbol[i] < min_symbol) {
-            min_symbol = symbol[i];
+          if (category[i] < min_category) {
+            min_category = category[i];
           }
-          if (symbol[i] > max_symbol) {
-            max_symbol = symbol[i];
+          if (category[i] > max_category) {
+            max_category = category[i];
           }
         }
       }
 
-      if ((min_symbol != 0) || (max_symbol == 0)) {
+      if ((min_category != 0) || (max_category == 0)) {
         status = false;
-        error.update(STAT_error[STATR_NB_SYMBOL]);
+        error.update(STAT_error[STATR_NB_CATEGORY]);
       }
     }
 
     if (status) {
-      presence = new bool[max_symbol + 1];
-      for (i = 0;i <= max_symbol;i++) {
+      presence = new bool[max_category + 1];
+      for (i = 0;i <= max_category;i++) {
         presence[i] = false;
       }
 
       for (i = 0;i < marginal_distribution[ivariable]->nb_value - marginal_distribution[ivariable]->offset;i++) {
-        presence[symbol[i]] = true;
+        presence[category[i]] = true;
       }
 
-      for (i = 0;i <= max_symbol;i++) {
+      for (i = 0;i <= max_category;i++) {
         if (!presence[i]) {
           status = false;
           ostringstream error_message;
-          error_message << STAT_error[STATR_MISSING_SYMBOL] << " " << i;
+          error_message << STAT_error[STATR_MISSING_CATEGORY] << " " << i;
           error.update((error_message.str()).c_str());
         }
       }
@@ -1318,17 +1318,17 @@ MarkovianSequences* MarkovianSequences::transcode(StatError &error , int ivariab
         break;
       }
 
-      itype = new int[nb_variable + offset];
+      itype = new variable_nature[nb_variable + offset];
       for (i = 0;i < nb_variable;i++) {
         itype[i + offset] = type[i];
       }
       itype[variable] = INT_VALUE;
 
       seq = new MarkovianSequences(nb_sequence , identifier , length , vertex_identifier ,
-                                   index_parameter_type , nb_variable + offset , itype);
+                                   index_param_type , nb_variable + offset , itype);
       delete [] itype;
 
-      seq->Sequences::transcode(*this , ivariable , 0 , max_symbol , symbol , add_flag);
+      seq->Sequences::transcode(*this , ivariable , 0 , max_category , category , add_flag);
 
       for (i = 0;i < seq->nb_variable;i++) {
         if (i == variable) {
@@ -1352,7 +1352,7 @@ MarkovianSequences* MarkovianSequences::transcode(StatError &error , int ivariab
 
 /*--------------------------------------------------------------*
  *
- *  Transcodage des symboles d'une variable entiere.
+ *  Transcodage des categories d'une variable entiere.
  *
  *  arguments : references sur un objet StatError et
  *              sur un objet CategoricalSequenceProcess.
@@ -1364,21 +1364,21 @@ MarkovianSequences* MarkovianSequences::transcode(StatError &error ,
 
 {
   register int i , j;
-  int *symbol;
+  int *category;
   MarkovianSequences *seq;
 
 
-  symbol = new int[process->nb_value];
+  category = new int[process->nb_value];
   for (i = 0;i < process->nb_state;i++) {
     for (j = 0;j < process->nb_value;j++) {
       if (process->observation[i]->mass[j] > 0.) {
-        symbol[j] = i;
+        category[j] = i;
       }
     }
   }
 
-  seq = transcode(error , 1 , symbol , true);
-  delete [] symbol;
+  seq = transcode(error , 1 , category , true);
+  delete [] category;
 
   return seq;
 }
@@ -1399,7 +1399,8 @@ MarkovianSequences* MarkovianSequences::consecutive_values(StatError &error , os
 {
   bool status = true;
   register int i , j;
-  int variable , offset , max , *symbol , *itype;
+  int variable , offset , max , *category;
+  variable_nature *itype;
   MarkovianSequences *seq;
 
 
@@ -1450,16 +1451,16 @@ MarkovianSequences* MarkovianSequences::consecutive_values(StatError &error , os
     os << endl;
 #   endif
 
-    symbol = new int[marginal_distribution[ivariable]->nb_value - marginal_distribution[ivariable]->offset];
+    category = new int[marginal_distribution[ivariable]->nb_value - marginal_distribution[ivariable]->offset];
 
 //    i = 0;
     i = -1;
     for (j = marginal_distribution[ivariable]->offset;j < marginal_distribution[ivariable]->nb_value;j++) {
-//      symbol[j - marginal_distribution[ivariable]->offset] = i;
+//      category[j - marginal_distribution[ivariable]->offset] = i;
       if (marginal_distribution[ivariable]->frequency[j] > 0) {
         i++;
       }
-      symbol[j - marginal_distribution[ivariable]->offset] = i;
+      category[j - marginal_distribution[ivariable]->offset] = i;
     }
 //    max = i - 1;
     max = i;
@@ -1467,7 +1468,7 @@ MarkovianSequences* MarkovianSequences::consecutive_values(StatError &error , os
 #   ifdef DEBUG
     cout << "\nTest :";
     for (i = 0;i < marginal_distribution[ivariable]->nb_value - marginal_distribution[ivariable]->offset;i++) {
-      cout << " " << symbol[i];
+      cout << " " << category[i];
     }
     cout << endl;
 #   endif
@@ -1483,18 +1484,18 @@ MarkovianSequences* MarkovianSequences::consecutive_values(StatError &error , os
       break;
     }
 
-    itype = new int[nb_variable + offset];
+    itype = new variable_nature[nb_variable + offset];
     for (i = 0;i < nb_variable;i++) {
       itype[i + offset] = type[i];
     }
     itype[variable] = INT_VALUE;
 
     seq = new MarkovianSequences(nb_sequence , identifier , length , vertex_identifier ,
-                                 index_parameter_type , nb_variable + offset , itype);
+                                 index_param_type , nb_variable + offset , itype);
     delete [] itype;
 
-    seq->Sequences::transcode(*this , ivariable , 0 , max , symbol , add_flag);
-    delete [] symbol;
+    seq->Sequences::transcode(*this , ivariable , 0 , max , category , add_flag);
+    delete [] category;
 
     for (i = 0;i < seq->nb_variable;i++) {
       if (i == variable) {
@@ -1515,10 +1516,10 @@ MarkovianSequences* MarkovianSequences::consecutive_values(StatError &error , os
 
 /*--------------------------------------------------------------*
  *
- *  Regroupement des symboles d'une variable entiere.
+ *  Regroupement des categories d'une variable entiere.
  *
  *  arguments : reference sur un objet StatError, indice de la variable,
- *              nombres de classes, bornes pour regrouper les symboles,
+ *              nombres de classes, bornes pour regrouper les categories,
  *              flag pour ajouter une variable.
  *
  *--------------------------------------------------------------*/
@@ -1529,7 +1530,8 @@ MarkovianSequences* MarkovianSequences::cluster(StatError &error , int ivariable
 {
   bool status = true;
   register int i , j , k;
-  int variable , offset , *symbol , *limit , *itype;
+  int variable , offset , *category , *limit;
+  variable_nature *itype;
   MarkovianSequences *seq;
 
 
@@ -1581,12 +1583,12 @@ MarkovianSequences* MarkovianSequences::cluster(StatError &error , int ivariable
     }
 
     if (status) {
-      symbol = new int[marginal_distribution[ivariable]->nb_value];
+      category = new int[marginal_distribution[ivariable]->nb_value];
 
       i = 0;
       for (j = 0;j < nb_class;j++) {
         for (k = limit[j];k < limit[j + 1];k++) {
-          symbol[i++] = j;
+          category[i++] = j;
         }
       }
 
@@ -1601,18 +1603,18 @@ MarkovianSequences* MarkovianSequences::cluster(StatError &error , int ivariable
         break;
       }
 
-      itype = new int[nb_variable + offset];
+      itype = new variable_nature[nb_variable + offset];
       for (i = 0;i < nb_variable;i++) {
         itype[i + offset] = type[i];
       }
       itype[variable] = INT_VALUE;
 
       seq = new MarkovianSequences(nb_sequence , identifier , length , vertex_identifier ,
-                                   index_parameter_type , nb_variable + offset , itype);
+                                   index_param_type , nb_variable + offset , itype);
       delete [] itype;
 
-      seq->Sequences::transcode(*this , ivariable , 0 , nb_class - 1 , symbol , add_flag);
-      delete [] symbol;
+      seq->Sequences::transcode(*this , ivariable , 0 , nb_class - 1 , category , add_flag);
+      delete [] category;
 
       for (i = 0;i < seq->nb_variable;i++) {
         if (i == variable) {
@@ -1727,34 +1729,6 @@ MarkovianSequences* MarkovianSequences::cluster(StatError &error , int variable 
 
 /*--------------------------------------------------------------*
  *
- *  Suppression du parametre d'index.
- *
- *  argument : reference sur un objet StatError.
- *
- *--------------------------------------------------------------*/
-
-MarkovianSequences* MarkovianSequences::remove_index_parameter(StatError &error) const
-
-{
-  MarkovianSequences *seq;
-
-
-  error.init();
-
-  if (!index_parameter) {
-    seq = NULL;
-    error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
-  }
-  else {
-    seq = new MarkovianSequences(*this , 'm');
-  }
-
-  return seq;
-}
-
-
-/*--------------------------------------------------------------*
- *
  *  Copie d'un objet MarkovianSequences avec transformation du parametre d'index implicite
  *  en parametre d'index explicite.
  *
@@ -1775,7 +1749,35 @@ MarkovianSequences* MarkovianSequences::explicit_index_parameter(StatError &erro
     error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
   }
   else {
-    seq = new MarkovianSequences(*this , 'e');
+    seq = new MarkovianSequences(*this , EXPLICIT_INDEX_PARAMETER);
+  }
+
+  return seq;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Suppression du parametre d'index.
+ *
+ *  argument : reference sur un objet StatError.
+ *
+ *--------------------------------------------------------------*/
+
+MarkovianSequences* MarkovianSequences::remove_index_parameter(StatError &error) const
+
+{
+  MarkovianSequences *seq;
+
+
+  error.init();
+
+  if (!index_parameter) {
+    seq = NULL;
+    error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
+  }
+  else {
+    seq = new MarkovianSequences(*this , REMOVE_INDEX_PARAMETER);
   }
 
   return seq;
@@ -1798,7 +1800,8 @@ MarkovianSequences* MarkovianSequences::select_variable(StatError &error , int i
 {
   bool status = true , *selected_variable;
   register int i;
-  int bnb_variable , *variable , *itype;
+  int bnb_variable , *variable;
+  variable_nature *itype;
   MarkovianSequences *seq;
 
 
@@ -1853,13 +1856,13 @@ MarkovianSequences* MarkovianSequences::select_variable(StatError &error , int i
     }
 
     if (status) {
-      itype = new int[bnb_variable];
+      itype = new variable_nature[bnb_variable];
       for (i = 0;i < bnb_variable;i++) {
         itype[i] = type[variable[i]];
       }
 
       seq = new MarkovianSequences(nb_sequence , identifier , length , vertex_identifier ,
-                                   index_parameter_type , bnb_variable , itype);
+                                   index_param_type , bnb_variable , itype);
 
       seq->Sequences::select_variable(*this , variable);
 
@@ -1890,19 +1893,20 @@ MarkovianSequences* MarkovianSequences::remove_variable_1() const
 
 {
   register int i;
-  int *variable , *itype;
+  int *variable;
+  variable_nature *itype;
   MarkovianSequences *seq;
 
 
   variable = new int[nb_variable - 1];
-  itype = new int[nb_variable - 1];
+  itype = new variable_nature[nb_variable - 1];
   for (i = 0;i < nb_variable - 1;i++) {
     variable[i] = i + 1;
     itype[i] = type[i + 1];
   }
 
   seq = new MarkovianSequences(nb_sequence , identifier , length , vertex_identifier ,
-                               index_parameter_type , nb_variable - 1 , itype);
+                               index_param_type , nb_variable - 1 , itype);
 
   seq->Sequences::select_variable(*this , variable);
 
@@ -1936,7 +1940,8 @@ MarkovianSequences* MarkovianSequences::merge_variable(StatError &error , int nb
 {
   bool status = true;
   register int i , j , k , m;
-  int inb_variable , *iidentifier , *itype , **ivertex_identifier;
+  int inb_variable , *iidentifier , **ivertex_identifier;
+  variable_nature *itype;
   MarkovianSequences *seq;
   const MarkovianSequences **pseq;
 
@@ -1945,18 +1950,18 @@ MarkovianSequences* MarkovianSequences::merge_variable(StatError &error , int nb
   error.init();
 
   for (i = 0;i < nb_sample;i++) {
-    if ((iseq[i]->index_parameter_type != IMPLICIT_TYPE) &&
-        (iseq[i]->index_parameter_type != index_parameter_type)) {
+    if ((iseq[i]->index_param_type != IMPLICIT_TYPE) &&
+        (iseq[i]->index_param_type != index_param_type)) {
       status = false;
       ostringstream error_message;
       error_message << STAT_label[STATL_SAMPLE] << " " << i + 2 << ": "
                     << SEQ_error[SEQR_INDEX_PARAMETER_TYPE];
 
-      if (index_parameter_type == IMPLICIT_TYPE) {
+      if (index_param_type == IMPLICIT_TYPE) {
         error.update((error_message.str()).c_str());
       }
       else {
-        error.correction_update((error_message.str()).c_str() , SEQ_index_parameter_word[index_parameter_type]);
+        error.correction_update((error_message.str()).c_str() , SEQ_index_parameter_word[index_param_type]);
       }
     }
 
@@ -1979,8 +1984,8 @@ MarkovianSequences* MarkovianSequences::merge_variable(StatError &error , int nb
           error.update((error_message.str()).c_str());
         }
 
-        else if ((iseq[i]->index_parameter_type == TIME) &&
-                 (iseq[i]->index_parameter_type == index_parameter_type)) {
+        else if ((iseq[i]->index_param_type == TIME) &&
+                 (iseq[i]->index_param_type == index_param_type)) {
           for (k = 0;k < length[j];k++) {
             if (iseq[i]->index_parameter[j][k] != index_parameter[j][k]) {
               status = false;
@@ -2085,7 +2090,7 @@ MarkovianSequences* MarkovianSequences::merge_variable(StatError &error , int nb
       ivertex_identifier = pseq[ref_sample]->vertex_identifier;
     }
 
-    itype = new int[inb_variable];
+    itype = new variable_nature[inb_variable];
     inb_variable = 0;
     for (i = 0;i < nb_sample;i++) {
       for (j = 0;j < pseq[i]->nb_variable;j++) {
@@ -2098,7 +2103,7 @@ MarkovianSequences* MarkovianSequences::merge_variable(StatError &error , int nb
     }
 
     seq = new MarkovianSequences(nb_sequence , iidentifier , length , ivertex_identifier ,
-                                 index_parameter_type , inb_variable , itype);
+                                 index_param_type , inb_variable , itype);
     delete [] itype;
 
     // copy of index parameters
@@ -2200,7 +2205,7 @@ MarkovianSequences* MarkovianSequences::merge_variable(StatError &error , int nb
   }
 
   else {
-    seq = new MarkovianSequences(*this , 'c' , ADD_INITIAL_RUN);
+    seq = new MarkovianSequences(*this , SEQUENCE_COPY , ADD_INITIAL_RUN);
   }
 
   return seq;
@@ -2231,7 +2236,7 @@ MarkovianSequences* MarkovianSequences::add_absorbing_run(StatError &error ,
   seq = NULL;
   error.init();
 
-/*  if (index_parameter_type == TIME) {
+/*  if (index_param_type == TIME) {
     status = false;
     error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
   } */
@@ -2268,7 +2273,7 @@ MarkovianSequences* MarkovianSequences::add_absorbing_run(StatError &error ,
     }
 
     seq = new MarkovianSequences(nb_sequence , identifier , ilength , vertex_identifier ,
-                                 index_parameter_type , nb_variable , type , false);
+                                 index_param_type , nb_variable , type , false);
     delete [] ilength;
 
     // copy of vertex identifiers
@@ -2498,7 +2503,7 @@ MarkovianSequences* MarkovianSequences::build_auxiliary_variable(DiscreteParamet
       }
 
       else if (continuous_process[j - 1]->ident == LINEAR_MODEL) {
-        switch (index_parameter_type) {
+        switch (index_param_type) {
 
         case IMPLICIT_TYPE : {
           for (k = 0;k < nb_sequence;k++) {
@@ -2590,7 +2595,7 @@ MarkovianSequences* MarkovianSequences::split(StatError &error , int step) const
 #   endif
 
     seq = new MarkovianSequences(inb_sequence , NULL , ilength , vertex_identifier ,
-                                 index_parameter_type , nb_variable , type);
+                                 index_param_type , nb_variable , type);
     delete [] ilength;
 
     // copie des sequences
@@ -2599,7 +2604,7 @@ MarkovianSequences* MarkovianSequences::split(StatError &error , int step) const
     for (i = 0;i < nb_sequence;i++) {
       nb_segment = (length[i] % step == 0 ? length[i] / step : length[i] / step + 1);
 
-      if (seq->index_parameter_type == TIME) {
+      if (seq->index_param_type == TIME) {
         cindex_param = index_parameter[i];
         for (j = 0;j < nb_segment;j++) {
           pindex_param = seq->index_parameter[inb_sequence + j];
@@ -2634,7 +2639,7 @@ MarkovianSequences* MarkovianSequences::split(StatError &error , int step) const
       inb_sequence += nb_segment;
     }
 
-    if (seq->index_parameter_type == TIME) {
+    if (seq->index_param_type == TIME) {
       seq->index_parameter_distribution = new FrequencyDistribution(*index_parameter_distribution);
       seq->index_interval_computation();
     }
@@ -4715,9 +4720,9 @@ ostream& MarkovianSequences::ascii_write(ostream &os , bool exhaustive , bool co
   double mean , variance;
 
 
-  if (index_parameter_type == TIME) {
+  if (index_param_type == TIME) {
     os << SEQ_word[SEQW_INDEX_PARAMETER] << " : "
-       << SEQ_index_parameter_word[index_parameter_type] << "   ";
+       << SEQ_index_parameter_word[index_param_type] << "   ";
     if (comment_flag) {
       os << "# ";
     }
@@ -4989,7 +4994,8 @@ bool MarkovianSequences::ascii_write(StatError &error , const char *path ,
  *
  *--------------------------------------------------------------*/
 
-ostream& MarkovianSequences::ascii_data_write(ostream &os , char format , bool exhaustive) const
+ostream& MarkovianSequences::ascii_data_write(ostream &os , output_sequence_format format ,
+                                              bool exhaustive) const
 
 {
   ascii_write(os , exhaustive , false);
@@ -5009,7 +5015,7 @@ ostream& MarkovianSequences::ascii_data_write(ostream &os , char format , bool e
  *--------------------------------------------------------------*/
 
 bool MarkovianSequences::ascii_data_write(StatError &error , const char *path ,
-                                          char format , bool exhaustive) const
+                                          output_sequence_format format , bool exhaustive) const
 
 {
   bool status = false;
@@ -5063,9 +5069,9 @@ bool MarkovianSequences::spreadsheet_write(StatError &error , const char *path) 
   else {
     status = true;
 
-    if (index_parameter_type == TIME) {
+    if (index_param_type == TIME) {
       out_file << SEQ_word[SEQW_INDEX_PARAMETER] << "\t"
-               << SEQ_index_parameter_word[index_parameter_type] << "\t\t"
+               << SEQ_index_parameter_word[index_param_type] << "\t\t"
                << SEQ_label[SEQL_MIN_INDEX_PARAMETER] << "\t" << index_parameter_distribution->offset << "\t\t"
                << SEQ_label[SEQL_MAX_INDEX_PARAMETER] << "\t" << index_parameter_distribution->nb_value - 1 << endl;
 
@@ -5086,7 +5092,7 @@ bool MarkovianSequences::spreadsheet_write(StatError &error , const char *path) 
                    << SEQ_label[SEQL_OBSERVED] << " " << SEQ_label[SEQL_SELF_TRANSITION] << endl;
           self_transition[i]->spreadsheet_print(out_file);
 
-          smoothed_curves = new Curves(*(self_transition[i]) , 's');
+          smoothed_curves = new Curves(*(self_transition[i]) , SMOOTHING);
 
           out_file << "\n\t" << STAT_label[STATL_STATE] << " " << i << " - "
                    << SEQ_label[SEQL_SMOOTHED] << " " << SEQ_label[SEQL_OBSERVED] << " " << SEQ_label[SEQL_SELF_TRANSITION] << endl;
@@ -5859,7 +5865,7 @@ ostream& MarkovianSequences::linear_model_spreadsheet_print(ostream &os , int va
   if (type[variable] == INT_VALUE) {
     used_sequence = new bool[nb_sequence];
   }
-  if (index_parameter_type == TIME) {
+  if (index_param_type == TIME) {
     index = new int[nb_sequence];
   }
 
@@ -5876,7 +5882,7 @@ ostream& MarkovianSequences::linear_model_spreadsheet_print(ostream &os , int va
 
   case STATE : {
     for (i = 0;i < process->nb_state;i++) {
-      switch (index_parameter_type) {
+      switch (index_param_type) {
 
       case IMPLICIT_TYPE : {
         switch (type[variable]) {
@@ -6016,7 +6022,7 @@ ostream& MarkovianSequences::linear_model_spreadsheet_print(ostream &os , int va
   }
 
   default : {
-    switch (index_parameter_type) {
+    switch (index_param_type) {
 
     case IMPLICIT_TYPE : {
       switch (type[variable]) {
@@ -6163,7 +6169,7 @@ ostream& MarkovianSequences::linear_model_spreadsheet_print(ostream &os , int va
   if (type[variable] == INT_VALUE) {
     delete [] used_sequence;
   }
-  if (index_parameter_type == TIME) {
+  if (index_param_type == TIME) {
     delete [] index;
   }
 
@@ -6202,7 +6208,7 @@ bool MarkovianSequences::linear_model_plot_print(const char *prefix , const char
   case STATE : {
     process_index = variable;
 
-    switch (index_parameter_type) {
+    switch (index_param_type) {
 
     case IMPLICIT_TYPE : {
       for (i = 0;i < process->nb_state;i++) {
@@ -6261,7 +6267,7 @@ bool MarkovianSequences::linear_model_plot_print(const char *prefix , const char
       }
 
       if (marginal_distribution[0]->frequency[i] == 0) {
-        switch (index_parameter_type) {
+        switch (index_param_type) {
 
         case IMPLICIT_TYPE : {
           state_min_index_parameter[i] = 0;
@@ -6344,7 +6350,7 @@ bool MarkovianSequences::linear_model_plot_print(const char *prefix , const char
   default : {
     process_index = variable + 1;
 
-    switch (index_parameter_type) {
+    switch (index_param_type) {
 
     case IMPLICIT_TYPE : {
       for (i = 0;i <= process->nb_state;i++) {
@@ -6411,7 +6417,7 @@ bool MarkovianSequences::linear_model_plot_print(const char *prefix , const char
         out_data_file[i] = new ofstream ((data_file_name[i * 2 + 1].str()).c_str());
       }
     }
-    switch (index_parameter_type) {
+    switch (index_param_type) {
 
     case IMPLICIT_TYPE : {
       switch (type[variable]) {
@@ -6478,7 +6484,7 @@ bool MarkovianSequences::linear_model_plot_print(const char *prefix , const char
   out_data_file[process->nb_state] = new ofstream ((data_file_name[process->nb_state * 2].str()).c_str());
 
   if (out_data_file[process->nb_state]) {
-    switch (index_parameter_type) {
+    switch (index_param_type) {
 
     case IMPLICIT_TYPE : {
       switch (type[variable]) {
@@ -6691,7 +6697,7 @@ void MarkovianSequences::linear_model_plotable_write(MultiPlotSet &plot , int &i
     process_index = variable;
     plot_offset = process->nb_state;
 
-    switch (index_parameter_type) {
+    switch (index_param_type) {
 
     case IMPLICIT_TYPE : {
       for (i = 0;i < process->nb_state;i++) {
@@ -6750,7 +6756,7 @@ void MarkovianSequences::linear_model_plotable_write(MultiPlotSet &plot , int &i
       }
 
       if (marginal_distribution[0]->frequency[i] == 0) {
-        switch (index_parameter_type) {
+        switch (index_param_type) {
 
         case IMPLICIT_TYPE : {
           state_min_index_parameter[i] = 0;
@@ -6834,7 +6840,7 @@ void MarkovianSequences::linear_model_plotable_write(MultiPlotSet &plot , int &i
     process_index = variable + 1;
     plot_offset = 0;
 
-    switch (index_parameter_type) {
+    switch (index_param_type) {
 
     case IMPLICIT_TYPE : {
       for (i = 0;i <= process->nb_state;i++) {
@@ -6913,7 +6919,7 @@ void MarkovianSequences::linear_model_plotable_write(MultiPlotSet &plot , int &i
       plot[index + i][1].style = "lines";
     }
 
-    switch (index_parameter_type) {
+    switch (index_param_type) {
 
     case IMPLICIT_TYPE : {
       switch (type[variable]) {
@@ -7011,7 +7017,7 @@ void MarkovianSequences::linear_model_plotable_write(MultiPlotSet &plot , int &i
     plot[index + plot_offset][i + 1].style = "lines";
   }
 
-  switch (index_parameter_type) {
+  switch (index_param_type) {
 
   case IMPLICIT_TYPE : {
     switch (type[variable]) {
@@ -7092,11 +7098,11 @@ void MarkovianSequences::linear_model_plotable_write(MultiPlotSet &plot , int &i
  *  Ecriture d'un objet MarkovianSequences dans un fichier au format MTG.
  *
  *  arguments : reference sur un objet StatError, path,
- *              type de chaque variable (NUMERIC/SYMBOLIC).
+ *              type de chaque variable (NOMINAL/NUMERIC).
  *
  *--------------------------------------------------------------*/
 
-bool MarkovianSequences::mtg_write(StatError &error , const char *path , int *itype) const
+bool MarkovianSequences::mtg_write(StatError &error , const char *path , variable_type *itype) const
 
 {
   bool status;
@@ -7126,7 +7132,7 @@ bool MarkovianSequences::mtg_write(StatError &error , const char *path , int *it
     for (i = 0;i < nb_variable;i++) {
       switch (itype[i]) {
 
-      case SYMBOLIC : {
+      case NOMINAL : {
         for (j = 1;j < marginal_distribution[i]->nb_value;j++) {
           out_file << (char)('F' + j) << "\t2\tFREE\tFREE\tIMPLICIT" << endl;
         }
@@ -7146,7 +7152,7 @@ bool MarkovianSequences::mtg_write(StatError &error , const char *path , int *it
     for (i = 0;i < nb_variable;i++) {
       switch (itype[i]) {
 
-      case SYMBOLIC : {
+      case NOMINAL : {
         out_file << "E\t";
         for (j = 1;j < marginal_distribution[i]->nb_value;j++) {
           out_file << (char)('F' + j);
@@ -7186,7 +7192,7 @@ bool MarkovianSequences::mtg_write(StatError &error , const char *path , int *it
         for (k = 0;k < nb_variable;k++) {
           switch (itype[k]) {
 
-          case SYMBOLIC : {
+          case NOMINAL : {
             if (int_sequence[i][k][j] > 0) {
               out_file <<"\t\t+" << (char)('F' + int_sequence[i][k][j]) << 1 << endl;
             }
