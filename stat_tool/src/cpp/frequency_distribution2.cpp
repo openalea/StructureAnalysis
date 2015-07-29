@@ -65,13 +65,13 @@ extern bool cumul_matching_plot_print(const char *path , int nb_cumul , int *off
  *  Ecriture des resultats d'une comparaison de lois empiriques.
  *
  *  arguments : stream, nombre de lois empiriques, pointeurs sur les lois empiriques,
- *              type de variable (SYMBOLIC/ORDINAL/NUMERIC), dissimilarites.
+ *              type de variable (NOMINAL/ORDINAL/NUMERIC), dissimilarites.
  *
  *--------------------------------------------------------------*/
 
 ostream& FrequencyDistribution::dissimilarity_ascii_write(ostream &os , int nb_histo ,
                                                           const FrequencyDistribution **ihisto ,
-                                                          int type , double **dissimilarity) const
+                                                          variable_type type , double **dissimilarity) const
 
 {
   register int i , j;
@@ -97,7 +97,7 @@ ostream& FrequencyDistribution::dissimilarity_ascii_write(ostream &os , int nb_h
   for (i = 0;i < nb_histo;i++) {
     os << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << i + 1  << " - ";
 
-    if (type == SYMBOLIC) {
+    if (type == NOMINAL) {
       os << STAT_label[STATL_SAMPLE_SIZE] << ": " << histo[i]->nb_element << endl;
     }
 
@@ -318,14 +318,14 @@ ostream& FrequencyDistribution::dissimilarity_ascii_write(ostream &os , int nb_h
  *  Ecriture des resultats d'une comparaison de lois empiriques dans un fichier.
  *
  *  arguments : reference sur un objet StatError, path, nombre de lois empiriques,
- *              pointeurs sur les lois empiriques, type de variable (SYMBOLIC/ORDINAL/NUMERIC),
+ *              pointeurs sur les lois empiriques, type de variable (NOMINAL/ORDINAL/NUMERIC),
  *              dissimilarites.
  *
  *--------------------------------------------------------------*/
 
 bool FrequencyDistribution::dissimilarity_ascii_write(StatError &error , const char *path ,
                                                       int nb_histo , const FrequencyDistribution **ihisto ,
-                                                      int type , double **dissimilarity) const
+                                                      variable_type type , double **dissimilarity) const
 
 {
   bool status;
@@ -354,14 +354,14 @@ bool FrequencyDistribution::dissimilarity_ascii_write(StatError &error , const c
  *  au format tableur.
  *
  *  arguments : reference sur un objet StatError, path, nombre de lois empiriques,
- *              pointeurs sur les lois empiriques, type de variable (SYMBOLIC/ORDINAL/NUMERIC),
+ *              pointeurs sur les lois empiriques, type de variable (NOMINAL/ORDINAL/NUMERIC),
  *              dissimilarites.
  *
  *--------------------------------------------------------------*/
 
 bool FrequencyDistribution::dissimilarity_spreadsheet_write(StatError &error , const char *path ,
                                                             int nb_histo , const FrequencyDistribution **ihisto ,
-                                                            int type , double **dissimilarity) const
+                                                            variable_type type , double **dissimilarity) const
 
 {
   bool status;
@@ -396,7 +396,7 @@ bool FrequencyDistribution::dissimilarity_spreadsheet_write(StatError &error , c
     for (i = 0;i < nb_histo;i++) {
       out_file << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << i + 1  << "\t";
 
-      if (type == SYMBOLIC) {
+      if (type == NOMINAL) {
         out_file << STAT_label[STATL_SAMPLE_SIZE] << "\t" << histo[i]->nb_element << endl;
       }
 
@@ -423,7 +423,7 @@ bool FrequencyDistribution::dissimilarity_spreadsheet_write(StatError &error , c
       cumul[i] = histo[i]->cumul_computation();
     }
 
-    if (type != SYMBOLIC) {
+    if (type != NOMINAL) {
       concentration = new double*[nb_histo];
       for (i = 0;i < nb_histo;i++) {
         concentration[i] = histo[i]->concentration_function_computation();
@@ -445,7 +445,7 @@ bool FrequencyDistribution::dissimilarity_spreadsheet_write(StatError &error , c
                << i + 1 << " " << STAT_label[STATL_FUNCTION];
     }
 
-    if (type != SYMBOLIC) {
+    if (type != NOMINAL) {
       for (i = 0;i < nb_histo;i++) {
         if (histo[i]->mean > 0.) {
           out_file << "\t" << STAT_label[STATL_CONCENTRATION] << " " << STAT_label[STATL_FUNCTION] << " "
@@ -470,7 +470,7 @@ bool FrequencyDistribution::dissimilarity_spreadsheet_write(StatError &error , c
         }
       }
 
-      if (type != SYMBOLIC) {
+      if (type != NOMINAL) {
         for (j = 0;j < nb_histo;j++) {
           if (histo[j]->mean > 0.) {
             out_file << "\t";
@@ -488,7 +488,7 @@ bool FrequencyDistribution::dissimilarity_spreadsheet_write(StatError &error , c
     }
     delete [] cumul;
 
-    if (type != SYMBOLIC) {
+    if (type != NOMINAL) {
       for (i = 0;i < nb_histo;i++) {
         delete [] concentration[i];
       }
@@ -669,14 +669,14 @@ Test* FrequencyDistribution::kruskal_wallis_test(int nb_histo , const FrequencyD
  *  Comparaison de lois empiriques.
  *
  *  arguments : reference sur un objet StatError, stream, nombre de lois empiriques,
- *              pointeurs sur les lois empiriques, type de variable (SYMBOLIC/ORDINAL/NUMERIC),
- *              path, format de fichier ('a' : ASCII, 's' : Spreadsheet).
+ *              pointeurs sur les lois empiriques, type de variable (NOMINAL/ORDINAL/NUMERIC),
+ *              path, format de fichier (ASCII/SPREADSHEET).
  *
  *--------------------------------------------------------------*/
 
 bool FrequencyDistribution::comparison(StatError &error , ostream &os , int nb_histo ,
-                                       const FrequencyDistribution **ihisto , int type ,
-                                       const char *path , char format) const
+                                       const FrequencyDistribution **ihisto , variable_type type ,
+                                       const char *path , output_format format) const
 
 {
   bool status = true;
@@ -793,7 +793,7 @@ bool FrequencyDistribution::comparison(StatError &error , ostream &os , int nb_h
 
       for (k = MIN(histo[i]->offset , histo[j]->offset);k < MAX(histo[i]->nb_value , histo[j]->nb_value);k++) {
         for (m = k + 1;m < MAX(histo[i]->nb_value , histo[j]->nb_value);m++) {
-          if (type == SYMBOLIC) {
+          if (type == NOMINAL) {
             dissimilarity[i][j] += fabs(dist[i]->mass[k] * dist[j]->mass[m] -
                                         dist[i]->mass[m] * dist[j]->mass[k]);
           }
@@ -808,7 +808,7 @@ bool FrequencyDistribution::comparison(StatError &error , ostream &os , int nb_h
         }
       }
 
-      if (type == SYMBOLIC) {
+      if (type == NOMINAL) {
         dissimilarity[j][i] = dissimilarity[i][j];
       }
       else {
@@ -823,11 +823,11 @@ bool FrequencyDistribution::comparison(StatError &error , ostream &os , int nb_h
 
   if (path) {
     switch (format) {
-    case 'a' :
+    case ASCII :
       status = dissimilarity_ascii_write(error , path , nb_histo - 1 , ihisto ,
                                          type , dissimilarity);
       break;
-    case 's' :
+    case SPREADSHEET :
       status = dissimilarity_spreadsheet_write(error , path , nb_histo - 1 , ihisto ,
                                                type , dissimilarity);
       break;
@@ -1967,7 +1967,7 @@ DiscreteParametricModel* DiscreteDistributionData::extract_model(StatError &erro
  *
  *--------------------------------------------------------------*/
 
-DiscreteDistributionData* frequency_distribution_ascii_read(StatError &error , const char *path)
+DiscreteDistributionData* DiscreteDistributionData::ascii_read(StatError &error , const char *path)
 
 {
   RWLocaleSnapshot locale("en");
