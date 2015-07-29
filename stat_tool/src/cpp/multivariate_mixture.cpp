@@ -594,7 +594,7 @@ MultivariateMixtureData* MultivariateMixture::extract_data(StatError &error) con
  *
  *--------------------------------------------------------------*/
 
-MultivariateMixture* multivariate_mixture_building(StatError &error , int nb_component ,
+MultivariateMixture* MultivariateMixture::building(StatError &error , int nb_component ,
                                                    int nb_variable , double *weight,
                                                    DiscreteParametricProcess **ppcomponent,
                                                    CategoricalProcess **pnpcomponent)
@@ -648,7 +648,7 @@ MultivariateMixture* multivariate_mixture_building(StatError &error , int nb_com
  *
  *--------------------------------------------------------------*/
 
-MultivariateMixture* multivariate_mixture_ascii_read(StatError &error , const char *path ,
+MultivariateMixture* MultivariateMixture::ascii_read(StatError &error , const char *path ,
                                                      double cumul_threshold)
 
 {
@@ -1057,8 +1057,8 @@ MultivariateMixture* multivariate_mixture_ascii_read(StatError &error , const ch
 
              case true :
                {
-                 np_observation[index-1]= categorical_observation_parsing(error, in_file, line,
-                                                                          nb_component, MIXTURE, true);
+                 np_observation[index-1]= CategoricalProcess::parsing(error, in_file, line,
+                                                                      nb_component, MIXTURE, true);
                  if (np_observation[index-1] == NULL)
                    status= false;
                  break;
@@ -1066,9 +1066,9 @@ MultivariateMixture* multivariate_mixture_ascii_read(StatError &error , const ch
 
              case false :
                {
-                 p_observation[index-1]= discrete_observation_parsing(error, in_file, line,
-                                                                      nb_component, MIXTURE,
-                                                                      cumul_threshold);
+                 p_observation[index-1]= DiscreteParametricProcess::parsing(error, in_file, line,
+                                                                            nb_component, MIXTURE,
+                                                                            cumul_threshold);
                  if (p_observation[index-1] == NULL)
                    status = false;
                  break;
