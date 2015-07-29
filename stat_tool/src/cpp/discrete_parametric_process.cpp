@@ -122,7 +122,7 @@ DiscreteParametricProcess::DiscreteParametricProcess(int inb_state , DiscretePar
 
   observation = new DiscreteParametric*[nb_state];
   for (i = 0;i < nb_state;i++) {
-    observation[i] = new DiscreteParametric(*pobservation[i] , 'c' , nb_value);
+    observation[i] = new DiscreteParametric(*pobservation[i] , DISTRIBUTION_COPY , nb_value);
   }
 
   weight = NULL;
@@ -151,7 +151,7 @@ void DiscreteParametricProcess::copy(const DiscreteParametricProcess &process)
 
   observation = new DiscreteParametric*[nb_state];
   for (i = 0;i < nb_state;i++) {
-    observation[i] = new DiscreteParametric(*(process.observation[i]) , 'c' , nb_value);
+    observation[i] = new DiscreteParametric(*(process.observation[i]) , DISTRIBUTION_COPY , nb_value);
   }
 
   if ((process.weight) && (process.mixture)) {
@@ -249,9 +249,9 @@ DiscreteParametricProcess& DiscreteParametricProcess::operator=(const DiscretePa
  *
  *--------------------------------------------------------------*/
 
-DiscreteParametricProcess* discrete_observation_parsing(StatError &error , ifstream &in_file ,
-                                                        int &line , int nb_state ,
-                                                        int model , double cumul_threshold)
+DiscreteParametricProcess* DiscreteParametricProcess::parsing(StatError &error , ifstream &in_file ,
+                                                              int &line , int nb_state ,
+                                                              model_type model , double cumul_threshold)
 
 {
   RWLocaleSnapshot locale("en");
@@ -359,7 +359,7 @@ DiscreteParametricProcess* discrete_observation_parsing(StatError &error , ifstr
           error.update(STAT_parsing[STATP_FORMAT] , line);
         }
 
-        dist[i] = discrete_parametric_parsing(error , in_file , line ,
+        dist[i] = DiscreteParametric::parsing(error , in_file , line ,
                                               UNIFORM , cumul_threshold);
         if (!dist[i]) {
           status = false;
@@ -399,7 +399,7 @@ DiscreteParametricProcess* discrete_observation_parsing(StatError &error , ifstr
 
 ostream& DiscreteParametricProcess::ascii_print(ostream &os , FrequencyDistribution **empirical_observation ,
                                                 FrequencyDistribution *marginal_distribution ,
-                                                bool exhaustive , bool file_flag , int model) const
+                                                bool exhaustive , bool file_flag , model_type model) const
 
 {
   register int i , j;
@@ -750,7 +750,8 @@ ostream& DiscreteParametricProcess::ascii_print(ostream &os , FrequencyDistribut
  *--------------------------------------------------------------*/
 
 ostream& DiscreteParametricProcess::spreadsheet_print(ostream &os , FrequencyDistribution **empirical_observation ,
-                                                      FrequencyDistribution *marginal_distribution , int model) const
+                                                      FrequencyDistribution *marginal_distribution ,
+                                                      model_type model) const
 
 {
   register int i , j;
@@ -1000,7 +1001,8 @@ ostream& DiscreteParametricProcess::spreadsheet_print(ostream &os , FrequencyDis
 
 bool DiscreteParametricProcess::plot_print(const char *prefix , const char *title , int process ,
                                            FrequencyDistribution **empirical_observation ,
-                                           FrequencyDistribution *marginal_distribution , int model) const
+                                           FrequencyDistribution *marginal_distribution ,
+                                           model_type model) const
 
 {
   bool status;
@@ -1377,7 +1379,7 @@ bool DiscreteParametricProcess::plot_print(const char *prefix , const char *titl
 void DiscreteParametricProcess::plotable_write(MultiPlotSet &plot , int &index , int process ,
                                                FrequencyDistribution **empirical_observation ,
                                                FrequencyDistribution *marginal_distribution ,
-                                               int model) const
+                                               model_type model) const
 
 {
   register int i , j;
