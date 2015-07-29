@@ -201,14 +201,12 @@ void MultivariateMixture::get_posterior_distribution(const Vectors &mixt_data,
  *  Restauration des etats d'un objet Vectors, pour un melange de lois.
  *
  *  arguments : reference sur un objet StatError, sur un object Vectors,
- *  l' algorithme de restauration, l'index (a partir de 0)
- *  et la loi a posteriori des etats (mise a jour au besoin)
+ *  l'index (a partir de 0) et la loi a posteriori des etats (mise a jour au besoin)
  *
  *--------------------------------------------------------------*/
 
 std::vector<int>* MultivariateMixture::state_computation(StatError &error, const Vectors &vec,
-                                                         double** &posterior_dist,
-                                                         int algorithm, int index) const {
+                                                         double** &posterior_dist, int index) const {
 
   bool status = true, delete_cond = false;
   int n, i, s;
@@ -1103,7 +1101,7 @@ MultivariateMixtureData* MultivariateMixture::simulation(StatError &error ,
  *--------------------------------------------------------------*/
 
 MultivariateMixtureData* MultivariateMixture::cluster(StatError &error,  const Vectors &vec,
-                                                      int algorithm, bool add_state_entropy) const {
+                                                      bool add_state_entropy) const {
 
   int n, var, s, k;
   int nb_vector = vec.get_nb_vector(),
@@ -1114,7 +1112,7 @@ MultivariateMixtureData* MultivariateMixture::cluster(StatError &error,  const V
   int **iint_vector = NULL;
   double **ireal_vector = NULL;  
   double **posterior_dist = NULL; // probabilites a posteriori des etats
-  int *itypes = NULL; // type des variables
+  variable_nature *itypes = NULL; // type des variables
   std::vector<int> *states = NULL;
   MultivariateMixtureData* clusters_vec = NULL;
   Vectors* state_vec = NULL;
@@ -1125,7 +1123,7 @@ MultivariateMixtureData* MultivariateMixture::cluster(StatError &error,  const V
     nb_real_variable++;
   }
 
-  itypes = new int[nb_res_variable];
+  itypes = new variable_nature[nb_res_variable];
   itypes[0] = STATE; // states
   for (var = 0; var < nb_variable; var++) {
     itypes[var+1] = vec.get_type(var);
@@ -1141,7 +1139,7 @@ MultivariateMixtureData* MultivariateMixture::cluster(StatError &error,  const V
     itypes[nb_res_variable-1] = REAL_VALUE;
   
   // calcul des etats et leur loi a posteriori
-  states = state_computation(error, vec, posterior_dist, algorithm, I_DEFAULT);
+  states = state_computation(error, vec, posterior_dist, I_DEFAULT);
 
   if (states != NULL) {
     iint_vector = new int*[nb_vector];
