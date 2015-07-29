@@ -643,7 +643,7 @@ TimeEvents& TimeEvents::operator=(const TimeEvents &timev)
  *
  *--------------------------------------------------------------*/
 
-DiscreteDistributionData* TimeEvents::extract(StatError &error , int histo_type ,
+DiscreteDistributionData* TimeEvents::extract(StatError &error , renewal_distribution histo_type ,
                                               int itime) const
 
 {
@@ -903,7 +903,7 @@ TimeEvents* TimeEvents::nb_event_select(StatError &error , int min_nb_event ,
  *
  *--------------------------------------------------------------*/
 
-TimeEvents* build_time_events(StatError &error , FrequencyDistribution &nb_event , int itime)
+TimeEvents* TimeEvents::building(StatError &error , FrequencyDistribution &nb_event , int itime)
 
 {
   bool status = true;
@@ -940,7 +940,7 @@ TimeEvents* build_time_events(StatError &error , FrequencyDistribution &nb_event
  *
  *--------------------------------------------------------------*/
 
-TimeEvents* time_events_ascii_read(StatError &error , const char *path)
+TimeEvents* TimeEvents::ascii_read(StatError &error , const char *path)
 
 {
   RWLocaleSnapshot locale("en");
@@ -1128,7 +1128,7 @@ TimeEvents* time_events_ascii_read(StatError &error , const char *path)
  *
  *--------------------------------------------------------------*/
 
-TimeEvents* old_time_events_ascii_read(StatError &error , const char *path)
+TimeEvents* TimeEvents::old_ascii_read(StatError &error , const char *path)
 
 {
   RWLocaleSnapshot locale("en");
@@ -1287,7 +1287,7 @@ ostream& TimeEvents::line_write(ostream &os) const
  *
  *--------------------------------------------------------------*/
 
-ostream& TimeEvents::ascii_write(ostream &os , bool exhaustive , char type) const
+ostream& TimeEvents::ascii_write(ostream &os , bool exhaustive , process_type type) const
 
 {
   register int i;
@@ -1318,7 +1318,7 @@ ostream& TimeEvents::ascii_write(ostream &os , bool exhaustive , char type) cons
 
       switch (type) {
 
-      case 'o' : {
+      case ORDINARY : {
         os << "\n" << SEQ_label[SEQL_1_CENSORED_INTER_EVENT] << ": " << hnb_event[i]->nb_element
            << " (" << 1. / (hnb_event[i]->mean + 1.) << ")" << endl;
 
@@ -1328,7 +1328,7 @@ ostream& TimeEvents::ascii_write(ostream &os , bool exhaustive , char type) cons
         break;
       }
 
-      case 'e' : {
+      case EQUILIBRIUM : {
         os << "\n" << SEQ_label[SEQL_2_CENSORED_INTER_EVENT] << ": " << hnb_event[i]->frequency[0]
            << " (" << hnb_event[i]->frequency[0] / (hnb_event[i]->nb_element * (hnb_event[i]->mean + 1.))
            << ")" << endl;
@@ -1360,7 +1360,7 @@ ostream& TimeEvents::ascii_write(ostream &os , bool exhaustive , char type) cons
 
     switch (type) {
 
-    case 'o' : {
+    case ORDINARY : {
       os << "\n" << SEQ_label[SEQL_1_CENSORED_INTER_EVENT] << ": " << mixture->nb_element
          << " (" << 1. / (mixture->mean + 1.) << ")" << endl;
 
@@ -1370,7 +1370,7 @@ ostream& TimeEvents::ascii_write(ostream &os , bool exhaustive , char type) cons
       break;
     }
 
-    case 'e' : {
+    case EQUILIBRIUM : {
       os << "\n" << SEQ_label[SEQL_2_CENSORED_INTER_EVENT] << ": " << mixture->frequency[0]
          << " (" << mixture->frequency[0] / (mixture->nb_element * (mixture->mean + 1.))
          << ")" << endl;
@@ -1407,7 +1407,7 @@ ostream& TimeEvents::ascii_write(ostream &os , bool exhaustive , char type) cons
 ostream& TimeEvents::ascii_write(ostream &os , bool exhaustive) const
 
 {
-  return ascii_write(os , exhaustive , 'v');
+  return ascii_write(os , exhaustive , DEFAULT_TYPE);
 }
 
 
@@ -1420,7 +1420,7 @@ ostream& TimeEvents::ascii_write(ostream &os , bool exhaustive) const
  *
  *--------------------------------------------------------------*/
 
-ostream& TimeEvents::ascii_file_write(ostream &os , bool exhaustive , char type) const
+ostream& TimeEvents::ascii_file_write(ostream &os , bool exhaustive , process_type type) const
 
 {
   register int i;
@@ -1480,7 +1480,7 @@ ostream& TimeEvents::ascii_file_write(ostream &os , bool exhaustive , char type)
 
       switch (type) {
 
-      case 'o' : {
+      case ORDINARY : {
         os << "\n# " << SEQ_label[SEQL_1_CENSORED_INTER_EVENT] << ": " << hnb_event[time[i]]->nb_element
            << " (" << 1. / (hnb_event[time[i]]->mean + 1.) << ")" << endl;
 
@@ -1490,7 +1490,7 @@ ostream& TimeEvents::ascii_file_write(ostream &os , bool exhaustive , char type)
         break;
       }
 
-      case 'e' : {
+      case EQUILIBRIUM : {
         os << "\n# " << SEQ_label[SEQL_2_CENSORED_INTER_EVENT] << ": " << hnb_event[time[i]]->frequency[0]
            << " (" << hnb_event[time[i]]->frequency[0] / (hnb_event[time[i]]->nb_element * (hnb_event[time[i]]->mean + 1.))
            << ")" << endl;
@@ -1528,7 +1528,7 @@ ostream& TimeEvents::ascii_file_write(ostream &os , bool exhaustive , char type)
 
     switch (type) {
 
-    case 'o' : {
+    case ORDINARY : {
       os << "\n# " << SEQ_label[SEQL_1_CENSORED_INTER_EVENT] << ": " << mixture->nb_element
          << " (" << 1. / (mixture->mean + 1.) << ")" << endl;
 
@@ -1538,7 +1538,7 @@ ostream& TimeEvents::ascii_file_write(ostream &os , bool exhaustive , char type)
       break;
     }
 
-    case 'e' : {
+    case EQUILIBRIUM : {
       os << "\n# " << SEQ_label[SEQL_2_CENSORED_INTER_EVENT] << ": " << mixture->frequency[0]
          << " (" << mixture->frequency[0] / (mixture->nb_element * (mixture->mean + 1.))
          << ")" << endl;
@@ -1605,7 +1605,7 @@ bool TimeEvents::ascii_write(StatError &error , const char *path ,
  *
  *--------------------------------------------------------------*/
 
-ostream& TimeEvents::spreadsheet_write(ostream &os , char type) const
+ostream& TimeEvents::spreadsheet_write(ostream &os , process_type type) const
 
 {
   register int i;
@@ -1636,7 +1636,7 @@ ostream& TimeEvents::spreadsheet_write(ostream &os , char type) const
 
       switch (type) {
 
-      case 'o' : {
+      case ORDINARY : {
         os << "\n" << SEQ_label[SEQL_1_CENSORED_INTER_EVENT] << "\t" << hnb_event[i]->nb_element
            << "\t" << 1. / (hnb_event[i]->mean + 1.) << endl;
 
@@ -1646,7 +1646,7 @@ ostream& TimeEvents::spreadsheet_write(ostream &os , char type) const
         break;
       }
 
-      case 'e' : {
+      case EQUILIBRIUM : {
         os << "\n" << SEQ_label[SEQL_2_CENSORED_INTER_EVENT] << "\t" << hnb_event[i]->frequency[0] << "\t"
            << hnb_event[i]->frequency[0] / (hnb_event[i]->nb_element * (hnb_event[i]->mean + 1.)) << endl;
 
@@ -1675,7 +1675,7 @@ ostream& TimeEvents::spreadsheet_write(ostream &os , char type) const
 
     switch (type) {
 
-    case 'o' : {
+    case ORDINARY : {
       os << "\n" << SEQ_label[SEQL_1_CENSORED_INTER_EVENT] << "\t" << mixture->nb_element
          << "\t" << 1. / (mixture->mean + 1.) << endl;
 
@@ -1685,7 +1685,7 @@ ostream& TimeEvents::spreadsheet_write(ostream &os , char type) const
       break;
     }
 
-    case 'e' : {
+    case EQUILIBRIUM : {
       os << "\n" << SEQ_label[SEQL_2_CENSORED_INTER_EVENT] << "\t" << mixture->frequency[0] << "\t"
          << mixture->frequency[0] / (mixture->nb_element * (mixture->mean + 1.)) << endl;
 
@@ -2176,7 +2176,7 @@ RenewalData::RenewalData()
 {
   renewal = NULL;
 
-  type = 'v';
+  type = EQUILIBRIUM;
 
   length = NULL;
   sequence = NULL;
@@ -2204,7 +2204,7 @@ RenewalData::RenewalData(int nb_element , int itime)
 {
   renewal = NULL;
 
-  type = 'e';
+  type = EQUILIBRIUM;
 
   length = new int[nb_element];
   sequence = new int*[nb_element];
@@ -2224,11 +2224,11 @@ RenewalData::RenewalData(int nb_element , int itime)
  *  Constructeur de la classe RenewalData.
  *
  *  arguments : reference sur un objet TimeEvents,
- *              type de processus ('o' : ordinaire, 'e' : en equilibre).
+ *              type de processus (ORDINARY/EQUILIBRIUM).
  *
  *--------------------------------------------------------------*/
 
-RenewalData::RenewalData(const TimeEvents &timev , int itype)
+RenewalData::RenewalData(const TimeEvents &timev , process_type itype)
 :TimeEvents(timev)
 
 {
@@ -2253,12 +2253,12 @@ RenewalData::RenewalData(const TimeEvents &timev , int itype)
  *
  *  Constructeur de la classe RenewalData.
  *
- *  arguments : type de processus ('o' : ordinaire, 'e' : en equilibre),
+ *  arguments : type de processus (ORDINARY/EQUILIBRIUM),
  *              reference sur un objet Renewal.
  *
  *--------------------------------------------------------------*/
 
-RenewalData::RenewalData(int itype , const Renewal &renew)
+RenewalData::RenewalData(process_type itype , const Renewal &renew)
 
 {
   renewal = NULL;
@@ -2549,7 +2549,7 @@ RenewalData* RenewalData::merge(StatError &error , int nb_sample ,
     }
     timev->forward = new FrequencyDistribution(nb_sample , phisto);
 
-    timev->build_index_event(timev->type == 'o' ? 0 : 1);
+    timev->build_index_event(timev->type == ORDINARY ? 0 : 1);
 
     delete [] phisto;
     delete [] ptimev;
@@ -2568,7 +2568,7 @@ RenewalData* RenewalData::merge(StatError &error , int nb_sample ,
  *
  *--------------------------------------------------------------*/
 
-DiscreteDistributionData* RenewalData::extract(StatError &error , int histo_type ,
+DiscreteDistributionData* RenewalData::extract(StatError &error , renewal_distribution histo_type ,
                                                int itime) const
 
 {
