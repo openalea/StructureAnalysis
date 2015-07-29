@@ -85,13 +85,13 @@ Correlation::Correlation()
  *
  *--------------------------------------------------------------*/
 
-Correlation::Correlation(int itype , int max_lag , int ivariable1 , int ivariable2)
+Correlation::Correlation(correlation_type itype , int max_lag , int ivariable1 , int ivariable2)
 :Curves(1 , max_lag + 1 , true , false)
 
 {
   type = itype;
 
-  variable_type = new int[1];
+  variable_type = new correlation_variable_type[1];
   variable_type[0] = OBSERVED_VALUE;
 
   variable1 = new int[1];
@@ -112,13 +112,13 @@ Correlation::Correlation(int itype , int max_lag , int ivariable1 , int ivariabl
  *
  *--------------------------------------------------------------*/
 
-Correlation::Correlation(int inb_curve , int ilength , bool frequency_flag , int itype)
+Correlation::Correlation(int inb_curve , int ilength , bool frequency_flag , correlation_type itype)
 :Curves(inb_curve , ilength , frequency_flag , false)
 
 {
   type = itype;
 
-  variable_type = new int[nb_curve];
+  variable_type = new correlation_variable_type[nb_curve];
 
   variable1 = new int[nb_curve];
   variable2 = new int[nb_curve];
@@ -143,7 +143,7 @@ void Correlation::copy(const Correlation &correl)
 
   type = correl.type;
 
-  variable_type = new int[nb_curve];
+  variable_type = new correlation_variable_type[nb_curve];
   for (i = 0;i < nb_curve;i++) {
     variable_type[i] = correl.variable_type[i];
   }
@@ -1250,7 +1250,7 @@ MultiPlotSet* Correlation::get_plotable() const
  *--------------------------------------------------------------*/
 
 void Sequences::correlation_computation(Correlation &correl , int variable1 , int variable2 ,
-                                        int normalization , bool individual_mean) const
+                                        correlation_normalization normalization , bool individual_mean) const
 
 {
   if (correl.type == PEARSON) {
@@ -1648,9 +1648,10 @@ void Sequences::correlation_computation(Correlation &correl , int variable1 , in
  *
  *--------------------------------------------------------------*/
 
-Correlation* Sequences::correlation_computation(StatError &error , int variable1 ,
-                                                int variable2 , int itype , int max_lag ,
-                                                int normalization , bool individual_mean) const
+Correlation* Sequences::correlation_computation(StatError &error , int variable1 , int variable2 ,
+                                                correlation_type itype , int max_lag ,
+                                                correlation_normalization normalization ,
+                                                bool individual_mean) const
 
 {
   bool status = true;
@@ -1921,7 +1922,7 @@ bool Correlation::white_noise_correlation(StatError &error , int order)
  *--------------------------------------------------------------*/
 
 Correlation* Sequences::partial_autocorrelation_computation(StatError &error , int variable ,
-                                                            int itype , int max_lag) const
+                                                            correlation_type itype , int max_lag) const
 
 {
   bool status = true;
