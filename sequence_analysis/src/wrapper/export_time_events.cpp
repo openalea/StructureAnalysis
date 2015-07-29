@@ -55,7 +55,7 @@ public:
   {
     StatError error;
     TimeEvents *time_events = NULL;
-    time_events = time_events_ascii_read(error, filename);
+    time_events = TimeEvents::ascii_read(error, filename);
     if(!time_events)
     {
       sequence_analysis::wrap_util::throw_error(error);
@@ -69,7 +69,7 @@ public:
   {
     StatError error;
     TimeEvents *time_events = NULL;
-    time_events = build_time_events(error, input, itime);
+    time_events = TimeEvents::building(error, input, itime);
     if(!time_events)
     {
       sequence_analysis::wrap_util::throw_error(error);
@@ -79,7 +79,7 @@ public:
 
 
   static DiscreteDistributionData*
-  extract(const TimeEvents &input, int histo_type, int itime)
+  extract(const TimeEvents &input, renewal_distribution histo_type, int itime)
   {
 
     // to finish !!. This function does not work. core dumped,seg fault!!
@@ -158,29 +158,29 @@ public:
   }
 
   static Renewal*
-  estimation_type(const TimeEvents &input, char type, int estimator, int nb_iter,
-                 int equilibrium_estimator, int mean_computation_method, double weight,
-                 int penalty_type, int outside)
+  estimation_type(const TimeEvents &input, process_type type, estimation_criterion estimator, int nb_iter,
+                 censoring_estimator equilibrium_estimator, duration_distribution_mean_estimator mean_estimator,
+                 double weight, penalty_type pen_type, side_effect outside)
   {
     HEADER_OS(Renewal);
     ret = input.estimation(error, os, type, estimator, nb_iter, equilibrium_estimator,
-                           mean_computation_method, weight, penalty_type, outside);
+                           mean_estimator, weight, pen_type, outside);
 
     FOOTER_OS;
   }
 
 
   static Renewal*
-  estimation_inter_event_type(const TimeEvents &input, char type,
-      const DiscreteParametric& input_dist, int estimator, int nb_iter,
-      int equilibrium_estimator, int mean_computation_method, double weight,
-      int penalty_type, int outside)
+  estimation_inter_event_type(const TimeEvents &input, process_type type,
+      const DiscreteParametric& input_dist, estimation_criterion estimator, int nb_iter,
+      censoring_estimator equilibrium_estimator, duration_distribution_mean_estimator mean_estimator,
+      double weight, penalty_type pen_type, side_effect outside)
   {
     HEADER_OS(Renewal);
 
 
     ret = input.estimation(error, os, type, input_dist, estimator, nb_iter,
-        equilibrium_estimator, mean_computation_method, weight, penalty_type, outside);
+        equilibrium_estimator, mean_estimator, weight, pen_type, outside);
 
     FOOTER_OS;
   }
@@ -238,8 +238,8 @@ void class_time_events() {
       int *nb_event;          // nombre d'evenements
       int *frequency;         // effectif de chacune des classes
                               // {temps, nombre d'evenements}
-      std::ostream& ascii_file_write(std::ostream &os , bool exhaustive , char type = 'v') const;
-      std::ostream& spreadsheet_write(std::ostream &os , char type = 'v') const;
+      std::ostream& ascii_file_write(std::ostream &os , bool exhaustive , process_type type = DEFAULT_TYPE) const;
+      std::ostream& spreadsheet_write(std::ostream &os , process_type type = DEFAULT_TYPE) const;
 
       void nb_element_computation();
       double min_inter_event_computation() const;
