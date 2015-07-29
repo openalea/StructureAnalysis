@@ -63,6 +63,17 @@ namespace stat_tool {
   const int BISECTION_NB_ITER = 100;     // nombre d'iterations maximum pour la methode
                                          // de bissection d'intervalle
 
+  enum penalty_type {
+    FIRST_DIFFERENCE ,
+    SECOND_DIFFERENCE ,
+    ENTROPY
+  };
+
+  enum side_effect {
+    ZERO ,
+    CONTINUATION
+  };
+
 
 
 /****************************************************************
@@ -128,8 +139,8 @@ namespace stat_tool {
     double likelihood_computation(const Distribution &dist) const;
 
     void distribution_estimation(Distribution *pdist) const;
-    void penalized_likelihood_estimation(Distribution *dist , double weight , int type ,
-                                         double *penalty , int outside) const;
+    void penalized_likelihood_estimation(Distribution *dist , double weight , penalty_type pen_type ,
+                                         double *penalty , side_effect outside) const;
 
     double binomial_estimation(DiscreteParametric *pdist , int min_inf_bound , bool min_inf_bound_flag) const;
     double poisson_estimation(DiscreteParametric *pdist , int min_inf_bound , bool min_inf_bound_flag ,
@@ -150,8 +161,8 @@ namespace stat_tool {
                                         Distribution *dist , double imean) const;
     void penalized_likelihood_equilibrium_process_estimation(const Reestimation<Type> *length_bias_reestim ,
                                                              Distribution *dist , double imean ,
-                                                             double weight , int type ,
-                                                             double *penalty , int outside) const;
+                                                             double weight , penalty_type pen_type ,
+                                                             double *penalty , side_effect outside) const;
 
     void state_occupancy_estimation(const Reestimation<Type> *final_run ,
                                     Reestimation<double> *occupancy_reestim ,
