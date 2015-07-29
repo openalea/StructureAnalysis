@@ -66,7 +66,7 @@ namespace sequence_analysis {
  *
  *--------------------------------------------------------------*/
 
-Sequences* sequences_ascii_read(StatError &error , const char *path , bool old_format)
+Sequences* Sequences::ascii_read(StatError &error , const char *path , bool old_format)
 
 {
   RWLocaleSnapshot locale("en");
@@ -75,8 +75,9 @@ Sequences* sequences_ascii_read(StatError &error , const char *path , bool old_f
   bool status , lstatus;
   register int i , j , k , m;
   int line , read_line , offset , initial_nb_line , max_length , nb_variable = 0 ,
-      index_parameter_type = IMPLICIT_TYPE , vector_size , nb_sequence , index , line_continue ,
-      *type , *length;
+      vector_size , nb_sequence , index , line_continue , *length;
+  variable_nature *type;
+  index_parameter_type index_param_type = IMPLICIT_TYPE;
   long int_value;
   double real_value;
   Sequences *seq;
@@ -120,7 +121,7 @@ Sequences* sequences_ascii_read(StatError &error , const char *path , bool old_f
           // test mot cle INDEX_PARAMETER
 
           if ((!old_format) && (read_line == 0) && (token == SEQ_word[SEQW_INDEX_PARAMETER])) {
-            index_parameter_type--;
+            index_param_type = TIME;
           }
 
           // test nombre de variables
@@ -148,7 +149,7 @@ Sequences* sequences_ascii_read(StatError &error , const char *path , bool old_f
 
           // test separateur
 
-          if ((!old_format) && (read_line == 0) && (index_parameter_type != IMPLICIT_TYPE)) {
+          if ((!old_format) && (read_line == 0) && (index_param_type != IMPLICIT_TYPE)) {
             if (token != ":") {
               status = false;
               error.update(STAT_parsing[STATP_SEPARATOR] , line , i + 1);
@@ -168,10 +169,10 @@ Sequences* sequences_ascii_read(StatError &error , const char *path , bool old_f
         // test mot cle correspondant au type du parametre d'index
 
         case 2 : {
-          if ((!old_format) && (read_line == 0) && (index_parameter_type != IMPLICIT_TYPE)) {
+          if ((!old_format) && (read_line == 0) && (index_param_type != IMPLICIT_TYPE)) {
             for (j = TIME;j <= POSITION_INTERVAL;j++) {
               if (token == SEQ_index_parameter_word[j]) {
-                index_parameter_type = j;
+                index_param_type = (index_parameter_type)j;
                 break;
               }
             }
@@ -189,16 +190,16 @@ Sequences* sequences_ascii_read(StatError &error , const char *path , bool old_f
       }
 
       if (i > 0) {
-        if (((!old_format) && (read_line == 0) && (index_parameter_type != IMPLICIT_TYPE) && (i != 3)) ||
-            (((old_format) || (read_line == 1) || (index_parameter_type == IMPLICIT_TYPE)) && (i != 2))) {
+        if (((!old_format) && (read_line == 0) && (index_param_type != IMPLICIT_TYPE) && (i != 3)) ||
+            (((old_format) || (read_line == 1) || (index_param_type == IMPLICIT_TYPE)) && (i != 2))) {
           status = false;
           error.update(STAT_parsing[STATP_FORMAT] , line);
         }
 
         read_line++;
-//        if (((!old_format) && (index_parameter_type != IMPLICIT_TYPE) && (read_line == 2)) ||
-//            (((old_format) || (index_parameter_type == IMPLICIT_TYPE)) && (read_line == 1)) {
-        if ((((old_format) || (index_parameter_type == IMPLICIT_TYPE)) && (read_line == 1)) ||
+//        if (((!old_format) && (index_param_type != IMPLICIT_TYPE) && (read_line == 2)) ||
+//            (((old_format) || (index_param_type == IMPLICIT_TYPE)) && (read_line == 1)) {
+        if ((((old_format) || (index_param_type == IMPLICIT_TYPE)) && (read_line == 1)) ||
             (read_line == 2)) {
           break;
         }
@@ -213,9 +214,9 @@ Sequences* sequences_ascii_read(StatError &error , const char *path , bool old_f
     // analyse des lignes definissant le type de chaque variable
 
     if (status) {
-      type = new int[nb_variable];
+      type = new variable_nature[nb_variable];
       for (i = 0;i < nb_variable;i++) {
-        type[i] = I_DEFAULT;
+        type[i] = AUXILIARY;
       }
 
       read_line = 0;
@@ -276,7 +277,7 @@ Sequences* sequences_ascii_read(StatError &error , const char *path , bool old_f
             if ((old_format) && (read_line == 0)) {
               for (j = TIME;j <= POSITION_INTERVAL;j++) {
                 if (token == SEQ_index_parameter_word[j]) {
-                  index_parameter_type = j;
+                  index_param_type = (index_parameter_type)j;
                   break;
                 }
               }
@@ -289,7 +290,7 @@ Sequences* sequences_ascii_read(StatError &error , const char *path , bool old_f
                     if ((j == STATE) || (j == OLD_INT_VALUE)) {
                       j = INT_VALUE;
                     }
-                    type[read_line] = j;
+                    type[read_line] = (variable_nature)j;
                     break;
                   }
                 }
@@ -308,7 +309,7 @@ Sequences* sequences_ascii_read(StatError &error , const char *path , bool old_f
                 if (token == STAT_variable_word[j]) {
 //                  if ((j == NB_INTERNODE) && ((read_line != offset) || ((read_line == offset) &&
                   if ((j == OLD_INT_VALUE) && ((read_line != offset) || ((read_line == offset) &&
-                        (index_parameter_type != POSITION) && (index_parameter_type != POSITION_INTERVAL)))) {
+                        (index_param_type != POSITION) && (index_param_type != POSITION_INTERVAL)))) {
                     status = false;
                     error.update(STAT_parsing[STATP_VARIABLE_TYPE] , line , i + 1);
                   }
@@ -319,11 +320,11 @@ Sequences* sequences_ascii_read(StatError &error , const char *path , bool old_f
                       j = INT_VALUE;
                     }
 
-                    if ((old_format) && (index_parameter_type != IMPLICIT_TYPE)) {
-                      type[read_line - 1] = j;
+                    if ((old_format) && (index_param_type != IMPLICIT_TYPE)) {
+                      type[read_line - 1] = (variable_nature)j;
                     }
                     else {
-                      type[read_line] = j;
+                      type[read_line] = (variable_nature)j;
                     }
                   }
                   break;
@@ -362,11 +363,11 @@ Sequences* sequences_ascii_read(StatError &error , const char *path , bool old_f
       }
 
       else {
-//        if ((((index_parameter_type == TIME) || (index_parameter_type == TIME_INTERVAL)) && (read_line < offset + 1)) ||
-//            (((index_parameter_type == POSITION) || (index_parameter_type == POSITION_INTERVAL)) &&
+//        if ((((index_param_type == TIME) || (index_param_type == TIME_INTERVAL)) && (read_line < offset + 1)) ||
+//            (((index_param_type == POSITION) || (index_param_type == POSITION_INTERVAL)) &&
 //             ((read_line < offset + 1) || ((read_line > offset + 1) && (type[0] == NB_INTERNODE))))) {
-        if (((index_parameter_type == TIME) || (index_parameter_type == TIME_INTERVAL) ||
-             (index_parameter_type == POSITION) || (index_parameter_type == POSITION_INTERVAL)) &&
+        if (((index_param_type == TIME) || (index_param_type == TIME_INTERVAL) ||
+             (index_param_type == POSITION) || (index_param_type == POSITION_INTERVAL)) &&
              (read_line < offset + 1)) {
           status = false;
           error.update(STAT_parsing[STATP_VARIABLE_TYPE]);
@@ -379,7 +380,7 @@ Sequences* sequences_ascii_read(StatError &error , const char *path , bool old_f
     if (status) {
       vector_size = nb_variable;
 
-      if (index_parameter_type != IMPLICIT_TYPE) {
+      if (index_param_type != IMPLICIT_TYPE) {
         if (old_format) {
           nb_variable--;
         }
@@ -427,7 +428,7 @@ Sequences* sequences_ascii_read(StatError &error , const char *path , bool old_f
       in_file.clear();
       in_file.seekg(0 , ios::beg);
 
-      offset = (index_parameter_type == IMPLICIT_TYPE ? 0 : 1);
+      offset = (index_param_type == IMPLICIT_TYPE ? 0 : 1);
 
       length = new int[nb_sequence];
       for (i = 0;i < nb_sequence;i++) {
@@ -454,7 +455,7 @@ Sequences* sequences_ascii_read(StatError &error , const char *path , bool old_f
 
       max_length = 0;
 
-      switch (index_parameter_type) {
+      switch (index_param_type) {
       case TIME :
         index = -1;
         break;
@@ -514,12 +515,12 @@ Sequences* sequences_ascii_read(StatError &error , const char *path , bool old_f
             }
 
             else {
-              if (((index_parameter_type != IMPLICIT_TYPE) && (k == 0)) ||
+              if (((index_param_type != IMPLICIT_TYPE) && (k == 0)) ||
                   (type[k - offset] != REAL_VALUE)) {
                 lstatus = locale.stringToNum(token , &int_value);
-                if ((lstatus) && (((k == 0) && (((index_parameter_type == TIME) || (index_parameter_type == POSITION) ||
-                        (index_parameter_type == POSITION_INTERVAL)) && (int_value < 0)) ||
-                      ((index_parameter_type == TIME_INTERVAL) && (int_value <= 0))))) {
+                if ((lstatus) && (((k == 0) && (((index_param_type == TIME) || (index_param_type == POSITION) ||
+                        (index_param_type == POSITION_INTERVAL)) && (int_value < 0)) ||
+                      ((index_param_type == TIME_INTERVAL) && (int_value <= 0))))) {
 //                     ((k == 1) && (type[k - 1] == NB_INTERNODE) && (int_value < 0)))) {
                   lstatus = false;
                 }
@@ -535,7 +536,7 @@ Sequences* sequences_ascii_read(StatError &error , const char *path , bool old_f
               }
 
               else if (k == 0) {
-                switch (index_parameter_type) {
+                switch (index_param_type) {
 
                 case TIME : {
                   if (int_value <= index) {
@@ -575,7 +576,7 @@ Sequences* sequences_ascii_read(StatError &error , const char *path , bool old_f
 
         if (j > 0) {
           if (vector_size > 1) {
-            if (((line_continue) || ((index_parameter_type != POSITION) && (index_parameter_type != POSITION_INTERVAL))) &&
+            if (((line_continue) || ((index_param_type != POSITION) && (index_param_type != POSITION_INTERVAL))) &&
                 (k != vector_size)) {
               status = false;
               error.update(STAT_parsing[STATP_FORMAT] , line , j);
@@ -583,7 +584,7 @@ Sequences* sequences_ascii_read(StatError &error , const char *path , bool old_f
           }
 
           if (!line_continue) {
-            if ((index_parameter_type == POSITION) || (index_parameter_type == POSITION_INTERVAL)) {
+            if ((index_param_type == POSITION) || (index_param_type == POSITION_INTERVAL)) {
               if (k != 1) {
                 status = false;
                 error.update(STAT_parsing[STATP_FORMAT] , line , j);
@@ -596,7 +597,7 @@ Sequences* sequences_ascii_read(StatError &error , const char *path , bool old_f
               }
             }
 
-            switch (index_parameter_type) {
+            switch (index_param_type) {
             case TIME :
               index = -1;
               break;
@@ -639,7 +640,7 @@ Sequences* sequences_ascii_read(StatError &error , const char *path , bool old_f
       in_file.seekg(0 , ios::beg);
 
       seq = new Sequences(nb_sequence , NULL , length , NULL ,
-                          index_parameter_type , nb_variable , type);
+                          index_param_type , nb_variable , type);
 
       line = 0;
 
@@ -679,11 +680,11 @@ Sequences* sequences_ascii_read(StatError &error , const char *path , bool old_f
             }
 
             else {
-              if (((index_parameter_type != IMPLICIT_TYPE) && (k == 0)) ||
+              if (((index_param_type != IMPLICIT_TYPE) && (k == 0)) ||
                   (type[k - offset] != REAL_VALUE)) {
                 locale.stringToNum(token , &int_value);
 
-                if ((index_parameter_type != IMPLICIT_TYPE) && (k == 0)) {
+                if ((index_param_type != IMPLICIT_TYPE) && (k == 0)) {
                   seq->index_parameter[i][j] = int_value;
                 }
                 else {
@@ -713,16 +714,16 @@ Sequences* sequences_ascii_read(StatError &error , const char *path , bool old_f
         }
       }
 
-      if ((seq->index_parameter_type == TIME_INTERVAL) || (seq->index_parameter_type == POSITION_INTERVAL)) {
+      if ((seq->index_param_type == TIME_INTERVAL) || (seq->index_param_type == POSITION_INTERVAL)) {
         seq->index_parameter_computation();
       }
 
       if (seq->index_parameter) {
         seq->build_index_parameter_frequency_distribution();
       }
-//      if ((seq->index_parameter_type == TIME) || ((seq->index_parameter_type == POSITION) &&
+//      if ((seq->index_param_type == TIME) || ((seq->index_param_type == POSITION) &&
 //          (seq->type[0] != NB_INTERNODE))) {
-      if ((seq->index_parameter_type == TIME) || (seq->index_parameter_type == POSITION)) {
+      if ((seq->index_param_type == TIME) || (seq->index_param_type == POSITION)) {
         seq->index_interval_computation();
       }
 
@@ -778,7 +779,7 @@ ostream& Sequences::ascii_write(ostream &os , bool exhaustive , bool comment_fla
 
   if (index_parameter) {
     os << SEQ_word[SEQW_INDEX_PARAMETER] << " : "
-       << SEQ_index_parameter_word[index_parameter_type];
+       << SEQ_index_parameter_word[index_param_type];
   }
 
   if (index_parameter_distribution) {
@@ -793,7 +794,7 @@ ostream& Sequences::ascii_write(ostream &os , bool exhaustive , bool comment_fla
     if (comment_flag) {
       os << "# ";
     }
-    os << (index_parameter_type == TIME ? SEQ_label[SEQL_TIME] : SEQ_label[SEQL_POSITION])
+    os << (index_param_type == TIME ? SEQ_label[SEQL_TIME] : SEQ_label[SEQL_POSITION])
        << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
     index_parameter_distribution->ascii_characteristic_print(os , false , comment_flag);
 
@@ -802,7 +803,7 @@ ostream& Sequences::ascii_write(ostream &os , bool exhaustive , bool comment_fla
       if (comment_flag) {
         os << "# ";
       }
-      os << "   | " << (index_parameter_type == TIME ? SEQ_label[SEQL_TIME] : SEQ_label[SEQL_POSITION])
+      os << "   | " << (index_param_type == TIME ? SEQ_label[SEQL_TIME] : SEQ_label[SEQL_POSITION])
          << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
       index_parameter_distribution->ascii_print(os , comment_flag);
     }
@@ -817,7 +818,7 @@ ostream& Sequences::ascii_write(ostream &os , bool exhaustive , bool comment_fla
     if (comment_flag) {
       os << "# ";
     }
-    os << (index_parameter_type == TIME ? SEQ_label[SEQL_TIME_INTERVAL] : SEQ_label[SEQL_POSITION_INTERVAL])
+    os << (index_param_type == TIME ? SEQ_label[SEQL_TIME_INTERVAL] : SEQ_label[SEQL_POSITION_INTERVAL])
        << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
     index_interval->ascii_characteristic_print(os , false , comment_flag);
 
@@ -826,7 +827,7 @@ ostream& Sequences::ascii_write(ostream &os , bool exhaustive , bool comment_fla
       if (comment_flag) {
         os << "# ";
       }
-      os << "   | " << (index_parameter_type == TIME ? SEQ_label[SEQL_TIME_INTERVAL] : SEQ_label[SEQL_POSITION_INTERVAL])
+      os << "   | " << (index_param_type == TIME ? SEQ_label[SEQL_TIME_INTERVAL] : SEQ_label[SEQL_POSITION_INTERVAL])
          << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
       index_interval->ascii_print(os , comment_flag);
     }
@@ -1007,14 +1008,14 @@ bool Sequences::ascii_write(StatError &error , const char *path ,
  *
  *  Ecriture des sequences.
  *
- *  arguments : stream, format ('c' : column / 'l' : line / 'a' : array / 'p' : posterior),
+ *  arguments : stream, format (LINE/COLUMN/VECTOR/POSTERIOR_PROBABILITY),
  *              flag commentaire, probabilites a posteriori des sequences d'etats
  *              les plus probables, entropies des sequences d'etats, nombres de sequences d'etats
  *              (modeles markoviens caches), nombre de caracteres par ligne.
  *
  *--------------------------------------------------------------*/
 
-ostream& Sequences::ascii_print(ostream &os , char format , bool comment_flag ,
+ostream& Sequences::ascii_print(ostream &os , output_sequence_format format , bool comment_flag ,
                                 double *posterior_probability , double *entropy ,
                                 double *nb_state_sequence , int line_nb_character) const
 
@@ -1024,7 +1025,7 @@ ostream& Sequences::ascii_print(ostream &os , char format , bool comment_flag ,
 
   switch (format) {
 
-  case 'c' : {
+  case COLUMN : {
     for (i = 0;i < nb_sequence;i++) {
       os << "\n";
 
@@ -1088,7 +1089,7 @@ ostream& Sequences::ascii_print(ostream &os , char format , bool comment_flag ,
       os << sos.str();
 #     endif
 
-      if (index_parameter_type == POSITION) {
+      if (index_param_type == POSITION) {
         os << "| " << index_parameter[i][length[i]];
       }
 
@@ -1118,7 +1119,7 @@ ostream& Sequences::ascii_print(ostream &os , char format , bool comment_flag ,
     break;
   }
 
-  case 'v' : {
+  case VECTOR : {
     for (i = 0;i < nb_sequence;i++) {
       os << "\n";
 
@@ -1140,7 +1141,7 @@ ostream& Sequences::ascii_print(ostream &os , char format , bool comment_flag ,
         }
       }
 
-      if (index_parameter_type == POSITION) {
+      if (index_param_type == POSITION) {
         os << "| " << index_parameter[i][length[i]];
       }
 
@@ -1170,7 +1171,7 @@ ostream& Sequences::ascii_print(ostream &os , char format , bool comment_flag ,
     break;
   }
 
-  case 'l' : {
+  case LINE : {
     int buff , start , width;
     long old_adjust;
 
@@ -1245,7 +1246,7 @@ ostream& Sequences::ascii_print(ostream &os , char format , bool comment_flag ,
         }
 
         else {
-          if (index_parameter_type == POSITION) {
+          if (index_param_type == POSITION) {
             os << setw(width + 1) << index_parameter[i][length[i]];
           }
 
@@ -1297,7 +1298,7 @@ ostream& Sequences::ascii_print(ostream &os , char format , bool comment_flag ,
     break;
   }
 
-  case 'a' : {
+  case ARRAY : {
     os << "[";
     for (i = 0;i < nb_sequence;i++) {
 
@@ -1395,7 +1396,7 @@ ostream& Sequences::ascii_print(ostream &os , char format , bool comment_flag ,
       os << sos.str();
 #     endif
 
-      if (index_parameter_type == POSITION) {
+      if (index_param_type == POSITION) {
         os << ",[" << index_parameter[i][length[i]];
         for (j = 1;j < nb_variable;j++) {
           os << "," << I_DEFAULT;
@@ -1413,7 +1414,7 @@ ostream& Sequences::ascii_print(ostream &os , char format , bool comment_flag ,
     break;
   }
 
-  case 'p' : {
+  case POSTERIOR_PROBABILITY : {
     if ((posterior_probability) && (entropy) && (nb_state_sequence)) {
       bool *selected_sequence;
       int index , width[6];
@@ -1538,11 +1539,13 @@ ostream& Sequences::ascii_print(ostream &os , char format , bool comment_flag ,
  *
  *  Ecriture d'un objet Sequences.
  *
- *  arguments : stream, format (ligne/colonne), flag niveau de detail.
+ *  arguments : stream, format (LINE/COLUMN/VECTOR/POSTERIOR_PROBABILITY),
+ *              flag niveau de detail.
  *
  *--------------------------------------------------------------*/
 
-ostream& Sequences::ascii_data_write(ostream &os , char format , bool exhaustive) const
+ostream& Sequences::ascii_data_write(ostream &os , output_sequence_format format ,
+                                     bool exhaustive) const
 
 {
   ascii_write(os , exhaustive , false);
@@ -1557,12 +1560,13 @@ ostream& Sequences::ascii_data_write(ostream &os , char format , bool exhaustive
  *  Ecriture d'un objet Sequences dans un fichier.
  *
  *  arguments : reference sur un objet StatError, path,
- *              format (ligne/colonne), flag niveau de detail.
+ *              format (LINE/COLUMN/VECTOR/POSTERIOR_PROBABILITY),
+ *              flag niveau de detail.
  *
  *--------------------------------------------------------------*/
 
 bool Sequences::ascii_data_write(StatError &error , const char *path ,
-                                 char format , bool exhaustive) const
+                                 output_sequence_format format , bool exhaustive) const
 
 {
   bool status = false;
@@ -1617,18 +1621,18 @@ bool Sequences::spreadsheet_write(StatError &error , const char *path) const
 
     if (index_parameter) {
       out_file << SEQ_word[SEQW_INDEX_PARAMETER] << "\t"
-               << SEQ_index_parameter_word[index_parameter_type];
+               << SEQ_index_parameter_word[index_param_type];
     }
 
     if (index_parameter_distribution) {
       out_file << "\t\t" << SEQ_label[SEQL_MIN_INDEX_PARAMETER] << "\t" << index_parameter_distribution->offset
                << "\t\t" << SEQ_label[SEQL_MAX_INDEX_PARAMETER] << "\t" << index_parameter_distribution->nb_value - 1 << endl;
 
-      out_file << "\n" << (index_parameter_type == TIME ? SEQ_label[SEQL_TIME] : SEQ_label[SEQL_POSITION])
+      out_file << "\n" << (index_param_type == TIME ? SEQ_label[SEQL_TIME] : SEQ_label[SEQL_POSITION])
                << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
       index_parameter_distribution->spreadsheet_characteristic_print(out_file);
 
-      out_file << "\n\t" << (index_parameter_type == TIME ? SEQ_label[SEQL_TIME] : SEQ_label[SEQL_POSITION])
+      out_file << "\n\t" << (index_param_type == TIME ? SEQ_label[SEQL_TIME] : SEQ_label[SEQL_POSITION])
                << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
       index_parameter_distribution->spreadsheet_print(out_file);
     }
@@ -1638,11 +1642,11 @@ bool Sequences::spreadsheet_write(StatError &error , const char *path) const
     }
 
     if (index_interval) {
-      out_file << "\n" << (index_parameter_type == TIME ? SEQ_label[SEQL_TIME_INTERVAL] : SEQ_label[SEQL_POSITION_INTERVAL])
+      out_file << "\n" << (index_param_type == TIME ? SEQ_label[SEQL_TIME_INTERVAL] : SEQ_label[SEQL_POSITION_INTERVAL])
                << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
       index_interval->spreadsheet_characteristic_print(out_file);
 
-      out_file << "\n\t" << (index_parameter_type == TIME ? SEQ_label[SEQL_TIME_INTERVAL] : SEQ_label[SEQL_POSITION_INTERVAL])
+      out_file << "\n\t" << (index_param_type == TIME ? SEQ_label[SEQL_TIME_INTERVAL] : SEQ_label[SEQL_POSITION_INTERVAL])
                << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
       index_interval->spreadsheet_print(out_file);
     }
@@ -1806,7 +1810,7 @@ bool Sequences::plot_write(StatError &error , const char *prefix ,
                  << index_parameter_distribution->nb_value - 1 << "] [0:"
                  << (int)(index_parameter_distribution->max * YSCALE) + 1 << "] \""
                  << label((data_file_name[0].str()).c_str()) << "\" using " << j++ << " title \""
-                 << (index_parameter_type == TIME ? SEQ_label[SEQL_TIME] : SEQ_label[SEQL_POSITION])
+                 << (index_param_type == TIME ? SEQ_label[SEQL_TIME] : SEQ_label[SEQL_POSITION])
                  << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\" with impulses" << endl;
 
         if (index_parameter_distribution->nb_value - 1 < TIC_THRESHOLD) {
@@ -1833,7 +1837,7 @@ bool Sequences::plot_write(StatError &error , const char *prefix ,
         out_file << "plot [0:" << index_interval->nb_value - 1 << "] [0:"
                  << (int)(index_interval->max * YSCALE) + 1 << "] \""
                  << label((data_file_name[0].str()).c_str()) << "\" using " << j++ << " title \""
-                 << (index_parameter_type == TIME ? SEQ_label[SEQL_TIME_INTERVAL] : SEQ_label[SEQL_POSITION_INTERVAL])
+                 << (index_param_type == TIME ? SEQ_label[SEQL_TIME_INTERVAL] : SEQ_label[SEQL_POSITION_INTERVAL])
                  << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\" with impulses" << endl;
 
         if (index_interval->nb_value - 1 < TIC_THRESHOLD) {
@@ -1991,7 +1995,7 @@ MultiPlotSet* Sequences::get_plotable() const
     plot[i].resize(1);
 
     legend.str("");
-    legend << (index_parameter_type == TIME ? SEQ_label[SEQL_TIME] : SEQ_label[SEQL_POSITION])
+    legend << (index_param_type == TIME ? SEQ_label[SEQL_TIME] : SEQ_label[SEQL_POSITION])
            << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
     plot[i][0].legend = legend.str();
 
@@ -2018,7 +2022,7 @@ MultiPlotSet* Sequences::get_plotable() const
     plot[i].resize(1);
 
     legend.str("");
-    legend << (index_parameter_type == TIME ? SEQ_label[SEQL_TIME_INTERVAL] : SEQ_label[SEQL_POSITION_INTERVAL])
+    legend << (index_param_type == TIME ? SEQ_label[SEQL_TIME_INTERVAL] : SEQ_label[SEQL_POSITION_INTERVAL])
            << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
     plot[i][0].legend = legend.str();
 
