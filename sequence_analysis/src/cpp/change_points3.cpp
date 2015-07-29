@@ -66,13 +66,13 @@ namespace sequence_analysis {
  *  Calcul des N segmentations les plus probables d'une sequence.
  *
  *  arguments : indice de la sequence, nombre de segments, types des modeles,
- *              rangs (variables ordinales), stream, format de fichier ('a' : ASCII,
- *              's' : Spreadsheet), nombre de segmentation, vraisemblance des donnees.
+ *              rangs (variables ordinales), stream, format de fichier (ASCII/SPREADSHEET),
+ *              nombre de segmentation, vraisemblance des donnees.
  *
  *--------------------------------------------------------------*/
 
-double Sequences::N_segmentation(int index , int nb_segment , int *model_type ,
-                                 double **irank , ostream &os , char format ,
+double Sequences::N_segmentation(int index , int nb_segment , segment_model *model_type ,
+                                 double **irank , ostream &os , output_format format ,
                                  int inb_segmentation , double likelihood) const
 
 {
@@ -276,7 +276,7 @@ double Sequences::N_segmentation(int index , int nb_segment , int *model_type ,
 
     if (((model_type[i - 1] == LINEAR_MODEL_CHANGE) && (!seq_index_parameter)) ||
         ((i == 1) && (model_type[0] == INTERCEPT_SLOPE_CHANGE))) {
-      if (index_parameter_type == IMPLICIT_TYPE) {
+      if (index_param_type == IMPLICIT_TYPE) {
         seq_index_parameter = new int[length[index]];
         for (j = 0;j < length[index];j++) {
           seq_index_parameter[j] = j;
@@ -868,7 +868,7 @@ double Sequences::N_segmentation(int index , int nb_segment , int *model_type ,
   os.precision(6);
 
   if (((model_type[0] == MEAN_CHANGE) || (model_type[0] == INTERCEPT_SLOPE_CHANGE)) &&
-      (format == 's') && (nb_segment == 2) && (inb_segmentation >= length[index] - 1)) {
+      (format == SPREADSHEET) && (nb_segment == 2) && (inb_segmentation >= length[index] - 1)) {
     change_point = new int[length[index]];
   }
 # endif
@@ -1096,7 +1096,7 @@ double Sequences::N_segmentation(int index , int nb_segment , int *model_type ,
 
     switch (format) {
 
-    case 'a' : {
+    case ASCII : {
       if (inb_segmentation <= 200) {
       psegment = int_sequence[index][0];
       for (j = 0;j < length[index];j++) {
@@ -1209,7 +1209,7 @@ double Sequences::N_segmentation(int index , int nb_segment , int *model_type ,
       break;
     }
 
-    case 's' : {
+    case SPREADSHEET : {
       psegment = int_sequence[index][0];
       for (j = 0;j < length[index];j++) {
         os << *psegment++ << "\t";
@@ -1304,7 +1304,7 @@ double Sequences::N_segmentation(int index , int nb_segment , int *model_type ,
 
 # ifdef MESSAGE
   if (((model_type[0] == MEAN_CHANGE) || (model_type[0] == INTERCEPT_SLOPE_CHANGE)) &&
-      (format == 's') && (nb_segment == 2) && (inb_segmentation >= length[index] - 1)) {
+      (format == SPREADSHEET) && (nb_segment == 2) && (inb_segmentation >= length[index] - 1)) {
     norm = 0.;
     for (i = 0;i < length[index] - 1;i++) {
       norm += exp(forward[length[index] - 1][nb_segment - 1][i]);
@@ -1557,7 +1557,7 @@ double Sequences::N_segmentation(int index , int nb_segment , int *model_type ,
   delete [] sequence_mean;
   delete [] residual;
 
-  if (index_parameter_type == IMPLICIT_TYPE) {
+  if (index_param_type == IMPLICIT_TYPE) {
     delete [] seq_index_parameter;
   }
 
@@ -1644,15 +1644,15 @@ double Sequences::N_segmentation(int index , int nb_segment , int *model_type ,
  *
  *  arguments : indice de la sequence, nombre de segments, types des modeles,
  *              rangs (variables ordinales), stream, pointeur sur un objet MultiPlotSet,
- *              type de sortie, format de sortie ('a' : ASCII, 's' : Spreadsheet,
- *              'g' : Gnuplot, 'p' : plotable), vraisemblance des donnees.
+ *              type de sortie, format de sortie (ASCII/SPREADSHEET/GNUPLOT/PLOT),
+ *              vraisemblance des donnees.
  *
  *--------------------------------------------------------------*/
 
 double Sequences::forward_backward_dynamic_programming(int index , int nb_segment ,
-                                                       int *model_type , double **rank ,
+                                                       segment_model *model_type , double **rank ,
                                                        ostream *os , MultiPlotSet *plot_set ,
-                                                       int output , char format ,
+                                                       change_point_profile output , output_format format ,
                                                        double likelihood) const
 
 {
@@ -1763,7 +1763,7 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
 
     if (((model_type[i - 1] == LINEAR_MODEL_CHANGE) && (!seq_index_parameter)) ||
         ((i == 1) && (model_type[0] == INTERCEPT_SLOPE_CHANGE))) {
-      if (index_parameter_type == IMPLICIT_TYPE) {
+      if (index_param_type == IMPLICIT_TYPE) {
         seq_index_parameter = new int[length[index]];
         for (j = 0;j < length[index];j++) {
           seq_index_parameter[j] = j;
@@ -2929,7 +2929,7 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
 
     switch (format) {
 
-    case 'a' : {
+    case ASCII : {
       if (likelihood != D_INF) {
         switch (output) {
         case CHANGE_POINT :
@@ -2964,7 +2964,7 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
       break;
     }
 
-    case 's' : {
+    case SPREADSHEET : {
       if (likelihood != D_INF) {
         switch (output) {
         case CHANGE_POINT :
@@ -2999,12 +2999,12 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
       break;
     }
 
-    case 'g' : {
+    case GNUPLOT : {
       profile_plot_print(*os , index , nb_segment , backward_output , piecewise_function);
       break;
     }
 
-    case 'p' : {
+    case PLOT : {
       MultiPlotSet &plot = *plot_set;
 
       i = 0;
@@ -3062,7 +3062,7 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
     }
 
 #   ifdef MESSAGE
-    if (format != 'g') {
+    if (format != GNUPLOT) {
       double ambiguity = 0.;
 
       psegment = int_sequence[index][0];
@@ -3080,11 +3080,11 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
       }
 
       switch (format) {
-      case 'a' :
+      case ASCII :
         *os << "\n" << SEQ_label[SEQL_AMBIGUITY] << ": " << ambiguity
             << " (" << ambiguity / length[index] << ")" << endl;
         break;
-      case 's' :
+      case SPREADSHEET :
         *os << "\n" << SEQ_label[SEQL_AMBIGUITY] << "\t" << ambiguity
             << "\t" << ambiguity / length[index] << "\t" << endl;
         break;
@@ -3109,7 +3109,7 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
   delete [] sequence_mean;
   delete [] residual;
 
-  if (index_parameter_type == IMPLICIT_TYPE) {
+  if (index_param_type == IMPLICIT_TYPE) {
     delete [] seq_index_parameter;
   }
 
@@ -3151,15 +3151,16 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
  *
  *  arguments : reference sur un objet StatError, stream,
  *              identificateur de la sequence, nombre de segments, types des modeles,
- *              type de sortie, format ('a' : ASCII, 's' : Spreadsheet),
- *              methode de calcul des segmentations (algorithme de programmation dynamique ou
- *              algorithme forward-backward de simulation), nombre de segmentations.
+ *              type de sortie, format (ASCII/SPREADSHEET),
+ *              methode de calcul des segmentations (FORWARD_DYNAMIC_PROGRAMMING/
+ *              FORWARD_BACKWARD_SAMPLING), nombre de segmentations.
  *
  *--------------------------------------------------------------*/
 
 bool Sequences::segment_profile_write(StatError &error , ostream &os , int iidentifier ,
-                                      int nb_segment , int *model_type , int output ,
-                                      char format , int segmentation , int nb_segmentation) const
+                                      int nb_segment , segment_model *model_type ,
+                                      change_point_profile output , output_format format ,
+                                      latent_structure_algorithm segmentation , int nb_segmentation) const
 
 {
   bool status = true;
@@ -3173,12 +3174,12 @@ bool Sequences::segment_profile_write(StatError &error , ostream &os , int iiden
 
   error.init();
 
-/*  if (((index_parameter_type == TIME) && (index_interval->variance > 0.)) ||
-      (index_parameter_type == POSITION)) {
+/*  if (((index_param_type == TIME) && (index_interval->variance > 0.)) ||
+      (index_param_type == POSITION)) {
     status = false;
     error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
   }
-  if (index_parameter_type == POSITION) {
+  if (index_param_type == POSITION) {
     status = false;
     error.correction_update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE] , SEQ_index_parameter_word[TIME]);
   } */
@@ -3307,7 +3308,7 @@ bool Sequences::segment_profile_write(StatError &error , ostream &os , int iiden
   }
 
   if (status) {
-    seq = new Sequences(*this , 'a');
+    seq = new Sequences(*this , ADD_STATE_VARIABLE);
 
     // calcul des rangs pour les variables ordinales
 
@@ -3336,7 +3337,7 @@ bool Sequences::segment_profile_write(StatError &error , ostream &os , int iiden
           error.update(SEQ_error[SEQR_SEGMENTATION_FAILURE]);
         }
 
-        else if ((format == 'a') || (length[index == I_DEFAULT ? 0 : index] <= 256)) {
+        else if ((format == ASCII) || (length[index == I_DEFAULT ? 0 : index] <= 256)) {
           switch (segmentation) {
           case FORWARD_DYNAMIC_PROGRAMMING :
             seq->N_segmentation(i , nb_segment , model_type , rank , os , format ,
@@ -3370,16 +3371,15 @@ bool Sequences::segment_profile_write(StatError &error , ostream &os , int iiden
  *
  *  arguments : reference sur un objet StatError, path, identificateur de la sequence,
  *              nombre de segments, types des modeles, type de sortie, format de fichier
- *              ('a' : ASCII, 's' : Spreadsheet), methode de calcul des segmentations
- *              (algorithme de programmation dynamique ou algorithme forward-backward
- *               de simulation), nombre de segmentations.
+ *              (ASCII/SPREADSHEET), methode de calcul des segmentations
+ *              (FORWARD_DYNAMIC_PROGRAMMING/FORWARD_BACKWARD_SAMPLING), nombre de segmentations.
  *
  *--------------------------------------------------------------*/
 
-bool Sequences::segment_profile_write(StatError &error , const char *path ,
-                                      int iidentifier , int nb_segment , int *model_type ,
-                                      int output , char format , int segmentation ,
-                                      int nb_segmentation) const
+bool Sequences::segment_profile_write(StatError &error , const char *path , int iidentifier ,
+                                      int nb_segment , segment_model *model_type ,
+                                      change_point_profile output , output_format format ,
+                                      latent_structure_algorithm segmentation , int nb_segmentation) const
 
 {
   bool status = true;
@@ -3413,9 +3413,9 @@ bool Sequences::segment_profile_write(StatError &error , const char *path ,
  *
  *--------------------------------------------------------------*/
 
-bool Sequences::segment_profile_plot_write(StatError &error , const char *prefix ,
-                                           int iidentifier , int nb_segment , int *model_type ,
-                                           int output , const char *title) const
+bool Sequences::segment_profile_plot_write(StatError &error , const char *prefix , int iidentifier ,
+                                           int nb_segment , segment_model *model_type ,
+                                           change_point_profile output , const char *title) const
 
 {
   bool status = true;
@@ -3431,12 +3431,12 @@ bool Sequences::segment_profile_plot_write(StatError &error , const char *prefix
 
   error.init();
 
-/*  if (((index_parameter_type == TIME) && (index_interval->variance > 0.)) ||
-      (index_parameter_type == POSITION)) {
+/*  if (((index_param_type == TIME) && (index_interval->variance > 0.)) ||
+      (index_param_type == POSITION)) {
     status = false;
     error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
   }
-  if (index_parameter_type == POSITION) {
+  if (index_param_type == POSITION) {
     status = false;
     error.correction_update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE] , SEQ_index_parameter_word[TIME]);
   } */
@@ -3571,7 +3571,7 @@ bool Sequences::segment_profile_plot_write(StatError &error , const char *prefix
     }
 
     else {
-      seq = new Sequences(*this , 'a');
+      seq = new Sequences(*this , ADD_STATE_VARIABLE);
 
       // calcul des rangs pour les variables ordinales
 
@@ -3588,7 +3588,7 @@ bool Sequences::segment_profile_plot_write(StatError &error , const char *prefix
 
       if ((model_type[0] != MEAN_CHANGE) && (model_type[0] != INTERCEPT_SLOPE_CHANGE)) {
         likelihood = seq->forward_backward(index , nb_segment , model_type , rank ,
-                                           out_data_file , NULL , output , 'g');
+                                           out_data_file , NULL , output , GNUPLOT);
         out_data_file->close();
         delete out_data_file;
 
@@ -3602,7 +3602,7 @@ bool Sequences::segment_profile_plot_write(StatError &error , const char *prefix
 
       segmentation_likelihood = seq->forward_backward_dynamic_programming(index , nb_segment , model_type ,
                                                                           rank , out_data_file , NULL ,
-                                                                          output , 'g' , likelihood);
+                                                                          output , GNUPLOT , likelihood);
       out_data_file->close();
       delete out_data_file;
 
@@ -4107,8 +4107,8 @@ bool Sequences::segment_profile_plot_write(StatError &error , const char *prefix
  *--------------------------------------------------------------*/
 
 MultiPlotSet* Sequences::segment_profile_plotable_write(StatError &error , int iidentifier ,
-                                                        int nb_segment , int *model_type ,
-                                                        int output) const
+                                                        int nb_segment , segment_model *model_type ,
+                                                        change_point_profile output) const
 
 {
   bool status = true;
@@ -4125,12 +4125,12 @@ MultiPlotSet* Sequences::segment_profile_plotable_write(StatError &error , int i
   plot_set = NULL;
   error.init();
 
-/*  if (((index_parameter_type == TIME) && (index_interval->variance > 0.)) ||
-      (index_parameter_type == POSITION)) {
+/*  if (((index_param_type == TIME) && (index_interval->variance > 0.)) ||
+      (index_param_type == POSITION)) {
     status = false;
     error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
   }
-  if (index_parameter_type == POSITION) {
+  if (index_param_type == POSITION) {
     status = false;
     error.correction_update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE] , SEQ_index_parameter_word[TIME]);
   } */
@@ -4252,7 +4252,7 @@ MultiPlotSet* Sequences::segment_profile_plotable_write(StatError &error , int i
   }
 
   if (status) {
-    seq = new Sequences(*this , 'a');
+    seq = new Sequences(*this , ADD_STATE_VARIABLE);
 
     // calcul du nombre de vues
 
@@ -4293,7 +4293,7 @@ MultiPlotSet* Sequences::segment_profile_plotable_write(StatError &error , int i
 
     if ((model_type[0] != MEAN_CHANGE) && (model_type[0] != INTERCEPT_SLOPE_CHANGE)) {
       likelihood = seq->forward_backward(index , nb_segment , model_type , rank ,
-                                         NULL , plot_set , output , 'p');
+                                         NULL , plot_set , output , PLOT);
     }
 
 #   ifdef DEBUG
@@ -4302,7 +4302,7 @@ MultiPlotSet* Sequences::segment_profile_plotable_write(StatError &error , int i
 
     segmentation_likelihood = seq->forward_backward_dynamic_programming(index , nb_segment , model_type ,
                                                                         rank , NULL , plot_set ,
-                                                                        output , 'p' , likelihood);
+                                                                        output , PLOT , likelihood);
 
     if (segmentation_likelihood == D_INF) {
       delete plot_set;
@@ -4592,7 +4592,7 @@ MultiPlotSet* Sequences::segment_profile_plotable_write(StatError &error , int i
  *--------------------------------------------------------------*/
 
 Sequences* Sequences::hierarchical_segmentation(StatError &error , ostream &os , int iidentifier ,
-                                                int max_nb_segment , int *model_type) const
+                                                int max_nb_segment , segment_model *model_type) const
 
 {
   bool status = true;
@@ -4611,12 +4611,12 @@ Sequences* Sequences::hierarchical_segmentation(StatError &error , ostream &os ,
   seq = NULL;
   error.init();
 
-/*  if (((index_parameter_type == TIME) && (index_interval->variance > 0.)) ||
-      (index_parameter_type == POSITION)) {
+/*  if (((index_param_type == TIME) && (index_interval->variance > 0.)) ||
+      (index_param_type == POSITION)) {
     status = false;
     error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
   } */
-  if (index_parameter_type == POSITION) {
+  if (index_param_type == POSITION) {
     status = false;
     error.correction_update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE] , SEQ_index_parameter_word[TIME]);
   }
@@ -4713,7 +4713,7 @@ Sequences* Sequences::hierarchical_segmentation(StatError &error , ostream &os ,
 
   if (status) {
     iseq = new Sequences(*this , 1 , &index);
-    seq = new Sequences(*iseq , 'a');
+    seq = new Sequences(*iseq , ADD_STATE_VARIABLE);
     delete iseq;
 
     // calcul des rangs pour les variables ordinales
