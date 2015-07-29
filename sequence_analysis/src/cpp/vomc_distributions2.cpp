@@ -49,15 +49,15 @@ namespace sequence_analysis {
 
 /*--------------------------------------------------------------*
  *
- *  Calcul d'un melange de lois du nombre de series d'un etat ('r') ou
- *  du nombre d'occurrences d'un etat ('o') d'une chaine de Markov
+ *  Calcul d'un melange de lois du nombre de series d'un etat (RUN) ou
+ *  du nombre d'occurrences d'un etat (OCCURRENCE) d'une chaine de Markov
  *  d'ordre variable pour une distribution des longueurs de sequences donnee.
  *
  *  arguments : etat, type de forme.
  *
  *--------------------------------------------------------------*/
 
-void VariableOrderMarkovChain::state_nb_pattern_mixture(int istate , char pattern)
+void VariableOrderMarkovChain::state_nb_pattern_mixture(int istate , count_pattern pattern)
 
 {
   register int i , j , k , m;
@@ -69,11 +69,11 @@ void VariableOrderMarkovChain::state_nb_pattern_mixture(int istate , char patter
   max_length = state_process->length->nb_value - 1;
 
   switch (pattern) {
-  case 'r' :
+  case RUN :
     pdist = state_process->nb_run[istate];
     nb_pattern = max_length / 2 + 2;
     break;
-  case 'o' :
+  case OCCURRENCE :
     pdist = state_process->nb_occurrence[istate];
     nb_pattern = max_length + 1;
     break;
@@ -102,7 +102,7 @@ void VariableOrderMarkovChain::state_nb_pattern_mixture(int istate , char patter
     if (i == 0) {
       switch (type) {
 
-      case 'o' : {
+      case ORDINARY : {
         for (j = 1;j < nb_row;j++) {
           if (order[j] == 1) {
             if (state[j][0] == istate) {
@@ -123,7 +123,7 @@ void VariableOrderMarkovChain::state_nb_pattern_mixture(int istate , char patter
         break;
       }
 
-      case 'e' : {
+      case EQUILIBRIUM : {
         for (j = 1;j < nb_row;j++) {
           if (!child[j]) {
             if (state[j][0] == istate) {
@@ -165,12 +165,12 @@ void VariableOrderMarkovChain::state_nb_pattern_mixture(int istate , char patter
 
         for (k = 0;k < nb_memory[j];k++) {
           switch (pattern) {
-          case 'r' :
+          case RUN :
             increment = (((state[j][0] == istate) &&
                           (((order[j] == 1) && (state[previous[j][k]][0] != istate)) ||
                            ((order[j] > 1) && (state[j][1] != istate)))) ? 1 : 0);
             break;
-          case 'o' :
+          case OCCURRENCE :
             increment = (state[j][0] == istate ? 1 : 0);
             break;
           }
@@ -183,7 +183,7 @@ void VariableOrderMarkovChain::state_nb_pattern_mixture(int istate , char patter
       }
     }
 
-    if ((pattern == 'o') || (i % 2 == 0)) {
+    if ((pattern == OCCURRENCE) || (i % 2 == 0)) {
       index_nb_pattern++;
     }
 
@@ -270,7 +270,7 @@ void VariableOrderMarkov::output_nb_run_mixture(int variable , int output)
     if (i == 0) {
       switch (type) {
 
-      case 'o' : {
+      case ORDINARY : {
         for (j = 1;j < nb_row;j++) {
           if (order[j] == 1) {
             memory[j][0] = (1. - observation[state[j][0]]) * initial[state[j][0]];
@@ -287,7 +287,7 @@ void VariableOrderMarkov::output_nb_run_mixture(int variable , int output)
         break;
       }
 
-      case 'e' : {
+      case EQUILIBRIUM : {
         for (j = 1;j < nb_row;j++) {
           if (!child[j]) {
             memory[j][0] = (1. - observation[state[j][0]]) * initial[j];
@@ -430,7 +430,7 @@ void VariableOrderMarkov::output_nb_occurrence_mixture(int variable , int output
     if (i == 0) {
       switch (type) {
 
-      case 'o' : {
+      case ORDINARY : {
         for (j = 1;j < nb_row;j++) {
           if (order[j] == 1) {
             memory[j][0] = (1. - observation[state[j][0]]) * initial[state[j][0]];
@@ -444,7 +444,7 @@ void VariableOrderMarkov::output_nb_occurrence_mixture(int variable , int output
         break;
       }
 
-      case 'e' : {
+      case EQUILIBRIUM : {
         for (j = 1;j < nb_row;j++) {
           if (!child[j]) {
             memory[j][0] = (1. - observation[state[j][0]]) * initial[j];
@@ -556,12 +556,12 @@ void VariableOrderMarkov::characteristic_computation(int length , bool counting_
 
       switch (type) {
 
-      case 'o' : {
+      case ORDINARY : {
         memory = memory_computation();
         break;
       }
 
-      case 'e' : {
+      case EQUILIBRIUM : {
         memory = new double[nb_row];
         for (i = 1;i < nb_row;i++) {
           memory[i] = initial[i];
@@ -573,17 +573,17 @@ void VariableOrderMarkov::characteristic_computation(int length , bool counting_
       index_state_distribution();
 
       for (i = 0;i < nb_state;i++) {
-        if (type == 'o') {
+        if (type == ORDINARY) {
           state_no_occurrence_probability(i);
         }
         state_first_occurrence_distribution(i);
 
-        if (type == 'o') {
+        if (type == ORDINARY) {
           state_leave_probability(memory , i);
         }
         state_recurrence_time_distribution(memory , i);
 
-        if (state_type[i] != 'a') {
+        if (stype[i] != ABSORBING) {
           state_sojourn_time_distribution(memory , i);
         }
         else {
@@ -594,7 +594,7 @@ void VariableOrderMarkov::characteristic_computation(int length , bool counting_
       }
 
 #     ifdef DEBUG
-      if (type == 'e') {
+      if (type == EQUILIBRIUM) {
         double sum = 0.;
 
         // calcul de la loi stationnaire dans le cas d'un processus en equilibre
@@ -637,12 +637,12 @@ void VariableOrderMarkov::characteristic_computation(int length , bool counting_
         if (!memory) {
           switch (type) {
 
-          case 'o' : {
+          case ORDINARY : {
             memory = memory_computation();
             break;
           }
 
-          case 'e' : {
+          case EQUILIBRIUM : {
             memory = new double[nb_row];
             for (j = 1;j < nb_row;j++) {
               memory[j] = initial[j];
@@ -653,7 +653,7 @@ void VariableOrderMarkov::characteristic_computation(int length , bool counting_
         }
 
         for (j = 0;j < categorical_process[i]->nb_value;j++) {
-          if (type == 'o') {
+          if (type == ORDINARY) {
             output_no_occurrence_probability(i , j);
           }
           if (categorical_process[i]->no_occurrence[j] < 1. - DOUBLE_ERROR) {
@@ -665,7 +665,7 @@ void VariableOrderMarkov::characteristic_computation(int length , bool counting_
             categorical_process[i]->leave[j] = 1.;
           }
 
-          if ((type == 'o') && (categorical_process[i]->first_occurrence[j])) {
+          if ((type == ORDINARY) && (categorical_process[i]->first_occurrence[j])) {
             output_leave_probability(memory , i , j);
           }
           if (categorical_process[i]->leave[j] < 1. - DOUBLE_ERROR) {
@@ -678,7 +678,7 @@ void VariableOrderMarkov::characteristic_computation(int length , bool counting_
 
           for (k = 0;k < nb_state;k++) {
             if ((categorical_process[i]->observation[k]->mass[j] > 0.) &&
-                ((state_type[k] != 'a') || (categorical_process[i]->observation[k]->mass[j] < 1.))) {
+                ((stype[k] != ABSORBING) || (categorical_process[i]->observation[k]->mass[j] < 1.))) {
               break;
             }
           }
@@ -707,8 +707,8 @@ void VariableOrderMarkov::characteristic_computation(int length , bool counting_
 
       if (computation[0]) {
         for (i = 0;i < nb_state;i++) {
-          state_nb_pattern_mixture(i , 'r');
-          state_nb_pattern_mixture(i , 'o');
+          state_nb_pattern_mixture(i , RUN);
+          state_nb_pattern_mixture(i , OCCURRENCE);
         }
       }
 
@@ -763,12 +763,12 @@ void VariableOrderMarkov::characteristic_computation(const VariableOrderMarkovDa
 
       switch (type) {
 
-      case 'o' : {
+      case ORDINARY : {
         memory = memory_computation();
         break;
       }
 
-      case 'e' : {
+      case EQUILIBRIUM : {
         memory = new double[nb_row];
         for (i = 1;i < nb_row;i++) {
           memory[i] = initial[i];
@@ -780,7 +780,7 @@ void VariableOrderMarkov::characteristic_computation(const VariableOrderMarkovDa
       index_state_distribution();
 
       for (i = 0;i < nb_state;i++) {
-        if (type == 'o') {
+        if (type == ORDINARY) {
           state_no_occurrence_probability(i);
         }
         if (seq.type[0] == STATE) {
@@ -790,7 +790,7 @@ void VariableOrderMarkov::characteristic_computation(const VariableOrderMarkovDa
           state_first_occurrence_distribution(i);
         }
 
-        if (type == 'o') {
+        if (type == ORDINARY) {
           state_leave_probability(memory , i);
         }
         if (seq.type[0] == STATE) {
@@ -800,7 +800,7 @@ void VariableOrderMarkov::characteristic_computation(const VariableOrderMarkovDa
           state_recurrence_time_distribution(memory , i);
         }
 
-        if (state_type[i] != 'a') {
+        if (stype[i] != ABSORBING) {
           if (seq.type[0] == STATE) {
             state_sojourn_time_distribution(memory , i , ((seq.characteristics[0]) && (i < seq.marginal_distribution[0]->nb_value) && (seq.characteristics[0]->sojourn_time[i]->nb_element > 0) ? seq.characteristics[0]->sojourn_time[i]->nb_value : 1));
           }
@@ -817,7 +817,7 @@ void VariableOrderMarkov::characteristic_computation(const VariableOrderMarkovDa
       }
 
 #     ifdef DEBUG
-      if (type == 'e') {
+      if (type == EQUILIBRIUM) {
         double sum = 0.;
 
         // calcul de la loi stationnaire dans le cas d'un processus en equilibre
@@ -869,12 +869,12 @@ void VariableOrderMarkov::characteristic_computation(const VariableOrderMarkovDa
         if (!memory) {
           switch (type) {
 
-          case 'o' : {
+          case ORDINARY : {
             memory = memory_computation();
             break;
           }
 
-          case 'e' : {
+          case EQUILIBRIUM : {
             memory = new double[nb_row];
             for (j = 1;j < nb_row;j++) {
               memory[j] = initial[j];
@@ -885,7 +885,7 @@ void VariableOrderMarkov::characteristic_computation(const VariableOrderMarkovDa
         }
 
         for (j = 0;j < categorical_process[i]->nb_value;j++) {
-          if (type == 'o') {
+          if (type == ORDINARY) {
             output_no_occurrence_probability(i , j);
           }
           if (categorical_process[i]->no_occurrence[j] < 1. - DOUBLE_ERROR) {
@@ -897,7 +897,7 @@ void VariableOrderMarkov::characteristic_computation(const VariableOrderMarkovDa
             categorical_process[i]->leave[j] = 1.;
           }
 
-          if ((type == 'o') && (categorical_process[i]->first_occurrence[j])) {
+          if ((type == ORDINARY) && (categorical_process[i]->first_occurrence[j])) {
             output_leave_probability(memory , i , j);
           }
           if (categorical_process[i]->leave[j] < 1. - DOUBLE_ERROR) {
@@ -910,7 +910,7 @@ void VariableOrderMarkov::characteristic_computation(const VariableOrderMarkovDa
 
           for (k = 0;k < nb_state;k++) {
             if ((categorical_process[i]->observation[k]->mass[j] > 0.) &&
-                ((state_type[k] != 'a') || (categorical_process[i]->observation[k]->mass[j] < 1.))) {
+                ((stype[k] != ABSORBING) || (categorical_process[i]->observation[k]->mass[j] < 1.))) {
               break;
             }
           }
@@ -939,8 +939,8 @@ void VariableOrderMarkov::characteristic_computation(const VariableOrderMarkovDa
 
       if (computation[0]) {
         for (i = 0;i < nb_state;i++) {
-          state_nb_pattern_mixture(i , 'r');
-          state_nb_pattern_mixture(i , 'o');
+          state_nb_pattern_mixture(i , RUN);
+          state_nb_pattern_mixture(i , OCCURRENCE);
         }
       }
 
