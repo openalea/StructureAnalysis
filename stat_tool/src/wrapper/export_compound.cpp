@@ -51,7 +51,7 @@ class CompoundWrap
   {
     StatError error;
     Compound *compound = NULL;
-    compound = compound_ascii_read(error, filename);
+    compound = Compound::ascii_read(error, filename);
     if (!compound)
       stat_tool::wrap_util::throw_error(error);
     return boost::shared_ptr<Compound>(compound);
@@ -207,7 +207,7 @@ class CompoundDataWrap
 
 public:
 
-  WRAP_METHOD1(CompoundData, extract, DiscreteDistributionData, char);
+  WRAP_METHOD1(CompoundData, extract, DiscreteDistributionData, compound_distribution);
 
   static DiscreteDistributionData*
   extract_sum_distribution(const CompoundData &input)
