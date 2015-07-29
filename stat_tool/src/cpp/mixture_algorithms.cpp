@@ -373,7 +373,7 @@ double Mixture::likelihood_computation(const Vectors &vec , int index) const
 
 Mixture* Vectors::mixture_estimation(StatError &error , ostream &os , const Mixture &imixt ,
                                      bool known_component , bool common_dispersion ,
-                                     int variance_factor , bool assignment , int nb_iter) const
+                                     tying_rule variance_factor , bool assignment , int nb_iter) const
 
 {
   bool status;
@@ -1050,7 +1050,7 @@ Mixture* Vectors::mixture_estimation(StatError &error , ostream &os , const Mixt
 
 Mixture* Vectors::mixture_estimation(StatError &error , ostream &os , int nb_component ,
                                      int ident , double mean , double standard_deviation ,
-                                     bool tied_mean , int variance_factor ,
+                                     bool tied_mean , tying_rule variance_factor ,
                                      bool assignment , int nb_iter) const
 
 {
@@ -1092,7 +1092,7 @@ Mixture* Vectors::mixture_estimation(StatError &error , ostream &os , int nb_com
 
 Mixture* Vectors::mixture_stochastic_estimation(StatError &error , ostream &os , const Mixture &imixt ,
                                                 bool known_component , bool common_dispersion ,
-                                                int variance_factor , int min_nb_assignment ,
+                                                tying_rule variance_factor , int min_nb_assignment ,
                                                 int max_nb_assignment , double parameter ,
                                                 bool assignment , int nb_iter) const
 
@@ -1797,7 +1797,7 @@ Mixture* Vectors::mixture_stochastic_estimation(StatError &error , ostream &os ,
 
 Mixture* Vectors::mixture_stochastic_estimation(StatError &error , ostream &os , int nb_component ,
                                                 int ident , double mean , double standard_deviation ,
-                                                bool tied_mean , int variance_factor ,
+                                                bool tied_mean , tying_rule variance_factor ,
                                                 int min_nb_assignment , int max_nb_assignment ,
                                                 double parameter , bool assignment , int nb_iter) const
 
@@ -1959,7 +1959,8 @@ MixtureData* Mixture::simulation(StatError &error , int nb_vector) const
 
 {
   register int i , j , k;
-  int *itype , *decimal_scale;
+  int *decimal_scale;
+  variable_nature *itype;
   double buff , min_location;
   Mixture *mixt;
   Vectors *observed_vec;
@@ -1977,7 +1978,7 @@ MixtureData* Mixture::simulation(StatError &error , int nb_vector) const
 
     // creation d'un objet MixtureData
 
-    itype = new int[nb_output_process + 1];
+    itype = new variable_nature[nb_output_process + 1];
 
     itype[0] = STATE;
     for (i = 0;i < nb_output_process;i++) {
