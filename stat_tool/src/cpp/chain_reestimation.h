@@ -59,7 +59,7 @@ namespace stat_tool {
 
   public :
 
-    char type;              // 'o' : ordinaire, 'e' : en equilibre
+    process_type type;      // ORDINARY/EQUILIBRIUM
     int nb_state;           // nombre d'etats
     int nb_row;             // nombre de lignes de la matrice des frequences
                             // de transition
@@ -71,7 +71,7 @@ namespace stat_tool {
     void remove();
 
     ChainReestimation();
-    ChainReestimation(char itype , int inb_state , int inb_row , bool init_flag = false);
+    ChainReestimation(process_type itype , int inb_state , int inb_row , bool init_flag = false);
     ChainReestimation(const ChainReestimation<Type> &chain_data)
     { copy(chain_data); }
     ~ChainReestimation();
