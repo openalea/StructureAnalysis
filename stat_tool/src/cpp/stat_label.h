@@ -50,7 +50,7 @@ namespace stat_tool {
  */
 
 
-  enum {
+  enum stat_tool_key_word {
     STATW_INF_BOUND ,
     STATW_SUP_BOUND ,
     STATW_PARAMETER ,
@@ -83,7 +83,7 @@ namespace stat_tool {
     STATW_VARIABLES ,
 
     STATW_DISTANCE ,
-    STATW_SYMBOLS ,
+    STATW_CATEGORIES ,
     STATW_PERIOD ,
 
     STATW_STATES ,
@@ -129,7 +129,7 @@ namespace stat_tool {
  */
 
 
-  enum {
+  enum stat_tool_label {
     STATL_LINE ,
     STATL_WORD ,
 
@@ -230,7 +230,7 @@ namespace stat_tool {
 
     STATL_INFORMATION_RATIO ,
     STATL_CLUSTERING_STEP ,
-    STATL_SYMBOL ,
+    STATL_CATEGORY ,
 
     STATL_VECTOR ,
     STATL_VECTORS ,
@@ -347,7 +347,7 @@ namespace stat_tool {
  */
 
 
-  enum {
+  enum stat_tool_parsing {
     STATP_KEY_WORD ,
     STATP_FORMAT ,
 
@@ -377,7 +377,7 @@ namespace stat_tool {
     STATP_VARIABLE_INDEX ,
     STATP_VARIABLE_TYPE ,
 
-    STATP_NB_SYMBOL ,
+    STATP_NB_CATEGORY ,
     STATP_LOCAL_DISTANCE ,
     STATP_TRIANGLE_INEQUALITY ,
     STATP_PERIOD_VALUE ,
@@ -412,7 +412,7 @@ namespace stat_tool {
  */
 
 
-  enum {
+  enum stat_tool_error {
     STATR_FILE_NAME ,
     STATR_FILE_PREFIX ,
     STATR_EMPTY_SAMPLE ,
@@ -434,7 +434,7 @@ namespace stat_tool {
     STATR_COMPLETE_MIN_VALUE ,
     STATR_FORWARD_MIN_VALUE ,
     STATR_NO_EVENT_MIN_VALUE ,
-    STATR_MEAN_COMPUTATION_METHOD ,
+    STATR_MEAN_ESTIMATION ,
     STATR_INTER_EVENT_SUPPORT ,
 
     STATR_DISTRIBUTION_INDEX ,
@@ -467,9 +467,9 @@ namespace stat_tool {
     STATR_SMALLER_THAN ,
     STATR_GREATER_THAN ,
     STATR_NOT_ALLOWED ,
-    STATR_NB_SYMBOL ,
-    STATR_NON_CONSECUTIVE_SYMBOLS ,
-    STATR_MISSING_SYMBOL ,
+    STATR_NB_CATEGORY ,
+    STATR_NON_CONSECUTIVE_CATEGORIES ,
+    STATR_MISSING_CATEGORY ,
     STATR_CLUSTER_LIMIT ,
     STATR_INFORMATION_RATIO ,
     STATR_NULL_INFORMATION ,
