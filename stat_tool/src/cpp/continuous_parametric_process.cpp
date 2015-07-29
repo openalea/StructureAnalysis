@@ -77,10 +77,10 @@ ContinuousParametricProcess::ContinuousParametricProcess(int inb_state)
 
 
   nb_state = inb_state;
-  ident = I_DEFAULT;
+  ident = GAUSSIAN;
   tied_location = false;
   tied_dispersion = false;
-  unit = I_DEFAULT;
+  unit = DEGREE;
 
   if (nb_state > 0) {
     observation = new ContinuousParametric*[nb_state];
@@ -241,9 +241,9 @@ ContinuousParametricProcess& ContinuousParametricProcess::operator=(const Contin
  *
  *--------------------------------------------------------------*/
 
-ContinuousParametricProcess* continuous_observation_parsing(StatError &error , ifstream &in_file ,
-                                                            int &line , int nb_state , int model ,
-                                                            int last_ident)
+ContinuousParametricProcess* ContinuousParametricProcess::parsing(StatError &error , ifstream &in_file ,
+                                                                  int &line , int nb_state , model_type model ,
+                                                                  continuous_parametric last_ident)
 
 {
   RWLocaleSnapshot locale("en");
@@ -355,10 +355,10 @@ ContinuousParametricProcess* continuous_observation_parsing(StatError &error , i
 
         switch (model) {
         case MIXTURE :
-          dist[i] = continuous_parametric_parsing(error , in_file , line , VON_MISES);
+          dist[i] = ContinuousParametric::parsing(error , in_file , line , VON_MISES);
           break;
         case HIDDEN_MARKOV :
-          dist[i] = continuous_parametric_parsing(error , in_file , line , last_ident);
+          dist[i] = ContinuousParametric::parsing(error , in_file , line , last_ident);
           break;
         }
         if (!dist[i]) {
@@ -419,7 +419,7 @@ ostream& ContinuousParametricProcess::ascii_print(ostream &os , Histogram **obse
                                                   FrequencyDistribution **observation_distribution ,
                                                   Histogram *marginal_histogram ,
                                                   FrequencyDistribution *marginal_distribution ,
-                                                  bool exhaustive , bool file_flag , int model) const
+                                                  bool exhaustive , bool file_flag , model_type model) const
 
 {
   register int i , j , k;
@@ -829,7 +829,7 @@ ostream& ContinuousParametricProcess::ascii_print(ostream &os , Histogram **obse
       nb_element = marginal_distribution->nb_element;
       marginal_cumul = marginal_distribution->cumul_computation();
 
-      clustered_histo = new FrequencyDistribution(*marginal_distribution , 'c' , (int)step);
+      clustered_histo = new FrequencyDistribution(*marginal_distribution , CLUSTER , (int)step);
 
       nb_negative_step = 0;
       if (ident == GAUSSIAN) {
@@ -1306,7 +1306,7 @@ ostream& ContinuousParametricProcess::spreadsheet_print(ostream &os , Histogram 
                                                         FrequencyDistribution **observation_distribution ,
                                                         Histogram *marginal_histogram ,
                                                         FrequencyDistribution *marginal_distribution ,
-                                                        int model) const
+                                                        model_type model) const
 
 {
   register int i , j , k;
@@ -1865,7 +1865,7 @@ ostream& ContinuousParametricProcess::spreadsheet_print(ostream &os , Histogram 
       nb_element = marginal_distribution->nb_element;
       marginal_cumul = marginal_distribution->cumul_computation();
 
-      clustered_histo = new FrequencyDistribution(*marginal_distribution , 'c' , (int)step);
+      clustered_histo = new FrequencyDistribution(*marginal_distribution , CLUSTER , (int)step);
 
       nb_negative_step = 0;
       if (ident == GAUSSIAN) {
@@ -2274,7 +2274,8 @@ bool ContinuousParametricProcess::plot_print(const char *prefix , const char *ti
                                              FrequencyDistribution **observation_distribution ,
                                              Histogram *marginal_histogram ,
                                              FrequencyDistribution *marginal_distribution ,
-                                             int nb_value , double **empirical_cdf , int model) const
+                                             int nb_value , double **empirical_cdf ,
+                                             model_type model) const
 
 {
   bool status = false;
@@ -3185,7 +3186,8 @@ void ContinuousParametricProcess::plotable_write(MultiPlotSet &plot , int &index
                                                  FrequencyDistribution **observation_distribution ,
                                                  Histogram *marginal_histogram ,
                                                  FrequencyDistribution *marginal_distribution ,
-                                                 int nb_value , double **empirical_cdf , int model) const
+                                                 int nb_value , double **empirical_cdf ,
+                                                 model_type model) const
 
 {
   register int i , j , k;
@@ -4147,7 +4149,7 @@ double ContinuousParametricProcess::variance_computation(Distribution *pweight ,
  *
  *--------------------------------------------------------------*/
 
-void ContinuousParametricProcess::select_unit(int iunit)
+void ContinuousParametricProcess::select_unit(angle_unit iunit)
 
 {
   if (ident == VON_MISES) {
@@ -4171,7 +4173,7 @@ void ContinuousParametricProcess::select_unit(int iunit)
  *
  *--------------------------------------------------------------*/
 
-void ContinuousParametricProcess::init(int iident , double min_value , double max_value ,
+void ContinuousParametricProcess::init(continuous_parametric iident , double min_value , double max_value ,
                                        double mean , double variance)
 
 {
