@@ -390,12 +390,12 @@ ostream& Sequences::alignment_spreadsheet_print(ostream &os , int ref_index , in
  *  Calcul du cout d'elision/insertion fixe.
  *
  *  arguments : reference sur un objet VectorDistance, rangs,
- *              distances maximum aux symboles.
+ *              distances maximum aux categories.
  *
  *--------------------------------------------------------------*/
 
 double Sequences::indel_distance_computation(const VectorDistance &vector_dist ,
-                                             double **rank , double **max_symbol_distance) const
+                                             double **rank , double **max_category_distance) const
 
 {
   register int i , j;
@@ -403,18 +403,18 @@ double Sequences::indel_distance_computation(const VectorDistance &vector_dist ,
 
 
   for (i = 0;i < vector_dist.get_nb_variable();i++) {
-    switch (vector_dist.get_variable_type(i)) {
+    switch (vector_dist.get_var_type(i)) {
 
-    case SYMBOLIC : {
-      if (!max_symbol_distance[i]) {
+    case NOMINAL : {
+      if (!max_category_distance[i]) {
         ldistance = 1.;
       }
 
       else {
         ldistance = 0.;
         for (j = (int)min_value[i];j <= (int)max_value[i];j++) {
-          if (max_symbol_distance[i][j] > ldistance) {
-            ldistance = max_symbol_distance[i][j];
+          if (max_category_distance[i][j] > ldistance) {
+            ldistance = max_category_distance[i][j];
           }
         }
       }
@@ -460,13 +460,13 @@ double Sequences::indel_distance_computation(const VectorDistance &vector_dist ,
  *  Calcul du cout d'elision/insertion d'un vecteur.
  *
  *  arguments : reference sur un objet VectorDistance, indice de la sequence,
- *              position dans la sequence, rangs, distances maximum aux symboles.
+ *              position dans la sequence, rangs, distances maximum aux categories.
  *
  *--------------------------------------------------------------*/
 
 double Sequences::indel_distance_computation(const VectorDistance &vector_dist ,
                                              int index , int position , double **rank ,
-                                             double **max_symbol_distance) const
+                                             double **max_category_distance) const
 
 {
   register int i;
@@ -474,14 +474,14 @@ double Sequences::indel_distance_computation(const VectorDistance &vector_dist ,
 
 
   for (i = 0;i < vector_dist.get_nb_variable();i++) {
-    switch (vector_dist.get_variable_type(i)) {
+    switch (vector_dist.get_var_type(i)) {
 
-    case SYMBOLIC : {
-      if (!max_symbol_distance[i]) {
+    case NOMINAL : {
+      if (!max_category_distance[i]) {
         ldistance = 1.;
       }
       else {
-        ldistance = max_symbol_distance[i][int_sequence[index][i][position]];
+        ldistance = max_category_distance[i][int_sequence[index][i][position]];
       }
       break;
     }
@@ -557,15 +557,15 @@ double Sequences::substitution_distance_computation(const VectorDistance &vector
   }
 
   for (i = 0;i < vector_dist.get_nb_variable();i++) {
-    switch (vector_dist.get_variable_type(i)) {
+    switch (vector_dist.get_var_type(i)) {
 
-    case SYMBOLIC : {
-      if (!vector_dist.get_symbol_distance(i)) {
+    case NOMINAL : {
+      if (!vector_dist.get_category_distance(i)) {
         ldistance = (int_sequence[ref_index][i][ref_position] == test_seq->int_sequence[test_index][i][test_position] ? 0. : 1.);
       }
       else {
-        ldistance = vector_dist.get_symbol_distance(i , int_sequence[ref_index][i][ref_position] ,
-                                                    test_seq->int_sequence[test_index][i][test_position]);
+        ldistance = vector_dist.get_category_distance(i , int_sequence[ref_index][i][ref_position] ,
+                                                      test_seq->int_sequence[test_index][i][test_position]);
       }
       break;
     }
@@ -627,17 +627,16 @@ double Sequences::substitution_distance_computation(const VectorDistance &vector
  *              couts d'elision/insertion adaptatifs ou fixes,
  *              facteur pour deduire les couts d'elision/insertion,
  *              flag transposition, facteur pour deduire les couts de transposition,
- *              path resultat, format du fichier resultat ('a' : ASCII, 's' : Spreadsheet),
- *              path alignement, format du fichier alignement ('a' : ASCII, 'b' : Binary).
+ *              path resultat, format du fichier resultat (ASCII/SPREADSHEET), path alignement.
  *
  *--------------------------------------------------------------*/
 
 DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , const VectorDistance &ivector_dist ,
                                      int ref_identifier , int test_identifier , bool begin_free ,
-                                     bool end_free , int indel_cost , double indel_factor ,
+                                     bool end_free , insertion_deletion_cost indel_cost , double indel_factor ,
                                      bool transposition_flag , double transposition_factor ,
-                                     const char *result_path , char result_format ,
-                                     const char *alignment_path , char alignment_format) const
+                                     const char *result_path , output_format result_format ,
+                                     const char *alignment_path) const
 
 {
   bool status = true , half_matrix;
@@ -645,9 +644,9 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , const Vect
   int nb_alignment , ilength , alignment_index , var , width , ref_position , pref_position ,
       test_position , ptest_position , gap_length , max_gap_length , nb_deletion , nb_insertion ,
       nb_match , nb_substitution , nb_transposition , nb_begin_end , offset , *palignment ,
-      *calignment , *symbol , **path_length , ***back_pointers;
+      *calignment , *category , **path_length , ***back_pointers;
   double buff , deletion_distance , insertion_distance , substitution_distance ,
-         transposition_distance , max_transposition_cost , **rank , **max_symbol_distance ,
+         transposition_distance , max_transposition_cost , **rank , **max_category_distance ,
          **local_indel_distance , **local_substitution_distance , **cumul_distance;
   VectorDistance *vector_dist;
   DistanceMatrix *dist_matrix;
@@ -663,8 +662,8 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , const Vect
     error.update(SEQ_error[SEQR_NB_SEQUENCE]);
   }
 
-  if (((index_parameter_type == TIME) && (index_interval->variance > 0.)) ||
-      (index_parameter_type == POSITION)) {
+  if (((index_param_type == TIME) && (index_interval->variance > 0.)) ||
+      (index_param_type == POSITION)) {
     status = false;
     error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
   }
@@ -676,7 +675,7 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , const Vect
 
   else {
     for (i = 0;i < nb_variable;i++) {
-      if (ivector_dist.get_variable_type(i) != NUMERIC) {
+      if (ivector_dist.get_var_type(i) != NUMERIC) {
         if ((type[i] != INT_VALUE) && (type[i] != STATE)) {
           status = false;
           ostringstream error_message , correction_message;
@@ -695,17 +694,17 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , const Vect
           error.update((error_message.str()).c_str());
         }
 
-        if ((ivector_dist.get_variable_type(i) == SYMBOLIC) &&
-            ((min_value[i] < 0) || (max_value[i] >= NB_SYMBOL) ||
-             ((ivector_dist.get_symbol_distance(i)) && (ivector_dist.get_nb_value(i) != max_value[i] + 1)))) {
+        if ((ivector_dist.get_var_type(i) == NOMINAL) &&
+            ((min_value[i] < 0) || (max_value[i] >= NB_CATEGORY) ||
+             ((ivector_dist.get_category_distance(i)) && (ivector_dist.get_nb_value(i) != max_value[i] + 1)))) {
           status = false;
           ostringstream error_message;
           error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
-                        << STAT_error[STATR_NB_SYMBOL];
+                        << STAT_error[STATR_NB_CATEGORY];
           error.update((error_message.str()).c_str());
         }
 
-        if ((ivector_dist.get_variable_type(i) == CIRCULAR) &&
+        if ((ivector_dist.get_var_type(i) == CIRCULAR) &&
             (max_value[i] - min_value[i] >= ivector_dist.get_period(i))) {
           status = false;
           ostringstream error_message;
@@ -793,21 +792,21 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , const Vect
 
     vector_dist = new VectorDistance(ivector_dist);
 
-    // calcul des distance maximum de substitution pour les variables symboliques et
+    // calcul des distance maximum de substitution pour les variables nominales et
     // des rangs pour les variables ordinales
 
     rank = new double*[nb_variable];
-    max_symbol_distance = new double*[nb_variable];
+    max_category_distance = new double*[nb_variable];
 
     for (i = 0;i < nb_variable;i++) {
-      if ((vector_dist->get_variable_type(i) == SYMBOLIC) && (vector_dist->get_symbol_distance(i))) {
-        max_symbol_distance[i] = vector_dist->max_symbol_distance_computation(i);
+      if ((vector_dist->get_var_type(i) == NOMINAL) && (vector_dist->get_category_distance(i))) {
+        max_category_distance[i] = vector_dist->max_category_distance_computation(i);
       }
       else {
-        max_symbol_distance[i] = 0;
+        max_category_distance[i] = 0;
       }
 
-      if (vector_dist->get_variable_type(i) == ORDINAL) {
+      if (vector_dist->get_var_type(i) == ORDINAL) {
         rank[i] = marginal_distribution[i]->rank_computation();
       }
       else {
@@ -838,9 +837,9 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , const Vect
 
 #   ifdef DEBUG
     cout << *vector_dist;
-    if (vector_dist->distance_type == ABSOLUTE_VALUE) {
+    if (vector_dist->get_distance_type() == ABSOLUTE_VALUE) {
       for (i = 0;i < nb_variable;i++) {
-        if (vector_dist->variable_type[i] == NUMERIC) {
+        if (vector_dist->get_var_type(i) == NUMERIC) {
           cout << "\n" << STAT_label[STATL_VARIABLE] << " " << i << "   mean absolute difference: "
                << mean_absolute_difference_computation(i) << endl;
         }
@@ -910,7 +909,7 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , const Vect
     // creation des structures de donnees de l'algorithme - calcul des couts d'elision/insertion
 
     if (indel_cost == FIXED) {
-      buff = indel_distance_computation(*vector_dist , rank , max_symbol_distance) * indel_factor;
+      buff = indel_distance_computation(*vector_dist , rank , max_category_distance) * indel_factor;
     }
 
     local_indel_distance = new double*[nb_sequence];
@@ -923,7 +922,7 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , const Vect
 
         case ADAPTATIVE : {
           for (j = 1;j <= length[i];j++) {
-            local_indel_distance[i][j] = indel_distance_computation(*vector_dist , i , j - 1 , rank , max_symbol_distance) * indel_factor;
+            local_indel_distance[i][j] = indel_distance_computation(*vector_dist , i , j - 1 , rank , max_category_distance) * indel_factor;
           }
 
 #         ifdef DEBUG
@@ -1347,7 +1346,7 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , const Vect
             if ((out_file) && (nb_alignment <= FILE_NB_ALIGNMENT)) {
               switch (result_format) {
 
-              case 'a' : {
+              case ASCII : {
                 alignment_ascii_print(*out_file , width , i , j , *alignment , alignment_index);
 
                 if (length[i] + length[j] - nb_begin_end > 0) {
@@ -1369,7 +1368,7 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , const Vect
                 break;
               }
 
-              case 's' : {
+              case SPREADSHEET : {
                 alignment_spreadsheet_print(*out_file , i , j , *alignment , alignment_index);
 
                 if (length[i] + length[j] - nb_begin_end > 0) {
@@ -1422,10 +1421,10 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , const Vect
         *out_file << "\n";
 
         switch (result_format) {
-        case 'a' :
+        case ASCII :
           dist_matrix->ascii_write(*out_file);
           break;
-        case 's' :
+        case SPREADSHEET :
           dist_matrix->spreadsheet_write(*out_file);
           break;
         }
@@ -1437,13 +1436,13 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , const Vect
       // regroupement elision/insertion et supression des elisions/insertions correspondant
       // aux debuts/fins d'alignement libres
 
-      symbol = new int[(transposition_flag ? TRANSPOSITION : SUBSTITUTION) + 1];
-      symbol[DELETION] = 0;
-      symbol[INSERTION] = 0;
-      symbol[MATCH] = 1;
-      symbol[SUBSTITUTION] = 2;
+      category = new int[(transposition_flag ? TRANSPOSITION : SUBSTITUTION) + 1];
+      category[DELETION] = 0;
+      category[INSERTION] = 0;
+      category[MATCH] = 1;
+      category[SUBSTITUTION] = 2;
       if (transposition_flag) {
-        symbol[TRANSPOSITION] = 3;
+        category[TRANSPOSITION] = 3;
       }
 
 #     ifdef MESSAGE
@@ -1469,12 +1468,12 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , const Vect
           if ((*calignment == BEGIN_END_DELETION) || (*calignment == BEGIN_END_INSERTION)) {
             break;
           }
-          *palignment++ = symbol[*calignment++];
+          *palignment++ = category[*calignment++];
         }
         alignment->length[i] = j - offset;
       }
 
-      delete [] symbol;
+      delete [] category;
 
       alignment->min_value_computation(0);
       alignment->max_value_computation(0);
@@ -1486,14 +1485,7 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , const Vect
 
       // ecriture des sequences d'alignement
 
-      switch (alignment_format) {
-      case 'a' :
-        status = alignment->ascii_data_write(error , alignment_path);
-        break;
-      case 'b' :
-//        status = alignment->binary_write(error , alignment_path);
-        break;
-      }
+      status = alignment->ascii_data_write(error , alignment_path);
 
 #     ifdef MESSAGE
       if ((!status) && (os)) {
@@ -1512,10 +1504,10 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , const Vect
 
     for (i = 0;i < nb_variable;i++) {
       delete [] rank[i];
-      delete [] max_symbol_distance[i];
+      delete [] max_category_distance[i];
     }
     delete [] rank;
-    delete [] max_symbol_distance;
+    delete [] max_category_distance;
 
     delete alignment;
 
@@ -1588,15 +1580,15 @@ double Sequences::substitution_distance_computation(int ref_index , int test_ind
  *  Alignement de sequences.
  *
  *  arguments : reference sur un objet StatError, stream, identificateurs de 2 sequences,
- *              flags debut/fin libres, path resultat, format du fichier resultat ('a' : ASCII, 's' : Spreadsheet),
- *              path alignement, format du fichier alignement ('a' : ASCII, 'b' : Binary),
+ *              flags debut/fin libres, path resultat, format du fichier resultat (ASCII/SPREADSHEET),
+ *              path alignement,
  *
  *--------------------------------------------------------------*/
 
 DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , int ref_identifier ,
                                      int test_identifier , bool begin_free , bool end_free ,
-                                     const char *result_path , char result_format ,
-                                     const char *alignment_path , char alignment_format) const
+                                     const char *result_path , output_format result_format ,
+                                     const char *alignment_path) const
 
 {
   bool status = true , half_matrix;
@@ -1604,7 +1596,7 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , int ref_id
   int nb_alignment , ilength , alignment_index , var , width , ref_position ,
       pref_position , test_position , ptest_position , gap_length , max_gap_length ,
       nb_deletion , nb_insertion , nb_match , nb_begin_end , offset , *palignment ,
-      *calignment , *symbol , **path_length , ***back_pointers;
+      *calignment , *category , **path_length , ***back_pointers;
   double buff , deletion_distance , insertion_distance , substitution_distance ,
          **cumul_distance;
   DistanceMatrix *dist_matrix;
@@ -1620,8 +1612,8 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , int ref_id
     error.update(SEQ_error[SEQR_NB_SEQUENCE]);
   }
 
-  if (((index_parameter_type == TIME) && (index_interval->variance > 0.)) ||
-      (index_parameter_type == POSITION)) {
+  if (((index_param_type == TIME) && (index_interval->variance > 0.)) ||
+      (index_param_type == POSITION)) {
     status = false;
     error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
   }
@@ -2018,7 +2010,7 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , int ref_id
             if ((out_file) && (nb_alignment <= FILE_NB_ALIGNMENT)) {
               switch (result_format) {
 
-              case 'a' : {
+              case ASCII : {
                 alignment_ascii_print(*out_file , width , i , j , *alignment , alignment_index);
 
                 if (length[i] + length[j] - nb_begin_end > 0) {
@@ -2034,7 +2026,7 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , int ref_id
                 break;
               }
 
-              case 's' : {
+              case SPREADSHEET : {
                 alignment_spreadsheet_print(*out_file , i , j , *alignment , alignment_index);
 
                 if (length[i] + length[j] - nb_begin_end > 0) {
@@ -2076,10 +2068,10 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , int ref_id
         *out_file << "\n";
 
         switch (result_format) {
-        case 'a' :
+        case ASCII :
           dist_matrix->ascii_write(*out_file);
           break;
-        case 's' :
+        case SPREADSHEET :
           dist_matrix->spreadsheet_write(*out_file);
           break;
         }
@@ -2091,10 +2083,10 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , int ref_id
       // regroupement elision/insertion et supression des elisions/insertions correspondant
       // aux debuts/fins d'alignement libres
 
-      symbol = new int[MATCH + 1];
-      symbol[DELETION] = 0;
-      symbol[INSERTION] = 0;
-      symbol[MATCH] = 1;
+      category = new int[MATCH + 1];
+      category[DELETION] = 0;
+      category[INSERTION] = 0;
+      category[MATCH] = 1;
 
 #     ifdef MESSAGE
       if (os) {
@@ -2115,12 +2107,12 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , int ref_id
           if ((*calignment == BEGIN_END_DELETION) || (*calignment == BEGIN_END_INSERTION)) {
             break;
           }
-          *palignment++ = symbol[*calignment++];
+          *palignment++ = category[*calignment++];
         }
         alignment->length[i] = j - offset;
       }
 
-      delete [] symbol;
+      delete [] category;
 
       alignment->min_value_computation(0);
       alignment->max_value_computation(0);
@@ -2132,14 +2124,7 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , int ref_id
 
       // ecriture des sequences d'alignement
 
-      switch (alignment_format) {
-      case 'a' :
-        status = alignment->ascii_data_write(error , alignment_path);
-        break;
-      case 'b' :
-//        status = alignment->binary_write(error , alignment_path);
-        break;
-      }
+      status = alignment->ascii_data_write(error , alignment_path);
 
 #     ifdef MESSAGE
       if ((!status) && (os)) {
@@ -2356,15 +2341,15 @@ bool Sequences::multiple_alignment_ascii_print(StatError &error , const char *pa
  *  Alignement multiple de sequences.
  *
  *  arguments : references sur les sequences de test et sur un objet VectorDistance,
- *              rangs, distances maximum aux symboles, flags debut/fin libres,
+ *              rangs, distances maximum aux categories, flags debut/fin libres,
  *              couts d'elision/insertion adaptatifs ou fixes,
  *              facteur pour deduire les couts d'elision/insertion.
  *
  *--------------------------------------------------------------*/
 
 Sequences* Sequences::multiple_alignment(const Sequences &test_seq , const VectorDistance &vector_dist ,
-                                         double **rank , double **max_symbol_distance , bool begin_free ,
-                                         bool end_free , int indel_cost , double indel_factor) const
+                                         double **rank , double **max_category_distance , bool begin_free ,
+                                         bool end_free , insertion_deletion_cost indel_cost , double indel_factor) const
 
 {
   register int i , j , k , m;
@@ -2377,7 +2362,7 @@ Sequences* Sequences::multiple_alignment(const Sequences &test_seq , const Vecto
   // creation des structures de donnees de l'algorithme - calcul des couts d'elision/insertion
 
   if (indel_cost == FIXED) {
-    buff = indel_distance_computation(vector_dist , rank , max_symbol_distance) * indel_factor;
+    buff = indel_distance_computation(vector_dist , rank , max_category_distance) * indel_factor;
   }
 
   ref_local_indel_distance = new double*[nb_sequence];
@@ -2389,7 +2374,7 @@ Sequences* Sequences::multiple_alignment(const Sequences &test_seq , const Vecto
     case ADAPTATIVE : {
       for (j = 1;j <= max_length;j++) {
         if (int_sequence[i][nb_variable - 1][j - 1] == DATA) {
-          ref_local_indel_distance[i][j] = indel_distance_computation(vector_dist , i , j - 1 , rank , max_symbol_distance) * indel_factor;
+          ref_local_indel_distance[i][j] = indel_distance_computation(vector_dist , i , j - 1 , rank , max_category_distance) * indel_factor;
         }
         else {
           ref_local_indel_distance[i][j] = 0.;
@@ -2423,7 +2408,7 @@ Sequences* Sequences::multiple_alignment(const Sequences &test_seq , const Vecto
     case ADAPTATIVE : {
       for (j = 1;j <= test_seq.max_length;j++) {
         if (test_seq.int_sequence[i][nb_variable - 1][j - 1] == DATA) {
-          test_local_indel_distance[i][j] = test_seq.indel_distance_computation(vector_dist , i , j - 1 , rank , max_symbol_distance) * indel_factor;
+          test_local_indel_distance[i][j] = test_seq.indel_distance_computation(vector_dist , i , j - 1 , rank , max_category_distance) * indel_factor;
         }
         else {
           test_local_indel_distance[i][j] = 0.;
@@ -2801,14 +2786,16 @@ Sequences* Sequences::multiple_alignment(const Sequences &test_seq , const Vecto
 
 Sequences* Sequences::multiple_alignment(StatError &error , ostream &os ,
                                          const VectorDistance &ivector_dist ,
-                                         bool begin_free , bool end_free , int indel_cost ,
-                                         double indel_factor , int algorithm , const char *path) const
+                                         bool begin_free , bool end_free ,
+                                         insertion_deletion_cost indel_cost , double indel_factor ,
+                                         hierarchical_strategy strategy ,
+                                         const char *path) const
 
 {
   bool status = true;
   register int i , j , k;
   int *itype , *psequence , *csequence , *variable;
-  double **rank , **max_symbol_distance;
+  double **rank , **max_category_distance;
   VectorDistance *vector_dist;
   DistanceMatrix *dist_matrix;
   Dendrogram *dendrogram;
@@ -2846,8 +2833,8 @@ Sequences* Sequences::multiple_alignment(StatError &error , ostream &os ,
 
       // construction d'un dendrogramme a partir de la matrice des distances entre sequences
 
-      if (algorithm != DIVISIVE) {
-        dendrogram = dist_matrix->agglomerative_hierarchical_clustering(algorithm);
+      if (strategy != DIVISIVE) {
+        dendrogram = dist_matrix->agglomerative_hierarchical_clustering(strategy);
       }
       else {
         dendrogram = dist_matrix->divisive_hierarchical_clustering();
@@ -2859,21 +2846,21 @@ Sequences* Sequences::multiple_alignment(StatError &error , ostream &os ,
 
       vector_dist = new VectorDistance(ivector_dist);
 
-      // calcul des distance maximum de substitution pour les variables symboliques et
+      // calcul des distance maximum de substitution pour les variables nominales et
       // des rangs pour les variables ordinales
 
       rank = new double*[nb_variable];
-      max_symbol_distance = new double*[nb_variable];
+      max_category_distance = new double*[nb_variable];
 
       for (i = 0;i < nb_variable;i++) {
-        if ((vector_dist->get_variable_type(i) == SYMBOLIC) && (vector_dist->get_symbol_distance(i))) {
-          max_symbol_distance[i] = vector_dist->max_symbol_distance_computation(i);
+        if ((vector_dist->get_var_type(i) == NOMINAL) && (vector_dist->get_category_distance(i))) {
+          max_category_distance[i] = vector_dist->max_category_distance_computation(i);
         }
         else {
-          max_symbol_distance[i] = 0;
+          max_category_distance[i] = 0;
         }
 
-        if (vector_dist->get_variable_type(i) == ORDINAL) {
+        if (vector_dist->get_var_type(i) == ORDINAL) {
           rank[i] = marginal_distribution[i]->rank_computation();
         }
         else {
@@ -2937,7 +2924,7 @@ Sequences* Sequences::multiple_alignment(StatError &error , ostream &os ,
       for (i = nb_sequence;i < 2 * nb_sequence - 1;i++) {
         clustered_seq[i] = clustered_seq[dendrogram->get_child(i , 0)]->multiple_alignment(*(clustered_seq[dendrogram->get_child(i , 1)]) ,
                                                                                            *vector_dist , rank ,
-                                                                                           max_symbol_distance , begin_free ,
+                                                                                           max_category_distance , begin_free ,
                                                                                            end_free , indel_cost , indel_factor);
 
 #       ifdef DEBUG
@@ -2994,10 +2981,10 @@ Sequences* Sequences::multiple_alignment(StatError &error , ostream &os ,
 
       for (i = 0;i < nb_variable;i++) {
         delete [] rank[i];
-        delete [] max_symbol_distance[i];
+        delete [] max_category_distance[i];
       }
       delete [] rank;
-      delete [] max_symbol_distance;
+      delete [] max_category_distance;
     }
 
     delete dist_matrix;
