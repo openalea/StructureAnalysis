@@ -64,10 +64,10 @@ ostream& Renewal::line_write(ostream &os) const
 
 {
   switch (type) {
-  case 'o' :
+  case ORDINARY :
     os << SEQ_label[SEQL_ORDINARY_RENEWAL] << " - ";
     break;
-  case 'e' :
+  case EQUILIBRIUM :
     os << SEQ_label[SEQL_EQUILIBRIUM_RENEWAL] << " - ";
     break;
   }
@@ -105,10 +105,10 @@ ostream& Renewal::ascii_write(ostream &os , const RenewalData *timev ,
     os << "# ";
   }
   switch (type) {
-  case 'o' :
+  case ORDINARY :
     os << SEQ_label[SEQL_ORDINARY_RENEWAL] << endl;
     break;
-  case 'e' :
+  case EQUILIBRIUM :
     os << SEQ_label[SEQL_EQUILIBRIUM_RENEWAL] << endl;
     break;
   }
@@ -423,7 +423,7 @@ ostream& Renewal::ascii_write(ostream &os , const RenewalData *timev ,
 
       switch (type) {
 
-      case 'o' : {
+      case ORDINARY : {
         os << "\n";
         if (file_flag) {
           os << "# ";
@@ -438,7 +438,7 @@ ostream& Renewal::ascii_write(ostream &os , const RenewalData *timev ,
         break;
       }
 
-      case 'e' : {
+      case EQUILIBRIUM : {
         os << "\n";
         if (file_flag) {
           os << "# ";
@@ -486,7 +486,7 @@ ostream& Renewal::ascii_write(ostream &os , const RenewalData *timev ,
 
         switch (type) {
 
-        case 'o' : {
+        case ORDINARY : {
           os << "\n";
           if (file_flag) {
             os << "# ";
@@ -503,7 +503,7 @@ ostream& Renewal::ascii_write(ostream &os , const RenewalData *timev ,
           break;
         }
 
-        case 'e' : {
+        case EQUILIBRIUM : {
           os << "\n";
           if (file_flag) {
             os << "# ";
@@ -596,7 +596,7 @@ ostream& Renewal::ascii_write(ostream &os , const RenewalData *timev ,
 
       switch (type) {
 
-      case 'o' : {
+      case ORDINARY : {
         os << "\n";
         if (file_flag) {
           os << "# ";
@@ -611,7 +611,7 @@ ostream& Renewal::ascii_write(ostream &os , const RenewalData *timev ,
         break;
       }
 
-      case 'e' : {
+      case EQUILIBRIUM : {
         os << "\n";
         if (file_flag) {
           os << "# ";
@@ -644,7 +644,7 @@ ostream& Renewal::ascii_write(ostream &os , const RenewalData *timev ,
 
         switch (type) {
 
-        case 'o' : {
+        case ORDINARY : {
           os << "\n";
           if (file_flag) {
             os << "# ";
@@ -661,7 +661,7 @@ ostream& Renewal::ascii_write(ostream &os , const RenewalData *timev ,
           break;
         }
 
-        case 'e' : {
+        case EQUILIBRIUM : {
           os << "\n";
           if (file_flag) {
             os << "# ";
@@ -920,10 +920,10 @@ ostream& Renewal::spreadsheet_write(ostream &os , const RenewalData *timev) cons
 
 
   switch (type) {
-  case 'o' :
+  case ORDINARY :
     os << SEQ_label[SEQL_ORDINARY_RENEWAL] << endl;
     break;
-  case 'e' :
+  case EQUILIBRIUM :
     os << SEQ_label[SEQL_EQUILIBRIUM_RENEWAL] << endl;
     break;
   }
@@ -1134,7 +1134,7 @@ ostream& Renewal::spreadsheet_write(ostream &os , const RenewalData *timev) cons
 
       switch (type) {
 
-      case 'o' : {
+      case ORDINARY : {
         os << "\n" << SEQ_label[SEQL_1_CENSORED_INTER_EVENT] << "\t" << 1. / (nb_event[i]->mean + 1.) << endl;
 
         os << SEQ_label[SEQL_COMPLETE_INTER_EVENT] << "\t"
@@ -1142,7 +1142,7 @@ ostream& Renewal::spreadsheet_write(ostream &os , const RenewalData *timev) cons
         break;
       }
 
-      case 'e' : {
+      case EQUILIBRIUM : {
         os << "\n" << SEQ_label[SEQL_2_CENSORED_INTER_EVENT] << "\t"
            << nb_event[i]->mass[0] / (nb_event[i]->mean + 1.) << endl;
 
@@ -1170,7 +1170,7 @@ ostream& Renewal::spreadsheet_write(ostream &os , const RenewalData *timev) cons
 
         switch (type) {
 
-        case 'o' : {
+        case ORDINARY : {
           os << "\n" << SEQ_label[SEQL_1_CENSORED_INTER_EVENT] << "\t" << timev->hnb_event[i]->nb_element << "\t"
              << 1. / (timev->hnb_event[i]->mean + 1.) << endl;
 
@@ -1180,7 +1180,7 @@ ostream& Renewal::spreadsheet_write(ostream &os , const RenewalData *timev) cons
           break;
         }
 
-        case 'e' : {
+        case EQUILIBRIUM : {
           os << "\n" << SEQ_label[SEQL_2_CENSORED_INTER_EVENT] << "\t" << timev->hnb_event[i]->frequency[0] << "\t"
              << timev->hnb_event[i]->frequency[0] / (timev->hnb_event[i]->nb_element * (timev->hnb_event[i]->mean + 1.)) << endl;
 
@@ -1241,7 +1241,7 @@ ostream& Renewal::spreadsheet_write(ostream &os , const RenewalData *timev) cons
 
     switch (type) {
 
-    case 'o' : {
+    case ORDINARY : {
       os << "\n" << SEQ_label[SEQL_1_CENSORED_INTER_EVENT] << "\t" << 1. / (mixture->mean + 1.) << endl;
 
       os << SEQ_label[SEQL_COMPLETE_INTER_EVENT] << "\t"
@@ -1249,7 +1249,7 @@ ostream& Renewal::spreadsheet_write(ostream &os , const RenewalData *timev) cons
       break;
     }
 
-    case 'e' : {
+    case EQUILIBRIUM : {
       os << "\n" << SEQ_label[SEQL_2_CENSORED_INTER_EVENT] << "\t"
          << mixture->mass[0] / (mixture->mean + 1.) << endl;
 
@@ -1268,7 +1268,7 @@ ostream& Renewal::spreadsheet_write(ostream &os , const RenewalData *timev) cons
 
       switch (type) {
 
-      case 'o' : {
+      case ORDINARY : {
         os << "\n" << SEQ_label[SEQL_1_CENSORED_INTER_EVENT] << "\t" << timev->mixture->nb_element << "\t"
            << 1. / (timev->mixture->mean + 1.) << endl;
 
@@ -1278,7 +1278,7 @@ ostream& Renewal::spreadsheet_write(ostream &os , const RenewalData *timev) cons
         break;
       }
 
-      case 'e' : {
+      case EQUILIBRIUM : {
         os << "\n" << SEQ_label[SEQL_2_CENSORED_INTER_EVENT] << "\t" << timev->mixture->frequency[0] << "\t"
            << timev->mixture->frequency[0] / (timev->mixture->nb_element * (timev->mixture->mean + 1.)) << endl;
 
