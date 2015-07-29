@@ -83,7 +83,7 @@ public:
   }
 
   static DiscreteDistributionData*
-  extract(const MarkovianSequences &input, int type, int variable, int value)
+  extract(const MarkovianSequences &input, process_distribution type, int variable, int value)
   {
     SIMPLE_METHOD_TEMPLATE_1(input, extract, DiscreteDistributionData, type,
         variable, value);
@@ -100,7 +100,7 @@ public:
 
   static MarkovianSequences*
   cluster_step(const MarkovianSequences &input, int variable, int step,
-		  int mode = FLOOR)
+		  rounding mode = FLOOR)
   {
     SIMPLE_METHOD_TEMPLATE_1(input, cluster, MarkovianSequences,
     		variable, step, mode);
@@ -221,7 +221,7 @@ public:
 
   static bool
   transition_count(const MarkovianSequences &input, int max_order,
-		  bool begin = false , int estimator = MAXIMUM_LIKELIHOOD ,
+		  bool begin = false , transition_estimator estimator = MAXIMUM_LIKELIHOOD ,
 		  const char *path = 0)
   {
     StatError error;
@@ -253,12 +253,12 @@ public:
 
   static VariableOrderMarkov*
   variable_order_markov_estimation1(const MarkovianSequences &input,
-      char model_type, int min_order, int max_order, int algorithm,
-      double threshold, int estimator, bool global_initial_transition,
+      process_type itype, int min_order, int max_order, memory_tree_selection algorithm,
+      double threshold, transition_estimator estimator, bool global_initial_transition,
       bool global_sample, bool counting_flag)
   {
     HEADER_OS(VariableOrderMarkov);
-    ret = input.variable_order_markov_estimation(error, os, model_type,
+    ret = input.variable_order_markov_estimation(error, os, itype,
         min_order, max_order, algorithm, threshold, estimator,
         global_initial_transition, global_sample, counting_flag);
     FOOTER_OS;
@@ -266,7 +266,7 @@ public:
 
   static VariableOrderMarkov*
   variable_order_markov_estimation2(const MarkovianSequences &input,
-      char type, int max_order, bool global_initial_transition,
+      process_type type, int max_order, bool global_initial_transition,
       bool counting_flag)
   {
     HEADER(VariableOrderMarkov);
@@ -289,7 +289,7 @@ public:
 
   static VariableOrderMarkov*
   lumpability_estimation(const MarkovianSequences &input,
-      boost::python::list& input_symbol, int penalty_type, int order,
+      boost::python::list& input_symbol, stat_tool::model_selection_criterion criterion, int order,
       bool counting_flag)
   {
     HEADER_OS(VariableOrderMarkov);
@@ -304,7 +304,7 @@ public:
       }
 */
     CREATE_ARRAY(input_symbol, int, symbol);
-    ret = input.lumpability_estimation(error, os, symbol.get(), penalty_type,
+    ret = input.lumpability_estimation(error, os, symbol.get(), criterion,
         order, counting_flag);
     FOOTER_OS;
 
@@ -366,7 +366,7 @@ public:
 
   static bool
   comparison_hidden_variable_order_markov(const MarkovianSequences &input,
-      boost::python::list &input_markov, int algorithm, const char *filename)
+      boost::python::list &input_markov, latent_structure_algorithm algorithm, const char *filename)
   {
     StatError error;
     std::stringstream os;
@@ -380,7 +380,7 @@ public:
 
   static bool
   comparison_hidden_semi_markov(const MarkovianSequences &input,
-      boost::python::list &input_markov, int algorithm,
+      boost::python::list &input_markov, latent_structure_algorithm algorithm,
       const char *filename)
   {
     StatError error;
@@ -403,25 +403,26 @@ public:
 
   static HiddenSemiMarkov*
   hidden_semi_markov_estimation(const MarkovianSequences &input,
-      const HiddenSemiMarkov &ihsmarkov, bool common_dispersion, int estimator,
-      bool counting_flag, bool state_sequence, int nb_iter, int mean_computation_method)
+      const HiddenSemiMarkov &ihsmarkov, bool common_dispersion, censoring_estimator estimator,
+      bool counting_flag, bool state_sequence, int nb_iter,
+      duration_distribution_mean_estimator mean_estimator)
   {
     HEADER_OS(HiddenSemiMarkov);
     ret = input.hidden_semi_markov_estimation(error, os, ihsmarkov, common_dispersion,
-        estimator, counting_flag, state_sequence, nb_iter, mean_computation_method);
+        estimator, counting_flag, state_sequence, nb_iter, mean_estimator);
     FOOTER_OS;
   }
 
   static HiddenSemiMarkov*
   hidden_semi_markov_estimation_model(const MarkovianSequences &input,
-      char model_type, int nb_state, bool left_right, double occupancy_mean,
-      bool common_dispersion, int estimator, bool counting_flag,
-      bool state_sequence, int nb_iter, int mean_computation_method)
+      process_type itype, int nb_state, bool left_right, double occupancy_mean,
+      bool common_dispersion, censoring_estimator estimator, bool counting_flag,
+      bool state_sequence, int nb_iter, duration_distribution_mean_estimator mean_estimator)
   {
     HEADER_OS(HiddenSemiMarkov);
-    ret = input.hidden_semi_markov_estimation(error, os, model_type, nb_state,
+    ret = input.hidden_semi_markov_estimation(error, os, itype, nb_state,
         left_right, occupancy_mean, common_dispersion, estimator, counting_flag,
-        state_sequence, nb_iter, mean_computation_method);
+        state_sequence, nb_iter, mean_estimator);
     FOOTER_OS;
   }
 
@@ -429,7 +430,7 @@ public:
   static HiddenSemiMarkov*
   hidden_semi_markov_stochastic_estimation(const MarkovianSequences &input,
       const HiddenSemiMarkov &ihsmarkov, bool common_dispersion, int min_nb_state_sequence,
-      int max_nb_state_sequence, double parameter, int estimator,
+      int max_nb_state_sequence, double parameter, censoring_estimator estimator,
       bool counting_flag, bool state_sequence, int nb_iter)
   {
     HEADER_OS(HiddenSemiMarkov);
@@ -443,13 +444,13 @@ public:
 
   static HiddenSemiMarkov*
   hidden_semi_markov_stochastic_estimation_model(
-      const MarkovianSequences &input, char model_type, int nb_state,
+      const MarkovianSequences &input, process_type itype, int nb_state,
       bool left_right, double occupancy_mean, bool common_dispersion, int min_nb_state_sequence,
-      int max_nb_state_sequence, double parameter, int estimator, bool counting_flag,
+      int max_nb_state_sequence, double parameter, censoring_estimator estimator, bool counting_flag,
       bool state_sequence, int nb_iter)
   {
     HEADER_OS(HiddenSemiMarkov);
-    ret = input.hidden_semi_markov_stochastic_estimation(error, os, model_type,
+    ret = input.hidden_semi_markov_stochastic_estimation(error, os, itype,
         nb_state, left_right, occupancy_mean, common_dispersion, min_nb_state_sequence,
         max_nb_state_sequence, parameter, estimator, counting_flag, state_sequence,
         nb_iter);
@@ -458,12 +459,13 @@ public:
   }
 
   static SemiMarkov*
-  semi_markov_estimation(const MarkovianSequences &input, char model_type,
-      int estimator, bool counting_flag, int nb_iter, int mean_computation_method)
+  semi_markov_estimation(const MarkovianSequences &input, process_type itype,
+      censoring_estimator estimator, bool counting_flag, int nb_iter,
+      duration_distribution_mean_estimator mean_estimator)
   {
     HEADER_OS(SemiMarkov);
-    ret = input.semi_markov_estimation(error, os, model_type, estimator,
-        counting_flag, nb_iter, mean_computation_method);
+    ret = input.semi_markov_estimation(error, os, itype, estimator,
+        counting_flag, nb_iter, mean_estimator);
     FOOTER_OS;
   }
 
@@ -475,7 +477,7 @@ public:
     bool ret;
 
     CREATE_ARRAY(input_values, int, data);
-    ret = input.mtg_write(error, path, data.get());
+    ret = input.mtg_write(error, path, (variable_type*)data.get());
 
     return ret;
   }
@@ -485,7 +487,7 @@ public:
       boost::python::list list_ident, bool counting_flag)
   {
     HEADER(NonhomogeneousMarkov);
-    CREATE_ARRAY(list_ident, int, data);
+    CREATE_ARRAY(list_ident, parametric_function, data);
     ret = input.nonhomogeneous_markov_estimation(error, data.get(), counting_flag);
     FOOTER;
   }
@@ -587,10 +589,10 @@ void class_markovian_sequences() {
     .def("word_count", WRAP::word_count, args("variable", "word_length","begin_state", "end_state","min_frequency"), "todo" )
 
     //estimation
-    DEF_RETURN_VALUE("variable_order_markov_estimation1", WRAP::variable_order_markov_estimation1, args("model_type", "min_order", "max_order", "algorithm", "threshold", "estimator","global_initial_transition","global_sample", "counting_flag"), "todo")
+    DEF_RETURN_VALUE("variable_order_markov_estimation1", WRAP::variable_order_markov_estimation1, args("itype", "min_order", "max_order", "algorithm", "threshold", "estimator","global_initial_transition","global_sample", "counting_flag"), "todo")
     DEF_RETURN_VALUE("variable_order_markov_estimation2", WRAP::variable_order_markov_estimation2, args("type","max_order","global_initial_transition","counting_flag"), "todo")
     DEF_RETURN_VALUE("variable_order_markov_estimation3", WRAP::variable_order_markov_estimation3, args("markov","global_initial_transition","counting_flag"), "todo")
-    DEF_RETURN_VALUE("lumpability_estimation", WRAP::lumpability_estimation, args("input_symbol", "penalty_type","order","counting_flag"), "todo")
+    DEF_RETURN_VALUE("lumpability_estimation", WRAP::lumpability_estimation, args("input_symbol", "criterion","order","counting_flag"), "todo")
     DEF_RETURN_VALUE("hidden_semi_markov_stochastic_estimation_model", WRAP::hidden_semi_markov_stochastic_estimation_model, args("tobedone"), "todo")
     DEF_RETURN_VALUE("hidden_semi_markov_stochastic_estimation", WRAP::hidden_semi_markov_stochastic_estimation, args("tobedone"), "todo")
     DEF_RETURN_VALUE("hidden_semi_markov_estimation_model", WRAP::hidden_semi_markov_estimation_model, args("tobedone"), "todo")
