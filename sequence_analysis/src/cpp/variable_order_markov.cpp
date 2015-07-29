@@ -72,7 +72,7 @@ VariableOrderMarkovChain::VariableOrderMarkovChain()
 {
   max_order = 0;
 
-  memory_type = NULL;
+  memo_type = NULL;
   order = NULL;
   state = NULL;
 
@@ -95,7 +95,7 @@ VariableOrderMarkovChain::VariableOrderMarkovChain()
  *
  *--------------------------------------------------------------*/
 
-VariableOrderMarkovChain::VariableOrderMarkovChain(char itype , int inb_state , int inb_row)
+VariableOrderMarkovChain::VariableOrderMarkovChain(process_type itype , int inb_state , int inb_row)
 :Chain(itype , inb_state , inb_row , true)
 
 {
@@ -103,7 +103,7 @@ VariableOrderMarkovChain::VariableOrderMarkovChain(char itype , int inb_state , 
 
   max_order = 0;
 
-  memory_type = new int[nb_row];
+  memo_type = new memory_type[nb_row];
   order = new int[nb_row];
   state = new int*[nb_row];
   parent = new int[nb_row];
@@ -130,7 +130,7 @@ VariableOrderMarkovChain::VariableOrderMarkovChain(char itype , int inb_state , 
  *
  *--------------------------------------------------------------*/
 
-VariableOrderMarkovChain::VariableOrderMarkovChain(char itype , int inb_state ,
+VariableOrderMarkovChain::VariableOrderMarkovChain(process_type itype , int inb_state ,
                                                    int inb_row , int imax_order)
 :Chain(itype , inb_state , inb_row , true)
 
@@ -140,7 +140,7 @@ VariableOrderMarkovChain::VariableOrderMarkovChain(char itype , int inb_state ,
 
   max_order = imax_order;
 
-  memory_type = new int[nb_row];
+  memo_type = new memory_type[nb_row];
   order = new int[nb_row];
   state = new int*[nb_row];
   parent = new int[nb_row];
@@ -167,7 +167,7 @@ VariableOrderMarkovChain::VariableOrderMarkovChain(char itype , int inb_state ,
  *
  *--------------------------------------------------------------*/
 
-VariableOrderMarkovChain::VariableOrderMarkovChain(char itype , int inb_state ,
+VariableOrderMarkovChain::VariableOrderMarkovChain(process_type itype , int inb_state ,
                                                    int iorder , bool init_flag)
 :Chain(itype , inb_state , (int)(pow((double)inb_state , iorder + 1) - 1) / (inb_state - 1) , init_flag)
 
@@ -176,7 +176,7 @@ VariableOrderMarkovChain::VariableOrderMarkovChain(char itype , int inb_state ,
 
   max_order = iorder;
 
-  memory_type = new int[nb_row];
+  memo_type = new memory_type[nb_row];
   order = new int[nb_row];
   state = new int*[nb_row];
   parent = new int[nb_row];
@@ -184,7 +184,7 @@ VariableOrderMarkovChain::VariableOrderMarkovChain(char itype , int inb_state ,
 
   // racine (ordre 0)
 
-  memory_type[0] = NON_TERMINAL;
+  memo_type[0] = NON_TERMINAL;
   order[0] = 0;
   state[0] = NULL;
   parent[0] = -1;
@@ -197,10 +197,10 @@ VariableOrderMarkovChain::VariableOrderMarkovChain(char itype , int inb_state ,
     if (order[i - 1] < max_order) {
       order[i] = order[i - 1] + 1;
       if (order[i] < max_order) {
-        memory_type[i] = NON_TERMINAL;
+        memo_type[i] = NON_TERMINAL;
       }
       else {
-        memory_type[i] = TERMINAL;
+        memo_type[i] = TERMINAL;
       }
 
       state[i] = new int[order[i]];
@@ -218,7 +218,7 @@ VariableOrderMarkovChain::VariableOrderMarkovChain(char itype , int inb_state ,
       // cas ordre (maximum) stable
 
       if (state[i - 1][order[i - 1] - 1] < nb_state - 1) {
-        memory_type[i] = TERMINAL;
+        memo_type[i] = TERMINAL;
         order[i] = max_order;
         state[i] = new int[order[i]];
         for (j = 0;j < order[i] - 1;j++) {
@@ -233,7 +233,7 @@ VariableOrderMarkovChain::VariableOrderMarkovChain(char itype , int inb_state ,
       // cas diminution de l'ordre
 
       else {
-        memory_type[i] = NON_TERMINAL;
+        memo_type[i] = NON_TERMINAL;
 
         for (j = order[i - 1] - 2;j >= 0;j--) {
           if (state[i - 1][j] != nb_state - 1) {
@@ -254,7 +254,7 @@ VariableOrderMarkovChain::VariableOrderMarkovChain(char itype , int inb_state ,
       }
     }
 
-    if (memory_type[i] == NON_TERMINAL) {
+    if (memo_type[i] == NON_TERMINAL) {
       child[i] = new int[nb_state];
     }
     else {
@@ -434,7 +434,7 @@ void VariableOrderMarkovChain::memory_tree_completion(const VariableOrderMarkovC
   for (i = 0;i < markov.nb_row;i++) {
     markov_next[i] = I_DEFAULT;
 
-    if ((markov.memory_type[i] == TERMINAL) && (markov.order[i] < markov.max_order - 1)) {
+    if ((markov.memo_type[i] == TERMINAL) && (markov.order[i] < markov.max_order - 1)) {
 
       // recherche du 1er fils (etat 0) du noeud terminal
 
@@ -585,9 +585,9 @@ void VariableOrderMarkovChain::memory_tree_completion(const VariableOrderMarkovC
       }
     }
 
-    state_type = new char[nb_state];
+    stype = new state_type[nb_state];
     for (i = 0;i < nb_state;i++) {
-      state_type[i] = markov.state_type[i];
+      stype[i] = markov.stype[i];
     }
   }
 
@@ -596,12 +596,12 @@ void VariableOrderMarkovChain::memory_tree_completion(const VariableOrderMarkovC
     nb_component = 0;
     component_nb_state = NULL;
     component = NULL;
-    state_type = NULL;
+    stype = NULL;
   }
 
-  initial = new double[type == 'o' ? nb_state : nb_row];
+  initial = new double[type == ORDINARY ? nb_state : nb_row];
 
-  if (type == 'o') {
+  if (type == ORDINARY) {
     for (i = 0;i < nb_state;i++) {
       initial[i] = markov.initial[i];
     }
@@ -617,7 +617,7 @@ void VariableOrderMarkovChain::memory_tree_completion(const VariableOrderMarkovC
 
   max_order = markov.max_order;
 
-  memory_type = new int[nb_row];
+  memo_type = new memory_type[nb_row];
   order = new int[nb_row];
   state = new int*[nb_row];
   parent = new int[nb_row];
@@ -635,7 +635,7 @@ void VariableOrderMarkovChain::memory_tree_completion(const VariableOrderMarkovC
       transition[i][k] = markov.transition[j][k];
     }
 
-    memory_type[i] = markov.memory_type[j];
+    memo_type[i] = markov.memo_type[j];
 
     order[i] = markov.order[j];
     state[i] = new int[order[i]];
@@ -645,10 +645,10 @@ void VariableOrderMarkovChain::memory_tree_completion(const VariableOrderMarkovC
 
     parent[i] = markov.parent[j];
 
-    if ((markov.memory_type[j] == NON_TERMINAL) || (markov_next[j] != I_DEFAULT)) {
+    if ((markov.memo_type[j] == NON_TERMINAL) || (markov_next[j] != I_DEFAULT)) {
       child[i] = new int[nb_state];
 
-      if (markov.memory_type[j] == NON_TERMINAL) {
+      if (markov.memo_type[j] == NON_TERMINAL) {
         for (k = 0;k < nb_state;k++) {
           child[i][k] = markov.child[j][k];
         }
@@ -666,7 +666,7 @@ void VariableOrderMarkovChain::memory_tree_completion(const VariableOrderMarkovC
       bnb_memory = i;
 
       do {
-        memory_type[i] = COMPLETION;
+        memo_type[i] = COMPLETION;
 
         order[i] = completion->order[k];
         state[i] = new int[order[i]];
@@ -696,7 +696,7 @@ void VariableOrderMarkovChain::memory_tree_completion(const VariableOrderMarkovC
       // mise a jour des relations parent/enfants
 
       for (k = 0;k < bnb_memory;k++) {
-        if (memory_type[k] == NON_TERMINAL) {
+        if (memo_type[k] == NON_TERMINAL) {
           for (m = 0;m < nb_state;m++) {
             if (child[k][m] >= bnb_memory) {
               child[k][m] += i - bnb_memory;
@@ -709,7 +709,7 @@ void VariableOrderMarkovChain::memory_tree_completion(const VariableOrderMarkovC
         if (markov.parent[k] >= bnb_memory) {
           markov.parent[k] += i - bnb_memory;
         }
-        if (markov.memory_type[k] == NON_TERMINAL) {
+        if (markov.memo_type[k] == NON_TERMINAL) {
           for (m = 0;m < nb_state;m++) {
             if (markov.child[k][m] >= bnb_memory) {
               markov.child[k][m] += i - bnb_memory;
@@ -734,7 +734,7 @@ void VariableOrderMarkovChain::memory_tree_completion(const VariableOrderMarkovC
         cout << state[i][j] << " ";
       }
 
-      switch (memory_type[i]) {
+      switch (memo_type[i]) {
       case NON_TERMINAL :
         cout << "  " << SEQ_label[SEQL_NON_TERMINAL];
         break;
@@ -798,12 +798,12 @@ void VariableOrderMarkovChain::build(const VariableOrderMarkovChain &markov)
 
   switch (type) {
 
-  case 'o' : {
+  case ORDINARY : {
     non_terminal_transition_probability_computation();
     break;
   }
 
-  case 'e' : {
+  case EQUILIBRIUM : {
     nb_terminal = (nb_row - 1) * (nb_state - 1) / nb_state + 1;
 
     for (i = 1;i < nb_row;i++) {
@@ -838,9 +838,9 @@ void VariableOrderMarkovChain::copy(const VariableOrderMarkovChain &markov)
   register int i , j;
 
 
-  memory_type = new int[nb_row];
+  memo_type = new memory_type[nb_row];
   for (i = 0;i < nb_row;i++) {
-    memory_type[i] = markov.memory_type[i];
+    memo_type[i] = markov.memo_type[i];
   }
 
   order = new int[nb_row];
@@ -938,7 +938,7 @@ void VariableOrderMarkovChain::remove()
   register int i;
 
 
-  delete [] memory_type;
+  delete [] memo_type;
   delete [] order;
 
   if (state) {
@@ -1059,7 +1059,7 @@ void VariableOrderMarkovChain::build_memory_transition()
     next[0] = NULL;
 
     for (i = 1;i < nb_row;i++) {
-      if ((type == 'o') || (!child[i])) {
+      if ((type == ORDINARY) || (!child[i])) {
         next[i] = new int[nb_state];
 
 #       ifdef DEBUG
@@ -1079,7 +1079,7 @@ void VariableOrderMarkovChain::build_memory_transition()
             }
 
             if ((order[j] == 1) || (k == order[j] - 1)) {
-//              if ((memory_type[i] == NON_TERMINAL) || (transition[i][state[j][0]] > 0.)) {
+//              if ((memo_type[i] == NON_TERMINAL) || (transition[i][state[j][0]] > 0.)) {
                 next[i][state[j][0]] = j;
 /*              }
               else {
@@ -1139,7 +1139,7 @@ void VariableOrderMarkovChain::build_previous_memory()
       nb_memory[i] = 0;
 
 //      if (next[i]) {
-      if ((type == 'o') || (!child[i])) {
+      if ((type == ORDINARY) || (!child[i])) {
         for (j = 1;j < nb_row;j++) {
           if ((next[j]) && (next[j][state[i][0]] == i)) {
             buffer[nb_memory[i]] = j;
@@ -1233,7 +1233,7 @@ bool** VariableOrderMarkovChain::logic_transition_computation() const
   }
 
   for (i = 1;i < nb_row;i++) {
-    if (memory_type[i] == TERMINAL) {
+    if (memo_type[i] == TERMINAL) {
       for (j = 0;j < nb_state;j++) {
         order1_transition[state[i][0]][j] += transition[i][j];
       }
@@ -1313,7 +1313,7 @@ void VariableOrderMarkovChain::build_non_terminal()
     // insertion des memoires non-terminales
 
     for (k = order[j] - bnb_memory;k < order[j];k++) {
-      memory_type[i] = NON_TERMINAL;
+      memo_type[i] = NON_TERMINAL;
 
       for (m = 0;m < nb_state;m++) {
         transition[i][m] = 0.;
@@ -1330,7 +1330,7 @@ void VariableOrderMarkovChain::build_non_terminal()
 
     // copie de la memoire terminale
 
-    memory_type[i] = TERMINAL;
+    memo_type[i] = TERMINAL;
     if (i < j) {
       for (k = 0;k < nb_state;k++) {
         transition[i][k] = transition[j][k];
@@ -1365,7 +1365,7 @@ void VariableOrderMarkovChain::build_non_terminal()
         cout << state[i][j] << " ";
       }
 
-      switch (memory_type[i]) {
+      switch (memo_type[i]) {
       case NON_TERMINAL :
         cout << "  " << SEQ_label[SEQL_NON_TERMINAL];
         break;
@@ -1419,7 +1419,7 @@ void VariableOrderMarkovChain::thresholding(double min_probability)
     min_probability = THRESHOLDING_FACTOR / (double)nb_state;
   }
 
-  if (type == 'o') {
+  if (type == ORDINARY) {
     do {
       stop = true;
       nb_correction = 0;
@@ -1450,8 +1450,8 @@ void VariableOrderMarkovChain::thresholding(double min_probability)
   }
 
   for (i = 1;i < nb_row;i++) {
-    if ((memory_type[i] == TERMINAL) || ((type == 'o') &&
-         (memory_type[i] == NON_TERMINAL))) {
+    if ((memo_type[i] == TERMINAL) || ((type == ORDINARY) &&
+         (memo_type[i] == NON_TERMINAL))) {
       do {
         stop = true;
         nb_correction = 0;
@@ -1481,7 +1481,7 @@ void VariableOrderMarkovChain::thresholding(double min_probability)
       while (!stop);
     }
 
-    else if (memory_type[i] == COMPLETION) {
+    else if (memo_type[i] == COMPLETION) {
       for (j = 0;j < nb_state;j++) {
         transition[i][j] = transition[parent[i]][j];
       }
@@ -1546,7 +1546,7 @@ void VariableOrderMarkovChain::max_order_computation()
 
   max_order = 0;
   for (i = 0;i < nb_row;i++) {
-    if ((memory_type[i] == TERMINAL) && (order[i] > max_order)) {
+    if ((memo_type[i] == TERMINAL) && (order[i] > max_order)) {
       max_order = order[i];
     }
   }
@@ -1596,9 +1596,9 @@ int VariableOrderMarkovChain::nb_parameter_computation(double min_probability) c
 
   if (nb_parameter == 0) {
     for (i = 1;i < nb_row;i++) {
-      if (memory_type[i] == TERMINAL) {
-//      if ((memory_type[i] == TERMINAL) || ((type == 'o') &&
-//           (memory_type[i] == NON_TERMINAL))) {
+      if (memo_type[i] == TERMINAL) {
+//      if ((memo_type[i] == TERMINAL) || ((type == ORDINARY) &&
+//           (memo_type[i] == NON_TERMINAL))) {
         for (j = 0;j < nb_state;j++) {
           if (transition[i][j] > min_probability) {
             nb_parameter++;
@@ -1631,9 +1631,9 @@ int VariableOrderMarkovChain::nb_transient_parameter_computation(double min_prob
   int nb_parameter = 0;
 
 
-  if (type == 'o') {
+  if (type == ORDINARY) {
     for (i = 1;i < nb_row;i++) {
-      if (memory_type[i] == NON_TERMINAL) {
+      if (memo_type[i] == NON_TERMINAL) {
         for (j = 0;j < nb_state;j++) {
           if (transition[i][j] > min_probability) {
             nb_parameter++;
@@ -1655,12 +1655,12 @@ int VariableOrderMarkovChain::nb_transient_parameter_computation(double min_prob
  *
  *  arguments : reference sur un objet StatError, stream,
  *              reference sur l'indice de la ligne lue, type du processus
- *              ('o' : ordinaire, 'e' : en equilibre).
+ *              (ORDINARY/EQUILIBRIUM).
  *
  *--------------------------------------------------------------*/
 
-VariableOrderMarkovChain* variable_order_markov_parsing(StatError &error , ifstream &in_file ,
-                                                        int &line , char type)
+VariableOrderMarkovChain* VariableOrderMarkovChain::parsing(StatError &error , ifstream &in_file ,
+                                                            int &line , process_type type)
 
 {
   RWLocaleSnapshot locale("en");
@@ -1768,13 +1768,13 @@ VariableOrderMarkovChain* variable_order_markov_parsing(StatError &error , ifstr
 
       RWCTokenizer next(buffer);
 
-      if ((read_line == 0) || ((type == 'o') && (read_line == 2))) {
+      if ((read_line == 0) || ((type == ORDINARY) && (read_line == 2))) {
         while (!((token = next()).isNull())) {
 
           // test mot cle INITIAL_PROBABILITIES / TRANSITION_PROBABILITIES
 
           if (i == 0) {
-            if ((type == 'o') && (read_line == 0)) {
+            if ((type == ORDINARY) && (read_line == 0)) {
               if (token != STAT_word[STATW_INITIAL_PROBABILITIES]) {
                 status = false;
                 error.correction_update(STAT_parsing[STATP_KEY_WORD] , STAT_word[STATW_INITIAL_PROBABILITIES] , line);
@@ -1793,7 +1793,7 @@ VariableOrderMarkovChain* variable_order_markov_parsing(StatError &error , ifstr
         }
 
         if (i > 0) {
-          if (((type == 'o') && (read_line == 2)) || ((type == 'e') && (read_line == 0))) {
+          if (((type == ORDINARY) && (read_line == 2)) || ((type == EQUILIBRIUM) && (read_line == 0))) {
             transition_line = in_file.tellg();
             tline = line;
           }
@@ -1818,7 +1818,7 @@ VariableOrderMarkovChain* variable_order_markov_parsing(StatError &error , ifstr
 
               else {
                 cumul += proba;
-                if ((type == 'o') && (read_line == 1)) {
+                if ((type == ORDINARY) && (read_line == 1)) {
                   initial[i] = proba;
                 }
               }
@@ -1826,7 +1826,7 @@ VariableOrderMarkovChain* variable_order_markov_parsing(StatError &error , ifstr
 
             if (!lstatus) {
               status = false;
-              if ((type == 'o') && (read_line == 1)) {
+              if ((type == ORDINARY) && (read_line == 1)) {
                 error.update(STAT_parsing[STATP_INITIAL_PROBABILITY] , line , i + 1);
               }
               else {
@@ -1835,7 +1835,7 @@ VariableOrderMarkovChain* variable_order_markov_parsing(StatError &error , ifstr
             }
           }
 
-          else if ((type == 'e') || (read_line >= 3)) {
+          else if ((type == EQUILIBRIUM) || (read_line >= 3)) {
             lstatus = locale.stringToNum(token , &value);
             if (lstatus) {
               if ((value < 0) || (value >= nb_state)) {
@@ -1856,7 +1856,7 @@ VariableOrderMarkovChain* variable_order_markov_parsing(StatError &error , ifstr
         }
 
         if (i > 0) {
-          if ((type == 'o') && (read_line == 1) && (i != nb_state)) {
+          if ((type == ORDINARY) && (read_line == 1) && (i != nb_state)) {
             status = false;
             error.update(STAT_parsing[STATP_FORMAT] , line);
           }
@@ -1866,7 +1866,7 @@ VariableOrderMarkovChain* variable_order_markov_parsing(StatError &error , ifstr
             error.update(STAT_parsing[STATP_PROBABILITY_SUM] , line);
           }
 
-          if (((type == 'o') && (read_line >= 3)) || ((type == 'e') && (read_line >= 1))) {
+          if (((type == ORDINARY) && (read_line >= 3)) || ((type == EQUILIBRIUM) && (read_line >= 1))) {
             if (i <= nb_state) {
               status = false;
               error.update(STAT_parsing[STATP_FORMAT] , line);
@@ -1891,7 +1891,7 @@ VariableOrderMarkovChain* variable_order_markov_parsing(StatError &error , ifstr
                   state[order - j - 1] = buff;
                 }
 
-                if (read_line - (type == 'o' ? 3 : 1) == 0) {
+                if (read_line - (type == ORDINARY ? 3 : 1) == 0) {
                   for (j = 0;j < order;j++) {
                     if (state[j] != 0) {
                       status = false;
@@ -1986,7 +1986,7 @@ VariableOrderMarkovChain* variable_order_markov_parsing(StatError &error , ifstr
 
     // verification nombre de memoires
 
-    nb_terminal = read_line - (type == 'o' ? 3 : 1);
+    nb_terminal = read_line - (type == ORDINARY ? 3 : 1);
     if ((nb_state > 2) && (nb_terminal % (nb_state - 1) != 1)) {
       status = false;
       error.update(SEQ_parsing[SEQP_NB_MEMORY] , line);
@@ -1999,7 +1999,7 @@ VariableOrderMarkovChain* variable_order_markov_parsing(StatError &error , ifstr
       nb_non_terminal = (nb_terminal - 1) / (nb_state - 1);
       markov = new VariableOrderMarkovChain(type , nb_state , nb_non_terminal + nb_terminal , max_order);
 
-      if (type == 'o') {
+      if (type == ORDINARY) {
         for (i = 0;i < nb_state;i++) {
           markov->initial[i] = initial[i];
         }
@@ -2073,7 +2073,7 @@ VariableOrderMarkovChain* variable_order_markov_parsing(StatError &error , ifstr
         // test irreductibilite dans le cas en equilibre
 
         markov->Chain::component_computation(logic_transition);
-        if ((type == 'e') && (markov->nb_component > 1)) {
+        if ((type == EQUILIBRIUM) && (markov->nb_component > 1)) {
           status = false;
           error.correction_update(STAT_parsing[STATP_CHAIN_STRUCTURE] , STAT_parsing[STATP_IRREDUCIBLE]);
         }
@@ -2195,7 +2195,7 @@ ostream& VariableOrderMarkovChain::ascii_memory_tree_print(ostream &os , bool fi
         }
       }
 
-      if (memory_type[i] == COMPLETION) {
+      if (memo_type[i] == COMPLETION) {
         os << "    " << SEQ_label[SEQL_COMPLETION];
       }
 
@@ -2239,7 +2239,7 @@ ostream& VariableOrderMarkovChain::ascii_transition_tree_print(ostream &os , boo
   for (i = 1;i < nb_row;i++) {
     nb_next_memory[i] = 0;
 
-    if ((type == 'o') || (!child[i])) {
+    if ((type == ORDINARY) || (!child[i])) {
       for (j = 0;j < nb_state;j++) {
         if (order[next[i][j]] == order[i] + 1) {
           nb_next_memory[i]++;
@@ -2263,7 +2263,7 @@ ostream& VariableOrderMarkovChain::ascii_transition_tree_print(ostream &os , boo
 
   nb_root = 0;
   for (i = 1;i < nb_row;i++) {
-    if ((type == 'o') || (!child[i])) {
+    if ((type == ORDINARY) || (!child[i])) {
       for (j = 0;j < nb_memory[i];j++) {
         if (order[previous[i][j]] == order[i] - 1) {
           break;
@@ -2281,10 +2281,10 @@ ostream& VariableOrderMarkovChain::ascii_transition_tree_print(ostream &os , boo
   for (i = max_order;i >= min_order + 1;i--) {
     for (j = 1;j < nb_row;j++) {
       if ((order[j] == i) && (nb_leaf_memory[j] > 0) &&
-          ((type == 'o') || (!child[j]))) {
+          ((type == ORDINARY) || (!child[j]))) {
         for (k = 0;k < nb_memory[j];k++) {
           if ((order[previous[j][k]] == order[j] - 1) &&
-              ((type == 'o') || (!child[previous[j][k]]))) {
+              ((type == ORDINARY) || (!child[previous[j][k]]))) {
             nb_leaf_memory[previous[j][k]] += nb_leaf_memory[j];
             break;
           }
@@ -2296,7 +2296,7 @@ ostream& VariableOrderMarkovChain::ascii_transition_tree_print(ostream &os , boo
 # ifdef DEBUG
   cout << "\n";
   for (i = 1;i < nb_row;i++) {
-    if ((type == 'o') || (!child[i])) {
+    if ((type == ORDINARY) || (!child[i])) {
       for (j = max_order - 1;j >= order[i];j--) {
         cout << "  ";
       }
@@ -2317,7 +2317,7 @@ ostream& VariableOrderMarkovChain::ascii_transition_tree_print(ostream &os , boo
 # endif
 
   for (i = 1;i < nb_row;i++) {
-    if ((type == 'o') || (!child[i])) {
+    if ((type == ORDINARY) || (!child[i])) {
       nb_drawn_next_memory[i] = nb_next_memory[i];
       nb_drawn_leaf_memory[i] = nb_leaf_memory[i];
     }
@@ -2444,7 +2444,7 @@ ostream& VariableOrderMarkovChain::ascii_print(ostream &os , bool file_flag) con
 
   // calcul des largeurs des colonnes
 
-  width = column_width((type == 'o' ? nb_state : nb_row) , initial);
+  width = column_width((type == ORDINARY ? nb_state : nb_row) , initial);
 
   for (i = 1;i < nb_row;i++) {
     buff = column_width(nb_state , transition[i]);
@@ -2458,7 +2458,7 @@ ostream& VariableOrderMarkovChain::ascii_print(ostream &os , bool file_flag) con
 
   switch (type) {
 
-  case 'o' : {
+  case ORDINARY : {
     os << STAT_word[STATW_INITIAL_PROBABILITIES] << endl;
     for (i = 0;i < nb_state;i++) {
       os << setw(width) << initial[i];
@@ -2467,7 +2467,7 @@ ostream& VariableOrderMarkovChain::ascii_print(ostream &os , bool file_flag) con
     break;
   }
 
-  case 'e' : {
+  case EQUILIBRIUM : {
 
     // extraction des probabilites stationnairees correspondant aux memoires completees
 
@@ -2477,7 +2477,7 @@ ostream& VariableOrderMarkovChain::ascii_print(ostream &os , bool file_flag) con
       stationary_probability[i] = initial[i];
     }
     for (i = nb_row - 1;i >= 1;i--) {
-      if (memory_type[i] == COMPLETION) {
+      if (memo_type[i] == COMPLETION) {
         stationary_probability[parent[i]] += stationary_probability[i];
       }
     }
@@ -2488,7 +2488,7 @@ ostream& VariableOrderMarkovChain::ascii_print(ostream &os , bool file_flag) con
     os << STAT_label[STATL_STATIONARY_PROBABILITIES] << endl;
 
     for (i = 1;i < nb_row;i++) {
-      if (memory_type[i] == TERMINAL) {
+      if (memo_type[i] == TERMINAL) {
         if (file_flag) {
           os << "# ";
         }
@@ -2517,7 +2517,7 @@ ostream& VariableOrderMarkovChain::ascii_print(ostream &os , bool file_flag) con
   os << STAT_label[STATL_MEMORY] << endl;
 
   for (i = 1;i < nb_row;i++) {
-    if ((memory_type[i] != TERMINAL) && (file_flag)) {
+    if ((memo_type[i] != TERMINAL) && (file_flag)) {
       os << "# ";
     }
 
@@ -2533,11 +2533,11 @@ ostream& VariableOrderMarkovChain::ascii_print(ostream &os , bool file_flag) con
       os << state[i][j] << " ";
     }
 
-    if ((memory_type[i] == TERMINAL) && (file_flag)) {
+    if ((memo_type[i] == TERMINAL) && (file_flag)) {
       os << "# ";
     }
 
-    switch (memory_type[i]) {
+    switch (memo_type[i]) {
 
     case NON_TERMINAL : {
       os << "  " << SEQ_label[SEQL_NON_TERMINAL];
@@ -2569,8 +2569,8 @@ ostream& VariableOrderMarkovChain::ascii_print(ostream &os , bool file_flag) con
         os << "# ";
       }
 
-      switch (state_type[component[i][0]]) {
-      case 't' :
+      switch (stype[component[i][0]]) {
+      case TRANSIENT :
         os << STAT_label[STATL_TRANSIENT] << " ";
         break;
       default :
@@ -2583,7 +2583,7 @@ ostream& VariableOrderMarkovChain::ascii_print(ostream &os , bool file_flag) con
         os << " " << component[i][j];
       }
 
-      if (state_type[component[i][0]] == 'a') {
+      if (stype[component[i][0]] == ABSORBING) {
         os << " (" << STAT_label[STATL_ABSORBING] << " " << STAT_label[STATL_STATE] << ")";
       }
     }
@@ -2601,7 +2601,7 @@ ostream& VariableOrderMarkovChain::ascii_print(ostream &os , bool file_flag) con
 
   os << "\n";
   for (i = 1;i < nb_row;i++) {
-    if ((type == 'o') || (!child[i])) {
+    if ((type == ORDINARY) || (!child[i])) {
       if (file_flag) {
         os << "# ";
       }
@@ -2623,7 +2623,7 @@ ostream& VariableOrderMarkovChain::ascii_print(ostream &os , bool file_flag) con
         }
       }
 
-      switch (memory_type[i]) {
+      switch (memo_type[i]) {
 
       case NON_TERMINAL : {
         os << "  " << SEQ_label[SEQL_NON_TERMINAL];
@@ -2653,7 +2653,7 @@ ostream& VariableOrderMarkovChain::ascii_print(ostream &os , bool file_flag) con
   if (previous) {
     os << "\n";
     for (i = 1;i < nb_row;i++) {
-      if ((type == 'o') || (!child[i])) {
+      if ((type == ORDINARY) || (!child[i])) {
         for (j = max_order - 1;j >= order[i];j--) {
           os << "  ";
         }
@@ -2701,7 +2701,7 @@ ostream& VariableOrderMarkovChain::spreadsheet_print(ostream &os) const
 
   switch (type) {
 
-  case 'o' : {
+  case ORDINARY : {
     os << "\n" << STAT_word[STATW_INITIAL_PROBABILITIES] << endl;
     for (i = 0;i < nb_state;i++) {
       os << initial[i] << "\t";
@@ -2710,7 +2710,7 @@ ostream& VariableOrderMarkovChain::spreadsheet_print(ostream &os) const
     break;
   }
 
-  case 'e' : {
+  case EQUILIBRIUM : {
 
     // extraction des probabilites stationnairees correspondant aux memoires completees
 
@@ -2720,14 +2720,14 @@ ostream& VariableOrderMarkovChain::spreadsheet_print(ostream &os) const
       stationary_probability[i] = initial[i];
     }
     for (i = nb_row - 1;i >= 1;i--) {
-      if (memory_type[i] == COMPLETION) {
+      if (memo_type[i] == COMPLETION) {
         stationary_probability[parent[i]] += stationary_probability[i];
       }
     }
 
     os << "\n" << STAT_label[STATL_STATIONARY_PROBABILITIES] << endl;
     for (i = 1;i < nb_row;i++) {
-      if (memory_type[i] == TERMINAL) {
+      if (memo_type[i] == TERMINAL) {
         os << stationary_probability[i] << "\t\t";
         for (j = order[i] - 1;j >= 0;j--) {
           os << state[i][j] << " ";
@@ -2755,7 +2755,7 @@ ostream& VariableOrderMarkovChain::spreadsheet_print(ostream &os) const
     }
 
     os << "\t";
-    switch (memory_type[i]) {
+    switch (memo_type[i]) {
 
     case NON_TERMINAL : {
       os << SEQ_label[SEQL_NON_TERMINAL];
@@ -2782,8 +2782,8 @@ ostream& VariableOrderMarkovChain::spreadsheet_print(ostream &os) const
 
   if (nb_component > 0) {
     for (i = 0;i < nb_component;i++) {
-      switch (state_type[component[i][0]]) {
-      case 't' :
+      switch (stype[component[i][0]]) {
+      case TRANSIENT :
         os << "\n"<< STAT_label[STATL_TRANSIENT] << " ";
         break;
       default :
@@ -2796,7 +2796,7 @@ ostream& VariableOrderMarkovChain::spreadsheet_print(ostream &os) const
         os << "\t" << component[i][j];
       }
 
-      if (state_type[component[i][0]] == 'a') {
+      if (stype[component[i][0]] == ABSORBING) {
         os << " (" << STAT_label[STATL_ABSORBING] << " " << STAT_label[STATL_STATE] << ")";
       }
     }
@@ -2807,7 +2807,7 @@ ostream& VariableOrderMarkovChain::spreadsheet_print(ostream &os) const
 
   os << "\n";
   for (i = 1;i < nb_row;i++) {
-    if ((type == 'o') || (!child[i])) {
+    if ((type == ORDINARY) || (!child[i])) {
       for (j = order[i] - 1;j >= 0;j--) {
         os << state[i][j] << " ";
       }
@@ -2821,7 +2821,7 @@ ostream& VariableOrderMarkovChain::spreadsheet_print(ostream &os) const
       }
 
       os << "\t";
-      switch (memory_type[i]) {
+      switch (memo_type[i]) {
 
       case NON_TERMINAL : {
         os << SEQ_label[SEQL_NON_TERMINAL];
@@ -2878,7 +2878,7 @@ VariableOrderMarkov::VariableOrderMarkov()
  *
  *--------------------------------------------------------------*/
 
-VariableOrderMarkov::VariableOrderMarkov(char itype , int inb_state , int inb_row)
+VariableOrderMarkov::VariableOrderMarkov(process_type itype , int inb_state , int inb_row)
 :VariableOrderMarkovChain(itype , inb_state , inb_row)
 
 {
@@ -2900,7 +2900,7 @@ VariableOrderMarkov::VariableOrderMarkov(char itype , int inb_state , int inb_ro
  *
  *--------------------------------------------------------------*/
 
-VariableOrderMarkov::VariableOrderMarkov(char itype , int inb_state ,
+VariableOrderMarkov::VariableOrderMarkov(process_type itype , int inb_state ,
                                          int inb_row , int imax_order)
 :VariableOrderMarkovChain(itype , inb_state , inb_row , imax_order)
 
@@ -2925,7 +2925,7 @@ VariableOrderMarkov::VariableOrderMarkov(char itype , int inb_state ,
  *
  *--------------------------------------------------------------*/
 
-VariableOrderMarkov::VariableOrderMarkov(char itype , int inb_state ,
+VariableOrderMarkov::VariableOrderMarkov(process_type itype , int inb_state ,
                                          int iorder , bool init_flag ,
                                          int inb_output_process , int nb_value)
 :VariableOrderMarkovChain(itype , inb_state , iorder , init_flag)
@@ -3265,7 +3265,7 @@ VariableOrderMarkov& VariableOrderMarkov::operator=(const VariableOrderMarkov &m
  *
  *--------------------------------------------------------------*/
 
-DiscreteParametricModel* VariableOrderMarkov::extract(StatError &error , int type ,
+DiscreteParametricModel* VariableOrderMarkov::extract(StatError &error , process_distribution dist_type ,
                                                       int variable , int value) const
 
 {
@@ -3284,7 +3284,7 @@ DiscreteParametricModel* VariableOrderMarkov::extract(StatError &error , int typ
   pdist = NULL;
   pparam = NULL;
 
-  if (type == OBSERVATION) {
+  if (dist_type == OBSERVATION) {
     if ((variable < 1) || (variable > nb_output_process)) {
       status = false;
       error.update(STAT_error[STATR_OUTPUT_PROCESS_INDEX]);
@@ -3349,7 +3349,7 @@ DiscreteParametricModel* VariableOrderMarkov::extract(StatError &error , int typ
       }
 
       if (status) {
-        switch (type) {
+        switch (dist_type) {
         case FIRST_OCCURRENCE :
           pdist = process->first_occurrence[value];
           break;
@@ -3389,7 +3389,7 @@ DiscreteParametricModel* VariableOrderMarkov::extract(StatError &error , int typ
       }
 
       if (hvariable >= 0) {
-        switch (type) {
+        switch (dist_type) {
 
         case OBSERVATION : {
           if ((markov_data->observation_distribution) &&
@@ -3516,13 +3516,13 @@ VariableOrderMarkov* VariableOrderMarkov::thresholding(double min_probability) c
  *
  *--------------------------------------------------------------*/
 
-VariableOrderMarkov* variable_order_markov_ascii_read(StatError &error ,
-                                                      const char *path , int length)
+VariableOrderMarkov* VariableOrderMarkov::ascii_read(StatError &error ,
+                                                     const char *path , int length)
 
 {
   RWCString buffer , token;
   size_t position;
-  char type = 'v';
+  process_type type = DEFAULT_TYPE;
   bool status;
   register int i;
   int line;
@@ -3573,10 +3573,10 @@ VariableOrderMarkov* variable_order_markov_ascii_read(StatError &error ,
 
         if (i == 0) {
           if (token == SEQ_word[SEQW_MARKOV_CHAIN]) {
-            type = 'o';
+            type = ORDINARY;
           }
           else if (token == SEQ_word[SEQW_EQUILIBRIUM_MARKOV_CHAIN]) {
-            type = 'e';
+            type = EQUILIBRIUM;
           }
           else {
             status = false;
@@ -3600,11 +3600,11 @@ VariableOrderMarkov* variable_order_markov_ascii_read(StatError &error ,
       }
     }
 
-    if (type != 'v') {
+    if (type != DEFAULT_TYPE) {
 
       // analyse du format et lecture de la chaine de Markov d'ordre variable
 
-      imarkov = variable_order_markov_parsing(error , in_file , line , type);
+      imarkov = VariableOrderMarkovChain::parsing(error , in_file , line , type);
 
       if (imarkov) {
 
@@ -3649,9 +3649,9 @@ VariableOrderMarkov* variable_order_markov_ascii_read(StatError &error ,
 
             // analyse du format et lecture des lois d'observation
 
-            observation = categorical_observation_parsing(error , in_file , line ,
-                                                          ((Chain*)imarkov)->nb_state ,
-                                                          HIDDEN_MARKOV , false);
+            observation = CategoricalProcess::parsing(error , in_file , line ,
+                                                      ((Chain*)imarkov)->nb_state ,
+                                                      HIDDEN_MARKOV , false);
             if (!observation) {
               status = false;
             }
@@ -3744,10 +3744,10 @@ ostream& VariableOrderMarkov::ascii_write(ostream &os , const VariableOrderMarko
 
   case false : {
     switch (type) {
-    case 'o' :
+    case ORDINARY :
       os << SEQ_word[SEQW_MARKOV_CHAIN] << endl;
       break;
-    case 'e' :
+    case EQUILIBRIUM :
       os << SEQ_word[SEQW_EQUILIBRIUM_MARKOV_CHAIN] << endl;
       break;
     }
@@ -3756,10 +3756,10 @@ ostream& VariableOrderMarkov::ascii_write(ostream &os , const VariableOrderMarko
 
   case true : {
     switch (type) {
-    case 'o' :
+    case ORDINARY :
       os << SEQ_word[SEQW_HIDDEN_MARKOV_CHAIN] << endl;
       break;
-    case 'e' :
+    case EQUILIBRIUM :
       os << SEQ_word[SEQW_EQUILIBRIUM_HIDDEN_MARKOV_CHAIN] << endl;
       break;
     }
@@ -3779,8 +3779,8 @@ ostream& VariableOrderMarkov::ascii_write(ostream &os , const VariableOrderMarko
     if (!hidden) {
       width[0] = 0;
       for (i = 1;i < nb_row;i++) {
-        if((memory_type[i] == TERMINAL) || ((type == 'o') &&
-            (memory_type[i] == NON_TERMINAL))) {
+        if((memo_type[i] == TERMINAL) || ((type == ORDINARY) &&
+            (memo_type[i] == NON_TERMINAL))) {
           buff = column_width(nb_state , transition[i]);
           if (buff > width[0]) {
             width[0] = buff;
@@ -3793,9 +3793,9 @@ ostream& VariableOrderMarkov::ascii_write(ostream &os , const VariableOrderMarko
     memory_count = new int[nb_row];
     max_memory_count = 0;
     for (i = 1;i < nb_row;i++) {
-//      if (memory_type[i] == TERMINAL) {
-      if ((memory_type[i] == TERMINAL) || ((type == 'o') &&
-           (memory_type[i] == NON_TERMINAL)) || (hidden)) {
+//      if (memo_type[i] == TERMINAL) {
+      if ((memo_type[i] == TERMINAL) || ((type == ORDINARY) &&
+           (memo_type[i] == NON_TERMINAL)) || (hidden)) {
         memory_count[i] = 0;
         for (j = 0;j < nb_state;j++) {
           memory_count[i] += seq->chain_data->transition[i][j];
@@ -3823,9 +3823,9 @@ ostream& VariableOrderMarkov::ascii_write(ostream &os , const VariableOrderMarko
 
     os << "\n";
     for (i = 1;i < nb_row;i++) {
-//      if (memory_type[i] == TERMINAL) {
-      if ((memory_type[i] == TERMINAL) || ((type == 'o') &&
-           (memory_type[i] == NON_TERMINAL)) || (hidden)) {
+//      if (memo_type[i] == TERMINAL) {
+      if ((memo_type[i] == TERMINAL) || ((type == ORDINARY) &&
+           (memo_type[i] == NON_TERMINAL)) || (hidden)) {
         if (memory_count[i] > 0.) {
           if (file_flag) {
             os << "# ";
@@ -3834,7 +3834,7 @@ ostream& VariableOrderMarkov::ascii_write(ostream &os , const VariableOrderMarko
           switch (hidden) {
 
           case false : {
-            if (memory_type[i] == TERMINAL) {
+            if (memo_type[i] == TERMINAL) {
               for (j = 0;j < nb_state;j++) {
                 if ((transition[i][j] > 0.) && (transition[i][j] < 1.)) {
                   half_confidence_interval = standard_normal_value *
@@ -4248,7 +4248,7 @@ ostream& VariableOrderMarkov::ascii_write(ostream &os , const VariableOrderMarko
     }
 
     if (seq->likelihood != D_INF) {
-      if (type == 'o') {
+      if (type == ORDINARY) {
         nb_transient_parameter = nb_transient_parameter_computation(hidden ? MIN_PROBABILITY : 0.);
 
         os << "\n";
@@ -4267,7 +4267,7 @@ ostream& VariableOrderMarkov::ascii_write(ostream &os , const VariableOrderMarko
          << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[AIC] << "): "
          << 2 * (seq->likelihood - nb_parameter) << endl;
 
-      if ((type == 'o') && (nb_transient_parameter > 0)) {
+      if ((type == ORDINARY) && (nb_transient_parameter > 0)) {
         if (file_flag) {
           os << "# ";
         }
@@ -4287,7 +4287,7 @@ ostream& VariableOrderMarkov::ascii_write(ostream &os , const VariableOrderMarko
                (double)(seq->cumul_length - nb_parameter - 1)) << endl;
       }
 
-      if ((type == 'o') && (nb_transient_parameter > 0) &&
+      if ((type == ORDINARY) && (nb_transient_parameter > 0) &&
           (nb_transient_parameter + nb_parameter < seq->cumul_length - 1)) {
         if (file_flag) {
           os << "# ";
@@ -4306,7 +4306,7 @@ ostream& VariableOrderMarkov::ascii_write(ostream &os , const VariableOrderMarko
          << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[BIC] << "): "
          << 2 * seq->likelihood - nb_parameter * log((double)seq->cumul_length) << endl;
 
-      if ((type == 'o') && (nb_transient_parameter > 0)) {
+      if ((type == ORDINARY) && (nb_transient_parameter > 0)) {
         if (file_flag) {
           os << "# ";
         }
@@ -4319,7 +4319,7 @@ ostream& VariableOrderMarkov::ascii_write(ostream &os , const VariableOrderMarko
       if (file_flag) {
         os << "# ";
       }
-      os << nb_parameter + (type == 'o' ? nb_transient_parameter : 0) << " " << STAT_label[STATL_FREE_PARAMETERS]
+      os << nb_parameter + (type == ORDINARY ? nb_transient_parameter : 0) << " " << STAT_label[STATL_FREE_PARAMETERS]
          << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[BICc] << "): "
          << 2 * seq->likelihood - penalty_computation(hidden , (hidden ? MIN_PROBABILITY : 0.)) << endl;
     }
@@ -4333,7 +4333,7 @@ ostream& VariableOrderMarkov::ascii_write(ostream &os , const VariableOrderMarko
          << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[ICL] << "): "
          << 2 * (seq->likelihood - seq->sample_entropy) - nb_parameter * log((double)seq->cumul_length) << endl;
 
-      if ((type == 'o') && (nb_transient_parameter > 0)) {
+      if ((type == ORDINARY) && (nb_transient_parameter > 0)) {
         if (file_flag) {
           os << "# ";
         }
@@ -4346,7 +4346,7 @@ ostream& VariableOrderMarkov::ascii_write(ostream &os , const VariableOrderMarko
       if (file_flag) {
         os << "# ";
       }
-      os << nb_parameter + (type == 'o' ? nb_transient_parameter : 0) << " " << STAT_label[nb_parameter == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS]
+      os << nb_parameter + (type == ORDINARY ? nb_transient_parameter : 0) << " " << STAT_label[nb_parameter == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS]
          << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[ICLc] << "): "
          << 2 * (seq->likelihood - seq->sample_entropy) - penalty_computation(hidden , MIN_PROBABILITY) << endl;
     }
@@ -4434,10 +4434,10 @@ ostream& VariableOrderMarkov::spreadsheet_write(ostream &os ,
 
   case false : {
     switch (type) {
-    case 'o' :
+    case ORDINARY :
       os << SEQ_word[SEQW_MARKOV_CHAIN] << endl;
       break;
-    case 'e' :
+    case EQUILIBRIUM :
       os << SEQ_word[SEQW_EQUILIBRIUM_MARKOV_CHAIN] << endl;
       break;
     }
@@ -4446,10 +4446,10 @@ ostream& VariableOrderMarkov::spreadsheet_write(ostream &os ,
 
   case true : {
     switch (type) {
-    case 'o' :
+    case ORDINARY :
       os << SEQ_word[SEQW_HIDDEN_MARKOV_CHAIN] << endl;
       break;
-    case 'e' :
+    case EQUILIBRIUM :
       os << SEQ_word[SEQW_EQUILIBRIUM_HIDDEN_MARKOV_CHAIN] << endl;
       break;
     }
@@ -4661,7 +4661,7 @@ ostream& VariableOrderMarkov::spreadsheet_write(ostream &os ,
     }
 
     if (seq->likelihood != D_INF) {
-      if (type == 'o') {
+      if (type == ORDINARY) {
         nb_transient_parameter = nb_transient_parameter_computation(hidden ? MIN_PROBABILITY : 0.);
 
         os << "\n" << nb_transient_parameter << "\t"
@@ -4671,7 +4671,7 @@ ostream& VariableOrderMarkov::spreadsheet_write(ostream &os ,
       os << "\n" << nb_parameter << "\t" << STAT_label[nb_parameter == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS] << "\t"
          << "2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[AIC] << ")\t"
          << 2 * (seq->likelihood - nb_parameter) << endl;
-      if ((type == 'o') && (nb_transient_parameter > 0)) {
+      if ((type == ORDINARY) && (nb_transient_parameter > 0)) {
         os << nb_transient_parameter + nb_parameter << "\t" << STAT_label[STATL_FREE_PARAMETERS] << "\t"
            << "2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[AIC] << ")\t"
            << 2 * (seq->likelihood - nb_transient_parameter - nb_parameter) << endl;
@@ -4683,7 +4683,7 @@ ostream& VariableOrderMarkov::spreadsheet_write(ostream &os ,
            << 2 * (seq->likelihood - (double)(nb_parameter * seq->cumul_length) /
                (double)(seq->cumul_length - nb_parameter - 1)) << endl;
       }
-      if ((type == 'o') && (nb_transient_parameter > 0) &&
+      if ((type == ORDINARY) && (nb_transient_parameter > 0) &&
           (nb_transient_parameter + nb_parameter < seq->cumul_length - 1)) {
         os << nb_transient_parameter + nb_parameter << "\t" << STAT_label[STATL_FREE_PARAMETERS] << "\t"
            << "2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[AICc] << ")\t"
@@ -4694,13 +4694,13 @@ ostream& VariableOrderMarkov::spreadsheet_write(ostream &os ,
       os << "\n" << nb_parameter << "\t" << STAT_label[nb_parameter == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS] << "\t"
          << "2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[BIC] << ")\t"
          << 2 * seq->likelihood - nb_parameter * log((double)seq->cumul_length) << endl;
-      if ((type == 'o') && (nb_transient_parameter > 0)) {
+      if ((type == ORDINARY) && (nb_transient_parameter > 0)) {
         os << nb_transient_parameter + nb_parameter << "\t" << STAT_label[STATL_FREE_PARAMETERS] << "\t"
            << "2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[BIC] << ")\t"
            << 2 * seq->likelihood - (nb_transient_parameter + nb_parameter) * log((double)seq->cumul_length) << endl;
       }
 
-      os << "\n" << nb_parameter + (type == 'o' ? nb_transient_parameter : 0) << "\t" << STAT_label[STATL_FREE_PARAMETERS] << "\t"
+      os << "\n" << nb_parameter + (type == ORDINARY ? nb_transient_parameter : 0) << "\t" << STAT_label[STATL_FREE_PARAMETERS] << "\t"
          << "2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[BICc] << ")\t"
          << 2 * seq->likelihood - penalty_computation(hidden , (hidden ? MIN_PROBABILITY : 0.)) << endl;
     }
@@ -4709,7 +4709,7 @@ ostream& VariableOrderMarkov::spreadsheet_write(ostream &os ,
       os << "\n" << nb_parameter << "\t" << STAT_label[nb_parameter == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS] << "\t"
          << "2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[ICL] << ")\t"
          << 2 * (seq->likelihood - seq->sample_entropy) - nb_parameter * log((double)seq->cumul_length) << endl;
-      if ((type == 'o') && (nb_transient_parameter > 0)) {
+      if ((type == ORDINARY) && (nb_transient_parameter > 0)) {
         os << nb_transient_parameter + nb_parameter << "\t" << STAT_label[STATL_FREE_PARAMETERS] << "\t"
            << "2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[ICL] << ")\t"
            << 2 * (seq->likelihood - seq->sample_entropy) - (nb_transient_parameter + nb_parameter) * log((double)seq->cumul_length) << endl;
@@ -5269,24 +5269,24 @@ double VariableOrderMarkov::penalty_computation(bool hidden , double min_probabi
     if (hidden) {
       switch (type) {
 
-      case 'o' : {
+      case ORDINARY : {
         memory = memory_computation();
 
         sum = 0.;
         for (i = 1;i < nb_row;i++) {
-//          if (memory_type[i] == TERMINAL) {
+//          if (memo_type[i] == TERMINAL) {
             sum += memory[i];
 //          }
         }
         for (i = 1;i < nb_row;i++) {
-//          if (memory_type[i] == TERMINAL) {
+//          if (memo_type[i] == TERMINAL) {
             memory[i] /= sum;
 //          }
         }
         break;
       }
 
-      case 'e' : {
+      case EQUILIBRIUM : {
         memory = new double[nb_row];
         for (i = 1;i < nb_row;i++) {
           memory[i] = initial[i];
@@ -5300,16 +5300,16 @@ double VariableOrderMarkov::penalty_computation(bool hidden , double min_probabi
         state_marginal[i] = 0.;
       }
       for (i = 1;i < nb_row;i++) {
-//        if (memory_type[i] == TERMINAL) {
+//        if (memo_type[i] == TERMINAL) {
         state_marginal[state[i][0]] += memory[i];
 //        }
       }
     }
 
     for (i = 1;i < nb_row;i++) {
-//      if (memory_type[i] == TERMINAL) {
-      if ((memory_type[i] == TERMINAL) || ((type == 'o') &&
-           (memory_type[i] == NON_TERMINAL))) {
+//      if (memo_type[i] == TERMINAL) {
+      if ((memo_type[i] == TERMINAL) || ((type == ORDINARY) &&
+           (memo_type[i] == NON_TERMINAL))) {
         nb_parameter = 0;
         if (!hidden) {
           sample_size = 0;
@@ -5447,7 +5447,7 @@ VariableOrderMarkovData::VariableOrderMarkovData()
  *--------------------------------------------------------------*/
 
 VariableOrderMarkovData::VariableOrderMarkovData(const FrequencyDistribution &ilength_distribution ,
-                                                 int inb_variable , int *itype , bool init_flag)
+                                                 int inb_variable , variable_nature *itype , bool init_flag)
 :MarkovianSequences(ilength_distribution , inb_variable , itype , init_flag)
 
 {
@@ -5474,7 +5474,7 @@ VariableOrderMarkovData::VariableOrderMarkovData(const FrequencyDistribution &il
  *--------------------------------------------------------------*/
 
 VariableOrderMarkovData::VariableOrderMarkovData(const MarkovianSequences &seq)
-:MarkovianSequences(seq , 'a' , UNCHANGED)
+:MarkovianSequences(seq , ADD_STATE_VARIABLE , UNCHANGED)
 
 {
   markov = NULL;
@@ -5496,13 +5496,13 @@ VariableOrderMarkovData::VariableOrderMarkovData(const MarkovianSequences &seq)
  *  d'un objet MarkovianSequences.
  *
  *  arguments : reference sur un objet MarkovianSequences, type de transformation
- *              ('c' : copie, 'a' : ajout d'une variable d'etat),
+ *              (SEQUENCE_COPY/ADD_STATE_VARIABLE),
  *              ajout/suppression des lois empiriques de temps de sejour initial.
  *
  *--------------------------------------------------------------*/
 
 VariableOrderMarkovData::VariableOrderMarkovData(const MarkovianSequences &seq ,
-                                                 char transform , bool initial_run_flag)
+                                                 sequence_transformation transform , bool initial_run_flag)
 :MarkovianSequences(seq , transform , (initial_run_flag ? ADD_INITIAL_RUN : REMOVE_INITIAL_RUN))
 
 {
@@ -5643,7 +5643,7 @@ VariableOrderMarkovData& VariableOrderMarkovData::operator=(const VariableOrderM
  *
  *--------------------------------------------------------------*/
 
-DiscreteDistributionData* VariableOrderMarkovData::extract(StatError &error , int type ,
+DiscreteDistributionData* VariableOrderMarkovData::extract(StatError &error , process_distribution histo_type ,
                                                            int variable , int value) const
 
 {
@@ -5658,7 +5658,7 @@ DiscreteDistributionData* VariableOrderMarkovData::extract(StatError &error , in
   histo = NULL;
   error.init();
 
-  if (type == OBSERVATION) {
+  if (histo_type == OBSERVATION) {
     if ((variable < 2) || (variable > nb_variable)) {
       status = false;
       error.update(STAT_error[STATR_VARIABLE_INDEX]);
@@ -5722,7 +5722,7 @@ DiscreteDistributionData* VariableOrderMarkovData::extract(StatError &error , in
       }
 
       else {
-        switch (type) {
+        switch (histo_type) {
         case FIRST_OCCURRENCE :
           phisto = characteristics[variable]->first_occurrence[value];
           break;
@@ -5762,7 +5762,7 @@ DiscreteDistributionData* VariableOrderMarkovData::extract(StatError &error , in
     pdist = NULL;
     pparam = NULL;
 
-    switch (type) {
+    switch (histo_type) {
 
     case OBSERVATION : {
       if (markov->categorical_process[variable - 1]) {
@@ -5814,34 +5814,6 @@ DiscreteDistributionData* VariableOrderMarkovData::extract(StatError &error , in
 
 /*--------------------------------------------------------------*
  *
- *  Suppression du parametre d'index.
- *
- *  argument : reference sur un objet StatError.
- *
- *--------------------------------------------------------------*/
-
-VariableOrderMarkovData* VariableOrderMarkovData::remove_index_parameter(StatError &error) const
-
-{
-  VariableOrderMarkovData *seq;
-
-
-  error.init();
-
-  if (!index_parameter) {
-    seq = NULL;
-    error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
-  }
-  else {
-    seq = new VariableOrderMarkovData(*this , true , 'm');
-  }
-
-  return seq;
-}
-
-
-/*--------------------------------------------------------------*
- *
  *  Copie d'un objet VariableOrderMarkovData avec transformation du parametre d'index implicite
  *  en parametre d'index explicite.
  *
@@ -5862,7 +5834,35 @@ VariableOrderMarkovData* VariableOrderMarkovData::explicit_index_parameter(StatE
     error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
   }
   else {
-    seq = new VariableOrderMarkovData(*this , true , 'e');
+    seq = new VariableOrderMarkovData(*this , true , EXPLICIT_INDEX_PARAMETER);
+  }
+
+  return seq;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Suppression du parametre d'index.
+ *
+ *  argument : reference sur un objet StatError.
+ *
+ *--------------------------------------------------------------*/
+
+VariableOrderMarkovData* VariableOrderMarkovData::remove_index_parameter(StatError &error) const
+
+{
+  VariableOrderMarkovData *seq;
+
+
+  error.init();
+
+  if (!index_parameter) {
+    seq = NULL;
+    error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
+  }
+  else {
+    seq = new VariableOrderMarkovData(*this , true , REMOVE_INDEX_PARAMETER);
   }
 
   return seq;
@@ -5931,7 +5931,7 @@ ostream& VariableOrderMarkovData::ascii_write(ostream &os , bool exhaustive) con
 {
   if (markov) {
     markov->ascii_write(os , this , exhaustive , false ,
-                        sequence_analysis::test_hidden(markov->nb_output_process , markov->categorical_process));
+                        CategoricalSequenceProcess::test_hidden(markov->nb_output_process , markov->categorical_process));
   }
 
   return os;
@@ -5967,7 +5967,7 @@ bool VariableOrderMarkovData::ascii_write(StatError &error , const char *path ,
     else {
       status = true;
       markov->ascii_write(out_file , this , exhaustive , true ,
-                          sequence_analysis::test_hidden(markov->nb_output_process , markov->categorical_process));
+                          CategoricalSequenceProcess::test_hidden(markov->nb_output_process , markov->categorical_process));
     }
   }
 
@@ -5983,7 +5983,7 @@ bool VariableOrderMarkovData::ascii_write(StatError &error , const char *path ,
  *
  *--------------------------------------------------------------*/
 
-ostream& VariableOrderMarkovData::ascii_data_write(ostream &os , char format ,
+ostream& VariableOrderMarkovData::ascii_data_write(ostream &os , output_sequence_format format ,
                                                    bool exhaustive) const
 
 {
@@ -6004,7 +6004,7 @@ ostream& VariableOrderMarkovData::ascii_data_write(ostream &os , char format ,
  *--------------------------------------------------------------*/
 
 bool VariableOrderMarkovData::ascii_data_write(StatError &error , const char *path ,
-                                               char format , bool exhaustive) const
+                                               output_sequence_format format , bool exhaustive) const
 
 {
   bool status = false;
@@ -6057,7 +6057,7 @@ bool VariableOrderMarkovData::spreadsheet_write(StatError &error , const char *p
     else {
       status = true;
       markov->spreadsheet_write(out_file , this ,
-                                sequence_analysis::test_hidden(markov->nb_output_process , markov->categorical_process));
+                                CategoricalSequenceProcess::test_hidden(markov->nb_output_process , markov->categorical_process));
     }
   }
 
