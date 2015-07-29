@@ -55,7 +55,7 @@ template <typename Type>
 ChainReestimation<Type>::ChainReestimation()
 
 {
-  type = 'v';
+  type = ORDINARY;
   nb_state = 0;
   nb_row = 0;
 
@@ -78,7 +78,7 @@ void ChainReestimation<Type>::init()
 
 
   if (initial) {
-    for (i = 0;i < (type == 'o' ? nb_state : nb_row);i++) {
+    for (i = 0;i < (type == ORDINARY ? nb_state : nb_row);i++) {
       initial[i] = 0;
     }
   }
@@ -101,7 +101,7 @@ void ChainReestimation<Type>::init()
  *--------------------------------------------------------------*/
 
 template <typename Type>
-ChainReestimation<Type>::ChainReestimation(char itype , int inb_state ,
+ChainReestimation<Type>::ChainReestimation(process_type itype , int inb_state ,
                                            int inb_row , bool init_flag)
 
 {
@@ -112,14 +112,13 @@ ChainReestimation<Type>::ChainReestimation(char itype , int inb_state ,
   nb_state = inb_state;
   nb_row = inb_row;
 
-  if (type == 'o') {
+  switch (type) {
+  case ORDINARY :
     initial = new Type[nb_state];
-  }
-  else if (type == 'e') {
+    break;
+  case EQUILIBRIUM :
     initial = new Type[nb_row];
-  }
-  else {
-    initial = NULL;
+    break;
   }
 
   transition = new Type*[nb_row];
@@ -152,10 +151,23 @@ void ChainReestimation<Type>::copy(const ChainReestimation<Type> &chain_data)
   nb_row = chain_data.nb_row;
 
   if (chain_data.initial) {
-    initial = new Type[type == 'o' ? nb_state : nb_row];
+    switch (type) {
 
-    for (i = 0;i < (type == 'o' ? nb_state : nb_row);i++) {
-      initial[i] = chain_data.initial[i];
+    case ORDINARY : {
+      initial = new Type[nb_state];
+      for (i = 0;i < nb_state;i++) {
+        initial[i] = chain_data.initial[i];
+      }
+      break;
+    }
+
+    case EQUILIBRIUM : {
+      initial = new Type[nb_row];
+      for (i = 0;i < nb_row;i++) {
+        initial[i] = chain_data.initial[i];
+      }
+      break;
+    }
     }
   }
 
@@ -250,14 +262,14 @@ ostream& ChainReestimation<Type>::print(ostream &os) const
   os << nb_state << " " << STAT_label[STATL_STATES] << endl;
 
   if (initial) {
-    if (type == 'o') {
+    if (type == ORDINARY) {
       os << "\ninitial states" << endl;
     }
     else {
       os << "\nmemories" << endl;
     }
 
-    for (i = 0;i < (type == 'o' ? nb_state : nb_row);i++) {
+    for (i = 0;i < (type == ORDINARY ? nb_state : nb_row);i++) {
       os << initial[i] << " ";
     }
   }
