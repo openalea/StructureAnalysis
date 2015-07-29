@@ -89,7 +89,7 @@ void SemiMarkovChain::initial_probability_computation()
         sum += fabs(state_in[i - 1][j] - state_out[j]);
       }
 
-      switch (state_subtype[j]) {
+      switch (sojourn_type[j]) {
 
       // cas etat semi-markovien
 
@@ -156,7 +156,7 @@ void SemiMarkovChain::initial_probability_computation()
 # endif
 
   for (j = 0;j < nb_state;j++) {
-    switch (state_subtype[j]) {
+    switch (sojourn_type[j]) {
 
     // cas etat semi-markovien
 
@@ -291,7 +291,7 @@ double SemiMarkov::likelihood_computation(const MarkovianSequences &seq , int in
             j++;
             occupancy = 1;
 
-            if (state_subtype[*pstate] == SEMI_MARKOVIAN) {
+            if (sojourn_type[*pstate] == SEMI_MARKOVIAN) {
               while ((j < seq.length[i]) && (*(pstate + 1) == *pstate)) {
                 j++;
                 occupancy++;
@@ -299,7 +299,7 @@ double SemiMarkov::likelihood_computation(const MarkovianSequences &seq , int in
               }
 
               proba = 0.;
-              if ((type == 'e') && (j == occupancy)) {
+              if ((type == EQUILIBRIUM) && (j == occupancy)) {
                 if (occupancy < forward[*pstate]->nb_value) {
                   if (j < seq.length[i]) {
                     proba = forward[*pstate]->mass[occupancy];
@@ -451,7 +451,7 @@ double SemiMarkov::likelihood_computation(const SemiMarkovData &seq) const
     likelihood = Chain::likelihood_computation(*(seq.chain_data));
 
     if (likelihood != D_INF) {
-      if (type == 'e') {
+      if (type == EQUILIBRIUM) {
 
         // creation des lois empiriques des temps de sejour censures
 
@@ -476,7 +476,7 @@ double SemiMarkov::likelihood_computation(const SemiMarkovData &seq) const
       }
 
       for (i = 0;i < nb_state;i++) {
-        if (state_subtype[i] == SEMI_MARKOVIAN) {
+        if (sojourn_type[i] == SEMI_MARKOVIAN) {
           buff = state_process->sojourn_time[i]->likelihood_computation(*(seq.characteristics[0]->sojourn_time[i]));
 
           if (buff != D_INF) {
@@ -489,7 +489,7 @@ double SemiMarkov::likelihood_computation(const SemiMarkovData &seq) const
 
           switch (type) {
 
-          case 'o' : {
+          case ORDINARY : {
             buff = state_process->sojourn_time[i]->survivor_likelihood_computation(*(seq.characteristics[0]->final_run[i]));
 
             if (buff != D_INF) {
@@ -501,7 +501,7 @@ double SemiMarkov::likelihood_computation(const SemiMarkovData &seq) const
             break;
           }
 
-          case 'e' : {
+          case EQUILIBRIUM : {
             buff = state_process->sojourn_time[i]->survivor_likelihood_computation(*(final_run[i]));
 
             if (buff != D_INF) {
@@ -538,7 +538,7 @@ double SemiMarkov::likelihood_computation(const SemiMarkovData &seq) const
         }
       }
 
-      if (type == 'e') {
+      if (type == EQUILIBRIUM) {
         for (i = 0;i < seq.marginal_distribution[0]->nb_value;i++) {
           delete initial_run[i];
         }
@@ -653,7 +653,7 @@ void MarkovianSequences::transition_count_computation(const ChainData &chain_dat
 
   if (smarkov) {
     for (i = 0;i < chain_data.nb_state;i++) {
-      if (smarkov->state_subtype[i] == SEMI_MARKOVIAN) {
+      if (smarkov->sojourn_type[i] == SEMI_MARKOVIAN) {
         chain_data.transition[i][i] = 0;
       }
     }
@@ -672,7 +672,7 @@ void MarkovianSequences::transition_count_computation(const ChainData &chain_dat
 void SemiMarkovData::build_transition_count(const SemiMarkov *smarkov)
 
 {
-  chain_data = new ChainData('o' , marginal_distribution[0]->nb_value ,
+  chain_data = new ChainData(ORDINARY , marginal_distribution[0]->nb_value ,
                              marginal_distribution[0]->nb_value);
   transition_count_computation(*chain_data , smarkov);
 }
@@ -684,7 +684,7 @@ void SemiMarkovData::build_transition_count(const SemiMarkov *smarkov)
  *  a partir d'un echantillon de sequences.
  *
  *  arguments : reference sur un objet StatError, stream,
- *              type de processus ('o' : ordinaire, 'e' : en equilibre),
+ *              type de processus (ORDINARY/EQUILIBRIUM),
  *              type d'estimateur pour la reestimation des lois d'occupation des etats,
  *              flag sur le calcul des lois de comptage, nombre d'iterations,
  *              methode de calcul de la moyenne des lois d'occupation des etats
@@ -692,9 +692,9 @@ void SemiMarkovData::build_transition_count(const SemiMarkov *smarkov)
  *
  *--------------------------------------------------------------*/
 
-SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostream &os ,
-                                                       char model_type , int estimator , bool counting_flag ,
-                                                       int nb_iter , int mean_computation_method) const
+SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostream &os , process_type itype ,
+                                                       censoring_estimator estimator , bool counting_flag , int nb_iter ,
+                                                       duration_distribution_mean_estimator mean_estimator) const
 
 {
   bool status = true;
@@ -789,7 +789,7 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostrea
       counting_flag = false;
     }
 
-    if (model_type == 'e') {
+    if (itype == EQUILIBRIUM) {
 
       // creation des lois empiriques des temps de sejour censures
 
@@ -817,10 +817,10 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostrea
       nb_value[0] = marginal_distribution[1]->nb_value;
     }
 
-    smarkov = new SemiMarkov(model_type , marginal_distribution[0]->nb_value ,
+    smarkov = new SemiMarkov(itype , marginal_distribution[0]->nb_value ,
                              nb_variable - 1 , nb_value);
-    smarkov->semi_markov_data = new SemiMarkovData(*this , 'c' ,
-                                                   (model_type == 'e' ? true : false));
+    smarkov->semi_markov_data = new SemiMarkovData(*this , SEQUENCE_COPY ,
+                                                   (itype == EQUILIBRIUM ? true : false));
 
     seq = smarkov->semi_markov_data;
     seq->state_variable_init();
@@ -828,7 +828,7 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostrea
 
     for (i = 0;i < smarkov->nb_state;i++) {
       if ((seq->characteristics[0]->sojourn_time[i]->nb_element > 0) ||
-          ((model_type == 'e') && (initial_run[i]->nb_element > 0))) {
+          ((itype == EQUILIBRIUM) && (initial_run[i]->nb_element > 0))) {
         seq->chain_data->transition[i][i] = 0;
       }
     }
@@ -838,7 +838,7 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostrea
     seq->chain_data->estimation(*smarkov);
     smarkov->component_computation();
 
-    if ((model_type == 'e') && (smarkov->nb_component > 1)) {
+    if ((itype == EQUILIBRIUM) && (smarkov->nb_component > 1)) {
       delete smarkov;
       smarkov = NULL;
       error.correction_update(STAT_parsing[STATP_CHAIN_STRUCTURE] , STAT_parsing[STATP_IRREDUCIBLE]);
@@ -854,7 +854,7 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostrea
         occupancy_reestim = new Reestimation<double>(max_length + 1);
       }
 
-      smarkov->state_subtype = new int[smarkov->nb_state];
+      smarkov->sojourn_type = new state_sojourn_type[smarkov->nb_state];
       smarkov->state_process->absorption = new double[smarkov->nb_state];
       smarkov->state_process->sojourn_time = new DiscreteParametric*[smarkov->nb_state];
       smarkov->forward = new Forward*[smarkov->nb_state];
@@ -865,19 +865,19 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostrea
 
       for (i = 0;i < smarkov->nb_state;i++) {
         if ((seq->characteristics[0]->sojourn_time[i]->nb_element == 0) &&
-            ((model_type == 'o') || (initial_run[i]->nb_element == 0))) {
-          smarkov->state_subtype[i] = MARKOVIAN;
+            ((itype == ORDINARY) || (initial_run[i]->nb_element == 0))) {
+          smarkov->sojourn_type[i] = MARKOVIAN;
           smarkov->state_process->absorption[i] = 1.;
         }
 
         else {
           smarkov->state_process->absorption[i] = 0.;
 
-          if ((model_type == 'e') && (seq->characteristics[0]->sojourn_time[i]->nb_element == 0)) {
+          if ((itype == EQUILIBRIUM) && (seq->characteristics[0]->sojourn_time[i]->nb_element == 0)) {
             occupancy = NULL;
           }
 
-          else if ((estimator != PARTIAL_LIKELIHOOD) && (model_type == 'e') && 
+          else if ((estimator != PARTIAL_LIKELIHOOD) && (itype == EQUILIBRIUM) && 
                    ((initial_run[i]->nb_element > 0) || (single_run[i]->nb_element > 0))) {
 
             //  initialisation de la loi d'occupation de l'etat
@@ -932,7 +932,7 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostrea
                                             *(single_run[i]) , occupancy_reestim ,
                                             length_bias_reestim , j);
 
-                switch (mean_computation_method) {
+                switch (mean_estimator) {
                 case COMPUTED :
                   occupancy_mean = interval_bisection(occupancy_reestim , length_bias_reestim);
                   break;
@@ -986,8 +986,7 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostrea
                   occupancy->expectation_step(*(seq->characteristics[0]->sojourn_time[i]) ,
                                               *(final_run[i]) , *(initial_run[i]) ,
                                               *(single_run[i]) , occupancy_reestim ,
-                                              length_bias_reestim , j , true ,
-                                              mean_computation_method);
+                                              length_bias_reestim , j , true , mean_estimator);
 
                   hreestim->update(occupancy_reestim , (int)(occupancy_reestim->nb_element *
                                    MAX(sqrt(occupancy_reestim->variance) , 1.) * OCCUPANCY_COEFF));
@@ -1058,14 +1057,14 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostrea
             }
           }
 
-          else if ((estimator != PARTIAL_LIKELIHOOD) && (((model_type == 'o') && (seq->characteristics[0]->final_run[i]->nb_element > 0) &&
-                     (seq->characteristics[0]->final_run[i]->nb_value > seq->characteristics[0]->sojourn_time[i]->nb_value)) || ((model_type == 'e') &&
+          else if ((estimator != PARTIAL_LIKELIHOOD) && (((itype == ORDINARY) && (seq->characteristics[0]->final_run[i]->nb_element > 0) &&
+                     (seq->characteristics[0]->final_run[i]->nb_value > seq->characteristics[0]->sojourn_time[i]->nb_value)) || ((itype == EQUILIBRIUM) &&
                      (final_run[i]->nb_element > 0) && (final_run[i]->nb_value > seq->characteristics[0]->sojourn_time[i]->nb_value)))) {
-            switch (model_type) {
-            case 'o' :
+            switch (itype) {
+            case ORDINARY :
               pfinal_run = seq->characteristics[0]->final_run[i];
               break;
-            case 'e' :
+            case EQUILIBRIUM :
               pfinal_run = final_run[i];
               break;
             }
@@ -1196,9 +1195,9 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostrea
             }
           }
 
-          else if ((estimator != PARTIAL_LIKELIHOOD) && (((model_type == 'o') && (seq->characteristics[0]->final_run[i]->nb_element > 0)) ||
-                    ((model_type == 'e') && (final_run[i]->nb_element > 0)))) {
-            seq->characteristics[0]->sojourn_time[i]->state_occupancy_estimation((model_type == 'o' ? seq->characteristics[0]->final_run[i] : final_run[i]) ,
+          else if ((estimator != PARTIAL_LIKELIHOOD) && (((itype == ORDINARY) && (seq->characteristics[0]->final_run[i]->nb_element > 0)) ||
+                    ((itype == EQUILIBRIUM) && (final_run[i]->nb_element > 0)))) {
+            seq->characteristics[0]->sojourn_time[i]->state_occupancy_estimation((itype == ORDINARY ? seq->characteristics[0]->final_run[i] : final_run[i]) ,
                                                                                  occupancy_reestim , occupancy_survivor ,
                                                                                  censored_occupancy_survivor);
 
@@ -1215,13 +1214,13 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostrea
 
           if (occupancy) {
             if (occupancy->mean == 1.) {
-              smarkov->state_subtype[i] = MARKOVIAN;
+              smarkov->sojourn_type[i] = MARKOVIAN;
             }
 
             else {
-              smarkov->state_subtype[i] = SEMI_MARKOVIAN;
+              smarkov->sojourn_type[i] = SEMI_MARKOVIAN;
               smarkov->state_process->sojourn_time[i] = new DiscreteParametric(*occupancy);
-              if (smarkov->state_type[i] == 'r') {
+              if (smarkov->stype[i] == RECURRENT) {
                 smarkov->forward[i] = new Forward(*(smarkov->state_process->sojourn_time[i]));
               }
             }
@@ -1250,7 +1249,7 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostrea
       }
     }
 
-    if (model_type == 'e') {
+    if (itype == EQUILIBRIUM) {
       for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
         delete initial_run[i];
       }
@@ -1268,7 +1267,7 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostrea
     }
 
     if (smarkov) {
-      if (model_type == 'e') {
+      if (itype == EQUILIBRIUM) {
         for (i = 0;i < smarkov->nb_state;i++) {
           smarkov->initial[i] = 1. / (double)smarkov->nb_state;
         }
@@ -1467,7 +1466,8 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , const FrequencyDistrib
 {
   bool status = true , hidden;
   register int i , j , k , m;
-  int cumul_length , occupancy , *itype , *decimal_scale , *pstate , **pioutput;
+  int cumul_length , occupancy , *decimal_scale , *pstate , **pioutput;
+  variable_nature *itype;
   double buff , min_location , likelihood , **proutput;
   Distribution *weight , *restoration_weight;
   SemiMarkov *smarkov;
@@ -1506,11 +1506,11 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , const FrequencyDistrib
     if (length_distribution.nb_value - 1 > COUNTING_MAX_LENGTH) {
       counting_flag = false;
     }
-    hidden = test_hidden(nb_output_process , categorical_process);
+    hidden = CategoricalSequenceProcess::test_hidden(nb_output_process , categorical_process);
 
     // initialisations
 
-    itype = new int[nb_output_process + 1];
+    itype = new variable_nature[nb_output_process + 1];
 
     itype[0] = STATE;
     for (i = 0;i < nb_output_process;i++) {
@@ -1631,10 +1631,10 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , const FrequencyDistrib
           *pstate = cumul_method(smarkov->nb_state , smarkov->cumul_transition[*(pstate - 1)]);
         }
 
-        switch (smarkov->state_subtype[*pstate]) {
+        switch (smarkov->sojourn_type[*pstate]) {
 
         case SEMI_MARKOVIAN : {
-          if ((smarkov->type == 'e') && (j == 0)) {
+          if ((smarkov->type == EQUILIBRIUM) && (j == 0)) {
             occupancy = smarkov->forward[*pstate]->simulation();
           }
           else {
@@ -1723,7 +1723,7 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , const FrequencyDistrib
     seq->build_transition_count(smarkov);
     seq->build_observation_frequency_distribution(nb_state);
     seq->build_observation_histogram(nb_state);
-    seq->build_characteristic(I_DEFAULT , true , (type == 'e' ? true : false));
+    seq->build_characteristic(I_DEFAULT , true , (type == EQUILIBRIUM ? true : false));
 
 /*    if ((seq->max_value[0] < nb_state - 1) || (!(seq->characteristics[0]))) {
       delete seq;
@@ -2392,14 +2392,14 @@ bool SemiMarkovIterator::simulation(int **int_seq , int length , bool initializa
     if (initialization) {
       state = cumul_method(semi_markov->nb_state , semi_markov->cumul_initial);
 
-      switch (semi_markov->state_subtype[state]) {
+      switch (semi_markov->sojourn_type[state]) {
 
       case SEMI_MARKOVIAN : {
         switch (semi_markov->type) {
-        case 'o' :
+        case ORDINARY :
           occupancy = semi_markov->state_process->sojourn_time[state]->simulation();
           break;
-        case 'e' :
+        case EQUILIBRIUM :
           occupancy = semi_markov->forward[state]->simulation();
           break;
         }
@@ -2448,7 +2448,7 @@ bool SemiMarkovIterator::simulation(int **int_seq , int length , bool initializa
       if ((semi_markov->transition[state][state] < 1.) && (counter == occupancy)) {
         state = cumul_method(semi_markov->nb_state , semi_markov->cumul_transition[state]);
 
-        switch (semi_markov->state_subtype[state]) {
+        switch (semi_markov->sojourn_type[state]) {
         case SEMI_MARKOVIAN :
           occupancy = semi_markov->state_process->sojourn_time[state]->simulation();
           break;
