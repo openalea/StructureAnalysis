@@ -155,18 +155,19 @@ HiddenVariableOrderMarkov* HiddenVariableOrderMarkov::thresholding(double min_pr
  *
  *--------------------------------------------------------------*/
 
-HiddenVariableOrderMarkov* hidden_variable_order_markov_ascii_read(StatError &error ,
-                                                                   const char *path , int length ,
-                                                                   double cumul_threshold)
+HiddenVariableOrderMarkov* HiddenVariableOrderMarkov::ascii_read(StatError &error ,
+                                                                 const char *path , int length ,
+                                                                 double cumul_threshold)
 
 {
   RWLocaleSnapshot locale("en");
   RWCString buffer , token;
   size_t position;
-  char type = 'v';
+  process_type type = DEFAULT_TYPE;
   bool status , lstatus;
   register int i;
-  int line , nb_output_process , output_process_type , index;
+  int line , nb_output_process , index;
+  observation_process obs_type;
   long value;
   const VariableOrderMarkovChain *imarkov;
   CategoricalProcess **categorical_observation;
@@ -217,10 +218,10 @@ HiddenVariableOrderMarkov* hidden_variable_order_markov_ascii_read(StatError &er
 
         if (i == 0) {
           if (token == SEQ_word[SEQW_HIDDEN_MARKOV_CHAIN]) {
-            type = 'o';
+            type = ORDINARY;
           }
           else if (token == SEQ_word[SEQW_EQUILIBRIUM_HIDDEN_MARKOV_CHAIN]) {
-            type = 'e';
+            type = EQUILIBRIUM;
           }
           else {
             status = false;
@@ -244,11 +245,11 @@ HiddenVariableOrderMarkov* hidden_variable_order_markov_ascii_read(StatError &er
       }
     }
 
-    if (type != 'v') {
+    if (type != DEFAULT_TYPE) {
 
       // analyse du format et lecture de la chaine de Markov d'ordre variable
 
-      imarkov = variable_order_markov_parsing(error , in_file , line , type);
+      imarkov = VariableOrderMarkovChain::parsing(error , in_file , line , type);
 
       // analyse du format et lecture des lois d'observation
 
@@ -400,17 +401,17 @@ HiddenVariableOrderMarkov* hidden_variable_order_markov_ascii_read(StatError &er
               case 3 : {
                 if ((token == STAT_word[STATW_CATEGORICAL]) ||
                     (token == STAT_word[STATW_NONPARAMETRIC])) {
-                  output_process_type = CATEGORICAL_PROCESS;
+                  obs_type = CATEGORICAL_PROCESS;
                 }
                 else if ((token == STAT_word[STATW_DISCRETE_PARAMETRIC]) ||
                          (token == STAT_word[STATW_PARAMETRIC])) {
-                  output_process_type = DISCRETE_PARAMETRIC;
+                  obs_type = DISCRETE_PARAMETRIC;
                 }
                 else if (token == STAT_word[STATW_CONTINUOUS_PARAMETRIC]) {
-                  output_process_type = CONTINUOUS_PARAMETRIC;
+                  obs_type = CONTINUOUS_PARAMETRIC;
                 }
                 else {
-                  output_process_type = CATEGORICAL_PROCESS - 1;
+                  obs_type = DEFAULT_PROCESS;
                   status = false;
                   ostringstream correction_message;
                   correction_message << STAT_word[STATW_CATEGORICAL] << " or "
@@ -431,12 +432,12 @@ HiddenVariableOrderMarkov* hidden_variable_order_markov_ascii_read(StatError &er
                 error.update(STAT_parsing[STATP_FORMAT] , line);
               }
 
-              switch (output_process_type) {
+              switch (obs_type) {
 
               case CATEGORICAL_PROCESS : {
-                categorical_observation[index - 1] = categorical_observation_parsing(error , in_file , line ,
-                                                                                     ((Chain*)imarkov)->nb_state ,
-                                                                                     HIDDEN_MARKOV , true);
+                categorical_observation[index - 1] = CategoricalProcess::parsing(error , in_file , line ,
+                                                                                 ((Chain*)imarkov)->nb_state ,
+                                                                                 HIDDEN_MARKOV , true);
                 if (!categorical_observation[index - 1]) {
                   status = false;
                 }
@@ -444,10 +445,10 @@ HiddenVariableOrderMarkov* hidden_variable_order_markov_ascii_read(StatError &er
               }
 
               case DISCRETE_PARAMETRIC : {
-                discrete_parametric_observation[index - 1] = discrete_observation_parsing(error , in_file , line ,
-                                                                                          ((Chain*)imarkov)->nb_state ,
-                                                                                          HIDDEN_MARKOV ,
-                                                                                          cumul_threshold);
+                discrete_parametric_observation[index - 1] = DiscreteParametricProcess::parsing(error , in_file , line ,
+                                                                                                ((Chain*)imarkov)->nb_state ,
+                                                                                                HIDDEN_MARKOV ,
+                                                                                                cumul_threshold);
                 if (!discrete_parametric_observation[index - 1]) {
                   status = false;
                 }
@@ -455,10 +456,10 @@ HiddenVariableOrderMarkov* hidden_variable_order_markov_ascii_read(StatError &er
               }
 
               case CONTINUOUS_PARAMETRIC : {
-                continuous_parametric_observation[index - 1] = continuous_observation_parsing(error , in_file , line ,
-                                                                                              ((Chain*)imarkov)->nb_state ,
-                                                                                              HIDDEN_MARKOV ,
-                                                                                              ZERO_INFLATED_GAMMA);
+                continuous_parametric_observation[index - 1] = ContinuousParametricProcess::parsing(error , in_file , line ,
+                                                                                                    ((Chain*)imarkov)->nb_state ,
+                                                                                                    HIDDEN_MARKOV ,
+                                                                                                    ZERO_INFLATED_GAMMA);
                 if (!continuous_parametric_observation[index - 1]) {
                   status = false;
                 }
