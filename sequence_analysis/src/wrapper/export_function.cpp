@@ -53,7 +53,7 @@ class FunctionWrap {
 
 public:
 
-  static boost::shared_ptr<Function> function_from_list(int ident, int length,
+  static boost::shared_ptr<Function> function_from_list(parametric_function ident, int length,
       boost::python::list& input_parameter)
   {
     Function *ret = NULL;
@@ -82,7 +82,7 @@ void class_function() {
 
   class_<Function, bases<RegressionKernel> > ("_Function", "Function")
     .def("__init__", make_constructor(FunctionWrap::function_from_list))
-    .def(init<int, int>())
+    .def(init<parametric_function, int>())
     .def(init<const Function &>())
 /*    .def("get_residual",&Function::get_residual,args("index"), "get residual")
       .def("get_frequency",&Function::get_frequency,args("index"), "get frequency") */
