@@ -871,7 +871,7 @@ void MarkovianSequences::linear_model_estimation(Type ***state_sequence_count , 
   }
   }
 
-  switch (index_parameter_type) {
+  switch (index_param_type) {
 
   case IMPLICIT_TYPE : {
     for (i = 0;i < nb_sequence;i++) {
@@ -939,7 +939,7 @@ void MarkovianSequences::linear_model_estimation(Type ***state_sequence_count , 
   }
   }
 
-  switch (index_parameter_type) {
+  switch (index_param_type) {
 
   case IMPLICIT_TYPE : {
     for (i = 0;i < nb_sequence;i++) {
@@ -969,7 +969,7 @@ void MarkovianSequences::linear_model_estimation(Type ***state_sequence_count , 
   switch (type[variable]) {
 
   case INT_VALUE : {
-    switch (index_parameter_type) {
+    switch (index_param_type) {
 
     case IMPLICIT_TYPE : {
       for (i = 0;i < nb_sequence;i++) {
@@ -999,7 +999,7 @@ void MarkovianSequences::linear_model_estimation(Type ***state_sequence_count , 
   }
 
   case REAL_VALUE : {
-    switch (index_parameter_type) {
+    switch (index_param_type) {
 
     case IMPLICIT_TYPE : {
       for (i = 0;i < nb_sequence;i++) {
@@ -1051,7 +1051,7 @@ void MarkovianSequences::linear_model_estimation(Type ***state_sequence_count , 
   switch (type[variable]) {
 
   case INT_VALUE : {
-    switch (index_parameter_type) {
+    switch (index_param_type) {
 
     case IMPLICIT_TYPE : {
       for (i = 0;i < nb_sequence;i++) {
@@ -1085,7 +1085,7 @@ void MarkovianSequences::linear_model_estimation(Type ***state_sequence_count , 
   }
 
   case REAL_VALUE : {
-    switch (index_parameter_type) {
+    switch (index_param_type) {
 
     case IMPLICIT_TYPE : {
       for (i = 0;i < nb_sequence;i++) {
@@ -1143,7 +1143,7 @@ void MarkovianSequences::linear_model_estimation(Type ***state_sequence_count , 
   switch (type[variable]) {
 
   case INT_VALUE : {
-    switch (index_parameter_type) {
+    switch (index_param_type) {
 
     case IMPLICIT_TYPE : {
       for (i = 0;i < nb_sequence;i++) {
@@ -1175,7 +1175,7 @@ void MarkovianSequences::linear_model_estimation(Type ***state_sequence_count , 
   }
 
   case REAL_VALUE : {
-    switch (index_parameter_type) {
+    switch (index_param_type) {
 
     case IMPLICIT_TYPE : {
       for (i = 0;i < nb_sequence;i++) {
