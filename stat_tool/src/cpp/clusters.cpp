@@ -609,12 +609,12 @@ ostream& Clusters::ascii_write(ostream &os , bool exhaustive) const
 
   for (i = 0;i < nb_cluster;i++) {
     os << "\n" << STAT_label[STATL_CLUSTER] << " " << i + 1 << ": ";
-    isolation = isolation_property(normalized_pattern_distance , i , 'c');
+    isolation = isolation_property(normalized_pattern_distance , i , CLUSTER_SCALE);
     if (isolation) {
       os << STAT_label[STATL_ISOLATED];
     }
     else {
-      isolation = isolation_property(normalized_pattern_distance , i , 'p');
+      isolation = isolation_property(normalized_pattern_distance , i , INDIVIDUAL);
       if (isolation) {
         os << STAT_label[STATL_ISOLATED] << " (" << STAT_label[STATL_PATTERN_LEVEL] << ")";
       }
@@ -852,12 +852,12 @@ bool Clusters::spreadsheet_write(StatError &error , const char *path) const
 
     for (i = 0;i < nb_cluster;i++) {
       out_file << "\n" << STAT_label[STATL_CLUSTER] << " " << i + 1 << "\t";
-      isolation = isolation_property(normalized_pattern_distance , i , 'c');
+      isolation = isolation_property(normalized_pattern_distance , i , CLUSTER_SCALE);
       if (isolation) {
         out_file << STAT_label[STATL_ISOLATED];
       }
       else {
-        isolation = isolation_property(normalized_pattern_distance , i , 'p');
+        isolation = isolation_property(normalized_pattern_distance , i , INDIVIDUAL);
         if (isolation) {
           out_file << STAT_label[STATL_ISOLATED] << " (" << STAT_label[STATL_PATTERN_LEVEL] << ")";
         }
@@ -1679,11 +1679,12 @@ double Clusters::min_between_cluster_distance_computation(double **normalized_di
  *  Calcul de la propriete d'isolement d'un groupe.
  *
  *  arguments : matrice des distances normalisees, indice du groupe,
- *              propriete niveau pattern ('p') ou niveau cluster ('c').
+ *              propriete niveau pattern (INDIVIDUAL) ou niveau cluster (CLUSTER_SCALE).
  *
  *--------------------------------------------------------------*/
 
-bool Clusters::isolation_property(double **normalized_distance , int cluster , char type) const
+bool Clusters::isolation_property(double **normalized_distance , int cluster ,
+                                  isolation_scale scale) const
 
 {
   bool isolation = true;
@@ -1691,14 +1692,14 @@ bool Clusters::isolation_property(double **normalized_distance , int cluster , c
   double max_intra_distance , min_inter_distance;
 
 
-  if (type == 'c') {
+  if (scale == CLUSTER_SCALE) {
     max_intra_distance = 0.;
     min_inter_distance = -D_INF;
   }
 
   for (i = 0;i < nb_pattern;i++) {
     if (assignment[i] == cluster) {
-      if (type == 'p') {
+      if (scale == INDIVIDUAL) {
         max_intra_distance = 0.;
         min_inter_distance = -D_INF;
       }
@@ -1719,14 +1720,14 @@ bool Clusters::isolation_property(double **normalized_distance , int cluster , c
         }
       }
 
-      if ((type == 'p') && (max_intra_distance >= min_inter_distance)) {
+      if ((scale == INDIVIDUAL) && (max_intra_distance >= min_inter_distance)) {
         isolation = false;
         break;
       }
     }
   }
 
-  if ((type == 'c') && (max_intra_distance >= min_inter_distance)) {
+  if ((scale == CLUSTER_SCALE) && (max_intra_distance >= min_inter_distance)) {
     isolation = false;
   }
 
