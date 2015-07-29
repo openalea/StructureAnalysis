@@ -44,7 +44,7 @@ class ChainReestimationWrap
 void class_chain_reestimation()
 {
 	//class_<Chain_reestimation>("_Chain_reestimation", "Chain_reestimation", no_init)
-    //.def(init<char, int , int, bool>())
+    //.def(init<process_type, int , int, bool>())
 /*    .def_readonly("get_type", &Chain::get_type, "get type")
     .def_readonly("get_nb_state", &Chain::get_nb_state, "get nb state")
     .def_readonly("get_nb_row", &Chain::get_nb_row, "get nb_row")
