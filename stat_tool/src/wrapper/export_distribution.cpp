@@ -116,7 +116,7 @@ void class_distribution()
     .def(init< boost::python::optional< int > > ())
     .def(init<const FrequencyDistribution&>())
     .def(init<const Distribution&, double>())
-    .def(init<const Distribution&, boost::python::optional< char, int > >())
+    .def(init<const Distribution&, boost::python::optional< distribution_transformation, int > >())
 
     .def(self_ns::str(self)) // __str__
     .def( self == self )
@@ -254,14 +254,14 @@ void class_discrete_parametric()
 
   // DiscreteParametric base class
   class_< DiscreteParametric, bases< Distribution > >
-    ("_DiscreteParametric", init< boost::python::optional< int, int, int, int, double, double > >())
-    .def(init<int, int, int, double, double, boost::python::optional< double > >())
+    ("_DiscreteParametric", init< boost::python::optional< int, discrete_parametric, int, int, double, double > >())
+    .def(init<discrete_parametric, int, int, double, double, boost::python::optional< double > >())
     .def(init<int, int>())
     .def(init<const Distribution&, boost::python::optional<int> >())
     .def(init<const Distribution&, double>())
     .def(init<const DiscreteParametric&, double>())
     .def(init<const FrequencyDistribution& >())
-    .def(init<const DiscreteParametric&, boost::python::optional< char, int> >())
+    .def(init<const DiscreteParametric&, boost::python::optional< distribution_transformation, int> >())
     .def(init<Distribution&>())
     .def(init<DiscreteParametric&>())
     //to remove
@@ -328,7 +328,7 @@ public:
   {
     StatError error;
     DiscreteParametricModel *model = NULL;
-    model = discrete_parametric_ascii_read(error, filename);
+    model = DiscreteParametricModel::ascii_read(error, filename);
 
     if(!model) stat_tool::wrap_util::throw_error(error);
     return boost::shared_ptr<DiscreteParametricModel>(model);
@@ -413,9 +413,9 @@ void class_discrete_parametric_model()
   class_< DiscreteParametricModel, bases< DiscreteParametric, StatInterface > >
   ("_DiscreteParametricModel", "Parametric model", init <const FrequencyDistribution& >())
 
-  .def(init< int, int, int, double, double, boost::python::optional< double > >())
+  .def(init< discrete_parametric, int, int, double, double, boost::python::optional< double > >())
   // this constructor clashes with the previous one and fail to pass tests.
-  //.def(init< int, boost::python::optional <int, int, int, double, double > >())
+  //.def(init< int, boost::python::optional <discrete_parametric, int, int, double, double > >())
   .def(init <const Distribution& >())
   .def(init <const DiscreteParametric& >())
   .def(init <const DiscreteParametricModel& , boost::python::optional< bool> >())
