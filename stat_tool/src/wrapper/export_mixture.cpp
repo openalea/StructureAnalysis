@@ -53,7 +53,7 @@ public:
   {
     StatError error;
     DiscreteMixture *mix = NULL;
-    mix = discrete_mixture_ascii_read(error, filename);
+    mix = DiscreteMixture::ascii_read(error, filename);
     if (!mix)
       stat_tool::wrap_util::throw_error(error);
     return boost::shared_ptr<DiscreteMixture>(mix);
@@ -104,7 +104,7 @@ public:
 
       }
 
-    mix = discrete_mixture_building(error, nb_component, weight.get(), component.get());
+    mix = DiscreteMixture::building(error, nb_component, weight.get(), component.get());
 
     if (!mix)
       stat_tool::wrap_util::throw_error(error);
@@ -392,7 +392,7 @@ public:
   {
     StatError error;
     MultivariateMixture *mix = NULL;
-    mix = multivariate_mixture_ascii_read(error, filename);
+    mix = MultivariateMixture::ascii_read(error, filename);
 
     if (mix == NULL)
       {
@@ -531,7 +531,7 @@ public:
         delete[] npprocess;
       } // end for (var)
 
-    mix = multivariate_mixture_building(error, nb_component, nb_variable, weight.get(),
+    mix = MultivariateMixture::building(error, nb_component, nb_variable, weight.get(),
         pcomponent.get(), npcomponent.get());
 
     for (var = 0; var < nb_variable; var++)
@@ -598,7 +598,7 @@ public:
     StatError error;
     MultivariateMixtureData* ret = NULL;
 
-    ret = mixt.cluster(error, vec, VITERBI, state_entropy);
+    ret = mixt.cluster(error, vec, state_entropy);
 
     if (ret == NULL)
       stat_tool::wrap_util::throw_error(error);
