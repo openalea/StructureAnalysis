@@ -104,11 +104,11 @@ StatError::~StatError()
  *
  *  Ecriture d'un objet StatError.
  *
- *  arguments : stream, type des erreurs (ERROR / WARNING).
+ *  arguments : stream, type des erreurs (ERROR/WARNING).
  *
  *--------------------------------------------------------------*/
 
-ostream& StatError::ascii_write(ostream &os , int type) const
+ostream& StatError::ascii_write(ostream &os , error_type type) const
 
 {
   register int i;
