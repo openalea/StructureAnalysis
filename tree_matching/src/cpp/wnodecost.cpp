@@ -62,12 +62,12 @@ DistanceType res =0;
       for (int i=0;i<node->getValueSize();i++) 
 	{
 	  DistanceType f_value1=node->getValue(i);
-	  if  (_vectDist.get_variable_type(i)==NUMERIC)
+	  if  (_vectDist.get_var_type(i)==NUMERIC)
 	    {
 	      cost=cost+_vectDist.get_weight(i)*MAX(_maxValue[i]-f_value1,f_value1-_minValue[i])/_dispersion[i];
 	    }
 	  else
-	    cost=cost+_vectDist.get_weight(i)*_vectDist.max_symbol_distance_computation(i)[int(f_value1)]/_dispersion[i];
+	    cost=cost+_vectDist.get_weight(i)*_vectDist.max_category_distance_computation(i)[int(f_value1)]/_dispersion[i];
 	}
       assert(cost>=0);
     }
@@ -76,14 +76,14 @@ DistanceType res =0;
       for (int i=0;i<node->getValueSize();i++) 
 	{
 	  DistanceType f_value1=node->getValue(i);
-	  if  (_vectDist.get_variable_type(i)==NUMERIC)
+	  if  (_vectDist.get_var_type(i)==NUMERIC)
 	    {
 	      cost=cost+_vectDist.get_weight(i)*MAX(_maxValue[i]-f_value1,f_value1-_minValue[i])
 		*MAX(_maxValue[i]-f_value1,f_value1-_minValue[i])/_dispersion[i];
 	    }
 	  else
-	    cost=cost+_vectDist.get_weight(i)*_vectDist.max_symbol_distance_computation(i)[int(f_value1)]
-	      *_vectDist.max_symbol_distance_computation(i)[int(f_value1)]/_dispersion[i];
+	    cost=cost+_vectDist.get_weight(i)*_vectDist.max_category_distance_computation(i)[int(f_value1)]
+	      *_vectDist.max_category_distance_computation(i)[int(f_value1)]/_dispersion[i];
 	}
       assert(cost>=0);
       cost=sqrt(cost);
@@ -106,12 +106,12 @@ DistanceType res = 0;
       for (int i=0;i<node->getValueSize();i++) 
 	{
 	  DistanceType f_value1=node->getValue(i);
-	  if  (_vectDist.get_variable_type(i)==NUMERIC)
+	  if  (_vectDist.get_var_type(i)==NUMERIC)
 	    {
 	      cost=cost+_vectDist.get_weight(i)*MAX(_maxValue[i]-f_value1,f_value1-_minValue[i])/_dispersion[i];
 	    }
 	  else
-	    cost=cost+_vectDist.get_weight(i)*_vectDist.max_symbol_distance_computation(i)[int(f_value1)]/_dispersion[i];
+	    cost=cost+_vectDist.get_weight(i)*_vectDist.max_category_distance_computation(i)[int(f_value1)]/_dispersion[i];
 	}
       assert(cost>=0);
     }
@@ -120,14 +120,14 @@ DistanceType res = 0;
       for (int i=0;i<node->getValueSize();i++) 
 	{
 	  DistanceType f_value1=node->getValue(i);
-	  if  (_vectDist.get_variable_type(i)==NUMERIC)
+	  if  (_vectDist.get_var_type(i)==NUMERIC)
 	    {
 	      cost=cost+_vectDist.get_weight(i)*MAX(_maxValue[i]-f_value1,f_value1-_minValue[i])
 		*MAX(_maxValue[i]-f_value1,f_value1-_minValue[i])/_dispersion[i];
 	    }
 	  else
-	    cost=cost+_vectDist.get_weight(i)*_vectDist.max_symbol_distance_computation(i)[int(f_value1)]
-	      *_vectDist.max_symbol_distance_computation(i)[int(f_value1)]/_dispersion[i];
+	    cost=cost+_vectDist.get_weight(i)*_vectDist.max_category_distance_computation(i)[int(f_value1)]
+	      *_vectDist.max_category_distance_computation(i)[int(f_value1)]/_dispersion[i];
 	}
       assert(cost>=0);
       cost=sqrt(cost);
@@ -154,7 +154,7 @@ DistanceType res = 0;
 	  DistanceType f_value2=r_node->getValue(i);
 	  if (f_value2==DIST_UNDEF) f_value2=0;
 
-	  if (_vectDist.get_variable_type(i)==NUMERIC)
+	  if (_vectDist.get_var_type(i)==NUMERIC)
 	    {
 	      cost=cost+_vectDist.get_weight(i)*ABS(f_value1-f_value2)/_dispersion[i];
 	      //cout<<ABS(f_value1-f_value2)/_dispersion[i]<<" - "<<f_value1<<" - "<<f_value2<<" - "<<_dispersion[i]<<endl;
@@ -162,7 +162,7 @@ DistanceType res = 0;
 	  else
 	    {
 	      cost=cost+_vectDist.get_weight(i)
-		*_vectDist.get_symbol_distance(i,int(f_value1),int(f_value2))/_dispersion[i];
+		*_vectDist.get_category_distance(i,int(f_value1),int(f_value2))/_dispersion[i];
 	    }
 	}
     }
@@ -175,14 +175,14 @@ DistanceType res = 0;
 	  DistanceType f_value2=r_node->getValue(i);
 	  if (f_value2==DIST_UNDEF) f_value2=0;
 
-	  if (_vectDist.get_variable_type(i)==NUMERIC)
+	  if (_vectDist.get_var_type(i)==NUMERIC)
 	    {
 	      cost=cost+_vectDist.get_weight(i)*(f_value1-f_value2)*(f_value1-f_value2)/_dispersion[i];
 	    }
 	  else
  	      cost=cost+_vectDist.get_weight(i)
-		*_vectDist.get_symbol_distance(i,int(f_value1),int(f_value2))
-		*_vectDist.get_symbol_distance(i,int(f_value1),int(f_value2))
+		*_vectDist.get_category_distance(i,int(f_value1),int(f_value2))
+		*_vectDist.get_category_distance(i,int(f_value1),int(f_value2))
 		/_dispersion[i];		       
 	}
       cost=sqrt(cost);
