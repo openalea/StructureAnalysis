@@ -66,7 +66,7 @@ Dendrogram::Dendrogram()
 {
   distance_matrix = NULL;
 
-  scale = I_DEFAULT;
+  scale = CHILD_CLUSTER_DISTANCE;
 
   nb_cluster = 0;
   cluster_nb_pattern = NULL;
@@ -91,7 +91,7 @@ Dendrogram::Dendrogram()
  *
  *--------------------------------------------------------------*/
 
-Dendrogram::Dendrogram(const DistanceMatrix &dist_matrix , int iscale)
+Dendrogram::Dendrogram(const DistanceMatrix &dist_matrix , cluster_scale iscale)
 
 {
   register int i;
@@ -780,16 +780,16 @@ void Dendrogram::tree_computation()
  *
  *--------------------------------------------------------------*/
 
-double Dendrogram::coefficient_computation(int iscale) const
+double Dendrogram::coefficient_computation(cluster_scale iscale) const
 
 {
   register int i;
   double coeff , *distance;
 
 
-  if (iscale == I_DEFAULT) {
+/*  if (iscale == I_DEFAULT) {
     iscale = scale;
-  }
+  } */
 
   switch (iscale) {
   case CHILD_CLUSTER_DISTANCE :
@@ -813,6 +813,19 @@ double Dendrogram::coefficient_computation(int iscale) const
 
 /*--------------------------------------------------------------*
  *
+ *  Calcul du coefficient d'agglomeration / de division.
+ *
+ *--------------------------------------------------------------*/
+
+double Dendrogram::coefficient_computation() const
+
+{
+  coefficient_computation(scale);
+}
+
+
+/*--------------------------------------------------------------*
+ *
  *  Algorithmes de clustering hierarchique par agglomeration des groupes
  *  (Kaufman & Rousseeuw, pp. 199-208).
  *
@@ -820,8 +833,8 @@ double Dendrogram::coefficient_computation(int iscale) const
  *
  *--------------------------------------------------------------*/
 
-Dendrogram* DistanceMatrix::agglomerative_hierarchical_clustering(int algorithm ,
-                                                                  int criterion) const
+Dendrogram* DistanceMatrix::agglomerative_hierarchical_clustering(hierarchical_strategy strategy ,
+                                                                  linkage criterion) const
 
 {
   register int i , j , k;
@@ -896,7 +909,7 @@ Dendrogram* DistanceMatrix::agglomerative_hierarchical_clustering(int algorithm 
     }
   }
 
-  if (algorithm == ORDERING) {
+  if (strategy == ORDERING) {
     cumul_distance = new double[nb_row];
 
     // tri par distance moyenne croissante aux autres formes
@@ -929,7 +942,7 @@ Dendrogram* DistanceMatrix::agglomerative_hierarchical_clustering(int algorithm 
 
       // recherche de la distance minimum courante
 
-      switch (algorithm) {
+      switch (strategy) {
 
       case AGGLOMERATIVE : {
         min_distance = -D_INF;
@@ -985,7 +998,7 @@ Dendrogram* DistanceMatrix::agglomerative_hierarchical_clustering(int algorithm 
           break;
         }
 
-        case AVERAGING : {
+        case AVERAGE_NEIGHBOR : {
           for (j = 0;j < nb_row - i - 1;j++) {
             for (k = j + 1;k < nb_row - i;k++) {
               if (normalized_cluster_distance[j][k] < min_distance) {
@@ -1186,7 +1199,7 @@ Dendrogram* DistanceMatrix::agglomerative_hierarchical_clustering(int algorithm 
     delete [] max_between_cluster_distance;
   }
 
-  if (algorithm == ORDERING) {
+  if (strategy == ORDERING) {
     delete [] cumul_distance;
     delete [] pattern_index;
   }
@@ -1446,13 +1459,13 @@ Dendrogram* DistanceMatrix::divisive_hierarchical_clustering() const
  *
  *  arguments : reference sur un objet StatError, stream, type d'algorithme,
  *              critere pour le groupement (algorithme par agglomeration),
- *              path, format ('a' : ASCII, 's' : Spreadsheet).
+ *              path, format (ASCII/SPREADSHEET).
  *
  *--------------------------------------------------------------*/
 
 bool DistanceMatrix::hierarchical_clustering(StatError &error , ostream &os ,
-                                             int algorithm , int criterion ,
-                                             const char *path , char format) const
+                                             hierarchical_strategy strategy , linkage criterion ,
+                                             const char *path , output_format format) const
 
 {
   bool status = true;
@@ -1467,8 +1480,8 @@ bool DistanceMatrix::hierarchical_clustering(StatError &error , ostream &os ,
   }
 
   else {
-    if (algorithm != DIVISIVE) {
-      dendrogram = agglomerative_hierarchical_clustering(algorithm , criterion);
+    if (strategy != DIVISIVE) {
+      dendrogram = agglomerative_hierarchical_clustering(strategy , criterion);
     }
     else {
       dendrogram = divisive_hierarchical_clustering();
@@ -1482,10 +1495,10 @@ bool DistanceMatrix::hierarchical_clustering(StatError &error , ostream &os ,
 
     if (path) {
       switch (format) {
-      case 'a' :
+      case ASCII :
         status = dendrogram->ascii_write(error , path);
         break;
-      case 's' :
+      case SPREADSHEET :
         status = dendrogram->spreadsheet_write(error , path);
         break;
       }
