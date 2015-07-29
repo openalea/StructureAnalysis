@@ -62,15 +62,26 @@ namespace stat_tool {
   const int PARTITIONING_NB_ITER_1 = 50;  // nombre maximum d'iterations
   const int PARTITIONING_NB_ITER_2 = 20;  // nombre maximum d'iterations
 
-  enum {
-    NEAREST_NEIGHBOR ,
-    FARTHEST_NEIGHBOR ,
-    AVERAGING
+  enum hierarchical_strategy {
+    AGGLOMERATIVE ,
+    DIVISIVE ,
+    ORDERING
   };
 
-  enum {
+  enum linkage {
+    NEAREST_NEIGHBOR ,
+    FARTHEST_NEIGHBOR ,
+    AVERAGE_NEIGHBOR
+  };
+
+  enum cluster_scale {
     CHILD_CLUSTER_DISTANCE ,
     DIAMETER
+  };
+
+  enum isolation_scale {
+    INDIVIDUAL ,
+    CLUSTER_SCALE
   };
 
 
@@ -116,7 +127,7 @@ namespace stat_tool {
     void remove();
 
     std::ostream& property_print(double **normalized_distance , std::ostream &os ,
-                                 char format) const;
+                                 output_format format) const;
 
     int cumul_length_computation(bool *row_flag , bool *column_flag) const;
     double cumul_distance_computation(bool *row_flag , bool *column_flag) const;
@@ -167,12 +178,14 @@ namespace stat_tool {
     Clusters* partitioning(StatError &error , std::ostream &os , int nb_cluster ,
                            int *cluster_nb_pattern , int **cluster_pattern) const;
 
-    Dendrogram* agglomerative_hierarchical_clustering(int algorithm , int criterion = AVERAGING) const;
+    Dendrogram* agglomerative_hierarchical_clustering(hierarchical_strategy strategy ,
+                                                      linkage criterion = AVERAGE_NEIGHBOR) const;
     Dendrogram* divisive_hierarchical_clustering() const;
 
     bool hierarchical_clustering(StatError &error , std::ostream &os ,
-                                 int algorithm = AGGLOMERATIVE , int criterion = AVERAGING ,
-                                 const char *path = NULL , char format = 'a') const;
+                                 hierarchical_strategy strategy = AGGLOMERATIVE ,
+                                 linkage criterion = AVERAGE_NEIGHBOR ,
+                                 const char *path = NULL , output_format format = ASCII) const;
 
     // acces membres de la classe
 
@@ -249,7 +262,8 @@ namespace stat_tool {
 
     double max_within_cluster_distance_computation(double **normalized_distance , int cluster) const;
     double min_between_cluster_distance_computation(double **normalized_distance , int cluster) const;
-    bool isolation_property(double **normalized_distance , int cluster , char type = 'c') const;
+    bool isolation_property(double **normalized_distance , int cluster ,
+                            isolation_scale scale = CLUSTER_SCALE) const;
     double between_cluster_distance_computation(int cluster) const;
     std::ostream& global_distance_ascii_print(std::ostream &os);
 
@@ -309,7 +323,7 @@ namespace stat_tool {
   private :
 
     DistanceMatrix *distance_matrix;  // pointeur sur un objet DistanceMatrix
-    int scale;              // echelle pour representer les distances entre groupes
+    cluster_scale scale;    // echelle pour representer les distances entre groupes
     int nb_cluster;         // nombre de groupes
     int *cluster_nb_pattern;  // effectifs des groupes
     int **cluster_pattern;  // compositions des groupes
@@ -325,13 +339,14 @@ namespace stat_tool {
     void remove();
 
     double* distance_ordering() const;
-    double coefficient_computation(int iscale = I_DEFAULT) const;
+    double coefficient_computation(cluster_scale iscale) const;
+    double coefficient_computation() const;
     void tree_computation();
 
   public :
 
     Dendrogram();
-    Dendrogram(const DistanceMatrix &dist_matrix , int iscale);
+    Dendrogram(const DistanceMatrix &dist_matrix , cluster_scale iscale);
     Dendrogram(const Dendrogram &dendrogram)
     { copy(dendrogram); }
     ~Dendrogram();
@@ -348,7 +363,7 @@ namespace stat_tool {
     // acces membres de la classe
 
     DistanceMatrix* get_distance_matrix() { return distance_matrix; }
-    int get_scale() const { return scale; }
+    cluster_scale get_scale() const { return scale; }
     int get_nb_cluster() const { return nb_cluster; }
     int get_cluster_nb_pattern(int cluster) const { return cluster_nb_pattern[cluster]; }
     int get_cluster_pattern(int cluster , int index) const { return cluster_pattern[cluster][index]; }
