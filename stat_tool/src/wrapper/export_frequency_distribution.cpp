@@ -110,8 +110,8 @@ public:
   }
 
   static std::string
-  comparison(const FrequencyDistribution &h, boost::python::tuple& histos, int type,
-      const char* filename, char format)
+  comparison(const FrequencyDistribution &h, boost::python::tuple& histos, variable_type type,
+      const char* filename, output_format format)
   {
     ostringstream output;
     StatError error;
@@ -167,7 +167,7 @@ public:
 
   static DiscreteMixture*
   discrete_mixture_estimation2(const FrequencyDistribution &h, boost::python::list& ident_list,
-      int min_inf_bound, bool flag, bool component_flag, int penalty)
+      int min_inf_bound, bool flag, bool component_flag, model_selection_criterion criterion)
   {
     DiscreteMixture* ret;
     ostringstream output;
@@ -180,7 +180,7 @@ public:
       ident[i] = boost::python::extract<int>(ident_list[i]);
 
     ret = h.discrete_mixture_estimation(error, output, 1, nb_component, ident,
-        min_inf_bound, flag, component_flag, penalty);
+        min_inf_bound, flag, component_flag, criterion);
 
     if (!ret)
       stat_tool::wrap_util::throw_error(error);
@@ -192,15 +192,15 @@ public:
 
   static Convolution*
   convolution_estimation1(const FrequencyDistribution &h, const DiscreteParametric &known_dist,
-      const DiscreteParametric &unknown_dist, int estimator, int nb_iter,
-      double weight, int penalty_type, int outside)
+      const DiscreteParametric &unknown_dist, estimation_criterion estimator, int nb_iter,
+      double weight, penalty_type pen_type, side_effect outside)
   {
     Convolution* ret;
     ostringstream output;
     StatError error;
 
     ret = h.convolution_estimation(error, output, known_dist, unknown_dist,
-        estimator, nb_iter, weight, penalty_type, outside);
+        estimator, nb_iter, weight, pen_type, outside);
 
     if (!ret)
       stat_tool::wrap_util::throw_error(error);
@@ -210,15 +210,15 @@ public:
 
   static Convolution*
   convolution_estimation2(const FrequencyDistribution &h, const DiscreteParametric &known_dist,
-      int min_inf_bound, int estimator, int nb_iter, double weight,
-      int penalty_type, int outside)
+      int min_inf_bound, estimation_criterion estimator, int nb_iter, double weight,
+      penalty_type pen_type, side_effect outside)
   {
     Convolution* ret;
     ostringstream output;
     StatError error;
 
     ret = h.convolution_estimation(error, output, known_dist, min_inf_bound,
-        estimator, nb_iter, weight, penalty_type, outside);
+        estimator, nb_iter, weight, pen_type, outside);
 
     if (!ret)
       stat_tool::wrap_util::throw_error(error);
@@ -228,15 +228,15 @@ public:
 
   static Compound*
   compound_estimation1(const FrequencyDistribution &h, const DiscreteParametric &sum_dist,
-      const DiscreteParametric &dist, char type, int estimator, int nb_iter,
-      double weight, int penalty_type, int outside)
+      const DiscreteParametric &dist, compound_distribution type, estimation_criterion estimator, int nb_iter,
+      double weight, penalty_type pen_type, side_effect outside)
   {
     Compound* ret;
     ostringstream output;
     StatError error;
 
     ret = h.compound_estimation(error, output, sum_dist, dist, type, estimator,
-        nb_iter, weight, penalty_type, outside);
+        nb_iter, weight, pen_type, outside);
 
     if (!ret)
       stat_tool::wrap_util::throw_error(error);
@@ -246,15 +246,15 @@ public:
 
   static Compound*
   compound_estimation2(const FrequencyDistribution &h, const DiscreteParametric &known_dist,
-      char type, int min_inf_bound, int estimator, int nb_iter, double weight,
-      int penalty_type, int outside)
+      compound_distribution type, int min_inf_bound, estimation_criterion estimator, int nb_iter, double weight,
+      penalty_type pen_type, side_effect outside)
   {
     Compound* ret;
     ostringstream output;
     StatError error;
 
     ret = h.compound_estimation(error, output, known_dist, type, min_inf_bound,
-        estimator, nb_iter, weight, penalty_type, outside);
+        estimator, nb_iter, weight, pen_type, outside);
 
     if (!ret)
       stat_tool::wrap_util::throw_error(error);
@@ -466,9 +466,9 @@ void class_frequency_distribution()
 
    void plotable_frequency_write(SinglePlot &plot) const;
    void plotable_mass_write(SinglePlot &plot) const;
-   void plotable_cumul_write(SinglePlot &plot , double *icumul = 0 ,   double scale = D_DEFAULT) const;
-   void plotable_cumul_matching_write(SinglePlot &plot , int reference_offset ,   int  reference_nb_value , double *reference_cumul ,   double *icumul = 0) const;
-   void plotable_concentration_write(SinglePlot &plot , double *icumul = 0 ,   double scale = D_DEFAULT) const;
+   void plotable_cumul_write(SinglePlot &plot , double *icumul = 0 , double scale = D_DEFAULT) const;
+   void plotable_cumul_matching_write(SinglePlot &plot , int reference_offset , int  reference_nb_value , double *reference_cumul , double *icumul = 0) const;
+   void plotable_concentration_write(SinglePlot &plot , double *icumul = 0 , double scale = D_DEFAULT) const;
    void plotable_survivor_write(SinglePlot &plot) const;
 
    double* cumul_computation(double scale = D_DEFAULT) const;
@@ -479,9 +479,9 @@ void class_frequency_distribution()
 
    Test* kruskal_wallis_test(int nb_histo , const FrequencyDistribution **ihisto) const;
 
-   std::ostream& dissimilarity_ascii_write(std::ostream &os , int nb_histo ,  const FrequencyDistribution **ihisto ,   int type , double **dissimilarity) const;
-   bool dissimilarity_ascii_write(StatError &error , const char *path ,   int nb_histo , const FrequencyDistribution **ihisto ,   int type , double **dissimilarity) const;
-   bool dissimilarity_spreadsheet_write(StatError &error , const char *path ,   int nb_histo , const FrequencyDistribution **ihisto ,   int type , double **dissimilarity) const;
+   std::ostream& dissimilarity_ascii_write(std::ostream &os , int nb_histo ,  const FrequencyDistribution **ihisto , int type , double **dissimilarity) const;
+   bool dissimilarity_ascii_write(StatError &error , const char *path , int nb_histo , const FrequencyDistribution **ihisto , int type , double **dissimilarity) const;
+   bool dissimilarity_spreadsheet_write(StatError &error , const char *path , int nb_histo , const FrequencyDistribution **ihisto , int type , double **dissimilarity) const;
 
    void update(const Reestimation<double> *reestim , int inb_element);
    FrequencyDistribution* frequency_scale(int inb_element) const;
@@ -493,7 +493,7 @@ void class_frequency_distribution()
 
 
    bool comparison(StatError &error , std::ostream &os , int nb_histo ,
-   const FrequencyDistribution **ihisto , int type , const char *path = 0 ,   char format = 'a') const;
+   const FrequencyDistribution **ihisto , int type , const char *path = 0 , output_format format = ASCII) const;
 
 
 
@@ -539,7 +539,7 @@ public:
   {
     StatError error;
     DiscreteDistributionData *histo = NULL;
-    histo = frequency_distribution_ascii_read(error, filename);
+    histo = DiscreteDistributionData::ascii_read(error, filename);
 
     if (!histo)
       stat_tool::wrap_util::throw_error(error);
