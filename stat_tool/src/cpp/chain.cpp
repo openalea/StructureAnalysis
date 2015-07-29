@@ -61,7 +61,7 @@ namespace stat_tool {
  *
  *--------------------------------------------------------------*/
 
-Chain::Chain(char itype , int inb_state , bool init_flag)
+Chain::Chain(process_type itype , int inb_state , bool init_flag)
 
 {
   type = itype;
@@ -72,7 +72,7 @@ Chain::Chain(char itype , int inb_state , bool init_flag)
   nb_component = 0;
   component_nb_state = NULL;
   component = NULL;
-  state_type = NULL;
+  stype = NULL;
 
   if (nb_state == 0) {
     nb_row = 0;
@@ -87,10 +87,10 @@ Chain::Chain(char itype , int inb_state , bool init_flag)
 
     nb_row = nb_state;
 
-    initial = new double[type == 'o' ? nb_state : nb_row];
+    initial = new double[type == ORDINARY ? nb_state : nb_row];
 
     if (init_flag) {
-      for (i = 0;i < (type == 'o' ? nb_state : nb_row);i++) {
+      for (i = 0;i < (type == ORDINARY ? nb_state : nb_row);i++) {
         initial[i] = 0.;
       }
     }
@@ -121,7 +121,7 @@ Chain::Chain(char itype , int inb_state , bool init_flag)
  *
  *--------------------------------------------------------------*/
 
-Chain::Chain(char itype , int inb_state , int inb_row , bool init_flag)
+Chain::Chain(process_type itype , int inb_state , int inb_row , bool init_flag)
 
 {
   register int i , j;
@@ -136,12 +136,12 @@ Chain::Chain(char itype , int inb_state , int inb_row , bool init_flag)
   nb_component = 0;
   component_nb_state = NULL;
   component = NULL;
-  state_type = NULL;
+  stype = NULL;
 
-  initial = new double[type == 'o' ? nb_state : nb_row];
+  initial = new double[type == ORDINARY ? nb_state : nb_row];
 
   if (init_flag) {
-    for (i = 0;i < (type == 'o' ? nb_state : nb_row);i++) {
+    for (i = 0;i < (type == ORDINARY ? nb_state : nb_row);i++) {
       initial[i] = 0.;
     }
   }
@@ -176,12 +176,12 @@ void Chain::parameter_copy(const Chain &chain)
   register int i , j;
 
 
-  for (i = 0;i < (type == 'o' ? nb_state : nb_row);i++) {
+  for (i = 0;i < (type == ORDINARY ? nb_state : nb_row);i++) {
     initial[i] = chain.initial[i];
   }
 
   if (chain.cumul_initial) {
-    for (i = 0;i < (type == 'o' ? nb_state : nb_row);i++) {
+    for (i = 0;i < (type == ORDINARY ? nb_state : nb_row);i++) {
       cumul_initial[i] = chain.cumul_initial[i];
     }
   }
@@ -241,9 +241,9 @@ void Chain::copy(const Chain &chain)
       }
     }
 
-    state_type = new char[nb_state];
+    stype = new state_type[nb_state];
     for (i = 0;i < nb_state;i++) {
-      state_type[i] = chain.state_type[i];
+      stype[i] = chain.stype[i];
     }
   }
 
@@ -252,13 +252,13 @@ void Chain::copy(const Chain &chain)
     nb_component = 0;
     component_nb_state = NULL;
     component = NULL;
-    state_type = NULL;
+    stype = NULL;
   }
 
-  initial = new double[type == 'o' ? nb_state : nb_row];
+  initial = new double[type == ORDINARY ? nb_state : nb_row];
 
   if (chain.cumul_initial) {
-    cumul_initial = new double[type == 'o' ? nb_state : nb_row];
+    cumul_initial = new double[type == ORDINARY ? nb_state : nb_row];
   }
   else {
     cumul_initial = NULL;
@@ -311,7 +311,7 @@ void Chain::remove()
     delete [] component;
   }
 
-  delete [] state_type;
+  delete [] stype;
 
   delete [] initial;
   delete [] cumul_initial;
@@ -371,11 +371,11 @@ Chain& Chain::operator=(const Chain &chain)
  *
  *  arguments : reference sur un objet StatError, stream,
  *              reference sur l'indice de la ligne lue, type du processus
- *              ('o' : ordinaire, 'e' : en equilibre).
+ *              (ORDINARY/EQUILIBRIUM).
  *
  *--------------------------------------------------------------*/
 
-Chain* chain_parsing(StatError &error , ifstream &in_file , int &line , char type)
+Chain* Chain::parsing(StatError &error , ifstream &in_file , int &line , process_type type)
 
 {
   RWLocaleSnapshot locale("en");
@@ -480,13 +480,13 @@ Chain* chain_parsing(StatError &error , ifstream &in_file , int &line , char typ
 
       RWCTokenizer next(buffer);
 
-      if ((read_line == 0) || ((type == 'o') && (read_line == 2))) {
+      if ((read_line == 0) || ((type == ORDINARY) && (read_line == 2))) {
         while (!((token = next()).isNull())) {
 
           // test mot cle INITIAL_PROBABILITIES / TRANSITION_PROBABILITIES
 
           if (i == 0) {
-            if ((type == 'o') && (read_line == 0)) {
+            if ((type == ORDINARY) && (read_line == 0)) {
               if (token != STAT_word[STATW_INITIAL_PROBABILITIES]) {
                 status = false;
                 error.correction_update(STAT_parsing[STATP_KEY_WORD] , STAT_word[STATW_INITIAL_PROBABILITIES] , line);
@@ -526,18 +526,18 @@ Chain* chain_parsing(StatError &error , ifstream &in_file , int &line , char typ
               else {
                 cumul += proba;
 
-                if ((type == 'o') && (read_line == 1)) {
+                if ((type == ORDINARY) && (read_line == 1)) {
                   chain->initial[i] = proba;
                 }
                 else {
-                  chain->transition[read_line - (type == 'o' ? 3 : 1)][i] = proba;
+                  chain->transition[read_line - (type == ORDINARY ? 3 : 1)][i] = proba;
                 }
               }
             }
 
             if (!lstatus) {
               status = false;
-              if ((type == 'o') && (read_line == 1)) {
+              if ((type == ORDINARY) && (read_line == 1)) {
                 error.update(STAT_parsing[STATP_INITIAL_PROBABILITY] , line , i + 1);
               }
               else {
@@ -564,8 +564,8 @@ Chain* chain_parsing(StatError &error , ifstream &in_file , int &line , char typ
 
       if (i > 0) {
         read_line++;
-        if (((type == 'o') && (read_line == chain->nb_row + 3)) ||
-            ((type == 'e') && (read_line == chain->nb_row + 1))) {
+        if (((type == ORDINARY) && (read_line == chain->nb_row + 3)) ||
+            ((type == EQUILIBRIUM) && (read_line == chain->nb_row + 1))) {
           break;
         }
       }
@@ -585,7 +585,7 @@ Chain* chain_parsing(StatError &error , ifstream &in_file , int &line , char typ
         // test irreductibilite dans le cas en equilibre
 
         chain->component_computation(logic_transition);
-        if ((type == 'e') && (chain->nb_component > 1)) {
+        if ((type == EQUILIBRIUM) && (chain->nb_component > 1)) {
           status = false;
           error.correction_update(STAT_parsing[STATP_CHAIN_STRUCTURE] , STAT_parsing[STATP_IRREDUCIBLE]);
         }
@@ -642,12 +642,12 @@ ostream& Chain::ascii_print(ostream &os , bool file_flag) const
 
   switch (type) {
 
-  case 'o' : {
+  case ORDINARY : {
     os << STAT_word[STATW_INITIAL_PROBABILITIES] << endl;
     break;
   }
 
-  case 'e' : {
+  case EQUILIBRIUM : {
     if (file_flag) {
       os << "# ";
     }
@@ -656,7 +656,7 @@ ostream& Chain::ascii_print(ostream &os , bool file_flag) const
   }
   }
 
-  if ((type == 'e') && (file_flag)) {
+  if ((type == EQUILIBRIUM) && (file_flag)) {
     os << "# ";
   }
   for (i = 0;i < nb_state;i++) {
@@ -680,8 +680,8 @@ ostream& Chain::ascii_print(ostream &os , bool file_flag) const
         os << "# ";
       }
 
-      switch (state_type[component[i][0]]) {
-      case 't' :
+      switch (stype[component[i][0]]) {
+      case TRANSIENT :
         os << STAT_label[STATL_TRANSIENT] << " ";
         break;
       default :
@@ -694,7 +694,7 @@ ostream& Chain::ascii_print(ostream &os , bool file_flag) const
         os << " " << component[i][j];
       }
 
-      if (state_type[component[i][0]] == 'a') {
+      if (stype[component[i][0]] == ABSORBING) {
         os << " (" << STAT_label[STATL_ABSORBING] << " " << STAT_label[STATL_STATE] << ")";
       }
     }
@@ -724,10 +724,10 @@ ostream& Chain::spreadsheet_print(ostream &os) const
   os << "\n" << nb_state << "\t" << STAT_word[STATW_STATES] << endl;
 
   switch (type) {
-  case 'o' :
+  case ORDINARY :
     os << "\n" << STAT_word[STATW_INITIAL_PROBABILITIES] << endl;
     break;
-  case 'e' :
+  case EQUILIBRIUM :
     os << "\n" << STAT_label[STATL_STATIONARY_PROBABILITIES] << endl;
     break;
   }
@@ -748,8 +748,8 @@ ostream& Chain::spreadsheet_print(ostream &os) const
 
   if (nb_component > 0) {
     for (i = 0;i < nb_component;i++) {
-      switch (state_type[component[i][0]]) {
-      case 't' :
+      switch (stype[component[i][0]]) {
+      case TRANSIENT :
         os << "\n"<< STAT_label[STATL_TRANSIENT] << " ";
         break;
       default :
@@ -762,7 +762,7 @@ ostream& Chain::spreadsheet_print(ostream &os) const
         os << "\t" << component[i][j];
       }
 
-      if (state_type[component[i][0]] == 'a') {
+      if (stype[component[i][0]] == ABSORBING) {
         os << " (" << STAT_label[STATL_ABSORBING] << " " << STAT_label[STATL_STATE] << ")";
       }
     }
@@ -786,7 +786,7 @@ void Chain::create_cumul()
 
 
   if (!cumul_initial) {
-    cumul_initial = new double[type == 'o' ? nb_state : nb_row];
+    cumul_initial = new double[type == ORDINARY ? nb_state : nb_row];
   }
 
   if (!cumul_transition) {
@@ -840,7 +840,7 @@ void Chain::cumul_computation()
     register int i;
 
 
-    stat_tool::cumul_computation((type == 'o' ? nb_state : nb_row) , initial , cumul_initial);
+    stat_tool::cumul_computation((type == ORDINARY ? nb_state : nb_row) , initial , cumul_initial);
 
     for (i = 0;i < nb_row;i++) {
       stat_tool::cumul_computation(nb_state , transition[i] , cumul_transition[i]);
@@ -862,7 +862,7 @@ void Chain::log_computation()
     register int i;
 
 
-    stat_tool::log_computation((type == 'o' ? nb_state : nb_row) , initial , cumul_initial);
+    stat_tool::log_computation((type == ORDINARY ? nb_state : nb_row) , initial , cumul_initial);
 
     for (i = 0;i < nb_row;i++) {
       stat_tool::log_computation(nb_state , transition[i] , cumul_transition[i]);
