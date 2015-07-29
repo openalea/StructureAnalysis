@@ -168,7 +168,7 @@ void class_constant()
   scope().attr("DISPLAY_CONDITIONAL_NB_VALUE") = DISPLAY_CONDITIONAL_NB_VALUE;
   scope().attr("PLOT_NB_VALUE") = PLOT_NB_VALUE;
   scope().attr("PLOT_RANGE_RATIO") = PLOT_RANGE_RATIO;
-  scope().attr("NB_SYMBOL") = NB_SYMBOL;
+  scope().attr("NB_CATEGORY") = NB_CATEGORY;
 
 
   // distance_matrix
@@ -213,7 +213,7 @@ void class_constant()
   ;
 
   enum_<stat_tool::wrap_util::UniqueInt<4, 6> >("VariableType")
-  .value("SYMBOLIC", SYMBOLIC)
+  .value("NOMINAL", NOMINAL)
   .value("ORDINAL", ORDINAL)
   .value("NUMERIC", NUMERIC)
   .value("CIRCULAR", CIRCULAR)
@@ -302,18 +302,16 @@ void class_constant()
   .value("NB_OCCURRENCE" , NB_OCCURRENCE)
   .value("COUNTING" , COUNTING)
   .value("LENGTH" , LENGTH)
-  .value("SEQUENCE_CUMUL", SEQUENCE_CUMUL)
-  .value("SEQUENCE_MEAN", SEQUENCE_MEAN)
   .export_values()
   ;
 
 
   // regression
   enum_<stat_tool::wrap_util::UniqueInt<4, 17> >("RegressionType")
-  .value("STAT_LINEAR", STAT_LINEAR)
-  .value("STAT_LOGISTIC", STAT_LOGISTIC)
-  .value("STAT_MONOMOLECULAR", STAT_MONOMOLECULAR)
-  .value("STAT_NONPARAMETRIC", STAT_NONPARAMETRIC)
+  .value("LINEAR_FUNCTION", LINEAR_FUNCTION)
+  .value("LOGISTIC", LOGISTIC)
+  .value("MONOMOLECULAR", MONOMOLECULAR)
+  .value("NONPARAMETRIC_FUNCTION", NONPARAMETRIC_FUNCTION)
   .export_values()
   ;
 
