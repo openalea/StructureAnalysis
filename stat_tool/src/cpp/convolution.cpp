@@ -88,7 +88,7 @@ Convolution::Convolution(int nb_dist , const DiscreteParametric **pdist)
 
   distribution = new DiscreteParametric*[nb_distribution];
   for (i = 0;i < nb_distribution;i++) {
-    distribution[i] = new DiscreteParametric(*pdist[i] , 'n');
+    distribution[i] = new DiscreteParametric(*pdist[i] , NORMALIZATION);
     cnb_value += distribution[i]->nb_value - 1;
   }
 
@@ -120,9 +120,10 @@ Convolution::Convolution(const DiscreteParametric &known_dist ,
                                              known_dist.probability , CONVOLUTION_THRESHOLD);
   }
   else {
-    distribution[0] = new DiscreteParametric(known_dist , 'n');
+    distribution[0] = new DiscreteParametric(known_dist , NORMALIZATION);
   }
-  distribution[1] = new DiscreteParametric(unknown_dist , 'c' , (int)(unknown_dist.nb_value * NB_VALUE_COEFF));
+  distribution[1] = new DiscreteParametric(unknown_dist , DISTRIBUTION_COPY ,
+                                           (int)(unknown_dist.nb_value * NB_VALUE_COEFF));
 
   Distribution::init(distribution[0]->alloc_nb_value + distribution[1]->alloc_nb_value - 1);
 }
@@ -286,8 +287,7 @@ ConvolutionData* Convolution::extract_data(StatError &error) const
  *
  *--------------------------------------------------------------*/
 
-Convolution* convolution_building(StatError &error , int nb_dist ,
-                                  const DiscreteParametric **dist)
+Convolution* Convolution::building(StatError &error , int nb_dist , const DiscreteParametric **dist)
 
 {
   Convolution *convol;
@@ -317,8 +317,7 @@ Convolution* convolution_building(StatError &error , int nb_dist ,
  *
  *--------------------------------------------------------------*/
 
-Convolution* convolution_ascii_read(StatError &error , const char *path ,
-                                    double cumul_threshold)
+Convolution* Convolution::ascii_read(StatError &error , const char *path , double cumul_threshold)
 
 {
   RWLocaleSnapshot locale("en");
@@ -477,7 +476,7 @@ Convolution* convolution_ascii_read(StatError &error , const char *path ,
               error.update(STAT_parsing[STATP_FORMAT] , line);
             }
 
-            dist[i] = discrete_parametric_parsing(error , in_file , line ,
+            dist[i] = DiscreteParametric::parsing(error , in_file , line ,
                                                   NEGATIVE_BINOMIAL , cumul_threshold);
             break;
           }
