@@ -66,7 +66,7 @@ namespace sequence_analysis {
 SemiMarkovChain::SemiMarkovChain()
 
 {
-  state_subtype = NULL;
+  sojourn_type = NULL;
   state_process = NULL;
   forward = NULL;
 }
@@ -80,11 +80,11 @@ SemiMarkovChain::SemiMarkovChain()
  *
  *--------------------------------------------------------------*/
 
-SemiMarkovChain::SemiMarkovChain(char itype , int inb_state)
+SemiMarkovChain::SemiMarkovChain(process_type itype , int inb_state)
 :Chain(itype , inb_state)
 
 {
-  state_subtype = NULL;
+  sojourn_type = NULL;
   state_process = new CategoricalSequenceProcess(nb_state , nb_state , false);
   forward = NULL;
 }
@@ -105,7 +105,7 @@ SemiMarkovChain::SemiMarkovChain(const Chain *pchain , const CategoricalSequence
   register int i;
 
 
-  state_subtype = new int[nb_state];
+  sojourn_type = new state_sojourn_type[nb_state];
 
   state_process = new CategoricalSequenceProcess(*poccupancy);
   for (i = 0;i < nb_state;i++) {
@@ -120,9 +120,9 @@ SemiMarkovChain::SemiMarkovChain(const Chain *pchain , const CategoricalSequence
   forward = new Forward*[nb_state];
 
   for (i = 0;i < nb_state;i++) {
-    state_subtype[i] = (state_process->sojourn_time[i] ? SEMI_MARKOVIAN : MARKOVIAN);
+    sojourn_type[i] = (state_process->sojourn_time[i] ? SEMI_MARKOVIAN : MARKOVIAN);
 
-    if ((state_subtype[i] == SEMI_MARKOVIAN) && (state_type[i] == 'r')) {
+    if ((sojourn_type[i] == SEMI_MARKOVIAN) && (stype[i] == RECURRENT)) {
       forward[i] = new Forward(*(state_process->sojourn_time[i]));
     }
     else {
@@ -130,7 +130,7 @@ SemiMarkovChain::SemiMarkovChain(const Chain *pchain , const CategoricalSequence
     }
   }
 
-  if (type == 'e') {
+  if (type == EQUILIBRIUM) {
     for (i = 0;i < nb_state;i++) {
       initial[i] = 1. / (double)nb_state;
     }
@@ -155,9 +155,9 @@ void SemiMarkovChain::copy(const SemiMarkovChain &smarkov , int param)
   register int i;
 
 
-  state_subtype = new int[nb_state];
+  sojourn_type = new state_sojourn_type[nb_state];
   for (i = 0;i < nb_state;i++) {
-    state_subtype[i] = smarkov.state_subtype[i];
+    sojourn_type[i] = smarkov.sojourn_type[i];
   }
 
   forward = new Forward*[nb_state];
@@ -176,10 +176,10 @@ void SemiMarkovChain::copy(const SemiMarkovChain &smarkov , int param)
     state_process = new CategoricalSequenceProcess(*(smarkov.state_process));
     break;
   case 0 :
-    state_process = new CategoricalSequenceProcess(*(smarkov.state_process) , 'o' , I_DEFAULT);
+    state_process = new CategoricalSequenceProcess(*(smarkov.state_process) , INIT_OCCUPANCY , I_DEFAULT);
     break;
   default :
-    state_process = new CategoricalSequenceProcess(*(smarkov.state_process) , 'o' , param);
+    state_process = new CategoricalSequenceProcess(*(smarkov.state_process) , INIT_OCCUPANCY , param);
     break;
   }
 }
@@ -197,7 +197,7 @@ void SemiMarkovChain::remove()
   register int i;
 
 
-  delete [] state_subtype;
+  delete [] sojourn_type;
 
   delete state_process;
 
@@ -262,7 +262,7 @@ int SemiMarkovChain::nb_parameter_computation(double min_probability) const
 
 
   for (i = 0;i < nb_state;i++) {
-    if (state_subtype[i] == SEMI_MARKOVIAN) {
+    if (sojourn_type[i] == SEMI_MARKOVIAN) {
       nb_parameter += state_process->sojourn_time[i]->nb_parameter_computation();
       if (state_process->sojourn_time[i]->inf_bound == 1) {
         nb_parameter--;
@@ -302,7 +302,7 @@ SemiMarkov::SemiMarkov()
  *
  *--------------------------------------------------------------*/
 
-SemiMarkov::SemiMarkov(char itype , int inb_state , int inb_output_process , int *nb_value)
+SemiMarkov::SemiMarkov(process_type itype , int inb_state , int inb_output_process , int *nb_value)
 :SemiMarkovChain(itype , inb_state)
 
 {
@@ -429,7 +429,7 @@ void SemiMarkov::copy(const SemiMarkov &smarkov , bool data_flag , int param)
       for (i = 0;i < nb_output_process;i++) {
         if (smarkov.categorical_process[i]) {
           categorical_process[i] = new CategoricalSequenceProcess(*(smarkov.categorical_process[i]) ,
-                                                                  'c' , false);
+                                                                  CATEGORICAL_SEQUENCE_PROCESS_COPY , false);
         }
         else {
           categorical_process[i] = NULL;
@@ -580,7 +580,7 @@ SemiMarkov& SemiMarkov::operator=(const SemiMarkov &smarkov)
  *
  *--------------------------------------------------------------*/
 
-DiscreteParametricModel* SemiMarkov::extract(StatError &error , int type ,
+DiscreteParametricModel* SemiMarkov::extract(StatError &error , process_distribution dist_type ,
                                              int variable , int value) const
 
 {
@@ -599,7 +599,7 @@ DiscreteParametricModel* SemiMarkov::extract(StatError &error , int type ,
   pdist = NULL;
   pparam = NULL;
 
-  if (type == OBSERVATION) {
+  if (dist_type == OBSERVATION) {
     if ((variable < 1) || (variable > nb_output_process)) {
       status = false;
       error.update(STAT_error[STATR_OUTPUT_PROCESS_INDEX]);
@@ -664,7 +664,7 @@ DiscreteParametricModel* SemiMarkov::extract(StatError &error , int type ,
       }
 
       if (status) {
-        switch (type) {
+        switch (dist_type) {
         case FIRST_OCCURRENCE :
           pdist = process->first_occurrence[value];
           break;
@@ -704,7 +704,7 @@ DiscreteParametricModel* SemiMarkov::extract(StatError &error , int type ,
       }
 
       if (hvariable >= 0) {
-        switch (type) {
+        switch (dist_type) {
 
         case OBSERVATION : {
           if ((semi_markov_data->observation_distribution) &&
@@ -768,7 +768,7 @@ DiscreteParametricModel* SemiMarkov::extract(StatError &error , int type ,
  *--------------------------------------------------------------*/
 
 DiscreteParametricModel* SemiMarkov::extract(StatError &error , int state ,
-                                             int frequency_distribution_type) const
+                                             process_distribution histo_type) const
 
 {
   bool status = true;
@@ -802,7 +802,7 @@ DiscreteParametricModel* SemiMarkov::extract(StatError &error , int state ,
       phisto = NULL;
 
       if ((semi_markov_data) && (semi_markov_data->type[0] == STATE)) {
-        switch (frequency_distribution_type) {
+        switch (histo_type) {
 
         case INITIAL_RUN : {
           if ((semi_markov_data->characteristics[0]->initial_run) &&
@@ -903,13 +903,13 @@ SemiMarkov* SemiMarkov::thresholding(double min_probability) const
  *
  *--------------------------------------------------------------*/
 
-SemiMarkov* semi_markov_ascii_read(StatError &error , const char *path , int length ,
+SemiMarkov* SemiMarkov::ascii_read(StatError &error , const char *path , int length ,
                                    bool counting_flag , double cumul_threshold)
 
 {
   RWCString buffer , token;
   size_t position;
-  char type = 'v';
+  process_type type = DEFAULT_TYPE;
   bool status;
   register int i;
   int line;
@@ -961,10 +961,10 @@ SemiMarkov* semi_markov_ascii_read(StatError &error , const char *path , int len
 
         if (i == 0) {
           if (token == SEQ_word[SEQW_SEMI_MARKOV_CHAIN]) {
-            type = 'o';
+            type = ORDINARY;
           }
           else if (token == SEQ_word[SEQW_EQUILIBRIUM_SEMI_MARKOV_CHAIN]) {
-            type = 'e';
+            type = EQUILIBRIUM;
           }
           else {
             status = false;
@@ -988,17 +988,18 @@ SemiMarkov* semi_markov_ascii_read(StatError &error , const char *path , int len
       }
     }
 
-    if (type != 'v') {
+    if (type != DEFAULT_TYPE) {
 
       // analyse du format et lecture de la chaine de Markov
 
-      chain = chain_parsing(error , in_file , line , type);
+      chain = Chain::parsing(error , in_file , line , type);
 
       if (chain) {
 
         // analyse du format et lecture des lois d'occupation de etats
 
-        occupancy = occupancy_parsing(error , in_file , line , *chain , cumul_threshold);
+        occupancy = CategoricalSequenceProcess::occupancy_parsing(error , in_file , line ,
+                                                                  *chain , cumul_threshold);
         if (!occupancy) {
           status = false;
         }
@@ -1044,8 +1045,8 @@ SemiMarkov* semi_markov_ascii_read(StatError &error , const char *path , int len
 
             // analyse du format et lecture des lois d'observation
 
-            observation = categorical_observation_parsing(error , in_file , line , chain->nb_state ,
-                                                          HIDDEN_MARKOV , false);
+            observation = CategoricalProcess::parsing(error , in_file , line , chain->nb_state ,
+                                                      HIDDEN_MARKOV , false);
             if (!observation) {
               status = false;
             }
@@ -1131,10 +1132,10 @@ ostream& SemiMarkov::ascii_write(ostream &os , const SemiMarkovData *seq ,
 
   case false : {
     switch (type) {
-    case 'o' :
+    case ORDINARY :
       os << SEQ_word[SEQW_SEMI_MARKOV_CHAIN] << endl;
       break;
-    case 'e' :
+    case EQUILIBRIUM :
       os << SEQ_word[SEQW_EQUILIBRIUM_SEMI_MARKOV_CHAIN] << endl;
       break;
     }
@@ -1143,10 +1144,10 @@ ostream& SemiMarkov::ascii_write(ostream &os , const SemiMarkovData *seq ,
 
   case true : {
     switch (type) {
-    case 'o' :
+    case ORDINARY :
       os << SEQ_word[SEQW_HIDDEN_SEMI_MARKOV_CHAIN] << endl;
       break;
-    case 'e' :
+    case EQUILIBRIUM :
       os << SEQ_word[SEQW_EQUILIBRIUM_HIDDEN_SEMI_MARKOV_CHAIN] << endl;
       break;
     }
@@ -1664,10 +1665,10 @@ ostream& SemiMarkov::spreadsheet_write(ostream &os , const SemiMarkovData *seq ,
 
   case false : {
     switch (type) {
-    case 'o' :
+    case ORDINARY :
       os << SEQ_word[SEQW_SEMI_MARKOV_CHAIN] << endl;
       break;
-    case 'e' :
+    case EQUILIBRIUM :
       os << SEQ_word[SEQW_EQUILIBRIUM_SEMI_MARKOV_CHAIN] << endl;
       break;
     }
@@ -1676,10 +1677,10 @@ ostream& SemiMarkov::spreadsheet_write(ostream &os , const SemiMarkovData *seq ,
 
   case true : {
     switch (type) {
-    case 'o' :
+    case ORDINARY :
       os << SEQ_word[SEQW_HIDDEN_SEMI_MARKOV_CHAIN] << endl;
       break;
-    case 'e' :
+    case EQUILIBRIUM :
       os << SEQ_word[SEQW_EQUILIBRIUM_HIDDEN_SEMI_MARKOV_CHAIN] << endl;
       break;
     }
@@ -2495,7 +2496,7 @@ double SemiMarkov::penalty_computation(bool hidden , double min_probability) con
 
       switch (type) {
 
-      case 'o' : {
+      case ORDINARY : {
         sum = 0.;
         for (i = 0;i < state_process->length->nb_value - 2;i++) {
           sum += (1. - state_process->length->cumul[i + 1]);
@@ -2524,7 +2525,7 @@ double SemiMarkov::penalty_computation(bool hidden , double min_probability) con
         break;
       }
 
-      case 'e' : {
+      case EQUILIBRIUM : {
         for (i = 0;i < nb_state;i++) {
           state_marginal[i] = initial[i];
         }
@@ -2570,7 +2571,7 @@ double SemiMarkov::penalty_computation(bool hidden , double min_probability) con
     }
 
     for (i = 0;i < nb_state;i++) {
-      if (state_subtype[i] == SEMI_MARKOVIAN) {
+      if (sojourn_type[i] == SEMI_MARKOVIAN) {
         nb_parameter = state_process->sojourn_time[i]->nb_parameter_computation();
         if (state_process->sojourn_time[i]->inf_bound == 1) {
           nb_parameter--;
@@ -2689,7 +2690,7 @@ SemiMarkovData::SemiMarkovData()
  *--------------------------------------------------------------*/
 
 SemiMarkovData::SemiMarkovData(const FrequencyDistribution &ilength_distribution , int inb_variable ,
-                               int *itype , bool init_flag)
+                               variable_nature *itype , bool init_flag)
 :MarkovianSequences(ilength_distribution , inb_variable , itype , init_flag)
 
 {
@@ -2716,7 +2717,7 @@ SemiMarkovData::SemiMarkovData(const FrequencyDistribution &ilength_distribution
  *--------------------------------------------------------------*/
 
 SemiMarkovData::SemiMarkovData(const MarkovianSequences &seq)
-:MarkovianSequences(seq , 'a' , UNCHANGED)
+:MarkovianSequences(seq , ADD_STATE_VARIABLE , UNCHANGED)
 
 {
   semi_markov = NULL;
@@ -2737,12 +2738,12 @@ SemiMarkovData::SemiMarkovData(const MarkovianSequences &seq)
  *  Construction d'un objet SemiMarkovData a partir d'un objet MarkovianSequences.
  *
  *  arguments : reference sur un objet MarkovianSequences, type de transformation
- *              ('c' : copie, 'a' : ajout d'une variable d'etat),
+ *              (SEQUENCE_COPY/ADD_STATE_VARIABLE),
  *              ajout/suppression des lois empiriques de temps de sejour initial.
  *
  *--------------------------------------------------------------*/
 
-SemiMarkovData::SemiMarkovData(const MarkovianSequences &seq , char transform ,
+SemiMarkovData::SemiMarkovData(const MarkovianSequences &seq , sequence_transformation transform ,
                                bool initial_run_flag)
 :MarkovianSequences(seq , transform , (initial_run_flag ? ADD_INITIAL_RUN : REMOVE_INITIAL_RUN))
 
@@ -2883,7 +2884,7 @@ SemiMarkovData& SemiMarkovData::operator=(const SemiMarkovData &seq)
  *
  *--------------------------------------------------------------*/
 
-DiscreteDistributionData* SemiMarkovData::extract(StatError &error , int type ,
+DiscreteDistributionData* SemiMarkovData::extract(StatError &error , process_distribution histo_type ,
                                                   int variable , int value) const
 
 {
@@ -2900,7 +2901,7 @@ DiscreteDistributionData* SemiMarkovData::extract(StatError &error , int type ,
 
   phisto = NULL;
 
-  if (type == OBSERVATION) {
+  if (histo_type == OBSERVATION) {
     if ((variable < 2) || (variable > nb_variable)) {
       status = false;
       error.update(STAT_error[STATR_VARIABLE_INDEX]);
@@ -2964,7 +2965,7 @@ DiscreteDistributionData* SemiMarkovData::extract(StatError &error , int type ,
       }
 
       if (status) {
-        switch (type) {
+        switch (histo_type) {
 
         case FIRST_OCCURRENCE : {
           phisto = characteristics[variable]->first_occurrence[value];
@@ -3027,7 +3028,7 @@ DiscreteDistributionData* SemiMarkovData::extract(StatError &error , int type ,
     pdist = NULL;
     pparam = NULL;
 
-    switch (type) {
+    switch (histo_type) {
 
     case OBSERVATION : {
       if (semi_markov->categorical_process[variable - 1]) {
@@ -3093,34 +3094,6 @@ DiscreteDistributionData* SemiMarkovData::extract(StatError &error , int type ,
 
 /*--------------------------------------------------------------*
  *
- *  Suppression du parametre d'index.
- *
- *  argument : reference sur un objet StatError.
- *
- *--------------------------------------------------------------*/
-
-SemiMarkovData* SemiMarkovData::remove_index_parameter(StatError &error) const
-
-{
-  SemiMarkovData *seq;
-
-
-  error.init();
-
-  if (!index_parameter) {
-    seq = NULL;
-    error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
-  }
-  else {
-    seq = new SemiMarkovData(*this , true , 'm');
-  }
-
-  return seq;
-}
-
-
-/*--------------------------------------------------------------*
- *
  *  Copie d'un objet SemiMarkovData avec transformation du parametre d'index implicite
  *  en parametre d'index explicite.
  *
@@ -3141,7 +3114,35 @@ SemiMarkovData* SemiMarkovData::explicit_index_parameter(StatError &error) const
     error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
   }
   else {
-    seq = new SemiMarkovData(*this , true , 'e');
+    seq = new SemiMarkovData(*this , true , EXPLICIT_INDEX_PARAMETER);
+  }
+
+  return seq;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Suppression du parametre d'index.
+ *
+ *  argument : reference sur un objet StatError.
+ *
+ *--------------------------------------------------------------*/
+
+SemiMarkovData* SemiMarkovData::remove_index_parameter(StatError &error) const
+
+{
+  SemiMarkovData *seq;
+
+
+  error.init();
+
+  if (!index_parameter) {
+    seq = NULL;
+    error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
+  }
+  else {
+    seq = new SemiMarkovData(*this , true , REMOVE_INDEX_PARAMETER);
   }
 
   return seq;
@@ -3210,7 +3211,7 @@ ostream& SemiMarkovData::ascii_write(ostream &os , bool exhaustive) const
 {
   if (semi_markov) {
     semi_markov->ascii_write(os , this , exhaustive , false ,
-                             sequence_analysis::test_hidden(semi_markov->nb_output_process , semi_markov->categorical_process));
+                             CategoricalSequenceProcess::test_hidden(semi_markov->nb_output_process , semi_markov->categorical_process));
   }
 
   return os;
@@ -3246,7 +3247,7 @@ bool SemiMarkovData::ascii_write(StatError &error , const char *path ,
     else {
       status = true;
       semi_markov->ascii_write(out_file , this , exhaustive , true ,
-                               sequence_analysis::test_hidden(semi_markov->nb_output_process , semi_markov->categorical_process));
+                               CategoricalSequenceProcess::test_hidden(semi_markov->nb_output_process , semi_markov->categorical_process));
     }
   }
 
@@ -3262,7 +3263,8 @@ bool SemiMarkovData::ascii_write(StatError &error , const char *path ,
  *
  *--------------------------------------------------------------*/
 
-ostream& SemiMarkovData::ascii_data_write(ostream &os , char format , bool exhaustive) const
+ostream& SemiMarkovData::ascii_data_write(ostream &os , output_sequence_format format ,
+                                          bool exhaustive) const
 
 {
   MarkovianSequences::ascii_write(os , exhaustive , false);
@@ -3282,7 +3284,7 @@ ostream& SemiMarkovData::ascii_data_write(ostream &os , char format , bool exhau
  *--------------------------------------------------------------*/
 
 bool SemiMarkovData::ascii_data_write(StatError &error , const char *path ,
-                                      char format , bool exhaustive) const
+                                      output_sequence_format format , bool exhaustive) const
 
 {
   bool status = false;
@@ -3335,7 +3337,7 @@ bool SemiMarkovData::spreadsheet_write(StatError &error , const char *path) cons
     else {
       status = true;
       semi_markov->spreadsheet_write(out_file , this ,
-                                     sequence_analysis::test_hidden(semi_markov->nb_output_process , semi_markov->categorical_process));
+                                     CategoricalSequenceProcess::test_hidden(semi_markov->nb_output_process , semi_markov->categorical_process));
     }
   }
 
