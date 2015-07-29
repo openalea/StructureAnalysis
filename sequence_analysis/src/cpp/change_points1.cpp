@@ -230,7 +230,7 @@ void Sequences::gaussian_gamma_hyperparameter_computation(int index , int variab
  *
  *--------------------------------------------------------------*/
 
-int Sequences::nb_parameter_computation(int index , int nb_segment , int *model_type) const
+int Sequences::nb_parameter_computation(int index , int nb_segment , segment_model *model_type) const
 
 {
   bool *used_output;
@@ -372,7 +372,7 @@ int Sequences::nb_parameter_computation(int index , int nb_segment , int *model_
  *
  *--------------------------------------------------------------*/
 
-double Sequences::one_segment_likelihood(int index , int *model_type , double **rank) const
+double Sequences::one_segment_likelihood(int index , segment_model *model_type , double **rank) const
 
 {
   register int i , j , k;
@@ -399,7 +399,7 @@ double Sequences::one_segment_likelihood(int index , int *model_type , double **
   for (i = 1;i < nb_variable;i++) {
     if (((model_type[i - 1] == LINEAR_MODEL_CHANGE) && (!seq_index_parameter)) ||
         ((i == 1) && (model_type[0] == INTERCEPT_SLOPE_CHANGE))) {
-      if (index_parameter_type == IMPLICIT_TYPE) {
+      if (index_param_type == IMPLICIT_TYPE) {
         seq_index_parameter = new int[length[index]];
         for (j = 0;j < length[index];j++) {
           seq_index_parameter[j] = j;
@@ -673,7 +673,7 @@ double Sequences::one_segment_likelihood(int index , int *model_type , double **
 
   delete [] frequency;
 
-  if (index_parameter_type == IMPLICIT_TYPE) {
+  if (index_param_type == IMPLICIT_TYPE) {
     delete [] seq_index_parameter;
   }
 
@@ -690,8 +690,8 @@ double Sequences::one_segment_likelihood(int index , int *model_type , double **
  *
  *--------------------------------------------------------------*/
 
-Sequences* Sequences::segmentation_output(int *nb_segment , int *model_type , ostream &os ,
-                                          int output , int *ichange_point)
+Sequences* Sequences::segmentation_output(int *nb_segment , segment_model *model_type , ostream &os ,
+                                          sequence_type output , int *ichange_point)
 
 {
   bool *piecewise_function;
@@ -756,7 +756,7 @@ Sequences* Sequences::segmentation_output(int *nb_segment , int *model_type , os
 
       if ((model_type[i - 1] == LINEAR_MODEL_CHANGE) || (model_type[0] == INTERCEPT_SLOPE_CHANGE)) {
         if (!seq_index_parameter) {
-          if (index_parameter_type == IMPLICIT_TYPE) {
+          if (index_param_type == IMPLICIT_TYPE) {
             seq_index_parameter = new int[length[0]];
             for (j = 0;j < length[0];j++) {
               seq_index_parameter[j] = j;
@@ -1366,7 +1366,7 @@ Sequences* Sequences::segmentation_output(int *nb_segment , int *model_type , os
     delete [] slope_standard_deviation;
     delete [] correlation;
 
-    if (index_parameter_type == IMPLICIT_TYPE) {
+    if (index_param_type == IMPLICIT_TYPE) {
       delete [] seq_index_parameter;
     }
 
@@ -1426,8 +1426,8 @@ Sequences* Sequences::segmentation_output(int *nb_segment , int *model_type , os
  *--------------------------------------------------------------*/
 
 Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentifier ,
-                                   int nb_segment , int *ichange_point , int *model_type ,
-                                   int output) const
+                                   int nb_segment , int *ichange_point , segment_model *model_type ,
+                                   sequence_type output) const
 
 {
   bool status = true;
@@ -1446,12 +1446,12 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
   oseq = NULL;
   error.init();
 
-/*  if (((index_parameter_type == TIME) && (index_interval->variance > 0.)) ||
-      (index_parameter_type == POSITION)) {
+/*  if (((index_param_type == TIME) && (index_interval->variance > 0.)) ||
+      (index_param_type == POSITION)) {
     status = false;
     error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
   }
-  if (index_parameter_type == POSITION) {
+  if (index_param_type == POSITION) {
     status = false;
     error.correction_update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE] , SEQ_index_parameter_word[TIME]);
   } */
@@ -1680,7 +1680,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
 
       if (((model_type[i] == LINEAR_MODEL_CHANGE) && (!seq_index_parameter)) ||
           ((i == 0) && (model_type[0] == INTERCEPT_SLOPE_CHANGE))) {
-        if (index_parameter_type == IMPLICIT_TYPE) {
+        if (index_param_type == IMPLICIT_TYPE) {
           seq_index_parameter = new int[length[index]];
           for (j = 0;j < length[index];j++) {
             seq_index_parameter[j] = j;
@@ -2013,7 +2013,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
     }
 
     iseq = new Sequences(*this , 1 , &index);
-    seq = new Sequences(*iseq , 'a');
+    seq = new Sequences(*iseq , ADD_STATE_VARIABLE);
     delete iseq;
 
     psegment = seq->int_sequence[0][0];
@@ -2072,7 +2072,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
 
     delete [] segment_variance;
 
-    if (index_parameter_type == IMPLICIT_TYPE) {
+    if (index_param_type == IMPLICIT_TYPE) {
       delete [] seq_index_parameter;
     }
   }
@@ -2094,7 +2094,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
  *
  *--------------------------------------------------------------*/
 
-double Sequences::segmentation(int *nb_segment , int *model_type , double **rank ,
+double Sequences::segmentation(int *nb_segment , segment_model *model_type , double **rank ,
                                double *isegmentation_likelihood , int *nb_parameter ,
                                double *segment_penalty)
 
@@ -2195,7 +2195,7 @@ double Sequences::segmentation(int *nb_segment , int *model_type , double **rank
 
       if (((model_type[j - 1] == LINEAR_MODEL_CHANGE) && (!seq_index_parameter)) ||
           ((j == 1) && (model_type[0] == INTERCEPT_SLOPE_CHANGE))) {
-        if (index_parameter_type == IMPLICIT_TYPE) {
+        if (index_param_type == IMPLICIT_TYPE) {
           seq_index_parameter = new int[max_length];
           for (k = 0;k < max_length;k++) {
             seq_index_parameter[k] = k;
@@ -2828,7 +2828,7 @@ double Sequences::segmentation(int *nb_segment , int *model_type , double **rank
   }
   delete [] factorial;
 
-  if (index_parameter_type == IMPLICIT_TYPE) {
+  if (index_param_type == IMPLICIT_TYPE) {
     delete [] seq_index_parameter;
   }
 
@@ -2869,7 +2869,8 @@ double Sequences::segmentation(int *nb_segment , int *model_type , double **rank
  *--------------------------------------------------------------*/
 
 Sequences* Sequences::segmentation(StatError &error , ostream &os , int *nb_segment ,
-                                   int *model_type , int iidentifier , int output) const
+                                   segment_model *model_type , int iidentifier ,
+                                   sequence_type output) const
 
 {
   bool status = true;
@@ -2884,12 +2885,12 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int *nb_segm
   oseq = NULL;
   error.init();
 
-/*  if (((index_parameter_type == TIME) && (index_interval->variance > 0.)) ||
-      (index_parameter_type == POSITION)) {
+/*  if (((index_param_type == TIME) && (index_interval->variance > 0.)) ||
+      (index_param_type == POSITION)) {
     status = false;
     error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
   }
-  if (index_parameter_type == POSITION) {
+  if (index_param_type == POSITION) {
     status = false;
     error.correction_update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE] , SEQ_index_parameter_word[TIME]);
   } */
@@ -3025,7 +3026,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int *nb_segm
   }
 
   if (status) {
-    seq = new Sequences(*this , 'a');
+    seq = new Sequences(*this , ADD_STATE_VARIABLE);
 
     // calcul des rangs pour les variables ordinales
 
@@ -3114,7 +3115,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int *nb_segm
  *
  *--------------------------------------------------------------*/
 
-double Sequences::forward_backward(int index , int nb_segment , int *model_type ,
+double Sequences::forward_backward(int index , int nb_segment , segment_model *model_type ,
                                    double **rank , double *likelihood ,
                                    long double *segmentation_entropy ,
                                    long double *first_order_entropy ,
@@ -3257,7 +3258,7 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
     }
 
     if ((model_type[i - 1] == LINEAR_MODEL_CHANGE) && (!seq_index_parameter)) {
-      if (index_parameter_type == IMPLICIT_TYPE) {
+      if (index_param_type == IMPLICIT_TYPE) {
         seq_index_parameter = new int[length[index]];
         for (j = 0;j < length[index];j++) {
           seq_index_parameter[j] = j;
@@ -4591,7 +4592,7 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
   delete [] mean;
   delete [] residual;
 
-  if (index_parameter_type == IMPLICIT_TYPE) {
+  if (index_param_type == IMPLICIT_TYPE) {
     delete [] seq_index_parameter;
   }
 
@@ -4764,13 +4765,15 @@ void log_likelihood_slope(int min_nb_segment , int max_nb_segment , int penalty_
  *--------------------------------------------------------------*/
 
 Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentifier ,
-                                   int max_nb_segment , int *model_type , int criterion ,
-                                   int min_nb_segment , int penalty_shape_type , int output) const
+                                   int max_nb_segment , segment_model *model_type ,
+                                   model_selection_criterion criterion , int min_nb_segment ,
+                                   int penalty_shape_type , sequence_type output) const
 
 {
   bool status = true , bayesian;
   register int i , j;
-  int index , nb_segment , inb_sequence , *nb_parameter , inb_segment[1] , ilength[4] , itype[1];
+  int index , nb_segment , inb_sequence , *nb_parameter , inb_segment[1] , ilength[4];
+  variable_nature itype[1];
   double buff , segmentation_intercept , segmentation_slope , segmentation_slope_standard_deviation ,
          segmentation_residual_standard_deviation , intercept , slope , slope_standard_deviation ,
          residual_standard_deviation , scaling_factor , max_likelihood[4] , *segmentation_likelihood ,
@@ -4785,12 +4788,12 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
   oseq = NULL;
   error.init();
 
-/*  if (((index_parameter_type == TIME) && (index_interval->variance > 0.)) ||
-      (index_parameter_type == POSITION)) {
+/*  if (((index_param_type == TIME) && (index_interval->variance > 0.)) ||
+      (index_param_type == POSITION)) {
     status = false;
     error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
   }
-  if (index_parameter_type == POSITION) {
+  if (index_param_type == POSITION) {
     status = false;
     error.correction_update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE] , SEQ_index_parameter_word[TIME]);
   } */
@@ -4969,7 +4972,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
     }
 
     iseq = new Sequences(*this , 1 , &index);
-    seq = new Sequences(*iseq , 'a');
+    seq = new Sequences(*iseq , ADD_STATE_VARIABLE);
     delete iseq;
 
     // calcul des rangs pour les variables ordinales
