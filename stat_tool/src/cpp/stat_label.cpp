@@ -78,7 +78,7 @@ const char *STAT_word[] = {
   "VARIABLES" ,
 
   "DISTANCE" ,
-  "SYMBOLS" ,
+  "CATEGORIES" ,
   "PERIOD" ,
 
   "STATES" ,
@@ -141,7 +141,7 @@ const char *STAT_continuous_distribution_letter[] = {
 
 
 const char *STAT_variable_type_word[] = {
-  "SYMBOLIC" ,
+  "NOMINAL" ,
   "ORDINAL" ,
   "NUMERIC" ,
   "CIRCULAR"
@@ -149,9 +149,9 @@ const char *STAT_variable_type_word[] = {
 
 
 const char *STAT_variable_type_letter[] = {
-  "S" ,
+  "No" ,
   "O" ,
-  "N" ,
+  "Nu" ,
   "C"
 };
 
@@ -300,7 +300,7 @@ const char *STAT_label[] = {
 
   "information ratio" ,
   "clustering step" ,
-  "symbol" ,
+  "category" ,
 
   "vector" ,
   "vectors" ,
@@ -444,7 +444,7 @@ const char *STAT_parsing[] = {
   "bad variable index" ,
   "bad variable type" ,
 
-  "bad number of symbols" ,
+  "bad number of categories" ,
   "bad local distance" ,
   "triangle inequality not verified" ,
   "bad period value" ,
@@ -499,7 +499,7 @@ const char *STAT_error[] = {
   "complete time interval: bad minimum value" ,
   "forward recurrence time interval: bad minimum value" ,
   "no event observation period: bad minimum value" ,
-  "bad inter-event mean computation method" ,
+  "bad duration mean estimation method" ,
   "initial inter-event distribution support incompatible with data" ,
 
   "bad distribution index" ,
@@ -532,9 +532,9 @@ const char *STAT_error[] = {
   "smaller than" ,
   "greater than" ,
   "not allowed" ,
-  "bad number of symbols" ,
-  "non-consecutive symbols",
-  "missing symbol" ,
+  "bad number of categories" ,
+  "non-consecutive categories",
+  "missing category" ,
   "bad cluster limit" ,
   "bad information ratio: should be between 0 and 1" ,
   "null reference information: variance should be strictly positive" ,
