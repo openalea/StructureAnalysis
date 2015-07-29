@@ -40,7 +40,6 @@
 #define NONHOMOGENEOUS_MARKOV_H
 
 
-#include "stat_tool/regression.h"
 #include "sequences.h"
 
 
@@ -84,16 +83,19 @@ namespace sequence_analysis {
     void remove();
 
     Function();
-    Function(int iident , int length , double *iparameter);
-    Function(int iident , int length);
+    Function(stat_tool::parametric_function iident , int length , double *iparameter);
+    Function(stat_tool::parametric_function iident , int length);
     Function(const Function &function);
     ~Function();
     Function& operator=(const Function &function);
 
+    static Function* parsing(stat_tool::StatError &error , std::ifstream &in_file , int &line ,
+                             int length , double min = 0. , double max = 1.);
+
     std::ostream& ascii_print(std::ostream &os , bool exhaustive , bool file_flag ,
                               const stat_tool::Curves *curves = NULL) const;
     std::ostream& spreadsheet_print(std::ostream &os , const stat_tool::Curves *curves = NULL) const;
-    bool plot_print(const char *path , double residual_standard_deviation = D_DEFAULT) const;
+    bool plot_print(const char *path , double residual_standard_deviation = stat_tool::D_DEFAULT) const;
 
     double regression_square_sum_computation(double self_transition_mean) const;
     void residual_computation(const SelfTransition &self_transition);
@@ -101,10 +103,6 @@ namespace sequence_analysis {
     double residual_variance_computation(double residual_mean) const;
     double residual_square_sum_computation() const;
   };
-
-
-  Function* function_parsing(stat_tool::StatError &error , std::ifstream &in_file , int &line ,
-                             int length , double min = 0. , double max = 1.);
 
 
 
@@ -116,8 +114,6 @@ namespace sequence_analysis {
     friend class MarkovianSequences;
     friend class NonhomogeneousMarkovData;
 
-    friend NonhomogeneousMarkov* nonhomogeneous_markov_ascii_read(stat_tool::StatError &error ,
-                                                                  const char *path , int length);
     friend std::ostream& operator<<(std::ostream &os , const NonhomogeneousMarkov &markov)
     { return markov.ascii_write(os , markov.markov_data); }
 
@@ -146,13 +142,13 @@ namespace sequence_analysis {
     void index_state_distribution();
     void state_no_occurrence_probability(int state , double increment = LEAVE_INCREMENT);
     void state_first_occurrence_distribution(int state , int min_nb_value = 1 ,
-                                             double cumul_threshold = CUMUL_THRESHOLD);
-    void state_nb_pattern_mixture(int state , char pattern);
+                                             double cumul_threshold = stat_tool::CUMUL_THRESHOLD);
+    void state_nb_pattern_mixture(int state , count_pattern pattern);
 
   public :
 
     NonhomogeneousMarkov();
-    NonhomogeneousMarkov(int inb_state , int *ident);
+    NonhomogeneousMarkov(int inb_state , parametric_function *ident);
     NonhomogeneousMarkov(const stat_tool::Chain *pchain , const Function **pself_transition , int length);
     NonhomogeneousMarkov(const NonhomogeneousMarkov &markov , bool data_flag = true ,
                          bool characteristic_flag = true)
@@ -160,7 +156,11 @@ namespace sequence_analysis {
     ~NonhomogeneousMarkov();
     NonhomogeneousMarkov& operator=(const NonhomogeneousMarkov &markov);
 
-    DiscreteParametricModel* extract(stat_tool::StatError &error , int type , int state) const;
+    DiscreteParametricModel* extract(stat_tool::StatError &error ,
+                                     stat_tool::process_distribution dist_type , int state) const;
+
+    static NonhomogeneousMarkov* ascii_read(stat_tool::StatError &error , const char *path ,
+                                            int length = DEFAULT_LENGTH);
 
     std::ostream& line_write(std::ostream &os) const;
 
@@ -175,7 +175,7 @@ namespace sequence_analysis {
                                     bool length_flag = true);
 
     double likelihood_computation(const MarkovianSequences &seq ,
-                                  int index = I_DEFAULT) const;
+                                  int index = stat_tool::I_DEFAULT) const;
 
     NonhomogeneousMarkovData* simulation(stat_tool::StatError &error ,
                                          const stat_tool::FrequencyDistribution &hlength ,
@@ -193,10 +193,6 @@ namespace sequence_analysis {
     Function* get_self_transition(int state) const { return self_transition[state]; }
     CategoricalSequenceProcess* get_process() const { return process; }
   };
-
-
-  NonhomogeneousMarkov* nonhomogeneous_markov_ascii_read(stat_tool::StatError &error , const char *path ,
-                                                         int length = DEFAULT_LENGTH);
 
 
 
@@ -223,14 +219,15 @@ namespace sequence_analysis {
     NonhomogeneousMarkovData(const stat_tool::FrequencyDistribution &ihlength);
     NonhomogeneousMarkovData(const MarkovianSequences &seq);
     NonhomogeneousMarkovData(const NonhomogeneousMarkovData &seq , bool model_flag = true ,
-                             char transform = 'c')
+                             sequence_transformation transform = SEQUENCE_COPY)
     :MarkovianSequences(seq , transform) { copy(seq , model_flag); }
     ~NonhomogeneousMarkovData();
     NonhomogeneousMarkovData& operator=(const NonhomogeneousMarkovData &seq);
 
-    stat_tool::DiscreteDistributionData* extract(stat_tool::StatError &error , int type , int state) const;
-    NonhomogeneousMarkovData* remove_index_parameter(stat_tool::StatError &error) const;
+    stat_tool::DiscreteDistributionData* extract(stat_tool::StatError &error ,
+                                                 stat_tool::process_distribution histo_type , int state) const;
     NonhomogeneousMarkovData* explicit_index_parameter(stat_tool::StatError &error) const;
+    NonhomogeneousMarkovData* remove_index_parameter(stat_tool::StatError &error) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
     bool ascii_write(stat_tool::StatError &error , const char *path , bool exhaustive = false) const;
