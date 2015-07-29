@@ -126,7 +126,7 @@ double HiddenVariableOrderMarkov::likelihood_computation(const MarkovianSequence
 
         switch (type) {
 
-        case 'o' : {
+        case ORDINARY : {
           for (j = 1;j < nb_row;j++) {
             if (order[j] == 1) {
               forward[j] = initial[state[j][0]];
@@ -176,7 +176,7 @@ double HiddenVariableOrderMarkov::likelihood_computation(const MarkovianSequence
           break;
         }
 
-        case 'e' : {
+        case EQUILIBRIUM : {
           for (j = 1;j < nb_row;j++) {
             if (!child[j]) {
               forward[j] = initial[j];
@@ -471,7 +471,7 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_esti
 
     hmarkov = new HiddenVariableOrderMarkov(ihmarkov , false);
 
-    if (hmarkov->type == 'e') {
+    if (hmarkov->type == EQUILIBRIUM) {
       nb_terminal = (hmarkov->nb_row - 1) * (hmarkov->nb_state - 1) / hmarkov->nb_state + 1;
 
       for (i = 1;i < hmarkov->nb_row;i++) {
@@ -512,8 +512,7 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_esti
 
     auxiliary = new double[hmarkov->nb_row];
 
-    chain_reestim = new ChainReestimation<double>((hmarkov->type == 'o' ?  'o' : 'v') ,
-                                                  hmarkov->nb_state , hmarkov->nb_row);
+    chain_reestim = new ChainReestimation<double>(hmarkov->type , hmarkov->nb_state , hmarkov->nb_row);
 
     observation_reestim = new Reestimation<double>**[hmarkov->nb_output_process];
     for (i = 0;i < hmarkov->nb_output_process;i++) {
@@ -632,7 +631,7 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_esti
 
         switch (hmarkov->type) {
 
-        case 'o' : {
+        case ORDINARY : {
           for (j = 1;j < hmarkov->nb_row;j++) {
             if (hmarkov->order[j] == 1) {
               forward[0][j] = hmarkov->initial[hmarkov->state[j][0]];
@@ -682,7 +681,7 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_esti
           break;
         }
 
-        case 'e' : {
+        case EQUILIBRIUM : {
           for (j = 1;j < hmarkov->nb_row;j++) {
             if (!(hmarkov->child[j])) {
               forward[0][j] = hmarkov->initial[j];
@@ -898,7 +897,7 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_esti
 
         // accumulation des quantites de reestimation des probabilites initiales
 
-        if (hmarkov->type == 'o') {
+        if (hmarkov->type == ORDINARY) {
           for (j = 1;j < hmarkov->nb_row;j++) {
             if (hmarkov->order[j] == 1) {
               chain_reestim->initial[hmarkov->state[j][0]] += backward[j];
@@ -911,7 +910,7 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_esti
 
         // reestimation des probabilites initiales
 
-        if (hmarkov->type == 'o') {
+        if (hmarkov->type == ORDINARY) {
           reestimation(hmarkov->nb_state , chain_reestim->initial ,
                        hmarkov->initial , MIN_PROBABILITY , false);
         }
@@ -919,8 +918,8 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_esti
         // reestimation des probabilites de transition
 
         for (i = hmarkov->nb_row - 1;i >= 1;i--) {
-          if (hmarkov->memory_type[i] == COMPLETION) {
-/*          if ((hmarkov->memory_type[i] == COMPLETION) || ((hmarkov->type == 'o') &&
+          if (hmarkov->memo_type[i] == COMPLETION) {
+/*          if ((hmarkov->memo_type[i] == COMPLETION) || ((hmarkov->type == ORDINARY) &&
                  (global_initial_transition) && (hmarkov->order[i] > 1))) { */
             for (j = 0;j < hmarkov->nb_state;j++) {
               chain_reestim->transition[hmarkov->parent[i]][j] += chain_reestim->transition[i][j];
@@ -929,19 +928,19 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_esti
         }
 
         for (i = 1;i < hmarkov->nb_row;i++) {
-          if ((hmarkov->memory_type[i] == TERMINAL) || ((hmarkov->type == 'o') &&
-               (hmarkov->memory_type[i] == NON_TERMINAL))) {
+          if ((hmarkov->memo_type[i] == TERMINAL) || ((hmarkov->type == ORDINARY) &&
+               (hmarkov->memo_type[i] == NON_TERMINAL))) {
             reestimation(hmarkov->nb_state , chain_reestim->transition[i] ,
                          hmarkov->transition[i] , MIN_PROBABILITY , false);
           }
-          else if (hmarkov->memory_type[i] == COMPLETION) {
+          else if (hmarkov->memo_type[i] == COMPLETION) {
             for (j = 0;j < hmarkov->nb_state;j++) {
               hmarkov->transition[i][j] = hmarkov->transition[hmarkov->parent[i]][j];
             }
           }
         }
 
-        if (hmarkov->type == 'e') {
+        if (hmarkov->type == EQUILIBRIUM) {
           hmarkov->initial_probability_computation();
         }
 
@@ -1136,16 +1135,16 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_esti
 
       // reestimation des probabilites initiales
 
-      if (hmarkov->type == 'o') {
+      if (hmarkov->type == ORDINARY) {
         reestimation(hmarkov->nb_state , chain_reestim->initial ,
                      hmarkov->initial , MIN_PROBABILITY , true);
       }
 
       // reestimation des probabilites de transition
 
-      if ((hmarkov->type == 'o') && (global_initial_transition)) {
+      if ((hmarkov->type == ORDINARY) && (global_initial_transition)) {
         for (i = hmarkov->nb_row - 1;i >= 1;i--) {
-          if ((hmarkov->memory_type[i] != COMPLETION) && (hmarkov->order[i] > 1)) {
+          if ((hmarkov->memo_type[i] != COMPLETION) && (hmarkov->order[i] > 1)) {
             for (j = 0;j < hmarkov->nb_state;j++) {
               chain_reestim->transition[hmarkov->parent[i]][j] += chain_reestim->transition[i][j];
             }
@@ -1154,19 +1153,19 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_esti
       }
 
       for (i = 1;i < hmarkov->nb_row;i++) {
-        if ((hmarkov->memory_type[i] == TERMINAL) || ((hmarkov->type == 'o') &&
-             (hmarkov->memory_type[i] == NON_TERMINAL))) {
+        if ((hmarkov->memo_type[i] == TERMINAL) || ((hmarkov->type == ORDINARY) &&
+             (hmarkov->memo_type[i] == NON_TERMINAL))) {
           reestimation(hmarkov->nb_state , chain_reestim->transition[i] ,
                        hmarkov->transition[i] , MIN_PROBABILITY , true);
         }
-        else if (hmarkov->memory_type[i] == COMPLETION) {
+        else if (hmarkov->memo_type[i] == COMPLETION) {
           for (j = 0;j < hmarkov->nb_state;j++) {
             hmarkov->transition[i][j] = hmarkov->transition[hmarkov->parent[i]][j];
           }
         }
       }
 
-      if (hmarkov->type == 'e') {
+      if (hmarkov->type == EQUILIBRIUM) {
         hmarkov->initial_probability_computation();
       }
 
@@ -1245,7 +1244,8 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_esti
 
     else {
       if (state_sequence) {
-        hmarkov->markov_data = new VariableOrderMarkovData(*this , 'a' , (hmarkov->type == 'e' ? true : false));
+        hmarkov->markov_data = new VariableOrderMarkovData(*this , ADD_STATE_VARIABLE ,
+                                                           (hmarkov->type == EQUILIBRIUM ? true : false));
         seq = hmarkov->markov_data;
 
         for (i = 0;i < hmarkov->nb_output_process;i++) {
@@ -1315,7 +1315,8 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_esti
       }
 
       else {
-        hmarkov->markov_data = new VariableOrderMarkovData(*this , 'c' , (hmarkov->type == 'e' ? true : false));
+        hmarkov->markov_data = new VariableOrderMarkovData(*this , SEQUENCE_COPY ,
+                                                           (hmarkov->type == EQUILIBRIUM ? true : false));
         seq = hmarkov->markov_data;
         if (seq->type[0] == STATE) {
           seq->state_variable_init(INT_VALUE);
@@ -1369,19 +1370,19 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_esti
 
       switch (hmarkov->type) {
 
-      case 'o' : {
+      case ORDINARY : {
         weight = hmarkov->state_process->weight_computation();
         break;
       }
 
-      case 'e' : {
+      case EQUILIBRIUM : {
         weight = new Distribution(hmarkov->nb_state);
 
         for (i = 0;i < hmarkov->nb_state;i++) {
           weight->mass[i] = 0.;
         }
         for (i = 1;i < hmarkov->nb_row;i++) {
-          if ((hmarkov->memory_type[i] == TERMINAL) || (hmarkov->memory_type[i] == COMPLETION)) {
+          if ((hmarkov->memo_type[i] == TERMINAL) || (hmarkov->memo_type[i] == COMPLETION)) {
             weight->mass[hmarkov->state[i][0]] += hmarkov->initial[i];
           }
         }
@@ -1565,7 +1566,7 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_stoc
 
     hmarkov = new HiddenVariableOrderMarkov(ihmarkov , false);
 
-    if (hmarkov->type == 'e') {
+    if (hmarkov->type == EQUILIBRIUM) {
       nb_terminal = (hmarkov->nb_row - 1) * (hmarkov->nb_state - 1) / hmarkov->nb_state + 1;
 
       for (i = 1;i < hmarkov->nb_row;i++) {
@@ -1607,8 +1608,7 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_stoc
 
     state_seq = new int[max_length];
 
-    chain_reestim = new ChainReestimation<double>((hmarkov->type == 'o' ?  'o' : 'v') ,
-                                                  hmarkov->nb_state , hmarkov->nb_row);
+    chain_reestim = new ChainReestimation<double>(hmarkov->type , hmarkov->nb_state , hmarkov->nb_row);
 
     observation_reestim = new Reestimation<double>**[hmarkov->nb_output_process];
     for (i = 0;i < hmarkov->nb_output_process;i++) {
@@ -1725,7 +1725,7 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_stoc
 
         switch (hmarkov->type) {
 
-        case 'o' : {
+        case ORDINARY : {
           for (j = 1;j < hmarkov->nb_row;j++) {
             if (hmarkov->order[j] == 1) {
               forward[0][j] = hmarkov->initial[hmarkov->state[j][0]];
@@ -1775,7 +1775,7 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_stoc
           break;
         }
 
-        case 'e' : {
+        case EQUILIBRIUM : {
           for (j = 1;j < hmarkov->nb_row;j++) {
             if (!(hmarkov->child[j])) {
               forward[0][j] = hmarkov->initial[j];
@@ -1980,7 +1980,7 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_stoc
 
           // accumulation des quantites de reestimation des probabilites initiales
 
-          if (hmarkov->type == 'o') {
+          if (hmarkov->type == ORDINARY) {
             (chain_reestim->initial[*pstate])++;
           }
         }
@@ -1990,7 +1990,7 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_stoc
 
         // reestimation des probabilites initiales
 
-        if (hmarkov->type == 'o') {
+        if (hmarkov->type == ORDINARY) {
           reestimation(hmarkov->nb_state , chain_reestim->initial ,
                        hmarkov->initial , MIN_PROBABILITY , false);
         }
@@ -1998,8 +1998,8 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_stoc
         // reestimation des probabilites de transition
 
         for (i = hmarkov->nb_row - 1;i >= 1;i--) {
-          if (hmarkov->memory_type[i] == COMPLETION) {
-/*          if ((hmarkov->memory_type[i] == COMPLETION) || ((hmarkov->type == 'o') &&
+          if (hmarkov->memo_type[i] == COMPLETION) {
+/*          if ((hmarkov->memo_type[i] == COMPLETION) || ((hmarkov->type == ORDINARY) &&
                  (global_initial_transition) && (hmarkov->order[i] > 1))) { */
             for (j = 0;j < hmarkov->nb_state;j++) {
               chain_reestim->transition[hmarkov->parent[i]][j] += chain_reestim->transition[i][j];
@@ -2008,19 +2008,19 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_stoc
         }
 
         for (i = 1;i < hmarkov->nb_row;i++) {
-          if ((hmarkov->memory_type[i] == TERMINAL) || ((hmarkov->type == 'o') &&
-               (hmarkov->memory_type[i] == NON_TERMINAL))) {
+          if ((hmarkov->memo_type[i] == TERMINAL) || ((hmarkov->type == ORDINARY) &&
+               (hmarkov->memo_type[i] == NON_TERMINAL))) {
             reestimation(hmarkov->nb_state , chain_reestim->transition[i] ,
                          hmarkov->transition[i] , MIN_PROBABILITY , false);
           }
-          else if (hmarkov->memory_type[i] == COMPLETION) {
+          else if (hmarkov->memo_type[i] == COMPLETION) {
             for (j = 0;j < hmarkov->nb_state;j++) {
               hmarkov->transition[i][j] = hmarkov->transition[hmarkov->parent[i]][j];
             }
           }
         }
 
-        if (hmarkov->type == 'e') {
+        if (hmarkov->type == EQUILIBRIUM) {
           hmarkov->initial_probability_computation();
         }
 
@@ -2212,16 +2212,16 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_stoc
 
       // reestimation des probabilites initiales
 
-      if (hmarkov->type == 'o') {
+      if (hmarkov->type == ORDINARY) {
         reestimation(hmarkov->nb_state , chain_reestim->initial ,
                      hmarkov->initial , MIN_PROBABILITY , true);
       }
 
       // reestimation des probabilites de transition
 
-      if ((hmarkov->type == 'o') && (global_initial_transition)) {
+      if ((hmarkov->type == ORDINARY) && (global_initial_transition)) {
         for (i = hmarkov->nb_row - 1;i >= 1;i--) {
-          if ((hmarkov->memory_type[i] != COMPLETION) && (hmarkov->order[i] > 1)) {
+          if ((hmarkov->memo_type[i] != COMPLETION) && (hmarkov->order[i] > 1)) {
             for (j = 0;j < hmarkov->nb_state;j++) {
               chain_reestim->transition[hmarkov->parent[i]][j] += chain_reestim->transition[i][j];
             }
@@ -2230,19 +2230,19 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_stoc
       }
 
       for (i = 1;i < hmarkov->nb_row;i++) {
-        if ((hmarkov->memory_type[i] == TERMINAL) || ((hmarkov->type == 'o') &&
-             (hmarkov->memory_type[i] == NON_TERMINAL))) {
+        if ((hmarkov->memo_type[i] == TERMINAL) || ((hmarkov->type == ORDINARY) &&
+             (hmarkov->memo_type[i] == NON_TERMINAL))) {
           reestimation(hmarkov->nb_state , chain_reestim->transition[i] ,
                        hmarkov->transition[i] , MIN_PROBABILITY , true);
         }
-        else if (hmarkov->memory_type[i] == COMPLETION) {
+        else if (hmarkov->memo_type[i] == COMPLETION) {
           for (j = 0;j < hmarkov->nb_state;j++) {
             hmarkov->transition[i][j] = hmarkov->transition[hmarkov->parent[i]][j];
           }
         }
       }
 
-      if (hmarkov->type == 'e') {
+      if (hmarkov->type == EQUILIBRIUM) {
         hmarkov->initial_probability_computation();
       }
 
@@ -2320,7 +2320,8 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_stoc
 
     else {
       if  (state_sequence) {
-        hmarkov->markov_data = new VariableOrderMarkovData(*this , 'a' , (hmarkov->type == 'e' ? true : false));
+        hmarkov->markov_data = new VariableOrderMarkovData(*this , ADD_STATE_VARIABLE ,
+                                                           (hmarkov->type == EQUILIBRIUM ? true : false));
         seq = hmarkov->markov_data;
 
         for (i = 0;i < hmarkov->nb_output_process;i++) {
@@ -2390,7 +2391,8 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_stoc
       }
 
       else {
-        hmarkov->markov_data = new VariableOrderMarkovData(*this , 'c' , (hmarkov->type == 'e' ? true : false));
+        hmarkov->markov_data = new VariableOrderMarkovData(*this , SEQUENCE_COPY ,
+                                                           (hmarkov->type == EQUILIBRIUM ? true : false));
         seq = hmarkov->markov_data;
         if (seq->type[0] == STATE) {
           seq->state_variable_init(INT_VALUE);
@@ -2444,19 +2446,19 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_stoc
 
       switch (hmarkov->type) {
 
-      case 'o' : {
+      case ORDINARY : {
         weight = hmarkov->state_process->weight_computation();
         break;
       }
 
-      case 'e' : {
+      case EQUILIBRIUM : {
         weight = new Distribution(hmarkov->nb_state);
 
         for (i = 0;i < hmarkov->nb_state;i++) {
           weight->mass[i] = 0.;
         }
         for (i = 1;i < hmarkov->nb_row;i++) {
-          if ((hmarkov->memory_type[i] == TERMINAL) || (hmarkov->memory_type[i] == COMPLETION)) {
+          if ((hmarkov->memo_type[i] == TERMINAL) || (hmarkov->memo_type[i] == COMPLETION)) {
             weight->mass[hmarkov->state[i][0]] += hmarkov->initial[i];
           }
         }
