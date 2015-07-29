@@ -359,20 +359,20 @@ void Curves::smooth(const Curves &curves , int max_frequency)
  *  Constructeur par copie de la classe Curves.
  *
  *  arguments : reference sur un objet Curves,
- *              type de transformation ('c' : copie , 's' : lissage),
+ *              type de transformation (CURVE_COPY/SMOOTHING),
  *              seuil sur les frequences pour le lissage.
  *
  *--------------------------------------------------------------*/
 
-Curves::Curves(const Curves &curves , char transform , int max_frequency)
+Curves::Curves(const Curves &curves , curve_transformation transform , int max_frequency)
 
 {
   if (!(curves.frequency)) {
-    transform = 'c';
+    transform = CURVE_COPY;
   }
 
   switch (transform) {
-  case 's' :
+  case SMOOTHING :
     smooth(curves , max_frequency);
     break;
   default :
