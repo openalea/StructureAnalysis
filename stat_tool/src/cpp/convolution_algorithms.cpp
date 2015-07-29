@@ -160,8 +160,9 @@ void Convolution::expectation_step(const FrequencyDistribution &histo ,
 Convolution* FrequencyDistribution::convolution_estimation(StatError &error , ostream &os ,
                                                            const DiscreteParametric &known_dist ,
                                                            const DiscreteParametric &unknown_dist ,
-                                                           int estimator , int nb_iter , double weight ,
-                                                           int penalty_type , int outside) const
+                                                           estimation_criterion estimator , int nb_iter ,
+                                                           double weight , penalty_type pen_type ,
+                                                           side_effect outside) const
 
 {
   bool status = true , dist_flag[2];
@@ -208,7 +209,7 @@ Convolution* FrequencyDistribution::convolution_estimation(StatError &error , os
       penalty = new double[convol->distribution[1]->alloc_nb_value];
 
       if (weight == D_DEFAULT) {
-        if (penalty_type != ENTROPY) {
+        if (pen_type != ENTROPY) {
           weight = CONVOLUTION_DIFFERENCE_WEIGHT;
         }
         else {
@@ -251,7 +252,7 @@ Convolution* FrequencyDistribution::convolution_estimation(StatError &error , os
       }
       else {
         reestim[1]->penalized_likelihood_estimation(convol->distribution[1] , weight ,
-                                                    penalty_type , penalty , outside);
+                                                    pen_type , penalty , outside);
       }
 
       // calcul du produit de convolution estime et de la log-vraisemblance correspondante
@@ -402,9 +403,9 @@ Convolution* FrequencyDistribution::convolution_estimation(StatError &error , os
 
 Convolution* FrequencyDistribution::convolution_estimation(StatError &error , ostream &os ,
                                                            const DiscreteParametric &known_dist ,
-                                                           int min_inf_bound , int estimator ,
+                                                           int min_inf_bound , estimation_criterion estimator ,
                                                            int nb_iter , double weight ,
-                                                           int penalty_type , int outside) const
+                                                           penalty_type pen_type , side_effect outside) const
 
 {
   bool status = true;
@@ -447,7 +448,7 @@ Convolution* FrequencyDistribution::convolution_estimation(StatError &error , os
 #   endif
 
     convol = convolution_estimation(error , os , known_dist , *unknown_dist , estimator ,
-                                    nb_iter , weight , penalty_type , outside);
+                                    nb_iter , weight , pen_type , outside);
 
     delete unknown_dist;
   }
