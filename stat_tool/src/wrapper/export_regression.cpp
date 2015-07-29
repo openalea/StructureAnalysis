@@ -46,7 +46,7 @@ class RegressionKernelWrap
 public:
 
   static boost::shared_ptr<RegressionKernel>
-  regression_constructor(int ident, int min_value, int max_value)
+  regression_constructor(parametric_function ident, int min_value, int max_value)
   {
     RegressionKernel *ret = NULL;
     ret = new RegressionKernel(ident, min_value, max_value);
@@ -111,7 +111,7 @@ void class_regression()
 {
   class_< Regression, bases<StatInterface> >
   ("_Regression", "Regression class")
-    .def(init <int, int, int, const Vectors&>())
+    .def(init <parametric_function, int, int, const Vectors&>())
     .def(init <const Regression &>())
 
     .def(self_ns::str(self)) // __str__
