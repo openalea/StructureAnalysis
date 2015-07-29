@@ -288,7 +288,7 @@ void Vectors::gamma_estimation(Type **component_vector_count , int variable ,
 template <typename Type>
 void Vectors::tied_gamma_estimation(Type **component_vector_count , int variable ,
                                     ContinuousParametricProcess *process ,
-                                    int variance_factor , int iter) const
+                                    tying_rule variance_factor , int iter) const
 
 {
   register int i , j;
@@ -776,7 +776,7 @@ void Vectors::gaussian_estimation(Type **component_vector_count , int variable ,
 template <typename Type>
 void Vectors::tied_gaussian_estimation(Type **component_vector_count , int variable ,
                                        ContinuousParametricProcess *process ,
-                                       int variance_factor) const
+                                       tying_rule variance_factor) const
 
 {
   register int i , j;
