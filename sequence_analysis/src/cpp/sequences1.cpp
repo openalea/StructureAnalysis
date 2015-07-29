@@ -71,7 +71,7 @@ Sequences::Sequences()
 
   vertex_identifier = NULL;
 
-  index_parameter_type = IMPLICIT_TYPE;
+  index_param_type = IMPLICIT_TYPE;
   index_parameter_distribution = NULL;
   index_interval = NULL;
   index_parameter = NULL;
@@ -121,14 +121,14 @@ Sequences::Sequences(int inb_sequence , int inb_variable)
 
   vertex_identifier = NULL;
 
-  index_parameter_type = IMPLICIT_TYPE;
+  index_param_type = IMPLICIT_TYPE;
   index_parameter_distribution = NULL;
   index_interval = NULL;
   index_parameter = NULL;
 
   nb_variable = inb_variable;
 
-  type = new int[nb_variable];
+  type = new variable_nature[nb_variable];
   min_value = new double[nb_variable];
   max_value = new double[nb_variable];
   marginal_distribution = new FrequencyDistribution*[nb_variable];
@@ -167,8 +167,8 @@ Sequences::Sequences(int inb_sequence , int inb_variable)
  *--------------------------------------------------------------*/
 
 void Sequences::init(int inb_sequence , int *iidentifier , int *ilength ,
-                     int **ivertex_identifier , int iindex_parameter_type ,
-                     int inb_variable , int *itype , bool vertex_identifier_copy ,
+                     int **ivertex_identifier , index_parameter_type iindex_param_type ,
+                     int inb_variable , variable_nature *itype , bool vertex_identifier_copy ,
                      bool init_flag)
 
 {
@@ -218,14 +218,14 @@ void Sequences::init(int inb_sequence , int *iidentifier , int *ilength ,
     vertex_identifier = NULL;
   }
 
-  index_parameter_type = iindex_parameter_type;
+  index_param_type = iindex_param_type;
   index_parameter_distribution = NULL;
   index_interval = NULL;
 
-  if (index_parameter_type != IMPLICIT_TYPE) {
+  if (index_param_type != IMPLICIT_TYPE) {
     index_parameter = new int*[nb_sequence];
     for (i = 0;i < nb_sequence;i++) {
-      blength = ((index_parameter_type == POSITION) || (index_parameter_type == POSITION_INTERVAL) ? length[i] + 1 : length[i]);
+      blength = ((index_param_type == POSITION) || (index_param_type == POSITION_INTERVAL) ? length[i] + 1 : length[i]);
       index_parameter[i] = new int[blength];
 
       if (init_flag) {
@@ -242,7 +242,7 @@ void Sequences::init(int inb_sequence , int *iidentifier , int *ilength ,
 
   nb_variable = inb_variable;
 
-  type = new int[nb_variable];
+  type = new variable_nature[nb_variable];
   min_value = new double[nb_variable];
   max_value = new double[nb_variable];
   marginal_distribution = new FrequencyDistribution*[nb_variable];
@@ -329,14 +329,14 @@ void Sequences::init(int inb_sequence , int *iidentifier , int *ilength ,
 
   vertex_identifier = NULL;
 
-  index_parameter_type = IMPLICIT_TYPE;
+  index_param_type = IMPLICIT_TYPE;
   index_parameter_distribution = NULL;
   index_interval = NULL;
   index_parameter = NULL;
 
   nb_variable = inb_variable;
 
-  type = new int[nb_variable];
+  type = new variable_nature[nb_variable];
   min_value = new double[nb_variable];
   max_value = new double[nb_variable];
   marginal_distribution = new FrequencyDistribution*[nb_variable];
@@ -381,36 +381,37 @@ void Sequences::init(int inb_sequence , int *iidentifier , int *ilength ,
  *--------------------------------------------------------------*/
 
 Sequences::Sequences(int inb_sequence , int *iidentifier , int *ilength ,
-                     int iindex_parameter_type , int inb_variable , int itype ,
-                     int ***iint_sequence)
+                     index_parameter_type iindex_param_type , int inb_variable ,
+                     variable_nature itype , int ***iint_sequence)
 
 {
   register int i , j , k;
-  int *btype , *pisequence , *cisequence;
+  int *pisequence , *cisequence;
+  variable_nature *btype;
 
 
-  btype = new int[inb_variable];
+  btype = new variable_nature[inb_variable];
   for (i = 0;i < inb_variable;i++) {
     btype[i] = itype;
   }
 
-  init(inb_sequence , iidentifier , ilength , NULL , iindex_parameter_type ,
+  init(inb_sequence , iidentifier , ilength , NULL , iindex_param_type ,
        inb_variable , btype , false , false);
   delete [] btype;
 
-//  if (index_parameter_type != IMPLICIT_TYPE) {
+//  if (index_param_type != IMPLICIT_TYPE) {
   if (index_parameter) {
     for (i = 0;i < nb_sequence;i++) {
-      for (j = 0;j < (index_parameter_type == POSITION ? length[i] + 1 : length[i]);j++) {
+      for (j = 0;j < (index_param_type == POSITION ? length[i] + 1 : length[i]);j++) {
         index_parameter[i][j] = iint_sequence[i][0][j];
       }
     }
 
     build_index_parameter_frequency_distribution();
 
-//    if ((index_parameter_type == TIME) || ((index_parameter_type == POSITION) &&
+//    if ((index_param_type == TIME) || ((index_param_type == POSITION) &&
 //        (type[0] != NB_INTERNODE))) {
-    if ((index_parameter_type == TIME) || (index_parameter_type == POSITION)) {
+    if ((index_param_type == TIME) || (index_param_type == POSITION)) {
       index_interval_computation();
     }
   }
@@ -454,10 +455,10 @@ Sequences::Sequences(int inb_sequence , int *iidentifier , int *ilength ,
 
 {
   register int i , j , k;
-  int *itype;
+  variable_nature *itype;
 
 
-  itype = new int[inb_variable];
+  itype = new variable_nature[inb_variable];
   for (i = 0;i < inb_variable;i++) {
     itype[i] = REAL_VALUE;
   }
@@ -496,8 +497,8 @@ Sequences::Sequences(int inb_sequence , int *iidentifier , int *ilength ,
  *--------------------------------------------------------------*/
 
 Sequences::Sequences(int inb_sequence , int *iidentifier , int *ilength ,
-                     int **ivertex_identifier , int iindex_parameter_type ,
-                     int **iindex_parameter , int inb_variable , int *itype ,
+                     int **ivertex_identifier , index_parameter_type iindex_param_type ,
+                     int **iindex_parameter , int inb_variable , variable_nature *itype ,
                      int ***iint_sequence , double ***ireal_sequence)
 
 {
@@ -505,19 +506,19 @@ Sequences::Sequences(int inb_sequence , int *iidentifier , int *ilength ,
 
 
   init(inb_sequence , iidentifier , ilength , ivertex_identifier ,
-       iindex_parameter_type , inb_variable , itype , true , false);
+       iindex_param_type , inb_variable , itype , true , false);
 
-//  if (index_parameter_type != IMPLICIT_TYPE) {
+//  if (index_param_type != IMPLICIT_TYPE) {
   if (index_parameter) {
     for (i = 0;i < nb_sequence;i++) {
-      for (j = 0;j < (index_parameter_type == POSITION ? length[i] + 1 : length[i]);j++) {
+      for (j = 0;j < (index_param_type == POSITION ? length[i] + 1 : length[i]);j++) {
         index_parameter[i][j] = iindex_parameter[i][j];
       }
     }
 
     build_index_parameter_frequency_distribution();
 
-    if ((index_parameter_type == TIME) || (index_parameter_type == POSITION)) {
+    if ((index_param_type == TIME) || (index_param_type == POSITION)) {
       index_interval_computation();
     }
   }
@@ -575,7 +576,7 @@ Sequences::Sequences(int inb_sequence , int *iidentifier , int *ilength ,
  *--------------------------------------------------------------*/
 
 Sequences::Sequences(const FrequencyDistribution &ilength_distribution ,
-                     int inb_variable , int *itype , bool init_flag)
+                     int inb_variable , variable_nature *itype , bool init_flag)
 
 {
   register int i , j , k;
@@ -603,14 +604,14 @@ Sequences::Sequences(const FrequencyDistribution &ilength_distribution ,
 
   vertex_identifier = NULL;
 
-  index_parameter_type = IMPLICIT_TYPE;
+  index_param_type = IMPLICIT_TYPE;
   index_parameter_distribution = NULL;
   index_interval = NULL;
   index_parameter = NULL;
 
   nb_variable = inb_variable;
 
-  type = new int[nb_variable];
+  type = new variable_nature[nb_variable];
   min_value = new double[nb_variable];
   max_value = new double[nb_variable];
   marginal_distribution = new FrequencyDistribution*[nb_variable];
@@ -700,14 +701,14 @@ Sequences::Sequences(const RenewalData &timev)
 
   vertex_identifier = NULL;
 
-  index_parameter_type = IMPLICIT_TYPE;
+  index_param_type = IMPLICIT_TYPE;
   index_parameter_distribution = NULL;
   index_interval = NULL;
   index_parameter = NULL;
 
   nb_variable = 1;
 
-  type = new int[nb_variable];
+  type = new variable_nature[nb_variable];
   type[0] = INT_VALUE;
 
   min_value = new double[nb_variable];
@@ -745,7 +746,7 @@ Sequences::Sequences(const RenewalData &timev)
  *
  *--------------------------------------------------------------*/
 
-Sequences::Sequences(const Sequences &seq , int variable , int itype)
+Sequences::Sequences(const Sequences &seq , int variable , variable_nature itype)
 
 {
   register int i , j , k;
@@ -783,7 +784,7 @@ Sequences::Sequences(const Sequences &seq , int variable , int itype)
     vertex_identifier = NULL;
   }
 
-  index_parameter_type = seq.index_parameter_type;
+  index_param_type = seq.index_param_type;
 
   if (seq.index_parameter_distribution) {
     index_parameter_distribution = new FrequencyDistribution(*(seq.index_parameter_distribution));
@@ -802,7 +803,7 @@ Sequences::Sequences(const Sequences &seq , int variable , int itype)
   if (seq.index_parameter) {
     index_parameter = new int*[nb_sequence];
     for (i = 0;i < nb_sequence;i++) {
-      blength = (index_parameter_type == POSITION ? length[i] + 1 : length[i]);
+      blength = (index_param_type == POSITION ? length[i] + 1 : length[i]);
       index_parameter[i] = new int[blength];
       for (j = 0;j < blength;j++) {
         index_parameter[i][j] = seq.index_parameter[i][j];
@@ -816,7 +817,7 @@ Sequences::Sequences(const Sequences &seq , int variable , int itype)
 
   nb_variable = seq.nb_variable;
 
-  type = new int[nb_variable];
+  type = new variable_nature[nb_variable];
   min_value = new double[nb_variable];
   max_value = new double[nb_variable];
   marginal_distribution = new FrequencyDistribution*[nb_variable];
@@ -930,13 +931,13 @@ Sequences::Sequences(const Sequences &seq , int inb_sequence , int *index)
     vertex_identifier = NULL;
   }
 
-  index_parameter_type = seq.index_parameter_type;
+  index_param_type = seq.index_param_type;
 
-//  if (index_parameter_type != IMPLICIT_TYPE) {
+//  if (index_param_type != IMPLICIT_TYPE) {
   if (seq.index_parameter) {
     index_parameter = new int*[nb_sequence];
     for (i = 0;i < nb_sequence;i++) {
-      blength = (index_parameter_type == POSITION ? length[i] + 1 : length[i]);
+      blength = (index_param_type == POSITION ? length[i] + 1 : length[i]);
       index_parameter[i] = new int[blength];
       for (j = 0;j < blength;j++) {
         index_parameter[i][j] = seq.index_parameter[index[i]][j];
@@ -954,7 +955,7 @@ Sequences::Sequences(const Sequences &seq , int inb_sequence , int *index)
 
   nb_variable = seq.nb_variable;
 
-  type = new int[nb_variable];
+  type = new variable_nature[nb_variable];
   min_value = new double[nb_variable];
   max_value = new double[nb_variable];
   marginal_distribution = new FrequencyDistribution*[nb_variable];
@@ -1059,7 +1060,7 @@ Sequences::Sequences(const Sequences &seq , bool *auxiliary)
     vertex_identifier = NULL;
   }
 
-  index_parameter_type = seq.index_parameter_type;
+  index_param_type = seq.index_param_type;
 
   if (seq.index_parameter_distribution) {
     index_parameter_distribution = new FrequencyDistribution(*(seq.index_parameter_distribution));
@@ -1078,7 +1079,7 @@ Sequences::Sequences(const Sequences &seq , bool *auxiliary)
   if (seq.index_parameter) {
     index_parameter = new int*[nb_sequence];
     for (i = 0;i < nb_sequence;i++) {
-      blength = (index_parameter_type == POSITION ? length[i] + 1 : length[i]);
+      blength = (index_param_type == POSITION ? length[i] + 1 : length[i]);
       index_parameter[i] = new int[blength];
       for (j = 0;j < blength;j++) {
         index_parameter[i][j] = seq.index_parameter[i][j];
@@ -1097,7 +1098,7 @@ Sequences::Sequences(const Sequences &seq , bool *auxiliary)
     }
   }
 
-  type = new int[nb_variable];
+  type = new variable_nature[nb_variable];
   min_value = new double[nb_variable];
   max_value = new double[nb_variable];
   marginal_distribution = new FrequencyDistribution*[nb_variable];
@@ -1218,7 +1219,7 @@ void Sequences::copy(const Sequences &seq)
     vertex_identifier = NULL;
   }
 
-  index_parameter_type = seq.index_parameter_type;
+  index_param_type = seq.index_param_type;
 
   if (seq.index_parameter_distribution) {
     index_parameter_distribution = new FrequencyDistribution(*(seq.index_parameter_distribution));
@@ -1237,7 +1238,7 @@ void Sequences::copy(const Sequences &seq)
   if (seq.index_parameter) {
     index_parameter = new int*[nb_sequence];
     for (i = 0;i < nb_sequence;i++) {
-      blength = (index_parameter_type == POSITION ? length[i] + 1 : length[i]);
+      blength = (index_param_type == POSITION ? length[i] + 1 : length[i]);
       index_parameter[i] = new int[blength];
       for (j = 0;j < blength;j++) {
         index_parameter[i][j] = seq.index_parameter[i][j];
@@ -1251,7 +1252,7 @@ void Sequences::copy(const Sequences &seq)
 
   nb_variable = seq.nb_variable;
 
-  type = new int[nb_variable];
+  type = new variable_nature[nb_variable];
   min_value = new double[nb_variable];
   max_value = new double[nb_variable];
   marginal_distribution = new FrequencyDistribution*[nb_variable];
@@ -1356,7 +1357,7 @@ void Sequences::reverse(const Sequences &seq)
     vertex_identifier = NULL;
   }
 
-  index_parameter_type = seq.index_parameter_type;
+  index_param_type = seq.index_param_type;
 
   if (seq.index_parameter_distribution) {
     index_parameter_distribution = new FrequencyDistribution(*(seq.index_parameter_distribution));
@@ -1375,11 +1376,11 @@ void Sequences::reverse(const Sequences &seq)
   if (seq.index_parameter) {
     index_parameter = new int*[nb_sequence];
     for (i = 0;i < nb_sequence;i++) {
-      blength = (index_parameter_type == POSITION ? length[i] + 1 : length[i]);
+      blength = (index_param_type == POSITION ? length[i] + 1 : length[i]);
       index_parameter[i] = new int[blength];
       pindex_param = index_parameter[i];
 
-      if (index_parameter_type == POSITION) {
+      if (index_param_type == POSITION) {
         cindex_param = seq.index_parameter[i] + length[i];
         end_position = *cindex_param--;
         for (j = 0;j < length[i];j++) {
@@ -1388,7 +1389,7 @@ void Sequences::reverse(const Sequences &seq)
         *pindex_param = end_position;
       }
 
-      else if (index_parameter_type == TIME) {
+      else if (index_param_type == TIME) {
         cindex_param = seq.index_parameter[i] + length[i] - 1;
         for (j = 0;j < length[i];j++) {
           *pindex_param++ = index_parameter_distribution->nb_value - *cindex_param--;
@@ -1410,7 +1411,7 @@ void Sequences::reverse(const Sequences &seq)
 
   nb_variable = seq.nb_variable;
 
-  type = new int[nb_variable];
+  type = new variable_nature[nb_variable];
   min_value = new double[nb_variable];
   max_value = new double[nb_variable];
   marginal_distribution = new FrequencyDistribution*[nb_variable];
@@ -1514,7 +1515,7 @@ void Sequences::add_state_variable(const Sequences &seq)
     vertex_identifier = NULL;
   }
 
-  index_parameter_type = seq.index_parameter_type;
+  index_param_type = seq.index_param_type;
 
   if (seq.index_parameter_distribution) {
     index_parameter_distribution = new FrequencyDistribution(*(seq.index_parameter_distribution));
@@ -1533,7 +1534,7 @@ void Sequences::add_state_variable(const Sequences &seq)
   if (seq.index_parameter) {
     index_parameter = new int*[nb_sequence];
     for (i = 0;i < nb_sequence;i++) {
-      blength = (index_parameter_type == POSITION ? length[i] + 1 : length[i]);
+      blength = (index_param_type == POSITION ? length[i] + 1 : length[i]);
       index_parameter[i] = new int[blength];
       for (j = 0;j < blength;j++) {
         index_parameter[i][j] = seq.index_parameter[i][j];
@@ -1547,7 +1548,7 @@ void Sequences::add_state_variable(const Sequences &seq)
 
   nb_variable = seq.nb_variable + 1;
 
-  type = new int[nb_variable];
+  type = new variable_nature[nb_variable];
   min_value = new double[nb_variable];
   max_value = new double[nb_variable];
   marginal_distribution = new FrequencyDistribution*[nb_variable];
@@ -1617,6 +1618,38 @@ void Sequences::add_state_variable(const Sequences &seq)
 
 /*--------------------------------------------------------------*
  *
+ *  Copie d'un objet Sequences avec transformation du parametre d'index implicite
+ *  en parametre d'index explicite.
+ *
+ *  argument : reference sur un objet Sequences.
+ *
+ *--------------------------------------------------------------*/
+
+void Sequences::explicit_index_parameter(const Sequences &seq)
+
+{
+  register int i , j;
+
+
+  Sequences::copy(seq);
+
+  index_param_type = TIME;
+
+  index_parameter = new int*[nb_sequence];
+  for (i = 0;i < nb_sequence;i++) {
+    index_parameter[i] = new int[length[i]];
+    for (j = 0;j < length[i];j++) {
+      index_parameter[i][j] = j;
+    }
+  }
+
+  build_index_parameter_frequency_distribution();
+  index_interval_computation();
+}
+
+
+/*--------------------------------------------------------------*
+ *
  *  Copie d'un objet Sequences avec suppression du parametre d'index.
  *
  *  argument : reference sur un objet Sequences.
@@ -1660,14 +1693,14 @@ void Sequences::remove_index_parameter(const Sequences &seq)
     vertex_identifier = NULL;
   }
 
-  index_parameter_type = IMPLICIT_TYPE;
+  index_param_type = IMPLICIT_TYPE;
   index_parameter_distribution = NULL;
   index_interval = NULL;
   index_parameter = NULL;
 
   nb_variable = seq.nb_variable;
 
-  type = new int[nb_variable];
+  type = new variable_nature[nb_variable];
   min_value = new double[nb_variable];
   max_value = new double[nb_variable];
   marginal_distribution = new FrequencyDistribution*[nb_variable];
@@ -1723,61 +1756,27 @@ void Sequences::remove_index_parameter(const Sequences &seq)
 
 /*--------------------------------------------------------------*
  *
- *  Copie d'un objet Sequences avec transformation du parametre d'index implicite
- *  en parametre d'index explicite.
- *
- *  argument : reference sur un objet Sequences.
- *
- *--------------------------------------------------------------*/
-
-void Sequences::explicit_index_parameter(const Sequences &seq)
-
-{
-  register int i , j;
-
-
-  Sequences::copy(seq);
-
-  index_parameter_type = TIME;
-
-  index_parameter = new int*[nb_sequence];
-  for (i = 0;i < nb_sequence;i++) {
-    index_parameter[i] = new int[length[i]];
-    for (j = 0;j < length[i];j++) {
-      index_parameter[i][j] = j;
-    }
-  }
-
-  build_index_parameter_frequency_distribution();
-  index_interval_computation();
-}
-
-
-/*--------------------------------------------------------------*
- *
  *  Constructeur par copie de la classe Sequences.
  *
- *  arguments : reference sur un objet Sequences, type de transformation
- *             ('r' : inversion du sens de parcours, 'a' : addition d'une variable,
- *              'm' : suppression du parametre d'index, 'e' : parametre d'index rendu explicite).
+ *  arguments : reference sur un objet Sequences, type de transformation.
  *
  *--------------------------------------------------------------*/
 
-Sequences::Sequences(const Sequences &seq , char transform , int param)
+Sequences::Sequences(const Sequences &seq , sequence_transformation transform)
 
 {
   switch (transform) {
-  case 'r' :
+  case REVERSE :
     Sequences::reverse(seq);
     break;
-  case 'a' :
+  case ADD_STATE_VARIABLE :
     Sequences::add_state_variable(seq);
     break;
-  case 'm' :
-    Sequences::remove_index_parameter(seq);
-    break;
-  case 'e' :
+  case EXPLICIT_INDEX_PARAMETER :
     Sequences::explicit_index_parameter(seq);
+    break;
+  case REMOVE_INDEX_PARAMETER :
+    Sequences::remove_index_parameter(seq);
     break;
   default :
     Sequences::copy(seq);
@@ -1952,7 +1951,8 @@ Vectors* Sequences::build_vectors(bool index_variable) const
 
 {
   register int i , j , k , m;
-  int offset , *itype , **int_vector;
+  int offset , **int_vector;
+  variable_nature *itype;
   double **real_vector;
   Vectors *vec;
 
@@ -1970,7 +1970,7 @@ Vectors* Sequences::build_vectors(bool index_variable) const
     break;
   }
 
-  itype = new int[nb_variable + offset];
+  itype = new variable_nature[nb_variable + offset];
 
   if (index_variable) {
     itype[0] = INT_VALUE;
@@ -2051,13 +2051,14 @@ Vectors* Sequences::build_vectors(bool index_variable) const
  *
  *--------------------------------------------------------------*/
 
-Vectors* Sequences::extract_vectors(StatError &error , int feature_type ,
+Vectors* Sequences::extract_vectors(StatError &error , sequence_pattern pattern ,
                                     int variable , int value) const
 
 {
   bool status = true;
   register int i , j;
-  int begin_run , count , itype[1] , **int_vector;
+  int begin_run , count , **int_vector;
+  variable_nature itype[1];
   double **real_vector;
   Vectors *vec;
 
@@ -2074,7 +2075,7 @@ Vectors* Sequences::extract_vectors(StatError &error , int feature_type ,
     else {
       variable--;
 
-      if ((feature_type == SEQUENCE_CUMUL) || (feature_type == SEQUENCE_MEAN)) {
+      if ((pattern == SEQUENCE_CUMUL) || (pattern == SEQUENCE_MEAN)) {
         if ((type[variable] != INT_VALUE) && (type[variable] != STATE) &&
             (type[variable] != REAL_VALUE)) {
           status = false;
@@ -2087,8 +2088,8 @@ Vectors* Sequences::extract_vectors(StatError &error , int feature_type ,
         }
       }
 
-//      else if ((feature_type == FIRST_OCCURRENCE) || (feature_type == NB_RUN) ||
-//               (feature_type == NB_OCCURRENCE)) {
+//      else if ((pattern == FIRST_OCCURRENCE) || (pattern == NB_RUN) ||
+//               (pattern == NB_OCCURRENCE)) {
       else {
         if ((type[variable] != INT_VALUE) && (type[variable] != STATE)) {
           status = false;
@@ -2112,7 +2113,7 @@ Vectors* Sequences::extract_vectors(StatError &error , int feature_type ,
   }
 
   if (status) {
-    switch (feature_type) {
+    switch (pattern) {
     case SEQUENCE_CUMUL :
       itype[0] = type[variable];
       break;
@@ -2134,16 +2135,16 @@ Vectors* Sequences::extract_vectors(StatError &error , int feature_type ,
       real_vector[i] = new double[1];
     }
 
-    switch (feature_type) {
+    switch (pattern) {
 
-    case LENGTH : {
-      if (index_parameter_type == POSITION) {
+    case LENGTH_PATTERN : {
+      if (index_param_type == POSITION) {
         for (i = 0;i < nb_sequence;i++) {
           int_vector[i][0] = index_parameter[i][length[i]];
         }
       }
 
-      else if ((index_parameter_type == TIME) && (index_interval->variance > 0.)) {
+      else if ((index_param_type == TIME) && (index_interval->variance > 0.)) {
         for (i = 0;i < nb_sequence;i++) {
           int_vector[i][0] = index_parameter[i][length[i] - 1];
         }
@@ -2201,8 +2202,8 @@ Vectors* Sequences::extract_vectors(StatError &error , int feature_type ,
       break;
     }
 
-    case FIRST_OCCURRENCE : {
-      if (index_parameter_type != IMPLICIT_TYPE) {
+    case FIRST_OCCURRENCE_PATTERN : {
+      if (index_param_type != IMPLICIT_TYPE) {
         for (i = 0;i < nb_sequence;i++) {
           int_vector[i][0] = -1;
           for (j = 0;j < length[i];j++) {
@@ -2228,8 +2229,8 @@ Vectors* Sequences::extract_vectors(StatError &error , int feature_type ,
       break;
     }
 
-    case SOJOURN_TIME : {
-      if ((index_parameter_type == TIME) && (index_interval->variance > 0.)) {  // pour les suivis de croissance manguier
+    case SOJOURN_TIME_PATTERN : {
+      if ((index_param_type == TIME) && (index_interval->variance > 0.)) {  // pour les suivis de croissance manguier
         for (i = 0;i < nb_sequence;i++) {
           int_vector[i][0] = -1;
           if (int_sequence[i][variable][0] == value) {
@@ -2282,7 +2283,7 @@ Vectors* Sequences::extract_vectors(StatError &error , int feature_type ,
       break;
     }
 
-    case NB_RUN : {
+    case NB_RUN_PATTERN : {
       for (i = 0;i < nb_sequence;i++) {
         count = 0;
         if (int_sequence[i][variable][0] == value) {
@@ -2300,7 +2301,7 @@ Vectors* Sequences::extract_vectors(StatError &error , int feature_type ,
       break;
     }
 
-    case NB_OCCURRENCE : {
+    case NB_OCCURRENCE_PATTERN : {
       for (i = 0;i < nb_sequence;i++) {
         count = 0;
         for (j = 0;j < length[i];j++) {
@@ -2351,9 +2352,9 @@ MarkovianSequences* Sequences::markovian_sequences(StatError &error) const
   seq = NULL;
   error.init();
 
-//  if (((index_parameter_type == TIME) && (index_interval->variance > 0.)) ||
-//      (index_parameter_type == POSITION)) {
-  if (index_parameter_type == POSITION) {
+//  if (((index_param_type == TIME) && (index_interval->variance > 0.)) ||
+//      (index_param_type == POSITION)) {
+  if (index_param_type == POSITION) {
     status = false;
     error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
   }
@@ -2423,13 +2424,13 @@ bool Sequences::increasing_index_parameter_checking(StatError &error , bool stri
 
 
   for (i = 0;i < nb_sequence;i++) {
-    for (j = 1;j < (index_parameter_type == POSITION ? length[i] + 1 : length[i]);j++) {
+    for (j = 1;j < (index_param_type == POSITION ? length[i] + 1 : length[i]);j++) {
       if ((((!strict) || (j == length[i])) && (index_parameter[i][j] < index_parameter[i][j - 1])) ||
           ((strict) && (j < length[i]) && (index_parameter[i][j] <= index_parameter[i][j - 1]))) {
         status = false;
         ostringstream error_message;
         error_message << pattern_label << " " << i + 1 << ": "
-                      << (index_parameter_type == TIME ? SEQ_label[SEQL_TIME] : SEQ_label[SEQL_POSITION]) << " "
+                      << (index_param_type == TIME ? SEQ_label[SEQL_TIME] : SEQ_label[SEQL_POSITION]) << " "
                       << index_parameter[i][j] << " " << STAT_error[STATR_NOT_ALLOWED];
         error.update((error_message.str()).c_str());
       }
@@ -2530,8 +2531,8 @@ bool Sequences::check(StatError &error , const char *pattern_label)
     status = false;
   }
 
-  if (index_parameter_type != IMPLICIT_TYPE) {
-    lstatus = increasing_index_parameter_checking(error , (index_parameter_type == POSITION ? false : true) ,
+  if (index_param_type != IMPLICIT_TYPE) {
+    lstatus = increasing_index_parameter_checking(error , (index_param_type == POSITION ? false : true) ,
                                                   pattern_label);
 
     if (!lstatus) {
@@ -2543,9 +2544,9 @@ bool Sequences::check(StatError &error , const char *pattern_label)
     if (index_parameter) {
       build_index_parameter_frequency_distribution();
     }
-//    if ((index_parameter_type == TIME) || ((index_parameter_type == POSITION) &&
+//    if ((index_param_type == TIME) || ((index_param_type == POSITION) &&
 //         (type[0] != NB_INTERNODE))) {
-    if ((index_parameter_type == TIME) || (index_parameter_type == POSITION)) {
+    if ((index_param_type == TIME) || (index_param_type == POSITION)) {
       index_interval_computation();
     }
   }
@@ -2578,7 +2579,7 @@ TimeEvents* Sequences::extract_time_events(StatError &error , int variable ,
   timev = NULL;
   error.init();
 
-  if (index_parameter_type != TIME) {
+  if (index_param_type != TIME) {
     status = false;
     error.correction_update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE] , SEQ_index_parameter_word[TIME]);
   }
