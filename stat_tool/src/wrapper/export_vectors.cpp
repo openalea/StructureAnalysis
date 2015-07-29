@@ -51,7 +51,7 @@ public:
   WRAP_METHOD2(Vectors,comparison, DistanceMatrix, VectorDistance, bool);
   WRAP_METHOD_SPREADSHEET_WRITE( Vectors);WRAP_METHOD2(Vectors,scaling,
        Vectors, int, int);
-  WRAP_METHOD2(Vectors,round, Vectors, int, int);
+  WRAP_METHOD2(Vectors,round, Vectors, int, rounding);
   WRAP_METHOD_FILE_ASCII_WRITE( Vectors)
 
   static Vectors*
@@ -60,7 +60,7 @@ public:
     Vectors *vec;
     StatError error;
 
-    vec = vectors_ascii_read(error, filename);
+    vec = Vectors::ascii_read(error, filename);
 
     if (vec)
       {
@@ -83,7 +83,7 @@ public:
 
     int dummy;
 
-    int *types = 0; // 0 for int and 1 for float/double
+    variable_nature *types = 0; // 0 for int and 1 for float/double
     int *identifier = 0;
     int nb_variable = -1, this_nb_variable=-1;
     int **int_vector = 0;
@@ -132,7 +132,7 @@ public:
     }
 
     // extract the types
-    types = new int[nb_types];
+    types = new variable_nature[nb_types];
     int nb_variable_int = 0;
     int nb_variable_float = 0;
     for (int ii = 0; ii < nb_types; ii++){
@@ -717,7 +717,7 @@ public:
 
   static Regression*
   moving_average_dist(const Vectors& v, int explanatory_var, int response_var,
-      const Distribution &dist, char algo)
+      const Distribution &dist, moving_average_method algo)
   {
     StatError error;
     Regression * ret = NULL;
@@ -729,7 +729,7 @@ public:
 
   static Regression*
   moving_average_list(const Vectors& v, int explanatory_var, int response_var,
-      const boost::python::list& filter, char algo)
+      const boost::python::list& filter, moving_average_method algo)
   {
     StatError error;
     Regression * ret = NULL;
@@ -977,7 +977,7 @@ public:
 
   static string
   contingency_table(const Vectors& v, int variable1, int variable2,
-      const string& filename, char format)
+      const string& filename, output_format format)
   {
     StatError error;
     std::stringstream s;
@@ -994,7 +994,7 @@ public:
   static string
   variance_analysis(const Vectors& v, int class_variable,
       int response_variable, int response_type, const string& filename,
-      char format)
+      output_format format)
   {
     StatError error;
     std::stringstream s;
@@ -1010,12 +1010,12 @@ public:
   }
 
   static string
-  rank_correlation_computation(const Vectors& input, int type, const string &filename)
+  rank_correlation_computation(const Vectors& input, correlation_type correl_type, const string &filename)
   {
     StatError error;
     std::stringstream os;
     bool ret;
-    ret = input.rank_correlation_computation(error, os, type, filename.c_str());
+    ret = input.rank_correlation_computation(error, os, correl_type, filename.c_str());
     //std::cout << os.str()<<endl;
     return os.str();
   }
@@ -1230,7 +1230,7 @@ public:
 
   static boost::shared_ptr<VectorDistance>
   build_from_types(boost::python::list& types, boost::python::list& weigths,
-      int distance_type)
+      metric distance_type)
   {
     VectorDistance* dist;
     int nb_variable;
@@ -1240,17 +1240,17 @@ public:
     stat_tool::wrap_util::auto_ptr_array<double> variable_weight(
         new double[nb_variable]);
 
-    stat_tool::wrap_util::auto_ptr_array<int> variable_type(
-        new int[nb_variable]);
+    stat_tool::wrap_util::auto_ptr_array<variable_type> var_type(
+        new variable_type[nb_variable]);
 
     // Extract each element of the vector
     for (int i = 0; i < nb_variable; i++)
       {
-        variable_type[i] = boost::python::extract<int>(types[i]);
+        var_type[i] = boost::python::extract<stat_tool::variable_type>(types[i]);
         variable_weight[i] = boost::python::extract<double>(weigths[i]);
       }
 
-    dist = new VectorDistance(nb_variable, variable_type.get(),
+    dist = new VectorDistance(nb_variable, var_type.get(),
         variable_weight.get(), distance_type);
 
     return boost::shared_ptr<VectorDistance>(dist);
@@ -1261,7 +1261,7 @@ public:
   {
     VectorDistance* dist;
     StatError error;
-    dist = vector_distance_ascii_read(error, filename);
+    dist = VectorDistance::ascii_read(error, filename);
 
     if (!dist)
       stat_tool::wrap_util::throw_error(error);
