@@ -122,8 +122,8 @@ void class_correlation() {
 
   class_<Correlation, bases<StatInterface> >
   ("_Correlation", "Correlation")
-    .def(init<int, int, int, int>())
-    .def(init<int, int, bool, int>())
+    .def(init<correlation_type, int, int, int>())
+    .def(init<int, int, bool, correlation_type>())
     .def(init<Correlation>())
 
     .def(self_ns::str(self)) //__str__
