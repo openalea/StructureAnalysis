@@ -375,19 +375,20 @@ void Distribution::normalization_copy(const Distribution &dist)
  *  Constructeur par copie de la classe Distribution.
  *
  *  arguments : reference sur un objet Distribution, type de transformation
- *              ('c' : copie , 'n' : copie avec renormalisation),
+ *              (DISTRIBUTION_COPY : copie , NORMALIZATION : copie avec renormalisation),
  *              nombre de valeurs allouees.
  *
  *--------------------------------------------------------------*/
 
-Distribution::Distribution(const Distribution &dist , char transform , int ialloc_nb_value)
+Distribution::Distribution(const Distribution &dist , distribution_transformation transform ,
+                           int ialloc_nb_value)
 
 {
   switch (transform) {
-  case 'c' :
+  case DISTRIBUTION_COPY :
     copy(dist , ialloc_nb_value);
     break;
-  case 'n' :
+  case NORMALIZATION :
     normalization_copy(dist);
     break;
   default :
