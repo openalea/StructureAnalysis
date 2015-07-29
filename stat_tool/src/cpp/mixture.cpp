@@ -137,7 +137,7 @@ Mixture::Mixture(int inb_component , int inb_output_process , int *nb_value)
  *--------------------------------------------------------------*/
 
 Mixture::Mixture(int inb_component , int ident , double mean , double standard_deviation ,
-                 bool tied_mean , int variance_factor)
+                 bool tied_mean , tying_rule variance_factor)
 
 {
   register int i , j;
@@ -568,7 +568,7 @@ Mixture* Mixture::thresholding(double min_probability) const
  *
  *--------------------------------------------------------------*/
 
-Mixture* mixture_ascii_read(StatError &error , const char *path , double cumul_threshold)
+Mixture* Mixture::ascii_read(StatError &error , const char *path , double cumul_threshold)
 
 {
   RWLocaleSnapshot locale("en");
@@ -576,7 +576,8 @@ Mixture* mixture_ascii_read(StatError &error , const char *path , double cumul_t
   size_t position;
   bool status , lstatus;
   register int i;
-  int line , read_line , nb_output_process , output_process_type , index;
+  int line , read_line , nb_output_process , index;
+  observation_process obs_type;
   long nb_component , value;
   double proba , cumul;
   DiscreteParametric *weight;
@@ -912,17 +913,17 @@ Mixture* mixture_ascii_read(StatError &error , const char *path , double cumul_t
               case 3 : {
                 if ((token == STAT_word[STATW_CATEGORICAL]) ||
                     (token == STAT_word[STATW_NONPARAMETRIC])) {
-                  output_process_type = CATEGORICAL_PROCESS;
+                  obs_type = CATEGORICAL_PROCESS;
                 }
                 else if ((token == STAT_word[STATW_DISCRETE_PARAMETRIC]) ||
                          (token == STAT_word[STATW_PARAMETRIC])) {
-                  output_process_type = DISCRETE_PARAMETRIC;
+                  obs_type = DISCRETE_PARAMETRIC;
                 }
                 else if (token == STAT_word[STATW_CONTINUOUS_PARAMETRIC]) {
-                  output_process_type = CONTINUOUS_PARAMETRIC;
+                  obs_type = CONTINUOUS_PARAMETRIC;
                 }
                 else {
-                  output_process_type = CATEGORICAL_PROCESS - 1;
+                  obs_type = DEFAULT_PROCESS;
                   status = false;
                   ostringstream correction_message;
                   correction_message << STAT_word[STATW_CATEGORICAL] << " or "
@@ -943,11 +944,11 @@ Mixture* mixture_ascii_read(StatError &error , const char *path , double cumul_t
                 error.update(STAT_parsing[STATP_FORMAT] , line);
               }
 
-              switch (output_process_type) {
+              switch (obs_type) {
 
               case CATEGORICAL_PROCESS : {
-                categorical_observation[index - 1] = categorical_observation_parsing(error , in_file , line ,
-                                                                                     nb_component , MIXTURE , true);
+                categorical_observation[index - 1] = CategoricalProcess::parsing(error , in_file , line ,
+                                                                                 nb_component , MIXTURE , true);
                 if (!categorical_observation[index - 1]) {
                   status = false;
                 }
@@ -955,9 +956,9 @@ Mixture* mixture_ascii_read(StatError &error , const char *path , double cumul_t
               }
 
               case DISCRETE_PARAMETRIC : {
-                discrete_parametric_observation[index - 1] = discrete_observation_parsing(error , in_file , line ,
-                                                                                          nb_component , MIXTURE ,
-                                                                                          cumul_threshold);
+                discrete_parametric_observation[index - 1] = DiscreteParametricProcess::parsing(error , in_file , line ,
+                                                                                                nb_component , MIXTURE ,
+                                                                                                cumul_threshold);
                 if (!discrete_parametric_observation[index - 1]) {
                   status = false;
                 }
@@ -965,9 +966,9 @@ Mixture* mixture_ascii_read(StatError &error , const char *path , double cumul_t
               }
 
               case CONTINUOUS_PARAMETRIC : {
-                continuous_parametric_observation[index - 1] = continuous_observation_parsing(error , in_file , line ,
-                                                                                              nb_component , MIXTURE ,
-                                                                                              VON_MISES);
+                continuous_parametric_observation[index - 1] = ContinuousParametricProcess::parsing(error , in_file , line ,
+                                                                                                    nb_component , MIXTURE ,
+                                                                                                    VON_MISES);
                 if (!continuous_parametric_observation[index - 1]) {
                   status = false;
                 }
@@ -1997,7 +1998,7 @@ MixtureData::MixtureData()
  *--------------------------------------------------------------*/
 
 MixtureData::MixtureData(int inb_vector , int inb_variable ,
-                         int *itype , bool init_flag)
+                         variable_nature *itype , bool init_flag)
 :Vectors(inb_vector , NULL , inb_variable , itype , init_flag)
 
 {
@@ -2024,7 +2025,7 @@ MixtureData::MixtureData(int inb_vector , int inb_variable ,
  *
  *--------------------------------------------------------------*/
 
-MixtureData::MixtureData(const Vectors &vec , char transform)
+MixtureData::MixtureData(const Vectors &vec , vector_transformation transform)
 :Vectors(vec , transform)
 
 {
@@ -2217,11 +2218,11 @@ MixtureData& MixtureData::operator=(const MixtureData &vec)
  *
  *  Initialisation de la 1ere variable.
  *
- *  argument : type de la 1ere variable (STATE / INT_VALUE / REAL_VALUE).
+ *  argument : type de la 1ere variable (STATE/INT_VALUE/REAL_VALUE).
  *
  *--------------------------------------------------------------*/
 
-void MixtureData::state_variable_init(int itype)
+void MixtureData::state_variable_init(variable_nature itype)
 
 {
   register int i , j;
