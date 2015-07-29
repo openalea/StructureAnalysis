@@ -287,9 +287,9 @@ CategoricalProcess& CategoricalProcess::operator=(const CategoricalProcess &proc
  *
  *--------------------------------------------------------------*/
 
-CategoricalProcess* categorical_observation_parsing(StatError &error , ifstream &in_file ,
-                                                    int &line , int nb_state , int model ,
-                                                    bool hidden)
+CategoricalProcess* CategoricalProcess::parsing(StatError &error , ifstream &in_file ,
+                                                int &line , int nb_state , model_type model ,
+                                                bool hidden)
 
 {
   RWLocaleSnapshot locale("en");
@@ -579,9 +579,9 @@ CategoricalProcess* categorical_observation_parsing(StatError &error , ifstream 
  *
  *--------------------------------------------------------------*/
 
-CategoricalProcess** old_categorical_observation_parsing(StatError &error , ifstream &in_file ,
-                                                         int &line , int nb_state ,
-                                                         int &nb_output_process)
+CategoricalProcess** CategoricalProcess::old_parsing(StatError &error , ifstream &in_file ,
+                                                     int &line , int nb_state ,
+                                                     int &nb_output_process)
 
 {
   RWLocaleSnapshot locale("en");
@@ -766,8 +766,8 @@ CategoricalProcess** old_categorical_observation_parsing(StatError &error , ifst
           error.update(STAT_parsing[STATP_FORMAT] , line);
         }
 
-        process[index - 1] = categorical_observation_parsing(error , in_file , line , nb_state ,
-                                                             HIDDEN_MARKOV , true);
+        process[index - 1] = CategoricalProcess::parsing(error , in_file , line , nb_state ,
+                                                         HIDDEN_MARKOV , true);
         if (!process[index - 1]) {
           status = false;
         }
@@ -805,7 +805,7 @@ CategoricalProcess** old_categorical_observation_parsing(StatError &error , ifst
 
 ostream& CategoricalProcess::ascii_print(ostream &os , FrequencyDistribution **empirical_observation ,
                                          FrequencyDistribution *marginal_distribution ,
-                                         bool exhaustive , bool file_flag , int model) const
+                                         bool exhaustive , bool file_flag , model_type model) const
 
 {
   if (observation) {
@@ -1078,7 +1078,7 @@ ostream& CategoricalProcess::ascii_print(ostream &os , FrequencyDistribution **e
 
 ostream& CategoricalProcess::spreadsheet_print(ostream &os , FrequencyDistribution **empirical_observation ,
                                                FrequencyDistribution *marginal_distribution ,
-                                               int model) const
+                                               model_type model) const
 
 {
   if (observation) {
@@ -1252,7 +1252,8 @@ ostream& CategoricalProcess::spreadsheet_print(ostream &os , FrequencyDistributi
 
 bool CategoricalProcess::plot_print(const char *prefix , const char *title , int process ,
                                     FrequencyDistribution **empirical_observation ,
-                                    FrequencyDistribution *marginal_distribution , int model) const
+                                    FrequencyDistribution *marginal_distribution ,
+                                    model_type model) const
 
 {
   bool status = false;
@@ -1551,7 +1552,7 @@ bool CategoricalProcess::plot_print(const char *prefix , const char *title , int
 void CategoricalProcess::plotable_write(MultiPlotSet &plot , int &index , int process ,
                                         FrequencyDistribution **empirical_observation ,
                                         FrequencyDistribution *marginal_distribution ,
-                                        int model) const
+                                        model_type model) const
 
 {
   if (observation) {
