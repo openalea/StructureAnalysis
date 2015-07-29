@@ -69,7 +69,7 @@ void Chain::init(bool left_right , double self_transition)
     accessibility[i] = new bool[nb_state];
   }
 
-  state_type = new char[nb_state];
+  stype = new state_type[nb_state];
 
   switch (left_right) {
 
@@ -88,7 +88,7 @@ void Chain::init(bool left_right , double self_transition)
       }
 
       component[0][i] = i;
-      state_type[i] = 'r';
+      stype[i] = RECURRENT;
     }
 
     for (i = 0;i < nb_state;i++) {
@@ -128,10 +128,10 @@ void Chain::init(bool left_right , double self_transition)
       component[i][0] = i;
 
       if (i < nb_state - 1) {
-        state_type[i] = 't';
+        stype[i] = TRANSIENT;
       }
       else {
-        state_type[i] = 'a';
+        stype[i] = ABSORBING;
       }
     }
 
@@ -229,7 +229,7 @@ bool Chain::connex_component_research(StatError &error , bool **ilogic_transitio
 
   // test etats initiaux tels que probabilite initiale > 0
 
-  if (type == 'o') {
+  if (type == ORDINARY) {
     for (i = 0;i < nb_state;i++) {
       for (j = 0;j < nb_state;j++) {
         if (logic_transition[j][i]) {
@@ -687,17 +687,17 @@ void Chain::component_computation(bool **ilogic_transition)
 
     // extraction des types des etats
 
-    state_type = new char[nb_state];
+    stype = new state_type[nb_state];
 
     for (i = 0;i < nb_component;i++) {
       state = component[i][0];
-      state_type[state] = 'r';
+      stype[state] = RECURRENT;
 
       for (j = 0;j < nb_component;j++) {
         if (j != i) {
           for (k = 0;k < component_nb_state[j];k++) {
             if (accessibility[state][component[j][k]]) {
-              state_type[state] = 't';
+              stype[state] = TRANSIENT;
               break;
             }
           }
@@ -707,12 +707,12 @@ void Chain::component_computation(bool **ilogic_transition)
         }
       }
 
-      if ((state_type[state] == 'r') && (component_nb_state[i] == 1)) {
-        state_type[state] = 'a';
+      if ((stype[state] == RECURRENT) && (component_nb_state[i] == 1)) {
+        stype[state] = ABSORBING;
       }
 
       for (j = 1;j < component_nb_state[i];j++) {
-        state_type[component[i][j]] = state_type[state];
+        stype[component[i][j]] = stype[state];
       }
     }
   }
@@ -740,7 +740,7 @@ void Chain::thresholding(double min_probability , bool semi_markov)
     min_probability = THRESHOLDING_FACTOR / (double)nb_state;
   }
 
-  if (type == 'o') {
+  if (type == ORDINARY) {
     do {
       stop = true;
       nb_correction = 0;
@@ -1003,7 +1003,7 @@ void ChainData::estimation(Chain &chain) const
 
   // estimation des probabilites initiales
 
-  if (chain.type == 'o') {
+  if (chain.type == ORDINARY) {
     sum = 0;
     for (i = 0;i < nb_state;i++) {
       sum += initial[i];
