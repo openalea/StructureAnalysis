@@ -61,7 +61,7 @@ namespace sequence_analysis {
   const int OCCUPANCY_COEFF = 10;        // coefficient arrondi estimateur pour les lois
                                          // d'occupation des etats
 
-  enum {
+  enum state_sojourn_type {
     MARKOVIAN ,
     SEMI_MARKOVIAN
   };
@@ -78,17 +78,17 @@ namespace sequence_analysis {
 
   public :
 
-    int *state_subtype;     //  MARKOVIAN/SEMI_MARKOVIAN
+    state_sojourn_type *sojourn_type;  //  MARKOVIAN/SEMI_MARKOVIAN
     CategoricalSequenceProcess *state_process;  // processus d'etat
     Forward **forward;      // lois de l'intervalle de temps residuel
 
-    void copy(const SemiMarkovChain &smarkov , int param = I_DEFAULT);
+    void copy(const SemiMarkovChain &smarkov , int param = stat_tool::I_DEFAULT);
     void remove();
 
     SemiMarkovChain();
-    SemiMarkovChain(char itype , int inb_state);
+    SemiMarkovChain(stat_tool::process_type itype , int inb_state);
     SemiMarkovChain(const stat_tool::Chain *pchain , const CategoricalSequenceProcess *poccupancy);
-    SemiMarkovChain(const SemiMarkovChain &smarkov , int param = I_DEFAULT)
+    SemiMarkovChain(const SemiMarkovChain &smarkov , int param = stat_tool::I_DEFAULT)
     :Chain(smarkov) { copy(smarkov , param); }
     ~SemiMarkovChain();
     SemiMarkovChain& operator=(const SemiMarkovChain &smarkov);
@@ -101,11 +101,11 @@ namespace sequence_analysis {
     double* memory_computation() const;
     void state_no_occurrence_probability(int state , double increment = LEAVE_INCREMENT);
     void state_first_occurrence_distribution(int state , int min_nb_value = 1 ,
-                                             double cumul_threshold = CUMUL_THRESHOLD);
+                                             double cumul_threshold = stat_tool::CUMUL_THRESHOLD);
     void state_leave_probability(int state , double increment = LEAVE_INCREMENT);
     void state_recurrence_time_distribution(int state , int min_nb_value = 1 ,
                                             double cumul_threshold = OCCUPANCY_THRESHOLD);
-    void state_nb_pattern_mixture(int state , char pattern);
+    void state_nb_pattern_mixture(int state , stat_tool::count_pattern pattern);
   };
 
 
@@ -119,9 +119,6 @@ namespace sequence_analysis {
     friend class SemiMarkovIterator;
     friend class SemiMarkovData;
 
-    friend SemiMarkov* semi_markov_ascii_read(stat_tool::StatError &error , const char *path ,
-                                              int length, bool counting_flag ,
-                                              double cumul_threshold );
     friend std::ostream& operator<<(std::ostream &os , const SemiMarkov &smarkov)
     { return smarkov.ascii_write(os , smarkov.semi_markov_data); }
 
@@ -144,7 +141,7 @@ namespace sequence_analysis {
                int length , bool counting_flag);
 
     void copy(const SemiMarkov &smarkov , bool data_flag = true ,
-              int param = I_DEFAULT);
+              int param = stat_tool::I_DEFAULT);
     void remove();
 
     std::ostream& ascii_write(std::ostream &os , const SemiMarkovData *seq ,
@@ -164,40 +161,45 @@ namespace sequence_analysis {
                                           double increment = LEAVE_INCREMENT);
     void output_first_occurrence_distribution(int variable , int output ,
                                               int min_nb_value = 1 ,
-                                              double cumul_threshold = CUMUL_THRESHOLD);
+                                              double cumul_threshold = stat_tool::CUMUL_THRESHOLD);
     void output_leave_probability(const double *memory ,
                                   int variable , int output ,
                                   double increment = LEAVE_INCREMENT);
     void output_recurrence_time_distribution(const double *memory , int variable ,
                                              int output , int min_nb_value = 1 ,
-                                             double cumul_threshold = CUMUL_THRESHOLD);
+                                             double cumul_threshold = stat_tool::CUMUL_THRESHOLD);
     void output_sojourn_time_distribution(const double *memory , int variable ,
                                           int output , int min_nb_value = 1 ,
-                                          double cumul_threshold = CUMUL_THRESHOLD);
+                                          double cumul_threshold = stat_tool::CUMUL_THRESHOLD);
     void output_nb_run_mixture(int variable , int output);
     void output_nb_occurrence_mixture(int variable , int output);
 
   public :
 
     SemiMarkov();
-    SemiMarkov(char itype , int inb_state , int inb_output_process , int *nb_value);
+    SemiMarkov(stat_tool::process_type itype , int inb_state , int inb_output_process , int *nb_value);
     SemiMarkov(const stat_tool::Chain *pchain , const CategoricalSequenceProcess *poccupancy ,
                const stat_tool::CategoricalProcess *pobservation , int length ,
                bool counting_flag);
     SemiMarkov(const SemiMarkov &smarkov , bool data_flag = true ,
-               int param = I_DEFAULT)
+               int param = stat_tool::I_DEFAULT)
     :SemiMarkovChain(smarkov , param) { copy(smarkov , data_flag , param); }
     void conditional_delete();
     ~SemiMarkov();
     SemiMarkov& operator=(const SemiMarkov &smarkov);
 
-    DiscreteParametricModel* extract(stat_tool::StatError &error , int type ,
+    DiscreteParametricModel* extract(stat_tool::StatError &error ,
+                                     stat_tool::process_distribution dist_type ,
                                      int variable , int value) const;
     DiscreteParametricModel* extract(stat_tool::StatError &error , int state ,
-                                     int frequency_distribution_type = FINAL_RUN) const;
+                                     stat_tool::process_distribution histo_type = FINAL_RUN) const;
     SemiMarkovData* extract_data(stat_tool::StatError &error) const;
 
     SemiMarkov* thresholding(double min_probability = MIN_PROBABILITY) const;
+
+    static SemiMarkov* ascii_read(stat_tool::StatError &error , const char *path ,
+                                  int length = DEFAULT_LENGTH , bool counting_flag = true ,
+                                  double cumul_threshold = OCCUPANCY_THRESHOLD);
 
     std::ostream& line_write(std::ostream &os) const;
 
@@ -207,9 +209,9 @@ namespace sequence_analysis {
     bool plot_write(stat_tool::StatError &error , const char *prefix , const char *title = NULL) const;
     stat_tool::MultiPlotSet* get_plotable() const;
 
-    void characteristic_computation(int length , bool counting_flag , int variable = I_DEFAULT);
+    void characteristic_computation(int length , bool counting_flag , int variable = stat_tool::I_DEFAULT);
     void characteristic_computation(const SemiMarkovData &seq , bool counting_flag ,
-                                    int variable = I_DEFAULT , bool length_flag = true);
+                                    int variable = stat_tool::I_DEFAULT , bool length_flag = true);
 
     double likelihood_computation(const MarkovianSequences &seq , int index) const;
     double likelihood_computation(const SemiMarkovData &seq) const;
@@ -250,11 +252,6 @@ namespace sequence_analysis {
     stat_tool::ContinuousParametricProcess* get_continuous_parametric_process(int variable) const
     { return continuous_parametric_process[variable]; }
   };
-
-
-  SemiMarkov* semi_markov_ascii_read(stat_tool::StatError &error , const char *path ,
-                                     int length = DEFAULT_LENGTH , bool counting_flag = true ,
-                                     double cumul_threshold = OCCUPANCY_THRESHOLD);
 
 
 
@@ -318,24 +315,26 @@ namespace sequence_analysis {
 
     SemiMarkovData();
     SemiMarkovData(const stat_tool::FrequencyDistribution &ihlength , int inb_variable ,
-                   int *itype , bool init_flag = false);
+                   stat_tool::variable_nature *itype , bool init_flag = false);
     SemiMarkovData(const MarkovianSequences &seq);
-    SemiMarkovData(const MarkovianSequences &seq , char transform , bool initial_run_flag);
-    SemiMarkovData(const SemiMarkovData &seq , bool model_flag = true , char transform = 'c')
+    SemiMarkovData(const MarkovianSequences &seq , sequence_transformation transform , bool initial_run_flag);
+    SemiMarkovData(const SemiMarkovData &seq , bool model_flag = true ,
+                   sequence_transformation transform = SEQUENCE_COPY)
     :MarkovianSequences(seq , transform) { copy(seq , model_flag); }
     ~SemiMarkovData();
     SemiMarkovData& operator=(const SemiMarkovData &seq);
 
-    DiscreteDistributionData* extract(stat_tool::StatError &error , int type ,
+    DiscreteDistributionData* extract(stat_tool::StatError &error ,
+                                      stat_tool::process_distribution histo_type ,
                                       int variable , int value) const;
-    SemiMarkovData* remove_index_parameter(stat_tool::StatError &error) const;
     SemiMarkovData* explicit_index_parameter(stat_tool::StatError &error) const;
+    SemiMarkovData* remove_index_parameter(stat_tool::StatError &error) const;
     MarkovianSequences* build_auxiliary_variable(stat_tool::StatError &error) const;
 
-    std::ostream& ascii_data_write(std::ostream &os , char format = 'c' ,
+    std::ostream& ascii_data_write(std::ostream &os , output_sequence_format format = COLUMN ,
                                    bool exhaustive = false) const;
     bool ascii_data_write(stat_tool::StatError &error , const char *path ,
-                          char format = 'c' , bool exhaustive = false) const;
+                          output_sequence_format format = COLUMN , bool exhaustive = false) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
     bool ascii_write(stat_tool::StatError &error , const char *path , bool exhaustive = false) const;
