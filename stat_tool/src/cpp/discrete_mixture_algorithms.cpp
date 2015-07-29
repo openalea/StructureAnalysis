@@ -783,8 +783,9 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
 
 DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &error , ostream &os ,
                                                                     int min_nb_component , int max_nb_component ,
-                                                                    int *ident , int min_inf_bound , bool mixt_flag ,
-                                                                    bool component_flag , int criterion ,
+                                                                    int *ident , int min_inf_bound ,
+                                                                    bool mixt_flag , bool component_flag ,
+                                                                    model_selection_criterion criterion ,
                                                                     double weight_step) const
 
 {
