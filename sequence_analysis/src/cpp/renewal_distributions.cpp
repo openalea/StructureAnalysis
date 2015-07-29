@@ -178,19 +178,19 @@ void NbEvent::computation(DiscreteParametric &inter_event)
   // calcul du nombre de valeurs
 
   switch (type) {
-  case 'o' :
+  case ORDINARY :
     nb_value = time / inter_event.offset + 1;
     break;
-  case 'e' :
+  case EQUILIBRIUM :
     nb_value = (time - 1) / inter_event.offset + 2;
     break;
   }
 
   switch (type) {
-  case 'o' :
+  case ORDINARY :
     time_nb_value = time + 1;
     break;
-  case 'e' :
+  case EQUILIBRIUM :
     time_nb_value = time;
     break;
   }
@@ -209,7 +209,7 @@ void NbEvent::computation(DiscreteParametric &inter_event)
         // processus de renouvellement ordinaire :
         // temps avant le 1er evenement distribue selon la loi inter-evenement
 
-        case 'o' : {
+        case ORDINARY : {
           nevent_time->mass_copy(inter_event , time + 1);
           break;
         }
@@ -217,7 +217,7 @@ void NbEvent::computation(DiscreteParametric &inter_event)
         // processus de renouvellement en equilibre :
         // temps avant le 1er evenement distribue selon la loi "forward"
 
-        case 'e' : {
+        case EQUILIBRIUM : {
           forward = new Forward(inter_event);
           nevent_time->mass_copy(*forward , time + 1);
           break;
@@ -229,10 +229,10 @@ void NbEvent::computation(DiscreteParametric &inter_event)
 
       else {
         switch (type) {
-        case 'o' :
+        case ORDINARY :
           j = i + 1;
           break;
-        case 'e' :
+        case EQUILIBRIUM :
           j = i;
           break;
         }
@@ -257,14 +257,14 @@ void NbEvent::computation(DiscreteParametric &inter_event)
             nevent_time->inf_bound = j * inter_event.inf_bound;
             nevent_time->sup_bound = j * inter_event.sup_bound;
             nevent_time->probability = inter_event.probability;
-            nevent_time->binomial_computation(time_nb_value , 'r');
+            nevent_time->binomial_computation(time_nb_value , RENEWAL);
             break;
           }
 
           case POISSON : {
             nevent_time->inf_bound = j * inter_event.inf_bound;
             nevent_time->parameter = j * inter_event.parameter;
-            nevent_time->poisson_computation(time_nb_value , RENEWAL_THRESHOLD , 'r');
+            nevent_time->poisson_computation(time_nb_value , RENEWAL_THRESHOLD , RENEWAL);
             break;
           }
 
@@ -272,14 +272,13 @@ void NbEvent::computation(DiscreteParametric &inter_event)
             nevent_time->inf_bound = j * inter_event.inf_bound;
             nevent_time->parameter = j * inter_event.parameter;
             nevent_time->probability = inter_event.probability;
-            nevent_time->negative_binomial_computation(time_nb_value ,
-                                                       RENEWAL_THRESHOLD , 'r');
+            nevent_time->negative_binomial_computation(time_nb_value , RENEWAL_THRESHOLD , RENEWAL);
             break;
           }
           }
         }
 
-        if ((type == 'e') && (ident != CATEGORICAL)) {
+        if ((type == EQUILIBRIUM) && (ident != CATEGORICAL)) {
           nevent_time->convolution(*forward , *nevent_time , time + 1);
           nevent_time->cumul_computation();
         }
@@ -300,7 +299,7 @@ void NbEvent::computation(DiscreteParametric &inter_event)
   }
 
   delete nevent_time;
-  if (type == 'e') {
+  if (type == EQUILIBRIUM) {
     delete forward;
   }
 
@@ -596,7 +595,7 @@ void NbEvent::negative_binomial_computation()
 void NbEvent::ordinary_computation(DiscreteParametric &inter_event)
 
 {
-  if (type == 'o') {
+  if (type == ORDINARY) {
     if ((ident == BINOMIAL) &&
         (time * (1. - probability) / (probability * sqrt((double)(MAX(1 , inf_bound)))) < RB_THRESHOLD)) {
       binomial_computation();
@@ -635,7 +634,7 @@ void Renewal::index_event_computation()
 
   switch (type) {
 
-  case 'o' : {
+  case ORDINARY : {
     index_event->offset = 0;
 
     index_event->point[0][0] = 0.;
@@ -643,7 +642,7 @@ void Renewal::index_event_computation()
     break;
   }
 
-  case 'e' : {
+  case EQUILIBRIUM : {
     index_event->offset = 1;
 
     index_event->point[0][0] = 0.;
@@ -665,11 +664,11 @@ void Renewal::index_event_computation()
 
       else {
         switch (type) {
-        case 'o' :
+        case ORDINARY :
           no_event += 1. - inter_event->cumul[j];
           event += inter_event->mass[j];
           break;
-        case 'e' :
+        case EQUILIBRIUM :
           no_event += (1. - forward->cumul[j]);
           event += forward->mass[j];
           break;
@@ -694,12 +693,12 @@ void Renewal::index_event_computation()
  *  intensite.
  *
  *  arguments : flag pour le calcul de la loi inter-evenement,
- *              type de processus ('o' : ordinaire, 'e' : en equilibre),
+ *              type de processus (ORDINARY/EQUILIBRIUM),
  *              pointeur sur la loi du temps d'observation.
  *
  *--------------------------------------------------------------*/
 
-void Renewal::computation(bool inter_event_flag , char itype , const Distribution *dtime)
+void Renewal::computation(bool inter_event_flag , process_type itype , const Distribution *dtime)
 
 {
   register int i , j;
@@ -708,7 +707,7 @@ void Renewal::computation(bool inter_event_flag , char itype , const Distributio
   DiscreteParametric *pnevent_time , *power , *forward_power;
 
 
-  if (itype == 'v') {
+  if (itype == DEFAULT_TYPE) {
     itype = type;
   }
 
@@ -748,10 +747,10 @@ void Renewal::computation(bool inter_event_flag , char itype , const Distributio
       time = new Distribution(*dtime);
 
       switch (type) {
-      case 'o' :
+      case ORDINARY :
         nb_event_max = (time->nb_value - 1) / inter_event->offset;
         break;
-      case 'e' :
+      case EQUILIBRIUM :
         nb_event_max = (time->nb_value - 2) / inter_event->offset + 1;
         break;
       }
@@ -774,10 +773,10 @@ void Renewal::computation(bool inter_event_flag , char itype , const Distributio
     for (i = time->offset;i < time->nb_value;i++) {
       if (*tmass++ > 0.) {
         switch (type) {
-        case 'o' :
+        case ORDINARY :
           nb_value = i / inter_event->offset + 1;
           break;
-        case 'e' :
+        case EQUILIBRIUM :
           nb_value = (i - 1) / inter_event->offset + 2;
           break;
         }
@@ -825,10 +824,10 @@ void Renewal::computation(bool inter_event_flag , char itype , const Distributio
   for (i = time->offset;i < time->nb_value;i++) {
     if (*tmass++ > 0.) {
       switch (type) {
-      case 'o' :
+      case ORDINARY :
         nb_event[i]->nb_value = i / inter_event->offset + 1;
         break;
-      case 'e' :
+      case EQUILIBRIUM :
         nb_event[i]->nb_value = (i - 1) / inter_event->offset + 2;
         break;
       }
@@ -838,15 +837,15 @@ void Renewal::computation(bool inter_event_flag , char itype , const Distributio
   mixture->nb_value = nb_event[time->nb_value - 1]->nb_value;
 
   switch (type) {
-  case 'o' :
+  case ORDINARY :
     time_nb_value = time->nb_value;
     break;
-  case 'e' :
+  case EQUILIBRIUM :
     time_nb_value = time->nb_value - 1;
     break;
   }
 
-  if (type == 'e') {
+  if (type == EQUILIBRIUM) {
     pnevent_time = new DiscreteParametric(time->nb_value , inter_event->ident);
     power = pnevent_time;
   }
@@ -865,16 +864,16 @@ void Renewal::computation(bool inter_event_flag , char itype , const Distributio
       }
 
       switch (type) {
-      case 'o' :
+      case ORDINARY :
         power = nevent_time[j];
         break;
-      case 'e' :
+      case EQUILIBRIUM :
         forward_power = nevent_time[j];
         break;
       }
 
       if (i == 0) {
-        if (type == 'e') {
+        if (type == EQUILIBRIUM) {
           forward_power->mass_copy(*forward , time->nb_value);
           forward_power->cumul_computation();
         }
@@ -884,7 +883,7 @@ void Renewal::computation(bool inter_event_flag , char itype , const Distributio
       }
 
       else {
-        if (type == 'e') {
+        if (type == EQUILIBRIUM) {
           forward_power->convolution(*forward , *power , time->nb_value);
           forward_power->cumul_computation();
         }
@@ -897,10 +896,10 @@ void Renewal::computation(bool inter_event_flag , char itype , const Distributio
 
         case CATEGORICAL : {
           switch (type) {
-          case 'o' :
+          case ORDINARY :
             power->convolution(*inter_event , *nevent_time[j - 1] , time_nb_value);
             break;
-          case 'e' :
+          case EQUILIBRIUM :
             power->convolution(*inter_event , *pnevent_time , time_nb_value);
             break;
           }
@@ -913,14 +912,14 @@ void Renewal::computation(bool inter_event_flag , char itype , const Distributio
           power->inf_bound = j * inter_event->inf_bound;
           power->sup_bound = j * inter_event->sup_bound;
           power->probability = inter_event->probability;
-          power->binomial_computation(time_nb_value , 'r');
+          power->binomial_computation(time_nb_value , RENEWAL);
           break;
         }
 
         case POISSON : {
           power->inf_bound = j * inter_event->inf_bound;
           power->parameter = j * inter_event->parameter;
-          power->poisson_computation(time_nb_value , RENEWAL_THRESHOLD , 'r');
+          power->poisson_computation(time_nb_value , RENEWAL_THRESHOLD , RENEWAL);
           break;
         }
 
@@ -928,8 +927,7 @@ void Renewal::computation(bool inter_event_flag , char itype , const Distributio
           power->inf_bound = j * inter_event->inf_bound;
           power->parameter = j * inter_event->parameter;
           power->probability = inter_event->probability;
-          power->negative_binomial_computation(time_nb_value ,
-                                               RENEWAL_THRESHOLD , 'r');
+          power->negative_binomial_computation(time_nb_value , RENEWAL_THRESHOLD , RENEWAL);
           break;
         }
         }
@@ -952,14 +950,14 @@ void Renewal::computation(bool inter_event_flag , char itype , const Distributio
         else {
           switch (type) {
 
-          case 'o' : {
+          case ORDINARY : {
             if (j < power->nb_value) {
               *pcumul1 = MIN(power->cumul[j] , 1.);
             }
             break;
           }
 
-          case 'e' : {
+          case EQUILIBRIUM : {
             if (j < forward_power->nb_value) {
               *pcumul1 = MIN(forward_power->cumul[j] , 1.);
             }
@@ -1006,7 +1004,7 @@ void Renewal::computation(bool inter_event_flag , char itype , const Distributio
   mixture->mean_computation();
   mixture->variance_computation();
 
-  if (type == 'e') {
+  if (type == EQUILIBRIUM) {
     delete pnevent_time;
   }
 
