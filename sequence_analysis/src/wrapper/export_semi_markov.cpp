@@ -56,7 +56,7 @@ public:
 
     SemiMarkov *semi_markov = NULL;
 
-    semi_markov = semi_markov_ascii_read(error, filename, length,
+    semi_markov = SemiMarkov::ascii_read(error, filename, length,
         counting_flag, cumul_threshold);
 
 
@@ -74,16 +74,16 @@ public:
   }
 
   static DiscreteParametricModel*
-  extract_histogram(const SemiMarkov &input, int state, int histogram_type)
+  extract_histogram(const SemiMarkov &input, int state, process_distribution histo_type)
   {
-    SIMPLE_METHOD_TEMPLATE_1(input, extract, DiscreteParametricModel, state, histogram_type);
+    SIMPLE_METHOD_TEMPLATE_1(input, extract, DiscreteParametricModel, state, histo_type);
   }
 
   static DiscreteParametricModel*
-  extract(const SemiMarkov &input, int type, int variable, int value)
+  extract(const SemiMarkov &input, process_distribution dist_type, int variable, int value)
   {
 
-    SIMPLE_METHOD_TEMPLATE_1(input, extract, DiscreteParametricModel, type, variable,
+    SIMPLE_METHOD_TEMPLATE_1(input, extract, DiscreteParametricModel, dist_type, variable,
         value);
   }
 
@@ -291,9 +291,9 @@ public:
    }
 
    static DiscreteDistributionData*
-   extract(const SemiMarkovData &input, int type, int variable, int value)
+   extract(const SemiMarkovData &input, process_distribution histo_type, int variable, int value)
    {
-     SIMPLE_METHOD_TEMPLATE_1(input, extract, DiscreteDistributionData, type, variable, value);
+     SIMPLE_METHOD_TEMPLATE_1(input, extract, DiscreteDistributionData, histo_type, variable, value);
    }
 
  static MarkovianSequences*
@@ -316,8 +316,8 @@ class_semi_markov_data()
 
   class_<SemiMarkovData, bases<MarkovianSequences> > ("_SemiMarkovData", "SemiMarkovData")
     .def(init<MarkovianSequences> ())
-    .def(init< MarkovianSequences, char, bool> ())
-    .def(init<SemiMarkovData, bool, char> ())
+    .def(init< MarkovianSequences, sequence_transformation, bool> ())
+    .def(init<SemiMarkovData, bool, sequence_transformation> ())
 
     .add_property("likelihood", &SemiMarkovData::get_likelihood, "returns likelihood")
     .add_property("restoration_likelihood", &SemiMarkovData::get_restoration_likelihood, "returns restoration likelihood")
