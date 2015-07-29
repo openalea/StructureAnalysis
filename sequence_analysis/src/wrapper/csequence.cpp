@@ -47,22 +47,22 @@ struct Parametric_Wrapper: DiscreteParametric
     Parametric_Wrapper(PyObject* self_, int p0, int p1):
         DiscreteParametric(p0, p1), self(self_) {}
 
-    Parametric_Wrapper(PyObject* self_, int p0, int p1, int p2):
+    Parametric_Wrapper(PyObject* self_, int p0, discrete_parametric p1, int p2):
         DiscreteParametric(p0, p1, p2), self(self_) {}
 
-    Parametric_Wrapper(PyObject* self_, int p0, int p1, int p2, int p3):
+    Parametric_Wrapper(PyObject* self_, int p0, discrete_parametric p1, int p2, int p3):
         DiscreteParametric(p0, p1, p2, p3), self(self_) {}
 
-    Parametric_Wrapper(PyObject* self_, int p0, int p1, int p2, int p3, double p4):
+    Parametric_Wrapper(PyObject* self_, int p0, discrete_parametric p1, int p2, int p3, double p4):
         DiscreteParametric(p0, p1, p2, p3, p4), self(self_) {}
 
-    Parametric_Wrapper(PyObject* self_, int p0, int p1, int p2, int p3, double p4, double p5):
+    Parametric_Wrapper(PyObject* self_, int p0, discrete_parametric p1, int p2, int p3, double p4, double p5):
         DiscreteParametric(p0, p1, p2, p3, p4, p5), self(self_) {}
 
-    Parametric_Wrapper(PyObject* self_, int p0, int p1, int p2, double p3, double p4):
+    Parametric_Wrapper(PyObject* self_, discrete_parametric p0, int p1, int p2, double p3, double p4):
         DiscreteParametric(p0, p1, p2, p3, p4), self(self_) {}
 
-    Parametric_Wrapper(PyObject* self_, int p0, int p1, int p2, double p3, double p4, double p5):
+    Parametric_Wrapper(PyObject* self_, discrete_parametric p0, int p1, int p2, double p3, double p4, double p5):
         DiscreteParametric(p0, p1, p2, p3, p4, p5), self(self_) {}
 
     Parametric_Wrapper(PyObject* self_, const Distribution& p0):
@@ -83,10 +83,10 @@ struct Parametric_Wrapper: DiscreteParametric
     Parametric_Wrapper(PyObject* self_, const DiscreteParametric& p0):
         DiscreteParametric(p0), self(self_) {}
 
-    Parametric_Wrapper(PyObject* self_, const DiscreteParametric& p0, char p1):
+    Parametric_Wrapper(PyObject* self_, const DiscreteParametric& p0, distribution_transformation p1):
         DiscreteParametric(p0, p1), self(self_) {}
 
-    Parametric_Wrapper(PyObject* self_, const DiscreteParametric& p0, char p1, int p2):
+    Parametric_Wrapper(PyObject* self_, const DiscreteParametric& p0, distribution_transformation p1, int p2):
         DiscreteParametric(p0, p1, p2), self(self_) {}
 
     std::basic_ostream<char,std::char_traits<char> >& plot_title_print(std::basic_ostream<char,std::char_traits<char> >& p0) const {
@@ -116,12 +116,12 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Parametric_computation_overloads_0_2, com
 BOOST_PYTHON_MODULE(csequence)
 {
     class_< DiscreteParametric, bases< Distribution > , boost::noncopyable, Parametric_Wrapper >("_DiscreteParametric", init< const Forward& >())
-        .def(init< optional< int, int, int, int, double, double > >())
-        .def(init< int, int, int, double, double, optional< double > >())
+        .def(init< optional< int, discrete_parametric, int, int, double, double > >())
+        .def(init< discrete_parametric, int, int, double, double, optional< double > >())
         .def(init< const Distribution&, optional< int > >())
         .def(init< const Distribution&, double >())
         .def(init< const DiscreteParametric&, double >())
-        .def(init< const DiscreteParametric&, optional< char, int > >())
+        .def(init< const DiscreteParametric&, optional< distribution_transformation, int > >())
         .def("parametric_mean_computation", &DiscreteParametric::parametric_mean_computation)
         .def("parametric_variance_computation", &DiscreteParametric::parametric_variance_computation)
         .def("parametric_skewness_computation", &DiscreteParametric::parametric_skewness_computation)
