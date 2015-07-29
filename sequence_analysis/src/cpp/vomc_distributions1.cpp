@@ -73,7 +73,7 @@ void VariableOrderMarkovChain::index_state_distribution()
 
   switch (type) {
 
-  case 'o' : {
+  case ORDINARY : {
     for (i = 1;i < nb_row;i++) {
       if (order[i] == 1) {
         index_state->point[state[i][0]][0] = initial[state[i][0]];
@@ -86,7 +86,7 @@ void VariableOrderMarkovChain::index_state_distribution()
     break;
   }
 
-  case 'e' : {
+  case EQUILIBRIUM : {
     for (i = 0;i < nb_state;i++) {
       index_state->point[i][0] = 0.;
     }
@@ -348,7 +348,7 @@ void VariableOrderMarkovChain::state_first_occurrence_distribution(int istate , 
 
   switch (type) {
 
-  case 'o' : {
+  case ORDINARY : {
     for (i = 1;i < nb_row;i++) {
       if (order[i] == 1) {
         if (state[i][0] != istate) {
@@ -367,7 +367,7 @@ void VariableOrderMarkovChain::state_first_occurrence_distribution(int istate , 
     break;
   }
 
-  case 'e' : {
+  case EQUILIBRIUM : {
     *pmass = 0.;
 
     for (i = 1;i < nb_row;i++) {
@@ -475,7 +475,7 @@ void VariableOrderMarkovChain::state_leave_probability(const double *imemory , i
                                                        double increment)
 
 {
-  if (state_type[istate] == 't') {
+  if (stype[istate] == TRANSIENT) {
     register int i , j , k;
     double memory_sum , *memory , *previous_memory ,
            &leave = state_process->leave[istate];
@@ -597,7 +597,7 @@ void VariableOrderMarkovChain::state_recurrence_time_distribution(const double *
   for (i = 1;i < nb_row;i++) {
     if (state[i][0] == istate) {
       memory[i] = imemory[i];
-      if ((type == 'o') && (order[i] == 1)) {
+      if ((type == ORDINARY) && (order[i] == 1)) {
         memory[i] += initial[state[i][0]];
       }
       sum += memory[i];
@@ -718,7 +718,7 @@ void VariableOrderMarkovChain::state_sojourn_time_distribution(const double *ime
     if ((state[i][0] == istate) && ((order[i] == 1) ||
          ((order[i] > 1) && (state[i][1] != istate)))) {
       memory[i] = imemory[i];
-      if ((type == 'o') && (order[i] == 1)) {
+      if ((type == ORDINARY) && (order[i] == 1)) {
         memory[i] += initial[state[i][0]];
       }
       sum += memory[i];
@@ -1018,7 +1018,7 @@ void VariableOrderMarkov::output_first_occurrence_distribution(int variable , in
 
   switch (type) {
 
-  case 'o' : {
+  case ORDINARY : {
     for (i = 1;i < nb_row;i++) {
       if (order[i] == 1) {
         memory[i] = (1. - observation[state[i][0]]) * initial[state[i][0]];
@@ -1031,7 +1031,7 @@ void VariableOrderMarkov::output_first_occurrence_distribution(int variable , in
     break;
   }
 
-  case 'e' : {
+  case EQUILIBRIUM : {
     for (i = 1;i < nb_row;i++) {
       if (!child[i]) {
         memory[i] = (1. - observation[state[i][0]]) * initial[i];
@@ -1258,7 +1258,7 @@ void VariableOrderMarkov::output_recurrence_time_distribution(const double *imem
 
   for (i = 1;i < nb_row;i++) {
     memory[i] = imemory[i];
-    if ((type == 'o') && (order[i] == 1)) {
+    if ((type == ORDINARY) && (order[i] == 1)) {
       memory[i] += initial[state[i][0]];
     }
     memory[i] *= observation[state[i][0]];
@@ -1373,7 +1373,7 @@ void VariableOrderMarkov::output_sojourn_time_distribution(const double *imemory
                      imemory[previous[i][j]];
       }
 
-      if (type == 'o') {
+      if (type == ORDINARY) {
         memory[i] += initial[state[i][0]];
         for (j = 0;j < nb_memory[i];j++) {
           memory[i] += (1. - observation[state[previous[i][j]][0]]) * transition[previous[i][j]][state[i][0]] *
@@ -1416,7 +1416,7 @@ void VariableOrderMarkov::output_sojourn_time_distribution(const double *imemory
         sum += transition[previous[j][k]][state[j][0]] * previous_memory[previous[j][k]];
       }
 
-      if ((state_type[state[j][0]] == 'a') && (observation[state[j][0]] == 1.)) {
+      if ((stype[state[j][0]] == ABSORBING) && (observation[state[j][0]] == 1.)) {
         absorption += sum;
       }
 
@@ -1479,7 +1479,7 @@ Correlation* VariableOrderMarkovChain::state_autocorrelation_computation(StatErr
 {
   bool status = true;
   register int i , j , k;
-  int *symbol;
+  int *category;
   double sum , norm , mean , *average_memory , *memory , *previous_memory , *ppoint;
   Correlation *correl;
   MarkovianSequences *binary_seq;
@@ -1534,12 +1534,12 @@ Correlation* VariableOrderMarkovChain::state_autocorrelation_computation(StatErr
 
     switch (type) {
 
-    case 'o' : {
+    case ORDINARY : {
       average_memory = memory_computation();
       break;
     }
 
-    case 'e' : {
+    case EQUILIBRIUM : {
       average_memory = new double[nb_row];
       for (i = 1;i < nb_row;i++) {
         average_memory[i] = initial[i];
@@ -1562,7 +1562,7 @@ Correlation* VariableOrderMarkovChain::state_autocorrelation_computation(StatErr
     for (i = 1;i < nb_row;i++) {
       if (state[i][0] == istate) {
         memory[i] = average_memory[i];
-        if ((type == 'o') && (order[i] == 1)) {
+        if ((type == ORDINARY) && (order[i] == 1)) {
           memory[i] += initial[state[i][0]];
         }
         sum += memory[i];
@@ -1572,7 +1572,7 @@ Correlation* VariableOrderMarkovChain::state_autocorrelation_computation(StatErr
         memory[i] = 0.;
 
         norm += average_memory[i];
-        if ((type == 'o') && (order[i] == 1)) {
+        if ((type == ORDINARY) && (order[i] == 1)) {
           norm += initial[state[i][0]];
         }
       }
@@ -1620,15 +1620,15 @@ Correlation* VariableOrderMarkovChain::state_autocorrelation_computation(StatErr
     delete [] previous_memory;
 
     if ((seq) && (seq->type[0] == STATE)) {
-      symbol = new int[nb_state];
+      category = new int[nb_state];
       for (i = 0;i < nb_state;i++) {
-        symbol[i] = 0;
+        category[i] = 0;
       }
-      symbol[istate] = 1;
+      category[istate] = 1;
 
-      binary_seq = seq->transcode(error , 1 , symbol);
+      binary_seq = seq->transcode(error , 1 , category);
       binary_seq->correlation_computation(*correl , 0 , 0 , EXACT);
-      delete [] symbol;
+      delete [] category;
       delete binary_seq;
     }
   }
@@ -1698,7 +1698,7 @@ Correlation* VariableOrderMarkov::output_autocorrelation_computation(StatError &
 {
   bool status = true;
   register int i , j , k;
-  int seq_variable , *symbol;
+  int seq_variable , *category;
   double sum , norm , mean , *average_memory , *observation , *memory ,
          *previous_memory , *ppoint;
   Correlation *correl;
@@ -1760,12 +1760,12 @@ Correlation* VariableOrderMarkov::output_autocorrelation_computation(StatError &
 
     switch (type) {
 
-    case 'o' : {
+    case ORDINARY : {
       average_memory = memory_computation();
       break;
     }
 
-    case 'e' : {
+    case EQUILIBRIUM : {
       average_memory = new double[nb_row];
       for (i = 1;i < nb_row;i++) {
         average_memory[i] = initial[i];
@@ -1792,7 +1792,7 @@ Correlation* VariableOrderMarkov::output_autocorrelation_computation(StatError &
 
     for (i = 1;i < nb_row;i++) {
       memory[i] = average_memory[i];
-      if ((type == 'o') && (order[i] == 1)) {
+      if ((type == ORDINARY) && (order[i] == 1)) {
         memory[i] += initial[state[i][0]];
       }
       norm += memory[i];
@@ -1847,15 +1847,15 @@ Correlation* VariableOrderMarkov::output_autocorrelation_computation(StatError &
         break;
       }
 
-      symbol = new int[categorical_process[variable]->nb_value];
+      category = new int[categorical_process[variable]->nb_value];
       for (i = 0;i < categorical_process[variable]->nb_value;i++) {
-        symbol[i] = 0;
+        category[i] = 0;
       }
-      symbol[output] = 1;
+      category[output] = 1;
 
-      binary_seq = seq->transcode(error , seq_variable + 1 , symbol);
+      binary_seq = seq->transcode(error , seq_variable + 1 , category);
       binary_seq->correlation_computation(*correl , seq_variable , seq_variable , EXACT);
-      delete [] symbol;
+      delete [] category;
       delete binary_seq;
     }
   }
