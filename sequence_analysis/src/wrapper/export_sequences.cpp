@@ -54,7 +54,7 @@ public:
   {
     StatError error;
     Sequences *sequences = NULL;
-    sequences = sequences_ascii_read(error, filename, old_format);
+    sequences = Sequences::ascii_read(error, filename, old_format);
     return boost::shared_ptr<Sequences>(sequences);
   }
 
@@ -63,13 +63,13 @@ public:
   {
     StatError error;
     Sequences *sequences = NULL;
-    sequences = sequences_ascii_read(error, filename, old_format);
+    sequences = Sequences::ascii_read(error, filename, old_format);
     return boost::shared_ptr<Sequences>(sequences);
   }
 */
 
 /*Sequences::Sequences(int inb_sequence , int *iidentifier , int *ilength ,
-                     int **ivertex_identifier , int iindex_parameter_type ,
+                     int **ivertex_identifier , index_parameter_type iindex_param_type ,
                      int **iindex_parameter , int inb_variable , int *itype ,
                      int ***iint_sequence , double ***ireal_sequence)
 
@@ -83,7 +83,7 @@ public:
         boost::python::list& input_vertex_identifiers,
         boost::python::list& input_index_parameters,
         boost::python::list& input_types,
-        int input_index_parameter_type
+        index_parameter_type input_index_param_type
         )
   {
     int nb_sequences = boost::python::len(input_sequences);
@@ -96,13 +96,13 @@ public:
 
     int *lengths = NULL;
     int *identifiers = NULL;
-    int *types = NULL;
+    variable_nature *types = NULL;
 
     double ***real_sequences = NULL;
     int ***int_sequences = NULL;
     int **index_parameters = NULL;
     int **vertex_identifiers = NULL;
-    int index_parameter_type = input_index_parameter_type;
+    index_parameter_type index_param_type = input_index_param_type;
 
     int nb_variable_float = 0;
     int nb_variable_int = 0;
@@ -112,7 +112,7 @@ public:
 
     lengths = new int[nb_sequences];
     identifiers = new int[nb_identifiers];
-    types = new int[nb_types];
+    types = new variable_nature[nb_types];
     index_parameters = new int*[nb_sequences];
 
 
@@ -123,7 +123,7 @@ public:
     {
         boost::python::list sequence = extract<boost::python::list> (input_sequences[iseq]);
         boost::python::list index_parameter = extract<boost::python::list> (input_index_parameters[iseq]);
-        if (index_parameter_type == POSITION)
+        if (index_param_type == POSITION)
         {
             index_parameters[iseq] = new int[len(sequence)+1];
             for (int ilength=0; ilength<len(sequence)+1 ; ilength++)
@@ -266,7 +266,7 @@ public:
 
     //cout << "calling Sequences "<<endl;
     ret = new Sequences(nb_sequences, identifiers, lengths,
-        vertex_identifiers, index_parameter_type, index_parameters,
+        vertex_identifiers, index_param_type, index_parameters,
         nb_variables, types, int_sequences, real_sequences);
     //cout << "calling Sequences done "<<endl;
 
@@ -340,7 +340,7 @@ public:
   // very complicated implementation of Sequence, but seems to work for now
   static Sequences*
   build_from_lists(boost::python::list& input_list,
-      boost::python::list& input_identifiers, int input_index_parameter_type)
+      boost::python::list& input_identifiers, index_parameter_type input_index_param_type)
   {
 
     // case 1 list of n lists of floats (only 1 variable and different sizes possible):
@@ -375,10 +375,10 @@ public:
     bool is_int = false;
     bool is_sequence = false;
     boost::python::list sequence;
-    int index_parameter_type = -1;
-    int type = -1; //
+    index_parameter_type index_param_type = TIME;
+    variable_nature type = AUXILIARY; //
 
-    index_parameter_type = input_index_parameter_type;
+    index_param_type = input_index_param_type;
     // length of each sequence will be store in this variable
     length = new int[nb_sequences];
     identifiers = new int[nb_sequences];
@@ -536,7 +536,7 @@ public:
           }
       }
 
-    if (index_parameter_type != IMPLICIT_TYPE)
+    if (index_param_type != IMPLICIT_TYPE)
         nb_variables--;
 
 
@@ -562,7 +562,7 @@ public:
     if (is_int)
       {
         sequences = new Sequences(nb_sequences, identifiers, length,
-            index_parameter_type, nb_variables, type, int_sequence);
+            index_param_type, nb_variables, type, int_sequence);
         // freeing memory
 
         if (int_sequence)
@@ -610,22 +610,23 @@ public:
   }
 
   static std::string
-  ascii_data_write(const Sequences &d, bool exhaustive)
+  ascii_data_write(const Sequences &d, output_sequence_format format, bool exhaustive)
   {
     std::stringstream os;
     std::string res;
-    d.ascii_data_write(os, exhaustive, exhaustive);
+    d.ascii_data_write(os, format, exhaustive);
     res = os.str();
     return res;
   }
 
   static void
-  file_ascii_data_write(const Sequences &d, const char *path, bool exhaustive)
+  file_ascii_data_write(const Sequences &d, const char *path,
+                        output_sequence_format format, bool exhaustive)
   {
     bool result = true;
     StatError error;
 
-    result = d.ascii_data_write(error, path, exhaustive);
+    result = d.ascii_data_write(error, path, format, exhaustive);
     if (!result)
       sequence_analysis::wrap_util::throw_error(error);
 
@@ -992,7 +993,7 @@ public:
   }
 
   static Sequences*
-  round(const Sequences &seq, int variable, int mode)
+  round(const Sequences &seq, int variable, rounding mode)
   {
     SIMPLE_METHOD_TEMPLATE_1(seq, round, Sequences, variable, mode);
   }
@@ -1052,7 +1053,7 @@ public:
 
   static Sequences*
   moving_average(const Sequences &seq, boost::python::list& input_values,
-      int variable, bool begin_end, int output)
+      int variable, bool begin_end, sequence_type output)
   {
 
     int nb_value = len(input_values);
@@ -1088,7 +1089,7 @@ public:
 
   static Sequences*
   moving_average_from_distribution(const Sequences &seq,
-      const Distribution& dist, int variable, bool begin_end, int output)
+      const Distribution& dist, int variable, bool begin_end, sequence_type output)
   {
     SIMPLE_METHOD_TEMPLATE_1(seq, moving_average, Sequences, dist, variable,
         begin_end, output);
@@ -1096,7 +1097,7 @@ public:
 
   static Sequences*
   pointwise_average(const Sequences &seq, bool circular, bool standard_deviation,
-      int output, const char *path, char format)
+      sequence_type output, const char *path, output_format format)
   {
     SIMPLE_METHOD_TEMPLATE_1(seq, pointwise_average, Sequences,
         circular, standard_deviation, output, path, format);
@@ -1129,16 +1130,16 @@ public:
 
   static Correlation*
   partial_autocorrelation_computation(const Sequences &seq, int variable,
-      int itype, int max_lag)
+      correlation_type itype, int max_lag)
   {
     SIMPLE_METHOD_TEMPLATE_1(seq, partial_autocorrelation_computation,
         Correlation, variable, itype, max_lag);
   }
 
   static Vectors*
-  extract_vectors(const Sequences &seq, int feature_type, int variable, int value)
+  extract_vectors(const Sequences &seq, sequence_pattern pattern, int variable, int value)
   {
-    SIMPLE_METHOD_TEMPLATE_1(seq, extract_vectors, Vectors, feature_type,
+    SIMPLE_METHOD_TEMPLATE_1(seq, extract_vectors, Vectors, pattern,
         variable, value);
   }
 
@@ -1158,7 +1159,7 @@ public:
 
   static Correlation*
   correlation_computation(const Sequences &input, int variable1, int variable2,
-  int itype, int max_lag, int normalization, bool individual_mean)
+  correlation_type itype, int max_lag, correlation_normalization normalization, bool individual_mean)
   {
     SIMPLE_METHOD_TEMPLATE_1 (input, correlation_computation,
       Correlation, variable1, variable2, itype, max_lag, normalization, individual_mean)
@@ -1166,11 +1167,12 @@ public:
 
   static Sequences*
   multiple_alignment(const Sequences &input, const VectorDistance &ivector_dist,
-      bool begin_free, bool end_free, int indel_cost, double indel_factor, int algorithm, const char *path)
+      bool begin_free, bool end_free, insertion_deletion_cost indel_cost, double indel_factor,
+      hierarchical_strategy strategy, const char *path)
   {
     HEADER_OS(Sequences);
     ret = input.multiple_alignment(error, os, ivector_dist, begin_free,\
-        end_free, indel_cost, indel_factor, algorithm, path);
+        end_free, indel_cost, indel_factor, strategy, path);
     FOOTER_OS;
 
   }
@@ -1178,17 +1180,16 @@ public:
   static DistanceMatrix*
   alignment_vector_distance(const Sequences &input,
       const VectorDistance &ivector_dist,  int ref_identifier,
-      int test_identifier, bool begin_free, bool end_free, int indel_cost,
+      int test_identifier, bool begin_free, bool end_free, insertion_deletion_cost indel_cost,
       double indel_factor, bool transposition_flag,
-      double transposition_factor, const char *result_path, char result_format,
-      const char *alignment_path, char alignment_format)
+      double transposition_factor, const char *result_path, output_format result_format,
+      const char *alignment_path)
   {
     HEADER_OS(DistanceMatrix);
 
     ret = input.alignment(error, &os, ivector_dist, ref_identifier, test_identifier, begin_free,
         end_free, indel_cost, indel_factor, transposition_flag,
-        transposition_factor, result_path, result_format, alignment_path,
-        alignment_format );
+        transposition_factor, result_path, result_format, alignment_path);
 
    FOOTER_OS;
   }
@@ -1196,14 +1197,13 @@ public:
   static DistanceMatrix*
   alignment(const Sequences &input,int ref_identifier,
   int test_identifier, bool begin_free, bool end_free,
-  const char *result_path, char result_format,
-  const char *alignment_path, char alignment_format)
+  const char *result_path, output_format result_format,
+  const char *alignment_path)
   {
     HEADER_OS(DistanceMatrix);
 
     ret = input.alignment(error, &os, ref_identifier, test_identifier, begin_free,
-      end_free, result_path, result_format, alignment_path,
-      alignment_format );
+      end_free, result_path, result_format, alignment_path);
     FOOTER_OS;
   }
 
@@ -1239,7 +1239,7 @@ public:
   static Sequences*
   segmentation_change_point(const Sequences &input, int iidentifier,
     int nb_segment , boost::python::list input_change_point ,
-    boost::python::list input_model_type , int output)
+    boost::python::list input_model_type , sequence_type output)
   {
     HEADER_OS(Sequences);
 
@@ -1250,10 +1250,10 @@ public:
       change_point[i] = boost::python::extract<int> (input_change_point[i]);
 
     nb = len(input_model_type);
-    int *model_type;
-    model_type = new int[nb];
+    segment_model *model_type;
+    model_type = new segment_model[nb];
     for (int i = 0; i < nb; i++)
-      model_type[i] = extract<int> (input_model_type[i]);
+      model_type[i] = extract<segment_model> (input_model_type[i]);
 
     ret = input.segmentation(error, os, iidentifier, nb_segment,
       change_point, model_type, output);
@@ -1264,7 +1264,7 @@ public:
 
   static Sequences*
   segmentation_array(const Sequences &input, boost::python::list input_nb_segment,
-      boost::python::list input_model_type , int iidentifier,  int output)
+      boost::python::list input_model_type , int iidentifier,  sequence_type output)
   {
     HEADER_OS(Sequences);
 
@@ -1275,10 +1275,10 @@ public:
         nb_segment[i] = extract<int> (input_nb_segment[i]);
 
     nb = len(input_model_type);
-    int *model_type;
-    model_type = new int[nb];
+    segment_model *model_type;
+    model_type = new segment_model[nb];
     for (int i = 0; i < nb; i++)
-        model_type[i] = extract<int> (input_model_type[i]);
+        model_type[i] = extract<segment_model> (input_model_type[i]);
 
 
     ret = input.segmentation(error, os, nb_segment, model_type, iidentifier,
@@ -1293,10 +1293,10 @@ public:
     HEADER_OS(Sequences);
 
     int nb = len(input_model_type);
-    int *model_type;
-    model_type = new int[nb];
+    segment_model *model_type;
+    model_type = new segment_model[nb];
     for (int i = 0; i < nb; i++)
-        model_type[i] = extract<int> (input_model_type[i]);
+        model_type[i] = extract<segment_model> (input_model_type[i]);
 
     ret = input.segmentation(error, os, iidentifier, max_nb_segment, model_type);
     FOOTER_OS;
@@ -1363,10 +1363,10 @@ public:
 
   static MultiPlotSet*
   segment_profile_plotable_write(const Sequences &input, int iidentifier ,
-      int nb_segment, boost::python::list model_type , int output)
+      int nb_segment, boost::python::list model_type , change_point_profile output)
   {
     StatError error;
-    CREATE_ARRAY(model_type, int, models);
+    CREATE_ARRAY(model_type, segment_model, models);
     MultiPlotSet* ret = input.segment_profile_plotable_write(error, iidentifier, nb_segment, models.get(), output);
 
     if (!ret)
@@ -1376,14 +1376,14 @@ public:
 
   static bool
   segment_profile_write(const Sequences &input,int iidentifier,
-                               int nb_segment , boost::python::list& model_type , int output ,
-                               char format, int segmentation ,
+                               int nb_segment , boost::python::list& model_type , change_point_profile output ,
+                               output_format format, latent_structure_algorithm segmentation ,
                                int nb_segmentation)
   {
     std::stringstream os;
     StatError error;
     bool ret;
-    CREATE_ARRAY(model_type, int, models);
+    CREATE_ARRAY(model_type, segment_model, models);
     ret = input.segment_profile_write(error, os, iidentifier,  nb_segment,
         models.get(), output, format, segmentation, nb_segmentation);
     if (!ret)
@@ -1443,7 +1443,7 @@ class_sequences()
    .add_property("nb_variable", &Sequences::get_nb_variable, "Return the number of variables")
    .add_property("max_length", &Sequences::get_max_length,"Return max length")
    .add_property("cumul_length", &Sequences::get_cumul_length,"Return cumul length")
-   .add_property("index_parameter_type", &Sequences::get_index_parameter_type,"return index parameter type")
+   .add_property("index_parameter_type", &Sequences::get_index_param_type,"return index parameter type")
 
    .def("get_min_value", &Sequences::get_min_value,args("index_var"), "return min value of variables")
    .def("get_max_value", &Sequences::get_max_value,args("index_var"), "return max value of variables")
@@ -1519,7 +1519,7 @@ class_sequences()
 
 /*
  Sequences(int inb_sequence , int inb_variable);
- Sequences(int inb_sequence , int *iidentifier , int *ilength , int iindex_parameter_type ,               int inb_variable , int *itype , bool init_flag = false)       { init(inb_sequence , iidentifier , ilength , iindex_parameter_type , inb_variable ,               itype , init_flag); }
+ Sequences(int inb_sequence , int *iidentifier , int *ilength , int iindex_param_type ,               int inb_variable , int *itype , bool init_flag = false)       { init(inb_sequence , iidentifier , ilength , iindex_param_type , inb_variable ,               itype , init_flag); }
  Sequences(int inb_sequence , int *iidentifier , int *ilength , int inb_variable , int *itype , bool init_flag = false){ init(inb_sequence , iidentifier , ilength , IMPLICIT_TYPE , inb_variable ,            itype , init_flag); }
  Sequences(int inb_sequence , int *iidentifier , int *ilength , int inb_variable ,  bool init_flag = false)     { init(inb_sequence , iidentifier , ilength , inb_variable , init_flag); }
  Sequences(const FrequencyDistribution &ilength_distribution , int inb_variable , bool init_flag = false);
@@ -1547,16 +1547,16 @@ class_sequences()
  double kurtosis_computation(int variable , double mean , double variance) const;
 
  FrequencyDistribution* value_index_interval_computation(StatError &error , int variable , int value) const;
- Sequences* hierarchical_segmentation(StatError &error , std::ostream &os , int iidentifier , int max_nb_segment , int *model_type) const;
-
+ Sequences* hierarchical_segmentation(StatError &error , std::ostream &os , int iidentifier , int max_nb_segment ,
+                                      segment_model *model_type) const;
 
     bool segment_profile_write(StatError &error , const char *path , int iidentifier ,
-                               int nb_segment , int *model_type , int output = SEGMENT ,
-                               char format = 'a' , int segmentation = FORWARD_DYNAMIC_PROGRAMMING ,
+                               int nb_segment , int *model_type , change_point_profile output = SEGMENT ,
+                               output_format format = ASCII , latent_structure_algorithm segmentation = FORWARD_DYNAMIC_PROGRAMMING ,
                                int nb_segmentation = NB_SEGMENTATION) const;
     bool segment_profile_plot_write(StatError &error , const char *prefix ,
                                     int iidentifier , int nb_segment , int *model_type ,
-                                    int output = SEGMENT , const char *title = NULL) const;
+                                    change_point_profile output = SEGMENT , const char *title = NULL) const;
 
 
 
