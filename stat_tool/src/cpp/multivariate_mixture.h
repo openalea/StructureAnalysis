@@ -75,11 +75,6 @@ namespace stat_tool {
     friend class Vectors;
     friend class MultivariateMixtureData;
 
-    friend MultivariateMixture* multivariate_mixture_building(StatError &error ,
-                                                              int nb_component , double *weight ,
-                                                              const DiscreteParametricProcess **component);
-    friend MultivariateMixture* multivariate_mixture_ascii_read(StatError &error , const char *path ,
-                                                                double cumul_threshold);
     friend std::ostream& operator<<(std::ostream &os , const MultivariateMixture &mixt)
     { return mixt.ascii_write(os , mixt.mixture_data , false , false); }
 
@@ -118,8 +113,7 @@ namespace stat_tool {
 
     /** MAP algorithm */
     std::vector<int>* state_computation(StatError &error, const Vectors &vec, 
-					double** &posterior_dist,
-                                        int algorithm=VITERBI, int index=I_DEFAULT) const;
+					double** &posterior_dist, int index=I_DEFAULT) const;
 
     /** Initialization of EM algorithm */
     void init();
@@ -155,6 +149,13 @@ namespace stat_tool {
     /** Permutation of the states of \e self */
     void state_permutation(StatError& error, int* perm) const;
 
+    static MultivariateMixture* building(StatError &error , int nb_component ,
+                                         int nb_variable, double *weight,
+                                         DiscreteParametricProcess **ppcomponent,
+                                         CategoricalProcess **pnpcomponent);
+    static MultivariateMixture* ascii_read(StatError &error , const char *path ,
+                                           double cumul_threshold = CUMUL_THRESHOLD);
+
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
@@ -172,7 +173,7 @@ namespace stat_tool {
 
     /** add restored states and state entropy to Vectors */
     MultivariateMixtureData* cluster(StatError &error, const Vectors &vec,
-                                     int algorithm=VITERBI, bool add_state_entropy=false) const;
+                                     bool add_state_entropy=false) const;
 
     /** return "true" if process ivariable is parametric */
     bool is_parametric(int ivariable) const;
@@ -188,14 +189,6 @@ namespace stat_tool {
     DiscreteParametric* get_parametric_component(int variable, int index) const;
     Distribution* get_categorical_component(int variable, int index) const;
   };
-
-
-  MultivariateMixture* multivariate_mixture_building(StatError &error , int nb_component ,
-                                                     int nb_variable, double *weight,
-                                                     DiscreteParametricProcess **ppcomponent,
-                                                     CategoricalProcess **pnpcomponent);
-  MultivariateMixture* multivariate_mixture_ascii_read(StatError &error , const char *path ,
-                                                       double cumul_threshold = CUMUL_THRESHOLD);
 
 
 
