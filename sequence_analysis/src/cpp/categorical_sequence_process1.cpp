@@ -576,7 +576,7 @@ void CategoricalSequenceProcess::init_occupancy(const CategoricalSequenceProcess
     absorption[i] = process.absorption[i];
     if ((process.sojourn_time[i]) && (process.sojourn_time[i]->ident != CATEGORICAL)) {
       sojourn_time[i] = new DiscreteParametric(*(process.sojourn_time[i]) ,
-                                               'c' , occupancy_nb_value);
+                                               DISTRIBUTION_COPY , occupancy_nb_value);
     }
     else {
       sojourn_time[i] = NULL;
@@ -593,22 +593,23 @@ void CategoricalSequenceProcess::init_occupancy(const CategoricalSequenceProcess
  *  Constructeur par copie de la classe CategoricalSequenceProcess.
  *
  *  arguments : reference sur un objet CategoricalSequenceProcess,
- *              type de manipulation ('c' : copy, 'o' :occupancy),
+ *              type de manipulation (CATEGORICAL_SEQUENCE_PROCESS_COPY/INIT_OCCUPANCY),
  *              parametre (flag sur le calcul des lois caracteristiques /
  *              nombre de valeurs allouees pour les lois d'occupation des etats).
  *
  *--------------------------------------------------------------*/
 
 CategoricalSequenceProcess::CategoricalSequenceProcess(const CategoricalSequenceProcess &process ,
-                                                       char manip , int param)
+                                                       categorical_sequence_process_transformation transform ,
+                                                       int param)
 
 {
-  switch (manip) {
-  case 'c' :
+  switch (transform) {
+  case CATEGORICAL_SEQUENCE_PROCESS_COPY :
     CategoricalProcess::copy(process);
     copy(process , param);
     break;
-  case 'o' :
+  case INIT_OCCUPANCY :
     init_occupancy(process , param);
     break;
   }
@@ -748,7 +749,7 @@ CategoricalSequenceProcess& CategoricalSequenceProcess::operator=(const Categori
  *
  *--------------------------------------------------------------*/
 
-bool test_hidden(int nb_output_process , CategoricalSequenceProcess **process)
+bool CategoricalSequenceProcess::test_hidden(int nb_output_process , CategoricalSequenceProcess **process)
 
 {
   bool hidden = false;
@@ -757,7 +758,7 @@ bool test_hidden(int nb_output_process , CategoricalSequenceProcess **process)
 
   for (i = 0;i < nb_output_process;i++) {
     if (process[i]) {
-      hidden = process[i]->test_hidden();
+      hidden = process[i]->CategoricalProcess::test_hidden();
       if (hidden) {
         break;
       }
@@ -783,9 +784,9 @@ bool test_hidden(int nb_output_process , CategoricalSequenceProcess **process)
  *
  *--------------------------------------------------------------*/
 
-CategoricalSequenceProcess* occupancy_parsing(StatError &error , ifstream &in_file ,
-                                              int &line , const Chain &chain ,
-                                              double cumul_threshold)
+CategoricalSequenceProcess* CategoricalSequenceProcess::occupancy_parsing(StatError &error , ifstream &in_file ,
+                                                                          int &line , const Chain &chain ,
+                                                                          double cumul_threshold)
 
 {
   RWLocaleSnapshot locale("en");
@@ -870,7 +871,7 @@ CategoricalSequenceProcess* occupancy_parsing(StatError &error , ifstream &in_fi
             error.update(STAT_parsing[STATP_FORMAT] , line);
           }
 
-          dist[i] = discrete_parametric_parsing(error , in_file , line , UNIFORM ,
+          dist[i] = DiscreteParametric::parsing(error , in_file , line , UNIFORM ,
                                                 cumul_threshold , 1);
           if (!dist[i]) {
             status = false;
