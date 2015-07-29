@@ -68,32 +68,28 @@ namespace sequence_analysis {
                                                                   // d'ordre variable cachee
     friend class MarkovianSequences;
 
-    friend HiddenVariableOrderMarkov* hidden_variable_order_markov_ascii_read(stat_tool::StatError &error ,
-                                                                              const char *path ,
-                                                                              int length,
-                                                                              double cumul_threshold);
     friend std::ostream& operator<<(std::ostream &os , const HiddenVariableOrderMarkov &hmarkov)
     { return hmarkov.ascii_write(os); }
 
   private :
 
     void forward_backward(VariableOrderMarkovData &seq) const;
-    double forward_backward(const MarkovianSequences &seq , int index ,
-                            std::ostream *os , stat_tool::MultiPlotSet *plot_set , char format ,
+    double forward_backward(const MarkovianSequences &seq , int index , std::ostream *os ,
+                            stat_tool::MultiPlotSet *plot_set , stat_tool::output_format format ,
                             double &max_marginal_entropy , double &entropy1) const;
-    double forward_backward_sampling(const MarkovianSequences &seq , int index ,
-                                     std::ostream &os , char format = 'a' ,
+    double forward_backward_sampling(const MarkovianSequences &seq , int index , std::ostream &os ,
+                                     stat_tool::output_format format = stat_tool::ASCII ,
                                      int nb_state_sequence = NB_STATE_SEQUENCE) const;
 
     void log_computation();
     double viterbi(const MarkovianSequences &seq , double *posterior_probability ,
-                   int index = I_DEFAULT) const;
+                   int index = stat_tool::I_DEFAULT) const;
     void viterbi(VariableOrderMarkovData &seq) const;
-    double generalized_viterbi(const MarkovianSequences &seq , int index ,
-                               std::ostream &os , double seq_likelihood , char format ,
+    double generalized_viterbi(const MarkovianSequences &seq , int index , std::ostream &os ,
+                               double seq_likelihood , stat_tool::output_format format ,
                                int inb_state_sequence) const;
-    double viterbi_forward_backward(const MarkovianSequences &seq , int index ,
-                                    std::ostream *os , stat_tool::MultiPlot *plot , char format ,
+    double viterbi_forward_backward(const MarkovianSequences &seq , int index , std::ostream *os ,
+                                    stat_tool::MultiPlot *plot , stat_tool::output_format format ,
                                     double seq_likelihood = D_INF) const;
 
   public :
@@ -113,29 +109,36 @@ namespace sequence_analysis {
 
     HiddenVariableOrderMarkov* thresholding(double min_probability = MIN_PROBABILITY) const;
 
+    static HiddenVariableOrderMarkov* ascii_read(stat_tool::StatError &error , const char *path ,
+                                                 int length = DEFAULT_LENGTH ,
+                                                 double cumul_threshold = OCCUPANCY_THRESHOLD);
+
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
     bool ascii_write(stat_tool::StatError &error , const char *path , bool exhaustive = false) const;
     bool spreadsheet_write(stat_tool::StatError &error , const char *path) const;
 
     double likelihood_computation(const MarkovianSequences &seq , double *posterior_probability = NULL ,
-                                  int index = I_DEFAULT) const;
+                                  int index = stat_tool::I_DEFAULT) const;
 
     bool state_profile_write(stat_tool::StatError &error , std::ostream &os ,
                              const MarkovianSequences &iseq ,
-                             int identifier = I_DEFAULT , char format = 'a' ,
-                             int state_sequence = GENERALIZED_VITERBI ,
+                             int identifier = stat_tool::I_DEFAULT ,
+                             stat_tool::output_format format = stat_tool::ASCII ,
+                             latent_structure_algorithm state_sequence = GENERALIZED_VITERBI ,
                              int nb_state_sequence = NB_STATE_SEQUENCE) const;
     bool state_profile_write(stat_tool::StatError &error , const char *path ,
                              const MarkovianSequences &iseq ,
-                             int identifier = I_DEFAULT , char format = 'a' ,
-                             int state_sequence = GENERALIZED_VITERBI ,
+                             int identifier = stat_tool::I_DEFAULT ,
+                             stat_tool::output_format format = stat_tool::ASCII ,
+                             latent_structure_algorithm state_sequence = GENERALIZED_VITERBI ,
                              int nb_state_sequence = NB_STATE_SEQUENCE) const;
     bool state_profile_ascii_write(stat_tool::StatError &error , std::ostream &os , int identifier ,
-                                   int state_sequence = GENERALIZED_VITERBI ,
+                                   latent_structure_algorithm state_sequence = GENERALIZED_VITERBI ,
                                    int nb_state_sequence = NB_STATE_SEQUENCE) const;
     bool state_profile_write(stat_tool::StatError &error , const char *path ,
-                             int identifier = I_DEFAULT , char format = 'a' ,
-                             int state_sequence = GENERALIZED_VITERBI ,
+                             int identifier = stat_tool::I_DEFAULT ,
+                             stat_tool::output_format format = stat_tool::ASCII ,
+                             latent_structure_algorithm state_sequence = GENERALIZED_VITERBI ,
                              int nb_state_sequence = NB_STATE_SEQUENCE) const;
 
     bool state_profile_plot_write(stat_tool::StatError &error , const char *prefix ,
@@ -174,12 +177,6 @@ namespace sequence_analysis {
                                                       const HiddenVariableOrderMarkov **hmarkov , int nb_sequence ,
                                                       const MarkovianSequences **seq , const char *path = NULL) const;
   };
-
-
-  HiddenVariableOrderMarkov* hidden_variable_order_markov_ascii_read(stat_tool::StatError &error ,
-                                                                     const char *path ,
-                                                                     int length = DEFAULT_LENGTH ,
-                                                                     double cumul_threshold = OCCUPANCY_THRESHOLD);
 
 
 };  // namespace sequence_analysis
