@@ -144,8 +144,8 @@ public:
   }
 
   static std::string
-  hierarchical_clustering(const DistanceMatrix& dm, int algorithm,
-      int criterion, const char*path, char format)
+  hierarchical_clustering(const DistanceMatrix& dm, hierarchical_strategy algorithm,
+      linkage criterion, const char*path, output_format format)
   {
     StatError error;
     std::stringstream output;
@@ -168,7 +168,7 @@ public:
     StatError error;
 
     // not implemented. see vectors.cpp for an exmaple.
-    //data = distance_matrix_ascii_read(error, filename);
+    // data = DistanceMatrix::ascii_read(error, filename);
 
     if (data)
       {
@@ -644,7 +644,7 @@ void
 class_dendrogram()
 {
   class_<Dendrogram, bases<StatInterface> > ("_Dendrogram", "Dendrogram", no_init)
-  .def(init <const DistanceMatrix &, int>())
+  .def(init <const DistanceMatrix &, cluster_scale>())
 
   .def(self_ns::str(self)) // __str__
 ;
@@ -671,8 +671,8 @@ Dendrogram();
    int get_parent(int cluster) const { return parent[cluster]; }
    int get_child(int cluster , int index) const { return child[cluster][index]; }
    double get_child_distance(int cluster) const { return child_distance[cluster]; }
-   double get_intra_cluster_distance(int cluster) const { return intra_cluster_distance[cluster]; }
-   double get_inter_cluster_distance(int cluster) const { return inter_cluster_distance[cluster]; }
-   double get_max_intra_cluster_distance(int cluster) const { return max_intra_cluster_distance[cluster]; }
-   double get_min_inter_cluster_distance(int cluster) const { return min_inter_cluster_distance[cluster]; }
+   double get_within_cluster_distance(int cluster) const { return within_cluster_distance[cluster]; }
+   double get_between_cluster_distance(int cluster) const { return between_cluster_distance[cluster]; }
+   double get_max_within_cluster_distance(int cluster) const { return max_within_cluster_distance[cluster]; }
+   double get_min_between_cluster_distance(int cluster) const { return min_between_cluster_distance[cluster]; }
 */
