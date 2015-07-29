@@ -264,8 +264,9 @@ void Renewal::expectation_step(const TimeEvents &timev ,
 
 void Renewal::expectation_step(const TimeEvents &timev ,
                                Reestimation<double> *inter_event_reestim ,
-                               Reestimation<double> *length_bias_reestim , int estimator ,
-                               bool combination , int mean_computation_method) const
+                               Reestimation<double> *length_bias_reestim ,
+                               censoring_estimator estimator , bool combination ,
+                               duration_distribution_mean_estimator mean_estimator) const
 
 {
   register int i , j;
@@ -461,7 +462,7 @@ void Renewal::expectation_step(const TimeEvents &timev ,
   }
 
   if ((estimator == COMPLETE_LIKELIHOOD) && (combination)) {
-    switch (mean_computation_method) {
+    switch (mean_estimator) {
     case ESTIMATED :
       inter_event_mean = timev.htime->mean / timev.mixture->mean;
       break;
@@ -474,7 +475,7 @@ void Renewal::expectation_step(const TimeEvents &timev ,
     }
 
 #   ifdef DEBUG
-    if (mean_computation_method != ESTIMATED) {
+    if (mean_estimator != ESTIMATED) {
       cout << SEQ_label[SEQL_INTER_EVENT] << " " << STAT_label[STATL_MEAN] << ": "
            << inter_event_mean << " (" << timev.htime->mean / timev.mixture->mean << ") | ";
     }
@@ -502,7 +503,7 @@ void Renewal::expectation_step(const TimeEvents &timev ,
  *  a partir d'echantillons {temps d'observation, nombre d'evenements}.
  *
  *  arguments : reference sur un objet StatError, stream,
- *              type de processus ('o' : ordinaire, 'e' : en equilibre),
+ *              type de processus (ORDINARY/EQUILIBRIUM),
  *              reference sur la loi inter-evenement initiale,
  *              type d'estimateur (vraisemblance, vraisemblance penalisee ou
  *              estimation d'une loi parametrique), nombre d'iterations,
@@ -514,10 +515,11 @@ void Renewal::expectation_step(const TimeEvents &timev ,
  *
  *--------------------------------------------------------------*/
 
-Renewal* TimeEvents::estimation(StatError &error , ostream &os , char type ,
-                                const DiscreteParametric &iinter_event , int estimator ,
-                                int nb_iter , int equilibrium_estimator , int mean_computation_method ,
-                                double weight , int penalty_type , int outside) const
+Renewal* TimeEvents::estimation(StatError &error , ostream &os , process_type type ,
+                                const DiscreteParametric &iinter_event , estimation_criterion estimator ,
+                                int nb_iter , censoring_estimator equilibrium_estimator ,
+                                duration_distribution_mean_estimator mean_estimator ,
+                                double weight , penalty_type pen_type , side_effect outside) const
 
 {
   bool status = true;
@@ -571,7 +573,7 @@ Renewal* TimeEvents::estimation(StatError &error , ostream &os , char type ,
       penalty = new double[pinter_ev->alloc_nb_value];
 
       if (weight == D_DEFAULT) {
-        if (penalty_type != ENTROPY) {
+        if (pen_type != ENTROPY) {
           weight = RENEWAL_DIFFERENCE_WEIGHT;
         }
         else {
@@ -589,7 +591,7 @@ Renewal* TimeEvents::estimation(StatError &error , ostream &os , char type ,
 
     inter_event_reestim = new Reestimation<double>(pinter_ev->alloc_nb_value);
 
-    if (type == 'e') {
+    if (type == EQUILIBRIUM) {
       if (equilibrium_estimator == COMPLETE_LIKELIHOOD) {
         length_bias_reestim = new Reestimation<double>(pinter_ev->alloc_nb_value);
       }
@@ -607,22 +609,22 @@ Renewal* TimeEvents::estimation(StatError &error , ostream &os , char type ,
       // calcul des quantites de reestimation
 
       switch (type) {
-      case 'o' :
+      case ORDINARY :
         renew->expectation_step(*this , inter_event_reestim);
         break;
-      case 'e' :
+      case EQUILIBRIUM :
         renew->expectation_step(*this , inter_event_reestim ,
                                 length_bias_reestim , equilibrium_estimator);
         break;
       }
 
       if (estimator != PENALIZED_LIKELIHOOD) {
-        if ((type == 'o') || (equilibrium_estimator == PARTIAL_LIKELIHOOD)) {
+        if ((type == ORDINARY) || (equilibrium_estimator == PARTIAL_LIKELIHOOD)) {
           inter_event_reestim->distribution_estimation(pinter_ev);
         }
 
         else {
-          switch (mean_computation_method) {
+          switch (mean_estimator) {
           case ESTIMATED :
             inter_event_mean = htime->mean / mixture->mean;
             break;
@@ -640,14 +642,14 @@ Renewal* TimeEvents::estimation(StatError &error , ostream &os , char type ,
       }
 
       else {
-        if ((type == 'o') || (equilibrium_estimator == PARTIAL_LIKELIHOOD)) {
+        if ((type == ORDINARY) || (equilibrium_estimator == PARTIAL_LIKELIHOOD)) {
           inter_event_reestim->penalized_likelihood_estimation(pinter_ev , weight ,
-                                                               penalty_type , penalty ,
+                                                               pen_type , penalty ,
                                                                outside);
         }
 
         else {
-          switch (mean_computation_method) {
+          switch (mean_estimator) {
           case ESTIMATED :
             inter_event_mean = htime->mean / mixture->mean;
             break;
@@ -658,7 +660,7 @@ Renewal* TimeEvents::estimation(StatError &error , ostream &os , char type ,
 
           inter_event_reestim->penalized_likelihood_equilibrium_process_estimation(length_bias_reestim ,
                                                                                    pinter_ev , inter_event_mean ,
-                                                                                   weight , penalty_type ,
+                                                                                   weight , pen_type ,
                                                                                    penalty , outside);
         }
       }
@@ -715,13 +717,13 @@ Renewal* TimeEvents::estimation(StatError &error , ostream &os , char type ,
           // calcul des quantites de reestimation
 
           switch (type) {
-          case 'o' :
+          case ORDINARY :
             renew->expectation_step(*this , inter_event_reestim);
             break;
-          case 'e' :
+          case EQUILIBRIUM :
             renew->expectation_step(*this , inter_event_reestim ,
                                     length_bias_reestim , equilibrium_estimator ,
-                                    true , mean_computation_method);
+                                    true , mean_estimator);
             break;
           }
 
@@ -785,7 +787,7 @@ Renewal* TimeEvents::estimation(StatError &error , ostream &os , char type ,
 
     delete inter_event_reestim;
 
-    if (type == 'e') {
+    if (type == EQUILIBRIUM) {
       if (equilibrium_estimator == COMPLETE_LIKELIHOOD) {
         delete length_bias_reestim;
       }
@@ -821,7 +823,7 @@ Renewal* TimeEvents::estimation(StatError &error , ostream &os , char type ,
  *  a partir d'echantillons {temps d'observation, nombre d'evenements}.
  *
  *  arguments : reference sur un objet StatError, stream,
- *              type de processus ('o' : ordinaire, 'e' : en equilibre),
+ *              type de processus (ORDINARY/EQUILIBRIUM),
  *              type d'estimateur (vraisemblance, vraisemblance penalisee ou
  *              estimation d'une loi parametrique), nombre d'iterations,
  *              type d'estimateur dans le cas d'un processus de renouvellement en equilibre,
@@ -832,10 +834,11 @@ Renewal* TimeEvents::estimation(StatError &error , ostream &os , char type ,
  *
  *--------------------------------------------------------------*/
 
-Renewal* TimeEvents::estimation(StatError &error , ostream &os , char type ,
-                                int estimator , int nb_iter , int equilibrium_estimator ,
-                                int mean_computation_method , double weight ,
-                                int penalty_type , int outside) const
+Renewal* TimeEvents::estimation(StatError &error , ostream &os , process_type type ,
+                                estimation_criterion estimator , int nb_iter ,
+                                censoring_estimator equilibrium_estimator ,
+                                duration_distribution_mean_estimator mean_estimator , double weight ,
+                                penalty_type pen_type , side_effect outside) const
 
 {
   double proba;
@@ -859,8 +862,8 @@ Renewal* TimeEvents::estimation(StatError &error , ostream &os , char type ,
 # endif
 
   renew = estimation(error , os , type , *iinter_event , estimator , nb_iter ,
-                     equilibrium_estimator , mean_computation_method , weight ,
-                     penalty_type , outside);
+                     equilibrium_estimator , mean_estimator , weight ,
+                     pen_type , outside);
   delete iinter_event;
 
   return renew;
@@ -884,9 +887,9 @@ Renewal* TimeEvents::estimation(StatError &error , ostream &os , char type ,
 
 Renewal* RenewalData::estimation(StatError &error , ostream &os ,
                                  const DiscreteParametric &iinter_event ,
-                                 int estimator , int nb_iter ,
-                                 int mean_computation_method , double weight ,
-                                 int penalty_type , int outside) const
+                                 estimation_criterion estimator , int nb_iter ,
+                                 duration_distribution_mean_estimator mean_estimator , double weight ,
+                                 penalty_type pen_type , side_effect outside) const
 
 {
   register int i , j;
@@ -966,8 +969,8 @@ Renewal* RenewalData::estimation(StatError &error , ostream &os ,
   }
 
   inter_event = within->estimation(error , os , *within_backward , *within_forward , no_event ,
-                                   iinter_event , estimator , nb_iter , mean_computation_method ,
-                                   weight , penalty_type , outside , htime->mean / mixture->mean);
+                                   iinter_event , estimator , nb_iter , mean_estimator ,
+                                   weight , pen_type , outside , htime->mean / mixture->mean);
 
   delete within_backward;
   delete within_forward;
@@ -998,9 +1001,9 @@ Renewal* RenewalData::estimation(StatError &error , ostream &os ,
  *
  *--------------------------------------------------------------*/
 
-Renewal* RenewalData::estimation(StatError &error , ostream &os , int estimator ,
-                                 int nb_iter , int mean_computation_method , double weight ,
-                                 int penalty_type , int outside) const
+Renewal* RenewalData::estimation(StatError &error , ostream &os , estimation_criterion estimator ,
+                                 int nb_iter , duration_distribution_mean_estimator mean_estimator ,
+                                 double weight , penalty_type pen_type , side_effect outside) const
 
 {
   double proba;
@@ -1024,7 +1027,7 @@ Renewal* RenewalData::estimation(StatError &error , ostream &os , int estimator 
 # endif
 
   renew = estimation(error , os , *iinter_event , estimator , nb_iter ,
-                     mean_computation_method , weight , penalty_type , outside);
+                     mean_estimator , weight , pen_type , outside);
   delete iinter_event;
 
   return renew;
@@ -1036,12 +1039,12 @@ Renewal* RenewalData::estimation(StatError &error , ostream &os , int estimator 
  *  Simulation par un processus de renouvellement.
  *
  *  arguments : reference sur un objet StatError,
- *              type de simulation ('o' : ordinaire, 'e' : en equilibre),
+ *              type de simulation (ORDINARY/EQUILIBRIUM),
  *              loi empirique du temps d'observation.
  *
  *--------------------------------------------------------------*/
 
-RenewalData* Renewal::simulation(StatError &error , char itype ,
+RenewalData* Renewal::simulation(StatError &error , process_type itype ,
                                  const FrequencyDistribution &ihtime) const
 
 {
@@ -1090,10 +1093,10 @@ RenewalData* Renewal::simulation(StatError &error , char itype ,
     timev->sequence = new int*[ihtime.nb_element];
 
     switch (itype) {
-    case 'o' :
+    case ORDINARY :
       offset = 0;
       break;
-    case 'e' :
+    case EQUILIBRIUM :
       offset = 1;
       break;
     }
@@ -1109,7 +1112,7 @@ RenewalData* Renewal::simulation(StatError &error , char itype ,
 
         // temps avant le 1er evenement (processus de renouvellement en equilibre)
 
-        if (itype == 'e') {
+        if (itype == EQUILIBRIUM) {
           if (i == 0) {
             cumul_time = renew->forward->simulation();
           }
@@ -1130,7 +1133,7 @@ RenewalData* Renewal::simulation(StatError &error , char itype ,
 
         // temps avant le 1er evenement (processus de renouvellement ordinaire)
 
-        if (itype == 'o') {
+        if (itype == ORDINARY) {
           time_interval = renew->inter_event->simulation();
           cumul_time = time_interval;
           (timev->inter_event->frequency[time_interval])++;
@@ -1143,7 +1146,7 @@ RenewalData* Renewal::simulation(StatError &error , char itype ,
         }
 
         psequence = timev->sequence[i] - 1;
-        if (itype == 'o') {
+        if (itype == ORDINARY) {
           *++psequence = 1;
         }
         for (m = 1;m < MIN(time_interval , *ptime + 1);m++) {
@@ -1174,7 +1177,7 @@ RenewalData* Renewal::simulation(StatError &error , char itype ,
         }
 
         (timev->backward->frequency[*ptime - (cumul_time - time_interval)])++;
-        if (itype == 'o') {
+        if (itype == ORDINARY) {
           (timev->forward->frequency[cumul_time - *ptime])++;
         }
 
@@ -1252,12 +1255,12 @@ RenewalData* Renewal::simulation(StatError &error , char itype ,
  *  Simulation par un processus de renouvellement.
  *
  *  arguments : reference sur un objet StatError,
- *              type de simulation ('o' : ordinaire, 'e' : en equilibre),
+ *              type de simulation (ORDINARY/EQUILIBRIUM),
  *              nombre d'echantillons, temps d'observation.
  *
  *--------------------------------------------------------------*/
 
-RenewalData* Renewal::simulation(StatError &error , char itype ,
+RenewalData* Renewal::simulation(StatError &error , process_type itype ,
                                  int nb_element , int itime) const
 
 {
@@ -1303,12 +1306,12 @@ RenewalData* Renewal::simulation(StatError &error , char itype ,
  *  Simulation par un processus de renouvellement.
  *
  *  arguments : reference sur un objet StatError,
- *              type de simulation ('o' : ordinaire, 'e' : en equilibre),
+ *              type de simulation (ORDINARY/EQUILIBRIUM),
  *              nombre d'echantillons, reference sur un objet TimeEvents.
  *
  *--------------------------------------------------------------*/
 
-RenewalData* Renewal::simulation(StatError &error , char itype ,
+RenewalData* Renewal::simulation(StatError &error , process_type itype ,
                                  int nb_element , const TimeEvents &itimev) const
 
 {
@@ -1429,11 +1432,11 @@ RenewalIterator& RenewalIterator::operator=(const RenewalIterator &iter)
  *  Simulation par un processus de renouvellement.
  *
  *  arguments : longueur de la sequence,
- *              type d'initialisation ('o' : ordinaire, 'e' : en equilibre).
+ *              type d'initialisation (ORDINARY/EQUILIBRIUM).
  *
  *--------------------------------------------------------------*/
 
-void RenewalIterator::simulation(int ilength , char type)
+void RenewalIterator::simulation(int ilength , process_type type)
 
 {
   register int i;
@@ -1441,7 +1444,7 @@ void RenewalIterator::simulation(int ilength , char type)
 
 
   switch (type) {
-  case 'o' :
+  case ORDINARY :
     offset = 1;
     break;
   default :
@@ -1458,12 +1461,12 @@ void RenewalIterator::simulation(int ilength , char type)
   psequence = sequence;
 
   switch (type) {
-  case 'o' :
+  case ORDINARY :
     interval = renewal->inter_event->simulation();
     *psequence++ = 1;
     counter = 1;
     break;
-  case 'e' :
+  case EQUILIBRIUM :
     interval = renewal->forward->simulation();
     counter = 1;
     break;
