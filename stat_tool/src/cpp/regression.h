@@ -58,11 +58,12 @@ namespace stat_tool {
   const int NEIGHBORHOOD = 3;            // voisinage minimum sur les valeurs
                                          // de la variable explicative
 
-  enum {
-    STAT_LINEAR ,
-    STAT_LOGISTIC ,
-    STAT_MONOMOLECULAR ,
-    STAT_NONPARAMETRIC
+  enum parametric_function {
+    LINEAR_FUNCTION ,
+    LOGISTIC ,
+    MONOMOLECULAR ,
+    NONPARAMETRIC_FUNCTION ,
+    CONSTANT_FUNCTION
   };
 
 
@@ -77,7 +78,7 @@ namespace stat_tool {
 
   public :
 
-    int ident;              // identificateur de la fonction de regression
+    parametric_function ident;  // identificateur de la fonction de regression
     int min_value;          // valeur minimum
     int max_value;          // valeur maximum
     double regression_df;   // degres de liberte regression
@@ -91,8 +92,8 @@ namespace stat_tool {
     void remove();
 
     RegressionKernel();
-//    RegressionKernel(int iident , double imin_value , double imax_value , double istep = 1);
-    RegressionKernel(int iident , int imin_value , int imax_value);
+//    RegressionKernel(parametric_function iident , double imin_value , double imax_value , double istep = 1);
+    RegressionKernel(parametric_function iident , int imin_value , int imax_value);
     RegressionKernel(const RegressionKernel &regression) { copy(regression); }
     ~RegressionKernel();
     RegressionKernel& operator=(const RegressionKernel &regression);
@@ -136,7 +137,8 @@ namespace stat_tool {
   public :
 
     Regression();
-    Regression(int iident , int explanatory_variable , int response_variable , const Vectors &vec);
+    Regression(parametric_function iident , int explanatory_variable ,
+               int response_variable , const Vectors &vec);
     Regression(const Regression &regression);
     ~Regression();
     Regression& operator=(const Regression &regression);
