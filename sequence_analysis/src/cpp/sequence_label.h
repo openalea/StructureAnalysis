@@ -50,7 +50,7 @@ namespace sequence_analysis {
  */
 
 
-  enum {
+  enum sequence_analysis_key_word {
     SEQW_MARKOV_CHAIN ,
     SEQW_EQUILIBRIUM_MARKOV_CHAIN ,
     SEQW_HIDDEN_MARKOV_CHAIN ,
@@ -86,7 +86,7 @@ namespace sequence_analysis {
  */
 
 
-  enum {
+  enum sequence_analysis_label {
     SEQL_STATE_SEQUENCE_LIKELIHOOD ,
     SEQL_STATE_SEQUENCES_LIKELIHOOD ,
     SEQL_OBSERVED_SEQUENCES_LIKELIHOOD ,
@@ -271,7 +271,7 @@ namespace sequence_analysis {
  */
 
 
-  enum {
+  enum sequence_analysis_parsing {
     SEQP_TIME_ORDER ,
     SEQP_MAX_TIME ,
     SEQP_NB_EVENT_ORDER ,
@@ -296,7 +296,7 @@ namespace sequence_analysis {
  */
 
 
-  enum {
+  enum sequence_analysis_error {
     SEQR_BOTH_END_CENSORED_INTERVAL ,
     SEQR_INCOMPATIBLE_RENEWAL_DATA ,
     SEQR_MAX_NB_EVENT_TOO_SMALL ,
