@@ -49,11 +49,26 @@
 using std::string;
 
 
-namespace stat_tool
+
+namespace stat_tool {
+
+  enum process_distribution {
+    SELF_TRANSITION ,
+    OBSERVATION ,
+    INTENSITY ,
+    FIRST_OCCURRENCE ,
+    RECURRENCE_TIME ,
+    SOJOURN_TIME ,
+    INITIAL_RUN ,
+    FINAL_RUN ,
+    NB_RUN ,
+    NB_OCCURRENCE ,
+    COUNTING ,
+    LENGTH
+  };
 
 
 
-{
   typedef std::pair<float, float> PlotPoint;
   typedef std::pair<float, float> Range;
   typedef std::pair<PlotPoint, string> Label;
@@ -175,7 +190,7 @@ namespace stat_tool
     int nb_variable;
     std::vector<int> variable_nb_viewpoint;
     std::vector<int> variable;
-    std::vector<int> viewpoint;
+    std::vector<process_distribution> viewpoint;
 
     MultiPlotSet(int size = 1)
     :multiplots(size)
