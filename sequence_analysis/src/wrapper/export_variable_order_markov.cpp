@@ -54,7 +54,7 @@ public:
   {
     StatError error;
     VariableOrderMarkov *vom = NULL;
-    vom = variable_order_markov_ascii_read(error, filename, length);
+    vom = VariableOrderMarkov::ascii_read(error, filename, length);
     if (!vom)
       {
         sequence_analysis::wrap_util::throw_error(error);
@@ -76,9 +76,9 @@ public:
   }
 
   static DiscreteParametricModel*
-  extract(const VariableOrderMarkov &input, int type, int variable, int value)
+  extract(const VariableOrderMarkov &input, process_distribution dist_type, int variable, int value)
   {
-    SIMPLE_METHOD_TEMPLATE_1(input, extract, DiscreteParametricModel, type, variable,
+    SIMPLE_METHOD_TEMPLATE_1(input, extract, DiscreteParametricModel, dist_type, variable,
         value);
   }
 
@@ -325,7 +325,7 @@ void class_variable_order_markov_data() {
    ~VariableOrderMarkovData();
    VariableOrderMarkovData& operator=(const VariableOrderMarkovData &seq);
 
-   DiscreteDistributionData* extract(StatError &error , int type ,
+   DiscreteDistributionData* extract(StatError &error , process_distribution histo_type ,
                                      int variable , int value) const;
    VariableOrderMarkovData* remove_index_parameter(StatError &error) const;
 
