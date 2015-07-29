@@ -381,7 +381,7 @@ void Compound::expectation_step(const FrequencyDistribution &histo ,
  *  Estimation des parametres d'une loi composee par l'algorithme EM.
  *
  *  arguments : references sur un objet StatError, stream, references sur les lois,
- *              type de la loi inconnue ('s' : loi de la somme, 'e' : loi elementaire),
+ *              type de la loi inconnue (SUM/ELEMENTARY),
  *              type d'estimateur (vraisemblance, vraisemblance penalisee ou
  *              estimation d'une loi parametrique), nombre d'iterations,
  *              poids de la penalisation, type de penalisation,
@@ -392,9 +392,11 @@ void Compound::expectation_step(const FrequencyDistribution &histo ,
 
 Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream &os ,
                                                      const DiscreteParametric &sum_dist ,
-                                                     const DiscreteParametric &dist , char type ,
-                                                     int estimator , int nb_iter , double weight ,
-                                                     int penalty_type , int outside) const
+                                                     const DiscreteParametric &dist ,
+                                                     compound_distribution type ,
+                                                     estimation_criterion estimator ,
+                                                     int nb_iter , double weight ,
+                                                     penalty_type pen_type , side_effect outside) const
 
 {
   bool status = true , sum_compute , dist_compute;
@@ -430,16 +432,16 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream 
 
     if (estimator == PENALIZED_LIKELIHOOD) {
       switch (type) {
-      case 's' :
+      case SUM :
         penalty = new double[compound->sum_distribution->alloc_nb_value];
         break;
-      case 'e' :
+      case ELEMENTARY :
         penalty = new double[compound->distribution->alloc_nb_value];
         break;
       }
 
       if (weight == D_DEFAULT) {
-        if (penalty_type != ENTROPY) {
+        if (pen_type != ENTROPY) {
           weight = COMPOUND_DIFFERENCE_WEIGHT;
         }
         else {
@@ -448,21 +450,21 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream 
       }
 
       switch (type) {
-      case 's' :
+      case SUM :
         weight *= nb_element;
         break;
-      case 'e' :
+      case ELEMENTARY :
         weight *= compound->sum_distribution->mean * nb_element;
         break;
       }
     }
 
     switch (type) {
-    case 's' :
+    case SUM :
       sum_compute = true;
       dist_compute = false;
       break;
-    case 'e' :
+    case ELEMENTARY :
       sum_compute = false;
       dist_compute = true;
       break;
@@ -490,10 +492,10 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream 
 #   endif
 
     switch (type) {
-    case 's' :
+    case SUM :
       compound->sum_distribution->init(CATEGORICAL , I_DEFAULT , I_DEFAULT , D_DEFAULT , D_DEFAULT);
       break;
-    case 'e' :
+    case ELEMENTARY :
       compound->distribution->init(CATEGORICAL , I_DEFAULT , I_DEFAULT , D_DEFAULT , D_DEFAULT);
       break;
     }
@@ -508,7 +510,7 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream 
 
       switch (type) {
 
-      case 's' : {
+      case SUM : {
         compound->expectation_step(*this , power_dist , sum_reestim , NULL);
 
         if (estimator != PENALIZED_LIKELIHOOD) {
@@ -516,12 +518,12 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream 
         }
         else {
           sum_reestim->penalized_likelihood_estimation(compound->sum_distribution , weight ,
-                                                       penalty_type , penalty , outside);
+                                                       pen_type , penalty , outside);
         }
         break;
       }
 
-      case 'e' : {
+      case ELEMENTARY : {
         compound->expectation_step(*this , power_dist , NULL , reestim);
 
         if (estimator != PENALIZED_LIKELIHOOD) {
@@ -529,7 +531,7 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream 
         }
         else {
           reestim->penalized_likelihood_estimation(compound->distribution , weight ,
-                                                   penalty_type , penalty , outside);
+                                                   pen_type , penalty , outside);
         }
         break;
       }
@@ -550,7 +552,7 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream 
 
         switch (type) {
 
-        case 's' : {
+        case SUM : {
           os << compound->sum_distribution->second_difference_norm_computation();
           if (estimator == PENALIZED_LIKELIHOOD) {
             os << "   cumul: " << compound->sum_distribution->cumul[compound->sum_distribution->nb_value - 1];
@@ -558,7 +560,7 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream 
           break;
         }
 
-        case 'e' : {
+        case ELEMENTARY : {
           os << compound->distribution->second_difference_norm_computation();
           if (estimator == PENALIZED_LIKELIHOOD) {
             os << "   cumul: " << compound->distribution->cumul[compound->distribution->nb_value - 1];
@@ -585,7 +587,7 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream 
 
       switch (type) {
 
-      case 's' : {
+      case SUM : {
         os << compound->sum_distribution->second_difference_norm_computation();
         if (estimator == PENALIZED_LIKELIHOOD) {
           os << "   cumul: " << compound->sum_distribution->cumul[compound->sum_distribution->nb_value - 1];
@@ -593,7 +595,7 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream 
         break;
       }
 
-      case 'e' : {
+      case ELEMENTARY : {
         os << compound->distribution->second_difference_norm_computation();
         if (estimator == PENALIZED_LIKELIHOOD) {
           os << "   cumul: " << compound->distribution->cumul[compound->distribution->nb_value - 1];
@@ -617,7 +619,7 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream 
 
           switch (type) {
 
-          case 's' : {
+          case SUM : {
             compound->expectation_step(*this , power_dist , sum_reestim , NULL);
             compound_histo->sum_frequency_distribution->update(sum_reestim ,
                                                                (int)(sum_reestim->nb_element *
@@ -627,7 +629,7 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream 
             break;
           }
 
-          case 'e' : {
+          case ELEMENTARY : {
             compound->expectation_step(*this , power_dist , NULL , reestim);
             compound_histo->frequency_distribution->update(reestim ,
                                                            (int)(reestim->nb_element *
@@ -665,10 +667,10 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream 
                  << STAT_label[STATL_SMOOTHNESS] << ": ";
 
               switch (type) {
-              case 's' :
+              case SUM :
                 os << compound->sum_distribution->second_difference_norm_computation() << endl;
                 break;
-              case 'e' :
+              case ELEMENTARY :
                 os << compound->distribution->second_difference_norm_computation() << endl;
                 break;
               }
@@ -688,10 +690,10 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream 
              << STAT_label[STATL_SMOOTHNESS] << ": ";
 
           switch (type) {
-          case 's' :
+          case SUM :
             os << compound->sum_distribution->second_difference_norm_computation() << endl;
             break;
-          case 'e' :
+          case ELEMENTARY :
             os << compound->distribution->second_difference_norm_computation() << endl;
             break;
           }
@@ -706,11 +708,11 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream 
       // mise a jour du nombre de parametres inconnus
 
       switch (type) {
-      case 's' :
+      case SUM :
         compound->sum_distribution->nb_parameter_update();
         compound->nb_parameter = compound->sum_distribution->nb_parameter;
         break;
-      case 'e' :
+      case ELEMENTARY :
         compound->distribution->nb_parameter_update();
         compound->nb_parameter = compound->distribution->nb_parameter;
         break;
@@ -749,7 +751,7 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream 
  *  Estimation des parametres d'une loi composee par l'algorithme EM.
  *
  *  arguments : references sur un objet StatError, stream, reference sur la loi connue,
- *              type de la loi inconnue ('s' : loi de la somme, 'e' : loi elementaire),
+ *              type de la loi inconnue (SUM/ELEMENTARY),
  *              borne inferieure minimum de la loi inconnue, type d'estimateur
  *              (vraisemblance, vraisemblance penalisee ou estimation d'une loi parametrique),
  *              nombre d'iterations, poids de la penalisation, type de penalisation,
@@ -759,9 +761,11 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream 
  *--------------------------------------------------------------*/
 
 Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream &os ,
-                                                     const DiscreteParametric &known_dist , char type ,
-                                                     int min_inf_bound , int estimator , int nb_iter ,
-                                                     double weight , int penalty_type , int outside) const
+                                                     const DiscreteParametric &known_dist ,
+                                                     compound_distribution type , int min_inf_bound ,
+                                                     estimation_criterion estimator , int nb_iter ,
+                                                     double weight , penalty_type pen_type ,
+                                                     side_effect outside) const
 
 {
   double proba;
@@ -786,11 +790,11 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream 
     }
 
     switch (type) {
-    case 's' :
+    case SUM :
       unknown_dist = new DiscreteParametric(NEGATIVE_BINOMIAL , min_inf_bound , I_DEFAULT ,
                                             1. , proba);
       break;
-    case 'e' :
+    case ELEMENTARY :
       unknown_dist = new DiscreteParametric(NEGATIVE_BINOMIAL , min_inf_bound , I_DEFAULT ,
                                             1. , proba , COMPOUND_THRESHOLD);
       break;
@@ -801,13 +805,13 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream 
 #   endif
 
     switch (type) {
-    case 's' :
+    case SUM :
       compound = compound_estimation(error , os , *unknown_dist , known_dist , type ,
-                                     estimator , nb_iter , weight , penalty_type , outside);
+                                     estimator , nb_iter , weight , pen_type , outside);
       break;
-    case 'e' :
+    case ELEMENTARY :
       compound = compound_estimation(error , os , known_dist , *unknown_dist , type ,
-                                     estimator , nb_iter , weight , penalty_type , outside);
+                                     estimator , nb_iter , weight , pen_type , outside);
       break;
     }
 
