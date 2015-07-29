@@ -548,7 +548,7 @@ void TreeMatch_U::standardization()
   int k,i;
   for (k=0;k<nb_fun;k++)
     {
-      if (_vectorDist.get_variable_type(k)==SYMBOLIC)
+      if (_vectorDist.get_var_type(k)==NOMINAL)
         {
           frequency[k] = new int[_vectorDist.get_nb_value(k)];
           for ( i=0;i<_vectorDist.get_nb_value(k);i++)
@@ -575,7 +575,7 @@ void TreeMatch_U::standardization()
           tree_node=new TreeNode(*_trees[i]->getNode(j));
           for ( k=0;k<nb_fun;k++)
             {
-              if (_vectorDist.get_variable_type(k)==SYMBOLIC)
+              if (_vectorDist.get_var_type(k)==NOMINAL)
                 {
                   frequency[k][int(tree_node->getValue(k))]++;
                   //cout<<frequency[k][int(tree_node->getValue(k))]<<endl;
@@ -602,7 +602,7 @@ void TreeMatch_U::standardization()
     }
   for (k=0;k<nb_fun;k++)
     {
-      if (_vectorDist.get_variable_type(k)==SYMBOLIC)
+      if (_vectorDist.get_var_type(k)==NOMINAL)
         {
           for (int i=0;i<_vectorDist.get_nb_value(k);i++)
             {
@@ -631,7 +631,7 @@ void TreeMatch_U::standardization()
           //tree_node=_trees[i]->getNode(j);
           for ( k = 0;k<nb_fun;k++)
             {
-              if (_vectorDist.get_variable_type(k)==SYMBOLIC)
+              if (_vectorDist.get_var_type(k)==NOMINAL)
                 {
                   _dispersion[k]=absd[k];
                 }
