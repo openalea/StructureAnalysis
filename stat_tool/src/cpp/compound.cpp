@@ -81,8 +81,8 @@ Compound::Compound(const DiscreteParametric &sum_dist , const DiscreteParametric
 {
   compound_data = NULL;
 
-  sum_distribution = new DiscreteParametric(sum_dist , 'n');
-  distribution = new DiscreteParametric(dist , 'n');
+  sum_distribution = new DiscreteParametric(sum_dist , NORMALIZATION);
+  distribution = new DiscreteParametric(dist , NORMALIZATION);
 
   Distribution::init((sum_distribution->nb_value - 1) * (distribution->nb_value - 1) + 1);
 
@@ -99,28 +99,31 @@ Compound::Compound(const DiscreteParametric &sum_dist , const DiscreteParametric
  *
  *--------------------------------------------------------------*/
 
-Compound::Compound(const DiscreteParametric &sum_dist , const DiscreteParametric &dist , char type)
+Compound::Compound(const DiscreteParametric &sum_dist , const DiscreteParametric &dist ,
+                   compound_distribution type)
 
 {
   compound_data = NULL;
 
   switch (type) {
 
-  case 's' : {
-    sum_distribution = new DiscreteParametric(sum_dist , 'c' , (int)(sum_dist.nb_value * NB_VALUE_COEFF));
+  case SUM : {
+    sum_distribution = new DiscreteParametric(sum_dist , DISTRIBUTION_COPY ,
+                                              (int)(sum_dist.nb_value * NB_VALUE_COEFF));
     if ((dist.ident == POISSON) || (dist.ident == NEGATIVE_BINOMIAL)) {
       distribution = new DiscreteParametric(dist.ident , dist.inf_bound , dist.sup_bound ,
                                             dist.parameter , dist.probability , COMPOUND_THRESHOLD);
     }
     else {
-      distribution = new DiscreteParametric(dist , 'n');
+      distribution = new DiscreteParametric(dist , NORMALIZATION);
     }
     break;
   }
 
-  case 'e' : {
-    sum_distribution = new DiscreteParametric(sum_dist , 'n');
-    distribution = new DiscreteParametric(dist , 'c' , (int)(dist.nb_value * NB_VALUE_COEFF));
+  case ELEMENTARY : {
+    sum_distribution = new DiscreteParametric(sum_dist , NORMALIZATION);
+    distribution = new DiscreteParametric(dist , DISTRIBUTION_COPY ,
+                                          (int)(dist.nb_value * NB_VALUE_COEFF));
     break;
   }
   }
@@ -236,8 +239,7 @@ CompoundData* Compound::extract_data(StatError &error) const
  *
  *--------------------------------------------------------------*/
 
-Compound* compound_ascii_read(StatError &error , const char *path ,
-                              double cumul_threshold)
+Compound* Compound::ascii_read(StatError &error , const char *path , double cumul_threshold)
 
 {
   RWCString buffer , token;
@@ -327,7 +329,7 @@ Compound* compound_ascii_read(StatError &error , const char *path ,
         switch (read_line) {
 
         case 1 : {
-          sum_dist = discrete_parametric_parsing(error , in_file , line ,
+          sum_dist = DiscreteParametric::parsing(error , in_file , line ,
                                                  NEGATIVE_BINOMIAL , CUMUL_THRESHOLD);
           if (!sum_dist) {
             status = false;
@@ -336,7 +338,7 @@ Compound* compound_ascii_read(StatError &error , const char *path ,
         }
 
         case 2 : {
-          dist = discrete_parametric_parsing(error , in_file , line ,
+          dist = DiscreteParametric::parsing(error , in_file , line ,
                                              NEGATIVE_BINOMIAL , cumul_threshold);
           if (!dist) {
             status = false;
@@ -1311,7 +1313,7 @@ CompoundData& CompoundData::operator=(const CompoundData &compound_histo)
  *
  *--------------------------------------------------------------*/
 
-DiscreteDistributionData* CompoundData::extract(StatError &error , char type) const
+DiscreteDistributionData* CompoundData::extract(StatError &error , compound_distribution type) const
 
 {
   DiscreteDistributionData *phisto;
@@ -1321,13 +1323,13 @@ DiscreteDistributionData* CompoundData::extract(StatError &error , char type) co
 
   switch (type) {
 
-  case 's' : {
+  case SUM : {
     phisto = new DiscreteDistributionData(*sum_frequency_distribution ,
                                           (compound ? compound->sum_distribution : NULL));
     break;
   }
 
-  case 'e' : {
+  case ELEMENTARY : {
     if (frequency_distribution->nb_element == 0) {
       phisto = NULL;
       error.update(STAT_error[STATR_EMPTY_SAMPLE]);
@@ -1340,7 +1342,7 @@ DiscreteDistributionData* CompoundData::extract(StatError &error , char type) co
     break;
   }
 
-  case 'c' : {
+  case COMPOUND : {
     phisto = new DiscreteDistributionData(*this , compound);
     break;
   }
