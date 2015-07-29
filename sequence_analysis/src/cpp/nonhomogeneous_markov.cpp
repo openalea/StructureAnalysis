@@ -80,7 +80,7 @@ Function::Function()
  *
  *--------------------------------------------------------------*/
 
-Function::Function(int iident , int length , double *iparameter)
+Function::Function(parametric_function iident , int length , double *iparameter)
 :RegressionKernel(iident , 0 , length - 1)
 
 {
@@ -106,7 +106,7 @@ Function::Function(int iident , int length , double *iparameter)
  *
  *--------------------------------------------------------------*/
 
-Function::Function(int iident , int length)
+Function::Function(parametric_function iident , int length)
 :RegressionKernel(iident , 0 , length - 1)
 
 {
@@ -234,8 +234,8 @@ Function& Function::operator=(const Function &function)
  *
  *--------------------------------------------------------------*/
 
-Function* function_parsing(StatError &error , ifstream &in_file , int &line ,
-                           int length , double min , double max)
+Function* Function::parsing(StatError &error , ifstream &in_file , int &line ,
+                            int length , double min , double max)
 
 {
   RWLocaleSnapshot locale("en");
@@ -243,7 +243,8 @@ Function* function_parsing(StatError &error , ifstream &in_file , int &line ,
   size_t position;
   bool status = true , lstatus;
   register int i , j;
-  int ident = I_DEFAULT , nb_parameter = 0;
+  int nb_parameter = 0;
+  parametric_function ident = NONPARAMETRIC_FUNCTION;
   long index;
   double parameter[3];
   Function *function;
@@ -270,17 +271,17 @@ Function* function_parsing(StatError &error , ifstream &in_file , int &line ,
       if (i <= 1) {
         switch (i) {
 
-        // test mot cle MONOMOLECULAR / LOGISTIC
+        // test mot cle LOGISTIC / MONOMOLECULAR
 
         case 0 : {
-          for (j = 1;j < 3;j++) {
+          for (j = LOGISTIC;j <= MONOMOLECULAR;j++) {
             if (token == STAT_function_word[j]) {
-              ident = j;
+              ident = (parametric_function)j;
               break;
             }
           }
 
-          if (j == 3) {
+          if (j == MONOMOLECULAR + 1) {
             status = false;
             error.update(STAT_parsing[STATP_KEY_WORD] , line , i + 1);
           }
@@ -350,7 +351,7 @@ Function* function_parsing(StatError &error , ifstream &in_file , int &line ,
             if (lstatus) {
               switch (ident) {
 
-              case STAT_MONOMOLECULAR : {
+              case LOGISTIC : {
                 switch ((i - 2) / 4) {
 
                 case 0 : {
@@ -362,7 +363,7 @@ Function* function_parsing(StatError &error , ifstream &in_file , int &line ,
 
                 case 1 : {
                   if ((parameter[0] != D_DEFAULT) &&
-                      ((parameter[0] + parameter[1] < min) || (parameter[0] + parameter[1] > max))) {
+                      ((parameter[0] / (1. + parameter[1]) < min) || (parameter[0] / (1. + parameter[1]) > max))) {
                     lstatus = false;
                   }
                   break;
@@ -379,7 +380,7 @@ Function* function_parsing(StatError &error , ifstream &in_file , int &line ,
                 break;
               }
 
-              case STAT_LOGISTIC : {
+              case MONOMOLECULAR : {
                 switch ((i - 2) / 4) {
 
                 case 0 : {
@@ -391,7 +392,7 @@ Function* function_parsing(StatError &error , ifstream &in_file , int &line ,
 
                 case 1 : {
                   if ((parameter[0] != D_DEFAULT) &&
-                      ((parameter[0] / (1. + parameter[1]) < min) || (parameter[0] / (1. + parameter[1]) > max))) {
+                      ((parameter[0] + parameter[1] < min) || (parameter[0] + parameter[1] > max))) {
                     lstatus = false;
                   }
                   break;
@@ -433,7 +434,7 @@ Function* function_parsing(StatError &error , ifstream &in_file , int &line ,
     }
   }
 
-  if (ident == I_DEFAULT) {
+  if (ident == NONPARAMETRIC_FUNCTION) {
     status = false;
     error.update(STAT_parsing[STATP_FORMAT] , line);
   }
@@ -754,8 +755,8 @@ NonhomogeneousMarkov::NonhomogeneousMarkov()
  *
  *--------------------------------------------------------------*/
 
-NonhomogeneousMarkov::NonhomogeneousMarkov(int inb_state , int *ident)
-:Chain('o' , inb_state)
+NonhomogeneousMarkov::NonhomogeneousMarkov(int inb_state , parametric_function *ident)
+:Chain(ORDINARY , inb_state)
 
 {
   register int i;
@@ -767,11 +768,11 @@ NonhomogeneousMarkov::NonhomogeneousMarkov(int inb_state , int *ident)
   self_transition = new Function*[nb_state];
 
   for (i = 0;i < nb_state;i++) {
-    if (ident[i] == I_DEFAULT) {
-      homogeneity[i] = true;
+    if ((ident[i] == LOGISTIC) || (ident[i] == MONOMOLECULAR)) {
+      homogeneity[i] = false;
     }
     else {
-      homogeneity[i] = false;
+      homogeneity[i] = true;
     }
     self_transition[i] = NULL;
   }
@@ -857,7 +858,8 @@ void NonhomogeneousMarkov::copy(const NonhomogeneousMarkov &markov , bool data_f
     }
   }
 
-  process = new CategoricalSequenceProcess(*(markov.process) , 'c' , characteristic_flag);
+  process = new CategoricalSequenceProcess(*(markov.process) , CATEGORICAL_SEQUENCE_PROCESS_COPY ,
+                                           characteristic_flag);
 }
 
 
@@ -934,7 +936,7 @@ NonhomogeneousMarkov& NonhomogeneousMarkov::operator=(const NonhomogeneousMarkov
  *
  *--------------------------------------------------------------*/
 
-DiscreteParametricModel* NonhomogeneousMarkov::extract(StatError &error , int type ,
+DiscreteParametricModel* NonhomogeneousMarkov::extract(StatError &error , process_distribution dist_type ,
                                                        int state) const
 
 {
@@ -960,7 +962,7 @@ DiscreteParametricModel* NonhomogeneousMarkov::extract(StatError &error , int ty
   }
 
   else {
-    switch (type) {
+    switch (dist_type) {
     case FIRST_OCCURRENCE :
       pdist = process->first_occurrence[state];
       break;
@@ -992,7 +994,7 @@ DiscreteParametricModel* NonhomogeneousMarkov::extract(StatError &error , int ty
     phisto = NULL;
 
     if (markov_data) {
-      switch (type) {
+      switch (dist_type) {
 
       case FIRST_OCCURRENCE : {
         phisto = markov_data->characteristics[0]->first_occurrence[state];
@@ -1046,7 +1048,7 @@ DiscreteParametricModel* NonhomogeneousMarkov::extract(StatError &error , int ty
  *
  *--------------------------------------------------------------*/
 
-NonhomogeneousMarkov* nonhomogeneous_markov_ascii_read(StatError &error , const char *path ,
+NonhomogeneousMarkov* NonhomogeneousMarkov::ascii_read(StatError &error , const char *path ,
                                                        int length)
 
 {
@@ -1123,7 +1125,7 @@ NonhomogeneousMarkov* nonhomogeneous_markov_ascii_read(StatError &error , const 
 
     // analyse du format et lecture de la chaine de Markov
 
-    chain = chain_parsing(error , in_file , line , 'o');
+    chain = Chain::parsing(error , in_file , line , ORDINARY);
 
     if (chain) {
       nb_state = chain->nb_state;
@@ -1210,7 +1212,7 @@ NonhomogeneousMarkov* nonhomogeneous_markov_ascii_read(StatError &error , const 
             }
 
             if (!homogeneity) {
-              self_transition[i] = function_parsing(error , in_file , line , length);
+              self_transition[i] = Function::parsing(error , in_file , line , length);
               if (!self_transition[i]) {
                 status = false;
               }
@@ -2315,7 +2317,7 @@ NonhomogeneousMarkovData& NonhomogeneousMarkovData::operator=(const Nonhomogeneo
  *
  *--------------------------------------------------------------*/
 
-DiscreteDistributionData* NonhomogeneousMarkovData::extract(StatError &error , int type ,
+DiscreteDistributionData* NonhomogeneousMarkovData::extract(StatError &error , process_distribution histo_type ,
                                                             int state) const
 
 {
@@ -2338,7 +2340,7 @@ DiscreteDistributionData* NonhomogeneousMarkovData::extract(StatError &error , i
   }
 
   else {
-    switch (type) {
+    switch (histo_type) {
     case FIRST_OCCURRENCE :
       phisto = characteristics[0]->first_occurrence[state];
       break;
@@ -2369,7 +2371,7 @@ DiscreteDistributionData* NonhomogeneousMarkovData::extract(StatError &error , i
     pdist = NULL;
     pparam = NULL;
 
-    switch (type) {
+    switch (histo_type) {
     case FIRST_OCCURRENCE :
       pdist = markov->process->first_occurrence[state];
       break;
@@ -2405,34 +2407,6 @@ DiscreteDistributionData* NonhomogeneousMarkovData::extract(StatError &error , i
 
 /*--------------------------------------------------------------*
  *
- *  Suppression du parametre d'index.
- *
- *  argument : reference sur un objet StatError.
- *
- *--------------------------------------------------------------*/
-
-NonhomogeneousMarkovData* NonhomogeneousMarkovData::remove_index_parameter(StatError &error) const
-
-{
-  NonhomogeneousMarkovData *seq;
-
-
-  error.init();
-
-  if (!index_parameter) {
-    seq = NULL;
-    error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
-  }
-  else {
-    seq = new NonhomogeneousMarkovData(*this , true , 'm');
-  }
-
-  return seq;
-}
-
-
-/*--------------------------------------------------------------*
- *
  *  Copie d'un objet NonhomogeneousMarkovData avec transformation du parametre d'index implicite
  *  en parametre d'index explicite.
  *
@@ -2453,7 +2427,35 @@ NonhomogeneousMarkovData* NonhomogeneousMarkovData::explicit_index_parameter(Sta
     error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
   }
   else {
-    seq = new NonhomogeneousMarkovData(*this , true , 'e');
+    seq = new NonhomogeneousMarkovData(*this , true , EXPLICIT_INDEX_PARAMETER);
+  }
+
+  return seq;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Suppression du parametre d'index.
+ *
+ *  argument : reference sur un objet StatError.
+ *
+ *--------------------------------------------------------------*/
+
+NonhomogeneousMarkovData* NonhomogeneousMarkovData::remove_index_parameter(StatError &error) const
+
+{
+  NonhomogeneousMarkovData *seq;
+
+
+  error.init();
+
+  if (!index_parameter) {
+    seq = NULL;
+    error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
+  }
+  else {
+    seq = new NonhomogeneousMarkovData(*this , true , REMOVE_INDEX_PARAMETER);
   }
 
   return seq;
