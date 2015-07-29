@@ -50,7 +50,7 @@ public:
   {
     StatError error;
     Convolution *conv = NULL;
-    conv = convolution_ascii_read(error, filename);
+    conv = Convolution::ascii_read(error, filename);
 
     if (!conv)
       {
@@ -92,7 +92,7 @@ public:
           }
       }
 
-    conv = convolution_building(error, nb_dist, dist.get());
+    conv = Convolution::building(error, nb_dist, dist.get());
 
     if (!conv)
       stat_tool::wrap_util::throw_error(error);
