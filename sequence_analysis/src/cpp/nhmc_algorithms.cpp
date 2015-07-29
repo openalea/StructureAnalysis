@@ -73,11 +73,11 @@ void NonhomogeneousMarkov::transition_update(int state , int index , Chain &inde
   // mise a jour de la probabilite de rester dans un etat
 
   switch (self_transition[state]->ident) {
-  case STAT_MONOMOLECULAR :
-    index_chain.transition[state][state] = pparam[0] + pparam[1] * exp(-pparam[2] * index);
-    break;
-  case STAT_LOGISTIC :
+  case LOGISTIC :
     index_chain.transition[state][state] = pparam[0] / (1. + pparam[1] * exp(-pparam[2] * index));
+    break;
+  case MONOMOLECULAR :
+    index_chain.transition[state][state] = pparam[0] + pparam[1] * exp(-pparam[2] * index);
     break;
   }
 
@@ -377,15 +377,15 @@ void NonhomogeneousMarkov::state_first_occurrence_distribution(int state , int m
 
 /*--------------------------------------------------------------*
  *
- *  Calcul d'un melange de lois du nombre de series d'un etat ('r')
- *  ou du nombre d'occurrences d'un etat ('o') d'une chaine de Markov non-homogene
+ *  Calcul d'un melange de lois du nombre de series d'un etat (RUN)
+ *  ou du nombre d'occurrences d'un etat (OCCURRENCE) d'une chaine de Markov non-homogene
  *  pour une distribution des longueurs de sequences donnee.
  *
  *  arguments : etat, type de forme.
  *
  *--------------------------------------------------------------*/
 
-void NonhomogeneousMarkov::state_nb_pattern_mixture(int state , char pattern)
+void NonhomogeneousMarkov::state_nb_pattern_mixture(int state , count_pattern pattern)
 
 {
   register int i , j , k , m;
@@ -398,11 +398,11 @@ void NonhomogeneousMarkov::state_nb_pattern_mixture(int state , char pattern)
   max_length = process->length->nb_value - 1;
 
   switch (pattern) {
-  case 'r' :
+  case RUN :
     pdist = process->nb_run[state];
     nb_pattern = max_length / 2 + 2;
     break;
-  case 'o' :
+  case OCCURRENCE :
     pdist = process->nb_occurrence[state];
     nb_pattern = max_length + 1;
     break;
@@ -475,10 +475,10 @@ void NonhomogeneousMarkov::state_nb_pattern_mixture(int state , char pattern)
 
         for (k = 0;k < nb_state;k++) {
           switch (pattern) {
-          case 'r' :
+          case RUN :
             increment = (((k != state) && (j == state)) ? 1 : 0);
             break;
-          case 'o' :
+          case OCCURRENCE :
             increment = (j == state ? 1 : 0);
             break;
           }
@@ -496,7 +496,7 @@ void NonhomogeneousMarkov::state_nb_pattern_mixture(int state , char pattern)
       }
     }
 
-    if ((pattern == 'o') || (i % 2 == 0)) {
+    if ((pattern == OCCURRENCE) || (i % 2 == 0)) {
       index_nb_pattern++;
     }
 
@@ -564,7 +564,7 @@ void NonhomogeneousMarkov::characteristic_computation(int length , bool counting
         state_first_occurrence_distribution(i);
 
         if (homogeneity[i]) {
-          if (state_type[i] != 'a') {
+          if (stype[i] != ABSORBING) {
             process->sojourn_time[i]->init(NEGATIVE_BINOMIAL , 1 , I_DEFAULT , 1. ,
                                            1. - transition[i][i]);
             process->sojourn_time[i]->computation(1 , OCCUPANCY_THRESHOLD);
@@ -579,8 +579,8 @@ void NonhomogeneousMarkov::characteristic_computation(int length , bool counting
         }
 
         if (counting_flag) {
-          state_nb_pattern_mixture(i , 'r');
-          state_nb_pattern_mixture(i , 'o');
+          state_nb_pattern_mixture(i , RUN);
+          state_nb_pattern_mixture(i , OCCURRENCE);
         }
       }
     }
@@ -620,7 +620,7 @@ void NonhomogeneousMarkov::characteristic_computation(const NonhomogeneousMarkov
         state_first_occurrence_distribution(i , seq.characteristics[0]->first_occurrence[i]->nb_value);
 
         if (homogeneity[i]) {
-          if (state_type[i] != 'a') {
+          if (stype[i] != ABSORBING) {
             process->sojourn_time[i]->init(NEGATIVE_BINOMIAL , 1 , I_DEFAULT , 1. ,
                                            1. - transition[i][i]);
             process->sojourn_time[i]->computation(seq.characteristics[0]->sojourn_time[i]->nb_value ,
@@ -636,8 +636,8 @@ void NonhomogeneousMarkov::characteristic_computation(const NonhomogeneousMarkov
         }
 
         if (counting_flag) {
-          state_nb_pattern_mixture(i , 'r');
-          state_nb_pattern_mixture(i , 'o');
+          state_nb_pattern_mixture(i , RUN);
+          state_nb_pattern_mixture(i , OCCURRENCE);
         }
       }
     }
@@ -816,153 +816,6 @@ double Function::residual_square_sum_computation() const
 
 /*--------------------------------------------------------------*
  *
- *  Estimation des parametres de la fonction y = a + b * exp(-c * x)
- *  par regression.
- *
- *--------------------------------------------------------------*/
-
-Function* SelfTransition::monomolecular_regression() const
-
-{
-  register int i;
-  int iter , nb_element = nb_element_computation() , norm , init_nb_element , *pfrequency;
-  double start_proba , residual , residual_square_sum = -D_INF , previous_residual_square_sum ,
-         correction[3] , *ppoint;
-  Function *function;
-
-
-  function = new Function(STAT_MONOMOLECULAR , length);
-
-  function->regression_df = function->nb_parameter;
-  function->residual_df = nb_element - function->nb_parameter;
-
-  // initialisations des parametres
-
-  init_nb_element = (int)(START_RATIO * nb_element);
-  init_nb_element = MAX(init_nb_element , REGRESSION_NB_ELEMENT / 4);
-
-  pfrequency = frequency;
-  ppoint = point[0];
-  start_proba = 0.;
-  i = 0;
-
-  do {
-    start_proba += *pfrequency * *ppoint++;
-    i += *pfrequency++;
-  }
-  while (i < init_nb_element);
-  start_proba /= i;
-
-  init_nb_element = (int)(END_RATIO * nb_element);
-  init_nb_element = MAX(init_nb_element , REGRESSION_NB_ELEMENT / 4);
-
-  pfrequency = frequency + length;
-  ppoint = point[0] + length;
-  function->parameter[0] = 0.;
-  i = 0;
-
-  do {
-    function->parameter[0] += *--pfrequency * *--ppoint;
-    i += *pfrequency;
-  }
-  while (i < init_nb_element);
-  function->parameter[0] /= i;
-  function->parameter[1] = start_proba - function->parameter[0];
-
-  pfrequency = frequency + 1;
-  ppoint = point[0] + 1;
-  function->parameter[2] = 0.;
-  norm = 0;
-  for (i = 1;i < length;i++) {
-    if ((*pfrequency > 0) && ((*ppoint - function->parameter[0]) / function->parameter[1] > 0.)) {
-      function->parameter[2] -= *pfrequency * log((*ppoint - function->parameter[0]) / function->parameter[1]) / i;
-      norm += *pfrequency;
-    }
-    pfrequency++;
-    ppoint++;
-  }
-  function->parameter[2] /= norm;
-
-# ifdef DEBUG
-  cout << "\n";
-  function->ascii_parameter_print(cout);
-  cout << endl;
-# endif
-
-  // iterations (gradient sur les moindres-carres)
-
-  iter = 0;
-  do {
-    iter++;
-    previous_residual_square_sum = residual_square_sum;
-
-    pfrequency = frequency;
-    ppoint = point[0];
-    residual_square_sum = 0.;
-
-    for (i = 0;i < function->nb_parameter;i++) {
-      correction[i] = 0.;
-    }
-  
-    for (i = 0;i < length;i++) {
-      if (*pfrequency > 0) {
-        residual = *ppoint - (function->parameter[0] + function->parameter[1] *
-                   exp(-function->parameter[2] * i));
-        residual_square_sum += *pfrequency * residual * residual;
-        correction[0] += *pfrequency * residual;
-        correction[1] += *pfrequency * residual * exp(-function->parameter[2] * i);
-        if (i > 0) {
-          correction[2] -= *pfrequency * residual * function->parameter[1] * i *
-                           exp(-function->parameter[2] * i);
-        }
-      }
-      pfrequency++;
-      ppoint++;
-    }
-    residual_square_sum /= nb_element;
-
-    function->parameter[0] += GRADIENT_DESCENT_COEFF * correction[0] / nb_element;
-    function->parameter[1] += GRADIENT_DESCENT_COEFF * correction[1] / nb_element;
-    function->parameter[2] += GRADIENT_DESCENT_COEFF * correction[2] / (nb_element - frequency[0]);
-
-    // applications de seuils sur les parametres
-
-    if (function->parameter[0] < MIN_PROBABILITY) {
-      function->parameter[0] = MIN_PROBABILITY;
-    }
-    if (function->parameter[0] > 1. - MIN_PROBABILITY) {
-      function->parameter[0] = 1. - MIN_PROBABILITY;
-    }
-    if (function->parameter[0] + function->parameter[1] < MIN_PROBABILITY) {
-      function->parameter[1] = MIN_PROBABILITY - function->parameter[0];
-    }
-    if (function->parameter[0] + function->parameter[1] > 1. - MIN_PROBABILITY) {
-      function->parameter[1] = 1. - MIN_PROBABILITY - function->parameter[0];
-    }
-
-#   ifdef DEBUG
-    if ((iter < 10) || (iter % 10 == 0)) {
-      function->ascii_parameter_print(cout);
-      cout << "\niteration " << iter << ", " << residual_square_sum << " | "
-           << (previous_residual_square_sum - residual_square_sum) / residual_square_sum << endl;
-    }
-#   endif
-
-  }
-  while (((previous_residual_square_sum - residual_square_sum) / residual_square_sum > RESIDUAL_SQUARE_SUM_DIFF) &&
-         (iter < REGRESSION_NB_ITER));
-
-  // calcul de la fonction et des residus
-
-  function->computation();
-  function->residual_computation(*this);
-
-  return function;
-}
-
-
-/*--------------------------------------------------------------*
- *
  *  Estimation des parametres de la fonction y = a / (1 + b * exp(-c * x))
  *  par regression.
  *
@@ -978,7 +831,7 @@ Function* SelfTransition::logistic_regression() const
   Function *function;
 
 
-  function = new Function(STAT_LOGISTIC , length);
+  function = new Function(LOGISTIC , length);
 
   function->regression_df = function->nb_parameter;
   function->residual_df = nb_element - function->nb_parameter;
@@ -1111,6 +964,153 @@ Function* SelfTransition::logistic_regression() const
 
 /*--------------------------------------------------------------*
  *
+ *  Estimation des parametres de la fonction y = a + b * exp(-c * x)
+ *  par regression.
+ *
+ *--------------------------------------------------------------*/
+
+Function* SelfTransition::monomolecular_regression() const
+
+{
+  register int i;
+  int iter , nb_element = nb_element_computation() , norm , init_nb_element , *pfrequency;
+  double start_proba , residual , residual_square_sum = -D_INF , previous_residual_square_sum ,
+         correction[3] , *ppoint;
+  Function *function;
+
+
+  function = new Function(MONOMOLECULAR , length);
+
+  function->regression_df = function->nb_parameter;
+  function->residual_df = nb_element - function->nb_parameter;
+
+  // initialisations des parametres
+
+  init_nb_element = (int)(START_RATIO * nb_element);
+  init_nb_element = MAX(init_nb_element , REGRESSION_NB_ELEMENT / 4);
+
+  pfrequency = frequency;
+  ppoint = point[0];
+  start_proba = 0.;
+  i = 0;
+
+  do {
+    start_proba += *pfrequency * *ppoint++;
+    i += *pfrequency++;
+  }
+  while (i < init_nb_element);
+  start_proba /= i;
+
+  init_nb_element = (int)(END_RATIO * nb_element);
+  init_nb_element = MAX(init_nb_element , REGRESSION_NB_ELEMENT / 4);
+
+  pfrequency = frequency + length;
+  ppoint = point[0] + length;
+  function->parameter[0] = 0.;
+  i = 0;
+
+  do {
+    function->parameter[0] += *--pfrequency * *--ppoint;
+    i += *pfrequency;
+  }
+  while (i < init_nb_element);
+  function->parameter[0] /= i;
+  function->parameter[1] = start_proba - function->parameter[0];
+
+  pfrequency = frequency + 1;
+  ppoint = point[0] + 1;
+  function->parameter[2] = 0.;
+  norm = 0;
+  for (i = 1;i < length;i++) {
+    if ((*pfrequency > 0) && ((*ppoint - function->parameter[0]) / function->parameter[1] > 0.)) {
+      function->parameter[2] -= *pfrequency * log((*ppoint - function->parameter[0]) / function->parameter[1]) / i;
+      norm += *pfrequency;
+    }
+    pfrequency++;
+    ppoint++;
+  }
+  function->parameter[2] /= norm;
+
+# ifdef DEBUG
+  cout << "\n";
+  function->ascii_parameter_print(cout);
+  cout << endl;
+# endif
+
+  // iterations (gradient sur les moindres-carres)
+
+  iter = 0;
+  do {
+    iter++;
+    previous_residual_square_sum = residual_square_sum;
+
+    pfrequency = frequency;
+    ppoint = point[0];
+    residual_square_sum = 0.;
+
+    for (i = 0;i < function->nb_parameter;i++) {
+      correction[i] = 0.;
+    }
+  
+    for (i = 0;i < length;i++) {
+      if (*pfrequency > 0) {
+        residual = *ppoint - (function->parameter[0] + function->parameter[1] *
+                   exp(-function->parameter[2] * i));
+        residual_square_sum += *pfrequency * residual * residual;
+        correction[0] += *pfrequency * residual;
+        correction[1] += *pfrequency * residual * exp(-function->parameter[2] * i);
+        if (i > 0) {
+          correction[2] -= *pfrequency * residual * function->parameter[1] * i *
+                           exp(-function->parameter[2] * i);
+        }
+      }
+      pfrequency++;
+      ppoint++;
+    }
+    residual_square_sum /= nb_element;
+
+    function->parameter[0] += GRADIENT_DESCENT_COEFF * correction[0] / nb_element;
+    function->parameter[1] += GRADIENT_DESCENT_COEFF * correction[1] / nb_element;
+    function->parameter[2] += GRADIENT_DESCENT_COEFF * correction[2] / (nb_element - frequency[0]);
+
+    // applications de seuils sur les parametres
+
+    if (function->parameter[0] < MIN_PROBABILITY) {
+      function->parameter[0] = MIN_PROBABILITY;
+    }
+    if (function->parameter[0] > 1. - MIN_PROBABILITY) {
+      function->parameter[0] = 1. - MIN_PROBABILITY;
+    }
+    if (function->parameter[0] + function->parameter[1] < MIN_PROBABILITY) {
+      function->parameter[1] = MIN_PROBABILITY - function->parameter[0];
+    }
+    if (function->parameter[0] + function->parameter[1] > 1. - MIN_PROBABILITY) {
+      function->parameter[1] = 1. - MIN_PROBABILITY - function->parameter[0];
+    }
+
+#   ifdef DEBUG
+    if ((iter < 10) || (iter % 10 == 0)) {
+      function->ascii_parameter_print(cout);
+      cout << "\niteration " << iter << ", " << residual_square_sum << " | "
+           << (previous_residual_square_sum - residual_square_sum) / residual_square_sum << endl;
+    }
+#   endif
+
+  }
+  while (((previous_residual_square_sum - residual_square_sum) / residual_square_sum > RESIDUAL_SQUARE_SUM_DIFF) &&
+         (iter < REGRESSION_NB_ITER));
+
+  // calcul de la fonction et des residus
+
+  function->computation();
+  function->residual_computation(*this);
+
+  return function;
+}
+
+
+/*--------------------------------------------------------------*
+ *
  *  Calcul de la vraisemblance de sequences pour une chaine de Markov non-homogene.
  *
  *  arguments : reference sur un objet MarkovianSequences, indice de la sequence.
@@ -1206,7 +1206,7 @@ double NonhomogeneousMarkov::likelihood_computation(const MarkovianSequences &se
 void NonhomogeneousMarkovData::build_transition_count()
 
 {
-  chain_data = new ChainData('o' , marginal_distribution[0]->nb_value ,
+  chain_data = new ChainData(ORDINARY , marginal_distribution[0]->nb_value ,
                              marginal_distribution[0]->nb_value);
   transition_count_computation(*chain_data);
 }
@@ -1223,7 +1223,7 @@ void NonhomogeneousMarkovData::build_transition_count()
  *
  *--------------------------------------------------------------*/
 
-NonhomogeneousMarkov* MarkovianSequences::nonhomogeneous_markov_estimation(StatError &error , int *ident ,
+NonhomogeneousMarkov* MarkovianSequences::nonhomogeneous_markov_estimation(StatError &error , parametric_function *ident ,
                                                                            bool counting_flag) const
 
 {
@@ -1272,11 +1272,11 @@ NonhomogeneousMarkov* MarkovianSequences::nonhomogeneous_markov_estimation(StatE
 
         if (seq->self_transition[i]->nb_element_computation() >= REGRESSION_NB_ELEMENT) {
           switch (ident[i]) {
-          case STAT_MONOMOLECULAR :
-            markov->self_transition[i] = seq->self_transition[i]->monomolecular_regression();
-            break;
-          case STAT_LOGISTIC :
+          case LOGISTIC :
             markov->self_transition[i] = seq->self_transition[i]->logistic_regression();
+            break;
+          case MONOMOLECULAR :
+            markov->self_transition[i] = seq->self_transition[i]->monomolecular_regression();
             break;
           }
         }
