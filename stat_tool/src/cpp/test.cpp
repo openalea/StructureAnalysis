@@ -63,7 +63,7 @@ static const double  CRITICAL_PROBABILITY_FACTOR = 1.2;
  *
  *--------------------------------------------------------------*/
 
-Test::Test(int iident , bool ione_side)
+Test::Test(test_distribution iident , bool ione_side)
 
 {
   ident = iident;
@@ -84,7 +84,7 @@ Test::Test(int iident , bool ione_side)
  *
  *--------------------------------------------------------------*/
 
-Test::Test(int iident , bool ione_side , int idf1 , int idf2 , double ivalue)
+Test::Test(test_distribution iident , bool ione_side , int idf1 , int idf2 , double ivalue)
 
 {
   ident = iident;
@@ -105,7 +105,7 @@ Test::Test(int iident , bool ione_side , int idf1 , int idf2 , double ivalue)
  *
  *--------------------------------------------------------------*/
 
-Test::Test(int iident , bool ione_side , int idf1 , int idf2 , double ivalue ,
+Test::Test(test_distribution iident , bool ione_side , int idf1 , int idf2 , double ivalue ,
            double icritical_probability)
 
 {
