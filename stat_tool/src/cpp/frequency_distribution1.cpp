@@ -148,7 +148,7 @@ void FrequencyDistribution::shift(const FrequencyDistribution &histo , int shift
  *--------------------------------------------------------------*/
 
 void FrequencyDistribution::cluster(const FrequencyDistribution &histo ,
-                                    int step , int mode)
+                                    int step , rounding mode)
 
 {
   register int i;
@@ -220,21 +220,22 @@ void FrequencyDistribution::cluster(const FrequencyDistribution &histo ,
  *  Constructeur de la classe FrequencyDistribution.
  *
  *  arguments : reference sur un objet FrequencyDistribution, type de transformation
- *              ('s' : translation, 'c' : groupement des valeurs),
- *              pas de regroupement ('c') / parametre de translation ('s'),
+ *              (SHIFT : translation, CLUSTER : groupement des valeurs),
+ *              parametre de translation (SHIFT) / pas de regroupement (CLUSTER),
  *              mode regroupement (FLOOR/ROUND/CEIL).
  *
  *--------------------------------------------------------------*/
 
 FrequencyDistribution::FrequencyDistribution(const FrequencyDistribution &histo ,
-                                             char transform , int param , int mode)
+                                             frequency_distribution_transformation transform ,
+                                             int param , rounding mode)
 
 {
   switch (transform) {
-  case 's' :
+  case SHIFT :
     shift(histo , param);
     break;
-  case 'c' :
+  case CLUSTER :
     cluster(histo , param , mode);
     break;
   default :
@@ -302,7 +303,7 @@ DiscreteDistributionData* FrequencyDistribution::shift(StatError &error ,
   }
 
   else {
-    histo = new DiscreteDistributionData(*this , 's' , shift_param);
+    histo = new DiscreteDistributionData(*this , SHIFT , shift_param);
   }
 
   return histo;
@@ -319,7 +320,7 @@ DiscreteDistributionData* FrequencyDistribution::shift(StatError &error ,
  *--------------------------------------------------------------*/
 
 DiscreteDistributionData* FrequencyDistribution::cluster(StatError &error ,
-                                                         int step , int mode) const
+                                                         int step , rounding mode) const
 
 {
   DiscreteDistributionData *histo;
@@ -333,7 +334,7 @@ DiscreteDistributionData* FrequencyDistribution::cluster(StatError &error ,
   }
 
   else {
-    histo = new DiscreteDistributionData(*this , 'c' , step , mode);
+    histo = new DiscreteDistributionData(*this , CLUSTER , step , mode);
   }
 
   return histo;
@@ -527,72 +528,72 @@ DiscreteDistributionData* FrequencyDistribution::cluster(StatError &error ,
 
 /*--------------------------------------------------------------*
  *
- *  Transcodage des symboles.
+ *  Transcodage des categories.
  *
  *  arguments : reference sur un objet StatError,
- *              table de transcodage des symboles.
+ *              table de transcodage des categories.
  *
  *--------------------------------------------------------------*/
 
 DiscreteDistributionData* FrequencyDistribution::transcode(StatError &error ,
-                                                           int *symbol) const
+                                                           int *category) const
 
 {
   bool status = true , *presence;
   register int i;
-  int min_symbol , max_symbol , *cfrequency;
+  int min_category , max_category , *cfrequency;
   DiscreteDistributionData *histo;
 
 
   histo = NULL;
   error.init();
 
-  min_symbol = INT_MAX;
-  max_symbol = 0;
+  min_category = INT_MAX;
+  max_category = 0;
 
   for (i = 0;i < nb_value - offset;i++) {
-    if (symbol[i] < 0) {
+    if (category[i] < 0) {
       status = false;
       ostringstream error_message;
-      error_message << STAT_label[STATL_SYMBOL] << " " << symbol[i] << " "
+      error_message << STAT_label[STATL_CATEGORY] << " " << category[i] << " "
                     << STAT_error[STATR_NOT_ALLOWED];
       error.update((error_message.str()).c_str());
     }
     else {
-      if (symbol[i] < min_symbol) {
-        min_symbol = symbol[i];
+      if (category[i] < min_category) {
+        min_category = category[i];
       }
-      if (symbol[i] > max_symbol) {
-        max_symbol = symbol[i];
+      if (category[i] > max_category) {
+        max_category = category[i];
       }
     }
   }
 
-  if (max_symbol - min_symbol == 0) {
+  if (max_category - min_category == 0) {
     status = false;
-    error.update(STAT_error[STATR_NB_SYMBOL]);
+    error.update(STAT_error[STATR_NB_CATEGORY]);
   }
 
-  if (max_symbol - min_symbol > nb_value - 1 - offset) {
+  if (max_category - min_category > nb_value - 1 - offset) {
     status = false;
-    error.update(STAT_error[STATR_NON_CONSECUTIVE_SYMBOLS]);
+    error.update(STAT_error[STATR_NON_CONSECUTIVE_CATEGORIES]);
   }
 
   if (status) {
-    presence = new bool[max_symbol + 1];
-    for (i = min_symbol;i <= max_symbol;i++) {
+    presence = new bool[max_category + 1];
+    for (i = min_category;i <= max_category;i++) {
       presence[i] = false;
     }
 
     for (i = 0;i < nb_value - offset;i++) {
-      presence[symbol[i]] = true;
+      presence[category[i]] = true;
     }
 
-    for (i = min_symbol;i <= max_symbol;i++) {
+    for (i = min_category;i <= max_category;i++) {
       if (!presence[i]) {
         status = false;
         ostringstream error_message;
-        error_message << STAT_error[STATR_MISSING_SYMBOL] << " " << i;
+        error_message << STAT_error[STATR_MISSING_CATEGORY] << " " << i;
         error.update((error_message.str()).c_str());
       }
     }
@@ -601,9 +602,9 @@ DiscreteDistributionData* FrequencyDistribution::transcode(StatError &error ,
   }
 
   if (status) {
-    histo = new DiscreteDistributionData(max_symbol + 1);
+    histo = new DiscreteDistributionData(max_category + 1);
 
-    // transcodage des symboles
+    // transcodage des categories
 
     for (i = 0;i < histo->nb_value;i++) {
       histo->frequency[i] = 0;
@@ -611,12 +612,12 @@ DiscreteDistributionData* FrequencyDistribution::transcode(StatError &error ,
 
     cfrequency = frequency + offset;
     for (i = 0;i < nb_value - offset;i++) {
-      histo->frequency[symbol[i]] += *cfrequency++;
+      histo->frequency[category[i]] += *cfrequency++;
     }
 
     // calcul des caracteristiques de la loi empirique
 
-    histo->offset = min_symbol;
+    histo->offset = min_category;
     histo->nb_element = nb_element;
     histo->max_computation();
     histo->mean_computation();
