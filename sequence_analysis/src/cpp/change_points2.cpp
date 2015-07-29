@@ -186,7 +186,7 @@ ostream& Sequences::profile_ascii_print(ostream &os , int index , int nb_segment
     os << STAT_label[STATL_VARIABLE] << " " << i << " | ";
   }
 
-  switch (index_parameter_type) {
+  switch (index_param_type) {
   case TIME :
     os << SEQ_label[SEQL_TIME];
     break;
@@ -255,7 +255,7 @@ ostream& Sequences::profile_ascii_print(ostream &os , int index , int nb_segment
        << SEQ_label[SEQL_CHANGE_POINT_ENTROPY] << endl;
 
     os << "\n";
-    switch (index_parameter_type) {
+    switch (index_param_type) {
     case TIME :
       os << SEQ_label[SEQL_TIME];
       break;
@@ -348,7 +348,7 @@ ostream& Sequences::profile_spreadsheet_print(ostream &os , int index , int nb_s
     os << STAT_label[STATL_VARIABLE] << " " << i << "\t";
   }
 
-  switch (index_parameter_type) {
+  switch (index_param_type) {
   case TIME :
     os << SEQ_label[SEQL_TIME];
     break;
@@ -418,7 +418,7 @@ ostream& Sequences::profile_spreadsheet_print(ostream &os , int index , int nb_s
     os << SEQ_label[SEQL_CHANGE_POINT_ENTROPY] << endl;
 
     os << "\n";
-    switch (index_parameter_type) {
+    switch (index_param_type) {
       os << SEQ_label[SEQL_TIME];
       break;
     case POSITION :
@@ -618,14 +618,13 @@ void Sequences::entropy_profile_plotable_write(MultiPlot &plot , int index ,
  *
  *  arguments : indice de la sequence, nombre de segments, types des modeles,
  *              rangs (variables ordinales), stream, pointeur sur un objet MultiPlotSet,
- *              type de sortie, format de sortie ('a' : ASCII, 's' : Spreadsheet,
- *              'g' : Gnuplot, 'p' : plotable).
+ *              type de sortie, format de sortie (ASCII/SPREADSHEET/GNUPLOT/PLOT).
  *
  *--------------------------------------------------------------*/
 
-double Sequences::forward_backward(int index , int nb_segment , int *model_type ,
+double Sequences::forward_backward(int index , int nb_segment , segment_model *model_type ,
                                    double **rank , ostream *os , MultiPlotSet *plot_set ,
-                                   int output , char format) const
+                                   change_point_profile output , output_format format) const
 
 {
   register int i , j , k , m;
@@ -792,7 +791,7 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
     }
 
     if ((model_type[i - 1] == LINEAR_MODEL_CHANGE) && (!seq_index_parameter)) {
-      if (index_parameter_type == IMPLICIT_TYPE) {
+      if (index_param_type == IMPLICIT_TYPE) {
         seq_index_parameter = new int[length[index]];
         for (j = 0;j < length[index];j++) {
           seq_index_parameter[j] = j;
@@ -2695,7 +2694,7 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
     if ((os) || (plot_set)) {
       switch (format) {
 
-      case 'a' : {
+      case ASCII : {
         switch (output) {
         case CHANGE_POINT :
           *os << "\n" << SEQ_label[SEQL_POSTERIOR_CHANGE_POINT_PROBABILITY] << "\n\n";
@@ -2719,7 +2718,7 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
         break;
       }
 
-      case 's' : {
+      case SPREADSHEET : {
         switch (output) {
         case CHANGE_POINT :
           *os << "\n" << SEQ_label[SEQL_POSTERIOR_CHANGE_POINT_PROBABILITY] << "\n\n";
@@ -2743,14 +2742,14 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
         break;
       }
 
-      case 'g' : {
+      case GNUPLOT : {
         profile_plot_print(*os , index , nb_segment , backward_output ,
                            NULL , change_point , forward_partial_entropy ,
                            backward_partial_entropy , change_point_entropy);
         break;
       }
 
-      case 'p' : {
+      case PLOT : {
         MultiPlotSet &plot = *plot_set;
 
         i = 1;
@@ -2836,7 +2835,7 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
   delete [] mean;
   delete [] residual;
 
-  if (index_parameter_type == IMPLICIT_TYPE) {
+  if (index_param_type == IMPLICIT_TYPE) {
     delete [] seq_index_parameter;
   }
 
@@ -2925,13 +2924,13 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
  *  Simulation des segmentations d'une sequence.
  *
  *  arguments : indice de la sequence, nombre de segments, types des modeles,
- *              rangs (variables ordinales), stream, format de fichier ('a' : ASCII,
- *              's' : Spreadsheet), nombre de segmentation.
+ *              rangs (variables ordinales), stream, format de fichier
+ *              (ASCII/SPREADSHEET), nombre de segmentation.
  *
  *--------------------------------------------------------------*/
 
-double Sequences::forward_backward_sampling(int index , int nb_segment , int *model_type ,
-                                            double **rank , ostream &os , char format ,
+double Sequences::forward_backward_sampling(int index , int nb_segment , segment_model *model_type ,
+                                            double **rank , ostream &os , output_format format ,
                                             int nb_segmentation) const
 
 {
@@ -3064,7 +3063,7 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *mo
     }
 
     if ((model_type[i - 1] == LINEAR_MODEL_CHANGE) && (!seq_index_parameter)) {
-      if (index_parameter_type == IMPLICIT_TYPE) {
+      if (index_param_type == IMPLICIT_TYPE) {
         seq_index_parameter = new int[length[index]];
         for (j = 0;j < length[index];j++) {
           seq_index_parameter[j] = j;
@@ -4070,7 +4069,7 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *mo
 
       switch (format) {
 
-      case 'a' : {
+      case ASCII : {
         psegment = int_sequence[index][0];
         for (j = 0;j < length[index];j++) {
           os << *psegment++ << " ";
@@ -4173,7 +4172,7 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *mo
         break;
       }
 
-      case 's' : {
+      case SPREADSHEET : {
         psegment = int_sequence[index][0];
         for (j = 0;j < length[index];j++) {
           os << *psegment++ << "\t";
@@ -4278,7 +4277,7 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *mo
   delete [] sequence_mean;
   delete [] residual;
 
-  if (index_parameter_type == IMPLICIT_TYPE) {
+  if (index_param_type == IMPLICIT_TYPE) {
     delete [] seq_index_parameter;
   }
 
