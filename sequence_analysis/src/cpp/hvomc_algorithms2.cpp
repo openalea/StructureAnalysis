@@ -136,7 +136,7 @@ void HiddenVariableOrderMarkov::forward_backward(VariableOrderMarkovData &seq) c
 
     switch (type) {
 
-    case 'o' : {
+    case ORDINARY : {
       for (j = 1;j < nb_row;j++) {
         if (order[j] == 1) {
           forward[0][j] = initial[state[j][0]];
@@ -186,7 +186,7 @@ void HiddenVariableOrderMarkov::forward_backward(VariableOrderMarkovData &seq) c
       break;
     }
 
-    case 'e' : {
+    case EQUILIBRIUM : {
       for (j = 1;j < nb_row;j++) {
         if (!child[j]) {
           forward[0][j] = initial[j];
@@ -501,14 +501,14 @@ void HiddenVariableOrderMarkov::forward_backward(VariableOrderMarkovData &seq) c
       for (j = 1;j < nb_row;j++) {
         switch (type) {
 
-        case 'o' : {
+        case ORDINARY : {
           if ((order[j] == 1) && (initial[state[j][0]] > 0.)) {
             entropy -= backward[0][j] * log(initial[state[j][0]]);
           }
           break;
         }
 
-        case 'e' : {
+        case EQUILIBRIUM : {
           if ((!child[j]) && (initial[j] > 0.)) {
             entropy -= backward[0][j] * log(initial[j]);
           }
@@ -549,7 +549,7 @@ void HiddenVariableOrderMarkov::forward_backward(VariableOrderMarkovData &seq) c
 
       switch (type) {
 
-      case 'o' : {
+      case ORDINARY : {
         for (j = 1;j < nb_row;j++) {
           if (order[j] == 1) {
             forward[0][j] = initial[state[j][0]];
@@ -601,7 +601,7 @@ void HiddenVariableOrderMarkov::forward_backward(VariableOrderMarkovData &seq) c
         break;
       }
 
-      case 'e' : {
+      case EQUILIBRIUM : {
         for (j = 1;j < nb_row;j++) {
           if (!child[j]) {
             forward[0][j] = initial[j];
@@ -831,7 +831,7 @@ ostream& Sequences::profile_ascii_print(ostream &os , int index , int nb_state ,
   for (i = 1;i < nb_variable;i++) {
     os << " | " << STAT_label[STATL_VARIABLE] << " " << i;
   }
-  if (index_parameter_type == TIME) {
+  if (index_param_type == TIME) {
     os << " | " << SEQ_label[SEQL_TIME];
   }
   else {
@@ -911,7 +911,7 @@ ostream& Sequences::profile_spreadsheet_print(ostream &os , int index , int nb_s
   for (i = 1;i < nb_variable;i++) {
     os << "\t" << STAT_label[STATL_VARIABLE] << " " << i;
   }
-  if (index_parameter_type == TIME) {
+  if (index_param_type == TIME) {
     os << "\t" << SEQ_label[SEQL_TIME];
   }
   else {
@@ -1108,15 +1108,15 @@ void Sequences::entropy_profile_plotable_write(MultiPlot &plot , int index ,
  *  Calcul des profils d'etats et d'entropie par l'algorithme forward-backward.
  *
  *  arguments : reference sur un objet MarkovianSequences, indice de la sequence,
- *              stream, pointeur sur un objet MultiPlotSet, format de sortie ('a' : ASCII,
- *              's' : Spreadsheet, 'g' : Gnuplot, 'p' : plotable), references sur
+ *              stream, pointeur sur un objet MultiPlotSet, format de sortie
+ *              (ASCII/SPREADSHEET/GNUPLOT/PLOT), references sur
  *              l'entropie marginale maximum et l'entropie (pour la visualisation).
  *
  *--------------------------------------------------------------*/
 
 double HiddenVariableOrderMarkov::forward_backward(const MarkovianSequences &seq , int index ,
                                                    ostream *os , MultiPlotSet *plot_set ,
-                                                   char format , double &max_marginal_entropy ,
+                                                   output_format format , double &max_marginal_entropy ,
                                                    double &entropy1) const
 
 {
@@ -1201,7 +1201,7 @@ double HiddenVariableOrderMarkov::forward_backward(const MarkovianSequences &seq
 
   switch (type) {
 
-  case 'o' : {
+  case ORDINARY : {
     for (i = 1;i < nb_row;i++) {
       if (order[i] == 1) {
         forward[0][i] = initial[state[i][0]];
@@ -1251,7 +1251,7 @@ double HiddenVariableOrderMarkov::forward_backward(const MarkovianSequences &seq
     break;
   }
 
-  case 'e' : {
+  case EQUILIBRIUM : {
     for (i = 1;i < nb_row;i++) {
       if (!child[i]) {
         forward[0][i] = initial[i];
@@ -1588,14 +1588,14 @@ double HiddenVariableOrderMarkov::forward_backward(const MarkovianSequences &seq
     for (i = 1;i < nb_row;i++) {
       switch (type) {
 
-      case 'o' : {
+      case ORDINARY : {
         if ((order[i] == 1) && (initial[state[i][0]] > 0.)) {
           entropy2 -= backward[0][i] * log(initial[state[i][0]]);
         }
         break;
       }
 
-      case 'e' : {
+      case EQUILIBRIUM : {
         if ((!child[i]) && (initial[i] > 0.)) {
           entropy2 -= backward[0][i] * log(initial[i]);
         }
@@ -1831,7 +1831,7 @@ double HiddenVariableOrderMarkov::forward_backward(const MarkovianSequences &seq
 
     switch (format) {
 
-    case 'a' : {
+    case ASCII : {
       *os << "\n" << SEQ_label[SEQL_POSTERIOR_STATE_PROBABILITY] << "\n\n";
 //      seq.profile_ascii_print(*os , index , nb_state , state_backward ,
 //                              STAT_label[STATL_STATE]);
@@ -1845,7 +1845,7 @@ double HiddenVariableOrderMarkov::forward_backward(const MarkovianSequences &seq
       break;
     }
 
-    case 's' : {
+    case SPREADSHEET : {
       *os << "\n" << SEQ_label[SEQL_POSTERIOR_STATE_PROBABILITY] << "\n\n";
 //      seq.profile_spreadsheet_print(*os , index , nb_state , state_backward ,
 //                                    STAT_label[STATL_STATE]);
@@ -1859,7 +1859,7 @@ double HiddenVariableOrderMarkov::forward_backward(const MarkovianSequences &seq
       break;
     }
 
-    case 'g' : {
+    case GNUPLOT : {
 //      seq.profile_plot_print(*os , index , nb_state , state_backward);
       seq.profile_plot_print(*os , index , nb_state , state_backward , begin_conditional_entropy ,
                              marginal_entropy , begin_partial_entropy , end_conditional_entropy ,
@@ -1867,7 +1867,7 @@ double HiddenVariableOrderMarkov::forward_backward(const MarkovianSequences &seq
       break;
     }
 
-    case 'p' : {
+    case PLOT : {
       seq.profile_plotable_write((*plot_set)[1] , index , nb_state , state_backward);
       seq.entropy_profile_plotable_write((*plot_set)[2] , index , begin_conditional_entropy ,
                                          end_conditional_entropy , marginal_entropy);
@@ -1877,7 +1877,7 @@ double HiddenVariableOrderMarkov::forward_backward(const MarkovianSequences &seq
     }
     }
 
-    if (format != 'g') {
+    if (format != GNUPLOT) {
 /*      double gini_index;
 
       gini_index = 0.;
@@ -1915,7 +1915,7 @@ double HiddenVariableOrderMarkov::forward_backward(const MarkovianSequences &seq
 
       switch (type) {
 
-      case 'o' : {
+      case ORDINARY : {
         for (i = 1;i < nb_row;i++) {
           if (order[i] == 1) {
             forward[0][i] = initial[state[i][0]];
@@ -1967,7 +1967,7 @@ double HiddenVariableOrderMarkov::forward_backward(const MarkovianSequences &seq
         break;
       }
 
-      case 'e' : {
+      case EQUILIBRIUM : {
         for (i = 1;i < nb_row;i++) {
           if (!child[i]) {
             forward[0][i] = initial[i];
@@ -2089,7 +2089,7 @@ double HiddenVariableOrderMarkov::forward_backward(const MarkovianSequences &seq
       }
 
       switch (format) {
-      case 'a' :
+      case ASCII :
 /*        *os << "\n" << SEQ_label[SEQL_GINI_INDEX] << ": " << gini_index << " ("
             << gini_index / seq.length[index] */
         *os << "\n" << SEQ_label[SEQL_STATE_SEQUENCE_ENTROPY] << ": " << entropy1
@@ -2100,7 +2100,7 @@ double HiddenVariableOrderMarkov::forward_backward(const MarkovianSequences &seq
             << entropy3 / seq.length[index] << ")\n\n"
             << SEQ_label[SEQL_NB_STATE_SEQUENCE] << ": " << nb_state_sequence << endl;
         break;
-      case 's' :
+      case SPREADSHEET :
 /*        *os << "\n" << SEQ_label[SEQL_GINI_INDEX] << "\t" << gini_index << "\t"
             << gini_index / seq.length[index] */
         *os << "\n" << SEQ_label[SEQL_STATE_SEQUENCE_ENTROPY] << "\t" << entropy1
@@ -2176,13 +2176,13 @@ double HiddenVariableOrderMarkov::forward_backward(const MarkovianSequences &seq
  *  par l'algorithme forward-backward de simulation.
  *
  *  arguments : reference sur un objet MarkovianSequences, indice de la sequence,
- *              stream, format de fichier ('a' : ASCII, 's' : Spreadsheet),
+ *              stream, format de fichier (ASCII/SPREADSHEET),
  *              nombre de sequences d'etats.
  *
  *--------------------------------------------------------------*/
 
-double HiddenVariableOrderMarkov::forward_backward_sampling(const MarkovianSequences &seq ,
-                                                            int index , ostream &os , char format ,
+double HiddenVariableOrderMarkov::forward_backward_sampling(const MarkovianSequences &seq , int index ,
+                                                            ostream &os , output_format format ,
                                                             int nb_state_sequence) const
 
 {
@@ -2245,7 +2245,7 @@ double HiddenVariableOrderMarkov::forward_backward_sampling(const MarkovianSeque
 
   switch (type) {
 
-  case 'o' : {
+  case ORDINARY : {
     for (i = 1;i < nb_row;i++) {
       if (order[i] == 1) {
         forward[0][i] = initial[state[i][0]];
@@ -2295,7 +2295,7 @@ double HiddenVariableOrderMarkov::forward_backward_sampling(const MarkovianSeque
     break;
   }
 
-  case 'e' : {
+  case EQUILIBRIUM : {
     for (i = 1;i < nb_row;i++) {
       if (!child[i]) {
         forward[0][i] = initial[i];
@@ -2481,7 +2481,7 @@ double HiddenVariableOrderMarkov::forward_backward_sampling(const MarkovianSeque
 
       switch (format) {
 
-      case 'a' : {
+      case ASCII : {
         for (j = 0;j < seq.length[index];j++) {
           os << *pstate++ << " ";
         }
@@ -2491,7 +2491,7 @@ double HiddenVariableOrderMarkov::forward_backward_sampling(const MarkovianSeque
         break;
       }
 
-      case 's' : {
+      case SPREADSHEET : {
         for (j = 0;j < seq.length[index];j++) {
           os << *pstate++ << "\t";
         }
@@ -2637,7 +2637,7 @@ double HiddenVariableOrderMarkov::viterbi(const MarkovianSequences &seq ,
 
       switch (type) {
 
-      case 'o' : {
+      case ORDINARY : {
         for (j = 1;j < nb_row;j++) {
           if (order[j] == 1) {
             forward[j] = cumul_initial[state[j][0]];
@@ -2702,7 +2702,7 @@ double HiddenVariableOrderMarkov::viterbi(const MarkovianSequences &seq ,
         break;
       }
 
-      case 'e' : {
+      case EQUILIBRIUM : {
         for (j = 1;j < nb_row;j++) {
           if (!child[j]) {
             forward[j] = cumul_initial[j];
@@ -2949,13 +2949,13 @@ void HiddenVariableOrderMarkov::viterbi(VariableOrderMarkovData &seq) const
  *
  *  arguments : reference sur un objet MarkovianSequences, indice de la sequence,
  *              stream, vraisemblance des donnees, format de fichier
- *              ('a' : ASCII, 's' : Spreadsheet), nombre de sequences d'etats.
+ *              (ASCII/SPREADSHEET), nombre de sequences d'etats.
  *
  *--------------------------------------------------------------*/
 
 double HiddenVariableOrderMarkov::generalized_viterbi(const MarkovianSequences &seq , int index ,
                                                       ostream &os , double seq_likelihood ,
-                                                      char format , int inb_state_sequence) const
+                                                      output_format format , int inb_state_sequence) const
 
 {
   bool **active_cell;
@@ -3043,7 +3043,7 @@ double HiddenVariableOrderMarkov::generalized_viterbi(const MarkovianSequences &
 
   switch (type) {
 
-  case 'o' : {
+  case ORDINARY : {
     for (i = 1;i < nb_row;i++) {
       if (order[i] == 1) {
         forward[i][0] = cumul_initial[state[i][0]];
@@ -3108,7 +3108,7 @@ double HiddenVariableOrderMarkov::generalized_viterbi(const MarkovianSequences &
     break;
   }
 
-  case 'e' : {
+  case EQUILIBRIUM : {
     for (i = 1;i < nb_row;i++) {
       if (!child[i]) {
         forward[i][0] = cumul_initial[i];
@@ -3422,7 +3422,7 @@ double HiddenVariableOrderMarkov::generalized_viterbi(const MarkovianSequences &
 
     switch (format) {
 
-    case 'a' : {
+    case ASCII : {
       for (j = 0;j < seq.length[index];j++) {
         os << *pstate++ << " ";
       }
@@ -3433,7 +3433,7 @@ double HiddenVariableOrderMarkov::generalized_viterbi(const MarkovianSequences &
       break;
     }
 
-    case 's' : {
+    case SPREADSHEET : {
       for (j = 0;j < seq.length[index];j++) {
         os << *pstate++ << "\t";
       }
@@ -3531,14 +3531,14 @@ double HiddenVariableOrderMarkov::generalized_viterbi(const MarkovianSequences &
  *  Calcul des profils d'etats par l'algorithme de Viterbi forward-backward.
  *
  *  arguments : reference sur un objet MarkovianSequences, indice de la sequence,
- *              stream, pointeur sur un objet MultiPlot, format de sortie ('a' : ASCII,
- *              's' : Spreadsheet, 'g' : Gnuplot, 'p' : plotable), vraisemblance des donnees.
+ *              stream, pointeur sur un objet MultiPlot, format de sortie
+ *              (ASCII/SPREADSHEET/GNUPLOT/PLOT), vraisemblance des donnees.
  *
  *--------------------------------------------------------------*/
 
-double HiddenVariableOrderMarkov::viterbi_forward_backward(const MarkovianSequences &seq ,
-                                                           int index , ostream *os , MultiPlot *plot ,
-                                                           char format , double seq_likelihood) const
+double HiddenVariableOrderMarkov::viterbi_forward_backward(const MarkovianSequences &seq , int index ,
+                                                           ostream *os , MultiPlot *plot ,
+                                                           output_format format , double seq_likelihood) const
 
 {
   register int i , j , k;
@@ -3595,7 +3595,7 @@ double HiddenVariableOrderMarkov::viterbi_forward_backward(const MarkovianSequen
 
   switch (type) {
 
-  case 'o' : {
+  case ORDINARY : {
     for (i = 1;i < nb_row;i++) {
       if (order[i] == 1) {
         forward[0][i] = cumul_initial[state[i][0]];
@@ -3659,7 +3659,7 @@ double HiddenVariableOrderMarkov::viterbi_forward_backward(const MarkovianSequen
     break;
   }
 
-  case 'e' : {
+  case EQUILIBRIUM : {
     for (i = 1;i < nb_row;i++) {
       if (!child[i]) {
         forward[0][i] = cumul_initial[i];
@@ -3966,7 +3966,7 @@ double HiddenVariableOrderMarkov::viterbi_forward_backward(const MarkovianSequen
 
     switch (format) {
 
-    case 'a' : {
+    case ASCII : {
       *os << "\n" << SEQ_label[SEQL_MAX_POSTERIOR_STATE_PROBABILITY] << "\n\n";
       seq.profile_ascii_print(*os , index , nb_state , state_backward ,
                               STAT_label[STATL_STATE]);
@@ -3976,7 +3976,7 @@ double HiddenVariableOrderMarkov::viterbi_forward_backward(const MarkovianSequen
       break;
     }
 
-    case 's' : {
+    case SPREADSHEET : {
       *os << "\n" << SEQ_label[SEQL_MAX_POSTERIOR_STATE_PROBABILITY] << "\n\n";
       seq.profile_spreadsheet_print(*os , index , nb_state , state_backward ,
                                     STAT_label[STATL_STATE]);
@@ -3986,19 +3986,19 @@ double HiddenVariableOrderMarkov::viterbi_forward_backward(const MarkovianSequen
       break;
     }
 
-    case 'g' : {
+    case GNUPLOT : {
       seq.profile_plot_print(*os , index , nb_state , state_backward);
       break;
     }
 
-    case 'p' : {
+    case PLOT : {
       seq.profile_plotable_write(*plot , index , nb_state , state_backward);
       break;
     }
     }
 
 #   ifdef DEBUG
-    if (format != 'g') {
+    if (format != GNUPLOT) {
       double ambiguity = 0.;
 
       pstate = seq.int_sequence[index][0];
@@ -4013,11 +4013,11 @@ double HiddenVariableOrderMarkov::viterbi_forward_backward(const MarkovianSequen
       ambiguity *= exp(seq_likelihood - state_seq_likelihood);
 
       switch (format) {
-      case 'a' :
+      case ASCII :
         *os << "\n" << SEQ_label[SEQL_AMBIGUITY] << ": " << ambiguity
             << " (" << ambiguity / seq.length[index] << ")" << endl;
         break;
-      case 's' :
+      case SPREADSHEET :
         *os << "\n" << SEQ_label[SEQL_AMBIGUITY] << "\t" << ambiguity
             << "\t" << ambiguity / seq.length[index] << "\t" << endl;
         break;
@@ -4069,16 +4069,17 @@ double HiddenVariableOrderMarkov::viterbi_forward_backward(const MarkovianSequen
  *  ecriture des resultats.
  *
  *  arguments : reference sur un objet StatError, stream, sequences,
- *              identificateur de la sequence, format ('a' : ASCII, 's' : Spreadsheet),
- *              methode de calcul des sequences d'etats (algorithme de Viterbi generalise ou
- *              algorithme forward-backward de simulation), nombre de sequences d'etats.
+ *              identificateur de la sequence, format (ASCII/SPREADSHEET),
+ *              methode de calcul des sequences d'etats (GENERALIZED_VITERBI/
+ *              FORWARD_BACKWARD_SAMPLING), nombre de sequences d'etats.
  *
  *--------------------------------------------------------------*/
 
 bool HiddenVariableOrderMarkov::state_profile_write(StatError &error , ostream &os ,
                                                     const MarkovianSequences &iseq ,
-                                                    int identifier , char format ,
-                                                    int state_sequence , int nb_state_sequence) const
+                                                    int identifier , output_format format ,
+                                                    latent_structure_algorithm state_sequence ,
+                                                    int nb_state_sequence) const
 
 {
   bool status = true;
@@ -4187,7 +4188,7 @@ bool HiddenVariableOrderMarkov::state_profile_write(StatError &error , ostream &
       seq = new VariableOrderMarkovData(iseq);
     }
     else {
-      seq = new VariableOrderMarkovData(iseq , 'c' , (type == 'e' ? true : false));
+      seq = new VariableOrderMarkovData(iseq , SEQUENCE_COPY , (type == EQUILIBRIUM ? true : false));
     }
 
     hmarkov = new HiddenVariableOrderMarkov(*this , false);
@@ -4247,16 +4248,17 @@ bool HiddenVariableOrderMarkov::state_profile_write(StatError &error , ostream &
  *  ecriture des resultats dans un fichier.
  *
  *  arguments : reference sur un objet StatError, path, sequences,
- *              identificateur de la sequence, format de fichier ('a' : ASCII, 's' : Spreadsheet),
- *              methode de calcul des sequences d'etats (algorithme de Viterbi generalise ou
- *              algorithme forward-backward de simulation), nombre de sequences d'etats.
+ *              identificateur de la sequence, format de fichier (ASCII/SPREADSHEET),
+ *              methode de calcul des sequences d'etats (GENERALIZED_VITERBI/
+ *              FORWARD_BACKWARD_SAMPLING), nombre de sequences d'etats.
  *
  *--------------------------------------------------------------*/
 
 bool HiddenVariableOrderMarkov::state_profile_write(StatError &error , const char *path ,
                                                     const MarkovianSequences &iseq ,
-                                                    int identifier , char format ,
-                                                    int state_sequence , int nb_state_sequence) const
+                                                    int identifier , output_format format ,
+                                                    latent_structure_algorithm state_sequence ,
+                                                    int nb_state_sequence) const
 
 {
   bool status = true;
@@ -4287,13 +4289,13 @@ bool HiddenVariableOrderMarkov::state_profile_write(StatError &error , const cha
  *  ecriture des resultats.
  *
  *  arguments : reference sur un objet StatError, stream, identificateur de la sequence,
- *              methode de calcul des sequences d'etats (algorithme de Viterbi generalise ou
- *              algorithme forward-backward de simulation), nombre de sequences d'etats.
+ *              methode de calcul des sequences d'etats (GENERALIZED_VITERBI/
+ *              FORWARD_BACKWARD_SAMPLING), nombre de sequences d'etats.
  *
  *--------------------------------------------------------------*/
 
-bool HiddenVariableOrderMarkov::state_profile_ascii_write(StatError &error , ostream &os ,
-                                                          int identifier , int state_sequence ,
+bool HiddenVariableOrderMarkov::state_profile_ascii_write(StatError &error , ostream &os , int identifier ,
+                                                          latent_structure_algorithm state_sequence ,
                                                           int nb_state_sequence) const
 
 {
@@ -4307,7 +4309,7 @@ bool HiddenVariableOrderMarkov::state_profile_ascii_write(StatError &error , ost
     error.update(STAT_error[STATR_NO_DATA]);
   }
   else {
-    status = state_profile_write(error , os , *markov_data , identifier , 'a' ,
+    status = state_profile_write(error , os , *markov_data , identifier , ASCII ,
                                  state_sequence , nb_state_sequence);
   }
 
@@ -4324,15 +4326,16 @@ bool HiddenVariableOrderMarkov::state_profile_ascii_write(StatError &error , ost
  *  ecriture des resultats dans un fichier.
  *
  *  arguments : reference sur un objet StatError, path, identificateur de la sequence,
- *              format de fichier ('a' : ASCII, 's' : Spreadsheet),
- *              methode de calcul des sequences d'etats (algorithme de Viterbi generalise ou
- *              algorithme forward-backward de simulation), nombre de sequences d'etats.
+ *              format de fichier (ASCII/SPREADSHEET),
+ *              methode de calcul des sequences d'etats (GENERALIZED_VITERBI/
+ *              FORWARD_BACKWARD_SAMPLING), nombre de sequences d'etats.
  *
  *--------------------------------------------------------------*/
 
 bool HiddenVariableOrderMarkov::state_profile_write(StatError &error , const char *path ,
-                                                    int identifier , char format ,
-                                                    int state_sequence , int nb_state_sequence) const
+                                                    int identifier , output_format format ,
+                                                    latent_structure_algorithm state_sequence ,
+                                                    int nb_state_sequence) const
 
 {
   bool status = true;
@@ -4488,10 +4491,10 @@ bool HiddenVariableOrderMarkov::state_profile_plot_write(StatError &error , cons
         seq = new VariableOrderMarkovData(iseq);
       }
       else {
-        seq = new VariableOrderMarkovData(iseq , 'c' , (type == 'e' ? true : false));
+        seq = new VariableOrderMarkovData(iseq , SEQUENCE_COPY , (type == EQUILIBRIUM ? true : false));
       }
 
-      seq_likelihood = forward_backward(*seq , index , out_data_file , NULL , 'g' ,
+      seq_likelihood = forward_backward(*seq , index , out_data_file , NULL , GNUPLOT ,
                                         max_marginal_entropy , entropy);
       out_data_file->close();
       delete out_data_file;
@@ -4510,7 +4513,7 @@ bool HiddenVariableOrderMarkov::state_profile_plot_write(StatError &error , cons
         hmarkov->create_cumul();
         hmarkov->log_computation();
         state_seq_likelihood = hmarkov->viterbi_forward_backward(*seq , index , out_data_file , NULL ,
-                                                                 'g' , seq_likelihood);
+                                                                 GNUPLOT , seq_likelihood);
         out_data_file->close();
         delete out_data_file;
 
@@ -4893,10 +4896,10 @@ MultiPlotSet* HiddenVariableOrderMarkov::state_profile_plotable_write(StatError 
       seq = new VariableOrderMarkovData(iseq);
     }
     else {
-      seq = new VariableOrderMarkovData(iseq , 'c' , (type == 'e' ? true : false));
+      seq = new VariableOrderMarkovData(iseq , SEQUENCE_COPY , (type == EQUILIBRIUM ? true : false));
     }
 
-    seq_likelihood = forward_backward(*seq , index , NULL , plot_set , 'p' ,
+    seq_likelihood = forward_backward(*seq , index , NULL , plot_set , PLOT ,
                                       max_marginal_entropy , entropy);
 
     if (seq_likelihood == D_INF) {
@@ -4911,7 +4914,7 @@ MultiPlotSet* HiddenVariableOrderMarkov::state_profile_plotable_write(StatError 
       hmarkov->create_cumul();
       hmarkov->log_computation();
       state_seq_likelihood = hmarkov->viterbi_forward_backward(*seq , index , NULL , &plot[0] ,
-                                                               'p' , seq_likelihood);
+                                                               PLOT , seq_likelihood);
 
       // 1ere vue : probabilitees maximum
 
@@ -5153,7 +5156,7 @@ VariableOrderMarkovData* HiddenVariableOrderMarkov::state_sequence_computation(S
   }
 
   if (status) {
-    seq = new VariableOrderMarkovData(iseq , 'a' , (type == 'e' ? true : false));
+    seq = new VariableOrderMarkovData(iseq , ADD_STATE_VARIABLE , (type == EQUILIBRIUM ? true : false));
 
     seq->markov = new VariableOrderMarkov(*this , false);
 
@@ -5214,13 +5217,13 @@ VariableOrderMarkovData* HiddenVariableOrderMarkov::state_sequence_computation(S
  *
  *  arguments : reference sur un objet StatError, stream, nombre de chaines
  *              de Markov cachees, pointeur sur les chaines de Markov cachees,
- *              type algorithme (forward ou Viterbi), path.
+ *              type algorithme (FORWARD/VITERBI), path.
  *
  *--------------------------------------------------------------*/
 
 bool MarkovianSequences::comparison(StatError &error , ostream &os , int nb_model ,
                                     const HiddenVariableOrderMarkov **ihmarkov ,
-                                    int algorithm , const char *path) const
+                                    latent_structure_algorithm algorithm , const char *path) const
 
 {
   bool status = true;
