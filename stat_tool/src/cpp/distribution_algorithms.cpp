@@ -112,12 +112,11 @@ void Distribution::convolution(Distribution &dist1 , Distribution &dist2 , int i
  *
  *  Calcul d'une loi binomiale.
  *
- *  arguments : nombre de valeurs,
- *              mode de calcul ('s' : standard, 'r' : renouvellement).
+ *  arguments : nombre de valeurs, mode de calcul (STANDARD/RENEWAL).
  *
  *--------------------------------------------------------------*/
 
-void DiscreteParametric::binomial_computation(int inb_value , char mode)
+void DiscreteParametric::binomial_computation(int inb_value , distribution_computation mode)
 
 {
   register int i;
@@ -126,11 +125,11 @@ void DiscreteParametric::binomial_computation(int inb_value , char mode)
 
 
   switch (mode) {
-  case 's' :
+  case STANDARD :
     offset = inf_bound;
     nb_value = sup_bound + 1;
     break;
-  case 'r' :
+  case RENEWAL :
     offset = MIN(inf_bound , inb_value - 1);
     nb_value = MIN(sup_bound + 1 , inb_value);
     break;
@@ -254,8 +253,8 @@ void DiscreteParametric::binomial_computation(int inb_value , char mode)
 
   cumul_computation();
 
-# ifdef DEBUG
-  if (mode == 's') {
+# ifdef DEBUG2
+  if (mode == STANDARD) {
     binomial dist(sup_bound - inf_bound , probability);
 
 
@@ -277,14 +276,13 @@ void DiscreteParametric::binomial_computation(int inb_value , char mode)
  *  soit a partir d'un seuil calcule sur la fonction de repartition,
  *  soit a partir d'une borne predefinie.
  *
- *  arguments : nombre de valeurs,
- *              seuil sur la fonction de repartition,
- *              mode de calcul ('s' : standard, 'r' : renouvellement).
+ *  arguments : nombre de valeurs, seuil sur la fonction de repartition,
+ *              mode de calcul (STANDARD/RENEWAL).
  *
  *--------------------------------------------------------------*/
 
 void DiscreteParametric::poisson_computation(int inb_value , double cumul_threshold ,
-                                             char mode)
+                                             distribution_computation mode)
 
 {
   register int i;
@@ -298,7 +296,7 @@ void DiscreteParametric::poisson_computation(int inb_value , double cumul_thresh
 
   // cas calcul complet
 
-  case 's' : {
+  case STANDARD : {
 
     // valeurs de probabilite nulle avant la borne inferieure
 
@@ -362,7 +360,7 @@ void DiscreteParametric::poisson_computation(int inb_value , double cumul_thresh
 
   // cas calcul incomplet (renouvellement)
 
-  case 'r' : {
+  case RENEWAL : {
 
     // valeurs de probabilite nulle avant la borne inferieure
 
@@ -428,8 +426,8 @@ void DiscreteParametric::poisson_computation(int inb_value , double cumul_thresh
   offset = MIN(inf_bound , i - 1);
   nb_value = i;
 
-# ifdef DEBUG
-  if (mode == 's') {
+# ifdef DEBUG2
+  if (mode == STANDARD) {
     poisson dist(parameter);
 
 
@@ -452,12 +450,12 @@ void DiscreteParametric::poisson_computation(int inb_value , double cumul_thresh
  *  soit a partir d'une borne predefinie.
  *
  *  arguments : nombre de valeurs, seuil sur la fonction de repartition,
- *              mode de calcul ('s' : standard, 'r' : renouvellement).
+ *              mode de calcul (STANDARD/RENEWAL).
  *
  *--------------------------------------------------------------*/
 
 void DiscreteParametric::negative_binomial_computation(int inb_value , double cumul_threshold ,
-                                                       char mode)
+                                                       distribution_computation mode)
 
 {
   register int i;
@@ -472,7 +470,7 @@ void DiscreteParametric::negative_binomial_computation(int inb_value , double cu
 
     // cas calcul complet
 
-    case 's' : {
+    case STANDARD : {
 
     // valeurs de probabilite nulle avant la borne inferieure
 
@@ -539,7 +537,7 @@ void DiscreteParametric::negative_binomial_computation(int inb_value , double cu
 
   // cas calcul incomplet (renouvellement)
 
-  case 'r' : {
+  case RENEWAL : {
 
     // valeurs de probabilite nulle avant la borne inferieure
 
@@ -608,8 +606,8 @@ void DiscreteParametric::negative_binomial_computation(int inb_value , double cu
   offset = MIN(inf_bound , i - 1);
   nb_value = i;
 
-# ifdef DEBUG
-  if (mode == 's') {
+# ifdef DEBUG2
+  if (mode == STANDARD) {
     negative_binomial dist(parameter , probability);
 
 
@@ -663,8 +661,8 @@ void DiscreteParametric::uniform_computation()
  *
  *--------------------------------------------------------------*/
 
-int nb_value_computation(int ident , int inf_bound , int sup_bound ,
-                         double parameter , double probability , double cumul_threshold)
+int DiscreteParametric::nb_value_computation(discrete_parametric ident , int inf_bound , int sup_bound ,
+                                             double parameter , double probability , double cumul_threshold)
 
 {
   int nb_value = 0;
@@ -705,13 +703,13 @@ void DiscreteParametric::computation(int min_nb_value , double cumul_threshold)
   if (ident > 0) {
     switch (ident) {
     case BINOMIAL :
-      binomial_computation(1 , 's');
+      binomial_computation(1 , STANDARD);
       break;
     case POISSON :
-      poisson_computation(min_nb_value , cumul_threshold , 's');
+      poisson_computation(min_nb_value , cumul_threshold , STANDARD);
       break;
     case NEGATIVE_BINOMIAL :
-      negative_binomial_computation(min_nb_value , cumul_threshold , 's');
+      negative_binomial_computation(min_nb_value , cumul_threshold , STANDARD);
       break;
     case UNIFORM :
       uniform_computation();
@@ -1227,13 +1225,14 @@ DiscreteParametricModel* FrequencyDistribution::type_parametric_estimation(StatE
  *
  *--------------------------------------------------------------*/
 
-void Distribution::penalty_computation(double weight , int type , double *penalty , int outside) const
+void Distribution::penalty_computation(double weight , penalty_type pen_type ,
+                                       double *penalty , side_effect outside) const
 
 {
   register int i;
 
 
-  switch (type) {
+  switch (pen_type) {
 
   case FIRST_DIFFERENCE : {
     switch (outside) {
@@ -1551,7 +1550,7 @@ double DiscreteParametric::renewal_likelihood_computation(const Forward &forward
   likelihood = likelihood_computation(within);
 
   if (likelihood != D_INF) {
-    histo = new FrequencyDistribution(backward , 's' , 1);
+    histo = new FrequencyDistribution(backward , SHIFT , 1);
     buff = survivor_likelihood_computation(*histo);
     delete histo;
 
@@ -1563,7 +1562,7 @@ double DiscreteParametric::renewal_likelihood_computation(const Forward &forward
         likelihood += buff;
 
         if (no_event) {
-          histo = new FrequencyDistribution(*no_event , 's' , 1);
+          histo = new FrequencyDistribution(*no_event , SHIFT , 1);
           buff = forward_dist.survivor_likelihood_computation(*histo);
           delete histo;
 
@@ -1830,9 +1829,9 @@ DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , os
                                                            const FrequencyDistribution &forward ,
                                                            const FrequencyDistribution *no_event ,
                                                            const DiscreteParametric &iinter_event ,
-                                                           int estimator , int nb_iter ,
-                                                           int mean_computation_method , double weight ,
-                                                           int penalty_type , int outside ,
+                                                           estimation_criterion estimator , int nb_iter ,
+                                                           duration_distribution_mean_estimator mean_estimator ,
+                                                           double weight , penalty_type pen_type , side_effect outside ,
                                                            double iinter_event_mean) const
 
 {
@@ -1878,9 +1877,9 @@ DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , os
     error.update(STAT_error[STATR_PENALTY_WEIGHT]);
   }
 
-  if ((mean_computation_method == ESTIMATED) && (iinter_event_mean == D_DEFAULT)) {
+  if ((mean_estimator == ESTIMATED) && (iinter_event_mean == D_DEFAULT)) {
     status = false;
-    error.update(STAT_error[STATR_MEAN_COMPUTATION_METHOD]);
+    error.update(STAT_error[STATR_MEAN_ESTIMATION]);
   }
 
   inb_value = nb_value;
@@ -1904,7 +1903,7 @@ DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , os
   }
 
   if (status) {
-    phisto[0] = new FrequencyDistribution(backward , 's' , 1);
+    phisto[0] = new FrequencyDistribution(backward , SHIFT , 1);
     phisto[1] = &forward;
     backward_forward = new FrequencyDistribution(2 , phisto);
     delete phisto[0];
@@ -2004,7 +2003,7 @@ DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , os
       penalty = new double[inter_event->nb_value];
 
       if (weight == D_DEFAULT) {
-        if (penalty_type != ENTROPY) {
+        if (pen_type != ENTROPY) {
           weight = RENEWAL_DIFFERENCE_WEIGHT;
         }
         else {
@@ -2035,7 +2034,7 @@ DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , os
       switch (estimator) {
 
       case LIKELIHOOD : {
-        switch (mean_computation_method) {
+        switch (mean_estimator) {
         case ESTIMATED :
           inter_event_mean = iinter_event_mean;
           break;
@@ -2053,7 +2052,7 @@ DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , os
       }
 
       case PENALIZED_LIKELIHOOD : {
-        switch (mean_computation_method) {
+        switch (mean_estimator) {
         case ESTIMATED :
           inter_event_mean = iinter_event_mean;
           break;
@@ -2064,7 +2063,7 @@ DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , os
 
         inter_event_reestim->penalized_likelihood_equilibrium_process_estimation(length_bias_reestim ,
                                                                                  inter_event , inter_event_mean ,
-                                                                                 weight , penalty_type , penalty ,
+                                                                                 weight , pen_type , penalty ,
                                                                                  outside);
         break;
       }
@@ -2086,7 +2085,7 @@ DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , os
 
         if ((no_event) && (no_event->offset + 1 == no_event->nb_value) && (backward_forward->nb_value > nb_value) &&
             ((forward.nb_element + no_event->nb_element) * (1. - inter_event->cumul[inb_value - 2]) > 0.)) {
-          if (mean_computation_method == ESTIMATED) {
+          if (mean_estimator == ESTIMATED) {
             inter_event_mean = iinter_event_mean;
           }
           else {
@@ -2133,7 +2132,7 @@ DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , os
 
       if ((no_event) && (no_event->offset + 1 == no_event->nb_value) && (backward_forward->nb_value > nb_value) &&
           ((forward.nb_element + no_event->nb_element) * (1. - inter_event->cumul[inb_value - 2]) > 0.)) {
-        if (mean_computation_method == ESTIMATED) {
+        if (mean_estimator == ESTIMATED) {
           inter_event_mean = iinter_event_mean;
         }
         else {
@@ -2190,9 +2189,9 @@ DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , os
                                                            const FrequencyDistribution &backward ,
                                                            const FrequencyDistribution &forward ,
                                                            const FrequencyDistribution *no_event ,
-                                                           int estimator , int nb_iter ,
-                                                           int mean_computation_method , double weight ,
-                                                           int penalty_type , int outside) const
+                                                           estimation_criterion estimator , int nb_iter ,
+                                                           duration_distribution_mean_estimator mean_estimator ,
+                                                           double weight , penalty_type pen_type , side_effect outside) const
 
 {
   register int i;
@@ -2206,11 +2205,11 @@ DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , os
 
   nb_histo = 3;
   phisto[0] = this;
-  phisto[1] = new FrequencyDistribution(backward , 's' , 1);
+  phisto[1] = new FrequencyDistribution(backward , SHIFT , 1);
   phisto[2] = &forward;
   if (no_event) {
     nb_histo++;
-    phisto[3] = new FrequencyDistribution(*no_event , 's' , 1);
+    phisto[3] = new FrequencyDistribution(*no_event , SHIFT , 1);
   }
 
   interval = new FrequencyDistribution(nb_histo , phisto);
@@ -2251,8 +2250,8 @@ DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , os
 # endif
 
   inter_event = estimation(error , os , backward , forward , no_event ,
-                           *iinter_event , estimator , nb_iter , mean_computation_method ,
-                           weight , penalty_type , outside);
+                           *iinter_event , estimator , nb_iter , mean_estimator ,
+                           weight , pen_type , outside);
   delete iinter_event;
 
   return inter_event;
@@ -2433,8 +2432,9 @@ void DiscreteParametric::expectation_step(const FrequencyDistribution &sojourn_t
                                           const FrequencyDistribution &initial_run ,
                                           const FrequencyDistribution &single_run ,
                                           Reestimation<double> *occupancy_reestim ,
-                                          Reestimation<double> *length_bias_reestim , int iter ,
-                                          bool combination , int mean_computation_method) const
+                                          Reestimation<double> *length_bias_reestim ,
+                                          int iter , bool combination ,
+                                          duration_distribution_mean_estimator mean_estimator) const
 
 {
   register int i , j;
@@ -2563,7 +2563,7 @@ void DiscreteParametric::expectation_step(const FrequencyDistribution &sojourn_t
 # endif
 
   if (combination) {
-    switch (mean_computation_method) {
+    switch (mean_estimator) {
     case COMPUTED :
       occupancy_mean = interval_bisection(occupancy_reestim , length_bias_reestim);
       break;
