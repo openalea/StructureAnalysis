@@ -79,10 +79,6 @@ namespace stat_tool {
     friend class FrequencyDistribution;
     friend class DiscreteMixtureData;
 
-    friend DiscreteMixture* discrete_mixture_building(StatError &error , int nb_component , double *weight ,
-                                                      const DiscreteParametric **component);
-    friend DiscreteMixture* discrete_mixture_ascii_read(StatError &error , const char *path ,
-                                                        double cumul_threshold);
     friend std::ostream& operator<<(std::ostream &os , const DiscreteMixture &mixt)
     { return mixt.ascii_write(os , mixt.mixture_data , false , false); }
 
@@ -127,6 +123,11 @@ namespace stat_tool {
     DiscreteParametricModel* extract(StatError &error , int index) const;
     DiscreteMixtureData* extract_data(StatError &error) const;
 
+    static DiscreteMixture* building(StatError &error , int nb_component , double *weight ,
+                                     const DiscreteParametric **component);
+    static DiscreteMixture* ascii_read(StatError &error , const char *path ,
+                                       double cumul_threshold = CUMUL_THRESHOLD);
+
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
@@ -147,12 +148,6 @@ namespace stat_tool {
     DiscreteParametric* get_weight() const { return weight; }
     DiscreteParametric* get_component(int index) const { return component[index]; }
   };
-
-
-  DiscreteMixture* discrete_mixture_building(StatError &error , int nb_component , double *weight ,
-                                             const DiscreteParametric **component);
-  DiscreteMixture* discrete_mixture_ascii_read(StatError &error , const char *path ,
-                                               double cumul_threshold = CUMUL_THRESHOLD);
 
 
 
