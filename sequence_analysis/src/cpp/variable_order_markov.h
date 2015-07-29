@@ -67,10 +67,11 @@ namespace sequence_analysis {
                                          // une memoire a ses fils
   const double LAPLACE_COEFF = 1.;       // coefficient pour l'estimateur de Laplace
 
-  enum {
+  enum memory_type {
     NON_TERMINAL ,
     TERMINAL ,
-    COMPLETION
+    COMPLETION ,
+    PRUNED
   };
 
 
@@ -85,7 +86,7 @@ namespace sequence_analysis {
 
   public :
 
-    int *memory_type;       // types des memoires (NON_TERMINAL/TERMINAL/COMPLETION)
+    memory_type *memo_type;  // types des memoires (NON_TERMINAL/TERMINAL/COMPLETION)
     int *order;             // ordres des memoires
     int max_order;          // ordre maximum des memoires
     int **state;            // etats composant les memoires
@@ -102,9 +103,9 @@ namespace sequence_analysis {
     void remove();
 
     VariableOrderMarkovChain();
-    VariableOrderMarkovChain(char itype , int inb_state , int inb_row);
-    VariableOrderMarkovChain(char itype , int inb_state , int inb_row , int imax_order);
-    VariableOrderMarkovChain(char itype , int inb_state , int iorder , bool init_flag);
+    VariableOrderMarkovChain(stat_tool::process_type itype , int inb_state , int inb_row);
+    VariableOrderMarkovChain(stat_tool::process_type itype , int inb_state , int inb_row , int imax_order);
+    VariableOrderMarkovChain(stat_tool::process_type itype , int inb_state , int iorder , bool init_flag);
     VariableOrderMarkovChain(const VariableOrderMarkovChain &markov)
     :Chain(markov) { copy(markov); }
     ~VariableOrderMarkovChain();
@@ -125,6 +126,9 @@ namespace sequence_analysis {
     int nb_parameter_computation(double min_probability = 0.) const;
     int nb_transient_parameter_computation(double min_probability = 0.) const;
 
+    static VariableOrderMarkovChain* parsing(stat_tool::StatError &error , std::ifstream &in_file ,
+                                             int &line , stat_tool::process_type type);
+
     std::ostream& ascii_memory_tree_print(std::ostream &os , bool file_flag = false) const;
     std::ostream& ascii_transition_tree_print(std::ostream &os , bool file_flag = false) const;
 
@@ -138,26 +142,21 @@ namespace sequence_analysis {
     double* memory_computation() const;
     void state_no_occurrence_probability(int istate , double increment = LEAVE_INCREMENT);
     void state_first_occurrence_distribution(int istate , int min_nb_value = 1 ,
-                                             double cumul_threshold = CUMUL_THRESHOLD);
+                                             double cumul_threshold = stat_tool::CUMUL_THRESHOLD);
     void state_leave_probability(const double *imemory , int istate ,
                                  double increment = LEAVE_INCREMENT);
     void state_recurrence_time_distribution(const double *imemory , int istate ,
                                             int min_nb_value = 1 ,
-                                            double cumul_threshold = CUMUL_THRESHOLD);
+                                            double cumul_threshold = stat_tool::CUMUL_THRESHOLD);
     void state_sojourn_time_distribution(const double *imemory , int istate ,
                                          int min_nb_value = 1 ,
-                                         double cumul_threshold = CUMUL_THRESHOLD);
-    void state_nb_pattern_mixture(int istate , char pattern);
+                                         double cumul_threshold = stat_tool::CUMUL_THRESHOLD);
+    void state_nb_pattern_mixture(int istate , stat_tool::count_pattern pattern);
 
     Correlation* state_autocorrelation_computation(stat_tool::StatError &error ,
                                                    int istate , int max_lag ,
                                                    const MarkovianSequences *seq) const;
   };
-
-
-  VariableOrderMarkovChain* variable_order_markov_parsing(stat_tool::StatError &error ,
-                                                          std::ifstream &in_file ,
-                                                          int &line , char type);
 
 
 
@@ -173,8 +172,6 @@ namespace sequence_analysis {
     friend class VariableOrderMarkovData;
     friend class Stat_trees::MarkovOutTree;  // revoir avec J.B.
 
-    friend VariableOrderMarkov* variable_order_markov_ascii_read(stat_tool::StatError &error ,
-                                                                 const char *path ,int length);
     friend Stat_trees::MarkovOutTree* Stat_trees::markov_out_tree_parsing(stat_tool::StatError& error,  // revoir avec J.B.
                                                                           std::ifstream &in_file, int &line);
                                                              
@@ -216,16 +213,16 @@ namespace sequence_analysis {
                                           double increment = LEAVE_INCREMENT);
     void output_first_occurrence_distribution(int variable , int output ,
                                               int min_nb_value = 1 ,
-                                              double cumul_threshold = CUMUL_THRESHOLD);
+                                              double cumul_threshold = stat_tool::CUMUL_THRESHOLD);
     void output_leave_probability(const double *memory ,
                                   int variable , int output ,
                                   double increment = LEAVE_INCREMENT);
     void output_recurrence_time_distribution(const double *memory , int variable ,
                                              int output , int min_nb_value = 1 ,
-                                             double cumul_threshold = CUMUL_THRESHOLD);
+                                             double cumul_threshold = stat_tool::CUMUL_THRESHOLD);
     void output_sojourn_time_distribution(const double *memory , int variable ,
                                           int output , int min_nb_value = 1 ,
-                                          double cumul_threshold = CUMUL_THRESHOLD);
+                                          double cumul_threshold = stat_tool::CUMUL_THRESHOLD);
     void output_nb_run_mixture(int variable , int output);
     void output_nb_occurrence_mixture(int variable , int output);
 
@@ -242,9 +239,9 @@ namespace sequence_analysis {
   public :
 
     VariableOrderMarkov();
-    VariableOrderMarkov(char itype , int inb_state , int inb_row);
-    VariableOrderMarkov(char itype , int inb_state , int inb_row , int imax_order);
-    VariableOrderMarkov(char itype , int inb_state , int iorder , bool init_flag ,
+    VariableOrderMarkov(stat_tool::process_type itype , int inb_state , int inb_row);
+    VariableOrderMarkov(stat_tool::process_type itype , int inb_state , int inb_row , int imax_order);
+    VariableOrderMarkov(stat_tool::process_type itype , int inb_state , int iorder , bool init_flag ,
                         int inb_output_process = 0 , int nb_value = 0);
     VariableOrderMarkov(const VariableOrderMarkov &markov ,
                         int inb_output_process , int nb_value);
@@ -258,11 +255,15 @@ namespace sequence_analysis {
     ~VariableOrderMarkov();
     VariableOrderMarkov& operator=(const VariableOrderMarkov &markov);
 
-    DiscreteParametricModel* extract(stat_tool::StatError &error , int type ,
+    DiscreteParametricModel* extract(stat_tool::StatError &error ,
+                                     stat_tool::process_distribution dist_type ,
                                      int variable , int value) const;
     VariableOrderMarkovData* extract_data(stat_tool::StatError &error) const;
 
     VariableOrderMarkov* thresholding(double min_probability = MIN_PROBABILITY) const;
+
+    static VariableOrderMarkov* ascii_read(stat_tool::StatError &error , const char *path ,
+                                           int length = DEFAULT_LENGTH);
 
     std::ostream& line_write(std::ostream &os) const;
 
@@ -272,9 +273,9 @@ namespace sequence_analysis {
     bool plot_write(stat_tool::StatError &error , const char *prefix , const char *title = NULL) const;
     stat_tool::MultiPlotSet* get_plotable() const;
 
-    void characteristic_computation(int length , bool counting_flag , int variable = I_DEFAULT);
+    void characteristic_computation(int length , bool counting_flag , int variable = stat_tool::I_DEFAULT);
     void characteristic_computation(const VariableOrderMarkovData &seq , bool counting_flag ,
-                                    int variable = I_DEFAULT , bool length_flag = true);
+                                    int variable = stat_tool::I_DEFAULT , bool length_flag = true);
 
     Correlation* state_autocorrelation_computation(stat_tool::StatError &error , int istate ,
                                                    int max_lag = MAX_LAG) const;
@@ -325,11 +326,6 @@ namespace sequence_analysis {
   };
 
 
-  VariableOrderMarkov* variable_order_markov_ascii_read(stat_tool::StatError &error ,
-                                                        const char *path ,
-                                                        int length = DEFAULT_LENGTH);
-
-
 
   class VariableOrderMarkovIterator {  // iterateur chaine de Markov d'ordre variable
 
@@ -365,11 +361,11 @@ namespace sequence_analysis {
 
   public :
 
-    VariableOrderMarkovChainData(char type , int inb_state , int inb_row , bool init_flag = false)
+    VariableOrderMarkovChainData(stat_tool::process_type type , int inb_state , int inb_row , bool init_flag = false)
     :ChainData(type , inb_state , inb_row , init_flag) {}
 
     void estimation(VariableOrderMarkovChain &markov , bool non_terminal = false ,
-                    int estimator = MAXIMUM_LIKELIHOOD ,
+                    transition_estimator estimator = MAXIMUM_LIKELIHOOD ,
                     double laplace_coeff = LAPLACE_COEFF) const;
   };
 
@@ -404,20 +400,21 @@ namespace sequence_analysis {
 
     VariableOrderMarkovData();
     VariableOrderMarkovData(const stat_tool::FrequencyDistribution &ihlength , int inb_variable ,
-                            int *itype , bool init_flag = false);
+                            stat_tool::variable_nature *itype , bool init_flag = false);
     VariableOrderMarkovData(const MarkovianSequences &seq);
-    VariableOrderMarkovData(const MarkovianSequences &seq , char transform ,
+    VariableOrderMarkovData(const MarkovianSequences &seq , sequence_transformation transform ,
                             bool initial_run_flag);
     VariableOrderMarkovData(const VariableOrderMarkovData &seq , bool model_flag = true ,
-                            char transform = 'c')
+                            sequence_transformation transform = SEQUENCE_COPY)
     :MarkovianSequences(seq , transform) { copy(seq , model_flag); }
     ~VariableOrderMarkovData();
     VariableOrderMarkovData& operator=(const VariableOrderMarkovData &seq);
 
-    DiscreteDistributionData* extract(stat_tool::StatError &error , int type ,
+    DiscreteDistributionData* extract(stat_tool::StatError &error ,
+                                      stat_tool::process_distribution histo_type ,
                                       int variable , int value) const;
-    VariableOrderMarkovData* remove_index_parameter(stat_tool::StatError &error) const;
     VariableOrderMarkovData* explicit_index_parameter(stat_tool::StatError &error) const;
+    VariableOrderMarkovData* remove_index_parameter(stat_tool::StatError &error) const;
     MarkovianSequences* build_auxiliary_variable(stat_tool::StatError &error) const;
 
     Correlation* state_autocorrelation_computation(stat_tool::StatError &error , int istate ,
@@ -425,10 +422,10 @@ namespace sequence_analysis {
     Correlation* output_autocorrelation_computation(stat_tool::StatError &error , int variable ,
                                                     int output , int max_lag = MAX_LAG) const;
 
-    std::ostream& ascii_data_write(std::ostream &os , char format = 'c' ,
+    std::ostream& ascii_data_write(std::ostream &os , output_sequence_format format = COLUMN ,
                                    bool exhaustive = false) const;
     bool ascii_data_write(stat_tool::StatError &error , const char *path ,
-                          char format = 'c' , bool exhaustive = false) const;
+                          output_sequence_format format = COLUMN , bool exhaustive = false) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
     bool ascii_write(stat_tool::StatError &error , const char *path , bool exhaustive = false) const;
