@@ -759,7 +759,8 @@ void Reestimation<Type>::distribution_estimation(Distribution *dist) const
 
 template <typename Type>
 void Reestimation<Type>::penalized_likelihood_estimation(Distribution *dist , double weight ,
-                                                         int type , double *penalty , int outside) const
+                                                         penalty_type pen_type , double *penalty ,
+                                                         side_effect outside) const
 
 {
   if (nb_element > 0) {
@@ -768,11 +769,11 @@ void Reestimation<Type>::penalized_likelihood_estimation(Distribution *dist , do
     double ratio , inf_ratio , sup_ratio , norm , inf_norm , sup_norm;
 
 
-    dist->penalty_computation(weight , type , penalty , outside);
+    dist->penalty_computation(weight , pen_type , penalty , outside);
 
 #   ifdef DEBUG
     {
-      switch (type) {
+      switch (pen_type) {
       case FIRST_DIFFERENCE :
         norm = dist->first_difference_norm_computation();
         break;
@@ -810,7 +811,7 @@ void Reestimation<Type>::penalized_likelihood_estimation(Distribution *dist , do
 
     sup_norm = 2. * nb_element;
 
-    if ((type != ENTROPY) && (nb_element + weight > sup_norm)) {
+    if ((pen_type != ENTROPY) && (nb_element + weight > sup_norm)) {
       sup_norm = nb_element + weight;
     }
 
@@ -988,7 +989,7 @@ double Reestimation<Type>::binomial_estimation(DiscreteParametric *dist , int mi
             dist->sup_bound = j;
             dist->probability = (mean - i) / (j - i);
 
-            dist->binomial_computation(1 , 's');
+            dist->binomial_computation(1 , STANDARD);
             likelihood = dist->likelihood_computation(*this);
 
 #           ifdef DEBUG
@@ -1086,7 +1087,7 @@ double Reestimation<Type>::poisson_estimation(DiscreteParametric *dist , int min
       dist->inf_bound = i;
       dist->parameter = mean - i;
 
-      dist->poisson_computation(nb_value , cumul_threshold , 's');
+      dist->poisson_computation(nb_value , cumul_threshold , STANDARD);
       likelihood = dist->likelihood_computation(*this);
 
       if (likelihood > max_likelihood) {
@@ -1175,7 +1176,7 @@ double Reestimation<Type>::negative_binomial_estimation(DiscreteParametric *dist
 //      cout << i << " : " dist->parameter << " | " << dist->probability << endl;
 #     endif
 
-      dist->negative_binomial_computation(nb_value , cumul_threshold , 's');
+      dist->negative_binomial_computation(nb_value , cumul_threshold , STANDARD);
       likelihood = dist->likelihood_computation(*this);
 
       if (likelihood > max_likelihood) {
@@ -1434,8 +1435,8 @@ void Reestimation<Type>::equilibrium_process_estimation(const Reestimation<Type>
 template <typename Type>
 void Reestimation<Type>::penalized_likelihood_equilibrium_process_estimation(const Reestimation<Type> *length_bias_reestim ,
                                                                              Distribution *dist , double imean ,
-                                                                             double weight , int type ,
-                                                                             double *penalty , int outside) const
+                                                                             double weight , penalty_type pen_type ,
+                                                                             double *penalty , side_effect outside) const
 
 {
   if (nb_element + length_bias_reestim->nb_element > 0) {
@@ -1444,7 +1445,7 @@ void Reestimation<Type>::penalized_likelihood_equilibrium_process_estimation(con
     double ratio , inf_ratio , sup_ratio , norm , inf_norm , sup_norm;
 
 
-    dist->penalty_computation(weight , type , penalty , outside);
+    dist->penalty_computation(weight , pen_type , penalty , outside);
 
     // calcul de la constante de normalisation
 
@@ -1463,7 +1464,7 @@ void Reestimation<Type>::penalized_likelihood_equilibrium_process_estimation(con
 
     sup_norm = 2. * nb_element;
 
-    if ((type != ENTROPY) && (nb_element + weight > sup_norm)) {
+    if ((pen_type != ENTROPY) && (nb_element + weight > sup_norm)) {
       sup_norm = nb_element + weight;
     }
 
