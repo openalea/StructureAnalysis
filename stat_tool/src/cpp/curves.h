@@ -59,6 +59,11 @@ namespace stat_tool {
   const int PLOT_MIN_FREQUENCY = 10;     // effectif minimum pour afficher les points
                                          // des courbes (sortie Gnuplot)
 
+  enum curve_transformation {
+    CURVE_COPY ,
+    SMOOTHING
+  };
+
 
 
 /****************************************************************
@@ -87,7 +92,8 @@ namespace stat_tool {
     Curves();
     Curves(int inb_curve , int ilength , bool frequency_flag = false ,
            bool index_parameter_flag = false , bool init_flag = true);
-    Curves(const Curves &curves , char transform = 'c' , int max_frequency = MAX_FREQUENCY);
+    Curves(const Curves &curves , curve_transformation transform = CURVE_COPY ,
+           int max_frequency = MAX_FREQUENCY);
     Curves(const Distribution &dist);
     Curves(const FrequencyDistribution &histo);
     ~Curves();
