@@ -99,7 +99,7 @@ DiscreteMixture::DiscreteMixture(int inb_component , double *pweight ,
   component = new DiscreteParametric*[nb_component];
 
   for (i = 0;i < nb_component;i++) {
-    component[i] = new DiscreteParametric(*pcomponent[i] , 'n');
+    component[i] = new DiscreteParametric(*pcomponent[i] , NORMALIZATION);
     if (component[i]->nb_value > nb_value) {
       nb_value = component[i]->nb_value;
     }
@@ -171,7 +171,7 @@ DiscreteMixture::DiscreteMixture(int inb_component , const DiscreteParametric **
 
   component = new DiscreteParametric*[nb_component];
   for (i = 0;i < nb_component;i++) {
-    component[i] = new DiscreteParametric(*pcomponent[i] , 'n');
+    component[i] = new DiscreteParametric(*pcomponent[i] , NORMALIZATION);
   }
 }
 
@@ -338,7 +338,7 @@ DiscreteMixtureData* DiscreteMixture::extract_data(StatError &error) const
  *
  *--------------------------------------------------------------*/
 
-DiscreteMixture* discrete_mixture_building(StatError &error , int nb_component , double *weight ,
+DiscreteMixture* DiscreteMixture::building(StatError &error , int nb_component , double *weight ,
                                            const DiscreteParametric **component)
 
 {
@@ -387,8 +387,7 @@ DiscreteMixture* discrete_mixture_building(StatError &error , int nb_component ,
  *
  *--------------------------------------------------------------*/
 
-DiscreteMixture* discrete_mixture_ascii_read(StatError &error , const char *path ,
-                                             double cumul_threshold)
+DiscreteMixture* DiscreteMixture::ascii_read(StatError &error , const char *path , double cumul_threshold)
 
 {
   RWLocaleSnapshot locale("en");
@@ -590,7 +589,7 @@ DiscreteMixture* discrete_mixture_ascii_read(StatError &error , const char *path
               error.update(STAT_parsing[STATP_FORMAT] , line);
             }
 
-            component[i] = discrete_parametric_parsing(error , in_file , line ,
+            component[i] = DiscreteParametric::parsing(error , in_file , line ,
                                                        NEGATIVE_BINOMIAL , cumul_threshold);
             break;
           }
