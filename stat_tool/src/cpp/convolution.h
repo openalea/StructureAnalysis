@@ -82,10 +82,6 @@ namespace stat_tool {
     friend class FrequencyDistribution;
     friend class ConvolutionData;
 
-    friend Convolution* convolution_building(StatError &error , int nb_dist ,
-                                             const DiscreteParametric **dist);
-    friend Convolution* convolution_ascii_read(StatError &error , const char *path ,
-                                               double cumul_threshold);
     friend std::ostream& operator<<(std::ostream &os , const Convolution &convol)
     { return convol.ascii_write(os , convol.convolution_data , false , false); }
 
@@ -121,6 +117,11 @@ namespace stat_tool {
     DiscreteParametricModel* extract(StatError &error , int index) const;
     ConvolutionData* extract_data(StatError &error) const;
 
+    static Convolution* building(StatError &error , int nb_dist ,
+                                 const DiscreteParametric **dist);
+    static Convolution* ascii_read(StatError &error , const char *path ,
+                                   double cumul_threshold = CONVOLUTION_THRESHOLD);
+
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
@@ -139,12 +140,6 @@ namespace stat_tool {
     int get_nb_distribution() const { return nb_distribution; }
     DiscreteParametric* get_distribution(int index) const { return distribution[index]; }
   };
-
-
-  Convolution* convolution_building(StatError &error , int nb_dist ,
-                                    const DiscreteParametric **dist);
-  Convolution* convolution_ascii_read(StatError &error , const char *path ,
-                                      double cumul_threshold = CONVOLUTION_THRESHOLD);
 
 
 
