@@ -73,14 +73,21 @@ namespace stat_tool {
 
   const int ERROR_LENGTH = 200;
 
+  enum output_format {
+    ASCII ,
+    SPREADSHEET ,
+//    BINARY ,
+    GNUPLOT ,
+    PLOT
+  };
+
   const int I_DEFAULT = -1;              // int par defaut
   const double D_DEFAULT = -1.;          // double par defaut
   const double D_INF = -1.e37;           // plus petit nombre reel
   const double DOUBLE_ERROR = 1.e-6;     // erreur sur une somme de doubles
 //  const double DOUBLE_ERROR = 5.e-6;     erreur sur une somme de doubles
 
-
-  enum {
+  enum test_distribution {
     STANDARD_NORMAL ,
     CHI2 ,
     FISHER ,
@@ -93,18 +100,19 @@ namespace stat_tool {
   const int NB_VALUE = 1000;             // nombre de valeurs prises par une v.a.
   const int SAMPLE_NB_VALUE = NB_VALUE;  // nombre de valeurs d'un echantillon
 
-  enum {
-    ABOVE ,
-    BELOW
+  enum frequency_distribution_transformation {
+    FREQUENCY_DISTRIBUTION_COPY ,
+    SHIFT ,
+    CLUSTER
   };
 
-  enum {
+  enum rounding {
     FLOOR ,
     ROUND ,
     CEIL
   };
 
-  enum {
+  enum discrete_parametric {
     CATEGORICAL ,
     BINOMIAL ,
     POISSON ,
@@ -113,63 +121,68 @@ namespace stat_tool {
     MULTINOMIAL                          // ajout par Florence Chaubert
   };
 
-  enum {
+  enum distribution_transformation {
+    DISTRIBUTION_COPY ,
+    NORMALIZATION
+  };
+
+  enum distribution_computation {
+    STANDARD ,
+    RENEWAL
+  };
+
+  enum continuous_parametric {
     GAMMA ,
     GAUSSIAN ,
+//    INVERSE_GAUSSIAN ,
     VON_MISES ,
     ZERO_INFLATED_GAMMA ,
     LINEAR_MODEL
   };
 
-  enum {
+  enum angle_unit {
     DEGREE ,
     RADIAN
   };
 
-  enum {
-    SYMBOLIC ,
+  enum compound_distribution {
+    SUM ,
+    ELEMENTARY ,
+    COMPOUND
+  };
+
+  enum variable_type {
+    NOMINAL ,
     ORDINAL ,
     NUMERIC ,
     CIRCULAR
   };
 
-  enum {
-    PEARSON ,
-    SPEARMAN ,
-    KENDALL ,
-    SPEARMAN2
+  enum process_type {
+    ORDINARY ,
+    EQUILIBRIUM ,
+    DEFAULT_TYPE
   };
 
-  enum {
-    FIRST_DIFFERENCE ,
-    SECOND_DIFFERENCE ,
-    ENTROPY
-  };
-
-  enum {
+  enum estimation_criterion {
     LIKELIHOOD ,
     PENALIZED_LIKELIHOOD ,
     PARAMETRIC_REGULARIZATION
   };
 
-  enum {
-    ZERO ,
-    CONTINUATION
-  };
-
-  enum {
-    PARTIAL_LIKELIHOOD ,
-    COMPLETE_LIKELIHOOD ,
-    KAPLAN_MEIER
-  };
-
-  enum {
+  enum duration_distribution_mean_estimator {
     COMPUTED ,
     ESTIMATED ,
     ONE_STEP_LATE
   };
 
-  enum {
+  enum censoring_estimator {
+    PARTIAL_LIKELIHOOD ,
+    COMPLETE_LIKELIHOOD ,
+    KAPLAN_MEIER
+  };
+
+  enum model_selection_criterion {
     AIC ,
     AICc ,
     BIC ,
@@ -181,41 +194,18 @@ namespace stat_tool {
     SEGMENTATION_LIKELIHOOD_SLOPE
   };
 
-  enum {
-    AGGLOMERATIVE ,
-    DIVISIVE ,
-    ORDERING
-  };
-
-  enum {
+  enum error_type {
     ERROR ,
     WARNING
   };
 
-  enum {
+  enum variable_nature {
     INT_VALUE ,                          // observation entiere
     REAL_VALUE ,                         // observation reelle
     STATE ,                              // etat
     OLD_INT_VALUE ,                      // pour compatibilite ascendante
 //    NB_INTERNODE ,                        nombre d'entrenoeuds axe porte
     AUXILIARY                            // variable auxiliaire (lissage/moyenne par segment)
-  };
-
-  enum {
-    SELF_TRANSITION ,
-    OBSERVATION ,
-    INTENSITY ,
-    FIRST_OCCURRENCE ,
-    RECURRENCE_TIME ,
-    SOJOURN_TIME ,
-    INITIAL_RUN ,
-    FINAL_RUN ,
-    NB_RUN ,
-    NB_OCCURRENCE ,
-    COUNTING ,
-    LENGTH ,
-    SEQUENCE_CUMUL ,
-    SEQUENCE_MEAN
   };
 
   const int MAX_INF_BOUND = 10000;       // borne inferieure maximum
@@ -331,7 +321,7 @@ namespace stat_tool {
 
   public :
 
-    int ident;              // identificateur (Normale / Chi2 / F / t)
+    test_distribution ident;  // identificateur (Normale / Chi2 / F / t)
     bool one_side;          // unilateral / bilateral
     int df1;                // nombre de degres de liberte (Chi2 / F / t)
     int df2;                // nombre de degres de liberte (F)
@@ -340,9 +330,9 @@ namespace stat_tool {
 
     void copy(const Test &test);
 
-    Test(int iident , bool ione_side = true);
-    Test(int iident , bool ione_side , int idf1 , int idf2 , double ivalue);
-    Test(int iident , bool ione_side , int idf1 , int idf2 , double ivalue ,
+    Test(test_distribution iident , bool ione_side = true);
+    Test(test_distribution iident , bool ione_side , int idf1 , int idf2 , double ivalue);
+    Test(test_distribution iident , bool ione_side , int idf1 , int idf2 , double ivalue ,
          double icritical_probability);
     Test(const Test &test)
     { copy(test); }
@@ -382,7 +372,7 @@ namespace stat_tool {
     StatError(int imax_nb_error = NB_ERROR);
     ~StatError();
 
-    std::ostream& ascii_write(std::ostream &os , int type = ERROR) const;
+    std::ostream& ascii_write(std::ostream &os , error_type type = ERROR) const;
 
     void init() { nb_error = 0; }
     void update(const char *ilabel , int iline = 0 , int icolumn = 0);
@@ -451,7 +441,8 @@ namespace stat_tool {
     Distribution(int inb_value , double *imass);
     Distribution(const Distribution &dist , double scaling_coeff);
     Distribution(const FrequencyDistribution &histo);
-    Distribution(const Distribution &dist , char transform = 'c' ,
+    Distribution(const Distribution &dist ,
+                 distribution_transformation transform = DISTRIBUTION_COPY ,
                  int ialloc_nb_value = I_DEFAULT);
     virtual ~Distribution();
     Distribution& operator=(const Distribution&);
@@ -536,7 +527,8 @@ namespace stat_tool {
     double chi2_value_computation(const FrequencyDistribution &histo) const;
     void chi2_degree_of_freedom(const FrequencyDistribution &histo , Test &test) const;
 
-    void penalty_computation(double weight , int type , double *penalty , int outside) const;
+    void penalty_computation(double weight , penalty_type pen_type , double *penalty ,
+                             side_effect outside) const;
 
     double likelihood_computation(const Reestimation<int> &histo) const
     { return histo.likelihood_computation(*this); }
@@ -567,28 +559,36 @@ namespace stat_tool {
 
   public :
 
-    int ident;              // identificateur
+    discrete_parametric ident;  // identificateur
     int inf_bound;          // borne inferieure
     int sup_bound;          // borne superieure (binomiale / uniforme)
     double parameter;       // parametre (Poisson / binomiale negative)
     double probability;     // probabilite de succes (binomiale / binomiale negative)
 
     void init(int iinf_bound , int isup_bound , double iparameter , double iprobability);
-    void init(int iident , int iinf_bound , int isup_bound , double iparameter , double iprobability);
+    void init(discrete_parametric iident , int iinf_bound , int isup_bound ,
+              double iparameter , double iprobability);
     void copy(const DiscreteParametric &dist);
 
-    DiscreteParametric(int inb_value = 0 , int iident = CATEGORICAL ,
+    DiscreteParametric(int inb_value = 0 , discrete_parametric iident = CATEGORICAL ,
                        int iinf_bound = I_DEFAULT , int isup_bound = I_DEFAULT ,
                        double iparameter = D_DEFAULT , double iprobability = D_DEFAULT);
-    DiscreteParametric(int iident , int iinf_bound , int isup_bound , double iparameter ,
-                       double iprobability , double cumul_threshold = CUMUL_THRESHOLD);
+    DiscreteParametric(discrete_parametric iident , int iinf_bound , int isup_bound ,
+                       double iparameter , double iprobability ,
+                       double cumul_threshold = CUMUL_THRESHOLD);
     DiscreteParametric(const Distribution &dist , int ialloc_nb_value = I_DEFAULT);
     DiscreteParametric(const Distribution &dist , double scaling_coeff);
     DiscreteParametric(const DiscreteParametric &dist , double scaling_coeff);
     DiscreteParametric(const FrequencyDistribution &histo);
-    DiscreteParametric(const DiscreteParametric &dist , char transform = 'c' ,
+    DiscreteParametric(const DiscreteParametric &dist ,
+                       distribution_transformation transform = DISTRIBUTION_COPY ,
                        int ialloc_nb_value = I_DEFAULT);
     DiscreteParametric& operator=(const DiscreteParametric &dist);
+
+    static DiscreteParametric* parsing(StatError &error , std::ifstream &in_file , int &line ,
+                                       discrete_parametric last_ident = NEGATIVE_BINOMIAL ,
+                                       double cumul_threshold = CUMUL_THRESHOLD ,
+                                       int min_inf_bound = 0);
 
     std::ostream& ascii_print(std::ostream &os) const;
     std::ostream& ascii_parametric_characteristic_print(std::ostream &os , bool shape = false ,
@@ -596,6 +596,10 @@ namespace stat_tool {
     std::ostream& spreadsheet_print(std::ostream &os) const;
     std::ostream& spreadsheet_parametric_characteristic_print(std::ostream &os , bool shape = false) const;
     std::ostream& plot_title_print(std::ostream &os) const;
+
+    static int nb_value_computation(discrete_parametric ident , int inf_bound , int sup_bound ,
+                                    double parameter , double probability ,
+                                    double cumul_threshold = CUMUL_THRESHOLD);
 
     int nb_parameter_computation();
     void nb_parameter_update();
@@ -607,11 +611,11 @@ namespace stat_tool {
 
     double sup_norm_distance_computation(const DiscreteParametric &dist) const;
 
-    void binomial_computation(int inb_value , char mode);
+    void binomial_computation(int inb_value , distribution_computation mode);
     void poisson_computation(int inb_value , double cumul_threshold ,
-                             char mode);
+                             distribution_computation mode);
     void negative_binomial_computation(int inb_value , double cumul_threshold ,
-                                       char mode);
+                                       distribution_computation mode);
     void uniform_computation();
 
     void computation(int min_nb_value = 1 ,
@@ -647,18 +651,10 @@ namespace stat_tool {
                           const FrequencyDistribution &initial_run ,
                           const FrequencyDistribution &single_run ,
                           Reestimation<double> *occupancy_reestim ,
-                          Reestimation<double> *length_bias_reestim , int iter ,
-                          bool combination = false , int mean_computation_method = COMPUTED) const;
+                          Reestimation<double> *length_bias_reestim ,
+                          int iter , bool combination = false ,
+                          duration_distribution_mean_estimator mean_estimator = COMPUTED) const;
   };
-
-
-  int nb_value_computation(int ident , int inf_bound , int sup_bound ,
-                           double parameter , double probability ,
-                           double cumul_threshold = CUMUL_THRESHOLD);
-  DiscreteParametric* discrete_parametric_parsing(StatError &error , std::ifstream &in_file ,
-                                                  int &line , int last_ident = NEGATIVE_BINOMIAL ,
-                                                  double cumul_threshold = CUMUL_THRESHOLD ,
-                                                  int min_inf_bound = 0);
 
 
 
@@ -666,14 +662,14 @@ namespace stat_tool {
 
   public :
 
-    Forward(int inb_value = 0 , int iident = CATEGORICAL ,
+    Forward(int inb_value = 0 , discrete_parametric iident = CATEGORICAL ,
             int iinf_bound = I_DEFAULT , int isup_bound = I_DEFAULT ,
             double iparameter = D_DEFAULT , double iprobability = D_DEFAULT)
     :DiscreteParametric(inb_value , iident , iinf_bound , isup_bound , iparameter , iprobability) {}
     Forward(const DiscreteParametric &dist , int ialloc_nb_value = I_DEFAULT)
-    :DiscreteParametric(dist , 'c' , ialloc_nb_value) { computation(dist); }
+    :DiscreteParametric(dist , DISTRIBUTION_COPY , ialloc_nb_value) { computation(dist); }
     Forward(const Forward &forward , int ialloc_nb_value = I_DEFAULT)
-    :DiscreteParametric((DiscreteParametric&)forward , 'c' , ialloc_nb_value) {}
+    :DiscreteParametric((DiscreteParametric&)forward , DISTRIBUTION_COPY , ialloc_nb_value) {}
 
     void computation(const DiscreteParametric &dist);
   };
@@ -698,8 +694,9 @@ namespace stat_tool {
     FrequencyDistribution(int inb_element , int *pelement);
     FrequencyDistribution(int nb_histo , const FrequencyDistribution **histo)
     :Reestimation<int>(nb_histo , (const Reestimation<int>**)histo) {}
-    FrequencyDistribution(const FrequencyDistribution &histo , char transform ,
-                          int param , int mode = FLOOR);
+    FrequencyDistribution(const FrequencyDistribution &histo ,
+                          frequency_distribution_transformation transform ,
+                          int param , rounding mode = FLOOR);
 
     bool operator==(const FrequencyDistribution&) const;
     bool operator!=(const FrequencyDistribution &histo) const { return !(*this == histo); }
@@ -739,13 +736,13 @@ namespace stat_tool {
 
     std::ostream& dissimilarity_ascii_write(std::ostream &os , int nb_histo ,
                                             const FrequencyDistribution **ihisto ,
-                                            int type , double **dissimilarity) const;
+                                            variable_type type , double **dissimilarity) const;
     bool dissimilarity_ascii_write(StatError &error , const char *path ,
                                    int nb_histo , const FrequencyDistribution **ihisto ,
-                                   int type , double **dissimilarity) const;
+                                   variable_type type , double **dissimilarity) const;
     bool dissimilarity_spreadsheet_write(StatError &error , const char *path ,
                                          int nb_histo , const FrequencyDistribution **ihisto ,
-                                         int type , double **dissimilarity) const;
+                                         variable_type type , double **dissimilarity) const;
 
     void update(const Reestimation<double> *reestim , int inb_element);
     FrequencyDistribution* frequency_scale(int inb_element) const;
@@ -760,13 +757,13 @@ namespace stat_tool {
                                   int min_interval = I_DEFAULT) const;
 
     void shift(const FrequencyDistribution &histo , int shift_param);
-    void cluster(const FrequencyDistribution &histo , int step , int mode);
+    void cluster(const FrequencyDistribution &histo , int step , rounding mode);
 
     DiscreteDistributionData* shift(StatError &error , int shift_param) const;
-    DiscreteDistributionData* cluster(StatError &error , int step , int mode = FLOOR) const;
+    DiscreteDistributionData* cluster(StatError &error , int step , rounding mode = FLOOR) const;
     DiscreteDistributionData* cluster(StatError &error , double ratio , std::ostream &os) const;
     DiscreteDistributionData* cluster(StatError &error , int nb_class , int *ilimit) const;
-    DiscreteDistributionData* transcode(StatError &error , int *isymbol) const;
+    DiscreteDistributionData* transcode(StatError &error , int *icategory) const;
     DiscreteDistributionData* value_select(StatError &error , int min_value ,
                                            int max_value , bool keep = true) const;
 
@@ -787,8 +784,8 @@ namespace stat_tool {
     MultiPlotSet* survival_get_plotable(StatError &error) const;
 
     bool comparison(StatError &error , std::ostream &os , int nb_histo ,
-                    const FrequencyDistribution **ihisto , int type , const char *path = NULL ,
-                    char format = 'a') const;
+                    const FrequencyDistribution **ihisto , variable_type type ,
+                    const char *path = NULL , output_format format = ASCII) const;
 
     void F_comparison(std::ostream &os , const FrequencyDistribution &histo) const;
     void t_comparison(std::ostream &os , const FrequencyDistribution &histo) const;
@@ -816,46 +813,49 @@ namespace stat_tool {
     DiscreteMixture* discrete_mixture_estimation(StatError &error , std::ostream &os , int min_nb_component ,
                                                  int max_nb_component , int *ident , int min_inf_bound = 0 ,
                                                  bool mixt_flag = true , bool component_flag = true ,
-                                                 int criterion = BICc , double weight_step = 0.1) const;
+                                                 model_selection_criterion criterion = BICc ,
+                                                 double weight_step = 0.1) const;
 
     Convolution* convolution_estimation(StatError &error , std::ostream &os , const DiscreteParametric &known_dist ,
-                                        const DiscreteParametric &unknown_dist , int estimator = LIKELIHOOD ,
+                                        const DiscreteParametric &unknown_dist , estimation_criterion estimator = LIKELIHOOD ,
                                         int nb_iter = I_DEFAULT , double weight = D_DEFAULT ,
-                                        int penalty_type = SECOND_DIFFERENCE , int outside = ZERO) const;
+                                        penalty_type pen_type = SECOND_DIFFERENCE , side_effect outside = ZERO) const;
     Convolution* convolution_estimation(StatError &error , std::ostream &os , const DiscreteParametric &known_dist ,
-                                        int min_inf_bound , int estimator = LIKELIHOOD ,
+                                        int min_inf_bound , estimation_criterion estimator = LIKELIHOOD ,
                                         int nb_iter = I_DEFAULT , double weight = D_DEFAULT ,
-                                        int penalty_type = SECOND_DIFFERENCE , int outside = ZERO) const;
+                                        penalty_type pen_type = SECOND_DIFFERENCE , side_effect outside = ZERO) const;
 
     Compound* compound_estimation(StatError &error , std::ostream &os , const DiscreteParametric &sum_dist ,
-                                  const DiscreteParametric &dist , char type , int estimator = LIKELIHOOD ,
-                                  int nb_iter = I_DEFAULT , double weight = D_DEFAULT ,
-                                  int penalty_type = SECOND_DIFFERENCE , int outside = ZERO) const;
+                                  const DiscreteParametric &dist , compound_distribution type ,
+                                  estimation_criterion estimator = LIKELIHOOD , int nb_iter = I_DEFAULT ,
+                                  double weight = D_DEFAULT , penalty_type pen_type = SECOND_DIFFERENCE ,
+                                  side_effect outside = ZERO) const;
     Compound* compound_estimation(StatError &error , std::ostream &os , const DiscreteParametric &known_dist ,
-                                  char type , int min_inf_bound = 0 , int estimator = LIKELIHOOD ,
+                                  compound_distribution type , int min_inf_bound = 0 ,
+                                  estimation_criterion estimator = LIKELIHOOD ,
                                   int nb_iter = I_DEFAULT , double weight = D_DEFAULT ,
-                                  int penalty_type = SECOND_DIFFERENCE , int outside = ZERO) const;
+                                  penalty_type pen_type = SECOND_DIFFERENCE , side_effect outside = ZERO) const;
 
     DiscreteParametricModel* estimation(StatError &error , std::ostream &os ,
                                         const FrequencyDistribution &backward ,
                                         const FrequencyDistribution &forward ,
                                         const FrequencyDistribution *no_event ,
                                         const DiscreteParametric &iinter_event ,
-                                        int estimator = LIKELIHOOD , int nb_iter = I_DEFAULT ,
-                                        int mean_computation_method = COMPUTED , double weight = D_DEFAULT ,
-                                        int penalty_type = SECOND_DIFFERENCE , int outside = ZERO ,
-                                        double iinter_event_mean = D_DEFAULT) const;
+                                        estimation_criterion estimator = LIKELIHOOD , int nb_iter = I_DEFAULT ,
+                                        duration_distribution_mean_estimator mean_estimator = COMPUTED ,
+                                        double weight = D_DEFAULT , penalty_type pen_type = SECOND_DIFFERENCE ,
+                                        side_effect outside = ZERO , double iinter_event_mean = D_DEFAULT) const;
     DiscreteParametricModel* estimation(StatError &error , std::ostream &os ,
                                         const FrequencyDistribution &backward ,
                                         const FrequencyDistribution &forward ,
                                         const FrequencyDistribution *no_event ,
-                                        int estimator = LIKELIHOOD , int nb_iter = I_DEFAULT ,
-                                        int mean_computation_method = COMPUTED , double weight = D_DEFAULT ,
-                                        int penalty_type = SECOND_DIFFERENCE , int outside = ZERO) const;
+                                        estimation_criterion estimator = LIKELIHOOD , int nb_iter = I_DEFAULT ,
+                                        duration_distribution_mean_estimator mean_estimator = COMPUTED ,
+                                        double weight = D_DEFAULT , penalty_type pen_type = SECOND_DIFFERENCE ,
+                                        side_effect outside = ZERO) const;
   };
 
 
-  DiscreteDistributionData* frequency_distribution_ascii_read(StatError &error , const char *path);
   bool plot_print(const char *path , int nb_dist , const Distribution **dist ,
                   double *scale , int *dist_nb_value , int nb_histo ,
                   const FrequencyDistribution **histo);
@@ -872,7 +872,7 @@ namespace stat_tool {
 
   public :
 
-    int ident;              // identificateur
+    continuous_parametric ident;  // identificateur
     union {
       double shape;         // parametre de forme (GAMMA, ZERO_INFLATED_GAMMA)
       double location;      // moyenne (GAUSSIAN), direction moyenne (VON_MISES),
@@ -888,7 +888,7 @@ namespace stat_tool {
     };
     double min_value;       // valeur minimum
     double max_value;       // valeur maximum
-    int unit;               // unite (degre/radian) pour la loi de von Mises
+    angle_unit unit;        // unite (degre/radian) pour la loi de von Mises
     double slope_standard_deviation;  // LINEAR_MODEL
     double sample_size;     // LINEAR_MODEL
     double correlation;     // LINEAR_MODEL
@@ -896,13 +896,16 @@ namespace stat_tool {
 
     void copy(const ContinuousParametric &dist);
 
-    ContinuousParametric(int iident = GAUSSIAN , double ilocation = D_INF ,
+    ContinuousParametric(continuous_parametric iident = GAUSSIAN , double ilocation = D_INF ,
                          double idispersion = D_DEFAULT , double izero_probability = D_DEFAULT ,
-                         int iunit = I_DEFAULT);
+                         angle_unit iunit = DEGREE);
     ContinuousParametric(const ContinuousParametric &dist)
     { copy(dist); }
     ~ContinuousParametric();
     ContinuousParametric& operator=(const ContinuousParametric&);
+
+    static ContinuousParametric* parsing(StatError &error , std::ifstream &in_file ,
+                                         int &line , continuous_parametric last_ident);
 
     std::ostream& ascii_parameter_print(std::ostream &os , bool file_flag = false) const;
     std::ostream& ascii_characteristic_print(std::ostream &os ,
@@ -942,12 +945,8 @@ namespace stat_tool {
   };
 
 
-  ContinuousParametric* continuous_parametric_parsing(StatError &error , std::ifstream &in_file ,
-                                                      int &line , int last_ident);
 
-
-
-  class Histogram {       // histogramme
+  class Histogram {         // histogramme
 
   public :
 
