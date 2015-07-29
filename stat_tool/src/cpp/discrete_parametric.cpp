@@ -85,7 +85,7 @@ void DiscreteParametric::init(int iinf_bound , int isup_bound ,
  *
  *--------------------------------------------------------------*/
 
-void DiscreteParametric::init(int iident , int iinf_bound , int isup_bound ,
+void DiscreteParametric::init(discrete_parametric iident , int iinf_bound , int isup_bound ,
                               double iparameter , double iprobability)
 
 {
@@ -107,7 +107,7 @@ void DiscreteParametric::init(int iident , int iinf_bound , int isup_bound ,
  *
  *--------------------------------------------------------------*/
 
-DiscreteParametric::DiscreteParametric(int inb_value , int iident ,
+DiscreteParametric::DiscreteParametric(int inb_value , discrete_parametric iident ,
                                        int iinf_bound , int isup_bound ,
                                        double iparameter , double iprobability)
 :Distribution(inb_value)
@@ -131,7 +131,7 @@ DiscreteParametric::DiscreteParametric(int inb_value , int iident ,
  *
  *--------------------------------------------------------------*/
 
-DiscreteParametric::DiscreteParametric(int iident , int iinf_bound ,
+DiscreteParametric::DiscreteParametric(discrete_parametric iident , int iinf_bound ,
                                        int isup_bound , double iparameter ,
                                        double iprobability , double cumul_threshold)
 
@@ -173,7 +173,7 @@ DiscreteParametric::DiscreteParametric(int iident , int iinf_bound ,
  *--------------------------------------------------------------*/
 
 DiscreteParametric::DiscreteParametric(const Distribution &dist , int ialloc_nb_value)
-:Distribution(dist , 'c' , ialloc_nb_value)
+:Distribution(dist , DISTRIBUTION_COPY , ialloc_nb_value)
 
 {
   ident = CATEGORICAL;
@@ -314,13 +314,13 @@ void DiscreteParametric::copy(const DiscreteParametric &dist)
  *  Constructeur par copie de la classe DiscreteParametric.
  *
  *  arguments : reference sur un objet DiscreteParametric, type de transformation
- *              ('c' : copie , 'n' : copie avec renormalisation),
+ *              (DISTRIBUTION_COPY : copie , NORMALIZATION : copie avec renormalisation),
  *              nombre de valeurs allouees.
  *
  *--------------------------------------------------------------*/
 
 DiscreteParametric::DiscreteParametric(const DiscreteParametric &dist ,
-                                       char transform , int ialloc_nb_value)
+                                       distribution_transformation transform , int ialloc_nb_value)
 :Distribution(dist , transform , ialloc_nb_value)
 
 {
@@ -362,8 +362,8 @@ DiscreteParametric& DiscreteParametric::operator=(const DiscreteParametric &dist
  *
  *--------------------------------------------------------------*/
 
-DiscreteParametric* discrete_parametric_parsing(StatError &error , ifstream &in_file ,
-                                                int &line , int last_ident ,
+DiscreteParametric* DiscreteParametric::parsing(StatError &error , ifstream &in_file ,
+                                                int &line , discrete_parametric last_ident ,
                                                 double cumul_threshold , int min_inf_bound)
 
 {
@@ -372,7 +372,7 @@ DiscreteParametric* discrete_parametric_parsing(StatError &error , ifstream &in_
   size_t position;
   bool status = true , lstatus;
   register int i , j;
-  int ident = I_DEFAULT;
+  discrete_parametric ident = CATEGORICAL;
   long inf_bound , sup_bound = I_DEFAULT;
   double parameter = D_DEFAULT , probability = D_DEFAULT;
   DiscreteParametric *dist;
@@ -402,7 +402,7 @@ DiscreteParametric* discrete_parametric_parsing(StatError &error , ifstream &in_
       if (i == 0) {
         for (j = BINOMIAL;j <= last_ident;j++) {
           if (token == STAT_discrete_distribution_word[j]) {
-            ident = j;
+            ident = (discrete_parametric)j;
             break;
           }
         }
@@ -1235,8 +1235,8 @@ DiscreteDistributionData* DiscreteParametricModel::extract_data(StatError &error
  *
  *--------------------------------------------------------------*/
 
-DiscreteParametricModel* discrete_parametric_ascii_read(StatError &error , const char *path ,
-                                                        double cumul_threshold)
+DiscreteParametricModel* DiscreteParametricModel::ascii_read(StatError &error , const char *path ,
+                                                             double cumul_threshold)
 
 {
   RWCString buffer;
@@ -1259,7 +1259,7 @@ DiscreteParametricModel* discrete_parametric_ascii_read(StatError &error , const
     status = true;
     line = 0;
 
-    pdist = discrete_parametric_parsing(error , in_file , line ,
+    pdist = DiscreteParametric::parsing(error , in_file , line ,
                                         UNIFORM , cumul_threshold);
 
     if (!pdist) {
