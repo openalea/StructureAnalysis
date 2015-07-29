@@ -97,7 +97,7 @@ Vectors::Vectors()
  *--------------------------------------------------------------*/
 
 void Vectors::init(int inb_vector , int *iidentifier , int inb_variable ,
-                   int *itype , bool init_flag)
+                   variable_nature *itype , bool init_flag)
 
 {
   register int i , j;
@@ -121,7 +121,7 @@ void Vectors::init(int inb_vector , int *iidentifier , int inb_variable ,
 
   nb_variable = inb_variable;
 
-  type = new int[nb_variable];
+  type = new variable_nature[nb_variable];
   min_value = new double[nb_variable];
   max_value = new double[nb_variable];
   min_interval = new double[nb_variable];
@@ -180,10 +180,10 @@ Vectors::Vectors(int inb_vector , int *iidentifier , int inb_variable ,
 
 {
   register int i , j;
-  int *itype;
+  variable_nature *itype;
 
 
-  itype = new int[inb_variable];
+  itype = new variable_nature[inb_variable];
   for (i = 0;i < inb_variable;i++) {
     itype[i] = INT_VALUE;
   }
@@ -223,10 +223,10 @@ Vectors::Vectors(int inb_vector , int *iidentifier , int inb_variable ,
 
 {
   register int i , j;
-  int *itype;
+  variable_nature *itype;
 
 
-  itype = new int[inb_variable];
+  itype = new variable_nature[inb_variable];
   for (i = 0;i < inb_variable;i++) {
     itype[i] = REAL_VALUE;
   }
@@ -265,7 +265,7 @@ Vectors::Vectors(int inb_vector , int *iidentifier , int inb_variable ,
  *
  *--------------------------------------------------------------*/
 
-Vectors::Vectors(int inb_vector , int *iidentifier , int inb_variable , int *itype ,
+Vectors::Vectors(int inb_vector , int *iidentifier , int inb_variable , variable_nature *itype ,
                  int **iint_vector , double **ireal_vector , bool variable_index)
 
 {
@@ -346,7 +346,7 @@ Vectors::Vectors(int inb_vector , int *iidentifier , int inb_variable , int *ity
  *
  *--------------------------------------------------------------*/
 
-Vectors::Vectors(const Vectors &vec , int variable , int itype)
+Vectors::Vectors(const Vectors &vec , int variable , variable_nature itype)
 
 {
   register int i , j;
@@ -361,7 +361,7 @@ Vectors::Vectors(const Vectors &vec , int variable , int itype)
 
   nb_variable = vec.nb_variable;
 
-  type = new int[nb_variable];
+  type = new variable_nature[nb_variable];
   min_value = new double[nb_variable];
   max_value = new double[nb_variable];
   min_interval = new double[nb_variable];
@@ -463,7 +463,7 @@ Vectors::Vectors(const Vectors &vec , int inb_vector , int *index)
 
   nb_variable = vec.nb_variable;
 
-  type = new int[nb_variable];
+  type = new variable_nature[nb_variable];
   min_value = new double[nb_variable];
   max_value = new double[nb_variable];
   min_interval = new double[nb_variable];
@@ -539,7 +539,7 @@ void Vectors::copy(const Vectors &vec)
 
   nb_variable = vec.nb_variable;
 
-  type = new int[nb_variable];
+  type = new variable_nature[nb_variable];
   min_value = new double[nb_variable];
   max_value = new double[nb_variable];
   min_interval = new double[nb_variable];
@@ -616,7 +616,7 @@ void Vectors::add_state_variable(const Vectors &vec)
 
   nb_variable = vec.nb_variable + 1;
 
-  type = new int[nb_variable];
+  type = new variable_nature[nb_variable];
   min_value = new double[nb_variable];
   max_value = new double[nb_variable];
   min_interval = new double[nb_variable];
@@ -684,16 +684,15 @@ void Vectors::add_state_variable(const Vectors &vec)
  *
  *  Constructeur par copie de la classe Vectors.
  *
- *  arguments : reference sur un objet Vectors, type de transformation ('c' : copie,
- *              'a' : ajout d'une variable d'etat).
+ *  arguments : reference sur un objet Vectors, type de transformation.
  *
  *--------------------------------------------------------------*/
 
-Vectors::Vectors(const Vectors &vec , char transform)
+Vectors::Vectors(const Vectors &vec , vector_transformation transform)
 
 {
   switch (transform) {
-  case 'a' :
+  case ADD_COMPONENT_VARIABLE :
     Vectors::add_state_variable(vec);
     break;
   default :
@@ -1192,7 +1191,8 @@ Vectors* Vectors::shift(StatError &error , int variable , int shift_param) const
     if ((vec->type[variable] == INT_VALUE) && (vec->min_value[variable] >= 0) &&
         (vec->max_value[variable] <= MARGINAL_DISTRIBUTION_MAX_VALUE)) {
       if (marginal_distribution[variable]) {
-        vec->marginal_distribution[variable] = new FrequencyDistribution(*marginal_distribution[variable] , 's' , shift_param);
+        vec->marginal_distribution[variable] = new FrequencyDistribution(*marginal_distribution[variable] ,
+                                                                         SHIFT , shift_param);
 
         vec->mean[variable] = vec->marginal_distribution[variable]->mean;
       }
@@ -1288,7 +1288,8 @@ Vectors* Vectors::shift(StatError &error , int variable , double shift_param) co
  *
  *--------------------------------------------------------------*/
 
-Vectors* Vectors::thresholding(StatError &error , int variable , int threshold , int mode) const
+Vectors* Vectors::thresholding(StatError &error , int variable , int threshold ,
+                               threshold_direction mode) const
 
 {
   bool status = true;
@@ -1439,7 +1440,8 @@ Vectors* Vectors::thresholding(StatError &error , int variable , int threshold ,
  *
  *--------------------------------------------------------------*/
 
-Vectors* Vectors::thresholding(StatError &error , int variable , double threshold , int mode) const
+Vectors* Vectors::thresholding(StatError &error , int variable , double threshold ,
+                               threshold_direction mode) const
 
 {
   bool status = true;
@@ -1537,7 +1539,7 @@ Vectors* Vectors::thresholding(StatError &error , int variable , double threshol
  *
  *--------------------------------------------------------------*/
 
-Vectors* Vectors::cluster(StatError &error , int variable , int step , int mode) const
+Vectors* Vectors::cluster(StatError &error , int variable , int step , rounding mode) const
 
 {
   bool status = true;
@@ -1619,7 +1621,8 @@ Vectors* Vectors::cluster(StatError &error , int variable , int step , int mode)
       }
 
       if (marginal_distribution[variable]) {
-        vec->marginal_distribution[variable] = new FrequencyDistribution(*marginal_distribution[variable] , 'c' , step , mode);
+        vec->marginal_distribution[variable] = new FrequencyDistribution(*marginal_distribution[variable] ,
+                                                                         CLUSTER , step , mode);
 
         vec->mean[variable] = vec->marginal_distribution[variable]->mean;
         vec->covariance[variable][variable] = vec->marginal_distribution[variable]->variance;
@@ -1662,27 +1665,27 @@ Vectors* Vectors::cluster(StatError &error , int variable , int step , int mode)
 
 /*--------------------------------------------------------------*
  *
- *  Transcodage des symboles d'une variable entiere.
+ *  Transcodage des categories d'une variable entiere.
  *
  *  arguments : reference sur un objet Vectors, indice de la variable,
- *              plus petit et plus grand symboles, table de transcodage des symboles.
+ *              plus petit et plus grand categories, table de transcodage des categories.
  *
  *--------------------------------------------------------------*/
 
-void Vectors::transcode(const Vectors &vec , int variable , int min_symbol ,
-                        int max_symbol , int *symbol)
+void Vectors::transcode(const Vectors &vec , int variable , int min_category ,
+                        int max_category , int *category)
 
 {
   register int i;
 
 
   for (i = 0;i < nb_vector;i++) {
-    int_vector[i][variable] = symbol[vec.int_vector[i][variable] -
-                                     (int)vec.min_value[variable]] + min_symbol;
+    int_vector[i][variable] = category[vec.int_vector[i][variable] -
+                                       (int)vec.min_value[variable]] + min_category;
   }
 
-  min_value[variable] = min_symbol;
-  max_value[variable] = max_symbol;
+  min_value[variable] = min_category;
+  max_value[variable] = max_category;
 
   build_marginal_frequency_distribution(variable);
   min_interval_computation(variable);
@@ -1693,19 +1696,19 @@ void Vectors::transcode(const Vectors &vec , int variable , int min_symbol ,
 
 /*--------------------------------------------------------------*
  *
- *  Transcodage des symboles d'une variable entiere.
+ *  Transcodage des categories d'une variable entiere.
  *
  *  arguments : reference sur un objet StatError, indice de la variable,
- *              table de transcodage des symboles.
+ *              table de transcodage des categories.
  *
  *--------------------------------------------------------------*/
 
-Vectors* Vectors::transcode(StatError &error , int variable , int *symbol) const
+Vectors* Vectors::transcode(StatError &error , int variable , int *category) const
 
 {
   bool status = true , *presence;
   register int i;
-  int min_symbol , max_symbol;
+  int min_category , max_category;
   Vectors *vec;
 
 
@@ -1728,44 +1731,44 @@ Vectors* Vectors::transcode(StatError &error , int variable , int *symbol) const
     }
 
     else {
-      min_symbol = symbol[0];
-      max_symbol = symbol[0];
+      min_category = category[0];
+      max_category = category[0];
 
       for (i = 1;i <= (int)(max_value[variable] - min_value[variable]);i++) {
-        if (symbol[i] < min_symbol) {
-          min_symbol = symbol[i];
+        if (category[i] < min_category) {
+          min_category = category[i];
         }
-        if (symbol[i] > max_symbol) {
-          max_symbol = symbol[i];
+        if (category[i] > max_category) {
+          max_category = category[i];
         }
       }
 
-      if (max_symbol - min_symbol == 0) {
+      if (max_category - min_category == 0) {
         status = false;
-        error.update(STAT_error[STATR_NB_SYMBOL]);
+        error.update(STAT_error[STATR_NB_CATEGORY]);
       }
 
-      if (max_symbol - min_symbol > (int)(max_value[variable] - min_value[variable])) {
+      if (max_category - min_category > (int)(max_value[variable] - min_value[variable])) {
         status = false;
-        error.update(STAT_error[STATR_NON_CONSECUTIVE_SYMBOLS]);
+        error.update(STAT_error[STATR_NON_CONSECUTIVE_CATEGORIES]);
       }
     }
 
     if (status) {
-      presence = new bool[max_symbol - min_symbol + 1];
-      for (i = 0;i <= max_symbol - min_symbol;i++) {
+      presence = new bool[max_category - min_category + 1];
+      for (i = 0;i <= max_category - min_category;i++) {
         presence[i] = false;
       }
 
       for (i = 0;i <= (int)(max_value[variable] - min_value[variable]);i++) {
-        presence[symbol[i] - min_symbol] = true;
+        presence[category[i] - min_category] = true;
       }
 
-      for (i = 0;i <= max_symbol - min_symbol;i++) {
+      for (i = 0;i <= max_category - min_category;i++) {
         if (!presence[i]) {
           status = false;
           ostringstream error_message;
-          error_message << STAT_error[STATR_MISSING_SYMBOL] << " " << i + min_symbol;
+          error_message << STAT_error[STATR_MISSING_CATEGORY] << " " << i + min_category;
           error.update((error_message.str()).c_str());
         }
       }
@@ -1775,11 +1778,11 @@ Vectors* Vectors::transcode(StatError &error , int variable , int *symbol) const
 
     if (status) {
       for (i = 0;i <= (int)(max_value[variable] - min_value[variable]);i++) {
-        symbol[i] -= min_symbol;
+        category[i] -= min_category;
       }
 
       vec = new Vectors(*this , variable , type[variable]);
-      vec->transcode(*this , variable , min_symbol , max_symbol , symbol);
+      vec->transcode(*this , variable , min_category , max_category , category);
     }
   }
 
@@ -1802,7 +1805,7 @@ Vectors* Vectors::cluster(StatError &error , int variable ,
 {
   bool status = true;
   register int i , j , k;
-  int *int_limit , *symbol;
+  int *int_limit , *category;
   double *real_limit;
   Vectors *vec;
 
@@ -1841,19 +1844,19 @@ Vectors* Vectors::cluster(StatError &error , int variable ,
       }
 
       if (status) {
-        symbol = new int[(int)(max_value[variable] - min_value[variable]) + 1];
+        category = new int[(int)(max_value[variable] - min_value[variable]) + 1];
 
         i = 0;
         for (j = 0;j < nb_class;j++) {
           for (k = int_limit[j];k < int_limit[j + 1];k++) {
-            symbol[i++] = j;
+            category[i++] = j;
           }
         }
 
         vec = new Vectors(*this , variable , type[variable]);
-        vec->transcode(*this , variable , 0 , nb_class - 1 , symbol);
+        vec->transcode(*this , variable , 0 , nb_class - 1 , category);
 
-        delete [] symbol;
+        delete [] category;
       }
 
       delete [] int_limit;
@@ -2161,12 +2164,12 @@ Vectors* Vectors::scaling(StatError &error , int variable , double scaling_coeff
  *
  *--------------------------------------------------------------*/
 
-Vectors* Vectors::round(StatError &error , int variable , int mode) const
+Vectors* Vectors::round(StatError &error , int variable , rounding mode) const
 
 {
   bool status = true;
   register int i , j;
-  int *itype;
+  variable_nature *itype;
   Vectors *vec;
 
 
@@ -2214,7 +2217,7 @@ Vectors* Vectors::round(StatError &error , int variable , int mode) const
   }
 
   if (status) {
-    itype = new int[nb_variable];
+    itype = new variable_nature[nb_variable];
 
     if (variable == I_DEFAULT) {
       for (i = 0;i < nb_variable;i++) {
@@ -2736,7 +2739,8 @@ void Vectors::select_variable(const Vectors &vec , int *variable)
 Vectors* Vectors::select_variable(int explanatory_variable , int response_variable) const
 
 {
-  int variable[2] , itype[2];
+  int variable[2];
+  variable_nature itype[2];
   Vectors *vec;
 
 
@@ -2826,7 +2830,8 @@ Vectors* Vectors::select_variable(StatError &error , int inb_variable ,
 {
   bool status = true , *selected_variable;
   register int i;
-  int bnb_variable , *variable , *itype;
+  int bnb_variable , *variable;
+  variable_nature *itype;
   Vectors *vec;
 
 
@@ -2872,7 +2877,7 @@ Vectors* Vectors::select_variable(StatError &error , int inb_variable ,
 
     bnb_variable = (keep ? inb_variable : nb_variable - inb_variable);
 
-    itype = new int[bnb_variable];
+    itype = new variable_nature[bnb_variable];
     for (i = 0;i < bnb_variable;i++) {
       itype[i] = type[variable[i]];
     }
@@ -2898,12 +2903,13 @@ Vectors* Vectors::remove_variable_1() const
 
 {
   register int i;
-  int *variable , *itype;
+  int *variable;
+  variable_nature *itype;
   Vectors *vec;
 
 
   variable = new int[nb_variable - 1];
-  itype = new int[nb_variable - 1];
+  itype = new variable_nature[nb_variable - 1];
   for (i = 0;i < nb_variable - 1;i++) {
     variable[i] = i + 1;
     itype[i] = type[i + 1];
@@ -2934,7 +2940,8 @@ Vectors* Vectors::merge_variable(StatError &error , int nb_sample ,
 {
   bool status = true;
   register int i , j , k;
-  int inb_variable , *iidentifier , *itype;
+  int inb_variable , *iidentifier;
+  variable_nature *itype;
   Vectors *vec;
   const Vectors **pvec;
 
@@ -2995,7 +3002,7 @@ Vectors* Vectors::merge_variable(StatError &error , int nb_sample ,
       iidentifier = pvec[ref_sample]->identifier;
     }
 
-    itype = new int[inb_variable];
+    itype = new variable_nature[inb_variable];
     inb_variable = 0;
     for (i = 0;i < nb_sample;i++) {
       for (j = 0;j < pvec[i]->nb_variable;j++) {
@@ -3061,7 +3068,7 @@ Vectors* Vectors::merge_variable(StatError &error , int nb_sample ,
  *
  *--------------------------------------------------------------*/
 
-Vectors* vectors_ascii_read(StatError &error , const char *path)
+Vectors* Vectors::ascii_read(StatError &error , const char *path)
 
 {
   RWLocaleSnapshot locale("en");
@@ -3069,7 +3076,8 @@ Vectors* vectors_ascii_read(StatError &error , const char *path)
   size_t position;
   bool status , lstatus;
   register int i , j;
-  int line , read_line , initial_nb_line , nb_variable = 0 , nb_vector , index , *type;
+  int line , read_line , initial_nb_line , nb_variable = 0 , nb_vector , index;
+  variable_nature *type;
   long int_value;
   double real_value;
   Vectors *vec;
@@ -3159,9 +3167,9 @@ Vectors* vectors_ascii_read(StatError &error , const char *path)
     // analyse des lignes definissant le type de chaque variable
 
     if (status) {
-      type = new int[nb_variable];
+      type = new variable_nature[nb_variable];
       for (i = 0;i < nb_variable;i++) {
-        type[i] = I_DEFAULT;
+        type[i] = AUXILIARY;
       }
 
       read_line = 0;
@@ -3220,7 +3228,7 @@ Vectors* vectors_ascii_read(StatError &error , const char *path)
           case 3 : {
             for (j = INT_VALUE;j <= STATE;j++) {
               if (token == STAT_variable_word[j]) {
-                type[read_line] = j;
+                type[read_line] = (variable_nature)j;
                 break;
               }
             }
@@ -5365,7 +5373,7 @@ double** Vectors::correlation_computation() const
  *
  *--------------------------------------------------------------*/
 
-double* Vectors::mean_direction_computation(int variable , int unit) const
+double* Vectors::mean_direction_computation(int variable , angle_unit unit) const
 
 {
   register int i;
