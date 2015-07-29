@@ -968,7 +968,7 @@ ostream& CategoricalSequenceProcess::spreadsheet_print(ostream &os , int process
     }
 
     if (characteristics) {
-      smoothed_curves = new Curves(*(characteristics->index_value) , 's');
+      smoothed_curves = new Curves(*(characteristics->index_value) , SMOOTHING);
 
       os << "\n" << SEQ_label[SEQL_SMOOTHED_OBSERVED_PROBABILITIES] << endl;
       for (i = 0;i < nb_value;i++) {
@@ -1417,7 +1417,7 @@ bool CategoricalSequenceProcess::plot_print(const char *prefix , const char *tit
     if (characteristics) {
       index_length = characteristics->index_value->plot_length_computation();
       if (characteristics->index_value->frequency[index_length - 1] < MAX_FREQUENCY) {
-        smoothed_curves = new Curves(*(characteristics->index_value) , 's');
+        smoothed_curves = new Curves(*(characteristics->index_value) , SMOOTHING);
       }
       else {
         smoothed_curves = NULL;
@@ -3039,7 +3039,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
       plot.variable[index] = process;
       plot.viewpoint[index] = INTENSITY;
 
-      smoothed_curves = new Curves(*(characteristics->index_value) , 's');
+      smoothed_curves = new Curves(*(characteristics->index_value) , SMOOTHING);
 
       title.str("");
       if (process > 0) {
