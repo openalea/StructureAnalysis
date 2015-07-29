@@ -70,8 +70,9 @@ namespace stat_tool {
  *
  *--------------------------------------------------------------*/
 
-ContinuousParametric::ContinuousParametric(int iident , double ilocation , double idispersion ,
-                                           double izero_probability , int iunit)
+ContinuousParametric::ContinuousParametric(continuous_parametric iident , double ilocation ,
+                                           double idispersion , double izero_probability ,
+                                           angle_unit iunit)
 
 {
   ident = iident;
@@ -175,8 +176,8 @@ ContinuousParametric& ContinuousParametric::operator=(const ContinuousParametric
  *
  *--------------------------------------------------------------*/
 
-ContinuousParametric* continuous_parametric_parsing(StatError &error , ifstream &in_file ,
-                                                    int &line , int last_ident)
+ContinuousParametric* ContinuousParametric::parsing(StatError &error , ifstream &in_file ,
+                                                    int &line , continuous_parametric last_ident)
 
 {
   RWLocaleSnapshot locale("en");
@@ -184,7 +185,7 @@ ContinuousParametric* continuous_parametric_parsing(StatError &error , ifstream 
   size_t position;
   bool status = true , lstatus;
   register int i , j;
-  int ident = I_DEFAULT;
+  continuous_parametric ident = GAUSSIAN;
   union {
     double shape;
     double location;
@@ -228,7 +229,7 @@ ContinuousParametric* continuous_parametric_parsing(StatError &error , ifstream 
       if (i == 0) {
         for (j = GAMMA;j <= last_ident;j++) {
           if (token == STAT_continuous_distribution_word[j]) {
-            ident = j;
+            ident = (continuous_parametric)j;
             break;
           }
         }
