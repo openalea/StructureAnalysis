@@ -44,7 +44,7 @@ void class_curves()
 {
   class_< Curves >("_Curves", "Curves")
   .def(init<int, int , optional<bool , bool> >())
-  .def(init<const Curves &, optional<char, int> >())
+  .def(init<const Curves &, optional<curve_transformation, int> >())
 
   .def(init<Distribution> ())
   .def(init<FrequencyDistribution> ())
