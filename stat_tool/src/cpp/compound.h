@@ -81,8 +81,6 @@ namespace stat_tool {
     friend class FrequencyDistribution;
     friend class CompoundData;
 
-    friend Compound* compound_ascii_read(StatError &error , const char *path ,
-                                         double cumul_threshold);
     friend std::ostream& operator<<(std::ostream &os , const Compound &compound)
     { return compound.ascii_write(os , compound.compound_data , false , false); }
 
@@ -111,13 +109,17 @@ namespace stat_tool {
     Compound();
     Compound(const DiscreteParametric &sum_dist , const DiscreteParametric &dist ,
              double cumul_threshold = COMPOUND_THRESHOLD);
-    Compound(const DiscreteParametric &sum_dist , const DiscreteParametric &dist , char type);
+    Compound(const DiscreteParametric &sum_dist , const DiscreteParametric &dist ,
+             compound_distribution type);
     Compound(const Compound &compound , bool data_flag = true)
     :Distribution(compound) { copy(compound , data_flag); }
     ~Compound();
     Compound& operator=(const Compound &compound);
 
     CompoundData* extract_data(StatError &error) const;
+
+    static Compound* ascii_read(StatError &error , const char *path ,
+                                double cumul_threshold = COMPOUND_THRESHOLD);
 
     std::ostream& line_write(std::ostream &os) const;
 
@@ -138,10 +140,6 @@ namespace stat_tool {
     DiscreteParametric* get_sum_distribution() const { return sum_distribution; }
     DiscreteParametric* get_distribution() const { return distribution; }
   };
-
-
-  Compound* compound_ascii_read(StatError &error , const char *path ,
-                                double cumul_threshold = COMPOUND_THRESHOLD);
 
 
 
@@ -171,7 +169,7 @@ namespace stat_tool {
     ~CompoundData();
     CompoundData& operator=(const CompoundData &compound_histo);
 
-    DiscreteDistributionData* extract(StatError &error , char type) const;
+    DiscreteDistributionData* extract(StatError &error , compound_distribution type) const;
 
     std::ostream& line_write(std::ostream &os) const;
 
