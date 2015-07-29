@@ -55,7 +55,7 @@ public:
     //olf_format should be true
     StatError error;
     NonhomogeneousMarkov *nonhomo = NULL;
-    nonhomo = nonhomogeneous_markov_ascii_read(error, filename, length);
+    nonhomo = NonhomogeneousMarkov::ascii_read(error, filename, length);
     /*if (!nonhomo)
       {
         sequence_analysis::wrap_util::throw_error(error);
@@ -89,10 +89,10 @@ public:
   }
 
   static DiscreteParametricModel*
-  extract(const NonhomogeneousMarkov &input, int type, int state)
+  extract(const NonhomogeneousMarkov &input, process_distribution dist_type, int state)
   {
     SIMPLE_METHOD_TEMPLATE_1(input, extract, DiscreteParametricModel,
-        type, state);
+        dist_type, state);
   }
 
  static MultiPlotSet*
@@ -159,10 +159,10 @@ class NonHomogeneousMarkovDataWrap
 
 public:
   static DiscreteDistributionData*
-  extract(const NonhomogeneousMarkovData &input, int type, int state)
+  extract(const NonhomogeneousMarkovData &input, process_distribution histo_type, int state)
   {
     SIMPLE_METHOD_TEMPLATE_1(input, extract,
-        DiscreteDistributionData, type, state);
+        DiscreteDistributionData, histo_type, state);
   }
 
   static NonhomogeneousMarkovData*
