@@ -78,8 +78,6 @@ namespace stat_tool {
     friend class Vectors;
     friend class MixtureData;
 
-    friend Mixture* mixture_ascii_read(StatError &error , const char *path ,
-                                       double cumul_threshold);
     friend std::ostream& operator<<(std::ostream &os , const Mixture &mixt)
     { return mixt.ascii_write(os , mixt.mixture_data); }
 
@@ -118,7 +116,7 @@ namespace stat_tool {
     Mixture();
     Mixture(int inb_component , int inb_output_process , int *nb_value);
     Mixture(int inb_component , int ident , double mean , double standard_deviation ,
-            bool tied_mean , int variance_factor);
+            bool tied_mean , tying_rule variance_factor);
     Mixture(const Mixture &mixt , bool data_flag = true)
     { copy(mixt , data_flag); }
     ~Mixture();
@@ -128,6 +126,9 @@ namespace stat_tool {
     MixtureData* extract_data(StatError &error) const;
 
     Mixture* thresholding(double min_probability = MIN_PROBABILITY) const;
+
+    static Mixture* ascii_read(StatError &error , const char *path ,
+                               double cumul_threshold = CUMUL_THRESHOLD);
 
     std::ostream& line_write(std::ostream &os) const;
 
@@ -163,10 +164,6 @@ namespace stat_tool {
   };
 
 
-  Mixture* mixture_ascii_read(StatError &error , const char *path ,
-                              double cumul_threshold = CUMUL_THRESHOLD);
-
-
 
   class MixtureData : public Vectors {  // structure de donnees correspondant
                                         // a un melange multivarie
@@ -198,9 +195,9 @@ namespace stat_tool {
   public :
 
     MixtureData();
-    MixtureData(int inb_vector , int inb_variable , int *itype , bool init_flag = false);
-    MixtureData(const Vectors &vec , char transform = 'c');
-    MixtureData(const MixtureData &vec , bool model_flag = true , char transform = 'c')
+    MixtureData(int inb_vector , int inb_variable , variable_nature *itype , bool init_flag = false);
+    MixtureData(const Vectors &vec , vector_transformation transform = VECTOR_COPY);
+    MixtureData(const MixtureData &vec , bool model_flag = true , vector_transformation transform = VECTOR_COPY)
     :Vectors(vec , transform) { copy(vec , model_flag); }
     ~MixtureData();
     MixtureData& operator=(const MixtureData &vec);
@@ -216,7 +213,7 @@ namespace stat_tool {
     bool plot_write(StatError &error , const char *prefix , const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
-    void state_variable_init(int itype = STATE);
+    void state_variable_init(variable_nature itype = STATE);
 
     double classification_information_computation() const;
     double information_computation() const;
