@@ -313,16 +313,16 @@ void SequenceCharacteristics::reverse(const SequenceCharacteristics &characteris
  *  Constructeur par copie de la classe SequenceCharacteristics.
  *
  *  arguments : reference sur un objet SequenceCharacteristics,
- *              type de transformation ('r' : inversion).
+ *              type de transformation.
  *
  *--------------------------------------------------------------*/
 
 SequenceCharacteristics::SequenceCharacteristics(const SequenceCharacteristics &characteristics ,
-                                                 char transform)
+                                                 sequence_transformation transform)
 
 {
   switch (transform) {
-  case 'r' :
+  case REVERSE :
     reverse(characteristics);
     break;
   default :
@@ -688,7 +688,7 @@ ostream& SequenceCharacteristics::spreadsheet_print(ostream &os , int type ,
   os << "\t" << STAT_label[STATL_FREQUENCY] << endl;
   index_value->spreadsheet_print(os);
 
-  smoothed_curves = new Curves(*index_value , 's');
+  smoothed_curves = new Curves(*index_value , SMOOTHING);
 
   os << "\n" << SEQ_label[SEQL_SMOOTHED_OBSERVED_PROBABILITIES] << endl;
   for (i = 0;i < nb_value;i++) {
@@ -709,7 +709,7 @@ ostream& SequenceCharacteristics::spreadsheet_print(ostream &os , int type ,
     os << "\t" << STAT_label[STATL_FREQUENCY] << endl;
     explicit_index_value->spreadsheet_print(os);
 
-    smoothed_curves = new Curves(*explicit_index_value , 's');
+    smoothed_curves = new Curves(*explicit_index_value , SMOOTHING);
 
     os << "\n" << SEQ_label[SEQL_SMOOTHED_OBSERVED_PROBABILITIES] << endl;
     os << SEQ_label[SEQL_INDEX_PARAMETER];
@@ -847,7 +847,7 @@ bool SequenceCharacteristics::plot_print(const char *prefix , const char *title 
   index_length = index_value->plot_length_computation();
 
   if (index_value->frequency[index_length - 1] < MAX_FREQUENCY) {
-    smoothed_curves = new Curves(*index_value , 's');
+    smoothed_curves = new Curves(*index_value , SMOOTHING);
   }
   else {
     smoothed_curves = NULL;
@@ -1616,7 +1616,7 @@ void SequenceCharacteristics::plotable_write(MultiPlotSet &plot , int &index ,
     plot.variable[index] = variable;
     plot.viewpoint[index] = INTENSITY;
 
-    smoothed_curves = new Curves(*index_value , 's');
+    smoothed_curves = new Curves(*index_value , SMOOTHING);
 
     title.str("");
     if (plot.nb_variable > 1) {
