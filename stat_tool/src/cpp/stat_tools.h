@@ -133,8 +133,8 @@ namespace stat_tool {
 
   enum continuous_parametric {
     GAMMA ,
+    INVERSE_GAUSSIAN ,
     GAUSSIAN ,
-//    INVERSE_GAUSSIAN ,
     VON_MISES ,
     ZERO_INFLATED_GAMMA ,
     LINEAR_MODEL
@@ -257,6 +257,10 @@ namespace stat_tool {
   const int GAMMA_MAX_NB_ITERATION = 5;  // nombre maximum d'iterations pour l'estimation des parametres de la loi gamma
 //  const double GAMMA_VARIATION_COEFF_THRESHOLD = 1.e-2;  seuil sur le coefficient de variation pour l'estimation
 //                                                         des parametres de la loi gamma
+
+  const double INVERSE_GAUSSIAN_TAIL = 1.e-3;   // traine de la loi inverse Gaussian
+  const int INVERSE_GAUSSIAN_NB_STEP = 1000;    // nombre de pas pour le calcul de la loi inverse Gaussian
+  const int INVERSE_GAUSSIAN_NB_SUB_STEP = 10;  // nombre de pas pour le calcul de la loi inverse Gaussian
 
   const double GAUSSIAN_TAIL = 5.e-4;    // traine de la loi de Gauss
   const int GAUSSIAN_NB_STEP = 1000;     // nombre de pas pour le calcul de la loi de Gauss
@@ -875,11 +879,11 @@ namespace stat_tool {
     continuous_parametric ident;  // identificateur
     union {
       double shape;         // parametre de forme (GAMMA, ZERO_INFLATED_GAMMA)
-      double location;      // moyenne (GAUSSIAN), direction moyenne (VON_MISES),
+      double location;      // moyenne (GAUSSIAN, INVERSE_GAUSSIAN), direction moyenne (VON_MISES),
       double intercept;     // LINEAR_MODEL
     };
     union {
-      double scale;         // parametre d'echelle (GAMMA, ZERO_INFLATED_GAMMA)
+      double scale;         // parametre d'echelle (GAMMA, INVERSE_GAUSSIAN, ZERO_INFLATED_GAMMA)
       double dispersion;    // ecart-type (GAUSSIAN), concentration (VON_MISES),
     };
     union {
