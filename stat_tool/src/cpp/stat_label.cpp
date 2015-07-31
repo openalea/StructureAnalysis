@@ -124,6 +124,7 @@ const char *STAT_discrete_distribution_letter[] = {
 
 const char *STAT_continuous_distribution_word[] = {
   "GAMMA" ,
+  "INVERSE_GAUSSIAN" ,
   "GAUSSIAN" ,
   "VON_MISES" ,
   "ZERO_INFLATED_GAMMA" ,
@@ -133,6 +134,7 @@ const char *STAT_continuous_distribution_word[] = {
 
 const char *STAT_continuous_distribution_letter[] = {
   "Ga" ,
+  "IG" ,
   "G" ,
   "VM" ,
   "ZIGa" ,
