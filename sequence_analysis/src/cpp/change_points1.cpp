@@ -691,16 +691,17 @@ double Sequences::one_segment_likelihood(int index , segment_model *model_type ,
  *--------------------------------------------------------------*/
 
 Sequences* Sequences::segmentation_output(int *nb_segment , segment_model *model_type , ostream &os ,
-                                          sequence_type output , int *ichange_point)
+                                          sequence_type output , int *ichange_point , bool continuity)
 
 {
   bool *piecewise_function;
   register int i , j , k , m , n;
   int max_nb_segment , *change_point , *psegment , *seq_index_parameter = NULL;
   double diff , response_mean , index_parameter_mean , response_variance , index_parameter_variance ,
-         covariance , residual_mean , residual_square_sum , *change_point_amplitude , *global_variance ,
-         *segment_variance , **mean , **variance , **intercept , **slope , **slope_standard_deviation ,
-         **correlation;
+         covariance , residual_mean , residual_square_sum , likelihood , corrected_likelihood ,
+         corrected_global_variance , *change_point_amplitude , *global_variance , *segment_variance ,
+         **mean , **variance , **intercept , **slope , **slope_standard_deviation , **correlation ,
+         **predicted_value , **corrected_intercept , **corrected_slope , **corrected_variance;
   Test *test;
   Sequences *seq;
 
@@ -742,6 +743,13 @@ Sequences* Sequences::segmentation_output(int *nb_segment , segment_model *model
     slope_standard_deviation = new double*[nb_variable];
     correlation = new double*[nb_variable];
 
+    if (continuity) {
+      predicted_value = new double*[nb_variable];
+      corrected_intercept = new double*[nb_variable];
+      corrected_slope = new double*[nb_variable];
+      corrected_variance = new double*[nb_variable];
+    }
+
     for (i = 1;i < nb_variable;i++) {
       if ((model_type[i - 1] == POISSON_CHANGE) || (model_type[0] == MULTIVARIATE_POISSON_CHANGE) ||
           (model_type[i - 1] == GAUSSIAN_CHANGE) || (model_type[i - 1] == VARIANCE_CHANGE) ||
@@ -771,6 +779,13 @@ Sequences* Sequences::segmentation_output(int *nb_segment , segment_model *model
         slope[i] = new double[nb_segment[0]];
         slope_standard_deviation[i] = new double[nb_segment[0]];
         correlation[i] = new double[nb_segment[0]];
+
+        if (continuity) {
+          predicted_value[i] = new double[nb_segment[0] + 1];
+          corrected_intercept[i] = new double[nb_segment[0]];
+          corrected_slope[i] = new double[nb_segment[0]];
+          corrected_variance[i] = new double[nb_segment[0]];
+        }
       }
 
       else {
@@ -778,6 +793,13 @@ Sequences* Sequences::segmentation_output(int *nb_segment , segment_model *model
         slope[i] = NULL;
         slope_standard_deviation[i] = NULL;
         correlation[i] = NULL;
+
+        if (continuity) {
+          predicted_value[i] = NULL;
+          corrected_intercept[i] = NULL;
+          corrected_slope[i] = NULL;
+          corrected_variance[i] = NULL;
+        }
       }
     }
 
@@ -786,6 +808,10 @@ Sequences* Sequences::segmentation_output(int *nb_segment , segment_model *model
 
     if ((model_type[0] == MEAN_CHANGE) || (model_type[0] == INTERCEPT_SLOPE_CHANGE)) {
       global_variance[0] = 0.;
+    }
+
+    if (continuity) {
+      corrected_global_variance = 0.;
     }
 
     if (model_type[0] == MEAN_VARIANCE_CHANGE) {
@@ -934,6 +960,10 @@ Sequences* Sequences::segmentation_output(int *nb_segment , segment_model *model
         }
 
         if ((model_type[j - 1] == LINEAR_MODEL_CHANGE) || (model_type[0] == INTERCEPT_SLOPE_CHANGE)) {
+          if (continuity) {
+            likelihood = 0.;
+          }
+
           for (k = 0;k < nb_segment[i];k++) {
             response_mean = 0.;
             if (type[j] != REAL_VALUE) {
@@ -1008,6 +1038,10 @@ Sequences* Sequences::segmentation_output(int *nb_segment , segment_model *model
             }
             residual_mean /= (change_point[k + 1] - change_point[k]);
             if (change_point[k + 1] - change_point[k] > 2) {
+              if (continuity) {
+                likelihood -= ((double)(change_point[k + 1] - change_point[k]) / 2.) * (log(residual_square_sum /
+                                (change_point[k + 1] - change_point[k])) + log(2 * M_PI) + 1);
+              }
               residual_square_sum /= (change_point[k + 1] - change_point[k] - 2);
             }
             else {
@@ -1036,6 +1070,71 @@ Sequences* Sequences::segmentation_output(int *nb_segment , segment_model *model
               }
 
               variance[j][k] /= (change_point[k + 1] - change_point[k] - 2);
+            }
+          }
+
+          if (continuity) {
+            predicted_value[j][0] = intercept[j][0] + slope[j][0] * seq_index_parameter[0];
+
+            for (k = 1;k < nb_segment[i];k++) {
+              predicted_value[j][k] = (fabs(slope[j][k - 1]) * (intercept[j][k - 1] + slope[j][k - 1] * seq_index_parameter[change_point[k]]) +
+                                       fabs(slope[j][k]) * (intercept[j][k] + slope[j][k] * seq_index_parameter[change_point[k]])) /
+                                      (fabs(slope[j][k - 1]) + fabs(slope[j][k]));
+            }
+
+            predicted_value[j][nb_segment[i]] = intercept[j][nb_segment[i] - 1] + slope[j][nb_segment[i] - 1] *
+                                                seq_index_parameter[length[0] - 1];
+
+            corrected_likelihood = 0.;
+
+            for (k = 0;k < nb_segment[i];k++) {
+              corrected_slope[j][k] = (predicted_value[j][k + 1] - predicted_value[j][k]) /
+                                      (seq_index_parameter[change_point[k + 1]] - seq_index_parameter[change_point[k]]);
+              corrected_intercept[j][k] = predicted_value[j][k] - corrected_slope[j][k] * seq_index_parameter[change_point[k]];
+
+              residual_mean = 0.;
+              residual_square_sum = 0.;
+              if (type[j] != REAL_VALUE) {
+                for (m = change_point[k];m < change_point[k + 1];m++) {
+                  diff = int_sequence[i][j][m] - (corrected_intercept[j][k] + corrected_slope[j][k] * seq_index_parameter[m]);
+                  residual_mean += diff;
+                  residual_square_sum += diff * diff;
+                }
+              }
+              else {
+                for (m = change_point[k];m < change_point[k + 1];m++) {
+                  diff = real_sequence[i][j][m] - (corrected_intercept[j][k] + corrected_slope[j][k] * seq_index_parameter[m]);
+                  residual_mean += diff;
+                  residual_square_sum += diff * diff;
+                }
+              }
+              residual_mean /= (change_point[k + 1] - change_point[k]);
+              if (change_point[k + 1] - change_point[k] > 2) {
+                corrected_likelihood -= ((double)(change_point[k + 1] - change_point[k]) / 2.) * (log(residual_square_sum /
+                                          (change_point[k + 1] - change_point[k])) + log(2 * M_PI) + 1);
+              }
+
+              corrected_variance[j][k] = 0.;
+              if (change_point[k + 1] - change_point[k] > 2) {
+                if (type[j] != REAL_VALUE) {
+                  for (m = change_point[k];m < change_point[k + 1];m++) {
+                    diff = int_sequence[i][j][m] - (corrected_intercept[j][k] + corrected_slope[j][k] * seq_index_parameter[m]) - residual_mean;
+                    corrected_variance[j][k] += diff * diff;
+                  }
+                }
+                else {
+                  for (m = change_point[k];m < change_point[k + 1];m++) {
+                    diff = real_sequence[i][j][m] - (corrected_intercept[j][k] + corrected_slope[j][k] * seq_index_parameter[m]) - residual_mean;
+                    corrected_variance[j][k] += diff * diff;
+                  }
+                }
+
+                if (model_type[0] == INTERCEPT_SLOPE_CHANGE) {
+                  corrected_global_variance += corrected_variance[j][k];
+                }
+
+                corrected_variance[j][k] /= (change_point[k + 1] - change_point[k] - 2);
+              }
             }
           }
         }
@@ -1198,6 +1297,22 @@ Sequences* Sequences::segmentation_output(int *nb_segment , segment_model *model
             }
           }
           os << endl;
+
+          if (continuity) {
+            os << "\n" << SEQ_label[SEQL_SEGMENT] << " " << STAT_label[STATL_INTERCEPT] << ", "
+               << STAT_label[STATL_SLOPE] << ", "
+               << STAT_label[STATL_RESIDUAL] << " " << STAT_label[STATL_STANDARD_DEVIATION] << ": ";
+            for (k = 0;k < nb_segment[i];k++) {
+              os << corrected_intercept[j][k] << " " << corrected_slope[j][k] << " " << sqrt(corrected_variance[j][k]);
+              if (k < nb_segment[i] - 1) {
+                os << " | ";
+              }
+            }
+            os << endl;
+
+            os << "2 * " << STAT_label[STATL_LIKELIHOOD] << ": "
+                << 2 * corrected_likelihood << " | " << 2 * likelihood << endl;
+          }
         }
       }
     }
@@ -1219,10 +1334,25 @@ Sequences* Sequences::segmentation_output(int *nb_segment , segment_model *model
           }
 
           else {
-            for (m = 0;m < nb_segment[i];m++) {
-              for (n = change_point[m];n < change_point[m + 1];n++) {
-                seq->real_sequence[i][j][n] = intercept[k][m] + slope[k][m] * seq_index_parameter[n];
+            switch (continuity) {
+
+            case false : {
+              for (m = 0;m < nb_segment[i];m++) {
+                for (n = change_point[m];n < change_point[m + 1];n++) {
+                  seq->real_sequence[i][j][n] = intercept[k][m] + slope[k][m] * seq_index_parameter[n];
+                }
               }
+              break;
+            }
+
+            case true : {
+              for (m = 0;m < nb_segment[i];m++) {
+                for (n = change_point[m];n < change_point[m + 1];n++) {
+                  seq->real_sequence[i][j][n] = corrected_intercept[k][m] + corrected_slope[k][m] * seq_index_parameter[n];
+                }
+              }
+              break;
+            }
             }
           }
           j++;
@@ -1366,6 +1496,19 @@ Sequences* Sequences::segmentation_output(int *nb_segment , segment_model *model
     delete [] slope_standard_deviation;
     delete [] correlation;
 
+    if (continuity) {
+      for (i = 1;i < nb_variable;i++) {
+        delete [] predicted_value[i];
+        delete [] corrected_intercept[i];
+        delete [] corrected_slope[i];
+        delete [] corrected_variance[i];
+      }
+      delete [] predicted_value;
+      delete [] corrected_intercept;
+      delete [] corrected_slope;
+      delete [] corrected_variance;
+    }
+
     if (index_param_type == IMPLICIT_TYPE) {
       delete [] seq_index_parameter;
     }
@@ -1427,7 +1570,7 @@ Sequences* Sequences::segmentation_output(int *nb_segment , segment_model *model
 
 Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentifier ,
                                    int nb_segment , int *ichange_point , segment_model *model_type ,
-                                   sequence_type output) const
+                                   sequence_type output , bool continuity) const
 
 {
   bool status = true;
@@ -2054,7 +2197,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
 #   endif
 
     inb_segment[0] = nb_segment;
-    oseq = seq->segmentation_output(inb_segment , model_type , os , output , change_point);
+    oseq = seq->segmentation_output(inb_segment , model_type , os , output , change_point , continuity);
 
     if (output == SEQUENCE) {
       delete seq;
@@ -2870,7 +3013,7 @@ double Sequences::segmentation(int *nb_segment , segment_model *model_type , dou
 
 Sequences* Sequences::segmentation(StatError &error , ostream &os , int *nb_segment ,
                                    segment_model *model_type , int iidentifier ,
-                                   sequence_type output) const
+                                   sequence_type output , bool continuity) const
 
 {
   bool status = true;
@@ -3083,7 +3226,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int *nb_segm
       }
 #     endif
 
-      oseq = seq->segmentation_output(nb_segment , model_type , os , output);
+      oseq = seq->segmentation_output(nb_segment , model_type , os , output , NULL , continuity);
 
       if (output == SEQUENCE) {
         delete seq;
