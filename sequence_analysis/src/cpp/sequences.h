@@ -554,7 +554,8 @@ namespace sequence_analysis {
     int nb_parameter_computation(int index , int nb_segment , segment_model *model_type) const;
     double one_segment_likelihood(int index , segment_model *model_type , double **rank) const;
     Sequences* segmentation_output(int *nb_segment , segment_model *model_type , std::ostream &os ,
-                                   sequence_type output = SEQUENCE , int *ichange_point = NULL);
+                                   sequence_type output = SEQUENCE , int *ichange_point = NULL ,
+                                   bool continuity = false);
     double segmentation(int *nb_segment , segment_model *model_type , double **rank ,
                         double *isegmentation_likelihood = NULL , int *nb_parameter = NULL ,
                         double *segment_penalty = NULL);
@@ -784,10 +785,10 @@ namespace sequence_analysis {
 
     Sequences* segmentation(stat_tool::StatError &error , std::ostream &os , int iidentifier ,
                             int nb_segment , int *ichange_point , segment_model *model_type ,
-                            sequence_type output = SEQUENCE) const;
+                            sequence_type output = SEQUENCE , bool continuity = false) const;
     Sequences* segmentation(stat_tool::StatError &error , std::ostream &os , int *nb_segment ,
                             segment_model *model_type , int iidentifier = stat_tool::I_DEFAULT ,
-                            sequence_type output = SEQUENCE) const;
+                            sequence_type output = SEQUENCE , bool continuity = false) const;
     Sequences* segmentation(stat_tool::StatError &error , std::ostream &os , int iidentifier ,
                             int max_nb_segment , segment_model *model_type ,
                             stat_tool::model_selection_criterion criterion = stat_tool::LIKELIHOOD_SLOPE ,
