@@ -4,11 +4,14 @@
  */
 
 #include "stat_tool/stat_tools.h"
+#include "stat_tool/vectors.h"
 #include "stat_tool/distribution.h"
 #include "stat_tool/curves.h"
 #include "stat_tool/markovian.h"
 #include "stat_tool/discrete_mixture.h"
 #include "stat_tool/multivariate_mixture.h"
+
+using namespace stat_tool;
 
 int main(void) {
 

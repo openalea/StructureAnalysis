@@ -127,9 +127,14 @@ def Vectors(*args, **kargs):
     obj = args[0]
     ret = None
 
+    import openalea.core.path
+
     if isinstance(obj, str):
         # constructor from a filename
         ret = _Vectors(args[0])
+    elif isinstance(obj, openalea.core.path.path):
+        # constructor from a path
+        ret = _Vectors(str(args[0]))
     elif isinstance(obj, list):
         # Normal usage is Vectors([ [1,2,3],  [1,2,3], [4,5,6]])
         # If only one variable is requited, then Normal usage is

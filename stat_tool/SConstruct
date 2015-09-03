@@ -20,5 +20,5 @@ SConscript(pj(prefix,"src/cpp/SConscript"),
 SConscript(pj(prefix,"src/wrapper/SConscript"),
            exports='env')
 
-if env['with_test']:
-    SConscript(pj(prefix,"test/cpp/SConscript"), exports="env")
+#if env['with_test']:
+#    SConscript(pj(prefix,"test/cpp/SConscript"), exports="env")

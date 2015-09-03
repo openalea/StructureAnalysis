@@ -59,16 +59,16 @@ variable_type = {
     "ORDINAL" : VariableType.ORDINAL,
     "N" : VariableType.NUMERIC,
     "NUMERIC" : VariableType.NUMERIC,
-    "S" : VariableType.SYMBOLIC,
-    "SYMBOLIC" : VariableType.SYMBOLIC,
+    "S" : VariableType.NOMINAL,
+    "SYMBOLIC" : VariableType.NOMINAL,
     "C" : VariableType.CIRCULAR,
     "CIRCULAR" : VariableType.CIRCULAR,
     }
 sub_variable_type = {
     "N" : VariableType.NUMERIC,
     "NUMERIC" : VariableType.NUMERIC,
-    "S" : VariableType.SYMBOLIC,
-    "SYMBOLIC" : VariableType.SYMBOLIC,
+    "S" : VariableType.NOMINAL,
+    "SYMBOLIC" : VariableType.NOMINAL,
     }
 
 pearson_type = {
