@@ -28,7 +28,7 @@ from _sequence_analysis import _MarkovianSequences
 from _sequence_analysis import _Sequences
 from _sequence_analysis import _SemiMarkov
 from _sequence_analysis import _SemiMarkovData
-from _sequence_analysis import _TopParameters
+# from _sequence_analysis import _TopParameters
 from _sequence_analysis import _VariableOrderMarkov
 from _sequence_analysis import _VariableOrderMarkovData
 from _sequence_analysis import _NonHomogeneousMarkov
@@ -36,7 +36,7 @@ from _sequence_analysis import _NonHomogeneousMarkovData
 from _sequence_analysis import _Renewal
 from _sequence_analysis import _HiddenVariableOrderMarkov
 from _sequence_analysis import _HiddenSemiMarkov
-from _sequence_analysis import _Tops
+# from _sequence_analysis import _Tops
 from _sequence_analysis import _RenewalData
 from _sequence_analysis import _TimeEvents
 

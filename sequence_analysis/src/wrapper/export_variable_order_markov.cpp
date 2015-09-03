@@ -272,7 +272,7 @@ void class_variable_order_markov() {
 
 
   VariableOrderMarkovData* get_markov_data() const { return markov_data; }
-  NonparametricSequenceProcess* get_nonparametric_process(int variable) const{ return nonparametric_process[variable]; }
+  CategoricalSequenceProcess* get_nonparametric_process(int variable) const{ return nonparametric_process[variable]; }
   DiscreteParametricProcess** get_parametric_process() const { return parametric_process; }
   DiscreteParametricProcess* get_parametric_process(int variable)const { return parametric_process[variable]; }
 */

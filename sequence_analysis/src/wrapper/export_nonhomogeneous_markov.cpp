@@ -146,7 +146,7 @@ void class_nonhomogeneous_markov() {
     double likelihood_computation(const MarkovianSequences &seq , int index = I_DEFAULT) const;
 
     NonhomogeneousMarkovData* get_markov_data() const { return markov_data; }
-    NonparametricSequenceProcess* get_process() const { return process; }
+    CategoricalSequenceProcess* get_process() const { return process; }
    */
 }
 #undef WRAP

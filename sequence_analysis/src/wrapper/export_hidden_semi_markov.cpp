@@ -224,14 +224,14 @@ void class_hidden_semi_markov() {
 
 /*
  *
-    HiddenSemiMarkov(const Chain *pchain , const NonparametricSequenceProcess *poccupancy , int inb_output_process , NonparametricProcess **pobservation ,    int length , bool counting_flag)  :SemiMarkov(pchain , poccupancy , inb_output_process , pobservation , length ,  counting_flag) {}
-    HiddenSemiMarkov(const Chain *pchain , const NonparametricSequenceProcess *poccupancy , int inb_output_process , NonparametricProcess **nonparametric_observation , DiscreteParametricProcess **parametric_observation , int length , bool counting_flag) :SemiMarkov(pchain , poccupancy , inb_output_process , nonparametric_observation , parametric_observation , length , counting_flag) {}
+    HiddenSemiMarkov(const Chain *pchain , const CategoricalSequenceProcess *poccupancy ,             int inb_output_process , NonparametricProcess **pobservation ,    int length , bool counting_flag)  :SemiMarkov(pchain , poccupancy , inb_output_process , pobservation , length ,  counting_flag) {}
+    HiddenSemiMarkov(const Chain *pchain , const CategoricalSequenceProcess *poccupancy ,          int inb_output_process , NonparametricProcess **nonparametric_observation ,    DiscreteParametricProcess **parametric_observation , int length , bool counting_flag)    :SemiMarkov(pchain , poccupancy , inb_output_process , nonparametric_observation ,     parametric_observation , length , counting_flag) {}
     HiddenSemiMarkov(const HiddenSemiMarkov &hsmarkov , bool data_flag = true , int param = I_DEFAULT)
 
     bool spreadsheet_write(StatError &error , const char *path) const;
 
-    HiddenSemiMarkov(const Chain *pchain , const NonparametricSequenceProcess *poccupancy ,  int inb_output_process , NonparametricProcess **pobservation ,  int length , bool counting_flag)    :SemiMarkov(pchain , poccupancy , inb_output_process , pobservation , length ,  counting_flag) {}
-    HiddenSemiMarkov(const Chain *pchain , const NonparametricSequenceProcess *poccupancy ,    int inb_output_process , NonparametricProcess **nonparametric_observation ,int observationn , int length , bool counting_flag)    :SemiMarkov(pchain , poccupancy , inb_output_process , nonparametric_observation ,                 parametric_observation , length , counting_flag) {}
+    HiddenSemiMarkov(const Chain *pchain , const CategoricalSequenceProcess *poccupancy ,  int inb_output_process , NonparametricProcess **pobservation ,  int length , bool counting_flag)    :SemiMarkov(pchain , poccupancy , inb_output_process , pobservation , length ,  counting_flag) {}
+    HiddenSemiMarkov(const Chain *pchain , const CategoricalSequenceProcess *poccupancy ,    int inb_output_process , NonparametricProcess **nonparametric_observation ,int observationn , int length , bool counting_flag)    :SemiMarkov(pchain , poccupancy , inb_output_process , nonparametric_observation ,                 parametric_observation , length , counting_flag) {}
 
 
     double likelihood_computation(const MarkovianSequences &seq , double *posterior_probability = 0 ,  int index = I_DEFAULT) const;

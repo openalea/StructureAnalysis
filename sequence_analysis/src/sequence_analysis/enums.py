@@ -153,7 +153,7 @@ type_map = {
             "INT": INT_VALUE,
             "REAL" : REAL_VALUE,
             "STATE": STATE,
-            "NB_INTERNODE":  NB_INTERNODE,
+            # "NB_INTERNODE":  NB_INTERNODE,
             "AUXILIARY":  AUXILIARY,
             }
 
@@ -269,8 +269,10 @@ from openalea.sequence_analysis._sequence_analysis import \
     _Sequences, _MarkovianSequences, _VariableOrderMarkovData, \
     _SemiMarkovData, _NonHomogeneousMarkovData, _VariableOrderMarkov,\
     _HiddenVariableOrderMarkov, _HiddenSemiMarkov, _SemiMarkov, \
-    _Renewal,_RenewalData,_TimeEvents, _Tops, \
-    _TopParameters, _Correlation, _NonHomogeneousMarkov
+    _Renewal,_RenewalData,_TimeEvents, \
+    _Correlation, _NonHomogeneousMarkovData
+    # Tops, _TopParameters, \
+    
     
 
 sequence_alignment_first_arg = [_Sequences,
@@ -321,13 +323,13 @@ all_sequences_types = [ _VariableOrderMarkov,
                         _MarkovianSequences,
                         _SemiMarkovData,
                         _NonHomogeneousMarkovData,
-                        _NonHomogeneousMarkov,
+                        # _NonHomogeneousMarkov,
                         _Renewal,
                         _RenewalData,
                         _TimeEvents,
                         _Sequences,
-                        _Tops,
-                        _TopParameters,
+                        # _Tops,
+                        # _TopParameters,
                         _Correlation
                         ]
 

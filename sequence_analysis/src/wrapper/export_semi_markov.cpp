@@ -253,7 +253,7 @@ class_semi_markov()
    *
    SemiMarkov();
    SemiMarkov(char itype , int inb_state , int inb_output_process , int *nb_value);
-   SemiMarkov(const Chain *pchain , const NonparametricSequenceProcess *poccupancy , const NonparametricProcess *pobservation , int length ,  bool counting_flag);
+   SemiMarkov(const Chain *pchain , const CategoricalSequenceProcess *poccupancy , const NonparametricProcess *pobservation , int length ,  bool counting_flag);
    SemiMarkov(const SemiMarkov &smarkov , bool data_flag = true ,  int param = I_DEFAULT)  :Chain(smarkov) { copy(smarkov , data_flag , param); }
 
     bool spreadsheet_write(StatError &error , const char *path) const;
@@ -268,7 +268,7 @@ class_semi_markov()
 
    Forward** get_forward() const { return forward; }
 
-   NonparametricSequenceProcess* get_nonparametric_process(int variable)   const { return nonparametric_process[variable]; }
+   CategoricalSequenceProcess* get_nonparametric_process(int variable)   const { return nonparametric_process[variable]; }
    DiscreteParametricProcess** get_parametric_process() const { return parametric_process; }
 
 

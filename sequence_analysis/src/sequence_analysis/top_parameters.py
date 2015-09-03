@@ -21,11 +21,11 @@ __version__ = "$Id$"
 import os
 import openalea.stat_tool.interface as interface
 
-from openalea.sequence_analysis._sequence_analysis import _TopParameters
-from openalea.sequence_analysis._sequence_analysis import MAX_POSITION
-from openalea.sequence_analysis._sequence_analysis import DEFAULT_MAX_POSITION
-from openalea.sequence_analysis._sequence_analysis import TOP_MIN_PROBABILITY
-from openalea.sequence_analysis._sequence_analysis import MIN_RHYTHM_RATIO
+# from openalea.sequence_analysis._sequence_analysis import _TopParameters
+#from openalea.sequence_analysis._sequence_analysis import MAX_POSITION
+#from openalea.sequence_analysis._sequence_analysis import DEFAULT_MAX_POSITION
+#from openalea.sequence_analysis._sequence_analysis import TOP_MIN_PROBABILITY
+#from openalea.sequence_analysis._sequence_analysis import MIN_RHYTHM_RATIO
 
 from openalea.stat_tool import error
 
@@ -34,7 +34,7 @@ __all__ = ['TopParameters',
 
 
 # Extend dynamically class
-interface.extend_class( _TopParameters, interface.StatInterface)
+# interface.extend_class( _TopParameters, interface.StatInterface)
 
 # Add methods to _Vectors
 

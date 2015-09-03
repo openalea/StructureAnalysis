@@ -47,10 +47,10 @@ from openalea.sequence_analysis.enums import stochastic_process_type
 from openalea.sequence_analysis._sequence_analysis import\
     _HiddenSemiMarkov,\
     _HiddenVariableOrderMarkov,\
-    _Tops,\
     _VariableOrderMarkov,\
     _RenewalData,\
     _TimeEvents
+# _Tops,\
 
 from openalea.stat_tool._stat_tool import _DiscreteMixture
 from openalea.stat_tool._stat_tool import _Compound
@@ -385,6 +385,8 @@ def _estimate_hidden_semi_markov(obj, *args, **kargs):
                         "third argument must be LeftRight or Irreducible.")
             if args[2] == "LeftRight":
                 LeftRight = True
+            else:
+                LeftRight = False
         elif args[0] == "Equilibrium":
             error.CheckArgumentsLength(args, 2, 2)
             Type = 'e'

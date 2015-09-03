@@ -25,7 +25,7 @@ from openalea.stat_tool._stat_tool import _CompoundData
 
 from openalea.sequence_analysis._sequence_analysis import srand
 from openalea.sequence_analysis._sequence_analysis import _Renewal
-from openalea.sequence_analysis._sequence_analysis import _TopParameters
+# from openalea.sequence_analysis._sequence_analysis import _TopParameters
 from openalea.sequence_analysis._sequence_analysis import _TimeEvents
 from openalea.sequence_analysis._sequence_analysis import \
     _VariableOrderMarkov,\

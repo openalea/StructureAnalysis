@@ -135,7 +135,7 @@ def TimeEvents(*args, **kargs):
         # should work with Histogram, Mixture_data, Conv_data, comp_data
         error.CheckArgumentsLength(args, 2, 2)
         error.CheckType([args[0], args[1]], \
-                        [[_DiscreteDistributionData, _MixtureData,\
+                        [[_DiscreteDistributionData, _DiscreteMixtureData,\
                           _ConvolutionData, _CompoundData], int])
         distribution = args[0]
         time = args[1]
