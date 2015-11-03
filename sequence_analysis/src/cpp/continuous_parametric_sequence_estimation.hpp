@@ -829,8 +829,8 @@ void MarkovianSequences::linear_model_estimation(Type ***state_sequence_count , 
 
 {
   register int i , j , k;
-  double diff , *mean , *index_parameter_mean , *variance , *index_parameter_variance , *covariance ,
-         *residual_mean , *residual_square_sum , *residual_variance;
+  double diff , threshold , *mean , *index_parameter_mean , *variance , *index_parameter_variance ,
+         *covariance , *residual_mean , *residual_square_sum , *residual_variance;
   Type *state_frequency;
 
 
@@ -1211,8 +1211,25 @@ void MarkovianSequences::linear_model_estimation(Type ***state_sequence_count , 
     if (state_frequency[i] > 2) {
 //      process->observation[i]->dispersion = sqrt(residual_variance[i] / state_frequency[i]);
       process->observation[i]->dispersion = sqrt(residual_variance[i] / (state_frequency[i] - 2));
-      if (process->observation[i]->dispersion / mean[i] < GAUSSIAN_MIN_VARIATION_COEFF) {
-        process->observation[i]->dispersion = mean[i] * GAUSSIAN_MIN_VARIATION_COEFF;
+
+      if (mean[i] != 0.) {
+        if (process->observation[i]->dispersion / mean[i] < GAUSSIAN_MIN_VARIATION_COEFF) {
+          process->observation[i]->dispersion = mean[i] * GAUSSIAN_MIN_VARIATION_COEFF;
+        }
+      }
+
+      else {
+        threshold = sqrt(variance_computation(variable , mean_computation(variable)));
+
+#       ifdef MESSAGE
+        cout << "\nTHRESHOLD: " << STAT_label[STATL_VARIABLE] << " " << variable + 1 << "   "
+             << STAT_word[STATW_STATE] << " " << i << "   " << threshold << endl;
+#       endif
+
+        threshold *= RESIDUAL_STANDARD_DEVIATION_COEFF * 1.e-4;
+        if (process->observation[i]->dispersion < threshold) {
+          process->observation[i]->dispersion = threshold;
+        }
       }
     }
 
