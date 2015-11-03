@@ -5275,6 +5275,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
         max_likelihood[0] = penalized_likelihood[0][1];
 
         if (max_nb_segment - min_nb_segment >= SLOPE_NB_SEGMENT_RANGE) {
+//          penalized_likelihood[1][1] = 2 * (likelihood[1] - 1.5 * penalty_shape[1] * slope);
           penalized_likelihood[1][1] = 2 * (likelihood[1] - 2 * penalty_shape[1] * slope);
           max_likelihood[1] = penalized_likelihood[1][1];
         }
@@ -5288,6 +5289,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
         max_likelihood[2] = penalized_likelihood[2][1];
 
         if (max_nb_segment - min_nb_segment >= SLOPE_NB_SEGMENT_RANGE) {
+//          penalized_likelihood[3][1] = 2 * (segmentation_likelihood[1] - 1.5 * penalty_shape[1] * segmentation_slope);
           penalized_likelihood[3][1] = 2 * (segmentation_likelihood[1] - 2 * penalty_shape[1] * segmentation_slope);
           max_likelihood[3] = penalized_likelihood[3][1];
         }
@@ -5324,6 +5326,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
           }
 
           if (max_nb_segment - min_nb_segment >= SLOPE_NB_SEGMENT_RANGE) {
+//            penalized_likelihood[1][i] = 2 * (likelihood[i] - 1.5 * penalty_shape[i] * slope);
             penalized_likelihood[1][i] = 2 * (likelihood[i] - 2 * penalty_shape[i] * slope);
             if (penalized_likelihood[1][i] > max_likelihood[1]) {
               max_likelihood[1] = penalized_likelihood[1][i];
@@ -5345,6 +5348,8 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
           }
 
           if (max_nb_segment - min_nb_segment >= SLOPE_NB_SEGMENT_RANGE) {
+//            penalized_likelihood[3][i] = 2 * (segmentation_likelihood[i] -
+//                                          1.5 * penalty_shape[i] * segmentation_slope);
             penalized_likelihood[3][i] = 2 * (segmentation_likelihood[i] -
                                           2 * penalty_shape[i] * segmentation_slope);
             if (penalized_likelihood[3][i] > max_likelihood[3]) {
