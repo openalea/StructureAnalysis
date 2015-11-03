@@ -574,18 +574,23 @@ ostream& ContinuousParametric::ascii_characteristic_print(ostream &os , bool fil
   switch (ident) {
 
   case GAMMA : {
-    double variance = shape * scale * scale;
+    if (shape != 0.) {
+      double variance = shape * scale * scale;
 
-    os << STAT_label[STATL_MEAN] << ": " << shape * scale << "   "
-       << STAT_label[STATL_VARIANCE] << ": " << variance << "   "
-       << STAT_label[STATL_STANDARD_DEVIATION] << ": " << sqrt(variance) << endl;
+      os << STAT_label[STATL_MEAN] << ": " << shape * scale << "   "
+         << STAT_label[STATL_VARIANCE] << ": " << variance << "   "
+         << STAT_label[STATL_STANDARD_DEVIATION] << ": " << sqrt(variance) << endl;
 
-    if (shape > 0.) {
       if (file_flag) {
         os << "# ";
       }
       os << STAT_label[STATL_SKEWNESS_COEFF] << ": " << 2 / sqrt(shape) << "   "
          << STAT_label[STATL_KURTOSIS_COEFF] << ": " << 6 / shape << endl;
+    }
+
+    else {
+      os << STAT_label[STATL_MEAN] << ": " << 0 << "   "
+         << STAT_label[STATL_VARIANCE] << ": " << 0 << endl;
     }
     break;
   }
@@ -1073,7 +1078,7 @@ ostream& ContinuousParametric::spreadsheet_parameter_print(ostream &os) const
 
   case GAMMA : {
     os << STAT_word[STATW_SHAPE] << "\t" << shape;
-    if (shape > 0.) {
+    if (shape != 0.) {
       os << "\t" << STAT_word[STATW_SCALE] << "\t" << scale;
     }
     break;
@@ -1146,15 +1151,20 @@ ostream& ContinuousParametric::spreadsheet_characteristic_print(ostream &os) con
   switch (ident) {
 
   case GAMMA : {
-    double variance = shape * scale * scale;
+    if (shape != 0.) {
+      double variance = shape * scale * scale;
 
-    os << STAT_label[STATL_MEAN] << "\t" << shape * scale << "\t"
-       << STAT_label[STATL_VARIANCE] << "\t" << variance << "\t"
-       << STAT_label[STATL_STANDARD_DEVIATION] << "\t" << sqrt(variance) << endl;
+      os << STAT_label[STATL_MEAN] << "\t" << shape * scale << "\t"
+         << STAT_label[STATL_VARIANCE] << "\t" << variance << "\t"
+         << STAT_label[STATL_STANDARD_DEVIATION] << "\t" << sqrt(variance) << endl;
 
-    if (shape > 0.) {
       os << STAT_label[STATL_SKEWNESS_COEFF] << "\t" << 2 / sqrt(shape) << "\t"
          << STAT_label[STATL_KURTOSIS_COEFF] << "\t" << 6 / shape << endl;
+    }
+
+    else {
+      os << STAT_label[STATL_MEAN] << "\t" << 0 << "\t"
+         << STAT_label[STATL_VARIANCE] << "\t" << 0 << endl;
     }
     break;
   }
@@ -1575,22 +1585,26 @@ ostream& ContinuousParametric::plot_title_print(ostream &os) const
 
   if (ident == GAMMA) {
     os << shape;
-    if (shape > 0.) {
+    if (shape != 0.) {
       os << ", " << scale;
     }
   }
-  if (ident == INVERSE_GAUSSIAN) {
+
+  else if (ident == INVERSE_GAUSSIAN) {
     os << location << ", " << scale;
   }
+
   else if (ident == ZERO_INFLATED_GAMMA) {
     os << zero_probability;
     if (zero_probability < 1.) {
       os << ", " << shape << ", " << scale;
     }
   }
+
   else if (ident == LINEAR_MODEL) {
     os << intercept << ", " << slope << ", " << dispersion;
   }
+
   else {
     os << location << ", " << dispersion;
   }
