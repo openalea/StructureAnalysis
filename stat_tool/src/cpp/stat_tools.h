@@ -276,7 +276,7 @@ namespace stat_tool {
   const int CHI2_FREQUENCY = 2;          // effectif theorique minimum pour un
                                          // test d'ajustement du Chi2
 
-  const int MARGINAL_DISTRIBUTION_MAX_VALUE = 20000;  // valeur maximum pour la construction
+  const int MARGINAL_DISTRIBUTION_MAX_VALUE = 25000;  // valeur maximum pour la construction
                                                       // de la loi marginale
   const int HISTOGRAM_FREQUENCY = 10;    // frequence moyenne pour definir le pas de regroupement
                                          // d'un histogramme
@@ -307,7 +307,7 @@ namespace stat_tool {
                                          // automatique (sortie graphique)
   const double PLOT_MASS_THRESHOLD = 1.e-3;  // valeur minimale pour afficher un 0 apres la derniere
                                              // valeur possible (sortie graphique)
-  const double YSCALE = 1.2;             // facteur d'echelle axe y (sortie graphique)
+  const double YSCALE = 1.1;             // facteur d'echelle axe y (sortie graphique)
   const double PLOT_RANGE_RATIO = 4.;    // seuil pour l'affichage a partir de 0
 
 
