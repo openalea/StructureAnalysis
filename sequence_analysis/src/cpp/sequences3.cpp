@@ -624,7 +624,7 @@ Sequences* Sequences::ascii_read(StatError &error , const char *path , bool old_
 
 #     ifdef DEBUG
       for (i = 0;i < nb_sequence;i++) {
-        cout << length[i] << " ";
+        cout << i << " " << length[i] << " | ";
       }
       cout << endl;
 #     endif
@@ -2290,7 +2290,7 @@ bool Sequences::plot_data_write(StatError &error , const char *prefix ,
             }
 
             out_file << "plot [" << min_index_parameter << ":" << max_index_parameter << "] ["
-                     << MIN(min , 0) << ":" << max * YSCALE << "] ";
+                     << MIN(min , 0) << ":" << (max >= 0. ? max * YSCALE : max * (2. - YSCALE)) << "] ";
             for (k = 0;k < nb_sequence;k++) {
               out_file << "\"" << label((data_file_name[length[k]].str()).c_str()) << "\" using "
                        << length_nb_sequence[length[k]] * (nb_variable + 1) + 1 << " : "
@@ -2339,7 +2339,7 @@ bool Sequences::plot_data_write(StatError &error , const char *prefix ,
             }
 
             out_file << "plot [0:" << max_length - 1 << "] [" << MIN(min , 0)
-                     << ":" << max * YSCALE << "] ";
+                     << ":" << (max >= 0. ? max * YSCALE : max * (2. - YSCALE)) << "] ";
             for (k = 0;k < nb_sequence;k++) {
               out_file << "\"" << label((data_file_name[length[k]].str()).c_str()) << "\" using "
                        << length_nb_sequence[length[k]] * nb_variable + j + 1;
@@ -2473,7 +2473,7 @@ MultiPlotSet* Sequences::get_plotable_data(StatError &error) const
           }
         }
 
-        plot[i].yrange = Range(MIN(min , 0) , max * YSCALE);
+        plot[i].yrange = Range(MIN(min , 0) , (max >= 0. ? max * YSCALE : max * (2. - YSCALE)));
         if (max - min < TIC_THRESHOLD) {
           plot[i].ytics = 1;
         }
