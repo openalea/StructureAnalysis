@@ -186,6 +186,8 @@ namespace sequence_analysis {
   const int MAX_LENGTH = 1000000;        // longueur maximum des sequences simulees
   const int CUMUL_LENGTH = 1000000;      // longueur maximum cumulee des sequences simulees
 
+  const	double RESIDUAL_STANDARD_DEVIATION_COEFF = 1.e-6;  // seuil pour l'estimation de l'ecart type residuel
+
   enum sequence_type {
     SEQUENCE ,
     TREND ,
