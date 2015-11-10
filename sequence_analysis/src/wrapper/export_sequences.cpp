@@ -83,7 +83,7 @@ public:
         boost::python::list& input_vertex_identifiers,
         boost::python::list& input_index_parameters,
         boost::python::list& input_types,
-        index_parameter_type input_index_param_type
+        int iinput_index_param_type
         )
   {
     int nb_sequences = boost::python::len(input_sequences);
@@ -91,7 +91,8 @@ public:
     int nb_types = boost::python::len(input_types);
     int nb_variables = boost::python::len(input_types);
     int nb_vectors = 0;
-
+    index_parameter_type input_index_param_type = index_parameter_type(iinput_index_param_type);
+    
     Sequences *ret = NULL;
 
     int *lengths = NULL;
@@ -813,10 +814,25 @@ public:
   }
 
   static Sequences*
-  cluster_limit(const Sequences &seq, int variable, boost::python::list& limit)
+  cluster_step_round(const Sequences &seq, int variable, int step, int imode)
+  {
+    StatError error;
+      
+    Sequences *ret = NULL;
+    
+    rounding rmode = rounding(imode);
+    ret = seq.cluster(error, variable, step, rmode);
+    if (!ret)
+      sequence_analysis::wrap_util::throw_error(error);
+    return ret;
+  }
+
+  static Sequences*
+  cluster_limit(const Sequences &seq, int variable, boost::python::list& limit, bool add)
   {
 
     StatError error;
+    MarkovianSequences *mseq = new MarkovianSequences(seq);
 
     int nb_limit = len(limit);
     bool is_float = true;
@@ -848,15 +864,17 @@ public:
     // Call correct function
     if (is_float)
       {
-        ret = seq.cluster(error, variable, nb_limit, ldouble);
+        ret = mseq->cluster(error, variable, nb_limit, ldouble);
         delete[] ldouble;
       }
     else
       {
-        ret = seq.cluster(error, variable, nb_limit, lint);
+        ret = mseq->cluster(error, variable, nb_limit, lint, add);
         delete[] lint;
       }
-
+    delete mseq;
+    mseq = NULL;
+    
     FOOTER;
   }
 
@@ -993,9 +1011,10 @@ public:
   }
 
   static Sequences*
-  round(const Sequences &seq, int variable, rounding mode)
+  round(const Sequences &seq, int variable, int imode)
   {
-    SIMPLE_METHOD_TEMPLATE_1(seq, round, Sequences, variable, mode);
+      rounding rmode = rounding(imode);
+      SIMPLE_METHOD_TEMPLATE_1(seq, round, Sequences, variable, rmode);
   }
 
   //cumulate
@@ -1462,6 +1481,7 @@ class_sequences()
    DEF_RETURN_VALUE("multiple_alignment", SequencesWrap::multiple_alignment, args(""), "todo")
    DEF_RETURN_VALUE("build_vectors", SequencesWrap::build_vectors, args("index_variable"), "build a vector from sequence")
    DEF_RETURN_VALUE("cluster_step", SequencesWrap::cluster_step, args("variable", "step"),"Cluster Step")
+   DEF_RETURN_VALUE("cluster_step", SequencesWrap::cluster_step_round, args("variable", "step", "round"),"Cluster Step")
    DEF_RETURN_VALUE("cluster_limit", SequencesWrap::cluster_limit, args("variable", "limits"),"Cluster limit")
    DEF_RETURN_VALUE("correlation_computation", SequencesWrap::correlation_computation, args("variable1", "variable2", "type","max_lag", "normalization"),"compute correlation")
    DEF_RETURN_VALUE("difference", SequencesWrap::difference,args("variable", "first_element"),"Difference")
