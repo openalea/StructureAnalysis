@@ -8,7 +8,7 @@
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: test.cpp 18469 2015-07-29 11:27:56Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -658,7 +658,7 @@ void Test::t_value_computation()
     students_t dist(df1);
 
 
-    value = quantile(complement(dist , critical_probability));
+    value = quantile(complement(dist , (one_side ? critical_probability : critical_probability / 2.)));
   }
 
   else {

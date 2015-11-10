@@ -8,7 +8,7 @@
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: change_points1.cpp 18669 2015-11-09 12:08:08Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -1284,8 +1284,7 @@ Sequences* Sequences::segmentation_output(int *nb_segment , segment_model *model
              << STAT_label[STATL_SLOPE] << ", " << STAT_label[STATL_CORRELATION_COEFF] << " ("
              << STAT_label[STATL_LIMIT_CORRELATION_COEFF] << "), "
              << STAT_label[STATL_RESIDUAL] << " " << STAT_label[STATL_STANDARD_DEVIATION] << ", "
-             << SEQ_label[SEQL_CHANGE_POINT_AMPLITUDE] << " (" << SEQ_label[SEQL_CONFIDENCE_INTERVALS] << " | "
-             << SEQ_label[SEQL_PREDICTION_INTERVALS] << ")" << endl;
+             << SEQ_label[SEQL_CHANGE_POINT_AMPLITUDE] << " (" << SEQ_label[SEQL_CONFIDENCE_INTERVALS] << ")" << endl;
 
           test = new Test(STUDENT , false , change_point[1] - change_point[0] - 2 , I_DEFAULT , D_DEFAULT);
           test->critical_probability = ref_critical_probability[0];
@@ -1309,12 +1308,10 @@ Sequences* Sequences::segmentation_output(int *nb_segment , segment_model *model
               diff = seq_index_parameter[change_point[k + 1]] - index_parameter_mean[j][k];
               buff = test->value * sqrt(variance[j][k] * (1. / (double)(change_point[k + 1] - change_point[k]) +
                      diff * diff / index_parameter_variance[j][k]));
+
+//              os << test->value << ", ";
               os << MAX(intercept[j][k] + slope[j][k] * seq_index_parameter[change_point[k + 1]] - buff , 0) << ", "
                  << intercept[j][k] + slope[j][k] * seq_index_parameter[change_point[k + 1]] + buff << " | ";
-              buff = test->value * sqrt(variance[j][k] * (1 + 1. / (double)(change_point[k + 1] - change_point[k]) +
-                     diff * diff / index_parameter_variance[j][k]));
-              os << MAX(intercept[j][k] + slope[j][k] * seq_index_parameter[change_point[k + 1]] - buff , 0) << ", "
-                 << intercept[j][k] + slope[j][k] * seq_index_parameter[change_point[k + 1]] + buff << " || ";
 
               delete test;
 
@@ -1324,10 +1321,6 @@ Sequences* Sequences::segmentation_output(int *nb_segment , segment_model *model
 
               diff = seq_index_parameter[change_point[k + 1]] - index_parameter_mean[j][k + 1];
               buff = test->value * sqrt(variance[j][k + 1] * (1. / (double)(change_point[k + 2] - change_point[k + 1]) +
-                     diff * diff / index_parameter_variance[j][k + 1]));
-              os << MAX(intercept[j][k + 1] + slope[j][k + 1] * seq_index_parameter[change_point[k + 1]] - buff , 0) << ", "
-                 << intercept[j][k + 1] + slope[j][k + 1] * seq_index_parameter[change_point[k + 1]] + buff << " | ";
-              buff = test->value * sqrt(variance[j][k + 1] * (1 + 1. / (double)(change_point[k + 2] - change_point[k + 1]) +
                      diff * diff / index_parameter_variance[j][k + 1]));
               os << MAX(intercept[j][k + 1] + slope[j][k + 1] * seq_index_parameter[change_point[k + 1]] - buff , 0) << ", "
                  << intercept[j][k + 1] + slope[j][k + 1] * seq_index_parameter[change_point[k + 1]] + buff << ")";
