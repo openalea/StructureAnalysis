@@ -8,7 +8,7 @@
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: sequence_label.cpp 18667 2015-11-09 12:03:24Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -234,7 +234,6 @@ const char *SEQ_label[] = {
   "global standard deviation" ,
   "piecewise linear function" ,
   "confidence intervals" ,
-  "prediction intervals" ,
   "number of segments" ,
   "posterior probability" ,
   "penalty" ,
