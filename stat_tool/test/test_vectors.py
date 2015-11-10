@@ -5,6 +5,8 @@ from openalea.stat_tool.vectors import Vectors
 from openalea.stat_tool.vectors import VarianceAnalysis
 from openalea.stat_tool.vectors import ContingencyTable
 from openalea.stat_tool.vectors import ComputeRankCorrelation
+from openalea.stat_tool.vectors import OutputFormat
+from openalea.stat_tool.enums import variance_type
 
 from tools import interface
 from tools import runTestClass
@@ -152,7 +154,7 @@ class Test(interface):
         # todo: finalise and make method variance_analysis robust.
         vec10 = self.vec10
         va = VarianceAnalysis(vec10, 1, 4, "O")
-        assert vec10.variance_analysis(1, 4, 1, "whatever", "whatever") == \
+        assert vec10.variance_analysis(1, 4, 1, "whatever", variance_type['O']) == \
             str(va)
     
         try:
@@ -167,7 +169,7 @@ class Test(interface):
         ct = ContingencyTable(vec10, 1, 4)
         assert ct and str(ct)
 
-        ct2 = vec10.contingency_table(1, 4, "what", "what")
+        ct2 = vec10.contingency_table(1, 4, "what", OutputFormat.ASCII)
         assert ct == ct2
 
     def test_rank_computation(self):

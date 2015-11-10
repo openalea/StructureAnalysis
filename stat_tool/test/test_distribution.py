@@ -143,7 +143,7 @@ class TestDistribution():
         assert d.get_inf_bound == 0
         assert d.get_probability == -1
         assert d.get_parameter == -1
-        assert d.get_ident == 4
+        assert d.get_ident() == 4
 
         d = Uniform(0, 10)
         assert list(d.simulate(1000))
@@ -159,7 +159,7 @@ class TestDistribution():
         assert d.get_inf_bound == 0
         assert d.get_probability == 0.5
         assert d.get_parameter == -1
-        assert d.get_ident == 1
+        assert d.get_ident() == 1
 
         d = Binomial(0, 10, 0.5)
         assert list(d.simulate(1000))
@@ -175,7 +175,7 @@ class TestDistribution():
         assert d.get_inf_bound == 0
         assert d.get_probability == -1
         assert d.get_parameter == 2
-        assert d.get_ident == 2
+        assert d.get_ident() == 2
 
         d = Poisson(0, 2)
         assert list(d.simulate(1000))
@@ -191,7 +191,7 @@ class TestDistribution():
         assert d.get_inf_bound == 0
         assert d.get_probability == 0.5
         assert d.get_parameter == 1
-        assert d.get_ident == 3
+        assert d.get_ident() == 3
         d = NegativeBinomial(0, 1, 0.5)
         assert list(d.simulate(1000))
 

@@ -103,8 +103,8 @@ class Test(interface):
     def test_extract_data(self):
         """run and test the extract_data methods"""
 
-        h = Histogram(get_shared_data( "meri2.his"))
-        m = h.estimate_mixture("B", "NB")
+        h = Histogram(str(get_shared_data( "meri2.his")))
+        m = h.estimate_DiscreteMixture("B", "NB")
 
         d = m.extract_data()
         assert d

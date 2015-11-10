@@ -237,12 +237,12 @@ class EstimateFunctions(object):
 
         if not NbComponent: # "FIXED"
             imixt = _DiscreteMixture(pcomponent)
-            ret = histo.mixture_estimation1(imixt, estimate, MinInfBound,
+            ret = histo.discrete_mixture_estimation1(imixt, estimate, MinInfBound,
                                             InfBoundStatus, DistInfBoundStatus)
 
             return ret
         else:  # "ESTIMATED"
-            ret = histo.mixture_estimation2(ident, MinInfBound, InfBoundStatus,
+            ret = histo.discrete_mixture_estimation2(ident, MinInfBound, InfBoundStatus,
                                             DistInfBoundStatus, Penalty)
             return ret
 

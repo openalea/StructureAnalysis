@@ -977,11 +977,13 @@ public:
 
   static string
   contingency_table(const Vectors& v, int variable1, int variable2,
-      const string& filename, output_format format)
+      const string& filename, int iformat)
   {
     StatError error;
     std::stringstream s;
     bool ret;
+    output_format format = output_format(iformat);   
+    
     ret = v.contingency_table(error, s, variable1, variable2, filename.c_str(),
         format);
 
@@ -994,11 +996,12 @@ public:
   static string
   variance_analysis(const Vectors& v, int class_variable,
       int response_variable, int response_type, const string& filename,
-      output_format format)
+      int iformat)
   {
     StatError error;
     std::stringstream s;
     bool ret;
+    output_format format = output_format(iformat);
 
     ret = v.variance_analysis(error, s, class_variable, response_variable,
         response_type, filename.c_str(), format);
@@ -1010,11 +1013,13 @@ public:
   }
 
   static string
-  rank_correlation_computation(const Vectors& input, correlation_type correl_type, const string &filename)
+  rank_correlation_computation(const Vectors& input, int icorrel_type, const string &filename)
   {
     StatError error;
     std::stringstream os;
     bool ret;
+    correlation_type correl_type = correlation_type(icorrel_type);
+    
     ret = input.rank_correlation_computation(error, os, correl_type, filename.c_str());
     //std::cout << os.str()<<endl;
     return os.str();
