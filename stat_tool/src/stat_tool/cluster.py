@@ -27,6 +27,8 @@ from enums import format_type
 from enums import criterion_type
 from enums import algorithm_type
 from enums import cluster_type
+from enums import round_type
+mode_type = round_type
 
 __all__ = [
      "_DistanceMatrix",
@@ -151,7 +153,10 @@ def Cluster(obj, utype, *args, **kargs):
     # check markovian_sequences call in Sequences
     AddVariable = error.ParseKargs(kargs, "AddVariable", False,
                                    possible=[False, True])
-
+                                   
+    possible_r = [str(f) for f in mode_type] # possible rounding modes
+    RoundingVariable = error.ParseKargs(kargs, "Round", "ROUND",
+                                       possible=possible_r)
 
     error.CheckArgumentsLength(args, 1, 2)
 
@@ -204,7 +209,7 @@ def Cluster(obj, utype, *args, **kargs):
             try:
                 ret = func(*args)
             except:
-                ret = func(args[0], args[1], AddVariable)
+                ret = func(args[0], args[1], mode_type[RoundingVariable]) # sequences case
         else:
             raise ValueError("""Extra arguments provided 
             (to specify variable value ?).

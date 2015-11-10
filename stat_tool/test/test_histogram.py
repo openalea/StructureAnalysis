@@ -18,7 +18,7 @@ class Test(interface):
     def __init__(self):
         interface.__init__(self,
                            self.build_data(),
-                           get_shared_data("peup1.his"),
+                           str(get_shared_data("peup1.his")),
                            Histogram)
 
     def build_data(self):
@@ -81,7 +81,7 @@ class Test(interface):
 
     def test_extract_data(self):
         """todo : check if this test makes sense"""
-        h = Histogram(get_shared_data("meri1.his"))
+        h = Histogram(str(get_shared_data("meri1.his")))
 
         e = h.estimate_nonparametric()
 
@@ -94,7 +94,7 @@ class Test(interface):
 
     def test_container(self):
         """ container / iterator"""
-        h = Histogram(get_shared_data("meri1.his"))
+        h = Histogram(str(get_shared_data("meri1.his")))
 
         assert h[0] == 0
         assert h[10] == 1

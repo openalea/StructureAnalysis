@@ -357,7 +357,7 @@ def Extract(obj, *args, **kargs):
         error.CheckType([args[0]], [str])
         if args[0] == 'Mixture':
             assert len(args) == 1
-            ret = obj.extract_DiscreteMixture()
+            ret = obj.extract_mixture()
         elif args[0] == 'Component':
             assert len(args) == 2
             error.CheckType([args[1]], [int])

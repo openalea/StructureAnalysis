@@ -155,9 +155,8 @@ def Binomial(inf_bound, sup_bound=I_DEFAULT, \
 
     param = D_DEFAULT
 
-    return _DiscreteParametricModel(BINOMIAL,
-        inf_bound, sup_bound, param, proba)
-
+    return(_DiscreteParametricModel(BINOMIAL.real,
+        inf_bound, sup_bound, param, proba))
 
 def Poisson(inf_bound, param=D_DEFAULT):
     """

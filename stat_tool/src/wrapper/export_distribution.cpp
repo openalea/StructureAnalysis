@@ -243,7 +243,8 @@ class DiscreteParametricWrap
 
 public:
 
-
+    static int get_ident(const DiscreteParametric& Model) 
+    { return int(Model.ident); }
 
 };
 
@@ -266,7 +267,7 @@ void class_discrete_parametric()
     .def(init<DiscreteParametric&>())
     //to remove
     .def(init<Distribution&>())
-    .def_readonly("get_ident", &DiscreteParametric::ident)
+    .def("get_ident", DiscreteParametricWrap::get_ident)
     .def_readonly("get_inf_bound", &DiscreteParametric::inf_bound)
     .def_readonly("get_sup_bound", &DiscreteParametric::sup_bound)
     .def_readonly("get_parameter", &DiscreteParametric::parameter)
@@ -333,8 +334,33 @@ public:
     if(!model) stat_tool::wrap_util::throw_error(error);
     return boost::shared_ptr<DiscreteParametricModel>(model);
   }
+  
+  static boost::shared_ptr<DiscreteParametricModel> parametric_model_from_ident(int iident = I_DEFAULT ,
+          int iinf_bound = I_DEFAULT , int isup_bound = I_DEFAULT ,
+          double iparameter = D_DEFAULT, double iprobability = D_DEFAULT, double cumul_threshold = CUMUL_THRESHOLD)
+  {
+    DiscreteParametricModel *model = NULL;
+    discrete_parametric ident = CATEGORICAL;
+    
+    if (iident != I_DEFAULT)
+       ident = discrete_parametric(iident);
+    
+    model = new DiscreteParametricModel(ident, iinf_bound, isup_bound,
+                                        iparameter, iprobability, cumul_threshold);
 
+    return boost::shared_ptr<DiscreteParametricModel>(model);
+  }
+  
+  static boost::shared_ptr<DiscreteParametricModel> parametric_model_from_ident2(int iident = I_DEFAULT ,
+          int iinf_bound = I_DEFAULT , int isup_bound = I_DEFAULT ,
+          double iparameter = D_DEFAULT, double iprobability = D_DEFAULT)
+  {
 
+    return parametric_model_from_ident(iident, iinf_bound, isup_bound,
+                                         iparameter, iprobability);
+
+  }
+  
   // simulation method wrapping
   WRAP_METHOD1(DiscreteParametricModel, simulation, DiscreteDistributionData, int);
 
@@ -421,6 +447,8 @@ void class_discrete_parametric_model()
   .def(init <const DiscreteParametricModel& , boost::python::optional< bool> >())
 
   .def("__init__", make_constructor(DiscreteParametricModelWrap::parametric_model_from_file))
+  .def("__init__", make_constructor(DiscreteParametricModelWrap::parametric_model_from_ident))
+  .def("__init__", make_constructor(DiscreteParametricModelWrap::parametric_model_from_ident2))
   .def(self_ns::str(self)) // __str__
 
   /*.def("get_histogram", &DiscreteParametricModel::get_histogram,

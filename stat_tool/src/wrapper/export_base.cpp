@@ -321,6 +321,17 @@ void class_constant()
 
   scope().attr("MIN_PROBABILITY") = MIN_PROBABILITY;
   scope().attr("ORDER") = ORDER;
+  
+  // Vectors
+  
+  enum_<stat_tool::wrap_util::UniqueInt<4, 18> >("OutputFormat")
+  .value("ASCII", ASCII)
+  .value("SPREADSHEET", SPREADSHEET)
+  .value("GNUPLOT", GNUPLOT)
+  .value("PLOT", PLOT)
+  .export_values()
+  ;
+  
   /*const int NB_STATE = 100;
   const int ORDER = 8;
   const double THRESHOLDING_FACTOR = 0.8;

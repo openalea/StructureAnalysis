@@ -23,10 +23,12 @@ from openalea.stat_tool.multivariate_mixture import _MultivariateMixture
 from openalea.stat_tool._stat_tool import _Vectors
 from openalea.stat_tool._stat_tool import _VectorDistance
 from openalea.stat_tool._stat_tool import I_DEFAULT
-from openalea.stat_tool.enums import format_type
+# from openalea.stat_tool.enums import format_type
 from openalea.stat_tool.enums import variable_type
 from openalea.stat_tool.enums import variance_type
 from openalea.stat_tool.enums import distance_type
+from openalea.stat_tool.enums import OutputFormat
+
 
 __all__ = ['Vectors',
            '_Vectors',
@@ -34,7 +36,8 @@ __all__ = ['Vectors',
            '_VectorDistance',
            'ContingencyTable',
            'VarianceAnalysis',
-           'ComputeRankCorrelation']
+           'ComputeRankCorrelation',
+           'OutputFormat']
 
 
 ############### VectorDistance #################################################
@@ -323,8 +326,8 @@ def VarianceAnalysis(*args, **kargs):
 
     #kargs
     filename = error.ParseKargs(kargs, "FileName", default="result")
-    format = error.ParseKargs(kargs, "Format", default="ASCII",
-                              possible=format_type)
+    format = error.ParseKargs(kargs, "Format", default="O",
+                              possible=variance_type)
 
     #args
     vec = args[0]
@@ -376,10 +379,11 @@ def ContingencyTable(*args, **kargs):
     error.CheckArgumentsLength(args, 3, 3)
     error.CheckKargs(kargs, possible_kargs = ["FileName", "Format"])
 
+    possible_v = [str(f) for f in OutputFormat.values.values()] # possible output formats
     #kargs
     filename = error.ParseKargs(kargs, "FileName", default="result")
     format = error.ParseKargs(kargs, "Format", default="ASCII",
-                              possible=format_type)
+                              possible=possible_v)
 
     #args
     vec = args[0]
@@ -387,7 +391,9 @@ def ContingencyTable(*args, **kargs):
     variable2 = args[2]
     error.CheckType([vec, variable1, variable2], [_Vectors, int, int])
 
-    return vec.contingency_table(variable1, variable2, filename, format)
+    of = "OutputFormat." + format + ".real"
+    of = eval(of)
+    return vec.contingency_table(variable1, variable2, filename, of)
 
 
 def ComputeRankCorrelation(*args, **kargs):

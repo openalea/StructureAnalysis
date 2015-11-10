@@ -39,14 +39,14 @@ using namespace stat_tool;
 
 void class_markovian()
 {
-    enum_<stat_tool::wrap_util::UniqueInt<8, 1> >("RestorationAlgorithm")
-      .value("NO_COMPUTATION", 0)
+    enum_<stat_tool::wrap_util::UniqueInt<6, 1> >("RestorationAlgorithm")
+      .value("NO_COMPUTATION", NO_LATENT_STRUCTURE)
       .value("FORWARD", FORWARD)
 //      .value("FORWARD_BACKWARD", FORWARD_BACKWARD)
       .value("VITERBI", VITERBI)
       .value("GENERALIZED_VITERBI", GENERALIZED_VITERBI)
       .value("FORWARD_BACKWARD_SAMPLING", FORWARD_BACKWARD_SAMPLING)
-      .value("FORWARD_DYNAMIC_PROGRAMMING", FORWARD_DYNAMIC_PROGRAMMING)
+      .value("FORWARD_DYNAMIC_PROGRAMMING", FORWARD_DYNAMIC_PROGRAMMING) // change point detection
       .export_values()
     ;
 
