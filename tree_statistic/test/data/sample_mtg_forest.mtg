@@ -1,0 +1,72 @@
+CODE:	FORM-A				
+
+CLASSES :					
+SYMBOL	SCALE	DECOMPOSITION	INDEXATION	DEFINITION	
+$	0	NOTCONNECTED	FREE	EXPLICIT	# FICHIER
+N	1	CONNECTED	FREE	EXPLICIT	# INDIVIDUS
+A	2	LINEAR	FREE	EXPLICIT	# AXES
+
+DESCRIPTION:					
+LEFT	RIGHT	RELTYPE	MAX		
+A	A	+	?		
+A	A	<	1		
+		
+
+FEATURES:																
+NAME	TYPE
+Leaves	INT															
+Length	INT	#en mm														
+Diam	INT	#en mm														
+Age	INT															
+
+MTG:																
+
+
+ENTITY-CODE								Leaves	Length	Diam	Age
+/N1											
+	/A0							5	90	24	6
+		+A1						17	330	19	5
+			+A11					4	115	3	2
+			+A12					2	100	2	2
+			+A13					6	45	5	2
+				+A131				14	380	4	1
+			+A14					2	75	2	2
+				+A141				12	180	3	1
+					+A1411			1	10	1	0
+			+A15					4	70	5	2
+				+A151				17	280	4	1
+			+A16					2	40	10	3
+				+A161				10	150	3	2
+					+A1611			11	270	6	1
+						+A16111		16	280	2	1
+					^<A16112			24	400	5	1
+
+^<N2											
+	/A0							6	95	13	7
+		+A1						5	65	2	2
+		+A2						3	52	2	2
+		+A3						1	32	2	3
+			+A31					6	62	2	2
+	^<A4							16	210	4	2
+		+A41						13	130	3	1
+		+A42						5	35	1	1
+	^<A43							8	65	2	1
+	^<A431							4	10	1	0
+	/A0<A4+A44							4	30	2	1
+	/A0+A5							19	270	7	2
+		+A51						2	10	1	1
+		+A52						2	10	1	1
+		+A53						2	13	2	1
+^<N3											
+	/A0							10	190	12	4
+		+A1						27	0	9	3
+			+A11					15	250	6	2
+				+A111				45	440	5	1
+				+A112				31	280	4	1
+			+A12					13	180	5	1
+			+A13					16	90	3	2
+			+A14					12	130	3	2
+			+A15					22	190	5	1
+			+A16					24	160	3	1
+		+A2						22	210	4	3
+			+A21					12	110	3	2

@@ -1,0 +1,1 @@
+This package provides tools to perform depthe tree reduction starting from a direct acyclic graph.

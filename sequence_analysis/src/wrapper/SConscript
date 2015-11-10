@@ -1,0 +1,30 @@
+# -*-python-*-
+
+import os
+
+Import("env")
+
+env.EnableQt4Modules(['QtCore','QtOpenGL', 'QtGui'])
+
+# Export symbols under windows
+if env['compiler'] == 'mingw':
+    LINKFLAGS=["-enable-stdcall-fixup",
+               "-enable-auto-import",
+               "-enable-runtime-pseudo-reloc",
+               "-s"]
+    env.AppendUnique(LINKFLAGS=LINKFLAGS)
+
+
+# Build wrappers as shared libraries
+#sources = Split("""""")
+sources = env.ALEAGlob('*.h')
+sources = env.ALEAGlob('*.cpp')
+
+LIBS = ['vptool', 'vpstat_tool', 'vpsequence']
+env.AppendUnique(LIBS=LIBS)
+
+env.AppendUnique(CPPDEFINES=['MESSAGE'])
+env.AppendUnique(LIBS=['vptool', 'vpstat_tool', 'vpsequence'])
+
+env.ALEAWrapper("../sequence_analysis", "_sequence_analysis", sources)
+

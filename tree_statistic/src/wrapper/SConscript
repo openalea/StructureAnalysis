@@ -1,0 +1,41 @@
+# -*-python-*-
+
+import os
+
+Import("env")
+
+#lenv = env.Clone(LIBS=env['LIBS']+['vptree_statistic'])
+lenv = env.Clone()
+
+# Export symbols under windows
+if lenv['compiler'] == 'mingw':
+    LINKFLAGS=["-enable-stdcall-fixup",
+               "-enable-auto-import",
+               "-enable-runtime-pseudo-reloc",
+               "-s"]
+    lenv.AppendUnique(LINKFLAGS=LINKFLAGS)
+
+# Uncomment if needed
+# CPPFLAGS=["-g"]
+# lenv.AppendUnique(CPPFLAGS=CPPFLAGS)
+
+py_dir = '../openalea/tree_statistic'
+
+lenv.AppendUnique(LIBS=['vptree_statistic'])
+
+# Build wrappers as shared libraries
+#sources = Split("""""")
+
+# hmt_sources = env.ALEAGlob('hmt/*.cpp')
+hmt_sources = Split("""
+export_hmt.cpp
+hmt_wrap.cpp
+""")
+
+
+wrap_errors = lenv.ALEAWrapper(py_dir, "_errors", ["errors.cpp"])
+lenv.ALEAWrapper(py_dir+'/trees', "ctree", ["trees/ctree.cpp"])
+lenv.ALEAWrapper(py_dir+'/trees', "ctrees", ["trees/ctrees.cpp"])
+lenv.ALEAWrapper(py_dir+'/int_fl_containers', "int_fl_containers", ["int_fl_containers/int_fl_containers.cpp"])
+lenv.ALEAWrapper(py_dir+'/hmt', "_hmt", ['hmt/'+f for f in hmt_sources])
+

@@ -1,0 +1,13 @@
+To generate sphinx documentation:
+
+    1. go to root directory of this package
+    2. type "python setup.py build_sphinx"
+    3. type "python setup.py build_sphinx -b latex"
+    !! right now (April 2009), there is an issue in pshinx related to utf-8. Because we are using unicode, we need
+    2.type "python setup.py build_sphinx"
+    to fix manually the latex documents, switching from ut88 to utf8x in the preamble section.
+
+
+to generate the epydoc documentation:
+
+    epydoc --html -o stat_tool ../src/openalea/stat_tool/

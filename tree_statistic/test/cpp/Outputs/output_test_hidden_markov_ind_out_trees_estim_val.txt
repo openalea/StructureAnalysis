@@ -1,0 +1,319 @@
+Read a hidden Markov tree from file ./hmot.hmt
+HIDDEN_MARKOV_INDEPENDENT_OUT_TREE
+
+2 STATES
+
+INITIAL_PROBABILITIES
+0.2  0.8  
+
+TRANSITION_PROBABILITIES
+0.8  0.2  
+0.3  0.7  
+
+recurrent class: states 0 1
+
+2 OUTPUT_PROCESSES
+
+OUTPUT_PROCESS 1 : DISCRETE_PARAMETRIC
+
+STATE 0 OBSERVATION_DISTRIBUTION
+BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.1
+mean: 90   variance: 81   standard deviation: 9
+
+STATE 1 OBSERVATION_DISTRIBUTION
+BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.5
+mean: 450   variance: 225   standard deviation: 15
+
+distances between observation distributions for consecutive states
+_  1  
+1  _  
+
+OUTPUT_PROCESS 2 : DISCRETE_PARAMETRIC
+
+STATE 0 OBSERVATION_DISTRIBUTION
+BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.3
+mean: 270   variance: 189   standard deviation: 13.7477
+
+STATE 1 OBSERVATION_DISTRIBUTION
+BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.9
+mean: 810   variance: 81   standard deviation: 9
+
+distances between observation distributions for consecutive states
+_  1  
+1  _  
+
+Simulate trees from this hidden Markov tree
+Initialization HMT: 
+HIDDEN_MARKOV_INDEPENDENT_OUT_TREE
+
+2 STATES
+
+INITIAL_PROBABILITIES
+0.5  0.5  
+
+TRANSITION_PROBABILITIES
+0.5  0.5  
+0.5  0.5  
+
+recurrent class: states 0 1
+
+2 OUTPUT_PROCESSES
+
+OUTPUT_PROCESS 1 : DISCRETE_PARAMETRIC
+
+STATE 0 OBSERVATION_DISTRIBUTION
+BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.3
+mean: 270   variance: 189   standard deviation: 13.7477
+
+STATE 1 OBSERVATION_DISTRIBUTION
+BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.35
+mean: 315   variance: 204.75   standard deviation: 14.3091
+
+distances between observation distributions for consecutive states
+_         0.891043  
+0.891043  _         
+
+OUTPUT_PROCESS 2 : DISCRETE_PARAMETRIC
+
+STATE 0 OBSERVATION_DISTRIBUTION
+BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.7
+mean: 630   variance: 189   standard deviation: 13.7477
+
+STATE 1 OBSERVATION_DISTRIBUTION
+BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.75
+mean: 675   variance: 168.75   standard deviation: 12.9904
+
+distances between observation distributions for consecutive states
+_         0.907323  
+0.907323  _         
+iteration 1   log-likelihood of the observed trees: -278546
+iteration 2   log-likelihood of the observed trees: -8596.41
+iteration 3   log-likelihood of the observed trees: -8596.41
+iteration 4   log-likelihood of the observed trees: -8596.41
+iteration 5   log-likelihood of the observed trees: -8596.41
+iteration 6   log-likelihood of the observed trees: -8596.41
+iteration 7   log-likelihood of the observed trees: -8596.41
+iteration 8   log-likelihood of the observed trees: -8596.41
+iteration 9   log-likelihood of the observed trees: -8596.41
+iteration 10   log-likelihood of the observed trees: -8596.41
+
+10 iterations
+
+log-likelihood of the state trees: -8596.41 | -8596.41
+
+Estimated HMT using above initialization:
+HIDDEN_MARKOV_INDEPENDENT_OUT_TREE
+
+2 STATES
+
+INITIAL_PROBABILITIES
+0.175     0.825     
+
+TRANSITION_PROBABILITIES
+0.801822  0.198178  
+0.28877   0.71123   
+
+recurrent class: states 0 1
+
+path length (starting from root) up to the first occurrence of state 0 distribution
+
+path length (starting from root) up to the first occurrence of state 1 distribution
+
+path length (starting from terminal node) up to the first occurrence of state 0 distribution
+
+path length (starting from terminal node) up to the first occurrence of state 1 distribution
+
+state 0 sojourn size distribution
+
+state 1 sojourn size distribution
+
+number of zones of state 0 per size 26 tree distribution
+
+number of zones of state 1 per size 26 tree distribution
+
+number of occurrences of state 0 per size 26 tree distribution
+
+number of occurrences of state 1 per size 26 tree distribution
+
+2 OUTPUT_PROCESSES
+
+OUTPUT_PROCESS 1 : DISCRETE_PARAMETRIC
+
+STATE 0 OBSERVATION_DISTRIBUTION
+BINOMIAL   INF_BOUND : 0   SUP_BOUND : 614   PROBABILITY : 0.145777
+mean: 89.5068   variance: 76.4588   standard deviation: 8.74407
+
+state 0 observation frequency distribution - sample size: 521
+mean: 89.5086   variance: 83.7735   standard deviation: 9.15279
+
+STATE 1 OBSERVATION_DISTRIBUTION
+BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.500653
+mean: 450.587   variance: 225   standard deviation: 15
+
+state 1 observation frequency distribution - sample size: 519
+mean: 450.588   variance: 229.679   standard deviation: 15.1552
+
+distances between observation distributions for consecutive states
+_  1  
+1  _  
+
+OUTPUT_PROCESS 2 : DISCRETE_PARAMETRIC
+
+STATE 0 OBSERVATION_DISTRIBUTION
+BINOMIAL   INF_BOUND : 9   SUP_BOUND : 862   PROBABILITY : 0.305724
+mean: 269.783   variance: 181.055   standard deviation: 13.4557
+
+state 0 observation frequency distribution - sample size: 521
+mean: 269.783   variance: 181.266   standard deviation: 13.4635
+
+STATE 1 OBSERVATION_DISTRIBUTION
+BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.899494
+mean: 809.544   variance: 81.3644   standard deviation: 9.02022
+
+state 1 observation frequency distribution - sample size: 519
+mean: 809.545   variance: 85.7002   standard deviation: 9.25744
+
+distances between observation distributions for consecutive states
+_  1  
+1  _  
+
+tree size frequency distribution - sample size: 40
+mean: 26   variance: 0   standard deviation: 0
+
+cumulative size: 1040
+
+information of the trees in the iid case: -9296.88 (-8.93931)
+
+log-likelihood of the state trees: -8596.41   (normalized: -8.26578)
+
+state tree entropy: -4.28546e-14   (normalized: -4.12064e-17)
+
+log-likelihood of the observed trees: -8596.41   (normalized: -8.26578)
+
+11 free parameters   2 * penalyzed log-likelihood (AIC): -17214.8
+
+11 free parameters   2 * penalyzed log-likelihood (AICc): -17215.1
+
+11 free parameters   2 * penalyzed log-likelihood (BIC): -17269.2
+
+11 free parameters   2 * penalyzed log-likelihood (BICc): -nan
+
+11 free parameters   2 * penalyzed log-likelihood (ICL): -17269.2
+
+11 free parameters   2 * penalyzed log-likelihood (ICLc): -nan
+iteration 1   log-likelihood of the observed trees: -16768.5
+iteration 2   log-likelihood of the observed trees: -13742.5
+iteration 3   log-likelihood of the observed trees: -13637.7
+iteration 4   log-likelihood of the observed trees: -12739.6
+iteration 5   log-likelihood of the observed trees: -10493.4
+iteration 6   log-likelihood of the observed trees: -8593.5
+iteration 7   log-likelihood of the observed trees: -8593.5
+iteration 8   log-likelihood of the observed trees: -8593.5
+iteration 9   log-likelihood of the observed trees: -8593.5
+iteration 10   log-likelihood of the observed trees: -8593.5
+
+10 iterations
+
+log-likelihood of the state trees: -8593.5 | -8593.5
+
+
+Estimated HMT using initial self-transitions:
+HIDDEN_MARKOV_INDEPENDENT_OUT_TREE
+
+2 STATES
+
+INITIAL_PROBABILITIES
+0.825     0.175     
+
+TRANSITION_PROBABILITIES
+0.71123   0.28877   
+0.198178  0.801822  
+
+recurrent class: states 0 1
+
+path length (starting from root) up to the first occurrence of state 0 distribution
+
+path length (starting from root) up to the first occurrence of state 1 distribution
+
+path length (starting from terminal node) up to the first occurrence of state 0 distribution
+
+path length (starting from terminal node) up to the first occurrence of state 1 distribution
+
+state 0 sojourn size distribution
+
+state 1 sojourn size distribution
+
+number of zones of state 0 per size 26 tree distribution
+
+number of zones of state 1 per size 26 tree distribution
+
+number of occurrences of state 0 per size 26 tree distribution
+
+number of occurrences of state 1 per size 26 tree distribution
+
+2 OUTPUT_PROCESSES
+
+OUTPUT_PROCESS 1 : DISCRETE_PARAMETRIC
+
+STATE 0 OBSERVATION_DISTRIBUTION
+NEGATIVE_BINOMIAL   INF_BOUND : 289   PARAMETER : 385.729   PROBABILITY : 0.704764
+mean: 450.587   variance: 229.279   standard deviation: 15.142
+
+state 0 observation frequency distribution - sample size: 519
+mean: 450.588   variance: 229.679   standard deviation: 15.1552
+
+STATE 1 OBSERVATION_DISTRIBUTION
+NEGATIVE_BINOMIAL   INF_BOUND : 38   PARAMETER : 82.6351   PROBABILITY : 0.616028
+mean: 89.5068   variance: 83.6112   standard deviation: 9.14392
+
+state 1 observation frequency distribution - sample size: 521
+mean: 89.5086   variance: 83.7735   standard deviation: 9.15279
+
+distances between observation distributions for consecutive states
+_  1  
+1  _  
+
+OUTPUT_PROCESS 2 : DISCRETE_PARAMETRIC
+
+STATE 0 OBSERVATION_DISTRIBUTION
+BINOMIAL   INF_BOUND : 0   SUP_BOUND : 905   PROBABILITY : 0.894524
+mean: 809.544   variance: 85.3874   standard deviation: 9.24053
+
+state 0 observation frequency distribution - sample size: 519
+mean: 809.545   variance: 85.7002   standard deviation: 9.25744
+
+STATE 1 OBSERVATION_DISTRIBUTION
+BINOMIAL   INF_BOUND : 9   SUP_BOUND : 862   PROBABILITY : 0.305724
+mean: 269.783   variance: 181.055   standard deviation: 13.4557
+
+state 1 observation frequency distribution - sample size: 521
+mean: 269.783   variance: 181.266   standard deviation: 13.4635
+
+distances between observation distributions for consecutive states
+_  1  
+1  _  
+
+tree size frequency distribution - sample size: 40
+mean: 26   variance: 0   standard deviation: 0
+
+cumulative size: 1040
+
+information of the trees in the iid case: -9296.88 (-8.93931)
+
+log-likelihood of the state trees: -8593.5   (normalized: -8.26298)
+
+state tree entropy: -4.28546e-14   (normalized: -4.12064e-17)
+
+log-likelihood of the observed trees: -8593.5   (normalized: -8.26298)
+
+13 free parameters   2 * penalyzed log-likelihood (AIC): -17213
+
+13 free parameters   2 * penalyzed log-likelihood (AICc): -17213.4
+
+13 free parameters   2 * penalyzed log-likelihood (BIC): -17277.3
+
+13 free parameters   2 * penalyzed log-likelihood (BICc): -nan
+
+13 free parameters   2 * penalyzed log-likelihood (ICL): -17277.3
+
+13 free parameters   2 * penalyzed log-likelihood (ICLc): -nan

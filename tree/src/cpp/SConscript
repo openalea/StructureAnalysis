@@ -1,0 +1,9 @@
+# -*-python-*-
+Import("env")
+
+# 1. Select and install the headers
+
+includes = env.ALEAGlob("*.h")
+includes += env.ALEAGlob("*.hpp")
+
+env.ALEAIncludes("tree", includes)

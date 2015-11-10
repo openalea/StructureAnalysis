@@ -1,0 +1,84 @@
+libvplants-tool (1.2.0~ppa2) trusty; urgency=medium
+
+  * Adapt the code to bison3 
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Mon, 13 Oct 2014 17:35:45 +0200
+
+libvplants-tool (1.2.0~ppa1) trusty; urgency=medium
+
+  * Port to Trusty 
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Thu, 02 Oct 2014 06:35:00 +0200
+
+libvplants-tool (1.0.1~ppa9) quantal; urgency=low
+
+  * Port to Quantal 
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Mon, 10 Dec 2012 17:16:15 +0100
+
+libvplants-tool (1.0.1~ppa8) precise; urgency=low
+
+  * Rebuild with new PlantGL 
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Thu, 06 Dec 2012 13:59:47 +0100
+
+libvplants-tool (1.0.1~ppa3) precise; urgency=low
+
+  * Port to gcc 4.7 
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Mon, 29 Oct 2012 15:42:42 +0100
+
+libvplants-tool (1.0.1~ppa2) precise; urgency=low
+
+  * Switch to dh_python2 
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Wed, 12 Sep 2012 15:39:52 +0200
+
+libvplants-tool (1.0.1~ppa1) precise; urgency=low
+
+  * Release 1.0 on precise 
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Sun, 25 Mar 2012 16:32:01 +0200
+
+libvplants-tool (1.0.0b2~ppa1) oneiric; urgency=low
+
+  * Fix vplants and openalea namespace 
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Fri, 06 Jan 2012 17:16:50 +0100
+
+libvplants-tool (1.0.0b1~ppa4) oneiric; urgency=low
+
+  * Replace size_t by std::size_t
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Thu, 08 Dec 2011 19:53:27 +0100
+
+libvplants-tool (1.0.0b1~ppa3) oneiric; urgency=low
+
+  * replace libglut3 by freeglut3 
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Tue, 06 Dec 2011 11:59:52 +0100
+
+libvplants-tool (1.0.0b1~ppa1) oneiric; urgency=low
+
+  * Final release
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Mon, 05 Dec 2011 17:35:58 +0100
+
+libvplants-tool (0.9.0-1~ppa4) lucid; urgency=low
+
+  *replace libglut by libglut3-dev 
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Fri, 24 Sep 2010 16:14:30 +0200
+
+libvplants-tool (0.9.0-1~ppa3) lucid; urgency=low
+
+  * Add libglut-dev as dependency 
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Fri, 24 Sep 2010 15:58:19 +0200
+
+libvplants-tool (0.9.0-1~ppa2) lucid; urgency=low
+
+  * source package automatically created by stdeb 0.6.0
+  * add pkg-config as dependency 
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Fri, 24 Sep 2010 15:36:19 +0200

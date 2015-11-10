@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual C++ Express 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tree_matching2", "cpp\tree_matching2.vcxproj", "{28665C90-9097-4B34-B07E-6E7076F69A0E}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wrap_tree_matching2", "wrapper\wrap_tree_matching2.vcxproj", "{BBDB57E8-CD4F-407D-9F5F-302ACC8EFAA2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{28665C90-9097-4B34-B07E-6E7076F69A0E}.Debug|Win32.ActiveCfg = Debug|Win32
+		{28665C90-9097-4B34-B07E-6E7076F69A0E}.Debug|Win32.Build.0 = Debug|Win32
+		{28665C90-9097-4B34-B07E-6E7076F69A0E}.Release|Win32.ActiveCfg = Release|Win32
+		{28665C90-9097-4B34-B07E-6E7076F69A0E}.Release|Win32.Build.0 = Release|Win32
+		{BBDB57E8-CD4F-407D-9F5F-302ACC8EFAA2}.Debug|Win32.ActiveCfg = Debug|Win32
+		{BBDB57E8-CD4F-407D-9F5F-302ACC8EFAA2}.Debug|Win32.Build.0 = Debug|Win32
+		{BBDB57E8-CD4F-407D-9F5F-302ACC8EFAA2}.Release|Win32.ActiveCfg = Release|Win32
+		{BBDB57E8-CD4F-407D-9F5F-302ACC8EFAA2}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

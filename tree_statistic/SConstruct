@@ -1,0 +1,29 @@
+# -*-python-*-
+
+from openalea.sconsx import config, environ
+import os
+
+pj = os.path.join
+ALEASolution = config.ALEASolution
+
+options = Variables(['../options.py','options.py'], ARGUMENTS)
+options.Add(BoolVariable('with_test', 'build test modules', 1))
+
+# dependencies
+tools = ['boost_python', 'install','vplants.tool', 'vplants.stat_tool','vplants.sequence_analysis','vplants.tree', 'qt4']
+# tools = ['install','vplants.tool', 'vplants.stat_tool','vplants.sequence_analysis','vplants.tree', 'qt4']
+
+env = ALEASolution(options, tools)
+
+# env.AppendUnique(LIBS= ["efence"])
+env.Append(CPPDEFINES= ['MESSAGE'])
+env.AppendUnique(LIBS=['vptool', 'vpstat_tool', 'vpsequence'])
+
+# Build stage
+prefix = env['build_prefix']
+SConscript(pj(prefix,"src/cpp/SConscript"), exports="env")
+SConscript(pj(prefix,"src/wrapper/SConscript"), exports="env")
+if env['with_test']:
+    SConscript(pj(prefix,"test/cpp/SConscript"), exports="env")
+
+Default("build")

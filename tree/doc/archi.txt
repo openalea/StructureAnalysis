@@ -1,0 +1,73 @@
+
+* structure de graphe abstraite:
+ graph_traits
+c'est la structure de donnee
+
+definition des methodes,
+           des iterateurs
+
+
+* description d'un type d'implementation
+ adjacency_list
+
+
+typedef vertex_descriptor vertex
+
+typedef vector<vertex> VertexArray: tableau de vertex
+
+vertex:
+id
+type: typdef enum {simple, multiple (<<, LESSLESS)}
+simple: class, index
+multiple: class interval(index1, index2)
+
+
+* Dynamic Mtg: MTG + Liste(Patch)
+  Patch: ensemble de fonctions d'editions
+Definir les fonctions d'edition sur un MTG
+Prevoir la methodo (le fichier) pour coder l'evolution d'un MTG
+fonction de modification des features
+
+
+******************
+objets:
+******
+
+*interval
+*vertex
+
+*edge:
+
+cout de representer les edges pour un arbre de n vertex: 2n+infos*n
+si on stocke par un tableau de coloration: info*n
+relation edge, vertex par le pere:
+edge(v): edge(parent(v),v)
+on stocke juste le type de l'edge
+
+EdgeArray: vector<edge_descriptor>
+
+!!! Implementation uniquement valable pour les arbres.
+
+* feature:
+a implementer comme les properties_map
+  -attribut qualitatif ou quantitatif,
+  -fonction(Intervalle(vid))
+  -geometrie+transformation
+
+* classe: qu'est ce qu'une classe?
+c un symbol auquel on associe:
+  scale
+  decomp: type de decomposition
+  indexing: facon d'indexer les elts(free, consecutive)
+  def: implicit or explicit
+relations permises entre classes
+chaque vertex appartient a une classe.
+
+* quotientement:
+tableau de couleurs:
+quel algo pour retrouver l'arbre a un niveau donne
+
+*******************
+* Iterateurs a implementer:
+vertex iterator
+edge iterator

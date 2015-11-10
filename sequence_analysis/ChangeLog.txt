@@ -1,0 +1,26 @@
+release 0.9
+============
+
+This release complete the wrapping of the sequence analysis functionalities 
+written in C++ into a complete python package that includes
+  * pylab plots for various data viewpoints
+  * original a la AML display and functions
+  * on line documentaiton
+  * complete test suite
+
+http://openalea.gforge.inria.fr/doc/vplants/sequence_analysis/doc/_build/html/contents.html
+
+
+
+
+18 August 2009
+==============
+* Sequence analysis major updates: python module, missing wrappers and
+  exhaustive tests added.
+
+20 May 2009
+===========
+
+* Sequence Analysis major update to wrap CPP classes with boost python
+* Add python modules 
+* add Tests

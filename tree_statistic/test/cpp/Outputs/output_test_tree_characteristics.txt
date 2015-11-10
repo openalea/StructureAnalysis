@@ -1,0 +1,168 @@
+_min_value == 0, _max_value == 5 _max_depth == 3, _max_size == 11
+Check assignement operator for 'TreeCharacteristics' : 
+Histogram of the marginal distribution: 
+frequency distribution - sample size: 53
+mean: 3   variance: 3.11538   standard deviation: 1.76505
+coefficient of skewness: -0.392517   coefficient of kurtosis: -1.20485
+mean absolute deviation: 1.50943   coefficient of concentration: 0.327044
+information: -91.7139 (-1.73045)
+
+   | frequency distribution | cumulative distribution function
+0   7  0.132075
+1   5  0.226415
+2   9  0.396226
+3   7  0.528302
+4  10  0.716981
+5  15         1
+Histogram for the number of occurrences for each value : 
+Number of occurrences for value 0 : 
+frequency distribution - sample size: 10
+mean: 0.7   variance: 0.455556   standard deviation: 0.674949
+coefficient of skewness: 0.433637   coefficient of kurtosis: -0.934979
+mean absolute deviation: 0.56   coefficient of concentration: 0.471429
+information: -9.43348 (-0.943348)
+
+   | frequency distribution | cumulative distribution function
+0  4  0.4
+1  5  0.9
+2  1    1
+
+Number of occurrences for value 1 : 
+frequency distribution - sample size: 10
+mean: 0.5   variance: 0.277778   standard deviation: 0.527046
+coefficient of skewness: 0   coefficient of kurtosis: -2.1
+mean absolute deviation: 0.5   coefficient of concentration: 0.5
+information: -6.93147 (-0.693147)
+
+   | frequency distribution | cumulative distribution function
+0  5  0.5
+1  5    1
+
+Number of occurrences for value 2 : 
+frequency distribution - sample size: 10
+mean: 0.9   variance: 0.766667   standard deviation: 0.875595
+coefficient of skewness: 0.223451   coefficient of kurtosis: -1.67353
+mean absolute deviation: 0.72   coefficient of concentration: 0.5
+information: -10.889 (-1.0889)
+
+   | frequency distribution | cumulative distribution function
+0  4  0.4
+1  3  0.7
+2  3    1
+
+Number of occurrences for value 3 : 
+frequency distribution - sample size: 10
+mean: 0.7   variance: 1.56667   standard deviation: 1.25167
+coefficient of skewness: 2.40531   coefficient of kurtosis: 2.4349
+mean absolute deviation: 0.84   coefficient of concentration: 0.728571
+information: -8.97946 (-0.897946)
+
+   | frequency distribution | cumulative distribution function
+0  6  0.6
+1  3  0.9
+2  0  0.9
+3  0  0.9
+4  1    1
+
+Number of occurrences for value 4 : 
+frequency distribution - sample size: 10
+mean: 1   variance: 1.55556   standard deviation: 1.24722
+coefficient of skewness: 0.859054   coefficient of kurtosis: -1.2551
+mean absolute deviation: 1   coefficient of concentration: 0.62
+information: -12.2061 (-1.22061)
+
+   | frequency distribution | cumulative distribution function
+0  5  0.5
+1  2  0.7
+2  1  0.8
+3  2    1
+
+Number of occurrences for value 5 : 
+frequency distribution - sample size: 10
+mean: 1.5   variance: 2.94444   standard deviation: 1.71594
+coefficient of skewness: 0.989612   coefficient of kurtosis: -0.685119
+mean absolute deviation: 1.4   coefficient of concentration: 0.58
+information: -14.7081 (-1.47081)
+
+   | frequency distribution | cumulative distribution function
+0  4  0.4
+1  2  0.6
+2  1  0.7
+3  2  0.9
+4  0  0.9
+5  1    1
+
+Histogram for the number of zones for each value : 
+Number of homogeneous zones for value 0 : 
+frequency distribution - sample size: 10
+mean: 0.7   variance: 0.455556   standard deviation: 0.674949
+coefficient of skewness: 0.433637   coefficient of kurtosis: -0.934979
+mean absolute deviation: 0.56   coefficient of concentration: 0.471429
+information: -9.43348 (-0.943348)
+
+   | frequency distribution | cumulative distribution function
+0  4  0.4
+1  5  0.9
+2  1    1
+
+Number of homogeneous zones for value 1 : 
+frequency distribution - sample size: 10
+mean: 0.5   variance: 0.277778   standard deviation: 0.527046
+coefficient of skewness: 0   coefficient of kurtosis: -2.1
+mean absolute deviation: 0.5   coefficient of concentration: 0.5
+information: -6.93147 (-0.693147)
+
+   | frequency distribution | cumulative distribution function
+0  5  0.5
+1  5    1
+
+Number of homogeneous zones for value 2 : 
+frequency distribution - sample size: 10
+mean: 0.8   variance: 0.622222   standard deviation: 0.788811
+coefficient of skewness: 0.407485   coefficient of kurtosis: -1.33776
+mean absolute deviation: 0.64   coefficient of concentration: 0.5
+information: -10.5492 (-1.05492)
+
+   | frequency distribution | cumulative distribution function
+0  4  0.4
+1  4  0.8
+2  2    1
+
+Number of homogeneous zones for value 3 : 
+frequency distribution - sample size: 10
+mean: 0.5   variance: 0.5   standard deviation: 0.707107
+coefficient of skewness: 1.17851   coefficient of kurtosis: -0.5
+mean absolute deviation: 0.6   coefficient of concentration: 0.66
+information: -8.97946 (-0.897946)
+
+   | frequency distribution | cumulative distribution function
+0  6  0.6
+1  3  0.9
+2  1    1
+
+Number of homogeneous zones for value 4 : 
+frequency distribution - sample size: 10
+mean: 0.8   variance: 0.844444   standard deviation: 0.918937
+coefficient of skewness: 0.472514   coefficient of kurtosis: -1.71108
+mean absolute deviation: 0.8   coefficient of concentration: 0.575
+information: -10.2965 (-1.02965)
+
+   | frequency distribution | cumulative distribution function
+0  5  0.5
+1  2  0.7
+2  3    1
+
+Number of homogeneous zones for value 5 : 
+frequency distribution - sample size: 10
+mean: 1.2   variance: 1.73333   standard deviation: 1.31656
+coefficient of skewness: 1.00787   coefficient of kurtosis: -0.374556
+mean absolute deviation: 1.04   coefficient of concentration: 0.55
+information: -12.7985 (-1.27985)
+
+   | frequency distribution | cumulative distribution function
+0  4  0.4
+1  2  0.6
+2  3  0.9
+3  0  0.9
+4  1    1
+

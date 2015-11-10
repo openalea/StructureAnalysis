@@ -1,0 +1,47 @@
+libvplants-tree (1.2.0~ppa1) trusty; urgency=medium
+
+  * Port to Trusty  
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Thu, 02 Oct 2014 06:35:47 +0200
+
+libvplants-tree (1.0.1~ppa9) quantal; urgency=low
+
+  *  Port to Quantal  
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Mon, 10 Dec 2012 17:17:05 +0100
+
+libvplants-tree (1.0.1~ppa8) precise; urgency=low
+
+  * Rebuild with new PlantGL 
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Thu, 06 Dec 2012 14:00:46 +0100
+
+libvplants-tree (1.0.1~ppa2) precise; urgency=low
+
+  * Switch to dh_python2 
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Wed, 12 Sep 2012 15:41:25 +0200
+
+libvplants-tree (1.0.1~ppa1) precise; urgency=low
+
+  *  Release 1.0 on precise  
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Sun, 25 Mar 2012 16:33:50 +0200
+
+libvplants-tree (1.0.0b2~ppa1) oneiric; urgency=low
+
+  * Fix Vplants and openalea namespace 
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Fri, 06 Jan 2012 17:18:11 +0100
+
+libvplants-tree (1.0.0b1~ppa1) oneiric; urgency=low
+
+  * Release 
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Tue, 06 Dec 2011 10:50:58 +0100
+
+libvplants-tree (0.9.0-1~ppa1) lucid; urgency=low
+
+  * source package automatically created by stdeb 0.6.0
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Thu, 23 Sep 2010 17:18:14 +0200

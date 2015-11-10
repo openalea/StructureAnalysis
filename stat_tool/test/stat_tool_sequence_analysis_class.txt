@@ -1,0 +1,254 @@
+Règle de base : les classes utilisateurs héritent de StatInterface.
+
+Module stat_tool
+
+classes de base
+
+stat_tools.h :
+Test
+StatError
+StatInterface
+
+Distribution :
+DiscreteParametric
+Forward
+FrequencyDistribution
+ContinuousParametric
+Histogram
+
+curves.h :
+Curves
+
+markovian.h :
+Chain
+ChainData
+CategoricalProcess
+DiscreteParametricProcess
+ContinuousParametricProcess
+
+plotable.h :
+SinglePlot
+MultiPlot
+MultiPlotSet
+
+chain_reestimation.h : -> classe template
+ChainReestimation
+
+reestimation.h : -> classe template
+Reestimation
+
+
+classes utilisateurs
+
+compound.h : -> pour usage interne
+Compound
+CompoundData
+
+convolution.h :
+Convolution
+ConvolutionData
+
+discrete_mixture.h :
+DiscreteMixture
+DiscreteMixtureData
+
+distance_matrix.h
+DistanceMatrix
+Clusters
+Dendrogram
+
+distribution.h :
+DiscreteParametricModel
+DiscreteDistributionData
+
+mixture.h :
+Mixture
+MixtureData
+
+multivariate_mixture.h -> repris en plus général dans mixture.h, à vocation à disparaître à terme
+
+regression.h :
+RegressionKernel -> classe de base
+Regression -> pour usage interne
+
+vectors.h :
+Vectors
+VectorDistance
+
+
+Module sequence_analysis
+
+classes utilisateurs
+
+sequences.h :
+CategoricalSequenceProcess -> classe de base
+SequenceCharacteristics -> classe de base
+SelfTransition -> classe de base
+Correlation
+Sequences
+MarkovianSequences
+
+nonhomogeneous_markov.h :
+Function -> classe de base
+NonhomogeneousMarkov
+NonhomogeneousMarkovData
+
+variable_order_markov.h :
+VariableOrderMarkovChain -> classe de base
+VariableOrderMarkovChainData -> classe de base
+VariableOrderMarkov
+VariableOrderMarkovData
+VariableOrderMarkovIterator -> statut particulier : brique de base pour de la simulation
+
+hidden_variable_order_markov.h :
+HiddenVariableOrderMarkov
+
+semi_markov.h :
+SemiMarkovChain -> classe de base
+SemiMarkov
+SemiMarkovData
+SemiMarkovIterator -> statut particulier : brique de base pour de la simulation
+
+hidden_semi_markov.h :
+HiddenSemiMarkov
+
+renewal.h :
+LengthBias -> classe de base
+Backward -> classe de base
+NbEvent -> classe de base
+Renewal
+TimeEvents
+RenewalData
+RenewalIterator -> statut particulier : brique de base pour de la simulation
+
+
+Interface aml
+
+stat_funs1.cpp : fonctions de sortie
+
+displayOneLine
+display
+save
+plot -> pour le moment interface gnuplot (methode C++ plot_write), a vocation a etre remplace
+        par interface plot generique (methode C++ get_plotable)
+
+
+stat_funs2.cpp : "constructeurs" des objets (a la volee dans quelques cas simples,
+                 a partir de fichier textes dans tous les cas ou de donnees extraites de MTGs)
+
+Distribution
+DiscreteMixture
+Convolution
+Compound
+FrequencyDistribution
+Histogram  // pour compatibilite ascendante
+Mixture
+Vectors
+VectorDistance
+Renewal
+TimeEvents
+RenewalData
+VariableOrderMarkov
+HiddenVariableOrderMarkov
+SemiMarkov
+HiddenSemiMarkov
+NonhomogeneousMarkov
+Sequences
+
+
+stat_funs3.cpp : filtrage, transformation des donnees, extraction de donnees ou
+                 de lois des modeles
+
+ToDistribution
+ToFrequencyDistribution
+ToHistogram  // pour compatibilite ascendante
+ExtractDistribution
+ExtractFrequencyDistribution
+ExtractHistogram  // pour compatibilite ascendante
+ExtractVectors
+ExtractData
+
+Merge
+Shift
+Cluster
+Transcode
+ValueSelect
+
+VariableScaling
+Round
+SelectStep
+SelectIndividual
+SelectVariable
+MergeVariable
+
+NbEventSelect
+TimeScaling
+TimeSelect
+
+ShiftVariable
+LengthSelect
+RemoveRun
+Reverse
+RemoveIndexParameter
+ExplicitIndexParameter
+IndexParameterSelect
+IndexParameterExtract
+SegmentationExtract
+Cumulate
+Difference
+RelativeGrowthRate
+SequenceNormalization
+MovingAverage
+PointwiseAverage
+RecurrenceTimeSequences
+SojournTimeSequences
+TransformPosition
+
+Cross
+ComputeInitialRun
+AddAbsorbingRun
+ConsecutiveValues
+Split
+
+ToDistanceMatrix
+Symmetrize
+Unnormalize
+
+
+stat_funs4.cpp : estimation des modeles (fonctions specifiques pour chaque famille de modeles)
+
+Estimate
+
+
+stat_funs5.cpp : autres fonctions statistiques ou algorithmiques
+
+Simulate
+
+Compare
+Clustering
+
+ComparisonTest
+Fit
+
+TruncateDistribution
+
+ComputeRankCorrelation
+ContingencyTable
+VarianceAnalysis
+Regression
+
+ComputeCorrelation
+ComputeWhiteNoiseCorrelation
+ComputePartialAutoCorrelation
+
+Segmentation
+
+ComputeSelfTransition
+TransitionCount
+WordCount
+LumpabilityTest
+
+Thresholding
+ComputeAutoCorrelation
+ComputeStateSequences
+BuildAuxiliaryVariable

@@ -1,0 +1,25 @@
+# -*-python-*-
+
+Import( "env" )
+
+import os.path
+pj = os.path.join
+
+py_dir = pj(os.path.pardir,'openalea','tree_matching')
+
+# Build wrappers as shared libraries
+lib_env=env.Clone()
+#lib_env.EnableQt4Modules( [ 'QtCore', 'QtGui', 'QtOpenGL'])
+#lib_env.AppendUnique( CPPPATH = ['$QT4_CPPPATH/Qt'] )
+
+# Install headers
+#includes = lib_env.ALEAGlob("*.h")
+#lib_env.ALEAIncludes("tree_matching2", includes)
+
+sources= lib_env.ALEAGlob( '*.cpp' )
+
+target= "__tree_matching__"
+
+lib_env.AppendUnique(LIBS= ['vptree_matching2'])
+lib_env.ALEAWrapper( py_dir, target, sources )
+

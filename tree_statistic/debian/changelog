@@ -1,0 +1,71 @@
+vplants-treestatistic (1.2.0~ppa2) trusty; urgency=medium
+
+  * Bison 3 
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Tue, 14 Oct 2014 08:38:08 +0200
+
+vplants-treestatistic (1.2.0~ppa1) trusty; urgency=medium
+
+  * Port to Trusty  
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Thu, 02 Oct 2014 06:35:54 +0200
+
+vplants-treestatistic (1.0.1~ppa11) precise; urgency=low
+
+  * Port to Precise 
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Tue, 11 Dec 2012 18:11:33 +0100
+
+vplants-treestatistic (1.0.1~ppa10) quantal; urgency=low
+
+  * Merge with trunk rev 13348 
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Tue, 11 Dec 2012 18:09:31 +0100
+
+vplants-treestatistic (1.0.1~ppa9) quantal; urgency=low
+
+  *  Port to Quantal  
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Mon, 10 Dec 2012 17:17:13 +0100
+
+vplants-treestatistic (1.0.1~ppa8) precise; urgency=low
+
+  * Rebuild with new PlantGL 
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Thu, 06 Dec 2012 14:00:50 +0100
+
+vplants-treestatistic (1.0.1~ppa2) precise; urgency=low
+
+  * Switch to dh_python2 
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Wed, 12 Sep 2012 15:41:31 +0200
+
+vplants-treestatistic (1.0.1~ppa1) precise; urgency=low
+
+  *  Release 1.0 on precise  
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Sun, 25 Mar 2012 16:33:55 +0200
+
+vplants-treestatistic (1.0.0b2~ppa1) oneiric; urgency=low
+
+  * Fix Vplants and openalea namespace 
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Fri, 06 Jan 2012 17:18:16 +0100
+
+vplants-treestatistic (1.0.0b1~ppa1) oneiric; urgency=low
+
+  * Release
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Tue, 06 Dec 2011 10:52:10 +0100
+
+vplants-treestatistic (0.9.0-1~ppa2) lucid; urgency=low
+
+  * Add build dependencies to fix build error 
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Tue, 28 Sep 2010 08:19:22 +0200
+
+vplants-treestatistic (0.9.0-1~ppa1) lucid; urgency=low
+
+  * source package automatically created by stdeb 0.6.0
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Thu, 23 Sep 2010 17:18:14 +0200

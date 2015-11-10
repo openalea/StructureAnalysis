@@ -1,0 +1,21 @@
+# -*-python-*-
+
+from openalea.sconsx import config, environ
+import os
+pj = os.path.join
+ALEASolution = config.ALEASolution
+
+options = Variables(['../options.py', 'options.py'], ARGUMENTS)
+
+tools = ['boost_python', 'qt4', 'vplants.tool', 'install', 'vplants.stat_tool']
+
+env = ALEASolution(options, tools)
+
+# Build stage
+prefix = env['build_prefix']
+SConscript(pj(prefix,"src/cpp/SConscript"),
+           exports='env')
+SConscript(pj(prefix,"src/wrapper/SConscript"),
+           exports='env')
+
+Default("build")

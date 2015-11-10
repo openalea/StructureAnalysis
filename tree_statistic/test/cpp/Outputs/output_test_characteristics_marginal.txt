@@ -1,0 +1,23 @@
+_min_value == 2, _max_value == 5 _max_depth == 12, _max_size == 101
+Histogram for the marginal distribution: 
+frequency distribution - sample size: 1232
+mean: 3.50731   variance: 1.24446   standard deviation: 1.11556
+coefficient of skewness: -0.0429753   coefficient of kurtosis: -1.35365
+mean absolute deviation: 0.99648   coefficient of concentration: 0.177617
+information: -1704.82 (-1.38378)
+
+   | frequency distribution | cumulative distribution function
+0    0         0
+1    0         0
+2  313  0.254058
+3  280  0.481331
+4  340  0.757305
+5  299         1
+
+Theoretical marginal distribution: 
+
+mean: 3.5   variance: 1.25   standard deviation: 1.118
+offset : 2   maximum : 0.25
+probability mass function (6) : 0 0 0.25 0.25 0.25 0.25 
+cumulative distribution function : 0 0 0.25 0.5 0.75 1 
+

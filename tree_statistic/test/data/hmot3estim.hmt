@@ -1,0 +1,102 @@
+HIDDEN_MARKOV_INDEPENDENT_OUT_TREE
+
+3 STATES
+
+INITIAL_PROBABILITIES
+0.99998    1e-05      1e-05      
+
+TRANSITION_PROBABILITIES
+0.885079   0.0290431  0.0858777  
+0.0152669  0.971177   0.0135559  
+0.0086359  0.0287393  0.962625   
+
+# recurrent class: states 0 1 2
+
+# path length (starting from root) up to the first occurrence of state 0 distribution
+
+# path length (starting from root) up to the first occurrence of state 1 distribution
+
+# path length (starting from root) up to the first occurrence of state 2 distribution
+
+# path length (starting from terminal node) up to the first occurrence of state 0 distribution
+
+# path length (starting from terminal node) up to the first occurrence of state 1 distribution
+
+# path length (starting from terminal node) up to the first occurrence of state 2 distribution
+
+# state 0 sojourn size distribution
+
+# state 1 sojourn size distribution
+
+# state 2 sojourn size distribution
+
+2 OUTPUT_PROCESSES
+
+OUTPUT_PROCESS 1 : PARAMETRIC
+
+STATE 0 OBSERVATION_DISTRIBUTION
+NEGATIVE_BINOMIAL   INF_BOUND : 0   PARAMETER : 11.8417   PROBABILITY : 0.148195
+# mean: 68.0096   variance: 453.967   standard deviation: 21.3065
+
+# state 0 observation frequency distribution - sample size: 834
+# mean: 68.0048   variance: 460.259   standard deviation: 21.4537
+
+STATE 1 OBSERVATION_DISTRIBUTION
+NEGATIVE_BINOMIAL   INF_BOUND : 1   PARAMETER : 1.79126   PROBABILITY : 0.0462687
+# mean: 37.9186   variance: 796.84   standard deviation: 28.2284
+
+# state 1 observation frequency distribution - sample size: 588
+# mean: 37.8537   variance: 794.636   standard deviation: 28.1893
+
+STATE 2 OBSERVATION_DISTRIBUTION
+NEGATIVE_BINOMIAL   INF_BOUND : 8   PARAMETER : 7.3373   PROBABILITY : 0.0479509
+# mean: 153.427   variance: 2974.85   standard deviation: 54.5422
+
+# state 2 observation frequency distribution - sample size: 579
+# mean: 153.425   variance: 3050.77   standard deviation: 55.2338
+
+OUTPUT_PROCESS 2 : PARAMETRIC
+
+STATE 0 OBSERVATION_DISTRIBUTION
+BINOMIAL   INF_BOUND : 0   SUP_BOUND : 9   PROBABILITY : 0.335956
+# mean: 3.0236   variance: 2.00781   standard deviation: 1.41697
+
+# state 0 observation frequency distribution - sample size: 834
+# mean: 3.02638   variance: 1.9945   standard deviation: 1.41227
+
+STATE 1 OBSERVATION_DISTRIBUTION
+BINOMIAL   INF_BOUND : 1   SUP_BOUND : 9   PROBABILITY : 0.461889
+# mean: 4.69511   variance: 1.98838   standard deviation: 1.4101
+
+# state 1 observation frequency distribution - sample size: 588
+# mean: 4.68197   variance: 1.93787   standard deviation: 1.39207
+
+STATE 2 OBSERVATION_DISTRIBUTION
+BINOMIAL   INF_BOUND : 0   SUP_BOUND : 11   PROBABILITY : 0.798803
+# mean: 8.78683   variance: 1.76789   standard deviation: 1.32962
+
+# state 2 observation frequency distribution - sample size: 579
+# mean: 8.77893   variance: 1.78495   standard deviation: 1.33602
+
+# tree size frequency distribution - sample size: 1
+# mean: 2001   variance: 0   standard deviation: 0
+
+# cumulative size: 2001
+
+# information of the trees in the iid case: -15086.6 (-7.53953)
+
+# log-likelihood of the state trees: -13472.4   (normalized: -6.73284)
+
+# log-likelihood of the observed trees: -13444.7   (normalized: -6.71899)
+
+# 24 free parameters   2 * penalyzed log-likelihood (AIC): -26937.4
+
+# 24 free parameters   2 * penalyzed log-likelihood (AICc): -26938
+
+# 24 free parameters   2 * penalyzed log-likelihood (BIC): -27071.8
+
+# 24 free parameters   2 * penalyzed log-likelihood (BICc): nan
+
+# 24 free parameters   2 * penalyzed log-likelihood (ICL): -27127.3
+
+# 24 free parameters   2 * penalyzed log-likelihood (ICLc): nan

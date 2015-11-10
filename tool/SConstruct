@@ -1,0 +1,22 @@
+# -*-python-*-
+
+from openalea.sconsx import config, environ
+import os
+
+pj = os.path.join
+ALEASolution = config.ALEASolution
+
+options = Variables(['../options.py', 'options.py'], ARGUMENTS)
+tools = ['qt4','opengl','readline']
+
+env = ALEASolution(options, tools)
+prefix = env['build_prefix']
+
+#X env.Replace(CC="gcc-4.7")
+#X env.Replace(CXX="g++-4.7")
+
+# Build stage
+env.SConscript(pj(prefix,"src/cpp/SConscript"), 
+           exports="env")
+Default("build")
+

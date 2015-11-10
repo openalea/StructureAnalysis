@@ -1,0 +1,83 @@
+vplants-stattool (1.2.0~ppa2) trusty; urgency=medium
+
+  * Port to bison 3 
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Mon, 13 Oct 2014 17:41:32 +0200
+
+vplants-stattool (1.2.0~ppa1) trusty; urgency=medium
+
+  * Port to Trusty  
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Thu, 02 Oct 2014 06:35:16 +0200
+
+vplants-stattool (1.0.1~ppa13) quantal; urgency=low
+
+  * Port to quantal
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Wed, 19 Dec 2012 13:07:57 +0100
+
+vplants-stattool (1.0.1~ppa12) precise; urgency=low
+
+  * Merge with runk at 13386 
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Wed, 19 Dec 2012 13:06:23 +0100
+
+vplants-stattool (1.0.1~ppa11) precise; urgency=low
+
+  * Port to precise 
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Tue, 11 Dec 2012 18:12:15 +0100
+
+vplants-stattool (1.0.1~ppa10) quantal; urgency=low
+
+  * Merge with trunk 13231
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Tue, 11 Dec 2012 18:05:00 +0100
+
+vplants-stattool (1.0.1~ppa9) quantal; urgency=low
+
+  *  Port to Quantal  
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Mon, 10 Dec 2012 17:16:35 +0100
+
+vplants-stattool (1.0.1~ppa8) precise; urgency=low
+
+  * Rebuild with new PlantGL 
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Thu, 06 Dec 2012 14:00:12 +0100
+
+vplants-stattool (1.0.1~ppa2) precise; urgency=low
+
+  * Switch to dh_python2
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Wed, 12 Sep 2012 15:40:37 +0200
+
+vplants-stattool (1.0.1~ppa1) precise; urgency=low
+
+  *  Release 1.0 on precise  
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Sun, 25 Mar 2012 16:33:05 +0200
+
+vplants-stattool (1.0.0b2~ppa1) oneiric; urgency=low
+
+  * Fix vplants and openalea namespace 
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Fri, 06 Jan 2012 17:17:15 +0100
+
+vplants-stattool (1.0.0b1~ppa1) oneiric; urgency=low
+
+  * Release 1.0
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Tue, 06 Dec 2011 10:42:42 +0100
+
+vplants-stattool (0.9.0-1~ppa2) lucid; urgency=low
+
+  * add a binary dependency on libvplants-tool 
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Mon, 27 Sep 2010 14:55:44 +0200
+
+vplants-stattool (0.9.0-1~ppa1) lucid; urgency=low
+
+  * source package automatically created by stdeb 0.6.0
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Thu, 23 Sep 2010 17:17:39 +0200

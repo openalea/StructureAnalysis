@@ -1,0 +1,122 @@
+CONVOLUTION	2	DISTRIBUTIONS
+mean	13.256	variance	9.1982	standard deviation	3.03285
+coefficient of skewness	0.419115	coefficient of kurtosis	-0.431924
+
+frequency distribution	sample size	86
+mean	13.2209		variance	9.28003		standard deviation	3.04631
+coefficient of skewness	0.408708		coefficient of kurtosis	-0.53418
+
+log-likelihood	-212.166	normalized	-2.46704
+maximum possible log-likelihood	-209.029	information	-2.43056
+deviance	6.27393
+
+chi-square test	12	degrees of freedom
+chi-square value	5.2761		critical probability	0.948261
+reference chi-square value	21.0156		reference critical probability	0.05
+
+	frequency distribution	convolution	cumulative frequency distribution function	cumulative convolution function
+0	0	0	0	0
+1	0	0	0	0
+2	0	0	0	0
+3	0	0	0	0
+4	0	0	0	0
+5	0	0	0	0
+6	0	0	0	0
+7	0	0	0	0
+8	3	2.3563	0.0348837	0.0273988
+9	5	6.03263	0.0930233	0.0975457
+10	9	9.60243	0.197674	0.209202
+11	15	10.7673	0.372093	0.334403
+12	6	9.60859	0.44186	0.44613
+13	9	9.21818	0.546512	0.553319
+14	10	9.41528	0.662791	0.662799
+15	10	8.86886	0.77907	0.765925
+16	6	6.97296	0.848837	0.847006
+17	4	4.80997	0.895349	0.902936
+18	5	3.50855	0.953488	0.943733
+19	1	2.26295	0.965116	0.970046
+20	2	1.56849	0.988372	0.988284
+21	1	0.671712	1	0.996095
+22		0.290141		0.999469
+23		0.0243628		0.999752
+24		0.0213289		1
+25		4.0985e-19		1
+
+DISTRIBUTION	1
+NONPARAMETRIC	
+mean	8.84	variance	0.8144	standard deviation	0.902441
+coefficient of skewness	0.972869	coefficient of kurtosis	0.937985
+variance/mean ratio	0.0921267	coefficient of variation	0.102086
+
+frequency distribution 1	sample size	86
+mean	8.84884		variance	0.859234		standard deviation	0.926949
+coefficient of skewness	1.03467		coefficient of kurtosis	0.988757
+
+	frequency distribution 1	distribution 1	cumulative frequency distribution 1 function	cumulative distribution 1 function
+0	0	0	0	0
+1	0	0	0	0
+2	0	0	0	0
+3	0	0	0	0
+4	0	0	0	0
+5	0	0	0	0
+6	0	0	0	0
+7	0	0	0	0
+8	38	37.84	0.44186	0.44
+9	27	27.52	0.755814	0.76
+10	19	18.92	0.976744	0.98
+11	0	0	0.976744	0.98
+12	2	1.72	1	1
+
+DISTRIBUTION	2
+NONPARAMETRIC	
+mean	4.41596	variance	8.3838	standard deviation	2.89548
+coefficient of skewness	0.452189	coefficient of kurtosis	-0.528765
+variance/mean ratio	1.89852	coefficient of variation	0.655686
+
+frequency distribution 2	sample size	86
+mean	4.37209		variance	8.54227		standard deviation	2.92272
+coefficient of skewness	0.438558		coefficient of kurtosis	-0.600288
+
+	frequency distribution 2	distribution 2	cumulative frequency distribution 2 function	cumulative distribution 2 function
+0	6	5.35523	0.0697674	0.0622701
+1	10	9.8158	0.186047	0.176407
+2	12	12.0073	0.325581	0.316028
+3	11	10.8306	0.453488	0.441964
+4	6	7.71384	0.523256	0.53166
+5	10	9.4789	0.639535	0.64188
+6	11	10.1019	0.767442	0.759344
+7	7	7.5779	0.848837	0.847459
+8	5	4.93485	0.906977	0.904841
+9	3	3.12295	0.94186	0.941155
+10	3	2.77613	0.976744	0.973435
+11	1	1.21814	0.988372	0.987599
+12	1	1.06645	1	1
+13		2.04925e-17		1
+
+	convolution	distribution 1	distribution 2	cumulative convolution function
+0	0	0	0.0622701	0
+1	0	0	0.114137	0
+2	0	0	0.13962	0
+3	0	0	0.125937	0
+4	0	0	0.0896958	0
+5	0	0	0.11022	0
+6	0	0	0.117464	0
+7	0	0	0.0881151	0
+8	0.0273988	0.44	0.057382	0.0273988
+9	0.0701468	0.32	0.0363134	0.0975457
+10	0.111656	0.22	0.0322806	0.209202
+11	0.125201	0	0.0141644	0.334403
+12	0.111728	0.02	0.0124005	0.44613
+13	0.107188		2.38285e-19	0.553319
+14	0.10948			0.662799
+15	0.103126			0.765925
+16	0.0810809			0.847006
+17	0.0559298			0.902936
+18	0.0407971			0.943733
+19	0.0263134			0.970046
+20	0.0182382			0.988284
+21	0.0078106			0.996095
+22	0.00337373			0.999469
+23	0.000283288			0.999752
+24	0.000248011			1
+25	4.7657e-21			1

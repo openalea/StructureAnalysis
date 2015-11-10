@@ -1,0 +1,141 @@
+_min_value == 0, _max_value == 3 _max_depth == 3, _max_size == 11
+Histogram for the number of occurrences for each value : 
+Number of occurrences for value 0 : 
+frequency distribution - sample size: 10
+mean: 1   variance: 0.888889   standard deviation: 0.942809
+coefficient of skewness: 0.994369   coefficient of kurtosis: -0.1875
+mean absolute deviation: 0.6   coefficient of concentration: 0.46
+information: -11.6828 (-1.16828)
+
+   | frequency distribution | cumulative distribution function
+0  3  0.3
+1  5  0.8
+2  1  0.9
+3  1    1
+
+Number of occurrences for value 1 : 
+frequency distribution - sample size: 10
+mean: 1.1   variance: 1.43333   standard deviation: 1.19722
+coefficient of skewness: 0.738145   coefficient of kurtosis: -1.23813
+mean absolute deviation: 0.94   coefficient of concentration: 0.554545
+information: -12.7985 (-1.27985)
+
+   | frequency distribution | cumulative distribution function
+0  4  0.4
+1  3  0.7
+2  1  0.8
+3  2    1
+
+Number of occurrences for value 2 : 
+frequency distribution - sample size: 10
+mean: 1.2   variance: 3.28889   standard deviation: 1.81353
+coefficient of skewness: 1.58717   coefficient of kurtosis: -0.120197
+mean absolute deviation: 1.32   coefficient of concentration: 0.683333
+information: -11.6828 (-1.16828)
+
+   | frequency distribution | cumulative distribution function
+0  5  0.5
+1  3  0.8
+2  0  0.8
+3  0  0.8
+4  1  0.9
+5  1    1
+
+Number of occurrences for value 3 : 
+frequency distribution - sample size: 10
+mean: 2   variance: 5.33333   standard deviation: 2.3094
+coefficient of skewness: 1.15019   coefficient of kurtosis: -0.796875
+mean absolute deviation: 1.8   coefficient of concentration: 0.57
+information: -15.0479 (-1.50479)
+
+   | frequency distribution | cumulative distribution function
+0  3  0.3
+1  3  0.6
+2  1  0.7
+3  1  0.8
+4  0  0.8
+5  0  0.8
+6  2    1
+
+Observed_trees has 10 trees of maximal size 11 and maximal depth 3
+Simulated random labels : 
+2
+|-1
+| |-3
+|   
+|-2
+| |-2
+| |-2
+| |-0
+|   
+|-3
+  |-2
+  |-0
+  |-0
+    
+
+3
+
+1
+
+0
+
+3
+|-2
+|-3
+| |-3
+| | |-0
+| | |-3
+| |   
+| |-1
+|   
+|-1
+  |-1
+  |-3
+  |-3
+    
+
+2
+|-3
+|-1
+
+0
+
+0
+|-3
+
+3
+|-3
+| |-2
+| | |-3
+| |   
+| |-2
+| |-1
+|   
+|-2
+| |-2
+|   
+|-1
+  |-0
+  |-1
+    
+
+3
+|-1
+| |-3
+|   |-3
+|     
+|-3
+|-2
+  |-1
+  | |-0
+  | |-3
+  |   
+  |-0
+  |-3
+    
+
+Number of integral variables == 1
+Number of float variables == 0
+Min value == 0
+Max value == 3

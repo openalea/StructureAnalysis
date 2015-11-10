@@ -1,0 +1,12 @@
+Source: vplants-stattool
+Maintainer: Christophe Pradal <christophe.pradal@cirad.fr>
+Section: python
+Priority: optional
+Build-Depends: python-all, python-setuptools (>= 0.6b3), python-dev, debhelper (>= 7), libvplants-tool, python-openalea.deploy, python-openalea.sconsx, libqt4-dev, libqt4-opengl-dev, libboost-python-dev, libreadline-dev, pkg-config
+
+Package: python-vplants.stattool
+Architecture: any
+Depends: ${misc:Depends}, ${python:Depends}, ${shlibs:Depends}, libvplants-tool
+Provides: ${python:Provides}
+Description: Basic Statistical tools
+ A Python version of the AML Stat module.

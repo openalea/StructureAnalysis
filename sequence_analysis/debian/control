@@ -1,0 +1,13 @@
+Source: vplants-sequenceanalysis
+Maintainer: Christophe Pradal <christophe.pradal@cirad.fr>
+Section: python
+Priority: optional
+Build-Depends: python-setuptools (>= 0.6b3), python-dev (>= 2.6.6-3~), debhelper (>= 7),  libvplants-tool, python-vplants.stattool, python-openalea.deploy, python-openalea.sconsx, libqt4-dev, libqt4-opengl-dev, libboost-python-dev, libreadline-dev, pkg-config
+
+
+Package: python-vplants.sequenceanalysis
+Architecture: any
+Depends: ${misc:Depends}, ${python:Depends}, ${shlibs:Depends}, python-vplants.stattool
+Provides: ${python:Provides}
+Description: sequence analysis library
+ Python version of sequence analysis (AML stat)

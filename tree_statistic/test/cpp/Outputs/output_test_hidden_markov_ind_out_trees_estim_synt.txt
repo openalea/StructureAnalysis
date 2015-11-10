@@ -1,0 +1,2014 @@
+HIDDEN_MARKOV_INDEPENDENT_OUT_TREE
+
+2 STATES
+
+INITIAL_PROBABILITIES
+0.2  0.8  
+
+TRANSITION_PROBABILITIES
+0.8  0.2  
+0.3  0.7  
+
+recurrent class: states 0 1
+
+1 OUTPUT_PROCESS
+
+OUTPUT_PROCESS 1 : NONPARAMETRIC
+
+STATE 0 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.8
+OUTPUT 1 : 0.2
+
+STATE 1 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.3
+OUTPUT 1 : 0.7
+
+observation probability matrix
+
+     0    1
+0  0.8  0.2
+1  0.3  0.7
+
+distances between observation distributions for consecutive states
+_    0.5  
+0.5  _    
+
+Indices for tree number 0:
+0
+|-1
+| |-3
+| | |-7
+| | |-8
+| |   
+| |-4
+|   
+|-2
+  |-5
+  |-6
+    
+Simulated trees : 
+1
+|-0
+| |-1
+| | |-0
+| | |-1
+| |   
+| |-0
+|   
+|-0
+  |-0
+  |-1
+    
+0
+|-1
+| |-1
+| | |-1
+| | |-0
+| |   
+| |-1
+|   
+|-0
+  |-1
+  |-1
+    
+0
+|-1
+| |-0
+| | |-1
+| | |-1
+| |   
+| |-1
+|   
+|-1
+  |-1
+  |-1
+    
+1
+|-1
+| |-0
+| | |-1
+| | |-1
+| |   
+| |-0
+|   
+|-1
+  |-0
+  |-0
+    
+0
+|-0
+| |-0
+| | |-1
+| | |-1
+| |   
+| |-1
+|   
+|-0
+  |-0
+  |-0
+    
+0
+|-0
+
+Simulated hidden trees : 
+1
+|-1
+| |-1
+| | |-0
+| | |-1
+| |   
+| |-0
+|   
+|-1
+  |-0
+  |-1
+    
+1
+|-1
+| |-1
+| | |-1
+| | |-0
+| |   
+| |-1
+|   
+|-1
+  |-1
+  |-1
+    
+1
+|-1
+| |-1
+| | |-1
+| | |-1
+| |   
+| |-1
+|   
+|-1
+  |-1
+  |-1
+    
+1
+|-1
+| |-1
+| | |-1
+| | |-1
+| |   
+| |-0
+|   
+|-1
+  |-0
+  |-0
+    
+1
+|-1
+| |-1
+| | |-1
+| | |-1
+| |   
+| |-1
+|   
+|-0
+  |-0
+  |-0
+    
+0
+|-0
+
+Marginal distributions for tree number 1 : 
+state 0 : 
+0.2
+|-0.4
+| |-0.5
+| | |-0.55
+| | |-0.55
+| |   
+| |-0.5
+|   
+|-0.4
+  |-0.5
+  |-0.5
+    
+state 1 : 
+0.8
+|-0.6
+| |-0.5
+| | |-0.45
+| | |-0.45
+| |   
+| |-0.5
+|   
+|-0.6
+  |-0.5
+  |-0.5
+    
+Output conditional distributions for tree number 1 : 
+state 0 : 
+0.2
+|-0.8
+| |-0.2
+| | |-0.8
+| | |-0.2
+| |   
+| |-0.8
+|   
+|-0.8
+  |-0.8
+  |-0.2
+    
+state 1 : 
+0.7
+|-0.3
+| |-0.7
+| | |-0.3
+| | |-0.7
+| |   
+| |-0.3
+|   
+|-0.3
+  |-0.3
+  |-0.7
+    
+Log-likelihood of the parameter : -34.7837
+State conditional distributions for tree number 1 : 
+state 0 : 
+0.128639
+|-0.529309
+| |-0.304883
+| | |-0.649479
+| | |-0.238435
+| |   
+| |-0.734975
+|   
+|-0.544817
+  |-0.740883
+  |-0.340226
+    
+state 1 : 
+0.871361
+|-0.470691
+| |-0.695117
+| | |-0.350521
+| | |-0.761565
+| |   
+| |-0.265025
+|   
+|-0.455183
+  |-0.259117
+  |-0.659774
+    
+State tree entropy: 4.69619
+Sum of conditional downward entropies: 4.69619
+Sum of conditional upward entropies: 4.75304
+Sum of marginal entropies: 5.36789
+State tree entropy (downward): 4.69619
+Partial entropies differ at vertex 7: 4.12148 / 4.12673 (fast)
+Consistency error for total entropy at leaf 7: 4.69093 / 4.69619
+Partial entropies differ at vertex 8: 4.24074 / 4.24599 (fast)
+Consistency error for total entropy at leaf 8: 4.69093 / 4.69619
+
+Raised a warning!
+State tree entropy: 3.91251
+Sum of conditional downward entropies: 3.91251
+Sum of conditional upward entropies: 3.95046
+Sum of marginal entropies: 4.39497
+State tree entropy (downward): 3.91251
+Partial entropies differ at vertex 7: 3.4692 / 3.52566 (fast)
+Consistency error for total entropy at leaf 7: 3.85605 / 3.91251
+Partial entropies differ at vertex 8: 3.21372 / 3.27018 (fast)
+Consistency error for total entropy at leaf 8: 3.85605 / 3.91251
+
+Raised a warning!
+State tree entropy: 3.31975
+Sum of conditional downward entropies: 3.31975
+Sum of conditional upward entropies: 3.35106
+Sum of marginal entropies: 3.70899
+State tree entropy (downward): 3.31975
+Partial entropies differ at vertex 7: 2.87348 / 2.87248 (fast)
+Consistency error for total entropy at leaf 7: 3.32075 / 3.31975
+Partial entropies differ at vertex 8: 2.87348 / 2.87248 (fast)
+Consistency error for total entropy at leaf 8: 3.32075 / 3.31975
+
+Raised a warning!
+State tree entropy: 4.41441
+Sum of conditional downward entropies: 4.41441
+Sum of conditional upward entropies: 4.45009
+Sum of marginal entropies: 4.91844
+State tree entropy (downward): 4.41441
+Partial entropies differ at vertex 7: 3.9927 / 3.95354 (fast)
+Consistency error for total entropy at leaf 7: 4.45357 / 4.41441
+Partial entropies differ at vertex 8: 3.9927 / 3.95354 (fast)
+Consistency error for total entropy at leaf 8: 4.45357 / 4.41441
+
+Raised a warning!
+State tree entropy: 4.42418
+Sum of conditional downward entropies: 4.42418
+Sum of conditional upward entropies: 4.48464
+Sum of marginal entropies: 5.13613
+State tree entropy (downward): 4.42418
+Partial entropies differ at vertex 7: 3.91972 / 3.87789 (fast)
+Consistency error for total entropy at leaf 7: 4.46601 / 4.42418
+Partial entropies differ at vertex 8: 3.91972 / 3.87789 (fast)
+Consistency error for total entropy at leaf 8: 4.46601 / 4.42418
+
+Raised a warning!
+State tree entropy: 1.18108
+Sum of conditional downward entropies: 1.18108
+Sum of conditional upward entropies: 1.18108
+Sum of marginal entropies: 1.27893
+State tree entropy (downward): 1.18108
+Conditional distributions for pairs of states for tree number 1 : 
+child state 0 : 
+(-1, -1)
+|-(0.115039, 0.41427)
+| |-(0.260583, 0.0443003)
+| | |-(0.27875, 0.370729)
+| | |-(0.162604, 0.0758309)
+| |   
+| |-(0.48394, 0.251035)
+|   
+|-(0.115839, 0.428978)
+  |-(0.498119, 0.242764)
+  |-(0.290569, 0.0496563)
+    
+child state 1 : 
+(-1, -1)
+|-(0.0135996, 0.457091)
+| |-(0.268726, 0.426391)
+| | |-(0.0261328, 0.324388)
+| | |-(0.142279, 0.619286)
+| |   
+| |-(0.0453693, 0.219656)
+|   
+|-(0.0127992, 0.442384)
+  |-(0.0466986, 0.212419)
+  |-(0.254248, 0.405526)
+    
+Testing estimation with initial hmt specification.
+Initialization HMT 
+HIDDEN_MARKOV_INDEPENDENT_OUT_TREE
+
+2 STATES
+
+INITIAL_PROBABILITIES
+0.5  0.5  
+
+TRANSITION_PROBABILITIES
+0.5  0.5  
+0.5  0.5  
+
+recurrent class: states 0 1
+
+1 OUTPUT_PROCESS
+
+OUTPUT_PROCESS 1 : NONPARAMETRIC
+
+STATE 0 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.5
+OUTPUT 1 : 0.5
+
+STATE 1 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.2
+OUTPUT 1 : 0.8
+
+observation probability matrix
+
+0     1    
+00.5  0.5  
+10.2  0.8  
+
+distances between observation distributions for consecutive states
+_    0.3  
+0.3  _    
+iteration 1   log-likelihood of the observed trees: -33.8657
+
+1 iteration
+
+log-likelihood of the state trees: -51.6719 | -51.6719
+estimated HMT (one iteration)
+HIDDEN_MARKOV_INDEPENDENT_OUT_TREE
+
+2 STATES
+
+INITIAL_PROBABILITIES
+0.604396  0.395604  
+
+TRANSITION_PROBABILITIES
+0.52424   0.47576   
+0.536108  0.463892  
+
+recurrent class: states 0 1
+
+path length (starting from root) up to the first occurrence of state 0 distribution
+
+path length (starting from root) up to the first occurrence of state 1 distribution
+
+path length (starting from terminal node) up to the first occurrence of state 0 distribution
+
+path length (starting from terminal node) up to the first occurrence of state 1 distribution
+
+state 0 sojourn size distribution
+
+state 1 sojourn size distribution
+
+mixture of number of zones of state 0 per tree distributions
+
+mixture of number of zones of state 1 per tree distributions
+
+mixture of number of occurrences of state 0 per tree distributions
+
+mixture of number of occurrences of state 1 per tree distributions
+
+1 OUTPUT_PROCESS
+
+OUTPUT_PROCESS 1 : NONPARAMETRIC
+
+STATE 0 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.62039
+OUTPUT 1 : 0.37961
+
+STATE 1 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.290061
+OUTPUT 1 : 0.709939
+
+observation probability matrix
+
+0          1         
+00.62039   0.37961   
+10.290061  0.709939  
+
+path length (starting from root) up to the first occurrence of output 0 distribution
+
+path length (starting from root) up to the first occurrence of output 0 frequency distribution - sample size: 6
+mean: 0.5   variance: 0.7   standard deviation: 0.83666
+
+path length (starting from root) up to the first occurrence of output 1 distribution
+
+path length (starting from root) up to the first occurrence of output 1 frequency distribution - sample size: 5
+mean: 0.8   variance: 0.7   standard deviation: 0.83666
+
+path length (starting from terminal nodes) up to the first occurrence of output 0 distribution
+
+path length (starting from terminal nodes) up to the first occurrence of output 0 frequency distribution - sample size: 6
+mean: 0.166667   variance: 0.166667   standard deviation: 0.408248
+
+path length (starting from terminal nodes) up to the first occurrence of output 1 distribution
+
+path length (starting from terminal nodes) up to the first occurrence of output 1 frequency distribution - sample size: 5
+mean: 0   variance: 0   standard deviation: 0
+
+output 0 sojourn size distribution
+
+output 0 sojourn size frequency distribution - sample size: 13
+mean: 1.69231   variance: 1.89744   standard deviation: 1.37747
+
+output 1 sojourn size distribution
+
+output 1 sojourn size frequency distribution - sample size: 16
+mean: 1.5625   variance: 0.929167   standard deviation: 0.963933
+
+mixture of number of zones of output 0 per tree distributions
+
+number of zones of output 0 per tree frequency distribution - sample size: 6
+mean: 2.16667   variance: 1.36667   standard deviation: 1.16905
+
+mixture of number of zones of output 1 per tree distributions
+
+number of zones of output 1 per tree frequency distribution - sample size: 6
+mean: 2.66667   variance: 1.86667   standard deviation: 1.36626
+
+mixture of number of occurrences of output 0 per tree distributions
+
+number of occurrences of output 0 per tree frequency distribution - sample size: 6
+mean: 3.66667   variance: 2.66667   standard deviation: 1.63299
+
+mixture of number of occurrences of output 1 per tree distributions
+
+number of occurrences of output 1 per tree frequency distribution - sample size: 6
+mean: 4.16667   variance: 6.16667   standard deviation: 2.48328
+
+distances between observation distributions for consecutive states
+_        0.33033  
+0.33033  _        
+
+tree size frequency distribution - sample size: 6
+mean: 7.83333   variance: 8.16667   standard deviation: 2.85774
+
+cumulative size: 47
+
+information of the trees in the iid case: -32.4821 (-0.691109)
+
+log-likelihood of the state trees: -51.6719   (normalized: -1.0994)
+
+state tree entropy: 29.6608   (normalized: 0.631082)
+
+log-likelihood of the observed trees: -32.3654   (normalized: -0.688626)
+
+4 free parameters   2 * penalyzed log-likelihood (AIC): -72.7309
+
+4 free parameters   2 * penalyzed log-likelihood (AICc): -73.6833
+
+4 free parameters   2 * penalyzed log-likelihood (BIC): -80.1315
+
+4 free parameters   2 * penalyzed log-likelihood (BICc): -nan
+
+4 free parameters   2 * penalyzed log-likelihood (ICL): -139.453
+
+4 free parameters   2 * penalyzed log-likelihood (ICLc): -nan
+iteration 1   log-likelihood of the observed trees: -32.3654
+
+1 iteration
+
+log-likelihood of the state trees: -51.124 | -51.124
+relative likelihood increase at iteration 0: 0.00281456
+iteration 1   log-likelihood of the observed trees: -32.2743
+
+1 iteration
+
+log-likelihood of the state trees: -50.31 | -50.31
+relative likelihood increase at iteration 1: 0.00232451
+iteration 1   log-likelihood of the observed trees: -32.1993
+
+1 iteration
+
+log-likelihood of the state trees: -49.4723 | -49.4723
+relative likelihood increase at iteration 2: 0.0019521
+iteration 1   log-likelihood of the observed trees: -32.1365
+
+1 iteration
+
+log-likelihood of the state trees: -48.6863 | -48.6863
+relative likelihood increase at iteration 3: 0.00163195
+iteration 1   log-likelihood of the observed trees: -32.084
+
+1 iteration
+
+log-likelihood of the state trees: -47.9638 | -47.9638
+relative likelihood increase at iteration 4: 0.00134558
+
+estimated HMT (5 iterations)
+HIDDEN_MARKOV_INDEPENDENT_OUT_TREE
+
+2 STATES
+
+INITIAL_PROBABILITIES
+0.806011  0.193989  
+
+TRANSITION_PROBABILITIES
+0.474144  0.525856  
+0.52455   0.47545   
+
+recurrent class: states 0 1
+
+path length (starting from root) up to the first occurrence of state 0 distribution
+
+path length (starting from root) up to the first occurrence of state 1 distribution
+
+path length (starting from terminal node) up to the first occurrence of state 0 distribution
+
+path length (starting from terminal node) up to the first occurrence of state 1 distribution
+
+state 0 sojourn size distribution
+
+state 1 sojourn size distribution
+
+mixture of number of zones of state 0 per tree distributions
+
+mixture of number of zones of state 1 per tree distributions
+
+mixture of number of occurrences of state 0 per tree distributions
+
+mixture of number of occurrences of state 1 per tree distributions
+
+1 OUTPUT_PROCESS
+
+OUTPUT_PROCESS 1 : NONPARAMETRIC
+
+STATE 0 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.650501
+OUTPUT 1 : 0.349499
+
+STATE 1 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.258981
+OUTPUT 1 : 0.741019
+
+observation probability matrix
+
+0          1         
+00.650501  0.349499  
+10.258981  0.741019  
+
+path length (starting from root) up to the first occurrence of output 0 distribution
+
+path length (starting from root) up to the first occurrence of output 0 frequency distribution - sample size: 6
+mean: 0.5   variance: 0.7   standard deviation: 0.83666
+
+path length (starting from root) up to the first occurrence of output 1 distribution
+
+path length (starting from root) up to the first occurrence of output 1 frequency distribution - sample size: 5
+mean: 0.8   variance: 0.7   standard deviation: 0.83666
+
+path length (starting from terminal nodes) up to the first occurrence of output 0 distribution
+
+path length (starting from terminal nodes) up to the first occurrence of output 0 frequency distribution - sample size: 6
+mean: 0.166667   variance: 0.166667   standard deviation: 0.408248
+
+path length (starting from terminal nodes) up to the first occurrence of output 1 distribution
+
+path length (starting from terminal nodes) up to the first occurrence of output 1 frequency distribution - sample size: 5
+mean: 0   variance: 0   standard deviation: 0
+
+output 0 sojourn size distribution
+
+output 0 sojourn size frequency distribution - sample size: 13
+mean: 1.69231   variance: 1.89744   standard deviation: 1.37747
+
+output 1 sojourn size distribution
+
+output 1 sojourn size frequency distribution - sample size: 16
+mean: 1.5625   variance: 0.929167   standard deviation: 0.963933
+
+mixture of number of zones of output 0 per tree distributions
+
+number of zones of output 0 per tree frequency distribution - sample size: 6
+mean: 2.16667   variance: 1.36667   standard deviation: 1.16905
+
+mixture of number of zones of output 1 per tree distributions
+
+number of zones of output 1 per tree frequency distribution - sample size: 6
+mean: 2.66667   variance: 1.86667   standard deviation: 1.36626
+
+mixture of number of occurrences of output 0 per tree distributions
+
+number of occurrences of output 0 per tree frequency distribution - sample size: 6
+mean: 3.66667   variance: 2.66667   standard deviation: 1.63299
+
+mixture of number of occurrences of output 1 per tree distributions
+
+number of occurrences of output 1 per tree frequency distribution - sample size: 6
+mean: 4.16667   variance: 6.16667   standard deviation: 2.48328
+
+distances between observation distributions for consecutive states
+_         0.391519  
+0.391519  _         
+
+tree size frequency distribution - sample size: 6
+mean: 7.83333   variance: 8.16667   standard deviation: 2.85774
+
+cumulative size: 47
+
+information of the trees in the iid case: -32.4821 (-0.691109)
+
+log-likelihood of the state trees: -47.9638   (normalized: -1.02051)
+
+state tree entropy: 27.5475   (normalized: 0.586116)
+
+log-likelihood of the observed trees: -32.0409   (normalized: -0.68172)
+
+4 free parameters   2 * penalyzed log-likelihood (AIC): -72.0817
+
+4 free parameters   2 * penalyzed log-likelihood (AICc): -73.0341
+
+4 free parameters   2 * penalyzed log-likelihood (BIC): -79.4823
+
+4 free parameters   2 * penalyzed log-likelihood (BICc): -nan
+
+4 free parameters   2 * penalyzed log-likelihood (ICL): -134.577
+
+4 free parameters   2 * penalyzed log-likelihood (ICLc): -nan
+
+Testing state profile plot
+Permutation of the states: 
+HIDDEN_MARKOV_INDEPENDENT_OUT_TREE
+
+2 STATES
+
+INITIAL_PROBABILITIES
+0.193989  0.806011  
+
+TRANSITION_PROBABILITIES
+0.47545   0.52455   
+0.525856  0.474144  
+
+recurrent class: states 0 1
+
+path length (starting from root) up to the first occurrence of state 0 distribution
+
+path length (starting from root) up to the first occurrence of state 1 distribution
+
+path length (starting from terminal node) up to the first occurrence of state 0 distribution
+
+path length (starting from terminal node) up to the first occurrence of state 1 distribution
+
+state 0 sojourn size distribution
+
+state 1 sojourn size distribution
+
+mixture of number of zones of state 0 per tree distributions
+
+mixture of number of zones of state 1 per tree distributions
+
+mixture of number of occurrences of state 0 per tree distributions
+
+mixture of number of occurrences of state 1 per tree distributions
+
+1 OUTPUT_PROCESS
+
+OUTPUT_PROCESS 1 : NONPARAMETRIC
+
+STATE 0 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.258981
+OUTPUT 1 : 0.741019
+
+STATE 1 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.650501
+OUTPUT 1 : 0.349499
+
+observation probability matrix
+
+0          1         
+00.258981  0.741019  
+10.650501  0.349499  
+
+path length (starting from root) up to the first occurrence of output 0 distribution
+
+path length (starting from root) up to the first occurrence of output 0 frequency distribution - sample size: 6
+mean: 0.5   variance: 0.7   standard deviation: 0.83666
+
+path length (starting from root) up to the first occurrence of output 1 distribution
+
+path length (starting from root) up to the first occurrence of output 1 frequency distribution - sample size: 5
+mean: 0.8   variance: 0.7   standard deviation: 0.83666
+
+path length (starting from terminal nodes) up to the first occurrence of output 0 distribution
+
+path length (starting from terminal nodes) up to the first occurrence of output 0 frequency distribution - sample size: 6
+mean: 0.166667   variance: 0.166667   standard deviation: 0.408248
+
+path length (starting from terminal nodes) up to the first occurrence of output 1 distribution
+
+path length (starting from terminal nodes) up to the first occurrence of output 1 frequency distribution - sample size: 5
+mean: 0   variance: 0   standard deviation: 0
+
+output 0 sojourn size distribution
+
+output 0 sojourn size frequency distribution - sample size: 13
+mean: 1.69231   variance: 1.89744   standard deviation: 1.37747
+
+output 1 sojourn size distribution
+
+output 1 sojourn size frequency distribution - sample size: 16
+mean: 1.5625   variance: 0.929167   standard deviation: 0.963933
+
+mixture of number of zones of output 0 per tree distributions
+
+number of zones of output 0 per tree frequency distribution - sample size: 6
+mean: 2.16667   variance: 1.36667   standard deviation: 1.16905
+
+mixture of number of zones of output 1 per tree distributions
+
+number of zones of output 1 per tree frequency distribution - sample size: 6
+mean: 2.66667   variance: 1.86667   standard deviation: 1.36626
+
+mixture of number of occurrences of output 0 per tree distributions
+
+number of occurrences of output 0 per tree frequency distribution - sample size: 6
+mean: 3.66667   variance: 2.66667   standard deviation: 1.63299
+
+mixture of number of occurrences of output 1 per tree distributions
+
+number of occurrences of output 1 per tree frequency distribution - sample size: 6
+mean: 4.16667   variance: 6.16667   standard deviation: 2.48328
+
+distances between observation distributions for consecutive states
+_         0.391519  
+0.391519  _         
+
+tree size frequency distribution - sample size: 6
+mean: 7.83333   variance: 8.16667   standard deviation: 2.85774
+
+cumulative size: 47
+
+information of the trees in the iid case: -32.4821 (-0.691109)
+
+log-likelihood of the state trees: -47.9638   (normalized: -1.02051)
+
+state tree entropy: 27.5475   (normalized: 0.586116)
+
+log-likelihood of the observed trees: -32.0409   (normalized: -0.68172)
+
+4 free parameters   2 * penalyzed log-likelihood (AIC): -72.0817
+
+4 free parameters   2 * penalyzed log-likelihood (AICc): -73.0341
+
+4 free parameters   2 * penalyzed log-likelihood (BIC): -79.4823
+
+4 free parameters   2 * penalyzed log-likelihood (BICc): -nan
+
+4 free parameters   2 * penalyzed log-likelihood (ICL): -134.577
+
+4 free parameters   2 * penalyzed log-likelihood (ICLc): -nan
+
+Testing estimation with initial self-transition probability specification.
+iteration 1   log-likelihood of the observed trees: -32.5739
+
+1 iteration
+
+log-likelihood of the state trees: -35.4685 | -35.4685
+estimated HMT (one iteration)
+HIDDEN_MARKOV_INDEPENDENT_OUT_TREE
+
+2 STATES
+
+INITIAL_PROBABILITIES
+0.477884     0.522116     
+
+TRANSITION_PROBABILITIES
+0.999989     1.08118e-05  
+1e-05        0.99999      
+
+recurrent class: states 0 1
+
+path length (starting from root) up to the first occurrence of state 0 distribution
+
+path length (starting from root) up to the first occurrence of state 1 distribution
+
+path length (starting from terminal node) up to the first occurrence of state 0 distribution
+
+path length (starting from terminal node) up to the first occurrence of state 1 distribution
+
+state 0 sojourn size distribution
+
+state 1 sojourn size distribution
+
+mixture of number of zones of state 0 per tree distributions
+
+mixture of number of zones of state 1 per tree distributions
+
+mixture of number of occurrences of state 0 per tree distributions
+
+mixture of number of occurrences of state 1 per tree distributions
+
+1 OUTPUT_PROCESS
+
+OUTPUT_PROCESS 1 : NONPARAMETRIC
+
+STATE 0 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.519278
+OUTPUT 1 : 0.480722
+
+STATE 1 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.424504
+OUTPUT 1 : 0.575496
+
+observation probability matrix
+
+0          1         
+00.519278  0.480722  
+10.424504  0.575496  
+
+path length (starting from root) up to the first occurrence of output 0 distribution
+
+path length (starting from root) up to the first occurrence of output 0 frequency distribution - sample size: 6
+mean: 0.5   variance: 0.7   standard deviation: 0.83666
+
+path length (starting from root) up to the first occurrence of output 1 distribution
+
+path length (starting from root) up to the first occurrence of output 1 frequency distribution - sample size: 5
+mean: 0.8   variance: 0.7   standard deviation: 0.83666
+
+path length (starting from terminal nodes) up to the first occurrence of output 0 distribution
+
+path length (starting from terminal nodes) up to the first occurrence of output 0 frequency distribution - sample size: 6
+mean: 0.166667   variance: 0.166667   standard deviation: 0.408248
+
+path length (starting from terminal nodes) up to the first occurrence of output 1 distribution
+
+path length (starting from terminal nodes) up to the first occurrence of output 1 frequency distribution - sample size: 5
+mean: 0   variance: 0   standard deviation: 0
+
+output 0 sojourn size distribution
+
+output 0 sojourn size frequency distribution - sample size: 13
+mean: 1.69231   variance: 1.89744   standard deviation: 1.37747
+
+output 1 sojourn size distribution
+
+output 1 sojourn size frequency distribution - sample size: 16
+mean: 1.5625   variance: 0.929167   standard deviation: 0.963933
+
+mixture of number of zones of output 0 per tree distributions
+
+number of zones of output 0 per tree frequency distribution - sample size: 6
+mean: 2.16667   variance: 1.36667   standard deviation: 1.16905
+
+mixture of number of zones of output 1 per tree distributions
+
+number of zones of output 1 per tree frequency distribution - sample size: 6
+mean: 2.66667   variance: 1.86667   standard deviation: 1.36626
+
+mixture of number of occurrences of output 0 per tree distributions
+
+number of occurrences of output 0 per tree frequency distribution - sample size: 6
+mean: 3.66667   variance: 2.66667   standard deviation: 1.63299
+
+mixture of number of occurrences of output 1 per tree distributions
+
+number of occurrences of output 1 per tree frequency distribution - sample size: 6
+mean: 4.16667   variance: 6.16667   standard deviation: 2.48328
+
+distances between observation distributions for consecutive states
+_          0.0947739  
+0.0947739  _          
+
+tree size frequency distribution - sample size: 6
+mean: 7.83333   variance: 8.16667   standard deviation: 2.85774
+
+cumulative size: 47
+
+information of the trees in the iid case: -32.4821 (-0.691109)
+
+log-likelihood of the state trees: -35.4685   (normalized: -0.754648)
+
+state tree entropy: 3.96394   (normalized: 0.0843392)
+
+log-likelihood of the observed trees: -32.492   (normalized: -0.691319)
+
+3 free parameters   2 * penalyzed log-likelihood (AIC): -70.9839
+
+3 free parameters   2 * penalyzed log-likelihood (AICc): -71.5421
+
+3 free parameters   2 * penalyzed log-likelihood (BIC): -76.5344
+
+3 free parameters   2 * penalyzed log-likelihood (BICc): -nan
+
+3 free parameters   2 * penalyzed log-likelihood (ICL): -84.4623
+
+3 free parameters   2 * penalyzed log-likelihood (ICLc): -nan
+iteration 1   log-likelihood of the observed trees: -32.492
+
+1 iteration
+
+log-likelihood of the state trees: -35.5308 | -35.5308
+relative likelihood increase at iteration 0: 4.88144e-05
+iteration 1   log-likelihood of the observed trees: -32.4904
+
+1 iteration
+
+log-likelihood of the state trees: -35.5869 | -35.5869
+relative likelihood increase at iteration 1: 3.78162e-05
+iteration 1   log-likelihood of the observed trees: -32.4892
+
+1 iteration
+
+log-likelihood of the state trees: -35.6378 | -35.6378
+relative likelihood increase at iteration 2: 3.00137e-05
+iteration 1   log-likelihood of the observed trees: -32.4882
+
+1 iteration
+
+log-likelihood of the state trees: -35.6843 | -35.6843
+relative likelihood increase at iteration 3: 2.42659e-05
+iteration 1   log-likelihood of the observed trees: -32.4874
+
+1 iteration
+
+log-likelihood of the state trees: -35.7271 | -35.7271
+relative likelihood increase at iteration 4: 1.99294e-05
+
+estimated HMT (5 iterations)
+HIDDEN_MARKOV_INDEPENDENT_OUT_TREE
+
+2 STATES
+
+INITIAL_PROBABILITIES
+0.477516     0.522484     
+
+TRANSITION_PROBABILITIES
+0.999986     1.36641e-05  
+1e-05        0.99999      
+
+recurrent class: states 0 1
+
+path length (starting from root) up to the first occurrence of state 0 distribution
+
+path length (starting from root) up to the first occurrence of state 1 distribution
+
+path length (starting from terminal node) up to the first occurrence of state 0 distribution
+
+path length (starting from terminal node) up to the first occurrence of state 1 distribution
+
+state 0 sojourn size distribution
+
+state 1 sojourn size distribution
+
+mixture of number of zones of state 0 per tree distributions
+
+mixture of number of zones of state 1 per tree distributions
+
+mixture of number of occurrences of state 0 per tree distributions
+
+mixture of number of occurrences of state 1 per tree distributions
+
+1 OUTPUT_PROCESS
+
+OUTPUT_PROCESS 1 : NONPARAMETRIC
+
+STATE 0 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.505978
+OUTPUT 1 : 0.494022
+
+STATE 1 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.435057
+OUTPUT 1 : 0.564943
+
+observation probability matrix
+
+0          1         
+00.505978  0.494022  
+10.435057  0.564943  
+
+path length (starting from root) up to the first occurrence of output 0 distribution
+
+path length (starting from root) up to the first occurrence of output 0 frequency distribution - sample size: 6
+mean: 0.5   variance: 0.7   standard deviation: 0.83666
+
+path length (starting from root) up to the first occurrence of output 1 distribution
+
+path length (starting from root) up to the first occurrence of output 1 frequency distribution - sample size: 5
+mean: 0.8   variance: 0.7   standard deviation: 0.83666
+
+path length (starting from terminal nodes) up to the first occurrence of output 0 distribution
+
+path length (starting from terminal nodes) up to the first occurrence of output 0 frequency distribution - sample size: 6
+mean: 0.166667   variance: 0.166667   standard deviation: 0.408248
+
+path length (starting from terminal nodes) up to the first occurrence of output 1 distribution
+
+path length (starting from terminal nodes) up to the first occurrence of output 1 frequency distribution - sample size: 5
+mean: 0   variance: 0   standard deviation: 0
+
+output 0 sojourn size distribution
+
+output 0 sojourn size frequency distribution - sample size: 13
+mean: 1.69231   variance: 1.89744   standard deviation: 1.37747
+
+output 1 sojourn size distribution
+
+output 1 sojourn size frequency distribution - sample size: 16
+mean: 1.5625   variance: 0.929167   standard deviation: 0.963933
+
+mixture of number of zones of output 0 per tree distributions
+
+number of zones of output 0 per tree frequency distribution - sample size: 6
+mean: 2.16667   variance: 1.36667   standard deviation: 1.16905
+
+mixture of number of zones of output 1 per tree distributions
+
+number of zones of output 1 per tree frequency distribution - sample size: 6
+mean: 2.66667   variance: 1.86667   standard deviation: 1.36626
+
+mixture of number of occurrences of output 0 per tree distributions
+
+number of occurrences of output 0 per tree frequency distribution - sample size: 6
+mean: 3.66667   variance: 2.66667   standard deviation: 1.63299
+
+mixture of number of occurrences of output 1 per tree distributions
+
+number of occurrences of output 1 per tree frequency distribution - sample size: 6
+mean: 4.16667   variance: 6.16667   standard deviation: 2.48328
+
+distances between observation distributions for consecutive states
+_          0.0709209  
+0.0709209  _          
+
+tree size frequency distribution - sample size: 6
+mean: 7.83333   variance: 8.16667   standard deviation: 2.85774
+
+cumulative size: 47
+
+information of the trees in the iid case: -32.4821 (-0.691109)
+
+log-likelihood of the state trees: -35.7271   (normalized: -0.760151)
+
+state tree entropy: 4.04741   (normalized: 0.0861152)
+
+log-likelihood of the observed trees: -32.4867   (normalized: -0.691207)
+
+3 free parameters   2 * penalyzed log-likelihood (AIC): -70.9735
+
+3 free parameters   2 * penalyzed log-likelihood (AICc): -71.5316
+
+3 free parameters   2 * penalyzed log-likelihood (BIC): -76.5239
+
+3 free parameters   2 * penalyzed log-likelihood (BICc): -nan
+
+3 free parameters   2 * penalyzed log-likelihood (ICL): -84.6188
+
+3 free parameters   2 * penalyzed log-likelihood (ICLc): -nan
+
+Testing estimation with auto-parametric distributions and self-transitions.
+iteration 1   log-likelihood of the observed trees: -836.795
+iteration 2   log-likelihood of the observed trees: -507.751
+iteration 3   log-likelihood of the observed trees: -507.75
+iteration 4   log-likelihood of the observed trees: -507.749
+iteration 5   log-likelihood of the observed trees: -507.744
+
+5 iterations
+
+log-likelihood of the state trees: -507.921 | -507.921
+
+estimated HMT (5 iterations)
+HIDDEN_MARKOV_INDEPENDENT_OUT_TREE
+
+2 STATES
+
+INITIAL_PROBABILITIES
+0.972378     0.0276217    
+
+TRANSITION_PROBABILITIES
+0.999989     1.07946e-05  
+2.46819e-05  0.999975     
+
+recurrent class: states 0 1
+
+path length (starting from root) up to the first occurrence of state 0 distribution
+
+path length (starting from root) up to the first occurrence of state 1 distribution
+
+path length (starting from terminal node) up to the first occurrence of state 0 distribution
+
+path length (starting from terminal node) up to the first occurrence of state 1 distribution
+
+state 0 sojourn size distribution
+
+state 1 sojourn size distribution
+
+number of zones of state 0 per size 9 tree distribution
+
+number of zones of state 1 per size 9 tree distribution
+
+number of occurrences of state 0 per size 9 tree distribution
+
+number of occurrences of state 1 per size 9 tree distribution
+
+2 OUTPUT_PROCESSES
+
+OUTPUT_PROCESS 1 : PARAMETRIC
+
+STATE 0 OBSERVATION_DISTRIBUTION
+NEGATIVE_BINOMIAL   INF_BOUND : 0   PARAMETER : 200.105   PROBABILITY : 0.402956
+mean: 296.489   variance: 735.786   standard deviation: 27.1254
+
+state 0 observation frequency distribution - sample size: 54
+mean: 296.37   variance: 750.464   standard deviation: 27.3946
+
+STATE 1 OBSERVATION_DISTRIBUTION
+NEGATIVE_BINOMIAL   INF_BOUND : 0   PARAMETER : 186.233   PROBABILITY : 0.389113
+mean: 292.376   variance: 751.39   standard deviation: 27.4115
+
+state 1 observation frequency distribution - sample size: 0
+
+distances between observation distributions for consecutive states
+_          0.0610288  
+0.0610288  _          
+
+OUTPUT_PROCESS 2 : PARAMETRIC
+
+STATE 0 OBSERVATION_DISTRIBUTION
+NEGATIVE_BINOMIAL   INF_BOUND : 0   PARAMETER : 25404.9   PROBABILITY : 0.974866
+mean: 654.983   variance: 671.87   standard deviation: 25.9205
+
+state 0 observation frequency distribution - sample size: 54
+mean: 654.889   variance: 683.912   standard deviation: 26.1517
+
+STATE 1 OBSERVATION_DISTRIBUTION
+POISSON   INF_BOUND : 3   PARAMETER : 648.732   
+mean: 651.732   variance: 648.732   standard deviation: 25.4702
+
+state 1 observation frequency distribution - sample size: 0
+
+distances between observation distributions for consecutive states
+_          0.0507028  
+0.0507028  _          
+
+tree size frequency distribution - sample size: 6
+mean: 9   variance: 0   standard deviation: 0
+
+cumulative size: 54
+
+information of the trees in the iid case: -394.06 (-7.29741)
+
+log-likelihood of the state trees: -507.921   (normalized: -9.40594)
+
+state tree entropy: 0.826693   (normalized: 0.0153091)
+
+log-likelihood of the observed trees: -507.71   (normalized: -9.40204)
+
+13 free parameters   2 * penalyzed log-likelihood (AIC): -1041.42
+
+13 free parameters   2 * penalyzed log-likelihood (AICc): -1050.52
+
+13 free parameters   2 * penalyzed log-likelihood (BIC): -1067.28
+
+13 free parameters   2 * penalyzed log-likelihood (BICc): -nan
+
+13 free parameters   2 * penalyzed log-likelihood (ICL): -1068.93
+
+13 free parameters   2 * penalyzed log-likelihood (ICLc): -nan
+
+Testing estimation with imposed parametric distributions  and self-transitions.
+iteration 1   log-likelihood of the observed trees: -110.817
+iteration 2   log-likelihood of the observed trees: -32.4841
+iteration 3   log-likelihood of the observed trees: -32.4833
+iteration 4   log-likelihood of the observed trees: -32.4831
+iteration 5   log-likelihood of the observed trees: -32.4831
+
+5 iterations
+
+log-likelihood of the state trees: -33.5638 | -33.5638
+
+estimated HMT (5 iterations)
+HIDDEN_MARKOV_INDEPENDENT_OUT_TREE
+
+2 STATES
+
+INITIAL_PROBABILITIES
+0.835585     0.164415     
+
+TRANSITION_PROBABILITIES
+0.99999      1e-05        
+1.80644e-05  0.999982     
+
+recurrent class: states 0 1
+
+path length (starting from root) up to the first occurrence of state 0 distribution
+
+path length (starting from root) up to the first occurrence of state 1 distribution
+
+path length (starting from terminal node) up to the first occurrence of state 0 distribution
+
+path length (starting from terminal node) up to the first occurrence of state 1 distribution
+
+state 0 sojourn size distribution
+
+state 1 sojourn size distribution
+
+mixture of number of zones of state 0 per tree distributions
+
+mixture of number of zones of state 1 per tree distributions
+
+mixture of number of occurrences of state 0 per tree distributions
+
+mixture of number of occurrences of state 1 per tree distributions
+
+1 OUTPUT_PROCESS
+
+OUTPUT_PROCESS 1 : PARAMETRIC
+
+STATE 0 OBSERVATION_DISTRIBUTION
+BINOMIAL   INF_BOUND : 0   SUP_BOUND : 1   PROBABILITY : 0.538071
+mean: 0.538071   variance: 0.248551   standard deviation: 0.498548
+
+state 0 observation frequency distribution - sample size: 47
+mean: 0.531915   variance: 0.254394   standard deviation: 0.504375
+
+STATE 1 OBSERVATION_DISTRIBUTION
+BINOMIAL   INF_BOUND : 0   SUP_BOUND : 1   PROBABILITY : 0.493333
+mean: 0.493333   variance: 0.249956   standard deviation: 0.499956
+
+state 1 observation frequency distribution - sample size: 0
+
+distances between observation distributions for consecutive states
+_          0.0447377  
+0.0447377  _          
+
+tree size frequency distribution - sample size: 6
+mean: 7.83333   variance: 8.16667   standard deviation: 2.85774
+
+cumulative size: 47
+
+information of the trees in the iid case: -32.4821 (-0.691109)
+
+log-likelihood of the state trees: -33.5638   (normalized: -0.714124)
+
+state tree entropy: 2.66012   (normalized: 0.0565983)
+
+log-likelihood of the observed trees: -32.4831   (normalized: -0.69113)
+
+7 free parameters   2 * penalyzed log-likelihood (AIC): -78.9662
+
+7 free parameters   2 * penalyzed log-likelihood (AICc): -81.838
+
+7 free parameters   2 * penalyzed log-likelihood (BIC): -91.9173
+
+7 free parameters   2 * penalyzed log-likelihood (BICc): -nan
+
+7 free parameters   2 * penalyzed log-likelihood (ICL): -97.2375
+
+7 free parameters   2 * penalyzed log-likelihood (ICLc): -nan
+Testing estimation using SEM algorithm
+iteration 1   log-likelihood of the observed trees: -32.5739
+iteration 2   log-likelihood of the observed trees: -32.635
+iteration 3   log-likelihood of the observed trees: -32.9181
+
+3 iterations
+
+log-likelihood of the state trees: -35.4684 | -35.4684
+HIDDEN_MARKOV_INDEPENDENT_OUT_TREE
+
+2 STATES
+
+INITIAL_PROBABILITIES
+0.5      0.5      
+
+TRANSITION_PROBABILITIES
+0.99999  1e-05    
+1e-05    0.99999  
+
+recurrent class: states 0 1
+
+path length (starting from root) up to the first occurrence of state 0 distribution
+
+path length (starting from root) up to the first occurrence of state 1 distribution
+
+path length (starting from terminal node) up to the first occurrence of state 0 distribution
+
+path length (starting from terminal node) up to the first occurrence of state 1 distribution
+
+state 0 sojourn size distribution
+
+state 1 sojourn size distribution
+
+mixture of number of zones of state 0 per tree distributions
+
+mixture of number of zones of state 1 per tree distributions
+
+mixture of number of occurrences of state 0 per tree distributions
+
+mixture of number of occurrences of state 1 per tree distributions
+
+1 OUTPUT_PROCESS
+
+OUTPUT_PROCESS 1 : NONPARAMETRIC
+
+STATE 0 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.55
+OUTPUT 1 : 0.45
+
+STATE 1 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.45
+OUTPUT 1 : 0.55
+
+observation probability matrix
+
+0      1     
+00.55  0.45  
+10.45  0.55  
+
+path length (starting from root) up to the first occurrence of output 0 distribution
+
+path length (starting from root) up to the first occurrence of output 0 frequency distribution - sample size: 6
+mean: 0.5   variance: 0.7   standard deviation: 0.83666
+
+path length (starting from root) up to the first occurrence of output 1 distribution
+
+path length (starting from root) up to the first occurrence of output 1 frequency distribution - sample size: 5
+mean: 0.8   variance: 0.7   standard deviation: 0.83666
+
+path length (starting from terminal nodes) up to the first occurrence of output 0 distribution
+
+path length (starting from terminal nodes) up to the first occurrence of output 0 frequency distribution - sample size: 6
+mean: 0.166667   variance: 0.166667   standard deviation: 0.408248
+
+path length (starting from terminal nodes) up to the first occurrence of output 1 distribution
+
+path length (starting from terminal nodes) up to the first occurrence of output 1 frequency distribution - sample size: 5
+mean: 0   variance: 0   standard deviation: 0
+
+output 0 sojourn size distribution
+
+output 0 sojourn size frequency distribution - sample size: 13
+mean: 1.69231   variance: 1.89744   standard deviation: 1.37747
+
+output 1 sojourn size distribution
+
+output 1 sojourn size frequency distribution - sample size: 16
+mean: 1.5625   variance: 0.929167   standard deviation: 0.963933
+
+mixture of number of zones of output 0 per tree distributions
+
+number of zones of output 0 per tree frequency distribution - sample size: 6
+mean: 2.16667   variance: 1.36667   standard deviation: 1.16905
+
+mixture of number of zones of output 1 per tree distributions
+
+number of zones of output 1 per tree frequency distribution - sample size: 6
+mean: 2.66667   variance: 1.86667   standard deviation: 1.36626
+
+mixture of number of occurrences of output 0 per tree distributions
+
+number of occurrences of output 0 per tree frequency distribution - sample size: 6
+mean: 3.66667   variance: 2.66667   standard deviation: 1.63299
+
+mixture of number of occurrences of output 1 per tree distributions
+
+number of occurrences of output 1 per tree frequency distribution - sample size: 6
+mean: 4.16667   variance: 6.16667   standard deviation: 2.48328
+
+distances between observation distributions for consecutive states
+_    0.1  
+0.1  _    
+
+tree size frequency distribution - sample size: 6
+mean: 7.83333   variance: 8.16667   standard deviation: 2.85774
+
+cumulative size: 47
+
+information of the trees in the iid case: -32.4821 (-0.691109)
+
+log-likelihood of the state trees: -35.4684   (normalized: -0.754646)
+
+state tree entropy: 3.93597   (normalized: 0.0837441)
+
+log-likelihood of the observed trees: -32.5739   (normalized: -0.693062)
+
+2 free parameters   2 * penalyzed log-likelihood (AIC): -69.1478
+
+2 free parameters   2 * penalyzed log-likelihood (AICc): -69.4205
+
+2 free parameters   2 * penalyzed log-likelihood (BIC): -72.8481
+
+2 free parameters   2 * penalyzed log-likelihood (BICc): -nan
+
+2 free parameters   2 * penalyzed log-likelihood (ICL): -80.72
+
+2 free parameters   2 * penalyzed log-likelihood (ICLc): -nan
+
+Testing estimation using EM algorithm 'a la Gibbs'
+iteration 1   log-likelihood of the observed trees: -32.5739
+iteration 2   log-likelihood of the observed trees: -32.9181
+iteration 3   log-likelihood of the observed trees: -32.9181
+
+3 iterations
+
+log-likelihood of the state trees: -35.4684 | -35.4684
+HIDDEN_MARKOV_INDEPENDENT_OUT_TREE
+
+2 STATES
+
+INITIAL_PROBABILITIES
+0.5      0.5      
+
+TRANSITION_PROBABILITIES
+0.99999  1e-05    
+1e-05    0.99999  
+
+recurrent class: states 0 1
+
+path length (starting from root) up to the first occurrence of state 0 distribution
+
+path length (starting from root) up to the first occurrence of state 1 distribution
+
+path length (starting from terminal node) up to the first occurrence of state 0 distribution
+
+path length (starting from terminal node) up to the first occurrence of state 1 distribution
+
+state 0 sojourn size distribution
+
+state 1 sojourn size distribution
+
+mixture of number of zones of state 0 per tree distributions
+
+mixture of number of zones of state 1 per tree distributions
+
+mixture of number of occurrences of state 0 per tree distributions
+
+mixture of number of occurrences of state 1 per tree distributions
+
+1 OUTPUT_PROCESS
+
+OUTPUT_PROCESS 1 : NONPARAMETRIC
+
+STATE 0 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.55
+OUTPUT 1 : 0.45
+
+STATE 1 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.45
+OUTPUT 1 : 0.55
+
+observation probability matrix
+
+0      1     
+00.55  0.45  
+10.45  0.55  
+
+path length (starting from root) up to the first occurrence of output 0 distribution
+
+path length (starting from root) up to the first occurrence of output 0 frequency distribution - sample size: 6
+mean: 0.5   variance: 0.7   standard deviation: 0.83666
+
+path length (starting from root) up to the first occurrence of output 1 distribution
+
+path length (starting from root) up to the first occurrence of output 1 frequency distribution - sample size: 5
+mean: 0.8   variance: 0.7   standard deviation: 0.83666
+
+path length (starting from terminal nodes) up to the first occurrence of output 0 distribution
+
+path length (starting from terminal nodes) up to the first occurrence of output 0 frequency distribution - sample size: 6
+mean: 0.166667   variance: 0.166667   standard deviation: 0.408248
+
+path length (starting from terminal nodes) up to the first occurrence of output 1 distribution
+
+path length (starting from terminal nodes) up to the first occurrence of output 1 frequency distribution - sample size: 5
+mean: 0   variance: 0   standard deviation: 0
+
+output 0 sojourn size distribution
+
+output 0 sojourn size frequency distribution - sample size: 13
+mean: 1.69231   variance: 1.89744   standard deviation: 1.37747
+
+output 1 sojourn size distribution
+
+output 1 sojourn size frequency distribution - sample size: 16
+mean: 1.5625   variance: 0.929167   standard deviation: 0.963933
+
+mixture of number of zones of output 0 per tree distributions
+
+number of zones of output 0 per tree frequency distribution - sample size: 6
+mean: 2.16667   variance: 1.36667   standard deviation: 1.16905
+
+mixture of number of zones of output 1 per tree distributions
+
+number of zones of output 1 per tree frequency distribution - sample size: 6
+mean: 2.66667   variance: 1.86667   standard deviation: 1.36626
+
+mixture of number of occurrences of output 0 per tree distributions
+
+number of occurrences of output 0 per tree frequency distribution - sample size: 6
+mean: 3.66667   variance: 2.66667   standard deviation: 1.63299
+
+mixture of number of occurrences of output 1 per tree distributions
+
+number of occurrences of output 1 per tree frequency distribution - sample size: 6
+mean: 4.16667   variance: 6.16667   standard deviation: 2.48328
+
+distances between observation distributions for consecutive states
+_    0.1  
+0.1  _    
+
+tree size frequency distribution - sample size: 6
+mean: 7.83333   variance: 8.16667   standard deviation: 2.85774
+
+cumulative size: 47
+
+information of the trees in the iid case: -32.4821 (-0.691109)
+
+log-likelihood of the state trees: -35.4684   (normalized: -0.754646)
+
+state tree entropy: 3.93597   (normalized: 0.0837441)
+
+log-likelihood of the observed trees: -32.5739   (normalized: -0.693062)
+
+2 free parameters   2 * penalyzed log-likelihood (AIC): -69.1478
+
+2 free parameters   2 * penalyzed log-likelihood (AICc): -69.4205
+
+2 free parameters   2 * penalyzed log-likelihood (BIC): -72.8481
+
+2 free parameters   2 * penalyzed log-likelihood (BICc): -nan
+
+2 free parameters   2 * penalyzed log-likelihood (ICL): -80.72
+
+2 free parameters   2 * penalyzed log-likelihood (ICLc): -nan
+
+Testing estimation using CEM algorithm
+iteration 1   log-likelihood of the observed trees: -32.5739
+iteration 2   log-likelihood of the observed trees: -32.9181
+iteration 3   log-likelihood of the observed trees: -32.9181
+
+3 iterations
+
+log-likelihood of the state trees: -35.4684 | -35.4684
+HIDDEN_MARKOV_INDEPENDENT_OUT_TREE
+
+2 STATES
+
+INITIAL_PROBABILITIES
+0.5      0.5      
+
+TRANSITION_PROBABILITIES
+0.99999  1e-05    
+1e-05    0.99999  
+
+recurrent class: states 0 1
+
+path length (starting from root) up to the first occurrence of state 0 distribution
+
+path length (starting from root) up to the first occurrence of state 1 distribution
+
+path length (starting from terminal node) up to the first occurrence of state 0 distribution
+
+path length (starting from terminal node) up to the first occurrence of state 1 distribution
+
+state 0 sojourn size distribution
+
+state 1 sojourn size distribution
+
+mixture of number of zones of state 0 per tree distributions
+
+mixture of number of zones of state 1 per tree distributions
+
+mixture of number of occurrences of state 0 per tree distributions
+
+mixture of number of occurrences of state 1 per tree distributions
+
+1 OUTPUT_PROCESS
+
+OUTPUT_PROCESS 1 : NONPARAMETRIC
+
+STATE 0 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.55
+OUTPUT 1 : 0.45
+
+STATE 1 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.45
+OUTPUT 1 : 0.55
+
+observation probability matrix
+
+0      1     
+00.55  0.45  
+10.45  0.55  
+
+path length (starting from root) up to the first occurrence of output 0 distribution
+
+path length (starting from root) up to the first occurrence of output 0 frequency distribution - sample size: 6
+mean: 0.5   variance: 0.7   standard deviation: 0.83666
+
+path length (starting from root) up to the first occurrence of output 1 distribution
+
+path length (starting from root) up to the first occurrence of output 1 frequency distribution - sample size: 5
+mean: 0.8   variance: 0.7   standard deviation: 0.83666
+
+path length (starting from terminal nodes) up to the first occurrence of output 0 distribution
+
+path length (starting from terminal nodes) up to the first occurrence of output 0 frequency distribution - sample size: 6
+mean: 0.166667   variance: 0.166667   standard deviation: 0.408248
+
+path length (starting from terminal nodes) up to the first occurrence of output 1 distribution
+
+path length (starting from terminal nodes) up to the first occurrence of output 1 frequency distribution - sample size: 5
+mean: 0   variance: 0   standard deviation: 0
+
+output 0 sojourn size distribution
+
+output 0 sojourn size frequency distribution - sample size: 13
+mean: 1.69231   variance: 1.89744   standard deviation: 1.37747
+
+output 1 sojourn size distribution
+
+output 1 sojourn size frequency distribution - sample size: 16
+mean: 1.5625   variance: 0.929167   standard deviation: 0.963933
+
+mixture of number of zones of output 0 per tree distributions
+
+number of zones of output 0 per tree frequency distribution - sample size: 6
+mean: 2.16667   variance: 1.36667   standard deviation: 1.16905
+
+mixture of number of zones of output 1 per tree distributions
+
+number of zones of output 1 per tree frequency distribution - sample size: 6
+mean: 2.66667   variance: 1.86667   standard deviation: 1.36626
+
+mixture of number of occurrences of output 0 per tree distributions
+
+number of occurrences of output 0 per tree frequency distribution - sample size: 6
+mean: 3.66667   variance: 2.66667   standard deviation: 1.63299
+
+mixture of number of occurrences of output 1 per tree distributions
+
+number of occurrences of output 1 per tree frequency distribution - sample size: 6
+mean: 4.16667   variance: 6.16667   standard deviation: 2.48328
+
+distances between observation distributions for consecutive states
+_    0.1  
+0.1  _    
+
+tree size frequency distribution - sample size: 6
+mean: 7.83333   variance: 8.16667   standard deviation: 2.85774
+
+cumulative size: 47
+
+information of the trees in the iid case: -32.4821 (-0.691109)
+
+log-likelihood of the state trees: -35.4684   (normalized: -0.754646)
+
+state tree entropy: 3.93597   (normalized: 0.0837441)
+
+log-likelihood of the observed trees: -32.5739   (normalized: -0.693062)
+
+2 free parameters   2 * penalyzed log-likelihood (AIC): -69.1478
+
+2 free parameters   2 * penalyzed log-likelihood (AICc): -69.4205
+
+2 free parameters   2 * penalyzed log-likelihood (BIC): -72.8481
+
+2 free parameters   2 * penalyzed log-likelihood (BICc): -nan
+
+2 free parameters   2 * penalyzed log-likelihood (ICL): -80.72
+
+2 free parameters   2 * penalyzed log-likelihood (ICLc): -nan
+
+Testing estimation using SAEM algorithm
+iteration 1   log-likelihood of the observed trees: -32.5739
+iteration 2   log-likelihood of the observed trees: -32.4922
+iteration 3   log-likelihood of the observed trees: -32.4974
+iteration 4   log-likelihood of the observed trees: -32.4981
+iteration 5   log-likelihood of the observed trees: -32.4876
+iteration 6   log-likelihood of the observed trees: -32.4904
+iteration 7   log-likelihood of the observed trees: -32.4894
+iteration 8   log-likelihood of the observed trees: -32.49
+iteration 9   log-likelihood of the observed trees: -32.4844
+iteration 10   log-likelihood of the observed trees: -32.4841
+
+10 iterations
+
+log-likelihood of the state trees: -33.6989 | -33.6989
+HIDDEN_MARKOV_INDEPENDENT_OUT_TREE
+
+2 STATES
+
+INITIAL_PROBABILITIES
+0.818395  0.181605  
+
+TRANSITION_PROBABILITIES
+0.99999   1e-05     
+1e-05     0.99999   
+
+recurrent class: states 0 1
+
+path length (starting from root) up to the first occurrence of state 0 distribution
+
+path length (starting from root) up to the first occurrence of state 1 distribution
+
+path length (starting from terminal node) up to the first occurrence of state 0 distribution
+
+path length (starting from terminal node) up to the first occurrence of state 1 distribution
+
+state 0 sojourn size distribution
+
+state 1 sojourn size distribution
+
+mixture of number of zones of state 0 per tree distributions
+
+mixture of number of zones of state 1 per tree distributions
+
+mixture of number of occurrences of state 0 per tree distributions
+
+mixture of number of occurrences of state 1 per tree distributions
+
+1 OUTPUT_PROCESS
+
+OUTPUT_PROCESS 1 : NONPARAMETRIC
+
+STATE 0 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.480245
+OUTPUT 1 : 0.519755
+
+STATE 1 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.417753
+OUTPUT 1 : 0.582247
+
+observation probability matrix
+
+0          1         
+00.480245  0.519755  
+10.417753  0.582247  
+
+path length (starting from root) up to the first occurrence of output 0 distribution
+
+path length (starting from root) up to the first occurrence of output 0 frequency distribution - sample size: 6
+mean: 0.5   variance: 0.7   standard deviation: 0.83666
+
+path length (starting from root) up to the first occurrence of output 1 distribution
+
+path length (starting from root) up to the first occurrence of output 1 frequency distribution - sample size: 5
+mean: 0.8   variance: 0.7   standard deviation: 0.83666
+
+path length (starting from terminal nodes) up to the first occurrence of output 0 distribution
+
+path length (starting from terminal nodes) up to the first occurrence of output 0 frequency distribution - sample size: 6
+mean: 0.166667   variance: 0.166667   standard deviation: 0.408248
+
+path length (starting from terminal nodes) up to the first occurrence of output 1 distribution
+
+path length (starting from terminal nodes) up to the first occurrence of output 1 frequency distribution - sample size: 5
+mean: 0   variance: 0   standard deviation: 0
+
+output 0 sojourn size distribution
+
+output 0 sojourn size frequency distribution - sample size: 13
+mean: 1.69231   variance: 1.89744   standard deviation: 1.37747
+
+output 1 sojourn size distribution
+
+output 1 sojourn size frequency distribution - sample size: 16
+mean: 1.5625   variance: 0.929167   standard deviation: 0.963933
+
+mixture of number of zones of output 0 per tree distributions
+
+number of zones of output 0 per tree frequency distribution - sample size: 6
+mean: 2.16667   variance: 1.36667   standard deviation: 1.16905
+
+mixture of number of zones of output 1 per tree distributions
+
+number of zones of output 1 per tree frequency distribution - sample size: 6
+mean: 2.66667   variance: 1.86667   standard deviation: 1.36626
+
+mixture of number of occurrences of output 0 per tree distributions
+
+number of occurrences of output 0 per tree frequency distribution - sample size: 6
+mean: 3.66667   variance: 2.66667   standard deviation: 1.63299
+
+mixture of number of occurrences of output 1 per tree distributions
+
+number of occurrences of output 1 per tree frequency distribution - sample size: 6
+mean: 4.16667   variance: 6.16667   standard deviation: 2.48328
+
+distances between observation distributions for consecutive states
+_          0.0624915  
+0.0624915  _          
+
+tree size frequency distribution - sample size: 6
+mean: 7.83333   variance: 8.16667   standard deviation: 2.85774
+
+cumulative size: 47
+
+information of the trees in the iid case: -32.4821 (-0.691109)
+
+log-likelihood of the state trees: -33.6989   (normalized: -0.716998)
+
+state tree entropy: 2.79393   (normalized: 0.0594453)
+
+log-likelihood of the observed trees: -32.4841   (normalized: -0.691151)
+
+2 free parameters   2 * penalyzed log-likelihood (AIC): -68.9682
+
+2 free parameters   2 * penalyzed log-likelihood (AICc): -69.241
+
+2 free parameters   2 * penalyzed log-likelihood (BIC): -72.6685
+
+2 free parameters   2 * penalyzed log-likelihood (BICc): -nan
+
+2 free parameters   2 * penalyzed log-likelihood (ICL): -78.2564
+
+2 free parameters   2 * penalyzed log-likelihood (ICLc): -nan
+
+
+Testing estimation using SAEM algorithm and initial model specification
+iteration 1   log-likelihood of the observed trees: -32.4841
+iteration 2   log-likelihood of the observed trees: -32.4839
+iteration 3   log-likelihood of the observed trees: -32.4836
+iteration 4   log-likelihood of the observed trees: -32.486
+iteration 5   log-likelihood of the observed trees: -32.484
+iteration 6   log-likelihood of the observed trees: -32.4835
+iteration 7   log-likelihood of the observed trees: -32.4842
+iteration 8   log-likelihood of the observed trees: -32.483
+iteration 9   log-likelihood of the observed trees: -32.4844
+iteration 10   log-likelihood of the observed trees: -32.4832
+
+10 iterations
+
+log-likelihood of the state trees: -32.9753 | -32.9753
+HIDDEN_MARKOV_INDEPENDENT_OUT_TREE
+
+2 STATES
+
+INITIAL_PROBABILITIES
+0.921653   0.0783471  
+
+TRANSITION_PROBABILITIES
+0.99999    1e-05      
+1e-05      0.99999    
+
+recurrent class: states 0 1
+
+path length (starting from root) up to the first occurrence of state 0 distribution
+
+path length (starting from root) up to the first occurrence of state 1 distribution
+
+path length (starting from terminal node) up to the first occurrence of state 0 distribution
+
+path length (starting from terminal node) up to the first occurrence of state 1 distribution
+
+state 0 sojourn size distribution
+
+state 1 sojourn size distribution
+
+mixture of number of zones of state 0 per tree distributions
+
+mixture of number of zones of state 1 per tree distributions
+
+mixture of number of occurrences of state 0 per tree distributions
+
+mixture of number of occurrences of state 1 per tree distributions
+
+1 OUTPUT_PROCESS
+
+OUTPUT_PROCESS 1 : NONPARAMETRIC
+
+STATE 0 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.473955
+OUTPUT 1 : 0.526045
+
+STATE 1 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.426782
+OUTPUT 1 : 0.573218
+
+observation probability matrix
+
+0          1         
+00.473955  0.526045  
+10.426782  0.573218  
+
+path length (starting from root) up to the first occurrence of output 0 distribution
+
+path length (starting from root) up to the first occurrence of output 0 frequency distribution - sample size: 6
+mean: 0.5   variance: 0.7   standard deviation: 0.83666
+
+path length (starting from root) up to the first occurrence of output 1 distribution
+
+path length (starting from root) up to the first occurrence of output 1 frequency distribution - sample size: 5
+mean: 0.8   variance: 0.7   standard deviation: 0.83666
+
+path length (starting from terminal nodes) up to the first occurrence of output 0 distribution
+
+path length (starting from terminal nodes) up to the first occurrence of output 0 frequency distribution - sample size: 6
+mean: 0.166667   variance: 0.166667   standard deviation: 0.408248
+
+path length (starting from terminal nodes) up to the first occurrence of output 1 distribution
+
+path length (starting from terminal nodes) up to the first occurrence of output 1 frequency distribution - sample size: 5
+mean: 0   variance: 0   standard deviation: 0
+
+output 0 sojourn size distribution
+
+output 0 sojourn size frequency distribution - sample size: 13
+mean: 1.69231   variance: 1.89744   standard deviation: 1.37747
+
+output 1 sojourn size distribution
+
+output 1 sojourn size frequency distribution - sample size: 16
+mean: 1.5625   variance: 0.929167   standard deviation: 0.963933
+
+mixture of number of zones of output 0 per tree distributions
+
+number of zones of output 0 per tree frequency distribution - sample size: 6
+mean: 2.16667   variance: 1.36667   standard deviation: 1.16905
+
+mixture of number of zones of output 1 per tree distributions
+
+number of zones of output 1 per tree frequency distribution - sample size: 6
+mean: 2.66667   variance: 1.86667   standard deviation: 1.36626
+
+mixture of number of occurrences of output 0 per tree distributions
+
+number of occurrences of output 0 per tree frequency distribution - sample size: 6
+mean: 3.66667   variance: 2.66667   standard deviation: 1.63299
+
+mixture of number of occurrences of output 1 per tree distributions
+
+number of occurrences of output 1 per tree frequency distribution - sample size: 6
+mean: 4.16667   variance: 6.16667   standard deviation: 2.48328
+
+distances between observation distributions for consecutive states
+_          0.0471732  
+0.0471732  _          
+
+tree size frequency distribution - sample size: 6
+mean: 7.83333   variance: 8.16667   standard deviation: 2.85774
+
+cumulative size: 47
+
+information of the trees in the iid case: -32.4821 (-0.691109)
+
+log-likelihood of the state trees: -32.9753   (normalized: -0.701602)
+
+state tree entropy: 1.64081   (normalized: 0.0349109)
+
+log-likelihood of the observed trees: -32.483   (normalized: -0.691128)
+
+2 free parameters   2 * penalyzed log-likelihood (AIC): -68.966
+
+2 free parameters   2 * penalyzed log-likelihood (AICc): -69.2387
+
+2 free parameters   2 * penalyzed log-likelihood (BIC): -72.6663
+
+2 free parameters   2 * penalyzed log-likelihood (BICc): -nan
+
+2 free parameters   2 * penalyzed log-likelihood (ICL): -75.9479
+
+2 free parameters   2 * penalyzed log-likelihood (ICLc): -nan
+
+

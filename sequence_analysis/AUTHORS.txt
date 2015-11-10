@@ -1,0 +1,4 @@
+Yann Guédon (Original code ; AML and CPP implementation; documentation)
+
+Thomas Cokelaer (Boost python wrapping, python modules, tests, documentation)
+

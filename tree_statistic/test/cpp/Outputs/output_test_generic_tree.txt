@@ -1,0 +1,806 @@
+A predefined (homemade) tree ... 
+1
+|-2
+| |-4
+| |-5
+|   
+|-3
+... of depth 2 and size 5.
+Number of children of node 1: 2; depth: 0
+Number of children of node 2: 2; depth: 1
+Number of children of node 3: 0; depth: 1
+Number of children of node 4: 0; depth: 2
+Number of children of node 5: 0; depth: 2
+
+Subtree from this tree rooted at node 2
+2
+|-4
+|-5
+preorder: 5
+1
+2
+4
+5
+3
+
+inorder: 5
+4
+2
+5
+1
+3
+
+postorder: 5
+4
+5
+2
+3
+1
+
+Breath first tree traversal: 
+1
+2
+3
+4
+5
+
+Leaves last tree traversal : 
+4
+5
+3
+1
+2
+
+Distance of each node to nearest leaf : 
+0
+0
+0
+1
+1
+
+Ancestors of vertex 5: 
+1
+2
+5
+
+Extracting subtree from this tree rooted at node 2
+2
+|-4
+|-5
+Extracting subtree from this tree rooted at node 4
+4
+New id of root node: 0
+Breath first tree traversal starting at root vertex: 
+1
+Pruning this tree at node 2
+1
+|-3
+Preorder tree traversal starting at vertex 2: 
+preorder: 3
+2
+4
+5
+
+Breath first tree traversal starting at vertex 2: 
+2
+4
+5
+A copy of the whole tree is (constr) 
+1
+|-2
+| |-4
+| |-5
+|   
+|-3
+It has depth 2 and size 5.
+Another copy : 
+1
+|-2
+| |-4
+| |-5
+|   
+|-3
+... which has depth 2 and size 5.
+A second predefined tree ... 
+6
+|-5
+| |-8
+| |-1
+| |-0
+|   |-9
+|     
+|-2
+|-4
+  |-3
+  |-7
+    
+... of depth 3 and size 10.
+Subtree from this tree rooted at node 4
+4
+|-3
+|-7
+Extracting subtree from this tree rooted at node 5
+5
+|-8
+|-1
+|-0
+  |-9
+    
+Pruning this tree at node 5
+6
+|-2
+|-4
+  |-3
+  |-7
+    
+preorder: 10
+6
+5
+8
+1
+0
+9
+2
+4
+3
+7
+
+inorder: 10
+8
+5
+1
+9
+0
+6
+2
+3
+4
+7
+
+postorder: 10
+8
+1
+9
+0
+5
+2
+3
+7
+4
+6
+
+Breath first tree traversal: 
+6
+5
+2
+4
+8
+1
+0
+3
+7
+9
+
+Leaves-last tree traversal: 
+8
+1
+9
+2
+3
+7
+4
+6
+0
+5
+
+Distance of each node to nearest leaf : 
+0
+0
+0
+0
+0
+0
+1
+1
+1
+1
+
+Tree structures have label : *
+
+Vertices are : 1 ... 5
+Root node is : 1
+... Above tree has following structure (built manually) 
+*
+|-*
+| |-*
+| |-*
+|   
+|-*
+It has depth 2 and size 5.
+... whose copy is : 
+*
+|-*
+| |-*
+| |-*
+|   
+|-*
+(5 vertices and depth 2)
+This can also be built from the labelled tree : 
+1
+|-2
+| |-4
+| |-5
+|   
+|-3
+... whose structure is then 
+*
+|-*
+| |-*
+| |-*
+|   
+|-*
+
+(5 vertices and depth 2)
+Extracting subtree from this tree rooted at node 1
+*
+|-*
+|-*
+Let's draw a random sample from following distribution 
+
+UNIFORM   INF_BOUND : 0   SUP_BOUND : 3   PROBABILITY : 0.6
+mean: 1.5   variance: 1.25   standard deviation: 1.118
+offset : 0   maximum : 0.25
+probability mass function (4) : 0.25 0.25 0.25 0.25 
+cumulative distribution function : 0.25 0.5 0.75 1 
+3 1 3 3 3 0 1 3 1 2 1 2 1 2 3 
+Now a random tree (unlimited depth, 30 vertices max)
+
+*
+|-*
+| |-*
+| | |-*
+| | | |-*
+| | | | |-*
+| | | |   |-*
+| | | |   |-*
+| | | |   |-*
+| | | |     
+| | | |-*
+| | | |-*
+| | |   
+| | |-*
+| |   
+| |-*
+|   
+|-*
+| |-*
+| |-*
+|   
+|-*
+... actually : 17 vertices and depth 6
+Then a random tree with maximal depth 3 and less than 45 vertices
+... using following distribution 
+
+BINOMIAL   INF_BOUND : 0   SUP_BOUND : 3   PROBABILITY : 0.6
+mean: 1.8   variance: 0.72   standard deviation: 0.84853
+offset : 0   maximum : 0.432
+probability mass function (4) : 0.064 0.288 0.432 0.216 
+cumulative distribution function : 0.064 0.352 0.784 1 
+*
+|-*
+| |-*
+|   |-*
+|   |-*
+|     
+|-*
+  |-*
+  | |-*
+  | |-*
+  |   
+  |-*
+    |-*
+    |-*
+    |-*
+      
+Is (0, 1) an edge ? :1
+Type of this edge :0
+Is (0, 4) an edge ?:0
+... actually : 13 vertices and depth 3
+Another random realization of this process 
+(8 vertices and depth 3)
+*
+|-*
+  |-*
+  | |-*
+  | |-*
+  |   
+  |-*
+    |-*
+    |-*
+      
+And another one 
+(16 vertices and depth 3)
+*
+|-*
+| |-*
+| | |-*
+| | |-*
+| |   
+| |-*
+| | |-*
+| | |-*
+| | |-*
+| |   
+| |-*
+|   |-*
+|   |-*
+|   |-*
+|     
+|-*
+  |-*
+    |-*
+      
+A copy from the tree above 
+*
+|-*
+| |-*
+| | |-*
+| | |-*
+| |   
+| |-*
+| | |-*
+| | |-*
+| | |-*
+| |   
+| |-*
+|   |-*
+|   |-*
+|   |-*
+|     
+|-*
+  |-*
+    |-*
+      
+Default tree structure is 
+*
+(1 vertices and depth 0)
+or equivalently 
+*
+A random structure with less than 45 vertices using no _max_depth constructor 
+*
+|-*
+| |-*
+| | |-*
+| | | |-*
+| | |   
+| | |-*
+| |   
+| |-*
+|   |-*
+|   |-*
+|   | |-*
+|   |   |-*
+|   |   |-*
+|   |   |-*
+|   |     
+|   |-*
+|     
+|-*
+|-*
+(16 vertices and depth 5)
+Corresponding labellized tree (using constructor): 
+0
+|-0
+| |-0
+| | |-0
+| | | |-0
+| | |   
+| | |-0
+| |   
+| |-0
+|   |-0
+|   |-0
+|   | |-0
+|   |   |-0
+|   |   |-0
+|   |   |-0
+|   |     
+|   |-0
+|     
+|-0
+|-0
+(16 vertices and depth 5)
+Corresponding labellized tree (using set_structure)
+with default value 2 
+2
+|-2
+| |-2
+| | |-2
+| | | |-2
+| | |   
+| | |-2
+| |   
+| |-2
+|   |-2
+|   |-2
+|   | |-2
+|   |   |-2
+|   |   |-2
+|   |   |-2
+|   |     
+|   |-2
+|     
+|-2
+|-2
+(16 vertices and depth 5)
+
+A random structure with less than 45 vertices using no _max_depth constructor 
+*
+|-*
+| |-*
+| | |-*
+| |   |-*
+| |     
+| |-*
+| | |-*
+| | | |-*
+| | | |-*
+| | | |-*
+| | |   
+| | |-*
+| | |-*
+| |   
+| |-*
+|   |-*
+|   |-*
+|     
+|-*
+| |-*
+|   |-*
+|   |-*
+|     
+|-*
+  |-*
+  | |-*
+  | |-*
+  |   
+  |-*
+    
+(24 vertices and depth 4)
+Corresponding labellized tree (using constructor): 
+0
+|-0
+| |-0
+| | |-0
+| |   |-0
+| |     
+| |-0
+| | |-0
+| | | |-0
+| | | |-0
+| | | |-0
+| | |   
+| | |-0
+| | |-0
+| |   
+| |-0
+|   |-0
+|   |-0
+|     
+|-0
+| |-0
+|   |-0
+|   |-0
+|     
+|-0
+  |-0
+  | |-0
+  | |-0
+  |   
+  |-0
+    
+(24 vertices and depth 4)
+Corresponding labellized tree (using set_structure)
+with default value 2 
+2
+|-2
+| |-2
+| | |-2
+| |   |-2
+| |     
+| |-2
+| | |-2
+| | | |-2
+| | | |-2
+| | | |-2
+| | |   
+| | |-2
+| | |-2
+| |   
+| |-2
+|   |-2
+|   |-2
+|     
+|-2
+| |-2
+|   |-2
+|   |-2
+|     
+|-2
+  |-2
+  | |-2
+  | |-2
+  |   
+  |-2
+    
+(24 vertices and depth 4)
+
+A random structure with less than 45 vertices using no _max_depth constructor 
+*
+|-*
+| |-*
+|   |-*
+|     |-*
+|     |-*
+|       
+|-*
+|-*
+  |-*
+  | |-*
+  | | |-*
+  | | |-*
+  | | |-*
+  | |   
+  | |-*
+  |   |-*
+  |     
+  |-*
+  | |-*
+  | | |-*
+  | | |-*
+  | |   
+  | |-*
+  | |-*
+  |   
+  |-*
+    |-*
+    |-*
+      
+(24 vertices and depth 4)
+Corresponding labellized tree (using constructor): 
+0
+|-0
+| |-0
+|   |-0
+|     |-0
+|     |-0
+|       
+|-0
+|-0
+  |-0
+  | |-0
+  | | |-0
+  | | |-0
+  | | |-0
+  | |   
+  | |-0
+  |   |-0
+  |     
+  |-0
+  | |-0
+  | | |-0
+  | | |-0
+  | |   
+  | |-0
+  | |-0
+  |   
+  |-0
+    |-0
+    |-0
+      
+(24 vertices and depth 4)
+Corresponding labellized tree (using set_structure)
+with default value 2 
+2
+|-2
+| |-2
+|   |-2
+|     |-2
+|     |-2
+|       
+|-2
+|-2
+  |-2
+  | |-2
+  | | |-2
+  | | |-2
+  | | |-2
+  | |   
+  | |-2
+  |   |-2
+  |     
+  |-2
+  | |-2
+  | | |-2
+  | | |-2
+  | |   
+  | |-2
+  | |-2
+  |   
+  |-2
+    |-2
+    |-2
+      
+(24 vertices and depth 4)
+
+A random structure with less than 45 vertices using no _max_depth constructor 
+*
+|-*
+| |-*
+|   |-*
+|     |-*
+|       |-*
+|         
+|-*
+  |-*
+  | |-*
+  | |-*
+  | |-*
+  |   |-*
+  |     
+  |-*
+    |-*
+      |-*
+      | |-*
+      | | |-*
+      | |   
+      | |-*
+      | | |-*
+      | | |-*
+      | | |-*
+      | |   
+      | |-*
+      |   
+      |-*
+        
+Vertices ordered by breadth first traversal: 
+1
+|-2
+| |-4
+|   |-7
+|     |-12
+|       |-16
+|         
+|-3
+  |-5
+  | |-8
+  | |-9
+  | |-10
+  |   |-13
+  |     
+  |-6
+    |-11
+      |-14
+      | |-17
+      | | |-20
+      | |   
+      | |-18
+      | | |-21
+      | | |-22
+      | | |-23
+      | |   
+      | |-19
+      |   
+      |-15
+        
+
+Leaves-last tree traversal: 
+15
+7
+8
+12
+19
+20
+21
+22
+18
+14
+10
+13
+17
+16
+9
+4
+11
+5
+2
+6
+0
+3
+1
+
+Distance of each node to nearest leaf : 
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+1
+1
+1
+1
+1
+1
+1
+2
+2
+2
+3
+3
+4
+
+Vertices ordered by leaves-first traversal: 
+21
+|-23
+| |-22
+|   |-20
+|     |-17
+|       |-1
+|         
+|-19
+  |-16
+  | |-2
+  | |-3
+  | |-15
+  |   |-4
+  |     
+  |-18
+    |-11
+      |-12
+      | |-14
+      | | |-5
+      | |   
+      | |-13
+      | | |-6
+      | | |-7
+      | | |-8
+      | |   
+      | |-9
+      |   
+      |-10
+        
+Test of the left (bit) shift operator : 
+21
+|-23
+| |-22
+|   |-20
+|     |-17
+|       |-1
+|         
+|-19
+  |-16
+  | |-2
+  | |-3
+  | |-15
+  |   |-4
+  |     
+  |-18
+    |-11
+      |-12
+      | |-14
+      | | |-5
+      | |   
+      | |-13
+      | | |-6
+      | | |-7
+      | | |-8
+      | |   
+      | |-9
+      |   
+      |-10
+        

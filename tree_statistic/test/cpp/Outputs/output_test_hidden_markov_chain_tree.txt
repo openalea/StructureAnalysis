@@ -1,0 +1,1582 @@
+Reference hidden Markov model : 
+HIDDEN_MARKOV_INDEPENDENT_OUT_TREE
+
+3 STATES
+
+INITIAL_PROBABILITIES
+0.4  0.3  0.3  
+
+TRANSITION_PROBABILITIES
+0.2  0.3  0.5  
+0.2  0.4  0.4  
+0.3  0.2  0.5  
+
+recurrent class: states 0 1 2
+
+1 OUTPUT_PROCESS
+
+OUTPUT_PROCESS 1 : NONPARAMETRIC
+
+STATE 0 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 1
+
+STATE 1 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.3
+OUTPUT 1 : 0.2
+OUTPUT 2 : 0.1
+OUTPUT 3 : 0.2
+OUTPUT 4 : 0.2
+
+STATE 2 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.2
+OUTPUT 1 : 0.3
+OUTPUT 2 : 0.1
+OUTPUT 3 : 0.2
+OUTPUT 4 : 0.2
+
+observation probability matrix
+
+     0    1    2    3    4
+0    1    0    0    0    0
+1  0.3  0.2  0.1  0.2  0.2
+2  0.2  0.3  0.1  0.2  0.2
+
+distances between observation distributions for consecutive states
+_    0.7  0.8  
+0.7  _    0.1  
+0.8  0.1  _    
+
+Markovian sequences: 
+1 VARIABLE
+
+VARIABLE 1 : INT   (minimum value: 0, maximum value: 4)
+
+marginal frequency distribution - sample size: 510
+mean: 1.35686   variance: 2.17495   standard deviation: 1.47477
+
+   | frequency
+0  216
+1  107
+2   44
+3   75
+4   68
+
+time up to the first occurrence of value 0 frequency distribution - sample size: 10
+mean: 1   variance: 1.33333   standard deviation: 1.1547
+
+time up to the first occurrence of value 1 frequency distribution - sample size: 10
+mean: 3.6   variance: 6.71111   standard deviation: 2.59058
+
+time up to the first occurrence of value 2 frequency distribution - sample size: 10
+mean: 8.6   variance: 78.0444   standard deviation: 8.83428
+
+time up to the first occurrence of value 3 frequency distribution - sample size: 10
+mean: 8   variance: 44.4444   standard deviation: 6.66667
+
+time up to the first occurrence of value 4 frequency distribution - sample size: 10
+mean: 3.8   variance: 14.4   standard deviation: 3.79473
+
+value 0 recurrence time frequency distribution - sample size: 206
+mean: 2.32524   variance: 3.00102   standard deviation: 1.73234
+
+value 1 recurrence time frequency distribution - sample size: 97
+mean: 4.34021   variance: 13.956   standard deviation: 3.73577
+
+value 2 recurrence time frequency distribution - sample size: 34
+mean: 8.14706   variance: 50.3111   standard deviation: 7.09303
+
+value 3 recurrence time frequency distribution - sample size: 65
+mean: 5.12308   variance: 21.3909   standard deviation: 4.62503
+
+value 4 recurrence time frequency distribution - sample size: 58
+mean: 7.13793   variance: 44.542   standard deviation: 6.67398
+
+value 0 sojourn time frequency distribution - sample size: 127
+mean: 1.61417   variance: 0.984877   standard deviation: 0.99241
+
+final run - value 0 sojourn time frequency distribution - sample size: 4
+mean: 2.75   variance: 2.91667   standard deviation: 1.70783
+
+value 1 sojourn time frequency distribution - sample size: 95
+mean: 1.11579   variance: 0.124748   standard deviation: 0.353197
+
+final run - value 1 sojourn time frequency distribution - sample size: 1
+mean: 1   variance: 0   standard deviation: 0
+
+value 2 sojourn time frequency distribution - sample size: 40
+mean: 1.075   variance: 0.0711538   standard deviation: 0.266747
+
+final run - value 2 sojourn time frequency distribution - sample size: 1
+mean: 1   variance: 0   standard deviation: 0
+
+value 3 sojourn time frequency distribution - sample size: 64
+mean: 1.15625   variance: 0.197421   standard deviation: 0.44432
+
+final run - value 3 sojourn time frequency distribution - sample size: 1
+mean: 1   variance: 0   standard deviation: 0
+
+value 4 sojourn time frequency distribution - sample size: 61
+mean: 1.06557   variance: 0.0622951   standard deviation: 0.24959
+
+final run - value 4 sojourn time frequency distribution - sample size: 3
+mean: 1   variance: 0   standard deviation: 0
+
+number of runs of value 0 per sequence frequency distribution - sample size: 10
+mean: 13.1   variance: 2.54444   standard deviation: 1.59513
+coefficient of skewness: -0.81717   coefficient of kurtosis: -0.611424
+
+number of runs of value 1 per sequence frequency distribution - sample size: 10
+mean: 9.6   variance: 10.4889   standard deviation: 3.23866
+coefficient of skewness: 0.302228   coefficient of kurtosis: -1.20291
+
+number of runs of value 2 per sequence frequency distribution - sample size: 10
+mean: 4.1   variance: 6.98889   standard deviation: 2.64365
+coefficient of skewness: 0.226418   coefficient of kurtosis: -1.637
+
+number of runs of value 3 per sequence frequency distribution - sample size: 10
+mean: 6.5   variance: 4.94444   standard deviation: 2.22361
+coefficient of skewness: 0.265284   coefficient of kurtosis: -1.86548
+
+number of runs of value 4 per sequence frequency distribution - sample size: 10
+mean: 6.4   variance: 6.26667   standard deviation: 2.50333
+coefficient of skewness: 0.758564   coefficient of kurtosis: -0.763377
+
+number of occurrences of value 0 per sequence frequency distribution - sample size: 10
+mean: 21.6   variance: 23.3778   standard deviation: 4.83506
+coefficient of skewness: -0.460633   coefficient of kurtosis: -1.22677
+
+number of occurrences of value 1 per sequence frequency distribution - sample size: 10
+mean: 10.7   variance: 9.78889   standard deviation: 3.12872
+coefficient of skewness: 0.102307   coefficient of kurtosis: -1.07002
+
+number of occurrences of value 2 per sequence frequency distribution - sample size: 10
+mean: 4.4   variance: 7.37778   standard deviation: 2.71621
+coefficient of skewness: 0.219566   coefficient of kurtosis: -1.72355
+
+number of occurrences of value 3 per sequence frequency distribution - sample size: 10
+mean: 7.5   variance: 3.61111   standard deviation: 1.90029
+coefficient of skewness: 0.182158   coefficient of kurtosis: -1.74213
+
+number of occurrences of value 4 per sequence frequency distribution - sample size: 10
+mean: 6.8   variance: 7.28889   standard deviation: 2.69979
+coefficient of skewness: 0.475985   coefficient of kurtosis: -1.10062
+
+sequence length frequency distribution - sample size: 10
+mean: 51   variance: 0   standard deviation: 0
+
+cumulated length: 510
+
+Plot of the Markovian Sequences into homedir:
+
+Plot of the Trees into homedir:
+
+Sequences: 
+
+1 VARIABLE
+
+VARIABLE 1 : INT   (minimum value: 0, maximum value: 4)
+
+marginal frequency distribution - sample size: 510
+mean: 1.35686   variance: 2.17495   standard deviation: 1.47477
+
+   | frequency
+0  216
+1  107
+2   44
+3   75
+4   68
+
+sequence length frequency distribution - sample size: 10
+mean: 51   variance: 0   standard deviation: 0
+
+cumulated length: 510
+
+Plot of the Sequences into homedir:
+Initialization HMT : 
+HIDDEN_MARKOV_INDEPENDENT_OUT_TREE
+
+3 STATES
+
+INITIAL_PROBABILITIES
+0.4   0.3   0.3   
+
+TRANSITION_PROBABILITIES
+0.5   0.25  0.25  
+0.25  0.5   0.25  
+0.25  0.25  0.5   
+
+recurrent class: states 0 1 2
+
+1 OUTPUT_PROCESS
+
+OUTPUT_PROCESS 1 : NONPARAMETRIC
+
+STATE 0 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 1
+
+STATE 1 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.2
+OUTPUT 1 : 0.2
+OUTPUT 2 : 0.2
+OUTPUT 3 : 0.2
+OUTPUT 4 : 0.2
+
+STATE 2 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.1
+OUTPUT 1 : 0.2
+OUTPUT 2 : 0.2
+OUTPUT 3 : 0.2
+OUTPUT 4 : 0.3
+
+observation probability matrix
+
+0     1    2    3    4    
+01    0    0    0    0    
+10.2  0.2  0.2  0.2  0.2  
+20.1  0.2  0.2  0.2  0.3  
+
+distances between observation distributions for consecutive states
+_    0.8  0.9  
+0.8  _    0.1  
+0.9  0.1  _    
+
+Initialization HMC : 
+HIDDEN_SEMI-MARKOV_CHAIN
+
+3 STATES
+
+INITIAL_PROBABILITIES
+0.4   0.3   0.3   
+
+TRANSITION_PROBABILITIES
+0.5   0.25  0.25  
+0.25  0.5   0.25  
+0.25  0.25  0.5   
+
+recurrent class: states 0 1 2
+
+time up to the first occurrence of state 0 distribution
+mean: 2.38024   variance: 10.5527   standard deviation: 3.24849
+
+time up to the first occurrence of state 1 distribution
+mean: 2.77732   variance: 11.2103   standard deviation: 3.34818
+
+time up to the first occurrence of state 2 distribution
+mean: 2.77732   variance: 11.2103   standard deviation: 3.34818
+
+state 0 recurrence time distribution
+mean: 2.99964   variance: 9.98568   standard deviation: 3.16001
+
+state 1 recurrence time distribution
+mean: 2.99964   variance: 9.98568   standard deviation: 3.16001
+
+state 2 recurrence time distribution
+mean: 2.99964   variance: 9.98568   standard deviation: 3.16001
+
+state 0 sojourn time distribution
+mean: 1.99987   variance: 1.9978   standard deviation: 1.41343
+coefficient of variation: 0.706763
+
+state 1 sojourn time distribution
+mean: 1.99987   variance: 1.9978   standard deviation: 1.41343
+coefficient of variation: 0.706763
+
+state 2 sojourn time distribution
+mean: 1.99987   variance: 1.9978   standard deviation: 1.41343
+coefficient of variation: 0.706763
+
+number of runs of state 0 per length 20 sequence distribution
+mean: 3.54444   variance: 1.40728   standard deviation: 1.18629
+coefficient of skewness: 0.069964   coefficient of kurtosis: -0.0888614
+
+number of runs of state 1 per length 20 sequence distribution
+mean: 3.47778   variance: 1.40136   standard deviation: 1.18379
+coefficient of skewness: 0.0780288   coefficient of kurtosis: -0.0895028
+
+number of runs of state 2 per length 20 sequence distribution
+mean: 3.47778   variance: 1.40136   standard deviation: 1.18379
+coefficient of skewness: 0.0780288   coefficient of kurtosis: -0.0895028
+
+number of occurrences of state 0 per length 20 sequence distribution
+mean: 6.75556   variance: 7.25136   standard deviation: 2.69283
+coefficient of skewness: 0.25786   coefficient of kurtosis: -0.126256
+
+number of occurrences of state 1 per length 20 sequence distribution
+mean: 6.62222   variance: 7.18321   standard deviation: 2.68015
+coefficient of skewness: 0.266329   coefficient of kurtosis: -0.122295
+
+number of occurrences of state 2 per length 20 sequence distribution
+mean: 6.62222   variance: 7.18321   standard deviation: 2.68015
+coefficient of skewness: 0.266329   coefficient of kurtosis: -0.122295
+
+1 OUTPUT_PROCESS
+
+OUTPUT_PROCESS 1 : NONPARAMETRIC
+
+STATE 0 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 1
+
+STATE 1 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.2
+OUTPUT 1 : 0.2
+OUTPUT 2 : 0.2
+OUTPUT 3 : 0.2
+OUTPUT 4 : 0.2
+
+STATE 2 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.1
+OUTPUT 1 : 0.2
+OUTPUT 2 : 0.2
+OUTPUT 3 : 0.2
+OUTPUT 4 : 0.3
+
+observation probability matrix
+
+   0    1    2    3    4    
+0  1    0    0    0    0    
+1  0.2  0.2  0.2  0.2  0.2  
+2  0.1  0.2  0.2  0.2  0.3  
+
+time up to the first occurrence of output 0 distribution
+mean: 1.39583   variance: 4.17782   standard deviation: 2.04397
+
+time up to the first occurrence of output 1 distribution
+mean: 6.75158   variance: 49.3416   standard deviation: 7.02436
+
+time up to the first occurrence of output 2 distribution
+mean: 6.75158   variance: 49.3416   standard deviation: 7.02436
+
+time up to the first occurrence of output 3 distribution
+mean: 6.75158   variance: 49.3416   standard deviation: 7.02436
+
+time up to the first occurrence of output 4 distribution
+mean: 5.28119   variance: 31.2745   standard deviation: 5.59236
+
+output 0 recurrence time distribution
+mean: 2.29208   variance: 3.99964   standard deviation: 1.99991
+
+output 1 recurrence time distribution
+mean: 7.45333   variance: 48.9102   standard deviation: 6.99358
+
+output 2 recurrence time distribution
+mean: 7.45333   variance: 48.9102   standard deviation: 6.99358
+
+output 3 recurrence time distribution
+mean: 7.45333   variance: 48.9102   standard deviation: 6.99358
+
+output 4 recurrence time distribution
+mean: 5.96461   variance: 30.7992   standard deviation: 5.5497
+
+output 0 sojourn time distribution
+mean: 2.1067   variance: 2.4271   standard deviation: 1.55792
+coefficient of variation: 0.739504
+
+output 1 sojourn time distribution
+mean: 1.17444   variance: 0.199504   standard deviation: 0.446659
+coefficient of variation: 0.380315
+
+output 2 sojourn time distribution
+mean: 1.17444   variance: 0.199504   standard deviation: 0.446659
+coefficient of variation: 0.380315
+
+output 3 sojourn time distribution
+mean: 1.17444   variance: 0.199504   standard deviation: 0.446659
+coefficient of variation: 0.380315
+
+output 4 sojourn time distribution
+mean: 1.23328   variance: 0.283844   standard deviation: 0.53277
+coefficient of variation: 0.431993
+
+number of runs of output 0 per length 20 sequence distribution
+mean: 4.35767   variance: 1.35861   standard deviation: 1.16559
+coefficient of skewness: 0.0524264   coefficient of kurtosis: -0.0854487
+
+number of runs of output 1 per length 20 sequence distribution
+mean: 2.27156   variance: 1.5338   standard deviation: 1.23846
+coefficient of skewness: 0.311142   coefficient of kurtosis: -0.128549
+
+number of runs of output 2 per length 20 sequence distribution
+mean: 2.27156   variance: 1.5338   standard deviation: 1.23846
+coefficient of skewness: 0.311142   coefficient of kurtosis: -0.128549
+
+number of runs of output 3 per length 20 sequence distribution
+mean: 2.27156   variance: 1.5338   standard deviation: 1.23846
+coefficient of skewness: 0.311142   coefficient of kurtosis: -0.128549
+
+number of runs of output 4 per length 20 sequence distribution
+mean: 2.71367   variance: 1.65753   standard deviation: 1.28745
+coefficient of skewness: 0.215773   coefficient of kurtosis: -0.159697
+
+number of occurrences of output 0 per length 20 sequence distribution
+mean: 8.74222   variance: 6.94837   standard deviation: 2.63598
+coefficient of skewness: 0.104188   coefficient of kurtosis: -0.161383
+
+number of occurrences of output 1 per length 20 sequence distribution
+mean: 2.64889   variance: 2.40917   standard deviation: 1.55215
+coefficient of skewness: 0.51541   coefficient of kurtosis: 0.171362
+
+number of occurrences of output 2 per length 20 sequence distribution
+mean: 2.64889   variance: 2.40917   standard deviation: 1.55215
+coefficient of skewness: 0.51541   coefficient of kurtosis: 0.171362
+
+number of occurrences of output 3 per length 20 sequence distribution
+mean: 2.64889   variance: 2.40917   standard deviation: 1.55215
+coefficient of skewness: 0.51541   coefficient of kurtosis: 0.171362
+
+number of occurrences of output 4 per length 20 sequence distribution
+mean: 3.31111   variance: 2.95714   standard deviation: 1.71963
+coefficient of skewness: 0.438291   coefficient of kurtosis: 0.0927595
+
+distances between observation distributions for consecutive states
+_    0.8  0.9  
+0.8  _    0.1  
+0.9  0.1  _    
+
+iteration 1   log-likelihood of the observed trees: -767.042
+iteration 2   log-likelihood of the observed trees: -743.582
+iteration 3   log-likelihood of the observed trees: -741.797
+iteration 4   log-likelihood of the observed trees: -741.157
+iteration 5   log-likelihood of the observed trees: -740.895
+iteration 6   log-likelihood of the observed trees: -740.775
+iteration 7   log-likelihood of the observed trees: -740.711
+iteration 8   log-likelihood of the observed trees: -740.668
+iteration 9   log-likelihood of the observed trees: -740.63
+iteration 10   log-likelihood of the observed trees: -740.593
+iteration 11   log-likelihood of the observed trees: -740.551
+iteration 12   log-likelihood of the observed trees: -740.505
+iteration 13   log-likelihood of the observed trees: -740.451
+iteration 14   log-likelihood of the observed trees: -740.39
+iteration 15   log-likelihood of the observed trees: -740.321
+iteration 16   log-likelihood of the observed trees: -740.243
+iteration 17   log-likelihood of the observed trees: -740.155
+iteration 18   log-likelihood of the observed trees: -740.059
+iteration 19   log-likelihood of the observed trees: -739.953
+iteration 20   log-likelihood of the observed trees: -739.839
+iteration 21   log-likelihood of the observed trees: -739.717
+iteration 22   log-likelihood of the observed trees: -739.589
+iteration 23   log-likelihood of the observed trees: -739.456
+iteration 24   log-likelihood of the observed trees: -739.32
+iteration 25   log-likelihood of the observed trees: -739.183
+iteration 26   log-likelihood of the observed trees: -739.047
+iteration 27   log-likelihood of the observed trees: -738.915
+iteration 28   log-likelihood of the observed trees: -738.787
+iteration 29   log-likelihood of the observed trees: -738.665
+iteration 30   log-likelihood of the observed trees: -738.552
+iteration 31   log-likelihood of the observed trees: -738.446
+iteration 32   log-likelihood of the observed trees: -738.349
+iteration 33   log-likelihood of the observed trees: -738.262
+iteration 34   log-likelihood of the observed trees: -738.183
+iteration 35   log-likelihood of the observed trees: -738.112
+iteration 36   log-likelihood of the observed trees: -738.05
+iteration 37   log-likelihood of the observed trees: -737.995
+iteration 38   log-likelihood of the observed trees: -737.946
+iteration 39   log-likelihood of the observed trees: -737.904
+iteration 40   log-likelihood of the observed trees: -737.867
+iteration 41   log-likelihood of the observed trees: -737.834
+iteration 42   log-likelihood of the observed trees: -737.805
+iteration 43   log-likelihood of the observed trees: -737.78
+iteration 44   log-likelihood of the observed trees: -737.757
+iteration 45   log-likelihood of the observed trees: -737.737
+iteration 46   log-likelihood of the observed trees: -737.719
+iteration 47   log-likelihood of the observed trees: -737.702
+iteration 48   log-likelihood of the observed trees: -737.686
+iteration 49   log-likelihood of the observed trees: -737.672
+iteration 50   log-likelihood of the observed trees: -737.658
+iteration 51   log-likelihood of the observed trees: -737.645
+iteration 52   log-likelihood of the observed trees: -737.633
+iteration 53   log-likelihood of the observed trees: -737.62
+iteration 54   log-likelihood of the observed trees: -737.608
+iteration 55   log-likelihood of the observed trees: -737.596
+iteration 56   log-likelihood of the observed trees: -737.584
+iteration 57   log-likelihood of the observed trees: -737.572
+iteration 58   log-likelihood of the observed trees: -737.56
+iteration 59   log-likelihood of the observed trees: -737.548
+iteration 60   log-likelihood of the observed trees: -737.535
+iteration 61   log-likelihood of the observed trees: -737.523
+iteration 62   log-likelihood of the observed trees: -737.509
+iteration 63   log-likelihood of the observed trees: -737.496
+iteration 64   log-likelihood of the observed trees: -737.482
+iteration 65   log-likelihood of the observed trees: -737.468
+iteration 66   log-likelihood of the observed trees: -737.453
+iteration 67   log-likelihood of the observed trees: -737.437
+iteration 68   log-likelihood of the observed trees: -737.422
+iteration 69   log-likelihood of the observed trees: -737.405
+iteration 70   log-likelihood of the observed trees: -737.388
+iteration 71   log-likelihood of the observed trees: -737.37
+iteration 72   log-likelihood of the observed trees: -737.351
+iteration 73   log-likelihood of the observed trees: -737.332
+iteration 74   log-likelihood of the observed trees: -737.312
+iteration 75   log-likelihood of the observed trees: -737.29
+iteration 76   log-likelihood of the observed trees: -737.268
+iteration 77   log-likelihood of the observed trees: -737.245
+iteration 78   log-likelihood of the observed trees: -737.221
+iteration 79   log-likelihood of the observed trees: -737.195
+iteration 80   log-likelihood of the observed trees: -737.169
+iteration 81   log-likelihood of the observed trees: -737.141
+iteration 82   log-likelihood of the observed trees: -737.111
+iteration 83   log-likelihood of the observed trees: -737.08
+iteration 84   log-likelihood of the observed trees: -737.048
+iteration 85   log-likelihood of the observed trees: -737.014
+iteration 86   log-likelihood of the observed trees: -736.978
+iteration 87   log-likelihood of the observed trees: -736.94
+iteration 88   log-likelihood of the observed trees: -736.9
+iteration 89   log-likelihood of the observed trees: -736.858
+iteration 90   log-likelihood of the observed trees: -736.814
+iteration 91   log-likelihood of the observed trees: -736.768
+iteration 92   log-likelihood of the observed trees: -736.719
+iteration 93   log-likelihood of the observed trees: -736.668
+iteration 94   log-likelihood of the observed trees: -736.615
+iteration 95   log-likelihood of the observed trees: -736.559
+iteration 96   log-likelihood of the observed trees: -736.502
+iteration 97   log-likelihood of the observed trees: -736.442
+iteration 98   log-likelihood of the observed trees: -736.38
+iteration 99   log-likelihood of the observed trees: -736.315
+iteration 100   log-likelihood of the observed trees: -736.25
+
+100 iterations
+
+log-likelihood of the state trees: -891.172 | -891.172
+iteration 1   log-likelihood of the observed sequences: -767.042
+iteration 2   log-likelihood of the observed sequences: -743.582
+iteration 3   log-likelihood of the observed sequences: -741.797
+iteration 4   log-likelihood of the observed sequences: -741.157
+iteration 5   log-likelihood of the observed sequences: -740.895
+iteration 6   log-likelihood of the observed sequences: -740.775
+iteration 7   log-likelihood of the observed sequences: -740.711
+iteration 8   log-likelihood of the observed sequences: -740.668
+iteration 9   log-likelihood of the observed sequences: -740.63
+iteration 10   log-likelihood of the observed sequences: -740.593
+iteration 11   log-likelihood of the observed sequences: -740.551
+iteration 12   log-likelihood of the observed sequences: -740.505
+iteration 13   log-likelihood of the observed sequences: -740.451
+iteration 14   log-likelihood of the observed sequences: -740.39
+iteration 15   log-likelihood of the observed sequences: -740.321
+iteration 16   log-likelihood of the observed sequences: -740.243
+iteration 17   log-likelihood of the observed sequences: -740.155
+iteration 18   log-likelihood of the observed sequences: -740.059
+iteration 19   log-likelihood of the observed sequences: -739.953
+iteration 20   log-likelihood of the observed sequences: -739.839
+iteration 21   log-likelihood of the observed sequences: -739.717
+iteration 22   log-likelihood of the observed sequences: -739.589
+iteration 23   log-likelihood of the observed sequences: -739.456
+iteration 24   log-likelihood of the observed sequences: -739.32
+iteration 25   log-likelihood of the observed sequences: -739.183
+iteration 26   log-likelihood of the observed sequences: -739.047
+iteration 27   log-likelihood of the observed sequences: -738.915
+iteration 28   log-likelihood of the observed sequences: -738.787
+iteration 29   log-likelihood of the observed sequences: -738.665
+iteration 30   log-likelihood of the observed sequences: -738.552
+iteration 31   log-likelihood of the observed sequences: -738.446
+iteration 32   log-likelihood of the observed sequences: -738.349
+iteration 33   log-likelihood of the observed sequences: -738.262
+iteration 34   log-likelihood of the observed sequences: -738.183
+iteration 35   log-likelihood of the observed sequences: -738.112
+iteration 36   log-likelihood of the observed sequences: -738.05
+iteration 37   log-likelihood of the observed sequences: -737.995
+iteration 38   log-likelihood of the observed sequences: -737.946
+iteration 39   log-likelihood of the observed sequences: -737.904
+iteration 40   log-likelihood of the observed sequences: -737.867
+iteration 41   log-likelihood of the observed sequences: -737.834
+iteration 42   log-likelihood of the observed sequences: -737.805
+iteration 43   log-likelihood of the observed sequences: -737.78
+iteration 44   log-likelihood of the observed sequences: -737.757
+iteration 45   log-likelihood of the observed sequences: -737.737
+iteration 46   log-likelihood of the observed sequences: -737.719
+iteration 47   log-likelihood of the observed sequences: -737.702
+iteration 48   log-likelihood of the observed sequences: -737.686
+iteration 49   log-likelihood of the observed sequences: -737.672
+iteration 50   log-likelihood of the observed sequences: -737.658
+iteration 51   log-likelihood of the observed sequences: -737.645
+iteration 52   log-likelihood of the observed sequences: -737.633
+iteration 53   log-likelihood of the observed sequences: -737.62
+iteration 54   log-likelihood of the observed sequences: -737.608
+iteration 55   log-likelihood of the observed sequences: -737.596
+iteration 56   log-likelihood of the observed sequences: -737.584
+iteration 57   log-likelihood of the observed sequences: -737.572
+iteration 58   log-likelihood of the observed sequences: -737.56
+iteration 59   log-likelihood of the observed sequences: -737.548
+iteration 60   log-likelihood of the observed sequences: -737.535
+iteration 61   log-likelihood of the observed sequences: -737.523
+iteration 62   log-likelihood of the observed sequences: -737.509
+iteration 63   log-likelihood of the observed sequences: -737.496
+iteration 64   log-likelihood of the observed sequences: -737.482
+iteration 65   log-likelihood of the observed sequences: -737.468
+iteration 66   log-likelihood of the observed sequences: -737.453
+iteration 67   log-likelihood of the observed sequences: -737.437
+iteration 68   log-likelihood of the observed sequences: -737.422
+iteration 69   log-likelihood of the observed sequences: -737.405
+iteration 70   log-likelihood of the observed sequences: -737.388
+iteration 71   log-likelihood of the observed sequences: -737.37
+iteration 72   log-likelihood of the observed sequences: -737.351
+iteration 73   log-likelihood of the observed sequences: -737.332
+iteration 74   log-likelihood of the observed sequences: -737.312
+iteration 75   log-likelihood of the observed sequences: -737.29
+iteration 76   log-likelihood of the observed sequences: -737.268
+iteration 77   log-likelihood of the observed sequences: -737.245
+iteration 78   log-likelihood of the observed sequences: -737.221
+iteration 79   log-likelihood of the observed sequences: -737.195
+iteration 80   log-likelihood of the observed sequences: -737.169
+iteration 81   log-likelihood of the observed sequences: -737.141
+iteration 82   log-likelihood of the observed sequences: -737.111
+iteration 83   log-likelihood of the observed sequences: -737.08
+iteration 84   log-likelihood of the observed sequences: -737.048
+iteration 85   log-likelihood of the observed sequences: -737.014
+iteration 86   log-likelihood of the observed sequences: -736.978
+iteration 87   log-likelihood of the observed sequences: -736.94
+iteration 88   log-likelihood of the observed sequences: -736.9
+iteration 89   log-likelihood of the observed sequences: -736.858
+iteration 90   log-likelihood of the observed sequences: -736.814
+iteration 91   log-likelihood of the observed sequences: -736.768
+iteration 92   log-likelihood of the observed sequences: -736.719
+iteration 93   log-likelihood of the observed sequences: -736.668
+iteration 94   log-likelihood of the observed sequences: -736.615
+iteration 95   log-likelihood of the observed sequences: -736.559
+iteration 96   log-likelihood of the observed sequences: -736.502
+iteration 97   log-likelihood of the observed sequences: -736.442
+iteration 98   log-likelihood of the observed sequences: -736.38
+iteration 99   log-likelihood of the observed sequences: -736.315
+iteration 100   log-likelihood of the observed sequences: -736.25
+
+100 iterations
+
+complete/censored state occupancy weights
+
+log-likelihood of the state sequences: -891.172 | -891.172
+
+posterior state sequence probability
+sequence 0: 1.56226e-07
+sequence 1: 8.50903e-09
+sequence 2: 2.63289e-08
+sequence 3: 4.02798e-08
+sequence 4: 4.51947e-07
+sequence 5: 6.05359e-07
+sequence 6: 7.24493e-07
+sequence 7: 2.27255e-07
+sequence 8: 7.6705e-07
+sequence 9: 1.00326e-06
+Estimated HMT : 
+HIDDEN_MARKOV_INDEPENDENT_OUT_TREE
+
+3 STATES
+
+INITIAL_PROBABILITIES
+0.439773  1e-05     0.560217  
+
+TRANSITION_PROBABILITIES
+0.274434  0.224747  0.500819  
+0.296096  0.407539  0.296365  
+0.322567  0.542472  0.134961  
+
+recurrent class: states 0 1 2
+
+path length (starting from root) up to the first occurrence of state 0 distribution
+
+path length (starting from root) up to the first occurrence of state 1 distribution
+
+path length (starting from root) up to the first occurrence of state 2 distribution
+
+path length (starting from terminal node) up to the first occurrence of state 0 distribution
+
+path length (starting from terminal node) up to the first occurrence of state 1 distribution
+
+path length (starting from terminal node) up to the first occurrence of state 2 distribution
+
+state 0 sojourn size distribution
+
+state 1 sojourn size distribution
+
+state 2 sojourn size distribution
+
+number of zones of state 0 per size 51 tree distribution
+
+number of zones of state 1 per size 51 tree distribution
+
+number of zones of state 2 per size 51 tree distribution
+
+number of occurrences of state 0 per size 51 tree distribution
+
+number of occurrences of state 1 per size 51 tree distribution
+
+number of occurrences of state 2 per size 51 tree distribution
+
+1 OUTPUT_PROCESS
+
+OUTPUT_PROCESS 1 : NONPARAMETRIC
+
+STATE 0 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 1
+
+STATE 1 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.210654
+OUTPUT 1 : 0.163215
+OUTPUT 2 : 0.21955
+OUTPUT 3 : 0.274483
+OUTPUT 4 : 0.132098
+
+STATE 2 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.132477
+OUTPUT 1 : 0.46938
+OUTPUT 2 : 0.00423288
+OUTPUT 3 : 0.130751
+OUTPUT 4 : 0.263159
+
+observation probability matrix
+
+0            1           2           3           4           
+01           0           0           0           0           
+10.210654    0.163215    0.21955     0.274483    0.132098    
+20.132477    0.46938     0.00423288  0.130751    0.263159    
+
+path length (starting from root) up to the first occurrence of output 0 distribution
+
+path length (starting from root) up to the first occurrence of output 0 frequency distribution - sample size: 10
+mean: 1   variance: 1.33333   standard deviation: 1.1547
+
+path length (starting from root) up to the first occurrence of output 1 distribution
+
+path length (starting from root) up to the first occurrence of output 1 frequency distribution - sample size: 10
+mean: 3.6   variance: 6.71111   standard deviation: 2.59058
+
+path length (starting from root) up to the first occurrence of output 2 distribution
+
+path length (starting from root) up to the first occurrence of output 2 frequency distribution - sample size: 10
+mean: 8.6   variance: 78.0444   standard deviation: 8.83428
+
+path length (starting from root) up to the first occurrence of output 3 distribution
+
+path length (starting from root) up to the first occurrence of output 3 frequency distribution - sample size: 10
+mean: 8   variance: 44.4444   standard deviation: 6.66667
+
+path length (starting from root) up to the first occurrence of output 4 distribution
+
+path length (starting from root) up to the first occurrence of output 4 frequency distribution - sample size: 10
+mean: 3.8   variance: 14.4   standard deviation: 3.79473
+
+path length (starting from terminal nodes) up to the first occurrence of output 0 distribution
+
+path length (starting from terminal nodes) up to the first occurrence of output 0 frequency distribution - sample size: 10
+mean: 1.1   variance: 1.21111   standard deviation: 1.1005
+
+path length (starting from terminal nodes) up to the first occurrence of output 1 distribution
+
+path length (starting from terminal nodes) up to the first occurrence of output 1 frequency distribution - sample size: 10
+mean: 4.3   variance: 34.2333   standard deviation: 5.85093
+
+path length (starting from terminal nodes) up to the first occurrence of output 2 distribution
+
+path length (starting from terminal nodes) up to the first occurrence of output 2 frequency distribution - sample size: 10
+mean: 13.7   variance: 269.567   standard deviation: 16.4185
+
+path length (starting from terminal nodes) up to the first occurrence of output 3 distribution
+
+path length (starting from terminal nodes) up to the first occurrence of output 3 frequency distribution - sample size: 10
+mean: 8.7   variance: 61.5667   standard deviation: 7.84644
+
+path length (starting from terminal nodes) up to the first occurrence of output 4 distribution
+
+path length (starting from terminal nodes) up to the first occurrence of output 4 frequency distribution - sample size: 10
+mean: 4.8   variance: 26.4   standard deviation: 5.13809
+
+output 0 sojourn size distribution
+
+output 0 sojourn size frequency distribution - sample size: 131
+mean: 1.64885   variance: 1.06036   standard deviation: 1.02974
+
+output 1 sojourn size distribution
+
+output 1 sojourn size frequency distribution - sample size: 96
+mean: 1.11458   variance: 0.123575   standard deviation: 0.351532
+
+output 2 sojourn size distribution
+
+output 2 sojourn size frequency distribution - sample size: 41
+mean: 1.07317   variance: 0.0695122   standard deviation: 0.263652
+
+output 3 sojourn size distribution
+
+output 3 sojourn size frequency distribution - sample size: 65
+mean: 1.15385   variance: 0.194712   standard deviation: 0.441261
+
+output 4 sojourn size distribution
+
+output 4 sojourn size frequency distribution - sample size: 64
+mean: 1.0625   variance: 0.0595238   standard deviation: 0.243975
+
+number of zones of output 0 per size 51 tree distribution
+
+number of zones of output 0 per tree frequency distribution - sample size: 10
+mean: 13.1   variance: 2.54444   standard deviation: 1.59513
+coefficient of skewness: -0.81717   coefficient of kurtosis: -0.611424
+
+number of zones of output 1 per size 51 tree distribution
+
+number of zones of output 1 per tree frequency distribution - sample size: 10
+mean: 9.6   variance: 10.4889   standard deviation: 3.23866
+coefficient of skewness: 0.302228   coefficient of kurtosis: -1.20291
+
+number of zones of output 2 per size 51 tree distribution
+
+number of zones of output 2 per tree frequency distribution - sample size: 10
+mean: 4.1   variance: 6.98889   standard deviation: 2.64365
+coefficient of skewness: 0.226418   coefficient of kurtosis: -1.637
+
+number of zones of output 3 per size 51 tree distribution
+
+number of zones of output 3 per tree frequency distribution - sample size: 10
+mean: 6.5   variance: 4.94444   standard deviation: 2.22361
+coefficient of skewness: 0.265284   coefficient of kurtosis: -1.86548
+
+number of zones of output 4 per size 51 tree distribution
+
+number of zones of output 4 per tree frequency distribution - sample size: 10
+mean: 6.4   variance: 6.26667   standard deviation: 2.50333
+coefficient of skewness: 0.758564   coefficient of kurtosis: -0.763377
+
+number of occurrences of output 0 per size 51 tree distribution
+
+number of occurrences of output 0 per tree frequency distribution - sample size: 10
+mean: 21.6   variance: 23.3778   standard deviation: 4.83506
+coefficient of skewness: -0.460633   coefficient of kurtosis: -1.22677
+
+number of occurrences of output 1 per size 51 tree distribution
+
+number of occurrences of output 1 per tree frequency distribution - sample size: 10
+mean: 10.7   variance: 9.78889   standard deviation: 3.12872
+coefficient of skewness: 0.102307   coefficient of kurtosis: -1.07002
+
+number of occurrences of output 2 per size 51 tree distribution
+
+number of occurrences of output 2 per tree frequency distribution - sample size: 10
+mean: 4.4   variance: 7.37778   standard deviation: 2.71621
+coefficient of skewness: 0.219566   coefficient of kurtosis: -1.72355
+
+number of occurrences of output 3 per size 51 tree distribution
+
+number of occurrences of output 3 per tree frequency distribution - sample size: 10
+mean: 7.5   variance: 3.61111   standard deviation: 1.90029
+coefficient of skewness: 0.182158   coefficient of kurtosis: -1.74213
+
+number of occurrences of output 4 per size 51 tree distribution
+
+number of occurrences of output 4 per tree frequency distribution - sample size: 10
+mean: 6.8   variance: 7.28889   standard deviation: 2.69979
+coefficient of skewness: 0.475985   coefficient of kurtosis: -1.10062
+
+distances between observation distributions for consecutive states
+_         0.789346  0.867523  
+0.789346  _         0.437226  
+0.867523  0.437226  _         
+
+tree size frequency distribution - sample size: 10
+mean: 51   variance: 0   standard deviation: 0
+
+cumulative size: 510
+
+information of the trees in the iid case: -741.254 (-1.45344)
+
+log-likelihood of the state trees: -891.172   (normalized: -1.7474)
+
+state tree entropy: 299.991   (normalized: 0.588218)
+
+log-likelihood of the observed trees: -736.183   (normalized: -1.4435)
+
+14 free parameters   2 * penalyzed log-likelihood (AIC): -1500.37
+
+14 free parameters   2 * penalyzed log-likelihood (AICc): -1501.21
+
+14 free parameters   2 * penalyzed log-likelihood (BIC): -1559.65
+
+14 free parameters   2 * penalyzed log-likelihood (BICc): -nan
+
+14 free parameters   2 * penalyzed log-likelihood (ICL): -2159.63
+
+14 free parameters   2 * penalyzed log-likelihood (ICLc): -nan
+log-likelihood of the state trees: -891.172
+log-likelihood of the observed trees: -736.183
+
+Estimated HMC : 
+HIDDEN_SEMI-MARKOV_CHAIN
+
+3 STATES
+
+INITIAL_PROBABILITIES
+0.439773  1e-05     0.560217  
+
+TRANSITION_PROBABILITIES
+0.274434  0.224747  0.500819  
+0.296096  0.407539  0.296365  
+0.322567  0.542472  0.134961  
+
+recurrent class: states 0 1 2
+
+time up to the first occurrence of state 0 distribution
+mean: 1.79248   variance: 6.4236   standard deviation: 2.53448
+
+time up to the first occurrence of state 0 frequency distribution - sample size: 10
+mean: 1   variance: 1.33333   standard deviation: 1.1547
+
+time up to the first occurrence of state 1 distribution
+mean: 2.53903   variance: 3.91715   standard deviation: 1.97918
+
+time up to the first occurrence of state 1 frequency distribution - sample size: 10
+mean: 2.5   variance: 2.72222   standard deviation: 1.64992
+
+time up to the first occurrence of state 2 distribution
+mean: 0.977198   variance: 2.62464   standard deviation: 1.62007
+
+time up to the first occurrence of state 2 frequency distribution - sample size: 10
+mean: 1.3   variance: 4.23333   standard deviation: 2.05751
+
+state 0 recurrence time distribution
+mean: 3.35781   variance: 7.48933   standard deviation: 2.73666
+
+state 0 recurrence time frequency distribution - sample size: 206
+mean: 2.32524   variance: 3.00102   standard deviation: 1.73234
+
+state 1 recurrence time distribution
+mean: 2.53396   variance: 4.03652   standard deviation: 2.00911
+
+state 1 recurrence time frequency distribution - sample size: 125
+mean: 3.464   variance: 7.62168   standard deviation: 2.76074
+
+state 2 recurrence time distribution
+mean: 3.25074   variance: 4.24692   standard deviation: 2.06081
+
+state 2 recurrence time frequency distribution - sample size: 149
+mean: 3.15436   variance: 1.92871   standard deviation: 1.38878
+
+state 0 sojourn time distribution
+mean: 1.37815   variance: 0.520579   standard deviation: 0.721512
+coefficient of variation: 0.523535
+
+state 0 sojourn time frequency distribution - sample size: 127
+mean: 1.61417   variance: 0.984877   standard deviation: 0.99241
+
+final run - state 0 sojourn time frequency distribution - sample size: 4
+mean: 2.75   variance: 2.91667   standard deviation: 1.70783
+
+state 1 sojourn time distribution
+mean: 1.68776   variance: 1.1596   standard deviation: 1.07685
+coefficient of variation: 0.638032
+
+state 1 sojourn time frequency distribution - sample size: 102
+mean: 1.29412   variance: 0.387886   standard deviation: 0.622805
+
+final run - state 1 sojourn time frequency distribution - sample size: 3
+mean: 1   variance: 0   standard deviation: 0
+
+state 2 sojourn time distribution
+mean: 1.15598   variance: 0.180141   standard deviation: 0.42443
+coefficient of variation: 0.36716
+
+state 2 sojourn time frequency distribution - sample size: 156
+mean: 1   variance: 0   standard deviation: 0
+
+final run - state 2 sojourn time frequency distribution - sample size: 3
+mean: 1   variance: 0   standard deviation: 0
+
+number of runs of state 0 per length 51 sequence distribution
+mean: 11.2064   variance: 4.1894   standard deviation: 2.0468
+coefficient of skewness: -0.0163088   coefficient of kurtosis: -0.04461
+
+number of runs of state 0 per sequence frequency distribution - sample size: 10
+mean: 13.1   variance: 2.54444   standard deviation: 1.59513
+coefficient of skewness: -0.81717   coefficient of kurtosis: -0.611424
+
+number of runs of state 1 per length 51 sequence distribution
+mean: 11.8541   variance: 3.45163   standard deviation: 1.85786
+coefficient of skewness: -0.0109528   coefficient of kurtosis: -0.0323153
+
+number of runs of state 1 per sequence frequency distribution - sample size: 10
+mean: 10.5   variance: 5.61111   standard deviation: 2.36878
+coefficient of skewness: -0.250787   coefficient of kurtosis: -1.21915
+
+number of runs of state 2 per length 51 sequence distribution
+mean: 13.8222   variance: 4.07865   standard deviation: 2.01957
+coefficient of skewness: -0.0775069   coefficient of kurtosis: -0.0315922
+
+number of runs of state 2 per sequence frequency distribution - sample size: 10
+mean: 15.9   variance: 4.98889   standard deviation: 2.23358
+coefficient of skewness: -0.741865   coefficient of kurtosis: -1.31029
+
+number of occurrences of state 0 per length 51 sequence distribution
+mean: 15.3324   variance: 10.1378   standard deviation: 3.18399
+coefficient of skewness: 0.108605   coefficient of kurtosis: -0.0262884
+
+number of occurrences of state 0 per sequence frequency distribution - sample size: 10
+mean: 21.6   variance: 23.3778   standard deviation: 4.83506
+coefficient of skewness: -0.460633   coefficient of kurtosis: -1.22677
+
+number of occurrences of state 1 per length 51 sequence distribution
+mean: 19.7368   variance: 12.4092   standard deviation: 3.52267
+coefficient of skewness: 0.0654635   coefficient of kurtosis: -0.0381494
+
+number of occurrences of state 1 per sequence frequency distribution - sample size: 10
+mean: 13.5   variance: 21.1667   standard deviation: 4.60072
+coefficient of skewness: 1.2836   coefficient of kurtosis: 0.38437
+
+number of occurrences of state 2 per length 51 sequence distribution
+mean: 15.9307   variance: 6.35511   standard deviation: 2.52093
+coefficient of skewness: 0.0141849   coefficient of kurtosis: -0.0178128
+
+number of occurrences of state 2 per sequence frequency distribution - sample size: 10
+mean: 15.9   variance: 4.98889   standard deviation: 2.23358
+coefficient of skewness: -0.741865   coefficient of kurtosis: -1.31029
+
+1 OUTPUT_PROCESS
+
+OUTPUT_PROCESS 1 : NONPARAMETRIC
+
+STATE 0 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 1
+
+STATE 1 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.210654
+OUTPUT 1 : 0.163215
+OUTPUT 2 : 0.21955
+OUTPUT 3 : 0.274483
+OUTPUT 4 : 0.132098
+
+STATE 2 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.132477
+OUTPUT 1 : 0.46938
+OUTPUT 2 : 0.00423288
+OUTPUT 3 : 0.130751
+OUTPUT 4 : 0.263159
+
+observation probability matrix
+
+   0           1           2           3           4           
+0  1           0           0           0           0           
+1  0.210654    0.163215    0.21955     0.274483    0.132098    
+2  0.132477    0.46938     0.00423288  0.130751    0.263159    
+
+time up to the first occurrence of output 0 distribution
+mean: 1.08907   variance: 2.59266   standard deviation: 1.61017
+
+time up to the first occurrence of output 0 frequency distribution - sample size: 10
+mean: 1   variance: 1.33333   standard deviation: 1.1547
+
+time up to the first occurrence of output 1 distribution
+mean: 3.33438   variance: 15.3571   standard deviation: 3.91881
+
+time up to the first occurrence of output 1 frequency distribution - sample size: 10
+mean: 3.6   variance: 6.71111   standard deviation: 2.59058
+
+time up to the first occurrence of output 2 distribution
+mean: 11.2924   variance: 113.338   standard deviation: 10.646
+
+time up to the first occurrence of output 2 frequency distribution - sample size: 10
+mean: 8.6   variance: 78.0444   standard deviation: 8.83428
+
+time up to the first occurrence of output 3 distribution
+mean: 6.23694   variance: 37.5602   standard deviation: 6.12864
+
+time up to the first occurrence of output 3 frequency distribution - sample size: 10
+mean: 8   variance: 44.4444   standard deviation: 6.66667
+
+time up to the first occurrence of output 4 distribution
+mean: 6.26103   variance: 45.0635   standard deviation: 6.71294
+
+time up to the first occurrence of output 4 frequency distribution - sample size: 10
+mean: 3.8   variance: 14.4   standard deviation: 3.79473
+
+output 0 recurrence time distribution
+mean: 2.36332   variance: 2.9497   standard deviation: 1.71747
+
+output 0 recurrence time frequency distribution - sample size: 206
+mean: 2.32524   variance: 3.00102   standard deviation: 1.73234
+
+output 1 recurrence time distribution
+mean: 4.76642   variance: 15.8457   standard deviation: 3.98067
+
+output 1 recurrence time frequency distribution - sample size: 97
+mean: 4.34021   variance: 13.956   standard deviation: 3.73577
+
+output 2 recurrence time distribution
+mean: 11.2997   variance: 113.272   standard deviation: 10.643
+
+output 2 recurrence time frequency distribution - sample size: 34
+mean: 8.14706   variance: 50.3111   standard deviation: 7.09303
+
+output 3 recurrence time distribution
+mean: 6.69293   variance: 37.388   standard deviation: 6.11458
+
+output 3 recurrence time frequency distribution - sample size: 65
+mean: 5.12308   variance: 21.3909   standard deviation: 4.62503
+
+output 4 recurrence time distribution
+mean: 7.46946   variance: 45.1816   standard deviation: 6.72172
+
+output 4 recurrence time frequency distribution - sample size: 58
+mean: 7.13793   variance: 44.542   standard deviation: 6.67398
+
+output 0 sojourn time distribution
+mean: 1.66418   variance: 1.07953   standard deviation: 1.03901
+coefficient of variation: 0.624337
+
+output 0 sojourn time frequency distribution - sample size: 127
+mean: 1.61417   variance: 0.984877   standard deviation: 0.99241
+
+final run - output 0 sojourn time frequency distribution - sample size: 4
+mean: 2.75   variance: 2.91667   standard deviation: 1.70783
+
+output 1 sojourn time distribution
+mean: 1.19856   variance: 0.2339   standard deviation: 0.483632
+coefficient of variation: 0.40351
+
+output 1 sojourn time frequency distribution - sample size: 95
+mean: 1.11579   variance: 0.124748   standard deviation: 0.353197
+
+final run - output 1 sojourn time frequency distribution - sample size: 1
+mean: 1   variance: 0   standard deviation: 0
+
+output 2 sojourn time distribution
+mean: 1.09804   variance: 0.103543   standard deviation: 0.321781
+coefficient of variation: 0.29305
+
+output 2 sojourn time frequency distribution - sample size: 40
+mean: 1.075   variance: 0.0711538   standard deviation: 0.266747
+
+final run - output 2 sojourn time frequency distribution - sample size: 1
+mean: 1   variance: 0   standard deviation: 0
+
+output 3 sojourn time distribution
+mean: 1.18117   variance: 0.207501   standard deviation: 0.455523
+coefficient of variation: 0.385653
+
+output 3 sojourn time frequency distribution - sample size: 64
+mean: 1.15625   variance: 0.197421   standard deviation: 0.44432
+
+final run - output 3 sojourn time frequency distribution - sample size: 1
+mean: 1   variance: 0   standard deviation: 0
+
+output 4 sojourn time distribution
+mean: 1.1313   variance: 0.147698   standard deviation: 0.384315
+coefficient of variation: 0.33971
+
+output 4 sojourn time frequency distribution - sample size: 61
+mean: 1.06557   variance: 0.0622951   standard deviation: 0.24959
+
+final run - output 4 sojourn time frequency distribution - sample size: 3
+mean: 1   variance: 0   standard deviation: 0
+
+number of runs of output 0 per length 51 sequence distribution
+mean: 13.1079   variance: 3.47823   standard deviation: 1.865
+coefficient of skewness: -0.0225094   coefficient of kurtosis: -0.0331746
+
+number of runs of output 0 per sequence frequency distribution - sample size: 10
+mean: 13.1   variance: 2.54444   standard deviation: 1.59513
+coefficient of skewness: -0.81717   coefficient of kurtosis: -0.611424
+
+number of runs of output 1 per length 51 sequence distribution
+mean: 8.93595   variance: 4.52099   standard deviation: 2.12626
+coefficient of skewness: 0.0520553   coefficient of kurtosis: -0.0657898
+
+number of runs of output 1 per sequence frequency distribution - sample size: 10
+mean: 9.6   variance: 10.4889   standard deviation: 3.23866
+coefficient of skewness: 0.302228   coefficient of kurtosis: -1.20291
+
+number of runs of output 2 per length 51 sequence distribution
+mean: 4.00744   variance: 3.05449   standard deviation: 1.74771
+coefficient of skewness: 0.309788   coefficient of kurtosis: -0.00585903
+
+number of runs of output 2 per sequence frequency distribution - sample size: 10
+mean: 4.1   variance: 6.98889   standard deviation: 2.64365
+coefficient of skewness: 0.226418   coefficient of kurtosis: -1.637
+
+number of runs of output 3 per length 51 sequence distribution
+mean: 6.36055   variance: 3.97724   standard deviation: 1.9943
+coefficient of skewness: 0.151767   coefficient of kurtosis: -0.062834
+
+number of runs of output 3 per sequence frequency distribution - sample size: 10
+mean: 6.5   variance: 4.94444   standard deviation: 2.22361
+coefficient of skewness: 0.265284   coefficient of kurtosis: -1.86548
+
+number of runs of output 4 per length 51 sequence distribution
+mean: 6.02205   variance: 3.96904   standard deviation: 1.99225
+coefficient of skewness: 0.17892   coefficient of kurtosis: -0.0562065
+
+number of runs of output 4 per sequence frequency distribution - sample size: 10
+mean: 6.4   variance: 6.26667   standard deviation: 2.50333
+coefficient of skewness: 0.758564   coefficient of kurtosis: -0.763377
+
+number of occurrences of output 0 per length 51 sequence distribution
+mean: 21.6006   variance: 11.7201   standard deviation: 3.42346
+coefficient of skewness: 0.0371498   coefficient of kurtosis: -0.0338057
+
+number of occurrences of output 0 per sequence frequency distribution - sample size: 10
+mean: 21.6   variance: 23.3778   standard deviation: 4.83506
+coefficient of skewness: -0.460633   coefficient of kurtosis: -1.22677
+
+number of occurrences of output 1 per length 51 sequence distribution
+mean: 10.6989   variance: 7.73315   standard deviation: 2.78085
+coefficient of skewness: 0.173101   coefficient of kurtosis: -0.00907058
+
+number of occurrences of output 1 per sequence frequency distribution - sample size: 10
+mean: 10.7   variance: 9.78889   standard deviation: 3.12872
+coefficient of skewness: 0.102307   coefficient of kurtosis: -1.07002
+
+number of occurrences of output 2 per length 51 sequence distribution
+mean: 4.40064   variance: 4.03925   standard deviation: 2.00979
+coefficient of skewness: 0.415347   coefficient of kurtosis: 0.134303
+
+number of occurrences of output 2 per sequence frequency distribution - sample size: 10
+mean: 4.4   variance: 7.37778   standard deviation: 2.71621
+coefficient of skewness: 0.219566   coefficient of kurtosis: -1.72355
+
+number of occurrences of output 3 per length 51 sequence distribution
+mean: 7.50038   variance: 6.47501   standard deviation: 2.5446
+coefficient of skewness: 0.284083   coefficient of kurtosis: 0.0423702
+
+number of occurrences of output 3 per sequence frequency distribution - sample size: 10
+mean: 7.5   variance: 3.61111   standard deviation: 1.90029
+coefficient of skewness: 0.182158   coefficient of kurtosis: -1.74213
+
+number of occurrences of output 4 per length 51 sequence distribution
+mean: 6.79951   variance: 5.70863   standard deviation: 2.38927
+coefficient of skewness: 0.28776   coefficient of kurtosis: 0.0404079
+
+number of occurrences of output 4 per sequence frequency distribution - sample size: 10
+mean: 6.8   variance: 7.28889   standard deviation: 2.69979
+coefficient of skewness: 0.475985   coefficient of kurtosis: -1.10062
+
+distances between observation distributions for consecutive states
+_         0.789346  0.867523  
+0.789346  _         0.437226  
+0.867523  0.437226  _         
+
+sequence length frequency distribution - sample size: 10
+mean: 51   variance: 0   standard deviation: 0
+
+cumulated length: 510
+
+information of the sequences in the iid case: -741.254 (-1.45344)
+
+log-likelihood of the state sequences: -891.172   (normalized: -1.7474)
+
+state sequence entropy: 299.991   (normalized: 0.588218)
+
+log-likelihood of the observed sequences: -736.183   (normalized: -1.4435)
+
+14 free parameters   2 * penalyzed log-likelihood (AIC): -1500.37
+
+14 free parameters   2 * penalyzed log-likelihood (AICc): -1501.21
+
+14 free parameters   2 * penalyzed log-likelihood (BIC): -1559.65
+
+14 free parameters   2 * penalyzed log-likelihood (BICc): -1544.57
+
+14 free parameters   2 * penalyzed log-likelihood (ICL): -2159.63
+
+14 free parameters   2 * penalyzed log-likelihood (ICLc): -2144.55
+
+
+posterior state probabilities
+
+optimal state | variable 1 | index | state 0 | state 1 | state 2 | conditional entropy | marginal entropy | partial state sequence entropy
+0  0   0  0.910507     3.35841e-06  0.0894901    0.301402   0.301402   0.301402   0
+2  4   1  0            0.187003     0.812997     0.438453   0.481848   0.739855  
+1  2   2  0            0.993173     0.00682734   0.0400138  0.0408507  0.779869  
+1  3   3  0            0.687397     0.312603     0.620583   0.621167   1.40045   
+1  2   4  0            0.990158     0.00984194   0.0544321  0.055274   1.45488   
+1  4   5  0            0.503045     0.496955     0.691906   0.693129   2.14679   
+2  1   6  0            0.3897       0.6103       0.635748   0.668614   2.78254   
+1  2   7  0            0.990956     0.00904397   0.0503125  0.0515608  2.83285   
+1  3   8  0            0.726671     0.273329     0.585857   0.586542   3.41871   
+1  3   9  0            0.77221      0.22779      0.520902   0.536592   3.93961   
+0  0  10  0.678961     0.227498     0.0935405    0.816115   0.821356   4.75572   
+0  0  11  0.769217     0.132841     0.0979421    0.685818   0.697539   5.44154   
+2  4  12  0            0.246693     0.753307     0.504222   0.558673   5.94576   
+1  3  13  0            0.846143     0.153857     0.412869   0.429342   6.35863   
+1  3  14  0            0.749924     0.250076     0.552231   0.562418   6.91086   
+1  3  15  0            0.768062     0.231938     0.526831   0.541607   7.4377    
+0  0  16  0.690811     0.221734     0.0874551    0.797604   0.802612   8.2353    
+0  0  17  0.544415     0.205185     0.2504       0.978596   1.00274    9.2139    
+1  2  18  0            0.965526     0.034474     0.141925   0.149966   9.35582   
+1  2  19  0            0.985509     0.0144907    0.0755979  0.0757425  9.43142   
+0  0  20  0.67694      0.216379     0.10668      0.833672   0.834082   10.2651   
+0  0  21  0.766454     0.134384     0.0991614    0.690249   0.70274    10.9553   
+2  1  22  0            0.255232     0.744768     0.512693   0.56801    11.468    
+2  1  23  0            0.495223     0.504777     0.667487   0.693102   12.1355   
+0  0  24  0.774819     0.186068     0.0391126    0.633021   0.637353   12.7685   
+2  1  25  0            0.176031     0.823969     0.433935   0.465321   13.2025   
+0  0  26  0.741685     0.219993     0.0383216    0.67625    0.679738   13.8787   
+2  4  27  0            0.296561     0.703439     0.568888   0.607922   14.4476   
+1  1  28  0            0.557522     0.442478     0.657487   0.686515   15.1051   
+1  4  29  0            0.512168     0.487832     0.658756   0.692851   15.7639   
+0  0  30  0.560341     0.317252     0.122407     0.933882   0.945883   16.6977   
+1  2  31  0            0.96959      0.0304097    0.130914   0.136164   16.8287   
+0  0  32  0.739637     0.187563     0.0728001    0.727119   0.727724   17.5558   
+2  4  33  0            0.309215     0.690785     0.568558   0.618472   18.1243   
+1  1  34  0            0.537979     0.462021     0.660629   0.69026    18.785    
+1  4  35  0            0.579594     0.420406     0.647217   0.680423   19.4322   
+1  4  36  0            0.505052     0.494948     0.659416   0.693096   20.0916   
+1  3  37  0            0.774378     0.225622     0.510555   0.533932   20.6021   
+1  2  38  0            0.990696     0.00930397   0.0521892  0.0527782  20.6543   
+2  1  39  0            0.381521     0.618479     0.663515   0.664804   21.3178   
+1  1  40  0            0.536299     0.463701     0.657726   0.69051    21.9756   
+1  4  41  0            0.513773     0.486227     0.658352   0.692768   22.6339   
+0  0  42  0.647061     0.263737     0.0892022    0.83984    0.848773   23.4738   
+1  3  43  0            0.64858      0.35142      0.605308   0.648321   24.0791   
+2  1  44  0            0.440394     0.559606     0.654346   0.686024   24.7334   
+1  4  45  0            0.637704     0.362296     0.622636   0.654728   25.3561   
+2  1  46  0            0.356246     0.643754     0.6205     0.651228   25.9766   
+1  2  47  0            0.991273     0.00872735   0.0488479  0.0500681  26.0254   
+0  0  48  0.763271     0.174826     0.0619033    0.683157   0.683308   26.7086   
+2  1  49  0            0.226789     0.773211     0.492835   0.535367   27.2014   
+1  4  50  0            0.609599     0.390401     0.644476   0.668927   27.8459   
+
+log-likelihood: -85.7208
+log-likelihood of the state sequence: -103.211   (2.53524e-08)
+
+state sequence entropy: 27.8459 (0.545998)   upper bound: 40.6216 (0.796501)
+sum of marginal entropies: 28.8002 (0.564709)
+
+number of state sequences: 4.38244e+17
+
+maximum posterior state probabilities
+
+optimal state | variable 1 | index | state 0 | state 1 | state 2
+0  0   0  1.56226e-07  4.42836e-13  1.07694e-08   0
+2  4   1  0            2.64386e-08  1.56226e-07  
+1  2   2  0            1.56226e-07  9.97465e-10  
+1  3   3  0            1.56226e-07  7.20361e-08  
+1  2   4  0            1.56226e-07  2.91558e-09  
+1  4   5  0            1.56226e-07  1.0822e-07   
+2  1   6  0            1.0822e-07   1.56226e-07  
+1  2   7  0            1.56226e-07  2.01967e-09  
+1  3   8  0            1.56226e-07  7.20361e-08  
+1  3   9  0            1.56226e-07  5.89562e-08  
+0  0  10  1.56226e-07  4.88716e-08  2.43486e-08  
+0  0  11  1.56226e-07  1.59488e-08  1.54279e-08  
+2  4  12  0            2.64386e-08  1.56226e-07  
+1  3  13  0            1.56226e-07  2.46446e-08  
+1  3  14  0            1.56226e-07  7.20361e-08  
+1  3  15  0            1.56226e-07  5.89562e-08  
+0  0  16  1.56226e-07  4.88716e-08  2.43486e-08  
+0  0  17  1.56226e-07  4.88716e-08  9.1164e-08   
+1  2  18  0            1.56226e-07  8.93416e-09  
+1  2  19  0            1.56226e-07  2.38619e-09  
+0  0  20  1.56226e-07  4.88716e-08  2.43486e-08  
+0  0  21  1.56226e-07  1.59488e-08  2.43486e-08  
+2  1  22  0            4.17258e-08  1.56226e-07  
+1  1  23  0            1.56226e-07  1.2177e-07   
+0  0  24  1.56226e-07  2.68045e-08  7.16199e-09  
+2  1  25  0            2.23776e-08  1.56226e-07  
+0  0  26  1.56226e-07  3.27513e-08  6.23906e-09  
+2  4  27  0            4.66343e-08  1.56226e-07  
+1  1  28  0            1.56226e-07  9.42743e-08  
+2  4  29  0            9.89892e-08  1.56226e-07  
+0  0  30  1.56226e-07  1.00359e-07  3.16817e-08  
+1  2  31  0            1.56226e-07  7.31194e-09  
+0  0  32  1.56226e-07  3.86949e-08  2.35555e-08  
+2  4  33  0            7.35991e-08  1.56226e-07  
+1  1  34  0            1.56226e-07  1.48785e-07  
+2  4  35  0            1.56226e-07  1.56226e-07  
+1  4  36  0            1.56226e-07  1.56226e-07  
+1  3  37  0            1.56226e-07  7.20361e-08  
+1  2  38  0            1.56226e-07  1.84739e-09  
+2  1  39  0            9.89892e-08  1.56226e-07  
+1  1  40  0            1.56226e-07  9.89892e-08  
+2  4  41  0            9.89892e-08  1.56226e-07  
+0  0  42  1.56226e-07  1.00359e-07  3.16817e-08  
+1  3  43  0            1.56226e-07  7.92948e-08  
+2  1  44  0            7.92948e-08  1.56226e-07  
+1  4  45  0            1.56226e-07  5.49286e-08  
+2  1  46  0            5.61204e-08  1.56226e-07  
+1  2  47  0            1.56226e-07  8.57178e-10  
+0  0  48  1.56226e-07  2.68045e-08  8.49164e-09  
+2  1  49  0            2.65321e-08  1.56226e-07  
+1  4  50  0            1.56226e-07  7.74293e-08  
+
+log-likelihood of the state sequence: -101.393   (1.56226e-07)
+
+0 2 1 1 1 1 2 1 1 1 0 0 2 1 1 1 0 0 1 1 0 0 2 1 0 2 0 2 1 2 0 1 0 2 1 2 1 1 1 2 1 2 0 1 2 1 2 1 0 2 1   1  -101.393   (1.56226e-07  1.56226e-07  51)
+0 2 1 1 1 1 2 1 1 1 0 0 2 1 1 1 0 0 1 1 0 0 2 1 0 2 0 2 1 2 0 1 0 2 1 1 2 1 1 2 1 2 0 1 2 1 2 1 0 2 1   2  -101.393   (1.56226e-07  3.12453e-07  53)
+0 2 1 1 1 1 2 1 1 1 0 0 2 1 1 1 0 0 1 1 0 0 2 1 0 2 0 2 1 2 0 1 0 2 2 1 2 1 1 2 1 2 0 1 2 1 2 1 0 2 1   3  -101.442   (1.48785e-07  4.61238e-07  54)
+0 2 1 1 1 1 2 1 1 1 0 0 2 1 1 1 0 0 1 1 0 0 2 2 0 2 0 2 1 2 0 1 0 2 1 2 1 1 1 2 1 2 0 1 2 1 2 1 0 2 1   4  -101.642   (1.2177e-07  5.83007e-07  55)
+0 2 1 1 1 1 2 1 1 1 0 0 2 1 1 1 0 0 1 1 0 0 2 2 0 2 0 2 1 2 0 1 0 2 1 1 2 1 1 2 1 2 0 1 2 1 2 1 0 2 1   5  -101.642   (1.2177e-07  7.04777e-07  55)
+
+Computation of the 1st smoothed tree: 
+
+posterior state probabilities
+
+(0, 0, 0.910507, 3.35841e-06, 0.0894901, 0.258008, 0.301402, 27.8459)
+|-(2, 4, 0, 0.187003, 0.812997, 0.481011, 0.481848, 27.5879)
+  |-(1, 2, 0, 0.993173, 0.00682734, 0.0402661, 0.0408507, 27.1069)
+    |-(1, 3, 0, 0.687397, 0.312603, 0.620325, 0.621167, 27.0666)
+      |-(1, 2, 0, 0.990158, 0.00984194, 0.0540516, 0.055274, 26.4463)
+        |-(1, 4, 0, 0.503045, 0.496955, 0.660263, 0.693129, 26.3922)
+          |-(2, 1, 0, 0.3897, 0.6103, 0.667365, 0.668614, 25.7319)
+            |-(1, 2, 0, 0.990956, 0.00904397, 0.0508759, 0.0515608, 25.0646)
+              |-(1, 3, 0, 0.726671, 0.273329, 0.570853, 0.586542, 25.0137)
+                |-(1, 3, 0, 0.77221, 0.22779, 0.531351, 0.536592, 24.4429)
+                  |-(0, 0, 0.678961, 0.227498, 0.0935405, 0.809635, 0.821356, 23.9115)
+                    |-(0, 0, 0.769217, 0.132841, 0.0979421, 0.643088, 0.697539, 23.1019)
+                      |-(2, 4, 0, 0.246693, 0.753307, 0.5422, 0.558673, 22.4588)
+                        |-(1, 3, 0, 0.846143, 0.153857, 0.419154, 0.429342, 21.9166)
+                          |-(1, 3, 0, 0.749924, 0.250076, 0.547642, 0.562418, 21.4974)
+                            |-(1, 3, 0, 0.768062, 0.231938, 0.536599, 0.541607, 20.9498)
+                              |-(0, 0, 0.690811, 0.221734, 0.0874551, 0.778471, 0.802612, 20.4132)
+                                |-(0, 0, 0.544415, 0.205185, 0.2504, 0.994696, 1.00274, 19.6347)
+                                  |-(1, 2, 0, 0.965526, 0.034474, 0.149821, 0.149966, 18.64)
+                                    |-(1, 2, 0, 0.985509, 0.0144907, 0.0753324, 0.0757425, 18.4902)
+                                      |-(0, 0, 0.67694, 0.216379, 0.10668, 0.821591, 0.834082, 18.4149)
+                                        |-(0, 0, 0.766454, 0.134384, 0.0991614, 0.647423, 0.70274, 17.5933)
+                                          |-(2, 1, 0, 0.255232, 0.744768, 0.542396, 0.56801, 16.9459)
+                                            |-(2, 1, 0, 0.495223, 0.504777, 0.68877, 0.693102, 16.4035)
+                                              |-(0, 0, 0.774819, 0.186068, 0.0391126, 0.605967, 0.637353, 15.7147)
+                                                |-(2, 1, 0, 0.176031, 0.823969, 0.461832, 0.465321, 15.1087)
+                                                  |-(0, 0, 0.741685, 0.219993, 0.0383216, 0.640704, 0.679738, 14.6469)
+                                                    |-(2, 4, 0, 0.296561, 0.703439, 0.578895, 0.607922, 14.0062)
+                                                      |-(1, 1, 0, 0.557522, 0.442478, 0.65242, 0.686515, 13.4273)
+                                                        |-(1, 4, 0, 0.512168, 0.487832, 0.68085, 0.692851, 12.7749)
+                                                          |-(0, 0, 0.560341, 0.317252, 0.122407, 0.940633, 0.945883, 12.094)
+                                                            |-(1, 2, 0, 0.96959, 0.0304097, 0.135558, 0.136164, 11.1534)
+                                                              |-(0, 0, 0.739637, 0.187563, 0.0728001, 0.677811, 0.727724, 11.0178)
+                                                                |-(2, 4, 0, 0.309215, 0.690785, 0.588841, 0.618472, 10.34)
+                                                                  |-(1, 1, 0, 0.537979, 0.462021, 0.657054, 0.69026, 9.75118)
+                                                                    |-(1, 4, 0, 0.579594, 0.420406, 0.646742, 0.680423, 9.09412)
+                                                                      |-(1, 4, 0, 0.505052, 0.494948, 0.669719, 0.693096, 8.44738)
+                                                                        |-(1, 3, 0, 0.774378, 0.225622, 0.533343, 0.533932, 7.77766)
+                                                                          |-(1, 2, 0, 0.990696, 0.00930397, 0.0514893, 0.0527782, 7.24432)
+                                                                            |-(2, 1, 0, 0.381521, 0.618479, 0.63202, 0.664804, 7.19283)
+                                                                              |-(1, 1, 0, 0.536299, 0.463701, 0.656094, 0.69051, 6.56081)
+                                                                                |-(1, 4, 0, 0.513773, 0.486227, 0.683835, 0.692768, 5.90471)
+                                                                                  |-(0, 0, 0.647061, 0.263737, 0.0892022, 0.80576, 0.848773, 5.22088)
+                                                                                    |-(1, 3, 0, 0.64858, 0.35142, 0.616643, 0.648321, 4.41512)
+                                                                                      |-(2, 1, 0, 0.440394, 0.559606, 0.653932, 0.686024, 3.79848)
+                                                                                        |-(1, 4, 0, 0.637704, 0.362296, 0.624001, 0.654728, 3.14454)
+                                                                                          |-(2, 1, 0, 0.356246, 0.643754, 0.650007, 0.651228, 2.52054)
+                                                                                            |-(1, 2, 0, 0.991273, 0.00872735, 0.0499166, 0.0500681, 1.87054)
+                                                                                              |-(0, 0, 0.763271, 0.174826, 0.0619033, 0.640777, 0.683308, 1.82062)
+                                                                                                |-(2, 1, 0, 0.226789, 0.773211, 0.510916, 0.535367, 1.17984)
+                                                                                                  |-(1, 4, 0, 0.609599, 0.390401, 0.668927, 0.668927, 0.668927)
+                                                                                                    
+
+
+log-likelihood: -85.7208
+log-likelihood of the state tree: -103.211   (2.53524e-08)
+
+number of state trees: 4.38244e+17
+
+Viterbi upward-downward algorithm: 
+
+maximum posterior state probabilities
+
+(0, 0, -15.672, -28.4456, -18.3466)
+|-(2, 4, -1e+37, -17.4484, -15.672)
+  |-(1, 2, -1e+37, -15.672, -20.7258)
+    |-(1, 3, -1e+37, -15.672, -16.4461)
+      |-(1, 2, -1e+37, -15.672, -19.6532)
+        |-(1, 4, -1e+37, -15.672, -16.0391)
+          |-(2, 1, -1e+37, -16.0391, -15.672)
+            |-(1, 2, -1e+37, -15.672, -20.0203)
+              |-(1, 3, -1e+37, -15.672, -16.4461)
+                |-(1, 3, -1e+37, -15.672, -16.6465)
+                  |-(0, 0, -15.672, -16.8341, -17.5308)
+                    |-(0, 0, -15.672, -17.9539, -17.9871)
+                      |-(2, 4, -1e+37, -17.4484, -15.672)
+                        |-(1, 3, -1e+37, -15.672, -17.5187)
+                          |-(1, 3, -1e+37, -15.672, -16.4461)
+                            |-(1, 3, -1e+37, -15.672, -16.6465)
+                              |-(0, 0, -15.672, -16.8341, -17.5308)
+                                |-(0, 0, -15.672, -16.8341, -16.2106)
+                                  |-(1, 2, -1e+37, -15.672, -18.5334)
+                                    |-(1, 2, -1e+37, -15.672, -19.8536)
+                                      |-(0, 0, -15.672, -16.8341, -17.5308)
+                                        |-(0, 0, -15.672, -17.9539, -17.5308)
+                                          |-(2, 1, -1e+37, -16.9921, -15.672)
+                                            |-(1, 1, -1e+37, -15.672, -15.9211)
+                                              |-(0, 0, -15.672, -17.4347, -18.7545)
+                                                |-(2, 1, -1e+37, -17.6152, -15.672)
+                                                  |-(0, 0, -15.672, -17.2343, -18.8924)
+                                                    |-(2, 4, -1e+37, -16.8809, -15.672)
+                                                      |-(1, 1, -1e+37, -15.672, -16.1771)
+                                                        |-(2, 4, -1e+37, -16.1283, -15.672)
+                                                          |-(0, 0, -15.672, -16.1145, -17.2675)
+                                                            |-(1, 2, -1e+37, -15.672, -18.7338)
+                                                              |-(0, 0, -15.672, -17.0676, -17.5639)
+                                                                |-(2, 4, -1e+37, -16.4246, -15.672)
+                                                                  |-(1, 1, -1e+37, -15.672, -15.7208)
+                                                                    |-(1, 4, -1e+37, -15.672, -15.672)
+                                                                      |-(1, 4, -1e+37, -15.672, -15.672)
+                                                                        |-(1, 3, -1e+37, -15.672, -16.4461)
+                                                                          |-(1, 2, -1e+37, -15.672, -20.1095)
+                                                                            |-(2, 1, -1e+37, -16.1283, -15.672)
+                                                                              |-(1, 1, -1e+37, -15.672, -16.1283)
+                                                                                |-(2, 4, -1e+37, -16.1283, -15.672)
+                                                                                  |-(0, 0, -15.672, -16.1145, -17.2675)
+                                                                                    |-(1, 3, -1e+37, -15.672, -16.3501)
+                                                                                      |-(2, 1, -1e+37, -16.3501, -15.672)
+                                                                                        |-(1, 4, -1e+37, -15.672, -16.7172)
+                                                                                          |-(2, 1, -1e+37, -16.6958, -15.672)
+                                                                                            |-(1, 2, -1e+37, -15.672, -20.8774)
+                                                                                              |-(0, 0, -15.672, -17.4347, -18.5842)
+                                                                                                |-(2, 1, -1e+37, -17.4449, -15.672)
+                                                                                                  |-(1, 4, -1e+37, -15.672, -16.3739)
+                                                                                                    
+
+
+log-likelihood of the state tree: -101.393   (1.56226e-07)
+
+Generalized viterbi: 
+(0, 0, 0, 0, 0)
+|-(2, 2, 2, 2, 2)
+  |-(1, 1, 1, 1, 1)
+    |-(1, 1, 1, 1, 1)
+      |-(1, 1, 1, 1, 1)
+        |-(1, 1, 1, 1, 1)
+          |-(2, 2, 2, 2, 2)
+            |-(1, 1, 1, 1, 1)
+              |-(1, 1, 1, 1, 1)
+                |-(1, 1, 1, 1, 1)
+                  |-(0, 0, 0, 0, 0)
+                    |-(0, 0, 0, 0, 0)
+                      |-(2, 2, 2, 2, 2)
+                        |-(1, 1, 1, 1, 1)
+                          |-(1, 1, 1, 1, 1)
+                            |-(1, 1, 1, 1, 1)
+                              |-(0, 0, 0, 0, 0)
+                                |-(0, 0, 0, 0, 0)
+                                  |-(1, 1, 1, 1, 1)
+                                    |-(1, 1, 1, 1, 1)
+                                      |-(0, 0, 0, 0, 0)
+                                        |-(0, 0, 0, 0, 0)
+                                          |-(2, 2, 2, 2, 2)
+                                            |-(1, 1, 1, 2, 2)
+                                              |-(0, 0, 0, 0, 0)
+                                                |-(2, 2, 2, 2, 2)
+                                                  |-(0, 0, 0, 0, 0)
+                                                    |-(2, 2, 2, 2, 2)
+                                                      |-(1, 1, 1, 1, 1)
+                                                        |-(2, 2, 2, 2, 2)
+                                                          |-(0, 0, 0, 0, 0)
+                                                            |-(1, 1, 1, 1, 1)
+                                                              |-(0, 0, 0, 0, 0)
+                                                                |-(2, 2, 2, 2, 2)
+                                                                  |-(1, 1, 2, 1, 1)
+                                                                    |-(1, 2, 1, 1, 2)
+                                                                      |-(2, 1, 2, 2, 1)
+                                                                        |-(1, 1, 1, 1, 1)
+                                                                          |-(1, 1, 1, 1, 1)
+                                                                            |-(2, 2, 2, 2, 2)
+                                                                              |-(1, 1, 1, 1, 1)
+                                                                                |-(2, 2, 2, 2, 2)
+                                                                                  |-(0, 0, 0, 0, 0)
+                                                                                    |-(1, 1, 1, 1, 1)
+                                                                                      |-(2, 2, 2, 2, 2)
+                                                                                        |-(1, 1, 1, 1, 1)
+                                                                                          |-(2, 2, 2, 2, 2)
+                                                                                            |-(1, 1, 1, 1, 1)
+                                                                                              |-(0, 0, 0, 0, 0)
+                                                                                                |-(2, 2, 2, 2, 2)
+                                                                                                  |-(1, 1, 1, 1, 1)
+                                                                                                    
+
+ranks:                0	        1	        2	        3	        4
+log-probs:   |  -101.39	  -101.39	  -101.44	  -101.64	  -101.64|
+prob ratio:  |     1.00	     1.00	     0.95	     0.78	     0.78|
+cumul ratio: |     0.00	     0.00	     0.00	     0.00	     0.00|
+nb cells:    |       51	       53	       54	       55	       55|

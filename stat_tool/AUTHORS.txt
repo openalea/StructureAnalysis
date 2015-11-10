@@ -1,0 +1,3 @@
+Yann Guédon (Original code ; Cpp version; documentation)
+
+Thomas Cokelaer (Boost python wrapping, python modules, tests, documentation) 
