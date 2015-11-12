@@ -15,7 +15,7 @@ if env['compiler'] == 'mingw':
     env.AppendUnique(LINKFLAGS=LINKFLAGS)
 
 # Build wrappers as shared libraries
-includes= env.ALEAGlob('*.h')
+#includes= env.ALEAGlob('*.h')
 sources = env.ALEAGlob('*.cpp')
 
 LIBS = ['vptool', 'vpstat_tool']
@@ -29,9 +29,9 @@ env.AppendUnique(LIBS=['vptool', 'vpstat_tool'])
 #env.ALEAWrapper("../openalea/stat_tool/old", "cstat_tool", ["cstat_tool.cpp"])
 
 
-env.ALEAWrapper("../stat_tool", "_stat_tool", sources)
+build = env.ALEAWrapper("../stat_tool", "_stat_tool", sources)
 # includes in wrappers should be restricted to boost_python_aliases.h and wrapper_util.h
 # inc = env.Install('$build_includedir/stat_tool', includes) 
-inc = env.Install('$build_includedir/stat_tool', ["boost_python_aliases.h", "wrapper_util.h"])
-env.Alias('build', inc)
+#inc = env.Install('$build_includedir/stat_tool', ["boost_python_aliases.h", "wrapper_util.h"])
+env.Alias('build', build)
 
