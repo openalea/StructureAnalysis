@@ -5,3 +5,4 @@ build-scons
 *.so
 *.pyc
 *.dblite
+options.py
