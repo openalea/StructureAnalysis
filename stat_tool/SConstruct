@@ -13,6 +13,7 @@ tools = ['boost_python', 'vplants.tool','qt4', 'install', 'alea']
 
 env = ALEASolution(options, tools)
 
+env.AppendUnique(CXXFLAGS="-std=c++0x")
 # Build stage
 prefix = env['build_prefix']
 SConscript(pj(prefix,"src/cpp/SConscript"),

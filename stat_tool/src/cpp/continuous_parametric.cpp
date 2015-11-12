@@ -814,7 +814,7 @@ ostream& ContinuousParametric::ascii_print(ostream &os , bool file_flag ,
       }
 
       else {
-        gamma_distribution<double> dist(shape , scale);
+          boost::math::gamma_distribution<double> dist(shape , scale);
 
         value = quantile(complement(dist , GAMMA_TAIL));
         while (max_value < value) {
@@ -946,7 +946,7 @@ ostream& ContinuousParametric::ascii_print(ostream &os , bool file_flag ,
       }
 
       else {
-        gamma_distribution<double> dist(shape , scale);
+          boost::math::gamma_distribution<double> dist(shape , scale);
 
         value = quantile(complement(dist , GAMMA_TAIL));
         while (max_value < value) {
@@ -1366,7 +1366,7 @@ ostream& ContinuousParametric::spreadsheet_print(ostream &os , bool cumul_flag ,
       }
 
       else {
-        gamma_distribution<double> dist(shape , scale);
+        boost::math::gamma_distribution<double> dist(shape , scale);
 
         value = quantile(complement(dist , GAMMA_TAIL));
         while (max_value < value) {
@@ -1497,7 +1497,7 @@ ostream& ContinuousParametric::spreadsheet_print(ostream &os , bool cumul_flag ,
       }
 
       else {
-        gamma_distribution<double> dist(shape , scale);
+        boost::math::gamma_distribution<double> dist(shape , scale);
 
         value = quantile(complement(dist , GAMMA_TAIL));
         while (max_value < value) {
@@ -1660,7 +1660,7 @@ bool ContinuousParametric::plot_print(const char *path , const Histogram *histo1
       }
 
       else {
-        gamma_distribution<double> dist(shape , scale);
+        boost::math::gamma_distribution<double> dist(shape , scale);
 
         max_value = quantile(complement(dist , GAMMA_TAIL));
         if ((histo1) && (histo1->max_value + histo1->step > max_value)) {
@@ -1875,7 +1875,7 @@ bool ContinuousParametric::plot_print(const char *path , const Histogram *histo1
       }
 
       else {
-        gamma_distribution<double> dist(shape , scale);
+        boost::math::gamma_distribution<double> dist(shape , scale);
 
         max_value = quantile(complement(dist , GAMMA_TAIL));
         if ((histo1) && (histo1->max_value + histo1->step > max_value)) {
@@ -2006,7 +2006,7 @@ void ContinuousParametric::plotable_write(SinglePlot &plot , const Histogram *hi
     }
 
     else {
-      gamma_distribution<double> dist(shape , scale);
+      boost::math::gamma_distribution<double> dist(shape , scale);
 
       max_value = quantile(complement(dist , GAMMA_TAIL));
       if ((histo1) && (histo1->max_value + histo1->step > max_value)) {
@@ -2209,7 +2209,7 @@ void ContinuousParametric::plotable_write(SinglePlot &plot , const Histogram *hi
     }
 
     else {
-      gamma_distribution<double> dist(shape , scale);
+      boost::math::gamma_distribution<double> dist(shape , scale);
 
       max_value = quantile(complement(dist , GAMMA_TAIL));
       if ((histo1) && (histo1->max_value + histo1->step > max_value)) {
@@ -2445,7 +2445,7 @@ double ContinuousParametric::mass_computation(double inf , double sup) const
     }
 
     else {
-      gamma_distribution<double> dist(shape , scale);
+      boost::math::gamma_distribution<double> dist(shape , scale);
 
       if (inf == sup) {
         mass = pdf(dist , MAX(inf , 1.e-12));  // bug boost C++
@@ -2545,7 +2545,7 @@ double ContinuousParametric::mass_computation(double inf , double sup) const
     }
 
     else {
-      gamma_distribution<double> dist(shape , scale);
+      boost::math::gamma_distribution<double> dist(shape , scale);
 
       if (inf == 0.) {
         mass = zero_probability;
@@ -2709,7 +2709,7 @@ double** ContinuousParametric::q_q_plot_computation(int nb_value ,
     }
 
     else {
-      gamma_distribution<double> dist(shape , scale);
+      boost::math::gamma_distribution<double> dist(shape , scale);
 
       for (i = 0;i < nb_value - 1;i++) {
         qqplot[1][i] = quantile(dist , empirical_cdf[1][i]);
@@ -2799,7 +2799,7 @@ double** ContinuousParametric::q_q_plot_computation(int nb_value ,
     }
 
     else {
-      gamma_distribution<double> dist(shape , scale);
+      boost::math::gamma_distribution<double> dist(shape , scale);
 
       i = 0;
       while (empirical_cdf[1][i] <= zero_probability) {
@@ -2851,7 +2851,7 @@ double ContinuousParametric::sup_norm_distance_computation(ContinuousParametric 
     }
 
     else {
-      gamma_distribution<double> dist1(shape , scale) , dist2(dist.shape , dist.scale);
+      boost::math::gamma_distribution<double> dist1(shape , scale) , dist2(dist.shape , dist.scale);
 
       step = MIN(quantile(complement(dist1 , GAMMA_TAIL)) , quantile(complement(dist2 , GAMMA_TAIL))) / GAMMA_NB_STEP;
       distance = 0.;
@@ -3218,7 +3218,7 @@ double ContinuousParametric::sup_norm_distance_computation(ContinuousParametric 
     }
 
     else {
-      gamma_distribution<double> dist1(shape , scale) , dist2(dist.shape , dist.scale);
+      boost::math::gamma_distribution<double> dist1(shape , scale) , dist2(dist.shape , dist.scale);
 
       step = MIN(quantile(complement(dist1 , GAMMA_TAIL)) , quantile(complement(dist2 , GAMMA_TAIL))) / GAMMA_NB_STEP;
       value = 0.;
@@ -3300,7 +3300,7 @@ double ContinuousParametric::simulation()
     }
 
     else {
-      gamma_distribution<double> dist(shape , scale);
+      boost::math::gamma_distribution<double> dist(shape , scale);
 
       value = quantile(dist , limit);
     }
@@ -3419,7 +3419,7 @@ double ContinuousParametric::simulation()
     }
 
     else if (zero_probability < 1.) {
-      gamma_distribution<double> dist(shape , scale);
+      boost::math::gamma_distribution<double> dist(shape , scale);
 
       value = quantile(dist , (limit - zero_probability) / (1. - zero_probability));
     }

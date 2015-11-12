@@ -427,7 +427,7 @@ ostream& ContinuousParametricProcess::ascii_print(ostream &os , Histogram **obse
   long old_adjust;
   double step , value , min_value , max_value , mass , *observation_cumul ,
          **frequency , **cumul;
-  gamma_distribution<double> **gamma_dist;
+  boost::math::gamma_distribution<double> **gamma_dist;
   normal **gaussian_dist;
 
 
@@ -486,12 +486,12 @@ ostream& ContinuousParametricProcess::ascii_print(ostream &os , Histogram **obse
 
     if ((ident == GAMMA) || (ident == ZERO_INFLATED_GAMMA)) {
       min_value = 0.;
-      gamma_dist = new gamma_distribution<double>*[nb_state];
+      gamma_dist = new boost::math::gamma_distribution<double>*[nb_state];
 
       for (i = 0;i < nb_state;i++) {
         if (((ident == GAMMA) && (observation[i]->shape > 0.)) ||
             ((ident == ZERO_INFLATED_GAMMA) && (observation[i]->zero_probability < 1.))) {
-          gamma_dist[i] = new gamma_distribution<double>(observation[i]->shape , observation[i]->scale);
+          gamma_dist[i] = new boost::math::gamma_distribution<double>(observation[i]->shape , observation[i]->scale);
 
           value = quantile(complement(*gamma_dist[i] , GAMMA_TAIL));
           while (max_value < value) {
@@ -1313,7 +1313,7 @@ ostream& ContinuousParametricProcess::spreadsheet_print(ostream &os , Histogram 
   int nb_step , nb_element;
   double step , value , min_value , max_value , mass , *observation_cumul ,
          **frequency , **cumul;
-  gamma_distribution<double> **gamma_dist;
+  boost::math::gamma_distribution<double> **gamma_dist;
   normal **gaussian_dist;
 
 
@@ -1373,12 +1373,12 @@ ostream& ContinuousParametricProcess::spreadsheet_print(ostream &os , Histogram 
 
     if ((ident == GAMMA) || (ident == ZERO_INFLATED_GAMMA)) {
       min_value = 0.;
-      gamma_dist = new gamma_distribution<double>*[nb_state];
+      gamma_dist = new boost::math::gamma_distribution<double>*[nb_state];
 
       for (i = 0;i < nb_state;i++) {
         if (((ident == GAMMA) && (observation[i]->shape > 0.)) ||
             ((ident == ZERO_INFLATED_GAMMA) && (observation[i]->zero_probability < 1.))) {
-          gamma_dist[i] = new gamma_distribution<double>(observation[i]->shape , observation[i]->scale);
+          gamma_dist[i] = new boost::math::gamma_distribution<double>(observation[i]->shape , observation[i]->scale);
 
           value = quantile(complement(*gamma_dist[i] , GAMMA_TAIL));
           while (max_value < value) {
@@ -1678,12 +1678,12 @@ ostream& ContinuousParametricProcess::spreadsheet_print(ostream &os , Histogram 
     switch (ident) {
 
     case GAMMA : {
-      gamma_dist = new gamma_distribution<double>*[nb_state];
+      gamma_dist = new boost::math::gamma_distribution<double>*[nb_state];
       max_value = 0.;
 
       for (i = 0;i < nb_state;i++) {
         if (observation[i]->shape > 0.) {
-          gamma_dist[i] = new gamma_distribution<double>(observation[i]->shape , observation[i]->scale);
+          gamma_dist[i] = new boost::math::gamma_distribution<double>(observation[i]->shape , observation[i]->scale);
 
           value = quantile(complement(*gamma_dist[i] , GAMMA_TAIL));
           if (value > max_value) {
@@ -1719,12 +1719,12 @@ ostream& ContinuousParametricProcess::spreadsheet_print(ostream &os , Histogram 
     }
 
     case ZERO_INFLATED_GAMMA : {
-      gamma_dist = new gamma_distribution<double>*[nb_state];
+      gamma_dist = new boost::math::gamma_distribution<double>*[nb_state];
       max_value = 0.;
 
       for (i = 0;i < nb_state;i++) {
         if (observation[i]->zero_probability < 1.) {
-          gamma_dist[i] = new gamma_distribution<double>(observation[i]->shape , observation[i]->scale);
+          gamma_dist[i] = new boost::math::gamma_distribution<double>(observation[i]->shape , observation[i]->scale);
 
           value = quantile(complement(*gamma_dist[i] , GAMMA_TAIL));
           if (value > max_value) {
@@ -2283,7 +2283,7 @@ bool ContinuousParametricProcess::plot_print(const char *prefix , const char *ti
   int min_interval , nb_step , dist_index;
   double value , min_value , max_value , step , buff , max , *scale , *dist_max ,
          **cumul , **frequency , **qqplot;
-  gamma_distribution<double> **gamma_dist;
+  boost::math::gamma_distribution<double> **gamma_dist;
   normal **gaussian_dist;
   ostringstream data_file_name[NB_STATE + 4];
 
@@ -2326,14 +2326,14 @@ bool ContinuousParametricProcess::plot_print(const char *prefix , const char *ti
     switch (ident) {
 
     case GAMMA : {
-      gamma_dist = new gamma_distribution<double>*[nb_state];
+      gamma_dist = new boost::math::gamma_distribution<double>*[nb_state];
 
       min_value = 0.;
       max_value = 0.;
 
       for (i = 0;i < nb_state;i++) {
         if (observation[i]->shape > 0.) {
-          gamma_dist[i] = new gamma_distribution<double>(observation[i]->shape , observation[i]->scale);
+          gamma_dist[i] = new boost::math::gamma_distribution<double>(observation[i]->shape , observation[i]->scale);
 
           value = quantile(complement(*gamma_dist[i] , GAMMA_TAIL));
           if (value > max_value) {
@@ -2411,14 +2411,14 @@ bool ContinuousParametricProcess::plot_print(const char *prefix , const char *ti
     }
 
     case ZERO_INFLATED_GAMMA : {
-      gamma_dist = new gamma_distribution<double>*[nb_state];
+      gamma_dist = new boost::math::gamma_distribution<double>*[nb_state];
 
       min_value = 0.;
       max_value = 0.;
 
       for (i = 0;i < nb_state;i++) {
         if (observation[i]->zero_probability < 1.) {
-          gamma_dist[i] = new gamma_distribution<double>(observation[i]->shape , observation[i]->scale);
+          gamma_dist[i] = new boost::math::gamma_distribution<double>(observation[i]->shape , observation[i]->scale);
 
           value = quantile(complement(*gamma_dist[i] , GAMMA_TAIL));
           if (value > max_value) {
@@ -3194,7 +3194,7 @@ void ContinuousParametricProcess::plotable_write(MultiPlotSet &plot , int &index
   int min_interval , nb_step;
   double value , min_value , max_value , step , buff , scale , max , *dist_max ,
          **cumul , **frequency , **qqplot;
-  gamma_distribution<double> **gamma_dist;
+  boost::math::gamma_distribution<double> **gamma_dist;
   normal **gaussian_dist;
   ostringstream title , legend;
 
@@ -3225,14 +3225,14 @@ void ContinuousParametricProcess::plotable_write(MultiPlotSet &plot , int &index
   switch (ident) {
 
   case GAMMA : {
-    gamma_dist = new gamma_distribution<double>*[nb_state];
+    gamma_dist = new boost::math::gamma_distribution<double>*[nb_state];
 
     min_value = 0.;
     max_value = 0.;
 
     for (i = 0;i < nb_state;i++) {
       if (observation[i]->shape > 0.) {
-        gamma_dist[i] = new gamma_distribution<double>(observation[i]->shape , observation[i]->scale);
+        gamma_dist[i] = new boost::math::gamma_distribution<double>(observation[i]->shape , observation[i]->scale);
 
         value = quantile(complement(*gamma_dist[i] , GAMMA_TAIL));
         if (value > max_value) {
@@ -3310,14 +3310,14 @@ void ContinuousParametricProcess::plotable_write(MultiPlotSet &plot , int &index
   }
 
   case ZERO_INFLATED_GAMMA : {
-    gamma_dist = new gamma_distribution<double>*[nb_state];
+    gamma_dist = new boost::math::gamma_distribution<double>*[nb_state];
 
     min_value = 0.;
     max_value = 0.;
 
     for (i = 0;i < nb_state;i++) {
       if (observation[i]->zero_probability < 1.) {
-        gamma_dist[i] = new gamma_distribution<double>(observation[i]->shape , observation[i]->scale);
+        gamma_dist[i] = new boost::math::gamma_distribution<double>(observation[i]->shape , observation[i]->scale);
 
         value = quantile(complement(*gamma_dist[i] , GAMMA_TAIL));
         if (value > max_value) {
