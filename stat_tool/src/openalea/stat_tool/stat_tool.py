@@ -1,1 +1,2 @@
-from openalea._stat_tool.
+from ._stat_tool import stat_tool
+import .plot
