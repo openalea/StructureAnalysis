@@ -21,14 +21,7 @@ void _stat_tool_convolution_data()
             .def(boost::python::init<  >())
             .def(boost::python::init< class ::stat_tool::FrequencyDistribution const &, int >())
             .def(boost::python::init< class ::stat_tool::Convolution const & >())
-            .def(boost::python::init< class ::stat_tool::ConvolutionData const &, bool >())
-            .def("extract", method_pointer_9095edf2ab535d02b6e5dedd623f48d2, boost::python::return_value_policy< boost::python::reference_existing_object >())
-            .def("line_write", method_pointer_6e176257ff1b5b25b13e5687f5e33eb6, boost::python::return_internal_reference<>())
-            .def("ascii_write", method_pointer_b5d0c3e54b7453f9b5bc8d3b17b2e4d4, boost::python::return_internal_reference<>())
-            .def("get_plotable", method_pointer_8984eb2a328d5f3a9c281da0a31a0b41, boost::python::return_value_policy< boost::python::reference_existing_object >())
-            .def("get_convolution", method_pointer_3d736d0b87aa50ea9a7b6f951a72aee0, boost::python::return_value_policy< boost::python::reference_existing_object >())
-            .def("get_nb_distribution", method_pointer_88f77df9758959e5af42130b5e24340a)
-            .def("get_frequency_distribution", method_pointer_407c3928cc115eb7b55d1ae35f3c8cc9, boost::python::return_value_policy< boost::python::reference_existing_object >());
+            .def(boost::python::init< class ::stat_tool::ConvolutionData const &, bool >())            .def("extract", method_pointer_9095edf2ab535d02b6e5dedd623f48d2, boost::python::return_value_policy< boost::python::reference_existing_object >())            .def("line_write", method_pointer_6e176257ff1b5b25b13e5687f5e33eb6, boost::python::return_internal_reference<>())            .def("ascii_write", method_pointer_b5d0c3e54b7453f9b5bc8d3b17b2e4d4, boost::python::return_internal_reference<>())            .def("get_plotable", method_pointer_8984eb2a328d5f3a9c281da0a31a0b41, boost::python::return_value_policy< boost::python::reference_existing_object >())            .def("get_convolution", method_pointer_3d736d0b87aa50ea9a7b6f951a72aee0, boost::python::return_value_policy< boost::python::reference_existing_object >())            .def("get_nb_distribution", method_pointer_88f77df9758959e5af42130b5e24340a)            .def("get_frequency_distribution", method_pointer_407c3928cc115eb7b55d1ae35f3c8cc9, boost::python::return_value_policy< boost::python::reference_existing_object >());
         boost::python::implicitly_convertible< std::shared_ptr< class ::stat_tool::ConvolutionData >, std::shared_ptr< class ::stat_tool::StatInterface > >();
         boost::python::implicitly_convertible< std::shared_ptr< class ::stat_tool::ConvolutionData >, std::shared_ptr< class ::stat_tool::FrequencyDistribution > >();
 }

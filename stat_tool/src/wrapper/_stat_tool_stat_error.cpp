@@ -12,9 +12,5 @@ void _stat_tool_stat_error()
         int (::stat_tool::StatError::*method_pointer_428a45e45b335e5ca2005b2914d07101)() const = &::stat_tool::StatError::get_nb_error;
         int (::stat_tool::StatError::*method_pointer_9007bd748c2c5e138d772eb3fd7ec146)() const = &::stat_tool::StatError::get_max_nb_error;
         boost::python::class_< class ::stat_tool::StatError, std::shared_ptr< class ::stat_tool::StatError > >("StatError", boost::python::no_init)
-            .def(boost::python::init< int >())
-            .def("ascii_write", method_pointer_9a50c46e29225e6482a864d8c627313f, boost::python::return_internal_reference<>())
-            .def("init", method_pointer_6aca1e4328215b179690c13e4babbc77)
-            .def("get_nb_error", method_pointer_428a45e45b335e5ca2005b2914d07101)
-            .def("get_max_nb_error", method_pointer_9007bd748c2c5e138d772eb3fd7ec146);
+            .def(boost::python::init< int >())            .def("ascii_write", method_pointer_9a50c46e29225e6482a864d8c627313f, boost::python::return_internal_reference<>())            .def("init", method_pointer_6aca1e4328215b179690c13e4babbc77)            .def("get_nb_error", method_pointer_428a45e45b335e5ca2005b2914d07101)            .def("get_max_nb_error", method_pointer_9007bd748c2c5e138d772eb3fd7ec146);
 }

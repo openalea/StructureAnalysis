@@ -14,7 +14,7 @@ flags = ['-x', 'c++', '-g', '-std=c++11', '-stdlib=libstdc++',
 asg = autowig.AbstractSemanticGraph()
 autowig.front_end.plugin = 'pyclanglite'
 autowig.front_end(asg, headers, flags=flags, silent=True,
-                  force_overload=True, bootstrap=3, cache=rootdir + '/.AutoWIG')
+                  force_overload=True, bootstrap=3, cache=rootdir + '/.AutoWIG', force=True)
 
 autowig.middle_end.plugin = 'default'
 autowig.middle_end(asg)
@@ -41,14 +41,14 @@ autowig.back_end(asg,
 autowig.back_end.plugin = 'boost_python:module'
 autowig.back_end(asg,
                  filename = rootdir + '/stat_tool/src/wrapper/__stat_tool.cpp',
-                 package = 'stat_tool')
+                 package = 'openalea.stat_tool')
 #autowig.back_end(asg,
 #                 filename = rootdir + '/misc/src/wrapper/__misc.cpp',
 #                 package = 'structure_analysis')
 
 autowig.back_end.plugin = 'boost_python:import'
 autowig.back_end(asg,
-                 filename = rootdir + '/stat_tool/src/stat_tool/_stat_tool.py',
+                 filename = rootdir + '/stat_tool/src/openalea/stat_tool/_stat_tool.py',
                  module = rootdir + '/stat_tool/src/wrapper/__stat_tool.cpp')
 #autowig.back_end(asg,
 #                 filename = rootdir + '/misc/src/structure_analysos/_misc.py',
@@ -59,4 +59,4 @@ autowig.back_end(asg,
 
 autowig.back_end.plugin = 'on_disk'
 autowig.back_end(asg,
-                 pattern = rootdir + '/(stat_tool|misc)/src/(wrapper|stat_tool|structure_analysis)/.*')
+                 pattern = rootdir + '/(stat_tool|misc)/src/(wrapper|openalea)/.*')

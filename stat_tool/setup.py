@@ -52,11 +52,11 @@ if __name__ == '__main__':
           create_namespaces=True,
 
           # Packages
-          packages=['openalea', 
-                    'openalea.stat_tool', 
+          packages=['openalea',
+                    'openalea.stat_tool',
                     ],
 
-          package_dir={ "openalea.stat_tool" : pj("src","stat_tool"), '':'src'  },
+          package_dir={ "openalea.stat_tool" : pj("src", "openalea","stat_tool"), '':'src'  },
           share_dirs = { 'share' : 'share' },
 
 

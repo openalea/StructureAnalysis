@@ -24,17 +24,6 @@ void _stat_tool_vector_distance()
         int (::stat_tool::VectorDistance::*method_pointer_97cf13043c2f5e40babb6f83fc923071)(int) const = &::stat_tool::VectorDistance::get_period;
         boost::python::class_< class ::stat_tool::VectorDistance, std::shared_ptr< class ::stat_tool::VectorDistance >, boost::python::bases< class ::stat_tool::StatInterface > >("VectorDistance", boost::python::no_init)
             .def(boost::python::init<  >())
-            .def(boost::python::init< class ::stat_tool::VectorDistance const & >())
-            .def("line_write", method_pointer_699849f5fc71536ca383aaf5b4f58d9a, boost::python::return_internal_reference<>())
-            .def("ascii_write", method_pointer_662b3898a6135f6ab572baeeec3fca01, boost::python::return_internal_reference<>())
-            .def("dispersion_update", method_pointer_c48cb58c82df5fd0845f4da056f382ed)
-            .def("get_nb_variable", method_pointer_f522981ef750530a886bbf3e448c387b)
-            .def("get_distance_type", method_pointer_8366a2e9ef805d4e98c43bcf3593ddfa)
-            .def("get_var_type", method_pointer_74ca394b8dd25ed5a5e109512c3edd88)
-            .def("get_weight", method_pointer_4a8076132c285fa6800f866ed97a0fd3)
-            .def("get_dispersion", method_pointer_99c788dc725954bbba868c6f3b38ad3a)
-            .def("get_nb_value", method_pointer_a1b01637456f5084b89fff4122e32f10)
-            .def("get_category_distance", method_pointer_610596ad20295a5cac0e85a6352d7c9e)
-            .def("get_period", method_pointer_97cf13043c2f5e40babb6f83fc923071);
+            .def(boost::python::init< class ::stat_tool::VectorDistance const & >())            .def("line_write", method_pointer_699849f5fc71536ca383aaf5b4f58d9a, boost::python::return_internal_reference<>())            .def("ascii_write", method_pointer_662b3898a6135f6ab572baeeec3fca01, boost::python::return_internal_reference<>())            .def("dispersion_update", method_pointer_c48cb58c82df5fd0845f4da056f382ed)            .def("get_nb_variable", method_pointer_f522981ef750530a886bbf3e448c387b)            .def("get_distance_type", method_pointer_8366a2e9ef805d4e98c43bcf3593ddfa)            .def("get_var_type", method_pointer_74ca394b8dd25ed5a5e109512c3edd88)            .def("get_weight", method_pointer_4a8076132c285fa6800f866ed97a0fd3)            .def("get_dispersion", method_pointer_99c788dc725954bbba868c6f3b38ad3a)            .def("get_nb_value", method_pointer_a1b01637456f5084b89fff4122e32f10)            .def("get_category_distance", method_pointer_610596ad20295a5cac0e85a6352d7c9e)            .def("get_period", method_pointer_97cf13043c2f5e40babb6f83fc923071);
         boost::python::implicitly_convertible< std::shared_ptr< class ::stat_tool::VectorDistance >, std::shared_ptr< class ::stat_tool::StatInterface > >();
 }

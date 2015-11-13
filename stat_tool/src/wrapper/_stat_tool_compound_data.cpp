@@ -21,14 +21,7 @@ void _stat_tool_compound_data()
             .def(boost::python::init<  >())
             .def(boost::python::init< class ::stat_tool::FrequencyDistribution const &, class ::stat_tool::Compound const & >())
             .def(boost::python::init< class ::stat_tool::Compound const & >())
-            .def(boost::python::init< class ::stat_tool::CompoundData const &, bool >())
-            .def("extract", method_pointer_f030d5b9a4fd569c81737fcc1a40e44d, boost::python::return_value_policy< boost::python::reference_existing_object >())
-            .def("line_write", method_pointer_aae4dd2c65b95718aff5e2c13ec6d6d9, boost::python::return_internal_reference<>())
-            .def("ascii_write", method_pointer_c825b567e8235d5792e38557d6f07aab, boost::python::return_internal_reference<>())
-            .def("get_plotable", method_pointer_bf5e91df53ae5989ba7aea918228d762, boost::python::return_value_policy< boost::python::reference_existing_object >())
-            .def("get_compound", method_pointer_b4247691758657039c75f6e8a5005fc5, boost::python::return_value_policy< boost::python::reference_existing_object >())
-            .def("get_sum_frequency_distribution", method_pointer_71f25a4d9a3d5dd48e19ef196515a723, boost::python::return_value_policy< boost::python::reference_existing_object >())
-            .def("get_frequency_distribution", method_pointer_7eb4fdc1dfe05a79952798f599446ac0, boost::python::return_value_policy< boost::python::reference_existing_object >());
+            .def(boost::python::init< class ::stat_tool::CompoundData const &, bool >())            .def("extract", method_pointer_f030d5b9a4fd569c81737fcc1a40e44d, boost::python::return_value_policy< boost::python::reference_existing_object >())            .def("line_write", method_pointer_aae4dd2c65b95718aff5e2c13ec6d6d9, boost::python::return_internal_reference<>())            .def("ascii_write", method_pointer_c825b567e8235d5792e38557d6f07aab, boost::python::return_internal_reference<>())            .def("get_plotable", method_pointer_bf5e91df53ae5989ba7aea918228d762, boost::python::return_value_policy< boost::python::reference_existing_object >())            .def("get_compound", method_pointer_b4247691758657039c75f6e8a5005fc5, boost::python::return_value_policy< boost::python::reference_existing_object >())            .def("get_sum_frequency_distribution", method_pointer_71f25a4d9a3d5dd48e19ef196515a723, boost::python::return_value_policy< boost::python::reference_existing_object >())            .def("get_frequency_distribution", method_pointer_7eb4fdc1dfe05a79952798f599446ac0, boost::python::return_value_policy< boost::python::reference_existing_object >());
         boost::python::implicitly_convertible< std::shared_ptr< class ::stat_tool::CompoundData >, std::shared_ptr< class ::stat_tool::StatInterface > >();
         boost::python::implicitly_convertible< std::shared_ptr< class ::stat_tool::CompoundData >, std::shared_ptr< class ::stat_tool::FrequencyDistribution > >();
 }
