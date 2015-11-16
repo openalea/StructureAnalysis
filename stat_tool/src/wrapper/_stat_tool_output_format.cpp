@@ -7,9 +7,5 @@ void _stat_tool_output_format()
         boost::python::object stat_tool_0cdd446515295e8e8373e99f328c3748_module(boost::python::handle<  >(boost::python::borrowed(PyImport_AddModule(stat_tool_0cdd446515295e8e8373e99f328c3748_name.c_str()))));
         boost::python::scope().attr("stat_tool") = stat_tool_0cdd446515295e8e8373e99f328c3748_module;
         boost::python::scope stat_tool_0cdd446515295e8e8373e99f328c3748_scope = stat_tool_0cdd446515295e8e8373e99f328c3748_module;
-        boost::python::enum_< enum ::stat_tool::output_format >("output_format")
-            .value("ASCII", ::stat_tool::output_format::ASCII)
-            .value("SPREADSHEET", ::stat_tool::output_format::SPREADSHEET)
-            .value("GNUPLOT", ::stat_tool::output_format::GNUPLOT)
-            .value("PLOT", ::stat_tool::output_format::PLOT);
+        boost::python::enum_< enum ::stat_tool::output_format >("output_format");
 }

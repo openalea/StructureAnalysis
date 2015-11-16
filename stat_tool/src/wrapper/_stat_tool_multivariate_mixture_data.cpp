@@ -26,6 +26,16 @@ void _stat_tool_multivariate_mixture_data()
             .def(boost::python::init<  >())
             .def(boost::python::init< class ::stat_tool::Vectors const &, int >())
             .def(boost::python::init< class ::stat_tool::MultivariateMixture const & >())
-            .def(boost::python::init< class ::stat_tool::MultivariateMixtureData const &, bool >())            .def("extract", method_pointer_e8cc8ae3b7fe5d778fb576c2ac3e1f86, boost::python::return_value_policy< boost::python::reference_existing_object >())            .def("extract_marginal", method_pointer_a06334f0426158cda4050e6a9c721b28, boost::python::return_value_policy< boost::python::reference_existing_object >())            .def("line_write", method_pointer_3ba05a1b1fff56c0962c44a0e39e9ba0, boost::python::return_internal_reference<>())            .def("ascii_write", method_pointer_09f0b5dba21d506da0167f58202e8209, boost::python::return_internal_reference<>())            .def("get_plotable", method_pointer_3c3e9ee0de7a561aa0cf233d65ba1b99, boost::python::return_value_policy< boost::python::reference_existing_object >())            .def("information_computation", method_pointer_1dd7cda444d35238a9a2409de29f093f)            .def("get_mixture", method_pointer_768dbcc427815947a358a6288177ea30, boost::python::return_value_policy< boost::python::reference_existing_object >())            .def("get_nb_component", method_pointer_60d122f2172454d990bab9f59ac9d2f7)            .def("get_weight", method_pointer_628611c055045c15aa3facd568cdccdd, boost::python::return_value_policy< boost::python::reference_existing_object >())            .def("get_component", method_pointer_9d73537d6e6655ca831f71b0021af566, boost::python::return_value_policy< boost::python::reference_existing_object >());
+            .def(boost::python::init< class ::stat_tool::MultivariateMixtureData const &, bool >())
+            .def("extract", method_pointer_e8cc8ae3b7fe5d778fb576c2ac3e1f86, boost::python::return_value_policy< boost::python::reference_existing_object >())
+            .def("extract_marginal", method_pointer_a06334f0426158cda4050e6a9c721b28, boost::python::return_value_policy< boost::python::reference_existing_object >())
+            .def("line_write", method_pointer_3ba05a1b1fff56c0962c44a0e39e9ba0, boost::python::return_internal_reference<>())
+            .def("ascii_write", method_pointer_09f0b5dba21d506da0167f58202e8209, boost::python::return_internal_reference<>())
+            .def("get_plotable", method_pointer_3c3e9ee0de7a561aa0cf233d65ba1b99, boost::python::return_value_policy< boost::python::reference_existing_object >())
+            .def("information_computation", method_pointer_1dd7cda444d35238a9a2409de29f093f)
+            .def("get_mixture", method_pointer_768dbcc427815947a358a6288177ea30, boost::python::return_value_policy< boost::python::reference_existing_object >())
+            .def("get_nb_component", method_pointer_60d122f2172454d990bab9f59ac9d2f7)
+            .def("get_weight", method_pointer_628611c055045c15aa3facd568cdccdd, boost::python::return_value_policy< boost::python::reference_existing_object >())
+            .def("get_component", method_pointer_9d73537d6e6655ca831f71b0021af566, boost::python::return_value_policy< boost::python::reference_existing_object >());
         boost::python::implicitly_convertible< std::shared_ptr< class ::stat_tool::MultivariateMixtureData >, std::shared_ptr< class ::stat_tool::Vectors > >();
 }

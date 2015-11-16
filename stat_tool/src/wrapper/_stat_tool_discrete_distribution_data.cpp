@@ -22,7 +22,12 @@ void _stat_tool_discrete_distribution_data()
             .def(boost::python::init< class ::stat_tool::FrequencyDistribution const &, enum ::stat_tool::frequency_distribution_transformation, int, enum ::stat_tool::rounding >())
             .def(boost::python::init< class ::stat_tool::FrequencyDistribution const &, class ::stat_tool::Distribution const * >())
             .def(boost::python::init< class ::stat_tool::FrequencyDistribution const &, class ::stat_tool::DiscreteParametric const * >())
-            .def(boost::python::init< class ::stat_tool::DiscreteDistributionData const &, bool >())            .def("extract_model", method_pointer_09f4b4034c225520bfc427bc9432f05a, boost::python::return_value_policy< boost::python::reference_existing_object >())            .def("line_write", method_pointer_215ec6ce42c4555896b7dba2d4cbb279, boost::python::return_internal_reference<>())            .def("ascii_write", method_pointer_3c58cd08063e56a28914d1f1fe842bb0, boost::python::return_internal_reference<>())            .def("get_plotable", method_pointer_3f4f4826dfb5525f8f9d15225dfdf431, boost::python::return_value_policy< boost::python::reference_existing_object >())            .def("get_distribution", method_pointer_3dc769f178ff5cacaf81003605ec49dc, boost::python::return_value_policy< boost::python::reference_existing_object >());
+            .def(boost::python::init< class ::stat_tool::DiscreteDistributionData const &, bool >())
+            .def("extract_model", method_pointer_09f4b4034c225520bfc427bc9432f05a, boost::python::return_value_policy< boost::python::reference_existing_object >())
+            .def("line_write", method_pointer_215ec6ce42c4555896b7dba2d4cbb279, boost::python::return_internal_reference<>())
+            .def("ascii_write", method_pointer_3c58cd08063e56a28914d1f1fe842bb0, boost::python::return_internal_reference<>())
+            .def("get_plotable", method_pointer_3f4f4826dfb5525f8f9d15225dfdf431, boost::python::return_value_policy< boost::python::reference_existing_object >())
+            .def("get_distribution", method_pointer_3dc769f178ff5cacaf81003605ec49dc, boost::python::return_value_policy< boost::python::reference_existing_object >());
         boost::python::implicitly_convertible< std::shared_ptr< class ::stat_tool::DiscreteDistributionData >, std::shared_ptr< class ::stat_tool::StatInterface > >();
         boost::python::implicitly_convertible< std::shared_ptr< class ::stat_tool::DiscreteDistributionData >, std::shared_ptr< class ::stat_tool::FrequencyDistribution > >();
 }

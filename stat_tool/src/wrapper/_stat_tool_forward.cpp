@@ -14,6 +14,7 @@ void _stat_tool_forward()
         boost::python::class_< class ::stat_tool::Forward, std::shared_ptr< class ::stat_tool::Forward >, boost::python::bases< class ::stat_tool::DiscreteParametric > >("Forward", boost::python::no_init)
             .def(boost::python::init< int, enum ::stat_tool::discrete_parametric, int, int, double, double >())
             .def(boost::python::init< class ::stat_tool::DiscreteParametric const &, int >())
-            .def(boost::python::init< class ::stat_tool::Forward const &, int >())            .def("computation", method_pointer_bfc33d5dcf2453368e8c72f45ac32592);
+            .def(boost::python::init< class ::stat_tool::Forward const &, int >())
+            .def("computation", method_pointer_bfc33d5dcf2453368e8c72f45ac32592);
         boost::python::implicitly_convertible< std::shared_ptr< class ::stat_tool::Forward >, std::shared_ptr< class ::stat_tool::DiscreteParametric > >();
 }

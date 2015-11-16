@@ -23,7 +23,16 @@ void _stat_tool_compound()
             .def(boost::python::init<  >())
             .def(boost::python::init< class ::stat_tool::DiscreteParametric const &, class ::stat_tool::DiscreteParametric const &, double >())
             .def(boost::python::init< class ::stat_tool::DiscreteParametric const &, class ::stat_tool::DiscreteParametric const &, enum ::stat_tool::compound_distribution >())
-            .def(boost::python::init< class ::stat_tool::Compound const &, bool >())            .def("extract_data", method_pointer_e2e33880d5e45709a3165f902811fef7, boost::python::return_value_policy< boost::python::reference_existing_object >())            .def("line_write", method_pointer_3a32c16c3bdf5766805dcf3918674435, boost::python::return_internal_reference<>())            .def("ascii_write", method_pointer_59f5ffd247e559898b7a0a93843c0938, boost::python::return_internal_reference<>())            .def("get_plotable", method_pointer_a3ac1a7cbe1950dca5ef638297443e8c, boost::python::return_value_policy< boost::python::reference_existing_object >())            .def("computation", method_pointer_40b9d2106f415ac190bab7e1b8715f95)            .def("simulation", method_pointer_b0550c167c9d5c97a464129d6e723e37, boost::python::return_value_policy< boost::python::reference_existing_object >())            .def("get_compound_data", method_pointer_b25b77fef5d259b79275ea462cfa8cea, boost::python::return_value_policy< boost::python::reference_existing_object >())            .def("get_sum_distribution", method_pointer_9c6954c5fb705e09ad736fb70b9ed568, boost::python::return_value_policy< boost::python::reference_existing_object >())            .def("get_distribution", method_pointer_aef6ebd1e1e252a491bf74f73217bdf4, boost::python::return_value_policy< boost::python::reference_existing_object >());
+            .def(boost::python::init< class ::stat_tool::Compound const &, bool >())
+            .def("extract_data", method_pointer_e2e33880d5e45709a3165f902811fef7, boost::python::return_value_policy< boost::python::reference_existing_object >())
+            .def("line_write", method_pointer_3a32c16c3bdf5766805dcf3918674435, boost::python::return_internal_reference<>())
+            .def("ascii_write", method_pointer_59f5ffd247e559898b7a0a93843c0938, boost::python::return_internal_reference<>())
+            .def("get_plotable", method_pointer_a3ac1a7cbe1950dca5ef638297443e8c, boost::python::return_value_policy< boost::python::reference_existing_object >())
+            .def("computation", method_pointer_40b9d2106f415ac190bab7e1b8715f95)
+            .def("simulation", method_pointer_b0550c167c9d5c97a464129d6e723e37, boost::python::return_value_policy< boost::python::reference_existing_object >())
+            .def("get_compound_data", method_pointer_b25b77fef5d259b79275ea462cfa8cea, boost::python::return_value_policy< boost::python::reference_existing_object >())
+            .def("get_sum_distribution", method_pointer_9c6954c5fb705e09ad736fb70b9ed568, boost::python::return_value_policy< boost::python::reference_existing_object >())
+            .def("get_distribution", method_pointer_aef6ebd1e1e252a491bf74f73217bdf4, boost::python::return_value_policy< boost::python::reference_existing_object >());
         boost::python::implicitly_convertible< std::shared_ptr< class ::stat_tool::Compound >, std::shared_ptr< class ::stat_tool::StatInterface > >();
         boost::python::implicitly_convertible< std::shared_ptr< class ::stat_tool::Compound >, std::shared_ptr< class ::stat_tool::Distribution > >();
 }

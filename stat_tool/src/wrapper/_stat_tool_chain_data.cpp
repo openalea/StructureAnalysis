@@ -12,6 +12,8 @@ void _stat_tool_chain_data()
         void (::stat_tool::ChainData::*method_pointer_576a1605ed7f5cf090c80db6f04828bf)(class ::stat_tool::Chain &) const = &::stat_tool::ChainData::estimation;
         boost::python::class_< class ::stat_tool::ChainData, std::shared_ptr< class ::stat_tool::ChainData >, boost::python::bases< class ::stat_tool::ChainReestimation<int> > >("ChainData", boost::python::no_init)
             .def(boost::python::init< enum ::stat_tool::process_type, int, int, bool >())
-            .def(boost::python::init< class ::stat_tool::ChainData const & >())            .def("nb_parameter_computation", method_pointer_4f13feefcea2566cb8fdaa172ed5ab53)            .def("estimation", method_pointer_576a1605ed7f5cf090c80db6f04828bf);
+            .def(boost::python::init< class ::stat_tool::ChainData const & >())
+            .def("nb_parameter_computation", method_pointer_4f13feefcea2566cb8fdaa172ed5ab53)
+            .def("estimation", method_pointer_576a1605ed7f5cf090c80db6f04828bf);
         boost::python::implicitly_convertible< std::shared_ptr< class ::stat_tool::ChainData >, std::shared_ptr< class ::stat_tool::ChainReestimation<int> > >();
 }

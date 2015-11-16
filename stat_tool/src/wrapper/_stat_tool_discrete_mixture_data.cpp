@@ -24,7 +24,16 @@ void _stat_tool_discrete_mixture_data()
             .def(boost::python::init< class ::stat_tool::FrequencyDistribution const &, int >())
             .def(boost::python::init< class ::stat_tool::FrequencyDistribution const &, class ::stat_tool::DiscreteMixture const * >())
             .def(boost::python::init< class ::stat_tool::DiscreteMixture const & >())
-            .def(boost::python::init< class ::stat_tool::DiscreteMixtureData const &, bool >())            .def("extract", method_pointer_7d5bf00793c45f8ca8afc677d8825fd7, boost::python::return_value_policy< boost::python::reference_existing_object >())            .def("line_write", method_pointer_278e115facfc5fcdb0ed841028916a29, boost::python::return_internal_reference<>())            .def("ascii_write", method_pointer_6568980242ba57f896ece1ac19e17be3, boost::python::return_internal_reference<>())            .def("get_plotable", method_pointer_2606379fda6757629e26d746dcbe68a3, boost::python::return_value_policy< boost::python::reference_existing_object >())            .def("information_computation", method_pointer_4bb3b235714c596f88fa6dbda61c3583)            .def("get_mixture", method_pointer_87c6ed1036fe58e8a09e4a6b3dea1ac9, boost::python::return_value_policy< boost::python::reference_existing_object >())            .def("get_nb_component", method_pointer_ccc8e0ad33b95412bd8532b25f0424ff)            .def("get_weight", method_pointer_709feca86c75592499578eefef265ea6, boost::python::return_value_policy< boost::python::reference_existing_object >())            .def("get_component", method_pointer_bc26366684395f8c85296fb6178556d0, boost::python::return_value_policy< boost::python::reference_existing_object >());
+            .def(boost::python::init< class ::stat_tool::DiscreteMixtureData const &, bool >())
+            .def("extract", method_pointer_7d5bf00793c45f8ca8afc677d8825fd7, boost::python::return_value_policy< boost::python::reference_existing_object >())
+            .def("line_write", method_pointer_278e115facfc5fcdb0ed841028916a29, boost::python::return_internal_reference<>())
+            .def("ascii_write", method_pointer_6568980242ba57f896ece1ac19e17be3, boost::python::return_internal_reference<>())
+            .def("get_plotable", method_pointer_2606379fda6757629e26d746dcbe68a3, boost::python::return_value_policy< boost::python::reference_existing_object >())
+            .def("information_computation", method_pointer_4bb3b235714c596f88fa6dbda61c3583)
+            .def("get_mixture", method_pointer_87c6ed1036fe58e8a09e4a6b3dea1ac9, boost::python::return_value_policy< boost::python::reference_existing_object >())
+            .def("get_nb_component", method_pointer_ccc8e0ad33b95412bd8532b25f0424ff)
+            .def("get_weight", method_pointer_709feca86c75592499578eefef265ea6, boost::python::return_value_policy< boost::python::reference_existing_object >())
+            .def("get_component", method_pointer_bc26366684395f8c85296fb6178556d0, boost::python::return_value_policy< boost::python::reference_existing_object >());
         boost::python::implicitly_convertible< std::shared_ptr< class ::stat_tool::DiscreteMixtureData >, std::shared_ptr< class ::stat_tool::StatInterface > >();
         boost::python::implicitly_convertible< std::shared_ptr< class ::stat_tool::DiscreteMixtureData >, std::shared_ptr< class ::stat_tool::FrequencyDistribution > >();
 }

@@ -21,7 +21,13 @@ void _stat_tool_regression()
         boost::python::class_< class ::stat_tool::Regression, std::shared_ptr< class ::stat_tool::Regression >, boost::python::bases< class ::stat_tool::StatInterface, class ::stat_tool::RegressionKernel > >("Regression", boost::python::no_init)
             .def(boost::python::init<  >())
             .def(boost::python::init< enum ::stat_tool::parametric_function, int, int, class ::stat_tool::Vectors const & >())
-            .def(boost::python::init< class ::stat_tool::Regression const & >())            .def("line_write", method_pointer_7e49ea513e005309b97ff7428432699a, boost::python::return_internal_reference<>())            .def("ascii_write", method_pointer_0c8162d732e55ea5bd18f0f52471929a, boost::python::return_internal_reference<>())            .def("get_plotable", method_pointer_da647e36334c5ebeb8777dcbe18712ca, boost::python::return_value_policy< boost::python::reference_existing_object >())            .def("get_vectors", method_pointer_f0f8e6da2e0c5362a32a10014a11cb45, boost::python::return_value_policy< boost::python::reference_existing_object >())            .def("get_nb_vector", method_pointer_ceb101baacb35a3aad7ed11d70736b08)            .def("get_residual", method_pointer_dded4e359e5850748ba155cde8aa6856);
+            .def(boost::python::init< class ::stat_tool::Regression const & >())
+            .def("line_write", method_pointer_7e49ea513e005309b97ff7428432699a, boost::python::return_internal_reference<>())
+            .def("ascii_write", method_pointer_0c8162d732e55ea5bd18f0f52471929a, boost::python::return_internal_reference<>())
+            .def("get_plotable", method_pointer_da647e36334c5ebeb8777dcbe18712ca, boost::python::return_value_policy< boost::python::reference_existing_object >())
+            .def("get_vectors", method_pointer_f0f8e6da2e0c5362a32a10014a11cb45, boost::python::return_value_policy< boost::python::reference_existing_object >())
+            .def("get_nb_vector", method_pointer_ceb101baacb35a3aad7ed11d70736b08)
+            .def("get_residual", method_pointer_dded4e359e5850748ba155cde8aa6856);
         boost::python::implicitly_convertible< std::shared_ptr< class ::stat_tool::Regression >, std::shared_ptr< class ::stat_tool::StatInterface > >();
         boost::python::implicitly_convertible< std::shared_ptr< class ::stat_tool::Regression >, std::shared_ptr< class ::stat_tool::RegressionKernel > >();
 }
