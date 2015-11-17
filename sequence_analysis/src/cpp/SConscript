@@ -36,6 +36,9 @@ lib_env.AppendUnique(LIBS=['vptool', 'vpstat_tool'])
 lib_env.AppendUnique(CPPDEFINES=['MESSAGE'])
 inc = lib_env.ALEAIncludes( "sequence_analysis", includes )
 
+if env['debug']:
+    env.Append(CPPDEFINES= ['DEBUG'])
+
 lib = lib_env.ALEALibrary( "vpsequence", 
                            sources, 
                            )

@@ -301,7 +301,8 @@ public:
      ret = input.extract(error, histo_type, variable, value);
      
      if (ret == NULL)
-         
+         sequence_analysis::wrap_util::throw_error(error);
+     return ret;
    }
 
  static MarkovianSequences*
