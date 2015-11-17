@@ -31,7 +31,7 @@ class Test(interface):
     def __init__(self):
         interface.__init__(self,
                            self.build_data(),
-                           get_shared_data("sequences1.seq"),
+                           str(get_shared_data("sequences1.seq")),
                            Sequences)
         self.seqn = self.build_seqn()
         self.seq1 = self.build_seq1()
@@ -333,17 +333,17 @@ class Test(interface):
 
     def test_cluster_step(self):
         seq1 = Sequences([[1, 2, 3], [1, 3, 1], [4, 5, 6]])
-        assert str(Cluster(seq1, "Step", 1, 2)) == str(seq1.cluster_step(1, 2, False))
+        assert str(Cluster(seq1, "Step", 1, 2)) == str(seq1.cluster_step(1, 2, True))
         seqn = Sequences([[[1, 2, 3], [1, 3, 1]], [[4, 5, 6], [7,8,9]]])
-        assert str(Cluster(seqn, "Step", 1, 2)) == str(seqn.cluster_step(1, 2, False))
+        assert str(Cluster(seqn, "Step", 1, 2)) == str(seqn.cluster_step(1, 2, True))
 
     def test_cluster_limit(self):
         seq1 = Sequences([[1, 2, 3], [1, 3, 1], [4, 5, 6]])
         assert str(Cluster(seq1, "Limit", 1, [2])) == \
-            str(seq1.cluster_limit(1, [2], False))
+            str(seq1.cluster_limit(1, [2], True))
         seqn = Sequences([[[1, 2, 3], [1, 3, 1]], [[4, 5, 6], [7,8,9]]])
         assert str(Cluster(seqn, "Limit", 1, [2, 4, 6])) == \
-            str(seqn.cluster_limit(1, [2, 4 ,6], False))
+            str(seqn.cluster_limit(1, [2, 4 ,6], True))
 
     def test_transcode(self):
         """This functionality need to be checked.
@@ -436,13 +436,13 @@ class Test(interface):
 
     def test_split(self):
         #markovian sequences
-        data = Sequences(get_shared_data('vanille_m.seq'))
+        data = Sequences(str(get_shared_data('vanille_m.seq')))
         Split(data, 2)
 
     def test_initial_run(self):
         from openalea.sequence_analysis import ComputeInitialRun
         #markovian sequences
-        data = Sequences(get_shared_data('vanille_m.seq'))
+        data = Sequences(str(get_shared_data('vanille_m.seq')))
         ComputeInitialRun(data)
 
 """

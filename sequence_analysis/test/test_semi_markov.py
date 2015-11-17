@@ -18,7 +18,7 @@ from tools import runTestClass
 
 
 def SemiMarkovData():
-    sm =  SemiMarkov(get_shared_data('test_semi_markov.dat'))
+    sm =  SemiMarkov(str(get_shared_data('test_semi_markov.dat')))
     ret = Simulate(sm, 1, 1000, True)
     return sm
 
@@ -30,14 +30,14 @@ class Test(interface):
     def __init__(self):
         interface.__init__(self,
                            self.build_data(),
-                           get_shared_data("test_semi_markov.dat"),
+                           str(get_shared_data("test_semi_markov.dat")),
                            SemiMarkov)
 
     def build_data(self):
         """todo: check identifier output. should be a list """
         # build a list of 2 sequences with a variable that should be identical
         # to sequences1.seq
-        sm =  SemiMarkov(get_shared_data('test_semi_markov.dat'))
+        sm =  SemiMarkov(str(get_shared_data('test_semi_markov.dat')))
 
 
         return sm

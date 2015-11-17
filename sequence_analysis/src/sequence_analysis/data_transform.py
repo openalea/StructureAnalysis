@@ -260,7 +260,7 @@ def ExtractVectors(obj, key, *args):
 
     error.CheckType([variable, value], [int, int])
 
-    rkey = markovian_sequence_type[key]
+    rkey = markovian_sequence_type[key].real
     sequence = obj.extract_vectors(rkey, variable, value)
 
     return sequence

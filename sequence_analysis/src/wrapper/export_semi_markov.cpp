@@ -291,9 +291,17 @@ public:
    }
 
    static DiscreteDistributionData*
-   extract(const SemiMarkovData &input, process_distribution histo_type, int variable, int value)
+   extract(const SemiMarkovData &input, int ihisto_type, int variable, int value)
    {
-     SIMPLE_METHOD_TEMPLATE_1(input, extract, DiscreteDistributionData, histo_type, variable, value);
+     process_distribution histo_type = process_distribution(ihisto_type);
+     
+     DiscreteDistributionData *ret = NULL;
+     StatError error;
+     
+     ret = input.extract(error, histo_type, variable, value);
+     
+     if (ret == NULL)
+         
    }
 
  static MarkovianSequences*

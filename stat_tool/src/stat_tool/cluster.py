@@ -209,7 +209,7 @@ def Cluster(obj, utype, *args, **kargs):
             try:
                 ret = func(*args)
             except:
-                ret = func(args[0], args[1], mode_type[RoundingVariable]) # sequences case
+                ret = func(args[0], args[1], mode_type[RoundingVariable].real) # sequences case
         else:
             raise ValueError("""Extra arguments provided 
             (to specify variable value ?).

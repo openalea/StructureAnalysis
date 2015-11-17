@@ -24,7 +24,7 @@ from openalea.sequence_analysis import get_shared_data
 import os
 
 def HiddenSemiMarkovData():
-     hsm = HiddenSemiMarkov(get_shared_data( "wij1.hsc"))
+     hsm = HiddenSemiMarkov(str(get_shared_data( "wij1.hsc")))
      return hsm
 
 
@@ -53,7 +53,7 @@ class Test(interface):
         self.constructor_from_file()
 
     def _test_constructor_from_file2(self):
-        hmc = HiddenSemiMarkov(get_shared_data("test_hidden_markov.hmc"))
+        hmc = HiddenSemiMarkov(str(get_shared_data("test_hidden_markov.hmc")))
         assert hmc
 
     def test_constructor_from_file_nonparametric1(self):

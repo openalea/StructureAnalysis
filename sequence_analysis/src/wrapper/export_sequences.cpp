@@ -806,15 +806,9 @@ public:
         data.get(), ref_sample);
   }
 
-  // Cluster
+    // Cluster
   static Sequences*
-  cluster_step(const Sequences &seq, int variable, int step)
-  {
-    SIMPLE_METHOD_TEMPLATE_1(seq, cluster, Sequences, variable, step);
-  }
-
-  static Sequences*
-  cluster_step_round(const Sequences &seq, int variable, int step, int imode)
+  cluster_step_rounding(const Sequences &seq, int variable, int step, int imode)
   {
     StatError error;
       
@@ -826,6 +820,13 @@ public:
       sequence_analysis::wrap_util::throw_error(error);
     return ret;
   }
+
+  static Sequences*
+  cluster_step(const Sequences &seq, int variable, int step)
+  {
+    return SequencesWrap::cluster_step_rounding(seq, variable, step, ROUND);
+  }
+
 
   static Sequences*
   cluster_limit(const Sequences &seq, int variable, boost::python::list& limit, bool add)
@@ -992,6 +993,13 @@ public:
     return seq.get_index_parameter(iseq, index);
   }
 
+ 
+  static int
+  get_index_parameter_type(const Sequences &seq)
+  {    
+    return int(seq.get_index_param_type());
+  }
+ 
   static double
   get_max_value(const Sequences &seq, int variable)
   {
@@ -1156,10 +1164,20 @@ public:
   }
 
   static Vectors*
-  extract_vectors(const Sequences &seq, sequence_pattern pattern, int variable, int value)
+  extract_vectors(const Sequences &seq, int ipattern, int variable, int value)
   {
-    SIMPLE_METHOD_TEMPLATE_1(seq, extract_vectors, Vectors, pattern,
-        variable, value);
+    StatError error;
+      
+    Vectors *ret = NULL;
+
+    sequence_pattern pattern = sequence_pattern(ipattern);   
+      
+    ret = seq.extract_vectors(error, pattern, variable, value);
+    
+    if (!ret)
+      sequence_analysis::wrap_util::throw_error(error);
+    return ret;
+
   }
 
   static DiscreteDistributionData*
@@ -1462,7 +1480,7 @@ class_sequences()
    .add_property("nb_variable", &Sequences::get_nb_variable, "Return the number of variables")
    .add_property("max_length", &Sequences::get_max_length,"Return max length")
    .add_property("cumul_length", &Sequences::get_cumul_length,"Return cumul length")
-   .add_property("index_parameter_type", &Sequences::get_index_param_type,"return index parameter type")
+   .add_property("index_parameter_type", SequencesWrap::get_index_parameter_type,"return index parameter type")
 
    .def("get_min_value", &Sequences::get_min_value,args("index_var"), "return min value of variables")
    .def("get_max_value", &Sequences::get_max_value,args("index_var"), "return max value of variables")
@@ -1481,7 +1499,7 @@ class_sequences()
    DEF_RETURN_VALUE("multiple_alignment", SequencesWrap::multiple_alignment, args(""), "todo")
    DEF_RETURN_VALUE("build_vectors", SequencesWrap::build_vectors, args("index_variable"), "build a vector from sequence")
    DEF_RETURN_VALUE("cluster_step", SequencesWrap::cluster_step, args("variable", "step"),"Cluster Step")
-   DEF_RETURN_VALUE("cluster_step", SequencesWrap::cluster_step_round, args("variable", "step", "round"),"Cluster Step")
+   DEF_RETURN_VALUE("cluster_step", SequencesWrap::cluster_step_rounding, args("variable", "step", "round"),"Cluster Step")
    DEF_RETURN_VALUE("cluster_limit", SequencesWrap::cluster_limit, args("variable", "limits"),"Cluster limit")
    DEF_RETURN_VALUE("correlation_computation", SequencesWrap::correlation_computation, args("variable1", "variable2", "type","max_lag", "normalization"),"compute correlation")
    DEF_RETURN_VALUE("difference", SequencesWrap::difference,args("variable", "first_element"),"Difference")

@@ -99,11 +99,17 @@ public:
   }
 
   static MarkovianSequences*
-  cluster_step(const MarkovianSequences &input, int variable, int step,
-		  rounding mode = FLOOR)
+  cluster_step(const MarkovianSequences &seq, int variable, int step, int imode)
   {
-    SIMPLE_METHOD_TEMPLATE_1(input, cluster, MarkovianSequences,
-    		variable, step, mode);
+    StatError error;
+      
+    MarkovianSequences *ret = NULL;
+    
+    rounding rmode = rounding(imode);
+    ret = seq.cluster(error, variable, step, rmode);
+    if (!ret)
+      sequence_analysis::wrap_util::throw_error(error);
+    return ret;
   }
 
   static MarkovianSequences*
@@ -253,10 +259,14 @@ public:
 
   static VariableOrderMarkov*
   variable_order_markov_estimation1(const MarkovianSequences &input,
-      process_type itype, int min_order, int max_order, memory_tree_selection algorithm,
-      double threshold, transition_estimator estimator, bool global_initial_transition,
+      int iitype, int min_order, int max_order, int ialgorithm,
+      double threshold, int iestimator, bool global_initial_transition,
       bool global_sample, bool counting_flag)
   {
+    process_type itype = process_type(iitype);
+    memory_tree_selection algorithm = memory_tree_selection(ialgorithm);
+    transition_estimator estimator = transition_estimator(iestimator);
+    
     HEADER_OS(VariableOrderMarkov);
     ret = input.variable_order_markov_estimation(error, os, itype,
         min_order, max_order, algorithm, threshold, estimator,
