@@ -7,5 +7,8 @@ void _stat_tool_frequency_distribution_transformation()
         boost::python::object stat_tool_0cdd446515295e8e8373e99f328c3748_module(boost::python::handle<  >(boost::python::borrowed(PyImport_AddModule(stat_tool_0cdd446515295e8e8373e99f328c3748_name.c_str()))));
         boost::python::scope().attr("stat_tool") = stat_tool_0cdd446515295e8e8373e99f328c3748_module;
         boost::python::scope stat_tool_0cdd446515295e8e8373e99f328c3748_scope = stat_tool_0cdd446515295e8e8373e99f328c3748_module;
-        boost::python::enum_< enum ::stat_tool::frequency_distribution_transformation >("frequency_distribution_transformation");
+        boost::python::enum_< enum ::stat_tool::frequency_distribution_transformation >("frequency_distribution_transformation")
+            .value("FREQUENCY_DISTRIBUTION_COPY", ::stat_tool::frequency_distribution_transformation::FREQUENCY_DISTRIBUTION_COPY)
+            .value("SHIFT", ::stat_tool::frequency_distribution_transformation::SHIFT)
+            .value("CLUSTER", ::stat_tool::frequency_distribution_transformation::CLUSTER);
 }

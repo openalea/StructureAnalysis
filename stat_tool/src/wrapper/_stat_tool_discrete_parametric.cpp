@@ -10,7 +10,13 @@ void _stat_tool_discrete_parametric()
         boost::python::object stat_tool_0cdd446515295e8e8373e99f328c3748_module(boost::python::handle<  >(boost::python::borrowed(PyImport_AddModule(stat_tool_0cdd446515295e8e8373e99f328c3748_name.c_str()))));
         boost::python::scope().attr("stat_tool") = stat_tool_0cdd446515295e8e8373e99f328c3748_module;
         boost::python::scope stat_tool_0cdd446515295e8e8373e99f328c3748_scope = stat_tool_0cdd446515295e8e8373e99f328c3748_module;
-        boost::python::enum_< enum ::stat_tool::discrete_parametric >("discrete_parametric");
+        boost::python::enum_< enum ::stat_tool::discrete_parametric >("discrete_parametric")
+            .value("CATEGORICAL", ::stat_tool::discrete_parametric::CATEGORICAL)
+            .value("BINOMIAL", ::stat_tool::discrete_parametric::BINOMIAL)
+            .value("POISSON", ::stat_tool::discrete_parametric::POISSON)
+            .value("NEGATIVE_BINOMIAL", ::stat_tool::discrete_parametric::NEGATIVE_BINOMIAL)
+            .value("UNIFORM", ::stat_tool::discrete_parametric::UNIFORM)
+            .value("MULTINOMIAL", ::stat_tool::discrete_parametric::MULTINOMIAL);
         void (::stat_tool::DiscreteParametric::*method_pointer_abfba932b25d52f7bfd2f2ea5b43da88)(int, int, double, double) = &::stat_tool::DiscreteParametric::init;
         void (::stat_tool::DiscreteParametric::*method_pointer_d60dea7c925a54c0bd2a855bbe1a5f58)(enum ::stat_tool::discrete_parametric, int, int, double, double) = &::stat_tool::DiscreteParametric::init;
         void (::stat_tool::DiscreteParametric::*method_pointer_ae8dca5e086c5c93a61df11a32ad57c0)(class ::stat_tool::DiscreteParametric const &) = &::stat_tool::DiscreteParametric::copy;

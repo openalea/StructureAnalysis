@@ -10,7 +10,13 @@ void _stat_tool_continuous_parametric()
         boost::python::object stat_tool_0cdd446515295e8e8373e99f328c3748_module(boost::python::handle<  >(boost::python::borrowed(PyImport_AddModule(stat_tool_0cdd446515295e8e8373e99f328c3748_name.c_str()))));
         boost::python::scope().attr("stat_tool") = stat_tool_0cdd446515295e8e8373e99f328c3748_module;
         boost::python::scope stat_tool_0cdd446515295e8e8373e99f328c3748_scope = stat_tool_0cdd446515295e8e8373e99f328c3748_module;
-        boost::python::enum_< enum ::stat_tool::continuous_parametric >("continuous_parametric");
+        boost::python::enum_< enum ::stat_tool::continuous_parametric >("continuous_parametric")
+            .value("GAMMA", ::stat_tool::continuous_parametric::GAMMA)
+            .value("INVERSE_GAUSSIAN", ::stat_tool::continuous_parametric::INVERSE_GAUSSIAN)
+            .value("GAUSSIAN", ::stat_tool::continuous_parametric::GAUSSIAN)
+            .value("VON_MISES", ::stat_tool::continuous_parametric::VON_MISES)
+            .value("ZERO_INFLATED_GAMMA", ::stat_tool::continuous_parametric::ZERO_INFLATED_GAMMA)
+            .value("LINEAR_MODEL", ::stat_tool::continuous_parametric::LINEAR_MODEL);
         void (::stat_tool::ContinuousParametric::*method_pointer_51d3f6aaff1c56f9958e931bf18034cc)(class ::stat_tool::ContinuousParametric const &) = &::stat_tool::ContinuousParametric::copy;
         class ::std::basic_ostream<char, std::char_traits<char> > & (::stat_tool::ContinuousParametric::*method_pointer_f33e653ce3c45484aaa449282e51e100)(class ::std::basic_ostream<char, std::char_traits<char> > &, bool) const = &::stat_tool::ContinuousParametric::ascii_parameter_print;
         class ::std::basic_ostream<char, std::char_traits<char> > & (::stat_tool::ContinuousParametric::*method_pointer_094becabde1558ffa4de95bf41b96b5a)(class ::std::basic_ostream<char, std::char_traits<char> > &, bool) const = &::stat_tool::ContinuousParametric::ascii_characteristic_print;

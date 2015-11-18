@@ -8,9 +8,6 @@ void _std_basic_string_7161f45fb596507dbfed70691c152b7e()
         boost::python::scope().attr("std") = std_a5e4e9231d6351ccb0e06756b389f0af_module;
         boost::python::scope std_a5e4e9231d6351ccb0e06756b389f0af_scope = std_a5e4e9231d6351ccb0e06756b389f0af_module;
         class ::__gnu_cxx::__normal_iterator<char *, std::basic_string<char> > (::std::basic_string<char, std::char_traits<char>, std::allocator<char> >::*method_pointer_d58f2c7a10d15789af57c2d75631b492)() = &::std::basic_string<char, std::char_traits<char>, std::allocator<char> >::begin;
-        class ::__gnu_cxx::__normal_iterator<char *, std::basic_string<char> > (::std::basic_string<char, std::char_traits<char>, std::allocator<char> >::*method_pointer_69739b48cd07524e8d17f804cd2107d0)() = &::std::basic_string<char, std::char_traits<char>, std::allocator<char> >::end;
-        class ::std::reverse_iterator<__gnu_cxx::__normal_iterator<char *, std::basic_string<char> > > (::std::basic_string<char, std::char_traits<char>, std::allocator<char> >::*method_pointer_d8738f68cff6570a88e1e6c0dcfad279)() = &::std::basic_string<char, std::char_traits<char>, std::allocator<char> >::rbegin;
-        class ::std::reverse_iterator<__gnu_cxx::__normal_iterator<const char *, std::basic_string<char> > > (::std::basic_string<char, std::char_traits<char>, std::allocator<char> >::*method_pointer_5c2e9939e6215cc79f02bf5d98225ba7)() const = &::std::basic_string<char, std::char_traits<char>, std::allocator<char> >::rbegin;
         class ::std::reverse_iterator<__gnu_cxx::__normal_iterator<char *, std::basic_string<char> > > (::std::basic_string<char, std::char_traits<char>, std::allocator<char> >::*method_pointer_a50806993ee55a51a6cbec4d5c76f4d0)() = &::std::basic_string<char, std::char_traits<char>, std::allocator<char> >::rend;
         class ::std::reverse_iterator<__gnu_cxx::__normal_iterator<const char *, std::basic_string<char> > > (::std::basic_string<char, std::char_traits<char>, std::allocator<char> >::*method_pointer_f5df813739f253f99a9cea041244956b)() const = &::std::basic_string<char, std::char_traits<char>, std::allocator<char> >::rend;
         class ::__gnu_cxx::__normal_iterator<const char *, std::basic_string<char> > (::std::basic_string<char, std::char_traits<char>, std::allocator<char> >::*method_pointer_c2b6b86a5f0a58d9a652753204251c91)() const = &::std::basic_string<char, std::char_traits<char>, std::allocator<char> >::cbegin;
@@ -32,7 +29,6 @@ void _std_basic_string_7161f45fb596507dbfed70691c152b7e()
         char const & (::std::basic_string<char, std::char_traits<char>, std::allocator<char> >::*method_pointer_1ad749a54e055794bf8043fd85bec066)() const = &::std::basic_string<char, std::char_traits<char>, std::allocator<char> >::back;
         class ::std::basic_string<char, std::char_traits<char>, std::allocator<char> > & (::std::basic_string<char, std::char_traits<char>, std::allocator<char> >::*method_pointer_97eda6673d5250d6a77fee856230becd)(class ::std::basic_string<char, std::char_traits<char>, std::allocator<char> > const &) = &::std::basic_string<char, std::char_traits<char>, std::allocator<char> >::operator+=;
         class ::std::basic_string<char, std::char_traits<char>, std::allocator<char> > & (::std::basic_string<char, std::char_traits<char>, std::allocator<char> >::*method_pointer_5baf1ee718835552b22bababb6df8b1c)(char) = &::std::basic_string<char, std::char_traits<char>, std::allocator<char> >::operator+=;
-        class ::std::basic_string<char, std::char_traits<char>, std::allocator<char> > & (::std::basic_string<char, std::char_traits<char>, std::allocator<char> >::*method_pointer_25d4a21481865bdc9be6cc8ae2e5ab03)(class ::std::initializer_list<char>) = &::std::basic_string<char, std::char_traits<char>, std::allocator<char> >::operator+=;
         class ::std::basic_string<char, std::char_traits<char>, std::allocator<char> > & (::std::basic_string<char, std::char_traits<char>, std::allocator<char> >::*method_pointer_544f8339f4ae546eb6eee6a646a54f85)(class ::std::basic_string<char, std::char_traits<char>, std::allocator<char> > const &) = &::std::basic_string<char, std::char_traits<char>, std::allocator<char> >::append;
         class ::std::basic_string<char, std::char_traits<char>, std::allocator<char> > & (::std::basic_string<char, std::char_traits<char>, std::allocator<char> >::*method_pointer_6d1bf569c74859d78cd105f65f255c19)(class ::std::basic_string<char, std::char_traits<char>, std::allocator<char> > const &, unsigned long, unsigned long) = &::std::basic_string<char, std::char_traits<char>, std::allocator<char> >::append;
         class ::std::basic_string<char, std::char_traits<char>, std::allocator<char> > & (::std::basic_string<char, std::char_traits<char>, std::allocator<char> >::*method_pointer_03c5040018505d949dcfb28af3b542b2)(unsigned long, char) = &::std::basic_string<char, std::char_traits<char>, std::allocator<char> >::append;
@@ -42,7 +38,6 @@ void _std_basic_string_7161f45fb596507dbfed70691c152b7e()
         class ::std::basic_string<char, std::char_traits<char>, std::allocator<char> > & (::std::basic_string<char, std::char_traits<char>, std::allocator<char> >::*method_pointer_c39f221dc38f5d8fb5e9b5352fc65be3)(class ::std::basic_string<char, std::char_traits<char>, std::allocator<char> > const &, unsigned long, unsigned long) = &::std::basic_string<char, std::char_traits<char>, std::allocator<char> >::assign;
         class ::std::basic_string<char, std::char_traits<char>, std::allocator<char> > & (::std::basic_string<char, std::char_traits<char>, std::allocator<char> >::*method_pointer_551afc8548a2529e8a1709d95f963351)(unsigned long, char) = &::std::basic_string<char, std::char_traits<char>, std::allocator<char> >::assign;
         class ::std::basic_string<char, std::char_traits<char>, std::allocator<char> > & (::std::basic_string<char, std::char_traits<char>, std::allocator<char> >::*method_pointer_9348d2072bf15a60aa1d30a511db3a8b)(class ::std::initializer_list<char>) = &::std::basic_string<char, std::char_traits<char>, std::allocator<char> >::assign;
-        void (::std::basic_string<char, std::char_traits<char>, std::allocator<char> >::*method_pointer_d639ff1ce2cb563fbec55b224fb0367a)(class ::__gnu_cxx::__normal_iterator<char *, std::basic_string<char> >, unsigned long, char) = &::std::basic_string<char, std::char_traits<char>, std::allocator<char> >::insert;
         class ::std::basic_string<char, std::char_traits<char>, std::allocator<char> > & (::std::basic_string<char, std::char_traits<char>, std::allocator<char> >::*method_pointer_c766678d25a256ba80381939b7e23f17)(unsigned long, class ::std::basic_string<char, std::char_traits<char>, std::allocator<char> > const &) = &::std::basic_string<char, std::char_traits<char>, std::allocator<char> >::insert;
         class ::std::basic_string<char, std::char_traits<char>, std::allocator<char> > & (::std::basic_string<char, std::char_traits<char>, std::allocator<char> >::*method_pointer_980f32d36f265639ae31b5459cd04db7)(unsigned long, class ::std::basic_string<char, std::char_traits<char>, std::allocator<char> > const &, unsigned long, unsigned long) = &::std::basic_string<char, std::char_traits<char>, std::allocator<char> >::insert;
         class ::std::basic_string<char, std::char_traits<char>, std::allocator<char> > & (::std::basic_string<char, std::char_traits<char>, std::allocator<char> >::*method_pointer_7219968409505d3b86186534121e5926)(unsigned long, unsigned long, char) = &::std::basic_string<char, std::char_traits<char>, std::allocator<char> >::insert;
@@ -82,9 +77,6 @@ void _std_basic_string_7161f45fb596507dbfed70691c152b7e()
             .def(boost::python::init< class ::std::basic_string<char, std::char_traits<char>, std::allocator<char> > const &, unsigned long, unsigned long, class ::std::allocator<char> const & >())
             .def(boost::python::init< class ::std::initializer_list<char>, class ::std::allocator<char> const & >())
             .def("begin", method_pointer_d58f2c7a10d15789af57c2d75631b492)
-            .def("end", method_pointer_69739b48cd07524e8d17f804cd2107d0)
-            .def("rbegin", method_pointer_d8738f68cff6570a88e1e6c0dcfad279)
-            .def("rbegin", method_pointer_5c2e9939e6215cc79f02bf5d98225ba7)
             .def("rend", method_pointer_a50806993ee55a51a6cbec4d5c76f4d0)
             .def("rend", method_pointer_f5df813739f253f99a9cea041244956b)
             .def("cbegin", method_pointer_c2b6b86a5f0a58d9a652753204251c91)
@@ -106,7 +98,6 @@ void _std_basic_string_7161f45fb596507dbfed70691c152b7e()
             .def("back", method_pointer_1ad749a54e055794bf8043fd85bec066, boost::python::return_value_policy< boost::python::return_by_value >())
             .def("__iadd__", method_pointer_97eda6673d5250d6a77fee856230becd, boost::python::return_internal_reference<>())
             .def("__iadd__", method_pointer_5baf1ee718835552b22bababb6df8b1c, boost::python::return_internal_reference<>())
-            .def("__iadd__", method_pointer_25d4a21481865bdc9be6cc8ae2e5ab03, boost::python::return_internal_reference<>())
             .def("append", method_pointer_544f8339f4ae546eb6eee6a646a54f85, boost::python::return_internal_reference<>())
             .def("append", method_pointer_6d1bf569c74859d78cd105f65f255c19, boost::python::return_internal_reference<>())
             .def("append", method_pointer_03c5040018505d949dcfb28af3b542b2, boost::python::return_internal_reference<>())
@@ -116,7 +107,6 @@ void _std_basic_string_7161f45fb596507dbfed70691c152b7e()
             .def("assign", method_pointer_c39f221dc38f5d8fb5e9b5352fc65be3, boost::python::return_internal_reference<>())
             .def("assign", method_pointer_551afc8548a2529e8a1709d95f963351, boost::python::return_internal_reference<>())
             .def("assign", method_pointer_9348d2072bf15a60aa1d30a511db3a8b, boost::python::return_internal_reference<>())
-            .def("insert", method_pointer_d639ff1ce2cb563fbec55b224fb0367a)
             .def("insert", method_pointer_c766678d25a256ba80381939b7e23f17, boost::python::return_internal_reference<>())
             .def("insert", method_pointer_980f32d36f265639ae31b5459cd04db7, boost::python::return_internal_reference<>())
             .def("insert", method_pointer_7219968409505d3b86186534121e5926, boost::python::return_internal_reference<>())
