@@ -10,10 +10,7 @@ void _stat_tool_distance_matrix()
         boost::python::scope stat_tool_0cdd446515295e8e8373e99f328c3748_scope = stat_tool_0cdd446515295e8e8373e99f328c3748_module;
         class ::stat_tool::DistanceMatrix * (::stat_tool::DistanceMatrix::*method_pointer_1d604885d9985299bd1f9b51dd023a91)(class ::stat_tool::StatError &) const = &::stat_tool::DistanceMatrix::symmetrize;
         class ::stat_tool::DistanceMatrix * (::stat_tool::DistanceMatrix::*method_pointer_e35d0838984b58eaa9ae519e30b67285)(class ::stat_tool::StatError &) const = &::stat_tool::DistanceMatrix::unnormalize;
-        class ::std::basic_ostream<char, std::char_traits<char> > & (::stat_tool::DistanceMatrix::*method_pointer_169ae8970221587b87c01bd1c3559c7e)(class ::std::basic_ostream<char, std::char_traits<char> > &) const = &::stat_tool::DistanceMatrix::line_write;
-        class ::std::basic_ostream<char, std::char_traits<char> > & (::stat_tool::DistanceMatrix::*method_pointer_2ac3fa0227975a97b9593e45cbe3bb04)(class ::std::basic_ostream<char, std::char_traits<char> > &, bool) const = &::stat_tool::DistanceMatrix::ascii_write;
         class ::std::basic_ostream<char, std::char_traits<char> > & (::stat_tool::DistanceMatrix::*method_pointer_e23319161b02558eb4a68ba86cf918de)(class ::std::basic_ostream<char, std::char_traits<char> > &) const = &::stat_tool::DistanceMatrix::spreadsheet_write;
-        class ::stat_tool::MultiPlotSet * (::stat_tool::DistanceMatrix::*method_pointer_c2cc9cec80bf58a2abe714f632c27ec2)() const = &::stat_tool::DistanceMatrix::get_plotable;
         bool (::stat_tool::DistanceMatrix::*method_pointer_7b0a0590fbf553b7a09c3fbad02a8977)() const = &::stat_tool::DistanceMatrix::test_symmetry;
         void (::stat_tool::DistanceMatrix::*method_pointer_3ffddd5defe953c8a5e3739abd7fd36a)(int, int, double, int, double, int, double, int, int, double, int, double, int) = &::stat_tool::DistanceMatrix::update;
         void (::stat_tool::DistanceMatrix::*method_pointer_09477275018c56d9ba6e229798e23b4e)(int, int, double, int) = &::stat_tool::DistanceMatrix::update;
@@ -45,10 +42,7 @@ void _stat_tool_distance_matrix()
             .def(boost::python::init< class ::stat_tool::DistanceMatrix const &, char >())
             .def("symmetrize", method_pointer_1d604885d9985299bd1f9b51dd023a91, boost::python::return_value_policy< boost::python::reference_existing_object >())
             .def("unnormalize", method_pointer_e35d0838984b58eaa9ae519e30b67285, boost::python::return_value_policy< boost::python::reference_existing_object >())
-            .def("line_write", method_pointer_169ae8970221587b87c01bd1c3559c7e, boost::python::return_internal_reference<>())
-            .def("ascii_write", method_pointer_2ac3fa0227975a97b9593e45cbe3bb04, boost::python::return_internal_reference<>())
             .def("spreadsheet_write", method_pointer_e23319161b02558eb4a68ba86cf918de, boost::python::return_internal_reference<>())
-            .def("get_plotable", method_pointer_c2cc9cec80bf58a2abe714f632c27ec2, boost::python::return_value_policy< boost::python::reference_existing_object >())
             .def("test_symmetry", method_pointer_7b0a0590fbf553b7a09c3fbad02a8977)
             .def("update", method_pointer_3ffddd5defe953c8a5e3739abd7fd36a)
             .def("update", method_pointer_09477275018c56d9ba6e229798e23b4e)

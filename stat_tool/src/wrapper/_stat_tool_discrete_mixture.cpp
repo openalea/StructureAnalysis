@@ -12,9 +12,6 @@ void _stat_tool_discrete_mixture()
         boost::python::scope stat_tool_0cdd446515295e8e8373e99f328c3748_scope = stat_tool_0cdd446515295e8e8373e99f328c3748_module;
         class ::stat_tool::DiscreteParametricModel * (::stat_tool::DiscreteMixture::*method_pointer_1485577473cd5114be525e738eeca625)(class ::stat_tool::StatError &, int) const = &::stat_tool::DiscreteMixture::extract;
         class ::stat_tool::DiscreteMixtureData * (::stat_tool::DiscreteMixture::*method_pointer_bc96663c51af53f0b4910aa28c6a6518)(class ::stat_tool::StatError &) const = &::stat_tool::DiscreteMixture::extract_data;
-        class ::std::basic_ostream<char, std::char_traits<char> > & (::stat_tool::DiscreteMixture::*method_pointer_1e3a103ec28d5f7cafedb0ec49f93683)(class ::std::basic_ostream<char, std::char_traits<char> > &) const = &::stat_tool::DiscreteMixture::line_write;
-        class ::std::basic_ostream<char, std::char_traits<char> > & (::stat_tool::DiscreteMixture::*method_pointer_439404d771385f1399eff99ce154ef2b)(class ::std::basic_ostream<char, std::char_traits<char> > &, bool) const = &::stat_tool::DiscreteMixture::ascii_write;
-        class ::stat_tool::MultiPlotSet * (::stat_tool::DiscreteMixture::*method_pointer_9c4f8dd882725a3790263fb7a23fa1ee)() const = &::stat_tool::DiscreteMixture::get_plotable;
         void (::stat_tool::DiscreteMixture::*method_pointer_280860cefdb855b48e419113a29ed6f0)(int, double, bool) = &::stat_tool::DiscreteMixture::computation;
         double (::stat_tool::DiscreteMixture::*method_pointer_f2bb8971d02a546e9c6e18ba9ed7ae81)(class ::stat_tool::DiscreteMixtureData const &) const = &::stat_tool::DiscreteMixture::likelihood_computation;
         class ::stat_tool::DiscreteMixtureData * (::stat_tool::DiscreteMixture::*method_pointer_6dc1d470644e5ccd97db63585a6215f8)(class ::stat_tool::StatError &, int) const = &::stat_tool::DiscreteMixture::simulation;
@@ -27,9 +24,6 @@ void _stat_tool_discrete_mixture()
             .def(boost::python::init< class ::stat_tool::DiscreteMixture const &, bool >())
             .def("extract", method_pointer_1485577473cd5114be525e738eeca625, boost::python::return_value_policy< boost::python::reference_existing_object >())
             .def("extract_data", method_pointer_bc96663c51af53f0b4910aa28c6a6518, boost::python::return_value_policy< boost::python::reference_existing_object >())
-            .def("line_write", method_pointer_1e3a103ec28d5f7cafedb0ec49f93683, boost::python::return_internal_reference<>())
-            .def("ascii_write", method_pointer_439404d771385f1399eff99ce154ef2b, boost::python::return_internal_reference<>())
-            .def("get_plotable", method_pointer_9c4f8dd882725a3790263fb7a23fa1ee, boost::python::return_value_policy< boost::python::reference_existing_object >())
             .def("computation", method_pointer_280860cefdb855b48e419113a29ed6f0)
             .def("likelihood_computation", method_pointer_f2bb8971d02a546e9c6e18ba9ed7ae81)
             .def("simulation", method_pointer_6dc1d470644e5ccd97db63585a6215f8, boost::python::return_value_policy< boost::python::reference_existing_object >())

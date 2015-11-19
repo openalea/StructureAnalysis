@@ -23,7 +23,6 @@ void _stat_tool_distribution()
         class ::std::basic_ostream<char, std::char_traits<char> > & (::stat_tool::Distribution::*method_pointer_fc62e5957d155ce0bb1540b7f70cfaf4)(class ::std::basic_ostream<char, std::char_traits<char> > &, bool) const = &::stat_tool::Distribution::spreadsheet_characteristic_print;
         class ::std::basic_ostream<char, std::char_traits<char> > & (::stat_tool::Distribution::*method_pointer_7a2fa049fdbf50378a84c364cde99a94)(class ::std::basic_ostream<char, std::char_traits<char> > &, bool, bool, bool, class ::stat_tool::FrequencyDistribution const *) const = &::stat_tool::Distribution::spreadsheet_print;
         int (::stat_tool::Distribution::*method_pointer_bf5ecf127084544b8020df64a53b8af6)(class ::stat_tool::FrequencyDistribution const *) const = &::stat_tool::Distribution::plot_nb_value_computation;
-        class ::std::basic_ostream<char, std::char_traits<char> > & (::stat_tool::Distribution::*method_pointer_8ce3a056decd5a1fba4eb53424486908)(class ::std::basic_ostream<char, std::char_traits<char> > &) const = &::stat_tool::Distribution::plot_title_print;
         void (::stat_tool::Distribution::*method_pointer_1611ec32975b592ab99017cd3e9155dc)(class ::stat_tool::SinglePlot &, double) const = &::stat_tool::Distribution::plotable_mass_write;
         void (::stat_tool::Distribution::*method_pointer_cd7d6da0b27c5c28a19645b64dcf3d4b)(class ::stat_tool::SinglePlot &) const = &::stat_tool::Distribution::plotable_cumul_write;
         void (::stat_tool::Distribution::*method_pointer_024ea3f353af53b49d19e8e16f5c81d6)(class ::stat_tool::SinglePlot &, class ::stat_tool::Distribution const &) const = &::stat_tool::Distribution::plotable_cumul_matching_write;
@@ -74,7 +73,6 @@ void _stat_tool_distribution()
             .def("spreadsheet_characteristic_print", method_pointer_fc62e5957d155ce0bb1540b7f70cfaf4, boost::python::return_internal_reference<>())
             .def("spreadsheet_print", method_pointer_7a2fa049fdbf50378a84c364cde99a94, boost::python::return_internal_reference<>())
             .def("plot_nb_value_computation", method_pointer_bf5ecf127084544b8020df64a53b8af6)
-            .def("plot_title_print", method_pointer_8ce3a056decd5a1fba4eb53424486908, boost::python::return_internal_reference<>())
             .def("plotable_mass_write", method_pointer_1611ec32975b592ab99017cd3e9155dc)
             .def("plotable_cumul_write", method_pointer_cd7d6da0b27c5c28a19645b64dcf3d4b)
             .def("plotable_cumul_matching_write", method_pointer_024ea3f353af53b49d19e8e16f5c81d6)

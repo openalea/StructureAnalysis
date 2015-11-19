@@ -14,7 +14,7 @@ flags = ['-x', 'c++', '-g', '-std=c++11', '-stdlib=libstdc++',
 asg = autowig.AbstractSemanticGraph()
 autowig.front_end.plugin = 'pyclanglite'
 autowig.front_end(asg, headers, flags=flags, silent=True,
-                  force_overload=True, bootstrap=3, cache=rootdir + '/.AutoWIG', force=False)
+                  force_overload=True, bootstrap=3, cache=rootdir + '/.AutoWIG', force=True)
 
 autowig.middle_end.plugin = 'default'
 autowig.middle_end(asg)

@@ -24,7 +24,6 @@ void _stat_tool_discrete_parametric()
         class ::std::basic_ostream<char, std::char_traits<char> > & (::stat_tool::DiscreteParametric::*method_pointer_1e2470ecea845c5ebc32d2bcfbc98ee4)(class ::std::basic_ostream<char, std::char_traits<char> > &, bool, bool) const = &::stat_tool::DiscreteParametric::ascii_parametric_characteristic_print;
         class ::std::basic_ostream<char, std::char_traits<char> > & (::stat_tool::DiscreteParametric::*method_pointer_bea7fd4010685dd38f61049f78e7197f)(class ::std::basic_ostream<char, std::char_traits<char> > &) const = &::stat_tool::DiscreteParametric::spreadsheet_print;
         class ::std::basic_ostream<char, std::char_traits<char> > & (::stat_tool::DiscreteParametric::*method_pointer_26ddfbf705055ef4800204a666cf0e0b)(class ::std::basic_ostream<char, std::char_traits<char> > &, bool) const = &::stat_tool::DiscreteParametric::spreadsheet_parametric_characteristic_print;
-        class ::std::basic_ostream<char, std::char_traits<char> > & (::stat_tool::DiscreteParametric::*method_pointer_44c56fc88c6856aba7893009d7e78e2c)(class ::std::basic_ostream<char, std::char_traits<char> > &) const = &::stat_tool::DiscreteParametric::plot_title_print;
         int (*method_pointer_60c76b854c1d563496f805ccd43c71d0)(enum ::stat_tool::discrete_parametric, int, int, double, double, double) = ::stat_tool::DiscreteParametric::nb_value_computation;
         int (::stat_tool::DiscreteParametric::*method_pointer_a24cc9da2b445b8fa9fbd5e1fa58f5f1)() = &::stat_tool::DiscreteParametric::nb_parameter_computation;
         void (::stat_tool::DiscreteParametric::*method_pointer_4e8d96996526545bb344532cc0ebec2d)() = &::stat_tool::DiscreteParametric::nb_parameter_update;
@@ -61,7 +60,6 @@ void _stat_tool_discrete_parametric()
             .def("ascii_parametric_characteristic_print", method_pointer_1e2470ecea845c5ebc32d2bcfbc98ee4, boost::python::return_internal_reference<>())
             .def("spreadsheet_print", method_pointer_bea7fd4010685dd38f61049f78e7197f, boost::python::return_internal_reference<>())
             .def("spreadsheet_parametric_characteristic_print", method_pointer_26ddfbf705055ef4800204a666cf0e0b, boost::python::return_internal_reference<>())
-            .def("plot_title_print", method_pointer_44c56fc88c6856aba7893009d7e78e2c, boost::python::return_internal_reference<>())
             .def("nb_value_computation", method_pointer_60c76b854c1d563496f805ccd43c71d0)
             .def("nb_parameter_computation", method_pointer_a24cc9da2b445b8fa9fbd5e1fa58f5f1)
             .def("nb_parameter_update", method_pointer_4e8d96996526545bb344532cc0ebec2d)

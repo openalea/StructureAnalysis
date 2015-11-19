@@ -11,8 +11,6 @@ void _stat_tool_vector_distance()
         boost::python::object stat_tool_0cdd446515295e8e8373e99f328c3748_module(boost::python::handle<  >(boost::python::borrowed(PyImport_AddModule(stat_tool_0cdd446515295e8e8373e99f328c3748_name.c_str()))));
         boost::python::scope().attr("stat_tool") = stat_tool_0cdd446515295e8e8373e99f328c3748_module;
         boost::python::scope stat_tool_0cdd446515295e8e8373e99f328c3748_scope = stat_tool_0cdd446515295e8e8373e99f328c3748_module;
-        class ::std::basic_ostream<char, std::char_traits<char> > & (::stat_tool::VectorDistance::*method_pointer_699849f5fc71536ca383aaf5b4f58d9a)(class ::std::basic_ostream<char, std::char_traits<char> > &) const = &::stat_tool::VectorDistance::line_write;
-        class ::std::basic_ostream<char, std::char_traits<char> > & (::stat_tool::VectorDistance::*method_pointer_662b3898a6135f6ab572baeeec3fca01)(class ::std::basic_ostream<char, std::char_traits<char> > &, bool) const = &::stat_tool::VectorDistance::ascii_write;
         void (::stat_tool::VectorDistance::*method_pointer_c48cb58c82df5fd0845f4da056f382ed)(int, double) const = &::stat_tool::VectorDistance::dispersion_update;
         int (::stat_tool::VectorDistance::*method_pointer_f522981ef750530a886bbf3e448c387b)() const = &::stat_tool::VectorDistance::get_nb_variable;
         enum ::stat_tool::metric (::stat_tool::VectorDistance::*method_pointer_8366a2e9ef805d4e98c43bcf3593ddfa)() const = &::stat_tool::VectorDistance::get_distance_type;
@@ -25,8 +23,6 @@ void _stat_tool_vector_distance()
         boost::python::class_< class ::stat_tool::VectorDistance, std::shared_ptr< class ::stat_tool::VectorDistance >, boost::python::bases< class ::stat_tool::StatInterface > >("VectorDistance", boost::python::no_init)
             .def(boost::python::init<  >())
             .def(boost::python::init< class ::stat_tool::VectorDistance const & >())
-            .def("line_write", method_pointer_699849f5fc71536ca383aaf5b4f58d9a, boost::python::return_internal_reference<>())
-            .def("ascii_write", method_pointer_662b3898a6135f6ab572baeeec3fca01, boost::python::return_internal_reference<>())
             .def("dispersion_update", method_pointer_c48cb58c82df5fd0845f4da056f382ed)
             .def("get_nb_variable", method_pointer_f522981ef750530a886bbf3e448c387b)
             .def("get_distance_type", method_pointer_8366a2e9ef805d4e98c43bcf3593ddfa)

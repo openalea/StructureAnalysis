@@ -16,9 +16,6 @@ void _stat_tool_multivariate_mixture()
         class ::stat_tool::Distribution * (::stat_tool::MultivariateMixture::*method_pointer_7b7a6d59de805fdca5e66b8347871266)(class ::stat_tool::StatError &, int, int) const = &::stat_tool::MultivariateMixture::extract_categorical_model;
         class ::stat_tool::Distribution * (::stat_tool::MultivariateMixture::*method_pointer_0bc6a3bbe55f51d5b2ee84e3f9a09791)(class ::stat_tool::StatError &, int) const = &::stat_tool::MultivariateMixture::extract_distribution;
         class ::stat_tool::MultivariateMixtureData * (::stat_tool::MultivariateMixture::*method_pointer_f538f32fc03a5eb3a55cf97b6ac6b92a)(class ::stat_tool::StatError &) const = &::stat_tool::MultivariateMixture::extract_data;
-        class ::std::basic_ostream<char, std::char_traits<char> > & (::stat_tool::MultivariateMixture::*method_pointer_0a1c21ef93f35e9dbd7db85206fe7380)(class ::std::basic_ostream<char, std::char_traits<char> > &) const = &::stat_tool::MultivariateMixture::line_write;
-        class ::std::basic_ostream<char, std::char_traits<char> > & (::stat_tool::MultivariateMixture::*method_pointer_360ff33e229f5c2f8a384433a468e6f6)(class ::std::basic_ostream<char, std::char_traits<char> > &, bool) const = &::stat_tool::MultivariateMixture::ascii_write;
-        class ::stat_tool::MultiPlotSet * (::stat_tool::MultivariateMixture::*method_pointer_e11eb9064dbf5927a2356225f1cc855a)() const = &::stat_tool::MultivariateMixture::get_plotable;
         double (::stat_tool::MultivariateMixture::*method_pointer_71f1fbb2602759d4b0bb16fc5694a80f)(class ::stat_tool::Vectors const &, bool) const = &::stat_tool::MultivariateMixture::likelihood_computation;
         class ::stat_tool::MultivariateMixtureData * (::stat_tool::MultivariateMixture::*method_pointer_93428291e97650838a9c17d6894d26e5)(class ::stat_tool::StatError &, int) const = &::stat_tool::MultivariateMixture::simulation;
         class ::stat_tool::MultivariateMixtureData * (::stat_tool::MultivariateMixture::*method_pointer_5236af2599fd5fe187872fa02b640655)(class ::stat_tool::StatError &, class ::stat_tool::Vectors const &, bool) const = &::stat_tool::MultivariateMixture::cluster;
@@ -38,9 +35,6 @@ void _stat_tool_multivariate_mixture()
             .def("extract_categorical_model", method_pointer_7b7a6d59de805fdca5e66b8347871266, boost::python::return_value_policy< boost::python::reference_existing_object >())
             .def("extract_distribution", method_pointer_0bc6a3bbe55f51d5b2ee84e3f9a09791, boost::python::return_value_policy< boost::python::reference_existing_object >())
             .def("extract_data", method_pointer_f538f32fc03a5eb3a55cf97b6ac6b92a, boost::python::return_value_policy< boost::python::reference_existing_object >())
-            .def("line_write", method_pointer_0a1c21ef93f35e9dbd7db85206fe7380, boost::python::return_internal_reference<>())
-            .def("ascii_write", method_pointer_360ff33e229f5c2f8a384433a468e6f6, boost::python::return_internal_reference<>())
-            .def("get_plotable", method_pointer_e11eb9064dbf5927a2356225f1cc855a, boost::python::return_value_policy< boost::python::reference_existing_object >())
             .def("likelihood_computation", method_pointer_71f1fbb2602759d4b0bb16fc5694a80f)
             .def("simulation", method_pointer_93428291e97650838a9c17d6894d26e5, boost::python::return_value_policy< boost::python::reference_existing_object >())
             .def("cluster", method_pointer_5236af2599fd5fe187872fa02b640655, boost::python::return_value_policy< boost::python::reference_existing_object >())

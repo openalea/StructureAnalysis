@@ -13,9 +13,6 @@ void _stat_tool_mixture_data()
         boost::python::scope().attr("stat_tool") = stat_tool_0cdd446515295e8e8373e99f328c3748_module;
         boost::python::scope stat_tool_0cdd446515295e8e8373e99f328c3748_scope = stat_tool_0cdd446515295e8e8373e99f328c3748_module;
         class ::stat_tool::DiscreteDistributionData * (::stat_tool::MixtureData::*method_pointer_22b0a6e9b8985815a70d8c14b0968354)(class ::stat_tool::StatError &, int, int) const = &::stat_tool::MixtureData::extract;
-        class ::std::basic_ostream<char, std::char_traits<char> > & (::stat_tool::MixtureData::*method_pointer_9c739f6c664a5fa5988c97abf15afc0d)(class ::std::basic_ostream<char, std::char_traits<char> > &, bool) const = &::stat_tool::MixtureData::ascii_data_write;
-        class ::std::basic_ostream<char, std::char_traits<char> > & (::stat_tool::MixtureData::*method_pointer_d6d234225317561587b622f00be4464d)(class ::std::basic_ostream<char, std::char_traits<char> > &, bool) const = &::stat_tool::MixtureData::ascii_write;
-        class ::stat_tool::MultiPlotSet * (::stat_tool::MixtureData::*method_pointer_3c47dfb85330571f819725339cebc09e)() const = &::stat_tool::MixtureData::get_plotable;
         void (::stat_tool::MixtureData::*method_pointer_65b10f92a726577cbf6564411c83c993)(enum ::stat_tool::variable_nature) = &::stat_tool::MixtureData::state_variable_init;
         double (::stat_tool::MixtureData::*method_pointer_33ca36d613b75e3ebc8bbd312abb4ab5)() const = &::stat_tool::MixtureData::classification_information_computation;
         double (::stat_tool::MixtureData::*method_pointer_500bb41fb5f55d4e8a20e25372760385)() const = &::stat_tool::MixtureData::information_computation;
@@ -36,9 +33,6 @@ void _stat_tool_mixture_data()
             .def(boost::python::init< class ::stat_tool::Vectors const &, enum ::stat_tool::vector_transformation >())
             .def(boost::python::init< class ::stat_tool::MixtureData const &, bool, enum ::stat_tool::vector_transformation >())
             .def("extract", method_pointer_22b0a6e9b8985815a70d8c14b0968354, boost::python::return_value_policy< boost::python::reference_existing_object >())
-            .def("ascii_data_write", method_pointer_9c739f6c664a5fa5988c97abf15afc0d, boost::python::return_internal_reference<>())
-            .def("ascii_write", method_pointer_d6d234225317561587b622f00be4464d, boost::python::return_internal_reference<>())
-            .def("get_plotable", method_pointer_3c47dfb85330571f819725339cebc09e, boost::python::return_value_policy< boost::python::reference_existing_object >())
             .def("state_variable_init", method_pointer_65b10f92a726577cbf6564411c83c993)
             .def("classification_information_computation", method_pointer_33ca36d613b75e3ebc8bbd312abb4ab5)
             .def("information_computation", method_pointer_500bb41fb5f55d4e8a20e25372760385)

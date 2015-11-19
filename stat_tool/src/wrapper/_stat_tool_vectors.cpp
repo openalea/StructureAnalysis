@@ -25,10 +25,6 @@ void _stat_tool_vectors()
         class ::stat_tool::Vectors * (::stat_tool::Vectors::*method_pointer_a1c95f46a3ce50d9a07a6f3c086fe120)(class ::stat_tool::StatError &, int, enum ::stat_tool::rounding) const = &::stat_tool::Vectors::round;
         class ::stat_tool::Vectors * (::stat_tool::Vectors::*method_pointer_3851b5934dd1541ea4e5a99df6faa717)(class ::stat_tool::StatError &, class ::std::basic_ostream<char, std::char_traits<char> > &, int, int, int, bool) const = &::stat_tool::Vectors::value_select;
         class ::stat_tool::Vectors * (::stat_tool::Vectors::*method_pointer_bd307c6b891f584f9831b5fa2a5df28f)(class ::stat_tool::StatError &, class ::std::basic_ostream<char, std::char_traits<char> > &, int, double, double, bool) const = &::stat_tool::Vectors::value_select;
-        class ::std::basic_ostream<char, std::char_traits<char> > & (::stat_tool::Vectors::*method_pointer_b39855b4d19f5638aef639c8827ab481)(class ::std::basic_ostream<char, std::char_traits<char> > &) const = &::stat_tool::Vectors::line_write;
-        class ::std::basic_ostream<char, std::char_traits<char> > & (::stat_tool::Vectors::*method_pointer_06a099886ed25ac89709f3f1f8f878eb)(class ::std::basic_ostream<char, std::char_traits<char> > &, bool) const = &::stat_tool::Vectors::ascii_data_write;
-        class ::std::basic_ostream<char, std::char_traits<char> > & (::stat_tool::Vectors::*method_pointer_d5d2d8f961e7583284bd35d394a8b1a8)(class ::std::basic_ostream<char, std::char_traits<char> > &, bool) const = &::stat_tool::Vectors::ascii_write;
-        class ::stat_tool::MultiPlotSet * (::stat_tool::Vectors::*method_pointer_e72f40f75bb65878b9591affd0b98035)() const = &::stat_tool::Vectors::get_plotable;
         bool (::stat_tool::Vectors::*method_pointer_9eaaa5f3017e581299fb0f28342bc777)(class ::stat_tool::StatError &, int, double, double) = &::stat_tool::Vectors::select_step;
         double (::stat_tool::Vectors::*method_pointer_cf538072d5af5e2dbe926ceab38d9e00)(int) const = &::stat_tool::Vectors::mean_absolute_deviation_computation;
         double (::stat_tool::Vectors::*method_pointer_d906dd83782c5681a7f3165911f1ea0f)(int) const = &::stat_tool::Vectors::mean_absolute_difference_computation;
@@ -73,10 +69,6 @@ void _stat_tool_vectors()
             .def("round", method_pointer_a1c95f46a3ce50d9a07a6f3c086fe120, boost::python::return_value_policy< boost::python::reference_existing_object >())
             .def("value_select", method_pointer_3851b5934dd1541ea4e5a99df6faa717, boost::python::return_value_policy< boost::python::reference_existing_object >())
             .def("value_select", method_pointer_bd307c6b891f584f9831b5fa2a5df28f, boost::python::return_value_policy< boost::python::reference_existing_object >())
-            .def("line_write", method_pointer_b39855b4d19f5638aef639c8827ab481, boost::python::return_internal_reference<>())
-            .def("ascii_data_write", method_pointer_06a099886ed25ac89709f3f1f8f878eb, boost::python::return_internal_reference<>())
-            .def("ascii_write", method_pointer_d5d2d8f961e7583284bd35d394a8b1a8, boost::python::return_internal_reference<>())
-            .def("get_plotable", method_pointer_e72f40f75bb65878b9591affd0b98035, boost::python::return_value_policy< boost::python::reference_existing_object >())
             .def("select_step", method_pointer_9eaaa5f3017e581299fb0f28342bc777)
             .def("mean_absolute_deviation_computation", method_pointer_cf538072d5af5e2dbe926ceab38d9e00)
             .def("mean_absolute_difference_computation", method_pointer_d906dd83782c5681a7f3165911f1ea0f)

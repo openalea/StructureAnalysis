@@ -8,8 +8,6 @@ void _stat_tool_dendrogram()
         boost::python::object stat_tool_0cdd446515295e8e8373e99f328c3748_module(boost::python::handle<  >(boost::python::borrowed(PyImport_AddModule(stat_tool_0cdd446515295e8e8373e99f328c3748_name.c_str()))));
         boost::python::scope().attr("stat_tool") = stat_tool_0cdd446515295e8e8373e99f328c3748_module;
         boost::python::scope stat_tool_0cdd446515295e8e8373e99f328c3748_scope = stat_tool_0cdd446515295e8e8373e99f328c3748_module;
-        class ::std::basic_ostream<char, std::char_traits<char> > & (::stat_tool::Dendrogram::*method_pointer_7360d569a3495266aaa940fc9e3bf10f)(class ::std::basic_ostream<char, std::char_traits<char> > &) const = &::stat_tool::Dendrogram::line_write;
-        class ::std::basic_ostream<char, std::char_traits<char> > & (::stat_tool::Dendrogram::*method_pointer_ab97e3681b325f299845355dd93902a1)(class ::std::basic_ostream<char, std::char_traits<char> > &, bool) const = &::stat_tool::Dendrogram::ascii_write;
         class ::stat_tool::DistanceMatrix * (::stat_tool::Dendrogram::*method_pointer_05a4690bdeb350c696a0f8adad6e2758)() = &::stat_tool::Dendrogram::get_distance_matrix;
         enum ::stat_tool::cluster_scale (::stat_tool::Dendrogram::*method_pointer_c37315bb315357baa9ef3613b899d13d)() const = &::stat_tool::Dendrogram::get_scale;
         int (::stat_tool::Dendrogram::*method_pointer_b63ab2c9cca65c0eb3933c295e2683ae)() const = &::stat_tool::Dendrogram::get_nb_cluster;
@@ -26,8 +24,6 @@ void _stat_tool_dendrogram()
             .def(boost::python::init<  >())
             .def(boost::python::init< class ::stat_tool::DistanceMatrix const &, enum ::stat_tool::cluster_scale >())
             .def(boost::python::init< class ::stat_tool::Dendrogram const & >())
-            .def("line_write", method_pointer_7360d569a3495266aaa940fc9e3bf10f, boost::python::return_internal_reference<>())
-            .def("ascii_write", method_pointer_ab97e3681b325f299845355dd93902a1, boost::python::return_internal_reference<>())
             .def("get_distance_matrix", method_pointer_05a4690bdeb350c696a0f8adad6e2758, boost::python::return_value_policy< boost::python::reference_existing_object >())
             .def("get_scale", method_pointer_c37315bb315357baa9ef3613b899d13d)
             .def("get_nb_cluster", method_pointer_b63ab2c9cca65c0eb3933c295e2683ae)

@@ -8,9 +8,6 @@ void _stat_tool_clusters()
         boost::python::object stat_tool_0cdd446515295e8e8373e99f328c3748_module(boost::python::handle<  >(boost::python::borrowed(PyImport_AddModule(stat_tool_0cdd446515295e8e8373e99f328c3748_name.c_str()))));
         boost::python::scope().attr("stat_tool") = stat_tool_0cdd446515295e8e8373e99f328c3748_module;
         boost::python::scope stat_tool_0cdd446515295e8e8373e99f328c3748_scope = stat_tool_0cdd446515295e8e8373e99f328c3748_module;
-        class ::std::basic_ostream<char, std::char_traits<char> > & (::stat_tool::Clusters::*method_pointer_87add017690852d8bd2e555b142d5a09)(class ::std::basic_ostream<char, std::char_traits<char> > &) const = &::stat_tool::Clusters::line_write;
-        class ::std::basic_ostream<char, std::char_traits<char> > & (::stat_tool::Clusters::*method_pointer_0a4671320bed551993a0769295d337a2)(class ::std::basic_ostream<char, std::char_traits<char> > &, bool) const = &::stat_tool::Clusters::ascii_write;
-        class ::stat_tool::MultiPlotSet * (::stat_tool::Clusters::*method_pointer_08d7f1c713815e52bb438c2daa011025)() const = &::stat_tool::Clusters::get_plotable;
         void (::stat_tool::Clusters::*method_pointer_bd5dc2ffdea2582897b9a29b13576dcf)() = &::stat_tool::Clusters::cluster_nb_pattern_computation;
         void (::stat_tool::Clusters::*method_pointer_f505de8e1c6a54ba9ede9c30f2f924b9)() = &::stat_tool::Clusters::pattern_distance_computation;
         void (::stat_tool::Clusters::*method_pointer_2d73e8b3a8ee536aab910acfc6be5f04)() = &::stat_tool::Clusters::cluster_distance_computation_1;
@@ -26,9 +23,6 @@ void _stat_tool_clusters()
             .def(boost::python::init<  >())
             .def(boost::python::init< class ::stat_tool::DistanceMatrix const &, int >())
             .def(boost::python::init< class ::stat_tool::Clusters const & >())
-            .def("line_write", method_pointer_87add017690852d8bd2e555b142d5a09, boost::python::return_internal_reference<>())
-            .def("ascii_write", method_pointer_0a4671320bed551993a0769295d337a2, boost::python::return_internal_reference<>())
-            .def("get_plotable", method_pointer_08d7f1c713815e52bb438c2daa011025, boost::python::return_value_policy< boost::python::reference_existing_object >())
             .def("cluster_nb_pattern_computation", method_pointer_bd5dc2ffdea2582897b9a29b13576dcf)
             .def("pattern_distance_computation", method_pointer_f505de8e1c6a54ba9ede9c30f2f924b9)
             .def("cluster_distance_computation_1", method_pointer_2d73e8b3a8ee536aab910acfc6be5f04)
