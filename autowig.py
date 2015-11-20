@@ -14,7 +14,9 @@ flags = ['-x', 'c++', '-g', '-std=c++11', '-stdlib=libstdc++',
 asg = autowig.AbstractSemanticGraph()
 autowig.front_end.plugin = 'pyclanglite'
 autowig.front_end(asg, headers, flags=flags, silent=True,
-                  force_overload=True, bootstrap=3, cache=rootdir + '/.AutoWIG', force=True)
+                  force_overload=True, bootstrap=3, cache=rootdir + '/.AutoWIG', force=False)
+
+asg['::std::cout'].clean = False
 
 autowig.middle_end.plugin = 'default'
 autowig.middle_end(asg)
@@ -41,6 +43,7 @@ autowig.back_end(asg,
 
 autowig.back_end.plugin = 'boost_python:closure'
 autowig.back_end(asg)
+asg['::std::cout'].boost_python_export = True
 
 autowig.back_end.plugin = 'boost_python:export'
 autowig.back_end(asg,

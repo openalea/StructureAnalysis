@@ -139,6 +139,8 @@ namespace stat_tool {
                              frequency_distribution_transformation transform ,
                              int param , rounding mode = FLOOR)
     :FrequencyDistribution(histo , transform , param , mode) { distribution = NULL; }
+    DiscreteDistributionData(const std::vector< Reestimation<int>* >& histo)
+    :FrequencyDistribution(histo) { distribution = NULL; }
     DiscreteDistributionData(int nb_histo , const FrequencyDistribution **phisto)
     :FrequencyDistribution(nb_histo , phisto) { distribution = NULL; }
     DiscreteDistributionData(const FrequencyDistribution &histo , const Distribution *dist);

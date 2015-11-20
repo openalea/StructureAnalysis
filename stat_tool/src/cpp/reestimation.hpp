@@ -149,6 +149,41 @@ Reestimation<Type>::Reestimation(const Reestimation<Type> &histo)
  *--------------------------------------------------------------*/
 
 template <typename Type>
+Reestimation<Type>::Reestimation(const std::vector< Reestimation<Type>* >& histo)
+{
+  register int i , j;
+
+
+  nb_value = 0;
+  nb_element = 0;
+  for (i = 0;i < histo.size();i++) {
+    if (histo[i]->nb_value > nb_value) {
+      nb_value = histo[i]->nb_value;
+    }
+    nb_element += histo[i]->nb_element;
+  }
+  alloc_nb_value = nb_value;
+
+  frequency = new Type[nb_value];
+
+  for (i = 0;i < nb_value;i++) {
+    frequency[i] = 0;
+  }
+  for (i = 0;i < histo.size();i++) {
+    for (j = histo[i]->offset;j < histo[i]->nb_value;j++) {
+      frequency[j] += histo[i]->frequency[j];
+    }
+  }
+
+  // calcul des caracteristiques de la loi empirique
+
+  offset_computation();
+  max_computation();
+  mean_computation();
+  variance_computation();
+}
+
+template <typename Type>
 Reestimation<Type>::Reestimation(int nb_histo , const Reestimation<Type> **histo)
 
 {

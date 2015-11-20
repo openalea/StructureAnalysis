@@ -696,6 +696,8 @@ namespace stat_tool {
     FrequencyDistribution(const Distribution &dist)
     :Reestimation<int>(dist.nb_value) {}
     FrequencyDistribution(int inb_element , int *pelement);
+    FrequencyDistribution(const std::vector< Reestimation<int>* >& histo)
+    :Reestimation<int>(histo) {}
     FrequencyDistribution(int nb_histo , const FrequencyDistribution **histo)
     :Reestimation<int>(nb_histo , (const Reestimation<int>**)histo) {}
     FrequencyDistribution(const FrequencyDistribution &histo ,

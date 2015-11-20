@@ -42,7 +42,7 @@
 
 
 #include <iostream>
-
+#include <vector>
 
 
 namespace stat_tool {
@@ -111,6 +111,7 @@ namespace stat_tool {
 
     Reestimation(int inb_value = 0) { init(inb_value); }
     Reestimation(const Reestimation<Type> &histo);
+    Reestimation(const std::vector< Reestimation<Type>* >& histo);
     Reestimation(int nb_histo , const Reestimation<Type> **histo);
     ~Reestimation();
     Reestimation<Type>& operator=(const Reestimation<Type> &histo);
