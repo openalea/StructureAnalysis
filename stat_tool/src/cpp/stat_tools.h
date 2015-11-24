@@ -807,15 +807,26 @@ namespace stat_tool {
                                                         int min_inf_bound = 0 , bool flag = true ,
                                                         double cumul_threshold = CUMUL_THRESHOLD) const;
 
+    DiscreteMixture* discrete_mixture_estimation(StatError &error , const DiscreteMixture &imixt , std::vector< bool>& estimate ,
+                                                 int min_inf_bound = 0 , bool mixt_flag = true ,
+                                                 bool component_flag = true , double weight_step = 0.1) const; // STD
     DiscreteMixture* discrete_mixture_estimation(StatError &error , const DiscreteMixture &imixt , bool *estimate ,
                                                  int min_inf_bound = 0 , bool mixt_flag = true ,
                                                  bool component_flag = true , double weight_step = 0.1) const;
     DiscreteMixture* discrete_mixture_estimation(StatError &error , const DiscreteMixture &imixt ,
                                                  int min_inf_bound = 0 , bool mixt_flag = true ,
                                                  bool component_flag = true , double weight_step = 0.1) const;
+    DiscreteMixture* discrete_mixture_estimation(StatError &error , int nb_component , std::vector< int >& ident ,
+                                                 int min_inf_bound = 0 , bool mixt_flag = true ,
+                                                 bool component_flag = true , double weight_step = 0.1) const; // STD
     DiscreteMixture* discrete_mixture_estimation(StatError &error , int nb_component , int *ident ,
                                                  int min_inf_bound = 0 , bool mixt_flag = true ,
                                                  bool component_flag = true , double weight_step = 0.1) const;
+    DiscreteMixture* discrete_mixture_estimation(StatError &error , std::ostream &os , int min_nb_component ,
+                                                 int max_nb_component , std::vector<int>& ident , int min_inf_bound = 0 ,
+                                                 bool mixt_flag = true , bool component_flag = true ,
+                                                 model_selection_criterion criterion = BICc ,
+                                                 double weight_step = 0.1) const; // STD
     DiscreteMixture* discrete_mixture_estimation(StatError &error , std::ostream &os , int min_nb_component ,
                                                  int max_nb_component , int *ident , int min_inf_bound = 0 ,
                                                  bool mixt_flag = true , bool component_flag = true ,

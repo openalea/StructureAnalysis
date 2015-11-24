@@ -227,8 +227,4 @@ def load_ipython_extension(ipython):
 
 def unload_ipython_extension(ipython):
 
-    from openalea.stat_tool.plot import set_plotter, fakeplot
-
-    set_plotter(fakeplot())
-    del set_plotter, fakeplot
-
+    pass

@@ -16,6 +16,8 @@ void _std_detail_list_node_base()
         void (::std::__detail::_List_node_base::*method_pointer_4bfe7cada9db5a1ea9d9e363b8fc24e8)(struct ::std::__detail::_List_node_base * const) = &::std::__detail::_List_node_base::_M_hook;
         void (::std::__detail::_List_node_base::*method_pointer_4d50dce7c1e15b48af1cbc6ea84554a7)() = &::std::__detail::_List_node_base::_M_unhook;
         boost::python::class_< struct ::std::__detail::_List_node_base, std::shared_ptr< struct ::std::__detail::_List_node_base > >("ListNodeBase", boost::python::no_init)
+            .def(boost::python::init<  >())
+            .def(boost::python::init< struct ::std::__detail::_List_node_base const & >())
             .def("swap", method_pointer_1427d93ccd8c59288d94c659c4ad3cef)
             .def("m__transfer", method_pointer_c3032c1171355925a70881b475d8886c)
             .def("m__reverse", method_pointer_92939f6b79b05c38b93d4ed105f03ee1)

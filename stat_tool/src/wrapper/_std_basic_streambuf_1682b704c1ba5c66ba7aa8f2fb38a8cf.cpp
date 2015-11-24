@@ -9,6 +9,8 @@ void _std_basic_streambuf_1682b704c1ba5c66ba7aa8f2fb38a8cf()
         boost::python::scope std_a5e4e9231d6351ccb0e06756b389f0af_scope = std_a5e4e9231d6351ccb0e06756b389f0af_module;
         class ::std::locale (::std::basic_streambuf<char, std::char_traits<char> >::*method_pointer_5f91820536bd56edaa6665a462e148db)(class ::std::locale const &) = &::std::basic_streambuf<char, std::char_traits<char> >::pubimbue;
         class ::std::locale (::std::basic_streambuf<char, std::char_traits<char> >::*method_pointer_c82af173b6a65520903dd8fbcd436978)() const = &::std::basic_streambuf<char, std::char_traits<char> >::getloc;
+        class ::std::fpos<__mbstate_t> (::std::basic_streambuf<char, std::char_traits<char> >::*method_pointer_c0a3e795740756a7938c644b63441606)(long, enum ::std::_Ios_Seekdir, enum ::std::_Ios_Openmode) = &::std::basic_streambuf<char, std::char_traits<char> >::pubseekoff;
+        class ::std::fpos<__mbstate_t> (::std::basic_streambuf<char, std::char_traits<char> >::*method_pointer_ba39279ddf1c50128da15915989b71a1)(class ::std::fpos<__mbstate_t>, enum ::std::_Ios_Openmode) = &::std::basic_streambuf<char, std::char_traits<char> >::pubseekpos;
         int (::std::basic_streambuf<char, std::char_traits<char> >::*method_pointer_ba0b0ddea84950c183abbdace771a53b)() = &::std::basic_streambuf<char, std::char_traits<char> >::pubsync;
         long (::std::basic_streambuf<char, std::char_traits<char> >::*method_pointer_622b3e983c985691acc059e8a2648ec0)() = &::std::basic_streambuf<char, std::char_traits<char> >::in_avail;
         int (::std::basic_streambuf<char, std::char_traits<char> >::*method_pointer_bca0a9fc504f5e239c22df6761d6998e)() = &::std::basic_streambuf<char, std::char_traits<char> >::snextc;
@@ -23,6 +25,8 @@ void _std_basic_streambuf_1682b704c1ba5c66ba7aa8f2fb38a8cf()
         boost::python::class_< class ::std::basic_streambuf<char, std::char_traits<char> >, std::shared_ptr< class ::std::basic_streambuf<char, std::char_traits<char> > >, boost::noncopyable >("_BasicStreambuf_1682b704c1ba5c66ba7aa8f2fb38a8cf", boost::python::no_init)
             .def("pubimbue", method_pointer_5f91820536bd56edaa6665a462e148db)
             .def("getloc", method_pointer_c82af173b6a65520903dd8fbcd436978)
+            .def("pubseekoff", method_pointer_c0a3e795740756a7938c644b63441606)
+            .def("pubseekpos", method_pointer_ba39279ddf1c50128da15915989b71a1)
             .def("pubsync", method_pointer_ba0b0ddea84950c183abbdace771a53b)
             .def("in_avail", method_pointer_622b3e983c985691acc059e8a2648ec0)
             .def("snextc", method_pointer_bca0a9fc504f5e239c22df6761d6998e)

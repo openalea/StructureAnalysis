@@ -12,6 +12,7 @@ void _stat_tool_multi_plot()
         int (::stat_tool::MultiPlot::*method_pointer_eab7c2749bae5da3903dfe580bd77831)() = &::stat_tool::MultiPlot::size;
         boost::python::class_< class ::stat_tool::MultiPlot, std::shared_ptr< class ::stat_tool::MultiPlot > >("MultiPlot", boost::python::no_init)
             .def(boost::python::init< int >())
+            .def(boost::python::init< class ::stat_tool::MultiPlot const & >())
             .def("__setitem__", method_pointer_af406258214b5e0d8168d234bb932acb, boost::python::return_internal_reference<>())
             .def("resize", method_pointer_95aa6653df98514e8e5b7e3f8fbf1b4b)
             .def("size", method_pointer_eab7c2749bae5da3903dfe580bd77831)

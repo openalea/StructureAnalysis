@@ -19,6 +19,7 @@ void _stat_tool_single_plot()
         struct ::std::_List_const_iterator<std::pair<float, float> > (::stat_tool::SinglePlot::*method_pointer_73c1e2ab42fe5cfda0f730a9dcb393cd)() = &::stat_tool::SinglePlot::end;
         boost::python::class_< class ::stat_tool::SinglePlot, std::shared_ptr< class ::stat_tool::SinglePlot > >("SinglePlot", boost::python::no_init)
             .def(boost::python::init<  >())
+            .def(boost::python::init< class ::stat_tool::SinglePlot const & >())
             .def("add_point", method_pointer_6a7e6a436fdf5223936bab1c87e3a925)
             .def("add_point", method_pointer_844b03359db15d14a628d52100fd1a25)
             .def("add_text", method_pointer_303fb6128f8e56a9bcbeda47ac209905)

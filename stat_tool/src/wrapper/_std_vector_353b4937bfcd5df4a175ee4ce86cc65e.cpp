@@ -56,4 +56,39 @@ void _std_vector_353b4937bfcd5df4a175ee4ce86cc65e()
             .def("pop_back", method_pointer_7022ca3e7c5557f089da3a139313c76a)
             .def("swap", method_pointer_3cd5f3b75e0f57bebbecbe69f20456a4)
             .def("clear", method_pointer_3468843386c55add8cf2668640bb3df0);
+    struct vector_353b4937bfcd5df4a175ee4ce86cc65e_from_python
+    {
+        vector_353b4937bfcd5df4a175ee4ce86cc65e_from_python()
+        {
+            boost::python::converter::registry::push_back(
+                &convertible,
+                &construct,
+                boost::python::type_id< class ::std::vector<stat_tool::MultiPlot, std::allocator<stat_tool::MultiPlot> > >());
+        }
+
+        static void* convertible(PyObject* obj_ptr)
+        { return obj_ptr; }
+
+        static void construct(PyObject* obj_ptr, boost::python::converter::rvalue_from_python_stage1_data* data)
+        {
+            boost::python::handle<> obj_iter(PyObject_GetIter(obj_ptr));
+            void* storage = ((boost::python::converter::rvalue_from_python_storage< class ::std::vector<stat_tool::MultiPlot, std::allocator<stat_tool::MultiPlot> > >*)data)->storage.bytes;
+            new (storage) class ::std::vector<stat_tool::MultiPlot, std::allocator<stat_tool::MultiPlot> >();
+            data->convertible = storage;
+            class ::std::vector<stat_tool::MultiPlot, std::allocator<stat_tool::MultiPlot> >& result = *((class ::std::vector<stat_tool::MultiPlot, std::allocator<stat_tool::MultiPlot> >*)storage);
+            unsigned int i = 0;
+            for(;; i++)
+            {
+                boost::python::handle<> py_elem_hdl(boost::python::allow_null(PyIter_Next(obj_iter.get())));
+                if(PyErr_Occurred())
+                { boost::python::throw_error_already_set(); }
+                if(!py_elem_hdl.get())
+                { break; }
+                boost::python::object py_elem_obj(py_elem_hdl);
+                result.push_back((class ::stat_tool::MultiPlot)(boost::python::extract< class ::stat_tool::MultiPlot >(py_elem_obj)));
+            }
+        }
+    };
+
+    vector_353b4937bfcd5df4a175ee4ce86cc65e_from_python();
 }

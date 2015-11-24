@@ -22,6 +22,8 @@ void _std_basic_ostream_d2368b7a8f79566f82141f26afccb03c()
         class ::std::basic_ostream<char, std::char_traits<char> > & (::std::basic_ostream<char, std::char_traits<char> >::*method_pointer_d47bf010575d5b0a892080be15714273)(class ::std::basic_streambuf<char, std::char_traits<char> > *) = &::std::basic_ostream<char, std::char_traits<char> >::operator<<;
         class ::std::basic_ostream<char, std::char_traits<char> > & (::std::basic_ostream<char, std::char_traits<char> >::*method_pointer_0a0356821c655592b2df94b2d3c1c194)(char) = &::std::basic_ostream<char, std::char_traits<char> >::put;
         class ::std::basic_ostream<char, std::char_traits<char> > & (::std::basic_ostream<char, std::char_traits<char> >::*method_pointer_104ea009de895af0ba17c1b0e5120691)() = &::std::basic_ostream<char, std::char_traits<char> >::flush;
+        class ::std::fpos<__mbstate_t> (::std::basic_ostream<char, std::char_traits<char> >::*method_pointer_428cc6b526935d48892bfacd7606784a)() = &::std::basic_ostream<char, std::char_traits<char> >::tellp;
+        class ::std::basic_ostream<char, std::char_traits<char> > & (::std::basic_ostream<char, std::char_traits<char> >::*method_pointer_489f2e36eccd5473b70e2fbd3c02464b)(class ::std::fpos<__mbstate_t>) = &::std::basic_ostream<char, std::char_traits<char> >::seekp;
         class ::std::basic_ostream<char, std::char_traits<char> > & (::std::basic_ostream<char, std::char_traits<char> >::*method_pointer_9fd3bb45734e566ab847be918fb76f69)(long, enum ::std::_Ios_Seekdir) = &::std::basic_ostream<char, std::char_traits<char> >::seekp;
         boost::python::class_< class ::std::basic_ostream<char, std::char_traits<char> >, std::shared_ptr< class ::std::basic_ostream<char, std::char_traits<char> > >, boost::python::bases< class ::std::basic_ios<char, std::char_traits<char> > >, boost::noncopyable >("_BasicOstream_d2368b7a8f79566f82141f26afccb03c", boost::python::no_init)
             .def(boost::python::init< class ::std::basic_streambuf<char, std::char_traits<char> > * >())
@@ -40,6 +42,8 @@ void _std_basic_ostream_d2368b7a8f79566f82141f26afccb03c()
             .def("__lshift__", method_pointer_d47bf010575d5b0a892080be15714273, boost::python::return_internal_reference<>())
             .def("put", method_pointer_0a0356821c655592b2df94b2d3c1c194, boost::python::return_internal_reference<>())
             .def("flush", method_pointer_104ea009de895af0ba17c1b0e5120691, boost::python::return_internal_reference<>())
+            .def("tellp", method_pointer_428cc6b526935d48892bfacd7606784a)
+            .def("seekp", method_pointer_489f2e36eccd5473b70e2fbd3c02464b, boost::python::return_internal_reference<>())
             .def("seekp", method_pointer_9fd3bb45734e566ab847be918fb76f69, boost::python::return_internal_reference<>());
         boost::python::implicitly_convertible< std::shared_ptr< class ::std::basic_ostream<char, std::char_traits<char> > >, std::shared_ptr< class ::std::basic_ios<char, std::char_traits<char> > > >();
 }

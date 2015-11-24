@@ -44,4 +44,39 @@ void _std_vector_b06d46b7ec9f551293bc27dc0a196afa()
             .def("pop_back", method_pointer_2d363ed2fc5950f68a03d934d57851cc)
             .def("swap", method_pointer_f617e6b977e651a6ae8985dd17f99bda)
             .def("clear", method_pointer_823a942d3fe95fb9bee873042664f0b9);
+    struct vector_b06d46b7ec9f551293bc27dc0a196afa_from_python
+    {
+        vector_b06d46b7ec9f551293bc27dc0a196afa_from_python()
+        {
+            boost::python::converter::registry::push_back(
+                &convertible,
+                &construct,
+                boost::python::type_id< class ::std::vector<stat_tool::process_distribution, std::allocator<stat_tool::process_distribution> > >());
+        }
+
+        static void* convertible(PyObject* obj_ptr)
+        { return obj_ptr; }
+
+        static void construct(PyObject* obj_ptr, boost::python::converter::rvalue_from_python_stage1_data* data)
+        {
+            boost::python::handle<> obj_iter(PyObject_GetIter(obj_ptr));
+            void* storage = ((boost::python::converter::rvalue_from_python_storage< class ::std::vector<stat_tool::process_distribution, std::allocator<stat_tool::process_distribution> > >*)data)->storage.bytes;
+            new (storage) class ::std::vector<stat_tool::process_distribution, std::allocator<stat_tool::process_distribution> >();
+            data->convertible = storage;
+            class ::std::vector<stat_tool::process_distribution, std::allocator<stat_tool::process_distribution> >& result = *((class ::std::vector<stat_tool::process_distribution, std::allocator<stat_tool::process_distribution> >*)storage);
+            unsigned int i = 0;
+            for(;; i++)
+            {
+                boost::python::handle<> py_elem_hdl(boost::python::allow_null(PyIter_Next(obj_iter.get())));
+                if(PyErr_Occurred())
+                { boost::python::throw_error_already_set(); }
+                if(!py_elem_hdl.get())
+                { break; }
+                boost::python::object py_elem_obj(py_elem_hdl);
+                result.push_back((enum ::stat_tool::process_distribution)(boost::python::extract< enum ::stat_tool::process_distribution >(py_elem_obj)));
+            }
+        }
+    };
+
+    vector_b06d46b7ec9f551293bc27dc0a196afa_from_python();
 }

@@ -11,5 +11,6 @@ void _std_ios_base_init()
         boost::python::scope().attr("_ios_base") = _ios_base_5647113ef4105dfab0588ffcaf6c479b_module;
         boost::python::scope _ios_base_5647113ef4105dfab0588ffcaf6c479b_scope = _ios_base_5647113ef4105dfab0588ffcaf6c479b_module;
         boost::python::class_< class ::std::ios_base::Init, std::shared_ptr< class ::std::ios_base::Init > >("Init", boost::python::no_init)
-            .def(boost::python::init<  >());
+            .def(boost::python::init<  >())
+            .def(boost::python::init< class ::std::ios_base::Init const & >());
 }

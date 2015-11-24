@@ -56,4 +56,39 @@ void _std_vector_de5cf896f8255947948857862d989260()
             .def("pop_back", method_pointer_1c02d61525af53cf8fa914fd5a8ae7f4)
             .def("swap", method_pointer_0058f91a44af5e22910f8f742735503f)
             .def("clear", method_pointer_546b94b9a8f15aca9a6e00823a3bb3ac);
+    struct vector_de5cf896f8255947948857862d989260_from_python
+    {
+        vector_de5cf896f8255947948857862d989260_from_python()
+        {
+            boost::python::converter::registry::push_back(
+                &convertible,
+                &construct,
+                boost::python::type_id< class ::std::vector<stat_tool::SinglePlot, std::allocator<stat_tool::SinglePlot> > >());
+        }
+
+        static void* convertible(PyObject* obj_ptr)
+        { return obj_ptr; }
+
+        static void construct(PyObject* obj_ptr, boost::python::converter::rvalue_from_python_stage1_data* data)
+        {
+            boost::python::handle<> obj_iter(PyObject_GetIter(obj_ptr));
+            void* storage = ((boost::python::converter::rvalue_from_python_storage< class ::std::vector<stat_tool::SinglePlot, std::allocator<stat_tool::SinglePlot> > >*)data)->storage.bytes;
+            new (storage) class ::std::vector<stat_tool::SinglePlot, std::allocator<stat_tool::SinglePlot> >();
+            data->convertible = storage;
+            class ::std::vector<stat_tool::SinglePlot, std::allocator<stat_tool::SinglePlot> >& result = *((class ::std::vector<stat_tool::SinglePlot, std::allocator<stat_tool::SinglePlot> >*)storage);
+            unsigned int i = 0;
+            for(;; i++)
+            {
+                boost::python::handle<> py_elem_hdl(boost::python::allow_null(PyIter_Next(obj_iter.get())));
+                if(PyErr_Occurred())
+                { boost::python::throw_error_already_set(); }
+                if(!py_elem_hdl.get())
+                { break; }
+                boost::python::object py_elem_obj(py_elem_hdl);
+                result.push_back((class ::stat_tool::SinglePlot)(boost::python::extract< class ::stat_tool::SinglePlot >(py_elem_obj)));
+            }
+        }
+    };
+
+    vector_de5cf896f8255947948857862d989260_from_python();
 }

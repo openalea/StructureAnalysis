@@ -34,7 +34,6 @@ void _std_vector_c12ae15f998e5bfbab2ce7e6d139e0e2()
             .def(boost::python::init<  >())
             .def(boost::python::init< class ::std::allocator<std::pair<std::pair<float, float>, std::basic_string<char> > > const & >())
             .def(boost::python::init< unsigned long, class ::std::allocator<std::pair<std::pair<float, float>, std::basic_string<char> > > const & >())
-            .def(boost::python::init< unsigned long, struct ::std::pair<std::pair<float, float>, std::basic_string<char> > const &, class ::std::allocator<std::pair<std::pair<float, float>, std::basic_string<char> > > const & >())
             .def(boost::python::init< class ::std::vector<std::pair<std::pair<float, float>, std::basic_string<char> >, std::allocator<std::pair<std::pair<float, float>, std::basic_string<char> > > > const & >())
             .def(boost::python::init< class ::std::initializer_list<std::pair<std::pair<float, float>, std::basic_string<char> > >, class ::std::allocator<std::pair<std::pair<float, float>, std::basic_string<char> > > const & >())
             .def("assign", method_pointer_51751263c203522f835af72eb99a19e1)
@@ -60,4 +59,39 @@ void _std_vector_c12ae15f998e5bfbab2ce7e6d139e0e2()
             .def("pop_back", method_pointer_a89eb66ff684500ab5b87ecb307a2bea)
             .def("swap", method_pointer_04722e1adfbf59be91eb120a160d5094)
             .def("clear", method_pointer_a3ee52903a4d57e5ba91ddab87512076);
+    struct vector_c12ae15f998e5bfbab2ce7e6d139e0e2_from_python
+    {
+        vector_c12ae15f998e5bfbab2ce7e6d139e0e2_from_python()
+        {
+            boost::python::converter::registry::push_back(
+                &convertible,
+                &construct,
+                boost::python::type_id< class ::std::vector<std::pair<std::pair<float, float>, std::basic_string<char> >, std::allocator<std::pair<std::pair<float, float>, std::basic_string<char> > > > >());
+        }
+
+        static void* convertible(PyObject* obj_ptr)
+        { return obj_ptr; }
+
+        static void construct(PyObject* obj_ptr, boost::python::converter::rvalue_from_python_stage1_data* data)
+        {
+            boost::python::handle<> obj_iter(PyObject_GetIter(obj_ptr));
+            void* storage = ((boost::python::converter::rvalue_from_python_storage< class ::std::vector<std::pair<std::pair<float, float>, std::basic_string<char> >, std::allocator<std::pair<std::pair<float, float>, std::basic_string<char> > > > >*)data)->storage.bytes;
+            new (storage) class ::std::vector<std::pair<std::pair<float, float>, std::basic_string<char> >, std::allocator<std::pair<std::pair<float, float>, std::basic_string<char> > > >();
+            data->convertible = storage;
+            class ::std::vector<std::pair<std::pair<float, float>, std::basic_string<char> >, std::allocator<std::pair<std::pair<float, float>, std::basic_string<char> > > >& result = *((class ::std::vector<std::pair<std::pair<float, float>, std::basic_string<char> >, std::allocator<std::pair<std::pair<float, float>, std::basic_string<char> > > >*)storage);
+            unsigned int i = 0;
+            for(;; i++)
+            {
+                boost::python::handle<> py_elem_hdl(boost::python::allow_null(PyIter_Next(obj_iter.get())));
+                if(PyErr_Occurred())
+                { boost::python::throw_error_already_set(); }
+                if(!py_elem_hdl.get())
+                { break; }
+                boost::python::object py_elem_obj(py_elem_hdl);
+                result.push_back((struct ::std::pair<std::pair<float, float>, std::basic_string<char> >)(boost::python::extract< struct ::std::pair<std::pair<float, float>, std::basic_string<char> > >(py_elem_obj)));
+            }
+        }
+    };
+
+    vector_c12ae15f998e5bfbab2ce7e6d139e0e2_from_python();
 }

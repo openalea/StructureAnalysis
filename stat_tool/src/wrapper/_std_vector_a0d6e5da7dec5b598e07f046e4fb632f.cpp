@@ -26,10 +26,11 @@ void _std_vector_a0d6e5da7dec5b598e07f046e4fb632f()
         void (::std::vector<int, std::allocator<int> >::*method_pointer_9d23ebaeda6d5d49b49b9958e15b5e51)() = &::std::vector<int, std::allocator<int> >::clear;
         boost::python::class_< class ::std::vector<int, std::allocator<int> >, std::shared_ptr< class ::std::vector<int, std::allocator<int> > > >("_Vector_a0d6e5da7dec5b598e07f046e4fb632f", boost::python::no_init)
             .def(boost::python::init<  >())
-            .def(boost::python::init< class ::std::allocator<int> const & >())
             .def(boost::python::init< unsigned long, class ::std::allocator<int> const & >())
             .def(boost::python::init< unsigned long, int const &, class ::std::allocator<int> const & >())
             .def(boost::python::init< class ::std::vector<int, std::allocator<int> > const & >())
+            .def(boost::python::init< class ::std::vector<int, std::allocator<int> > const &, class ::std::allocator<int> const & >())
+            .def(boost::python::init< class ::std::initializer_list<int>, class ::std::allocator<int> const & >())
             .def("assign", method_pointer_4ccc81500a895368a9e8d22d68286743)
             .def("size", method_pointer_e07ec54b5ecf51aba9ea64933865d66f)
             .def("max_size", method_pointer_71bf07dd40255055b8a324e995732a46)
@@ -47,4 +48,39 @@ void _std_vector_a0d6e5da7dec5b598e07f046e4fb632f()
             .def("pop_back", method_pointer_8d12d434085a5f54a8c38754cb8ce092)
             .def("swap", method_pointer_730a17c027895110a75f98866282c7c5)
             .def("clear", method_pointer_9d23ebaeda6d5d49b49b9958e15b5e51);
+    struct vector_a0d6e5da7dec5b598e07f046e4fb632f_from_python
+    {
+        vector_a0d6e5da7dec5b598e07f046e4fb632f_from_python()
+        {
+            boost::python::converter::registry::push_back(
+                &convertible,
+                &construct,
+                boost::python::type_id< class ::std::vector<int, std::allocator<int> > >());
+        }
+
+        static void* convertible(PyObject* obj_ptr)
+        { return obj_ptr; }
+
+        static void construct(PyObject* obj_ptr, boost::python::converter::rvalue_from_python_stage1_data* data)
+        {
+            boost::python::handle<> obj_iter(PyObject_GetIter(obj_ptr));
+            void* storage = ((boost::python::converter::rvalue_from_python_storage< class ::std::vector<int, std::allocator<int> > >*)data)->storage.bytes;
+            new (storage) class ::std::vector<int, std::allocator<int> >();
+            data->convertible = storage;
+            class ::std::vector<int, std::allocator<int> >& result = *((class ::std::vector<int, std::allocator<int> >*)storage);
+            unsigned int i = 0;
+            for(;; i++)
+            {
+                boost::python::handle<> py_elem_hdl(boost::python::allow_null(PyIter_Next(obj_iter.get())));
+                if(PyErr_Occurred())
+                { boost::python::throw_error_already_set(); }
+                if(!py_elem_hdl.get())
+                { break; }
+                boost::python::object py_elem_obj(py_elem_hdl);
+                result.push_back((int)(boost::python::extract< int >(py_elem_obj)));
+            }
+        }
+    };
+
+    vector_a0d6e5da7dec5b598e07f046e4fb632f_from_python();
 }
