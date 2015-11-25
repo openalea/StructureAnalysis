@@ -16,7 +16,7 @@
  *
  *        OpenAlea WebSite : http://openalea.gforge.inria.fr
  *
- *        $Id$
+ *        $Id: export_frequency_distribution.cpp 18482 2015-07-29 11:36:58Z guedon $
  *
  *-----------------------------------------------------------------------------*/
 
@@ -174,10 +174,10 @@ public:
     StatError error;
 
     int nb_component = boost::python::len(ident_list);
-    int ident[DISCRETE_MIXTURE_NB_COMPONENT];
+    discrete_parametric ident[DISCRETE_MIXTURE_NB_COMPONENT];
 
     for (int i = 0; i < nb_component; i++)
-      ident[i] = boost::python::extract<int>(ident_list[i]);
+      ident[i] = (discrete_parametric)((int)boost::python::extract<int>(ident_list[i]));
 
     ret = h.discrete_mixture_estimation(error, output, 1, nb_component, ident,
         min_inf_bound, flag, component_flag, criterion);
@@ -286,7 +286,7 @@ public:
     return histo;
   }
 
-  WRAP_METHOD3(FrequencyDistribution, parametric_estimation, DiscreteParametricModel, int, int, bool);
+  WRAP_METHOD3(FrequencyDistribution, parametric_estimation, DiscreteParametricModel, discrete_parametric, int, bool);
   WRAP_METHOD3(FrequencyDistribution, value_select, DiscreteDistributionData, int, int, bool);
   WRAP_METHOD1(FrequencyDistribution, shift, DiscreteDistributionData, int);
   WRAP_METHOD1(FrequencyDistribution, fit, DiscreteParametricModel, DiscreteParametric);

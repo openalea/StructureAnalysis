@@ -26,7 +26,6 @@
 #include "export_base.h"
 
 #include "stat_tool/regression.h"
-#include "stat_tool/multivariate_mixture.h"
 
 #include <boost/python.hpp>
 #include <boost/python/detail/api_placeholder.hpp>
@@ -691,18 +690,6 @@ public:
     return ret;
   }
 
-  // Mixture cluster
-  static MultivariateMixtureData*
-  mixture_cluster(const Vectors& v, const MultivariateMixture& m)
-  {
-    StatError error;
-    MultivariateMixtureData* ret = NULL;
-    ret = m.cluster(error, v);
-    if (ret == NULL)
-      stat_tool::wrap_util::throw_error(error);
-    return ret;
-  }
-
   // Extract
   static DiscreteDistributionData*
   extract_histogram(const Vectors& v, int variable)
@@ -780,198 +767,6 @@ public:
     if (!ret)
       stat_tool::wrap_util::throw_error(error);
 
-    return ret;
-  }
-
-  static MultivariateMixture*
-  mixture_estimation_model(const Vectors& v, const MultivariateMixture& mixt, int nb_iter,
-      boost::python::list force_param)
-  {
-    bool status = true, several_errors = false;
-    MultivariateMixture* ret = NULL;
-    bool *fparam = NULL;
-    StatError error;
-    ostringstream error_message;
-    int nb_fparam, p;
-    const int nb_variables = v.get_nb_variable();
-    object o;
-
-    nb_fparam = boost::python::len(force_param);
-
-    if (nb_fparam > 0)
-      {
-        if (nb_fparam != nb_variables)
-          {
-            status = false;
-            error_message << "bad size of argument list: " << nb_fparam
-                << ": should be the number of variables (" << nb_variables
-                << ")";
-            PyErr_SetString(PyExc_ValueError, (error_message.str()).c_str());
-            throw_error_already_set();
-          }
-        else
-          {
-            fparam = new bool[nb_fparam];
-            for (p = 0; p < nb_fparam; p++)
-              {
-                o = force_param[p];
-                try
-                  {
-                    extract<bool> x(o);
-                    if (x.check())
-                      fparam[p] = x();
-                    else
-                      status = false;
-                  }
-                catch (...)
-                  {
-                    status = false;
-                  }
-                if (!status)
-                  {
-                    if (several_errors)
-                      error_message << endl;
-                    else
-                      several_errors = true;
-                    error_message << "incorrect type for element " << p
-                        << " of argument list: expecting a boolean";
-                  }
-              }
-            if (!status)
-              {
-                delete[] fparam;
-                fparam = NULL;
-                PyErr_SetString(PyExc_TypeError, (error_message.str()).c_str());
-                throw_error_already_set();
-              }
-          }
-      }
-    else
-      {
-        nb_fparam = nb_variables;
-        fparam = new bool[nb_fparam];
-        for (p = 0; p < nb_fparam; p++)
-          fparam[p] = false;
-      }
-
-    if (status)
-      {
-
-        ret = v.mixture_estimation(error, cout, mixt, nb_iter, fparam);
-        if (fparam != NULL)
-          {
-            delete[] fparam;
-            fparam = NULL;
-          }
-
-        if (ret == NULL)
-          stat_tool::wrap_util::throw_error(error);
-
-        if (error.get_nb_error() > 0)
-          {
-            ret->ascii_write(cout, true);
-            delete ret;
-            error_message << error << endl;
-            PyErr_SetString(PyExc_UserWarning, (error_message.str()).c_str());
-            throw_error_already_set();
-          }
-      }
-    return ret;
-  }
-
-  static MultivariateMixture*
-  mixture_estimation_nb_component(const Vectors& v, int nb_component, int nb_iter,
-      boost::python::list force_param)
-  {
-    bool status = true, several_errors = false;
-    MultivariateMixture* ret = NULL;
-    bool *fparam = NULL;
-    StatError error;
-    ostringstream error_message;
-    int nb_fparam, p;
-    const int nb_variables = v.get_nb_variable();
-    object o;
-
-    nb_fparam = boost::python::len(force_param);
-
-    if (nb_fparam > 0)
-      {
-        if (nb_fparam != nb_variables)
-          {
-            status = false;
-            error_message << "bad size of argument list: " << nb_fparam
-                << ": should be the number of variables (" << nb_variables
-                << ")";
-            PyErr_SetString(PyExc_ValueError, (error_message.str()).c_str());
-            throw_error_already_set();
-          }
-        else
-          {
-            fparam = new bool[nb_fparam];
-            for (p = 0; p < nb_fparam; p++)
-              {
-                o = force_param[p];
-                try
-                  {
-                    extract<bool> x(o);
-                    if (x.check())
-                      fparam[p] = x();
-                    else
-                      status = false;
-                  }
-                catch (...)
-                  {
-                    status = false;
-                  }
-                if (!status)
-                  {
-                    if (several_errors)
-                      error_message << endl;
-                    else
-                      several_errors = true;
-                    error_message << "incorrect type for element " << p
-                        << " of argument list: expecting a boolean";
-                  }
-              }
-            if (!status)
-              {
-                delete[] fparam;
-                fparam = NULL;
-                PyErr_SetString(PyExc_TypeError, (error_message.str()).c_str());
-                throw_error_already_set();
-              }
-          }
-      }
-    else
-      {
-        nb_fparam = nb_variables;
-        fparam = new bool[nb_fparam];
-        for (p = 0; p < nb_fparam; p++)
-          fparam[p] = false;
-      }
-
-    if (status)
-      {
-
-        ret = v.mixture_estimation(error, cout, nb_component, nb_iter, fparam);
-        if (fparam != NULL)
-          {
-            delete[] fparam;
-            fparam = NULL;
-          }
-
-        if (ret == NULL)
-          stat_tool::wrap_util::throw_error(error);
-
-        if (error.get_nb_error() > 0)
-          {
-            ret->ascii_write(cout, true);
-            delete ret;
-            error_message << error << endl;
-            PyErr_SetString(PyExc_UserWarning, (error_message.str()).c_str());
-            throw_error_already_set();
-          }
-      }
     return ret;
   }
 
@@ -1146,17 +941,8 @@ class_vectors()
   DEF_RETURN_VALUE("nearest_neighbours_regression", WRAP::nearest_neighbours,
       args("explanatory_var", "response_var", "span", "weighting"),
       "TODO Linear regression (nearest neighbours)")
-  DEF_RETURN_VALUE("mixture_estimation_model", WRAP::mixture_estimation_model,
-      args("initial_mixture", "nb_max_iteration", "force_param"),
-      "TODO Mixture estimation (EM algorithm with initial model)")
-  DEF_RETURN_VALUE("mixture_estimation_nb_component", WRAP::mixture_estimation_nb_component,
-      args("nb_component", "nb_max_iteration", "force_param"),
-      "TODO Mixture estimation (EM algorithm with fixed number of components)")
 
 
-
-  DEF_RETURN_VALUE("mixture_cluster", WRAP::mixture_cluster,
-      args("model"), "TODOCluster individuals using mixture model" )
   DEF_RETURN_VALUE("compare", WRAP::comparison,
       args("distance"), "TODOCompare Vectors given a VectorDistance")
   DEF_RETURN_VALUE("scaling", WRAP::scaling,

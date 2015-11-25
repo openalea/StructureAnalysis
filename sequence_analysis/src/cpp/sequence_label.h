@@ -8,7 +8,7 @@
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: sequence_label.h 18668 2015-11-09 12:03:42Z guedon $
  *
  *       Forum for AMAPmod developers: amldevlp@cirad.fr
  *
@@ -234,7 +234,6 @@ namespace sequence_analysis {
     SEQL_GLOBAL_STANDARD_DEVIATION ,
     SEQL_PIECEWISE_LINEAR_FUNCTION ,
     SEQL_CONFIDENCE_INTERVALS ,
-    SEQL_PREDICTION_INTERVALS ,
     SEQL_NB_SEGMENT ,
     SEQL_POSTERIOR_PROBABILITY ,
     SEQL_PENALTY ,

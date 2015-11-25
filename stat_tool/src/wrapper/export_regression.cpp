@@ -25,7 +25,6 @@
 #include "export_base.h"
 
 #include "stat_tool/regression.h"
-#include "stat_tool/multivariate_mixture.h"
 
 #include <boost/python.hpp>
 #include <boost/python/detail/api_placeholder.hpp>

@@ -8,7 +8,7 @@
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: distribution_algorithms.cpp 18450 2015-07-29 09:42:43Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -1056,7 +1056,7 @@ DiscreteParametricModel* FrequencyDistribution::fit(StatError &error ,
  *
  *--------------------------------------------------------------*/
 
-DiscreteParametric* FrequencyDistribution::parametric_estimation(int ident , int min_inf_bound ,
+DiscreteParametric* FrequencyDistribution::parametric_estimation(discrete_parametric ident , int min_inf_bound ,
                                                                  bool flag , double cumul_threshold) const
 
 {
@@ -1098,7 +1098,7 @@ DiscreteParametric* FrequencyDistribution::parametric_estimation(int ident , int
  *
  *--------------------------------------------------------------*/
 
-DiscreteParametricModel* FrequencyDistribution::parametric_estimation(StatError &error , int ident ,
+DiscreteParametricModel* FrequencyDistribution::parametric_estimation(StatError &error , discrete_parametric ident ,
                                                                       int min_inf_bound , bool flag ,
                                                                       double cumul_threshold) const
 
