@@ -8,7 +8,7 @@
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: discrete_mixture.h 18442 2015-07-29 09:35:54Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -59,7 +59,7 @@ namespace stat_tool {
   const double NEGATIVE_BINOMIAL_PARAMETER = 20.;  // parametre initial pour une loi binomiale negative
   const double MIN_WEIGHT_STEP = 0.1;    // pas minimum d'initialisation des poids
   const double MAX_WEIGHT_STEP = 0.5;    // pas maximum d'initialisation des poids
-  const int MIXTURE_COEFF = 2;           // coefficient arrondi estimateur
+  const int DISCRETE_MIXTURE_COEFF = 2;           // coefficient arrondi estimateur
   const double DISCRETE_MIXTURE_LIKELIHOOD_DIFF = 1.e-5;  // seuil pour stopper les iterations EM
   const int DISCRETE_MIXTURE_NB_ITER = 500;        // nombre maximum d'iterations EM
 
