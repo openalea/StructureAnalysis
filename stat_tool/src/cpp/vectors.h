@@ -115,7 +115,6 @@ namespace stat_tool {
  */
 
 
-  class MultivariateMixture;
   class Mixture;
   class Regression;
   class VectorDistance;
@@ -124,7 +123,6 @@ namespace stat_tool {
   class Vectors : public StatInterface {  // vecteurs
 
     friend class Regression;
-    friend class MultivariateMixture;
     friend class Mixture;
 
     friend std::ostream& operator<<(std::ostream &os , const Vectors &vec)
@@ -333,14 +331,6 @@ namespace stat_tool {
     Regression* nearest_neighbor_smoother(StatError &error , int explanatory_variable ,
                                           int response_variable , double span ,
                                           bool weighting = true) const;
-
-    MultivariateMixture* mixture_estimation(StatError &error , std::ostream &os ,
-                                            const MultivariateMixture &imixture,
-                                            int nb_iter = I_DEFAULT ,
-                                            bool *force_param = NULL) const;
-    MultivariateMixture* mixture_estimation(StatError &error , std::ostream& os ,
-                                            int nb_component , int nb_iter = I_DEFAULT ,
-                                            bool *force_param = NULL) const;
 
     Mixture* mixture_estimation(StatError &error , std::ostream &os , const Mixture &imixt ,
                                 bool known_component = false , bool common_dispersion = false ,

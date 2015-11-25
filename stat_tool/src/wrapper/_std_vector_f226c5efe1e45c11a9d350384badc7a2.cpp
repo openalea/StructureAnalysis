@@ -1,8 +1,8 @@
 #include <boost/python.hpp>
 #include <stat_tool/compound.h>
+#include <stat_tool/discrete_mixture.h>
 #include <stat_tool/stat_tools.h>
 #include <stat_tool/convolution.h>
-#include <stat_tool/discrete_mixture.h>
 
 void _std_vector_f226c5efe1e45c11a9d350384badc7a2()
 {

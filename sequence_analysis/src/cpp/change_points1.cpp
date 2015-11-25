@@ -1330,6 +1330,17 @@ Sequences* Sequences::segmentation_output(int *nb_segment , segment_model *model
 
           delete test;
 
+          os << SEQ_label[SEQL_PIECEWISE_LINEAR_FUNCTION] << ": ";
+          for (k = 0;k < nb_segment[i];k++) {
+            os << intercept[j][k] + slope[j][k] * seq_index_parameter[change_point[k]] << " -> ";
+            if (k < nb_segment[i] - 1) {
+              os << intercept[j][k] + slope[j][k] * seq_index_parameter[change_point[k + 1]] << " | ";
+            }
+            else {
+              os << intercept[j][k] + slope[j][k] * seq_index_parameter[change_point[k + 1] - 1] << endl;
+            }
+          }
+
           if (continuity) {
             os << "\n" << SEQ_label[SEQL_SEGMENT] << " " << STAT_label[STATL_INTERCEPT] << ", "
                << STAT_label[STATL_SLOPE] << ", "

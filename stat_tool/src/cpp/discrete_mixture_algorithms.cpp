@@ -8,7 +8,7 @@
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: discrete_mixture_algorithms.cpp 18443 2015-07-29 09:36:21Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -257,7 +257,7 @@ void DiscreteMixture::init(const FrequencyDistribution &histo , bool *estimate ,
 # ifdef DEBUG
   cout << endl;
   for (i = 0;i < nb_component;i++) {
-    cout << "weights : " << weight->mass[i] << "  ";
+    cout << "weights: " << weight->mass[i] << "  ";
     component[i]->ascii_print(cout);
   }
 # endif
@@ -570,7 +570,7 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
 
           // calcul des composantes empiriques
 
-          mixt->expectation_step(mixt_histo , (int)round(nb_element * MAX(sqrt(mixt->variance) , 1.) * MIXTURE_COEFF));
+          mixt->expectation_step(mixt_histo , (int)round(nb_element * MAX(sqrt(mixt->variance) , 1.) * DISCRETE_MIXTURE_COEFF));
           mixt->variance_correction(mixt_histo , estimate , min_inf_bound);
 
           // reestimation des poids
@@ -737,20 +737,19 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
  *
  *--------------------------------------------------------------*/
 
-DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &error , int nb_component , std::vector<int>& ident ,
+DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &error , int nb_component , std::vector< discrete_parametric >& ident ,
                                                                     int min_inf_bound , bool mixt_flag ,
-                                                                    bool component_flag , double weight_step) const
+                                                                    bool component_flag , double weight_step) const // TODO STD
 {
-    std::cout << BINOMIAL << " : " << ident[0] << std::endl;
     return discrete_mixture_estimation(error , nb_component , ident.data() ,
             min_inf_bound , mixt_flag ,
             component_flag , weight_step);
 }
 
-DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &error , int nb_component , int *ident ,
-                                                                    int min_inf_bound , bool mixt_flag ,
-                                                                    bool component_flag , double weight_step) const
-
+DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &error , int nb_component ,
+                                                                    discrete_parametric *ident , int min_inf_bound ,
+                                                                    bool mixt_flag , bool component_flag ,
+                                                                    double weight_step) const
 {
   bool estimate[DISCRETE_MIXTURE_NB_COMPONENT];
   register int i;
@@ -803,10 +802,10 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
 
 DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &error , ostream &os ,
                                                                     int min_nb_component , int max_nb_component ,
-                                                                    std::vector<int>& ident , int min_inf_bound ,
+                                                                    std::vector< discrete_parametric >& ident , int min_inf_bound ,
                                                                     bool mixt_flag , bool component_flag ,
                                                                     model_selection_criterion criterion ,
-                                                                    double weight_step) const
+                                                                    double weight_step) const // TODO STD
 {
     return discrete_mixture_estimation(error, os,
         min_nb_component , max_nb_component ,
@@ -818,7 +817,7 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
 
 DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &error , ostream &os ,
                                                                     int min_nb_component , int max_nb_component ,
-                                                                    int *ident , int min_inf_bound ,
+                                                                    discrete_parametric *ident , int min_inf_bound ,
                                                                     bool mixt_flag , bool component_flag ,
                                                                     model_selection_criterion criterion ,
                                                                     double weight_step) const

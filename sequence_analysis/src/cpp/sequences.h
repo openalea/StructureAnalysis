@@ -8,7 +8,7 @@
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: sequences.h 18659 2015-11-03 07:28:02Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -249,7 +249,7 @@ namespace sequence_analysis {
   const double ROUNDOFF_ERROR = 1.e-10;  // erreur sur une somme de doubles
   const int PENALTY_SHAPE_SCALING_FACTOR = 100;  // facteur d'echelle pour l'affichage des pentes de log-vraisemblances
   const int NB_SEGMENTATION = 10;        // nombre de segmentations calculees
-  const int SLOPE_NB_SEGMENT_RANGE = 6;  // nombre minimum de points pour calculer la pente des vraisemblances
+  const int SLOPE_NB_SEGMENT_RANGE = 5;  // nombre minimum de points pour calculer la pente des vraisemblances
 
   enum correlation_normalization {
     APPROXIMATED ,

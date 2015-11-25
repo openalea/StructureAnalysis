@@ -1,8 +1,8 @@
 #include <boost/python.hpp>
 #include <stat_tool/compound.h>
+#include <stat_tool/discrete_mixture.h>
 #include <stat_tool/stat_tools.h>
 #include <stat_tool/convolution.h>
-#include <stat_tool/discrete_mixture.h>
 
 void _stat_tool_frequency_distribution()
 {
@@ -25,7 +25,7 @@ void _stat_tool_frequency_distribution()
         void (::stat_tool::FrequencyDistribution::*method_pointer_9fe9a16abbbb56babbba6a548924f162)(class ::stat_tool::Reestimation<double> const *, int) = &::stat_tool::FrequencyDistribution::update;
         class ::stat_tool::FrequencyDistribution * (::stat_tool::FrequencyDistribution::*method_pointer_5882a600801d5cc5ac78f111a990f6b4)(int) const = &::stat_tool::FrequencyDistribution::frequency_scale;
         int (::stat_tool::FrequencyDistribution::*method_pointer_2b8a299165215e44ad3ec5cb8e6c85b0)() const = &::stat_tool::FrequencyDistribution::min_interval_computation;
-        class ::stat_tool::DiscreteParametric * (::stat_tool::FrequencyDistribution::*method_pointer_cada63185bcd53a9992002c7b742c69f)(int, int, bool, double) const = &::stat_tool::FrequencyDistribution::parametric_estimation;
+        class ::stat_tool::DiscreteParametric * (::stat_tool::FrequencyDistribution::*method_pointer_5378bc5deac05aedb57ce3e0fba4344b)(enum ::stat_tool::discrete_parametric, int, bool, double) const = &::stat_tool::FrequencyDistribution::parametric_estimation;
         double (::stat_tool::FrequencyDistribution::*method_pointer_b0a0fd68ce7952998ac6c6e0c971980f)(class ::stat_tool::ContinuousParametric const &, int) const = &::stat_tool::FrequencyDistribution::likelihood_computation;
         void (::stat_tool::FrequencyDistribution::*method_pointer_01abb08d00865de783d5f214e2fb750c)(class ::stat_tool::FrequencyDistribution const &, int) = &::stat_tool::FrequencyDistribution::shift;
         void (::stat_tool::FrequencyDistribution::*method_pointer_2010daaf8405536eb6244ab6f6ae7e30)(class ::stat_tool::FrequencyDistribution const &, int, enum ::stat_tool::rounding) = &::stat_tool::FrequencyDistribution::cluster;
@@ -40,12 +40,12 @@ void _stat_tool_frequency_distribution()
         void (::stat_tool::FrequencyDistribution::*method_pointer_7ef560611e0e57208c1aa16c12990c7c)(class ::std::basic_ostream<char, std::char_traits<char> > &, class ::stat_tool::FrequencyDistribution const &) const = &::stat_tool::FrequencyDistribution::t_comparison;
         bool (::stat_tool::FrequencyDistribution::*method_pointer_896194f1dcca5cc9aa7d08a6826cd90f)(class ::stat_tool::StatError &, class ::std::basic_ostream<char, std::char_traits<char> > &, class ::stat_tool::FrequencyDistribution const &) const = &::stat_tool::FrequencyDistribution::wilcoxon_mann_whitney_comparison;
         class ::stat_tool::DiscreteParametricModel * (::stat_tool::FrequencyDistribution::*method_pointer_0e6e66d328825e58ac42478d950343a9)(class ::stat_tool::StatError &, class ::stat_tool::DiscreteParametric const &) const = &::stat_tool::FrequencyDistribution::fit;
-        class ::stat_tool::DiscreteParametricModel * (::stat_tool::FrequencyDistribution::*method_pointer_4a6b4adefa695ef284f6ff789e2957a7)(class ::stat_tool::StatError &, int, int, bool, double) const = &::stat_tool::FrequencyDistribution::parametric_estimation;
+        class ::stat_tool::DiscreteParametricModel * (::stat_tool::FrequencyDistribution::*method_pointer_4443f5df74fd5265b08286162c0e8df5)(class ::stat_tool::StatError &, enum ::stat_tool::discrete_parametric, int, bool, double) const = &::stat_tool::FrequencyDistribution::parametric_estimation;
         class ::stat_tool::DiscreteParametricModel * (::stat_tool::FrequencyDistribution::*method_pointer_93be0d5f583551e48f38113575b8cdcb)(class ::stat_tool::StatError &, int, bool, double) const = &::stat_tool::FrequencyDistribution::type_parametric_estimation;
         class ::stat_tool::DiscreteMixture * (::stat_tool::FrequencyDistribution::*method_pointer_6aebbbfa54915d9983501cd6ca26dbf0)(class ::stat_tool::StatError &, class ::stat_tool::DiscreteMixture const &, class ::std::vector<bool, std::allocator<bool> > &, int, bool, bool, double) const = &::stat_tool::FrequencyDistribution::discrete_mixture_estimation;
         class ::stat_tool::DiscreteMixture * (::stat_tool::FrequencyDistribution::*method_pointer_3c7877e75df35d599ee7ea6ab878440e)(class ::stat_tool::StatError &, class ::stat_tool::DiscreteMixture const &, int, bool, bool, double) const = &::stat_tool::FrequencyDistribution::discrete_mixture_estimation;
-        class ::stat_tool::DiscreteMixture * (::stat_tool::FrequencyDistribution::*method_pointer_c045947962f951478cb56d4ed8d9e77d)(class ::stat_tool::StatError &, int, class ::std::vector<int, std::allocator<int> > &, int, bool, bool, double) const = &::stat_tool::FrequencyDistribution::discrete_mixture_estimation;
-        class ::stat_tool::DiscreteMixture * (::stat_tool::FrequencyDistribution::*method_pointer_d2266288a16c5cd88230776b8a347eb1)(class ::stat_tool::StatError &, class ::std::basic_ostream<char, std::char_traits<char> > &, int, int, class ::std::vector<int, std::allocator<int> > &, int, bool, bool, enum ::stat_tool::model_selection_criterion, double) const = &::stat_tool::FrequencyDistribution::discrete_mixture_estimation;
+        class ::stat_tool::DiscreteMixture * (::stat_tool::FrequencyDistribution::*method_pointer_fce20c89e8b250979a6eafb7d58d7046)(class ::stat_tool::StatError &, int, class ::std::vector<stat_tool::discrete_parametric, std::allocator<stat_tool::discrete_parametric> > &, int, bool, bool, double) const = &::stat_tool::FrequencyDistribution::discrete_mixture_estimation;
+        class ::stat_tool::DiscreteMixture * (::stat_tool::FrequencyDistribution::*method_pointer_e4569067a5945066a73a74403be33bc1)(class ::stat_tool::StatError &, class ::std::basic_ostream<char, std::char_traits<char> > &, int, int, class ::std::vector<stat_tool::discrete_parametric, std::allocator<stat_tool::discrete_parametric> > &, int, bool, bool, enum ::stat_tool::model_selection_criterion, double) const = &::stat_tool::FrequencyDistribution::discrete_mixture_estimation;
         class ::stat_tool::Convolution * (::stat_tool::FrequencyDistribution::*method_pointer_9d4ed33554365e1aab874caf0433a719)(class ::stat_tool::StatError &, class ::std::basic_ostream<char, std::char_traits<char> > &, class ::stat_tool::DiscreteParametric const &, class ::stat_tool::DiscreteParametric const &, enum ::stat_tool::estimation_criterion, int, double, enum ::stat_tool::penalty_type, enum ::stat_tool::side_effect) const = &::stat_tool::FrequencyDistribution::convolution_estimation;
         class ::stat_tool::Convolution * (::stat_tool::FrequencyDistribution::*method_pointer_089ef3e1597659f2ab6fdd581f19f25d)(class ::stat_tool::StatError &, class ::std::basic_ostream<char, std::char_traits<char> > &, class ::stat_tool::DiscreteParametric const &, int, enum ::stat_tool::estimation_criterion, int, double, enum ::stat_tool::penalty_type, enum ::stat_tool::side_effect) const = &::stat_tool::FrequencyDistribution::convolution_estimation;
         class ::stat_tool::Compound * (::stat_tool::FrequencyDistribution::*method_pointer_1b8ec7ac94b65332bc5431f9f8f7b611)(class ::stat_tool::StatError &, class ::std::basic_ostream<char, std::char_traits<char> > &, class ::stat_tool::DiscreteParametric const &, class ::stat_tool::DiscreteParametric const &, enum ::stat_tool::compound_distribution, enum ::stat_tool::estimation_criterion, int, double, enum ::stat_tool::penalty_type, enum ::stat_tool::side_effect) const = &::stat_tool::FrequencyDistribution::compound_estimation;
@@ -73,7 +73,7 @@ void _stat_tool_frequency_distribution()
             .def("update", method_pointer_9fe9a16abbbb56babbba6a548924f162)
             .def("frequency_scale", method_pointer_5882a600801d5cc5ac78f111a990f6b4, boost::python::return_value_policy< boost::python::reference_existing_object >())
             .def("min_interval_computation", method_pointer_2b8a299165215e44ad3ec5cb8e6c85b0)
-            .def("parametric_estimation", method_pointer_cada63185bcd53a9992002c7b742c69f, boost::python::return_value_policy< boost::python::reference_existing_object >())
+            .def("parametric_estimation", method_pointer_5378bc5deac05aedb57ce3e0fba4344b, boost::python::return_value_policy< boost::python::reference_existing_object >())
             .def("likelihood_computation", method_pointer_b0a0fd68ce7952998ac6c6e0c971980f)
             .def("shift", method_pointer_01abb08d00865de783d5f214e2fb750c)
             .def("cluster", method_pointer_2010daaf8405536eb6244ab6f6ae7e30)
@@ -88,12 +88,12 @@ void _stat_tool_frequency_distribution()
             .def("t_comparison", method_pointer_7ef560611e0e57208c1aa16c12990c7c)
             .def("wilcoxon_mann_whitney_comparison", method_pointer_896194f1dcca5cc9aa7d08a6826cd90f)
             .def("fit", method_pointer_0e6e66d328825e58ac42478d950343a9, boost::python::return_value_policy< boost::python::reference_existing_object >())
-            .def("parametric_estimation", method_pointer_4a6b4adefa695ef284f6ff789e2957a7, boost::python::return_value_policy< boost::python::reference_existing_object >())
+            .def("parametric_estimation", method_pointer_4443f5df74fd5265b08286162c0e8df5, boost::python::return_value_policy< boost::python::reference_existing_object >())
             .def("type_parametric_estimation", method_pointer_93be0d5f583551e48f38113575b8cdcb, boost::python::return_value_policy< boost::python::reference_existing_object >())
             .def("discrete_mixture_estimation", method_pointer_6aebbbfa54915d9983501cd6ca26dbf0, boost::python::return_value_policy< boost::python::reference_existing_object >())
             .def("discrete_mixture_estimation", method_pointer_3c7877e75df35d599ee7ea6ab878440e, boost::python::return_value_policy< boost::python::reference_existing_object >())
-            .def("discrete_mixture_estimation", method_pointer_c045947962f951478cb56d4ed8d9e77d, boost::python::return_value_policy< boost::python::reference_existing_object >())
-            .def("discrete_mixture_estimation", method_pointer_d2266288a16c5cd88230776b8a347eb1, boost::python::return_value_policy< boost::python::reference_existing_object >())
+            .def("discrete_mixture_estimation", method_pointer_fce20c89e8b250979a6eafb7d58d7046, boost::python::return_value_policy< boost::python::reference_existing_object >())
+            .def("discrete_mixture_estimation", method_pointer_e4569067a5945066a73a74403be33bc1, boost::python::return_value_policy< boost::python::reference_existing_object >())
             .def("convolution_estimation", method_pointer_9d4ed33554365e1aab874caf0433a719, boost::python::return_value_policy< boost::python::reference_existing_object >())
             .def("convolution_estimation", method_pointer_089ef3e1597659f2ab6fdd581f19f25d, boost::python::return_value_policy< boost::python::reference_existing_object >())
             .def("compound_estimation", method_pointer_1b8ec7ac94b65332bc5431f9f8f7b611, boost::python::return_value_policy< boost::python::reference_existing_object >())

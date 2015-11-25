@@ -34,4 +34,3 @@ build = env.ALEAWrapper("../openalea/stat_tool", "__stat_tool", sources)
 # inc = env.Install('$build_includedir/stat_tool', includes) 
 #inc = env.Install('$build_includedir/stat_tool', ["boost_python_aliases.h", "wrapper_util.h"])
 env.Alias('build', build)
-

@@ -5,3 +5,5 @@ from openalea.stat_tool.error import *
 from openalea.stat_tool.data import *
 
 from openalea.stat_tool.plot import *
+
+from openalea.stat_tool.__stat_tool.stat_tool import discrete_parametric
