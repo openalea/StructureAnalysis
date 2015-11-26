@@ -193,7 +193,7 @@ void DiscreteMixture::computation(int min_nb_value , double cumul_threshold , bo
  *
  *--------------------------------------------------------------*/
 
-void DiscreteMixture::init(const FrequencyDistribution &histo , bool *estimate ,
+void DiscreteMixture::init(const FrequencyDistribution &histo , const bool* estimate ,
                            int min_inf_bound , bool component_flag)
 
 {
@@ -383,7 +383,7 @@ void DiscreteMixture::expectation_step(DiscreteMixtureData *mixt_histo , int nb_
  *--------------------------------------------------------------*/
 
 void DiscreteMixture::variance_correction(DiscreteMixtureData *mixt_histo ,
-                                          bool *estimate , int min_inf_bound) const
+                                          const bool* estimate , int min_inf_bound) const
 
 {
   register int i;
@@ -493,7 +493,7 @@ bool DiscreteMixture::component_order_test() const
  *--------------------------------------------------------------*/
 
 DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &error , const DiscreteMixture &imixt ,
-                                                                    std::vector<bool>& estimate , int min_inf_bound , bool mixt_flag ,
+                                                                    const std::vector< bool >& estimate , int min_inf_bound , bool mixt_flag ,
                                                                     bool component_flag , double weight_step) const
 {
     bool es[estimate.size()];
@@ -503,7 +503,7 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
 }
 
 DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &error , const DiscreteMixture &imixt ,
-                                                                    bool *estimate , int min_inf_bound , bool mixt_flag ,
+                                                                    const bool* estimate , int min_inf_bound , bool mixt_flag ,
                                                                     bool component_flag , double weight_step) const
 
 {
@@ -737,7 +737,7 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
  *
  *--------------------------------------------------------------*/
 
-DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &error , int nb_component , std::vector< discrete_parametric >& ident ,
+DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &error , int nb_component , const std::vector< discrete_parametric >&  ident ,
                                                                     int min_inf_bound , bool mixt_flag ,
                                                                     bool component_flag , double weight_step) const // TODO STD
 {
@@ -747,7 +747,7 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
 }
 
 DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &error , int nb_component ,
-                                                                    discrete_parametric *ident , int min_inf_bound ,
+                                                                    const discrete_parametric* ident , int min_inf_bound ,
                                                                     bool mixt_flag , bool component_flag ,
                                                                     double weight_step) const
 {
@@ -802,7 +802,7 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
 
 DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &error , ostream &os ,
                                                                     int min_nb_component , int max_nb_component ,
-                                                                    std::vector< discrete_parametric >& ident , int min_inf_bound ,
+                                                                    const std::vector< discrete_parametric >&  ident , int min_inf_bound ,
                                                                     bool mixt_flag , bool component_flag ,
                                                                     model_selection_criterion criterion ,
                                                                     double weight_step) const // TODO STD
@@ -817,7 +817,7 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
 
 DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &error , ostream &os ,
                                                                     int min_nb_component , int max_nb_component ,
-                                                                    discrete_parametric *ident , int min_inf_bound ,
+                                                                    const discrete_parametric* ident , int min_inf_bound ,
                                                                     bool mixt_flag , bool component_flag ,
                                                                     model_selection_criterion criterion ,
                                                                     double weight_step) const

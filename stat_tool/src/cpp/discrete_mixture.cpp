@@ -120,7 +120,7 @@ DiscreteMixture::DiscreteMixture(int inb_component , double *pweight ,
  *
  *--------------------------------------------------------------*/
 
-DiscreteMixture::DiscreteMixture(const DiscreteMixture &mixt , bool *component_flag , int inb_value)
+DiscreteMixture::DiscreteMixture(const DiscreteMixture &mixt , const bool *component_flag , int inb_value)
 
 {
   register int i;
@@ -1412,7 +1412,6 @@ MultiPlotSet* DiscreteMixture::get_plotable(const DiscreteMixtureData *mixt_hist
   ostringstream title , legend;
   MultiPlotSet *plot_set;
 
-
   // calcul du nombre de graphiques
 
   nb_plot_set = 1;
@@ -2045,7 +2044,6 @@ MultiPlotSet* DiscreteMixtureData::get_plotable() const
 
 {
   MultiPlotSet *plot_set;
-
 
   if (mixture) {
     plot_set = mixture->get_plotable(this);

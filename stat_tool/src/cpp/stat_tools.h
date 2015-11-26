@@ -807,28 +807,28 @@ namespace stat_tool {
                                                         int min_inf_bound = 0 , bool flag = true ,
                                                         double cumul_threshold = CUMUL_THRESHOLD) const;
 
-    DiscreteMixture* discrete_mixture_estimation(StatError &error , const DiscreteMixture &imixt , std::vector< bool>& estimate ,
+    DiscreteMixture* discrete_mixture_estimation(StatError &error , const DiscreteMixture &imixt , const std::vector< bool >& estimate ,
                                                  int min_inf_bound = 0 , bool mixt_flag = true ,
                                                  bool component_flag = true , double weight_step = 0.1) const; // TODO STD
-    DiscreteMixture* discrete_mixture_estimation(StatError &error , const DiscreteMixture &imixt , bool *estimate ,
+    DiscreteMixture* discrete_mixture_estimation(StatError &error , const DiscreteMixture &imixt , const bool* estimate ,
                                                  int min_inf_bound = 0 , bool mixt_flag = true ,
                                                  bool component_flag = true , double weight_step = 0.1) const;
     DiscreteMixture* discrete_mixture_estimation(StatError &error , const DiscreteMixture &imixt ,
                                                  int min_inf_bound = 0 , bool mixt_flag = true ,
                                                  bool component_flag = true , double weight_step = 0.1) const;
-    DiscreteMixture* discrete_mixture_estimation(StatError &error , int nb_component , std::vector< discrete_parametric >& ident ,
+    DiscreteMixture* discrete_mixture_estimation(StatError &error , int nb_component , const std::vector< discrete_parametric >&  ident ,
                                                  int min_inf_bound = 0 , bool mixt_flag = true ,
                                                  bool component_flag = true , double weight_step = 0.1) const; // TODO STD
-    DiscreteMixture* discrete_mixture_estimation(StatError &error , int nb_component , discrete_parametric *ident ,
+    DiscreteMixture* discrete_mixture_estimation(StatError &error , int nb_component , const discrete_parametric* ident ,
                                                  int min_inf_bound = 0 , bool mixt_flag = true ,
                                                  bool component_flag = true , double weight_step = 0.1) const;
     DiscreteMixture* discrete_mixture_estimation(StatError &error , std::ostream &os , int min_nb_component ,
-                                                 int max_nb_component , std::vector< discrete_parametric >& ident , int min_inf_bound = 0 ,
+                                                 int max_nb_component , const std::vector< discrete_parametric >&  ident , int min_inf_bound = 0 ,
                                                  bool mixt_flag = true , bool component_flag = true ,
                                                  model_selection_criterion criterion = BICc ,
                                                  double weight_step = 0.1) const; // TODO STD
     DiscreteMixture* discrete_mixture_estimation(StatError &error , std::ostream &os , int min_nb_component ,
-                                                 int max_nb_component , discrete_parametric *ident , int min_inf_bound = 0 ,
+                                                 int max_nb_component , const discrete_parametric* ident , int min_inf_bound = 0 ,
                                                  bool mixt_flag = true , bool component_flag = true ,
                                                  model_selection_criterion criterion = BICc ,
                                                  double weight_step = 0.1) const;

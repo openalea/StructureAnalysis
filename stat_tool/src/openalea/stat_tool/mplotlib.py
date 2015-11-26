@@ -49,6 +49,7 @@ def load_ipython_extension(ipython):
 
             # Configure figure
             fig = plt.figure(fig_id, figsize=(10, 10))
+            #fig = plt.gcf()
             fig.clf()
 
             fig.set_facecolor("w")

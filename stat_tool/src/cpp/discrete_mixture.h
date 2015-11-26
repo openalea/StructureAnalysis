@@ -102,10 +102,10 @@ namespace stat_tool {
     int nb_parameter_computation() const;
     double penalty_computation() const;
 
-    void init(const FrequencyDistribution &histo , bool *estimate , int min_inf_bound ,
+    void init(const FrequencyDistribution &histo , const bool* estimate , int min_inf_bound ,
               bool component_flag);
     void expectation_step(DiscreteMixtureData *mixt_histo , int nb_element) const;
-    void variance_correction(DiscreteMixtureData *mixt_histo , bool *estimate ,
+    void variance_correction(DiscreteMixtureData *mixt_histo , const bool* estimate ,
                              int min_inf_bound) const;
     bool component_order_test() const;
 
@@ -113,7 +113,7 @@ namespace stat_tool {
 
     DiscreteMixture();
     DiscreteMixture(int inb_component , double *pweight , const DiscreteParametric **pcomponent);
-    DiscreteMixture(const DiscreteMixture &mixt , bool *component_flag , int inb_value);
+    DiscreteMixture(const DiscreteMixture &mixt , const bool* component_flag , int inb_value);
     DiscreteMixture(int inb_component , const DiscreteParametric **pcomponent);
     DiscreteMixture(const DiscreteMixture &mixt , bool data_flag = true)
     :Distribution(mixt) { copy(mixt , data_flag); }
