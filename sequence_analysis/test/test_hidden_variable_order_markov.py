@@ -27,14 +27,14 @@ class Test(interface):
     def __init__(self):
         interface.__init__(self,
                            self.build_data(),
-                           get_shared_data("dupreziana21.hc"),
+                           str(get_shared_data("dupreziana21.hc")),
                            HiddenVariableOrderMarkov)
 
     def build_data(self):
         """todo: check identifier output. should be a list """
         # build a list of 2 sequences with a variable that should be identical
         # to sequences1.seq
-        hvom =  HiddenVariableOrderMarkov(get_shared_data('dupreziana21.hc'))
+        hvom =  HiddenVariableOrderMarkov(str(get_shared_data('dupreziana21.hc')))
 
         return hvom
 

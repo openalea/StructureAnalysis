@@ -50,4 +50,12 @@ void class_markovian()
       .export_values()
     ;
 
+  // types of stochastic processes
+  enum_<stat_tool::wrap_util::UniqueInt<3, 18> >("ProcessType")
+  .value("ORDINARY", ORDINARY)
+  .value("EQUILIBRIUM", EQUILIBRIUM)
+  .value("DEFAULT_TYPE", DEFAULT_TYPE)
+  .export_values()
+  ;
+
 }

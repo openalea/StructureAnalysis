@@ -22,7 +22,7 @@ from tools import runTestClass
 from openalea.sequence_analysis import get_shared_data
 
 def VariableOrderMarkovData():
-    sm =  VariableOrderMarkov(get_shared_data('test_variable_order_markov.dat'))
+    sm =  VariableOrderMarkov(str(get_shared_data('test_variable_order_markov.dat')))
     ret = Simulate(sm, 1, 1000, True)
     return sm
 
@@ -34,11 +34,11 @@ class Test(interface):
     def __init__(self):
         interface.__init__(self,
                            self.build_data(),
-                           get_shared_data("test_variable_order_markov.dat"),
+                           str(get_shared_data("test_variable_order_markov.dat")),
                            VariableOrderMarkov)
 
     def build_data(self):
-        seq = Sequences(get_shared_data("belren1.seq"))
+        seq = Sequences(str(get_shared_data("belren1.seq")))
         vom = Estimate(seq, "VARIABLE_ORDER_MARKOV", "Ordinary",
                         MaxOrder=4, GlobalInitialTransition=False)
 

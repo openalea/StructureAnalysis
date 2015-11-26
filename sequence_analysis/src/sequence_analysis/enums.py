@@ -167,26 +167,26 @@ index_parameter_type_map = {
 
 
 stochastic_process_type = {
-    'Ordinary': 'o',
-    'Equilibrium' : 'e'
+    'Ordinary': _stat_tool.ProcessType.ORDINARY,
+    'Equilibrium' : _stat_tool.ProcessType.EQUILIBRIUM,
+    'DefaultType' : _stat_tool.ProcessType.DEFAULT_TYPE
     }
 
 markovian_algorithms = {
     'Forward':_stat_tool.RestorationAlgorithm.FORWARD,
-    'EM':_stat_tool.RestorationAlgorithm.FORWARD_BACKWARD,
-    'MCEM':_stat_tool.RestorationAlgorithm.FORWARD_BACKWARD_SAMPLING,
+    'ForwardDynamicProgramming': \
+        _stat_tool.RestorationAlgorithm.FORWARD_DYNAMIC_PROGRAMMING, # change point detection
     'ForwardBackwardSampling': \
-        _stat_tool.RestorationAlgorithm.FORWARD_DYNAMIC_PROGRAMMING,
+        _stat_tool.RestorationAlgorithm.FORWARD_BACKWARD_SAMPLING,
     'GeneralizedViterbi': \
         _stat_tool.RestorationAlgorithm.GENERALIZED_VITERBI,
-    'Gibbs':_stat_tool.RestorationAlgorithm.GIBBS_SAMPLING,
     'NoComputation':_stat_tool.RestorationAlgorithm.NO_COMPUTATION,
     'Viterbi':_stat_tool.RestorationAlgorithm.VITERBI,
     }
 
 sub_markovian_algorithms = {
-    'EM':_stat_tool.RestorationAlgorithm.FORWARD_BACKWARD,
-    'MCEM':_stat_tool.RestorationAlgorithm.FORWARD_BACKWARD_SAMPLING,
+    'EM':0,
+    'MCEM':1,
     }
 
 
@@ -232,10 +232,10 @@ estimator_semi_markov_type = {
 
 ident_map = {
              "VOID" : _stat_tool.I_DEFAULT,
-             "LINEAR": _stat_tool.RegressionType.STAT_LINEAR,
-             "MONOMOLECULAR": _stat_tool.RegressionType.STAT_MONOMOLECULAR,
-             "LOGISTIC": _stat_tool.RegressionType.STAT_LOGISTIC,
-             "NONPARAMETRIC": _stat_tool.RegressionType.STAT_NONPARAMETRIC,
+             "LINEAR": _stat_tool.RegressionType.LINEAR_FUNCTION,
+             "MONOMOLECULAR": _stat_tool.RegressionType.MONOMOLECULAR,
+             "LOGISTIC": _stat_tool.RegressionType.LOGISTIC,
+             "NONPARAMETRIC": _stat_tool.RegressionType.NONPARAMETRIC_FUNCTION,
 
              }
 

@@ -315,7 +315,6 @@ void class_constant()
   .export_values()
   ;
 
-
   // markovian
 
 
