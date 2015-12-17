@@ -36,6 +36,7 @@
 
 
 
+#include <string>
 #include <sstream>
 #include <iomanip>
 
@@ -903,7 +904,7 @@ SemiMarkov* SemiMarkov::thresholding(double min_probability) const
  *
  *--------------------------------------------------------------*/
 
-SemiMarkov* SemiMarkov::ascii_read(StatError &error , const char *path , int length ,
+SemiMarkov* SemiMarkov::ascii_read(StatError &error , const string path , int length ,
                                    bool counting_flag , double cumul_threshold)
 
 {
@@ -917,7 +918,7 @@ SemiMarkov* SemiMarkov::ascii_read(StatError &error , const char *path , int len
   const CategoricalSequenceProcess *occupancy;
   const CategoricalProcess *observation;
   SemiMarkov *smarkov;
-  ifstream in_file(path);
+  ifstream in_file(path.c_str());
 
 
   smarkov = NULL;
@@ -1615,12 +1616,12 @@ ostream& SemiMarkov::ascii_write(ostream &os , bool exhaustive) const
  *
  *--------------------------------------------------------------*/
 
-bool SemiMarkov::ascii_write(StatError &error , const char *path ,
+bool SemiMarkov::ascii_write(StatError &error , const string path ,
                              bool exhaustive) const
 
 {
   bool status;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -1947,11 +1948,11 @@ ostream& SemiMarkov::spreadsheet_write(ostream &os , const SemiMarkovData *seq ,
  *
  *--------------------------------------------------------------*/
 
-bool SemiMarkov::spreadsheet_write(StatError &error , const char *path) const
+bool SemiMarkov::spreadsheet_write(StatError &error , const string path) const
 
 {
   bool status;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -3227,7 +3228,7 @@ ostream& SemiMarkovData::ascii_write(ostream &os , bool exhaustive) const
  *
  *--------------------------------------------------------------*/
 
-bool SemiMarkovData::ascii_write(StatError &error , const char *path ,
+bool SemiMarkovData::ascii_write(StatError &error , const string path ,
                                  bool exhaustive) const
 
 {
@@ -3235,7 +3236,7 @@ bool SemiMarkovData::ascii_write(StatError &error , const char *path ,
 
 
   if (semi_markov) {
-    ofstream out_file(path);
+    ofstream out_file(path.c_str());
 
     error.init();
 
@@ -3283,12 +3284,12 @@ ostream& SemiMarkovData::ascii_data_write(ostream &os , output_sequence_format f
  *
  *--------------------------------------------------------------*/
 
-bool SemiMarkovData::ascii_data_write(StatError &error , const char *path ,
+bool SemiMarkovData::ascii_data_write(StatError &error , const string path ,
                                       output_sequence_format format , bool exhaustive) const
 
 {
   bool status = false;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -3318,14 +3319,14 @@ bool SemiMarkovData::ascii_data_write(StatError &error , const char *path ,
  *
  *--------------------------------------------------------------*/
 
-bool SemiMarkovData::spreadsheet_write(StatError &error , const char *path) const
+bool SemiMarkovData::spreadsheet_write(StatError &error , const string path) const
 
 {
   bool status = false;
 
 
   if (semi_markov) {
-    ofstream out_file(path);
+    ofstream out_file(path.c_str());
 
     error.init();
 

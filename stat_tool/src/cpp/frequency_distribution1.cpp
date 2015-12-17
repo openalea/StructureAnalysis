@@ -38,6 +38,8 @@
 
 #include <limits.h>
 #include <math.h>
+
+#include <string>
 #include <sstream>
 #include <iomanip>
 
@@ -834,11 +836,11 @@ ostream& FrequencyDistribution::ascii_write(ostream &os , bool exhaustive ,
  *
  *--------------------------------------------------------------*/
 
-bool FrequencyDistribution::ascii_write(StatError &error , const char *path) const
+bool FrequencyDistribution::ascii_write(StatError &error , const string path) const
 
 {
   bool status;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -1275,11 +1277,11 @@ ostream& FrequencyDistribution::survival_ascii_write(ostream &os) const
  *
  *--------------------------------------------------------------*/
 
-bool FrequencyDistribution::survival_ascii_write(StatError &error , const char *path) const
+bool FrequencyDistribution::survival_ascii_write(StatError &error , const string path) const
 
 {
   bool status;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -1307,12 +1309,12 @@ bool FrequencyDistribution::survival_ascii_write(StatError &error , const char *
  *
  *--------------------------------------------------------------*/
 
-bool FrequencyDistribution::survival_spreadsheet_write(StatError &error , const char *path) const
+bool FrequencyDistribution::survival_spreadsheet_write(StatError &error , const string path) const
 
 {
   bool status;
   Curves *survival_rate;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();

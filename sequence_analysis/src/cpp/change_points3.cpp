@@ -37,6 +37,8 @@
 
 
 #include <math.h>
+
+#include <string>
 #include <sstream>
 #include <iomanip>
 
@@ -3376,14 +3378,14 @@ bool Sequences::segment_profile_write(StatError &error , ostream &os , int iiden
  *
  *--------------------------------------------------------------*/
 
-bool Sequences::segment_profile_write(StatError &error , const char *path , int iidentifier ,
+bool Sequences::segment_profile_write(StatError &error , const string path , int iidentifier ,
                                       int nb_segment , segment_model *model_type ,
                                       change_point_profile output , output_format format ,
                                       latent_structure_algorithm segmentation , int nb_segmentation) const
 
 {
   bool status = true;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();

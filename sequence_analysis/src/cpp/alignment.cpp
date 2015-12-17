@@ -37,6 +37,8 @@
 
 
 #include <math.h>
+
+#include <string>
 #include <sstream>
 #include <iomanip>
 #include <iostream>
@@ -635,8 +637,8 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , const Vect
                                      int ref_identifier , int test_identifier , bool begin_free ,
                                      bool end_free , insertion_deletion_cost indel_cost , double indel_factor ,
                                      bool transposition_flag , double transposition_factor ,
-                                     const char *result_path , output_format result_format ,
-                                     const char *alignment_path) const
+                                     const string result_path , output_format result_format ,
+                                     const string alignment_path) const
 
 {
   bool status = true , half_matrix;
@@ -782,8 +784,8 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , const Vect
   }
 
   if (status) {
-    if ((ref_identifier == I_DEFAULT) && (test_identifier == I_DEFAULT) && ((!result_path) ||
-         (nb_alignment > FILE_NB_ALIGNMENT)) && (!alignment_path)) {
+    if ((ref_identifier == I_DEFAULT) && (test_identifier == I_DEFAULT) && ((result_path.empty()) ||
+         (nb_alignment > FILE_NB_ALIGNMENT)) && (alignment_path.empty())) {
       half_matrix = true;
     }
     else {
@@ -877,8 +879,8 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , const Vect
 
     out_file = NULL;
 
-    if (result_path) {
-      out_file = new ofstream(result_path);
+    if (!result_path.empty()) {
+      out_file = new ofstream(result_path.c_str());
 
       if (!out_file) {
         error.update(STAT_error[STATR_FILE_NAME]);
@@ -898,7 +900,7 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , const Vect
                                      SEQ_label[SEQL_SEQUENCE] , identifier ,
                                      true , transposition_flag);
 
-    if (alignment_path) {
+    if (!alignment_path.empty()) {
       alignment = new Sequences(nb_alignment , 1);
     }
     else {
@@ -1153,7 +1155,7 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , const Vect
 #           endif
 
             alignment->length[alignment_index] = path_length[length[i]][length[j]];
-            if (alignment_path) {
+            if (!alignment_path.empty()) {
               alignment->int_sequence[alignment_index][0] = new int[alignment->length[alignment_index]];
             }
 
@@ -1392,7 +1394,7 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , const Vect
               }
             }
 
-            if (alignment_path) {
+            if (!alignment_path.empty()) {
               alignment_index++;
             }
           }
@@ -1431,7 +1433,7 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , const Vect
       }
     }
 
-    if (alignment_path) {
+    if (!alignment_path.empty()) {
 
       // regroupement elision/insertion et supression des elisions/insertions correspondant
       // aux debuts/fins d'alignement libres
@@ -1587,8 +1589,8 @@ double Sequences::substitution_distance_computation(int ref_index , int test_ind
 
 DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , int ref_identifier ,
                                      int test_identifier , bool begin_free , bool end_free ,
-                                     const char *result_path , output_format result_format ,
-                                     const char *alignment_path) const
+                                     const string result_path , output_format result_format ,
+                                     const string alignment_path) const
 
 {
   bool status = true , half_matrix;
@@ -1675,8 +1677,8 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , int ref_id
   }
 
   if (status) {
-    if ((ref_identifier == I_DEFAULT) && (test_identifier == I_DEFAULT) && ((!result_path) ||
-         (nb_alignment > FILE_NB_ALIGNMENT)) && (!alignment_path)) {
+    if ((ref_identifier == I_DEFAULT) && (test_identifier == I_DEFAULT) && ((result_path.empty()) ||
+         (nb_alignment > FILE_NB_ALIGNMENT)) && (alignment_path.empty())) {
       half_matrix = true;
     }
     else {
@@ -1700,8 +1702,8 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , int ref_id
 
     out_file = NULL;
 
-    if (result_path) {
-      out_file = new ofstream(result_path);
+    if (!result_path.empty()) {
+      out_file = new ofstream(result_path.c_str());
 
       if (!out_file) {
         error.update(STAT_error[STATR_FILE_NAME]);
@@ -1720,7 +1722,7 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , int ref_id
     dist_matrix = new DistanceMatrix(nb_sequence , ref_identifier , test_identifier ,
                                      SEQ_label[SEQL_SEQUENCE] , identifier , false);
 
-    if (alignment_path) {
+    if (!alignment_path.empty()) {
       alignment = new Sequences(nb_alignment , 1);
     }
     else {
@@ -1857,7 +1859,7 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , int ref_id
 #           endif
 
             alignment->length[alignment_index] = path_length[length[i]][length[j]];
-            if (alignment_path) {
+            if (!alignment_path.empty()) {
               alignment->int_sequence[alignment_index][0] = new int[alignment->length[alignment_index]];
             }
 
@@ -2044,7 +2046,7 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , int ref_id
               }
             }
 
-            if (alignment_path) {
+            if (!alignment_path.empty()) {
               alignment_index++;
             }
           }
@@ -2078,7 +2080,7 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , int ref_id
       }
     }
 
-    if (alignment_path) {
+    if (!alignment_path.empty()) {
 
       // regroupement elision/insertion et supression des elisions/insertions correspondant
       // aux debuts/fins d'alignement libres
@@ -2313,11 +2315,11 @@ ostream& Sequences::multiple_alignment_ascii_print(ostream &os) const
  *
  *--------------------------------------------------------------*/
 
-bool Sequences::multiple_alignment_ascii_print(StatError &error , const char *path) const
+bool Sequences::multiple_alignment_ascii_print(StatError &error , const string path) const
 
 {
   bool status;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -2789,7 +2791,7 @@ Sequences* Sequences::multiple_alignment(StatError &error , ostream &os ,
                                          bool begin_free , bool end_free ,
                                          insertion_deletion_cost indel_cost , double indel_factor ,
                                          hierarchical_strategy strategy ,
-                                         const char *path) const
+                                         const string path) const
 
 {
   bool status = true;
@@ -2941,7 +2943,7 @@ Sequences* Sequences::multiple_alignment(StatError &error , ostream &os ,
       clustered_seq[2 * nb_sequence - 2]->multiple_alignment_ascii_print(os);
 #     endif
 
-      if (path) {
+      if (!path.empty()) {
         status = clustered_seq[2 * nb_sequence - 2]->multiple_alignment_ascii_print(error , path);
 
 #       ifdef MESSAGE

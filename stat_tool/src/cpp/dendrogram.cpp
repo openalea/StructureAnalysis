@@ -36,6 +36,7 @@
 
 
 
+#include <string>
 #include <iomanip>
 
 #include "tool/config.h"
@@ -619,12 +620,12 @@ ostream& Dendrogram::ascii_write(ostream &os , bool exhaustive) const
  *
  *--------------------------------------------------------------*/
 
-bool Dendrogram::ascii_write(StatError &error , const char *path ,
+bool Dendrogram::ascii_write(StatError &error , const string path ,
                              bool exhaustive) const
 
 {
   bool status;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -651,13 +652,13 @@ bool Dendrogram::ascii_write(StatError &error , const char *path ,
  *
  *--------------------------------------------------------------*/
 
-bool Dendrogram::spreadsheet_write(StatError &error , const char *path) const
+bool Dendrogram::spreadsheet_write(StatError &error , const string path) const
 
 {
   bool status;
   register int i , j;
   double *ordered_distance;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -1465,7 +1466,7 @@ Dendrogram* DistanceMatrix::divisive_hierarchical_clustering() const
 
 bool DistanceMatrix::hierarchical_clustering(StatError &error , ostream &os ,
                                              hierarchical_strategy strategy , linkage criterion ,
-                                             const char *path , output_format format) const
+                                             const string path , output_format format) const
 
 {
   bool status = true;
@@ -1493,7 +1494,7 @@ bool DistanceMatrix::hierarchical_clustering(StatError &error , ostream &os ,
     dendrogram->ascii_write(os);
 #   endif
 
-    if (path) {
+    if (!path.empty()) {
       switch (format) {
       case ASCII :
         status = dendrogram->ascii_write(error , path);

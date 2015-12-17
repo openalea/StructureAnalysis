@@ -37,6 +37,8 @@
 
 
 #include <math.h>
+
+#include <string>
 #include <sstream>
 
 #include "tool/rw_tokenizer.h"
@@ -317,7 +319,7 @@ Convolution* Convolution::building(StatError &error , int nb_dist , const Discre
  *
  *--------------------------------------------------------------*/
 
-Convolution* Convolution::ascii_read(StatError &error , const char *path , double cumul_threshold)
+Convolution* Convolution::ascii_read(StatError &error , const string path , double cumul_threshold)
 
 {
   RWLocaleSnapshot locale("en");
@@ -329,7 +331,7 @@ Convolution* Convolution::ascii_read(StatError &error , const char *path , doubl
   long index , nb_dist;
   const DiscreteParametric **dist;
   Convolution *convol;
-  ifstream in_file(path);
+  ifstream in_file(path.c_str());
 
 
   convol = NULL;
@@ -705,12 +707,12 @@ ostream& Convolution::ascii_write(ostream &os , bool exhaustive) const
  *
  *--------------------------------------------------------------*/
 
-bool Convolution::ascii_write(StatError &error , const char *path ,
+bool Convolution::ascii_write(StatError &error , const string path ,
                               bool exhaustive) const
 
 {
   bool status;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -834,11 +836,11 @@ ostream& Convolution::spreadsheet_write(ostream &os , const ConvolutionData *con
  *
  *--------------------------------------------------------------*/
 
-bool Convolution::spreadsheet_write(StatError &error , const char *path) const
+bool Convolution::spreadsheet_write(StatError &error , const string path) const
 
 {
   bool status;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -1464,7 +1466,7 @@ ostream& ConvolutionData::ascii_write(ostream &os , bool exhaustive) const
  *
  *--------------------------------------------------------------*/
 
-bool ConvolutionData::ascii_write(StatError &error , const char *path ,
+bool ConvolutionData::ascii_write(StatError &error , const string path ,
                                   bool exhaustive) const
 
 {
@@ -1472,7 +1474,7 @@ bool ConvolutionData::ascii_write(StatError &error , const char *path ,
 
 
   if (convolution) {
-    ofstream out_file(path);
+    ofstream out_file(path.c_str());
 
     error.init();
 
@@ -1499,14 +1501,14 @@ bool ConvolutionData::ascii_write(StatError &error , const char *path ,
  *
  *--------------------------------------------------------------*/
 
-bool ConvolutionData::spreadsheet_write(StatError &error , const char *path) const
+bool ConvolutionData::spreadsheet_write(StatError &error , const string path) const
 
 {
   bool status = false;
 
 
   if (convolution) {
-    ofstream out_file(path);
+    ofstream out_file(path.c_str());
 
     error.init();
 

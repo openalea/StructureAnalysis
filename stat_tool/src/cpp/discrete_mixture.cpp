@@ -37,6 +37,7 @@
 
 
 #include <sstream>
+#include <string>
 #include <iomanip>
 
 #include "tool/rw_tokenizer.h"
@@ -387,7 +388,8 @@ DiscreteMixture* DiscreteMixture::building(StatError &error , int nb_component ,
  *
  *--------------------------------------------------------------*/
 
-DiscreteMixture* DiscreteMixture::ascii_read(StatError &error , const char *path , double cumul_threshold)
+DiscreteMixture* DiscreteMixture::ascii_read(StatError &error , const string path ,
+                                             double cumul_threshold)
 
 {
   RWLocaleSnapshot locale("en");
@@ -400,7 +402,7 @@ DiscreteMixture* DiscreteMixture::ascii_read(StatError &error , const char *path
   double cumul , weight[DISCRETE_MIXTURE_NB_COMPONENT];
   const DiscreteParametric **component;
   DiscreteMixture *mixt;
-  ifstream in_file(path);
+  ifstream in_file(path.c_str());
 
 
   mixt = NULL;
@@ -942,12 +944,12 @@ ostream& DiscreteMixture::ascii_write(ostream &os , bool exhaustive) const
  *
  *--------------------------------------------------------------*/
 
-bool DiscreteMixture::ascii_write(StatError &error , const char *path ,
+bool DiscreteMixture::ascii_write(StatError &error , const string path ,
                                   bool exhaustive) const
 
 {
   bool status;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -1148,11 +1150,11 @@ ostream& DiscreteMixture::spreadsheet_write(ostream &os , const DiscreteMixtureD
  *
  *--------------------------------------------------------------*/
 
-bool DiscreteMixture::spreadsheet_write(StatError &error , const char *path) const
+bool DiscreteMixture::spreadsheet_write(StatError &error , const string path) const
 
 {
   bool status;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -1944,7 +1946,7 @@ ostream& DiscreteMixtureData::ascii_write(ostream &os , bool exhaustive) const
  *
  *--------------------------------------------------------------*/
 
-bool DiscreteMixtureData::ascii_write(StatError &error , const char *path ,
+bool DiscreteMixtureData::ascii_write(StatError &error , const string path ,
                                       bool exhaustive) const
 
 {
@@ -1952,7 +1954,7 @@ bool DiscreteMixtureData::ascii_write(StatError &error , const char *path ,
 
 
   if (mixture) {
-    ofstream out_file(path);
+    ofstream out_file(path.c_str());
 
     error.init();
 
@@ -1979,14 +1981,14 @@ bool DiscreteMixtureData::ascii_write(StatError &error , const char *path ,
  *
  *--------------------------------------------------------------*/
 
-bool DiscreteMixtureData::spreadsheet_write(StatError &error , const char *path) const
+bool DiscreteMixtureData::spreadsheet_write(StatError &error , const string path) const
 
 {
   bool status = false;
 
 
   if (mixture) {
-    ofstream out_file(path);
+    ofstream out_file(path.c_str());
 
     error.init();
 

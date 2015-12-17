@@ -36,6 +36,7 @@
 
 
 
+#include <string>
 #include <sstream>
 #include <iomanip>
 #include <cstring>
@@ -1821,12 +1822,12 @@ ostream& DistanceMatrix::ascii_write(ostream &os , bool exhaustive) const
  *
  *--------------------------------------------------------------*/
 
-bool DistanceMatrix::ascii_write(StatError &error , const char *path ,
+bool DistanceMatrix::ascii_write(StatError &error , const string path ,
                                  bool exhaustive) const
 
 {
   bool status;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -2079,11 +2080,11 @@ ostream& DistanceMatrix::spreadsheet_write(ostream &os) const
  *
  *--------------------------------------------------------------*/
 
-bool DistanceMatrix::spreadsheet_write(StatError &error , const char *path) const
+bool DistanceMatrix::spreadsheet_write(StatError &error , const string path) const
 
 {
   bool status;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();

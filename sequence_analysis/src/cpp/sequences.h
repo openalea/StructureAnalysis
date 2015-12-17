@@ -397,8 +397,8 @@ namespace sequence_analysis {
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(stat_tool::StatError &error , const char *path , bool exhaustive) const;
-    bool spreadsheet_write(stat_tool::StatError &error , const char *path) const;
+    bool ascii_write(stat_tool::StatError &error , const std::string path , bool exhaustive) const;
+    bool spreadsheet_write(stat_tool::StatError &error , const std::string path) const;
     bool plot_write(stat_tool::StatError &error , const char *prefix , const char *title = NULL) const;
     stat_tool::MultiPlotSet* get_plotable() const;
 
@@ -473,9 +473,9 @@ namespace sequence_analysis {
     void cluster(const Sequences &seq , int variable , int nb_class , double *limit);
     void select_variable(const Sequences &seq , int *variable);
 
-    bool pointwise_average_ascii_print(stat_tool::StatError &error , const char *path , int *size ,
+    bool pointwise_average_ascii_print(stat_tool::StatError &error , const std::string path , int *size ,
                                        bool standard_deviation , sequence_type output) const;
-    bool pointwise_average_spreadsheet_print(stat_tool::StatError &error , const char *path , int *size ,
+    bool pointwise_average_spreadsheet_print(stat_tool::StatError &error , const std::string path , int *size ,
                                              bool standard_deviation , sequence_type output) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive , bool comment_flag) const;
@@ -515,7 +515,7 @@ namespace sequence_analysis {
                                              int test_position , double substitution_distance) const;
 
     std::ostream& multiple_alignment_ascii_print(std::ostream &os) const;
-    bool multiple_alignment_ascii_print(stat_tool::StatError &error , const char *path) const;
+    bool multiple_alignment_ascii_print(stat_tool::StatError &error , const std::string path) const;
 
     Sequences* multiple_alignment(const Sequences &test_seq , const stat_tool::VectorDistance &vector_dist ,
                                   double **rank , double **max_category_distance , bool begin_free ,
@@ -707,7 +707,7 @@ namespace sequence_analysis {
 
     Sequences* pointwise_average(stat_tool::StatError &error , bool circular = false ,
                                  bool standard_deviation = false , sequence_type output = SEQUENCE ,
-                                 const char *path = NULL , stat_tool::output_format format = stat_tool::ASCII) const;
+                                 const std::string path = "" , stat_tool::output_format format = stat_tool::ASCII) const;
 
     Sequences* recurrence_time_sequences(stat_tool::StatError &error , int variable , int value) const;
     Sequences* sojourn_time_sequences(stat_tool::StatError &error , int variable) const;
@@ -716,22 +716,22 @@ namespace sequence_analysis {
 
     Sequences* cross(stat_tool::StatError &error) const;
 
-    static Sequences* ascii_read(stat_tool::StatError &error , const char *path ,
+    static Sequences* ascii_read(stat_tool::StatError &error , const std::string path ,
                                  bool old_format = false);
 
     std::ostream& line_write(std::ostream &os) const;
 
     virtual std::ostream& ascii_data_write(std::ostream &os , output_sequence_format format = COLUMN ,
                                            bool exhaustive = false) const;
-    virtual bool ascii_data_write(stat_tool::StatError &error , const char *path ,
+    virtual bool ascii_data_write(stat_tool::StatError &error , const std::string path ,
                                   output_sequence_format format = COLUMN , bool exhaustive = false) const;
     bool plot_data_write(stat_tool::StatError &error , const char *prefix ,
                          const char *title = NULL) const;
     stat_tool::MultiPlotSet* get_plotable_data(stat_tool::StatError &error) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(stat_tool::StatError &error , const char *path , bool exhaustive = false) const;
-    bool spreadsheet_write(stat_tool::StatError &error , const char *path) const;
+    bool ascii_write(stat_tool::StatError &error , const std::string path , bool exhaustive = false) const;
+    bool spreadsheet_write(stat_tool::StatError &error , const std::string path) const;
     bool plot_write(stat_tool::StatError &error , const char *prefix , const char *title = NULL) const;
     stat_tool::MultiPlotSet* get_plotable() const;
 
@@ -769,13 +769,13 @@ namespace sequence_analysis {
                                          insertion_deletion_cost indel_cost = ADAPTATIVE ,
                                          double indel_factor = INDEL_FACTOR_1 , bool transposition_flag = false ,
                                          double transposition_factor = TRANSPOSITION_FACTOR ,
-                                         const char *result_path = NULL , stat_tool::output_format result_format = stat_tool::ASCII ,
-                                         const char *alignment_path = NULL) const;
+                                         const std::string result_path = "" , stat_tool::output_format result_format = stat_tool::ASCII ,
+                                         const std::string alignment_path = "") const;
     stat_tool::DistanceMatrix* alignment(stat_tool::StatError &error , std::ostream *os ,
                                          int ref_identifier = stat_tool::I_DEFAULT , int test_identifier = stat_tool::I_DEFAULT ,
                                          bool begin_free = false , bool end_free = false ,
-                                         const char *result_path = NULL , stat_tool::output_format result_format = stat_tool::ASCII ,
-                                         const char *alignment_path = NULL) const;
+                                         const std::string result_path = "" , stat_tool::output_format result_format = stat_tool::ASCII ,
+                                         const std::string alignment_path = "") const;
 
     Sequences* multiple_alignment(stat_tool::StatError &error , std::ostream &os ,
                                   const stat_tool::VectorDistance &ivector_dist ,
@@ -783,7 +783,7 @@ namespace sequence_analysis {
                                   insertion_deletion_cost indel_cost = ADAPTATIVE ,
                                   double indel_factor = INDEL_FACTOR_N ,
                                   stat_tool::hierarchical_strategy strategy = stat_tool::AGGLOMERATIVE ,
-                                  const char *path = NULL) const;
+                                  const std::string path = "") const;
 
     Sequences* segmentation(stat_tool::StatError &error , std::ostream &os , int iidentifier ,
                             int nb_segment , int *ichange_point , segment_model *model_type ,
@@ -805,7 +805,7 @@ namespace sequence_analysis {
                                stat_tool::output_format format = stat_tool::ASCII ,
                                stat_tool::latent_structure_algorithm segmentation = stat_tool::FORWARD_DYNAMIC_PROGRAMMING ,
                                int nb_segmentation = NB_SEGMENTATION) const;
-    bool segment_profile_write(stat_tool::StatError &error , const char *path , int iidentifier ,
+    bool segment_profile_write(stat_tool::StatError &error , const std::string path , int iidentifier ,
                                int nb_segment , segment_model *model_type , change_point_profile output = SEGMENT ,
                                stat_tool::output_format format = stat_tool::ASCII ,
                                stat_tool::latent_structure_algorithm segmentation = stat_tool::FORWARD_DYNAMIC_PROGRAMMING ,
@@ -1006,7 +1006,7 @@ namespace sequence_analysis {
     std::ostream& likelihood_write(std::ostream &os , int nb_model , double **likelihood ,
                                    const char *label , bool exhaustive = false ,
                                    stat_tool::latent_structure_algorithm algorithm = stat_tool::NO_LATENT_STRUCTURE) const;
-    bool likelihood_write(stat_tool::StatError &error , const char *path , int nb_model ,
+    bool likelihood_write(stat_tool::StatError &error , const std::string path , int nb_model ,
                           double **likelihood , const char *label ,
                           stat_tool::latent_structure_algorithm algorithm = stat_tool::NO_LATENT_STRUCTURE) const;
 
@@ -1065,22 +1065,22 @@ namespace sequence_analysis {
 
     std::ostream& ascii_data_write(std::ostream &os , output_sequence_format format = COLUMN ,
                                    bool exhaustive = false) const;
-    bool ascii_data_write(stat_tool::StatError &error , const char *path ,
+    bool ascii_data_write(stat_tool::StatError &error , const std::string path ,
                           output_sequence_format format = COLUMN , bool exhaustive = false) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(stat_tool::StatError &error , const char *path , bool exhaustive = false) const;
-    bool spreadsheet_write(stat_tool::StatError &error , const char *path) const;
+    bool ascii_write(stat_tool::StatError &error , const std::string path , bool exhaustive = false) const;
+    bool spreadsheet_write(stat_tool::StatError &error , const std::string path) const;
     bool plot_write(stat_tool::StatError &error , const char *prefix , const char *title = NULL) const;
     stat_tool::MultiPlotSet* get_plotable() const;
 
     bool transition_count(stat_tool::StatError &error , std::ostream &os , int max_order ,
                           bool begin = false , transition_estimator estimator = MAXIMUM_LIKELIHOOD ,
-                          const char *path = NULL) const;
+                          const std::string path = "") const;
     bool word_count(stat_tool::StatError &error , std::ostream &os , int variable , int word_length ,
                     int begin_state = stat_tool::I_DEFAULT , int end_state = stat_tool::I_DEFAULT ,
                     int min_frequency = 1) const;
-    bool mtg_write(stat_tool::StatError &error , const char *path , stat_tool::variable_type *itype) const;
+    bool mtg_write(stat_tool::StatError &error , const std::string path , stat_tool::variable_type *itype) const;
 
     int cumulative_distribution_function_computation(int variable , double **cdf) const;
     int cumulative_distribution_function_computation(int variable , int state , double **cdf) const;
@@ -1190,20 +1190,20 @@ namespace sequence_analysis {
     bool lumpability_test(stat_tool::StatError &error , std::ostream &os , int *category , int order = 1) const;
 
     bool comparison(stat_tool::StatError &error , std::ostream &os , int nb_model ,
-                    const VariableOrderMarkov **imarkov , const char *path = NULL) const;
+                    const VariableOrderMarkov **imarkov , const std::string path = "") const;
 
     bool comparison(stat_tool::StatError &error , std::ostream &os , int nb_model ,
-                    const SemiMarkov **ismarkov , const char *path = NULL) const;
+                    const SemiMarkov **ismarkov , const std::string path = "") const;
 
     bool comparison(stat_tool::StatError &error , std::ostream &os , int nb_model ,
                     const HiddenVariableOrderMarkov **ihmarkov ,
                     stat_tool::latent_structure_algorithm algorithm = stat_tool::FORWARD ,
-                    const char *path = NULL) const;
+                    const std::string path = "") const;
 
     bool comparison(stat_tool::StatError &error , std::ostream &os , int nb_model ,
                     const HiddenSemiMarkov **ihsmarkov ,
                     stat_tool::latent_structure_algorithm algorithm = stat_tool::FORWARD ,
-                    const char *path = NULL) const;
+                    const std::string path = "") const;
 
     // acces membres de la classe
 

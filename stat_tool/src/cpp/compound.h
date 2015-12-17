@@ -118,14 +118,14 @@ namespace stat_tool {
 
     CompoundData* extract_data(StatError &error) const;
 
-    static Compound* ascii_read(StatError &error , const char *path ,
+    static Compound* ascii_read(StatError &error , const std::string path ,
                                 double cumul_threshold = COMPOUND_THRESHOLD);
 
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(StatError &error , const char *path , bool exhaustive = false) const;
-    bool spreadsheet_write(StatError &error , const char *path) const;
+    bool ascii_write(StatError &error , const std::string path , bool exhaustive = false) const;
+    bool spreadsheet_write(StatError &error , const std::string path) const;
     bool plot_write(StatError &error , const char *prefix , const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
@@ -174,8 +174,8 @@ namespace stat_tool {
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(StatError &error , const char *path , bool exhaustive = false) const;
-    bool spreadsheet_write(StatError &error , const char *path) const;
+    bool ascii_write(StatError &error , const std::string path , bool exhaustive = false) const;
+    bool spreadsheet_write(StatError &error , const std::string path) const;
     bool plot_write(StatError &error , const char *prefix , const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 

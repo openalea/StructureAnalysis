@@ -159,14 +159,14 @@ namespace sequence_analysis {
     DiscreteParametricModel* extract(stat_tool::StatError &error ,
                                      stat_tool::process_distribution dist_type , int state) const;
 
-    static NonhomogeneousMarkov* ascii_read(stat_tool::StatError &error , const char *path ,
+    static NonhomogeneousMarkov* ascii_read(stat_tool::StatError &error , const std::string path ,
                                             int length = DEFAULT_LENGTH);
 
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(stat_tool::StatError &error , const char *path , bool exhaustive = false) const;
-    bool spreadsheet_write(stat_tool::StatError &error , const char *path) const;
+    bool ascii_write(stat_tool::StatError &error , const std::string path , bool exhaustive = false) const;
+    bool spreadsheet_write(stat_tool::StatError &error , const std::string path) const;
     bool plot_write(stat_tool::StatError &error , const char *prefix , const char *title = NULL) const;
     stat_tool::MultiPlotSet* get_plotable() const;
 
@@ -230,8 +230,8 @@ namespace sequence_analysis {
     NonhomogeneousMarkovData* remove_index_parameter(stat_tool::StatError &error) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(stat_tool::StatError &error , const char *path , bool exhaustive = false) const;
-    bool spreadsheet_write(stat_tool::StatError &error , const char *path) const;
+    bool ascii_write(stat_tool::StatError &error , const std::string path , bool exhaustive = false) const;
+    bool spreadsheet_write(stat_tool::StatError &error , const std::string path) const;
     bool plot_write(stat_tool::StatError &error , const char *prefix , const char *title = NULL) const;
     stat_tool::MultiPlotSet* get_plotable() const;
 

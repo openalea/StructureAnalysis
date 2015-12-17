@@ -38,6 +38,8 @@
 
 #include <limits.h>
 #include <math.h>
+
+#include <string>
 #include <sstream>
 #include <iomanip>
 
@@ -4977,7 +4979,7 @@ Sequences* Sequences::moving_average(StatError &error , const Distribution &dist
  *
  *--------------------------------------------------------------*/
 
-bool Sequences::pointwise_average_ascii_print(StatError &error , const char *path ,
+bool Sequences::pointwise_average_ascii_print(StatError &error , const string path ,
                                               int *size , bool standard_deviation ,
                                               sequence_type output) const
 
@@ -4987,7 +4989,7 @@ bool Sequences::pointwise_average_ascii_print(StatError &error , const char *pat
   int buff , inb_sequence , *width;
   long old_adjust;
   double standard_normal_value , half_confidence_interval , *t_value;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -5185,7 +5187,7 @@ bool Sequences::pointwise_average_ascii_print(StatError &error , const char *pat
  *
  *--------------------------------------------------------------*/
 
-bool Sequences::pointwise_average_spreadsheet_print(StatError &error , const char *path ,
+bool Sequences::pointwise_average_spreadsheet_print(StatError &error , const string path ,
                                                     int *size , bool standard_deviation ,
                                                     sequence_type output) const
 
@@ -5194,7 +5196,7 @@ bool Sequences::pointwise_average_spreadsheet_print(StatError &error , const cha
   register int i , j , k , m;
   int inb_sequence;
   double standard_normal_value , half_confidence_interval , *t_value;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -5336,7 +5338,7 @@ bool Sequences::pointwise_average_spreadsheet_print(StatError &error , const cha
 
 Sequences* Sequences::pointwise_average(StatError &error , bool circular ,
                                         bool standard_deviation , sequence_type output ,
-                                        const char *path , output_format format) const
+                                        const string path , output_format format) const
 
 {
   bool status = true;
@@ -6127,7 +6129,7 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular ,
 
     // ecriture des sequences de moyennes et d'ecart-types
 
-    if (path) {
+    if (!path.empty()) {
       switch (format) {
       case ASCII :
         status = seq->pointwise_average_ascii_print(error , path , size ,

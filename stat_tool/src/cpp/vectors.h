@@ -185,7 +185,7 @@ namespace stat_tool {
 
     std::ostream& rank_correlation_ascii_write(std::ostream &os , correlation_type correl_type ,
                                                double **correlation) const;
-    bool rank_correlation_ascii_write(StatError &error , const char *path , correlation_type correl_type ,
+    bool rank_correlation_ascii_write(StatError &error , const std::string path , correlation_type correl_type ,
                                       double **correlation) const;
 
     int** joint_frequency_computation(int variable1 , int variable2) const;
@@ -194,18 +194,18 @@ namespace stat_tool {
                                                 int **frequency , double **deviation ,
                                                 double **chi2_contribution , const Test &test ,
                                                 bool file_flag = false) const;
-    bool contingency_table_ascii_write(StatError &error , const char *path , int variable1 ,
+    bool contingency_table_ascii_write(StatError &error , const std::string path , int variable1 ,
                                        int variable2 , int **frequency , double **deviation ,
                                        double **chi2_contribution , const Test &test) const;
-    bool contingency_table_spreadsheet_write(StatError &error , const char *path , int variable1 ,
+    bool contingency_table_spreadsheet_write(StatError &error , const std::string path , int variable1 ,
                                              int variable2 , int **frequency , double **deviation ,
                                              double **chi2_contribution , const Test &test) const;
 
     std::ostream& variance_analysis_ascii_write(std::ostream &os , int type , const Vectors **value_vec ,
                                                 bool exhaustive = false) const;
-    bool variance_analysis_ascii_write(StatError &error , const char *path , int response_type ,
+    bool variance_analysis_ascii_write(StatError &error , const std::string path , int response_type ,
                                        const Vectors **value_vec , bool exhaustive = false) const;
-    bool variance_analysis_spreadsheet_write(StatError &error , const char *path ,
+    bool variance_analysis_spreadsheet_write(StatError &error , const std::string path ,
                                              int response_type , const Vectors **value_vec) const;
 
     template <typename Type>
@@ -280,16 +280,16 @@ namespace stat_tool {
     Vectors* merge_variable(StatError &error , int nb_sample , const Vectors **ivec ,
                             int ref_sample = I_DEFAULT) const;
 
-    static Vectors* ascii_read(StatError &error , const char *path);
+    static Vectors* ascii_read(StatError &error , const std::string path);
 
     std::ostream& line_write(std::ostream &os) const;
 
     virtual std::ostream& ascii_data_write(std::ostream &os , bool exhaustive = false) const;
-    virtual bool ascii_data_write(StatError &error , const char *path , bool exhaustive = false) const;
+    virtual bool ascii_data_write(StatError &error , const std::string path , bool exhaustive = false) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(StatError &error , const char *path , bool exhaustive = false) const;
-    bool spreadsheet_write(StatError &error , const char *path) const;
+    bool ascii_write(StatError &error , const std::string path , bool exhaustive = false) const;
+    bool spreadsheet_write(StatError &error , const std::string path) const;
     bool plot_write(StatError &error , const char *prefix , const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
@@ -308,17 +308,17 @@ namespace stat_tool {
     double kendall_rank_single_correlation_computation() const;
 
     bool rank_correlation_computation(StatError &error , std::ostream &os ,
-                                      correlation_type correl_type , const char *path = NULL) const;
+                                      correlation_type correl_type , const std::string path = "") const;
 
     DistanceMatrix* comparison(StatError &error , const VectorDistance &ivector_dist ,
                                bool standardization = true) const;
 
     bool contingency_table(StatError &error , std::ostream &os , int variable1 ,
-                           int variable2 , const char *path = NULL , output_format format = ASCII) const;
+                           int variable2 , const std::string path = "" , output_format format = ASCII) const;
 
     bool variance_analysis(StatError &error , std::ostream &os , int class_variable ,
                            int response_variable , int response_type ,
-                           const char *path = NULL , output_format format = ASCII) const;
+                           const std::string path = "" , output_format format = ASCII) const;
 
     Regression* linear_regression(StatError &error , int explanatory_variable ,
                                   int response_variable) const;
@@ -413,7 +413,7 @@ namespace stat_tool {
     ~VectorDistance();
     VectorDistance& operator=(const VectorDistance &vector_dist);
 
-    static VectorDistance* ascii_read(StatError &error , const char *path);
+    static VectorDistance* ascii_read(StatError &error , const std::string path);
 
     std::ostream& line_write(std::ostream &os) const;
 
@@ -421,8 +421,8 @@ namespace stat_tool {
 
     // fonctions pour la compatibilite avec la classe StatInterface
 
-    bool ascii_write(StatError &error , const char *path , bool exhaustive = false) const;
-    bool spreadsheet_write(StatError &error , const char *path) const;
+    bool ascii_write(StatError &error , const std::string path , bool exhaustive = false) const;
+    bool spreadsheet_write(StatError &error , const std::string path) const;
     bool plot_write(StatError &error , const char *prefix , const char *title = NULL) const;
 
     double* max_category_distance_computation(int variable) const;

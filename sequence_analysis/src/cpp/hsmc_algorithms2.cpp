@@ -37,6 +37,8 @@
 
 
 #include <math.h>
+
+#include <string>
 #include <sstream>
 
 #include "stat_tool/stat_label.h"
@@ -5150,7 +5152,7 @@ bool HiddenSemiMarkov::state_profile_write(StatError &error , ostream &os ,
  *
  *--------------------------------------------------------------*/
 
-bool HiddenSemiMarkov::state_profile_write(StatError &error , const char *path ,
+bool HiddenSemiMarkov::state_profile_write(StatError &error , const string path ,
                                            const MarkovianSequences &iseq , int identifier ,
                                            state_profile output , output_format format ,
                                            latent_structure_algorithm state_sequence ,
@@ -5158,7 +5160,7 @@ bool HiddenSemiMarkov::state_profile_write(StatError &error , const char *path ,
 
 {
   bool status = true;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -5230,14 +5232,14 @@ bool HiddenSemiMarkov::state_profile_ascii_write(StatError &error , ostream &os 
  *
  *--------------------------------------------------------------*/
 
-bool HiddenSemiMarkov::state_profile_write(StatError &error , const char *path , int identifier ,
+bool HiddenSemiMarkov::state_profile_write(StatError &error , const string path , int identifier ,
                                            state_profile output , output_format format ,
                                            latent_structure_algorithm state_sequence ,
                                            int nb_state_sequence) const
 
 {
   bool status = true;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -6191,7 +6193,7 @@ SemiMarkovData* HiddenSemiMarkov::state_sequence_computation(StatError &error , 
 bool MarkovianSequences::comparison(StatError &error , ostream &os , int nb_model ,
                                     const HiddenSemiMarkov **ihsmarkov ,
                                     latent_structure_algorithm algorithm ,
-                                    const char *path) const
+                                    const string path) const
 
 {
   bool status = true;
@@ -6317,7 +6319,7 @@ bool MarkovianSequences::comparison(StatError &error , ostream &os , int nb_mode
                      SEQ_label[SEQL_HIDDEN_SEMI_MARKOV_CHAIN] , true , algorithm);
 #   endif
 
-    if (path) {
+    if (!path.empty()) {
       status = likelihood_write(error , path , nb_model , likelihood ,
                                 SEQ_label[SEQL_HIDDEN_SEMI_MARKOV_CHAIN] , algorithm);
     }
@@ -6471,7 +6473,7 @@ SemiMarkovData* HiddenSemiMarkov::simulation(StatError &error , int nb_sequence 
 DistanceMatrix* HiddenSemiMarkov::divergence_computation(StatError &error , ostream &os ,
                                                          int nb_model , const HiddenSemiMarkov **ihsmarkov ,
                                                          FrequencyDistribution **length_distribution ,
-                                                         const char *path) const
+                                                         const string path) const
 
 {
   bool status = true , lstatus;
@@ -6579,8 +6581,8 @@ DistanceMatrix* HiddenSemiMarkov::divergence_computation(StatError &error , ostr
   if (status) {
     out_file = NULL;
 
-    if (path) {
-      out_file = new ofstream(path);
+    if (!path.empty()) {
+      out_file = new ofstream(path.c_str());
 
       if (!out_file) {
         error.update(STAT_error[STATR_FILE_NAME]);
@@ -6707,7 +6709,7 @@ DistanceMatrix* HiddenSemiMarkov::divergence_computation(StatError &error , ostr
 
 DistanceMatrix* HiddenSemiMarkov::divergence_computation(StatError &error , ostream &os ,
                                                          int nb_model , const HiddenSemiMarkov **hsmarkov ,
-                                                         int nb_sequence , int length , const char *path) const
+                                                         int nb_sequence , int length , const string path) const
 
 {
   bool status = true;
@@ -6774,7 +6776,7 @@ DistanceMatrix* HiddenSemiMarkov::divergence_computation(StatError &error , ostr
 DistanceMatrix* HiddenSemiMarkov::divergence_computation(StatError &error , ostream &os ,
                                                          int nb_model , const HiddenSemiMarkov **hsmarkov ,
                                                          int nb_sequence , const MarkovianSequences **seq ,
-                                                         const char *path) const
+                                                         const string path) const
 
 {
   register int i;

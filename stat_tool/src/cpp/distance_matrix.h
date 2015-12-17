@@ -158,9 +158,9 @@ namespace stat_tool {
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(StatError &error , const char *path , bool exhaustive = false) const;
+    bool ascii_write(StatError &error , const std::string path , bool exhaustive = false) const;
     std::ostream& spreadsheet_write(std::ostream &os) const;
-    bool spreadsheet_write(StatError &error , const char *path) const;
+    bool spreadsheet_write(StatError &error , const std::string path) const;
     bool plot_write(StatError &error , const char *prefix , const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
@@ -185,7 +185,7 @@ namespace stat_tool {
     bool hierarchical_clustering(StatError &error , std::ostream &os ,
                                  hierarchical_strategy strategy = AGGLOMERATIVE ,
                                  linkage criterion = AVERAGE_NEIGHBOR ,
-                                 const char *path = NULL , output_format format = ASCII) const;
+                                 const std::string path = "" , output_format format = ASCII) const;
 
     // acces membres de la classe
 
@@ -288,8 +288,8 @@ namespace stat_tool {
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(StatError &error , const char *path , bool exhaustive = false) const;
-    bool spreadsheet_write(StatError &error , const char *path) const;
+    bool ascii_write(StatError &error , const std::string path , bool exhaustive = false) const;
+    bool spreadsheet_write(StatError &error , const std::string path) const;
     bool plot_write(StatError &error , const char *prefix , const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
@@ -355,8 +355,8 @@ namespace stat_tool {
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(StatError &error , const char *path , bool exhaustive = false) const;
-    bool spreadsheet_write(StatError &error , const char *path) const;
+    bool ascii_write(StatError &error , const std::string path , bool exhaustive = false) const;
+    bool spreadsheet_write(StatError &error , const std::string path) const;
     bool plot_write(StatError &error , const char *prefix , const char *title = NULL) const
     { return false; }
 

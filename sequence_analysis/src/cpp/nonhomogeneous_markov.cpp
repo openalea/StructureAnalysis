@@ -37,6 +37,8 @@
 
 
 #include <math.h>
+
+#include <string>
 #include <sstream>
 #include <iomanip>
 
@@ -1048,7 +1050,7 @@ DiscreteParametricModel* NonhomogeneousMarkov::extract(StatError &error , proces
  *
  *--------------------------------------------------------------*/
 
-NonhomogeneousMarkov* NonhomogeneousMarkov::ascii_read(StatError &error , const char *path ,
+NonhomogeneousMarkov* NonhomogeneousMarkov::ascii_read(StatError &error , const string path ,
                                                        int length)
 
 {
@@ -1062,7 +1064,7 @@ NonhomogeneousMarkov* NonhomogeneousMarkov::ascii_read(StatError &error , const 
   const Chain *chain;
   const Function **self_transition;
   NonhomogeneousMarkov *markov;
-  ifstream in_file(path);
+  ifstream in_file(path.c_str());
 
 
   markov = NULL;
@@ -1438,12 +1440,12 @@ ostream& NonhomogeneousMarkov::ascii_write(ostream &os , bool exhaustive) const
  *
  *--------------------------------------------------------------*/
 
-bool NonhomogeneousMarkov::ascii_write(StatError &error , const char *path ,
+bool NonhomogeneousMarkov::ascii_write(StatError &error , const string path ,
                                        bool exhaustive) const
 
 {
   bool status;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -1561,11 +1563,11 @@ ostream& NonhomogeneousMarkov::spreadsheet_write(ostream &os , const Nonhomogene
  *
  *--------------------------------------------------------------*/
 
-bool NonhomogeneousMarkov::spreadsheet_write(StatError &error , const char *path) const
+bool NonhomogeneousMarkov::spreadsheet_write(StatError &error , const string path) const
 
 {
   bool status;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -2490,7 +2492,7 @@ ostream& NonhomogeneousMarkovData::ascii_write(ostream &os , bool exhaustive) co
  *
  *--------------------------------------------------------------*/
 
-bool NonhomogeneousMarkovData::ascii_write(StatError &error , const char *path ,
+bool NonhomogeneousMarkovData::ascii_write(StatError &error , const string path ,
                                            bool exhaustive) const
 
 {
@@ -2498,7 +2500,7 @@ bool NonhomogeneousMarkovData::ascii_write(StatError &error , const char *path ,
 
 
   if (markov) {
-    ofstream out_file(path);
+    ofstream out_file(path.c_str());
 
     error.init();
 
@@ -2525,14 +2527,14 @@ bool NonhomogeneousMarkovData::ascii_write(StatError &error , const char *path ,
  *
  *--------------------------------------------------------------*/
 
-bool NonhomogeneousMarkovData::spreadsheet_write(StatError &error , const char *path) const
+bool NonhomogeneousMarkovData::spreadsheet_write(StatError &error , const string path) const
 
 {
   bool status = false;
 
 
   if (markov) {
-    ofstream out_file(path);
+    ofstream out_file(path.c_str());
 
     error.init();
 

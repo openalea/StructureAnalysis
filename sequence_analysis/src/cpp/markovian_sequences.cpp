@@ -36,6 +36,7 @@
 
 
 
+#include <string>
 #include <sstream>
 #include <iomanip>
 
@@ -4962,12 +4963,12 @@ ostream& MarkovianSequences::ascii_write(ostream &os , bool exhaustive) const
  *
  *--------------------------------------------------------------*/
 
-bool MarkovianSequences::ascii_write(StatError &error , const char *path ,
+bool MarkovianSequences::ascii_write(StatError &error , const string path ,
                                      bool exhaustive) const
 
 {
   bool status;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -5014,12 +5015,12 @@ ostream& MarkovianSequences::ascii_data_write(ostream &os , output_sequence_form
  *
  *--------------------------------------------------------------*/
 
-bool MarkovianSequences::ascii_data_write(StatError &error , const char *path ,
+bool MarkovianSequences::ascii_data_write(StatError &error , const string path ,
                                           output_sequence_format format , bool exhaustive) const
 
 {
   bool status = false;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -5049,14 +5050,14 @@ bool MarkovianSequences::ascii_data_write(StatError &error , const char *path ,
  *
  *--------------------------------------------------------------*/
 
-bool MarkovianSequences::spreadsheet_write(StatError &error , const char *path) const
+bool MarkovianSequences::spreadsheet_write(StatError &error , const string path) const
 
 {
   bool status;
   register int i;
   double mean , variance;
   Curves *smoothed_curves;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -7102,12 +7103,12 @@ void MarkovianSequences::linear_model_plotable_write(MultiPlotSet &plot , int &i
  *
  *--------------------------------------------------------------*/
 
-bool MarkovianSequences::mtg_write(StatError &error , const char *path , variable_type *itype) const
+bool MarkovianSequences::mtg_write(StatError &error , const string path , variable_type *itype) const
 
 {
   bool status;
   register int i , j , k , m;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
