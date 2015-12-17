@@ -36,6 +36,7 @@
 
 
 
+#include <string>
 #include <sstream>
 #include <iomanip>
 #include <cstring>
@@ -650,12 +651,12 @@ ostream& Clusters::ascii_write(ostream &os , bool exhaustive) const
  *
  *--------------------------------------------------------------*/
 
-bool Clusters::ascii_write(StatError &error , const char *path ,
+bool Clusters::ascii_write(StatError &error , const string path ,
                            bool exhaustive) const
 
 {
   bool status;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -682,7 +683,7 @@ bool Clusters::ascii_write(StatError &error , const char *path ,
  *
  *--------------------------------------------------------------*/
 
-bool Clusters::spreadsheet_write(StatError &error , const char *path) const
+bool Clusters::spreadsheet_write(StatError &error , const string path) const
 
 {
   bool status;
@@ -690,7 +691,7 @@ bool Clusters::spreadsheet_write(StatError &error , const char *path) const
   int isolation , neighbor_cluster , most_distant_pattern , neighbor_pattern , *index , *order;
   double **normalized_pattern_distance , **normalized_pattern_cluster_distance ,
          **normalized_cluster_distance;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();

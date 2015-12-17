@@ -36,6 +36,7 @@
 
 
 
+#include <string>
 #include <sstream>
 
 #include "tool/rw_tokenizer.h"
@@ -239,7 +240,7 @@ CompoundData* Compound::extract_data(StatError &error) const
  *
  *--------------------------------------------------------------*/
 
-Compound* Compound::ascii_read(StatError &error , const char *path , double cumul_threshold)
+Compound* Compound::ascii_read(StatError &error , const string path , double cumul_threshold)
 
 {
   RWCString buffer , token;
@@ -250,7 +251,7 @@ Compound* Compound::ascii_read(StatError &error , const char *path , double cumu
   int line , read_line;
   DiscreteParametric *sum_dist , *dist;
   Compound *compound;
-  ifstream in_file(path);
+  ifstream in_file(path.c_str());
 
 
   compound = NULL;
@@ -578,12 +579,12 @@ ostream& Compound::ascii_write(ostream &os , bool exhaustive) const
  *
  *--------------------------------------------------------------*/
 
-bool Compound::ascii_write(StatError &error , const char *path ,
+bool Compound::ascii_write(StatError &error , const string path ,
                            bool exhaustive) const
 
 {
   bool status;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -714,11 +715,11 @@ ostream& Compound::spreadsheet_write(ostream &os , const CompoundData *compound_
  *
  *--------------------------------------------------------------*/
 
-bool Compound::spreadsheet_write(StatError &error , const char *path) const
+bool Compound::spreadsheet_write(StatError &error , const string path) const
 
 {
   bool status;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -1399,7 +1400,7 @@ ostream& CompoundData::ascii_write(ostream &os , bool exhaustive) const
  *
  *--------------------------------------------------------------*/
 
-bool CompoundData::ascii_write(StatError &error , const char *path ,
+bool CompoundData::ascii_write(StatError &error , const string path ,
                                bool exhaustive) const
 
 {
@@ -1407,7 +1408,7 @@ bool CompoundData::ascii_write(StatError &error , const char *path ,
 
 
   if (compound) {
-    ofstream out_file(path);
+    ofstream out_file(path.c_str());
 
     error.init();
 
@@ -1434,14 +1435,14 @@ bool CompoundData::ascii_write(StatError &error , const char *path ,
  *
  *--------------------------------------------------------------*/
 
-bool CompoundData::spreadsheet_write(StatError &error , const char *path) const
+bool CompoundData::spreadsheet_write(StatError &error , const string path) const
 
 {
   bool status = false;
 
 
   if (compound) {
-    ofstream out_file(path);
+    ofstream out_file(path.c_str());
 
     error.init();
 

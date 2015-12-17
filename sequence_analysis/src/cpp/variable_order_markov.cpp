@@ -37,6 +37,8 @@
 
 
 #include <math.h>
+
+#include <string>
 #include <sstream>
 #include <iomanip>
 
@@ -3517,7 +3519,7 @@ VariableOrderMarkov* VariableOrderMarkov::thresholding(double min_probability) c
  *--------------------------------------------------------------*/
 
 VariableOrderMarkov* VariableOrderMarkov::ascii_read(StatError &error ,
-                                                     const char *path , int length)
+                                                     const string path , int length)
 
 {
   RWCString buffer , token;
@@ -3529,7 +3531,7 @@ VariableOrderMarkov* VariableOrderMarkov::ascii_read(StatError &error ,
   const VariableOrderMarkovChain *imarkov;
   const CategoricalProcess *observation;
   VariableOrderMarkov *markov;
-  ifstream in_file(path);
+  ifstream in_file(path.c_str());
 
 
   markov = NULL;
@@ -4382,12 +4384,12 @@ ostream& VariableOrderMarkov::ascii_write(ostream &os , bool exhaustive) const
  *
  *--------------------------------------------------------------*/
 
-bool VariableOrderMarkov::ascii_write(StatError &error , const char *path ,
+bool VariableOrderMarkov::ascii_write(StatError &error , const string path ,
                                       bool exhaustive) const
 
 {
   bool status;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -4733,11 +4735,11 @@ ostream& VariableOrderMarkov::spreadsheet_write(ostream &os ,
  *
  *--------------------------------------------------------------*/
 
-bool VariableOrderMarkov::spreadsheet_write(StatError &error , const char *path) const
+bool VariableOrderMarkov::spreadsheet_write(StatError &error , const string path) const
 
 {
   bool status;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -5947,7 +5949,7 @@ ostream& VariableOrderMarkovData::ascii_write(ostream &os , bool exhaustive) con
  *
  *--------------------------------------------------------------*/
 
-bool VariableOrderMarkovData::ascii_write(StatError &error , const char *path ,
+bool VariableOrderMarkovData::ascii_write(StatError &error , const string path ,
                                           bool exhaustive) const
 
 {
@@ -5955,7 +5957,7 @@ bool VariableOrderMarkovData::ascii_write(StatError &error , const char *path ,
 
 
   if (markov) {
-    ofstream out_file(path);
+    ofstream out_file(path.c_str());
 
     error.init();
 
@@ -6003,12 +6005,12 @@ ostream& VariableOrderMarkovData::ascii_data_write(ostream &os , output_sequence
  *
  *--------------------------------------------------------------*/
 
-bool VariableOrderMarkovData::ascii_data_write(StatError &error , const char *path ,
+bool VariableOrderMarkovData::ascii_data_write(StatError &error , const string path ,
                                                output_sequence_format format , bool exhaustive) const
 
 {
   bool status = false;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -6038,14 +6040,14 @@ bool VariableOrderMarkovData::ascii_data_write(StatError &error , const char *pa
  *
  *--------------------------------------------------------------*/
 
-bool VariableOrderMarkovData::spreadsheet_write(StatError &error , const char *path) const
+bool VariableOrderMarkovData::spreadsheet_write(StatError &error , const string path) const
 
 {
   bool status = false;
 
 
   if (markov) {
-    ofstream out_file(path);
+    ofstream out_file(path.c_str());
 
     error.init();
 

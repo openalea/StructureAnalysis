@@ -37,6 +37,8 @@
 
 
 #include <math.h>
+
+#include <string>
 #include <sstream>
 #include <iomanip>
 
@@ -2575,7 +2577,7 @@ ostream& VariableOrderMarkov::transition_count_ascii_write(ostream &os , bool be
 
 bool MarkovianSequences::transition_count(StatError &error , ostream &os , int max_order ,
                                           bool begin , transition_estimator estimator ,
-                                          const char *path) const
+                                          const string path) const
 
 {
   bool status = true;
@@ -2637,8 +2639,8 @@ bool MarkovianSequences::transition_count(StatError &error , ostream &os , int m
     markov->transition_count_ascii_write(os , begin);
 #   endif
 
-    if (path) {
-      ofstream out_file(path);
+    if (!path.empty()) {
+      ofstream out_file(path.c_str());
 
       if (!out_file) {
         status = false;
@@ -2900,13 +2902,13 @@ ostream& MarkovianSequences::likelihood_write(ostream &os , int nb_model , doubl
  *
  *--------------------------------------------------------------*/
 
-bool MarkovianSequences::likelihood_write(StatError &error , const char *path ,
+bool MarkovianSequences::likelihood_write(StatError &error , const string path ,
                                           int nb_model , double **likelihood , const char *label ,
                                           latent_structure_algorithm algorithm) const
 
 {
   bool status;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -2936,7 +2938,7 @@ bool MarkovianSequences::likelihood_write(StatError &error , const char *path ,
 
 bool MarkovianSequences::comparison(StatError &error , ostream &os , int nb_model ,
                                     const VariableOrderMarkov **imarkov ,
-                                    const char *path) const
+                                    const string path) const
 
 {
   bool status = true;
@@ -3051,7 +3053,7 @@ bool MarkovianSequences::comparison(StatError &error , ostream &os , int nb_mode
     likelihood_write(os , nb_model , likelihood , SEQ_label[SEQL_MARKOV_CHAIN] , true);
 #   endif
 
-    if (path) {
+    if (!path.empty()) {
       status = likelihood_write(error , path , nb_model , likelihood , SEQ_label[SEQL_MARKOV_CHAIN]);
     }
 
@@ -3484,7 +3486,7 @@ VariableOrderMarkovData* VariableOrderMarkov::simulation(StatError &error , int 
 DistanceMatrix* VariableOrderMarkov::divergence_computation(StatError &error , ostream &os , int nb_model ,
                                                             const VariableOrderMarkov **imarkov ,
                                                             FrequencyDistribution **length_distribution ,
-                                                            const char *path) const
+                                                            const string path) const
 
 {
   bool status = true , lstatus;
@@ -3600,8 +3602,8 @@ DistanceMatrix* VariableOrderMarkov::divergence_computation(StatError &error , o
   if (status) {
     out_file = NULL;
 
-    if (path) {
-      out_file = new ofstream(path);
+    if (!path.empty()) {
+      out_file = new ofstream(path.c_str());
 
       if (!out_file) {
         error.update(STAT_error[STATR_FILE_NAME]);
@@ -3747,7 +3749,7 @@ DistanceMatrix* VariableOrderMarkov::divergence_computation(StatError &error , o
 
 DistanceMatrix* VariableOrderMarkov::divergence_computation(StatError &error , ostream &os , int nb_model ,
                                                             const VariableOrderMarkov **markov ,
-                                                            int nb_sequence , int length , const char *path) const
+                                                            int nb_sequence , int length , const string path) const
 
 {
   bool status = true;
@@ -3814,7 +3816,7 @@ DistanceMatrix* VariableOrderMarkov::divergence_computation(StatError &error , o
 DistanceMatrix* VariableOrderMarkov::divergence_computation(StatError &error , ostream &os , int nb_model ,
                                                             const VariableOrderMarkov **markov ,
                                                             int nb_sequence , const MarkovianSequences **seq ,
-                                                            const char *path) const
+                                                            const string path) const
 
 {
   register int i;

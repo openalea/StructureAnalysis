@@ -400,15 +400,16 @@ namespace stat_tool {
     virtual std::ostream& line_write(std::ostream &os) const = 0;
 
     virtual std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const = 0;
-    virtual bool ascii_write(StatError &error , const char *path ,
+    virtual bool ascii_write(StatError &error , const std::string path ,
                              bool exhaustive = false) const = 0;
-    virtual bool spreadsheet_write(StatError &error , const char *path) const = 0;
+    virtual bool spreadsheet_write(StatError &error , const std::string path) const = 0;
+
     virtual bool plot_write(StatError &error , const char *prefix ,
                             const char *title = NULL) const = 0;
 
     virtual MultiPlotSet* get_plotable() const { return NULL; };
 
-//    bool binary_write(StatError &error , const char *path) const;
+//    bool binary_write(StatError &error , const std::string path) const;
   };
 
 
@@ -498,8 +499,8 @@ namespace stat_tool {
                                              const Distribution **idist) const;
 
     std::ostream& survival_ascii_write(std::ostream &os) const;
-    bool survival_ascii_write(StatError &error , const char *path) const;
-    bool survival_spreadsheet_write(StatError &error , const char *path) const;
+    bool survival_ascii_write(StatError &error , const std::string path) const;
+    bool survival_spreadsheet_write(StatError &error , const std::string path) const;
     bool survival_plot_write(StatError &error , const char *prefix ,
                              const char *title = NULL) const;
     MultiPlotSet* survival_get_plotable(StatError &error) const;
@@ -741,10 +742,10 @@ namespace stat_tool {
     std::ostream& dissimilarity_ascii_write(std::ostream &os , int nb_histo ,
                                             const FrequencyDistribution **ihisto ,
                                             variable_type type , double **dissimilarity) const;
-    bool dissimilarity_ascii_write(StatError &error , const char *path ,
+    bool dissimilarity_ascii_write(StatError &error , const std::string path ,
                                    int nb_histo , const FrequencyDistribution **ihisto ,
                                    variable_type type , double **dissimilarity) const;
-    bool dissimilarity_spreadsheet_write(StatError &error , const char *path ,
+    bool dissimilarity_spreadsheet_write(StatError &error , const std::string path ,
                                          int nb_histo , const FrequencyDistribution **ihisto ,
                                          variable_type type , double **dissimilarity) const;
 
@@ -771,7 +772,7 @@ namespace stat_tool {
     DiscreteDistributionData* value_select(StatError &error , int min_value ,
                                            int max_value , bool keep = true) const;
 
-    bool ascii_write(StatError &error , const char *path) const;
+    bool ascii_write(StatError &error , const std::string path) const;
 
     bool plot_write(StatError &error , const char *prefix , int nb_histo ,
                     const FrequencyDistribution **ihisto , const char *title) const;
@@ -781,15 +782,15 @@ namespace stat_tool {
                                                        const FrequencyDistribution **ihisto) const;
 
     std::ostream& survival_ascii_write(std::ostream &os) const;
-    bool survival_ascii_write(StatError &error , const char *path) const;
-    bool survival_spreadsheet_write(StatError &error , const char *path) const;
+    bool survival_ascii_write(StatError &error , const std::string path) const;
+    bool survival_spreadsheet_write(StatError &error , const std::string path) const;
     bool survival_plot_write(StatError &error , const char *prefix ,
                              const char *title = NULL) const;
     MultiPlotSet* survival_get_plotable(StatError &error) const;
 
     bool comparison(StatError &error , std::ostream &os , int nb_histo ,
                     const FrequencyDistribution **ihisto , variable_type type ,
-                    const char *path = NULL , output_format format = ASCII) const;
+                    const std::string path = NULL , output_format format = ASCII) const;
 
     void F_comparison(std::ostream &os , const FrequencyDistribution &histo) const;
     void t_comparison(std::ostream &os , const FrequencyDistribution &histo) const;
@@ -987,7 +988,7 @@ namespace stat_tool {
   int column_width(int min_value , int max_value);
   int column_width(double min_value , double max_value);
   int column_width(int nb_value , const double *value , double scale = 1.);
-  char* label(const char*);
+  char* label(const char *file_name);
 
   void cumul_computation(int nb_value , const double *pmass , double *pcumul);
   int cumul_method(int nb_value , const double *cumul , double scale = 1.);

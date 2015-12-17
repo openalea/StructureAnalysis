@@ -227,15 +227,15 @@ namespace sequence_analysis {
     static Renewal* building(stat_tool::StatError &error , const stat_tool::DiscreteParametric &inter_event ,
                              stat_tool::process_type type = stat_tool::EQUILIBRIUM , int time = DEFAULT_TIME);
 
-    static Renewal* ascii_read(stat_tool::StatError& error , const char *path ,
+    static Renewal* ascii_read(stat_tool::StatError& error , const std::string path ,
                                stat_tool::process_type type = stat_tool::EQUILIBRIUM , int time = DEFAULT_TIME ,
                                double cumul_threshold = RENEWAL_THRESHOLD);
 
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(stat_tool::StatError &error , const char *path , bool exhaustive = false) const;
-    bool spreadsheet_write(stat_tool::StatError &error , const char *path) const;
+    bool ascii_write(stat_tool::StatError &error , const std::string path , bool exhaustive = false) const;
+    bool spreadsheet_write(stat_tool::StatError &error , const std::string path) const;
     bool plot_write(stat_tool::StatError &error , const char *prefix , const char *title = NULL) const;
     stat_tool::MultiPlotSet* get_plotable() const;
 
@@ -362,14 +362,14 @@ namespace sequence_analysis {
 
     static TimeEvents* building(stat_tool::StatError &error , stat_tool::FrequencyDistribution &nb_event , int itime);
 
-    static TimeEvents* ascii_read(stat_tool::StatError &error , const char *path);
-    static TimeEvents* old_ascii_read(stat_tool::StatError &error , const char *path);
+    static TimeEvents* ascii_read(stat_tool::StatError &error , const std::string path);
+    static TimeEvents* old_ascii_read(stat_tool::StatError &error , const std::string path);
 
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = true) const;
-    bool ascii_write(stat_tool::StatError &error , const char *path , bool exhaustive = true) const;
-    bool spreadsheet_write(stat_tool::StatError &error , const char *path) const;
+    bool ascii_write(stat_tool::StatError &error , const std::string path , bool exhaustive = true) const;
+    bool spreadsheet_write(stat_tool::StatError &error , const std::string path) const;
     bool plot_write(stat_tool::StatError &error , const char *prefix , const char *title = NULL) const;
     stat_tool::MultiPlotSet* get_plotable() const;
 
@@ -453,8 +453,8 @@ namespace sequence_analysis {
                                                  int itime = stat_tool::I_DEFAULT) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(stat_tool::StatError &error , const char *path , bool exhaustive = false) const;
-    bool spreadsheet_write(stat_tool::StatError &error , const char *path) const;
+    bool ascii_write(stat_tool::StatError &error , const std::string path , bool exhaustive = false) const;
+    bool spreadsheet_write(stat_tool::StatError &error , const std::string path) const;
     bool plot_write(stat_tool::StatError &error , const char *prefix , const char *title = NULL) const;
     stat_tool::MultiPlotSet* get_plotable() const;
 

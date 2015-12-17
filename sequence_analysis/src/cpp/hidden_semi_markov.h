@@ -132,15 +132,15 @@ namespace sequence_analysis {
 
     HiddenSemiMarkov* thresholding(double min_probability = MIN_PROBABILITY) const;
 
-    static HiddenSemiMarkov* ascii_read(StatError &error , const char *path ,
+    static HiddenSemiMarkov* ascii_read(StatError &error , const std::string path ,
                                         int length = DEFAULT_LENGTH ,
                                         bool counting_flag = true ,
                                         double cumul_threshold = OCCUPANCY_THRESHOLD ,
                                         bool old_format = false);
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(StatError &error , const char *path , bool exhaustive = false) const;
-    bool spreadsheet_write(StatError &error , const char *path) const;
+    bool ascii_write(StatError &error , const std::string path , bool exhaustive = false) const;
+    bool spreadsheet_write(StatError &error , const std::string path) const;
 
     double likelihood_computation(const MarkovianSequences &seq , double *posterior_probability = NULL ,
                                   int index = stat_tool::I_DEFAULT) const;
@@ -150,7 +150,7 @@ namespace sequence_analysis {
                              stat_tool::output_format format = stat_tool::ASCII ,
                              latent_structure_algorithm state_sequence = GENERALIZED_VITERBI ,
                              int nb_state_sequence = NB_STATE_SEQUENCE) const;
-    bool state_profile_write(StatError &error , const char *path , const MarkovianSequences &iseq ,
+    bool state_profile_write(StatError &error , const std::string path , const MarkovianSequences &iseq ,
                              int identifier = stat_tool::I_DEFAULT , state_profile output = SSTATE ,
                              stat_tool::output_format format = stat_tool::ASCII ,
                              latent_structure_algorithm state_sequence = GENERALIZED_VITERBI ,
@@ -159,7 +159,7 @@ namespace sequence_analysis {
                                    state_profile output = SSTATE ,
                                    latent_structure_algorithm state_sequence = GENERALIZED_VITERBI ,
                                    int nb_state_sequence = NB_STATE_SEQUENCE) const;
-    bool state_profile_write(StatError &error , const char *path ,
+    bool state_profile_write(StatError &error , const std::string path ,
                              int identifier = stat_tool::I_DEFAULT , state_profile output = SSTATE ,
                              stat_tool::output_format format = stat_tool::ASCII ,
                              latent_structure_algorithm state_sequence = GENERALIZED_VITERBI ,
@@ -191,13 +191,13 @@ namespace sequence_analysis {
     stat_tool::DistanceMatrix* divergence_computation(StatError &error , std::ostream &os , int nb_model ,
                                                       const HiddenSemiMarkov **ihsmarkov ,
                                                       stat_tool::FrequencyDistribution **hlength ,
-                                                      const char *path = NULL) const;
+                                                      const std::string path = "") const;
     stat_tool::DistanceMatrix* divergence_computation(StatError &error , std::ostream &os , int nb_model ,
                                                       const HiddenSemiMarkov **hsmarkov , int nb_sequence ,
-                                                      int length , const char *path = NULL) const;
+                                                      int length , const std::string path = "") const;
     stat_tool::DistanceMatrix* divergence_computation(StatError &error , std::ostream &os , int nb_model ,
                                                       const HiddenSemiMarkov **hsmarkov , int nb_sequence ,
-                                                      const MarkovianSequences **seq , const char *path = NULL) const;
+                                                      const MarkovianSequences **seq , const std::string path = "") const;
   };
 
 

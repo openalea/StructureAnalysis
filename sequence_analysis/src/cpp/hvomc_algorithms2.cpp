@@ -37,6 +37,8 @@
 
 
 #include <math.h>
+
+#include <string>
 #include <sstream>
 #include <iomanip>
 
@@ -4254,7 +4256,7 @@ bool HiddenVariableOrderMarkov::state_profile_write(StatError &error , ostream &
  *
  *--------------------------------------------------------------*/
 
-bool HiddenVariableOrderMarkov::state_profile_write(StatError &error , const char *path ,
+bool HiddenVariableOrderMarkov::state_profile_write(StatError &error , const string path ,
                                                     const MarkovianSequences &iseq ,
                                                     int identifier , output_format format ,
                                                     latent_structure_algorithm state_sequence ,
@@ -4262,7 +4264,7 @@ bool HiddenVariableOrderMarkov::state_profile_write(StatError &error , const cha
 
 {
   bool status = true;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -4332,14 +4334,14 @@ bool HiddenVariableOrderMarkov::state_profile_ascii_write(StatError &error , ost
  *
  *--------------------------------------------------------------*/
 
-bool HiddenVariableOrderMarkov::state_profile_write(StatError &error , const char *path ,
+bool HiddenVariableOrderMarkov::state_profile_write(StatError &error , const string path ,
                                                     int identifier , output_format format ,
                                                     latent_structure_algorithm state_sequence ,
                                                     int nb_state_sequence) const
 
 {
   bool status = true;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -5223,7 +5225,7 @@ VariableOrderMarkovData* HiddenVariableOrderMarkov::state_sequence_computation(S
 
 bool MarkovianSequences::comparison(StatError &error , ostream &os , int nb_model ,
                                     const HiddenVariableOrderMarkov **ihmarkov ,
-                                    latent_structure_algorithm algorithm , const char *path) const
+                                    latent_structure_algorithm algorithm , const string path) const
 
 {
   bool status = true;
@@ -5346,7 +5348,7 @@ bool MarkovianSequences::comparison(StatError &error , ostream &os , int nb_mode
                      true , algorithm);
 #   endif
 
-    if (path) {
+    if (!path.empty()) {
       status = likelihood_write(error , path , nb_model , likelihood ,
                                 SEQ_label[SEQL_HIDDEN_MARKOV_CHAIN] , algorithm);
     }
@@ -5523,7 +5525,7 @@ VariableOrderMarkovData* HiddenVariableOrderMarkov::simulation(StatError &error 
 DistanceMatrix* HiddenVariableOrderMarkov::divergence_computation(StatError &error , ostream &os , int nb_model ,
                                                                   const HiddenVariableOrderMarkov **ihmarkov ,
                                                                   FrequencyDistribution **length_distribution ,
-                                                                  const char *path) const
+                                                                  const string path) const
 
 {
   bool status = true , lstatus;
@@ -5631,8 +5633,8 @@ DistanceMatrix* HiddenVariableOrderMarkov::divergence_computation(StatError &err
   if (status) {
     out_file = NULL;
 
-    if (path) {
-      out_file = new ofstream(path);
+    if (!path.empty()) {
+      out_file = new ofstream(path.c_str());
 
       if (!out_file) {
         error.update(STAT_error[STATR_FILE_NAME]);
@@ -5759,7 +5761,7 @@ DistanceMatrix* HiddenVariableOrderMarkov::divergence_computation(StatError &err
 
 DistanceMatrix* HiddenVariableOrderMarkov::divergence_computation(StatError &error , ostream &os ,
                                                                   int nb_model , const HiddenVariableOrderMarkov **hmarkov ,
-                                                                  int nb_sequence , int length , const char *path) const
+                                                                  int nb_sequence , int length , const string path) const
 
 {
   bool status = true;
@@ -5826,7 +5828,7 @@ DistanceMatrix* HiddenVariableOrderMarkov::divergence_computation(StatError &err
 DistanceMatrix* HiddenVariableOrderMarkov::divergence_computation(StatError &error , ostream &os ,
                                                                   int nb_model , const HiddenVariableOrderMarkov **hmarkov ,
                                                                   int nb_sequence , const MarkovianSequences **seq ,
-                                                                  const char *path) const
+                                                                  const string path) const
 
 {
   register int i;

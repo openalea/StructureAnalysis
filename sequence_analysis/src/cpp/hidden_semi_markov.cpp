@@ -37,6 +37,8 @@
 
 
 #include <math.h>
+
+#include <string>
 #include <sstream>
 
 #include "tool/rw_tokenizer.h"
@@ -261,7 +263,7 @@ HiddenSemiMarkov* HiddenSemiMarkov::thresholding(double min_probability) const
  *
  *--------------------------------------------------------------*/
 
-HiddenSemiMarkov* HiddenSemiMarkov::ascii_read(StatError &error , const char *path ,
+HiddenSemiMarkov* HiddenSemiMarkov::ascii_read(StatError &error , const string path ,
                                                int length , bool counting_flag ,
                                                double cumul_threshold , bool old_format)
 
@@ -281,7 +283,7 @@ HiddenSemiMarkov* HiddenSemiMarkov::ascii_read(StatError &error , const char *pa
   DiscreteParametricProcess **discrete_parametric_observation;
   ContinuousParametricProcess **continuous_parametric_observation;
   HiddenSemiMarkov *hsmarkov;
-  ifstream in_file(path);
+  ifstream in_file(path.c_str());
 
 
   hsmarkov = NULL;
@@ -673,12 +675,12 @@ ostream& HiddenSemiMarkov::ascii_write(ostream &os , bool exhaustive) const
  *
  *--------------------------------------------------------------*/
 
-bool HiddenSemiMarkov::ascii_write(StatError &error , const char *path ,
+bool HiddenSemiMarkov::ascii_write(StatError &error , const string path ,
                                    bool exhaustive) const
 
 {
   bool status;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -706,11 +708,11 @@ bool HiddenSemiMarkov::ascii_write(StatError &error , const char *path ,
  *
  *--------------------------------------------------------------*/
 
-bool HiddenSemiMarkov::spreadsheet_write(StatError &error , const char *path) const
+bool HiddenSemiMarkov::spreadsheet_write(StatError &error , const string path) const
 
 {
   bool status;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();

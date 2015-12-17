@@ -37,6 +37,8 @@
 
 
 #include <math.h>
+
+#include <string>
 #include <sstream>
 #include <iomanip>
 
@@ -594,11 +596,11 @@ ostream& Correlation::ascii_write(ostream &os , bool exhaustive) const
  *
  *--------------------------------------------------------------*/
 
-bool Correlation::ascii_write(StatError &error , const char *path , bool exhaustive) const
+bool Correlation::ascii_write(StatError &error , const string path , bool exhaustive) const
 
 {
   bool status;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -625,13 +627,13 @@ bool Correlation::ascii_write(StatError &error , const char *path , bool exhaust
  *
  *--------------------------------------------------------------*/
 
-bool Correlation::spreadsheet_write(StatError &error , const char *path) const
+bool Correlation::spreadsheet_write(StatError &error , const string path) const
 
 {
   bool status , autocorrelation , cross_correlation;
   register int i , j;
   double standard_normal_value , confidence_limit;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();

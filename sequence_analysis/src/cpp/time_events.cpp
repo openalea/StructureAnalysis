@@ -37,6 +37,8 @@
 
 
 #include <math.h>
+
+#include <string>
 #include <sstream>
 #include <iomanip>
 #include <iostream>
@@ -940,7 +942,7 @@ TimeEvents* TimeEvents::building(StatError &error , FrequencyDistribution &nb_ev
  *
  *--------------------------------------------------------------*/
 
-TimeEvents* TimeEvents::ascii_read(StatError &error , const char *path)
+TimeEvents* TimeEvents::ascii_read(StatError &error , const string path)
 
 {
   RWLocaleSnapshot locale("en");
@@ -951,7 +953,7 @@ TimeEvents* TimeEvents::ascii_read(StatError &error , const char *path)
   int line , nb_class , nb_element;
   long value , time , nb_event;
   TimeEvents *timev;
-  ifstream in_file(path);
+  ifstream in_file(path.c_str());
 
 
   timev = NULL;
@@ -1070,7 +1072,7 @@ TimeEvents* TimeEvents::ascii_read(StatError &error , const char *path)
 
     if (status) {
 //      in_file.close();
-//      in_file.open(path , ios::in);
+//      in_file.open(path.c_str() , ios::in);
       in_file.clear();
       in_file.seekg(0,ios::beg);
 
@@ -1128,7 +1130,7 @@ TimeEvents* TimeEvents::ascii_read(StatError &error , const char *path)
  *
  *--------------------------------------------------------------*/
 
-TimeEvents* TimeEvents::old_ascii_read(StatError &error , const char *path)
+TimeEvents* TimeEvents::old_ascii_read(StatError &error , const string path)
 
 {
   RWLocaleSnapshot locale("en");
@@ -1139,7 +1141,7 @@ TimeEvents* TimeEvents::old_ascii_read(StatError &error , const char *path)
   int line , nb_element , *ptime , *pnb_event;
   long value;
   TimeEvents *timev;
-  ifstream in_file(path);
+  ifstream in_file(path.c_str());
 
 
   timev = NULL;
@@ -1214,7 +1216,7 @@ TimeEvents* TimeEvents::old_ascii_read(StatError &error , const char *path)
 
     if (status) {
 //      in_file.close();
-//      in_file.open(path , ios::in);
+//      in_file.open(path.c_str() , ios::in);
         in_file.clear();
         in_file.seekg(0,ios::beg);
 
@@ -1573,12 +1575,12 @@ ostream& TimeEvents::ascii_file_write(ostream &os , bool exhaustive , process_ty
  *
  *--------------------------------------------------------------*/
 
-bool TimeEvents::ascii_write(StatError &error , const char *path ,
+bool TimeEvents::ascii_write(StatError &error , const string path ,
                              bool exhaustive) const
 
 {
   bool status;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -1718,11 +1720,11 @@ ostream& TimeEvents::spreadsheet_write(ostream &os , process_type type) const
  *
  *--------------------------------------------------------------*/
 
-bool TimeEvents::spreadsheet_write(StatError &error , const char *path) const
+bool TimeEvents::spreadsheet_write(StatError &error , const string path) const
 
 {
   bool status;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -2940,14 +2942,14 @@ ostream& RenewalData::ascii_write(ostream &os , bool exhaustive) const
  *
  *--------------------------------------------------------------*/
 
-bool RenewalData::ascii_write(StatError &error , const char *path ,
+bool RenewalData::ascii_write(StatError &error , const string path ,
                               bool exhaustive) const
 
 {
   bool status = false;
 
 
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
   error.init();
 
@@ -3093,13 +3095,13 @@ ostream& RenewalData::spreadsheet_write(ostream &os) const
  *
  *--------------------------------------------------------------*/
 
-bool RenewalData::spreadsheet_write(StatError &error , const char *path) const
+bool RenewalData::spreadsheet_write(StatError &error , const string path) const
 
 {
   bool status = false;
 
 
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
   error.init();
 

@@ -37,6 +37,8 @@
 
 
 #include <math.h>
+
+#include <string>
 #include <sstream>
 
 #include "stat_tool/stat_label.h"
@@ -864,12 +866,12 @@ ostream& Renewal::ascii_write(ostream &os , bool exhaustive) const
  *
  *--------------------------------------------------------------*/
 
-bool Renewal::ascii_write(StatError &error , const char *path ,
+bool Renewal::ascii_write(StatError &error , const string path ,
                           bool exhaustive) const
 
 {
   bool status;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -1391,11 +1393,11 @@ ostream& Renewal::spreadsheet_write(ostream &os , const RenewalData *timev) cons
  *
  *--------------------------------------------------------------*/
 
-bool Renewal::spreadsheet_write(StatError &error , const char *path) const
+bool Renewal::spreadsheet_write(StatError &error , const string path) const
 
 {
   bool status;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();

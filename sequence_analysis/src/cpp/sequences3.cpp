@@ -37,6 +37,8 @@
 
 
 #include <math.h>
+
+#include <string>
 #include <sstream>
 #include <iomanip>
 
@@ -66,7 +68,7 @@ namespace sequence_analysis {
  *
  *--------------------------------------------------------------*/
 
-Sequences* Sequences::ascii_read(StatError &error , const char *path , bool old_format)
+Sequences* Sequences::ascii_read(StatError &error , const string path , bool old_format)
 
 {
   RWLocaleSnapshot locale("en");
@@ -81,7 +83,7 @@ Sequences* Sequences::ascii_read(StatError &error , const char *path , bool old_
   long int_value;
   double real_value;
   Sequences *seq;
-  ifstream in_file(path);
+  ifstream in_file(path.c_str());
 
 
   seq = NULL;
@@ -423,7 +425,7 @@ Sequences* Sequences::ascii_read(StatError &error , const char *path , bool old_
 
     if (status) {
 //      in_file.close();
-//      in_file.open(path , ios::in);
+//      in_file.open(path.c_str() , ios::in);
 
       in_file.clear();
       in_file.seekg(0 , ios::beg);
@@ -634,7 +636,7 @@ Sequences* Sequences::ascii_read(StatError &error , const char *path , bool old_
 
     if (status) {
 //      in_file.close();
-//      in_file.open(path , ios::in);
+//      in_file.open(path.c_str() , ios::in);
 
       in_file.clear();
       in_file.seekg(0 , ios::beg);
@@ -980,12 +982,12 @@ ostream& Sequences::ascii_write(ostream &os , bool exhaustive) const
  *
  *--------------------------------------------------------------*/
 
-bool Sequences::ascii_write(StatError &error , const char *path ,
+bool Sequences::ascii_write(StatError &error , const string path ,
                             bool exhaustive) const
 
 {
   bool status;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -1565,12 +1567,12 @@ ostream& Sequences::ascii_data_write(ostream &os , output_sequence_format format
  *
  *--------------------------------------------------------------*/
 
-bool Sequences::ascii_data_write(StatError &error , const char *path ,
+bool Sequences::ascii_data_write(StatError &error , const string path ,
                                  output_sequence_format format , bool exhaustive) const
 
 {
   bool status = false;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -1600,13 +1602,13 @@ bool Sequences::ascii_data_write(StatError &error , const char *path ,
  *
  *--------------------------------------------------------------*/
 
-bool Sequences::spreadsheet_write(StatError &error , const char *path) const
+bool Sequences::spreadsheet_write(StatError &error , const string path) const
 
 {
   bool status;
   register int i;
   double mean , variance;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();

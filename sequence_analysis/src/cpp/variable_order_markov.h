@@ -262,14 +262,14 @@ namespace sequence_analysis {
 
     VariableOrderMarkov* thresholding(double min_probability = MIN_PROBABILITY) const;
 
-    static VariableOrderMarkov* ascii_read(stat_tool::StatError &error , const char *path ,
+    static VariableOrderMarkov* ascii_read(stat_tool::StatError &error , const std::string path ,
                                            int length = DEFAULT_LENGTH);
 
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(stat_tool::StatError &error , const char *path , bool exhaustive = false) const;
-    bool spreadsheet_write(stat_tool::StatError &error , const char *path) const;
+    bool ascii_write(stat_tool::StatError &error , const std::string path , bool exhaustive = false) const;
+    bool spreadsheet_write(stat_tool::StatError &error , const std::string path) const;
     bool plot_write(stat_tool::StatError &error , const char *prefix , const char *title = NULL) const;
     stat_tool::MultiPlotSet* get_plotable() const;
 
@@ -296,13 +296,13 @@ namespace sequence_analysis {
     stat_tool::DistanceMatrix* divergence_computation(stat_tool::StatError &error , std::ostream &os , int nb_model ,
                                                       const VariableOrderMarkov **imarkov ,
                                                       stat_tool::FrequencyDistribution **hlength ,
-                                                      const char *path = NULL) const;
+                                                      const std::string path = "") const;
     stat_tool::DistanceMatrix* divergence_computation(stat_tool::StatError &error , std::ostream &os , int nb_model ,
                                                       const VariableOrderMarkov **markov , int nb_sequence ,
-                                                      int length , const char *path = NULL) const;
+                                                      int length , const std::string path = "") const;
     stat_tool::DistanceMatrix* divergence_computation(stat_tool::StatError &error , std::ostream &os , int nb_model ,
                                                       const VariableOrderMarkov **markov , int nb_sequence ,
-                                                      const MarkovianSequences **seq , const char *path = NULL) const;
+                                                      const MarkovianSequences **seq , const std::string path = "") const;
 
     // acces membres de la classe
 
@@ -424,12 +424,12 @@ namespace sequence_analysis {
 
     std::ostream& ascii_data_write(std::ostream &os , output_sequence_format format = COLUMN ,
                                    bool exhaustive = false) const;
-    bool ascii_data_write(stat_tool::StatError &error , const char *path ,
+    bool ascii_data_write(stat_tool::StatError &error , const std::string path ,
                           output_sequence_format format = COLUMN , bool exhaustive = false) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(stat_tool::StatError &error , const char *path , bool exhaustive = false) const;
-    bool spreadsheet_write(stat_tool::StatError &error , const char *path) const;
+    bool ascii_write(stat_tool::StatError &error , const std::string path , bool exhaustive = false) const;
+    bool spreadsheet_write(stat_tool::StatError &error , const std::string path) const;
     bool plot_write(stat_tool::StatError &error , const char *prefix , const char *title = NULL) const;
     stat_tool::MultiPlotSet* get_plotable() const;
 

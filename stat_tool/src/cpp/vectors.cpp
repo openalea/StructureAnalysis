@@ -38,6 +38,8 @@
 
 #include <limits.h>
 #include <math.h>
+
+#include <string>
 #include <sstream>
 #include <iomanip>
 
@@ -3068,7 +3070,7 @@ Vectors* Vectors::merge_variable(StatError &error , int nb_sample ,
  *
  *--------------------------------------------------------------*/
 
-Vectors* Vectors::ascii_read(StatError &error , const char *path)
+Vectors* Vectors::ascii_read(StatError &error , const string path)
 
 {
   RWLocaleSnapshot locale("en");
@@ -3081,7 +3083,7 @@ Vectors* Vectors::ascii_read(StatError &error , const char *path)
   long int_value;
   double real_value;
   Vectors *vec;
-  ifstream in_file(path);
+  ifstream in_file(path.c_str());
 
 
   vec = NULL;
@@ -3327,7 +3329,7 @@ Vectors* Vectors::ascii_read(StatError &error , const char *path)
 
     if (status) {
 //      in_file.close();
-//      in_file.open(path , ios::in);
+//      in_file.open(path.c_str() , ios::in);
 
       in_file.clear();
       in_file.seekg(0 , ios::beg);
@@ -3701,12 +3703,11 @@ ostream& Vectors::ascii_write(ostream &os , bool exhaustive) const
  *
  *--------------------------------------------------------------*/
 
-bool Vectors::ascii_write(StatError &error , const char *path ,
-                          bool exhaustive) const
+bool Vectors::ascii_write(StatError &error , const string path , bool exhaustive) const
 
 {
   bool status;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -3835,11 +3836,11 @@ ostream& Vectors::ascii_data_write(ostream &os , bool exhaustive) const
  *
  *--------------------------------------------------------------*/
 
-bool Vectors::ascii_data_write(StatError &error , const char *path , bool exhaustive) const
+bool Vectors::ascii_data_write(StatError &error , const string path , bool exhaustive) const
 
 {
   bool status = false;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -3867,14 +3868,14 @@ bool Vectors::ascii_data_write(StatError &error , const char *path , bool exhaus
  *
  *--------------------------------------------------------------*/
 
-bool Vectors::spreadsheet_write(StatError &error , const char *path) const
+bool Vectors::spreadsheet_write(StatError &error , const string path) const
 
 {
   bool status;
   register int i , j;
   double **correlation;
   Test *test;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
