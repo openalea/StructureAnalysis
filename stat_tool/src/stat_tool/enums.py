@@ -12,9 +12,7 @@ from openalea.stat_tool._stat_tool import *
 from openalea.stat_tool._stat_tool import _FrequencyDistribution, _DiscreteMixtureData, \
     _CompoundData,_ConvolutionData, _DiscreteDistributionData, _DiscreteMixture, \
     _Compound, _Convolution, _DiscreteParametricModel, _Distribution, \
-    _Vectors, _Cluster, _DistanceMatrix, _VectorDistance, _Regression, \
-    _MultivariateMixture, _MultivariateMixtureData
-
+    _Vectors, _Cluster, _DistanceMatrix, _VectorDistance, _Regression
 
 # map to enumerate in boost python
 criterion_type = {
@@ -201,8 +199,6 @@ all_stat_tool_types  = [_FrequencyDistribution,
                         _ConvolutionData,
                         _DiscreteDistributionData,
                         _DiscreteMixture,
-                        _MultivariateMixture,
-                        _MultivariateMixtureData,
                         _Compound,
                         _Convolution,
                         _DiscreteParametricModel,
