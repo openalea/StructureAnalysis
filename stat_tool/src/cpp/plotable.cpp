@@ -111,12 +111,12 @@ std::string SinglePlot::get_label(int i)
 
 //////////////////////// MultiPlotSet /////////////////////////////////////////////
 
-
+/*
 MultiPlotSet::MultiPlotSet(int size, int inb_variable)
 :multiplots(size), variable_nb_viewpoint(inb_variable) , variable(size), viewpoint(size)
 {
   nb_variable = inb_variable;
 }
-
+*/
 
 };  // namespace stat_tool

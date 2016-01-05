@@ -787,7 +787,7 @@ public :
                                                           const HiddenMarkovIndOutTree& ihmarkov,
                                                           bool counting_flag= true,
                                                           int state_trees= VITERBI,
-                                                          int algorithm= FORWARD_BACKWARD,
+                                                          stat_tool::latent_structure_algorithm algorithm= FORWARD,
                                                           double saem_exponent= 1.,
                                                           int nb_iter= I_DEFAULT,
                                                           bool force_param= false) const;
@@ -810,7 +810,7 @@ public :
                                                           bool left_right,
                                                           bool counting_flag= true,
                                                           int state_trees= VITERBI,
-                                                          int algorithm= FORWARD_BACKWARD,
+                                                          stat_tool::latent_structure_algorithm algorithm= FORWARD,
                                                           double saem_exponent= 1.,
                                                           double self_transition= D_DEFAULT,
                                                           int nb_iter= I_DEFAULT,

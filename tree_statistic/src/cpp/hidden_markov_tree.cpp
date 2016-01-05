@@ -524,7 +524,7 @@ void CategoricalTreeProcess::init_occupancy(const CategoricalTreeProcess& proces
       absorption[i]= process.absorption[i];
       if (process.sojourn_size[i] != NULL)
          sojourn_size[i]= new stat_tool::Distribution(*(process.sojourn_size[i]),
-                                           'c', occupancy_nb_value);
+                                                     DISTRIBUTION_COPY, occupancy_nb_value);
       else
          sojourn_size[i]= NULL;
    }
@@ -697,10 +697,10 @@ void CategoricalTreeProcess::copy_Distribution_array(stat_tool::Distribution**& 
  *
  **/
 
-ostream& CategoricalTreeProcess::ascii_print(ostream& os, int process, 
-                                             FrequencyDistribution** empirical_observation, 
-                                             const TreeCharacteristics * characteristics, 
-					     bool exhaustive, bool file_flag) const
+ostream& CategoricalTreeProcess::ascii_print(ostream& os, int process,
+                                             FrequencyDistribution** empirical_observation,
+                                             const TreeCharacteristics * characteristics,
+                         bool exhaustive, bool file_flag) const
 
 {
    bool no_characteristic_print = false;
