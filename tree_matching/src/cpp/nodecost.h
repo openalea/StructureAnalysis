@@ -1,14 +1,14 @@
-/* -*-c++-*- 
+/* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture 
+ *       TreeMatching : Comparison of Tree Structures
  *
- *       Copyright 1995-2000 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2009 UMR LaBRI
  *
- *       File author(s): P.ferraro (pascal.ferraro@cirad.fr) 
+ *       File author(s): P.ferraro (pascal.ferraro@labri.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: nodecost.h 3258 2007-06-06 13:18:26Z dufourko $
  *
  *       Forum for AMAPmod developers    : amldevlp@cirad.fr
  *               
@@ -38,71 +38,86 @@
 #ifndef SB_NODE_COST_HEADER
 #define SB_NODE_COST_HEADER
 
-#include <string>
-using std::string;
-#include <iostream>
-#include <map>
-using namespace std;
 
 #include "definitions.h"
 #include "treenode.h"
+#include <boost/shared_ptr.hpp>
 
-/** Type of  Node Cost */
-enum NodeCostType { MATRIX, WEIGTH , TOPOLOGIC, LOCAL_TOPO, LOCAL_WEIGHT , SCORE};
-
-/** Two type of Norms for computing the Node Cost */
-enum Norm {L1, L2};
+/* ----------------------------------------------------------------------- */
 
 
 /**
  *\class NodeCost
  *\brief Definition of an elementary cost for the comparison between nodes
  *\author Pascal ferraro
- *\date 1999
+ *\date 2009
  */
 
-class NodeCost
+class TREEMATCH_API NodeCost
 {
-  public :
+public :
 
-    /** Default constructor. */
-    NodeCost(){}
+  /** Default constructor. */
+  NodeCost(){}
 
-    /** Constructs a NodeCost with the type /e type and the default norm /e L1. */
-    NodeCost(NodeCostType );
+  /** Destructor. */
+  virtual ~NodeCost();
+  
+  /** Returns the insertion cost of /e node */
+  virtual DistanceType getInsertionCost(const TreeNodePtr ) const ;
+  
+  /** Returns the deletion cost of /e node */
+  virtual DistanceType getDeletionCost( const TreeNodePtr ) const ;
+  
+  /** Returns the changing cost between /e i_node and /e r_node*/
+  virtual DistanceType getChangingCost( const TreeNodePtr , const TreeNodePtr ) const ;
 
-    NodeCost(char* );
+  /** Returns the merging cost between /e a vector of node and /e r_node*/
+  virtual DistanceType getMergingCost( const vector<TreeNodePtr> , const TreeNodePtr ) const ;
+       
+  /** Returns the splitting cost between /e a vector of node and /e r_node*/
+  virtual DistanceType getSplittingCost( const TreeNodePtr, const vector<TreeNodePtr> ) const ;
+       
+};
+
+
+// A smart pointer on a NodeCost
+typedef boost::shared_ptr<NodeCost> NodeCostPtr;
+// A weak reference to avoid loop.
+typedef boost::weak_ptr<NodeCost> NodeCostWeakPtr;
+
+
+/* ----------------------------------------------------------------------- */
+
+
+class TREEMATCH_API ScoreNodeCost : public NodeCost
+{
+public :
 
     /** Constructs a NodeCost with the type /e type and the default norm /e norm . */
-    NodeCost(NodeCostType,Norm );
+  ScoreNodeCost();
 
-    /** Destructor. */
-    ~NodeCost(){}
-
-    /** Returns the insertion cost of /e node */
-    virtual DistanceType getInsertionCost(TreeNode* );
-
-    int getCost(const char*, const char* );
-
-    /** Returns the deletion cost of /e node */
-    virtual DistanceType getDeletionCost(TreeNode* );
-
-    /** Returns the changing cost between /e i_node and /e r_node*/
-    virtual DistanceType getChangingCost(TreeNode* ,TreeNode* );
-
-    /** Returns the type of the node cost*/
-    NodeCostType type() const { return(_type); }
-
-protected :
+  /** Destructor. */
+  virtual ~ScoreNodeCost(){}
   
-  NodeCostType _type;
-  Norm         _norm;
+  /** Returns the insertion cost of /e node */
+  virtual DistanceType getInsertionCost(const TreeNodePtr ) const ;
   
-  std::map<string, int> symbols;  
-  int matrix [30][30];
-  int matrix_size;
-    
+  /** Returns the deletion cost of /e node */
+  virtual DistanceType getDeletionCost(const TreeNodePtr ) const ;
+  
+  /** Returns the changing cost between /e i_node and /e r_node*/
+  virtual DistanceType getChangingCost(const TreeNodePtr ,const TreeNodePtr ) const ;
+
+  /** Returns the merging cost between /e a vector of node and /e r_node*/
+  virtual DistanceType getMergingCost( const vector<TreeNodePtr> , const TreeNodePtr ) const ;
+         
+  /** Returns the splitting cost between /e a vector of node and /e r_node*/
+  virtual DistanceType getSplittingCost( const TreeNodePtr, const vector<TreeNodePtr> ) const ;
 };
+
+/* ----------------------------------------------------------------------- */
+
 
 #endif
 

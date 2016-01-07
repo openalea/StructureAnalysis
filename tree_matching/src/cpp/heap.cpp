@@ -1,14 +1,15 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       TreeMatching : Comparison of Tree Structures
  *
- *       Copyright 1995-2000 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2009 UMR LaBRI
  *
- *       File author(s): P.ferraro (pascal.ferraro@cirad.fr)
+ *       File author(s): P.ferraro (pascal.ferraro@labri.fr)
+ *
  *
  *       $Source$
- *       $Id$
+ *       $Id: heap.cpp 5532 2008-09-12 09:40:59Z boudon $
  *
  *       Forum for AMAPmod developers    : amldevlp@cirad.fr
  *
@@ -224,24 +225,24 @@ ItemType Heap::quickDeleteMin()
     }
 }
 
-AmlBoolean Heap::order()
+bool Heap::order()
 {
   int i;
   for (i=nbItem();i>0;i--)
     {
       siftDown(*at(i),i);
     }
-  return(TRUE);
+  return(true);
 }
 
-AmlBoolean Heap::quickInsert(KeyType key,ItemType object)
+bool Heap::quickInsert(KeyType key,ItemType object)
 {
   Item* new_item=new Item(key,object);
 
   new_item->putNumber(nbItem()+1);
   push_back(new_item);
   //delete (Item*) new_item;
-  return(FALSE);
+  return(false);
 }
 
 

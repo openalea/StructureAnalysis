@@ -1,14 +1,14 @@
-/* -*-c++-*- 
+/* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture 
+ *       TreeMatching : Comparison of Tree Structures
  *
- *       Copyright 1995-2000 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2009 UMR LaBRI
  *
- *       File author(s): P.ferraro (pascal.ferraro@cirad.fr) 
+ *       File author(s): P.ferraro (pascal.ferraro@labri.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: sequence.cpp 3258 2007-06-06 13:18:26Z dufourko $
  *
  *       Forum for AMAPmod developers    : amldevlp@cirad.fr
  *               

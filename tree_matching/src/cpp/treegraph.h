@@ -1,14 +1,14 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       TreeMatching : Comparison of Tree Structures
  *
- *       Copyright 1995-2000 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2009 UMR LaBRI
  *
- *       File author(s): P.ferraro (pascal.ferraro@cirad.fr)
+ *       File author(s): P.ferraro (pascal.ferraro@labri.fr)
  *
  *       $Source: /usr/cvsmaster/AMAPmod/src/TreeMatching/treegraph.h,v $
- *       $Id$
+ *       $Id: treegraph.h 3264 2007-06-06 14:22:22Z dufourko $
  *
  *       Forum for AMAPmod developers    : amldevlp@cirad.fr
  *
@@ -39,27 +39,24 @@
 #define SB_TREE_GRAPH_HEADER
 
 #include "definitions.h"
-#include "mtg/mtg.h"
 #include "treenode.h"
-#include "distancetable.h"
 #include <list>
 #include <vector>
+#include <stack>
 #include <iterator>
-
-typedef std::vector<int> NodeList;
-typedef std::vector<int> ClassList;
-typedef std::vector<NodeList*> NodeTable;
-typedef  int node;
-typedef  int edge;
-
 
 /**
  * List of TreeNode
  */
-// typedef RWTPtrSlist<TreeNode> TreeNodeList;
-typedef std::vector<TreeNode*> TreeNodeList;
+typedef std::vector<TreeNodePtr> TreeNodeList;
 
-enum TreeType  { TOPO , COMPO };
+/**
+ * List of Children
+ */
+
+typedef std::vector<int> NodeList;
+
+
 using namespace std;
 
 
@@ -67,151 +64,193 @@ using namespace std;
  *\class TreeGraph
  *\brief Definition of a tree graph
  *\author Pascal ferraro
- *\date 1999
+ *\date 2009
  */
 
-class TreeGraph
+class TREEMATCH_API TreeGraph
 {
 
   public :
-  typedef const TreeNode* const_iterator;
-    /** Constructor */
-    TreeGraph();
-    TreeGraph(MTG& ,VId ,TreeType,EType,AmlBoolean valued=FALSE,NodeFunctionList* funcions=NULL);
-    TreeGraph(MTG& ,VIdList* ,TreeType,EType,AmlBoolean valued=FALSE,NodeFunctionList* funcions=NULL);
-    
-    TreeGraph(MTG& ,VId ,TreeType,AmlBoolean valued=FALSE,NodeFunctionList* funcions=NULL);
-    TreeGraph(MTG& ,VId ,int,AmlBoolean valued=FALSE,NodeFunctionList* functions=NULL);
-    TreeGraph(char* fich_name, MTG&, VId root, AmlBoolean valued=FALSE,NodeFunctionList* functions=NULL);
+  typedef TreeNodeList::const_iterator const_iterator;
+
+  /** Constructor */
+  TreeGraph();
   
-  TreeGraph(TreeGraph*,int);
+  /** Destructor */
+  ~TreeGraph();
 
-    /** Destructor */
-    ~TreeGraph();
+  void addNode(int, int);
 
-  int getRealNumber(int postfix) const;
+  void addNode(TreeNodePtr);
 
-    /** Return the father of a node */
-    int father(int ) const;
+  /** return TreeNode corresponding to vertex */
+  inline TreeNodePtr getTreeNode(int vertex) { return getNode(vertex); }
+  TreeNodePtr getNode(int vertex);
 
-    /** Give a child of the ChildrenList */
-    int child(int ,int) const ;
+  int getDepth() const { return _depth;};
 
-    /** Give a the left brother of child */
-    int leftBrother(int) const ;
+   /** Return the father of a node */
+  int father(int ) const;
 
-    /** Give a the right brother of child */
-    int rightBrother(int) const ;
+  /** Give a child of the ChildrenList */
+  int child(const int ,const int) const ;
 
-    /** return 1 if a given child of a vertex is
-     *  child is in the same complex of vertex */
-    int childIsInComplex(int ,int ) const;
-	int childIsInAxis(int ,int ) const;
+  void addValue(int, DistanceType);
+  DistanceType getValue(int, int) const;
 
-    /**father isin the same complex of vertex */
-    int fatherIsInComplex(int) const;
+  /** Give the SonsList */
+  const NodeList& childList(const int ) const ;
 
-    /** return TreeNode corresponding to vertex */
-    TreeNode* getTreeNode(int vertex) const;
+  /** Return the number of child of a node  */
+  int getNbChild(int ) const;
+  int getNbDesc(int ) const;
 
-//   /** remove A subTree corresponding to a given vertex **/
-     void delSubTree(int vertex);
+  vector<int> getPath(int, int) const;
 
-    /** Give the SonsList */
-    const NodeList* sons(int ) const ;
+  /** Return the number of node in the tree */
+  inline int getNbVertex() const { return _treenodes.size(); }
 
-  /** Return the root number */
-  int getRoot() const;
+  /** Return the root id */
+  inline int getRoot() const { return _rootId; }
+
+  /** Return the root id */
+  inline int getDegree() const{ return _degree; }
   
-  /** Return the depth of the tree */
-  int getDepth() const;
-  
-  /** Return the degree of the tree */
-    int getDegree() const;
+  /** Return whether the node is a leaf or not          */
+  inline bool isLeaf(int node) const { return (getNbChild(node)==0); }
 
-    /** Return the order of the tree */
-    int getOrder() const;
+  /** Return wheter the tree is null or not  */
+  inline bool isNull() {  return _treenodes.empty(); }
 
-    /** Return the number of child of a node  */
-    int getNbChild(int ) const;
-    int getNbDesc(int ) const;
+  /** Method for printing */
+  void print() const;
+  ostream& mtg_write(ostream &os) const;
+  bool mtg_write(  char *path ) ;   
 
-    /** Return the number of node in the tree */
-    int getNbVertex() const;
-    int getNbClass() const;
-    int getNbAxisVertex() const;
 
-    /** Return wether the node is a leaf or not          */
-  int isLeaf(int ) const;
-  int getChildLess( int ) const;
-  void printNodedClass() const;
-    /** Return a node */
-    TreeNode* getNode(int ) const;
-	int getNumber(int vertex) const;
-
-    /** Return the edge type */
-    EType getEdgeType() const { return(_edge); }
-
-    /** Return a pointer to the mtg the tree is linked with  */
-    MTG* getMTG() const { return(_mtg); }
-
-    /** Return wheter the tree is null or not  */
-    int isNull();
-
-    /** Method for printing */
-    void print();
-    ostream& mtg_write(ostream &os) const;
-  bool mtg_write( const char *path ) const;
-
-    void upDate(MTG& );
-
-    int outdeg(const node);
-    std::list<int>::const_iterator getOutNodes(const node);
-   
-    void removeSon(int vertex,int son,int decalage);
-  void shiftSonNumber(int vertex,int son,int decalage);
-  void addSubTree(TreeGraph* T,int root, int insertion_point) ;
-
-  int minimalClass(int node) const;
-  int rightClasse(int clas);
-  NodeList* getRootsInForestClass(int clas);
-  
-  NodeList* getRootsInClass(int clas);
-  int getNbRootsInClass(int clas);
 
   private :
-  MTG* _mtg;
-  VId _root;
-  int _nbVertex;
-  int _nbClass;
-  int _nbAxisVertex;
-  int _degree;
-  int _depth;
-  int _number;
-  int _numPostfix;
-  int _numClass;
-  std::vector<int> _postfix;
-  std::vector<int> _class;
-  int _order;
-  EType _edge;
-  AmlBoolean _valued;
-  NodeFunctionList* _functions;
-  int depth(int );
-  NodeTable _outNodeTable;
-  NodeTable _classNodeTable;
+  // int _nbVertex;
   TreeNodeList _treenodes;
-  void putNode(int,int);
-  void putNodeinClass(int,int);
-  void putTreeNode(TreeNode*);
-  void putNodeList(NodeList* );
-  void putClassNodeList(NodeList* );
-  void makeNode(VId ,int ,VId,TreeType );
-  void makeNode(VId ,int ,VId ,TreeType ,VIdList*);	
-  void makeComplexNode(VId ,int ,VId,TreeType ); 
-  void makeAxeNode(VId ,int ,int ,int );	
-  
+  int _depth;
+  int _degree;
+  int _rootId;
+
+public:
+
+  /*
+    Definition of an iterator of the node if of the graph in pre order mode
+  */
+  struct TREEMATCH_API const_pre_order_iterator {
+        friend class TreeGraph;
+    protected:
+        // pointer to the graph
+        const TreeGraph * __treegraph;
+
+        typedef NodeList::const_iterator TIter;
+
+        typedef int value_t ;
+        typedef const int * pointer_t;
+
+        // pointer to actual node id in the graph
+        TIter __current;
+        // pointer to end of list of actual node id in the graph
+        TIter __current_end;
+
+        // type definition of a pair of pointer and a stack of pairs
+        typedef std::pair<TIter,TIter> TIterPair;
+        typedef std::stack<TIterPair> IteratorStack;
+        // stack of higher value of pointers in the graph hierarchy
+        IteratorStack __stack;
+
+        // Pop pointers value from the stack
+        inline void pop() 
+        {  
+           TIterPair p = __stack.top(); 
+           __current = p.first;  __current_end = p.second; 
+           __stack.pop();
+        }
+
+        // Push pointers value into the stack
+        inline void push() { __stack.push( TIterPair(__current, __current_end)); }
+
+        const_pre_order_iterator(TIter current, TIter current_end, const TreeGraph * treegraph):
+            __current(current), __current_end(current_end), __treegraph(treegraph) {}
+
+        // advance in the traversal
+        void increment();
+
+    public:
+        bool  atEnd() const ;
+
+        // pre increment operator for iterator
+        inline const_pre_order_iterator& operator++() 
+        { increment(); return *this; }
+
+        // post incremental operator for iterator
+        inline const_pre_order_iterator operator++(int i) 
+        { const_pre_order_iterator original = *this; for (int j = 0 ; j < i; ++j) increment(); return original; }
+
+        // value access operator for iterator
+        inline value_t operator*() const { return *__current; }
+
+        // return pointer to class object
+        inline pointer_t operator->() const
+		{	return __current.operator->(); }
+
+        const_pre_order_iterator& operator+=(int i)
+		{	// increment by integer
+            for (int j = 0 ; j < i; ++j) increment();
+            return *this;
+        }
+
+        const_pre_order_iterator operator+(int i)
+		{	// increment by integer
+            const_pre_order_iterator newiter = *this;
+            for (int j = 0 ; j < i; ++j) newiter.increment();
+            return newiter;
+        }
+
+        // compare two iterators
+        inline bool operator==(const_pre_order_iterator other) {
+            return __treegraph == other.__treegraph && __current == other.__current;
+        }
+
+        // compare two iterators
+        inline bool operator!=(const_pre_order_iterator other) {
+            return __treegraph != other.__treegraph || __current != other.__current;
+        }
+  };
+
+  /// Get a begin iterator for the traversal of the subtree rooted in nodeid (nodeid is not given)
+  inline const_pre_order_iterator subtree_iterator_begin(int nodeid) { 
+      TreeNodePtr node = getNode(nodeid); 
+      return const_pre_order_iterator(node->getChildList().begin(), node->getChildList().end(),this);
+  }
+
+  /// Get an end iterator for the traversal of the subtree rooted in nodeid
+  inline const_pre_order_iterator subtree_iterator_end(int nodeid) { 
+      TreeNodePtr node = getNode(nodeid); 
+      return const_pre_order_iterator(node->getChildList().end(),  node->getChildList().end(),this);
+  }
+
+  /*
+    To access to all the descendants of a node, one can use the previous iterator in the following way:
+    TreeGraph t;
+    ...
+    int root = 0;
+    for(TreeGraph::const_pre_order_iterator it = t.subtree_iterator_begin(root); it != t.subtree_iterator_begin(root); ++it)
+    {
+        int next_ascendant_it = *it;
+        ...
+     }
+  */
 };
 
+// A smart pointer on a TreeGraph
+typedef boost::shared_ptr<TreeGraph> TreeGraphPtr;
+// A weak reference to avoid loop.
+typedef boost::weak_ptr<TreeGraph> TreeGraphWeakPtr;
 
 #endif
 

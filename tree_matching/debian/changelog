@@ -1,71 +1,72 @@
-libvplants-treematching (1.2.0~ppa2) trusty; urgency=medium
-
-  * Port to bison 3 
-
- -- Christophe Pradal <christophe.pradal@cirad.fr>  Mon, 13 Oct 2014 17:48:35 +0200
-
-libvplants-treematching (1.2.0~ppa1) trusty; urgency=medium
+vplants-treematching2 (1.2.0~ppa1) trusty; urgency=medium
 
   * Port to Trusty  
 
- -- Christophe Pradal <christophe.pradal@cirad.fr>  Thu, 02 Oct 2014 06:35:37 +0200
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Thu, 02 Oct 2014 06:36:17 +0200
 
-libvplants-treematching (1.0.1~ppa9) quantal; urgency=low
+vplants-treematching2 (1.0.1~ppa9) quantal; urgency=low
 
   *  Port to Quantal  
 
- -- Christophe Pradal <christophe.pradal@cirad.fr>  Mon, 10 Dec 2012 17:16:57 +0100
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Mon, 10 Dec 2012 17:17:34 +0100
 
-libvplants-treematching (1.0.1~ppa8) precise; urgency=low
+vplants-treematching2 (1.0.1~ppa8) precise; urgency=low
 
   * Rebuild with new PlantGL 
 
- -- Christophe Pradal <christophe.pradal@cirad.fr>  Thu, 06 Dec 2012 14:00:33 +0100
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Thu, 06 Dec 2012 14:01:12 +0100
 
-libvplants-treematching (1.0.1~ppa2) precise; urgency=low
+vplants-treematching2 (1.0.1~ppa2) precise; urgency=low
 
-  * Switch to dh_python2 
+  *  Switch to dh_python2 
 
- -- Christophe Pradal <christophe.pradal@cirad.fr>  Wed, 12 Sep 2012 15:41:17 +0200
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Wed, 12 Sep 2012 15:42:00 +0200
 
-libvplants-treematching (1.0.1~ppa1) precise; urgency=low
+vplants-treematching2 (1.0.1~ppa1) precise; urgency=low
 
   *  Release 1.0 on precise  
 
- -- Christophe Pradal <christophe.pradal@cirad.fr>  Sun, 25 Mar 2012 16:33:38 +0200
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Sun, 25 Mar 2012 16:34:27 +0200
 
-libvplants-treematching (1.0.0b2~ppa1) oneiric; urgency=low
+vplants-treematching2 (1.0.0b2~ppa3) oneiric; urgency=low
+
+  * Port to Oneiric
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Thu, 12 Jan 2012 10:22:54 +0100
+
+vplants-treematching2 (1.0.0b2~ppa2) natty; urgency=low
+
+  * Fix setup.py by declaring openalea as a namespace package 
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Wed, 11 Jan 2012 15:19:41 +0100
+
+vplants-treematching2 (1.0.0b2~ppa1) oneiric; urgency=low
 
   * Fix Vplants and openalea namespace 
 
- -- Christophe Pradal <christophe.pradal@cirad.fr>  Fri, 06 Jan 2012 17:18:01 +0100
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Fri, 06 Jan 2012 17:18:34 +0100
 
-libvplants-treematching (1.0.0b1~ppa2) oneiric; urgency=low
+vplants-treematching2 (1.0.0b1~ppa4) oneiric; urgency=low
 
-  * replace libglut3 by freeglut3
+  * Enhance rules file to just build with python 2.7
 
- -- Christophe Pradal <christophe.pradal@cirad.fr>  Tue, 06 Dec 2011 12:19:49 +0100
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Fri, 09 Dec 2011 11:31:33 +0100
 
-libvplants-treematching (1.0.0b1~ppa1) oneiric; urgency=low
+vplants-treematching2 (1.0.0b1~ppa3) oneiric; urgency=low
+
+  * Fix build error 
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Thu, 08 Dec 2011 19:41:29 +0100
+
+vplants-treematching2 (1.0.0b1~ppa2) oneiric; urgency=low
+
+  * Add dependencies on deploy and sconsx
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Wed, 07 Dec 2011 09:32:56 +0100
+
+vplants-treematching2 (1.0.0b1~ppa1) oneiric; urgency=low
 
   * Release
 
- -- Christophe Pradal <christophe.pradal@cirad.fr>  Tue, 06 Dec 2011 10:48:41 +0100
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Tue, 06 Dec 2011 11:15:03 +0100
 
-libvplants-treematching (0.9.0-1~ppa3) lucid; urgency=low
-
-  * update binary deps 
-
- -- Christophe Pradal <christophe.pradal@cirad.fr>  Mon, 27 Sep 2010 15:12:28 +0200
-
-libvplants-treematching (0.9.0-1~ppa2) lucid; urgency=low
-
-  * update deps with libglut3-dev 
-
- -- Christophe Pradal <christophe.pradal@cirad.fr>  Mon, 27 Sep 2010 12:05:25 +0200
-
-libvplants-treematching (0.9.0-1~ppa1) lucid; urgency=low
-
-  * source package automatically created by stdeb 0.6.0
-
- -- Christophe Pradal <christophe.pradal@cirad.fr>  Thu, 23 Sep 2010 17:18:28 +0200

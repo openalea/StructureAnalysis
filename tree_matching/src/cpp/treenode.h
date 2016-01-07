@@ -1,14 +1,14 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       TreeMatching : Comparison of Tree Structures
  *
- *       Copyright 1995-2000 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2009 UMR LaBRI
  *
- *       File author(s): P.ferraro (pascal.ferraro@cirad.fr)
+ *       File author(s): P.ferraro (pascal.ferraro@labri.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: treenode.h 3264 2007-06-06 14:22:22Z dufourko $
  *
  *       Forum for AMAPmod developers    : amldevlp@cirad.fr
  *
@@ -40,192 +40,176 @@
 
 #include <list>
 #include <iostream>
+#include <boost/shared_ptr.hpp>
+#include <boost/any.hpp>
+
 #include "definitions.h"
-#include "mtg/mtg.h"
-#include "amlnodefunction.h"
+using namespace std;
 
 
-typedef DistanceType ValueType;
+class TreeNode;
+// A smart pointer on a TreeNode
+typedef boost::shared_ptr<TreeNode> TreeNodePtr;
+// A weak reference to avoid loop.
+typedef boost::weak_ptr<TreeNode> TreeNodeWeakPtr;
 
-/**
- * A type for a list of function that can be applied to a TreeNode.
- */
-typedef std::list<NodeFunction> NodeFunctionList;
-
-/**
- * A type for attributes of TreeNodes.
- */
-typedef std::vector<DistanceType> ValueVector;
-
+#define NOID -1
 
 /**
  *\class TreeNode
  *\brief Definition of a vertex in a tree graph
  *\author Pascal ferraro
- *\date 1999
+ *\date 2009
  */
 
 
-class TreeNode
+class TREEMATCH_API TreeNode
 {
 
   public :
+	/// A type for attributes of TreeNodes.
+	typedef boost::any ValueType;
+	typedef std::vector<ValueType> ValueVector;	
+
+	typedef int IdType;
+	typedef std::vector<IdType> ChildVector;
+
+	// static const int NOID;
 
     /** Default constructor
      *\par Remarks
      * Never used
      */
-    TreeNode() : _number(0),
-		 _numPostfix(0),
-		 _depth(0),
-		 _father(0),
-		 _vertex(0),
-		 _complex(0),
-		 _value(0),
-		 _order(0),
-		 _position(0),
-		 _nb_value(0),
-		 _mtg(NULL),
-		 _values(NULL) {};
-
-    /** Copy constructor. */
-  TreeNode(const TreeNode& inode):  
-    _number(inode.getNumber()),
-    _numPostfix(inode.getNumPostfix()),
-    _depth(inode.depth()),
-    _father(inode.father()),
-    _vertex(inode.getVertex()),
-    _complex(inode.getComplex()),
-    _value(inode.getValue()),
-    _order(inode.getOrder()),
-    _position(inode.getPosition()),
-    _nb_value(inode.getValueSize()),
-    _mtg(inode.getMTG()),
-    _values(NULL){
-    //    cout <<"_nbvalue =" <<_nbvalue<<endl;
-    resize(_nb_value);
-    for(int i=0;i<_nb_value;i++)
-      putValue(i,inode.getValue(i));
-  }
-
-    /** Constructs by default a TreeNode from a MTG /e mtg. */
-
-  TreeNode(MTG& mtg) : _mtg(&mtg),_values(0),_nb_value(0){}
-
-    /** constructs a TreeNode with /e mtg , /e number, /e depth, /e father, /e vertex, /e complex. */
-    TreeNode(MTG& ,int ,int ,int ,int ,int );
-
-    /** Destructor. */
-    ~TreeNode();
-
-    /** \par Reading Functions. */
+    TreeNode() : _id(0), _father(NOID), _values() {};
 
 
-    /** Returns the /e i value of TreeNode. */
-    ValueType  value(int ) const ;
 
-    /** Returns the depth of the TreeNode in the TreeGraph. */
-    int depth() const { return(_depth);}
+  /** constructs a TreeNode with  /e id, /e father */
+  TreeNode(IdType ,IdType father = NOID);
 
-    /** Returns the father of TreeNode. */
-    int father() const { return(_father);}
+  /** Destructor. */
+  ~TreeNode();
 
-    /** Returns the the Vertex of the TreeNode in MTG.
-     *  vertex is the reference of TreeNode in a MTG */
-    int getVertex() const { return(_vertex);}
+  /** \par Reading Functions. */
 
-    /** Returns the number of the TreeNode in MTG.
-     *  number is the reference of TreeNode in a TreeGraph */
-  int getNumber() const { return(_number);}
-  int getId() const { return(_id);}
- 
+  /** Returns the father of TreeNode. */
+  inline attribute_deprecated IdType father() const { return(_father);}
+  inline IdType getFather() const { return _father;}
 
-  int getNumPostfix() const { return(_numPostfix);}
-  
-  /** Returns the complex of the TreeNode in MTG. */
-    int getComplex() const { return(_complex);}
-
-    /** Returns the value of the TreeNode in MTG. */
-    int getValue() const { return(_value);}
-
-    /** Returns the order of the TreeNode in MTG. */
-    int getOrder() const { return(_order);}
-
-    /** Returns the position of the TreeNode in MTG. */
-    int getPosition() const { return(_position);}
+  /** Returns the id of the TreeNode in MTG.
+   *  id is the reference of TreeNode in a TreeGraph */
+  inline IdType getId() const { return _id;}
 
     /** \par Writing Functions. */
 
-    /** Puts the position of the TreeNode in MTG. */
-    void putPosition(int position) { _position=position;}
-
-    /** Puts the order of the TreeNode in MTG. */
-    void putOrder(int order) { _order=order;}
-
-    /** Puts the value of the TreeNode in MTG. */
-    void putValue(int value) { _value=value;}
-
-    /** Puts the complex of the TreeNode in MTG. */
-    void putComplex(int complex) { _complex=complex;}
-
-    /** Puts the number of the TreeNode in a TreeGraph.
-     *  number is the reference of TreeNode in a TreeGraph */
-  void putNumber(int number) { _number=number;}
-void putId(int id) { _id=id;}
-  void putNumPostfix(int number) { _numPostfix=number;}
-  
-  
-  /** Puts the vertex of the TreeNode in MTG.
-   *  vertex is the reference of TreeNode in a MTG */
-  void putVertex(int vertex) { _vertex=vertex;}
-  
-  /** Puts the father of the TreeNode in MTG. */
-    void putFather(int father ){ _father=father;}
-  
-  /** Puts the depth of the TreeNode in MTG. */
-  void putDepth(int depth){ _depth=depth;}
-    void put(std::ostream& os);
+  /** Set the id of the TreeNode in a TreeGraph.
+   *  id is the reference of TreeNode in a TreeGraph */
+  inline attribute_deprecated void putId(IdType id) { _id=id;}
+  inline void setId(IdType id) { _id=id;}
+   
+  /** Set the father of the TreeNode in MTG. */
+  inline attribute_deprecated void putFather(IdType father ){ _father=father;}
+  inline void setFather(IdType father ){ _father=father;}
   
   /** Print a TreeNode*/
-  void print();
+  void print() const;
   
-    /** Changes the number of value affected to a TreeNode.*/
-    void resize(int new_size);
+  /** Returns the number of values into the TreeNode.*/
+  inline size_t getValueSize() const {  return _values.size(); }
 
-    /** Returns the number of value affected to a TreeNode.*/
-    int getValueSize() const;
-    DistanceType getValue(int index) const;
+  /** Returns the values into the TreeNode.*/
+  inline const ValueVector& getValueList() const {  return _values; }
+  inline ValueVector& getValueList() {  return _values; }
 
-    /** Puts a value /e new_value at teh index /e index to a TreeNode.*/
-    void putValue(int index, DistanceType new_value);
-    MTG* getMTG() const { return(_mtg);};
-  void upDate(MTG& );
+  /// Return untyped value 
+  inline boost::any getAnyValue(size_t index) const 
+  { assert(index<_values.size()); return _values[index]; }
+
+  /// check if value at index is of type T
+  template <class T>
+  inline bool isValueOfType(size_t index) const 
+  { assert(index<_values.size()); return _values[index].type() == typeid(T); }
+
+  /// Return value of a given type
+  template <class T>
+  T getTypedValue(size_t index) const 
+  { assert(index<_values.size()); return boost::any_cast<T>(_values[index]); }
+
+  /// Set a value of any type at index
+  template <class T>
+  void setTypedValue(size_t index, const T& value) 
+  { assert(index<_values.size()); _values[index]=boost::any(value); }
+
+  /// Append a value of any type
+  template <class T>
+  void appendTypedValue(const T& value) 
+  { _values.push_back(boost::any(value)); }
+
+  DistanceType getValue(int index) const;
+
+  /** Puts a value /e new_value at the index /e index to a TreeNode.*/
+  inline attribute_deprecated void putValue(size_t index, DistanceType new_value = 0.) { setTypedValue(index,new_value); }
+
+ /** Puts a value /e new_value at the index /e index to a TreeNode.*/
+  inline attribute_deprecated void addValue( DistanceType new_value = 0.) { appendTypedValue(new_value); }
+
+  /** Add a child in child list, a child is referenced by is id only */
+  inline void addChild(IdType child_id){ _childList.push_back(child_id); }
+
+  /** Set Child List */
+  inline void setChildList(const ChildVector& child_list) { _childList = child_list; }
+
+  /** Get Child List */
+  inline const ChildVector& getChildList() const { return _childList; }
+
+  /** Get i-th Child  */
+  IdType getChild(int i) const;
+
+  /** Get Number of Child */
+  inline size_t  getChildNumber() const { return _childList.size(); }
+  inline bool  hasChild() const { return !_childList.empty(); }
+
+  /** depth accessors */
+  inline attribute_deprecated int depth() const{ return _depth;  }  
+  inline attribute_deprecated void putDepth(int depth){ _depth = depth;  }
+
+  inline int getDepth() const{ return _depth;  }  
+  inline void setDepth(int depth){ _depth = depth;  }
   
-  int getAt1() const {return at1;};
-  int getAt2() const {return at2;};
-  int getAt3() const {return at3;};
-  char getAt4() const {return at4;};
-  
-  
+  public:
+  /** 
+    This class make it possible to construct TreeNode.
+	The interesting point is that it allow to redefine its behaviour
+	by passing a custom builder function. By default, it uses the TreeNode constructor.
+	Note that it is singleton.
+    */
+  class TREEMATCH_API Factory {
+  public:
+	  typedef TreeNodePtr (*TNBuilder)(IdType, IdType);
+	  friend class TreeNode;
+
+	  // set of a custion treenode builder function 
+	  inline void setBuilder(TNBuilder b) { __builder = b; }
+	  // reset builder function
+	  inline void setBuilderToDefault() { __builder = NULL; }
+
+	  TreeNodePtr build(IdType, IdType);
+  protected:
+	   Factory();
+	   TNBuilder __builder;
+  };
+
+  // singleton access
+  static Factory& factory();
+
   private :
-  int _number;
-  int _numPostfix;
+  IdType _id;
+  IdType _father;
   int _depth;
-  int _father;
-  int _vertex;
-  int _id;
-  int _complex;
-  int _value;
-  int _order;
-  int _position;
-  int _nb_value;
-  ValueVector* _values;
-  MTG* _mtg;
-  int at1;
-  int at2;
-  int at3;
-  char at4;
+  ChildVector _childList;
+  ValueVector _values;
 };
+
 
 #endif
 
