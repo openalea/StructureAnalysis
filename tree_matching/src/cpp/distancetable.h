@@ -8,7 +8,7 @@
  *       File author(s): P.ferraro (pascal.ferraro@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: distancetable.h 3258 2007-06-06 13:18:26Z dufourko $
  *
  *       Forum for AMAPmod developers    : amldevlp@cirad.fr
  *
@@ -51,7 +51,7 @@ typedef std::vector<DistanceType> DistanceVector;
 typedef std::vector<DistanceVector> DistanceVectorTable;
 
 
-class DistanceTable
+class TREEMATCH_API DistanceTable
 {
 
  public:

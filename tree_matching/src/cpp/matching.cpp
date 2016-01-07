@@ -1,14 +1,14 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       TreeMatching : Comparison of Tree Structures
  *
- *       Copyright 1995-2000 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2009 UMR LaBRI
  *
- *       File author(s): P.ferraro (pascal.ferraro@cirad.fr)
+ *       File author(s): P.ferraro (pascal.ferraro@labri.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: matching.cpp 3258 2007-06-06 13:18:26Z dufourko $
  *
  *       Forum for AMAPmod developers    : amldevlp@cirad.fr
  *
@@ -41,36 +41,26 @@
   // -------------
   // Constructeur
   // -------------
-Matching::Matching(TreeGraph& input,TreeGraph& reference,NodeCost& nodeDistance)
+Matching::Matching(const TreeGraphPtr& input,const TreeGraphPtr& reference,const NodeCostPtr& nodeDistance, MDTableType mdtable_type  ):
+  T1(input), T2(reference), ND(nodeDistance), _distances(0), verbose(true) //,_distances(input,reference,nodeDistance)
 {
-  T1=&input;
-  T2=&reference;
-  ND=&nodeDistance;
-  _distances.make(*T1,*T2,nodeDistance);
-  _insertCost.make(*T1,*T2,nodeDistance);
-  _deleteCost.make(*T1,*T2,nodeDistance);
-  _substitutionCost.make(*T1,*T2,nodeDistance);
-  _sumNbCaseVector = CaseVector(3,0);
-  _nbCaseVector = CaseVector(7,0);
-  _distanceMatrix = DistanceVectorTable(T1->getNbVertex());
-  // _choices est un tableau de listes retenant les tentatives successives alignements durant l'algo.
-  // c'est donc un tableau de |T1| lignes et |T2| colonnes initialise a 0
+  _mdtable_type = mdtable_type;
+  if (_mdtable_type == STD)
+    _distances = new StdMatchingDistanceTable(input,reference,nodeDistance);
+  else
+    _distances = new CompactMatchingDistanceTable(input,reference,nodeDistance);
   _choices.resize(T1->getNbVertex(),T2->getNbVertex());
   // constante qui va permettre de calculer l'alignement restreint
-  _restrMapp.link(I_MAX(T1->getDegree(),T2->getDegree()),*_distances.getDistanceTable());
+  //_restrMapp.link(I_MAX(T1->getDegree(),T2->getDegree()),_distances.getDistanceTable());
+  _restrMapp.link(I_MAX(T1->getDegree(),T2->getDegree()),_distances);
 }
 // -------------
 // Destructeur
   // -------------
 Matching::~Matching()
 {
-  int size1 = T1->getNbVertex();
-  int size2 = T2->getNbVertex();
-//   for (int iv=0;iv<=size1-1;iv++)
-//     {
-//       delete (DistanceType*) _distanceMatrix[iv];
-//     }
-//   delete (DistanceType**) _distanceMatrix;
+    if(_distances) delete _distances;
+
 }
 
 // ----------------------------------------------------------------------------------
@@ -82,7 +72,7 @@ DistanceType Matching::distanceBetweenTree(int input_vertex,int reference_vertex
   int ni=T1->getNbChild(input_vertex);
   int nj=T2->getNbChild(reference_vertex);
 
-  DistanceType cost1,cost2,cost3,dist1,dist2,insert,del,sub;
+  DistanceType cost1,cost2,cost3,dist1,dist2;
   DistanceType min,MIN=2*MAXDIST;
   int im=0,jm=0,MTC=0;
   int i;
@@ -96,7 +86,7 @@ DistanceType Matching::distanceBetweenTree(int input_vertex,int reference_vertex
   min=MAXDIST;
   // cout de l'effacement de l'arbre initial
   cost1=getDBT(input_vertex,EMPTY_TREE);
-  for (i=1;i<=ni;i++)
+  for (i=0;i<ni;i++)
     {
       // On cherche parmi tous les fils de input_vertex celui dont l'arbre est le plus ressemblant a T2
       int input_child=T1->child(input_vertex,i);
@@ -119,7 +109,7 @@ DistanceType Matching::distanceBetweenTree(int input_vertex,int reference_vertex
   min=MAXDIST;
   // cout de l'insertion de l'arbre T2
   cost2=getDBT(EMPTY_TREE,reference_vertex);
-  for (i=1;i<=nj;i++)
+  for (i=0;i<nj;i++)
     {
       // On recherche parmi tous les fils de T2 celui qui ressemble le plus a T1
       int reference_child=T2->child(reference_vertex,i);
@@ -137,7 +127,7 @@ DistanceType Matching::distanceBetweenTree(int input_vertex,int reference_vertex
   // Le cout est celui de l'alignement des deux forets
   // plus celui de l'echange de T1(i) en T2(j)
   cost3=getDBF(input_vertex,reference_vertex);
-  cost3=cost3+_distances.getCCost(input_vertex,reference_vertex);
+  cost3=cost3+_distances->getCCost(input_vertex,reference_vertex);
   // On conserve le cout s'il est inferieur au precedent
   if (cost3<MIN) { MIN=cost3; MTC=3;  }
 
@@ -150,57 +140,19 @@ DistanceType Matching::distanceBetweenTree(int input_vertex,int reference_vertex
     case 1 :{
       _choices.putFirst(input_vertex,reference_vertex,im);
       _choices.putLast(input_vertex,reference_vertex,-1);
-      insert=getInBT(im,reference_vertex);
-      del=getDBT(input_vertex,EMPTY_TREE)-getDBT(im,EMPTY_TREE)+getDeBT(im,reference_vertex);
-      sub=getSuBT(im,reference_vertex);
     }break;
     case 2 :{
       _choices.putFirst(input_vertex,reference_vertex,jm);
       _choices.putLast(input_vertex,reference_vertex,M(input_vertex,jm));
-      insert=getDBT(EMPTY_TREE,reference_vertex)-getDBT(EMPTY_TREE,jm)+getInBT(input_vertex,jm);
-      del=getDeBT(input_vertex,jm);
-      sub=getSuBT(input_vertex,jm);
     }break;
     case 3 :{
       _choices.putFirst(input_vertex,reference_vertex,-1);
       _choices.putLast(input_vertex,reference_vertex,reference_vertex);
-      insert=getInBF(input_vertex,reference_vertex);
-      del=getDeBF(input_vertex,reference_vertex);
-      sub=getSuBF(input_vertex,reference_vertex)+_distances.getCCost(input_vertex,reference_vertex);
     }break;
     default :   assert(0);break;
     }
   _choices.putFirst(input_vertex,reference_vertex,MTC);
-  // On range dans le tableau des distances, la distance entre les arbres de racines input_vertex et
-  // reference_vertex.
-  _insertCost.putDBT(input_vertex,reference_vertex,insert);
-  _deleteCost.putDBT(input_vertex,reference_vertex,del);
-  _substitutionCost.putDBT(input_vertex,reference_vertex,sub);
-  _distances.putDBT(input_vertex,reference_vertex,MIN);
-
-
-  // On calcule les differents cas rencontres
-
-  if ((cost1==cost2) && (cost1==cost3))
-    { _nbCaseVector[0]++;}
-  if ((cost1==cost2) && (cost1<cost3))
-    { _nbCaseVector[1]++;}
-  if ((cost1==cost3) && (cost1<cost2))
-    { _nbCaseVector[2]++;}
-  if ((cost2==cost3) && (cost2<cost1))
-    { _nbCaseVector[3]++;}
-  if ((cost1<cost3) && (cost1<cost2))
-    { _nbCaseVector[4]++;}
-  if ((cost2<cost3) && (cost2<cost1))
-    { _nbCaseVector[5]++;}
-  if ((cost3<cost1) && (cost3<cost2))
-    { _nbCaseVector[6]++;}
-
-  _sumNbCaseVector[MTC-1]++;
-
-
-
-
+  _distances->putDBT(input_vertex,reference_vertex,MIN);
   return(MIN);
 
 }
@@ -216,28 +168,33 @@ DistanceType Matching::distanceBetweenForest(int input_vertex,int reference_vert
 // ni et nj representent le nombre de forets a comparees
   int ni=T1->getNbChild(input_vertex);
   int nj=T2->getNbChild(reference_vertex);
-  DistanceType cost1,cost2,cost3,dist1,dist2,insert,del,sub;
+  DistanceType cost1,cost2,cost3,dist1,dist2;
   DistanceType min,DIST;
   int im=0,jm=0,MFC=0;
   int i;
 
   DIST=MAXDIST;
-
   //------------------------------------------------------------------------
   //Case 1 : We search the reference_forest as a subtree of the input_forest
   // On met en correspondance une sous-foret d'un arbre de F1 avec la foret F2
   //------------------------------------------------------------------------
   min=MAXDIST;
   cost1=getDBF(input_vertex,EMPTY_TREE);
-  for (i=1;i<=ni;i++)
+  for (i=0;i<ni;i++)
     {
       int input_child=T1->child(input_vertex,i);
       dist1=getDBF(input_child,reference_vertex)-getDBF(input_child,EMPTY_TREE);
-      if (dist1<min) { min=dist1;im=input_child;}
+      if (dist1<min) {
+	min=dist1;
+	im=input_child;
+      }
     }
   cost1=cost1+min;
 
-  if (cost1<=DIST) {DIST=cost1;MFC=1;}
+  if (cost1<=DIST) {
+    DIST=cost1;
+    MFC=1;
+  }
 
   //------------------------------------------------------------------------
   //Case 2 : We search the input_forest as a subtree of the reference_forest
@@ -245,7 +202,7 @@ DistanceType Matching::distanceBetweenForest(int input_vertex,int reference_vert
   //------------------------------------------------------------------------
   min=MAXDIST;
   cost2=getDBF(EMPTY_TREE,reference_vertex);
-  for (i=1;i<=nj;i++)
+  for (i=0;i<nj;i++)
     {
       int reference_child=T2->child(reference_vertex,i);
       dist2=getDBF(input_vertex,reference_child)-getDBF(EMPTY_TREE,reference_child);
@@ -253,21 +210,25 @@ DistanceType Matching::distanceBetweenForest(int input_vertex,int reference_vert
     }
   cost2=cost2+min;
 
-  if (cost2<=DIST) {DIST=cost2;MFC=2;}
+  if (cost2<=DIST) {
+    DIST=cost2;
+    MFC=2;
+  }
 
   //---------------------------------------------------------------------------------------------
   //Case 3 : We evaluate the restricted mapping between the input_forest and the reference_forest
   // On evalue l'alignement restreint entre les deux forets
   //---------------------------------------------------------------------------------------------
 
-  // On fabrique le graphe de flot necessaire a la resolution du probleme
+  //On fabrique le graphe de flot necessaire a la resolution du probleme
   NodeList* input_list=new NodeList();
   NodeList* reference_list=new NodeList();
-  for (int s1=1;s1<=ni;s1++) { input_list->push_back(T1->child(input_vertex,s1)); }
-  for (int s2=1;s2<=nj;s2++) { reference_list->push_back(T2->child(reference_vertex,s2)); }
-  _restrMapp.make(*input_list,*reference_list);
-  _restrMappList.resize(ni+nj+3,EMPTY_NODE);
-
+   for (int s1=0;s1<ni;s1++)
+    input_list->push_back(T1->child(input_vertex,s1)); 
+   for (int s2=0;s2<nj;s2++) 
+    reference_list->push_back(T2->child(reference_vertex,s2)); 
+   _restrMapp.make(*input_list,*reference_list);
+   _restrMappList.resize(ni+nj+3,EMPTY_NODE);
   // THE INPUT FOREST IS EMPTY_TREE
   // All the reference vertices are paired with empty
   // Si la foret initiale est vide, il faut inserer toutes les arbres de
@@ -299,7 +260,6 @@ DistanceType Matching::distanceBetweenForest(int input_vertex,int reference_vert
           // A retricted mapping must be calculated
           // Sinon on resout le probleme de flot maximum de cout minimum
           cost3=_restrMapp.minCostFlow(_restrMappList);
-
         }
     }
 
@@ -313,258 +273,200 @@ DistanceType Matching::distanceBetweenForest(int input_vertex,int reference_vert
   _choices.createList(input_vertex,reference_vertex);
   _choices.putFirst(input_vertex,reference_vertex,MFC);
 
-
   switch(MFC)
     {
     case 1 :
-      {
         _choices.putLast(input_vertex,reference_vertex,im);
-        del=getDBF(input_vertex,EMPTY_TREE)-getDBF(im,EMPTY_TREE)+getDeBF(im,reference_vertex);
-        insert=getInBF(im,reference_vertex);
-        sub=getSuBF(im,reference_vertex);
-      }
-      break;
+	break;
     case 2 :
-      {
         _choices.putLast(input_vertex,reference_vertex,jm);
-        del=getDeBF(input_vertex,jm);
-        insert=getDBF(EMPTY_TREE,reference_vertex)-getDBF(EMPTY_TREE,jm)+getInBF(input_vertex,jm);
-        sub=getSuBF(input_vertex,jm);
+	break;
+    case 3 :
+      for (int i=1;i<=T1->getNbChild(input_vertex);i++){
+	_choices.putLast(input_vertex,reference_vertex,_restrMapp.who(_restrMappList[i]));
       }
       break;
-      case 3 :
-        {
-          if (ni==0)
-            {
-              insert=getDBF(EMPTY_TREE,reference_vertex);
-              del=0;
-              sub=0;
-            }
-          else if (nj==0)
-            {
-              insert=0;
-              del=getDBF(input_vertex,EMPTY_TREE);
-              sub=0;
-            }
-          else
-          {
-            sub=0;
-            del=0;
-            for (int i=1;i<=T1->getNbChild(input_vertex);i++)
-              {
-                _choices.putLast(input_vertex,reference_vertex,_restrMapp.who(_restrMappList[i]));
-                if (_restrMapp.who(_restrMappList[i])!=EMPTY_NODE)
-                  {
-                    sub=sub+getSuBT(T1->child(input_vertex,i),_restrMapp.who(_restrMappList[i]));
-                    del=del+getDeBT(T1->child(input_vertex,i),_restrMapp.who(_restrMappList[i]));
-                  }
-                else
-                  {
-                    del=del+getDBT(T1->child(input_vertex,i),EMPTY_TREE);
-                  }
-              }
-            insert=DIST-sub-del;
-          }
-        }
-        break;
     default :   break;
     }
 
-  _deleteCost.putDBF(input_vertex,reference_vertex,del);
-  _insertCost.putDBF(input_vertex,reference_vertex,insert);
-  _substitutionCost.putDBF(input_vertex,reference_vertex,sub);
-
   delete (NodeList*) input_list;
   delete (NodeList*) reference_list;
-  _distances.putDBF(input_vertex,reference_vertex,DIST);
+  _distances->putDBF(input_vertex,reference_vertex,DIST);
   return(DIST);
 
 }
 
 
-void Matching::getList(int input_vertex, int reference_vertex, Sequence* sequence)
-{
-  TreeList(input_vertex,reference_vertex,*sequence);
+void Matching::getList(int input_vertex, int reference_vertex, Sequence* sequence){
+  MatchRecordList mrl;
+  _choices.getList(input_vertex,reference_vertex,T1, T2,&mrl);
+
+  // conversion to a sequence to keep similar signature
+  for (MatchRecordList::const_iterator it = mrl.begin(); it != mrl.end(); ++it)
+	  sequence->append(it->first,it->second,-1);
+
+  // TreeList(input_vertex,reference_vertex,*sequence);
 }
 
-int Matching::Lat(ChoiceList* L, int vertex)
-{
-  ChoiceList::iterator begin;
-  begin = L->begin();
-  for (int i=0;i<vertex;i++)
-    begin++;
-  return(*begin);
+/*
+int Matching::Lat(ChoiceList* L, int vertex){
+  assert(L->size() > vertex); // check for wrong access in the list.
+  ChoiceList::iterator begin = L->begin();
+  for (int i=0 ; i<vertex ; ++i) ++begin;
+  return (*begin); 
 }
 
 
 
-void Matching::TreeList(int input_vertex,int reference_vertex,Sequence& sequence)
-{
-  if ((!T1->isNull())&&(!T2->isNull()))
-    {
-      ChoiceList* L=_choices.getList(input_vertex,reference_vertex);
-      int tree_choice=L->front();
-      switch(tree_choice)
-        {
-        case 1:
-          {
-            TreeList(Lat(L,1),reference_vertex,sequence);
-          }
-          break;
-        case 2:
-          {
-            TreeList(input_vertex,Lat(L,1),sequence);
-          }
-          break;
-        case 3: {
-          sequence.append(input_vertex,reference_vertex,_distances.getCCost(input_vertex,reference_vertex));
-          ForestList(input_vertex,reference_vertex,sequence);
-        }break;
-        default : break;
-        }
-    }
+void Matching::TreeList(int input_vertex, int reference_vertex, Sequence& sequence){
+	if ((!T1->isNull())&&(!T2->isNull()))
+	{
+		ChoiceList* L=_choices.getList(input_vertex,reference_vertex);
+		int tree_choice=L->front();
+		switch(tree_choice)
+		{
+		case 1:
+			{
+				TreeList(Lat(L,1),reference_vertex,sequence);
+			}
+			break;
+		case 2:
+			{
+				TreeList(input_vertex,Lat(L,1),sequence);
+			}
+			break;
+		case 3: 
+			{
+				sequence.append(input_vertex,reference_vertex,_distances->getCCost(input_vertex,reference_vertex));
+				ForestList(input_vertex,reference_vertex,sequence);
+			}
+			break;
+		case 4: 
+			{
+				int size = Lat(L,1);
+				int nbChoices = L->size();
+				//	Fred temptative of fix:
+				//	The actual list of id of matched elements seems to be the n last value of the choice list.				
+				int input_vertex;
+				for (int i=0;i<size;i++){
+					input_vertex = Lat(L,nbChoices-size+i);
+					sequence.append(input_vertex,reference_vertex,-1);
+				}
+				// question : is input_vertex to continue the fist or the last of the list. I choose the first
+				input_vertex = Lat(L,nbChoices-size); 
+				ForestList(input_vertex,reference_vertex,sequence);
+			}
+			break;
+		case 5: 
+			{
+				int size = Lat(L,1);
+				int nbChoices = L->size();
+				// Fred temptative of fix:
+				// The actual list of id of matched elements seems to be the n last value of the choice list.
+				int reference_vertex;
+				for (int i=0;i<size;i++){
+					reference_vertex = Lat(L,nbChoices-size+i);
+					sequence.append(input_vertex,reference_vertex,-1);
+				}
+				// question : is reference_vertex to continue the fist or the last of the list. I choose the first
+				reference_vertex = Lat(L,nbChoices-size); 
+				ForestList(input_vertex,reference_vertex,sequence);
+			}
+			break;
+		default : break;
+		}
+	}
 }
 
 void Matching::ForestList(int input_vertex,int reference_vertex,Sequence& sequence)
 {
-  ChoiceList* L=_choices.getList(input_vertex,reference_vertex);
-  int forest_choice=Lat(L,2);
+	ChoiceList* L=_choices.getList(input_vertex,reference_vertex);
+	int forest_choice=Lat(L,2);
 
-  switch(forest_choice)
-    {
-    case 1: ForestList(Lat(L,3),reference_vertex,sequence);break;
-    case 2: ForestList(input_vertex,Lat(L,3),sequence);break;
-    case 3: {
-      for (int i=1;i<=T1->getNbChild(input_vertex);i++)
-        {
-          int i_node=T1->child(input_vertex,i);
-          int r_node=Lat(L,2+i);
-          if (r_node!=-1) TreeList(i_node,r_node,sequence);
-        }
-    }break;
-    default : break;
-    }
+	switch(forest_choice)
+	{
+		case 1: ForestList(Lat(L,3),reference_vertex,sequence);break;
+		case 2: ForestList(input_vertex,Lat(L,3),sequence);break;
+		case 3: 
+		{
+			for (int i=0;i<T1->getNbChild(input_vertex);i++)
+			{
+				int i_node=T1->child(input_vertex,i);
+				int r_node=Lat(L,3+i);
+				if (r_node!=-1) TreeList(i_node,r_node,sequence);
+			}
+		}
+		break;
+		default : break;
+	}
 }
-
+*/
 DistanceType Matching::match()
 {
-  const int size1 = T1->getNbVertex();
-  const int size2 = T2->getNbVertex();
-  DistanceType D=0;
-  _distanceMatrix.resize(size1);
-  cerr << "\x0d" << "Already computed : 0% matched ...                                   " << flush;
-  if ((!T1->isNull())&&(!T2->isNull()))
-    {
-      for (int input_vertex=size1-1;input_vertex>=0;input_vertex--)
-        {
-          _distances.openDistancesVector(input_vertex);
-          _insertCost.openDistancesVector(input_vertex);
-          _deleteCost.openDistancesVector(input_vertex);
-          _substitutionCost.openDistancesVector(input_vertex);
-	  _distanceMatrix[input_vertex].resize(size2);
-          for (int reference_vertex=size2-1;reference_vertex>=0;reference_vertex--)
-            {
-              distanceBetweenForest(input_vertex,reference_vertex);
-              DistanceType d =distanceBetweenTree(input_vertex,reference_vertex);
-	      (_distanceMatrix[input_vertex])[reference_vertex]=d;
-            }
-	  if (int(100. - 100*input_vertex/size1)%5 == 0)
-	      cerr << "\x0d" << "Already computed : "<<int(100. - 100*input_vertex/size1) <<"% " <<" matched ...                                   " << flush;
-          for (int i=1;i<=T1->getNbChild(input_vertex);i++)
-            {
-              _distances.closeDistancesVector(T1->child(input_vertex,i));
-              _insertCost.closeDistancesVector(T1->child(input_vertex,i));
-              _deleteCost.closeDistancesVector(T1->child(input_vertex,i));
-              _substitutionCost.closeDistancesVector(T1->child(input_vertex,i));
-            }
-        }
-//     for (int iv=0;iv<=size1-1;iv++)
-//      {
-//        _distanceMatrix[iv] = new DistanceType[size2];
-//        for (int rv=0;rv<=size2-1;rv++)
-//          {
-//            _distanceMatrix[iv][rv]=matrix[iv][rv];
-//          }
-//      }
+	DistanceType D=0;
+	if(verbose) cerr << "\x0d" << "Already computed : 0% matched ...                                   " << flush;
+	if ((!T1->isNull())&&(!T2->isNull()))
+	{
+		const int size1 = T1->getNbVertex();
+		const int size2 = T2->getNbVertex();
+		if (_mdtable_type == STD){
+		  for (int input_vertex=size1-1;input_vertex>=0;input_vertex--)
+		    {
+		      _distances->inputForestToEmpty(input_vertex);
+		      _distances->inputTreeToEmpty(input_vertex);
+		    }
+		  for (int reference_vertex=size2-1;reference_vertex>=0;reference_vertex--)
+		    {
+		      _distances->referenceForestFromEmpty(reference_vertex);
+		      _distances->referenceTreeFromEmpty(reference_vertex);
+		    }
+		}
+		for (int input_vertex=size1-1;input_vertex>=0;input_vertex--)
+		{
+		  if (_mdtable_type == COMPACT) _distances->openDistancesVector(input_vertex);
 
-      D=getDBT(0,0);
-    }
-  else
-    {
-      if (T1->isNull())
-        {
-          if (!T2->isNull()) {D=_distances.referenceTreeFromEmpty(0);}
-        }
-      else
-        {
-          D=_distances.inputTreeToEmpty(0);
-        }
-    }
-  return(D);
+		  for (int reference_vertex=size2-1;reference_vertex>=0;reference_vertex--)
+		    {
+		      distanceBetweenForest(input_vertex,reference_vertex);
+		      DistanceType d =distanceBetweenTree(input_vertex,reference_vertex);
+		    }
+		  if (int(100. - 100*input_vertex/size1)%5 == 0)
+		    if(verbose)cerr << "\x0d" << "Already computed : "<<int(100. - 100*input_vertex/size1) <<"% " <<" matched ...                                   " << flush;
+		  if (_mdtable_type == COMPACT)
+		    for (int i=0;i<T1->getNbChild(input_vertex);i++){
+		      _distances->closeDistancesVector(T1->child(input_vertex,i));
+		    }
+ 		}
+		D=getDBT(0,0);
+	}
+	else
+	{
+		if (T1->isNull())
+		{
+			if (!T2->isNull()) {D=_distances->referenceTreeFromEmpty(0);}
+		}
+		else
+		{
+			D=_distances->inputTreeToEmpty(0);
+		}
+	}
+	if(verbose)cerr<<"\x0d"<<endl;
+	return(D);
 }
 
-DistanceType  Matching::getInsertCost()
-{
-  return(getInBT(0,0));
-}
-
-DistanceType  Matching::getDeleteCost()
-{
-  return(getDeBT(0,0));
-}
-
-DistanceType  Matching::getSubstitutionCost()
-{
-  return(getSuBT(0,0));
-}
 
 // --------------------------------------------
 // Renvoie les distances entre arbres et forets
 // --------------------------------------------
-DistanceType Matching::getDistanceMatrix(int iv,int rv) const
-{
-  return(_distanceMatrix[iv][rv]);
-}
 
 DistanceType Matching::getDBT(int input_vertex,int reference_vertex) const
 {
-  return(_distances.getDBT(input_vertex,reference_vertex));
+  return(_distances->getDBT(input_vertex,reference_vertex));
 }
 
 DistanceType Matching::getDBF(int input_vertex,int reference_vertex) const
 {
-  return(_distances.getDBF(input_vertex,reference_vertex));
-}
-DistanceType Matching::getInBT(int input_vertex,int reference_vertex) const
-{
-  return(_insertCost.getDBT(input_vertex,reference_vertex));
-}
-
-DistanceType Matching::getInBF(int input_vertex,int reference_vertex) const
-{
-  return(_insertCost.getDBF(input_vertex,reference_vertex));
-}
-
-DistanceType Matching::getDeBT(int input_vertex,int reference_vertex) const
-{
-  return(_deleteCost.getDBT(input_vertex,reference_vertex));
-}
-
-
-
-DistanceType Matching::getDeBF(int input_vertex,int reference_vertex) const
-{
-  return(_deleteCost.getDBF(input_vertex,reference_vertex));
-}
-
-DistanceType Matching::getSuBF(int input_vertex,int reference_vertex) const
-{
-  return(_substitutionCost.getDBF(input_vertex,reference_vertex));
-}
-
-DistanceType Matching::getSuBT(int input_vertex,int reference_vertex) const
-{
-  return(_substitutionCost.getDBT(input_vertex,reference_vertex));
+  return(_distances->getDBF(input_vertex,reference_vertex));
 }
 
 
@@ -575,9 +477,169 @@ int Matching::M(int i_node,int r_node)
 }
 
 
+// ----------------------------------------------------------------------------------
+// Calcule la distance entre les deux arbres T1[input_vertex] et T2[reference_vertex]
+// ----------------------------------------------------------------------------------
+DistanceType ExtMatching::distanceBetweenTree(int input_vertex,int reference_vertex)
+{
+  // On stocke dans ni et nj le nombre d'enfants de T1[i] et T2[j]
+  int ni=T1->getNbChild(input_vertex);
+  int nj=T2->getNbChild(reference_vertex);
+
+  DistanceType cost1,cost2,cost3,cost4,cost5,dist1,dist2,dist4,dist5;
+  DistanceType min,MIN=2*MAXDIST;
+  int im=0,jm=0,MTC=0;
+  int i;
+
+  //----------------------------------------------------------------------
+  //Case 1 : We search the reference_tree as a subtree of the input_tree
+  //         On cherche a mettre en correspondance l'arbre de reference
+  //         avec un sous arbre de l'arbre initial, il faut donc effacer
+  //         T1 moins le sous arbre qui ressemble le plus a T2
+  //----------------------------------------------------------------------
+  min=MAXDIST;
+  // cout de l'effacement de l'arbre initial
+  cost1=getDBT(input_vertex,EMPTY_TREE);
+  for (i=0;i<ni;i++)
+    {
+      // On cherche parmi tous les fils de input_vertex celui dont l'arbre est le plus ressemblant a T2
+      int input_child=T1->child(input_vertex,i);
+      // la distance est donc le passage de T1[iam] en T2[j] - l'effacement de T[iam] qui a ete
+      // compte precedemment
+      dist1=getDBT(input_child,reference_vertex)-getDBT(input_child,EMPTY_TREE);
+      // On conserve la plus petite distance
+      if (dist1<min) { min=dist1; im=input_child; }
+    }
+  cost1=cost1+min;
+  // On conserve le cout minimum
+  if (cost1<MIN) { MIN=cost1; MTC=1; }
+
+  //--------------------------------------------------------------------
+  //Case2 : We search the input_tree as a subtree of the reference_tree
+  //        On cherche a mettre en correspondance T1 et un sous arbre de
+  //        T2, il faut donc inserer T2 dans T1 moins l'arbre qui
+  //        ressemble le plus a T2 qu'on transforme
+  //--------------------------------------------------------------------
+  min=MAXDIST;
+  // cout de l'insertion de l'arbre T2
+  cost2=getDBT(EMPTY_TREE,reference_vertex);
+  for (i=0;i<nj;i++)
+    {
+      // On recherche parmi tous les fils de T2 celui qui ressemble le plus a T1
+      int reference_child=T2->child(reference_vertex,i);
+      dist2=getDBT(input_vertex,reference_child)-getDBT(EMPTY_TREE,reference_child);
+      if (dist2<min) { min=dist2;jm=reference_child; };
+    }
+  cost2=cost2+min;
+  // On conserve le cout s'il est inferieur au precedent
+  if (cost2<MIN) { MIN=cost2; MTC=2; }
+  //----------------------------------------------------------------------------------
+  //Case3 : We evaluate the matching between the input_forest and the reference_forest
+  // On evalue la mise en correspondance des arbres des deux forets issues de T1 et T2
+  //----------------------------------------------------------------------------------
+  // Le cout est celui de l'alignement des deux forets
+  // plus celui de l'echange de T1(i) en T2(j)
+  cost3=getDBF(input_vertex,reference_vertex);
+  cost3=cost3+_distances->getCCost(input_vertex,reference_vertex);
+  // On conserve le cout s'il est inferieur au precedent
+  if (cost3<MIN) { MIN=cost3; MTC=3;  }
+  const int size1 = T1->getNbVertex();
+  const int size2 = T2->getNbVertex();
+  min = MAXDIST;
+  vector<int> min_path_im;
+  cost4 = getDBT(input_vertex,EMPTY_TREE);
+  for (int des = size1-1; des > input_vertex;des--){
+    vector<int> path = T1->getPath(des,input_vertex);
+    if (path.size()>0){
+      dist4 = _distances->getMCost(path,reference_vertex)+getDBF(des,reference_vertex)-getDBF(des,EMPTY_TREE);
+      for (int i = 0; i<path.size();i++)
+			dist4 -= _distances->getDCost(path[i]);
+      if (dist4<min){
+			min = dist4;
+			min_path_im = path;
+      }
+    }
+  }
+  if (min_path_im.size()>0){ // on ne met à jour que si le chemin est au moins de taille 1
+    cost4 += min;
+    if ((cost4<MIN)&&(cost4>=0)){
+      MIN = cost4;
+      MTC = 4;
+    }
+  }
+  min = MAXDIST;
+  vector<int> min_path_jm;
+  cost5 = getDBT(EMPTY_TREE,reference_vertex);
+  for (int des = size2-1; des > reference_vertex;des--){
+    vector<int> path = T2->getPath(des,reference_vertex);
+    if (path.size()>0){
+      dist5 = _distances->getSCost(input_vertex,path)+getDBF(input_vertex,des)-getDBF(EMPTY_TREE,des);
+      for (int i = 0; i<path.size();i++)
+			dist5 -= _distances->getICost(path[i]);
+      if (dist5<min){
+			min = dist5;
+			min_path_jm = path;
+      }
+    }
+  }
+  if (min_path_jm.size()>0){
+    cost5 += min;
+    if (cost5<MIN){
+      MIN = cost5;
+      MTC = 5;
+    }
+  }
+
+  //-----------------------------------
+  // We maintain the matching lists
+  // mise a jour des listes d'alignement
+  //-----------------------------------
+  switch (MTC)
+    {
+    case 1 :{
+		  _choices.putFirst(input_vertex,reference_vertex,im);
+		  _choices.putLast(input_vertex,reference_vertex,-1);
+		}
+		break;
+    case 2 :{
+		  _choices.putFirst(input_vertex,reference_vertex,jm);
+		  _choices.putLast(input_vertex,reference_vertex,M(input_vertex,jm));
+		}
+		break;
+    case 3 :{
+		  _choices.putFirst(input_vertex,reference_vertex,-1);
+		  _choices.putLast(input_vertex,reference_vertex,reference_vertex);
+		}
+		break;
+    case 4 :{
+		 _choices.putFirst(input_vertex,reference_vertex,min_path_im.size());
+		 for (int i=0;i<min_path_im.size();i++){
+			_choices.putLast(input_vertex,reference_vertex,min_path_im[i]);
+		 }
+		  //  _choices.putLast(input_vertex,reference_vertex,reference_vertex);
+		}
+		break;
+    case 5 :{
+		  _choices.putFirst(input_vertex,reference_vertex,min_path_jm.size());
+		  for (int i=0;i<min_path_jm.size();i++){
+			_choices.putLast(input_vertex,reference_vertex,min_path_jm[i]);
+		  //     _choices.putLast(input_vertex,reference_vertex,reference_vertex);
+		  }
+		}
+		break;
+    default :   
+		assert(0);
+		break;
+    }
+  _choices.putFirst(input_vertex,reference_vertex,MTC);
+  _distances->putDBT(input_vertex,reference_vertex,MIN);
+  return(MIN);
+
+}
 
 
-
+ExtMatching::~ExtMatching() {
+}
 
 
 

@@ -8,7 +8,7 @@
  *       File author(s): P.ferraro (pascal.ferraro@cirad.fr) 
  *
  *       $Source$
- *       $Id$
+ *       $Id: indexmanager.cpp 3258 2007-06-06 13:18:26Z dufourko $
  *
  *       Forum for AMAPmod developers    : amldevlp@cirad.fr
  *               

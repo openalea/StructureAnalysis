@@ -1,14 +1,14 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       TreeMatching : Comparison of Tree Structures
  *
- *       Copyright 1995-2000 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2009 UMR LaBRI
  *
- *       File author(s): P.ferraro (pascal.ferraro@cirad.fr)
- *
+ *       File author(s): P.ferraro (pascal.ferraro@labri.fr)
+ * 
  *       $Source$
- *       $Id$
+ *       $Id: treenode.cpp 3258 2007-06-06 13:18:26Z dufourko $
  *
  *       Forum for AMAPmod developers    : amldevlp@cirad.fr
  *
@@ -39,98 +39,69 @@
 using namespace std;
 
 
-TreeNode::TreeNode(MTG& mtg ,int number, int depth, int father, int vertex, int complex)
+TreeNode::TreeNode(IdType id, IdType father):
+  _id(id), _father(father), _values(), _depth(0)
 {
-  _number   = number;
-  _depth    = depth;
-  _father   = father;
-  _vertex   = vertex;
-  _complex  = complex;
-  _mtg      = &mtg;
-  _values   = (ValueVector*) NULL;
-  _nb_value = 0;
 }
 
 TreeNode::~TreeNode()
 {
-  if (_values) delete (ValueVector*) _values;
 }
 
-void TreeNode::put(ostream& os)
-{
-        os<<"NUMBER   : "<<_number<<std::endl;
-        os<<"NUMPOSTFIX: "<<_numPostfix<<std::endl;
-        os<<"DEPTH    : "<<_depth<<std::endl;
-        os<<"FATHER   : "<<_father<<std::endl;
-        os<<"VERTEX   : "<<_vertex<<std::endl;
-        os<<"COMPLEX  : "<<_complex;
-        os<<"VALUE    : "<<_value;
-        os<<"ORDER    : "<<_order;
-        os<<"POSITION : "<<_position;
-}
 
-void TreeNode::print()
+void TreeNode::print() const
 {
-        cout<<"NUMBER    : "<<_number<<endl;
-        cout<<"DEPTH     : "<<_depth<<endl;
-        cout<<"FATHER    : "<<_father<<endl;
-        cout<<"VERTEX    : "<<_vertex<<endl;
-//         cout<<"COMPLEX   : "<<_complex<<endl;
-//         cout<<"VALUE     : "<<_value<<endl;
-//         cout<<"ORDER     : "<<_order<<endl;
-//         cout<<"POSITION  : "<<_position<<endl;
-//         cout<<" NB VALUE : "<<_nb_value<<endl;
-//         if (_nb_value)
-//         {
-//           for (int i=0;i<_nb_value;i++)
-//           {
-//             cout<< " VALUE("<<i<<")="<<(*_values)[i]<<endl;
-//           }
-//         }
-}
-
-ostream& operator<<(ostream& os ,TreeNode node)
-{
-        node.put(os);
-        return(os);
-};
-
-void TreeNode::resize(int new_size)
-{
-  if (_values)
-  {
-    _values->resize(new_size);
+  cout<<"ID \t : "<<_id<<endl;
+  cout<<"FATHER \t : "<<_father<<endl;
+  cout<<"DEPTH \t : "<<_depth<<endl;
+  cout<<"CHILD LIST \t : [ ";
+  if(hasChild()){
+	  for (size_t i=0; i < getChildNumber();i++){
+		if (i>0) cout <<" , ";
+		cout << getChild(i);
+	  }
   }
-   else
-  {
-    _values=new ValueVector(new_size,DIST_UNDEF);
-  }
-  _nb_value=new_size;
+  cout<<" ]"<<endl;
+
+   for (int i=0;i<_values.size();i++)
+     cout<<"ARG["<<i<<"] \t : "<<getValue(i)<<endl;
 }
 
-int TreeNode::getValueSize() const
-{
-  return(_nb_value);
-}
+
 
 DistanceType TreeNode::getValue(int index) const
 {
-  if (_values)
+  if (!_values.empty())
   {
-    assert((index>=0)&&(index<_nb_value));
-    return((*_values)[index]);
+    return getTypedValue<DistanceType>(index);
+    assert((index>=0)&&(index<_values.size()));
+	return boost::any_cast<DistanceType>(_values[index]);
   }
-  else
-  {
-    return(DIST_UNDEF);
-  }
+  else  return(DIST_UNDEF);
 }
 
-void TreeNode::putValue(int index, DistanceType new_value)
+
+TreeNode::IdType TreeNode::getChild(int id) const{
+  assert ((id>=0) && (id<_childList.size()));
+  return _childList[id];
+}
+
+
+/* ----------------------------------------------------------------------- */
+
+static TreeNode::Factory * TREENODEFACTORY = NULL;
+
+TreeNode::Factory::Factory(): __builder(NULL) { }
+
+
+TreeNodePtr TreeNode::Factory::build(IdType id, IdType father_id)
 {
-  assert((index>=0)&&(index<_nb_value));
-  if (_values) { (*_values)[index]=new_value; }
+	if(!__builder) return TreeNodePtr(new TreeNode(id, father_id));
+	else return (*__builder)(id, father_id);
 }
 
-
-
+TreeNode::Factory& TreeNode::factory() {
+	if(!TREENODEFACTORY) TREENODEFACTORY = new TreeNode::Factory();
+	return *TREENODEFACTORY;
+}
+/* ----------------------------------------------------------------------- */
