@@ -37,6 +37,8 @@
 
 
 #include <math.h>
+
+#include <string>
 #include <sstream>
 
 #include "tool/rw_tokenizer.h"
@@ -1235,7 +1237,7 @@ DiscreteDistributionData* DiscreteParametricModel::extract_data(StatError &error
  *
  *--------------------------------------------------------------*/
 
-DiscreteParametricModel* DiscreteParametricModel::ascii_read(StatError &error , const char *path ,
+DiscreteParametricModel* DiscreteParametricModel::ascii_read(StatError &error , const string path ,
                                                              double cumul_threshold)
 
 {
@@ -1245,7 +1247,7 @@ DiscreteParametricModel* DiscreteParametricModel::ascii_read(StatError &error , 
   int line;
   DiscreteParametric *pdist;
   DiscreteParametricModel *dist;
-  ifstream in_file(path);
+  ifstream in_file(path.c_str());
 
 
   dist = NULL;
@@ -1459,12 +1461,12 @@ ostream& DiscreteParametricModel::ascii_write(ostream &os , bool exhaustive) con
  *
  *--------------------------------------------------------------*/
 
-bool DiscreteParametricModel::ascii_write(StatError &error , const char *path ,
+bool DiscreteParametricModel::ascii_write(StatError &error , const string path ,
                                           bool exhaustive) const
 
 {
   bool status;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -1581,11 +1583,11 @@ ostream& DiscreteParametricModel::spreadsheet_write(ostream &os ,
  *
  *--------------------------------------------------------------*/
 
-bool DiscreteParametricModel::spreadsheet_write(StatError &error , const char *path) const
+bool DiscreteParametricModel::spreadsheet_write(StatError &error , const string path) const
 
 {
   bool status;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();

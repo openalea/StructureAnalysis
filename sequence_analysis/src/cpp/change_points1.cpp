@@ -1800,7 +1800,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
           }
         }
 
-        if (i < nb_segment - 1) {
+        if (i < nb_segment) {
           status = false;
           error.update(SEQ_error[SEQR_CHANGE_POINT]);
         }

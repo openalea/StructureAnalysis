@@ -37,6 +37,8 @@
 
 
 #include <math.h>
+
+#include <string>
 #include <sstream>
 
 #include <boost/math/distributions/normal.hpp>
@@ -1320,7 +1322,7 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostrea
  *--------------------------------------------------------------*/
 
 bool MarkovianSequences::comparison(StatError &error , ostream &os , int nb_model ,
-                                    const SemiMarkov **ismarkov , const char *path) const
+                                    const SemiMarkov **ismarkov , const string path) const
 
 {
   bool status = true;
@@ -1435,7 +1437,7 @@ bool MarkovianSequences::comparison(StatError &error , ostream &os , int nb_mode
     likelihood_write(os , nb_model , likelihood , SEQ_label[SEQL_SEMI_MARKOV_CHAIN] , true);
 #   endif
 
-    if (path) {
+    if (!path.empty()) {
       status = likelihood_write(error , path , nb_model , likelihood , SEQ_label[SEQL_SEMI_MARKOV_CHAIN]);
     }
 
@@ -1919,7 +1921,7 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , int nb_sequence ,
 DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , ostream &os ,
                                                    int nb_model , const SemiMarkov **ismarkov ,
                                                    FrequencyDistribution **length_distribution ,
-                                                   const char *path) const
+                                                   const string path) const
 
 {
   bool status = true , lstatus;
@@ -2035,8 +2037,8 @@ DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , ostream &o
   if (status) {
     out_file = NULL;
 
-    if (path) {
-      out_file = new ofstream(path);
+    if (!path.empty()) {
+      out_file = new ofstream(path.c_str());
 
       if (!out_file) {
         error.update(STAT_error[STATR_FILE_NAME]);
@@ -2181,7 +2183,7 @@ DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , ostream &o
 
 DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , ostream &os ,
                                                    int nb_model , const SemiMarkov **smarkov ,
-                                                   int nb_sequence , int length , const char *path) const
+                                                   int nb_sequence , int length , const string path) const
 
 {
   bool status = true;
@@ -2247,7 +2249,7 @@ DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , ostream &o
 DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , ostream &os ,
                                                    int nb_model , const SemiMarkov **smarkov ,
                                                    int nb_sequence , const MarkovianSequences **seq ,
-                                                   const char *path) const
+                                                   const string path) const
 
 {
   register int i;

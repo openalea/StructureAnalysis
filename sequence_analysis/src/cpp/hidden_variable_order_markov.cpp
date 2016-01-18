@@ -36,6 +36,7 @@
 
 
 
+#include <string>
 #include <sstream>
 
 #include "tool/rw_tokenizer.h"
@@ -156,7 +157,7 @@ HiddenVariableOrderMarkov* HiddenVariableOrderMarkov::thresholding(double min_pr
  *--------------------------------------------------------------*/
 
 HiddenVariableOrderMarkov* HiddenVariableOrderMarkov::ascii_read(StatError &error ,
-                                                                 const char *path , int length ,
+                                                                 const string path , int length ,
                                                                  double cumul_threshold)
 
 {
@@ -174,7 +175,7 @@ HiddenVariableOrderMarkov* HiddenVariableOrderMarkov::ascii_read(StatError &erro
   DiscreteParametricProcess **discrete_parametric_observation;
   ContinuousParametricProcess **continuous_parametric_observation;
   HiddenVariableOrderMarkov *hmarkov;
-  ifstream in_file(path);
+  ifstream in_file(path.c_str());
 
 
   hmarkov = NULL;
@@ -531,12 +532,12 @@ ostream& HiddenVariableOrderMarkov::ascii_write(ostream &os , bool exhaustive) c
  *
  *--------------------------------------------------------------*/
 
-bool HiddenVariableOrderMarkov::ascii_write(StatError &error , const char *path ,
+bool HiddenVariableOrderMarkov::ascii_write(StatError &error , const string path ,
                                             bool exhaustive) const
 
 {
   bool status;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -564,11 +565,11 @@ bool HiddenVariableOrderMarkov::ascii_write(StatError &error , const char *path 
  *--------------------------------------------------------------*/
 
 bool HiddenVariableOrderMarkov::spreadsheet_write(StatError &error ,
-                                                  const char *path) const
+                                                  const string path) const
 
 {
   bool status;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();

@@ -309,7 +309,7 @@ def _estimate_semi_markov(obj, *args, **kargs):
         if kargs.get("OccupancyMean"):
             raise ValueError("Forbidden options Estimate OccupancyMean")
 
-    return obj.semi_markov_estimation(Type , Estimator , Counting,
+    return obj.semi_markov_estimation(Type.real , Estimator , Counting,
                                         NbIteration , OccupancyMean)
 
 
@@ -505,7 +505,7 @@ def _estimate_variable_order_markov(obj, *args, **kargs):
 
         if order_estimation is True:
             markov = obj.variable_order_markov_estimation1(
-                Type, MinOrder, MaxOrder, Algorithm, Threshold, Estimator ,
+                Type.real, MinOrder, MaxOrder, Algorithm.real, Threshold, Estimator.real ,
                   GlobalInitialTransition , GlobalSample , Counting)
         else:
             markov = obj.variable_order_markov_estimation2(
@@ -536,23 +536,23 @@ def _estimate_variable_order_markov(obj, *args, **kargs):
 
 
 #todo: should be estimate_top_parameters ?
-def _estimate_top(obj, **kargs):
-    """
-    Top parameters Estimate switch
-    """
-    error.CheckType([obj], [_Tops])
+#def _estimate_top(obj, **kargs):
+    #"""
+    #Top parameters Estimate switch
+    #"""
+    #error.CheckType([obj], [_Tops])
 
-    MinPosition = kargs.get("MinPosition", 1)
-    MaxPosition = kargs.get("MaxPosition", obj.max_position)
-    Neighbourhood = kargs.get("Neighbourhood", 1)
-    # user may use us of uk spelling.
-    Neighbourhood = kargs.get("Neighborhood", Neighbourhood)
-    EqualProbability = kargs.get("EqualProbability", False)
+    #MinPosition = kargs.get("MinPosition", 1)
+    #MaxPosition = kargs.get("MaxPosition", obj.max_position)
+    #Neighbourhood = kargs.get("Neighbourhood", 1)
+    ## user may use us of uk spelling.
+    #Neighbourhood = kargs.get("Neighborhood", Neighbourhood)
+    #EqualProbability = kargs.get("EqualProbability", False)
 
 
-    error.CheckType([MinPosition, MaxPosition], [int, int])
-    return obj.estimation(MinPosition, MaxPosition, Neighbourhood,
-                          EqualProbability)
+    #error.CheckType([MinPosition, MaxPosition], [int, int])
+    #return obj.estimation(MinPosition, MaxPosition, Neighbourhood,
+                          #EqualProbability)
 
 
 
@@ -846,8 +846,8 @@ def Estimate(obj, *args, **kargs):
     """
 
     # top case (no type specified and args may be empty)
-    if isinstance(obj, _Tops):
-        return _estimate_top(obj, *args, **kargs)
-    else:
-        return _estimate_dispatch(obj, *args, **kargs)
+    #if isinstance(obj, _Tops):
+        #return _estimate_top(obj, *args, **kargs)
+    #else:
+    return _estimate_dispatch(obj, *args, **kargs)
 

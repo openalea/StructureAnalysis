@@ -38,6 +38,7 @@
 
 #include <math.h>
 
+#include <string>
 #include <sstream>
 #include <iomanip>
 
@@ -568,7 +569,7 @@ Mixture* Mixture::thresholding(double min_probability) const
  *
  *--------------------------------------------------------------*/
 
-Mixture* Mixture::ascii_read(StatError &error , const char *path , double cumul_threshold)
+Mixture* Mixture::ascii_read(StatError &error , const string path , double cumul_threshold)
 
 {
   RWLocaleSnapshot locale("en");
@@ -585,7 +586,7 @@ Mixture* Mixture::ascii_read(StatError &error , const char *path , double cumul_
   DiscreteParametricProcess **discrete_parametric_observation;
   ContinuousParametricProcess **continuous_parametric_observation;
   Mixture *mixt;
-  ifstream in_file(path);
+  ifstream in_file(path.c_str());
 
 
   mixt = NULL;
@@ -1345,12 +1346,12 @@ ostream& Mixture::ascii_write(ostream &os , bool exhaustive) const
  *
  *--------------------------------------------------------------*/
 
-bool Mixture::ascii_write(StatError &error , const char *path ,
+bool Mixture::ascii_write(StatError &error , const string path ,
                           bool exhaustive) const
 
 {
   bool status;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -1571,11 +1572,11 @@ ostream& Mixture::spreadsheet_write(ostream &os , const MixtureData *vec) const
  *
  *--------------------------------------------------------------*/
 
-bool Mixture::spreadsheet_write(StatError &error , const char *path) const
+bool Mixture::spreadsheet_write(StatError &error , const string path) const
 
 {
   bool status;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -2372,14 +2373,14 @@ ostream& MixtureData::ascii_write(ostream &os , bool exhaustive) const
  *
  *--------------------------------------------------------------*/
 
-bool MixtureData::ascii_write(StatError &error , const char *path , bool exhaustive) const
+bool MixtureData::ascii_write(StatError &error , const string path , bool exhaustive) const
 
 {
   bool status = false;
 
 
   if (mixture) {
-    ofstream out_file(path);
+    ofstream out_file(path.c_str());
 
     error.init();
 
@@ -2425,12 +2426,12 @@ ostream& MixtureData::ascii_data_write(ostream &os , bool exhaustive) const
  *
  *--------------------------------------------------------------*/
 
-bool MixtureData::ascii_data_write(StatError &error , const char *path ,
+bool MixtureData::ascii_data_write(StatError &error , const string path ,
                                    bool exhaustive) const
 
 {
   bool status = false;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -2458,14 +2459,14 @@ bool MixtureData::ascii_data_write(StatError &error , const char *path ,
  *
  *--------------------------------------------------------------*/
 
-bool MixtureData::spreadsheet_write(StatError &error , const char *path) const
+bool MixtureData::spreadsheet_write(StatError &error , const string path) const
 
 {
   bool status = false;
 
 
   if (mixture) {
-    ofstream out_file(path);
+    ofstream out_file(path.c_str());
 
     error.init();
 

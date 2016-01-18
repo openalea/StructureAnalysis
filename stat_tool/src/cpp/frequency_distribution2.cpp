@@ -38,6 +38,8 @@
 
 #include <limits.h>
 #include <math.h>
+
+#include <string>
 #include <sstream>
 #include <iomanip>
 
@@ -323,13 +325,13 @@ ostream& FrequencyDistribution::dissimilarity_ascii_write(ostream &os , int nb_h
  *
  *--------------------------------------------------------------*/
 
-bool FrequencyDistribution::dissimilarity_ascii_write(StatError &error , const char *path ,
+bool FrequencyDistribution::dissimilarity_ascii_write(StatError &error , const string path ,
                                                       int nb_histo , const FrequencyDistribution **ihisto ,
                                                       variable_type type , double **dissimilarity) const
 
 {
   bool status;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -359,7 +361,7 @@ bool FrequencyDistribution::dissimilarity_ascii_write(StatError &error , const c
  *
  *--------------------------------------------------------------*/
 
-bool FrequencyDistribution::dissimilarity_spreadsheet_write(StatError &error , const char *path ,
+bool FrequencyDistribution::dissimilarity_spreadsheet_write(StatError &error , const string path ,
                                                             int nb_histo , const FrequencyDistribution **ihisto ,
                                                             variable_type type , double **dissimilarity) const
 
@@ -370,7 +372,7 @@ bool FrequencyDistribution::dissimilarity_spreadsheet_write(StatError &error , c
   double information , **cumul , **concentration;
   Test *test;
   const FrequencyDistribution **histo;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -676,7 +678,7 @@ Test* FrequencyDistribution::kruskal_wallis_test(int nb_histo , const FrequencyD
 
 bool FrequencyDistribution::comparison(StatError &error , ostream &os , int nb_histo ,
                                        const FrequencyDistribution **ihisto , variable_type type ,
-                                       const char *path , output_format format) const
+                                       const string path , output_format format) const
 
 {
   bool status = true;
@@ -821,7 +823,7 @@ bool FrequencyDistribution::comparison(StatError &error , ostream &os , int nb_h
   dissimilarity_ascii_write(os , nb_histo - 1 , ihisto , type , dissimilarity);
 # endif
 
-  if (path) {
+  if (!path.empty()) {
     switch (format) {
     case ASCII :
       status = dissimilarity_ascii_write(error , path , nb_histo - 1 , ihisto ,
@@ -1967,7 +1969,7 @@ DiscreteParametricModel* DiscreteDistributionData::extract_model(StatError &erro
  *
  *--------------------------------------------------------------*/
 
-DiscreteDistributionData* DiscreteDistributionData::ascii_read(StatError &error , const char *path)
+DiscreteDistributionData* DiscreteDistributionData::ascii_read(StatError &error , const string path)
 
 {
   RWLocaleSnapshot locale("en");
@@ -1978,7 +1980,7 @@ DiscreteDistributionData* DiscreteDistributionData::ascii_read(StatError &error 
   int line , nb_element;
   long value , index , max_index;
   DiscreteDistributionData *histo;
-  ifstream in_file(path);
+  ifstream in_file(path.c_str());
 
 
   histo = NULL;
@@ -2076,7 +2078,7 @@ DiscreteDistributionData* DiscreteDistributionData::ascii_read(StatError &error 
 
     if (status) {
 //      in_file.close();
-//      in_file.open(path , ios::in);
+//      in_file.open(path.c_str() , ios::in);
 
       in_file.clear();
       in_file.seekg(0 , ios::beg);
@@ -2194,12 +2196,12 @@ ostream& DiscreteDistributionData::ascii_write(ostream &os , bool exhaustive) co
  *
  *--------------------------------------------------------------*/
 
-bool DiscreteDistributionData::ascii_write(StatError &error , const char *path ,
+bool DiscreteDistributionData::ascii_write(StatError &error , const string path ,
                                            bool exhaustive) const
 
 {
   bool status;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -2226,11 +2228,11 @@ bool DiscreteDistributionData::ascii_write(StatError &error , const char *path ,
  *
  *--------------------------------------------------------------*/
 
-bool DiscreteDistributionData::spreadsheet_write(StatError &error , const char *path) const
+bool DiscreteDistributionData::spreadsheet_write(StatError &error , const string path) const
 
 {
   bool status;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();

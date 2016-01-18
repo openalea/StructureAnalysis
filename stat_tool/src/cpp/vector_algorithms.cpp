@@ -37,6 +37,8 @@
 
 
 #include <math.h>
+
+#include <string>
 #include <sstream>
 #include <iomanip>
 
@@ -382,12 +384,12 @@ ostream& Vectors::rank_correlation_ascii_write(ostream &os , correlation_type co
  *
  *--------------------------------------------------------------*/
 
-bool Vectors::rank_correlation_ascii_write(StatError &error , const char *path ,
+bool Vectors::rank_correlation_ascii_write(StatError &error , const string path ,
                                            correlation_type correl_type , double **correlation) const
 
 {
   bool status;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -417,7 +419,7 @@ bool Vectors::rank_correlation_ascii_write(StatError &error , const char *path ,
  *--------------------------------------------------------------*/
 
 bool Vectors::rank_correlation_computation(StatError &error , ostream &os ,
-                                           correlation_type correl_type , const char *path) const
+                                           correlation_type correl_type , const string path) const
 
 {
   bool status = true;
@@ -467,7 +469,7 @@ bool Vectors::rank_correlation_computation(StatError &error , ostream &os ,
     rank_correlation_ascii_write(os , correl_type , correlation);
 #   endif
 
-    if (path) {
+    if (!path.empty()) {
       status = rank_correlation_ascii_write(error , path , correl_type , correlation);
     }
 
@@ -1133,14 +1135,14 @@ ostream& Vectors::contingency_table_ascii_write(ostream &os , int variable1 , in
  *
  *--------------------------------------------------------------*/
 
-bool Vectors::contingency_table_ascii_write(StatError &error , const char *path ,
+bool Vectors::contingency_table_ascii_write(StatError &error , const string path ,
                                             int variable1 , int variable2 , int **frequency ,
                                             double **deviation , double **chi2_contribution ,
                                             const Test &test) const
 
 {
   bool status;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -1170,7 +1172,7 @@ bool Vectors::contingency_table_ascii_write(StatError &error , const char *path 
  *
  *--------------------------------------------------------------*/
 
-bool Vectors::contingency_table_spreadsheet_write(StatError &error , const char *path ,
+bool Vectors::contingency_table_spreadsheet_write(StatError &error , const string path ,
                                                   int variable1 , int variable2 , int **frequency ,
                                                   double **deviation , double **chi2_contribution ,
                                                   const Test &test) const
@@ -1178,7 +1180,7 @@ bool Vectors::contingency_table_spreadsheet_write(StatError &error , const char 
 {
   bool status;
   register int i , j;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -1264,7 +1266,7 @@ bool Vectors::contingency_table_spreadsheet_write(StatError &error , const char 
  *--------------------------------------------------------------*/
 
 bool Vectors::contingency_table(StatError &error , ostream &os , int variable1 ,
-                                int variable2 , const char *path , output_format format) const
+                                int variable2 , const string path , output_format format) const
 
 {
   bool status = true;
@@ -1410,7 +1412,7 @@ bool Vectors::contingency_table(StatError &error , ostream &os , int variable1 ,
                                   deviation , chi2_contribution , *test);
 #   endif
 
-    if (path) {
+    if (!path.empty()) {
       switch (format) {
       case ASCII :
         status = contingency_table_ascii_write(error , path , variable1 , variable2 , frequency ,
@@ -1802,12 +1804,12 @@ ostream& Vectors::variance_analysis_ascii_write(ostream &os , int type , const V
  *
  *--------------------------------------------------------------*/
 
-bool Vectors::variance_analysis_ascii_write(StatError &error , const char *path , int response_type ,
+bool Vectors::variance_analysis_ascii_write(StatError &error , const string path , int response_type ,
                                             const Vectors **value_vec , bool exhaustive) const
 
 {
   bool status;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -1837,7 +1839,7 @@ bool Vectors::variance_analysis_ascii_write(StatError &error , const char *path 
  *
  *--------------------------------------------------------------*/
 
-bool Vectors::variance_analysis_spreadsheet_write(StatError &error , const char *path ,
+bool Vectors::variance_analysis_spreadsheet_write(StatError &error , const string path ,
                                                   int response_type , const Vectors **value_vec) const
 
 {
@@ -1846,7 +1848,7 @@ bool Vectors::variance_analysis_spreadsheet_write(StatError &error , const char 
   int df[3];
   double diff , square_sum[3] , mean_square[3] , **cumul;
   Test *test;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -2081,7 +2083,7 @@ bool Vectors::variance_analysis_spreadsheet_write(StatError &error , const char 
 
 bool Vectors::variance_analysis(StatError &error , ostream &os , int class_variable ,
                                 int response_variable , int response_type ,
-                                const char *path , output_format format) const
+                                const string path , output_format format) const
 
 {
   bool status = true;
@@ -2187,7 +2189,7 @@ bool Vectors::variance_analysis(StatError &error , ostream &os , int class_varia
     vec->variance_analysis_ascii_write(os , response_type , value_vec, false);
 #   endif
 
-    if (path) {
+    if (!path.empty()) {
       switch (format) {
       case ASCII :
         status = vec->variance_analysis_ascii_write(error , path , response_type ,

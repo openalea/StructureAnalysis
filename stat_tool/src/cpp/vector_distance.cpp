@@ -37,6 +37,8 @@
 
 
 #include <math.h>
+
+#include <string>
 #include <sstream>
 #include <iomanip>
 
@@ -324,7 +326,7 @@ VectorDistance& VectorDistance::operator=(const VectorDistance &vector_dist)
  *
  *--------------------------------------------------------------*/
 
-VectorDistance* VectorDistance::ascii_read(StatError &error , const char *path)
+VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
 
 {
   RWLocaleSnapshot locale("en");
@@ -339,7 +341,7 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const char *path)
   long value;
   double cumul , weight[VECTOR_NB_VARIABLE] , ***category_distance;
   VectorDistance *vector_dist;
-  ifstream in_file(path);
+  ifstream in_file(path.c_str());
 
 
   vector_dist = NULL;
@@ -974,12 +976,11 @@ ostream& VectorDistance::ascii_write(ostream &os , bool exhaustive) const
  *
  *--------------------------------------------------------------*/
 
-bool VectorDistance::ascii_write(StatError &error , const char *path ,
-                                 bool exhaustive) const
+bool VectorDistance::ascii_write(StatError &error , const string path , bool exhaustive) const
 
 {
   bool status;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -998,7 +999,7 @@ bool VectorDistance::ascii_write(StatError &error , const char *path ,
 }
 
 
-bool VectorDistance::spreadsheet_write(StatError &error , const char *path) const
+bool VectorDistance::spreadsheet_write(StatError &error , const string path) const
 
 {
   return false;

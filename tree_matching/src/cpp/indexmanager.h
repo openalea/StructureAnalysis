@@ -8,7 +8,7 @@
  *       File author(s): P.ferraro (pascal.ferraro@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: indexmanager.h 3258 2007-06-06 13:18:26Z dufourko $
  *
  *       Forum for AMAPmod developers    : amldevlp@cirad.fr
  *
@@ -53,7 +53,7 @@ typedef std::list<int> IndexList;
  *\date 1999
  */
 
-class IndexManager
+class TREEMATCH_API IndexManager
 {
 
  public :

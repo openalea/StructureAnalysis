@@ -37,6 +37,8 @@
 
 
 #include <math.h>
+
+#include <string>
 #include <sstream>
 #include <iomanip>
 
@@ -978,12 +980,12 @@ ostream& Regression::ascii_write(ostream &os , bool exhaustive) const
  *
  *--------------------------------------------------------------*/
 
-bool Regression::ascii_write(StatError &error , const char *path ,
+bool Regression::ascii_write(StatError &error , const string path ,
                              bool exhaustive) const
 
 {
   bool status;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -1010,7 +1012,7 @@ bool Regression::ascii_write(StatError &error , const char *path ,
  *
  *--------------------------------------------------------------*/
 
-bool Regression::spreadsheet_write(StatError &error , const char *path) const
+bool Regression::spreadsheet_write(StatError &error , const string path) const
 
 {
   bool status;
@@ -1018,7 +1020,7 @@ bool Regression::spreadsheet_write(StatError &error , const char *path) const
   double t_value , residual_mean , residual_standard_deviation , square_sum[3] ,
          df[3] , mean_square[3] , standard_deviation[2];
   Test *test;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();

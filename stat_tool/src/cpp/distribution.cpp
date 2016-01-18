@@ -37,6 +37,7 @@
 
 
 #include <math.h>
+
 #include <sstream>
 #include <iomanip>
 #include <cstring>
@@ -2046,11 +2047,11 @@ ostream& Distribution::survival_ascii_write(ostream &os) const
  *
  *--------------------------------------------------------------*/
 
-bool Distribution::survival_ascii_write(StatError &error , const char *path) const
+bool Distribution::survival_ascii_write(StatError &error , const string path) const
 
 {
   bool status;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
 
 
   error.init();
@@ -2078,11 +2079,11 @@ bool Distribution::survival_ascii_write(StatError &error , const char *path) con
  *
  *--------------------------------------------------------------*/
 
-bool Distribution::survival_spreadsheet_write(StatError &error , const char *path) const
+bool Distribution::survival_spreadsheet_write(StatError &error , const string path) const
 
 {
   bool status;
-  ofstream out_file(path);
+  ofstream out_file(path.c_str());
   Curves *survival_rate;
 
 

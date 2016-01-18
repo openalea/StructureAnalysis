@@ -127,14 +127,14 @@ namespace stat_tool {
 
     Mixture* thresholding(double min_probability = MIN_PROBABILITY) const;
 
-    static Mixture* ascii_read(StatError &error , const char *path ,
+    static Mixture* ascii_read(StatError &error , const std::string path ,
                                double cumul_threshold = CUMUL_THRESHOLD);
 
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(StatError &error , const char *path , bool exhaustive = false) const;
-    bool spreadsheet_write(StatError &error , const char *path) const;
+    bool ascii_write(StatError &error , const std::string path , bool exhaustive = false) const;
+    bool spreadsheet_write(StatError &error , const std::string path) const;
     bool plot_write(StatError &error , const char *prefix , const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
@@ -205,11 +205,11 @@ namespace stat_tool {
     DiscreteDistributionData* extract(StatError &error , int variable , int index) const;
 
     std::ostream& ascii_data_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_data_write(StatError &error , const char *path , bool exhaustive = false) const;
+    bool ascii_data_write(StatError &error , const std::string path , bool exhaustive = false) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(StatError &error , const char *path , bool exhaustive = false) const;
-    bool spreadsheet_write(StatError &error , const char *path) const;
+    bool ascii_write(StatError &error , const std::string path , bool exhaustive = false) const;
+    bool spreadsheet_write(StatError &error , const std::string path) const;
     bool plot_write(StatError &error , const char *prefix , const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 

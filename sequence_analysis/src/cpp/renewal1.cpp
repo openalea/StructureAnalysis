@@ -36,6 +36,8 @@
 
 
 
+#include <string>
+
 #include "tool/rw_tokenizer.h"
 #include "tool/rw_cstring.h"
 #include "tool/rw_locale.h"
@@ -777,7 +779,7 @@ Renewal* Renewal::building(StatError &error , const DiscreteParametric &inter_ev
  *
  *--------------------------------------------------------------*/
 
-Renewal* Renewal::ascii_read(StatError &error , const char *path ,
+Renewal* Renewal::ascii_read(StatError &error , const string path ,
                              process_type type , int time , double cumul_threshold)
 
 {
@@ -788,7 +790,7 @@ Renewal* Renewal::ascii_read(StatError &error , const char *path ,
   int line;
   DiscreteParametric *inter_event;
   Renewal *renew;
-  ifstream in_file(path);
+  ifstream in_file(path.c_str());
 
 
   renew = NULL;
