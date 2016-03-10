@@ -1,14 +1,14 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       TreeMatching : Comparison of Tree Structures
  *
- *       Copyright 1995-2000 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2009 UMR LaBRI
  *
- *       File author(s): P.ferraro (pascal.ferraro@cirad.fr)
+ *       File author(s): P.ferraro (pascal.ferraro@labri.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: matchpath.h 3258 2007-06-06 13:18:26Z dufourko $
  *
  *       Forum for AMAPmod developers    : amldevlp@cirad.fr
  *
@@ -46,7 +46,6 @@
 #include "treegraph.h"
 #include "heap.h"
 #include "mdtable.h"
-#include "inttable.h"
 #include <vector>
 
 typedef int FlowType;
@@ -57,35 +56,80 @@ typedef std::vector<int> IntVector;
 typedef std::vector<int> VertexVector;
 typedef std::vector<int> EdgeList;
 
-class MatchPath
+
+/* -----------------------------------------------------------------*/
+
+// An evaluator of edge cost for the MatchPath algorithm
+class TREEMATCH_API MatchEdgeCost
+{
+public :
+
+  /** Default constructor. */
+  MatchEdgeCost(){}
+
+  /** Destructor. */
+  virtual ~MatchEdgeCost() { }
+
+  // should be redefined
+  virtual DistanceType edgeCost(int , int ) = 0;
+};
+
+// A smart pointer on a MatchEdgeCost
+typedef boost::shared_ptr<MatchEdgeCost> MatchEdgeCostPtr;
+
+/* -----------------------------------------------------------------*/
+
+// EdgeCost evaluator that get cost from a table
+class TREEMATCH_API TableEdgeCost : public MatchEdgeCost
+{
+public :
+
+  /** Default constructor. */
+  TableEdgeCost(MatchingDistanceTable* mdtable = NULL);
+
+  /** Destructor. */
+  virtual ~TableEdgeCost() { }
+
+  // redefined to lookup in the table
+  virtual DistanceType edgeCost(int , int );
+
+protected:
+	// The distance table stored as a matrix
+    MatchingDistanceTable*     _mdtable;  
+};
+
+
+/* -----------------------------------------------------------------*/
+
+
+class TREEMATCH_API MatchPath
 {
   public :
     //Constructor
-    MatchPath(){};
+    MatchPath();
+    MatchPath(const NodeList& ,const NodeList& );
     //Destructor
-    ~MatchPath();
+    virtual ~MatchPath();
+
     // Cree un graphe de flot a partir de deux listes de noeuds,
     // une contenant les noeuds initiaux et l'autre les noeuds de reference
-    void make(NodeList& ,NodeList& );
-    void make(int ni, int nj, int *input_list,int *reference_list,int *capacity, double **distances);
-    void link(int, DistanceTable&);
-    void link(int, DistanceTable&, IntTable&);
+    void make(const NodeList& ,const NodeList& );
+
+
+    void link(int, MatchingDistanceTable*);
     // Recherche le plus court chemin au sens du cout ameliore de
     // Edmons et Karp
-    AmlBoolean findPath(VertexVector&,EdgeList& );
-    AmlBoolean findPathWithComponents(VertexVector&,EdgeList& );
+    bool findPath(VertexVector&,EdgeList& );
+
     // Resout le probleme de flot de cout minimum avec l'algorithme de
     // Busacker et Gowen ameliore par Edmons et Karp
     DistanceType minCostFlow(VertexVector&); //Au lieu de FlowType ...
-    DistanceType minCostFlow(int*);
-   DistanceType minCostFlowWithComponents(VertexVector&);
     // Functions used to get the edges' cost
     DistanceType length(int,int,int);
-    int connected_component(int,int,int);
-    AmlBoolean saturated(int);
-    AmlBoolean empty(int);
-    AmlBoolean reverse(int );
-    AmlBoolean direct(int );
+    bool saturated(int);
+    bool empty(int);
+    bool reverse(int );
+    bool direct(int );
     void initCost();
     // Useful function to simulate the flowgraph structure
     int next_edge(int,int);
@@ -93,19 +137,20 @@ class MatchPath
     int nbOut(int);
     int who(int );
     int capacity(int);
-    DistanceType edgeCost(int , int );
-    int edgeComponents(int , int );
+
+	// call the evaluator. Still can be redefined.
+    virtual DistanceType edgeCost(int a, int b)
+	{ assert(_edgecostEvaluator);
+	  return _edgecostEvaluator->edgeCost(a,b); }
+	  
+ 
 
   protected :
-    DistanceTable*     _treeDistances;  //
-    IntTable*          _treeComponents;  //
+    MatchEdgeCostPtr   _edgecostEvaluator;
     NodeList*          _inputList;     //Liste des noeuds de la foret initiale
-    NodeList*         _referenceList; //Liste des noeuds de la foret de reference
+    NodeList*          _referenceList; //Liste des noeuds de la foret de reference
     CapacityVector     flow; // Vecteur flot
     CostVector         cost;     // Vecteur cout
-    IntVector          components;     // Vecteur cout
-    IntVector          _capacityList;     // Vecteur cout
-    int                _generalCapacity;
     int                nbEdge;          // Nombre d'arcs dans le graphe de flot.
     int                nbVertex;        // Nombre de sommets dans le graphe de flot.
 };

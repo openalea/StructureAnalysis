@@ -1,14 +1,15 @@
 /* -*-c++-*- 
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture 
+ *       TreeMatching : Comparison of Tree Structures
  *
- *       Copyright 1995-2000 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2009 UMR LaBRI
  *
- *       File author(s): P.ferraro (pascal.ferraro@cirad.fr) 
+ *       File author(s): P.ferraro (pascal.ferraro@labri.fr)
+ *
  *
  *       $Source$
- *       $Id$
+ *       $Id: definitions.h 3264 2007-06-06 14:22:22Z dufourko $
  *
  *       Forum for AMAPmod developers    : amldevlp@cirad.fr
  *               
@@ -38,26 +39,15 @@
 #ifndef SB_DEFINITIONS_HEADER
 #define SB_DEFINITIONS_HEADER
 
+#include "treematch_config.h"
 #include <iostream>
 #include <assert.h>
 #include <math.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <fstream>
-// #include <rw/timer.h>
-// #include <rw/rwtime.h>
-// //#include <rw/tpslist.h>
-// #include <rw/tvslist.h>
-// #include <rw/tvvector.h>
-// #include <rw/tpvector.h>
-// #include <rw/cstring.h>
-// #include <rw/vstream.h>
-// #include <rw/rwfile.h>
-// #include <rw/collect.h>
 #include <list>
 #include <vector>
-#include "aml/ammodel.h"
-#include "mtg/mtg.h"
 
 typedef double 		DistanceType;
 typedef int 		IntType;
@@ -67,7 +57,6 @@ typedef char 		Symbolic;
 typedef double 		Numeric;
 
 const DistanceType MAXDIST=1e+20;
-//const int MAXINT=LONG_MAX/2;
 const DistanceType MINDIST=0.0;
 
 #define D_MAX(A,B) ((A)>(B)? (A):(B))
@@ -87,17 +76,17 @@ typedef enum { TM_RELATION=414,TM_SEQUENCE,TM_TREENODE,TM_TREEGRAPH,TM_TREEMATCH
 /**\par Tarjan's functions */
 
 /** Return the smallest integer not less than val. */
-int SINLT(float );
+TREEMATCH_API int SINLT(float );
 
 /** Return the largest integer not greater than val */
-int LINGT(float);
+TREEMATCH_API int LINGT(float);
 
 /** Absolute value */
-DistanceType ABS(DistanceType );
+TREEMATCH_API DistanceType ABS(DistanceType );
 
-Symbolic readSymbol(const char* );
+TREEMATCH_API Symbolic readSymbol(const char* );
 
-Numeric readNumber(const char* );
+TREEMATCH_API Numeric readNumber(const char* );
 
 #endif
 

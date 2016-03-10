@@ -80,11 +80,18 @@ public:
   }
 
   static DiscreteParametricModel*
-  extract(const SemiMarkov &input, process_distribution dist_type, int variable, int value)
+  extract(const SemiMarkov &input, int idist_type, int variable, int value)
   {
-
-    SIMPLE_METHOD_TEMPLATE_1(input, extract, DiscreteParametricModel, dist_type, variable,
-        value);
+     process_distribution dist_type = process_distribution(idist_type);
+     
+     DiscreteParametricModel *ret = NULL;
+     StatError error;
+     
+     ret = input.extract(error, dist_type, variable, value);
+     
+     if (ret == NULL)
+         sequence_analysis::wrap_util::throw_error(error);
+     return ret;
   }
 
 

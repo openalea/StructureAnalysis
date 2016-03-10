@@ -18,8 +18,6 @@ __version__ = "$Id$"
 import interface
 import error
 
-from openalea.stat_tool.multivariate_mixture import _MultivariateMixture
-
 from openalea.stat_tool._stat_tool import _Vectors
 from openalea.stat_tool._stat_tool import _VectorDistance
 from openalea.stat_tool._stat_tool import I_DEFAULT
