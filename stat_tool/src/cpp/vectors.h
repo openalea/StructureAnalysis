@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -215,6 +215,13 @@ namespace stat_tool {
     void tied_gamma_estimation(Type **component_vector_count , int variable ,
                                ContinuousParametricProcess *process ,
                                tying_rule variance_factor , int iter) const;
+    template <typename Type>
+    void inverse_gaussian_estimation(Type **component_vector_count , int variable ,
+                                     ContinuousParametricProcess *process) const;
+    template <typename Type>
+    void tied_inverse_gaussian_estimation(Type **component_vector_count , int variable ,
+                                          ContinuousParametricProcess *process ,
+                                          tying_rule variance_factor) const;
     template <typename Type>
     void gaussian_estimation(Type **component_vector_count , int variable ,
                              ContinuousParametricProcess *process) const;

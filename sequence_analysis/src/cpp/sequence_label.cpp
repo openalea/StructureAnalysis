@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -232,6 +232,7 @@ const char *SEQ_label[] = {
   "segments" ,
   "segment sample size" ,
   "global standard deviation" ,
+  "global residual standard deviation" ,
   "piecewise linear function" ,
   "confidence intervals" ,
   "number of segments" ,
@@ -331,6 +332,7 @@ const char *SEQ_error[] = {
   "sequence length too short" ,
   "sequence length too long" ,
   "cumulative sequence length too long" ,
+  "variable sequence length: should be common to the individuals" ,
   "states not represented" ,
   "failure in the computation of the optimal state sequences" ,
   "reference model" ,

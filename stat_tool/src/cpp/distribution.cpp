@@ -567,7 +567,7 @@ int column_width(int nb_value , const double *value , double scale)
 
   for (i = 0;i < nb_value;i++) {
     ostringstream ostring;
-    ostring << *value++ * scale;
+    ostring << value[i] * scale;
     width = (ostring.str()).size();
     if (width > max_width) {
       max_width = width;

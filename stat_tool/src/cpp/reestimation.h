@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -171,6 +171,7 @@ namespace stat_tool {
 
     void gamma_estimation(ContinuousParametric *dist , int iter) const;
     void zero_inflated_gamma_estimation(ContinuousParametric *dist , int iter) const;
+    void inverse_gaussian_estimation(ContinuousParametric *dist) const;
   };
 
 
