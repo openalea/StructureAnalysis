@@ -6,8 +6,8 @@ pj = os.path.join
 ALEASolution = config.ALEASolution
 
 options = Variables(['../options.py', 'options.py'], ARGUMENTS)
-options.Add(BoolVariable('with_test', 'build test modules', 0))
 options.Add(BoolVariable('with_efence', 'build tests with efence library', 0))
+options.Add(BoolVariable('DEBUG', 'my debug', 0))
 
 tools = ['boost_python', 'vplants.tool','qt4', 'install', 'alea']
 
@@ -20,5 +20,4 @@ SConscript(pj(prefix,"src/cpp/SConscript"),
 SConscript(pj(prefix,"src/wrapper/SConscript"),
            exports='env')
 
-#if env['with_test']:
-#    SConscript(pj(prefix,"test/cpp/SConscript"), exports="env")
+Default("build")

@@ -31,15 +31,19 @@ for f in excludes:
             sources.remove(cpp)
 	    break
 
+# Add defines to export symbols
+lib_env.AppendUnique(CPPDEFINES=['MESSAGE'])
 lib_env.AppendUnique(LIBS=['vptool', 'vpstat_tool'])
 
-lib_env.AppendUnique(CPPDEFINES=['MESSAGE'])
-inc = lib_env.ALEAIncludes( "sequence_analysis", includes )
+if lib_env['DEBUG']:
+    lib_env.Append(CPPDEFINES= ['DEBUG'])
+    lib_env.AppendUnique(LIBS=['efence'])
+    CPPFLAGS=["-g"]
+    lib_env.AppendUnique(CPPFLAGS=CPPFLAGS)
+    if '-DNDEBUG' in lib_env._dict['CCFLAGS']:
+        lib_env._dict['CCFLAGS'] = []
+    if '-DNDEBUG' in lib_env._dict['CXXFLAGS']:
+        lib_env._dict['CXXFLAGS'] = []
 
-if env['debug']:
-    env.Append(CPPDEFINES= ['DEBUG'])
-
-lib = lib_env.ALEALibrary( "vpsequence", 
-                           sources, 
-                           )
-
+inc = lib_env.ALEAIncludes( "sequence_analysis", includes)
+lib = lib_env.ALEALibrary( "vpsequence", sources)

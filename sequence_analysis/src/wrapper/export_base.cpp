@@ -113,7 +113,6 @@ void class_constant_sequence()
     .value("GAUSSIAN_CHANGE", GAUSSIAN_CHANGE)
     .value("MEAN_CHANGE", MEAN_CHANGE)
     .value("VARIANCE_CHANGE", VARIANCE_CHANGE)
-    .value("MEAN_VARIANCE_CHANGE", MEAN_VARIANCE_CHANGE)
     .export_values();
 
 /*

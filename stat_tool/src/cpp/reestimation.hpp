@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -712,7 +712,7 @@ double Reestimation<Type>::likelihood_computation(const Distribution &dist) cons
 
 /*--------------------------------------------------------------*
  *
- *  Estimation d'une loi discrete a partir d'un echantillon.
+ *  Estimation d'une loi discrete on the basis of a frequency distribution.
  *
  *  argument : pointeur sur une loi discrete.
  *
@@ -747,7 +747,7 @@ void Reestimation<Type>::distribution_estimation(Distribution *dist) const
 
 /*--------------------------------------------------------------*
  *
- *  Estimation d'une loi discrete a partir d'un echantillon au sens
+ *  Estimation d'une loi discrete on the basis of a frequency distribution au sens
  *  d'une vraisemblance penalisee.
  *
  *  arguments : pointeur sur une loi discrete, poids de la penalisation,
@@ -904,10 +904,10 @@ void Reestimation<Type>::penalized_likelihood_estimation(Distribution *dist , do
 
 /*--------------------------------------------------------------*
  *
- *  Estimation des parametres d'une loi binomiale a partir
+ *  Estimation of parameters of a distribution binomial a partir
  *  d'un echantillon.
  *
- *  arguments : loi discrete parametrique, borne inferieure minimum,
+ *  arguments : parametric discrete distribution, borne inferieure minimum,
  *              flag sur la borne inferieure.
  *
  *--------------------------------------------------------------*/
@@ -1038,10 +1038,10 @@ double Reestimation<Type>::binomial_estimation(DiscreteParametric *dist , int mi
 
 /*--------------------------------------------------------------*
  *
- *  Estimation des parametres d'une loi de Poisson a partir
+ *  Estimation of parameters of a distribution de Poisson a partir
  *  d'un echantillon.
  *
- *  arguments : loi discrete parametrique, borne inferieure minimum,
+ *  arguments : parametric discrete distribution, borne inferieure minimum,
  *              flag sur la borne inferieure, seuil sur la fonction de repartition.
  *
  *--------------------------------------------------------------*/
@@ -1121,10 +1121,10 @@ double Reestimation<Type>::poisson_estimation(DiscreteParametric *dist , int min
 
 /*--------------------------------------------------------------*
  *
- *  Estimation des parametres d'une loi binomiale negative
- *  a partir d'un echantillon.
+ *  Estimation of parameters of a distribution negative binomial
+ *  on the basis of a frequency distribution.
  *
- *  arguments : loi discrete parametrique, borne inferieure minimum,
+ *  arguments : parametric discrete distribution, borne inferieure minimum,
  *              flag sur la borne inferieure, seuil sur la fonction de repartition.
  *
  *--------------------------------------------------------------*/
@@ -1211,10 +1211,10 @@ double Reestimation<Type>::negative_binomial_estimation(DiscreteParametric *dist
 
 /*--------------------------------------------------------------*
  *
- *  Estimation des parametres d'une loi discrete elementaire
- *  (binomiale negative, binomiale, Poisson) a partir d'un echantillon.
+ *  Estimation of parameters of a distribution discrete elementaire
+ *  (negative binomial, binomial, Poisson) on the basis of a frequency distribution.
  *
- *  arguments : loi discrete parametrique, borne inferieure minimum,
+ *  arguments : parametric discrete distribution, borne inferieure minimum,
  *              flag sur la borne inferieure, seuil sur la fonction de repartition.
  *
  *--------------------------------------------------------------*/
@@ -1246,9 +1246,9 @@ double Reestimation<Type>::parametric_estimation(DiscreteParametric *dist , int 
 /*--------------------------------------------------------------*
  *
  *  Estimation du type et des parametres d'une loi discrete elementaire
- *  (binomiale negative, binomiale, Poisson) a partir d'un echantillon.
+ *  (negative binomial, binomial, Poisson) on the basis of a frequency distribution.
  *
- *  arguments : loi discrete parametrique, borne inferieure minimum,
+ *  arguments : parametric discrete distribution, borne inferieure minimum,
  *              flag sur la borne inferieure, seuil sur la fonction de repartition.
  *
  *--------------------------------------------------------------*/
@@ -1270,8 +1270,8 @@ double Reestimation<Type>::type_parametric_estimation(DiscreteParametric *dist ,
   }
 
 # ifdef DEBUG
-  max_likelihood = D_INF;  // pour les donnees de tremblements de terre
-  likelihood = poisson_estimation(bdist , 0 , false , cumul_threshold);
+//  max_likelihood = D_INF;   pour les donnees de tremblements de terre
+//  likelihood = poisson_estimation(bdist , 0 , false , cumul_threshold);
 # endif
 
   likelihood = poisson_estimation(bdist , min_inf_bound , min_inf_bound_flag , cumul_threshold);
@@ -1299,7 +1299,7 @@ double Reestimation<Type>::type_parametric_estimation(DiscreteParametric *dist ,
 /*--------------------------------------------------------------*
  *
  *  Estimation du type et des parametres d'une loi discrete elementaire
- *  (binomiale negative, binomiale, Poisson) a partir d'un echantillon.
+ *  (negative binomial, binomial, Poisson) on the basis of a frequency distribution.
  *
  *  arguments : borne inferieure minimum, flag sur la borne inferieure,
  *              seuil sur la fonction de repartition.
@@ -1553,7 +1553,7 @@ void Reestimation<Type>::penalized_likelihood_equilibrium_process_estimation(con
 
 /*--------------------------------------------------------------*
  *
- *  Estimation d'une loi d'occupation d'un etat par l'estimateur de Kaplan-Meier.
+ *  Estimation of a state occupancy distribution using the Kaplan-Meier estimator.
  *
  *  arguments : pointeurs sur les temps de sejour censures a droite,
  *              sur les quantites de reestimation, sur les fonctions de survie
@@ -1635,10 +1635,10 @@ void Reestimation<Type>::state_occupancy_estimation(const Reestimation<Type> *fi
 
 /*--------------------------------------------------------------*
  *
- *  Estimation des parametres d'une loi gamma a partir
- *  d'une distribution de frequences empiriques.
+ *  Estimation of parameters of a gamma distribution on the basis
+ *  of a frequency distribution.
  *
- *  arguments : loi continue parametrique, iteration EM.
+ *  arguments: parametric continuous distribution, EM iteration.
  *
  *--------------------------------------------------------------*/
 
@@ -1646,7 +1646,7 @@ template <typename Type>
 void Reestimation<Type>::gamma_estimation(ContinuousParametric *dist , int iter) const
 
 {
-  register int i;
+//  register int i;
   double log_geometric_mean , diff;
 //  double bvariance;
 
@@ -1675,7 +1675,8 @@ void Reestimation<Type>::gamma_estimation(ContinuousParametric *dist , int iter)
       if ((dist->shape >= GAMMA_SHAPE_PARAMETER_THRESHOLD) &&
           (nb_element < GAMMA_FREQUENCY_THRESHOLD)) {
         log_geometric_mean = log_geometric_mean_computation();
-/*        i = 0;   a revoir
+
+/*        i = 0;  to be investigated
 
 #       ifdef DEBUG
         cout << "\n" << STAT_word[STATW_SHAPE] << " : " << dist->shape << "   "
@@ -1714,10 +1715,10 @@ void Reestimation<Type>::gamma_estimation(ContinuousParametric *dist , int iter)
 
 /*--------------------------------------------------------------*
  *
- *  Estimation des parametres d'une loi zero-inflated gamma a partir
- *  d'une distribution de frequences empiriques.
+ *  Estimation of parameters of a zero-inflated gamma distribution on the basis
+ *  of a frequency distribution.
  *
- *  arguments : loi continue parametrique, iteration EM.
+ *  arguments: parametric continuous distribution, EM iteration.
  *
  *--------------------------------------------------------------*/
 
@@ -1802,6 +1803,39 @@ void Reestimation<Type>::zero_inflated_gamma_estimation(ContinuousParametric *di
       dist->shape = GAMMA_MIN_SHAPE_PARAMETER;
       dist->scale = GAMMA_DEFAULT_SCALE_PARAMETER;
     }
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Estimation of parameters of an inverse Gaussian distribution on the basis
+ *  of a frequency distribution.
+ *
+ *  argument: parametric continuous distribution.
+ *
+ *--------------------------------------------------------------*/
+
+template <typename Type>
+void Reestimation<Type>::inverse_gaussian_estimation(ContinuousParametric *dist) const
+
+{
+  register int i;
+
+
+  if (mean > 0.) {
+    dist->location = mean;
+
+    dist->scale = 0.;
+    for (i = MIN(offset , 1);i < nb_value;i++) {
+      dist->scale += frequency[i] * (1. / (double)i - 1. / mean);
+    }
+    dist->scale = nb_element / dist->scale;
+  }
+
+  else {
+    dist->location = D_DEFAULT;
+    dist->scale = D_DEFAULT;
   }
 }
 

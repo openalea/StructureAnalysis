@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -128,10 +128,11 @@ Mixture::Mixture(int inb_component , int inb_output_process , int *nb_value)
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur de la classe Mixture (modele gamma ou gaussien univarié avec parametres lies).
+ *  Constructeur de la classe Mixture (modele gamma, inverse gaussien ou gaussien univarie avec parametres lies).
  *
- *  arguments : nombre de composantes, identificateur des composantes (GAMMA / GAUSSIAN),
+ *  arguments : nombre de composantes, identificateur des composantes (GAMMA / INVERSE_GAUSSIAN / GAUSSIAN),
  *              moyenne et parametre de forme de la premiere composante (GAMMA) /
+ *              moyenne et parametre d'echelle de la premiere composante (INVERSE_GAUSSIAN) /
  *              moyenne et ecart-type de la premiere composante (GAUSSIAN), flag moyennes liees,
  *              type de lien entre les variances (CONVOLUTION_FACTOR / SCALING_FACTOR).
  *
@@ -174,6 +175,18 @@ Mixture::Mixture(int inb_component , int ident , double mean , double standard_d
         break;
       case SCALING_FACTOR :
         observation[j] = new ContinuousParametric(GAMMA , standard_deviation , i * mean / standard_deviation);
+        break;
+      }
+      break;
+    }
+
+    case INVERSE_GAUSSIAN : {
+      switch (variance_factor) {
+      case CONVOLUTION_FACTOR :
+        observation[j] = new ContinuousParametric(INVERSE_GAUSSIAN , i * mean ,  i * i * standard_deviation);
+        break;
+      case SCALING_FACTOR :
+        observation[j] = new ContinuousParametric(INVERSE_GAUSSIAN , i * mean , i * standard_deviation);
         break;
       }
       break;
@@ -2022,7 +2035,7 @@ MixtureData::MixtureData(int inb_vector , int inb_variable ,
  *  Construction d'un objet MixtureData a partir d'un objet Vectors.
  *
  *  arguments : reference sur un objet Vectors, type de transformation
- *              ('c' : copie, 'a' : ajout d'une variable d'etat).
+ *              (VECTOR_COPY/ADD_COMPONENT_VARIABLE).
  *
  *--------------------------------------------------------------*/
 

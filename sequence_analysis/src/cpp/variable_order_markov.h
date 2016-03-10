@@ -416,6 +416,7 @@ namespace sequence_analysis {
     VariableOrderMarkovData* explicit_index_parameter(stat_tool::StatError &error) const;
     VariableOrderMarkovData* remove_index_parameter(stat_tool::StatError &error) const;
     MarkovianSequences* build_auxiliary_variable(stat_tool::StatError &error) const;
+    MarkovianSequences* residual_sequences(stat_tool::StatError &error) const;
 
     Correlation* state_autocorrelation_computation(stat_tool::StatError &error , int istate ,
                                                    int max_lag = MAX_LAG) const;

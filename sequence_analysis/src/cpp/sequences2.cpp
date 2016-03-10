@@ -963,7 +963,7 @@ Sequences* Sequences::cluster(StatError &error , int variable , int step , round
  *--------------------------------------------------------------*/
 
 void Sequences::transcode(const Sequences &seq , int ivariable , int min_category ,
-                          int max_category , int *category , bool add_flag)
+                          int max_category , int *category , bool add_variable)
 
 {
   register int i , j , k;
@@ -987,7 +987,7 @@ void Sequences::transcode(const Sequences &seq , int ivariable , int min_categor
     }
   }
 
-  switch (add_flag) {
+  switch (add_variable) {
   case false :
     variable = ivariable;
     offset = 0;
@@ -2901,13 +2901,13 @@ Sequences* Sequences::length_select(StatError &error , ostream &os , int min_len
  *  Suppression des premieres/dernieres series d'une valeur donne.
  *
  *  arguments : reference sur un objet StatError, indice de la variable,
- *              valeur, position ('b' : begin, 'e' : end),
+ *              valeur, position (BEGIN_RUN/END_RUN),
  *              longueur maximum de la serie supprimee.
  *
  *--------------------------------------------------------------*/
 
 Sequences* Sequences::remove_run(StatError &error , int variable , int ivalue ,
-                                 char position , int max_run_length) const
+                                 run_position position , int max_run_length) const
 
 {
   bool status = true;
@@ -2934,20 +2934,27 @@ Sequences* Sequences::remove_run(StatError &error , int variable , int ivalue ,
   else {
     variable--;
 
-    if ((type[variable] != INT_VALUE) && (type[variable] != STATE)) {
+    if ((type[variable] != INT_VALUE) && (type[variable] != STATE) &&
+        (type[variable] != REAL_VALUE)) {
       status = false;
       ostringstream correction_message;
-      correction_message << STAT_variable_word[INT_VALUE] << " or " << STAT_variable_word[STATE];
+      correction_message << STAT_variable_word[INT_VALUE] << " or "
+                         << STAT_variable_word[STATE] << " or "
+                         << STAT_variable_word[REAL_VALUE];
       error.correction_update(STAT_error[STATR_VARIABLE_TYPE] , (correction_message.str()).c_str());
     }
 
     else {
       if (!marginal_distribution[variable]) {
-        status = false;
+        if ((ivalue < min_value[variable]) || (ivalue > max_value[variable])) {
+          status = false;
+          error.update(STAT_error[STATR_VALUE]);
+        }
+/*        status = false;
         ostringstream error_message;
         error_message << STAT_label[STATL_VARIABLE] << " " << variable + 1 << ": "
                       << STAT_error[STATR_MARGINAL_FREQUENCY_DISTRIBUTION];
-        error.update((error_message.str()).c_str());
+        error.update((error_message.str()).c_str()); */
       }
 
       else if ((ivalue < marginal_distribution[variable]->offset) ||
@@ -2987,21 +2994,43 @@ Sequences* Sequences::remove_run(StatError &error , int variable , int ivalue ,
 
       switch (position) {
 
-      case 'b' : {
-        cisequence = int_sequence[i][variable];
-        for (j = 0;j < smax_length;j++) {
-          if (*cisequence++ != ivalue) {
-            break;
+      case BEGIN_RUN : {
+        if (type[variable] != REAL_VALUE) {
+          cisequence = int_sequence[i][variable];
+          for (j = 0;j < smax_length;j++) {
+            if (*cisequence++ != ivalue) {
+              break;
+            }
+          }
+        }
+
+        else {
+          crsequence = real_sequence[i][variable];
+          for (j = 0;j < smax_length;j++) {
+            if (*crsequence++ != (double)ivalue) {
+              break;
+            }
           }
         }
         break;
       }
 
-      case 'e' : {
-        cisequence = int_sequence[i][variable] + length[i];
-        for (j = 0;j < smax_length;j++) {
-          if (*--cisequence != ivalue) {
-            break;
+      case END_RUN : {
+        if (type[variable] != REAL_VALUE) {
+          cisequence = int_sequence[i][variable] + length[i];
+          for (j = 0;j < smax_length;j++) {
+            if (*--cisequence != ivalue) {
+              break;
+            }
+          }
+        }
+
+        else {
+          crsequence = real_sequence[i][variable] + length[i];
+          for (j = 0;j < smax_length;j++) {
+            if (*--crsequence != (double)ivalue) {
+              break;
+            }
           }
         }
         break;
@@ -3025,10 +3054,10 @@ Sequences* Sequences::remove_run(StatError &error , int variable , int ivalue ,
         pvertex_id = seq->vertex_identifier[i];
 
         switch (position) {
-        case 'b' :
+        case BEGIN_RUN :
           cvertex_id = vertex_identifier[index[i]] + length[index[i]] - seq->length[i];
           break;
-        case 'e' :
+        case END_RUN :
           cvertex_id = vertex_identifier[index[i]];
           break;
         }
@@ -3046,10 +3075,10 @@ Sequences* Sequences::remove_run(StatError &error , int variable , int ivalue ,
         pindex_param = seq->index_parameter[i];
 
         switch (position) {
-        case 'b' :
+        case BEGIN_RUN :
           cindex_param = index_parameter[index[i]] + length[index[i]] - seq->length[i];
           break;
-        case 'e' :
+        case END_RUN :
           cindex_param = index_parameter[index[i]];
           break;
         }
@@ -3071,10 +3100,10 @@ Sequences* Sequences::remove_run(StatError &error , int variable , int ivalue ,
           pisequence = seq->int_sequence[i][j];
 
           switch (position) {
-          case 'b' :
+          case BEGIN_RUN :
             cisequence = int_sequence[index[i]][j] + length[index[i]] - seq->length[i];
             break;
-          case 'e' :
+          case END_RUN :
             cisequence = int_sequence[index[i]][j];
             break;
           }
@@ -3088,10 +3117,10 @@ Sequences* Sequences::remove_run(StatError &error , int variable , int ivalue ,
           prsequence = seq->real_sequence[i][j];
 
           switch (position) {
-          case 'b' :
+          case BEGIN_RUN :
             crsequence = real_sequence[index[i]][j] + length[index[i]] - seq->length[i];
             break;
-          case 'e' :
+          case END_RUN :
             crsequence = real_sequence[index[i]][j];
             break;
           }

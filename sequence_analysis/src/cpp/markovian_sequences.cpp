@@ -40,6 +40,8 @@
 #include <sstream>
 #include <iomanip>
 
+#include <boost/math/distributions/normal.hpp>
+
 #include "stat_tool/stat_label.h"
 
 #include "sequences.h"
@@ -1220,7 +1222,7 @@ MarkovianSequences* MarkovianSequences::cluster(StatError &error , int variable 
  *--------------------------------------------------------------*/
 
 MarkovianSequences* MarkovianSequences::transcode(StatError &error , int ivariable ,
-                                                  int *category , bool add_flag) const
+                                                  int *category , bool add_variable) const
 
 {
   bool status = true , *presence;
@@ -1261,7 +1263,7 @@ MarkovianSequences* MarkovianSequences::transcode(StatError &error , int ivariab
       max_category = 0;
 
       for (i = 0;i < marginal_distribution[ivariable]->nb_value - marginal_distribution[ivariable]->offset;i++) {
-        if ((category[i] < 0) || (category[i] >= (add_flag ? marginal_distribution[ivariable]->nb_value - 1 : marginal_distribution[ivariable]->nb_value))) {
+        if ((category[i] < 0) || (category[i] >= (add_variable ? marginal_distribution[ivariable]->nb_value - 1 : marginal_distribution[ivariable]->nb_value))) {
           status = false;
           ostringstream error_message;
           error_message << STAT_label[STATL_CATEGORY] << " " << category[i] << " "
@@ -1308,7 +1310,7 @@ MarkovianSequences* MarkovianSequences::transcode(StatError &error , int ivariab
     }
 
     if (status) {
-      switch (add_flag) {
+      switch (add_variable) {
       case false :
         variable = ivariable;
         offset = 0;
@@ -1329,7 +1331,7 @@ MarkovianSequences* MarkovianSequences::transcode(StatError &error , int ivariab
                                    index_param_type , nb_variable + offset , itype);
       delete [] itype;
 
-      seq->Sequences::transcode(*this , ivariable , 0 , max_category , category , add_flag);
+      seq->Sequences::transcode(*this , ivariable , 0 , max_category , category , add_variable);
 
       for (i = 0;i < seq->nb_variable;i++) {
         if (i == variable) {
@@ -1395,7 +1397,7 @@ MarkovianSequences* MarkovianSequences::transcode(StatError &error ,
  *--------------------------------------------------------------*/
 
 MarkovianSequences* MarkovianSequences::consecutive_values(StatError &error , ostream &os ,
-                                                           int ivariable , bool add_flag) const
+                                                           int ivariable , bool add_variable) const
 
 {
   bool status = true;
@@ -1474,7 +1476,7 @@ MarkovianSequences* MarkovianSequences::consecutive_values(StatError &error , os
     cout << endl;
 #   endif
 
-    switch (add_flag) {
+    switch (add_variable) {
     case false :
       variable = ivariable;
       offset = 0;
@@ -1495,7 +1497,7 @@ MarkovianSequences* MarkovianSequences::consecutive_values(StatError &error , os
                                  index_param_type , nb_variable + offset , itype);
     delete [] itype;
 
-    seq->Sequences::transcode(*this , ivariable , 0 , max , category , add_flag);
+    seq->Sequences::transcode(*this , ivariable , 0 , max , category , add_variable);
     delete [] category;
 
     for (i = 0;i < seq->nb_variable;i++) {
@@ -1526,7 +1528,7 @@ MarkovianSequences* MarkovianSequences::consecutive_values(StatError &error , os
  *--------------------------------------------------------------*/
 
 MarkovianSequences* MarkovianSequences::cluster(StatError &error , int ivariable , int nb_class ,
-                                                int *ilimit , bool add_flag) const
+                                                int *ilimit , bool add_variable) const
 
 {
   bool status = true;
@@ -1593,7 +1595,7 @@ MarkovianSequences* MarkovianSequences::cluster(StatError &error , int ivariable
         }
       }
 
-      switch (add_flag) {
+      switch (add_variable) {
       case false :
         variable = ivariable;
         offset = 0;
@@ -1614,7 +1616,7 @@ MarkovianSequences* MarkovianSequences::cluster(StatError &error , int ivariable
                                    index_param_type , nb_variable + offset , itype);
       delete [] itype;
 
-      seq->Sequences::transcode(*this , ivariable , 0 , nb_class - 1 , category , add_flag);
+      seq->Sequences::transcode(*this , ivariable , 0 , nb_class - 1 , category , add_variable);
       delete [] category;
 
       for (i = 0;i < seq->nb_variable;i++) {
@@ -2215,22 +2217,23 @@ MarkovianSequences* MarkovianSequences::merge_variable(StatError &error , int nb
 
 /*--------------------------------------------------------------*
  *
- *  Ajout d'une serie de vecteurs absorbants a la fin de chaque sequence.
+ *  Addition of an absorbing run at the end of each sequence.
  *
- *  arguments : reference sur un objet StatError, longueur des sequences,
- *              longueur des series finales absorbantes.
+ *  arguments : reference on a StatError object, end absorbing run length,
+ *              sequence length, flag for adding a categorical variable
+ *              (0: data, 1: end absorbing run).
  *
  *--------------------------------------------------------------*/
 
-MarkovianSequences* MarkovianSequences::add_absorbing_run(StatError &error ,
-                                                          int sequence_length ,
-                                                          int run_length) const
+MarkovianSequences* MarkovianSequences::add_absorbing_run(StatError &error , int run_length ,
+                                                          int sequence_length , bool add_variable) const
 
 {
   bool status = true , initial_run_flag;
   register int i , j , k;
-  int end_value , *ilength;
-  double mean , variance , *deviation;
+  int inb_variable , end_value , *ilength;
+  double mean , variance , limit , *standard_deviation;
+  variable_nature *itype;
   MarkovianSequences *seq;
 
 
@@ -2242,19 +2245,36 @@ MarkovianSequences* MarkovianSequences::add_absorbing_run(StatError &error ,
     error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
   } */
 
-  if ((sequence_length != I_DEFAULT) && ((sequence_length <= max_length) ||
-       (sequence_length > max_length + MAX_ABSORBING_RUN_LENGTH))) {
-    status = false;
-    error.update(SEQ_error[SEQR_SEQUENCE_LENGTH]);
-  }
-
   if ((run_length != I_DEFAULT) && ((run_length < 1) ||
        (run_length > MAX_ABSORBING_RUN_LENGTH))) {
     status = false;
     error.update(SEQ_error[SEQR_RUN_LENGTH]);
   }
 
+  if ((sequence_length != I_DEFAULT) && ((sequence_length <= max_length) ||
+       (sequence_length > max_length + MAX_ABSORBING_RUN_LENGTH))) {
+    status = false;
+    error.update(SEQ_error[SEQR_SEQUENCE_LENGTH]);
+  }
+
   if (status) {
+    switch (add_variable) {
+    case false :
+      inb_variable = nb_variable;
+      break;
+    case true :
+      inb_variable = nb_variable + 1;
+      break;
+    }
+
+    itype = new variable_nature[inb_variable];
+    for (i = 0;i < nb_variable;i++) {
+      itype[i] = type[i];
+    }
+    if (add_variable) {
+      itype[nb_variable] = INT_VALUE;
+    }
+
     ilength = new int[nb_sequence];
 
     if (run_length == I_DEFAULT) {
@@ -2274,7 +2294,8 @@ MarkovianSequences* MarkovianSequences::add_absorbing_run(StatError &error ,
     }
 
     seq = new MarkovianSequences(nb_sequence , identifier , ilength , vertex_identifier ,
-                                 index_param_type , nb_variable , type , false);
+                                 index_param_type , inb_variable , itype , false);
+    delete [] itype;
     delete [] ilength;
 
     // copy of vertex identifiers
@@ -2308,20 +2329,20 @@ MarkovianSequences* MarkovianSequences::add_absorbing_run(StatError &error ,
       }
     }
 
-    deviation = new double[nb_variable];
+    standard_deviation = new double[nb_variable];
 
     for (i = 0;i < nb_variable;i++) {
       if ((type[i] == REAL_VALUE) || (type[i] == AUXILIARY)) {
         mean = mean_computation(i);
         variance = variance_computation(i , mean);
-        deviation[i] = sqrt(variance) / ABSORBING_RUN_STANDARD_DEVIATION_FACTOR;
+        standard_deviation[i] = sqrt(variance) / ABSORBING_RUN_STANDARD_DEVIATION_FACTOR;
       }
     }
 
-    // copie des sequences avec ajout series finales absorbantes
+    // copy of sequences with addition of an end absorbing run
 
     for (i = 0;i < seq->nb_sequence;i++) {
-      for (j = 0;j < seq->nb_variable;j++) {
+      for (j = 0;j < nb_variable;j++) {
         if ((seq->type[j] != REAL_VALUE) && (seq->type[j] != AUXILIARY)) {
           for (k = 0;k < length[i];k++) {
             seq->int_sequence[i][j][k] = int_sequence[i][j][k];
@@ -2356,22 +2377,53 @@ MarkovianSequences* MarkovianSequences::add_absorbing_run(StatError &error ,
             seq->real_sequence[i][j][k] = real_sequence[i][j][k];
           }
 
-          if (min_value[j] >= 5 * deviation[j]) {
+          // random generation of absorbing run values
+
+          if (min_value[j] >= 10 * standard_deviation[j]) {
+            normal dist(min_value[j] - 2 * standard_deviation[j] , standard_deviation[j]);
+
             for (k = length[i];k < seq->length[i];k++) {
-              seq->real_sequence[i][j][k] = min_value[j] - (k % 2 + 4) * deviation[j];
+              limit = ((double)rand() / (RAND_MAX + 1.));
+              seq->real_sequence[i][j][k] = quantile(dist , limit);
+            }
+          }
+
+          else {
+            normal dist(max_value[j] + 2 * standard_deviation[j] , standard_deviation[j]);
+
+            for (k = length[i];k < seq->length[i];k++) {
+              limit = ((double)rand() / (RAND_MAX + 1.));
+              seq->real_sequence[i][j][k] = quantile(dist , limit);
+            }
+          }
+
+/*          if (min_value[j] >= 5 * standard_deviation[j]) {
+            for (k = length[i];k < seq->length[i];k++) {
+              seq->real_sequence[i][j][k] = min_value[j] - (k % 2 + 4) * standard_deviation[j];
             }
           }
 
           else {
             for (k = length[i];k < seq->length[i];k++) {
-              seq->real_sequence[i][j][k] = max_value[j] + (k % 2 + 4) * deviation[j];
+              seq->real_sequence[i][j][k] = max_value[j] + (k % 2 + 4) * standard_deviation[j];
             }
-          }
+          } */
+        }
+      }
+
+      // addition of a binary variable
+
+      if (add_variable) {
+        for (j = 0;j < length[i];j++) {
+          seq->int_sequence[i][nb_variable][j] = 0;
+        }
+        for (j = length[i];j < seq->length[i];j++) {
+          seq->int_sequence[i][nb_variable][j] = 1;
         }
       }
     }
 
-    delete [] deviation;
+    delete [] standard_deviation;
 
     for (i = 0;i < seq->nb_variable;i++) {
       seq->min_value_computation(i);
@@ -2414,7 +2466,7 @@ MarkovianSequences* MarkovianSequences::build_auxiliary_variable(DiscreteParamet
   bool *auxiliary;
   register int i , j , k , m;
   int *pstate;
-  double *pauxiliary , *mean;
+  double *mean;
   MarkovianSequences *seq;
 
 
@@ -2441,10 +2493,8 @@ MarkovianSequences* MarkovianSequences::build_auxiliary_variable(DiscreteParamet
       i++;
       for (k = 0;k < nb_sequence;k++) {
         pstate = seq->int_sequence[k][0];
-        pauxiliary = seq->real_sequence[k][i];
-
         for (m = 0;m < length[k];m++) {
-          *pauxiliary++ = discrete_process[j - 1]->observation[*pstate++]->mean;
+          seq->real_sequence[k][i][m] = discrete_process[j - 1]->observation[*pstate++]->mean;
         }
       }
     }
@@ -2452,7 +2502,9 @@ MarkovianSequences* MarkovianSequences::build_auxiliary_variable(DiscreteParamet
     else if ((continuous_process) && (continuous_process[j - 1])) {
       i++;
 
-      if ((continuous_process[j - 1]->ident == GAMMA) || (continuous_process[j - 1]->ident == ZERO_INFLATED_GAMMA)) {
+      if ((continuous_process[j - 1]->ident == GAMMA) || (continuous_process[j - 1]->ident == ZERO_INFLATED_GAMMA) ||
+          (continuous_process[j - 1]->ident == GAUSSIAN) || (continuous_process[j - 1]->ident == INVERSE_GAUSSIAN) ||
+          (continuous_process[j - 1]->ident == VON_MISES)) {
         mean = new double [continuous_process[j - 1]->nb_state];
 
         switch (continuous_process[j - 1]->ident) {
@@ -2478,29 +2530,23 @@ MarkovianSequences* MarkovianSequences::build_auxiliary_variable(DiscreteParamet
           }
           break;
         }
+
+        default : {
+          for (k = 0;k < continuous_process[j - 1]->nb_state;k++) {
+            mean[k] = continuous_process[j - 1]->observation[k]->location;
+          }
+          break;
+        }
         }
 
         for (k = 0;k < nb_sequence;k++) {
           pstate = seq->int_sequence[k][0];
-          pauxiliary = seq->real_sequence[k][i];
-
           for (m = 0;m < length[k];m++) {
-            *pauxiliary++ = mean[*pstate++];
+            seq->real_sequence[k][i][m] = mean[*pstate++];
           }
         }
 
         delete [] mean;
-      }
-
-      else if ((continuous_process[j - 1]->ident == GAUSSIAN) || (continuous_process[j - 1]->ident == VON_MISES)) {
-        for (k = 0;k < nb_sequence;k++) {
-          pstate = seq->int_sequence[k][0];
-          pauxiliary = seq->real_sequence[k][i];
-
-          for (m = 0;m < length[k];m++) {
-            *pauxiliary++ = continuous_process[j - 1]->observation[*pstate++]->location;
-          }
-        }
       }
 
       else if (continuous_process[j - 1]->ident == LINEAR_MODEL) {
@@ -2509,11 +2555,9 @@ MarkovianSequences* MarkovianSequences::build_auxiliary_variable(DiscreteParamet
         case IMPLICIT_TYPE : {
           for (k = 0;k < nb_sequence;k++) {
             pstate = seq->int_sequence[k][0];
-            pauxiliary = seq->real_sequence[k][i];
-
             for (m = 0;m < length[k];m++) {
-              *pauxiliary++ = continuous_process[j - 1]->observation[*pstate]->intercept +
-                              continuous_process[j - 1]->observation[*pstate]->slope * m;
+              seq->real_sequence[k][i][m] = continuous_process[j - 1]->observation[*pstate]->intercept +
+                                            continuous_process[j - 1]->observation[*pstate]->slope * m;
               pstate++;
             }
           }
@@ -2523,11 +2567,9 @@ MarkovianSequences* MarkovianSequences::build_auxiliary_variable(DiscreteParamet
         case TIME : {
           for (k = 0;k < nb_sequence;k++) {
             pstate = seq->int_sequence[k][0];
-            pauxiliary = seq->real_sequence[k][i];
-
             for (m = 0;m < length[k];m++) {
-              *pauxiliary++ = continuous_process[j - 1]->observation[*pstate]->intercept +
-                              continuous_process[j - 1]->observation[*pstate]->slope * index_parameter[k][m];
+              seq->real_sequence[k][i][m] = continuous_process[j - 1]->observation[*pstate]->intercept +
+                                            continuous_process[j - 1]->observation[*pstate]->slope * index_parameter[k][m];
               pstate++;
             }
           }
@@ -2553,7 +2595,234 @@ MarkovianSequences* MarkovianSequences::build_auxiliary_variable(DiscreteParamet
 
 /*--------------------------------------------------------------*
  *
- *  Segmentation de sequences.
+ *  buidling of residual sequences on the basis of restored state sequences.
+ *
+ *  arguments: pointers on CategoricalSequenceProcess, DiscreteParametricProcess and
+ *             ContinuousParametricProcess objects.
+ *
+ *--------------------------------------------------------------*/
+
+MarkovianSequences* MarkovianSequences::residual_sequences(CategoricalSequenceProcess **categorical_process ,
+                                                           DiscreteParametricProcess **discrete_process ,
+                                                           ContinuousParametricProcess **continuous_process) const
+
+{
+  register int i , j , k;
+  int *pstate;
+  double *mean;
+  variable_nature *itype;
+  MarkovianSequences *seq;
+
+
+  itype = new variable_nature[nb_variable];
+  itype[0] = type[0];
+  for (i = 1;i < nb_variable;i++) {
+    itype[i] = REAL_VALUE;
+  }
+
+  seq = new MarkovianSequences(nb_sequence , identifier , length , vertex_identifier ,
+                               index_param_type , nb_variable , itype);
+  delete [] itype;
+
+  // copy of index parameters
+
+  if (index_parameter_distribution) {
+    seq->index_parameter_distribution = new FrequencyDistribution(*index_parameter_distribution);
+  }
+  if (index_interval) {
+    seq->index_interval = new FrequencyDistribution(*index_interval);
+  }
+
+  if (index_parameter) {
+    for (i = 0;i < nb_sequence;i++) {
+      for (j = 0;j < (index_param_type == POSITION ? length[i] + 1 : length[i]);j++) {
+        seq->index_parameter[i][j] = index_parameter[i][j];
+      }
+    }
+  }
+
+  // copy of restored state sequences
+
+  for (i = 0;i < nb_sequence;i++) {
+    for (j = 0;j < length[i];j++) {
+      seq->int_sequence[i][0][j] = int_sequence[i][0][j];
+    }
+  }
+
+  seq->min_value[0] = min_value[0];
+  seq->max_value[0] = max_value[0];
+  seq->marginal_distribution[0] = new FrequencyDistribution(*marginal_distribution[0]);
+
+  // computation of residual sequences
+
+  for (i = 1;i < nb_variable;i++) {
+    if ((categorical_process) && (categorical_process[i - 1])) {
+      for (j = 0;j < nb_sequence;j++) {
+        pstate = seq->int_sequence[j][0];
+        for (k = 0;k < length[j];k++) {
+          seq->real_sequence[j][i][k] = int_sequence[j][i][k] - categorical_process[i - 1]->observation[*pstate++]->mean;
+        }
+      }
+    }
+
+    else if ((discrete_process) && (discrete_process[i - 1])) {
+      for (j = 0;j < nb_sequence;j++) {
+        pstate = seq->int_sequence[j][0];
+        for (k = 0;k < length[j];k++) {
+          seq->real_sequence[j][i][k] = int_sequence[j][i][k] - discrete_process[i - 1]->observation[*pstate++]->mean;
+        }
+      }
+    }
+
+    else if ((continuous_process) && (continuous_process[i - 1])) {
+      if ((continuous_process[i - 1]->ident == GAMMA) || (continuous_process[i - 1]->ident == ZERO_INFLATED_GAMMA) ||
+          (continuous_process[i - 1]->ident == GAUSSIAN) || (continuous_process[i - 1]->ident == INVERSE_GAUSSIAN) ||
+          (continuous_process[i - 1]->ident == VON_MISES)) {
+        mean = new double [continuous_process[i - 1]->nb_state];
+
+        switch (continuous_process[i - 1]->ident) {
+
+        case GAMMA : {
+          for (j = 0;j < continuous_process[i - 1]->nb_state;j++) {
+            mean[j] = continuous_process[i - 1]->observation[j]->shape *
+                      continuous_process[i - 1]->observation[j]->scale;
+          }
+          break;
+        }
+
+        case ZERO_INFLATED_GAMMA : {
+          for (j = 0;j < continuous_process[i - 1]->nb_state;j++) {
+            if (continuous_process[i - 1]->observation[j]->zero_probability == 1.) {
+              mean[j] = 0.;
+            }
+            else {
+              mean[j] = (1 - continuous_process[i - 1]->observation[j]->zero_probability) *
+                        continuous_process[i - 1]->observation[j]->shape *
+                        continuous_process[i - 1]->observation[j]->scale;
+            }
+          }
+          break;
+        }
+
+        default : {
+          for (j = 0;j < continuous_process[i - 1]->nb_state;j++) {
+            mean[j] = continuous_process[i - 1]->observation[j]->location;
+          }
+          break;
+        }
+        }
+
+        switch (type[i]) {
+
+        case INT_VALUE : {
+          for (j = 0;j < nb_sequence;j++) {
+            pstate = seq->int_sequence[j][0];
+            for (k = 0;k < length[j];k++) {
+              seq->real_sequence[j][i][k] = int_sequence[j][i][k] - mean[*pstate++];
+            }
+          }
+          break;
+        }
+
+        case REAL_VALUE : {
+          for (j = 0;j < nb_sequence;j++) {
+            pstate = seq->int_sequence[j][0];
+            for (k = 0;k < length[j];k++) {
+              seq->real_sequence[j][i][k] = real_sequence[j][i][k] - mean[*pstate++];
+            }
+          }
+          break;
+        }
+        }
+
+        delete [] mean;
+      }
+
+      else if (continuous_process[i - 1]->ident == LINEAR_MODEL) {
+        switch (index_param_type) {
+
+        case IMPLICIT_TYPE : {
+          switch (type[i]) {
+
+          case INT_VALUE : {
+            for (j = 0;j < nb_sequence;j++) {
+              pstate = seq->int_sequence[j][0];
+
+              for (k = 0;k < length[j];k++) {
+                seq->real_sequence[j][i][k] = int_sequence[j][i][k] - continuous_process[i - 1]->observation[*pstate]->intercept -
+                                              continuous_process[i - 1]->observation[*pstate]->slope * k;
+                pstate++;
+              }
+            }
+            break;
+          }
+
+          case REAL_VALUE : {
+            for (j = 0;j < nb_sequence;j++) {
+              pstate = seq->int_sequence[j][0];
+
+              for (k = 0;k < length[j];k++) {
+                seq->real_sequence[j][i][k] = real_sequence[j][i][k] - continuous_process[i - 1]->observation[*pstate]->intercept -
+                                              continuous_process[i - 1]->observation[*pstate]->slope * k;
+                pstate++;
+              }
+            }
+            break;
+          }
+          }
+          break;
+        }
+
+        case TIME : {
+          switch (type[i]) {
+
+          case INT_VALUE : {
+            for (j = 0;j < nb_sequence;j++) {
+              pstate = seq->int_sequence[j][0];
+
+              for (k = 0;k < length[j];k++) {
+                seq->real_sequence[j][i][k] = int_sequence[j][i][k] - continuous_process[i - 1]->observation[*pstate]->intercept -
+                                              continuous_process[i - 1]->observation[*pstate]->slope * index_parameter[j][k];
+                pstate++;
+              }
+            }
+            break;
+          }
+
+          case REAL_VALUE : {
+            for (j = 0;j < nb_sequence;j++) {
+              pstate = seq->int_sequence[j][0];
+
+              for (k = 0;k < length[j];k++) {
+                seq->real_sequence[j][i][k] = real_sequence[j][i][k] - continuous_process[i - 1]->observation[*pstate]->intercept -
+                                              continuous_process[i - 1]->observation[*pstate]->slope * index_parameter[j][k];
+                pstate++;
+              }
+            }
+            break;
+          }
+          }
+          break;
+        }
+        }
+      }
+    }
+  }
+
+  for (i = 1;i < seq->nb_variable;i++) {
+    seq->min_value_computation(i);
+    seq->max_value_computation(i);
+
+    seq->build_marginal_histogram(i);
+  }
+
+  return seq;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Segmentation of sequences.
  *
  *  arguments : reference sur un objet StatError,
  *              longueur des sequences.
@@ -3070,7 +3339,7 @@ void MarkovianSequences::min_interval_computation(int variable)
       }
       while (i < nb_value);
 
-#     ifdef MESSAGE
+#     ifdef DEBUG
       cout << "\n" << STAT_label[STATL_VARIABLE] << " " <<  variable + 1 << ": "
            << min_interval[variable] << " " << frequency[index[nb_value / 2]];
 #     endif
@@ -3081,7 +3350,7 @@ void MarkovianSequences::min_interval_computation(int variable)
         min_interval[variable] = 0.;
       }
 
-#     ifdef MESSAGE
+#     ifdef DEBUG
       cout << " | " << nb_value << " " << cumul_length << endl;
 #     endif
 

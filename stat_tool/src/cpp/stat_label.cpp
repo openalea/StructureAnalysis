@@ -541,6 +541,7 @@ const char *STAT_error[] = {
   "bad information ratio: should be between 0 and 1" ,
   "null reference information: variance should be strictly positive" ,
   "bad scaling coefficient" ,
+  "bad value" ,
   "bad minimum value" ,
   "bad maximum value" ,
 
