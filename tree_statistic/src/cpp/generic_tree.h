@@ -66,16 +66,15 @@ const int I_DEFAULT_INF_BOUND= 0;              // default minumum number of chil
 const int I_DEFAULT_SUP_BOUND= 2;              // default maximum number of children
 const int I_DEFAULT_MAX_CHILDREN= I_DEFAULT_SUP_BOUND;
 const double D_DEFAULT_PROBABILITY= 0.5;       // parameter value for default distribution
-  const int I_DEFAULT_IDENT= stat_tool::BINOMIAL;           // default type of distribution
+const stat_tool::discrete_parametric I_DEFAULT_IDENT= stat_tool::BINOMIAL;           // default type of distribution
 const double D_DEFAULT_PARAMETER= stat_tool::D_DEFAULT;   // cf. stat_tool::Distribution()
 const char C_DEFAULT_CHAR= '*';                // default label for char trees
-const stat_tool::DiscreteParametric P_DEFAULT_DISTRIBUTION(I_DEFAULT_SUP_BOUND-I_DEFAULT_INF_BOUND+1,
-                                                I_DEFAULT_IDENT,
-                                                I_DEFAULT_INF_BOUND,
-                                                I_DEFAULT_SUP_BOUND,
-                                                D_DEFAULT_PARAMETER,
-                                                D_DEFAULT_PROBABILITY);
-                                               // default distribution
+const stat_tool::DiscreteParametric P_DEFAULT_DISTRIBUTION(I_DEFAULT_IDENT,
+                                                           I_DEFAULT_INF_BOUND,
+                                                           I_DEFAULT_SUP_BOUND,
+                                                           D_DEFAULT_PARAMETER,
+                                                           D_DEFAULT_PROBABILITY);
+                                                          // default distribution
 
 /****************************************************************
  *

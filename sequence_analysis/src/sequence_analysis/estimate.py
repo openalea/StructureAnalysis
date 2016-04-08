@@ -89,8 +89,9 @@ def _estimate_hidden_variable_order_markov(obj, *args, **kargs):
         MAX_NB_STATE_SEQUENCE, \
         NB_STATE_SEQUENCE_PARAMETER
     from openalea.stat_tool._stat_tool import \
-        FORWARD_BACKWARD, \
-        FORWARD_BACKWARD_SAMPLING
+        FORWARD, \
+        FORWARD_BACKWARD_SAMPLING, \
+        FORWARD_DYNAMIC_PROGRAMMING
 
     GlobalInitialTransition = kargs.get("GlobalInitialTransition", True)
     CommonDispersion = kargs.get("CommonDispersion", False)
@@ -120,7 +121,7 @@ def _estimate_hidden_variable_order_markov(obj, *args, **kargs):
                 raise ValueError("If % is provided, Algorithm cannot be MCEM" %
                                  option)
 
-    if Algorithm == FORWARD_BACKWARD:
+    if Algorithm == FORWARD:
         hmarkov = obj.hidden_variable_order_markov_estimation(
                 args[0], GlobalInitialTransition, CommonDispersion,
                 Counting, StateSequence, NbIteration)
@@ -130,7 +131,8 @@ def _estimate_hidden_variable_order_markov(obj, *args, **kargs):
                         args[0], GlobalInitialTransition, CommonDispersion,
                         MinNbSequence, MaxNbSequence, Parameter, Counting,
                         StateSequence, NbIteration)
-
+    else:
+        print(Algorithm)
     return hmarkov
 
 def _estimate_renewal_count_data(obj, itype, **kargs):
@@ -331,7 +333,8 @@ def _estimate_hidden_semi_markov(obj, *args, **kargs):
 
 
     from openalea.stat_tool._stat_tool import \
-        FORWARD_BACKWARD, \
+        NO_COMPUTATION, \
+        FORWARD, \
         FORWARD_BACKWARD_SAMPLING, \
         KAPLAN_MEIER
 
@@ -356,7 +359,9 @@ def _estimate_hidden_semi_markov(obj, *args, **kargs):
                      InitialOccupancyMean],
                      [bool, bool, int, int, int, [int, float], bool,
                      [float, int]])
-
+    
+    print(Algorithm)
+    
     if Algorithm != sub_markovian_algorithms["MCEM"]:
         options = ["Parameter", "MaxNbStateSequence", "MinNbStateSequence"]
         for option in options:
@@ -395,11 +400,11 @@ def _estimate_hidden_semi_markov(obj, *args, **kargs):
             raise AttributeError("type must be Ordinary or Equilibrium")
 
         if ((Type != 'e') or (Estimator == PARTIAL_LIKELIHOOD) or \
-            (Algorithm != FORWARD_BACKWARD)) and \
+            (Algorithm != NO_COMPUTATION)) and \
             kargs.get(InitialOccupancyMean):
             raise ValueError("Incompatible user arguments")
 
-        if Algorithm == FORWARD_BACKWARD:
+        if Algorithm == NO_COMPUTATION:
             hsmarkov = obj.hidden_semi_markov_estimation_model( Type, NbState,
                          LeftRight, InitialOccupancyMean, CommonDispersion, Estimator,
                          Counting, StateSequence, NbIteration, MeanComputation)
@@ -422,7 +427,7 @@ def _estimate_hidden_semi_markov(obj, *args, **kargs):
         #    raise ValueError("Incompatible arguments")
 
         hsmarkov = args[0]
-        if Algorithm == FORWARD_BACKWARD:
+        if Algorithm == NO_COMPUTATION:
             output = obj.hidden_semi_markov_estimation(hsmarkov,
                                 CommonDispersion, Estimator, Counting,
                                 StateSequence, NbIteration, MeanComputation)

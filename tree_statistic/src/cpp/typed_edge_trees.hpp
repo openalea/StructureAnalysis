@@ -1098,7 +1098,7 @@ Typed_edge_trees<Generic_Int_fl_container>::build_sequences(StatError& error,
       }
 
       res= new sequence_analysis::Sequences(nb_sequences, iidentifier, ilength, sequence_analysis::IMPLICIT_TYPE,
-                         _nb_integral, itype[0], isequence);
+                                            _nb_integral, stat_tool::variable_nature(itype[0]), isequence);
 
       for (s= 0; s < nb_sequences; s++)
       {
@@ -1493,13 +1493,13 @@ Typed_edge_trees<Generic_Int_fl_container>::transcode(StatError& error,
          if (max_symbol-min_symbol == 0)
          {
             status= false;
-            error.update(STAT_error[STATR_NB_SYMBOL]);
+            error.update(STAT_error[STATR_NB_CATEGORY]);
          }
 
          if (max_symbol-min_symbol > _max_value.Int(variable)-_min_value.Int(variable))
          {
             status= false;
-            error.update(STAT_error[STATR_NON_CONSECUTIVE_SYMBOLS]);
+            error.update(STAT_error[STATR_NON_CONSECUTIVE_CATEGORIES]);
          }
       }
 
@@ -1517,7 +1517,7 @@ Typed_edge_trees<Generic_Int_fl_container>::transcode(StatError& error,
             {
                status= false;
                ostringstream error_message;
-               error_message << STAT_error[STATR_MISSING_SYMBOL] << " " << i+min_symbol;
+               error_message << STAT_error[STATR_MISSING_CATEGORY] << " " << i+min_symbol;
                error.update((error_message.str()).c_str());
             }
          delete [] presence;
@@ -3232,7 +3232,7 @@ bool Typed_edge_trees<Generic_Int_fl_container>::plot_data_write(StatError& erro
 
 template<typename Generic_Int_fl_container>
 ostream& Typed_edge_trees<Generic_Int_fl_container>::ascii_write(ostream& os,
-                                                               bool exhaustive) const
+                                                                 bool exhaustive) const
 { return ascii_write(os, exhaustive, false); }
 
 /*****************************************************************
@@ -3421,11 +3421,11 @@ Typed_edge_trees<Generic_Int_fl_container>::ascii_print(ostream& os,
 
 template<typename Generic_Int_fl_container>
 bool Typed_edge_trees<Generic_Int_fl_container>::ascii_write(StatError& error,
-                                                             const char * path,
+                                                             const std::string path,
                                                              bool exhaustive) const
 {
    bool status;
-   ofstream out_file(path);
+   ofstream out_file(path.c_str());
 
    error.init();
 
@@ -3452,13 +3452,13 @@ bool Typed_edge_trees<Generic_Int_fl_container>::ascii_write(StatError& error,
 
 template<typename Generic_Int_fl_container>
 bool Typed_edge_trees<Generic_Int_fl_container>::spreadsheet_write(StatError& error,
-                                                                   const char * path) const
+                                                                   const std::string path) const
 {
    register int var, nb_variable= _nb_integral+_nb_float,
                 cumul_size= cumul_size_computation(),
                 cumul_children= cumul_nb_children_computation();
    double mean, variance;
-   ofstream out_file(path);
+   ofstream out_file(path.c_str());
    bool status;
 
    error.init();

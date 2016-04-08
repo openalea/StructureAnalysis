@@ -91,8 +91,8 @@ public :
    Int_trees(int inb_integral = 1, int inb_trees = 0);
    // Int_trees(const Typed_edge_trees<Int_fl_container>& otrees);
    Int_trees(int inb_trees,
-                      int* itype,
-                      pt_tree_type_array otrees);
+             int* itype,
+             pt_tree_type_array otrees);
    Int_trees(int inb_integral,
              const stat_tool::FrequencyDistribution& ihsize,
              const stat_tool::FrequencyDistribution& ihnb_children,
