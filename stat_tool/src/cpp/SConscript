@@ -22,16 +22,22 @@ includes += lib_env.ALEAGlob('*.hpp')
 sources = lib_env.ALEAGlob('*.cpp')
 
 
-# Add defines to export symbols on Windows
+# files to exclude from sources
+excludes = Split( """
+""")
+
+for f in excludes: 
+    for cpp in sources:
+	if f in cpp:
+            sources.remove(cpp)
+	    break
+
+# Add defines to export symbols
 lib_env.AppendUnique(CPPDEFINES=['MESSAGE'])
 lib_env.AppendUnique(LIBS=['vptool'])
 
-my_debug = False
-
-if env['debug']:
+if lib_env['DEBUG']:
     lib_env.Append(CPPDEFINES= ['DEBUG'])
-
-if my_debug:   
     lib_env.AppendUnique(LIBS=['efence'])
     CPPFLAGS=["-g"]
     lib_env.AppendUnique(CPPFLAGS=CPPFLAGS)
@@ -39,8 +45,6 @@ if my_debug:
         lib_env._dict['CCFLAGS'] = []
     if '-DNDEBUG' in lib_env._dict['CXXFLAGS']:
         lib_env._dict['CXXFLAGS'] = []
-        
 
 inc = lib_env.ALEAIncludes( "stat_tool", includes )
 lib = lib_env.ALEALibrary( "vpstat_tool", sources )
-

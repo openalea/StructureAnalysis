@@ -3,7 +3,7 @@
  *
  *       AMAPmod: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -232,6 +232,7 @@ namespace sequence_analysis {
     SEQL_SEGMENTS ,
     SEQL_SEGMENT_SAMPLE_SIZE ,
     SEQL_GLOBAL_STANDARD_DEVIATION ,
+    SEQL_GLOBAL_RESIDUAL_STANDARD_DEVIATION ,
     SEQL_PIECEWISE_LINEAR_FUNCTION ,
     SEQL_CONFIDENCE_INTERVALS ,
     SEQL_NB_SEGMENT ,
@@ -337,6 +338,7 @@ namespace sequence_analysis {
     SEQR_SHORT_SEQUENCE_LENGTH ,
     SEQR_LONG_SEQUENCE_LENGTH ,
     SEQR_CUMUL_SEQUENCE_LENGTH ,
+    SEQR_VARIABLE_SEQUENCE_LENGTH ,
     SEQR_STATES_NOT_REPRESENTED ,
     SEQR_STATE_SEQUENCE_COMPUTATION_FAILURE ,
     SEQR_REFERENCE_MODEL ,

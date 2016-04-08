@@ -3201,6 +3201,42 @@ MarkovianSequences* SemiMarkovData::build_auxiliary_variable(StatError &error) c
 
 /*--------------------------------------------------------------*
  *
+ *  Construction de sequences residuelles correspondant a
+ *  la restauration des sequences d'etats optimales.
+ *
+ *  argument : reference sur un objet StatError.
+ *
+ *--------------------------------------------------------------*/
+
+MarkovianSequences* SemiMarkovData::residual_sequences(StatError &error) const
+
+{
+  MarkovianSequences *seq;
+
+
+  error.init();
+
+  if (type[0] != STATE) {
+    seq = NULL;
+
+    ostringstream error_message;
+    error_message << STAT_label[STATL_VARIABLE] << " 1: "
+                  << STAT_error[STATR_VARIABLE_TYPE];
+    error.correction_update((error_message.str()).c_str() , STAT_variable_word[STATE]);
+  }
+
+  else {
+    seq = MarkovianSequences::residual_sequences(semi_markov->categorical_process ,
+                                                 semi_markov->discrete_parametric_process ,
+                                                 semi_markov->continuous_parametric_process);
+  }
+
+  return seq;
+}
+
+
+/*--------------------------------------------------------------*
+ *
  *  Ecriture d'un objet SemiMarkovData.
  *
  *  arguments : stream, flag niveau de detail.

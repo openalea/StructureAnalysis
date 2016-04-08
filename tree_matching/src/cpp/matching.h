@@ -1,14 +1,14 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       TreeMatching : Comparison of Tree Structures
  *
- *       Copyright 1995-2000 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2009 UMR LaBRI
  *
- *       File author(s): P.ferraro (pascal.ferraro@cirad.fr)
+ *       File author(s): P.ferraro (pascal.ferraro@labri.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: matching.h 3258 2007-06-06 13:18:26Z dufourko $
  *
  *       Forum for AMAPmod developers    : amldevlp@cirad.fr
  *
@@ -48,83 +48,93 @@
 #include "treegraph.h"
 #include "sequence.h"
 #include "nodecost.h"
-#include "wnodecost.h"
-#include "mnodecost.h"
 
 
-typedef std::vector<int> CaseVector;
 
 /**
- *\class Matching With Complex
+ *\class Matching 
  *\brief Algorithm for comparing two unordered tree graph
  *\par Presentation
- * In order to compute a distance between two multiscale tree graph, we have extended
- * the algorithm proposed by Zhang \cite{Zha93}. The distance is computed as the minimum
+ * The distance between two trees is computed as the minimum
  * cost of sequence of edit operations needed to transform one tree graph into another one.
  *\par Requirements
  * - Two TreeGraphs defined at the same scale;
  * - A NodeCost (method for computing the local distance),
  *\author Pascal ferraro
- *\date 1999
+ *\date 2009
  */
 
-class Matching
+
+
+class TREEMATCH_API Matching
 {
 
-  public :
-    //Constructor
-    Matching() {};
-    Matching(TreeGraph& , TreeGraph& ,NodeCost& ) ;
-    void make(TreeGraph& , TreeGraph& ,NodeCost& ) ;
-    //Destructor
-    ~Matching();
+public :
+  //Constructor
+  Matching() {};
 
-    //Distance Between Trees
-    virtual DistanceType distanceBetweenTree(int ,int ) ;
-    //Distances Betweeen Forest
-    virtual DistanceType distanceBetweenForest(int ,int ) ;
+  Matching(const TreeGraphPtr& , const TreeGraphPtr& ,const NodeCostPtr&, MDTableType mdtable_type = STD ) ;
 
+  //Destructor
+  virtual ~Matching();
+  
+  //Distance Between Trees
+  virtual DistanceType distanceBetweenTree(int ,int ) ;
+  //Distances Betweeen Forest
+  virtual DistanceType distanceBetweenForest(int ,int ) ;
+  
+  
+  
+  //Operator
+  inline DistanceVectorTable getDistanceTable(){ 
+    if (_distances->getType() == STD)
+      return ((StdMatchingDistanceTable*)_distances)->getDistanceTable(); 
+    else
+      exit(0);
+  }
 
+  DistanceType getDBT(int ,int ) const;
+  DistanceType getDBF(int ,int ) const;
+  virtual DistanceType  match();
 
-    //Operator
-    DistanceType getDBT(int ,int ) const;
-    DistanceType getDBF(int ,int ) const;
-    DistanceType getInBT(int ,int ) const;
-    DistanceType getInBF(int ,int ) const;
-    DistanceType getDeBT(int ,int ) const;
-    DistanceType getDeBF(int ,int ) const;
-    DistanceType getSuBT(int ,int ) const;
-    DistanceType getSuBF(int ,int ) const;
-    DistanceType getInsertCost();
-    DistanceType getDeleteCost();
-    DistanceType getSubstitutionCost();
-    DistanceType  match();
-    DistanceType getDistanceMatrix(int ,int) const;
-    void getList(int ,int ,Sequence*);
-    void ForestList(int ,int ,Sequence& );
-    void TreeList(int ,int ,Sequence& );
-    int operator()(int );
-    int getNbMin(){return _nb_min;};
-    int Lat(ChoiceList* L, int vertex);
+  void getList(int ,int ,Sequence*);
+  // void ForestList(int ,int ,Sequence& );
+  // void TreeList(int ,int ,Sequence& );
 
-  protected :
-    TreeGraph* T1;
-    TreeGraph* T2;
-    CaseVector _sumNbCaseVector;
-    CaseVector _nbCaseVector;
-    MatchingDistanceTable _distances;
-    MatchingDistanceTable _insertCost;
-    MatchingDistanceTable _deleteCost;
-    MatchingDistanceTable _substitutionCost;
-    ChoiceTable _choices;
-    NodeCost* ND;
-    MatchPath _restrMapp;
-    VertexVector _restrMappList;
-    DistanceVectorTable _distanceMatrix;
-    int M(int,int);
-    int _nb_min;
+  int operator()(int );
+  // int Lat(ChoiceList* L, int vertex);
+  
+
+  inline const ChoiceTable& getChoiceTable() const { return _choices; }
+
+  bool verbose;
+
+protected :
+  TreeGraphPtr T1;
+  TreeGraphPtr T2;
+  MatchingDistanceTable * _distances;
+  ChoiceTable _choices;
+  NodeCostPtr ND;
+  MatchPath _restrMapp;
+  VertexVector _restrMappList;
+
+  int M(int,int);
+
+  MDTableType _mdtable_type;
+  
 };
 
+class TREEMATCH_API ExtMatching : public Matching
+{
+
+public :
+  ExtMatching(const TreeGraphPtr& input,const TreeGraphPtr& reference,const NodeCostPtr& nodeDistance, MDTableType mdtable_type  ):Matching(input,reference,nodeDistance,mdtable_type){};
+  virtual ~ExtMatching();
+  
+  //Distance Between Trees
+  virtual DistanceType distanceBetweenTree(int ,int ) ;
+  
+};
 
 #endif
 

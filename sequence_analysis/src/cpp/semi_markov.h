@@ -330,6 +330,7 @@ namespace sequence_analysis {
     SemiMarkovData* explicit_index_parameter(stat_tool::StatError &error) const;
     SemiMarkovData* remove_index_parameter(stat_tool::StatError &error) const;
     MarkovianSequences* build_auxiliary_variable(stat_tool::StatError &error) const;
+    MarkovianSequences* residual_sequences(stat_tool::StatError &error) const;
 
     std::ostream& ascii_data_write(std::ostream &os , output_sequence_format format = COLUMN ,
                                    bool exhaustive = false) const;

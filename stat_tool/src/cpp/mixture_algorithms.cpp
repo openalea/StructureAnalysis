@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -720,6 +720,13 @@ Mixture* Vectors::mixture_estimation(StatError &error , ostream &os , const Mixt
                   break;
                 }
 
+                case INVERSE_GAUSSIAN : {
+                  for (j = 0;j < mixt->nb_component;j++) {
+                    observation_reestim[i][j]->inverse_gaussian_estimation(mixt->continuous_parametric_process[i]->observation[j]);
+                  }
+                  break;
+                }
+
                 case GAUSSIAN : {
                   for (j = 0;j < mixt->nb_component;j++) {
                     mixt->continuous_parametric_process[i]->observation[j]->location = observation_reestim[i][j]->mean;
@@ -809,6 +816,11 @@ Mixture* Vectors::mixture_estimation(StatError &error , ostream &os , const Mixt
                                         mixt->continuous_parametric_process[i] ,
                                         variance_factor , iter);
                   break;
+                case INVERSE_GAUSSIAN :
+                  tied_inverse_gaussian_estimation(component_vector_count , i ,
+                                                   mixt->continuous_parametric_process[i] ,
+                                                   variance_factor);
+                  break;
                 case GAUSSIAN :
                   tied_gaussian_estimation(component_vector_count , i ,
                                            mixt->continuous_parametric_process[i] ,
@@ -822,6 +834,10 @@ Mixture* Vectors::mixture_estimation(StatError &error , ostream &os , const Mixt
                 case GAMMA :
                   gamma_estimation(component_vector_count , i ,
                                    mixt->continuous_parametric_process[i] , iter);
+                  break;
+                case INVERSE_GAUSSIAN :
+                  inverse_gaussian_estimation(component_vector_count , i ,
+                                              mixt->continuous_parametric_process[i]);
                   break;
                 case GAUSSIAN :
                   gaussian_estimation(component_vector_count , i ,
@@ -924,7 +940,7 @@ Mixture* Vectors::mixture_estimation(StatError &error , ostream &os , const Mixt
 
     else {
       if (assignment) {
-        mixt->mixture_data = new MixtureData(*this , 'a');
+        mixt->mixture_data = new MixtureData(*this , ADD_COMPONENT_VARIABLE);
         vec = mixt->mixture_data;
 
         mixt->individual_assignment(*vec , true);
@@ -1040,8 +1056,9 @@ Mixture* Vectors::mixture_estimation(StatError &error , ostream &os , const Mixt
  *  a partir d'un echantillon de vecteurs par l'algorithme EM.
  *
  *  arguments : reference sur un objet StatError, stream, nombre de composantes,
- *              identificateur des composantes (GAMMA / GAUSSIAN),
+ *              identificateur des composantes (GAMMA / INVERSE_GAUSSIAN / GAUSSIAN),
  *              moyenne et parametre de forme de la premiere composante (GAMMA) /
+ *              moyenne et parametre d'echelle de la premiere composante (INVERSE_GAUSSIAN) /
  *              moyenne et ecart-type de la premiere composante (GAUSSIAN), flag moyennes liees,
  *              type de lien entre les variances (CONVOLUTION_FACTOR / SCALING_FACTOR)
  *              flag sur le calcul des affectations optimales, nombre d'iterations.
@@ -1465,6 +1482,13 @@ Mixture* Vectors::mixture_stochastic_estimation(StatError &error , ostream &os ,
                   break;
                 }
 
+                case INVERSE_GAUSSIAN : {
+                  for (j = 0;j < mixt->nb_component;j++) {
+                    observation_reestim[i][j]->inverse_gaussian_estimation(mixt->continuous_parametric_process[i]->observation[j]);
+                  }
+                  break;
+                }
+
                 case GAUSSIAN : {
                   for (j = 0;j < mixt->nb_component;j++) {
                     mixt->continuous_parametric_process[i]->observation[j]->location = observation_reestim[i][j]->mean;
@@ -1554,6 +1578,11 @@ Mixture* Vectors::mixture_stochastic_estimation(StatError &error , ostream &os ,
                                         mixt->continuous_parametric_process[i] ,
                                         variance_factor , iter);
                   break;
+                case INVERSE_GAUSSIAN :
+                  tied_inverse_gaussian_estimation(component_vector_count , i ,
+                                                   mixt->continuous_parametric_process[i] ,
+                                                   variance_factor);
+                  break;
                 case GAUSSIAN :
                   tied_gaussian_estimation(component_vector_count , i ,
                                            mixt->continuous_parametric_process[i] ,
@@ -1567,6 +1596,10 @@ Mixture* Vectors::mixture_stochastic_estimation(StatError &error , ostream &os ,
                 case GAMMA :
                   gamma_estimation(component_vector_count , i ,
                                    mixt->continuous_parametric_process[i] , iter);
+                  break;
+                case INVERSE_GAUSSIAN :
+                  inverse_gaussian_estimation(component_vector_count , i ,
+                                              mixt->continuous_parametric_process[i]);
                   break;
                 case GAUSSIAN :
                   gaussian_estimation(component_vector_count , i ,
@@ -1670,7 +1703,7 @@ Mixture* Vectors::mixture_stochastic_estimation(StatError &error , ostream &os ,
 
     else {
       if (assignment) {
-        mixt->mixture_data = new MixtureData(*this , 'a');
+        mixt->mixture_data = new MixtureData(*this , ADD_COMPONENT_VARIABLE);
         vec = mixt->mixture_data;
 
         mixt->individual_assignment(*vec , true);
@@ -1786,8 +1819,9 @@ Mixture* Vectors::mixture_stochastic_estimation(StatError &error , ostream &os ,
  *  a partir d'un echantillon de vecteurs par l'algorithme MCEM.
  *
  *  arguments : reference sur un objet StatError, stream, nombre de composantes,
- *              identificateur des composantes (GAMMA / GAUSSIAN),
+ *              identificateur des composantes (GAMMA / INVERSE_GAUSSIAN / GAUSSIAN),
  *              moyenne et parametre de forme de la premiere composante (GAMMA) /
+ *              moyenne et parametre d'echelle de la premiere composante (INVERSE_GAUSSIAN) /
  *              moyenne et ecart-type de la premiere composante (GAUSSIAN), flag moyennes liees,
  *              type de lien entre les variances (CONVOLUTION_FACTOR / SCALING_FACTOR)
  *              parametres pour le nombre d'affectation des individus simulees,
@@ -2017,6 +2051,30 @@ MixtureData* Mixture::simulation(StatError &error , int nb_vector) const
           }
           else {
            decimal_scale[i] = 1;
+          }
+
+#         ifdef MESSAGE
+          cout << "\nScale: " << i + 1 << " " << decimal_scale[i] << endl;
+#         endif
+
+          break;
+        }
+
+        case INVERSE_GAUSSIAN : {
+          min_location = mixt->continuous_parametric_process[i]->observation[0]->location;
+          for (j = 1;j < mixt->nb_component;j++) {
+            buff = mixt->continuous_parametric_process[i]->observation[j]->location;
+            if (buff < min_location) {
+              min_location = buff;
+            }
+          }
+
+          buff = (int)ceil(log(min_location) / log(10));
+          if (buff < INVERSE_GAUSSIAN_MAX_NB_DECIMAL) {
+            decimal_scale[i] = pow(10 , (INVERSE_GAUSSIAN_MAX_NB_DECIMAL - buff));
+          }
+          else {
+            decimal_scale[i] = 1;
           }
 
 #         ifdef MESSAGE

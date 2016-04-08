@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -79,8 +79,10 @@ namespace stat_tool {
 
   const int GAMMA_MAX_NB_DECIMAL = 6;     // nombre maximum de decimales pour la simulation
                                           // d'une loi gamma
+  const int INVERSE_GAUSSIAN_MAX_NB_DECIMAL = 6;  // nombre maximum de decimales pour la simulation
+                                                  // d'une loi inverse Gaussian
   const int GAUSSIAN_MAX_NB_DECIMAL = 6;  // nombre maximum de decimales pour la simulation
-                                          // d'une loi gaussienne
+                                          // d'une loi Gaussian
   const int DEGREE_DECIMAL_SCALE = 10;   // facteur pour determiner le nombre de decimales
                                          // pour la simulation d'une loi de Von Mises en degrees
   const int RADIAN_DECIMAL_SCALE = 1000;  // facteur pour determiner le nombre de decimales

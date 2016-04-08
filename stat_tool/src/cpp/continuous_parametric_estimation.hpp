@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -61,10 +61,10 @@ extern double von_mises_concentration_computation(double mean_direction);
 
 /*--------------------------------------------------------------*
  *
- *  Estimation des parametres des lois gamma d'un processus d'observation.
+ *  Estimation of parameters of gamma observation distributions.
  *
- *  arguments : comptage des etats, variable, pointeur sur un processus d'observation continu,
- *              iteration EM.
+ *  arguments: state counts, variable, pointer on a continuous observation process,
+ *             EM iteration.
  *
  *--------------------------------------------------------------*/
 
@@ -277,11 +277,11 @@ void Vectors::gamma_estimation(Type **component_vector_count , int variable ,
 
 /*--------------------------------------------------------------*
  *
- *  Estimation des parametres des lois gamma d'un processus d'observation :
- *  parametres de forme et eventuellement parametres d'echelle lies.
+ *  Estimation of parameters of gamma observation distributions:
+ *  tied shape parameters and eventually tied scale parameters.
  *
- *  arguments : comptage des etats, variable, pointeur sur un processus d'observation continue,
- *              facteur pour la variance, iteration EM.
+ *  arguments: state counts, variable, pointer on a continuous observation process,
+ *             tying rule, EM iteration.
  *
  *--------------------------------------------------------------*/
 
@@ -614,9 +614,402 @@ void Vectors::tied_gamma_estimation(Type **component_vector_count , int variable
 
 /*--------------------------------------------------------------*
  *
- *  Estimation des parametres des lois gaussiennes d'un processus d'observation.
+ *  Estimation of parameters of inverse Gaussian observation distributions.
  *
- *  arguments : comptage des etats, variable, pointeur sur un processus d'observation continu.
+ *  arguments: state counts, variable, pointer on a continuous observation process.
+ *
+ *--------------------------------------------------------------*/
+
+template <typename Type>
+void Vectors::inverse_gaussian_estimation(Type **component_vector_count , int variable ,
+                                          ContinuousParametricProcess *process) const
+
+{
+  register int i , j;
+  double *mean , *inverse_scale;
+  Type *component_frequency;
+
+
+  component_frequency = new Type[process->nb_state];
+  mean = new double[process->nb_state];
+
+  for (i = 0;i < process->nb_state;i++) {
+    mean[i] = 0.;
+    component_frequency[i] = 0;
+  }
+
+  switch (type[variable]) {
+
+  case INT_VALUE : {
+    for (i = 0;i < nb_vector;i++) {
+      for (j = 0;j < process->nb_state;j++) {
+        mean[j] += component_vector_count[i][j] * int_vector[i][variable];
+        component_frequency[j] += component_vector_count[i][j];
+      }
+    }
+    break;
+  }
+
+  case REAL_VALUE : {
+    for (i = 0;i < nb_vector;i++) {
+      for (j = 0;j < process->nb_state;j++) {
+        mean[j] += component_vector_count[i][j] * real_vector[i][variable];
+        component_frequency[j] += component_vector_count[i][j];
+      }
+    }
+    break;
+  }
+  }
+
+  for (i = 0;i < process->nb_state;i++) {
+    if (component_frequency[i] > 0) {
+      mean[i] /= component_frequency[i];
+      process->observation[i]->location = mean[i];
+    }
+    else {
+      process->observation[i]->location = D_DEFAULT;
+    }
+  }
+
+  inverse_scale = new double[process->nb_state];
+  for (i = 0;i < process->nb_state;i++) {
+    inverse_scale[i] = 0.;
+  }
+
+  switch (type[variable]) {
+
+  case INT_VALUE : {
+    for (i = 0;i < nb_vector;i++) {
+      for (j = 0;j < process->nb_state;j++) {
+        if ((mean[j] > 0.) && (int_vector[i][variable] > 0)) {
+          inverse_scale[j] += component_vector_count[i][j] * (1. / (double)int_vector[i][variable] - 1. / mean[j]);
+        }
+      }
+    }
+    break;
+  }
+
+  case REAL_VALUE : {
+    for (i = 0;i < nb_vector;i++) {
+      for (j = 0;j < process->nb_state;j++) {
+        if ((mean[j] > 0.) && (real_vector[i][variable] > 0.)) {
+          inverse_scale[j] += component_vector_count[i][j] * (1. / real_vector[i][variable] - 1. / mean[j]);
+        }
+      }
+    }
+    break;
+  }
+  }
+
+  for (i = 0;i < process->nb_state;i++) {
+    if (inverse_scale[i] > 0.) {
+      process->observation[i]->scale = component_frequency[i] / inverse_scale[i];
+    }
+    else {
+      process->observation[i]->scale = D_DEFAULT;
+    }
+  }
+
+  delete [] component_frequency;
+  delete [] mean;
+  delete [] inverse_scale;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Estimation of parameters of inverse Gaussian observation distributions:
+ *  tied variances and eventually tied means.
+ *
+ *  arguments: state counts, variable, pointer on a continuous observation process,
+ *             tying rule for the variance.
+ *
+ *--------------------------------------------------------------*/
+
+template <typename Type>
+void Vectors::tied_inverse_gaussian_estimation(Type **component_vector_count , int variable ,
+                                               ContinuousParametricProcess *process ,
+                                               tying_rule variance_factor) const
+
+{
+  register int i , j;
+  double inverse_scale , *mean , *factor;
+  Type *component_frequency;
+
+  double inverse_scale2;
+
+
+  component_frequency = new Type[process->nb_state];
+  mean = new double[process->nb_state];
+  factor = new double[process->nb_state];
+
+  switch (process->tied_location) {
+
+  case false : {
+    for (i = 0;i < process->nb_state;i++) {
+      mean[i] = 0.;
+      component_frequency[i] = 0;
+    }
+
+    switch (type[variable]) {
+
+    case INT_VALUE : {
+      for (i = 0;i < nb_vector;i++) {
+        for (j = 0;j < process->nb_state;j++) {
+          mean[j] += component_vector_count[i][j] * int_vector[i][variable];
+          component_frequency[j] += component_vector_count[i][j];
+        }
+      }
+      break;
+    }
+
+    case REAL_VALUE : {
+      for (i = 0;i < nb_vector;i++) {
+        for (j = 0;j < process->nb_state;j++) {
+          mean[j] += component_vector_count[i][j] * real_vector[i][variable];
+          component_frequency[j] += component_vector_count[i][j];
+        }
+      }
+      break;
+    }
+    }
+
+    for (i = 0;i < process->nb_state;i++) {
+      if (component_frequency[i] > 0) {
+        mean[i] /= component_frequency[i];
+        process->observation[i]->location = mean[i];
+      }
+      else {
+        process->observation[i]->location = D_DEFAULT;
+      }
+    }
+
+    switch (variance_factor) {
+
+    case CONVOLUTION_FACTOR : {
+      factor[0] = 1.;
+      for (i = 1;i < process->nb_state;i++) {
+        if (component_frequency[i] > 0) {
+          factor[i] = (mean[i] * mean[i]) / (mean[0] * mean[0]);
+        }
+        else {
+          factor[i] = 1.;
+        }
+      }
+      break;
+    }
+
+    case SCALING_FACTOR : {
+      factor[0] = 1.;
+      for (i = 1;i < process->nb_state;i++) {
+        if (component_frequency[i] > 0) {
+          factor[i] = mean[i] / mean[0];
+        }
+        else {
+          factor[i] = 1.;
+        }
+      }
+      break;
+    }
+    }
+
+    inverse_scale = 0.;
+    inverse_scale2 = 0.;
+
+    switch (type[variable]) {
+
+    case INT_VALUE : {
+      for (i = 0;i < nb_vector;i++) {
+        for (j = 0;j < process->nb_state;j++) {
+          if ((mean[j] > 0.) && (int_vector[i][variable] > 0)) {
+            inverse_scale += component_vector_count[i][j] * factor[j] * (1. / (double)int_vector[i][variable] - 1. / mean[j]);
+            inverse_scale2 += component_vector_count[i][j] * factor[j] * (1. / (double)int_vector[i][variable] - 2. / mean[j] +
+                                                                          int_vector[i][variable] / (mean[j] * mean[j]));
+          }
+        }
+      }
+      break;
+    }
+
+    case REAL_VALUE : {
+      for (i = 0;i < nb_vector;i++) {
+        for (j = 0;j < process->nb_state;j++) {
+          if ((mean[j] > 0.) && (real_vector[i][variable] > 0.)) {
+            inverse_scale += component_vector_count[i][j] * factor[j] * (1. / real_vector[i][variable] - 1 / mean[j]);
+            inverse_scale2 += component_vector_count[i][j] * factor[j] * (1. / real_vector[i][variable] - 2. / mean[j] +
+                                                                          real_vector[i][variable] / (mean[j] * mean[j]));
+          }
+        }
+      }
+      break;
+    }
+    }
+
+#   ifdef MESSAGE
+/*    cout << "\n";
+    for (i = 1;i < process->nb_state;i++) {
+      cout << factor[i];
+      if (variance_factor == CONVOLUTION_FACTOR) {
+        cout << " (" << sqrt(factor[i]) << ")";
+      }
+      if (i < process->nb_state - 1) {
+        cout << ", ";
+      }
+    }
+    cout << endl; */
+
+    if ((inverse_scale2 < inverse_scale - DOUBLE_ERROR) || (inverse_scale2 > inverse_scale + DOUBLE_ERROR)) {
+      cout << "\nERROR: " << inverse_scale << " | " << inverse_scale2 << endl;
+    }
+#   endif
+
+    for (i = 1;i < process->nb_state;i++) {
+      component_frequency[0] += component_frequency[i];
+    }
+    break;
+  }
+
+  case true : {
+    mean[0] = 0.;
+    component_frequency[0] = 0.;
+
+    factor[0] = 1.;
+    for (i = 1;i < process->nb_state;i++) {
+      factor[i] = factor[i - 1] * 2;
+    }
+
+    switch (type[variable]) {
+
+    case INT_VALUE : {
+      for (i = 0;i < nb_vector;i++) {
+        for (j = 0;j < process->nb_state;j++) {
+          mean[0] += component_vector_count[i][j] * int_vector[i][variable] / factor[j];
+          component_frequency[0] += component_vector_count[i][j];
+        }
+      }
+      break;
+    }
+
+    case REAL_VALUE : {
+      for (i = 0;i < nb_vector;i++) {
+        for (j = 0;j < process->nb_state;j++) {
+          mean[0] += component_vector_count[i][j] * real_vector[i][variable] / factor[j];
+          component_frequency[0] += component_vector_count[i][j];
+        }
+      }
+      break;
+    }
+    }
+
+    mean[0] /= component_frequency[0];
+    process->observation[0]->location = mean[0];
+    for (i = 1;i < process->nb_state;i++) {
+      mean[i] = mean[0] * factor[i];
+      process->observation[i]->location = mean[i];
+    }
+
+    if (variance_factor == CONVOLUTION_FACTOR) {
+      for (i = 1;i < process->nb_state;i++) {
+//        factor[i] = factor[i - 1] * 4;
+        factor[i] *= factor[i];
+      }
+    }
+
+    inverse_scale = 0.;
+
+    switch (variance_factor) {
+
+    case CONVOLUTION_FACTOR : {
+      switch (type[variable]) {
+
+      case INT_VALUE : {
+        for (i = 0;i < nb_vector;i++) {
+          for (j = 0;j < process->nb_state;j++) {
+            if ((mean[j] > 0.) && (int_vector[i][variable] > 0)) {
+              inverse_scale += component_vector_count[i][j] * factor[j] * (1. / (double)int_vector[i][variable] - 2. / mean[j] +
+                                                                           int_vector[i][variable] / (mean[j] * mean[j]));
+            }
+          }
+        }
+        break;
+      }
+
+      case REAL_VALUE : {
+        for (i = 0;i < nb_vector;i++) {
+          for (j = 0;j < process->nb_state;j++) {
+            if ((mean[j] > 0.) && (real_vector[i][variable] > 0.)) {
+              inverse_scale += component_vector_count[i][j] * factor[j] * (1. / real_vector[i][variable] - 2. / mean[j] +
+                                                                           real_vector[i][variable] / (mean[j] * mean[j]));
+            }
+          }
+        }
+        break;
+      }
+      }
+      break;
+    }
+
+    case SCALING_FACTOR : {
+      inverse_scale2 = 0.;
+
+      switch (type[variable]) {
+
+      case INT_VALUE : {
+        for (i = 0;i < nb_vector;i++) {
+          for (j = 0;j < process->nb_state;j++) {
+            if ((mean[j] > 0.) && (int_vector[i][variable] > 0)) {
+              inverse_scale += component_vector_count[i][j] * factor[j] * (1. / (double)int_vector[i][variable] - 1. / mean[j]);
+              inverse_scale2 += component_vector_count[i][j] * factor[j] * (1. / (double)int_vector[i][variable] - 2. / mean[j] +
+                                                                            int_vector[i][variable] / (mean[j] * mean[j]));
+            }
+          }
+        }
+        break;
+      }
+
+      case REAL_VALUE : {
+        for (i = 0;i < nb_vector;i++) {
+          for (j = 0;j < process->nb_state;j++) {
+            if ((mean[j] > 0.) && (real_vector[i][variable] > 0.)) {
+              inverse_scale += component_vector_count[i][j] * factor[j] * (1. / real_vector[i][variable] - 1. / mean[j]);
+              inverse_scale2 += component_vector_count[i][j] * factor[j] * (1. / real_vector[i][variable] - 2. / mean[j] +
+                                                                           real_vector[i][variable] / (mean[j] * mean[j]));
+            }
+          }
+        }
+        break;
+      }
+      }
+
+#     ifdef MESSAGE
+      if ((inverse_scale2 < inverse_scale - DOUBLE_ERROR) || (inverse_scale2 > inverse_scale + DOUBLE_ERROR)) {
+        cout << "\nERROR: " << inverse_scale << " | " << inverse_scale2 << endl;
+      }
+#     endif
+
+      break;
+    }
+    }
+    break;
+  }
+  }
+
+  process->observation[0]->scale = component_frequency[0] / inverse_scale;
+  for (i = 1;i < process->nb_state;i++) {
+    process->observation[i]->scale = process->observation[0]->scale * factor[i];
+  }
+
+  delete [] component_frequency;
+  delete [] mean;
+  delete [] factor;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Estimation of parameters of Gaussian observation distributions.
+ *
+ *  arguments: state counts, variable, pointer on a continuous observation process.
  *
  *--------------------------------------------------------------*/
 
@@ -765,11 +1158,11 @@ void Vectors::gaussian_estimation(Type **component_vector_count , int variable ,
 
 /*--------------------------------------------------------------*
  *
- *  Estimation des parametres des lois gaussiennes d'un processus d'observation :
- *  variance et eventuellement moyennes liees.
+ *  Estimation of parameters of Gaussian observation distributions:
+ *  tied variances and eventually tied means.
  *
- *  arguments : comptage des etats, variable, pointeur sur un processus d'observation continu,
- *              facteur pour la variance.
+ *  arguments: state counts, variable, pointer on a continuous observation process,
+ *             tying rule for the variance.
  *
  *--------------------------------------------------------------*/
 
@@ -954,9 +1347,9 @@ void Vectors::tied_gaussian_estimation(Type **component_vector_count , int varia
 
 /*--------------------------------------------------------------*
  *
- *  Estimation des parametres des lois de von Mises d'un processus d'observation.
+ *  Estimation of parameters of von Mises observation distributions.
  *
- *  arguments : comptage des etats, variable, pointeur sur un processus d'observation continu.
+ *  arguments: state counts, variable, pointer on a continuous observation process.
  *
  *--------------------------------------------------------------*/
 

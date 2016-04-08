@@ -928,7 +928,7 @@ public:
   }
 
   static Sequences*
-  remove_run(const Sequences &seq, int variable, int ivalue, char position,
+  remove_run(const Sequences &seq, int variable, int ivalue, run_position position,
       int max_run_length)
   {
     SIMPLE_METHOD_TEMPLATE_1(seq, remove_run, Sequences, variable, ivalue,
@@ -1274,7 +1274,7 @@ public:
   }
 
   static Sequences*
-  segmentation_change_point(const Sequences &input, int iidentifier,
+  segmentation_change_point(Sequences &input, int iidentifier,
     int nb_segment , boost::python::list input_change_point ,
     boost::python::list input_model_type , sequence_type output)
   {
@@ -1293,38 +1293,32 @@ public:
       model_type[i] = extract<segment_model> (input_model_type[i]);
 
     ret = input.segmentation(error, os, iidentifier, nb_segment,
-      change_point, model_type, output);
+                             change_point, model_type, true, NULL, output);
 
     FOOTER_OS;
   }
 
 
   static Sequences*
-  segmentation_array(const Sequences &input, boost::python::list input_nb_segment,
-      boost::python::list input_model_type , int iidentifier,  sequence_type output)
+  segmentation_array(Sequences &input, int iidentifier, int nb_segment,
+      boost::python::list input_model_type, sequence_type output)
   {
     HEADER_OS(Sequences);
 
-    int nb = len(input_nb_segment);
-    int *nb_segment;
-    nb_segment = new int[nb];
-    for (int i = 0; i < nb; i++)
-        nb_segment[i] = extract<int> (input_nb_segment[i]);
-
-    nb = len(input_model_type);
+    int nb = len(input_model_type);
     segment_model *model_type;
     model_type = new segment_model[nb];
     for (int i = 0; i < nb; i++)
         model_type[i] = extract<segment_model> (input_model_type[i]);
 
 
-    ret = input.segmentation(error, os, nb_segment, model_type, iidentifier,
-        output);
+    ret = input.segmentation(error, os, iidentifier, nb_segment, model_type,
+                             true, NULL, output);
     FOOTER_OS;
   }
 
   static Sequences*
-  segmentation_model(const Sequences &input, int iidentifier,
+  segmentation_model(Sequences &input, int iidentifier,
     int max_nb_segment , boost::python::list input_model_type)
   {
     HEADER_OS(Sequences);
@@ -1335,7 +1329,8 @@ public:
     for (int i = 0; i < nb; i++)
         model_type[i] = extract<segment_model> (input_model_type[i]);
 
-    ret = input.segmentation(error, os, iidentifier, max_nb_segment, model_type);
+    ret = input.segmentation(error, os, iidentifier, max_nb_segment, model_type,
+                             true, NULL);
     FOOTER_OS;
   }
 
@@ -1404,7 +1399,8 @@ public:
   {
     StatError error;
     CREATE_ARRAY(model_type, segment_model, models);
-    MultiPlotSet* ret = input.segment_profile_plotable_write(error, iidentifier, nb_segment, models.get(), output);
+    MultiPlotSet* ret = input.segment_profile_plotable_write(error, iidentifier, nb_segment, models.get(),
+                                                             true, NULL, output);
 
     if (!ret)
       ERROR;
@@ -1421,8 +1417,8 @@ public:
     StatError error;
     bool ret;
     CREATE_ARRAY(model_type, segment_model, models);
-    ret = input.segment_profile_write(error, os, iidentifier,  nb_segment,
-        models.get(), output, format, segmentation, nb_segmentation);
+    ret = input.segment_profile_write(error, os, iidentifier,  nb_segment, models.get(),
+                                      true, NULL, output, format, segmentation, nb_segmentation);
     if (!ret)
       sequence_analysis::wrap_util::throw_error(error);
     cout << os.str() << endl;
