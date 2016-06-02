@@ -95,7 +95,7 @@ const int PLOT_TITLE_NB_TREES= 15;
  */
 
 /// nature of the characteristic quantities for trees
-enum {
+enum tree_process_distribution {
   FIRST_OCCURRENCE_ROOT ,
   FIRST_OCCURRENCE_LEAVES ,
   SOJOURN_SIZE ,
@@ -103,6 +103,8 @@ enum {
   NB_OCCURRENCES ,
   OBSERVATION
 };
+
+typedef TemplateMultiPlotSet<tree_process_distribution> TreeMultiPlotSet;
 
 /*--------------------------------------------------------------*
  *

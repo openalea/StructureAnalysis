@@ -387,22 +387,22 @@ public :
    the number of states, the number of integer and floating observation processes,
    the number of values for each integer process
    and an indicator array for forcing parametric integer processes */
-   HiddenMarkovIndOutTree(char itype, int inb_state, int inb_ioutput_process,
-                       int inb_doutput_process, int* nb_value,
-                       bool* force_param=NULL);
+   HiddenMarkovIndOutTree(process_type itype, int inb_state, int inb_ioutput_process,
+                          int inb_doutput_process, int* nb_value,
+                          bool* force_param=NULL);
    HiddenMarkovIndOutTree(const Chain * pchain, int inb_ioutput_process,
-                       CategoricalProcess** pobservation,
-                       int size, bool counting_flag);
+                          CategoricalProcess** pobservation,
+                          int size, bool counting_flag);
    HiddenMarkovIndOutTree(const Chain * pchain,
-                       int inb_ioutput_process, int inb_doutput_process,
-                       CategoricalProcess** categorical_observation,
-                       stat_tool::DiscreteParametricProcess** iparametric_observation,
-                       stat_tool::DiscreteParametricProcess** dparametric_observation,
-                       int size, bool counting_flag);
+                          int inb_ioutput_process, int inb_doutput_process,
+                          CategoricalProcess** categorical_observation,
+                          stat_tool::DiscreteParametricProcess** iparametric_observation,
+                          stat_tool::DiscreteParametricProcess** dparametric_observation,
+                          int size, bool counting_flag);
    HiddenMarkovIndOutTree(const HiddenMarkovIndOutTree& markov, bool data_flag=true,
-                       bool characteristic_flag=true);
+                         bool characteristic_flag=true);
    HiddenMarkovIndOutTree(const HiddenMarkovTree& markov, bool data_flag=true,
-                       bool characteristic_flag=true);
+                          bool characteristic_flag=true);
    HiddenMarkovIndOutTree(const HiddenMarkovIndOutTree& markov, double self_transition);
    HiddenMarkovIndOutTree(const HiddenMarkovIndOutTree& markov, char manip, int param);
    virtual ~HiddenMarkovIndOutTree();
