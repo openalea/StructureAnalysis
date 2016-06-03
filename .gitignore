@@ -6,3 +6,4 @@ build-scons
 *.pyc
 *.dblite
 options.py
+/.project
