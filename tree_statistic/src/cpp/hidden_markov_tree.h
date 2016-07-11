@@ -30,7 +30,7 @@
  *       License along with this program; see the file COPYING. If not,
  *       write to the Free Software Foundation, Inc., 59
  *       Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- *
+*
  *  ----------------------------------------------------------------------------
  */
 
@@ -183,8 +183,8 @@ private :
                    const stat_tool::FrequencyDistribution * hsize= NULL) const;
 
    /** Matplotlib output of CategoricalTreeProcess */
-   MultiPlotSet* plotable_write(MultiPlotSet &plot, int &index,
-                                int process, stat_tool::FrequencyDistribution * const * empirical_observation = NULL,
+   TreeMultiPlotSet* plotable_write(TreeMultiPlotSet &plot, int &index,
+                                    int process, stat_tool::FrequencyDistribution * const * empirical_observation = NULL,
                                 const TreeCharacteristics * characteristics = NULL,
                                 const stat_tool::FrequencyDistribution * hsize = NULL) const;
 
@@ -491,7 +491,7 @@ public :
    the number of states, the number of integer and floating observation processes,
    the number of values for each integer process
    and an indicator array for forcing parametric integer processes */
-   HiddenMarkovTree(char itype, int inb_state, int ich_order,
+   HiddenMarkovTree(process_type itype, int inb_state, int ich_order,
                     int inb_ioutput_process, int inb_doutput_process,
                     int* nb_value, bool* force_param= NULL);
    HiddenMarkovTree(const Chain * pchain, int ich_order, int inb_ioutput_process,
@@ -527,9 +527,9 @@ public :
    virtual std::ostream& line_write(std::ostream& os) const;
 
    virtual std::ostream& ascii_write(std::ostream& os, bool exhaustive= false) const;
-   virtual bool ascii_write(StatError& error, const char * path,
+   virtual bool ascii_write(StatError& error, const std::string path,
                             bool exhaustive= false) const;
-   virtual bool spreadsheet_write(StatError& error, const char * path) const;
+   virtual bool spreadsheet_write(StatError& error, const std::string path) const;
    virtual bool plot_write(StatError& error, const char * prefix,
                            const char * title= NULL) const;
 
@@ -804,17 +804,17 @@ public :
 
    /** Estimate a Hidden Markov Out Tree from the number of states and the data in \e self */
    HiddenMarkovIndOutTree* hidden_markov_ind_out_tree_estimation(StatError& error,
-                                                          std::ostream& os,
-                                                          char type,
-                                                          int nb_state,
-                                                          bool left_right,
-                                                          bool counting_flag= true,
-                                                          int state_trees= VITERBI,
-                                                          stat_tool::latent_structure_algorithm algorithm= FORWARD,
-                                                          double saem_exponent= 1.,
-                                                          double self_transition= D_DEFAULT,
-                                                          int nb_iter= I_DEFAULT,
-                                                          bool* force_param= NULL) const;
+                                                                 std::ostream& os,
+                                                                 process_type type,
+                                                                 int nb_state,
+                                                                 bool left_right,
+                                                                 bool counting_flag= true,
+                                                                 int state_trees= VITERBI,
+                                                                 stat_tool::latent_structure_algorithm algorithm= FORWARD,
+                                                                 double saem_exponent= 1.,
+                                                                 double self_transition= D_DEFAULT,
+                                                                 int nb_iter= I_DEFAULT,
+                                                                 bool* force_param= NULL) const;
 
    void create_observation_frequency_distribution(int nb_state);
    // allocation of the frequency distributions corresponding to the observation distributions

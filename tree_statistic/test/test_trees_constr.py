@@ -208,8 +208,9 @@ def test_exception_inheritance():
 
 def test_build_mtg_filter():
     """Read a Tree from a MTG with filter and custom attributes"""
-    import openalea.aml as amlPy
-    f = lambda x: amlPy.Feature(x, "Length")*3*(amlPy.Feature(x, "Diam")/2)**2
+    import openalea.mtg as mtg
+    g = mtg.MTG(mtg_name)
+    f = lambda x: g.node(x).Length*3*(g.node(x).Diam/2)**2
     filter = lambda x: x < 6
     attributes = ["anything"]
     T = trees.Trees(mtg_name, filter, attributes, [f], scale=2)
@@ -279,7 +280,6 @@ def test_attribute_type_failure():
     """use bad attribute types in building trees"sample_mtg_forest.txt"""
     filter = lambda x: x < 6
     attributes = ["anything"]
-    import openalea.aml as amlPy
     try:
         T = trees.Trees(mtg_name, filter, attributes,
                         [lambda x: "z"], scale=2)
@@ -303,8 +303,7 @@ def test_attribute_name_failure():
     return 0
 
 def test_filter_failure():
-    """use bad filterin function in building trees"""
-    filter = lambda x: x < 6
+    """use bad filtering function in building trees"""
     f = lambda x: 1
     attributes = ["anything"]
     try:
@@ -317,11 +316,10 @@ def test_filter_failure():
 
 def test_nonrecursive_filter_failure():
     """use nonrecursive filtering function in building trees"""
-    filter = lambda x: x < 6
     f = lambda x: 1
     attributes = ["anything"]
     try:
-        T = trees.Trees(mtg_name, lambda x: x != 2, attributes, [f],
+        T = trees.Trees(mtg_name, lambda x: x != 24, attributes, [f],
                         scale=2)
     except IndexError, i:
         print i
@@ -331,11 +329,11 @@ def test_nonrecursive_filter_failure():
 
 def test_filter_type_failure():
     """use incorrect type return for filter in building trees"""
-    filter = lambda x: x < 6
-    f = lambda x: "a"
+    filt = lambda x: "a"
+    f = lambda x: 1
     attributes = ["anything"]
     try:
-        T = trees.Trees(mtg_name, filter, attributes, [f], scale=1)
+        T = trees.Trees(mtg_name, filt, attributes, [f], scale=2)
     except TypeError, t:
         print t
     else:

@@ -303,7 +303,7 @@ HiddenMarkovIndOutTree::state_tree_computation(StatError& error,
 
       switch (algorithm)
       {
-         case FORWARD_BACKWARD :
+         case FORWARD :
          {
             res_trees->build_state_trees();
             res_trees->hidden_likelihood= hmarkovt->upward_downward(*res_trees,
@@ -434,7 +434,7 @@ bool HiddenMarkovIndOutTree::state_profile(StatError& error,
       if (smoothed_tree == NULL)
       {
          smoothed_state_tree=
-            cptrees->get_state_smoothed_hidden_markov_tree_data(index, FORWARD_BACKWARD,
+            cptrees->get_state_smoothed_hidden_markov_tree_data(index, FORWARD,
                                                                 entropy_algo);
          // add restored states, smoothed probabilities and entropy profiles as variables
 
@@ -2082,7 +2082,8 @@ void HiddenMarkovIndOutTree::downward_step(const HiddenMarkovTreeData& trees,
  *  the type of variant for the EM algorithm (EM, CEM, SAEM, Gibbs),
  *  a weight for the stochastic restoration in the case of SAEM or Gibbs,
  *  the number of iterations and a flag on keeping parametric distributions
- *  or not
+ *  or not.
+ *  FORWARD_DYNAMIC_PROGRAMMING stands for GIBBS_SAMPLING
  *
  **/
 
@@ -2092,7 +2093,7 @@ HiddenMarkovTreeData::hidden_markov_ind_out_tree_estimation(StatError& error,
                                                             const HiddenMarkovIndOutTree& ihmarkov,
                                                             bool counting_flag,
                                                             int state_trees,
-                                                            int algorithm,
+                                                            latent_structure_algorithm algorithm,
                                                             double saem_exponent,
                                                             int nb_iter,
                                                             bool force_param) const
@@ -2207,14 +2208,14 @@ HiddenMarkovTreeData::hidden_markov_ind_out_tree_estimation(StatError& error,
       error.update(STAT_error[STATR_NB_ITERATION]);
    }
    if (!((algorithm == VITERBI) || (algorithm == FORWARD_BACKWARD_SAMPLING) ||
-       (algorithm == GIBBS_SAMPLING) || (algorithm == FORWARD_BACKWARD)))
+       (algorithm == FORWARD_DYNAMIC_PROGRAMMING) || (algorithm == FORWARD)))
    {
       status= false;
       error.update(STAT_TREES_error[TREESTATR_EM_ALGORITHM]);
    }
 
    if ((algorithm == VITERBI) || (algorithm == FORWARD_BACKWARD_SAMPLING) ||
-       (algorithm == GIBBS_SAMPLING))
+       (algorithm == FORWARD_DYNAMIC_PROGRAMMING))
    {
       if ((saem_exponent < 0) || (saem_exponent >= 1))
       {
@@ -2242,7 +2243,7 @@ HiddenMarkovTreeData::hidden_markov_ind_out_tree_estimation(StatError& error,
          best_hmarkovt= new HiddenMarkovIndOutTree(*hmarkovt, false, false);
          // initialise state trees for state simulation
 
-         if (algorithm == GIBBS_SAMPLING)
+         if (algorithm == FORWARD_DYNAMIC_PROGRAMMING)
             otrees= hmarkovt->state_tree_computation(error_v, *this, VITERBI, false);
 
          if (otrees == NULL)
@@ -2258,7 +2259,7 @@ HiddenMarkovTreeData::hidden_markov_ind_out_tree_estimation(StatError& error,
 
       // create data structures for estimation
 
-      chain_reestim= new ChainReestimation<double>((hmarkovt->type == 'o' ?  'o' : 'v') ,
+      chain_reestim= new ChainReestimation<double>((hmarkovt->type == ORDINARY ?  ORDINARY : DEFAULT_TYPE) ,
                                                    hmarkovt->nb_state, hmarkovt->nb_state);
 
       observation_reestim= new Reestimation<double>**[hmarkovt->_nb_ioutput_process];
@@ -2324,7 +2325,7 @@ HiddenMarkovTreeData::hidden_markov_ind_out_tree_estimation(StatError& error,
                test[i][j] = 0.;
 #     endif
 
-         if ((algorithm == FORWARD_BACKWARD) || (saem_exponent != .0))
+         if ((algorithm == FORWARD) || (saem_exponent != .0))
          {
             hmarkovt->state_marginal_distribution(*this, state_marginal);
             hmarkovt->output_conditional_distribution(*this, output_cond);
@@ -2358,7 +2359,7 @@ HiddenMarkovTreeData::hidden_markov_ind_out_tree_estimation(StatError& error,
                break;
          }
 
-         if (algorithm == GIBBS_SAMPLING)
+         if (algorithm == FORWARD_DYNAMIC_PROGRAMMING)
          {
             state_restoration= hmarkovt->gibbs_state_simulation(*otrees,
                                                                 state_likelihood,
@@ -2436,14 +2437,14 @@ HiddenMarkovTreeData::hidden_markov_ind_out_tree_estimation(StatError& error,
                      // should not modify chain_reestim->transition[i][j]
                   for(u= 0; u < trees[t]->get_size(); u++)
                   {
-                     if ((algorithm == FORWARD_BACKWARD))
+                     if ((algorithm == FORWARD))
                         chain_reestim->transition[i][j]
                            += downward_pair_prob[t][i][j][u];
-                     if ((algorithm != FORWARD_BACKWARD) && (saem_exponent != .0))
+                     if ((algorithm != FORWARD) && (saem_exponent != .0))
                         chain_reestim->transition[i][j]
                            += (1-saem_coef)*downward_pair_prob[t][i][j][u]
                            + saem_coef*state_pair_array[t][i][j][u];
-                     if ((algorithm != FORWARD_BACKWARD) && (saem_exponent == .0))
+                     if ((algorithm != FORWARD) && (saem_exponent == .0))
                         chain_reestim->transition[i][j]+= state_pair_array[t][i][j][u];
                   }
                }
@@ -2452,13 +2453,13 @@ HiddenMarkovTreeData::hidden_markov_ind_out_tree_estimation(StatError& error,
             for(t= 0; t < _nb_trees; t++)
             {
                u= trees[t]->root();
-               if ((algorithm == FORWARD_BACKWARD))
+               if ((algorithm == FORWARD))
                   chain_reestim->initial[i]+= downward_prob[t][i][u];
-               if ((algorithm != FORWARD_BACKWARD) && (saem_exponent != .0))
+               if ((algorithm != FORWARD) && (saem_exponent != .0))
                   chain_reestim->initial[i]
                      += (1-saem_coef)*downward_prob[t][i][u]
                      + saem_coef*state_array[t][i][u];
-               if ((algorithm != FORWARD_BACKWARD) && (saem_exponent == .0))
+               if ((algorithm != FORWARD) && (saem_exponent == .0))
                   chain_reestim->initial[i]+= state_array[t][i][u];
             }
 
@@ -2475,14 +2476,14 @@ HiddenMarkovTreeData::hidden_markov_ind_out_tree_estimation(StatError& error,
                   val= v.Int(var);
                   for(k= 0; k < hmarkovt->nb_state; k++)
                   {
-                     if ((algorithm == FORWARD_BACKWARD))
+                     if ((algorithm == FORWARD))
                         observation_reestim[var][k]->frequency[val]
                            += downward_prob[t][k][*it];
-                     if ((algorithm != FORWARD_BACKWARD) && (saem_exponent != .0))
+                     if ((algorithm != FORWARD) && (saem_exponent != .0))
                         observation_reestim[var][k]->frequency[val]
                            += (1-saem_coef)*downward_prob[t][k][*it];
                            + saem_coef*state_array[t][k][*it];
-                     if ((algorithm != FORWARD_BACKWARD) && (saem_exponent == .0))
+                     if ((algorithm != FORWARD) && (saem_exponent == .0))
                         observation_reestim[var][k]->frequency[val]+= state_array[t][k][*it];
                   }
                }
@@ -2625,7 +2626,7 @@ HiddenMarkovTreeData::hidden_markov_ind_out_tree_estimation(StatError& error,
       chain_reestim= NULL;
 
       if ((algorithm == VITERBI) || (algorithm == FORWARD_BACKWARD_SAMPLING) ||
-          (algorithm == GIBBS_SAMPLING))
+          (algorithm == FORWARD_DYNAMIC_PROGRAMMING))
       {
          for(t= 0; t < _nb_trees; t++)
          {
@@ -2652,7 +2653,7 @@ HiddenMarkovTreeData::hidden_markov_ind_out_tree_estimation(StatError& error,
          state_pair_array= NULL;
       }
 
-      if ((algorithm == FORWARD_BACKWARD) || (saem_exponent != .0))
+      if ((algorithm == FORWARD) || (saem_exponent != .0))
       {
          for(t= 0; t < _nb_trees; t++)
          {
@@ -2747,7 +2748,7 @@ HiddenMarkovTreeData::hidden_markov_ind_out_tree_estimation(StatError& error,
             otrees= NULL;
          }
 
-         if ((state_trees == FORWARD_BACKWARD) || (state_trees == VITERBI))
+         if ((state_trees == FORWARD) || (state_trees == VITERBI))
          {
              if (hmarkovt->markov_data != NULL)
                 delete hmarkovt->markov_data;
@@ -2758,7 +2759,7 @@ HiddenMarkovTreeData::hidden_markov_ind_out_tree_estimation(StatError& error,
              switch (state_trees)
              {
 
-                case FORWARD_BACKWARD :
+                case FORWARD :
                 {
                    otrees->build_state_trees();
                    otrees->hidden_likelihood=
@@ -2881,12 +2882,12 @@ HiddenMarkovTreeData::hidden_markov_ind_out_tree_estimation(StatError& error,
 HiddenMarkovIndOutTree*
 HiddenMarkovTreeData::hidden_markov_ind_out_tree_estimation(StatError &error,
                                                             std::ostream& os,
-                                                            char type,
+                                                            process_type type,
                                                             int nb_state,
                                                             bool left_right,
                                                             bool counting_flag,
                                                             int state_trees,
-                                                            int algorithm,
+                                                            latent_structure_algorithm algorithm,
                                                             double saem_exponent,
                                                             double self_transition,
                                                             int nb_iter,

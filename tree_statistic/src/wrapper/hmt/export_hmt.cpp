@@ -1062,22 +1062,23 @@ public :
 
    static HiddenMarkovIndOutTree*
    Chmt_data_wrapper_hidden_markov_ind_out_tree_estimation_markov(const HiddenMarkovTreeData& hmtd,
-                                                              const HiddenMarkovIndOutTree& ihmarkov,
-                                                              bool counting_flag,
-                                                              int state_trees,
-                                                              int algorithm,
-                                                              double saem_exponent,
-                                                              int nb_iter,
-                                                              bool force_param)
+                                                                  const HiddenMarkovIndOutTree& ihmarkov,
+                                                                  bool counting_flag,
+                                                                  int state_trees,
+                                                                  int algorithm,
+                                                                  double saem_exponent,
+                                                                  int nb_iter,
+                                                                  bool force_param)
    {
       HiddenMarkovIndOutTree *hmt= NULL;
       StatError error;
       ostringstream error_message;
 
       hmt= hmtd.hidden_markov_ind_out_tree_estimation(error, cout, ihmarkov,
-                                                  counting_flag, state_trees,
-                                                  algorithm, saem_exponent,
-                                                  nb_iter, force_param);
+                                                      counting_flag, state_trees,
+                                                      latent_structure_algorithm(algorithm),
+                                                      saem_exponent,
+                                                      nb_iter, force_param);
       if (hmt == NULL)
       {
          error_message << error;
@@ -1088,20 +1089,20 @@ public :
 
    static HiddenMarkovIndOutTree*
    Chmt_data_wrapper_hidden_markov_ind_out_tree_estimation_self_transition(const HiddenMarkovTreeData& hmtd,
-                                                                       int nb_state,
-                                                                       bool left_right,
-                                                                       bool counting_flag,
-                                                                       int state_trees,
-                                                                       int algorithm,
-                                                                       double saem_exponent,
-                                                                       double self_transition,
-                                                                       int nb_iter,
-                                                                       boost::python::list force_param)
+                                                                           int nb_state,
+                                                                           bool left_right,
+                                                                           bool counting_flag,
+                                                                           int state_trees,
+                                                                           int algorithm,
+                                                                           double saem_exponent,
+                                                                           double self_transition,
+                                                                           int nb_iter,
+                                                                           boost::python::list force_param)
    {
       bool status= true, several_errors= false;
       const int nb_variables= hmtd.get_nb_int() + hmtd.get_nb_float();
       int nb_fparam, p;
-      char type= 'o'; // or may be not ...
+      process_type type= ORDINARY; // or may be not ...
       ostringstream error_message;
       object o;
       StatError error;
@@ -1158,10 +1159,11 @@ public :
       if (status)
       {
          hmt= hmtd.hidden_markov_ind_out_tree_estimation(error, cout, type, nb_state,
-                                                     left_right, counting_flag,
-                                                     state_trees, algorithm,
-                                                     saem_exponent, self_transition,
-                                                     nb_iter, fparam);
+                                                         left_right, counting_flag,
+                                                         state_trees,
+                                                         latent_structure_algorithm(algorithm),
+                                                         saem_exponent, self_transition,
+                                                         nb_iter, fparam);
 
          if (hmt == NULL)
          {
