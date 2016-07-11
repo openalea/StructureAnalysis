@@ -1163,6 +1163,7 @@ class Trees(object):
         self.__tree_to_mtg_vid = None
         self.__tree_to_mtg_tid = None
         self.__mtg_to_tree_tid = None
+        self.__mtg = None        
         self.__attributes = []
         if issubclass(arg.__class__, Trees):
             # arg is supposed to be a Trees object...
@@ -1206,6 +1207,7 @@ class Trees(object):
             no_scale=(scale is None)
             import openalea.mtg as mtg
             M=mtg.MTG(arg)
+            self.__mtg = M
             mtg_file=file(arg, 'r')
             # reading the MTG header
             nbfloat=0
@@ -1677,7 +1679,7 @@ class Trees(object):
                 raise ValueError, msg
 
     def Estimate(self, model_name, arg1, arg2=None, arg3=None, arg4=None, 
-                 arg5=None, arg6=None, Algorithm="ForwardBackward", Saem=1., 
+                 arg5=None, arg6=None, Algorithm="Forward", Saem=1., 
                  ForceParametric=[]):
         """Estimate a (hidden) Markov tree.
 
@@ -1704,7 +1706,7 @@ class Trees(object):
                 "Viterbi" or "ForwardBackward"
           * `Counting` (bool) - True
           * `Algorithm` (str) - type of restoration/maximisation algorithm: \
-                "ForwardBackward", "Viterbi", "ForwardBackwardSampling" or "GibbsSampling"
+                "Forward", "Viterbi", "ForwardBackwardSampling" or "GibbsSampling"
           * `Saem` (float) - rate of decay for the weight of restoration in restoration algorithm \
                 (not relevant for "ForwardBackward"). Saem=.0 for pure SEM or CEM algorithms
           * `ForceParametric` (list of bool) - Force the observation distributions or not to remain \
@@ -1739,9 +1741,9 @@ class Trees(object):
                 'Saem, Counting): '\
                 +"type 'str' expected"
                 raise TypeError, msg                
-            if Algorithm.upper() == "FORWARDBACKWARD":
-                algo="FORWARD_BACKWARD"
-                algo="RestorationAlgorithm."+algo.upper()
+            if Algorithm.upper() == "FORWARD":
+                algo="FORWARD"
+                algo="RestorationAlgorithm."+algo
             elif Algorithm.upper() == "FORWARDBACKWARDSAMPLING":
                 algo="FORWARD_BACKWARD_SAMPLING"
                 algo="RestorationAlgorithm."+algo.upper()
@@ -2020,15 +2022,36 @@ class Trees(object):
 
     def MPlot(self, ViewPoint="Data", Length=None, BottomDiameter=None, 
               Color=None, DressingFile=None, Title="", variable=0):
-        """Graphical output using the Geom 3D viewer for Trees 
+        """
+        Graphical output using the Geom 3D viewer for Trees 
            or MultiPlotSet for features.
         
-        Usage:  MPlot(ViewPoint="Data")
-                MPlot("FirstOccurrenceRoot", variable=0)
-        Other possible values for ViewPoint: 
-            FirstOccurrenceLeaves
-            SojournSize
-            Counting"""
+        :Usage:  
+           MPlot(ViewPoint="Data")
+           MPlot("FirstOccurrenceRoot", variable=0)
+
+        :Parameters:
+          `ViewPoint` (str) - type of graphical output
+          `Length` (function) - lambda x: length of cylinder 
+            to plot vertex x
+          `BottomDiameter` (function) - lambda x: bottom diameter 
+            of cylinder to plot vertex x
+          `Color` (function) - lambda x: color of cylinder to use
+            to plot vertex x
+          `DressingFile` (str) - filename of options to use with
+            PlantFrame (default angles, ...)
+          `Title` (str) - title of output figure
+          `variable` (int) - variable number to be plot          
+
+        :Remarks:                        
+          - Possible values for ViewPoint: 
+            Data, FirstOccurrenceRoot, FirstOccurrenceLeaves, SojournSize, 
+            Counting
+          - if ViewPoint == "Data", a plantframe is used to represent each tree
+            in PlantGL. Otherwise an histogram is used to represent some numerical
+            characteristic
+          - Title and variable arguments are used only when ViewPoint != "Data" 
+        """
         if type(ViewPoint)!=str:
             msg='bad type for argument "ViewPoint": '\
               +"type 'str' expected"
