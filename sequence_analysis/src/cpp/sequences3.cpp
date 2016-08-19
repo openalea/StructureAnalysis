@@ -1222,7 +1222,7 @@ ostream& Sequences::ascii_print(ostream &os , output_sequence_format format , bo
         }
 
         if (j < length[i] - 1) {
-          if ((j - start) * (width + 1) > 1000) {
+          if ((j - start) * (width + 1) > 10000) {
 //          if ((j - start) * (width + 1) > line_nb_character) {
             os << " \\" << endl;
 
@@ -1891,8 +1891,8 @@ bool Sequences::plot_write(StatError &error , const char *prefix ,
             out_file << "set ytics 0,1" << endl;
           }
 
-          out_file << "plot [" << marginal_histogram[j]->min_value - marginal_histogram[j]->step << ":"
-                   << marginal_histogram[j]->max_value + marginal_histogram[j]->step << "] [0:"
+          out_file << "plot [" << marginal_histogram[j]->min_value - marginal_histogram[j]->bin_width << ":"
+                   << marginal_histogram[j]->max_value + marginal_histogram[j]->bin_width << "] [0:"
                    << (int)(marginal_histogram[j]->max * YSCALE) + 1 << "] \""
                    << label((data_file_name[j + 1].str()).c_str()) << "\" using 1:2 title \""
                    << STAT_label[STATL_VARIABLE] << " " << j + 1 << " - "
@@ -2068,8 +2068,8 @@ MultiPlotSet* Sequences::get_plotable() const
 
       // vue : histogramme marginal
 
-      plot[i].xrange = Range(marginal_histogram[j]->min_value - marginal_histogram[j]->step ,
-                             marginal_histogram[j]->max_value + marginal_histogram[j]->step);
+      plot[i].xrange = Range(marginal_histogram[j]->min_value - marginal_histogram[j]->bin_width ,
+                             marginal_histogram[j]->max_value + marginal_histogram[j]->bin_width);
       plot[i].yrange = Range(0 , ceil(marginal_histogram[j]->max * YSCALE));
 
       if (ceil(marginal_histogram[j]->max * YSCALE) < TIC_THRESHOLD) {

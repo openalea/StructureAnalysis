@@ -173,7 +173,9 @@ const char *STAT_criterion_word[] = {
   "ICLc" ,
   "mBIC" ,
   "log-likelihood slope" ,
-  "segmentation log-likelihood slope"
+  "dimension jump" ,
+  "segmentation log-likelihood slope" ,
+  "segmentation dimension jump"
 };
 
 
@@ -213,6 +215,9 @@ const char *STAT_label[] = {
   "mean" ,
   "variance" ,
   "standard deviation" ,
+  "median" ,
+  "lower quartile" ,
+  "upper quartile" ,
   "mean absolute deviation" ,
   "coefficient of variation" ,
   "variance/mean ratio" ,
@@ -272,6 +277,7 @@ const char *STAT_label[] = {
   "matching" ,
   "concentration" ,
   "curve" ,
+
   "mixture" ,
   "weight" ,
   "component" ,
@@ -296,6 +302,7 @@ const char *STAT_label[] = {
   "frequency distribution" ,
   "frequency distributions" ,
   "histogram" ,
+  "bin width" ,
   "sample" ,
   "sample size" ,
   "dissimilarities" ,
@@ -319,6 +326,8 @@ const char *STAT_label[] = {
   "limit correlation coefficient" ,
   "Spearman limit rank correlation coefficient" ,
   "Kendall limit rank correlation coefficient" ,
+  "sup norm distance" ,
+  "overlap" ,
 
   "contingency table" ,
   "deviation table" ,
@@ -547,7 +556,7 @@ const char *STAT_error[] = {
 
   "marginal frequency distribution not built" ,
   "marginal histogram not built" ,
-  "bad histogram step" ,
+  "bad histogram bin width" ,
   "bad histogram min value" ,
   "bad" ,
   "bad number of vectors" ,

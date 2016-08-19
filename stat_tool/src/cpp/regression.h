@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -49,14 +49,12 @@ namespace stat_tool {
 
 /****************************************************************
  *
- *  Constantes :
+ *  Constants
  */
 
 
-  const int REGRESSION_NB_VECTOR = 10000;  // nombre maximum de vecteurs pour la
-                                           // regression non-parametrique
-  const int NEIGHBORHOOD = 3;            // voisinage minimum sur les valeurs
-                                         // de la variable explicative
+  const int REGRESSION_NB_VECTOR = 10000;  // maximum number of individuals for the nonparametric regression
+  const int NEIGHBORHOOD = 3;            // minimum neighborhood on the values of the explanatory variable
 
   enum parametric_function {
     LINEAR_FUNCTION ,
@@ -70,22 +68,22 @@ namespace stat_tool {
 
 /****************************************************************
  *
- *  Definition des classes :
+ *  Class definition
  */
 
 
-  class RegressionKernel {  // noyau de regression
+  class RegressionKernel {  // regression kernel class
 
   public :
 
-    parametric_function ident;  // identificateur de la fonction de regression
-    int min_value;          // valeur minimum
-    int max_value;          // valeur maximum
-    double regression_df;   // degres de liberte regression
-    double residual_df;     // degres de liberte residus
-    int nb_parameter;       // nombre de parametres
-    double *parameter;      // parametres
-//    double step;            // pas pour representer la fonction de regression
+    parametric_function ident;  // identifier of the regression function
+    int min_value;          // minimum value
+    int max_value;          // maximum value
+    double regression_df;   // degrees of freedom regression
+    double residual_df;     // degrees of freedom residuals
+    int nb_parameter;       // number of parameters
+    double *parameter;      // parameters
+//    double step;             step for representing the regression function
     double *point;          // points
 
     void copy(const RegressionKernel&);
@@ -112,7 +110,7 @@ namespace stat_tool {
 
 
 
-  class Regression : public StatInterface , public RegressionKernel {  // fonction de regression
+  class Regression : public StatInterface , public RegressionKernel {  // regression function
 
     friend class Vectors;
 
@@ -121,9 +119,9 @@ namespace stat_tool {
 
   private :
 
-    Vectors *vectors;       // pointeur sur un objet Vectors
-    int nb_vector;          // nombre de vecteurs
-    double *residual;       // residus
+    Vectors *vectors;       // pointer on a Vectors object
+    int nb_vector;          // number of individuals
+    double *residual;       // residuals
 
     void copy(const Regression&);
     void remove();
@@ -151,7 +149,7 @@ namespace stat_tool {
     bool plot_write(StatError &error , const char *prefix , const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
-    // acces membres de la classe
+    // class member access
 
     Vectors* get_vectors() const { return vectors; }
     int get_nb_vector() const { return nb_vector; }

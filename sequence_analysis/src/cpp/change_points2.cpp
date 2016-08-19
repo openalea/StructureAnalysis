@@ -63,48 +63,54 @@ extern int column_width(int nb_value , const long double *value);
 
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Optimal segmentation of a single sequence or a sample of sequences.
  *
- *  Computation of segmentation and change-point entropies.
+ *  \param[in]  index                    sequence index,
+ *  \param[in]  nb_segment               number of segments,
+ *  \param[in]  model_type               segment model types,
+ *  \param[in]  common_contrast          flag contrast functions common to the individuals,
+ *  \param[in]  shape_parameter          negative binomial shape parameters,
+ *  \param[in]  rank                     ranks (ordinal variables),
+ *  \param[in]  isegmentation_likelihood pointer on the segmentation log-likelihoods,
+ *  \param[in]  nb_parameter             pointer on the number of free parameters of models,
+ *  \param[in]  segment_penalty          pointer on the penalties related to segment lengths (for mBIC),
  *
- *  arguments: sequence index, number of segments, segment model types,
- *             flag contrast functions common to the individuals,
- *             negative binomial distribution parameters,
- *             ranks (ordinal variables), pointers on the likelihoods of
- *             all the possibles segmentations, the segmentation entropies,
- *             the change-point entropies considering or not change-point ranks,
- *             the entropies corresponding to a uniform distribution assumption,
- *             the marginal entropies.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] segmentation_likelihood  log-likelihood of the optimal segmentation.
+ */
+/*--------------------------------------------------------------*/
 
-double Sequences::forward_backward(int index , int nb_segment , segment_model *model_type ,
-                                   bool common_contrast , double *shape_parameter ,
-                                   double **rank , double *likelihood ,
-                                   long double *segmentation_entropy ,
-                                   long double *first_order_entropy ,
-                                   long double *change_point_entropy , double *uniform_entropy ,
-                                   long double *marginal_entropy) const
+double Sequences::segmentation(int index , int nb_segment , segment_model *model_type ,
+                               bool common_contrast , double *shape_parameter , double **rank ,
+                               double *isegmentation_likelihood , int *nb_parameter ,
+                               double *segment_penalty)
 
 {
-  register int i , j , k , m;
-  int seq_length , *inf_bound_parameter , *seq_index_parameter;
-  double sum , buff , rlikelihood , *seq_mean , **hyperparam , **nb_segmentation_forward ,
-         **nb_segmentation_backward , **smoothed , ***factorial , ***binomial_coeff;
-  long double segment_norm , sequence_norm , lbuff , *contrast , *normalized_contrast , *norm ,
-              *backward_norm , *entropy_smoothed , *segment_predicted , **forward ,
-              *forward_norm , **backward , **change_point , **forward_predicted_entropy ,
-              **backward_predicted_entropy;
+  bool *used_output;
+  register int i , j , k , m , n , p;
+  int max_nb_value , seq_length , count , *inf_bound_parameter , *seq_index_parameter ,
+      *psegment , **optimal_length;
+  double buff , segmentation_likelihood , **seq_mean , **hyperparam , **forward ,
+         ***factorial , ***binomial_coeff;
+  long double *contrast; 
 
 
+  max_nb_value = 0;
   factorial = new double**[nb_variable];
   inf_bound_parameter = new int[nb_variable];
   binomial_coeff = new double**[nb_variable];
-
-  hyperparam = new double*[nb_variable];
+  seq_mean = new double*[nb_variable];
   seq_index_parameter = NULL;
+  hyperparam = new double*[nb_variable];
 
   for (i = 1;i < nb_variable;i++) {
+    if ((model_type[i - 1] == CATEGORICAL_CHANGE) && (marginal_distribution[i]->nb_value > max_nb_value)) {
+      max_nb_value = marginal_distribution[i]->nb_value;
+    }
+
+    // computation of log of factorials for Poisson models
+
     if ((model_type[i - 1] == POISSON_CHANGE) || (model_type[i - 1] == BAYESIAN_POISSON_CHANGE)) {
       factorial[i] = new double*[nb_sequence];
       for (j = 0;j < nb_sequence;j++) {
@@ -123,6 +129,8 @@ double Sequences::forward_backward(int index , int nb_segment , segment_model *m
     else {
       factorial[i] = NULL;
     }
+
+    // computation of log of binomial coefficients for negative binomial models
 
     if ((model_type[i - 1] == NEGATIVE_BINOMIAL_0_CHANGE) || (model_type[i - 1] == NEGATIVE_BINOMIAL_1_CHANGE)) {
       switch (model_type[i - 1]) {
@@ -153,6 +161,841 @@ double Sequences::forward_backward(int index , int nb_segment , segment_model *m
       binomial_coeff[i] = NULL;
     }
 
+    // computation of sequence means for Gaussian change in the variance models
+
+    if (model_type[i - 1] == VARIANCE_CHANGE) {
+      if ((index != I_DEFAULT) || (!common_contrast)) {
+        seq_mean[i] = new double[nb_sequence];
+
+        if (type[i] != REAL_VALUE) {
+          for (j = 0;j < nb_sequence;j++) {
+            if ((index == I_DEFAULT) || (index == j)) {
+              seq_mean[i][j] = 0.;
+              for (k = 0;k < length[j];k++) {
+                seq_mean[i][j] += int_sequence[j][i][k];
+              }
+              seq_mean[i][j] /= length[j];
+            }
+          }
+        }
+
+        else {
+          for (j = 0;j < nb_sequence;j++) {
+            if ((index == I_DEFAULT) || (index == j)) {
+              seq_mean[i][j] = 0.;
+              for (k = 0;k < length[j];k++) {
+                seq_mean[i][j] += real_sequence[j][i][k];
+              }
+              seq_mean[i][j] /= length[j];
+            }
+          }
+        }
+      }
+
+      else {
+        seq_mean[i] = new double[1];
+        seq_mean[i][0] = 0.;
+
+        if (type[i] != REAL_VALUE) {
+          for (j = 0;j < length[0];j++) {
+            for (k = 0;k < nb_sequence;k++) {
+              seq_mean[i][0] += int_sequence[k][i][j];
+            }
+          }
+        }
+
+        else {
+          for (j = 0;j < length[0];j++) {
+            for (k = 0;k < nb_sequence;k++) {
+              seq_mean[i][0] += real_sequence[k][i][j];
+            }
+          }
+        }
+
+        seq_mean[i][0] /= (nb_sequence * length[0]);
+      }
+    }
+
+    else {
+      seq_mean[i] = NULL;
+    }
+
+    if (((i == 1) && (model_type[0] == INTERCEPT_SLOPE_CHANGE)) ||
+        ((model_type[i - 1] == LINEAR_MODEL_CHANGE) && (!seq_index_parameter))) {
+      if (index_param_type == IMPLICIT_TYPE) {
+        seq_index_parameter = new int[seq_length];
+        for (j = 0;j < seq_length;j++) {
+          seq_index_parameter[j] = j;
+        }
+      }
+      else {
+        seq_index_parameter = index_parameter[index == I_DEFAULT ? 0 : index];
+      }
+    }
+
+    // computation of hyperparameters for Bayesian Poisson and Gaussian models
+
+    if (model_type[i - 1] == BAYESIAN_POISSON_CHANGE) {
+      hyperparam[i] = new double[2];
+      gamma_hyperparameter_computation(index , i , hyperparam[i]);
+    }
+    else if (model_type[i - 1] == BAYESIAN_GAUSSIAN_CHANGE) {
+      hyperparam[i] = new double[4];
+      gaussian_gamma_hyperparameter_computation(index , i , hyperparam[i]);
+    }
+    else {
+      hyperparam[i] = NULL;
+    }
+  }
+
+  seq_length = length[index == I_DEFAULT ? 0 : index];
+  contrast = new long double[seq_length];
+
+  forward = new double*[seq_length];
+  for (i = 0;i < seq_length;i++) {
+    forward[i] = new double[nb_segment];
+  }
+
+  optimal_length = new int*[seq_length];
+  for (i = 0;i < seq_length;i++) {
+    optimal_length[i] = new int[nb_segment];
+  }
+
+  if ((nb_parameter) && (max_nb_value > 0)) {
+    used_output = new bool[max_nb_value];
+  }
+  else {
+    used_output = NULL;
+  }
+
+  // forward recurrence
+
+  for (i = 0;i < seq_length;i++) {
+
+    // computation of segment contrast functions (log-likelihoods or sum of squared deviations)
+
+    forward_contrast(i , index , model_type , common_contrast , factorial ,
+                     shape_parameter , binomial_coeff , seq_mean , seq_index_parameter ,
+                     hyperparam , rank , contrast);
+
+    for (j = 0;j < MIN((i < seq_length - 1 ? nb_segment - 1 : nb_segment) , i + 1);j++) {
+//    for (j = MAX(0 , nb_segment + i - seq_length);j < MIN((i < seq_length - 1 ? nb_segment - 1 : nb_segment) , i + 1);j++) {
+      if (j == 0) {
+        forward[i][j] = contrast[0];
+        if (forward[i][j] != D_INF) {
+          optimal_length[i][j] = i + 1;
+        }
+      }
+
+      else {
+        forward[i][j] = D_INF;
+        for (k = i;k >= j;k--) {
+          if ((contrast[k] != D_INF) && (forward[k - 1][j - 1] != D_INF)) {
+            buff = contrast[k] + forward[k - 1][j - 1];
+            if (buff > forward[i][j]) {
+              forward[i][j] = buff;
+              optimal_length[i][j] = i - k + 1;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  if ((model_type[0] != MEAN_CHANGE) && (model_type[0] != INTERCEPT_SLOPE_CHANGE)) {
+    if (isegmentation_likelihood) {
+      for (i = 0;i < nb_segment;i++) {
+        isegmentation_likelihood[i] = forward[seq_length - 1][i];
+      }
+    }
+
+    segmentation_likelihood = forward[seq_length - 1][nb_segment - 1];
+  }
+
+  else {
+    count = (index == I_DEFAULT ? nb_sequence : 1);
+
+    if (isegmentation_likelihood) {
+      for (i = 0;i < nb_segment;i++) {
+        if (forward[seq_length - 1][i] < 0.) {
+          isegmentation_likelihood[i] = -((double)(count * seq_length) / 2.) *
+                                         (log(-forward[seq_length - 1][i] /
+                                           (count * seq_length)) + log(2 * M_PI) + 1);
+/*          isegmentation_likelihood[i] = -(((double)(count * seq_length) / 2.) *
+                                          (log(-forward[seq_length - 1][i] /
+                                            (count * (seq_length - nb_segment))) + log(2 * M_PI)) +
+                                          (double)(count * (seq_length - nb_segment)) / 2.); */
+        }
+        else {
+          isegmentation_likelihood[i] = D_INF;
+        }
+      }
+    }
+
+    if (forward[seq_length - 1][nb_segment - 1] < 0.) {
+      segmentation_likelihood = -((double)(count * seq_length) / 2.) *
+                                 (log(-forward[seq_length - 1][nb_segment - 1] /
+                                   (count * seq_length)) + log(2 * M_PI) + 1);
+/*      segmentation_likelihood = -(((double)(count * seq_length) / 2.) *
+                                  (log(-forward[seq_length - 1][nb_segment - 1] /
+                                    (count * (seq_length - nb_segment))) + log(2 * M_PI)) +
+                                  (double)(count * (seq_length - nb_segment)) / 2.); */
+    }
+    else {
+      segmentation_likelihood = D_INF;
+    }
+  }
+
+  // computation of the penalty term related to the change-point distribution (modified BIC)
+
+  if (segment_penalty) {
+
+#   ifdef DEBUG
+    int cumul_segment_length;
+    cout << "\n";
+#   endif
+
+    for (i = 0;i < nb_segment;i++) {
+      segment_penalty[i] = 0.;
+      j = seq_length - 1;
+
+#     ifdef DEBUG
+      cumul_segment_length = 0;
+#     endif
+
+      for (k = i;k >= 0;k--) {
+
+#       ifdef DEBUG
+        cout << optimal_length[j][k] << " ";
+        cumul_segment_length += optimal_length[j][k];
+#       endif
+
+        segment_penalty[i] += log((double)optimal_length[j][k]);
+        j -= optimal_length[j][k];
+      }
+
+#     ifdef DEBUG
+      cout << "| " << segment_penalty[i] << endl;
+      if (cumul_segment_length != seq_length) {
+        cout << "\nERROR: " << i << "   " << cumul_segment_length << " | " << seq_length << endl;
+      }
+#     endif
+
+    }
+  }
+
+  // computation of the number of free parameters
+
+  if (nb_parameter) {
+    for (i = 0;i < nb_segment;i++) {
+//      nb_parameter[i] = 0;
+      nb_parameter[i] = i;
+
+      if (model_type[0] == MEAN_CHANGE) {
+        if ((index != I_DEFAULT) || (common_contrast)) {
+          nb_parameter[i] += i + 2;
+        }
+        else {
+          nb_parameter[i] += nb_sequence * (i + 1) + 1;
+        }
+      }
+
+      else if (model_type[0] == INTERCEPT_SLOPE_CHANGE) {
+        if ((index != I_DEFAULT) || (common_contrast)) {
+          nb_parameter[i] += (i + 1) * 2 + 1;
+        }
+        else {
+          nb_parameter[i] += nb_sequence * (i + 1) * 2 + 1;
+        }
+      }
+
+      else {
+        for (j = 1;j < nb_variable;j++) {
+          if (model_type[j - 1] == CATEGORICAL_CHANGE) {
+            if ((index != I_DEFAULT) || (!common_contrast)) {
+              for (k = 0;k < nb_sequence;k++) {
+                if ((index == I_DEFAULT) || (index == k)) {
+                  m = length[k] - 1;
+
+                  for (n = i;n >= 0;n--) {
+                    for (p = 0;p < marginal_distribution[j]->nb_value;p++) {
+                      used_output[p] = false;
+                    }
+                    nb_parameter[i]--;
+
+                    for (p = m;p > m - optimal_length[m][n];p--) {
+                      if (!used_output[int_sequence[k][j][p]]) {
+                        nb_parameter[i]++;
+                        used_output[int_sequence[k][j][p]] = true;
+                      }
+                    }
+
+                    m -= optimal_length[m][n];
+                  }
+                }
+              }
+            }
+
+            else {
+              k = length[0] - 1;
+
+              for (m = i;m >= 0;m--) {
+                for (n = 0;n < marginal_distribution[j]->nb_value;n++) {
+                  used_output[n] = false;
+                }
+                nb_parameter[i]--;
+
+                for (n = k;n > k - optimal_length[k][m];n--) {
+                  for (p = 0;p < nb_sequence;p++) {
+                    if (!used_output[int_sequence[p][j][n]]) {
+                      nb_parameter[i]++;
+                      used_output[int_sequence[p][j][n]] = true;
+                    }
+                  }
+                }
+
+                k -= optimal_length[k][m];
+              }
+            }
+          }
+
+          else if ((model_type[j - 1] == POISSON_CHANGE) || (model_type[j - 1] == NEGATIVE_BINOMIAL_0_CHANGE) ||
+                   (model_type[j - 1] == NEGATIVE_BINOMIAL_1_CHANGE) || (model_type[j - 1] == BAYESIAN_POISSON_CHANGE)) {
+            if ((index != I_DEFAULT) || (common_contrast)) {
+              nb_parameter[i] += i + 1;
+            }
+            else {
+              nb_parameter[i] += (i + 1) * nb_sequence;
+            }
+          }
+
+          else if ((model_type[j - 1] == GAUSSIAN_CHANGE) || (model_type[j - 1] == ORDINAL_GAUSSIAN_CHANGE) ||
+                   (model_type[j - 1] == BAYESIAN_GAUSSIAN_CHANGE)) {
+            if ((index != I_DEFAULT) || (common_contrast)) {
+              nb_parameter[i] += 2 * (i + 1);
+            }
+            else {
+              nb_parameter[i] += 2 * (i + 1) * nb_sequence;
+            }
+          }
+
+          else if ((model_type[j - 1] == LINEAR_MODEL_CHANGE) || (model_type[j - 1] == AUTOREGRESSIVE_MODEL_CHANGE)) {
+            if ((index != I_DEFAULT) || (common_contrast)) {
+              nb_parameter[i] += 3 * (i + 1);
+            }
+            else {
+              nb_parameter[i] += 3 * (i + 1) * nb_sequence;
+            }
+          }
+
+          else if (model_type[j - 1] == VARIANCE_CHANGE) {
+            nb_parameter[i] += i + 2;
+          }
+        }
+      }
+    }
+  }
+
+  // restoration
+
+  i = seq_length - 1;
+  psegment = int_sequence[index == I_DEFAULT ? 0 : index][0] + i;
+
+  for (j = nb_segment - 1;j >= 0;j--) {
+//    for (k = 0;k < optimal_length[i][j];m++) {
+    for (k = i;k > i - optimal_length[i][j];k--) {
+      *psegment-- = j;
+    }
+    i -= optimal_length[i][j];
+  }
+
+  if (index == I_DEFAULT) {
+    for (i = 1;i < nb_sequence;i++) {
+      for (j = 0;j < length[0];j++) {
+        int_sequence[i][0][j] = int_sequence[0][0][j];
+      }
+    }
+  }
+
+  min_value[0] = 0;
+  max_value[0] = nb_segment - 1;
+  delete marginal_distribution[0];
+  build_marginal_frequency_distribution(0);
+
+  for (i = 1;i < nb_variable;i++) {
+    if ((model_type[i - 1] == POISSON_CHANGE) || (model_type[i - 1] == BAYESIAN_POISSON_CHANGE)) {
+      for (j = 0;j < nb_sequence;j++) {
+        delete [] factorial[i][j];
+      }
+      delete [] factorial[i];
+    }
+
+    if ((model_type[i - 1] == NEGATIVE_BINOMIAL_0_CHANGE) || (model_type[i - 1] == NEGATIVE_BINOMIAL_1_CHANGE)) {
+      for (j = 0;j < nb_sequence;j++) {
+        delete [] binomial_coeff[i][j];
+      }
+      delete [] binomial_coeff[i];
+    }
+
+    delete [] seq_mean[i];
+    delete [] hyperparam[i];
+  }
+  delete [] factorial;
+  delete [] inf_bound_parameter;
+  delete [] binomial_coeff;
+  delete [] seq_mean;
+  delete [] hyperparam;
+
+  if (index_param_type == IMPLICIT_TYPE) {
+    delete [] seq_index_parameter;
+  }
+
+  delete [] contrast;
+
+  for (i = 0;i < seq_length;i++) {
+    delete [] forward[i];
+  }
+  delete [] forward;
+
+  for (i = 0;i < seq_length;i++) {
+    delete [] optimal_length[i];
+  }
+  delete [] optimal_length;
+
+  delete [] used_output;
+
+  return segmentation_likelihood;
+}
+
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Optimal segmentation of a single sequence or a sample of sequences.
+ *
+ *  \param[in]  error           reference on a StatError object,
+ *  \param[in]  os              stream,
+ *  \param[in]  iidentifier     sequence identifier,
+ *  \param[in]  nb_segment      number of segments,
+ *  \param[in]  model_type      segment model types,
+ *  \param[in]  common_contrast flag contrast functions common to the individuals,
+ *  \param[in]  shape_parameter negative binomial shape parameters,
+ *  \param[in]  output          output (sequence or residuals).
+ *  \param[in]  continuity      flag continuous piecewise linear function,
+ *
+ *  \param[out] oseq            sequences.
+ */
+/*--------------------------------------------------------------*/
+
+Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentifier ,
+                                   int nb_segment , segment_model *model_type ,
+                                   bool common_contrast , double *shape_parameter ,
+                                   sequence_type output , bool continuity) const
+
+{
+  bool status = true;
+  register int i , j;
+  int index , nb_parameter , *psegment;
+  double segmentation_likelihood , segment_penalty , penalized_likelihood , **rank;
+  FrequencyDistribution *marginal;
+  Sequences *seq , *iseq , *oseq;
+
+
+  oseq = NULL;
+  error.init();
+
+/*  if (((index_param_type == TIME) && (index_interval->variance > 0.)) ||
+      (index_param_type == POSITION)) {
+    status = false;
+    error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
+  }
+  if (index_param_type == POSITION) {
+    status = false;
+    error.correction_update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE] , SEQ_index_parameter_word[TIME]);
+  } */
+
+  for (i = 0;i < nb_variable;i++) {
+    if ((model_type[i] == CATEGORICAL_CHANGE) || (model_type[i] == POISSON_CHANGE) ||
+        (model_type[i] == NEGATIVE_BINOMIAL_0_CHANGE) || (model_type[i] == NEGATIVE_BINOMIAL_1_CHANGE) ||
+        (model_type[i] == ORDINAL_GAUSSIAN_CHANGE) || (model_type[i] == BAYESIAN_POISSON_CHANGE)) {
+      if ((type[i] != INT_VALUE) && (type[i] != STATE)) {
+        status = false;
+        ostringstream error_message , correction_message;
+        error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
+                      << STAT_error[STATR_VARIABLE_TYPE];
+        correction_message << STAT_variable_word[INT_VALUE] << " or "
+                           << STAT_variable_word[STATE];
+        error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
+      }
+
+      else {
+        if (((model_type[i] != NEGATIVE_BINOMIAL_1_CHANGE) && (min_value[i] < 0)) ||
+            ((model_type[i] == NEGATIVE_BINOMIAL_1_CHANGE) && (min_value[i] < 1))) {
+          status = false;
+          ostringstream error_message;
+          error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
+                        << STAT_error[STATR_POSITIVE_MIN_VALUE];
+          error.update((error_message.str()).c_str());
+        }
+
+        if (!marginal_distribution[i]) {
+          status = false;
+          ostringstream error_message;
+          error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
+                        << STAT_error[STATR_MARGINAL_FREQUENCY_DISTRIBUTION];
+          error.update((error_message.str()).c_str());
+        }
+
+        else if (model_type[i] == CATEGORICAL_CHANGE) {
+          if ((marginal_distribution[i]->nb_value < 2) ||
+              (marginal_distribution[i]->nb_value > NB_OUTPUT)) {
+            status = false;
+            ostringstream error_message;
+            error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
+                          << STAT_error[STATR_NB_VALUE];
+            error.update((error_message.str()).c_str());
+          }
+
+          else {
+            for (j = 0;j < marginal_distribution[i]->nb_value;j++) {
+              if (marginal_distribution[i]->frequency[j] == 0) {
+                status = false;
+                ostringstream error_message;
+                error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
+                              << STAT_error[STATR_MISSING_VALUE] << " " << j;
+                error.update((error_message.str()).c_str());
+              }
+            }
+          }
+        }
+      }
+
+      if (((model_type[i] == CATEGORICAL_CHANGE) || (model_type[i] == ORDINAL_GAUSSIAN_CHANGE)) &&
+          ((output == SUBTRACTION_RESIDUAL) || (output == DIVISION_RESIDUAL))) {
+        status = false;
+        error.update(SEQ_error[SEQR_FORBIDDEN_OUTPUT]);
+      }
+    }
+
+    else if ((type[i] != INT_VALUE) && (type[i] != STATE) && (type[i] != REAL_VALUE)) {
+      status = false;
+      ostringstream error_message , correction_message;
+      error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
+                    << STAT_error[STATR_VARIABLE_TYPE];
+      correction_message << STAT_variable_word[INT_VALUE] << " or "
+                         << STAT_variable_word[STATE] << " or "
+                         << STAT_variable_word[REAL_VALUE];
+      error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
+    }
+  }
+
+  if (iidentifier != I_DEFAULT) {
+    for (i = 0;i < nb_sequence;i++) {
+      if (iidentifier == identifier[i]) {
+        index = i;
+        break;
+      }
+    }
+
+    if (i == nb_sequence) {
+      status = false;
+      error.update(SEQ_error[SEQR_SEQUENCE_IDENTIFIER]);
+    }
+  }
+
+  else {
+    index = I_DEFAULT;
+    if (length_distribution->variance > 0.) {
+      status = false;
+      error.update(SEQ_error[SEQR_VARIABLE_SEQUENCE_LENGTH]);
+    }
+  }
+
+  if ((status) && ((nb_segment < 1) || (nb_segment > length[index == I_DEFAULT ? 0 : index] / 2))) {
+    status = false;
+    error.update(SEQ_error[SEQR_NB_SEGMENT]);
+  }
+
+  if (status) {
+    if (index != I_DEFAULT) {
+      iseq = new Sequences(*this , 1 , &index);
+      seq = new Sequences(*iseq , ADD_STATE_VARIABLE);
+      delete iseq;
+    }
+    else {
+      seq = new Sequences(*this , ADD_STATE_VARIABLE);
+    }
+
+    // rank computation for ordinal variables
+
+    rank = new double*[seq->nb_variable];
+
+    for (i = 1;i < seq->nb_variable;i++) {
+      if (model_type[i - 1] == ORDINAL_GAUSSIAN_CHANGE) {
+        rank[i] = seq->marginal_distribution[i]->rank_computation();
+      }
+      else {
+        rank[i] = NULL;
+      }
+    }
+
+    segmentation_likelihood = seq->segmentation((index == I_DEFAULT ? index : 0) , nb_segment , model_type ,
+                                                common_contrast , shape_parameter , rank);
+
+    for (i = 1;i < seq->nb_variable;i++) {
+      delete [] rank[i];
+    }
+    delete [] rank;
+
+    if (segmentation_likelihood != D_INF) {
+
+#     ifdef MESSAGE
+      psegment = seq->int_sequence[0][0] + 1;
+      segment_penalty = 0.;
+      i = 0;
+      for (j = 1;j < seq->length[0];j++) {
+        if (*psegment != *(psegment - 1)) {
+          segment_penalty += log((double)(j - i));
+          i = j;
+        }
+        psegment++;
+      }
+      segment_penalty += log((double)(seq->length[0] - i));
+
+      nb_parameter = seq->nb_parameter_computation((index == I_DEFAULT ? index : 0) , nb_segment , model_type ,
+                                                   common_contrast);
+
+      penalized_likelihood = 2 * segmentation_likelihood - nb_parameter *
+                             log((double)((seq->nb_variable - 1) * seq->length[0])) - segment_penalty;
+
+      os << "\n" << nb_segment << " " << (nb_segment == 1 ? SEQ_label[SEQL_SEGMENT] : SEQ_label[SEQL_SEGMENTS])
+         << "   2 * " << STAT_label[STATL_LIKELIHOOD] << ": " << 2 * segmentation_likelihood << "   "
+         << nb_parameter << " " << STAT_label[nb_parameter == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS]
+         << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " (Modified "  << STAT_criterion_word[BIC] << "): "
+         << penalized_likelihood << endl;
+#     endif
+
+      oseq = seq->segmentation_output(nb_segment , model_type , common_contrast , os , output ,
+                                      NULL , continuity);
+
+      if (output == SEQUENCE) {
+        delete seq;
+      }
+    }
+
+    else {
+      delete seq;
+      oseq = NULL;
+      error.update(SEQ_error[SEQR_SEGMENTATION_FAILURE]);
+    }
+  }
+
+  return oseq;
+}
+
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Optimal segmentation of a single sequence or a sample of sequences.
+ *
+ *  \param[in]  error           reference on a StatError object,
+ *  \param[in]  os              stream,
+ *  \param[in]  iidentifier     sequence identifier,
+ *  \param[in]  nb_segment      number of segments,
+ *  \param[in]  model_type      segment model types,
+ *  \param[in]  common_contrast flag contrast functions common to the individuals,
+ *  \param[in]  shape_parameter negative binomial shape parameters,
+ *  \param[in]  output          output (sequence or residuals).
+ *  \param[in]  continuity      flag continuous piecewise linear function,
+ *
+ *  \param[out]                 sequences.
+ */
+/*--------------------------------------------------------------*/
+
+Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentifier ,
+                                   int nb_segment , vector<segment_model> model_type ,
+                                   bool common_contrast , vector<double> shape_parameter ,
+                                   sequence_type output , bool continuity) const
+
+{
+  return segmentation(error , os , iidentifier , nb_segment , model_type.data() ,
+                      common_contrast , shape_parameter.data() , output , continuity);
+}
+
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of segmentation and change-point entropies.
+ *
+ *  \param[in] index                sequence index,
+ *  \param[in] nb_segment           number of segments,
+ *  \param[in] model_type           segment model types,
+ *  \param[in] common_contrast      flag contrast functions common to the individuals,
+ *  \param[in] shape_parameter      negative binomial shape parameters,
+ *  \param[in] rank                 ranks (ordinal variables),
+ *  \param[in] likelihood           pointer on the log-likelihoods of all the possibles segmentations,
+ *  \param[in] segmentation_entropy pointer on the segmentation entropies,
+ *  \param[in] first_order_entropy  pointer on the entropies assuming first-order dependencies,
+ *  \param[in] change_point_entropy pointer on the change-point entropies considering or not change-point ranks,
+ *  \param[in] uniform_entropy      pointer on the entropies corresponding to a uniform distribution assumption,
+ *  \param[in] marginal_entropy     pointer on the marginal entropies,
+ *
+ *  \param[out] rlikelihood         log-likelihood of the multiple change-point model.
+ */
+/*--------------------------------------------------------------*/
+
+double Sequences::forward_backward(int index , int nb_segment , segment_model *model_type ,
+                                   bool common_contrast , double *shape_parameter ,
+                                   double **rank , double *likelihood ,
+                                   long double *segmentation_entropy ,
+                                   long double *first_order_entropy ,
+                                   long double *change_point_entropy , double *uniform_entropy ,
+                                   long double *marginal_entropy) const
+
+{
+  register int i , j , k , m;
+  int seq_length , *inf_bound_parameter , *seq_index_parameter;
+  double sum , buff , rlikelihood , **seq_mean , **hyperparam , **nb_segmentation_forward ,
+         **nb_segmentation_backward , **smoothed , ***factorial , ***binomial_coeff;
+  long double segment_norm , sequence_norm , lbuff , *contrast , *normalized_contrast , *norm ,
+              *backward_norm , *entropy_smoothed , *segment_predicted , **forward ,
+              *forward_norm , **backward , **change_point , **forward_predicted_entropy ,
+              **backward_predicted_entropy;
+
+
+  factorial = new double**[nb_variable];
+  inf_bound_parameter = new int[nb_variable];
+  binomial_coeff = new double**[nb_variable];
+  seq_mean = new double*[nb_variable];
+  seq_index_parameter = NULL;
+  hyperparam = new double*[nb_variable];
+
+  for (i = 1;i < nb_variable;i++) {
+
+    // computation of log of factorials for Poisson models
+
+    if ((model_type[i - 1] == POISSON_CHANGE) || (model_type[i - 1] == BAYESIAN_POISSON_CHANGE)) {
+      factorial[i] = new double*[nb_sequence];
+      for (j = 0;j < nb_sequence;j++) {
+        if ((index == I_DEFAULT) || (index == j)) {
+          factorial[i][j] = new double[length[j]];
+          for (k = 0;k < length[j];k++) {
+            factorial[i][j][k] = log_factorial(int_sequence[j][i][k]);
+          }
+        }
+        else {
+          factorial[i][j] = NULL;
+        }
+      }
+    }
+
+    else {
+      factorial[i] = NULL;
+    }
+
+    // computation of log of binomial coefficients for negative binomial models
+
+    if ((model_type[i - 1] == NEGATIVE_BINOMIAL_0_CHANGE) || (model_type[i - 1] == NEGATIVE_BINOMIAL_1_CHANGE)) {
+      switch (model_type[i - 1]) {
+      case NEGATIVE_BINOMIAL_0_CHANGE :
+        inf_bound_parameter[i - 1] = 0;
+        break;
+      case NEGATIVE_BINOMIAL_1_CHANGE :
+        inf_bound_parameter[i - 1] = 1;
+        break;
+      }
+
+      binomial_coeff[i] = new double*[nb_sequence];
+      for (j = 0;j < nb_sequence;j++) {
+        if ((index == I_DEFAULT) || (index == j)) {
+          binomial_coeff[i][j] = new double[length[j]];
+          for (k = 0;k < length[j];k++) {
+            binomial_coeff[i][j][k] = log_binomial_coefficient(inf_bound_parameter[i - 1] , shape_parameter[i - 1] ,
+                                                               int_sequence[j][i][k]);
+          }
+        }
+        else {
+          binomial_coeff[i][j] = NULL;
+        }
+      }
+    }
+
+    else {
+      binomial_coeff[i] = NULL;
+    }
+
+    // computation of sequence means for Gaussian change in the variance models
+
+    if (model_type[i - 1] == VARIANCE_CHANGE) {
+      if ((index != I_DEFAULT) || (!common_contrast)) {
+        seq_mean[i] = new double[nb_sequence];
+
+        if (type[i] != REAL_VALUE) {
+          for (j = 0;j < nb_sequence;j++) {
+            if ((index == I_DEFAULT) || (index == j)) {
+              seq_mean[i][j] = 0.;
+              for (k = 0;k < length[j];k++) {
+                seq_mean[i][j] += int_sequence[j][i][k];
+              }
+              seq_mean[i][j] /= length[j];
+            }
+          }
+        }
+
+        else {
+          for (j = 0;j < nb_sequence;j++) {
+            if ((index == I_DEFAULT) || (index == j)) {
+              seq_mean[i][j] = 0.;
+              for (k = 0;k < length[j];k++) {
+                seq_mean[i][j] += real_sequence[j][i][k];
+              }
+              seq_mean[i][j] /= length[j];
+            }
+          }
+        }
+      }
+
+      else {
+        seq_mean[i] = new double[1];
+        seq_mean[i][0] = 0.;
+
+        if (type[i] != REAL_VALUE) {
+          for (j = 0;j < length[0];j++) {
+            for (k = 0;k < nb_sequence;k++) {
+              seq_mean[i][0] += int_sequence[k][i][j];
+            }
+          }
+        }
+
+        else {
+          for (j = 0;j < length[0];j++) {
+            for (k = 0;k < nb_sequence;k++) {
+              seq_mean[i][0] += real_sequence[k][i][j];
+            }
+          }
+        }
+
+        seq_mean[i][0] /= (nb_sequence * length[0]);
+      }
+    }
+
+    else {
+      seq_mean[i] = NULL;
+    }
+
+    if ((model_type[i - 1] == LINEAR_MODEL_CHANGE) && (!seq_index_parameter)) {
+      if (index_param_type == IMPLICIT_TYPE) {
+        seq_index_parameter = new int[seq_length];
+        for (j = 0;j < seq_length;j++) {
+          seq_index_parameter[j] = j;
+        }
+      }
+      else {
+        seq_index_parameter = index_parameter[index == I_DEFAULT ? 0 : index];
+      }
+    }
+
+    // computation of hyperparameters for Bayesian Poisson and Gaussian models
+
     if (model_type[i - 1] == BAYESIAN_POISSON_CHANGE) {
       hyperparam[i] = new double[2];
       gamma_hyperparameter_computation(index , i , hyperparam[i]);
@@ -178,8 +1021,6 @@ double Sequences::forward_backward(int index , int nb_segment , segment_model *m
       hyperparam[i] = NULL;
     }
   }
-
-  seq_mean = new double[nb_variable];
 
   seq_length = length[index == I_DEFAULT ? 0 : index];
   contrast = new long double[seq_length];
@@ -234,35 +1075,6 @@ double Sequences::forward_backward(int index , int nb_segment , segment_model *m
 
   entropy_smoothed = new long double[nb_segment];
 
-  for (i = 1;i < nb_variable;i++) {
-    if (model_type[i - 1] == VARIANCE_CHANGE) {
-      seq_mean[i] = 0.;
-      if (type[i] != REAL_VALUE) {
-        for (j = 0;j < length[index];j++) {
-          seq_mean[i] += int_sequence[index][i][j];
-        }
-      }
-      else {
-        for (j = 0;j < length[index];j++) {
-          seq_mean[i] += real_sequence[index][i][j];
-        }
-      }
-      seq_mean[i] /= length[index];
-    }
-
-    if ((model_type[i - 1] == LINEAR_MODEL_CHANGE) && (!seq_index_parameter)) {
-      if (index_param_type == IMPLICIT_TYPE) {
-        seq_index_parameter = new int[seq_length];
-        for (j = 0;j < seq_length;j++) {
-          seq_index_parameter[j] = j;
-        }
-      }
-      else {
-        seq_index_parameter = index_parameter[index == I_DEFAULT ? 0 : index];
-      }
-    }
-  }
-
   // forward recurrence
 
   for (i = 0;i < seq_length;i++) {
@@ -270,8 +1082,8 @@ double Sequences::forward_backward(int index , int nb_segment , segment_model *m
     // computation of segment log-likelihoods
 
     forward_contrast(i , index , model_type , common_contrast , factorial ,
-                     shape_parameter , binomial_coeff , seq_index_parameter ,
-                     seq_mean , hyperparam , rank , contrast);
+                     shape_parameter , binomial_coeff , seq_mean , seq_index_parameter ,
+                     hyperparam , rank , contrast);
 
     // computation of the number of segmentations
 
@@ -403,8 +1215,8 @@ double Sequences::forward_backward(int index , int nb_segment , segment_model *m
       // computation of segment log-likelihoods
 
       backward_contrast(i , index , model_type , common_contrast , factorial ,
-                        shape_parameter , binomial_coeff , seq_index_parameter ,
-                        seq_mean , hyperparam , rank , contrast);
+                        shape_parameter , binomial_coeff , seq_mean , seq_index_parameter ,
+                        hyperparam , rank , contrast);
 
       // computation of the number of possible segmentations
 
@@ -731,120 +1543,6 @@ double Sequences::forward_backward(int index , int nb_segment , segment_model *m
     }
   }
 
-# ifdef DEBUG
-  double **segment_length;
-  Distribution *prior;
-
-
-  // computation of the prior segment length distribution corresponding to the assumption of
-  // a uniform prior distribution for the possible segmentations
-
-  segment_length = new double*[nb_segment];
-  for (i = 0;i < nb_segment;i++) {
-    segment_length[i] = new double[seq_length - nb_segment + 2];
-    for (j = 0;j <= seq_length - nb_segment + 1;j++) {
-      segment_length[i][j] = 0.;
-    }
-  }
-
-  // forward recurrence
-
-  for (i = 0;i < seq_length;i++) {
-    for (j = 0;j < nb_segment;j++) {
-      nb_segmentation_forward[i][j] = 0;
-    }
-
-    for (j = MAX(0 , nb_segment + i - seq_length);j < MIN((i < seq_length - 1 ? nb_segment - 1 : nb_segment) , i + 1);j++) {
-      if (j == 0) {
-        nb_segmentation_forward[i][j]++;
-      }
-
-      else {
-        for (k = i;k >= j;k--) {
-          nb_segmentation_forward[i][j] += nb_segmentation_forward[k - 1][j - 1];
-        }
-      }
-    }
-  }
-
-  // backward recurrence
-
-  for (i = seq_length - 1;i > 0;i--) {
-    for (j = 0;j < nb_segment;j++) {
-      nb_segmentation_backward[i][j] = 0;
-    }
-
-    for (j = MAX(1 , nb_segment + i - seq_length);j < MIN(nb_segment , i + 1);j++) {
-      if (j < nb_segment - 1) {
-        for (k = i;k <= seq_length + j - nb_segment;k++) {
-          nb_segmentation_backward[i][j] += nb_segmentation_backward[k + 1][j + 1];
-          segment_length[j][k - i + 1] += nb_segmentation_forward[i - 1][j - 1] *
-                                          nb_segmentation_backward[k + 1][j + 1];
-        }
-      }
-
-      else {
-        nb_segmentation_backward[i][j]++;
-        segment_length[j][seq_length - i] += nb_segmentation_forward[i - 1][j - 1];
-      }
-    }
-  }
-
-  for (i = 0;i <= seq_length - nb_segment;i++) {
-    segment_length[0][i + 1] += nb_segmentation_backward[i + 1][1];
-  }
-
-  for (i = 0;i < nb_segment;i++) {
-    cout << "\n" << SEQ_label[SEQL_SEGMENT] << " " << i << ":";
-
-    sum = 0.;
-    for (j = 1;j <= seq_length - nb_segment + 1;j++) {
-      sum += segment_length[i][j];
-    }
-
-    for (j = 1;j <= seq_length - nb_segment + 1;j++) {
-      cout << " " << segment_length[i][j] / sum;
-    }
-    cout << endl;
-  }
-
-  prior = new Distribution(seq_length - nb_segment + 2);
-  prior->mass[0] = 0.;
-
-  buff = 1.;
-  for (i = 1;i < nb_segment - 1;i++) {
-    buff *= (double)(seq_length - i - 1) / (double)i;
-  }
-  sum = buff * (double)(seq_length - 1) / (double)(nb_segment - 1);
-
-//  cout << "\nAll " << SEQ_label[SEQL_SEGMENTS] << ":";
-  for (i = 1;i <= seq_length - nb_segment + 1;i++) {
-//    cout << " " << buff / sum;
-    prior->mass[i] = buff / sum;
-    buff *= (double)(seq_length - i - nb_segment + 1) /
-            (double)(seq_length - i - 1);
-  }
-//  cout << endl;
-
-  prior->offset = 1.;
-  prior->cumul_computation();
-  prior->max = prior->mass[1];
-  prior->mean_computation();
-  prior->variance_computation();
-
-  cout << "\n";
-  prior->ascii_characteristic_print(cout , true);
-//  prior->spreadsheet_characteristic_print(cout , true);
-  prior->ascii_print(cout , false , true , false);
-
-  for (i = 0;i < nb_segment;i++) {
-    delete [] segment_length[i];
-  }
-  delete [] segment_length;
-
-  delete prior;
-# endif
-
   for (i = 1;i < nb_variable;i++) {
     if ((model_type[i - 1] == POISSON_CHANGE) || (model_type[i - 1] == BAYESIAN_POISSON_CHANGE)) {
       for (j = 0;j < nb_sequence;j++) {
@@ -859,17 +1557,16 @@ double Sequences::forward_backward(int index , int nb_segment , segment_model *m
       }
       delete [] binomial_coeff[i];
     }
+
+    delete [] seq_mean[i];
+    delete [] hyperparam[i];
   }
   delete [] factorial;
   delete [] inf_bound_parameter;
   delete [] binomial_coeff;
-
-  for (i = 1;i < nb_variable;i++) {
-    delete [] hyperparam[i];
-  }
+  delete [] seq_mean;
   delete [] hyperparam;
 
-  delete [] seq_mean;
   if (index_param_type == IMPLICIT_TYPE) {
     delete [] seq_index_parameter;
   }
@@ -931,20 +1628,25 @@ double Sequences::forward_backward(int index , int nb_segment , segment_model *m
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Slope heuristic: date-driven slope estimation (log-likelihood as
+ *         a function of the penalty shape).
  *
- *  Slope heuristic: date-driven slope estimation (log-likelihood as
- *  a function of the penalty shape).
- *
- *  arguments: minimum and maximum numbers of segments, penalty shape type,
- *             sequence length, pointers on the penalty shapes and
- *             the log-likelihoods, references on the intercept, slope
- *             slope standard deviation and residual standard deviation.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] min_nb_segment              minimum number of segments,
+ *  \param[in] max_nb_segment              maximum number of segments,
+ *  \param[in] penalty_shape_type          penalty shape type,
+ *  \param[in] penalty_shape               pointer on the penalty shapes,
+ *  \param[in] likelihood                  pointer on the log-likelihoods,
+ *  \param[in] intercept                   references on the intercept,
+ *  \param[in] slope                       references on the slope,
+ *  \param[in] slope_standard_deviation    slope standard deviation,
+ *  \param[in] residual_standard_deviation residual standard deviation.
+ */
+/*--------------------------------------------------------------*/
 
 void log_likelihood_slope(int min_nb_segment , int max_nb_segment , int penalty_shape_type ,
-                          int length , double *penalty_shape , double *likelihood ,
+                          double *penalty_shape , double *likelihood ,
                           double &intercept , double &slope , double &slope_standard_deviation ,
                           double &residual_standard_deviation)
 
@@ -1031,19 +1733,135 @@ void log_likelihood_slope(int min_nb_segment , int max_nb_segment , int penalty_
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Slope heuristic: dimension jump method.
  *
- *  Optimal segmentation of a single sequence or a sample of sequences.
+ *  \param[in]  os             stream,
+ *  \param[in]  max_nb_segment maximum number of segments,
+ *  \param[in]  slope_step     step on the slope,
+ *  \param[in]  penalty_shape  pointer on the penalty shapes,
+ *  \param[in]  likelihood     pointer on the log-likelihoods,
  *
- *  arguments: reference on a StatError object, stream, sequence identifier,
- *             maximum number of segments, segment model types,
- *             flag contrast functions common to the individuals,
- *             negative binomial distribution parameters, criterion
- *             for selection of the number of segments, minimum  number of segments,
- *             penalty shape for the slope heuristic,
- *             output (sequence, entropies or KL divergences).
+ *  \param[out] optimal_slope  optimal slope.
+ */
+/*--------------------------------------------------------------*/
+
+double dimension_jump(ostream &os , int max_nb_segment , double slope_step ,
+                      double *penalty_shape , double *likelihood)
+
+{
+  register int i , j;
+  int max_diff_nb_segment , nb_segment , previous_nb_segment , nb_step , *step_nb_segment;
+  double slope , optimal_slope , max_likelihood , penalized_likelihood , *begin_slope , *end_slope;
+
+
+  step_nb_segment = new int[max_nb_segment + 1];
+  begin_slope = new double[max_nb_segment + 1];
+  end_slope = new double[max_nb_segment + 1];
+
+  max_diff_nb_segment = 0;
+  slope = slope_step;
+  i = 0;
+
+  do {
+    max_likelihood = D_INF;
+    for (j = 1;j <= max_nb_segment;j++) {
+      penalized_likelihood = 2 * (likelihood[j] - 2 * penalty_shape[j] * slope);
+      if (penalized_likelihood > max_likelihood) {
+        max_likelihood = penalized_likelihood;
+        nb_segment = j;
+      }
+    }
+
+    if (slope == slope_step) {
+      step_nb_segment[i] = nb_segment;
+      begin_slope[i] = slope;
+    }
+
+    else {
+      if (previous_nb_segment > nb_segment) {
+        end_slope[i] = slope - slope_step;
+        i++;
+        step_nb_segment[i] = nb_segment;
+        begin_slope[i] = slope;
+
+        if (previous_nb_segment - nb_segment > max_diff_nb_segment) {
+          max_diff_nb_segment = previous_nb_segment - nb_segment;
+          optimal_slope = slope;
+        }
+      }
+    }
+
+    previous_nb_segment = nb_segment;
+    slope += slope_step;
+  }
+  while ((nb_segment > 1) && (slope <= MAX_SLOPE));
+
+  end_slope[i] = ceil(slope);
+  nb_step = i + 1;
+
+  if (max_diff_nb_segment < MIN_DIMENSION_JUMP) {
+    optimal_slope = D_DEFAULT;
+  }
+  if (optimal_slope > 0.) {
+    optimal_slope *= 2;
+  }
+
+# ifdef MESSAGE
+  int width[2];
+  long old_adjust;
+
+  old_adjust = os.flags(ios::adjustfield);
+
+  width[0] = stat_tool::column_width(max_nb_segment);
+  width[1] = stat_tool::column_width(1 , begin_slope + nb_step - 1);
+
+  os << "\n" << SEQ_label[SEQL_PIECEWISE_STEP_FUNCTION] << endl;
+  for (i = 0;i < nb_step;i++) {
+    os.setf(ios::left , ios::adjustfield);
+
+    os << setw(width[0]) << step_nb_segment[i] << "   "
+       << setw(width[1]) << begin_slope[i] << " -> "
+       << setw(width[1]) << end_slope[i] << endl;
+  }
+
+  os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
+
+  os << "\n" << SEQ_label[SEQL_DIMENSION_JUMP] << ": " << max_diff_nb_segment;
+  if (optimal_slope > 0.) {
+    os << "   " << SEQ_label[SEQL_OPTIMAL_SLOPE] << ": " << optimal_slope;
+  }
+  os << endl;
+# endif
+
+  delete [] step_nb_segment;
+  delete [] begin_slope;
+  delete [] end_slope;
+
+  return optimal_slope;
+}
+
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Optimal segmentation of a single sequence or a sample of sequences.
  *
- *--------------------------------------------------------------*/
+ *  \param[in]  error              reference on a StatError object,
+ *  \param[in]  os                 stream,
+ *  \param[in]  iidentifier        sequence identifier,
+ *  \param[in]  max_nb_segment     maximum number of segments,
+ *  \param[in]  model_type         segment model types,
+ *  \param[in]  common_contrast    flag contrast functions common to the individuals,
+ *  \param[in]  shape_parameter    negative binomial shape parameters,
+ *  \param[in]  criterion          criterion for the selection of the number of segments,
+ *  \param[in]  min_nb_segment     minimum  number of segments,
+ *  \param[in]  penalty_shape_type penalty shape for the slope heuristic,
+ *  \param[in]  output             output (sequence, entropies or Kullback-Leibler divergences),
+ *
+ *  \param[out] oseq               sequences.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentifier ,
                                    int max_nb_segment , segment_model *model_type ,
@@ -1057,10 +1875,10 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
   int index , nb_segment , inb_sequence , *nb_parameter , ilength[4];
   variable_nature itype[1];
   double buff , segmentation_intercept , segmentation_slope , segmentation_slope_standard_deviation ,
-         segmentation_residual_standard_deviation , intercept , slope , slope_standard_deviation ,
-         residual_standard_deviation , scaling_factor , max_likelihood[4] , *segmentation_likelihood ,
-         *segment_penalty , *penalty_shape , **penalized_likelihood , *likelihood , *uniform_entropy ,
-         *segmentation_divergence , **rank;
+         segmentation_residual_standard_deviation , segmentation_dimension_jump_slope , intercept ,
+         slope , slope_standard_deviation , residual_standard_deviation , dimension_jump_slope ,
+         scaling_factor , max_likelihood[6] , *segmentation_likelihood , *segment_penalty , *penalty_shape ,
+         **penalized_likelihood , *likelihood , *uniform_entropy , *segmentation_divergence , **rank;
   long double *segmentation_entropy , *first_order_entropy , *change_point_entropy , *marginal_entropy;
   Sequences *iseq , *seq , *oseq;
 
@@ -1089,6 +1907,9 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
 
     if (criterion == LIKELIHOOD_SLOPE) {
       criterion = SEGMENTATION_LIKELIHOOD_SLOPE;
+    }
+    else if (criterion == DIMENSION_JUMP) {
+      criterion = SEGMENTATION_DIMENSION_JUMP;
     }
     else if (criterion == ICL) {
       criterion = mBIC;
@@ -1204,10 +2025,10 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
       min_nb_segment = max_nb_segment / 2;
 
       if (criterion == LIKELIHOOD_SLOPE) {
-        criterion = ICL;
+        criterion = DIMENSION_JUMP;
       }
       else if (criterion == SEGMENTATION_LIKELIHOOD_SLOPE) {
-        criterion = mBIC;
+        criterion = SEGMENTATION_DIMENSION_JUMP;
       }
     }
 
@@ -1220,10 +2041,10 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
   if (status) {
     if (max_nb_segment - min_nb_segment < SLOPE_NB_SEGMENT_RANGE) {
       if (criterion == LIKELIHOOD_SLOPE) {
-        criterion = ICL;
+        criterion = DIMENSION_JUMP;
       }
       else if (criterion == SEGMENTATION_LIKELIHOOD_SLOPE) {
-        criterion = mBIC;
+        criterion = SEGMENTATION_DIMENSION_JUMP;
       }
 
       if (output == LOG_LIKELIHOOD_SLOPE) {
@@ -1260,8 +2081,8 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
       bayesian = true;
 //      nb_segment = 2;
 
-      penalized_likelihood = new double*[1];
-      penalized_likelihood[0] = new double[max_nb_segment + 1];
+      penalized_likelihood = new double*[3];
+      penalized_likelihood[2] = new double[max_nb_segment + 1];
     }
 
     else {
@@ -1269,8 +2090,8 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
 
       segment_penalty = new double[max_nb_segment + 2];
 
-      penalized_likelihood = new double*[4];
-      for (i = 0;i < 4;i++) {
+      penalized_likelihood = new double*[6];
+      for (i = 0;i < 6;i++) {
         penalized_likelihood[i] = new double[max_nb_segment + 1];
       }
     }
@@ -1347,9 +2168,15 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
                       segmentation_likelihood + 1 , nb_parameter + 1 ,
                       (bayesian ? NULL : segment_penalty + 1));
 
+    segmentation_dimension_jump_slope = dimension_jump(os , max_nb_segment , SLOPE_STEP , penalty_shape ,
+                                                       segmentation_likelihood);
+    if ((segmentation_dimension_jump_slope < 0.) && (criterion = SEGMENTATION_DIMENSION_JUMP)) {
+      criterion = mBIC;
+    }
+
     if (max_nb_segment - min_nb_segment >= SLOPE_NB_SEGMENT_RANGE) {
-      log_likelihood_slope(min_nb_segment , max_nb_segment , penalty_shape_type , seq->length[0] ,
-                           penalty_shape , segmentation_likelihood , segmentation_intercept , segmentation_slope ,
+      log_likelihood_slope(min_nb_segment , max_nb_segment , penalty_shape_type , penalty_shape ,
+                           segmentation_likelihood , segmentation_intercept , segmentation_slope ,
                            segmentation_slope_standard_deviation , segmentation_residual_standard_deviation);
     }
 
@@ -1365,8 +2192,13 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
         segmentation_divergence[i] = uniform_entropy[i] - segmentation_entropy[i];
       }
 
+      dimension_jump_slope = dimension_jump(os , max_nb_segment , SLOPE_STEP , penalty_shape , likelihood);
+      if ((dimension_jump_slope < 0.) && (criterion == DIMENSION_JUMP)) {
+        criterion = ICL;
+      }
+
       if (max_nb_segment - min_nb_segment >= SLOPE_NB_SEGMENT_RANGE) {
-        log_likelihood_slope(min_nb_segment , max_nb_segment , penalty_shape_type , seq->length[0] ,
+        log_likelihood_slope(min_nb_segment , max_nb_segment , penalty_shape_type ,
                              penalty_shape , likelihood , intercept , slope ,
                              slope_standard_deviation , residual_standard_deviation);
 
@@ -1385,8 +2217,8 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
 
     case false : {
 
-      // computation of penalized likelihoods corresponding to ICL criterion, the slope heuristic and
-      // the modified BIC (Zhang & Siegmund, 2007)
+      // computation of penalized likelihoods corresponding to the slope heuristic (data-driven slope estimation and
+      // dimension jump), the ICL criterion and the modified BIC (Zhang & Siegmund, 2007)
 
 /*      segmentation_likelihood[1] = seq->one_segment_likelihood((index == I_DEFAULT ? index : 0) , model_type ,
                                                                common_contrast , shape_parameter , rank);
@@ -1395,29 +2227,39 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
 
       if ((model_type[0] != MEAN_CHANGE) && (model_type[0] != INTERCEPT_SLOPE_CHANGE) &&
           (likelihood[1] != D_INF)) {
-        penalized_likelihood[0][1] = 2 * likelihood[1] - nb_parameter[1] *
-                                     log((double)(seq->nb_sequence * seq->length[0]));
-        max_likelihood[0] = penalized_likelihood[0][1];
-
         if (max_nb_segment - min_nb_segment >= SLOPE_NB_SEGMENT_RANGE) {
-//          penalized_likelihood[1][1] = 2 * (likelihood[1] - 1.5 * penalty_shape[1] * slope);
-          penalized_likelihood[1][1] = 2 * (likelihood[1] - 2 * penalty_shape[1] * slope);
+//          penalized_likelihood[0][1] = 2 * (likelihood[1] - 1.5 * penalty_shape[1] * slope);
+          penalized_likelihood[0][1] = 2 * (likelihood[1] - 2 * penalty_shape[1] * slope);
+          max_likelihood[0] = penalized_likelihood[0][1];
+        }
+
+        if (dimension_jump_slope > 0.) {
+          penalized_likelihood[1][1] = 2 * (likelihood[1] - 2 * penalty_shape[1] * dimension_jump_slope);
           max_likelihood[1] = penalized_likelihood[1][1];
         }
+
+        penalized_likelihood[2][1] = 2 * likelihood[1] - nb_parameter[1] *
+                                     log((double)(seq->nb_sequence * seq->length[0]));
+        max_likelihood[2] = penalized_likelihood[2][1];
 
         nb_segment = 1;
       }
 
       if (segmentation_likelihood[1] != D_INF) {
-        penalized_likelihood[2][1] = 2 * segmentation_likelihood[1] - nb_parameter[1] *
-                                     log((double)(seq->nb_sequence * seq->length[0])) - segment_penalty[1];
-        max_likelihood[2] = penalized_likelihood[2][1];
-
         if (max_nb_segment - min_nb_segment >= SLOPE_NB_SEGMENT_RANGE) {
 //          penalized_likelihood[3][1] = 2 * (segmentation_likelihood[1] - 1.5 * penalty_shape[1] * segmentation_slope);
           penalized_likelihood[3][1] = 2 * (segmentation_likelihood[1] - 2 * penalty_shape[1] * segmentation_slope);
           max_likelihood[3] = penalized_likelihood[3][1];
         }
+
+        if (segmentation_dimension_jump_slope > 0.) {
+          penalized_likelihood[4][1] = 2 * (segmentation_likelihood[1] - 2 * penalty_shape[1] * segmentation_dimension_jump_slope);
+          max_likelihood[4] = penalized_likelihood[4][1];
+        }
+
+        penalized_likelihood[5][1] = 2 * segmentation_likelihood[1] - nb_parameter[1] *
+                                     log((double)(seq->nb_sequence * seq->length[0])) - segment_penalty[1];
+        max_likelihood[5] = penalized_likelihood[5][1];
 
         if ((model_type[0] == MEAN_CHANGE) || (model_type[0] == INTERCEPT_SLOPE_CHANGE)) {
           nb_segment = 1;
@@ -1443,37 +2285,38 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
 
         if ((model_type[0] != MEAN_CHANGE) && (model_type[0] != INTERCEPT_SLOPE_CHANGE) &&
             (likelihood[i] != D_INF)) {
-          penalized_likelihood[0][i] = 2 * (likelihood[i] - segmentation_entropy[i]) - nb_parameter[i] *
-                                       log((double)(seq->nb_sequence * seq->length[0]));
-          if (penalized_likelihood[0][i] > max_likelihood[0]) {
-            max_likelihood[0] = penalized_likelihood[0][i];
-            if (criterion == ICL) {
-              nb_segment = i;
-            }
-          }
-
           if (max_nb_segment - min_nb_segment >= SLOPE_NB_SEGMENT_RANGE) {
-//            penalized_likelihood[1][i] = 2 * (likelihood[i] - 1.5 * penalty_shape[i] * slope);
-            penalized_likelihood[1][i] = 2 * (likelihood[i] - 2 * penalty_shape[i] * slope);
-            if (penalized_likelihood[1][i] > max_likelihood[1]) {
-              max_likelihood[1] = penalized_likelihood[1][i];
+//            penalized_likelihood[0][i] = 2 * (likelihood[i] - 1.5 * penalty_shape[i] * slope);
+            penalized_likelihood[0][i] = 2 * (likelihood[i] - 2 * penalty_shape[i] * slope);
+            if (penalized_likelihood[0][i] > max_likelihood[0]) {
+              max_likelihood[0] = penalized_likelihood[0][i];
               if (criterion == LIKELIHOOD_SLOPE) {
                 nb_segment = i;
               }
             }
           }
-        }
 
-        if (segmentation_likelihood[i] != D_INF) {
-          penalized_likelihood[2][i] = 2 * segmentation_likelihood[i] - nb_parameter[i] *
-                                       log((double)(seq->nb_sequence * seq->length[0])) - segment_penalty[i];
-          if (penalized_likelihood[2][i] > max_likelihood[2]) {
-            max_likelihood[2] = penalized_likelihood[2][i];
-            if (criterion == mBIC) {
-              nb_segment = i;
+          if (dimension_jump_slope > 0.) {
+            penalized_likelihood[1][i] = 2 * (likelihood[i] - 2 * penalty_shape[i] * dimension_jump_slope);
+            if (penalized_likelihood[1][i] > max_likelihood[1]) {
+              max_likelihood[1] = penalized_likelihood[1][i];
+              if (criterion == DIMENSION_JUMP) {
+                nb_segment = i;
+              }
             }
           }
 
+          penalized_likelihood[2][i] = 2 * (likelihood[i] - segmentation_entropy[i]) - nb_parameter[i] *
+                                       log((double)(seq->nb_sequence * seq->length[0]));
+          if (penalized_likelihood[2][i] > max_likelihood[2]) {
+            max_likelihood[2] = penalized_likelihood[2][i];
+            if (criterion == ICL) {
+              nb_segment = i;
+            }
+          }
+        }
+
+        if (segmentation_likelihood[i] != D_INF) {
           if (max_nb_segment - min_nb_segment >= SLOPE_NB_SEGMENT_RANGE) {
 //            penalized_likelihood[3][i] = 2 * (segmentation_likelihood[i] -
 //                                          1.5 * penalty_shape[i] * segmentation_slope);
@@ -1484,6 +2327,26 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
               if (criterion == SEGMENTATION_LIKELIHOOD_SLOPE) {
                 nb_segment = i;
               }
+            }
+          }
+
+          if (segmentation_dimension_jump_slope > 0.) {
+            penalized_likelihood[4][i] = 2 * (segmentation_likelihood[i] -
+                                          2 * penalty_shape[i] * segmentation_dimension_jump_slope);
+            if (penalized_likelihood[4][i] > max_likelihood[4]) {
+              max_likelihood[4] = penalized_likelihood[4][i];
+              if (criterion == SEGMENTATION_DIMENSION_JUMP) {
+                nb_segment = i;
+              }
+            }
+          }
+
+          penalized_likelihood[5][i] = 2 * segmentation_likelihood[i] - nb_parameter[i] *
+                                       log((double)(seq->nb_sequence * seq->length[0])) - segment_penalty[i];
+          if (penalized_likelihood[5][i] > max_likelihood[5]) {
+            max_likelihood[5] = penalized_likelihood[5][i];
+            if (criterion == mBIC) {
+              nb_segment = i;
             }
           }
         }
@@ -1499,8 +2362,8 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
 
     case true : {
       if (likelihood[1] != D_INF) {
-        penalized_likelihood[0][1] = 2 * likelihood[1];
-        max_likelihood[0] = penalized_likelihood[0][1];
+        penalized_likelihood[2][1] = 2 * likelihood[1];
+        max_likelihood[2] = penalized_likelihood[2][1];
         nb_segment = 1;
       }
 
@@ -1511,12 +2374,12 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
 
       for (i = 2;i <= max_nb_segment;i++) {
         if (likelihood[i] != D_INF) {
-//          penalized_likelihood[0][i] = 2 * (likelihood[i] - segmentation_entropy[i]);
-          penalized_likelihood[0][i] = 2 * (likelihood[i] - segmentation_entropy[i] -
+//          penalized_likelihood[2][i] = 2 * (likelihood[i] - segmentation_entropy[i]);
+          penalized_likelihood[2][i] = 2 * (likelihood[i] - segmentation_entropy[i] -
                                             uniform_entropy[i]);
 
-          if (penalized_likelihood[0][i] > max_likelihood[0]) {
-            max_likelihood[0] = penalized_likelihood[0][i];
+          if (penalized_likelihood[2][i] > max_likelihood[2]) {
+            max_likelihood[2] = penalized_likelihood[2][i];
             nb_segment = i;
           }
         }
@@ -1533,7 +2396,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
     if (nb_segment > 0) {
 
 #     ifdef MESSAGE
-      int width[20];
+      int width[23];
       long old_adjust;
       double norm , *posterior_probability , **weight;
       Test *test;
@@ -1552,16 +2415,16 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
       switch (bayesian) {
 
       case false : {
-        weight = new double*[4];
-        for (i = 0;i < 4;i++) {
+        weight = new double*[6];
+        for (i = 0;i < 6;i++) {
           weight[i] = new double[max_nb_segment + 1];
         }
         break;
       }
 
       case true : {
-        weight = new double*[1];
-        weight[0] = new double[max_nb_segment + 1];
+        weight = new double*[3];
+        weight[2] = new double[max_nb_segment + 1];
         break;
       }
       }
@@ -1569,46 +2432,49 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
       if ((model_type[0] != MEAN_CHANGE) && (model_type[0] != INTERCEPT_SLOPE_CHANGE)) {
         norm = 0.;
         for (i = 1;i <= max_nb_segment;i++) {
-          weight[0][i] = exp((penalized_likelihood[0][i] - max_likelihood[0]) / 2);
-          norm += weight[0][i];
-        }
-        for (i = 1;i <= max_nb_segment;i++) {
-          weight[0][i] /= norm;
-        }
-      }
-
-      if (!bayesian) {
-        if ((model_type[0] != MEAN_CHANGE) && (model_type[0] != INTERCEPT_SLOPE_CHANGE) &&
-            (max_nb_segment - min_nb_segment >= SLOPE_NB_SEGMENT_RANGE)) {
-          norm = 0.;
-          for (i = 1;i <= max_nb_segment;i++) {
-            weight[1][i] = exp((penalized_likelihood[1][i] - max_likelihood[1]) / 2);
-            norm += weight[1][i];
-          }
-          for (i = 1;i <= max_nb_segment;i++) {
-            weight[1][i] /= norm;
-          }
-
-          test = new Test(STUDENT , false , max_nb_segment - min_nb_segment - 1 , I_DEFAULT , D_DEFAULT);
-          test->critical_probability = ref_critical_probability[0];
-          test->t_value_computation();
-
-          os << STAT_criterion_word[LIKELIHOOD_SLOPE] << ": " << slope << " ("
-             << slope - test->value * slope_standard_deviation << ", "
-             << slope + test->value * slope_standard_deviation << ") | "
-             << STAT_label[STATL_RESIDUAL] << " " << STAT_label[STATL_STANDARD_DEVIATION] << ": "
-             << residual_standard_deviation << endl;
-
-          delete test;
-        }
-
-        norm = 0.;
-        for (i = 1;i <= max_nb_segment;i++) {
           weight[2][i] = exp((penalized_likelihood[2][i] - max_likelihood[2]) / 2);
           norm += weight[2][i];
         }
         for (i = 1;i <= max_nb_segment;i++) {
           weight[2][i] /= norm;
+        }
+      }
+
+      if (!bayesian) {
+        if ((model_type[0] != MEAN_CHANGE) && (model_type[0] != INTERCEPT_SLOPE_CHANGE)) {
+          if (max_nb_segment - min_nb_segment >= SLOPE_NB_SEGMENT_RANGE) {
+            norm = 0.;
+            for (i = 1;i <= max_nb_segment;i++) {
+              weight[0][i] = exp((penalized_likelihood[0][i] - max_likelihood[0]) / 2);
+              norm += weight[0][i];
+            }
+            for (i = 1;i <= max_nb_segment;i++) {
+              weight[0][i] /= norm;
+            }
+
+            test = new Test(STUDENT , false , max_nb_segment - min_nb_segment - 1 , I_DEFAULT , D_DEFAULT);
+            test->critical_probability = ref_critical_probability[0];
+            test->t_value_computation();
+
+            os << STAT_criterion_word[LIKELIHOOD_SLOPE] << ": " << slope << " ("
+               << slope - test->value * slope_standard_deviation << ", "
+               << slope + test->value * slope_standard_deviation << ") | "
+               << STAT_label[STATL_RESIDUAL] << " " << STAT_label[STATL_STANDARD_DEVIATION] << ": "
+               << residual_standard_deviation << endl;
+
+            delete test;
+          }
+
+          if (dimension_jump_slope > 0.) {
+            norm = 0.;
+            for (i = 1;i <= max_nb_segment;i++) {
+              weight[1][i] = exp((penalized_likelihood[1][i] - max_likelihood[1]) / 2);
+              norm += weight[1][i];
+            }
+            for (i = 1;i <= max_nb_segment;i++) {
+              weight[1][i] /= norm;
+            }
+          }
         }
 
         if (max_nb_segment - min_nb_segment >= SLOPE_NB_SEGMENT_RANGE) {
@@ -1633,6 +2499,26 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
 
           delete test;
         }
+
+        if (segmentation_dimension_jump_slope > 0.) {
+          norm = 0.;
+          for (i = 1;i <= max_nb_segment;i++) {
+            weight[4][i] = exp((penalized_likelihood[4][i] - max_likelihood[4]) / 2);
+            norm += weight[4][i];
+          }
+          for (i = 1;i <= max_nb_segment;i++) {
+            weight[4][i] /= norm;
+          }
+        }
+
+        norm = 0.;
+        for (i = 1;i <= max_nb_segment;i++) {
+          weight[5][i] = exp((penalized_likelihood[5][i] - max_likelihood[5]) / 2);
+          norm += weight[5][i];
+        }
+        for (i = 1;i <= max_nb_segment;i++) {
+          weight[5][i] /= norm;
+        }
       }
 
       old_adjust = os.flags(ios::adjustfield);
@@ -1649,20 +2535,32 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
         width[8] = stat_tool::column_width(max_nb_segment - 1 , segmentation_divergence + 2) + ASCII_SPACE;
 //        width[9] = column_width(max_nb_segment - 1 , marginal_entropy + 2) + ASCII_SPACE
         width[10] = stat_tool::column_width(nb_parameter[max_nb_segment]) + ASCII_SPACE;
-        width[11] = stat_tool::column_width(max_nb_segment , penalized_likelihood[0] + 1) + ASCII_SPACE;
-        width[12] = stat_tool::column_width(max_nb_segment , weight[0] + 1) + ASCII_SPACE;
 
         if (!bayesian) {
           if (max_nb_segment - min_nb_segment >= SLOPE_NB_SEGMENT_RANGE) {
+            width[11] = stat_tool::column_width(max_nb_segment , penalized_likelihood[0] + 1) + ASCII_SPACE;
+            width[12] = stat_tool::column_width(max_nb_segment , weight[0] + 1) + ASCII_SPACE;
+          }
+          if (dimension_jump_slope > 0.) {
             width[13] = stat_tool::column_width(max_nb_segment , penalized_likelihood[1] + 1) + ASCII_SPACE;
             width[14] = stat_tool::column_width(max_nb_segment , weight[1] + 1) + ASCII_SPACE;
           }
-          width[15] = stat_tool::column_width(max_nb_segment , penalized_likelihood[2] + 1) + ASCII_SPACE;
-          width[16] = stat_tool::column_width(max_nb_segment , weight[2] + 1) + ASCII_SPACE;
+        }
+
+        width[15] = stat_tool::column_width(max_nb_segment , penalized_likelihood[2] + 1) + ASCII_SPACE;
+        width[16] = stat_tool::column_width(max_nb_segment , weight[2] + 1) + ASCII_SPACE;
+
+        if (!bayesian) {
           if (max_nb_segment - min_nb_segment >= SLOPE_NB_SEGMENT_RANGE) {
             width[17] = stat_tool::column_width(max_nb_segment , penalized_likelihood[3] + 1) + ASCII_SPACE;
             width[18] = stat_tool::column_width(max_nb_segment , weight[3] + 1) + ASCII_SPACE;
           }
+          if (segmentation_dimension_jump_slope > 0.) {
+            width[19] = stat_tool::column_width(max_nb_segment , penalized_likelihood[4] + 1) + ASCII_SPACE;
+            width[20] = stat_tool::column_width(max_nb_segment , weight[4] + 1) + ASCII_SPACE;
+          }
+          width[21] = stat_tool::column_width(max_nb_segment , penalized_likelihood[5] + 1) + ASCII_SPACE;
+          width[22] = stat_tool::column_width(max_nb_segment , weight[5] + 1) + ASCII_SPACE;
         }
 
         os << "\n" << SEQ_label[SEQL_NB_SEGMENT] << " | 2 * " << STAT_label[STATL_LIKELIHOOD]
@@ -1672,21 +2570,8 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
            << " | " << SEQ_label[SEQL_FIRST_ORDER_ENTROPY]
            << " | " << SEQ_label[SEQL_CHANGE_POINT_ENTROPY]
            << " | " << SEQ_label[SEQL_UNIFORM_ENTROPY]
-           << " | " << SEQ_label[SEQL_SEGMENTATION_DIVERGENCE]
+           << " | " << SEQ_label[SEQL_SEGMENTATION_DIVERGENCE] << endl;
 //           << " | " << SEQ_label[SEQL_MARGINAL_ENTROPY]
-           << " | " << STAT_label[STATL_FREE_PARAMETERS]
-           << " | "  << STAT_criterion_word[ICL] << " - "  << STAT_label[STATL_WEIGHT];
-
-        if (!bayesian) {
-          if (max_nb_segment - min_nb_segment >= SLOPE_NB_SEGMENT_RANGE) {
-            os << " | " << STAT_criterion_word[LIKELIHOOD_SLOPE] << " - "  << STAT_label[STATL_WEIGHT];
-          }
-          os << " | " << STAT_criterion_word[mBIC] << " - "  << STAT_label[STATL_WEIGHT];
-          if (max_nb_segment - min_nb_segment >= SLOPE_NB_SEGMENT_RANGE) {
-            os << " | " << STAT_criterion_word[SEGMENTATION_LIKELIHOOD_SLOPE] << " - "  << STAT_label[STATL_WEIGHT];
-          }
-        }
-        os << endl;
 
         os.setf(ios::left , ios::adjustfield);
 
@@ -1698,25 +2583,8 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
            << setw(width[5]) << " "
            << setw(width[6]) << " "
            << setw(width[7]) << " "
-           << setw(width[8]) << segmentation_divergence[1]
+           << setw(width[8]) << segmentation_divergence[1] << endl;
 //           << setw(width[9]) << " "
-           << setw(width[10]) << nb_parameter[1]
-           << setw(width[11]) << penalized_likelihood[0][1]
-           << setw(width[12]) << weight[0][1];
-
-        if (!bayesian) {
-          if (max_nb_segment - min_nb_segment >= SLOPE_NB_SEGMENT_RANGE) {
-            os << setw(width[13]) << penalized_likelihood[1][1]
-               << setw(width[14]) << weight[1][1];
-          }
-          os << setw(width[15]) << penalized_likelihood[2][1]
-             << setw(width[16]) << weight[2][1];
-          if (max_nb_segment - min_nb_segment >= SLOPE_NB_SEGMENT_RANGE) {
-            os << setw(width[17]) << penalized_likelihood[3][1]
-               << setw(width[18]) << weight[3][1];
-          }
-        }
-        os << endl;
 
         for (i = 2;i <= max_nb_segment;i++) {
           os << setw(width[0]) << i
@@ -1727,115 +2595,122 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
              << setw(width[5]) << first_order_entropy[i]
              << setw(width[6]) << change_point_entropy[i]
              << setw(width[7]) << uniform_entropy[i]
-             << setw(width[8]) << segmentation_divergence[i]
+             << setw(width[8]) << segmentation_divergence[i] << endl;
 //             << setw(width[9]) << marginal_entropy[i]
-             << setw(width[10]) << nb_parameter[i]
-             << setw(width[11]) << penalized_likelihood[0][i]
-             << setw(width[12]) << weight[0][i];
+        }
+
+        os << "\n" << SEQ_label[SEQL_NB_SEGMENT] << " | 2 * " << STAT_label[STATL_LIKELIHOOD]
+           << " | 2 * " << SEQ_label[SEQL_POSSIBLE_SEGMENTATION_LIKELIHOOD]
+           << " | " << SEQ_label[SEQL_POSTERIOR_PROBABILITY]
+           << " | " << SEQ_label[SEQL_SEGMENTATION_DIVERGENCE]
+           << " | " << STAT_label[STATL_FREE_PARAMETERS];
+
+        if (!bayesian) {
+          if (max_nb_segment - min_nb_segment >= SLOPE_NB_SEGMENT_RANGE) {
+            os << " | " << STAT_criterion_word[LIKELIHOOD_SLOPE] << " - "  << STAT_label[STATL_WEIGHT];
+          }
+          if (dimension_jump_slope > 0.) {
+            os << " | " << STAT_criterion_word[DIMENSION_JUMP] << " - "  << STAT_label[STATL_WEIGHT];
+          }
+        }
+
+        os << " | "  << STAT_criterion_word[ICL] << " - "  << STAT_label[STATL_WEIGHT];
+
+        if (!bayesian) {
+          if (max_nb_segment - min_nb_segment >= SLOPE_NB_SEGMENT_RANGE) {
+            os << " | " << STAT_criterion_word[SEGMENTATION_LIKELIHOOD_SLOPE] << " - "  << STAT_label[STATL_WEIGHT];
+          }
+          if (segmentation_dimension_jump_slope > 0.) {
+            os << " | " << STAT_criterion_word[SEGMENTATION_DIMENSION_JUMP] << " - "  << STAT_label[STATL_WEIGHT];
+          }
+          os << " | " << STAT_criterion_word[mBIC] << " - "  << STAT_label[STATL_WEIGHT];
+        }
+        os << endl;
+
+        for (i = 1;i <= max_nb_segment;i++) {
+          os << setw(width[0]) << i
+             << setw(width[1]) << 2 * segmentation_likelihood[i]
+             << setw(width[2]) << 2 * likelihood[i]
+             << setw(width[3]) << posterior_probability[i]
+             << setw(width[8]) << segmentation_divergence[i]
+             << setw(width[10]) << nb_parameter[i];
 
           if (!bayesian) {
             if (max_nb_segment - min_nb_segment >= SLOPE_NB_SEGMENT_RANGE) {
+              os << setw(width[11]) << penalized_likelihood[0][i]
+                 << setw(width[12]) << weight[0][i];
+            }
+            if (dimension_jump_slope > 0.) {
               os << setw(width[13]) << penalized_likelihood[1][i]
                  << setw(width[14]) << weight[1][i];
             }
-            os << setw(width[15]) << penalized_likelihood[2][i]
-               << setw(width[16]) << weight[2][i];
+          }
+
+          os << setw(width[15]) << penalized_likelihood[2][i]
+             << setw(width[16]) << weight[2][i];
+
+          if (!bayesian) {
             if (max_nb_segment - min_nb_segment >= SLOPE_NB_SEGMENT_RANGE) {
               os << setw(width[17]) << penalized_likelihood[3][i]
                  << setw(width[18]) << weight[3][i];
             }
+            if (segmentation_dimension_jump_slope > 0.) {
+              os << setw(width[19]) << penalized_likelihood[4][i]
+                 << setw(width[20]) << weight[4][i];
+            }
+            os << setw(width[21]) << penalized_likelihood[5][i]
+               << setw(width[22]) << weight[5][i];
           }
           os << endl;
         }
-        os << endl;
       }
 
       else {
         width[0] = stat_tool::column_width(max_nb_segment) + ASCII_SPACE;
         width[1] = stat_tool::column_width(max_nb_segment , segmentation_likelihood + 1 , 2.) + ASCII_SPACE;
         width[10] = stat_tool::column_width(nb_parameter[max_nb_segment]) + ASCII_SPACE;
-        width[15] = stat_tool::column_width(max_nb_segment , penalized_likelihood[2] + 1) + ASCII_SPACE;
-        width[16] = stat_tool::column_width(max_nb_segment , weight[2] + 1) + ASCII_SPACE;
+
         if (max_nb_segment - min_nb_segment >= SLOPE_NB_SEGMENT_RANGE) {
           width[17] = stat_tool::column_width(max_nb_segment , penalized_likelihood[3] + 1) + ASCII_SPACE;
           width[18] = stat_tool::column_width(max_nb_segment , weight[3] + 1) + ASCII_SPACE;
         }
+        if (segmentation_dimension_jump_slope > 0.) {
+          width[19] = stat_tool::column_width(max_nb_segment , penalized_likelihood[4] + 1) + ASCII_SPACE;
+          width[20] = stat_tool::column_width(max_nb_segment , weight[4] + 1) + ASCII_SPACE;
+        }
+        width[21] = stat_tool::column_width(max_nb_segment , penalized_likelihood[5] + 1) + ASCII_SPACE;
+        width[22] = stat_tool::column_width(max_nb_segment , weight[5] + 1) + ASCII_SPACE;
 
         os << "\n" << SEQ_label[SEQL_NB_SEGMENT] << " | 2 * " << STAT_label[STATL_LIKELIHOOD]
-           << " | " << STAT_label[STATL_FREE_PARAMETERS]
-           << " | " << STAT_criterion_word[mBIC] << " - "  << STAT_label[STATL_WEIGHT];
+           << " | " << STAT_label[STATL_FREE_PARAMETERS];
         if (max_nb_segment - min_nb_segment >= SLOPE_NB_SEGMENT_RANGE) {
           os << " | " << STAT_criterion_word[SEGMENTATION_LIKELIHOOD_SLOPE] << " - "  << STAT_label[STATL_WEIGHT];
         }
-        os << endl;
+        if (segmentation_dimension_jump_slope > 0.) {
+          os << " | " << STAT_criterion_word[SEGMENTATION_DIMENSION_JUMP] << " - "  << STAT_label[STATL_WEIGHT];
+        }
+        os << " | " << STAT_criterion_word[mBIC] << " - "  << STAT_label[STATL_WEIGHT] << endl;
 
         os.setf(ios::left , ios::adjustfield);
 
-        os << setw(width[0]) << 1
-           << setw(width[1]) << 2 * segmentation_likelihood[1]
-           << setw(width[10]) << nb_parameter[1]
-           << setw(width[15]) << penalized_likelihood[2][1]
-           << setw(width[16]) << weight[2][1];
-        if (max_nb_segment - min_nb_segment >= SLOPE_NB_SEGMENT_RANGE) {
-          os << setw(width[17]) << penalized_likelihood[3][1]
-             << setw(width[18]) << weight[3][1];
-        }
-        os << endl;
-
-        for (i = 2;i <= max_nb_segment;i++) {
+        for (i = 1;i <= max_nb_segment;i++) {
           os << setw(width[0]) << i
              << setw(width[1]) << 2 * segmentation_likelihood[i]
-             << setw(width[10]) << nb_parameter[i]
-             << setw(width[15]) << penalized_likelihood[2][i]
-             << setw(width[16]) << weight[2][i];
+             << setw(width[10]) << nb_parameter[i];
           if (max_nb_segment - min_nb_segment >= SLOPE_NB_SEGMENT_RANGE) {
             os << setw(width[17]) << penalized_likelihood[3][i]
                << setw(width[18]) << weight[3][i];
           }
-          os << endl;
+          if (segmentation_dimension_jump_slope > 0.) {
+            os << setw(width[19]) << penalized_likelihood[4][i]
+               << setw(width[20]) << weight[4][i];
+          }
+          os << setw(width[21]) << penalized_likelihood[5][i]
+             << setw(width[22]) << weight[5][i] << endl;
         }
-        os << endl;
       }
 
       os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
-
-/*      if (!bayesian) {
-        penalized_likelihood[0][1] = 2 * likelihood[1] - nb_parameter[1] *
-                                     log((double)seq->length[0]);
-//        penalized_likelihood[0][1] += nb_parameter[1] *
-//                                      log((double)((seq->nb_variable - 2) * seq->length[0]));
-        for (i = 2;i <= max_nb_segment;i++) {
-          penalized_likelihood[0][i] = 2 * (likelihood[i] - segmentation_entropy[i]) -
-                                       nb_parameter[i] * log((double)seq->length[0]);
-//          penalized_likelihood[0][i] += nb_parameter[i] *
-//                                        log((double)((seq->nb_variable - 2) * seq->length[0]));
-        }
-
-        max_likelihood[0] = penalized_likelihood[0][1];
-        for (i = 2;i <= max_nb_segment;i++) {
-          if (penalized_likelihood[0][i] > max_likelihood[0]) {
-            max_likelihood[0] = penalized_likelihood[0][i];
-          }
-        }
-
-        norm = 0.;
-        for (i = 1;i <= max_nb_segment;i++) {
-          weight[0][i] = exp((penalized_likelihood[0][i] - max_likelihood[0]) / 2);
-          norm += weight[0][i];
-        }
-        for (i = 1;i <= max_nb_segment;i++) {
-          weight[0][i] /= norm;
-        }
-
-        for (i = 1;i <= max_nb_segment;i++) {
-          os << "\n" << i << " " << (i == 1 ? SEQ_label[SEQL_SEGMENT] : SEQ_label[SEQL_SEGMENTS])
-             << "   2 * " << STAT_label[STATL_LIKELIHOOD] << ": " << 2 * segmentation_likelihood[i] << "   "
-             << nb_parameter[i] << " " << STAT_label[nb_parameter[i] == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS]
-             << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << STAT_criterion_word[ICL] << "): "
-             << penalized_likelihood[0][i] << "   " << STAT_label[STATL_WEIGHT] << ": " << weight[0][i] << endl;
-        }
-        os << endl;
-      } */
 
       if ((model_type[0] != MEAN_CHANGE) && (model_type[0] != INTERCEPT_SLOPE_CHANGE)) {
         delete [] posterior_probability;
@@ -1844,14 +2719,14 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
       switch (bayesian) {
 
       case false : {
-        for (i = 0;i < 4;i++) {
+        for (i = 0;i < 6;i++) {
           delete [] weight[i];
         }
         break;
       }
 
       case true : {
-        delete [] weight[0];
+        delete [] weight[2];
         break;
       }
       }
@@ -1938,7 +2813,10 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
           if ((model_type[0] != MEAN_CHANGE) && (model_type[0] != INTERCEPT_SLOPE_CHANGE)) {
             os << "\t" << likelihood[i] << "\t" << intercept + slope * penalty_shape[i];
           }
-          os << "\t" << segmentation_likelihood[i] << "\t" << segmentation_intercept + segmentation_slope * penalty_shape[i] << endl;
+          else {
+            os << "\t" << segmentation_likelihood[i] << "\t" << segmentation_intercept + segmentation_slope * penalty_shape[i];
+          }
+          os << endl;
         }
 #       endif
 
@@ -2031,14 +2909,14 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
     case false : {
       delete [] segment_penalty;
 
-      for (i = 0;i < 4;i++) {
+      for (i = 0;i < 6;i++) {
         delete [] penalized_likelihood[i];
       }
       break;
     }
 
     case true : {
-      delete [] penalized_likelihood[0];
+      delete [] penalized_likelihood[2];
       break;
     }
     }
@@ -2062,27 +2940,248 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
 
 /*--------------------------------------------------------------*/
 /**
- *  Writing of segment/state, change-point and entropy profiles for
- *  a single sequence or a sample of sequences (in the case of
- *  multiple change-point models).
+ *  \brief Optimal segmentation of a single sequence or a sample of sequences.
  *
- *  arguments: stream, sequence index, number of segments/states,
- *             pointer on the segment/state profiles, label,
- *             pointer on the piecewise linear functions,
- *             the change-point and the entropy profiles.
+ *  \param[in]  error              reference on a StatError object,
+ *  \param[in]  os                 stream,
+ *  \param[in]  iidentifier        sequence identifier,
+ *  \param[in]  max_nb_segment     maximum number of segments,
+ *  \param[in]  model_type         segment model types,
+ *  \param[in]  common_contrast    flag contrast functions common to the individuals,
+ *  \param[in]  shape_parameter    negative binomial shape parameters,
+ *  \param[in]  criterion          criterion for the selection of the number of segments,
+ *  \param[in]  min_nb_segment     minimum  number of segments,
+ *  \param[in]  penalty_shape_type penalty shape for the slope heuristic,
+ *  \param[in]  output             output (sequence, entropies or Kullback-Leibler divergences),
+ *
+ *  \param[out]                    sequences.
+ */
+/*--------------------------------------------------------------*/
+
+Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentifier ,
+                                   int max_nb_segment , vector<segment_model> model_type ,
+                                   bool common_contrast , vector<double> shape_parameter ,
+                                   model_selection_criterion criterion , int min_nb_segment ,
+                                   int penalty_shape_type , sequence_type output) const
+
+{
+  return segmentation(error ,os , iidentifier , max_nb_segment , model_type.data() ,
+                      common_contrast , shape_parameter.data() , criterion , min_nb_segment ,
+                      penalty_shape_type , output);
+}
+
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the prior segment length distribution corresponding to
+ *         the assumption of a uniform prior distribution for the possible segmentations.
+ *
+ *  \param[in]  nb_segment number of segments,
+ *  \param[in]  length     sequence length,
+ *
+ *  \param[out] prior      prior segment length distribution.
+ */
+/*--------------------------------------------------------------*/
+
+Distribution* prior_segment_length_distribution(int nb_segment , int length)
+
+{
+  register int i;
+  double buff , sum , variance , skewness , kurtosis;
+  Distribution *prior;
+
+
+  prior = new Distribution(length - nb_segment + 2);
+  prior->mass[0] = 0.;
+
+  buff = 1.;
+  for (i = 1;i < nb_segment - 1;i++) {
+    buff *= (double)(length - i - 1) / (double)i;
+  }
+  sum = buff * (double)(length - 1) / (double)(nb_segment - 1);
+
+  for (i = 1;i <= length - nb_segment + 1;i++) {
+    prior->mass[i] = buff / sum;
+    buff *= (double)(length - i - nb_segment + 1) /
+            (double)(length - i - 1);
+  }
+
+  prior->offset = 1.;
+  prior->cumul_computation();
+  prior->max = prior->mass[1];
+  prior->mean_computation();
+  prior->variance_computation();
+
+# ifdef MESSAGE
+  cout << "\n";
+  prior->ascii_characteristic_print(cout , true);
+
+  variance = ((double)length * (length - nb_segment) * (nb_segment - 1)) /
+             ((double)nb_segment * nb_segment * (nb_segment + 1));
+  skewness = (((double)(nb_segment - 2) * (2 * length - nb_segment)) / (double)(nb_segment + 2)) *
+             sqrt((double)(nb_segment + 1) / ((double)length * (length - nb_segment) * (nb_segment - 1)));
+  kurtosis = ((double)(nb_segment + 1) * (-nb_segment * nb_segment * nb_segment * (nb_segment - 1) *(nb_segment - 6) +
+               2 * nb_segment * nb_segment * length * (5 * nb_segment * nb_segment - 14 * nb_segment + 12) +
+               3 * length * length * (length - 2 * nb_segment) * (3 * nb_segment * nb_segment - 7 * nb_segment + 6))) /
+             ((double)length * (length - nb_segment) * (length - nb_segment) * (nb_segment - 1) *
+              (nb_segment + 2) * (nb_segment + 3)) - 3.;
+
+  cout << "\n" << STAT_label[STATL_MEAN] << ": " << (double)length / (double)nb_segment << "   "
+       << STAT_label[STATL_VARIANCE] << ": " << variance << "   "
+       << STAT_label[STATL_STANDARD_DEVIATION] << ": " << sqrt(variance) << endl;
+  cout << STAT_label[STATL_SKEWNESS_COEFF] << ": " << skewness << "   "
+       << STAT_label[STATL_KURTOSIS_COEFF] << ": " << kurtosis << endl;
+
+  cout << "\n";
+  prior->ascii_print(cout , false , true , false);
+# endif
+
+# ifdef MESSAGE
+  register int j , k;
+  double cumul , **segment_length , **nb_segmentation_forward , **nb_segmentation_backward;
+
+
+  nb_segmentation_forward = new double*[length];
+  for (i = 0;i < length;i++) {
+    nb_segmentation_forward[i] = new double[nb_segment];
+  }
+
+  nb_segmentation_backward = new double*[length];
+  for (i = 0;i < length;i++) {
+    nb_segmentation_backward[i] = new double[nb_segment];
+  }
+
+  segment_length = new double*[nb_segment];
+  for (i = 0;i < nb_segment;i++) {
+    segment_length[i] = new double[length - nb_segment + 2];
+    for (j = 0;j <= length - nb_segment + 1;j++) {
+      segment_length[i][j] = 0.;
+    }
+  }
+
+  // forward recurrence
+
+  for (i = 0;i < length;i++) {
+    for (j = 0;j < nb_segment;j++) {
+      nb_segmentation_forward[i][j] = 0;
+    }
+
+    for (j = MAX(0 , nb_segment + i - length);j < MIN((i < length - 1 ? nb_segment - 1 : nb_segment) , i + 1);j++) {
+      if (j == 0) {
+        nb_segmentation_forward[i][j]++;
+      }
+
+      else {
+        for (k = i;k >= j;k--) {
+          nb_segmentation_forward[i][j] += nb_segmentation_forward[k - 1][j - 1];
+        }
+      }
+    }
+  }
+
+  // backward recurrence
+
+  for (i = length - 1;i > 0;i--) {
+    for (j = 0;j < nb_segment;j++) {
+      nb_segmentation_backward[i][j] = 0;
+    }
+
+    for (j = MAX(1 , nb_segment + i - length);j < MIN(nb_segment , i + 1);j++) {
+      if (j < nb_segment - 1) {
+        for (k = i;k <= length + j - nb_segment;k++) {
+          nb_segmentation_backward[i][j] += nb_segmentation_backward[k + 1][j + 1];
+          segment_length[j][k - i + 1] += nb_segmentation_forward[i - 1][j - 1] *
+                                          nb_segmentation_backward[k + 1][j + 1];
+        }
+      }
+
+      else {
+        nb_segmentation_backward[i][j]++;
+        segment_length[j][length - i] += nb_segmentation_forward[i - 1][j - 1];
+      }
+    }
+  }
+
+  for (i = 0;i <= length - nb_segment;i++) {
+    segment_length[0][i + 1] += nb_segmentation_backward[i + 1][1];
+  }
+
+  for (i = 0;i < nb_segment;i++) {
+    sum = 0.;
+    for (j = 1;j <= length - nb_segment + 1;j++) {
+      sum += segment_length[i][j];
+    }
+
+    cumul = 0.;
+    for (j = 1;j <= length - nb_segment + 1;j++) {
+      cumul += segment_length[i][j] / sum;
+
+      if ((cumul < prior->cumul[j] - DOUBLE_ERROR) || (cumul > prior->cumul[j] + DOUBLE_ERROR)) {
+        cout << "\nERROR: " << i << ", " << j << " | " << cumul << " | " << prior->cumul[j] << endl;
+      }
+    }
+
+/*    cout << "\n" << SEQ_label[SEQL_SEGMENT] << " " << i << ":";
+    for (j = 1;j <= length - nb_segment + 1;j++) {
+      cout << " " << segment_length[i][j] / sum;
+    }
+    cout << endl; */
+  }
+
+  for (i = 0;i < length;i++) {
+    delete [] nb_segmentation_forward[i];
+  }
+  delete [] nb_segmentation_forward;
+
+  for (i = 0;i < length;i++) {
+    delete [] nb_segmentation_backward[i];
+  }
+  delete [] nb_segmentation_backward;
+
+  for (i = 0;i < nb_segment;i++) {
+    delete [] segment_length[i];
+  }
+  delete [] segment_length;
+# endif
+
+  return prior;
+}
+
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of segment/state, change-point and entropy profiles for
+ *         a single sequence or a sample of sequences (in the case of
+ *         multiple change-point models).
+ *
+ *  \param[in,out] os                       stream,
+ *  \param[in]     index                    sequence index,
+ *  \param[in]     nb_segment               number of segments/states,
+ *  \param[in]     profiles                 pointer on the segment/state profiles,
+ *  \param[in]     label                    profile type label,
+ *  \param[in]     piecewise_function       pointer on the piecewise linear functions,
+ *  \param[in]     change_point             pointer on the change-point profiles,
+ *  \param[in]     segment_length           pointer on the segment length distributions,
+ *  \param[in]     prior_segment_length     pointer on the prior segment length distribution assuming a
+ *                                          uniform prior on the possible segmentations,
+ *  \param[in]     begin_conditonal_entropy pointer on the profiles of entropies conditional on the past,
+ *  \param[in]     end_conditional_entropy  pointer on the profiles of entropies conditional on the future,
+ *  \param[in]     change_point_entropy     pointer on the change-point entropy profiles.
  */
 /*--------------------------------------------------------------*/
 
 ostream& Sequences::profile_ascii_print(ostream &os , int index , int nb_segment ,
                                         double **profiles , const char *label ,
                                         double **piecewise_function , long double **change_point ,
+                                        Distribution **segment_length ,
+                                        Distribution *prior_segment_length ,
                                         long double **begin_conditonal_entropy ,
                                         long double **end_conditional_entropy ,
                                         long double **change_point_entropy) const
 
 {
   register int i , j , k;
-  int seq_length , start , buff , *seq_index_parameter , *width;
+  int seq_length , start , buff , max_nb_value , *seq_index_parameter , *width;
   long old_adjust;
 
 
@@ -2102,7 +3201,7 @@ ostream& Sequences::profile_ascii_print(ostream &os , int index , int nb_segment
 
   // computation of column width
 
-  width = new int[2 * nb_variable + 4];
+  width = new int[2 * nb_variable + 6];
 
   start = 0;
   if (change_point) {
@@ -2171,32 +3270,64 @@ ostream& Sequences::profile_ascii_print(ostream &os , int index , int nb_segment
     width[2 * nb_variable + 2] += ASCII_SPACE;
   }
 
+  if (segment_length) {
+    width[2 * nb_variable + 3] = stat_tool::column_width(segment_length[0]->nb_value , segment_length[0]->mass);
+    for (i = 1;i < nb_segment;i++) {
+      buff = stat_tool::column_width(segment_length[i]->nb_value , segment_length[i]->mass);
+      if (buff > width[2 * nb_variable + 3]) {
+        width[2 * nb_variable + 3] = buff;
+      }
+    }
+    if (prior_segment_length) {
+      buff = stat_tool::column_width(prior_segment_length->nb_value , prior_segment_length->mass);
+      if (buff > width[2 * nb_variable + 3]) {
+        width[2 * nb_variable + 3] = buff;
+      }
+    }
+    width[2 * nb_variable + 3] += ASCII_SPACE;
+
+    width[2 * nb_variable + 4] = stat_tool::column_width(segment_length[0]->nb_value , segment_length[0]->cumul);
+    for (i = 1;i < nb_segment;i++) {
+      buff = stat_tool::column_width(segment_length[i]->nb_value , segment_length[i]->cumul);
+      if (buff > width[2 * nb_variable + 4]) {
+        width[2 * nb_variable + 4] = buff;
+      }
+    }
+    if (prior_segment_length) {
+      buff = stat_tool::column_width(prior_segment_length->nb_value , prior_segment_length->cumul);
+      if (buff > width[2 * nb_variable + 4]) {
+        width[2 * nb_variable + 4] = buff;
+      }
+    }
+    width[2 * nb_variable + 4] += ASCII_SPACE;
+  }
+
   if ((begin_conditonal_entropy) && (end_conditional_entropy) &&
       (change_point_entropy)) {
-    width[2 * nb_variable + 3] = 0;
+    width[2 * nb_variable + 5] = 0;
 
     for (i = 1;i < nb_segment;i++) {
       buff = column_width(seq_length , begin_conditonal_entropy[i]);
-      if (buff > width[2 * nb_variable + 3]) {
-        width[2 * nb_variable + 3] = buff;
+      if (buff > width[2 * nb_variable + 5]) {
+        width[2 * nb_variable + 5] = buff;
       }
     }
 
     for (i = 1;i < nb_segment;i++) {
       buff = column_width(seq_length , end_conditional_entropy[i]);
-      if (buff > width[2 * nb_variable + 3]) {
-        width[2 * nb_variable + 3] = buff;
+      if (buff > width[2 * nb_variable + 5]) {
+        width[2 * nb_variable + 5] = buff;
       }
     }
 
     for (i = 1;i < nb_segment;i++) {
       buff = column_width(seq_length , change_point_entropy[i]);
-      if (buff > width[2 * nb_variable + 3]) {
-        width[2 * nb_variable + 3] = buff;
+      if (buff > width[2 * nb_variable + 5]) {
+        width[2 * nb_variable + 5] = buff;
       }
     }
 
-    width[2 * nb_variable + 3] += ASCII_SPACE;
+    width[2 * nb_variable + 5] += ASCII_SPACE;
   }
 
   if (!change_point) {
@@ -2298,6 +3429,80 @@ ostream& Sequences::profile_ascii_print(ostream &os , int index , int nb_segment
     os << endl;
   }
 
+  if (segment_length) {
+    if (prior_segment_length) {
+      max_nb_value = prior_segment_length->nb_value;
+    }
+
+    else {
+      max_nb_value = segment_length[0]->nb_value;
+      for (i = 1;i < nb_segment;i++) {
+        if (segment_length[i]->nb_value > max_nb_value) {
+          max_nb_value = segment_length[i]->nb_value;
+        }
+      }
+    }
+
+    os << "\n\n" << SEQ_label[SEQL_SEGMENT_LENGTH] << " " << STAT_label[STATL_DISTRIBUTIONS] << endl;
+
+    for (i = 0;i < nb_segment;i++) {
+      os << "\n" << SEQ_label[SEQL_SEGMENT] << " " << i << " " << SEQ_label[SEQL_LENGTH]
+         << " " << STAT_label[STATL_DISTRIBUTION] << endl;
+      segment_length[i]->ascii_characteristic_print(os , true);
+    }
+    if (prior_segment_length) {
+      os << "\n" << SEQ_label[SEQL_PRIOR_SEGMENT_LENGTH] << " " << STAT_label[STATL_DISTRIBUTION] << endl;
+      prior_segment_length->ascii_characteristic_print(os , true);
+    }
+
+    os << "\n  ";
+    for (i = 0;i < nb_segment;i++) {
+      os << " | " << SEQ_label[SEQL_SEGMENT] << " " << i << " " << SEQ_label[SEQL_LENGTH]
+         << " " << STAT_label[STATL_DISTRIBUTION];
+    }
+    if (prior_segment_length) {
+      os << " | " << SEQ_label[SEQL_PRIOR_SEGMENT_LENGTH] << " " << STAT_label[STATL_DISTRIBUTION];
+    }
+    for (i = 0;i < nb_segment;i++) {
+      os << " | " << SEQ_label[SEQL_SEGMENT] << " " << i << " " << STAT_label[STATL_CUMULATIVE]
+         << " " << STAT_label[STATL_DISTRIBUTION] << " " << STAT_label[STATL_FUNCTION];
+    }
+    if (prior_segment_length) {
+      os << " | " << SEQ_label[SEQL_PRIOR_SEGMENT_LENGTH] << " " << i << " " << STAT_label[STATL_CUMULATIVE]
+         << " " << STAT_label[STATL_DISTRIBUTION] << " " << STAT_label[STATL_FUNCTION];
+    }
+    os << endl;
+
+    for (i = 0;i < max_nb_value;i++) {
+      os << setw(width[nb_variable]) << i;
+
+      for (j = 0;j < nb_segment;j++) {
+        if (i < segment_length[j]->nb_value) {
+          os << setw(width[2 * nb_variable + 3]) << segment_length[j]->mass[i];
+        }
+        else {
+          os << setw(width[2 * nb_variable + 3]) << " ";
+        }
+      }
+      if (prior_segment_length) {
+        os << setw(width[2 * nb_variable + 3]) << prior_segment_length->mass[i];
+      }
+      for (j = 0;j < nb_segment;j++) {
+        if (i < segment_length[j]->nb_value) {
+          os << setw(width[2 * nb_variable + 4]) << segment_length[j]->cumul[i];
+        }
+        else {
+          os << setw(width[2 * nb_variable + 4]) << " ";
+        }
+      }
+      if (prior_segment_length) {
+        os << setw(width[2 * nb_variable + 4]) << prior_segment_length->cumul[i];
+      }
+      os << endl;
+    }
+    os << endl;
+  }
+
   if ((begin_conditonal_entropy) && (end_conditional_entropy) &&
       (change_point_entropy)) {
     os << "\n" << SEQ_label[SEQL_BEGIN_CONDITIONAL_ENTROPY] << ", "
@@ -2338,15 +3543,15 @@ ostream& Sequences::profile_ascii_print(ostream &os , int index , int nb_segment
 
       os.setf(ios::left , ios::adjustfield);
       for (j = 1;j < nb_segment;j++) {
-        os << setw(width[2 * nb_variable + 3]) << begin_conditonal_entropy[j][i];
+        os << setw(width[2 * nb_variable + 5]) << begin_conditonal_entropy[j][i];
       }
       os << "   ";
       for (j = 1;j < nb_segment;j++) {
-        os << setw(width[2 * nb_variable + 3]) << end_conditional_entropy[j][i];
+        os << setw(width[2 * nb_variable + 5]) << end_conditional_entropy[j][i];
       }
       os << "   ";
       for (j = 1;j < nb_segment;j++) {
-        os << setw(width[2 * nb_variable + 3]) << change_point_entropy[j][i];
+        os << setw(width[2 * nb_variable + 5]) << change_point_entropy[j][i];
       }
 
       if (i == 0) {
@@ -2371,31 +3576,42 @@ ostream& Sequences::profile_ascii_print(ostream &os , int index , int nb_segment
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of segment/state, change-point and entropy profiles for
+ *         a single sequence or a sample of sequences (in the case of
+ *         multiple change-point models) at the spreadsheet format.
  *
- *  Writing of segment/state, change-point and entropy profiles for
- *  a single sequence or a sample of sequences (in the case of
- *  multiple change-point models) at the spreadsheet format.
- *
- *  arguments: stream, sequence index, number of segments/states,
- *             pointer on the segment/state profiles, label,
- *             flag contrast functions common to the individuals,
- *             pointer on the piecewise linear functions,
- *             the change-point and the entropy profiles.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os                       stream,
+ *  \param[in]     index                    sequence index,
+ *  \param[in]     nb_segment               number of segments/states,
+ *  \param[in]     profiles                 pointer on the segment/state profiles,
+ *  \param[in]     label                    profile type label,
+ *  \param[in]     common_contrast          flag contrast functions common to the individuals,
+ *  \param[in]     piecewise_function       pointer on the piecewise linear functions,
+ *  \param[in]     change_point             pointer on the change-point profiles,
+ *  \param[in]     segment_length           pointer on the segment length distributions,
+ *  \param[in]     prior_segment_length     pointer on the prior segment length distribution, assuming a
+ *                                          uniform prior on the possible segmentations,
+ *  \param[in]     begin_conditonal_entropy pointer on the profiles of entropies conditional on the past,
+ *  \param[in]     end_conditional_entropy  pointer on the profiles of entropies conditional on the future,
+ *  \param[in]     change_point_entropy     pointer on the change-point entropy profiles.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& Sequences::profile_spreadsheet_print(ostream &os , int index , int nb_segment ,
                                               double **profiles , const char *label ,
                                               bool common_contrast , double ***piecewise_function ,
                                               long double **change_point ,
+                                              Distribution **segment_length ,
+                                              Distribution *prior_segment_length ,
                                               long double **begin_conditonal_entropy ,
                                               long double **end_conditional_entropy ,
                                               long double **change_point_entropy) const
 
 {
   register int i , j , k;
-  int seq_length , *seq_index_parameter;
+  int seq_length , max_nb_value , *seq_index_parameter;
 
 
   seq_length = length[index == I_DEFAULT ? 0 : index];
@@ -2549,6 +3765,76 @@ ostream& Sequences::profile_spreadsheet_print(ostream &os , int index , int nb_s
     os << endl;
   }
 
+  if (segment_length) {
+    if (prior_segment_length) {
+      max_nb_value = prior_segment_length->nb_value;
+    }
+
+    else {
+      max_nb_value = segment_length[0]->nb_value;
+      for (i = 1;i < nb_segment;i++) {
+        if (segment_length[i]->nb_value > max_nb_value) {
+          max_nb_value = segment_length[i]->nb_value;
+        }
+      }
+    }
+
+    os << "\n\n" << SEQ_label[SEQL_SEGMENT_LENGTH] << " " << STAT_label[STATL_DISTRIBUTIONS] << endl;
+
+    for (i = 0;i < nb_segment;i++) {
+      os << "\n" << SEQ_label[SEQL_SEGMENT] << " " << i << " " << SEQ_label[SEQL_LENGTH]
+         << " " << STAT_label[STATL_DISTRIBUTION] << endl;
+      segment_length[i]->spreadsheet_characteristic_print(os , true);
+    }
+    if (prior_segment_length) {
+      os << "\n" << SEQ_label[SEQL_PRIOR_SEGMENT_LENGTH] << " " << STAT_label[STATL_DISTRIBUTION] << endl;
+      prior_segment_length->spreadsheet_characteristic_print(os , true);
+    }
+
+    os << "\n";
+    for (i = 0;i < nb_segment;i++) {
+      os << "\t" << SEQ_label[SEQL_SEGMENT] << " " << i << " " << SEQ_label[SEQL_LENGTH]
+         << " " << STAT_label[STATL_DISTRIBUTION];
+    }
+    if (prior_segment_length) {
+      os << "\t" << SEQ_label[SEQL_PRIOR_SEGMENT_LENGTH] << " " << STAT_label[STATL_DISTRIBUTION];
+    }
+    for (i = 0;i < nb_segment;i++) {
+      os << "\t" << SEQ_label[SEQL_SEGMENT] << " " << i << " " << STAT_label[STATL_CUMULATIVE]
+         << " " << STAT_label[STATL_DISTRIBUTION] << " " << STAT_label[STATL_FUNCTION];
+    }
+    if (prior_segment_length) {
+      os << "\t" << SEQ_label[SEQL_PRIOR_SEGMENT_LENGTH] << " " << i << " " << STAT_label[STATL_CUMULATIVE]
+         << " " << STAT_label[STATL_DISTRIBUTION] << " " << STAT_label[STATL_FUNCTION];
+    }
+    os << endl;
+
+    for (i = 0;i < max_nb_value;i++) {
+      os << i;
+
+      for (j = 0;j < nb_segment;j++) {
+        os << "\t";
+        if (i < segment_length[j]->nb_value) {
+          os << segment_length[j]->mass[i];
+        }
+      }
+      if (prior_segment_length) {
+        os << "\t" << prior_segment_length->mass[i];
+      }
+      for (j = 0;j < nb_segment;j++) {
+        os << "\t";
+        if (i < segment_length[j]->nb_value) {
+          os << segment_length[j]->cumul[i];
+        }
+      }
+      if (prior_segment_length) {
+        os << "\t" << prior_segment_length->cumul[i];
+      }
+      os << endl;
+    }
+    os << endl;
+  }
+
   if ((begin_conditonal_entropy) && (end_conditional_entropy) &&
       (change_point_entropy)) {
     os << "\n" << SEQ_label[SEQL_BEGIN_CONDITIONAL_ENTROPY];
@@ -2616,23 +3902,33 @@ ostream& Sequences::profile_spreadsheet_print(ostream &os , int index , int nb_s
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of segment/state, change-point and entropy profiles for
+ *         a single sequence or a sample of sequences (in the case of
+ *         multiple change-point models) at the Gnuplot format.
  *
- *  Writing of segment/state, change-point and entropy profiles for
- *  a single sequence or a sample of sequences (in the case of
- *  multiple change-point models) at the Gnuplot. format.
- *
- *  arguments: stream, sequence index, number of segments/states,
- *             pointer on the segment/state profiles,
- *             flag contrast functions common to the individuals,
- *             the piecewise linear functions,
- *             the change-point and the entropy profiles.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os                       stream,
+ *  \param[in]     index                    sequence index,
+ *  \param[in]     nb_segment               number of segments/states,
+ *  \param[in]     profiles                 pointer on the segment/state profiles,
+ *  \param[in]     common_contrast          flag contrast functions common to the individuals,
+ *  \param[in]     piecewise_function       pointer on the piecewise linear functions,
+ *  \param[in]     change_point             pointer on the change-point profiles,
+ *  \param[in]     segment_length           pointer on the segment length distributions,
+ *  \param[in]     prior_segment_length     pointer on the prior segment length distribution, assuming a
+ *                                          uniform prior on the possible segmentations,
+ *  \param[in]     begin_conditonal_entropy pointer on the profiles of entropies conditional on the past,
+ *  \param[in]     end_conditional_entropy  pointer on the profiles of entropies conditional on the future,
+ *  \param[in]     change_point_entropy     pointer on the change-point entropy profiles.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& Sequences::profile_plot_print(ostream &os , int index , int nb_segment ,
                                        double **profiles , bool common_contrast ,
                                        double ***piecewise_function , long double **change_point ,
+                                       Distribution **segment_length ,
+                                       Distribution *prior_segment_length ,
                                        long double **begin_conditonal_entropy ,
                                        long double **end_conditional_entropy ,
                                        long double **change_point_entropy) const
@@ -2697,11 +3993,50 @@ ostream& Sequences::profile_plot_print(ostream &os , int index , int nb_segment 
       os << profiles[i][j] << " ";
     }
 
-    if ((change_point) && (begin_conditonal_entropy) &&
-        (end_conditional_entropy) && (change_point_entropy)) {
+    if (change_point) {
       for (j = 1;j < nb_segment;j++) {
         os << change_point[j][i] << " ";
       }
+    }
+
+    if (segment_length) {
+      for (j = 0;j < nb_segment;j++) {
+        if (i < segment_length[j]->nb_value) {
+          os << segment_length[j]->mass[i] << " ";
+        }
+        else {
+          os << 0. << " ";
+        }
+      }
+      if (prior_segment_length) {
+        if (i < prior_segment_length->nb_value) {
+          os << prior_segment_length->mass[i] << " ";
+        }
+        else {
+          os << 0. << " ";
+        }
+      }
+
+/*      for (j = 0;j < nb_segment;j++) {
+        if (i < segment_length[j]->nb_value) {
+          os << segment_length[j]->cumul[i] << " ";
+        }
+        else {
+          os << 1. << " ";
+        }
+      }
+      if (prior_segment_length) {
+        if (i < prior_segment_length->nb_value) {
+          os << prior_segment_length->cumul[i] << " ";
+        }
+        else {
+          os << 1. << " ";
+        }
+      } */
+    }
+
+    if ((begin_conditonal_entropy) && (end_conditional_entropy) &&
+        (change_point_entropy)) {
       for (j = 1;j < nb_segment;j++) {
         os << begin_conditonal_entropy[j][i] << " ";
       }
@@ -2724,16 +4059,18 @@ ostream& Sequences::profile_plot_print(ostream &os , int index , int nb_segment 
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of change-point profiles for a single sequence or
+ *         a sample of sequences (in the case of multiple change-point models)
+ *         at the "plotable" format.
  *
- *  Writing of change-point profiles for a single sequence or
- *  a sample of sequences (in the case of multiple change-point models)
- *  at the "plotable" format.
- *
- *  arguments: reference on a MultiPlot object, sequence index,
- *             number of segments, pointer on the change-point profiles.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] plot         reference on a MultiPlot object,
+ *  \param[in] index        sequence index,
+ *  \param[in] nb_segment   number of segments,
+ *  \param[in] change_point pointer on the change-point profiles.
+ */
+/*--------------------------------------------------------------*/
 
 void Sequences::change_point_profile_plotable_write(MultiPlot &plot , int index , int nb_segment ,
                                                     long double **change_point) const
@@ -2771,16 +4108,76 @@ void Sequences::change_point_profile_plotable_write(MultiPlot &plot , int index 
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of segment length distributions including the prior segment length
+ *         distribution corresponding to a uniform prior on the possible segmentations 
+ *         at the "plotable" format.
  *
- *  Writing of entropy profiles for a single sequence or
- *  a sample of sequences (in the case of multiple change-point models)
- *  at the "plotable" format.
+ *  \param[in] plot                 reference on a MultiPlot object,
+ *  \param[in] nb_segment           number of segments,
+ *  \param[in] segment_length_max   maximum probability of segment length distribution,
+ *  \param[in] segment_length       pointer on the segment length distributions,
+ *  \param[in] prior_segment_length pointer on the prior segment length distribution.
+ */
+/*--------------------------------------------------------------*/
+
+void Sequences::segment_length_distribution_plotable_write(MultiPlot &plot , int nb_segment ,
+                                                           double segment_length_max ,
+                                                           Distribution **segment_length ,
+                                                           Distribution *prior_segment_length) const
+
+{
+  register int i;
+  int max_nb_value;
+
+
+  if (prior_segment_length) {
+    max_nb_value = prior_segment_length->nb_value;
+ 
+    plot.resize(nb_segment + 1);
+  }
+
+  else {
+    max_nb_value = segment_length[0]->nb_value;
+    for (i = 1;i < nb_segment;i++) {
+      if (segment_length[i]->nb_value > max_nb_value) {
+        max_nb_value = segment_length[i]->nb_value;
+      }
+    }
+
+    plot.resize(nb_segment);
+  }
+
+  plot.xrange = Range(0 , max_nb_value - 1);
+  if (max_nb_value - 1 < TIC_THRESHOLD) {
+    plot.xtics = 1;
+  }
+
+  plot.yrange = Range(0 , segment_length_max * YSCALE);
+
+  for (i = 0;i < nb_segment;i++) {
+    segment_length[i]->plotable_mass_write(plot[i]);
+  }
+  if (prior_segment_length) {
+    prior_segment_length->plotable_mass_write(plot[nb_segment]);
+  }
+}
+
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of entropy profiles for a single sequence or
+ *         a sample of sequences (in the case of multiple change-point models)
+ *         at the "plotable" format.
  *
- *  arguments: reference on a MultiPlot object, sequence index,
- *             pointers on the entropy profiles.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] plot                     reference on a MultiPlot object,
+ *  \param[in] index                    sequence index,
+ *  \param[in] begin_conditonal_entropy pointer on the profiles of entropies conditional on the past,
+ *  \param[in] end_conditional_entropy  pointer on the profiles of entropies conditional on the future,
+ *  \param[in] change_point_entropy     pointer on the change-point entropy profiles.
+ */
+/*--------------------------------------------------------------*/
 
 void Sequences::entropy_profile_plotable_write(MultiPlot &plot , int index ,
                                                long double *begin_conditional_entropy ,
@@ -2818,35 +4215,45 @@ void Sequences::entropy_profile_plotable_write(MultiPlot &plot , int index ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation by summation of segments/change-point profiles for
+ *         a single sequence or a sample of sequences and of entropy profiles.
  *
- *  Computation by summation of segments/change-point profiles for
- *  a single sequence or a sample of sequences and of entropy profiles.
+ *  \param[in]  index              sequence index,
+ *  \param[in]  nb_segment         number of segments,
+ *  \param[in]  model_type         segment model types,
+ *  \param[in]  common_contrast    flag contrast functions common to the individuals,
+ *  \param[in]  shape_parameter    negative binomial shape parameters,
+ *  \param[in]  rank               ranks (ordinal variables),
+ *  \param[in]  os                 stream,
+ *  \param[in]  plot_set           pointer on a MultiPlotSet object,
+ *  \param[in]  segment_length_max maximum probability of segment length distribution,
+ *  \param[in]  output             output type,
+ *  \param[in]  format             output format (ASCII/SPREADSHEET/GNUPLOT/PLOT),
  *
- *  arguments: sequence index, number of segments, segment model types,
- *             flag contrast functions common to the individuals,
- *             negative binomial distribution parameters,
- *             ranks (ordinal variables), stream, pointer on a MultiPlotSet object,
- *             output type, output format (ASCII/SPREADSHEET/GNUPLOT/PLOT).
- *
- *--------------------------------------------------------------*/
+ *  \param[out] rlikelihood        log-likelihood of the multiple change-point model.
+ */
+/*--------------------------------------------------------------*/
 
 double Sequences::forward_backward(int index , int nb_segment , segment_model *model_type ,
                                    bool common_contrast , double *shape_parameter ,
                                    double **rank , ostream *os , MultiPlotSet *plot_set ,
-                                   change_point_profile output , output_format format) const
+                                   double &segment_length_max , change_point_profile output ,
+                                   output_format format) const
 
 {
   register int i , j , k , m;
   int seq_length , *inf_bound_parameter , *seq_index_parameter;
-  double sum , buff , rlikelihood , *seq_mean , *likelihood , **hyperparam , **backward_output ,
-         ***factorial , ***binomial_coeff , ***smoothed;
+  double sum , buff , rlikelihood , backward_max , *likelihood , **seq_mean , **hyperparam ,
+         **backward_output , ***factorial , ***binomial_coeff , ***smoothed;
   long double segment_norm , sequence_norm , lbuff , lsum , segmentation_entropy , first_order_entropy ,
               change_point_entropy_sum , marginal_entropy , *contrast , *normalized_contrast ,
               *norm , *forward_norm , *backward_norm , *entropy_smoothed , *segment_predicted ,
               **forward , **backward , **change_point , **forward_predicted_entropy ,
               **backward_predicted_entropy , **forward_partial_entropy , **backward_partial_entropy ,
               **change_point_entropy , ***state_entropy;
+  Distribution *prior_segment_length , **segment_length;
 
 # ifdef DEBUG
   long double *entropy_norm;
@@ -2856,11 +4263,14 @@ double Sequences::forward_backward(int index , int nb_segment , segment_model *m
   factorial = new double**[nb_variable];
   inf_bound_parameter = new int[nb_variable];
   binomial_coeff = new double**[nb_variable];
-
-  hyperparam = new double*[nb_variable];
+  seq_mean = new double*[nb_variable];
   seq_index_parameter = NULL;
+  hyperparam = new double*[nb_variable];
 
   for (i = 1;i < nb_variable;i++) {
+
+    // computation of log of factorials for Poisson models
+
     if ((model_type[i - 1] == POISSON_CHANGE) || (model_type[i - 1] == BAYESIAN_POISSON_CHANGE)) {
       factorial[i] = new double*[nb_sequence];
       for (j = 0;j < nb_sequence;j++) {
@@ -2879,6 +4289,8 @@ double Sequences::forward_backward(int index , int nb_segment , segment_model *m
     else {
       factorial[i] = NULL;
     }
+
+    // computation of log of binomial coefficients for negative binomial models
 
     if ((model_type[i - 1] == NEGATIVE_BINOMIAL_0_CHANGE) || (model_type[i - 1] == NEGATIVE_BINOMIAL_1_CHANGE)) {
       switch (model_type[i - 1]) {
@@ -2909,6 +4321,79 @@ double Sequences::forward_backward(int index , int nb_segment , segment_model *m
       binomial_coeff[i] = NULL;
     }
 
+    // computation of sequence means for Gaussian change in the variance models
+
+    if (model_type[i - 1] == VARIANCE_CHANGE) {
+      if ((index != I_DEFAULT) || (!common_contrast)) {
+        seq_mean[i] = new double[nb_sequence];
+
+        if (type[i] != REAL_VALUE) {
+          for (j = 0;j < nb_sequence;j++) {
+            if ((index == I_DEFAULT) || (index == j)) {
+              seq_mean[i][j] = 0.;
+              for (k = 0;k < length[j];k++) {
+                seq_mean[i][j] += int_sequence[j][i][k];
+              }
+              seq_mean[i][j] /= length[j];
+            }
+          }
+        }
+
+        else {
+          for (j = 0;j < nb_sequence;j++) {
+            if ((index == I_DEFAULT) || (index == j)) {
+              seq_mean[i][j] = 0.;
+              for (k = 0;k < length[j];k++) {
+                seq_mean[i][j] += real_sequence[j][i][k];
+              }
+              seq_mean[i][j] /= length[j];
+            }
+          }
+        }
+      }
+
+      else {
+        seq_mean[i] = new double[1];
+        seq_mean[i][0] = 0.;
+
+        if (type[i] != REAL_VALUE) {
+          for (j = 0;j < length[0];j++) {
+            for (k = 0;k < nb_sequence;k++) {
+              seq_mean[i][0] += int_sequence[k][i][j];
+            }
+          }
+        }
+
+        else {
+          for (j = 0;j < length[0];j++) {
+            for (k = 0;k < nb_sequence;k++) {
+              seq_mean[i][0] += real_sequence[k][i][j];
+            }
+          }
+        }
+
+        seq_mean[i][0] /= (nb_sequence * length[0]);
+      }
+    }
+
+    else {
+      seq_mean[i] = NULL;
+    }
+
+    if (((model_type[i - 1] == LINEAR_MODEL_CHANGE) || (output == CHANGE_POINT)) && (!seq_index_parameter)) {
+      if (index_param_type == IMPLICIT_TYPE) {
+        seq_index_parameter = new int[seq_length];
+        for (j = 0;j < seq_length;j++) {
+          seq_index_parameter[j] = j;
+        }
+      }
+      else {
+        seq_index_parameter = index_parameter[index == I_DEFAULT ? 0 : index];
+      }
+    }
+
+    // computation of hyperparameters for Bayesian Poisson and Gaussian models
+
     if (model_type[i - 1] == BAYESIAN_POISSON_CHANGE) {
       hyperparam[i] = new double[2];
       gamma_hyperparameter_computation(index , i , hyperparam[i]);
@@ -2934,8 +4419,6 @@ double Sequences::forward_backward(int index , int nb_segment , segment_model *m
       hyperparam[i] = NULL;
     }
   }
-
-  seq_mean = new double[nb_variable];
 
   seq_length = length[index == I_DEFAULT ? 0 : index];
   contrast = new long double[seq_length];
@@ -2984,6 +4467,14 @@ double Sequences::forward_backward(int index , int nb_segment , segment_model *m
     backward_output[i] = new double[nb_segment];
   }
 
+  segment_length = new Distribution*[nb_segment];
+  for (i = 0;i < nb_segment;i++) {
+    segment_length[i] = new Distribution(seq_length);
+    for (j = 0;j < seq_length;j++) {
+      segment_length[i]->mass[j] = 0.;
+    }
+  }
+
   change_point = new long double*[nb_segment];
   for (i = 1;i < nb_segment;i++) {
     change_point[i] = new long double[seq_length];
@@ -3014,35 +4505,6 @@ double Sequences::forward_backward(int index , int nb_segment , segment_model *m
     change_point_entropy[i] = new long double[seq_length];
   }
 
-  for (i = 1;i < nb_variable;i++) {
-    if (model_type[i - 1] == VARIANCE_CHANGE) {
-      seq_mean[i] = 0.;
-      if (type[i] != REAL_VALUE) {
-        for (j = 0;j < length[index];j++) {
-          seq_mean[i] += int_sequence[index][i][j];
-        }
-      }
-      else {
-        for (j = 0;j < length[index];j++) {
-          seq_mean[i] += real_sequence[index][i][j];
-        }
-      }
-      seq_mean[i] /= length[index];
-    }
-
-    if ((model_type[i - 1] == LINEAR_MODEL_CHANGE) && (!seq_index_parameter)) {
-      if (index_param_type == IMPLICIT_TYPE) {
-        seq_index_parameter = new int[seq_length];
-        for (j = 0;j < seq_length;j++) {
-          seq_index_parameter[j] = j;
-        }
-      }
-      else {
-        seq_index_parameter = index_parameter[index == I_DEFAULT ? 0 : index];
-      }
-    }
-  }
-
   // forward recurrence
 
   for (i = 0;i < seq_length;i++) {
@@ -3050,8 +4512,8 @@ double Sequences::forward_backward(int index , int nb_segment , segment_model *m
     // computation of segment log-likelihoods
 
     forward_contrast(i , index , model_type , common_contrast , factorial ,
-                     shape_parameter , binomial_coeff , seq_index_parameter ,
-                     seq_mean , hyperparam , rank , contrast);
+                     shape_parameter , binomial_coeff , seq_mean , seq_index_parameter ,
+                     hyperparam , rank , contrast);
 
     // recurrence and computation of predicted entropies
 
@@ -3201,8 +4663,8 @@ double Sequences::forward_backward(int index , int nb_segment , segment_model *m
       // computation of segment log-likelihoods
 
       backward_contrast(i , index , model_type , common_contrast , factorial ,
-                        shape_parameter , binomial_coeff , seq_index_parameter ,
-                        seq_mean , hyperparam , rank , contrast);
+                        shape_parameter , binomial_coeff , seq_mean , seq_index_parameter ,
+                        hyperparam , rank , contrast);
 
       // recurrence and computation of predicted entropies
 
@@ -3362,8 +4824,6 @@ double Sequences::forward_backward(int index , int nb_segment , segment_model *m
         }
       }
 
-      // computation of partial entropies for the different numbers of possible segments
-
       segment_norm = 0.;
       for (j = i;j < seq_length;j++) {
         segment_norm += norm[j];
@@ -3374,6 +4834,36 @@ double Sequences::forward_backward(int index , int nb_segment , segment_model *m
           normalized_contrast[j] = 0.;
         }
       }
+
+      // extraction of segment length distributions
+
+      if (i == 0) {
+        for (j = i;j <= seq_length - nb_segment;j++) {
+          segment_length[0]->mass[j + 1] = normalized_contrast[j] * backward[j + 1][1] * sequence_norm;
+        }
+      }
+
+      else {
+        for (j = MAX(1 , nb_segment + i - seq_length);j < MIN(nb_segment , i + 1);j++) {
+          if (j < nb_segment - 1) {
+            if (backward[i][j] > 0.) {
+              for (k = i;k <= seq_length + j - nb_segment;k++) {
+                segment_length[j]->mass[k - i + 1] += forward[i - 1][j - 1] * normalized_contrast[k] *
+                                                      backward[k + 1][j + 1] * sequence_norm;
+
+              }
+            }
+          }
+
+          else {
+//            segment_length[j]->mass[seq_length - i] = forward[i - 1][j - 1] * backward[i][j] * sequence_norm;
+            segment_length[j]->mass[seq_length - i] = forward[i - 1][j - 1] * normalized_contrast[seq_length - 1] *
+                                                      sequence_norm;
+          }
+        }
+      }
+
+      // computation of partial entropies for the different numbers of possible segments
 
       if (i > 0) {
         for (j = 1;j < nb_segment;j++) {
@@ -3510,6 +5000,33 @@ double Sequences::forward_backward(int index , int nb_segment , segment_model *m
     }
 #   endif
 
+    for (i = 0;i < nb_segment;i++) {
+      segment_length[i]->nb_value_computation();
+      segment_length[i]->offset_computation();
+      segment_length[i]->cumul_computation();
+      segment_length[i]->max_computation();
+      segment_length[i]->mean_computation();
+      segment_length[i]->variance_computation();
+
+#     ifdef DEBUG
+      cout << "\n" << SEQ_label[SEQL_SEGMENT] << " " << i << " " << SEQ_label[SEQL_LENGTH] << " "
+           << STAT_label[STATL_DISTRIBUTION] << "   ";
+      segment_length[i]->ascii_characteristic_print(cout);
+      cout << "\n";
+      segment_length[i]->ascii_print(cout , false , true , false);
+#     endif
+
+    }
+
+    prior_segment_length = prior_segment_length_distribution(nb_segment , seq_length);
+
+    segment_length_max = prior_segment_length->max;
+    for (i = 0;i < nb_segment;i++) {
+      if (segment_length[i]->max > segment_length_max) {
+        segment_length_max = segment_length[i]->max;
+      }
+    }
+
     // extraction of partial entropies for the different numbers of possible segments
 
     for (i = 1;i < nb_segment;i++) {
@@ -3604,7 +5121,7 @@ double Sequences::forward_backward(int index , int nb_segment , segment_model *m
 
         change_point_entropy[nb_segment - 1][i] = -change_point[nb_segment - 1][i] * logl(change_point[nb_segment - 1][i]) -
                                                   (1 - change_point[nb_segment - 1][i]) * logl(1 - change_point[nb_segment - 1][i]);
-         change_point_entropy_sum += change_point_entropy[nb_segment - 1][i];
+        change_point_entropy_sum += change_point_entropy[nb_segment - 1][i];
       }
       else {
         change_point_entropy[nb_segment - 1][i] = 0.;
@@ -3641,8 +5158,8 @@ double Sequences::forward_backward(int index , int nb_segment , segment_model *m
       // computation of segment log-likelihoods
 
       forward_contrast(i , index , model_type , common_contrast , factorial ,
-                       shape_parameter , binomial_coeff , seq_index_parameter ,
-                       seq_mean , hyperparam , rank , contrast);
+                       shape_parameter , binomial_coeff , seq_mean , seq_index_parameter ,
+                       hyperparam , rank , contrast);
 
       // recurrence
 
@@ -3867,8 +5384,8 @@ double Sequences::forward_backward(int index , int nb_segment , segment_model *m
 
         profile_ascii_print(*os , index , nb_segment , backward_output ,
                             (output == CHANGE_POINT ? SEQ_label[SEQL_CHANGE_POINT] : SEQ_label[SEQL_SEGMENT]) ,
-                            NULL , change_point , forward_partial_entropy ,
-                            backward_partial_entropy , change_point_entropy);
+                            NULL , change_point , segment_length , prior_segment_length ,
+                            forward_partial_entropy , backward_partial_entropy , change_point_entropy);
 
         *os << "\n" << SEQ_label[SEQL_POSSIBLE_SEGMENTATION_LIKELIHOOD] << ": " << rlikelihood << endl;
         *os << "\n" << SEQ_label[SEQL_SEGMENTATION_ENTROPY] << ": " << segmentation_entropy
@@ -3876,6 +5393,43 @@ double Sequences::forward_backward(int index , int nb_segment , segment_model *m
             << "\n" << SEQ_label[SEQL_CHANGE_POINT_ENTROPY] << ": " << change_point_entropy_sum
 //            << " (" << change_point_entropy_sum / nb_segment << ")";
             << "\n" << SEQ_label[SEQL_MARGINAL_ENTROPY] << ": " << marginal_entropy << endl;
+
+        // extraction of change-point uncertainty intervals
+
+        if (output == CHANGE_POINT) {
+          *os << "\n" << SEQ_label[SEQL_CHANGE_POINT_UNCERTAINTY_INTERVALS] << endl;
+          for (i = 1;i < nb_segment;i++) {
+            *os << SEQ_label[SEQL_CHANGE_POINT] << " " << i << " (";
+
+            sum = 0.;
+            backward_max = 0.;
+            j = 0;
+            while (sum < CHANGE_POINT_UNCERTAINTY_PROBABILITY / 2) {
+              j++;
+              sum += backward_output[j][i];
+              if (backward_output[j][i] > backward_max) {
+                backward_max = backward_output[j][i];
+              }
+            }
+            *os << seq_index_parameter[j] << ", ";
+
+            while (sum <= 1. - CHANGE_POINT_UNCERTAINTY_PROBABILITY / 2) {
+              j++;
+              sum += backward_output[j][i];
+              if (backward_output[j][i] > backward_max) {
+                backward_max = backward_output[j][i];
+              }
+            }
+
+            if (backward_output[j][i] == backward_max) {
+              *os << seq_index_parameter[j] << ")" << endl;
+            }
+            else {
+              *os << seq_index_parameter[j - 1] << ")" << endl;
+            }
+          }
+        }
+
         break;
       }
 
@@ -3891,8 +5445,8 @@ double Sequences::forward_backward(int index , int nb_segment , segment_model *m
 
         profile_spreadsheet_print(*os , index , nb_segment , backward_output ,
                                   (output == CHANGE_POINT ? SEQ_label[SEQL_CHANGE_POINT] : SEQ_label[SEQL_SEGMENT]) ,
-                                  common_contrast , NULL , change_point , forward_partial_entropy ,
-                                  backward_partial_entropy , change_point_entropy);
+                                  common_contrast , NULL , change_point , segment_length , prior_segment_length ,
+                                  forward_partial_entropy , backward_partial_entropy , change_point_entropy);
 
         *os << "\n" << SEQ_label[SEQL_POSSIBLE_SEGMENTATION_LIKELIHOOD] << "\t" << rlikelihood << endl;
         *os << "\n" << SEQ_label[SEQL_SEGMENTATION_ENTROPY] << "\t" << segmentation_entropy
@@ -3905,8 +5459,8 @@ double Sequences::forward_backward(int index , int nb_segment , segment_model *m
 
       case GNUPLOT : {
         profile_plot_print(*os , index , nb_segment , backward_output ,
-                           common_contrast , NULL ,
-                           change_point , forward_partial_entropy ,
+                           common_contrast , NULL , change_point ,
+                           segment_length , prior_segment_length , forward_partial_entropy ,
                            backward_partial_entropy , change_point_entropy);
         break;
       }
@@ -3929,6 +5483,9 @@ double Sequences::forward_backward(int index , int nb_segment , segment_model *m
         i++;
         change_point_profile_plotable_write(plot[i] , index , nb_segment , change_point);
         i++;
+        segment_length_distribution_plotable_write(plot[i] , nb_segment , segment_length_max ,
+                                                   segment_length , prior_segment_length);
+        i++;
         change_point_profile_plotable_write(plot[i] , index , nb_segment , forward_partial_entropy);
         i++;
         change_point_profile_plotable_write(plot[i] , index , nb_segment , backward_partial_entropy);
@@ -3941,45 +5498,6 @@ double Sequences::forward_backward(int index , int nb_segment , segment_model *m
       }
     }
   }
-
-# ifdef DEBUG
-  Distribution *prior;
-
-
-  // computation of the prior segment length distribution corresponding to the assumption of
-  // a uniform prior distribution for the possible segmentations
-
-  prior = new Distribution(seq_length - nb_segment + 2);
-  prior->mass[0] = 0.;
-
-  buff = 1.;
-  for (i = 1;i < nb_segment - 1;i++) {
-    buff *= (double)(seq_length - i - 1) / (double)i;
-  }
-  sum = buff * (double)(seq_length - 1) / (double)(nb_segment - 1);
-
-//  cout << "\nAll " << SEQ_label[SEQL_SEGMENTS] << ":";
-  for (i = 1;i <= seq_length - nb_segment + 1;i++) {
-//    cout << " " << buff / sum;
-    prior->mass[i] = buff / sum;
-    buff *= (double)(seq_length - i - nb_segment + 1) /
-            (double)(seq_length - i - 1);
-  }
-//  cout << endl;
-
-  prior->offset = 1.;
-  prior->cumul_computation();
-  prior->max = prior->mass[1];
-  prior->mean_computation();
-  prior->variance_computation();
-
-  cout << "\n";
-  prior->ascii_characteristic_print(cout , true);
-//  prior->spreadsheet_characteristic_print(cout , true);
-  prior->ascii_print(cout , false , true , false);
-
-  delete prior;
-# endif
 
   for (i = 1;i < nb_variable;i++) {
     if ((model_type[i - 1] == POISSON_CHANGE) || (model_type[i - 1] == BAYESIAN_POISSON_CHANGE)) {
@@ -3995,17 +5513,16 @@ double Sequences::forward_backward(int index , int nb_segment , segment_model *m
       }
       delete [] binomial_coeff[i];
     }
+
+    delete [] seq_mean[i];
+    delete [] hyperparam[i];
   }
   delete [] factorial;
   delete [] inf_bound_parameter;
   delete [] binomial_coeff;
-
-  for (i = 1;i < nb_variable;i++) {
-    delete [] hyperparam[i];
-  }
+  delete [] seq_mean;
   delete [] hyperparam;
 
-  delete [] seq_mean;
   if (index_param_type == IMPLICIT_TYPE) {
     delete [] seq_index_parameter;
   }
@@ -4056,6 +5573,13 @@ double Sequences::forward_backward(int index , int nb_segment , segment_model *m
   }
   delete [] backward_output;
 
+  for (i = 0;i < nb_segment;i++) {
+    delete segment_length[i];
+  }
+  delete [] segment_length;
+
+  delete prior_segment_length;
+
   for (i = 1;i < nb_segment;i++) {
     delete [] change_point[i];
   }
@@ -4090,17 +5614,23 @@ double Sequences::forward_backward(int index , int nb_segment , segment_model *m
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Simulation of segmentations of a single sequence  or a sample of sequences.
  *
- *  Simulation of segmentations of a single sequence  or a sample of sequences.
+ *  \param[in]  index           sequence index,
+ *  \param[in]  nb_segment      number of segments,
+ *  \param[in]  model_type      segment model types,
+ *  \param[in]  common_contrast flag contrast functions common to the individuals,
+ *  \param[in]  shape_parameter negative binomial shape parameters,
+ *  \param[in]  rank            ranks (ordinal variables),
+ *  \param[in]  os              stream,
+ *  \param[in]  format          file format (ASCII/SPREADSHEET),
+ *  \param[in]  nb_segmentation number of segmentations,
  *
- *  arguments: sequence index, number of segments, segment model types,
- *             flag contrast functions common to the individuals,
-               negative binomial distribution parameters,
- *             ranks (ordinal variables), stream, file format
- *             (ASCII/SPREADSHEET), number of segmentations.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] likelihood      log-likelihood of the multiple change-point model.
+ */
+/*--------------------------------------------------------------*/
 
 double Sequences::forward_backward_sampling(int index , int nb_segment , segment_model *model_type ,
                                             bool common_contrast , double *shape_parameter ,
@@ -4111,19 +5641,22 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , segment
   register int i , j , k , m;
   int seq_length , segment_length , *inf_bound_parameter , *seq_index_parameter , *change_point ,
       *psegment;
-  double sum , likelihood , segmentation_likelihood , *seq_mean , *backward , *cumul_backward ,
+  double sum , likelihood , segmentation_likelihood , *backward , *cumul_backward , **seq_mean ,
          **hyperparam , ***factorial , ***binomial_coeff , ***mean , ***variance ,
-         ***intercept , ***slope;
+         ***intercept , ***slope , ***autoregressive_coeff;
   long double segment_norm , sequence_norm , *contrast , *norm , **forward;
 
 
   factorial = new double**[nb_variable];
   inf_bound_parameter = new int[nb_variable];
   binomial_coeff = new double**[nb_variable];
-
+  seq_mean = new double*[nb_variable];
   hyperparam = new double*[nb_variable];
 
   for (i = 1;i < nb_variable;i++) {
+
+    // computation of log of factorials for Poisson models
+
     if ((model_type[i - 1] == POISSON_CHANGE) || (model_type[i - 1] == BAYESIAN_POISSON_CHANGE)) {
       factorial[i] = new double*[nb_sequence];
       for (j = 0;j < nb_sequence;j++) {
@@ -4142,6 +5675,8 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , segment
     else {
       factorial[i] = NULL;
     }
+
+    // computation of log of binomial coefficients for negative binomial models
 
     if ((model_type[i - 1] == NEGATIVE_BINOMIAL_0_CHANGE) || (model_type[i - 1] == NEGATIVE_BINOMIAL_1_CHANGE)) {
       switch (model_type[i - 1]) {
@@ -4172,6 +5707,67 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , segment
       binomial_coeff[i] = NULL;
     }
 
+    // computation of sequence means for Gaussian change in the variance models
+
+    if (model_type[i - 1] == VARIANCE_CHANGE) {
+      if ((index != I_DEFAULT) || (!common_contrast)) {
+        seq_mean[i] = new double[nb_sequence];
+
+        if (type[i] != REAL_VALUE) {
+          for (j = 0;j < nb_sequence;j++) {
+            if ((index == I_DEFAULT) || (index == j)) {
+              seq_mean[i][j] = 0.;
+              for (k = 0;k < length[j];k++) {
+                seq_mean[i][j] += int_sequence[j][i][k];
+              }
+              seq_mean[i][j] /= length[j];
+            }
+          }
+        }
+
+        else {
+          for (j = 0;j < nb_sequence;j++) {
+            if ((index == I_DEFAULT) || (index == j)) {
+              seq_mean[i][j] = 0.;
+              for (k = 0;k < length[j];k++) {
+                seq_mean[i][j] += real_sequence[j][i][k];
+              }
+              seq_mean[i][j] /= length[j];
+            }
+          }
+        }
+      }
+
+      else {
+        seq_mean[i] = new double[1];
+        seq_mean[i][0] = 0.;
+
+        if (type[i] != REAL_VALUE) {
+          for (j = 0;j < length[0];j++) {
+            for (k = 0;k < nb_sequence;k++) {
+              seq_mean[i][0] += int_sequence[k][i][j];
+            }
+          }
+        }
+
+        else {
+          for (j = 0;j < length[0];j++) {
+            for (k = 0;k < nb_sequence;k++) {
+              seq_mean[i][0] += real_sequence[k][i][j];
+            }
+          }
+        }
+
+        seq_mean[i][0] /= (nb_sequence * length[0]);
+      }
+    }
+
+    else {
+      seq_mean[i] = NULL;
+    }
+
+    // computation of hyperparameters for Bayesian Poisson and Gaussian models
+
     if (model_type[i - 1] == BAYESIAN_POISSON_CHANGE) {
       hyperparam[i] = new double[2];
       gamma_hyperparameter_computation(index , i , hyperparam[i]);
@@ -4184,8 +5780,6 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , segment
       hyperparam[i] = NULL;
     }
   }
-
-  seq_mean = new double[nb_variable];
 
   seq_length = length[index == I_DEFAULT ? 0 : index];
 
@@ -4217,6 +5811,7 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , segment
   variance = new double**[nb_variable];
   intercept = new double**[nb_variable];
   slope = new double**[nb_variable];
+  autoregressive_coeff = new double**[nb_variable];
 
   for (i = 1;i < nb_variable;i++) {
     if ((model_type[i - 1] == POISSON_CHANGE) || (model_type[i - 1] == NEGATIVE_BINOMIAL_0_CHANGE) ||
@@ -4276,6 +5871,36 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , segment
         variance[i][0] = new double[nb_segment];
       }
     }
+
+    else if (model_type[i - 1] == AUTOREGRESSIVE_MODEL_CHANGE) {
+      if ((index != I_DEFAULT) || (!common_contrast)) {
+        mean[i] = new double*[nb_sequence];
+        autoregressive_coeff[i] = new double*[nb_sequence];
+        variance[i] = new double*[nb_sequence];
+
+        for (j = 0;j < nb_sequence;j++) {
+          if ((index == I_DEFAULT) || (index == j)) {
+            mean[i][j] = new double[nb_segment];
+            autoregressive_coeff[i][j] = new double[nb_segment];
+            variance[i][j] = new double[nb_segment];
+          }
+          else {
+            mean[i][j] = NULL;
+            autoregressive_coeff[i][j] = NULL;
+            variance[i][j] = NULL;
+          }
+        }
+      }
+
+      else {
+        mean[i] = new double*[1];
+        mean[i][0] = new double[nb_segment];
+        autoregressive_coeff[i] = new double*[1];
+        autoregressive_coeff[i][0] = new double[nb_segment];
+        variance[i] = new double*[1];
+        variance[i][0] = new double[nb_segment];
+      }
+    }
   }
 
 # ifdef DEBUG
@@ -4290,23 +5915,6 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , segment
   }
 # endif
 
-  for (i = 1;i < nb_variable;i++) {
-    if (model_type[i - 1] == VARIANCE_CHANGE) {
-      seq_mean[i] = 0.;
-      if (type[i] != REAL_VALUE) {
-        for (j = 0;j < length[index];j++) {
-          seq_mean[i] += int_sequence[index][i][j];
-        }
-      }
-      else {
-        for (j = 0;j < length[index];j++) {
-          seq_mean[i] += real_sequence[index][i][j];
-        }
-      }
-      seq_mean[i] /= length[index];
-    }
-  }
-
   // forward recurrence
 
   for (i = 0;i < seq_length;i++) {
@@ -4314,8 +5922,8 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , segment
     // computation of segment log-likelihoods
 
     forward_contrast(i , index , model_type , common_contrast , factorial ,
-                     shape_parameter , binomial_coeff , seq_index_parameter ,
-                     seq_mean , hyperparam , rank , contrast);
+                     shape_parameter , binomial_coeff , seq_mean , seq_index_parameter ,
+                     hyperparam , rank , contrast);
 
     if (contrast[i] != D_INF) {
       contrast[i] = expl(contrast[i]);
@@ -4399,8 +6007,8 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , segment
         // computation of segment log-likelihoods
 
         forward_contrast(j , index , model_type , common_contrast , factorial ,
-                         shape_parameter , binomial_coeff , seq_index_parameter ,
-                         seq_mean , hyperparam , rank , contrast , k);
+                         shape_parameter , binomial_coeff , seq_mean , seq_index_parameter ,
+                         hyperparam , rank , contrast , k);
 
         segment_norm = 0.;
         for (m = j;m >= k;m--) {
@@ -4448,7 +6056,7 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , segment
       for (j = 1;j < nb_variable;j++) {
         piecewise_linear_function(index , j , nb_segment , model_type[j - 1] , common_contrast ,
                                   change_point , seq_index_parameter , NULL , mean[j] , variance[j] ,
-                                  NULL , intercept[j] , slope[j]);
+                                  NULL , intercept[j] , slope[j] , autoregressive_coeff[j]);
       }
 
 #     ifdef DEBUG
@@ -4490,7 +6098,8 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , segment
         for (j = 1;j < nb_variable;j++) {
           piecewise_linear_function_ascii_print(os , index , j , nb_segment , model_type[j - 1] ,
                                                 common_contrast , change_point , seq_index_parameter ,
-                                                mean[j] , variance[j] , intercept[j] , slope[j]);
+                                                mean[j] , variance[j] , intercept[j] , slope[j] ,
+                                                autoregressive_coeff[j]);
         }
         break;
       }
@@ -4507,7 +6116,8 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , segment
         for (j = 1;j < nb_variable;j++) {
           piecewise_linear_function_spreadsheet_print(os , index , j , nb_segment , model_type[j - 1] ,
                                                       common_contrast , change_point , seq_index_parameter ,
-                                                      mean[j] , variance[j] , intercept[j] , slope[j]);
+                                                      mean[j] , variance[j] , intercept[j] , slope[j] ,
+                                                      autoregressive_coeff[j]);
         }
         break;
       }
@@ -4552,21 +6162,20 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , segment
       }
       delete [] binomial_coeff[i];
     }
+
+    delete [] seq_mean[i];
+    delete [] hyperparam[i];
   }
   delete [] factorial;
   delete [] inf_bound_parameter;
   delete [] binomial_coeff;
+  delete [] seq_mean;
+  delete [] hyperparam;
 
   if (index_param_type == IMPLICIT_TYPE) {
     delete [] seq_index_parameter;
   }
 
-  for (i = 1;i < nb_variable;i++) {
-    delete [] hyperparam[i];
-  }
-  delete [] hyperparam;
-
-  delete [] seq_mean;
   delete [] contrast;
 
   for (i = 0;i < seq_length;i++) {
@@ -4625,12 +6234,35 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , segment
       delete [] slope[i];
       delete [] variance[i];
     }
+
+    else if (model_type[i - 1] == AUTOREGRESSIVE_MODEL_CHANGE) {
+      if ((index != I_DEFAULT) || (!common_contrast)) {
+        for (j = 0;j < nb_sequence;j++) {
+          if ((index == I_DEFAULT) || (index == j)) {
+            delete [] mean[i][j];
+            delete [] autoregressive_coeff[i][j];
+            delete [] variance[i][j];
+          }
+        }
+      }
+
+      else {
+        delete [] mean[i][0];
+        delete [] autoregressive_coeff[i][0];
+        delete [] variance[i][0];
+      }
+
+      delete [] mean[i];
+      delete [] autoregressive_coeff[i];
+      delete [] variance[i];
+    }
   }
 
   delete [] mean;
   delete [] variance;
   delete [] intercept;
   delete [] slope;
+  delete [] autoregressive_coeff;
 
 # ifdef DEBUG
   for (i = 0;i < seq_length;i++) {

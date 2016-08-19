@@ -57,11 +57,11 @@ namespace stat_tool {
 
 
 
-/*--------------------------------------------------------------*
- *
- *  Constructeur par defaut de la classe Mixture.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Default constructor of the Mixture class.
+ */
+/*--------------------------------------------------------------*/
 
 Mixture::Mixture()
 
@@ -78,14 +78,15 @@ Mixture::Mixture()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the Mixture class.
  *
- *  Constructeur de la classe Mixture.
- *
- *  arguments : nombre de composantes, nombre de processus d'observation,
- *              nombre de valeurs observees par processus.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] inb_component      number of components,
+ *  \param[in] inb_output_process number of observation processes,
+ *  \param[in] nb_value           number of observed values per process.
+ */
+/*--------------------------------------------------------------*/
 
 Mixture::Mixture(int inb_component , int inb_output_process , int *nb_value)
 
@@ -126,17 +127,19 @@ Mixture::Mixture(int inb_component , int inb_output_process , int *nb_value)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the Mixture class (univariate gamma, inverse gaussien or gaussien with tied parameters).
  *
- *  Constructeur de la classe Mixture (modele gamma, inverse gaussien ou gaussien univarie avec parametres lies).
- *
- *  arguments : nombre de composantes, identificateur des composantes (GAMMA / INVERSE_GAUSSIAN / GAUSSIAN),
- *              moyenne et parametre de forme de la premiere composante (GAMMA) /
- *              moyenne et parametre d'echelle de la premiere composante (INVERSE_GAUSSIAN) /
- *              moyenne et ecart-type de la premiere composante (GAUSSIAN), flag moyennes liees,
- *              type de lien entre les variances (CONVOLUTION_FACTOR / SCALING_FACTOR).
- *
- *--------------------------------------------------------------*/
+ *  \param[in] inb_component      number of components,
+ *  \param[in] ident              component identifiers (GAMMA / INVERSE_GAUSSIAN / GAUSSIAN),
+ *  \param[in] mean               mean of the 1st component,
+ *  \param[in] standard_deviation shape parameter (GAMMA) / scale parameter (INVERSE_GAUSSIAN) /
+ *  \param[in]                    standard deviation (GAUSSIAN) of the 1st component,
+ *  \param[in] tied_mean          flag tied means,
+ *  \param[in] variance_factor    type of link between the variances (CONVOLUTION_FACTOR / SCALING_FACTOR).
+ */
+/*--------------------------------------------------------------*/
 
 Mixture::Mixture(int inb_component , int ident , double mean , double standard_deviation ,
                  bool tied_mean , tying_rule variance_factor)
@@ -215,16 +218,17 @@ Mixture::Mixture(int inb_component , int ident , double mean , double standard_d
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the Mixture class.
  *
- *  Constructeur de la classe Mixture.
- *
- *  arguments : pointeur sur objet DiscreteParametric,
- *              nombre de processus d'observation, pointeurs sur des objets
- *              CategoricalProcess, DiscreteParametricProcess et
- *              ContinuousParametricProcess.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] iweight                           weight distribution,
+ *  \param[in] inb_output_process                number of observation processes,
+ *  \param[in] categorical_observation           pointer on CategoricalProcess objects,
+ *  \param[in] discrete_parametric_observation   pointer on DiscreteParametricProcess objects,
+ *  \param[in] continuous_parametric_observation pointer on ContinuousParametricProcess objects.
+ */
+/*--------------------------------------------------------------*/
 
 Mixture::Mixture(const DiscreteParametric *iweight , int inb_output_process ,
                  CategoricalProcess **categorical_observation ,
@@ -266,14 +270,14 @@ Mixture::Mixture(const DiscreteParametric *iweight , int inb_output_process ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Copy of a Mixture object.
  *
- *  Copie d'un objet Mixture.
- *
- *  arguments : reference sur un objet Mixture,
- *              flag copie de l'objet MixtureData.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] mixt      reference on a Mixture object,
+ *  \param[in] data_flag flag copy of the included MixtureData object.
+ */
+/*--------------------------------------------------------------*/
 
 void Mixture::copy(const Mixture &mixt , bool data_flag)
 
@@ -347,11 +351,11 @@ void Mixture::copy(const Mixture &mixt , bool data_flag)
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Destruction des champs d'un objet Mixture.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Destruction of the data members of a Mixture object.
+ */
+/*--------------------------------------------------------------*/
 
 void Mixture::remove()
 
@@ -386,11 +390,11 @@ void Mixture::remove()
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Destructeur de la classe Mixture.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Destructor of the Mixture class.
+ */
+/*--------------------------------------------------------------*/
 
 Mixture::~Mixture()
 
@@ -399,13 +403,15 @@ Mixture::~Mixture()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Assignment operator of the Mixture class.
  *
- *  Operateur d'assignement de la classe Mixture.
+ *  \param[in]  mixt reference on a Mixture object,
  *
- *  argument : reference sur un objet Mixture.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] this Mixture object.
+ */
+/*--------------------------------------------------------------*/
 
 Mixture& Mixture::operator=(const Mixture &mixt)
 
@@ -419,13 +425,17 @@ Mixture& Mixture::operator=(const Mixture &mixt)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Extraction of a discrete parametric component.
  *
- *  Extraction d'une loi.
+ *  \param[in]  error    reference on a StatError object,
+ *  \param[in]  variable variable index,
+ *  \param[in]  index    component index,
  *
- *  arguments : reference sur un objet StatError, variable, indice de la composante.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] dist     discrete parametric component.
+ */
+/*--------------------------------------------------------------*/
 
 DiscreteParametricModel* Mixture::extract(StatError &error , int variable , int index) const
 
@@ -510,13 +520,15 @@ DiscreteParametricModel* Mixture::extract(StatError &error , int variable , int 
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Extraction of the data part of a Mixture object.
  *
- *  Extraction de la partie "donnees" d'un objet Mixture.
+ *  \param[in]  error reference on a StatError object,
  *
- *  argument : reference sur un objet StatError.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] vec   data corresponding to a mixture of distributions.
+ */
+/*--------------------------------------------------------------*/
 
 MixtureData* Mixture::extract_data(StatError &error) const
 
@@ -546,13 +558,15 @@ MixtureData* Mixture::extract_data(StatError &error) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Application of a threshold on the parameters of a multivariate mixture.
  *
- *  Application d'un seuil sur les parametres d'un melange multivarie.
+ *  \param[in]  min_probability minimum probability,
  *
- *  argument : probabilite minimum.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] mixt            Mixture object.
+ */
+/*--------------------------------------------------------------*/
 
 Mixture* Mixture::thresholding(double min_probability) const
 
@@ -573,14 +587,17 @@ Mixture* Mixture::thresholding(double min_probability) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Construction of a Mixture object from a file.
  *
- *  Construction d'un objet Mixture a partir d'un fichier.
+ *  \param[in]  error           reference on a StatError object,
+ *  \param[in]  path            file path,
+ *  \param[in]  cumul_threshold threshold on the cumulative distribution function,
  *
- *  arguments : reference sur un objet StatError, path,
- *              seuil sur les fonctions de repartition des lois parametriques.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] mixt            Mixture object.
+ */
+/*--------------------------------------------------------------*/
 
 Mixture* Mixture::ascii_read(StatError &error , const string path , double cumul_threshold)
 
@@ -632,7 +649,7 @@ Mixture* Mixture::ascii_read(StatError &error , const string path , double cumul
       while (!((token = next()).isNull())) {
         switch (i) {
 
-        // test mot cle MIXTURE
+        // test MIXTURE key word
 
         case 0 : {
           if (token != STAT_word[STATW_MIXTURE]) {
@@ -642,7 +659,7 @@ Mixture* Mixture::ascii_read(StatError &error , const string path , double cumul
           break;
         }
 
-        // test nombre de composantes
+        // test number of components
 
         case 1 : {
           lstatus = locale.stringToNum(token , &nb_component);
@@ -657,7 +674,7 @@ Mixture* Mixture::ascii_read(StatError &error , const string path , double cumul
           break;
         }
 
-        // test mot cle COMPONENTS
+        // test COMPONENTS key word
 
         case 2 : {
           if (token != STAT_word[STATW_COMPONENTS]) {
@@ -689,7 +706,7 @@ Mixture* Mixture::ascii_read(StatError &error , const string path , double cumul
     if (status) {
       weight = new DiscreteParametric(nb_component);
 
-      // analyse du format et lecture de la loi des poids
+      // format analysis and reading of the weight distribution
 
       read_line = 0;
       while (buffer.readLine(in_file , false)) {
@@ -710,7 +727,7 @@ Mixture* Mixture::ascii_read(StatError &error , const string path , double cumul
         if (read_line == 0) {
           while (!((token = next()).isNull())) {
 
-            // test mot cle WEIGHTS
+            // test WEIGHTS key word
 
             if (i == 0) {
               if (token != STAT_word[STATW_WEIGHTS]) {
@@ -777,7 +794,7 @@ Mixture* Mixture::ascii_read(StatError &error , const string path , double cumul
         }
       }
 
-      // analyse du format et lecture des lois d'observation
+      // format analysis and reading of the observation distributions
 
       if (status) {
         nb_output_process = I_DEFAULT;
@@ -804,7 +821,7 @@ Mixture* Mixture::ascii_read(StatError &error , const string path , double cumul
           while (!((token = next()).isNull())) {
             switch (i) {
 
-            // test nombre de processus d'observation
+            // test number of observation processes
 
             case 0 : {
               lstatus = locale.stringToNum(token , &value);
@@ -824,7 +841,7 @@ Mixture* Mixture::ascii_read(StatError &error , const string path , double cumul
               break;
             }
 
-            // test mot cle OUTPUT_PROCESS(ES)
+            // test OUTPUT_PROCESS(ES) key word
 
             case 1 : {
               if (token != STAT_word[nb_output_process == 1 ? STATW_OUTPUT_PROCESS : STATW_OUTPUT_PROCESSES]) {
@@ -884,7 +901,7 @@ Mixture* Mixture::ascii_read(StatError &error , const string path , double cumul
             while (!((token = next()).isNull())) {
               switch (i) {
 
-              // test mot cle OUTPUT_PROCESS
+              // test OUTPUT_PROCESS key word
 
               case 0 : {
                 if (token == STAT_word[STATW_OUTPUT_PROCESS]) {
@@ -897,7 +914,7 @@ Mixture* Mixture::ascii_read(StatError &error , const string path , double cumul
                 break;
               }
 
-              // test indice du processus d'observation
+              // test observation process index
 
               case 1 : {
                 lstatus = locale.stringToNum(token , &value);
@@ -912,7 +929,7 @@ Mixture* Mixture::ascii_read(StatError &error , const string path , double cumul
                 break;
               }
 
-              // test separateur
+              // test separator
 
               case 2 : {
                 if (token != ":") {
@@ -922,7 +939,7 @@ Mixture* Mixture::ascii_read(StatError &error , const string path , double cumul
                 break;
               }
 
-              // test mot cle CATEGORICAL / DISCRETE_PARAMETRIC / CONTINUOUS_PARAMETRIC
+              // test CATEGORICAL/DISCRETE_PARAMETRIC/CONTINUOUS_PARAMETRIC key word
 
               case 3 : {
                 if ((token == STAT_word[STATW_CATEGORICAL]) ||
@@ -1028,13 +1045,13 @@ Mixture* Mixture::ascii_read(StatError &error , const string path , double cumul
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing on a single line of a Mixture object.
  *
- *  Ecriture sur une ligne d'un objet Mixture.
- *
- *  argument : stream.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os stream.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& Mixture::line_write(ostream &os) const
 
@@ -1045,14 +1062,16 @@ ostream& Mixture::line_write(ostream &os) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a Mixture object and the associated data structure.
  *
- *  Ecriture d'un objet Mixture et de la structure de donnees associee.
- *
- *  arguments : stream, pointeur sur un objet MixtureData,
- *              flag niveau de detail, flag fichier.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os         stream,
+ *  \param[in]     vec        pointer on a MixtureData object,
+ *  \param[in]     exhaustive flag detail level,
+ *  \param[in]     file_flag  flag file.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& Mixture::ascii_write(ostream &os , const MixtureData *vec ,
                                bool exhaustive , bool file_flag) const
@@ -1070,7 +1089,7 @@ ostream& Mixture::ascii_write(ostream &os , const MixtureData *vec ,
 
   os << STAT_word[STATW_MIXTURE] << " " << nb_component << " " << STAT_word[STATW_COMPONENTS] << endl;
 
-  // ecriture des poids
+  // writing of the weights
 
   os << "\n" << STAT_word[STATW_WEIGHTS] << endl;
 
@@ -1091,7 +1110,7 @@ ostream& Mixture::ascii_write(ostream &os , const MixtureData *vec ,
   os << "\n" << nb_output_process << " "
      << STAT_word[nb_output_process == 1 ? STATW_OUTPUT_PROCESS : STATW_OUTPUT_PROCESSES] << endl;
 
-  // ecriture des lois associees a chaque processus d'observation
+  // writing of the distributions associated with each observation process
 
   distance = new double*[nb_component];
   for (i = 0;i < nb_component;i++) {
@@ -1242,7 +1261,7 @@ ostream& Mixture::ascii_write(ostream &os , const MixtureData *vec ,
     }
     os << STAT_label[STATL_NB_VECTOR] << ": " << vec->nb_vector << endl;
 
-    // ecriture de la quantite d'information des vecteurs
+    // writing of the information quantity of the vectors in the iid case
 
     for (i = 0;i < vec->nb_variable;i++) {
       if (vec->type[i] == REAL_VALUE) {
@@ -1261,7 +1280,7 @@ ostream& Mixture::ascii_write(ostream &os , const MixtureData *vec ,
          << information / vec->nb_vector << ")" << endl;
     }
 
-    // ecriture des vraisemblances des vecteurs
+    // writing of the log-likelihoods for the observed vectors
 
     if (vec->restoration_likelihood != D_INF) {
       os << "\n";
@@ -1335,13 +1354,14 @@ ostream& Mixture::ascii_write(ostream &os , const MixtureData *vec ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a Mixture object.
  *
- *  Ecriture d'un objet Mixture.
- *
- *  arguments : stream, flag niveau de detail.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os         stream,
+ *  \param[in]     exhaustive flag detail level.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& Mixture::ascii_write(ostream &os , bool exhaustive) const
 
@@ -1350,14 +1370,17 @@ ostream& Mixture::ascii_write(ostream &os , bool exhaustive) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a Mixture object in a file.
  *
- *  Ecriture d'un objet Mixture dans un fichier.
+ *  \param[in]  error      reference on a StatError object,
+ *  \param[in]  path       file path,
+ *  \param[in]  exhaustive flag detail level,
  *
- *  arguments : reference sur un objet StatError, path,
- *              flag niveau de detail.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] status     error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool Mixture::ascii_write(StatError &error , const string path ,
                           bool exhaustive) const
@@ -1383,14 +1406,15 @@ bool Mixture::ascii_write(StatError &error , const string path ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a Mixture object and the associated data structure
+ *         in a file at the spreadsheet format.
  *
- *  Ecriture d'un objet Mixture et de la structure de donnees associee
- *  dans un fichier au format tableur.
- *
- *  arguments : stream, pointeur sur les vecteurs observees.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os  stream,
+ *  \param[in]     vec pointer on a MixtureData object.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& Mixture::spreadsheet_write(ostream &os , const MixtureData *vec) const
 
@@ -1404,7 +1428,7 @@ ostream& Mixture::spreadsheet_write(ostream &os , const MixtureData *vec) const
 
   os << STAT_word[STATW_MIXTURE] << "\t" << nb_component << "\t" << STAT_word[STATW_DISTRIBUTIONS] << endl;
 
-  // ecriture des poids
+  // writing of the weights
 
   os << "\n" << STAT_word[STATW_WEIGHTS] << endl;
 
@@ -1413,7 +1437,7 @@ ostream& Mixture::spreadsheet_write(ostream &os , const MixtureData *vec) const
   }
   os << endl;
 
-  // ecriture des lois associees a chaque processus d'observation
+  // writing of the distributions associated with each observation process
 
   os << "\n" << nb_output_process << "\t"
      << STAT_word[nb_output_process == 1 ? STATW_OUTPUT_PROCESS : STATW_OUTPUT_PROCESSES] << endl;
@@ -1518,7 +1542,7 @@ ostream& Mixture::spreadsheet_write(ostream &os , const MixtureData *vec) const
 
     os << "\n" << STAT_label[STATL_NB_VECTOR] << "\t" << vec->nb_vector << endl;
 
-    // ecriture de la quantite d'information des vecteurs dans le cas iid
+    // writing of the information quantity of the vectors in the iid case
 
     for (i = 0;i < vec->nb_variable;i++) {
       if (vec->type[i] == REAL_VALUE) {
@@ -1533,7 +1557,7 @@ ostream& Mixture::spreadsheet_write(ostream &os , const MixtureData *vec) const
          << information / vec->nb_vector << endl;
     }
 
-    // ecriture des vraisemblances des vecteurs
+    // writing of log-likelihoods for the observed vectors
 
     if (vec->restoration_likelihood != D_INF) {
       os << "\n" << STAT_label[STATL_CLASSIFICATION_LIKELIHOOD] << "\t" << vec->restoration_likelihood << "\t"
@@ -1577,13 +1601,16 @@ ostream& Mixture::spreadsheet_write(ostream &os , const MixtureData *vec) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a Mixture object in a file at the spreadsheet format.
  *
- *  Ecriture d'un objet Mixture dans un fichier au format tableur.
+ *  \param[in]  error  reference on a StatError object,
+ *  \param[in]  path   file path,
  *
- *  arguments : reference sur un objet StatError, path.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] status error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool Mixture::spreadsheet_write(StatError &error , const string path) const
 
@@ -1608,14 +1635,17 @@ bool Mixture::spreadsheet_write(StatError &error , const string path) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Plot of a Mixture object and the associated data structure using Gnuplot.
  *
- *  Sortie Gnuplot d'un objet Mixture et de la structure de donnees associee.
+ *  \param[in]  prefix file prefix,
+ *  \param[in]  title  figure title,
+ *  \param[in]  vec    pointer on a MixtureData object,
  *
- *  arguments : prefixe des fichiers, titre des figures,
- *              pointeur sur les vecteurs observees.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] status error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool Mixture::plot_write(const char *prefix , const char *title ,
                          const MixtureData *vec) const
@@ -1630,14 +1660,14 @@ bool Mixture::plot_write(const char *prefix , const char *title ,
   ostringstream data_file_name;
 
 
-  // ecriture du fichier de donnees
+  // writing of data file
 
   data_file_name << prefix << 0 << ".dat";
   status = weight->plot_print((data_file_name.str()).c_str() , (vec ? vec->marginal_distribution[0] : NULL));
 
   if (status) {
 
-    // ecriture du fichier de commandes et du fichier d'impression
+    // writing of script files
 
     for (i = 0;i < 2;i++) {
       ostringstream file_name[2];
@@ -1751,14 +1781,17 @@ bool Mixture::plot_write(const char *prefix , const char *title ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Plot of a Mixture object using Gnuplot.
  *
- *  Sortie Gnuplot d'un objet Mixture.
+ *  \param[in]  error  reference on a StatError object,
+ *  \param[in]  prefix file prefix,
+ *  \param[in]  title  figure title,
  *
- *  arguments : reference sur un objet StatError, prefixe des fichiers,
- *              titre des figures.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] status error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool Mixture::plot_write(StatError &error , const char *prefix ,
                          const char *title) const
@@ -1776,14 +1809,15 @@ bool Mixture::plot_write(StatError &error , const char *prefix ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Plot of a Mixture object and the associated data structure.
  *
- *  Sortie graphique d'un objet Mixture et de la structure
- *  de donnees associee.
+ *  \param[in]  vec      pointer on a MixtureData object,
  *
- *  argument : pointeur sur les vecteurs observees.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] plot_set plots.
+ */
+/*--------------------------------------------------------------*/
 
 MultiPlotSet* Mixture::get_plotable(const MixtureData *vec) const
 
@@ -1796,7 +1830,7 @@ MultiPlotSet* Mixture::get_plotable(const MixtureData *vec) const
   ostringstream title , legend;
 
 
-  // calcul du nombre de vues
+  // computation of the number of plots
 
   nb_plot_set = 1;
 
@@ -1853,7 +1887,7 @@ MultiPlotSet* Mixture::get_plotable(const MixtureData *vec) const
 
   if (vec) {
 
-    // 1ere vue : poids
+    // weights
 
     plot[0].yrange = Range(0 , ceil(MAX(vec->marginal_distribution[0]->max ,
                                     weight->max * vec->marginal_distribution[0]->nb_element)
@@ -1935,11 +1969,13 @@ MultiPlotSet* Mixture::get_plotable(const MixtureData *vec) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Plot of a Mixture object.
  *
- *  Sortie graphique d'un objet Mixture.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] plot_set plots.
+ */
+/*--------------------------------------------------------------*/
 
 MultiPlotSet* Mixture::get_plotable() const
 
@@ -1948,13 +1984,15 @@ MultiPlotSet* Mixture::get_plotable() const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the number of free parameters of a Mixture object.
  *
- *  Calcul du nombre de parametres independants d'un objet Mixture.
+ *  \param[in]  min_probability minimum probability,
  *
- *  argument : probabilite minimum.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] nb_parameter    number of free parameters.
+ */
+/*--------------------------------------------------------------*/
 
 int Mixture::nb_parameter_computation(double min_probability) const
 
@@ -1979,11 +2017,11 @@ int Mixture::nb_parameter_computation(double min_probability) const
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Constructeur par defaut de la classe MixtureData.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Default constructor of the MixtureData class.
+ */
+/*--------------------------------------------------------------*/
 
 MixtureData::MixtureData()
 
@@ -2002,14 +2040,16 @@ MixtureData::MixtureData()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the MixtureData class.
  *
- *  Constructeur de la classe MixtureData.
- *
- *  arguments : nombre d'individus, nombre de variables,
- *              type de chaque variable, flag initialisation.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] inb_vector   number of individuals,
+ *  \param[in] inb_variable number of variables,
+ *  \param[in] itype        variable types,
+ *  \param[in] init_flag    flag initialization.
+ */
+/*--------------------------------------------------------------*/
 
 MixtureData::MixtureData(int inb_vector , int inb_variable ,
                          variable_nature *itype , bool init_flag)
@@ -2030,14 +2070,14 @@ MixtureData::MixtureData(int inb_vector , int inb_variable ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Construction of a MixtureData object from a Vectors object.
  *
- *  Construction d'un objet MixtureData a partir d'un objet Vectors.
- *
- *  arguments : reference sur un objet Vectors, type de transformation
- *              (VECTOR_COPY/ADD_COMPONENT_VARIABLE).
- *
- *--------------------------------------------------------------*/
+ *  \param[in] vec                   reference sur un objet Vectors,
+ *  \param[in] vector_transformation type of transform(VECTOR_COPY/ADD_COMPONENT_VARIABLE).
+ */
+/*--------------------------------------------------------------*/
 
 MixtureData::MixtureData(const Vectors &vec , vector_transformation transform)
 :Vectors(vec , transform)
@@ -2057,14 +2097,14 @@ MixtureData::MixtureData(const Vectors &vec , vector_transformation transform)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Copy of a MixtureData object.
  *
- *  Copie d'un objet MixtureData.
- *
- *  arguments : reference sur un objet MixtureData,
- *              flag copie de l'objet Mixture.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] vec        reference on a MixtureData object,
+ *  \param[in] model_flag flag copy of the Mixture object.
+ */
+/*--------------------------------------------------------------*/
 
 void MixtureData::copy(const MixtureData &vec , bool model_flag)
 
@@ -2149,11 +2189,11 @@ void MixtureData::copy(const MixtureData &vec , bool model_flag)
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Destructeur des champs de la classe MixtureData.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Destructor of the data members of the MixtureData class.
+ */
+/*--------------------------------------------------------------*/
 
 void MixtureData::remove()
 
@@ -2192,11 +2232,11 @@ void MixtureData::remove()
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Destructeur de la classe MixtureData.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Destructor of the MixtureData class.
+ */
+/*--------------------------------------------------------------*/
 
 MixtureData::~MixtureData()
 
@@ -2205,13 +2245,15 @@ MixtureData::~MixtureData()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Assignment operator of the MixtureData class.
  *
- *  Operateur d'assignement de la classe MixtureData.
+ *  \param[in]  vec  reference on a MixtureData object,
  *
- *  argument : reference sur un objet MixtureData.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] this MixtureData object.
+ */
+/*--------------------------------------------------------------*/
 
 MixtureData& MixtureData::operator=(const MixtureData &vec)
 
@@ -2228,13 +2270,13 @@ MixtureData& MixtureData::operator=(const MixtureData &vec)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Initialization of the 1st variable.
  *
- *  Initialisation de la 1ere variable.
- *
- *  argument : type de la 1ere variable (STATE/INT_VALUE/REAL_VALUE).
- *
- *--------------------------------------------------------------*/
+ *  \param[in] itype 1st variable type (STATE/INT_VALUE/REAL_VALUE).
+ */
+/*--------------------------------------------------------------*/
 
 void MixtureData::state_variable_init(variable_nature itype)
 
@@ -2278,14 +2320,17 @@ void MixtureData::state_variable_init(variable_nature itype)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Extraction of an empirical component.
  *
- *  Extraction d'une composante empirique.
+ *  \param[in]  error    reference on a StatError object,
+ *  \param[in]  variable variable index,
+ *  \param[in]  index    component index,
  *
- *  arguments : reference sur un objet StatError, variable,
- *              indice de la composante.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] histo    empirical component.
+ */
+/*--------------------------------------------------------------*/
 
 DiscreteDistributionData* MixtureData::extract(StatError &error , int variable , int index) const
 
@@ -2358,13 +2403,14 @@ DiscreteDistributionData* MixtureData::extract(StatError &error , int variable ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a MixtureData object.
  *
- *  Ecriture d'un objet MixtureData.
- *
- *  arguments : stream, flag niveau de detail.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os         stream,
+ *  \param[in]     exhaustive flag niveau de detail.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& MixtureData::ascii_write(ostream &os , bool exhaustive) const
 
@@ -2377,14 +2423,17 @@ ostream& MixtureData::ascii_write(ostream &os , bool exhaustive) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a MixtureData object in a file.
  *
- *  Ecriture d'un objet MixtureData dans un fichier.
+ *  \param[in]  error       reference on a StatError object,
+ *  \param[in]  path        file path,
+ *  \param[in]  exhaustive  flag detail level,
  *
- *  arguments : reference sur un objet StatError, path,
- *              flag niveau de detail.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] status      error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool MixtureData::ascii_write(StatError &error , const string path , bool exhaustive) const
 
@@ -2412,13 +2461,14 @@ bool MixtureData::ascii_write(StatError &error , const string path , bool exhaus
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a MixtureData object.
  *
- *  Ecriture d'un objet MixtureData.
- *
- *  arguments : stream, flag niveau de detail.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os         stream,
+ *  \param[in]     exhaustive flag detail level.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& MixtureData::ascii_data_write(ostream &os , bool exhaustive) const
 
@@ -2430,14 +2480,17 @@ ostream& MixtureData::ascii_data_write(ostream &os , bool exhaustive) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a MixtureData object in a file.
  *
- *  Ecriture d'un objet MixtureData dans un fichier.
+ *  \param[in]  error      reference on a StatError object,
+ *  \param[in]  path       file path,
+ *  \param[in]  exhaustive flag detail level,
  *
- *  arguments : reference sur un objet StatError, path,
- *              flag niveau de detail.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] status     error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool MixtureData::ascii_data_write(StatError &error , const string path ,
                                    bool exhaustive) const
@@ -2464,13 +2517,16 @@ bool MixtureData::ascii_data_write(StatError &error , const string path ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a MixtureData object in a file at the spreadsheet format.
  *
- *  Ecriture d'un objet MixtureData dans un fichier au format tableur.
+ *  \param[in]  error  reference on a StatError object,
+ *  \param[in]  path   file path,
  *
- *  arguments : reference sur un objet StatError, path.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] status error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool MixtureData::spreadsheet_write(StatError &error , const string path) const
 
@@ -2498,14 +2554,17 @@ bool MixtureData::spreadsheet_write(StatError &error , const string path) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Plot of a MixtureData object using Gnuplot.
  *
- *  Sortie Gnuplot d'un objet MixtureData.
+ *  \param[in]  error  reference on a StatError object,
+ *  \param[in]  prefix file prefix,
+ *  \param[in]  title  figure title,
  *
- *  arguments : reference sur un objet StatError, prefixe des fichiers,
- *              titre des figures.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] status error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool MixtureData::plot_write(StatError &error , const char *prefix ,
                              const char *title) const
@@ -2528,11 +2587,13 @@ bool MixtureData::plot_write(StatError &error , const char *prefix ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Plot of a MixtureData object.
  *
- *  Sortie graphique d'un objet MixtureData.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] plot_set plots.
+ */
+/*--------------------------------------------------------------*/
 
 MultiPlotSet* MixtureData::get_plotable() const
 
@@ -2551,11 +2612,13 @@ MultiPlotSet* MixtureData::get_plotable() const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the information quantity.
  *
- *  Calcul de la quantite d'information.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] information information quantity.
+ */
+/*--------------------------------------------------------------*/
 
 double MixtureData::information_computation() const
 
@@ -2578,13 +2641,14 @@ double MixtureData::information_computation() const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Cumul of observations for a variable.
  *
- *  Accumulation des observations (pour une variable donnee).
- *
- *  arguments : indice de la variable, nombre de composantes.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] variable     variable index,
+ *  \param[in] nb_component number of components.
+ */
+/*--------------------------------------------------------------*/
 
 void MixtureData::observation_frequency_distribution_computation(int variable , int nb_component)
 
@@ -2592,7 +2656,7 @@ void MixtureData::observation_frequency_distribution_computation(int variable , 
   register int i , j;
 
 
-  // initialisation des lois empiriques
+  // initialization of the observation frequency distributions
 
   for (i = 0;i < nb_component;i++) {
     for (j = 0;j < marginal_distribution[variable]->nb_value;j++) {
@@ -2600,13 +2664,13 @@ void MixtureData::observation_frequency_distribution_computation(int variable , 
     }
   }
 
-  // mise a jour des lois empiriques
+  // update of the observation frequency distributions
 
   for (i = 0;i < nb_vector;i++) {
     (observation_distribution[variable][int_vector[i][0]]->frequency[int_vector[i][variable]])++;
   }
 
-  // extraction des caracteristiques des lois empiriques
+  // extraction of the characteristics of the observation frequency distributions
 
   for (i = 0;i < nb_component;i++) {
     observation_distribution[variable][i]->nb_value_computation();
@@ -2619,13 +2683,13 @@ void MixtureData::observation_frequency_distribution_computation(int variable , 
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Construction of the observation frequency distributions.
  *
- *  Construction des lois empiriques d'observation.
- *
- *  argument : nombre d'etats.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] nb_component number of components.
+ */
+/*--------------------------------------------------------------*/
 
 void MixtureData::build_observation_frequency_distribution(int nb_component)
 
@@ -2655,35 +2719,37 @@ void MixtureData::build_observation_frequency_distribution(int nb_component)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Construction of the observation histograms for a variable.
  *
- *  Construction des histogrammes d'observation pour une variable.
- *
- *  arguments : indice de la variable, nombre d'etats, pas de regroupement.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] variable     variable index,
+ *  \param[in] nb_component number of components,
+ *  \param[in] bin_width    bin width.
+ */
+/*--------------------------------------------------------------*/
 
-void MixtureData::build_observation_histogram(int variable , int nb_component , double step)
+void MixtureData::build_observation_histogram(int variable , int nb_component , double bin_width)
 
 {
-  if ((!observation_histogram[variable]) || (step != observation_histogram[variable][0]->step)) {
+  if ((!observation_histogram[variable]) || (bin_width != observation_histogram[variable][0]->bin_width)) {
     register int i , j;
     double imin_value;
 
 
-    // construction de l'histogramme
+    // construction of the observation histograms
 
-    if (step == D_DEFAULT) {
-      step = marginal_histogram[variable]->step;
+    if (bin_width == D_DEFAULT) {
+      bin_width = marginal_histogram[variable]->bin_width;
     }
-    imin_value = floor(min_value[variable] / step) * step;
+    imin_value = floor(min_value[variable] / bin_width) * bin_width;
 
     if (observation_histogram[variable]) {
       for (i = 0;i < nb_component;i++) {
-        observation_histogram[variable][i]->nb_category = (int)floor((max_value[variable] - imin_value) / step) + 1;
+        observation_histogram[variable][i]->nb_bin = (int)floor((max_value[variable] - imin_value) / bin_width) + 1;
 
         delete [] observation_histogram[variable][i]->frequency;
-        observation_histogram[variable][i]->frequency = new int[observation_histogram[variable][i]->nb_category];
+        observation_histogram[variable][i]->frequency = new int[observation_histogram[variable][i]->nb_bin];
       }
     }
 
@@ -2691,13 +2757,13 @@ void MixtureData::build_observation_histogram(int variable , int nb_component , 
       observation_histogram[variable] = new Histogram*[nb_component];
 
       for (i = 0;i < nb_component;i++) {
-        observation_histogram[variable][i] = new Histogram((int)floor((max_value[variable] - imin_value) / step) + 1 , false);
+        observation_histogram[variable][i] = new Histogram((int)floor((max_value[variable] - imin_value) / bin_width) + 1 , false);
 
         observation_histogram[variable][i]->nb_element = marginal_distribution[0]->frequency[i];
         observation_histogram[variable][i]->type = type[variable];
       }
 
-      // calcul des valeurs minimums et maximums par etat
+      // computation des valeurs minimums et maximums par etat
 
 /*      for (i = 0;i < nb_component;i++) {
         observation_histogram[variable][i]->min_value = max_value[variable];
@@ -2733,15 +2799,15 @@ void MixtureData::build_observation_histogram(int variable , int nb_component , 
     }
 
     for (i = 0;i < nb_component;i++) {
-      observation_histogram[variable][i]->step = step;
+      observation_histogram[variable][i]->bin_width = bin_width;
       observation_histogram[variable][i]->min_value = imin_value;
-      observation_histogram[variable][i]->max_value = ceil(max_value[variable] / step) * step;
+      observation_histogram[variable][i]->max_value = ceil(max_value[variable] / bin_width) * bin_width;
     }
 
-    // calcul des frequences
+    // frequency computation
 
     for (i = 0;i < nb_component;i++) {
-      for (j = 0;j < observation_histogram[variable][i]->nb_category;j++) {
+      for (j = 0;j < observation_histogram[variable][i]->nb_bin;j++) {
         observation_histogram[variable][i]->frequency[j] = 0;
       }
     }
@@ -2750,16 +2816,16 @@ void MixtureData::build_observation_histogram(int variable , int nb_component , 
 
     case INT_VALUE : {
       for (i = 0;i < nb_vector;i++) {
-//        (observation_histogram[variable][int_vector[i][0]]->frequency[(int)((int_vector[i][variable] - imin_value) / step)])++;
-        (observation_histogram[variable][int_vector[i][0]]->frequency[(int)floor((int_vector[i][variable] - imin_value) / step)])++;
+//        (observation_histogram[variable][int_vector[i][0]]->frequency[(int)((int_vector[i][variable] - imin_value) / bin_width)])++;
+        (observation_histogram[variable][int_vector[i][0]]->frequency[(int)floor((int_vector[i][variable] - imin_value) / bin_width)])++;
       }
       break;
     }
 
     case REAL_VALUE : {
       for (i = 0;i < nb_vector;i++) {
-//        (observation_histogram[variable][int_vector[i][0]]->frequency[(int)((real_vector[i][variable] - imin_value) / step)]++;
-        (observation_histogram[variable][int_vector[i][0]]->frequency[(int)floor((real_vector[i][variable] - imin_value) / step)])++;
+//        (observation_histogram[variable][int_vector[i][0]]->frequency[(int)((real_vector[i][variable] - imin_value) / bin_width)]++;
+        (observation_histogram[variable][int_vector[i][0]]->frequency[(int)floor((real_vector[i][variable] - imin_value) / bin_width)])++;
       }
       break;
     }
@@ -2772,13 +2838,13 @@ void MixtureData::build_observation_histogram(int variable , int nb_component , 
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Construction of the observation histograms.
  *
- *  Construction des histogrammes d'observation.
- *
- *  argument : nombre d'etats.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] number of components.
+ */
+/*--------------------------------------------------------------*/
 
 void MixtureData::build_observation_histogram(int nb_component)
 
@@ -2793,25 +2859,29 @@ void MixtureData::build_observation_histogram(int nb_component)
     for (i = 1;i < nb_variable;i++) {
       observation_histogram[i] = NULL;
       if (marginal_histogram[i]) {
-        build_observation_histogram(i , nb_component , marginal_histogram[i]->step);
+        build_observation_histogram(i , nb_component , marginal_histogram[i]->bin_width);
       }
     }
   }
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Change of the bin width of the marginal histogram and of
+ *         the observation histograms for a variable.
  *
- *  Changement du pas de regroupement de l'histogramme marginal et
- *  des histogrammes d'observation pour une variable donnee.
+ *  \param[in]  error      reference on a StatError object,
+ *  \param[in]  variable   variable index,
+ *  \param[in]  bin_width  bin width,
+ *  \param[in]  imin_value minimum value,
  *
- *  arguments : reference sur un objet StatError, indice de la variable,
- *              pas de regroupement, valeur minimum.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] status     error status.
+ */
+/*--------------------------------------------------------------*/
 
-bool MixtureData::select_step(StatError &error , int variable ,
-                              double step , double imin_value)
+bool MixtureData::select_bin_width(StatError &error , int variable ,
+                                   double bin_width , double imin_value)
 
 {
   bool status = true;
@@ -2831,11 +2901,11 @@ bool MixtureData::select_step(StatError &error , int variable ,
       status = false;
       error.update(STAT_error[STATR_MARGINAL_HISTOGRAM]);
     }
-    if ((step <= 0.) || ((type[variable] != REAL_VALUE) && ((int)step != step))) {
+    if ((bin_width <= 0.) || ((type[variable] != REAL_VALUE) && ((int)bin_width != bin_width))) {
       status = false;
-      error.update(STAT_error[STATR_HISTOGRAM_STEP]);
+      error.update(STAT_error[STATR_HISTOGRAM_BIN_WIDTH]);
     }
-    if ((imin_value != D_INF) && ((imin_value <= min_value[variable] - step) ||
+    if ((imin_value != D_INF) && ((imin_value <= min_value[variable] - bin_width) ||
          (imin_value > min_value[variable]) || ((type[variable] != REAL_VALUE) &&
           ((int)imin_value != imin_value)))) {
       status = false;
@@ -2844,10 +2914,10 @@ bool MixtureData::select_step(StatError &error , int variable ,
   }
 
   if (status) {
-    build_marginal_histogram(variable , step , imin_value);
+    build_marginal_histogram(variable , bin_width , imin_value);
 
     if ((observation_histogram) && (observation_histogram[variable])) {
-      build_observation_histogram(variable , marginal_distribution[0]->nb_value , step);
+      build_observation_histogram(variable , marginal_distribution[0]->nb_value , bin_width);
     }
   }
 

@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -53,13 +53,15 @@ namespace stat_tool {
 
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the Chain class.
  *
- *  Constructeur de la classe Chain.
- *
- *  arguments : type, nombre d'etats, flag initialisation.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] itype     type,
+ *  \param[in] inb_state number of states,
+ *  \param[in] init_flag flag initialization.
+ */
+/*--------------------------------------------------------------*/
 
 Chain::Chain(process_type itype , int inb_state , bool init_flag)
 
@@ -112,14 +114,16 @@ Chain::Chain(process_type itype , int inb_state , bool init_flag)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the Chain class.
  *
- *  Constructeur de la classe Chain.
- *
- *  arguments : type, nombre d'etats, nombre de lignes de la matrice
- *              des probabilites de transition, flag initialisation.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] itype     type,
+ *  \param[in] inb_state number of states,
+ *  \param[in] inb_row   number of rows of the transition probability matrix,
+ *  \param[in] init_flag flag initialization.
+ */
+/*--------------------------------------------------------------*/
 
 Chain::Chain(process_type itype , int inb_state , int inb_row , bool init_flag)
 
@@ -162,13 +166,13 @@ Chain::Chain(process_type itype , int inb_state , int inb_row , bool init_flag)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Copy of Markov chain parameters.
  *
- *  Copie des parametres d'une chaine de Markov.
- *
- *  argument : reference sur un objet Chain.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] chain reference on a Chain object.
+ */
+/*--------------------------------------------------------------*/
 
 void Chain::parameter_copy(const Chain &chain)
 
@@ -202,13 +206,13 @@ void Chain::parameter_copy(const Chain &chain)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Copy of a Chain object.
  *
- *  Copie d'un objet Chain.
- *
- *  argument : reference sur un objet Chain.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] chain reference on a Chain object.
+ */
+/*--------------------------------------------------------------*/
 
 void Chain::copy(const Chain &chain)
 
@@ -283,11 +287,11 @@ void Chain::copy(const Chain &chain)
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Destruction des champs d'un objet Chain.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Destruction of Chain object data members.
+ */
+/*--------------------------------------------------------------*/
 
 void Chain::remove()
 
@@ -332,11 +336,11 @@ void Chain::remove()
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Destructeur de la classe Chain.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Destructor of the Chain class.
+ */
+/*--------------------------------------------------------------*/
 
 Chain::~Chain()
 
@@ -345,13 +349,15 @@ Chain::~Chain()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Assignment operator of the Chain class.
  *
- *  Operateur d'assignement de la classe Chain.
+ *  \param[in]  chain reference on a Chain object,
  *
- *  argument : reference sur un objet Chain.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] this  Chain object.
+ */
+/*--------------------------------------------------------------*/
 
 Chain& Chain::operator=(const Chain &chain)
 
@@ -365,15 +371,18 @@ Chain& Chain::operator=(const Chain &chain)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Analysis of the format of a Chain object.
  *
- *  Analyse du format d'un objet Chain.
+ *  \param[in]  error   reference on a StatError object,
+ *  \param[in]  in_file stream,
+ *  \param[in]  line    reference on the file line index,
+ *  \param[in]  type    process type (ORDINARY/EQUILIBRIUM),
  *
- *  arguments : reference sur un objet StatError, stream,
- *              reference sur l'indice de la ligne lue, type du processus
- *              (ORDINARY/EQUILIBRIUM).
- *
- *--------------------------------------------------------------*/
+ *  \param[out] chain   Chain object.
+ */
+/*--------------------------------------------------------------*/
 
 Chain* Chain::parsing(StatError &error , ifstream &in_file , int &line , process_type type)
 
@@ -391,7 +400,7 @@ Chain* Chain::parsing(StatError &error , ifstream &in_file , int &line , process
 
   chain = NULL;
 
-  // analyse lignes definissant le nombre d'etats et l'ordre
+  // analysis of the lines defining the number of states and the order (or memory length)
 
   while (buffer.readLine(in_file , false)) {
     line++;
@@ -411,7 +420,7 @@ Chain* Chain::parsing(StatError &error , ifstream &in_file , int &line , process
     while (!((token = next()).isNull())) {
       switch (i) {
 
-      // test valeur nombre d'etats
+      // test number of states
 
       case 0 : {
         lstatus = locale.stringToNum(token , &value);
@@ -431,7 +440,7 @@ Chain* Chain::parsing(StatError &error , ifstream &in_file , int &line , process
         break;
       }
 
-      // test mot cle STATES
+      // test STATES key word
 
       case 1 : {
         if (token != STAT_word[STATW_STATES]) {
@@ -462,7 +471,7 @@ Chain* Chain::parsing(StatError &error , ifstream &in_file , int &line , process
   if (status) {
     chain = new Chain(type , nb_state , nb_state , false);
 
-    // analyse probabilites initiales / probabilites de transition
+    // analysis initial/transition probabilities
 
     read_line = 0;
     while (buffer.readLine(in_file , false)) {
@@ -483,7 +492,7 @@ Chain* Chain::parsing(StatError &error , ifstream &in_file , int &line , process
       if ((read_line == 0) || ((type == ORDINARY) && (read_line == 2))) {
         while (!((token = next()).isNull())) {
 
-          // test mot cle INITIAL_PROBABILITIES / TRANSITION_PROBABILITIES
+          // test INITIAL_PROBABILITIES / TRANSITION_PROBABILITIES key word
 
           if (i == 0) {
             if ((type == ORDINARY) && (read_line == 0)) {
@@ -573,7 +582,7 @@ Chain* Chain::parsing(StatError &error , ifstream &in_file , int &line , process
 
     if (status) {
 
-      // test etats atteignables
+      // test reachable states
 
       status = chain->connex_component_research(error);
 
@@ -582,7 +591,7 @@ Chain* Chain::parsing(StatError &error , ifstream &in_file , int &line , process
 
       if (status) {
 
-        // test irreductibilite dans le cas en equilibre
+        // test irreducibility in the equilibrium process case
 
         chain->component_computation(logic_transition);
         if ((type == EQUILIBRIUM) && (chain->nb_component > 1)) {
@@ -607,13 +616,14 @@ Chain* Chain::parsing(StatError &error , ifstream &in_file , int &line , process
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a Chain object.
  *
- *  Ecriture d'un objet Chain.
- *
- *  arguments : stream, flag fichier.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os        stream,
+ *  \param[in]     file_flag file flag.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& Chain::ascii_print(ostream &os , bool file_flag) const
 
@@ -627,7 +637,7 @@ ostream& Chain::ascii_print(ostream &os , bool file_flag) const
 
   os << "\n" << nb_state << " " << STAT_word[STATW_STATES] << endl;
 
-  // calcul des largeurs des colonnes
+  // computation of the column width
 
   width = column_width(nb_state , initial);
   for (i = 0;i < nb_row;i++) {
@@ -707,13 +717,13 @@ ostream& Chain::ascii_print(ostream &os , bool file_flag) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a Chain object at the spreadsheet format.
  *
- *  Ecriture d'un objet Chain au format tableur.
- *
- *  argument : stream.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os stream.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& Chain::spreadsheet_print(ostream &os) const
 
@@ -773,11 +783,11 @@ ostream& Chain::spreadsheet_print(ostream &os) const
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Creation des champs de type "cumul" d'un objet Chain.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Construction of the cumulative initial and transition distribution functions of a Chain object.
+ */
+/*--------------------------------------------------------------*/
 
 void Chain::create_cumul()
 
@@ -798,11 +808,11 @@ void Chain::create_cumul()
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Destruction des champs de type "cumul" d'un objet Chain.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Destruction of the cumulative initial and transition distribution functions of a Chain object.
+ */
+/*--------------------------------------------------------------*/
 
 void Chain::remove_cumul()
 
@@ -827,11 +837,11 @@ void Chain::remove_cumul()
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Calcul des fonctions de repartition.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of cumulative initial and transition distribution functions.
+ */
+/*--------------------------------------------------------------*/
 
 void Chain::cumul_computation()
 
@@ -849,11 +859,11 @@ void Chain::cumul_computation()
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Transfomation en log des parametres d'une chaine de Markov.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Log transform of Markov chain parameters.
+ */
+/*--------------------------------------------------------------*/
 
 void Chain::log_computation()
 
@@ -871,13 +881,13 @@ void Chain::log_computation()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor by copy of the ChainData class.
  *
- *  Constructeur par copie de la classe ChainData.
- *
- *  argument : reference sur un objet ChainData.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] reference on a ChainData object.
+ */
+/*--------------------------------------------------------------*/
 
 ChainData::ChainData(const ChainData &chain_data)
 

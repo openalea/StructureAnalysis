@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -57,11 +57,11 @@ namespace stat_tool {
 
 
 
-/*--------------------------------------------------------------*
- *
- *  Constructeur par defaut de la classe VectorDistance.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Default constructor of the VectorDistance class.
+ */
+/*--------------------------------------------------------------*/
 
 VectorDistance::VectorDistance()
 
@@ -80,14 +80,16 @@ VectorDistance::VectorDistance()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the VectorDistance class.
  *
- *  Constructeur de la classe VectorDistance.
- *
- *  arguments : nombre de variables, type et poids de chaque variable,
- *              type de distance (ABSOLUTE_VALUE/QUADRATIC).
- *
- *--------------------------------------------------------------*/
+ *  \param[in] inb_variable   number of variables,
+ *  \param[in] ivar_type      variable types,
+ *  \param[in] iweight        variable weights,
+ *  \param[in] idistance_type distance type (ABSOLUTE_VALUE/QUADRATIC).
+ */
+/*--------------------------------------------------------------*/
 
 VectorDistance::VectorDistance(int inb_variable , variable_type *ivar_type ,
                                double *iweight , metric idistance_type)
@@ -130,15 +132,19 @@ VectorDistance::VectorDistance(int inb_variable , variable_type *ivar_type ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the VectorDistance class.
  *
- *  Constructeur de la classe VectorDistance.
- *
- *  arguments : nombre de variables, type de distance (ABSOLUTE_VALUE/QUADRATIC),
- *              type et poids de chaque variable, nombre de valeurs,
- *              matrice des distances entre categories, periodes.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] number of variables,
+ *  \param[in] distance type (ABSOLUTE_VALUE/QUADRATIC),
+ *  \param[in] variable types,
+ *  \param[in] variable weights,
+ *  \param[in] number of categories (for categorical variables),
+ *  \param[in] between-category distance matrices (for categorical variables),
+ *  \param[in] periods (for circular variables).
+ */
+/*--------------------------------------------------------------*/
 
 VectorDistance::VectorDistance(int inb_variable , metric idistance_type , variable_type *ivar_type ,
                                double *iweight , int *inb_value , double ***icategory_distance ,
@@ -192,13 +198,13 @@ VectorDistance::VectorDistance(int inb_variable , metric idistance_type , variab
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Copy of a VectorDistance object.
  *
- *  Copie d'un objet VectorDistance.
- *
- *  argument : reference sur un objet VectorDistance.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] vector_dist reference on a VectorDistance object.
+ */
+/*--------------------------------------------------------------*/
 
 void VectorDistance::copy(const VectorDistance &vector_dist)
 
@@ -251,11 +257,11 @@ void VectorDistance::copy(const VectorDistance &vector_dist)
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Destruction des champs d'un objet VectorDistance.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Destruction of data members of a VectorDistance object.
+ */
+/*--------------------------------------------------------------*/
 
 void VectorDistance::remove()
 
@@ -285,11 +291,11 @@ void VectorDistance::remove()
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Destructeur de la classe VectorDistance.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Destructor of the VectorDistance class.
+ */
+/*--------------------------------------------------------------*/
 
 VectorDistance::~VectorDistance()
 
@@ -298,13 +304,15 @@ VectorDistance::~VectorDistance()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Assignment operator of the VectorDistance class.
  *
- *  Operateur d'assignement de la classe VectorDistance.
+ *  \param[in]  vector_dist reference on a VectorDistance object,
  *
- *  argument : reference sur un objet VectorDistance.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] this        VectorDistance object.
+ */
+/*--------------------------------------------------------------*/
 
 VectorDistance& VectorDistance::operator=(const VectorDistance &vector_dist)
 
@@ -318,13 +326,16 @@ VectorDistance& VectorDistance::operator=(const VectorDistance &vector_dist)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Construction of a VectorDistance object from a file.
  *
- *  Construction d'un objet VectorDistance a partir d'un fichier.
+ *  \param[in]  error       reference on a StatError object,
+ *  \param[in]  path        file path,
  *
- *  arguments : reference sur un objet StatError, path.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] vector_dist VectorDistance object.
+ */
+/*--------------------------------------------------------------*/
 
 VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
 
@@ -356,7 +367,7 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
     line = 0;
     read_line = 0;
 
-    // analyse de la ligne definissant le nombre de variables
+    // analysis of the line defining the number of variables
 
     while (buffer.readLine(in_file , false)) {
       line++;
@@ -376,7 +387,7 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
       while (!((token = next()).isNull())) {
         switch (i) {
 
-        // test nombre de variables
+        // test number of variables
 
         case 0 : {
           lstatus = locale.stringToNum(token , &value);
@@ -396,7 +407,7 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
           break;
         }
 
-        // test mot cle VARIABLE(S)
+        // test VARIABLE(S) key word
 
         case 1 : {
           if (token != STAT_word[nb_variable == 1 ? STATW_VARIABLE : STATW_VARIABLES]) {
@@ -429,7 +440,7 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
 
     if ((status) && (nb_variable > 1)) {
 
-      // analyse de la ligne definissant le type de distance
+      // analysis of the line defining the distance type
 
       while (buffer.readLine(in_file , false)) {
         line++;
@@ -449,7 +460,7 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
         while (!((token = next()).isNull())) {
           switch (i) {
 
-          // test mot cle DISTANCE
+          // test DISTANCE key word
 
           case 0 : {
             if (token != STAT_word[STATW_DISTANCE]) {
@@ -459,7 +470,7 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
             break;
           }
 
-          // test separateur
+          // test separator
 
           case 1 : {
             if (token != ":") {
@@ -469,7 +480,7 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
             break;
           }
 
-          // test mot cle correspondant au type de distance
+          // test key word defining the distance type
 
           case 2 : {
             for (j = ABSOLUTE_VALUE;j <= QUADRATIC;j++) {
@@ -502,8 +513,8 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
 
     if (status) {
 
-      // analyse des lignes definissant le type de chaque variable et
-      // les matrices de distances entre categories
+      // analysis of the lines defining the type of each variable and
+      // the between-category distance matrices
 
       category_distance = new double**[nb_variable];
       for (i = 0;i < nb_variable;i++) {
@@ -572,7 +583,7 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
 
             switch (i) {
 
-            // test indice de la variable
+            // test variable index
 
             case 1 : {
               lstatus = locale.stringToNum(token , &value);
@@ -587,7 +598,7 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
               break;
             }
 
-            // test separateur
+            // test separator
 
             case 2 : {
               if (token != ":") {
@@ -597,7 +608,7 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
               break;
             }
 
-            // test mot cle correspondant au type de la variable
+            // test key word corresponding to the variable type
 
             case 3 : {
               if ((variable >= 0) && (variable < nb_variable)) {
@@ -616,7 +627,7 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
               break;
             }
 
-            // test mot cle WEIGHT
+            // test WEIGHT key word
 
             case 4 : {
               if (token != STAT_word[STATW_WEIGHT]) {
@@ -626,7 +637,7 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
               break;
             }
 
-            // test separateur
+            // test separator
 
             case 5 : {
               if (token != ":") {
@@ -636,7 +647,7 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
               break;
             }
 
-            // test valeur du poids
+            // test weight value
 
             case 6 : {
               if ((variable >= 0) && (variable < nb_variable)) {
@@ -664,7 +675,7 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
 
           case 1 : {
 
-            // test mot cle CATEGORIES
+            // test CATEGORIES key word
 
             if ((i == 1) && (token != STAT_word[STATW_CATEGORIES])) {
               status = false;
@@ -697,7 +708,7 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
 
             switch (i) {
 
-            // test mot cle PERIOD
+            // test PERIOD key word
 
             case 0 : {
               if (token != STAT_word[STATW_PERIOD]) {
@@ -707,7 +718,7 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
               break;
             }
 
-            // test separateur
+            // test separator
 
             case 1 : {
               if (token != ":") {
@@ -717,7 +728,7 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
               break;
             }
 
-            // test valeur de la periode
+            // test period value
 
             case 2 : {
               if ((variable >= 0) && (variable < nb_variable)) {
@@ -834,7 +845,7 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
               }
             }
 
-            // verification de l'inegalite triagulaire
+            // checking of the triagular inequality
 
             for (j = 0;j < nb_value[i];j++) {
               for (k = j + 1;k < nb_value[i];k++) {
@@ -868,13 +879,13 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing on a single line of a VectorDistance object.
  *
- *  Ecriture sur une ligne d'un objet VectorDistance.
- *
- *  argument : stream.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os stream.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& VectorDistance::line_write(ostream &os) const
 
@@ -888,13 +899,14 @@ ostream& VectorDistance::line_write(ostream &os) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a VectorDistance object.
  *
- *  Ecriture d'un objet VectorDistance.
- *
- *  arguments : stream, flag niveau de detail.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os         stream,
+ *  \param[in]     exhaustive flag detail level.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& VectorDistance::ascii_write(ostream &os , bool exhaustive) const
 
@@ -925,7 +937,7 @@ ostream& VectorDistance::ascii_write(ostream &os , bool exhaustive) const
       if (category_distance[i]) {
         os << "\n" << nb_value[i] << " " << STAT_word[STATW_CATEGORIES] << endl;
 
-        // calcul des largeurs des colonnes
+        // computation of the column widths
 
         width[0] = column_width(nb_value[i]);
 
@@ -938,7 +950,7 @@ ostream& VectorDistance::ascii_write(ostream &os , bool exhaustive) const
         }
         width[1] += ASCII_SPACE;
 
-        // ecriture de la matrice des distances entre categories
+        // writing of the between-category distance matrix
 
         os << "\n" << setw(width[0] + width[1]) << 0;
         for (j = 1;j < nb_value[i];j++) {
@@ -970,11 +982,11 @@ ostream& VectorDistance::ascii_write(ostream &os , bool exhaustive) const
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Fonctions pour la compatibilite avec la classe StatInterface.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Functions for compatibility with the StatInterface class.
+ */
+/*--------------------------------------------------------------*/
 
 bool VectorDistance::ascii_write(StatError &error , const string path , bool exhaustive) const
 
@@ -1014,13 +1026,15 @@ bool VectorDistance::plot_write(StatError &error , const char *prefix ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the maximum distance for each category
  *
- *  Calcul de la distance maximum pour chaque categories
+ *  \param[in]  variable              variable index,
  *
- *  argument : indice de la variable.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] max_category_distance maximum distances.
+ */
+/*--------------------------------------------------------------*/
 
 double* VectorDistance::max_category_distance_computation(int variable) const
 
@@ -1046,13 +1060,14 @@ double* VectorDistance::max_category_distance_computation(int variable) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Update of the standardization quantity.
  *
- *  Mise a jour de la quantite de standardisation.
- *
- *  arguments : indice de la variable, dispersion.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] variable    variable index,
+ *  \param[in] idispersion variable dispersion.
+ */
+/*--------------------------------------------------------------*/
 
 void VectorDistance::dispersion_update(int variable , double idispersion) const
 
@@ -1061,13 +1076,15 @@ void VectorDistance::dispersion_update(int variable , double idispersion) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the standardization quantity.
  *
- *  Calcul de la quantite de standardisation.
- *
- *  arguments : indice de la variable, loi marginale empirique, rangs.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] variable              variable index,
+ *  \param[in] marginal_distribution marginal frequency distribution,
+ *  \param[in] rank                  ranks.
+ */
+/*--------------------------------------------------------------*/
 
 void VectorDistance::dispersion_computation(int variable , const FrequencyDistribution *marginal_distribution ,
                                             double *rank) const

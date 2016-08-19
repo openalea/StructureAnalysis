@@ -141,6 +141,7 @@ namespace sequence_analysis {
     VARIANCE_CHANGE ,
     LINEAR_MODEL_CHANGE ,
     INTERCEPT_SLOPE_CHANGE ,
+    AUTOREGRESSIVE_MODEL_CHANGE ,
     BAYESIAN_POISSON_CHANGE ,
     BAYESIAN_GAUSSIAN_CHANGE
   };
@@ -247,11 +248,15 @@ namespace sequence_analysis {
     SEGMENT
   };
 
+  const double CHANGE_POINT_UNCERTAINTY_PROBABILITY = 0.05;  // probability for defining change-point uncertainty intervals
   const int SEQUENCE_MAX_NB_COLUMN = 20; // threshold for the writing of sequences in text files
   const double ROUNDOFF_ERROR = 1.e-10;  // erreur sur une somme de doubles
   const int PENALTY_SHAPE_SCALING_FACTOR = 100;  // facteur d'echelle pour l'affichage des pentes de log-vraisemblances
   const int NB_SEGMENTATION = 10;        // nombre de segmentations calculees
   const int SLOPE_NB_SEGMENT_RANGE = 5;  // nombre minimum de points pour calculer la pente des vraisemblances
+  const double SLOPE_STEP = 0.01;        // slope step for the dimension jump method
+  const double MAX_SLOPE = 100.;         // maximum slope for the dimension jump method
+  const int MIN_DIMENSION_JUMP = 3;      // minimum dimension jump
 
   enum correlation_normalization {
     APPROXIMATED ,
@@ -476,9 +481,9 @@ namespace sequence_analysis {
     void select_variable(const Sequences &seq , int *variable);
 
     bool pointwise_average_ascii_print(stat_tool::StatError &error , const std::string path , int *size ,
-                                       bool standard_deviation , sequence_type output) const;
+                                       bool dispersion , sequence_type output) const;
     bool pointwise_average_spreadsheet_print(stat_tool::StatError &error , const std::string path , int *size ,
-                                             bool standard_deviation , sequence_type output) const;
+                                             bool dispersion , sequence_type output) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive , bool comment_flag) const;
     std::ostream& ascii_print(std::ostream &os , output_sequence_format format , bool comment_flag ,
@@ -497,7 +502,7 @@ namespace sequence_analysis {
     void min_value_computation(int variable);
     void max_value_computation(int variable);
     void build_marginal_frequency_distribution(int variable);
-    void build_marginal_histogram(int variable , double step = stat_tool::D_DEFAULT ,
+    void build_marginal_histogram(int variable , double bin_width = stat_tool::D_DEFAULT ,
                                   double imin_value = stat_tool::D_INF);
 
     std::ostream& alignment_ascii_print(std::ostream &os , int width , int ref_index , int test_index ,
@@ -529,6 +534,8 @@ namespace sequence_analysis {
     std::ostream& profile_ascii_print(std::ostream &os , int index , int nb_segment ,
                                       double **profiles , const char *label ,
                                       double **piecewise_function = NULL , long double **change_point = NULL ,
+                                      stat_tool::Distribution **segment_length = NULL ,
+                                      stat_tool::Distribution *prior_segment_length = NULL ,
                                       long double **begin_conditonal_entropy = NULL ,
                                       long double **end_conditional_entropy = NULL ,
                                       long double **change_point_entropy = NULL) const;
@@ -536,6 +543,8 @@ namespace sequence_analysis {
                                             double **profiles , const char *label ,
                                             bool common_contrast = true , double ***piecewise_function = NULL ,
                                             long double **change_point = NULL ,
+                                            stat_tool::Distribution **segment_length = NULL ,
+                                            stat_tool::Distribution *prior_segment_length = NULL ,
                                             long double **begin_conditonal_entropy = NULL ,
                                             long double **end_conditional_entropy = NULL ,
                                             long double **change_point_entropy = NULL) const;
@@ -543,6 +552,8 @@ namespace sequence_analysis {
                                      double **profiles , bool common_contrast = true ,
                                      double ***piecewise_function = NULL ,
                                      long double **change_point = NULL ,
+                                     stat_tool::Distribution **segment_length = NULL ,
+                                     stat_tool::Distribution *prior_segment_length = NULL ,
                                      long double **begin_conditonal_entropy = NULL ,
                                      long double **end_conditional_entropy = NULL ,
                                      long double **change_point_entropy = NULL) const;
@@ -565,18 +576,21 @@ namespace sequence_analysis {
                                      bool common_contrast , int *change_point , int *seq_index_parameter ,
                                      double **piecewise_function , double **imean = NULL , double **variance = NULL ,
                                      double *global_variance = NULL , double **iintercept = NULL , double **islope = NULL ,
-                                     double **correlation = NULL , double **slope_standard_deviation = NULL ,
-                                     double **iindex_parameter_mean = NULL , long double **iindex_parameter_variance = NULL) const;
+                                     double **autoregressive_coeff = NULL , double **correlation = NULL ,
+                                     double **slope_standard_deviation = NULL , double **iindex_parameter_mean = NULL ,
+                                     long double **iindex_parameter_variance = NULL) const;
     std::ostream& piecewise_linear_function_ascii_print(std::ostream &os , int index , int variable , int nb_segment ,
                                                         segment_model model_type , bool common_contrast , int *change_point ,
                                                         int *seq_index_parameter , double **mean , double **variance ,
-                                                        double **intercept , double **slope , double **correlation = NULL ,
-                                                        double **slope_standard_deviation = NULL , double **index_parameter_mean = NULL ,
+                                                        double **intercept , double **slope , double **autoregressive_coeff = NULL ,
+                                                        double **correlation = NULL , double **slope_standard_deviation = NULL ,
+                                                        double **index_parameter_mean = NULL ,
                                                         long double **index_parameter_variance = NULL) const;
     std::ostream& piecewise_linear_function_spreadsheet_print(std::ostream &os , int index , int variable , int nb_segment ,
                                                               segment_model model_type , bool common_contrast , int *change_point ,
                                                               int *seq_index_parameter , double **mean , double **variance ,
-                                                              double **intercept , double **slope) const;
+                                                              double **intercept , double **slope ,
+                                                              double **autoregressive_coeff) const;
     double continuous_piecewise_linear_function(std::ostream &os , int index , int variable , int nb_segment ,
                                                 segment_model model_type , bool common_contrast ,
                                                 int *change_point , int *seq_index_parameter ,
@@ -587,11 +601,11 @@ namespace sequence_analysis {
                                    bool continuity = false);
     void forward_contrast(int time , int index , segment_model *model_type , bool common_contrast ,
                           double ***factorial , double *shape_parameter , double ***binomial_coeff ,
-                          int *seq_index_parameter , double *seq_mean , double **hyperparam ,
+                          double **seq_mean , int *seq_index_parameter , double **hyperparam ,
                           double **rank , long double *contrast , int nb_segment = 0) const;
     void backward_contrast(int time , int index , segment_model *model_type , bool common_contrast ,
                            double ***factorial , double *shape_parameter , double ***binomial_coeff ,
-                           int *seq_index_parameter , double *seq_mean , double **hyperparam ,
+                           double **seq_mean , int *seq_index_parameter , double **hyperparam ,
                            double **rank , long double *contrast) const;
     double segmentation(int index , int nb_segment , segment_model *model_type ,
                         bool common_contrast , double *shape_parameter , double **rank ,
@@ -605,7 +619,8 @@ namespace sequence_analysis {
     double forward_backward(int index , int nb_segment , segment_model *model_type ,
                             bool common_contrast , double *shape_parameter ,  double **rank ,
                             std::ostream *os , stat_tool::MultiPlotSet *plot_set ,
-                            change_point_profile output , stat_tool::output_format format) const;
+                            double &segment_length_max , change_point_profile output ,
+                            stat_tool::output_format format) const;
     double forward_backward_sampling(int index , int nb_segment , segment_model *model_type ,
                                      bool common_contrast , double *shape_parameter , double **rank ,
                                      std::ostream &os , stat_tool::output_format format ,
@@ -634,6 +649,10 @@ namespace sequence_analysis {
                                      double *end_conditional_entropy = NULL , double *end_partial_entropy = NULL) const;
     void profile_plotable_write(stat_tool::MultiPlot &plot , int index , int nb_state ,
                                 double **profiles) const;
+    void segment_length_distribution_plotable_write(stat_tool::MultiPlot &plot , int nb_segment ,
+                                                    double segment_length_max ,
+                                                    stat_tool::Distribution **segment_length ,
+                                                    stat_tool::Distribution *prior_segment_length) const;
     void entropy_profile_plotable_write(stat_tool::MultiPlot &plot , int index , double *begin_entropy ,
                                         double *end_entropy = NULL , double *marginal_entropy = NULL) const;
 
@@ -685,6 +704,7 @@ namespace sequence_analysis {
                                       int begin_index , int end_index) const;
 
     Sequences* merge(stat_tool::StatError &error , int nb_sample , const Sequences **iseq) const;
+    Sequences* merge(stat_tool::StatError &error , int nb_sample , const std::vector<Sequences> iseq) const;
 
     Sequences* shift(stat_tool::StatError &error , int variable , int shift_param) const;
     Sequences* shift(stat_tool::StatError &error , int variable , double shift_param) const;
@@ -695,10 +715,15 @@ namespace sequence_analysis {
     Sequences* cluster(stat_tool::StatError &error , int variable , int step ,
                        stat_tool::rounding mode = stat_tool::FLOOR) const;
     Sequences* transcode(stat_tool::StatError &error , int variable , int *category) const;
+    Sequences* transcode(stat_tool::StatError &error , int variable , std::vector<int> category) const;
     Sequences* cluster(stat_tool::StatError &error , int variable , int nb_class ,
                        int *ilimit) const;
     Sequences* cluster(stat_tool::StatError &error , int variable , int nb_class ,
+                       std::vector<int> ilimit) const;
+    Sequences* cluster(stat_tool::StatError &error , int variable , int nb_class ,
                        double *ilimit) const;
+    Sequences* cluster(stat_tool::StatError &error , int variable , int nb_class ,
+                       std::vector<double> ilimit) const;
     Sequences* scaling(stat_tool::StatError &error , int variable , int scaling_coeff) const;
     Sequences* scaling(stat_tool::StatError &error , int variable , double scaling_coeff) const;
     Sequences* round(stat_tool::StatError &error , int variable = stat_tool::I_DEFAULT ,
@@ -713,12 +738,18 @@ namespace sequence_analysis {
                             double imin_value , double imax_value , bool keep = true) const;
     Sequences* select_individual(stat_tool::StatError &error , int inb_sequence , int *iidentifier ,
                                  bool keep = true) const;
+    Sequences* select_individual(stat_tool::StatError &error , int inb_sequence , std::vector<int> iidentifier ,
+                                 bool keep = true) const;
 
     Sequences* remove_index_parameter(stat_tool::StatError &error) const;
     Sequences* explicit_index_parameter(stat_tool::StatError &error) const;
     Sequences* select_variable(stat_tool::StatError &error , int inb_variable , int *ivariable ,
                                bool keep = true) const;
+    Sequences* select_variable(stat_tool::StatError &error , int inb_variable , std::vector<int> ivariable ,
+                               bool keep = true) const;
     Sequences* merge_variable(stat_tool::StatError &error , int nb_sample , const Sequences **iseq ,
+                              int ref_sample = stat_tool::I_DEFAULT) const;
+    Sequences* merge_variable(stat_tool::StatError &error , int nb_sample , const std::vector<Sequences> iseq ,
                               int ref_sample = stat_tool::I_DEFAULT) const;
     Sequences* shift_variable(stat_tool::StatError &error , int variable , int lag) const;
 
@@ -732,6 +763,9 @@ namespace sequence_analysis {
     Sequences* segmentation_extract(stat_tool::StatError &error , int variable , int nb_value ,
                                     int *ivalue , bool keep = true ,
                                     bool concatenation = false) const;
+    Sequences* segmentation_extract(stat_tool::StatError &error , int variable , int nb_value ,
+                                    std::vector<int> ivalue , bool keep = true ,
+                                    bool concatenation = false) const;
 
     Sequences* cumulate(stat_tool::StatError &error , int variable = stat_tool::I_DEFAULT) const;
     Sequences* difference(stat_tool::StatError &error , int variable = stat_tool::I_DEFAULT ,
@@ -741,13 +775,17 @@ namespace sequence_analysis {
     Sequences* moving_average(stat_tool::StatError &error , int nb_point , double *filter ,
                               int variable = stat_tool::I_DEFAULT , bool begin_end = false ,
                               sequence_type output = TREND) const;
+    Sequences* moving_average(stat_tool::StatError &error , int nb_point , std::vector<double> filter ,
+                              int variable = stat_tool::I_DEFAULT , bool begin_end = false ,
+                              sequence_type output = TREND) const;
     Sequences* moving_average(stat_tool::StatError &error , const stat_tool::Distribution &dist ,
                               int variable = stat_tool::I_DEFAULT , bool begin_end = false ,
                               sequence_type output = TREND) const;
 
-    Sequences* pointwise_average(stat_tool::StatError &error , bool circular = false ,
-                                 bool standard_deviation = false , sequence_type output = SEQUENCE ,
-                                 const std::string path = "" , stat_tool::output_format format = stat_tool::ASCII) const;
+    Sequences* pointwise_average(stat_tool::StatError &error , bool robust = false , bool circular = false ,
+                                 bool dispersion = false , bool frequency_correction = false ,
+                                 sequence_type output = SEQUENCE , const std::string path = "" ,
+                                 stat_tool::output_format format = stat_tool::ASCII) const;
 
     Sequences* recurrence_time_sequences(stat_tool::StatError &error , int variable , int value) const;
     Sequences* sojourn_time_sequences(stat_tool::StatError &error , int variable) const;
@@ -779,8 +817,8 @@ namespace sequence_analysis {
     int max_index_parameter_computation(bool last_position = false) const;
 
     void marginal_frequency_distribution_computation(int variable);
-    bool select_step(stat_tool::StatError &error , int variable , double step ,
-                     double imin_value = stat_tool::D_INF);
+    bool select_bin_width(stat_tool::StatError &error , int variable , double bin_width ,
+                          double imin_value = stat_tool::D_INF);
 
     double mean_computation(int variable) const;
     double variance_computation(int variable , double mean) const;
@@ -830,12 +868,26 @@ namespace sequence_analysis {
                             bool common_contrast , double *shape_parameter ,
                             sequence_type output = SEQUENCE , bool continuity = false) const;
     Sequences* segmentation(stat_tool::StatError &error , std::ostream &os , int iidentifier ,
+                            int nb_segment , std::vector<int> ichange_point , std::vector<segment_model> model_type ,
+                            bool common_contrast , std::vector<double> shape_parameter ,
+                            sequence_type output = SEQUENCE , bool continuity = false) const;
+    Sequences* segmentation(stat_tool::StatError &error , std::ostream &os , int iidentifier ,
                             int nb_segment , segment_model *model_type ,
                             bool common_contrast , double *shape_parameter ,
                             sequence_type output , bool continuity = false) const;
     Sequences* segmentation(stat_tool::StatError &error , std::ostream &os , int iidentifier ,
+                            int nb_segment , std::vector<segment_model> model_type ,
+                            bool common_contrast , std::vector<double> shape_parameter ,
+                            sequence_type output , bool continuity = false) const;
+    Sequences* segmentation(stat_tool::StatError &error , std::ostream &os , int iidentifier ,
                             int max_nb_segment , segment_model *model_type ,
                             bool common_contrast , double *shape_parameter ,
+                            stat_tool::model_selection_criterion criterion = stat_tool::LIKELIHOOD_SLOPE ,
+                            int min_nb_segment = 0 , int penalty_shape_type = 2 ,
+                            sequence_type output = SEQUENCE) const;
+    Sequences* segmentation(stat_tool::StatError &error , std::ostream &os , int iidentifier ,
+                            int max_nb_segment , std::vector<segment_model> model_type ,
+                            bool common_contrast , std::vector<double> shape_parameter ,
                             stat_tool::model_selection_criterion criterion = stat_tool::LIKELIHOOD_SLOPE ,
                             int min_nb_segment = 0 , int penalty_shape_type = 2 ,
                             sequence_type output = SEQUENCE) const;
@@ -850,9 +902,23 @@ namespace sequence_analysis {
                                stat_tool::output_format format = stat_tool::ASCII ,
                                stat_tool::latent_structure_algorithm segmentation = stat_tool::FORWARD_DYNAMIC_PROGRAMMING ,
                                int nb_segmentation = NB_SEGMENTATION) const;
+    bool segment_profile_write(stat_tool::StatError &error , std::ostream &os , int iidentifier ,
+                               int nb_segment , std::vector<segment_model> model_type ,
+                               bool common_contrast , std::vector<double> shape_parameter ,
+                               change_point_profile output = SEGMENT ,
+                               stat_tool::output_format format = stat_tool::ASCII ,
+                               stat_tool::latent_structure_algorithm segmentation = stat_tool::FORWARD_DYNAMIC_PROGRAMMING ,
+                               int nb_segmentation = NB_SEGMENTATION) const;
     bool segment_profile_write(stat_tool::StatError &error , const std::string path , int iidentifier ,
                                int nb_segment , segment_model *model_type ,
                                bool common_contrast , double *shape_parameter ,
+                               change_point_profile output = SEGMENT ,
+                               stat_tool::output_format format = stat_tool::ASCII ,
+                               stat_tool::latent_structure_algorithm segmentation = stat_tool::FORWARD_DYNAMIC_PROGRAMMING ,
+                               int nb_segmentation = NB_SEGMENTATION) const;
+    bool segment_profile_write(stat_tool::StatError &error , const std::string path , int iidentifier ,
+                               int nb_segment , std::vector<segment_model> model_type ,
+                               bool common_contrast , std::vector<double> shape_parameter ,
                                change_point_profile output = SEGMENT ,
                                stat_tool::output_format format = stat_tool::ASCII ,
                                stat_tool::latent_structure_algorithm segmentation = stat_tool::FORWARD_DYNAMIC_PROGRAMMING ,
@@ -864,6 +930,10 @@ namespace sequence_analysis {
     stat_tool::MultiPlotSet* segment_profile_plotable_write(stat_tool::StatError &error , int iidentifier ,
                                                             int nb_segment , segment_model *model_type ,
                                                             bool common_contrast , double *shape_parameter ,
+                                                            change_point_profile output = SEGMENT) const;
+    stat_tool::MultiPlotSet* segment_profile_plotable_write(stat_tool::StatError &error , int iidentifier ,
+                                                            int nb_segment , std::vector<segment_model> model_type ,
+                                                            bool common_contrast , std::vector<double> shape_parameter ,
                                                             change_point_profile output = SEGMENT) const;
 
     // acces membres de la classe
@@ -964,7 +1034,7 @@ namespace sequence_analysis {
   class VariableOrderMarkovChainData;
 
   class MarkovianSequences : public Sequences {  // trajectoires correspondant a
-                                               // un processus markovien
+                                                 // un processus markovien
     friend class VariableOrderMarkovChain;
     friend class VariableOrderMarkov;
     friend class HiddenVariableOrderMarkov;
@@ -1091,24 +1161,37 @@ namespace sequence_analysis {
 
     MarkovianSequences* merge(stat_tool::StatError &error , int nb_sample ,
                               const MarkovianSequences **iseq) const;
+    MarkovianSequences* merge(stat_tool::StatError &error , int nb_sample ,
+                              const std::vector<MarkovianSequences> iseq) const;
 
     MarkovianSequences* cluster(stat_tool::StatError &error , int variable , int step ,
                                 stat_tool::rounding mode = stat_tool::FLOOR) const;
     MarkovianSequences* transcode(stat_tool::StatError &error , int ivariable , int *category ,
                                   bool add_variable = false) const;
+    MarkovianSequences* transcode(stat_tool::StatError &error , int ivariable , std::vector<int> category ,
+                                  bool add_variable = false) const;
     MarkovianSequences* consecutive_values(stat_tool::StatError &error , std::ostream &os ,
                                            int ivariable , bool add_variable = false) const;
     MarkovianSequences* cluster(stat_tool::StatError &error , int ivariable , int nb_class ,
                                 int *ilimit , bool add_variable = false) const;
+    MarkovianSequences* cluster(stat_tool::StatError &error , int ivariable , int nb_class ,
+                                std::vector<int> ilimit , bool add_variable = false) const;
     MarkovianSequences* cluster(stat_tool::StatError &error , int variable , int nb_class ,
                                 double *ilimit) const;
+    MarkovianSequences* cluster(stat_tool::StatError &error , int variable , int nb_class ,
+                                std::vector<double> ilimit) const;
 
     MarkovianSequences* remove_index_parameter(stat_tool::StatError &error) const;
     MarkovianSequences* explicit_index_parameter(stat_tool::StatError &error) const;
     MarkovianSequences* select_variable(stat_tool::StatError &error , int inb_variable ,
                                         int *ivariable , bool keep = true) const;
+    MarkovianSequences* select_variable(stat_tool::StatError &error , int inb_variable ,
+                                        std::vector<int> ivariable , bool keep = true) const;
     MarkovianSequences* merge_variable(stat_tool::StatError &error , int nb_sample ,
                                        const MarkovianSequences **iseq ,
+                                       int ref_sample = stat_tool::I_DEFAULT) const;
+    MarkovianSequences* merge_variable(stat_tool::StatError &error , int nb_sample ,
+                                       const std::vector<MarkovianSequences> iseq ,
                                        int ref_sample = stat_tool::I_DEFAULT) const;
 
     MarkovianSequences* initial_run_computation(stat_tool::StatError &error) const;
@@ -1148,10 +1231,10 @@ namespace sequence_analysis {
     void sojourn_time_frequency_distribution_computation(int variable);
 
     void build_observation_frequency_distribution(int nb_state);
-    void build_observation_histogram(int variable , int nb_state , double step = stat_tool::D_DEFAULT);
+    void build_observation_histogram(int variable , int nb_state , double bin_width = stat_tool::D_DEFAULT);
     void build_observation_histogram(int nb_state);
-    bool select_step(stat_tool::StatError &error , int variable , double step ,
-                     double imin_value = stat_tool::D_INF);
+    bool select_bin_width(stat_tool::StatError &error , int variable , double bin_width ,
+                          double imin_value = stat_tool::D_INF);
 
     void build_characteristic(int variable = stat_tool::I_DEFAULT , bool sojourn_time_flag = true ,
                               bool initial_run_flag = false);

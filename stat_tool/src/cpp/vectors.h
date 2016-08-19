@@ -59,6 +59,8 @@ namespace stat_tool {
   const int VECTOR_NB_VARIABLE = 60;     // nombre maximum de variables
   const int DISTANCE_NB_VECTOR = 2000;   // nombre maximum de vecteurs pour le calcul
                                          // d'une matrice des distances
+  const int SUP_NORM_DISTANCE_NB_VECTOR = 10;   // nombre minimum de vecteurs pour le calcul
+                                                // de la distance sup norm
   const int CONTINGENCY_NB_VALUE = 100;  // nombre maximum de valeurs pour le calcul
                                          // d'un tableau de contingence
   const int DISPLAY_CONTINGENCY_NB_VALUE = 20;  // nombre maximum de valeurs pour l'affichage
@@ -170,7 +172,7 @@ namespace stat_tool {
     void max_value_computation(int variable);
 
     void build_marginal_frequency_distribution(int variable);
-    void build_marginal_histogram(int variable , double step = D_DEFAULT ,
+    void build_marginal_histogram(int variable , double bin_width = D_DEFAULT ,
                                   double imin_value = D_INF);
     int* order_computation(int variable) const;
 
@@ -207,6 +209,15 @@ namespace stat_tool {
                                        const Vectors **value_vec , bool exhaustive = false) const;
     bool variance_analysis_spreadsheet_write(StatError &error , const std::string path ,
                                              int response_type , const Vectors **value_vec) const;
+
+    double likelihood_computation(int variable , const ContinuousParametric &dist) const;
+
+    double gamma_estimation(int variable , ContinuousParametric *dist) const;
+    double inverse_gaussian_estimation(int variable , ContinuousParametric *dist) const;
+    double gaussian_estimation(int variable , ContinuousParametric *dist) const;
+    double von_mises_estimation(int variable , ContinuousParametric *dist) const;
+
+    double continuous_parametric_estimation(int variable , continuous_parametric ident) const;
 
     template <typename Type>
     void gamma_estimation(Type **component_vector_count , int variable ,
@@ -257,6 +268,8 @@ namespace stat_tool {
     bool check(StatError &error);
 
     Vectors* merge(StatError &error, int nb_sample , const Vectors **ivec) const;
+    Vectors* merge(StatError &error, int nb_sample , const std::vector<Vectors> ivec) const;
+
     Vectors* shift(StatError &error , int variable , int shift_param) const;
     Vectors* shift(StatError &error , int variable , double shift_param) const;
     Vectors* thresholding(StatError &error , int variable , int threshold ,
@@ -264,12 +277,18 @@ namespace stat_tool {
     Vectors* thresholding(StatError &error , int variable , double threshold ,
                           threshold_direction mode) const;
     Vectors* transcode(StatError &error , int variable , int *category) const;
+    Vectors* transcode(StatError &error , int variable , std::vector<int> category) const;
+
     Vectors* cluster(StatError &error , int variable , int step ,
                      rounding mode = FLOOR) const;
     Vectors* cluster(StatError &error , int variable , int inb_value ,
                      int *ilimit) const;
+    Vectors* cluster(StatError &error , int variable , int inb_value ,
+                     std::vector<int> ilimit) const;
     Vectors* cluster(StatError &error , int variable , int nb_class ,
                      double *ilimit) const;
+    Vectors* cluster(StatError &error , int variable , int nb_class ,
+                     std::vector<double> ilimit) const;
     Vectors* scaling(StatError &error , int variable , int scaling_coeff) const;
     Vectors* scaling(StatError &error , int variable , double scaling_coeff) const;
     Vectors* round(StatError &error , int variable = I_DEFAULT ,
@@ -282,9 +301,15 @@ namespace stat_tool {
 
     Vectors* select_individual(StatError &error , int inb_vector , int *iidentifier ,
                                bool keep = true) const;
+    Vectors* select_individual(StatError &error , int inb_vector , std::vector<int> iidentifier ,
+                               bool keep = true) const;
     Vectors* select_variable(StatError &error , int inb_variable , int *ivariable ,
                              bool keep = true) const;
+    Vectors* select_variable(StatError &error , int inb_variable , std::vector<int> ivariable ,
+                             bool keep = true) const;
     Vectors* merge_variable(StatError &error , int nb_sample , const Vectors **ivec ,
+                            int ref_sample = I_DEFAULT) const;
+    Vectors* merge_variable(StatError &error , int nb_sample , const std::vector<Vectors> ivec ,
                             int ref_sample = I_DEFAULT) const;
 
     static Vectors* ascii_read(StatError &error , const std::string path);
@@ -300,8 +325,8 @@ namespace stat_tool {
     bool plot_write(StatError &error , const char *prefix , const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
-    bool select_step(StatError &error , int variable , double step ,
-                     double imin_value = D_INF);
+    bool select_bin_width(StatError &error , int variable , double bin_width ,
+                          double imin_value = D_INF);
     int cumulative_distribution_function_computation(int variable , double **cdf) const;
 
     double mean_absolute_deviation_computation(int variable) const;
@@ -326,6 +351,8 @@ namespace stat_tool {
     bool variance_analysis(StatError &error , std::ostream &os , int class_variable ,
                            int response_variable , int response_type ,
                            const std::string path = "" , output_format format = ASCII) const;
+
+    bool sup_norm_distance(StatError &error , std::ostream &os , const Vectors &ivec) const;
 
     Regression* linear_regression(StatError &error , int explanatory_variable ,
                                   int response_variable) const;

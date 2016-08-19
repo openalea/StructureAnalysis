@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -57,11 +57,11 @@ namespace stat_tool {
 
 
 
-/*--------------------------------------------------------------*
- *
- *  Constructeur par defaut de la classe RegressionKernel.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Default constructor of the RegressionKernel class.
+ */
+/*--------------------------------------------------------------*/
 
 RegressionKernel::RegressionKernel()
 
@@ -81,13 +81,15 @@ RegressionKernel::RegressionKernel()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the RegressionKernel class.
  *
- *  Constructeur de la classe RegressionKernel.
- *
- *  arguments : identificateur, valeurs minimum et maximum de la variable explicative.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] iident     identifier,
+ *  \param[in] imin_value minimum value of the explanatory variable,
+ *  \param[in] imax_value maximum value of the explanatory variable.
+ */
+/*--------------------------------------------------------------*/
 
 // RegressionKernel::RegressionKernel(parametric_function iident , double imin_value ,
 //                                    double imax_value , double istep)
@@ -137,13 +139,13 @@ RegressionKernel::RegressionKernel(parametric_function iident , int imin_value ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Copy of a RegressionKernel object.
  *
- *  Copie d'un objet RegressionKernel.
- *
- *  argument : reference sur un objet RegressionKernel.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] regression reference on a RegressionKernel object.
+ */
+/*--------------------------------------------------------------*/
 
 void RegressionKernel::copy(const RegressionKernel &regression)
 
@@ -182,11 +184,11 @@ void RegressionKernel::copy(const RegressionKernel &regression)
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Destruction des champs d'un objet RegressionKernel.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Destruction of the data members of a RegressionKernel object.
+ */
+/*--------------------------------------------------------------*/
 
 void RegressionKernel::remove()
 
@@ -196,11 +198,11 @@ void RegressionKernel::remove()
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Destructeur de la classe RegressionKernel.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Destructor of the RegressionKernel class.
+ */
+/*--------------------------------------------------------------*/
 
 RegressionKernel::~RegressionKernel()
 
@@ -209,13 +211,15 @@ RegressionKernel::~RegressionKernel()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Assignment operator of the RegressionKernel class.
  *
- *  Operateur d'assignement de la classe RegressionKernel.
+ *  \param[in]  regression reference on a RegressionKernel object,
  *
- *  argument : reference sur un objet RegressionKernel.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] this       RegressionKernel object.
+ */
+/*--------------------------------------------------------------*/
 
 RegressionKernel& RegressionKernel::operator=(const RegressionKernel &regression)
 
@@ -229,13 +233,13 @@ RegressionKernel& RegressionKernel::operator=(const RegressionKernel &regression
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of the regression function parameters.
  *
- *  Ecriture des parametres de la fonction.
- *
- *  argument : stream.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os stream.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& RegressionKernel::ascii_parameter_print(ostream &os) const
 
@@ -259,13 +263,13 @@ ostream& RegressionKernel::ascii_parameter_print(ostream &os) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Formal writing of the regression function.
  *
- *  Ecriture formelle de la fonction.
- *
- *  argument : stream.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os stream.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& RegressionKernel::ascii_formal_print(ostream &os) const
 
@@ -312,13 +316,13 @@ ostream& RegressionKernel::ascii_formal_print(ostream &os) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of the regression function.
  *
- *  Ecriture de la fonction de regression.
- *
- *  argument : stream.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os stream.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& RegressionKernel::ascii_print(ostream &os) const
 
@@ -342,13 +346,13 @@ ostream& RegressionKernel::ascii_print(ostream &os) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of the regression function at the spreadsheet format.
  *
- *  Ecriture de la fonction de regression au format tableur.
- *
- *  argument : stream.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os stream.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& RegressionKernel::spreadsheet_print(ostream &os) const
 
@@ -367,13 +371,15 @@ ostream& RegressionKernel::spreadsheet_print(ostream &os) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of the regression function (Gnuplot output).
  *
- *  Ecriture de la fonction de regression au format Gnuplot.
+ *  \param[in]  path   file path,
  *
- *  argument : path.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] status error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool RegressionKernel::plot_print(const char *path) const
 
@@ -404,13 +410,13 @@ bool RegressionKernel::plot_print(const char *path) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of the regression function for plotting.
  *
- *  Ecriture de la fonction de regression.
- *
- *  argument : reference sur un objet SinglePlot.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] plot reference on a SinglePlot object.
+ */
+/*--------------------------------------------------------------*/
 
 void RegressionKernel::plotable_write(SinglePlot &plot) const
 
@@ -432,11 +438,11 @@ void RegressionKernel::plotable_write(SinglePlot &plot) const
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Calcul des valeurs d'une fonction parametrique.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of a parametric regression function.
+ */
+/*--------------------------------------------------------------*/
 
 void RegressionKernel::computation()
 
@@ -473,11 +479,13 @@ void RegressionKernel::computation()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the minimum value of a regression function.
  *
- *  Calcul de la valeur minimum d'une fonction.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] min minimum value.
+ */
+/*--------------------------------------------------------------*/
 
 double RegressionKernel::min_computation() const
 
@@ -500,11 +508,13 @@ double RegressionKernel::min_computation() const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the maximum value of a regression function.
  *
- *  Calcul de la valeur maximum d'une fonction.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] max maximum value.
+ */
+/*--------------------------------------------------------------*/
 
 double RegressionKernel::max_computation() const
 
@@ -527,11 +537,11 @@ double RegressionKernel::max_computation() const
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Constructeur par defaut de la classe Regression.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Default constructor of the Regression class.
+ */
+/*--------------------------------------------------------------*/
 
 Regression::Regression()
 
@@ -543,14 +553,16 @@ Regression::Regression()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Construction of a Regression object from a Vectors object.
  *
- *  Construction d'un objet Regression a partir d'un objet Vectors.
- *
- *  arguments : identificateur de la regression, indices des variables explicative et
- *              expliquee, reference sur un objet Vectors.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] iident               regression function identifier,
+ *  \param[in] explanatory_variable explanatory variable index,
+ *  \param[in] response_variable    response variable index,
+ *  \param[in] vec                  reference on a Vectors object.
+ */
+/*--------------------------------------------------------------*/
 
 Regression::Regression(parametric_function iident , int explanatory_variable ,
                        int response_variable , const Vectors &vec)
@@ -571,13 +583,13 @@ Regression::Regression(parametric_function iident , int explanatory_variable ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Copy of a Regression object.
  *
- *  Copie d'un objet Regression.
- *
- *  argument : reference sur un objet Regression.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] regression reference on a Regression object.
+ */
+/*--------------------------------------------------------------*/
 
 void Regression::copy(const Regression &regression)
 
@@ -601,13 +613,13 @@ void Regression::copy(const Regression &regression)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor by copy of the Regression class.
  *
- *  Constructeur par copie de la classe Regression.
- *
- *  argument : reference sur un objet Regression.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] regression reference on a Regression object.
+ */
+/*--------------------------------------------------------------*/
 
 Regression::Regression(const Regression &regression)
 
@@ -617,11 +629,11 @@ Regression::Regression(const Regression &regression)
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Destruction des champs d'un objet Regression.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Destruction of the data members of a Regression object.
+ */
+/*--------------------------------------------------------------*/
 
 void Regression::remove()
 
@@ -631,11 +643,11 @@ void Regression::remove()
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Destructeur de la classe Regression.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Destructor of the Regression class.
+ */
+/*--------------------------------------------------------------*/
 
 Regression::~Regression()
 
@@ -644,13 +656,15 @@ Regression::~Regression()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Assignment operator of the Regression class.
  *
- *  Operateur d'assignement de la classe Regression.
+ *  \param[in]  regression reference on a Regression object,
  *
- *  argument : reference sur un objet Regression.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] this       Regression object.
+ */
+/*--------------------------------------------------------------*/
 
 Regression& Regression::operator=(const Regression &regression)
 
@@ -667,13 +681,13 @@ Regression& Regression::operator=(const Regression &regression)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing on a single line of a Regression object.
  *
- *  Ecriture sur une ligne d'un objet Regression.
- *
- *  argument : stream.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os stream.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& Regression::line_write(ostream &os) const
 
@@ -686,13 +700,14 @@ ostream& Regression::line_write(ostream &os) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a Regression object.
  *
- *  Ecriture d'un objet Regression.
- *
- *  arguments : stream, flag niveau de detail.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os         stream,
+ *  \param[in]     exhaustive flag detail level.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& Regression::ascii_write(ostream &os , bool exhaustive) const
 
@@ -707,7 +722,7 @@ ostream& Regression::ascii_write(ostream &os , bool exhaustive) const
 
   old_adjust = os.setf(ios::right , ios::adjustfield);
 
-  // ecriture des lois marginales
+  // writing of marginal distributions
 
   os << nb_vector << " " << STAT_label[nb_vector == 1 ? STATL_VECTOR : STATL_VECTORS] << endl;
 
@@ -752,7 +767,7 @@ ostream& Regression::ascii_write(ostream &os , bool exhaustive) const
 
   if (ident == LINEAR_FUNCTION) {
 
-    // ecriture des parametres de la regression
+    // writing of regression function parameters
 
     df[0] = regression_df;
     df[1] = residual_df;
@@ -852,7 +867,7 @@ ostream& Regression::ascii_write(ostream &os , bool exhaustive) const
     os << square_sum[0] + square_sum[1] << " | " << square_sum[2] << endl;
 #   endif
 
-    // tableau d'analyse de variance
+    // writing of variance analysis table
 
     width[0] = column_width(nb_vector - 1) + ASCII_SPACE;
     width[1] = column_width(3 , square_sum) + ASCII_SPACE;
@@ -892,7 +907,7 @@ ostream& Regression::ascii_write(ostream &os , bool exhaustive) const
   }
   }
 
-  // ecriture moyenne et ecart-type des residus
+  // writing of the mean and standard deviation of residuals
 
   residual_mean = residual_mean_computation();
   residual_standard_deviation = sqrt(residual_variance_computation(residual_mean));
@@ -911,14 +926,14 @@ ostream& Regression::ascii_write(ostream &os , bool exhaustive) const
       estimated_response[i] = point[vectors->int_vector[i][0] - min_value];
     }
 
-    // calcul des residus standardises
+    // computation of standardized residuals
 
     standard_residual = new double[nb_vector];
     for (i = 0;i < nb_vector;i++) {
       standard_residual[i] = residual[i] / residual_standard_deviation;
     }
 
-    // calcul des largeurs des colonnes
+    // computation of the column width
 
     width[0] = column_width((int)vectors->min_value[0] , (int)vectors->max_value[0]);
 
@@ -941,7 +956,7 @@ ostream& Regression::ascii_write(ostream &os , bool exhaustive) const
     width[3] = column_width(nb_vector , residual) + ASCII_SPACE;
     width[4] = column_width(nb_vector , standard_residual) + ASCII_SPACE;
 
-    // ecriture des reponses observees et theoriques, des residus et des residus standardises
+    // writing of observed and theoretical responses, of residuals and of standardized residuals
 
     os << "\n" << STAT_label[STATL_EXPLANATORY_VARIABLE] << " | " << STAT_label[STATL_RESPONSE_VARIABLE]
        << " | " << STAT_label[STATL_ESTIMATION] << " | " << STAT_label[STATL_RESIDUAL]
@@ -971,14 +986,17 @@ ostream& Regression::ascii_write(ostream &os , bool exhaustive) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a Regression object in a file.
  *
- *  Ecriture d'un objet Regression dans un fichier.
+ *  \param[in]  error      reference on a StatError object,
+ *  \param[in]  path       file path,
+ *  \param[in]  exhaustive flag detail level,
  *
- *  arguments : reference sur un objet StatError, path,
- *              flag niveau de detail.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] status     error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool Regression::ascii_write(StatError &error , const string path ,
                              bool exhaustive) const
@@ -1004,13 +1022,16 @@ bool Regression::ascii_write(StatError &error , const string path ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a Regression object in a file at the spreadsheet format.
  *
- *  Ecriture d'un objet Regression dans un fichier au format tableur.
+ *  \param[in]  error  reference on a StatError object,
+ *  \param[in]  path   file path,
  *
- *  arguments : reference sur un objet StatError, path.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] status error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool Regression::spreadsheet_write(StatError &error , const string path) const
 
@@ -1033,7 +1054,7 @@ bool Regression::spreadsheet_write(StatError &error , const string path) const
   else {
     status = true;
 
-    // ecriture des lois marginales
+    // writing of marginal distributions
 
     out_file << nb_vector << "\t" << STAT_label[nb_vector == 1 ? STATL_VECTOR : STATL_VECTORS] << endl;
 
@@ -1076,7 +1097,7 @@ bool Regression::spreadsheet_write(StatError &error , const string path) const
 
     if (ident == LINEAR_FUNCTION) {
 
-      // ecriture des parametres de la regression
+      // writing of regression function parameters
 
       df[0] = regression_df;
       df[1] = residual_df;
@@ -1158,7 +1179,7 @@ bool Regression::spreadsheet_write(StatError &error , const string path) const
 
     case LINEAR_FUNCTION : {
 
-      // tableau d'analyse de variance
+      // writing of variance analysis table
 
       out_file << "\n" << STAT_label[STATL_VARIANCE_ANALYSIS] << endl;
       out_file << STAT_label[STATL_VARIATION_SOURCE] << "\t" << STAT_label[STATL_FREEDOM_DEGREES] << "\t"
@@ -1192,7 +1213,7 @@ bool Regression::spreadsheet_write(StatError &error , const string path) const
     }
     }
 
-    // ecriture moyenne et ecart-type des residus
+    // writing of the mean and standard deviation of residuals
 
     residual_mean = residual_mean_computation();
     residual_standard_deviation = sqrt(residual_variance_computation(residual_mean));
@@ -1205,7 +1226,7 @@ bool Regression::spreadsheet_write(StatError &error , const string path) const
     out_file << STAT_label[STATL_RESIDUAL] << " " << STAT_label[STATL_STANDARD_DEVIATION] << "\t"
              << residual_standard_deviation << endl;
 
-    // ecriture des reponses observees et theoriques, des residus et des residus standardises
+    // writing of observed and theoretical responses, of residuals and of standardized residuals
 
     out_file << "\n" << STAT_label[STATL_EXPLANATORY_VARIABLE] << "\t" << STAT_label[STATL_RESPONSE_VARIABLE]
              << "\t" << STAT_label[STATL_ESTIMATION] << "\t" << STAT_label[STATL_RESIDUAL]
@@ -1228,14 +1249,17 @@ bool Regression::spreadsheet_write(StatError &error , const string path) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Plot of a Regression object using Gnuplot.
  *
- *  Sortie Gnuplot d'un objet Regression.
+ *  \param[in]  error  reference on a StatError object,
+ *  \param[in]  prefix file prefix,
+ *  \param[in]  title  figure title,
  *
- *  arguments : reference sur un objet StatError, prefixe des fichiers,
- *              titre des figures.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] status error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool Regression::plot_write(StatError &error , const char *prefix ,
                             const char *title) const
@@ -1252,7 +1276,7 @@ bool Regression::plot_write(StatError &error , const char *prefix ,
 
   error.init();
 
-  // ecriture des fichiers de donnees
+  // writing of data files
 
   data_file_name[0] << prefix << 0 << ".dat";
   status = plot_print((data_file_name[0].str()).c_str());
@@ -1263,7 +1287,7 @@ bool Regression::plot_write(StatError &error , const char *prefix ,
 
   else {
 
-    // calcul des residus standardises
+    // computation of standardized residuals
 
     residual_mean = residual_mean_computation();
     residual_standard_deviation = sqrt(residual_variance_computation(residual_mean));
@@ -1286,7 +1310,7 @@ bool Regression::plot_write(StatError &error , const char *prefix ,
     vectors->plot_print((data_file_name[1].str()).c_str() , standard_residual);
     delete [] standard_residual;
 
-    // ecriture du fichier de commandes et du fichier d'impression
+    // writing of script files
 
     min_response = MIN(min_computation() , vectors->min_value[1]);
     max_response = MAX(max_computation() , vectors->max_value[1]);
@@ -1430,11 +1454,13 @@ bool Regression::plot_write(StatError &error , const char *prefix ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Plot of a Regression object.
  *
- *  Sortie graphique d'un objet Regression.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] plot_set plots.
+ */
+/*--------------------------------------------------------------*/
 
 MultiPlotSet* Regression::get_plotable() const
 
@@ -1457,7 +1483,7 @@ MultiPlotSet* Regression::get_plotable() const
 
   plot.border = "15 lw 0";
 
-  // 1ere vue : fonction de regression et donnees
+  // regression function and data
 
   if ((min_value >= 0) && (max_value - min_value > min_value * PLOT_RANGE_RATIO)) {
     xmin = 0.;
@@ -1521,7 +1547,7 @@ MultiPlotSet* Regression::get_plotable() const
     vectors->plotable_frequency_write(plot[0][2] , 0 , 1);
   }
 
-  // 2eme vue : residus standardises
+  // standardized residuals 
 
   residual_mean = residual_mean_computation();
   residual_standard_deviation = sqrt(residual_variance_computation(residual_mean));
@@ -1592,11 +1618,13 @@ MultiPlotSet* Regression::get_plotable() const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the variation explained by a regression function.
  *
- *  Calcul de la variation expliquee par le modele.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] regression_square_sum regression square sum.
+ */
+/*--------------------------------------------------------------*/
 
 double Regression::regression_square_sum_computation() const
 
@@ -1615,11 +1643,11 @@ double Regression::regression_square_sum_computation() const
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Calcul des residus.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the residuals.
+ */
+/*--------------------------------------------------------------*/
 
 void Regression::residual_computation()
 
@@ -1640,11 +1668,13 @@ void Regression::residual_computation()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the residual mean,
  *
- *  Calcul de la moyenne des residus.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] residual_mean residual mean.
+ */
+/*--------------------------------------------------------------*/
 
 double Regression::residual_mean_computation() const
 
@@ -1663,13 +1693,15 @@ double Regression::residual_mean_computation() const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the residual variance.
  *
- *  Calcul de la variance des residus.
+ *  \param[in]  residual_mean     residual mean,
  *
- *  argument : moyenne.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] residual_variance residual variance.
+ */
+/*--------------------------------------------------------------*/
 
 double Regression::residual_variance_computation(double residual_mean) const
 
@@ -1691,11 +1723,13 @@ double Regression::residual_variance_computation(double residual_mean) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the residual square sum.
  *
- *  Calcul de la somme des carres des residus.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] residual_square_sum residual square sum.
+ */
+/*--------------------------------------------------------------*/
 
 double Regression::residual_square_sum_computation() const
 
@@ -1713,14 +1747,17 @@ double Regression::residual_square_sum_computation() const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Linear regression.
  *
- *  Regression lineaire.
+ *  \param[in]  error                reference on a StatError object,
+ *  \param[in]  explanatory_variable explanatory variable index,
+ *  \param[in]  response_variable    response variable index,
  *
- *  arguments : reference sur un objet StatError, indices des variables
- *              explicative et expliquee.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] regression           linear regression.
+ */
+/*--------------------------------------------------------------*/
 
 Regression* Vectors::linear_regression(StatError &error , int explanatory_variable ,
                                        int response_variable) const
@@ -1777,12 +1814,12 @@ Regression* Vectors::linear_regression(StatError &error , int explanatory_variab
     regression->regression_df = 1.;
     regression->residual_df = nb_vector - 2;
 
-    // estimation des parametres
+    // estimation of linear regression parameters (intercept and slope)
 
     regression->parameter[1] = regression->vectors->covariance[0][1] / regression->vectors->covariance[0][0];
     regression->parameter[0] = regression->vectors->mean[1] - regression->vectors->mean[0] * regression->parameter[1];
 
-    // calcul de la fonction et des residus
+    // computation of the regression function and of residuals
 
     regression->computation();
     regression->residual_computation();
@@ -1792,15 +1829,20 @@ Regression* Vectors::linear_regression(StatError &error , int explanatory_variab
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Nonparametric moving-average regression.
  *
- *  Regression non-parametrique de type moyenne mobile.
+ *  \param[in]  error                reference on a StatError object,
+ *  \param[in]  explanatory_variable explanatory variable index,
+ *  \param[in]  response_variable    response variable index,
+ *  \param[in]  nb_point             filter half width,
+ *  \param[in]  filter               filter,
+ *  \param[in]  algorithm            response computation: AVERAGING/LEAST_SQUARES,
  *
- *  arguments : reference sur un objet StatError, indices des variables
- *              explicative et expliquee, demi-largeur du filtre, filtre,
- *              calcul de la reponse : AVERAGING/LEAST_SQUARES.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] regression           nonparametric regression.
+ */
+/*--------------------------------------------------------------*/
 
 Regression* Vectors::moving_average(StatError &error , int explanatory_variable ,
                                     int response_variable , int nb_point , double *filter ,
@@ -1898,7 +1940,7 @@ Regression* Vectors::moving_average(StatError &error , int explanatory_variable 
       }
     }
 
-    // calcul d'un ordre sur les vecteurs a partir des valeurs prises par la variable explicative
+    // Sort of the individuals by increasing explanatory values
 
     index = vec->order_computation(0);
 
@@ -1909,7 +1951,7 @@ Regression* Vectors::moving_average(StatError &error , int explanatory_variable 
     ppoint = regression->point;
     for (i = regression->min_value;i <= regression->max_value;i++) {
 
-      // calcul des bornes sur la liste des indices ordonnes des vecteurs
+      // computation of bounds
 
       switch (algorithm) {
 
@@ -1952,7 +1994,7 @@ Regression* Vectors::moving_average(StatError &error , int explanatory_variable 
 
       switch (algorithm) {
 
-      // estimation par moyennage
+      // estimation by averaging
 
       case AVERAGING : {
         local_mean[1] = 0.;
@@ -1981,7 +2023,7 @@ Regression* Vectors::moving_average(StatError &error , int explanatory_variable 
 
         *ppoint++ = local_mean[1] / norm;
 
-        // calcul de la matrice de lissage
+        // computation of the smoother matrix
 
         for (j = 0;j < vec->marginal_distribution[0]->frequency[i];j++) {
           for (k = min_index;k <= max_index;k++) {
@@ -1991,7 +2033,7 @@ Regression* Vectors::moving_average(StatError &error , int explanatory_variable 
         break;
       }
 
-      // estimation au sens des moindres carres
+      // least-square estimation
 
       case LEAST_SQUARES : {
         local_mean[0] = 0.;
@@ -2052,7 +2094,7 @@ Regression* Vectors::moving_average(StatError &error , int explanatory_variable 
 
         *ppoint++ = local_mean[1] + (i - local_mean[0]) * local_covariance / local_variance;
 
-        // calcul de la matrice de lissage
+        // computation of the smoother matrix
 
         for (j = 0;j < vec->marginal_distribution[0]->frequency[i];j++) {
           for (k = min_index;k <= max_index;k++) {
@@ -2069,7 +2111,7 @@ Regression* Vectors::moving_average(StatError &error , int explanatory_variable 
     cout << endl;
 #   endif
 
-    // calcul du nombre de degrees de libertes
+    // computation of the equivalent degrees of freedom
 
     regression->regression_df = 0.;
     regression->residual_df = nb_vector;
@@ -2082,7 +2124,7 @@ Regression* Vectors::moving_average(StatError &error , int explanatory_variable 
       }
     }
 
-    // calcul des residus
+    // computation of residuals
 
     regression->residual_computation();
 
@@ -2100,15 +2142,19 @@ Regression* Vectors::moving_average(StatError &error , int explanatory_variable 
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Nonparametric moving-average regression.
  *
- *  Regression non-parametrique de type moyenne mobile.
+ *  \param[in]  error                reference on a StatError object,
+ *  \param[in]  explanatory_variable explanatory variable index,
+ *  \param[in]  response_variable    response variable index,
+ *  \param[in]  dist                 symmetric distribution,
+ *  \param[in]  algorithm            response computation: AVERAGING/LEAST_SQUARES,
  *
- *  arguments : reference sur un objet StatError, indices des variables
- *              explicative et expliquee, loi symmetrique,
- *              calcul de la reponse : AVERAGING/LEAST_SQUARES.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] regression           nonparametric regression.
+ */
+/*--------------------------------------------------------------*/
 
 Regression* Vectors::moving_average(StatError &error , int explanatory_variable ,
                                     int response_variable , const Distribution &dist ,
@@ -2144,15 +2190,19 @@ Regression* Vectors::moving_average(StatError &error , int explanatory_variable 
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Nonparametric k-nearest-neighbor regression.
  *
- *  Regression non-parametrique de type plus proches voisins.
+ *  \param[in]  error                reference on a StatError object,
+ *  \param[in]  explanatory_variable explanatory variable index,
+ *  \param[in]  response_variable    response variable index,
+ *  \param[in]  span                 neighboring proportion with respect to the sample size,
+ *  \param[in]  weighting            flag neighbor weighting,
  *
- *  arguments : reference sur un objet StatError, indices des variables
- *              explicative et expliquee, proportion du voisinage par rapport
- *              a la taille de l'echantillon, ponderation des voisins ou non.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] regression           nonparametric regression.
+ */
+/*--------------------------------------------------------------*/
 
 Regression* Vectors::nearest_neighbor_smoother(StatError &error , int explanatory_variable ,
                                                int response_variable , double span ,
@@ -2227,7 +2277,7 @@ Regression* Vectors::nearest_neighbor_smoother(StatError &error , int explanator
       }
     }
 
-    // calcul d'un ordre sur les vecteurs a partir des valeurs prises par la variable explicative
+    // Sort of the individuals by increasing explanatory values
 
     index = vec->order_computation(0);
 
@@ -2247,12 +2297,12 @@ Regression* Vectors::nearest_neighbor_smoother(StatError &error , int explanator
     ppoint = regression->point;
     for (i = regression->min_value;i <= regression->max_value;i++) {
 
-      // recherche des plus proches voisins
+      // determination of the nearest neighbor
 
       min_index = I_DEFAULT;
       do {
 
-        // recherche de la valeur la plus proche courante
+        // determination of the current nearest value
 
         if (min_index == I_DEFAULT) {
           min_index = 0;
@@ -2301,7 +2351,7 @@ Regression* Vectors::nearest_neighbor_smoother(StatError &error , int explanator
           }
         }
 
-        // recherche des vecteurs prenant la valeur la plus proche courante
+        // selection of the individuals taking the current nearest value
 
         if (!greater) {
           value = vec->int_vector[index[min_index]][0];
@@ -2334,7 +2384,7 @@ Regression* Vectors::nearest_neighbor_smoother(StatError &error , int explanator
         }
       }
 
-      // estimation au sens des moindres carres
+      // least-square estimation
 
       local_mean[0] = 0.;
       local_mean[1] = 0.;
@@ -2417,7 +2467,7 @@ Regression* Vectors::nearest_neighbor_smoother(StatError &error , int explanator
 
       *ppoint++ = local_mean[1] + (i - local_mean[0]) * local_covariance / local_variance;
 
-      // calcul de la matrice de lissage
+      // computation of the smoother matrix
 
       for (j = 0;j < frequency;j++) {
         for (k = min_index;k <= max_index;k++) {
@@ -2429,7 +2479,7 @@ Regression* Vectors::nearest_neighbor_smoother(StatError &error , int explanator
 
     if (status) {
 
-      // calcul du nombre de degrees de libertes
+      // computation of the equivalent degrees of freedom
 
       regression->regression_df = 0.;
       regression->residual_df = nb_vector;
@@ -2443,7 +2493,7 @@ Regression* Vectors::nearest_neighbor_smoother(StatError &error , int explanator
       }
 
 #     ifdef DEBUG
-/*      cout << "\nmatrice de lissage" << endl;
+/*      cout << "\nsmoother matrix" << endl;
       for (i = 0;i < nb_vector;i++) {
         cout << vec->int_vector[index[i]][0] << " ";
       }
@@ -2456,7 +2506,7 @@ Regression* Vectors::nearest_neighbor_smoother(StatError &error , int explanator
       } */
 #     endif
 
-      // calcul des residus
+      // computation of residuals
 
       regression->residual_computation();
     }

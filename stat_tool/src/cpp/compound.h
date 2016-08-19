@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -50,33 +50,33 @@ namespace stat_tool {
 
 /****************************************************************
  *
- *  Constantes :
+ *  Constants
  */
 
 
-  const double COMPOUND_THRESHOLD = 0.99999;  // seuil sur la fonction de repartition
-                                              // pour borner une loi
+  const double COMPOUND_THRESHOLD = 0.99999;  // threshold on the cumulative distribution function
+                                              // for determining the support upper bound
 
-  const double COMPOUND_INIT_PROBABILITY = 0.001;  // seuil pour l'initialisation de la probabilite
-  const double COMPOUND_LIKELIHOOD_DIFF = 1.e-5;  // seuil pour stopper les iterations EM
-  const int COMPOUND_NB_ITER = 10000;    // nombre maximum d'iterations EM
-  const double COMPOUND_DIFFERENCE_WEIGHT = 0.5;  // poids par defaut de la penalisation
-                                                  // (cas des differences 1ere ou 2nde)
-  const double COMPOUND_ENTROPY_WEIGHT = 0.1;  // poids par defaut de la penalisation (cas de l'entropie)
-  const int COMPOUND_COEFF = 10;         // coefficient arrondi estimateur
+  const double COMPOUND_INIT_PROBABILITY = 0.001;  // threshold for probability initialization
+  const double COMPOUND_LIKELIHOOD_DIFF = 1.e-5;  // threshold for stopping EM iterations
+  const int COMPOUND_NB_ITER = 10000;    // maximum number of EM iterations
+  const double COMPOUND_DIFFERENCE_WEIGHT = 0.5;  // default weight of the penalty
+                                                  // (first- or 2nd-order difference cases)
+  const double COMPOUND_ENTROPY_WEIGHT = 0.1;  // default weight of the penalty (entropy case)
+  const int COMPOUND_COEFF = 10;         // rounding coefficient for the estimator
 
 
 
 /****************************************************************
  *
- *  Definition des classes :
+ *  Class definition
  */
 
 
   class CompoundData;
 
 
-  class Compound : public StatInterface , public Distribution {  // loi composee
+  class Compound : public StatInterface , public Distribution {  // compound distribution
 
     friend class FrequencyDistribution;
     friend class CompoundData;
@@ -86,9 +86,9 @@ namespace stat_tool {
 
   private :
 
-    CompoundData *compound_data;  // pointeur sur un objet CompoundData
-    DiscreteParametric *sum_distribution;  // loi de la somme
-    DiscreteParametric *distribution;  // loi elementaire
+    CompoundData *compound_data;  // pointer on a CompoundData object
+    DiscreteParametric *sum_distribution;  // sum distribution
+    DiscreteParametric *distribution;  // basis distribution
 
     void copy(const Compound &compound , bool data_flag = true);
 
@@ -134,7 +134,7 @@ namespace stat_tool {
                      bool sum_flag = true , bool dist_flag = true);
     CompoundData* simulation(StatError &error , int nb_element) const;
 
-    // acces membres de la classe
+    // class member access
 
     CompoundData* get_compound_data() const { return compound_data; }
     DiscreteParametric* get_sum_distribution() const { return sum_distribution; }
@@ -143,8 +143,8 @@ namespace stat_tool {
 
 
 
-  class CompoundData : public StatInterface , public FrequencyDistribution {  // structure de donnees correspondant
-                                                                              // a une loi composee
+  class CompoundData : public StatInterface , public FrequencyDistribution {  // data structure corresponding to
+                                                                              // a compound distribution
     friend class FrequencyDistribution;
     friend class Compound;
 
@@ -153,9 +153,9 @@ namespace stat_tool {
 
   private :
 
-    Compound *compound;     // pointeur sur un objet Compound
-    FrequencyDistribution *sum_frequency_distribution;   // loi empirique de la somme
-    FrequencyDistribution *frequency_distribution;   // loi empirique elementaire
+    Compound *compound;     // pointer on a Compound object
+    FrequencyDistribution *sum_frequency_distribution;   // sum frequency distribution
+    FrequencyDistribution *frequency_distribution;   // basis frequency distribution
 
     void copy(const CompoundData &compound_histo , bool model_flag = true);
 
@@ -179,7 +179,7 @@ namespace stat_tool {
     bool plot_write(StatError &error , const char *prefix , const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
-    // acces membres de la classe
+    // class member access
 
     Compound* get_compound() const { return compound; }
     FrequencyDistribution* get_sum_frequency_distribution() const { return sum_frequency_distribution; }

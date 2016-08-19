@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -45,11 +45,11 @@ namespace stat_tool {
 
 
 
-/*--------------------------------------------------------------*
- *
- *  Constructeur par defaut d'un objet ChainReestimation.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Default constructor of a ChainReestimation object.
+ */
+/*--------------------------------------------------------------*/
 
 template <typename Type>
 ChainReestimation<Type>::ChainReestimation()
@@ -64,11 +64,11 @@ ChainReestimation<Type>::ChainReestimation()
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Initialisation d'un objet ChainReestimation.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Initialization of a ChainReestimation object.
+ */
+/*--------------------------------------------------------------*/
 
 template <typename Type>
 void ChainReestimation<Type>::init()
@@ -91,14 +91,16 @@ void ChainReestimation<Type>::init()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the ChainReestimation class.
  *
- *  Constructeur de la classe ChainReestimation.
- *
- *  arguments : type, nombre d'etats, nombre de lignes de la matrice
- *              des probabilites de transition, flag initialisation.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] itype     type,
+ *  \param[in] inb_state number of states,
+ *  \param[in] inb_row   number of rows of the transition probability matrix,
+ *  \param[in] init_flag flag initialization.
+ */
+/*--------------------------------------------------------------*/
 
 template <typename Type>
 ChainReestimation<Type>::ChainReestimation(process_type itype , int inb_state ,
@@ -132,13 +134,13 @@ ChainReestimation<Type>::ChainReestimation(process_type itype , int inb_state ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Copy of a ChainReestimation object.
  *
- *  Copie d'un objet ChainReestimation.
- *
- *  argument : reference sur un objet ChainReestimation.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] chain_data reference on a ChainReestimation object.
+ */
+/*--------------------------------------------------------------*/
 
 template <typename Type>
 void ChainReestimation<Type>::copy(const ChainReestimation<Type> &chain_data)
@@ -186,11 +188,11 @@ void ChainReestimation<Type>::copy(const ChainReestimation<Type> &chain_data)
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Destruction des champs d'un objet ChainReestimation.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Destruction of the data members of a ChainReestimation object.
+ */
+/*--------------------------------------------------------------*/
 
 template <typename Type>
 void ChainReestimation<Type>::remove()
@@ -209,11 +211,11 @@ void ChainReestimation<Type>::remove()
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Destructeur de la classe ChainReestimation.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Destructor of the ChainReestimation class.
+ */
+/*--------------------------------------------------------------*/
 
 template <typename Type>
 ChainReestimation<Type>::~ChainReestimation()
@@ -223,13 +225,15 @@ ChainReestimation<Type>::~ChainReestimation()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Assignment operator of the ChainReestimation class.
  *
- *  Operateur d'assignement de la classe ChainReestimation.
+ *  \param[in]  chain_data reference on a ChainReestimation object,
  *
- *  argument : reference sur un objet ChainReestimation.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] this       ChainReestimation object.
+ */
+/*--------------------------------------------------------------*/
 
 template <typename Type>
 ChainReestimation<Type>& ChainReestimation<Type>::operator=(const ChainReestimation<Type> &chain_data)
@@ -244,13 +248,13 @@ ChainReestimation<Type>& ChainReestimation<Type>::operator=(const ChainReestimat
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a ChainReestimation object.
  *
- *  Visualisation d'un objet ChainReestimation.
- *
- *  argument : stream.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os stream.
+ */
+/*--------------------------------------------------------------*/
 
 template <typename Type>
 ostream& ChainReestimation<Type>::print(ostream &os) const

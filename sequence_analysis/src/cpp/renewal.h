@@ -350,6 +350,7 @@ namespace sequence_analysis {
     ~TimeEvents();
     TimeEvents& operator=(const TimeEvents &timev);
 
+    TimeEvents* merge(int nb_sample , const std::vector<TimeEvents> itimev) const;
     stat_tool::DiscreteDistributionData* extract(stat_tool::StatError &error ,
                                                  renewal_distribution histo_type ,
                                                  int itime = stat_tool::I_DEFAULT) const;
@@ -448,6 +449,7 @@ namespace sequence_analysis {
     RenewalData& operator=(const RenewalData&);
 
     RenewalData* merge(stat_tool::StatError &error , int nb_sample , const RenewalData **itimev) const;
+    RenewalData* merge(stat_tool::StatError &error , int nb_sample , const std::vector<RenewalData> itimev) const;
     stat_tool::DiscreteDistributionData* extract(stat_tool::StatError &error ,
                                                  renewal_distribution histo_type ,
                                                  int itime = stat_tool::I_DEFAULT) const;

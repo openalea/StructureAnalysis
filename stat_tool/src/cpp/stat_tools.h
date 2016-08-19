@@ -191,7 +191,9 @@ namespace stat_tool {
     ICLc ,
     mBIC ,
     LIKELIHOOD_SLOPE ,
-    SEGMENTATION_LIKELIHOOD_SLOPE
+    DIMENSION_JUMP ,
+    SEGMENTATION_LIKELIHOOD_SLOPE ,
+    SEGMENTATION_DIMENSION_JUMP
   };
 
   enum error_type {
@@ -242,10 +244,13 @@ namespace stat_tool {
   const double RENEWAL_ENTROPY_WEIGHT = 0.05;  // poids par defaut de la penalisation (cas de l'entropie)
   const double MAX_VALUE_COEFF = 10.;    // coefficient pour deduire la valeur maximum de la loi inter-evenement
 
+  const double CONTINUOUS_POSITIVE_INF_BOUND = 1.e-12; // inf bound of positive continous distribution support (bug boost C++)
+
   const double GAMMA_TAIL = 1.e-3;       // traine de la loi Gamma
   const int GAMMA_NB_STEP = 1000;        // nombre de pas pour le calcul de la loi Gamma
   const int GAMMA_NB_SUB_STEP = 10;      // nombre de pas pour le calcul de la loi Gamma
 //  const int GAMMA_MIN_MEAN = 0.1;        // moyenne minimum de la loi gamma
+  const double GAMMA_INVERSE_SAMPLE_SIZE_FACTOR = 5.;  // factor for the gamma distribution corrected moment estimator
   const double GAMMA_MIN_SHAPE_PARAMETER = 0.1;  // parametre de forme minimum de la loi gamma
   const double GAMMA_DEFAULT_SCALE_PARAMETER = 1;  // parametre d'echelle par defaut de la loi gamma
   const double GAMMA_ZERO_FREQUENCY_THRESHOLD = 0.999;  // seuil sur la frequence relative de 0
@@ -761,6 +766,8 @@ namespace stat_tool {
     double likelihood_computation(const ContinuousParametric &dist ,
                                   int min_interval = I_DEFAULT) const;
 
+    DiscreteDistributionData* merge(int nb_histo , std::vector<FrequencyDistribution> ihisto) const;
+
     void shift(const FrequencyDistribution &histo , int shift_param);
     void cluster(const FrequencyDistribution &histo , int step , rounding mode);
 
@@ -768,7 +775,9 @@ namespace stat_tool {
     DiscreteDistributionData* cluster(StatError &error , int step , rounding mode = FLOOR) const;
     DiscreteDistributionData* cluster(StatError &error , double ratio , std::ostream &os) const;
     DiscreteDistributionData* cluster(StatError &error , int nb_class , int *ilimit) const;
-    DiscreteDistributionData* transcode(StatError &error , int *icategory) const;
+    DiscreteDistributionData* cluster(StatError &error , int nb_class , std::vector<int> ilimit) const;
+    DiscreteDistributionData* transcode(StatError &error , int *category) const;
+    DiscreteDistributionData* transcode(StatError &error , std::vector<int> category) const;
     DiscreteDistributionData* value_select(StatError &error , int min_value ,
                                            int max_value , bool keep = true) const;
 
@@ -790,6 +799,9 @@ namespace stat_tool {
 
     bool comparison(StatError &error , std::ostream &os , int nb_histo ,
                     const FrequencyDistribution **ihisto , variable_type type ,
+                    const std::string path = NULL , output_format format = ASCII) const;
+    bool comparison(StatError &error , std::ostream &os , int nb_histo ,
+                    const std::vector<FrequencyDistribution> ihisto , variable_type type ,
                     const std::string path = NULL , output_format format = ASCII) const;
 
     void F_comparison(std::ostream &os , const FrequencyDistribution &histo) const;
@@ -815,8 +827,16 @@ namespace stat_tool {
     DiscreteMixture* discrete_mixture_estimation(StatError &error , int nb_component , discrete_parametric *ident ,
                                                  int min_inf_bound = 0 , bool mixt_flag = true ,
                                                  bool component_flag = true , double weight_step = 0.1) const;
+    DiscreteMixture* discrete_mixture_estimation(StatError &error , int nb_component , std::vector<discrete_parametric> ident ,
+                                                 int min_inf_bound = 0 , bool mixt_flag = true ,
+                                                 bool component_flag = true , double weight_step = 0.1) const;
     DiscreteMixture* discrete_mixture_estimation(StatError &error , std::ostream &os , int min_nb_component ,
                                                  int max_nb_component , discrete_parametric *ident , int min_inf_bound = 0 ,
+                                                 bool mixt_flag = true , bool component_flag = true ,
+                                                 model_selection_criterion criterion = BICc ,
+                                                 double weight_step = 0.1) const;
+    DiscreteMixture* discrete_mixture_estimation(StatError &error , std::ostream &os , int min_nb_component ,
+                                                 int max_nb_component , std::vector<discrete_parametric> ident , int min_inf_bound = 0 ,
                                                  bool mixt_flag = true , bool component_flag = true ,
                                                  model_selection_criterion criterion = BICc ,
                                                  double weight_step = 0.1) const;
@@ -879,25 +899,25 @@ namespace stat_tool {
 
     continuous_parametric ident;  // identificateur
     union {
-      double shape;         // parametre de forme (GAMMA, ZERO_INFLATED_GAMMA)
-      double location;      // moyenne (GAUSSIAN, INVERSE_GAUSSIAN), direction moyenne (VON_MISES),
+      double shape;         // shape parameter (GAMMA, ZERO_INFLATED_GAMMA)
+      double location;      // mean (GAUSSIAN, INVERSE_GAUSSIAN), mean direction (VON_MISES),
       double intercept;     // LINEAR_MODEL
     };
     union {
-      double scale;         // parametre d'echelle (GAMMA, INVERSE_GAUSSIAN, ZERO_INFLATED_GAMMA)
-      double dispersion;    // ecart-type (GAUSSIAN), concentration (VON_MISES),
+      double scale;         // scale parameter (GAMMA, INVERSE_GAUSSIAN, ZERO_INFLATED_GAMMA)
+      double dispersion;    // standard deviation (GAUSSIAN), concentration (VON_MISES),
     };
     union {
-      double zero_probability;  // probabilite pour 0 (ZERO_INFLATED_GAMMA)
+      double zero_probability;  // zero probability (ZERO_INFLATED_GAMMA)
       double slope;           // LINEAR_MODEL
     };
-    double min_value;       // valeur minimum
-    double max_value;       // valeur maximum
-    angle_unit unit;        // unite (degre/radian) pour la loi de von Mises
+    double min_value;       // minimum value
+    double max_value;       // maximum value
+    angle_unit unit;        // unit (degree/radian) for the von Mises distribution
     double slope_standard_deviation;  // LINEAR_MODEL
     double sample_size;     // LINEAR_MODEL
     double correlation;     // LINEAR_MODEL
-    double *cumul;          // fonction de repartition (loi de von Mises)
+    double *cumul;          // cumulative distribution function (von Mises distribution)
 
     void copy(const ContinuousParametric &dist);
 
@@ -956,8 +976,8 @@ namespace stat_tool {
   public :
 
     int nb_element;         // effectif total
-    int nb_category;        // nombre de categories
-    double step;            // pas de regroupement
+    int nb_bin;             // number of bins
+    double bin_width;       // pas de regroupement
     int max;                // frequence maximum
     int *frequency;         // frequences
     int type;               // type de la variable (INT_VALUE/REAL_VALUE)
@@ -966,7 +986,7 @@ namespace stat_tool {
 
     void copy(const Histogram &histo);
 
-    Histogram(int inb_category = 0 , bool init_flag = true);
+    Histogram(int inb_bin = 0 , bool init_flag = true);
     Histogram(const FrequencyDistribution &histo);
     Histogram(const Histogram &histo)
     { copy(histo); }

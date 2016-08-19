@@ -89,7 +89,7 @@ namespace sequence_analysis {
     int end_state() const;
 
     void forward_backward(SemiMarkovData &seq) const;
-    double forward_backward(const MarkovianSequences &seq , int index , std::ostream *os ,
+    double forward_backward(MarkovianSequences &seq , int index , std::ostream *os ,
                             stat_tool::MultiPlotSet *plot_set ,
                             state_profile output , stat_tool::output_format format ,
                             double &max_marginal_entropy , double &entropy1) const;

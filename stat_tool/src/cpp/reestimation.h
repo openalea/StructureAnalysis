@@ -51,17 +51,15 @@ namespace stat_tool {
 
 /****************************************************************
  *
- *  Constantes :
+ *  Constants
  */
 
 
-  const double CUMUL_THRESHOLD = 0.999;  // seuil sur la fonction de repartition
-                                         // pour borner une loi
+  const double CUMUL_THRESHOLD = 0.999;  // threshold on the cumulative distribution function
+                                         // to determine an upper bound of the support
 
-  const double BISECTION_RATIO_THRESHOLD = 1.e-8;  // seuil pour stopper la recherche
-                                                   // par bissection d'intervalle
-  const int BISECTION_NB_ITER = 100;     // nombre d'iterations maximum pour la methode
-                                         // de bissection d'intervalle
+  const double BISECTION_RATIO_THRESHOLD = 1.e-8;  // threshold for stopping the interval bisection method
+  const int BISECTION_NB_ITER = 100;     // maximum number of iterations for the interval bisection method
 
   enum penalty_type {
     FIRST_DIFFERENCE ,
@@ -78,7 +76,7 @@ namespace stat_tool {
 
 /****************************************************************
  *
- *  Definition de la classe :
+ *  Class definition
  */
 
 
@@ -88,23 +86,23 @@ namespace stat_tool {
 
 
   template <typename Type>
-  class Reestimation {    // loi empirique a frequences entieres ou reelles (estimateur EM)
+  class Reestimation {    // frequency distribution with integer or real (for EM estimators) frequencies
 
     friend std::ostream& operator<<(std::ostream &os , const Reestimation<Type> &histo)
     { return histo.print(os); }
 
   public :
 
-    int nb_value;           // nombre de valeurs a partir de 0
-    int alloc_nb_value;     // nombre de valeurs alloues
-    int offset;             // nombre de valeurs de frequence nulle a partir de 0
+    int nb_value;           // number of values from 0
+    int alloc_nb_value;     // number of allocated values
+    int offset;             // number of values of null frequencies from 0
     /// sample size
-    Type nb_element;        // effectif total
+    Type nb_element;        // sample size
     /// maximal frequency
-    Type max;               // frequence maximum
-    double mean;            // moyenne
+    Type max;               // maximum frequency
+    double mean;            // mean
     double variance;        // variance
-    Type *frequency;        // frequence de chacune des valeurs
+    Type *frequency;        // frequencies for each value
 
     void init(int inb_value);
     void copy(const Reestimation<Type> &histo);
@@ -153,7 +151,7 @@ namespace stat_tool {
     double type_parametric_estimation(DiscreteParametric *pdist , int min_inf_bound = 0 , bool min_inf_bound_flag = true ,
                                       double cumul_threshold = CUMUL_THRESHOLD) const;
 
-    DiscreteParametric* type_parametric_estimation(int min_inf_bound = 0 , bool flag = true ,
+    DiscreteParametric* type_parametric_estimation(int min_inf_bound = 0 , bool min_inf_bound_flag = true ,
                                                    double cumul_threshold = CUMUL_THRESHOLD) const;
 
     void equilibrium_process_combination(const Reestimation<Type> *length_bias_reestim , double imean);

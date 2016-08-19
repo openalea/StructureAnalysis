@@ -1006,7 +1006,7 @@ Sequences::Sequences(const Sequences &seq , int inb_sequence , int *index)
         build_marginal_frequency_distribution(i);
       }
       else {
-        build_marginal_histogram(i , seq.marginal_histogram[i]->step);
+        build_marginal_histogram(i , seq.marginal_histogram[i]->bin_width);
       }
     }
   }

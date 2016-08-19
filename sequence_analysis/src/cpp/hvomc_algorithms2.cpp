@@ -1116,7 +1116,7 @@ void Sequences::entropy_profile_plotable_write(MultiPlot &plot , int index ,
  *
  *--------------------------------------------------------------*/
 
-double HiddenVariableOrderMarkov::forward_backward(const MarkovianSequences &seq , int index ,
+double HiddenVariableOrderMarkov::forward_backward(MarkovianSequences &seq , int index ,
                                                    ostream *os , MultiPlotSet *plot_set ,
                                                    output_format format , double &max_marginal_entropy ,
                                                    double &entropy1) const
@@ -1792,6 +1792,10 @@ double HiddenVariableOrderMarkov::forward_backward(const MarkovianSequences &seq
 
       pstate++;
     }
+
+    seq.min_value[0] = 0;
+    seq.max_value[0] = nb_state - 1;
+    seq.build_marginal_frequency_distribution(0);
 
     state_seq_likelihood = VariableOrderMarkov::likelihood_computation(seq , index);
 
