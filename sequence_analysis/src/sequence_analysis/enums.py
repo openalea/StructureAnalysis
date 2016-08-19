@@ -145,7 +145,6 @@ model_type = {
               "Gaussian": ChangeType.GAUSSIAN_CHANGE,
               "Mean": ChangeType.MEAN_CHANGE,
               "Variance": ChangeType.VARIANCE_CHANGE,
-              "MeanVariance": ChangeType.MEAN_VARIANCE_CHANGE
               }
 
 # todo:: ckean the 2 next enums ?

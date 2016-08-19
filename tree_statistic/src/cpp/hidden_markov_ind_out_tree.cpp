@@ -82,11 +82,11 @@ HiddenMarkovIndOutTree::HiddenMarkovIndOutTree()
  *
  **/
 
-HiddenMarkovIndOutTree::HiddenMarkovIndOutTree(char itype, int inb_state,
-                                         int inb_ioutputprocess,
-                                         int inb_doutputprocess,
-                                         int* nb_value,
-                                         bool* force_param)
+HiddenMarkovIndOutTree::HiddenMarkovIndOutTree(process_type itype, int inb_state,
+                                               int inb_ioutputprocess,
+                                               int inb_doutputprocess,
+                                               int* nb_value,
+                                               bool* force_param)
  : HiddenMarkovTree(itype, inb_state, 1, inb_ioutputprocess,
                     inb_doutputprocess, nb_value, force_param)
 {}

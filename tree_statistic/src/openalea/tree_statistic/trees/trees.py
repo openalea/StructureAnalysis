@@ -1163,6 +1163,7 @@ class Trees(object):
         self.__tree_to_mtg_vid = None
         self.__tree_to_mtg_tid = None
         self.__mtg_to_tree_tid = None
+        self.__mtg = None        
         self.__attributes = []
         if issubclass(arg.__class__, Trees):
             # arg is supposed to be a Trees object...
@@ -1204,17 +1205,10 @@ class Trees(object):
             nbmtg=0     # number of MTG ComponentRoots
             nbtrees=0   # number of trees
             no_scale=(scale is None)
-            import openalea.aml as amlPy
-            mode=False
-            if not amlPy.getmode():
-            # conversion from AML object to Python
-                mode=True
-                amlPy.setmode(1)
-            try:
-                mtg_file=file(arg, 'r')
-            except IOError, msg:
-                raise IOError, msg
-            M=amlPy.MTG(arg)
+            import openalea.mtg as mtg
+            M=mtg.MTG(arg)
+            self.__mtg = M
+            mtg_file=file(arg, 'r')
             # reading the MTG header
             nbfloat=0
             nbint=0
@@ -1234,11 +1228,6 @@ class Trees(object):
             while ((mtg_code.upper().find("DESCRIPTION")==-1) and
                     not mtg_code.isspace()):
                 words=mtg_code.split()
-                if no_scale:
-                # scale should not be modified if given by user
-                    try:
-                        scale=int(words[1])
-                    except ValueError: pass
                 mtg_code=mtg_file.readline()
             # same procedure for keyword "FEATURES"
             found=False
@@ -1287,13 +1276,16 @@ class Trees(object):
                     attribute_names=feature_names
                 attribute_def=[]
                 for name in attribute_names:
-                    attribute_def.append(lambda x,y=name: amlPy.Feature(x,y))
+                    # string generating the function
+                    attr_code="lambda x,g=M: g.node(x)."+name
+                    attribute_def.append(eval(attr_code))
                 self.__types=feature_types
-            elif attribute_names is None:
-                # only attribute_def is given
-                attribute_names=[]
-                for var in range(len(attribute_def)):
-                    attribute_names.append("Variable"+str(var))
+            # code below transferred to mtg.treestats.extract_trees
+            #elif attribute_names is None:
+                ## only attribute_def is given
+                #attribute_names=[]
+                #for var in range(len(attribute_def)):
+                    #attribute_names.append("Variable"+str(var))
             else:
                 # both attribute_def and attribute_name are given
                 index=0
@@ -1316,101 +1308,64 @@ class Trees(object):
                     index+=1                    
             if arg2 is None:
             # default filter: accept all vertices
-                arg2=lambda x: True
-            elif not callable(arg2):
+                filt=lambda x: True
+            elif callable(arg2):
+            # filtered vertices should have filtered descendants
+                def filt(x, g=M):
+                    val = arg2(x)
+                    msg = "Bad filter type at vertex " + str(x) + ": "
+                    if type(val) != bool:
+                        raise TypeError, msg+str(type(val))
+                    if val:
+                        return True
+                    else:
+                        msg="Filter should discard every descendant of vertex "
+                        f=[arg2(d) for d in g.Descendants(x)]
+                        if any(f):
+                            raise IndexError, msg+str(x)
+                        else:
+                            return False
+            else:
                 msg="bad type for filtering function: expecting a callable"
                 raise TypeError, msg
-            croots=amlPy.ComponentRoots(amlPy.MTGRoot(), Scale=scale)
+            if no_scale:
+            # scale should not be modified if given by user
+                scale=len(M.scales())-1
+            assert(scale > 1)
+            croots=M.component_roots_at_scale(M.root,scale)
             v0=croots[0]
-            tree_list=[]
-            for v in croots:
-                # roots at given scale. Each value of v represents a new tree.
-                nbmtg+=1
-                if ((len(self.__types)==0) and (v0==v)):
-                    # determine the type of each variable if necessary
-                    values=[attr(v) for attr in attribute_def]
-                    index=0
-                    for val in values:
-                        if type(val)==int:
-                            self.__types.append(VariableType.INT_VALUE)
-                            nbint+=1
-                        elif type(val)==float:
-                            self.__types.append(VariableType.REAL_VALUE)
-                            nbfloat+=1
-                        else:
-                            msg="bad result type for function defining attribute "\
-                                +str(index)+": expecting types 'int' or 'float'"
-                            raise TypeError, msg
-                        index+=1
-                if (v0==v):
-                    # build a list of typical values
-                    typical_values=[]
-                    for t in self.__types:
-                        if ((t==VariableType.INT_VALUE) or 
-                            (t==VariableType.STATE)):
-                            typical_values.append(0)
-                        else:
-                            typical_values.append(0.)
-                mtg2tree_vertices={}
-                # dictionnary vid(mtg)->vid(Tree)
-                mtgvertices=amlPy.Descendants(v) # warning : contains v !
-                current_tree=ctree.CTree(nbint, nbfloat, 0, 0)
-                for x in mtgvertices:
-                    if arg2(x):
-                        values=[attr(x) for attr in attribute_def]
-                        typecheck=[((type(val)==int) or (type(val)==float))
-                                   for val in values]
-                        if typecheck.count(0) > 0:
-                            # at least one element of values has incorrect type
-                            msg="bad type for attributes of vertex "\
-                                +str(x)+": expecting types 'int' or 'float'"
-                            raise TypeError, msg                     
-                        mtg2tree_vertices[x]= \
-                            current_tree.AddVertex(ctree.TreeValue(values))
-                        if ((x != v) and mtg2tree_vertices.has_key(amlPy.Father(x))):
-                            edgetype=amlPy.EdgeType(amlPy.Father(x), x)
-                            if edgetype=='+':
-                                btype=False
-                            elif edgetype=='<':
-                                btype=True
-                            elif type(edgetype)==str:
-                                msg="Bad value for edge type: " + edgetype
-                                raise ValueError, msg
-                            else:
-                                msg="Bad type for edge type: " + str(type(edgetype))
-                                raise TypeError, msg
-                            current_tree.AddEdge(mtg2tree_vertices[amlPy.Father(x)],
-                                                 mtg2tree_vertices[x], btype)
-                        elif (x != v):
-                            # the father of x has been filtered but x has not
-                            msg="father of vertex "+str(x)+" has been deleted by " \
-                                "filter but vertex "+str(x)+" has not"
-                            raise IndexError, msg
-                if current_tree.Size() > 0:
-                    tree_list.append(Tree(typical_values, current_tree))
-                    nbtrees+=1
-                    self.__tree_to_mtg_tid[nbtrees-1]=v # nbmtg-1
-                    # conversion of the MTG vid to Trees vid and vice versa
-                    self.__mtg_to_tree_vid.append(mtg2tree_vertices)
-                    tree2mtg_vertices={}
-                    for key in mtg2tree_vertices.keys():
-                        tree2mtg_vertices[mtg2tree_vertices[key]]=key
-                    self.__tree_to_mtg_vid.append(tree2mtg_vertices)            
-            if len(tree_list) > 0:
-                self.__ctrees=ctrees.CTrees(tree_list)
+            nbmtg=len(croots)
+            if len(self.__types)==0:
+                # determine the type of each variable if necessary
+                values=[attr(v0) for attr in attribute_def]
+                index=0
+                for val in values:
+                    if type(val)==int:
+                        self.__types.append(VariableType.INT_VALUE)
+                        nbint+=1
+                    elif type(val)==float:
+                        self.__types.append(VariableType.REAL_VALUE)
+                        nbfloat+=1
+                    else:
+                        msg="bad result type for function defining attribute "\
+                            +str(index)+": expecting types 'int' or 'float'"
+                        raise TypeError, msg
+                    index+=1
+            if nbmtg > 0:
+                from openalea.mtg.treestats import extract_trees
+                F=extract_trees(M, scale, filt, attribute_def, attribute_names)
+                self.__ctrees=F._ctrees()
             else:
                 raise ValueError, "cannot build an empty Trees object"
             # inversion of table of the tree_to_mtg identifiers
-            for key in self.__tree_to_mtg_tid.keys():
-                self.__mtg_to_tree_tid[self.__tree_to_mtg_tid[key]]=key
+            F._copy_vid_conversion(self)
+            F._copy_tid_conversion(self)            
             if len(self.__types)==0:
                 for val in values:
                     if type(val)==float:
                         self.__types.append(VariableType.INT_VALUE)
                     else:
                         self.__types.append(VariableType.REAL_VALUE)
-            if mode:
-                amlPy.setmode(0)
         else:
             #... or a list of Tree objects
             self.__ctrees=ctrees.CTrees(arg)
@@ -1724,7 +1679,7 @@ class Trees(object):
                 raise ValueError, msg
 
     def Estimate(self, model_name, arg1, arg2=None, arg3=None, arg4=None, 
-                 arg5=None, arg6=None, Algorithm="ForwardBackward", Saem=1., 
+                 arg5=None, arg6=None, Algorithm="Forward", Saem=1., 
                  ForceParametric=[]):
         """Estimate a (hidden) Markov tree.
 
@@ -1751,7 +1706,7 @@ class Trees(object):
                 "Viterbi" or "ForwardBackward"
           * `Counting` (bool) - True
           * `Algorithm` (str) - type of restoration/maximisation algorithm: \
-                "ForwardBackward", "Viterbi", "ForwardBackwardSampling" or "GibbsSampling"
+                "Forward", "Viterbi", "ForwardBackwardSampling" or "GibbsSampling"
           * `Saem` (float) - rate of decay for the weight of restoration in restoration algorithm \
                 (not relevant for "ForwardBackward"). Saem=.0 for pure SEM or CEM algorithms
           * `ForceParametric` (list of bool) - Force the observation distributions or not to remain \
@@ -1786,9 +1741,9 @@ class Trees(object):
                 'Saem, Counting): '\
                 +"type 'str' expected"
                 raise TypeError, msg                
-            if Algorithm.upper() == "FORWARDBACKWARD":
-                algo="FORWARD_BACKWARD"
-                algo="RestorationAlgorithm."+algo.upper()
+            if Algorithm.upper() == "FORWARD":
+                algo="FORWARD"
+                algo="RestorationAlgorithm."+algo
             elif Algorithm.upper() == "FORWARDBACKWARDSAMPLING":
                 algo="FORWARD_BACKWARD_SAMPLING"
                 algo="RestorationAlgorithm."+algo.upper()
@@ -2067,15 +2022,36 @@ class Trees(object):
 
     def MPlot(self, ViewPoint="Data", Length=None, BottomDiameter=None, 
               Color=None, DressingFile=None, Title="", variable=0):
-        """Graphical output using the Geom 3D viewer for Trees 
+        """
+        Graphical output using the Geom 3D viewer for Trees 
            or MultiPlotSet for features.
         
-        Usage:  MPlot(ViewPoint="Data")
-                MPlot("FirstOccurrenceRoot", variable=0)
-        Other possible values for ViewPoint: 
-            FirstOccurrenceLeaves
-            SojournSize
-            Counting"""
+        :Usage:  
+           MPlot(ViewPoint="Data")
+           MPlot("FirstOccurrenceRoot", variable=0)
+
+        :Parameters:
+          `ViewPoint` (str) - type of graphical output
+          `Length` (function) - lambda x: length of cylinder 
+            to plot vertex x
+          `BottomDiameter` (function) - lambda x: bottom diameter 
+            of cylinder to plot vertex x
+          `Color` (function) - lambda x: color of cylinder to use
+            to plot vertex x
+          `DressingFile` (str) - filename of options to use with
+            PlantFrame (default angles, ...)
+          `Title` (str) - title of output figure
+          `variable` (int) - variable number to be plot          
+
+        :Remarks:                        
+          - Possible values for ViewPoint: 
+            Data, FirstOccurrenceRoot, FirstOccurrenceLeaves, SojournSize, 
+            Counting
+          - if ViewPoint == "Data", a plantframe is used to represent each tree
+            in PlantGL. Otherwise an histogram is used to represent some numerical
+            characteristic
+          - Title and variable arguments are used only when ViewPoint != "Data" 
+        """
         if type(ViewPoint)!=str:
             msg='bad type for argument "ViewPoint": '\
               +"type 'str' expected"
@@ -2929,7 +2905,7 @@ class Trees(object):
 
         :Parameters:
 
-          `dict` (trees.Trees) - instance from which dictionaries have to be copied
+          `dest` (trees.Trees) - instance in which dictionaries have to be copied
         """
         if self.__mtg_to_tree_vid is None:
             dest.__mtg_to_tree_vid=None
@@ -2941,7 +2917,7 @@ class Trees(object):
             dest.__tree_to_mtg_vid=list(self.__tree_to_mtg_vid)
 
     def _copy_tid_conversion(self, dest):
-        """Copy the dictionnaries corresponding to the tree -> MTG
+        """Copy the dictionaries corresponding to the tree -> MTG
             and MTG -> tree id conversions
 
         :Usage:
@@ -2950,7 +2926,7 @@ class Trees(object):
 
         :Parameters:
 
-          `dict` (trees.Trees) - instance from which dictionaries have to be copied
+          `dest` (trees.Trees) - instance in which dictionaries have to be copied
         """
         if self.__mtg_to_tree_tid is None:
             dest.__mtg_to_tree_tid=None

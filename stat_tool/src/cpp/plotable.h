@@ -179,7 +179,7 @@ namespace stat_tool {
 
   // Class MultiPlotSet: list of MultiPlot
 
-  class MultiPlotSet
+  template<typename Type> class TemplateMultiPlotSet
   {
     std::vector<MultiPlot> multiplots;
 
@@ -190,13 +190,11 @@ namespace stat_tool {
     int nb_variable;
     std::vector<int> variable_nb_viewpoint;
     std::vector<int> variable;
-    std::vector<process_distribution> viewpoint;
+    std::vector<Type> viewpoint;
 
-    MultiPlotSet(int size = 1)
-    :multiplots(size)
-    {};
+    TemplateMultiPlotSet(int size = 1);
 
-    MultiPlotSet(int size, int inb_variable);
+    TemplateMultiPlotSet(int size, int inb_variable);
 
     MultiPlot& operator[](int index)
     { return multiplots[index]; };
@@ -211,6 +209,9 @@ namespace stat_tool {
     { return multiplots.end(); };
   };
 
+  typedef TemplateMultiPlotSet<process_distribution> MultiPlotSet;
+
+#include "plotable.hpp"
 
 };  // namespace stat_tool
 

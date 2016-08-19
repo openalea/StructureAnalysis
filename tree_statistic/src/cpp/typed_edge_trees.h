@@ -95,7 +95,7 @@ const int PLOT_TITLE_NB_TREES= 15;
  */
 
 /// nature of the characteristic quantities for trees
-enum {
+enum tree_process_distribution {
   FIRST_OCCURRENCE_ROOT ,
   FIRST_OCCURRENCE_LEAVES ,
   SOJOURN_SIZE ,
@@ -103,6 +103,8 @@ enum {
   NB_OCCURRENCES ,
   OBSERVATION
 };
+
+typedef TemplateMultiPlotSet<tree_process_distribution> TreeMultiPlotSet;
 
 /*--------------------------------------------------------------*
  *
@@ -151,15 +153,15 @@ public :
                 int n= 1,
                 const value& default_value= value());
     Typed_edge_int_fl_tree(int inb_integral,
-                int inb_float,
-                key root,
-                int n);
+                           int inb_float,
+                           key root,
+                           int n);
     Typed_edge_int_fl_tree(const Typed_edge_int_fl_tree& tree);
     Typed_edge_int_fl_tree(Unlabelled_typed_edge_tree& utree, const value& default_value= value());
     Typed_edge_int_fl_tree(const Typed_edge_tree<Generic_Int_fl_container>& tree);
     Typed_edge_int_fl_tree(int inb_integral,
-                int inb_float,
-                Unlabelled_typed_edge_tree& utree);
+                           int inb_float,
+                           Unlabelled_typed_edge_tree& utree);
     ~Typed_edge_int_fl_tree();
     Typed_edge_int_fl_tree<Generic_Int_fl_container>&
        operator=(const Typed_edge_int_fl_tree<Generic_Int_fl_container>& tree);
@@ -447,9 +449,9 @@ public :
                          const char * title= NULL) const;
 
     std::ostream& ascii_write(std::ostream& os, bool exhaustive= false) const;
-    bool ascii_write(StatError& error, const char * path,
+    bool ascii_write(StatError& error, const std::string path,
                      bool exhaustive= false) const;
-    bool spreadsheet_write(StatError& error, const char * path) const;
+    bool spreadsheet_write(StatError& error, const std::string path) const;
 
     /** Gnuplot output of \e self*/
     bool plot_write(StatError& error, const char * prefix,

@@ -524,7 +524,7 @@ void CategoricalTreeProcess::init_occupancy(const CategoricalTreeProcess& proces
       absorption[i]= process.absorption[i];
       if (process.sojourn_size[i] != NULL)
          sojourn_size[i]= new stat_tool::Distribution(*(process.sojourn_size[i]),
-                                           'c', occupancy_nb_value);
+                                                     DISTRIBUTION_COPY, occupancy_nb_value);
       else
          sojourn_size[i]= NULL;
    }
@@ -697,10 +697,10 @@ void CategoricalTreeProcess::copy_Distribution_array(stat_tool::Distribution**& 
  *
  **/
 
-ostream& CategoricalTreeProcess::ascii_print(ostream& os, int process, 
-                                             FrequencyDistribution** empirical_observation, 
-                                             const TreeCharacteristics * characteristics, 
-					     bool exhaustive, bool file_flag) const
+ostream& CategoricalTreeProcess::ascii_print(ostream& os, int process,
+                                             FrequencyDistribution** empirical_observation,
+                                             const TreeCharacteristics * characteristics,
+                         bool exhaustive, bool file_flag) const
 
 {
    bool no_characteristic_print = false;
@@ -2533,10 +2533,11 @@ bool CategoricalTreeProcess::plot_print(const char * prefix, const char * title,
  *
  **/
 
-MultiPlotSet* CategoricalTreeProcess::plotable_write(MultiPlotSet &plot, int &index,
-                                                     int process, FrequencyDistribution * const * empirical_observation,
-                                                     const TreeCharacteristics * characteristics,
-                                                     const FrequencyDistribution * hsize) const
+TreeMultiPlotSet* CategoricalTreeProcess::plotable_write(TreeMultiPlotSet &plot, int &index,
+                                                         int process,
+                                                         FrequencyDistribution * const * empirical_observation,
+                                                         const TreeCharacteristics * characteristics,
+                                                         const FrequencyDistribution * hsize) const
 {
    register int val, i, j, var;
    int dist_nb_value;
@@ -2551,7 +2552,7 @@ MultiPlotSet* CategoricalTreeProcess::plotable_write(MultiPlotSet &plot, int &in
       for(val = 0; val < nb_value; val++)
       {
          if ((first_occurrence_root != NULL) && (first_occurrence_root[val] != NULL))
-         {
+        {
             plot.variable[index] = process;
             plot.viewpoint[index] = FIRST_OCCURRENCE_ROOT;
 
@@ -3459,7 +3460,7 @@ HiddenMarkovTree::HiddenMarkovTree()
  *
  **/
 
-HiddenMarkovTree::HiddenMarkovTree(char itype, int inb_state,
+HiddenMarkovTree::HiddenMarkovTree(process_type itype, int inb_state,
                                    int ich_order,
                                    int inb_ioutput_process,
                                    int inb_doutput_process,
@@ -4064,11 +4065,11 @@ ostream& HiddenMarkovTree::ascii_write(ostream& os, bool exhaustive) const
  *
  **/
 
-bool HiddenMarkovTree::ascii_write(StatError& error, const char * path,
+bool HiddenMarkovTree::ascii_write(StatError& error, const string path,
                                    bool exhaustive) const
 {
    bool status;
-   ofstream out_file(path);
+   ofstream out_file(path.c_str());
 
    error.init();
 
@@ -4095,10 +4096,10 @@ bool HiddenMarkovTree::ascii_write(StatError& error, const char * path,
  **/
 
 bool HiddenMarkovTree::spreadsheet_write(StatError& error,
-                                         const char * path) const
+                                         const string path) const
 {
    bool status;
-   ofstream out_file(path);
+   ofstream out_file(path.c_str());
 
 
    error.init();
@@ -4196,7 +4197,7 @@ void HiddenMarkovTree::characteristic_computation(const HiddenMarkovTreeData& tr
 
             state_leave_probability(memory, i);
 
-            if (state_type[i] != 'a')
+            if (stype[i] != 'a')
             {
                if (tree.state_characteristics != NULL)
                   nb_value= tree.state_characteristics->_max_value;
@@ -4251,7 +4252,7 @@ void HiddenMarkovTree::characteristic_computation(const HiddenMarkovTreeData& tr
 
                for (k= 0; k < nb_state; k++)
                   if ((npprocess[i]->observation[k]->mass[j] > 0.) &&
-                     ((state_type[k] != 'a') || (npprocess[i]->observation[k]->mass[j] < 1.)))
+                     ((stype[k] != 'a') || (npprocess[i]->observation[k]->mass[j] < 1.)))
                      break;
 
                if (k < nb_state)
@@ -4619,7 +4620,7 @@ void HiddenMarkovTree::characteristic_computation(int size,
             for(k= 0; k < nb_state; k++)
             {
                if ((npprocess[i]->observation[k]->mass[j] > 0.) &&
-                  ((state_type[k] != 'a') || (npprocess[i]->observation[k]->mass[j] < 1.)))
+                  ((stype[k] != 'a') || (npprocess[i]->observation[k]->mass[j] < 1.)))
                 break;
             }
 
@@ -5826,7 +5827,7 @@ void HiddenMarkovTree::init(bool left_right, double self_transition)
    for(i= 0; i < nb_state; i++)
       accessibility[i]= new bool[nb_state];
 
-   state_type= new char[nb_state];
+   stype= new state_type[nb_state];
 
    switch (left_right)
    {
@@ -5846,7 +5847,7 @@ void HiddenMarkovTree::init(bool left_right, double self_transition)
                accessibility[i][j] = true;
 
             component[0][i]= i;
-            state_type[i]= 'r';
+            stype[i]= RECURRENT;
          }
 
          for(i= 0; i < nb_state; i++)
@@ -5884,9 +5885,9 @@ void HiddenMarkovTree::init(bool left_right, double self_transition)
             component[i][0]= i;
 
             if (i < nb_state - 1)
-               state_type[i]= 't';
+               stype[i]= TRANSIENT;
             else
-               state_type[i] = 'a';
+               stype[i] = ABSORBING;
          }
 
          for(i= 0; i < nb_state-1; i++)
@@ -6581,7 +6582,7 @@ HiddenMarkovTree* Stat_trees::hidden_markov_tree_ascii_read(StatError& error,
    RWLocaleSnapshot locale("en");
    RWCString buffer, token, tree_ident;
    size_t position;
-   char type= 'v';
+   process_type type= DEFAULT_TYPE;
    bool status, lstatus, categorical= false;
    register int i;
    int line, ch_order, nb_state, index, // j, n,
@@ -6640,11 +6641,11 @@ HiddenMarkovTree* Stat_trees::hidden_markov_tree_ascii_read(StatError& error,
                tree_ident= token;
                if (token == STAT_TREES_word[TREESTATW_HIDDEN_MARKOV_IND_OUT_TREE])
                    // || (token == STAT_TREES_word[TREESTATW_HIDDEN_MARKOV_IN_TREE]))
-                  type= 'o';
+                  type= ORDINARY;
                else
                   if (token == STAT_TREES_word[TREESTATW_EQUILIBRIUM_HIDDEN_MARKOV_IND_OUT_TREE])
                       // || (token == STAT_TREES_word[TREESTATW_EQUILIBRIUM_HIDDEN_MARKOV_IN_TREE]))
-                     type= 'e';
+                     type= EQUILIBRIUM;
                   else
                   {
                      status= false;
@@ -6671,16 +6672,16 @@ HiddenMarkovTree* Stat_trees::hidden_markov_tree_ascii_read(StatError& error,
 
       // analysis of the Markov tree format and processing
 
-      if (type != 'v')
+      if (type != DEFAULT_TYPE)
       {
          if ((tree_ident == STAT_TREES_word[TREESTATW_HIDDEN_MARKOV_IND_OUT_TREE]) ||
              (tree_ident == STAT_TREES_word[TREESTATW_EQUILIBRIUM_HIDDEN_MARKOV_IND_OUT_TREE]))
             {
                ch_order= 1;
-               chain= chain_parsing(error, in_file, line, type);
+               chain= Chain::parsing(error, in_file, line, type);
             }
          else
-            chain= chain_parsing(error, in_file, line, type);
+            chain= Chain::parsing(error, in_file, line, type);
 
          if (chain != NULL)
          {
@@ -6890,9 +6891,9 @@ HiddenMarkovTree* Stat_trees::hidden_markov_tree_ascii_read(StatError& error,
 
                         case true :
                         {
-                           np_observation[index-1]= categorical_observation_parsing(error, in_file, line,
-                                                                                    chain->nb_state,
-                                                                                    HIDDEN_MARKOV, true);
+                           np_observation[index-1]= CategoricalProcess::parsing(error, in_file, line,
+                                                                                chain->nb_state,
+                                                                                HIDDEN_MARKOV, true);
                            // ip_observation[index-1]= NULL;
                            if (np_observation[index-1] == NULL)
                               status= false;
@@ -6901,9 +6902,10 @@ HiddenMarkovTree* Stat_trees::hidden_markov_tree_ascii_read(StatError& error,
 
                         case false :
                         {
-                           ip_observation[index-1]= discrete_observation_parsing(error, in_file, line,
-                                                                                 chain->nb_state, HIDDEN_MARKOV,
-                                                                                 cumul_threshold);
+                           ip_observation[index-1]= DiscreteParametricProcess::parsing(error, in_file, line,
+                                                                                       chain->nb_state,
+                                                                                       HIDDEN_MARKOV,
+                                                                                       cumul_threshold);
                            // np_observation[index-1]= NULL;
                            if (ip_observation[index-1] == NULL)
                               status = false;
@@ -8166,7 +8168,7 @@ HiddenMarkovTreeData::get_state_smoothed_hidden_markov_tree_data(int index,
                   new Typed_edge_one_int_tree(*(this->state_trees[t]));
                // default state tree restoration : viterbi algorithm
                // restored state tree must be updated if algorithm == FORWARD_BACKWARD
-               if (algorithm == FORWARD_BACKWARD)
+               if (algorithm == FORWARD)
                {
                   Tree_tie::tie(it, end)= res->state_trees[ti]->vertices();
                   while (it < end)
@@ -8199,7 +8201,7 @@ HiddenMarkovTreeData::get_state_smoothed_hidden_markov_tree_data(int index,
          }
 
 
-         if (algorithm == FORWARD_BACKWARD)
+         if (algorithm == FORWARD)
          {
             this_cp= new HiddenMarkovTreeData(*this, false);
             for(t= 0; t < _nb_trees; t++)
