@@ -574,6 +574,42 @@ void TimeEvents::merge(int nb_sample , const TimeEvents **ptimev)
 
 /*--------------------------------------------------------------*
  *
+ *  Fusion d'objets TimeEvents.
+ *
+ *  argument : nombre d'objets TimeEvents,
+ *             pointeurs sur les objets TimeEvents.
+ *
+ *--------------------------------------------------------------*/
+
+TimeEvents* TimeEvents::merge(int nb_sample , const vector<TimeEvents> itimev) const
+
+{
+  register int i;
+  TimeEvents *timev;
+  const TimeEvents **ptimev;
+
+
+  nb_sample++;
+  ptimev = new const TimeEvents*[nb_sample];
+
+  ptimev[0] = this;
+  for (i = 1;i < nb_sample;i++) {
+    ptimev[i] = new TimeEvents(itimev[i - 1]);
+  }
+
+  timev = new TimeEvents(nb_sample , ptimev);
+
+  for (i = 1;i < nb_sample;i++) {
+    delete ptimev[i];
+  }
+  delete [] ptimev;
+
+  return timev;
+}
+
+
+/*--------------------------------------------------------------*
+ *
  *  Destruction des champs d'un objet TimeEvents.
  *
  *--------------------------------------------------------------*/
@@ -2556,6 +2592,40 @@ RenewalData* RenewalData::merge(StatError &error , int nb_sample ,
     delete [] phisto;
     delete [] ptimev;
   }
+
+  return timev;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Fusion d'objets RenewalData.
+ *
+ *  arguments : reference sur un objet StatError, nombre d'objets RenewalData,
+ *              pointeurs sur les objets RenewalData.
+ *
+ *--------------------------------------------------------------*/
+
+RenewalData* RenewalData::merge(StatError &error , int nb_sample ,
+                                const vector<RenewalData> itimev) const
+
+{
+  register int i;
+  RenewalData *timev;
+  const RenewalData **ptimev;
+
+
+  ptimev = new const RenewalData*[nb_sample];
+  for (i = 0;i < nb_sample;i++) {
+    ptimev[i] = new RenewalData(itimev[i]);
+  }
+
+  timev = merge(error , nb_sample , ptimev);
+
+  for (i = 0;i < nb_sample;i++) {
+    delete ptimev[i];
+  }
+  delete [] ptimev;
 
   return timev;
 }

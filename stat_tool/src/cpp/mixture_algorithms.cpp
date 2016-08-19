@@ -51,14 +51,16 @@ namespace stat_tool {
 
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the concentration parameter of a von Mises distribution
+ *         on the basis of the mean direction (Mardia & Jupp, 2000; pp. 85-86).
  *
- *  Calcul du parametre de concentration d'une loi de Von Mises
- *  a partir de la direction moyenne (d'apres Mardia & Jupp, 2000; pp. 85-86).
+ *  \param[in]  mean_direction mean direction,
  *
- *  argument : direction moyenne.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] concentration  concentration parameter.
+ */
+/*--------------------------------------------------------------*/
 
 double von_mises_concentration_computation(double mean_direction)
 
@@ -97,12 +99,14 @@ double von_mises_concentration_computation(double mean_direction)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the information quantity of a MixtureData object
+ *         in the case of discrete observed variables.
  *
- *  Calcul de la quantite d'information d'un objet MixtureData dans
- *  le cas de variables observees discretes.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] information information quantity.
+ */
+/*--------------------------------------------------------------*/
 
 double MixtureData::classification_information_computation() const
 
@@ -146,14 +150,16 @@ double MixtureData::classification_information_computation() const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the log-likelihood of a mixture of multivariate
+ *         distributions for individuals assigned to components.
  *
- *  Calcul de la vraisemblance de vecteurs affectes aux composantes
- *  pour un melange de lois multivaries.
+ *  \param[in]  vec        reference on a MixtureData object,
  *
- *  argument : reference sur un objet MixtureData.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] likelihood log-likelihood.
+ */
+/*--------------------------------------------------------------*/
 
 double Mixture::classification_likelihood_computation(const MixtureData &vec) const
 
@@ -163,7 +169,7 @@ double Mixture::classification_likelihood_computation(const MixtureData &vec) co
   double buff , likelihood = 0.;
 
 
-  // verification de la compatibilite entre le modele et les donnees
+  // checking of the compatibility between the model and the data
 
   if (nb_output_process + 1 == vec.nb_variable) {
     if ((!(vec.marginal_distribution[0])) || (nb_component < vec.marginal_distribution[0]->nb_value)) {
@@ -255,13 +261,17 @@ double Mixture::classification_likelihood_computation(const MixtureData &vec) co
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the log-likelihood of a mixture of
+           multivariate distributions for a sample of observed vectors.
  *
- *  Calcul de la vraisemblance de vecteurs pour un melange de lois multivaries.
+ *  \param[in]  vec        reference on a Vectors object,
+ *  \param[in]  index      vector index,
  *
- *  argument : reference sur un objet Vectors, indice du vecteur.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] likelihood log-likelihood.
+ */
+/*--------------------------------------------------------------*/
 
 double Mixture::likelihood_computation(const Vectors &vec , int index) const
 
@@ -271,7 +281,7 @@ double Mixture::likelihood_computation(const Vectors &vec , int index) const
   double likelihood = 0. , norm , component_proba;
 
 
-  // verification de la compatibilite entre le modele et les donnees
+  // checking of the compatibility between the model and the data
 
   if (nb_output_process == vec.nb_variable) {
     for (i = 0;i < nb_output_process;i++) {
@@ -358,18 +368,22 @@ double Mixture::likelihood_computation(const Vectors &vec , int index) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Estimation of a multivariate mixture of distributions using the EM algorithm.
  *
- *  Estimation des parametres d'un melange multivarie
- *  a partir d'un echantillon de vecteurs par l'algorithme EM.
+ *  \param[in]  error             reference on a StatError object,
+ *  \param[in]  os                stream,
+ *  \param[in]  imixt             initial mixture,
+ *  \param[in]  known_component   flags component estimation,
+ *  \param[in]  common_dispersion common dispersion parameter (continuous observation processes),
+ *  \param[in]  variance_factor   type of relationship between the variances (CONVOLUTION_FACTOR/SCALING_FACTOR)
+ *  \param[in]  assignment        flag for the computation of the optimal assignments,
+ *  \param[in]  nb_iter           number of iterations,
  *
- *  arguments : reference sur un objet StatError, stream, melange initial,
- *              flags estimation des composantes,
- *              parametres de dispersion communs (processus d'observation continus),
- *              type de lien entre les variances des lois gaussiennes (CONVOLUTION_FACTOR / SCALING_FACTOR)
- *              flag sur le calcul des affectations optimales, nombre d'iterations.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] mixt              multivariate mixture of distributions.
+ */
+/*--------------------------------------------------------------*/
 
 Mixture* Vectors::mixture_estimation(StatError &error , ostream &os , const Mixture &imixt ,
                                      bool known_component , bool common_dispersion ,
@@ -392,7 +406,7 @@ Mixture* Vectors::mixture_estimation(StatError &error , ostream &os , const Mixt
   mixt = NULL;
   error.init();
 
-  // test nombre de valeurs observees par variable
+  // test number of values per variable
 
   status = false;
   for (i = 0;i < nb_variable;i++) {
@@ -413,6 +427,12 @@ Mixture* Vectors::mixture_estimation(StatError &error , ostream &os , const Mixt
 
   else {
     for (i = 0;i < nb_variable;i++) {
+
+#     ifdef MESSAGE
+      cout << STAT_label[STATL_VARIABLE] << " " << i + 1 << " - " << STAT_label[STATL_MIN_VALUE] << ": " << min_value[i]
+           << "   minimum interval: " << min_interval[i] << endl;
+#     endif
+
       if ((imixt.categorical_process[i]) || (imixt.discrete_parametric_process[i])) {
         if (type[i] == REAL_VALUE) {
           status = false;
@@ -463,7 +483,7 @@ Mixture* Vectors::mixture_estimation(StatError &error , ostream &os , const Mixt
 
   if (status) {
 
-    // creation du melange multivarie
+    // construction of the multivariate mixture of distributions
 
     mixt = new Mixture(imixt , false);
 
@@ -479,7 +499,7 @@ Mixture* Vectors::mixture_estimation(StatError &error , ostream &os , const Mixt
     cout << *mixt;
 #   endif
 
-    // creation des structures de donnees de l'algorithme
+    // construction of the data structures of the algorithm
  
     component_proba = new double[mixt->nb_component];
 
@@ -555,7 +575,7 @@ Mixture* Vectors::mixture_estimation(StatError &error , ostream &os , const Mixt
       previous_likelihood = likelihood;
       likelihood = 0.;
 
-      // initialisation des quantites de reestimation
+      // initialization of the reestimation quantitities
 
       for (i = 0;i < mixt->nb_component;i++) {
         weight_reestim->frequency[i] = 0.;
@@ -584,7 +604,7 @@ Mixture* Vectors::mixture_estimation(StatError &error , ostream &os , const Mixt
       for (i = 0;i < nb_vector;i++) {
         norm = 0.;
 
-        // calcul des probabilites des composantes
+        // computation of the component posterior probabilities
 
         for (j = 0;j < mixt->nb_component;j++) {
           component_proba[j] = 1.;
@@ -599,7 +619,8 @@ Mixture* Vectors::mixture_estimation(StatError &error , ostream &os , const Mixt
             }
 
             else {
-              if ((mixt->continuous_parametric_process[k]->ident == GAMMA) && (min_value[k] < min_interval[k] / 2)) {
+              if (((mixt->continuous_parametric_process[k]->ident == GAMMA) ||
+                   (mixt->continuous_parametric_process[k]->ident == INVERSE_GAUSSIAN)) && (min_value[k] < min_interval[k] / 2)) {
                 switch (type[k]) {
                 case INT_VALUE :
                   component_proba[j] *= mixt->continuous_parametric_process[k]->observation[j]->mass_computation(int_vector[i][k] , int_vector[i][k] + min_interval[k]);
@@ -633,11 +654,11 @@ Mixture* Vectors::mixture_estimation(StatError &error , ostream &os , const Mixt
           for (j = 0;j < mixt->nb_component;j++) {
             component_proba[j] /= norm;
 
-            // accumulation des quantites de reestimation des poids
+            // accumulation of the reestimation quantitities of the weights
 
             weight_reestim->frequency[j] += component_proba[j];
 
-            // accumulation des quantites de reestimation des lois d'observation
+            // accumulation of the reestimation quantitities of the observation distributions
 
             if (!known_component) {
               for (k = 0;k < mixt->nb_output_process;k++) {
@@ -661,12 +682,12 @@ Mixture* Vectors::mixture_estimation(StatError &error , ostream &os , const Mixt
 
       if (likelihood != D_INF) {
 
-        // reestimation des poids
+        // reestimation of the weights
 
         reestimation(mixt->nb_component , weight_reestim->frequency ,
                      mixt->weight->mass , MIN_PROBABILITY , false);
 
-        // reestimation des lois d'observation
+        // reestimation of the observation distributions
 
         if (!known_component) {
           for (i = 0;i < mixt->nb_output_process;i++) {
@@ -879,7 +900,7 @@ Mixture* Vectors::mixture_estimation(StatError &error , ostream &os , const Mixt
       reestimation(mixt->nb_component , weight_reestim->frequency ,
                    mixt->weight->mass , MIN_PROBABILITY , true);
 
-      // reestimation des lois d'observation categorielles
+      // reestimation of the categorical observation distributions
 
       if (!known_component) {
         for (i = 0;i < mixt->nb_output_process;i++) {
@@ -898,7 +919,7 @@ Mixture* Vectors::mixture_estimation(StatError &error , ostream &os , const Mixt
       }
     }
 
-    // destruction des structures de donnees de l'algorithme
+    // destruction of the data structures of the algorithm
 
     delete [] component_proba;
 
@@ -960,7 +981,7 @@ Mixture* Vectors::mixture_estimation(StatError &error , ostream &os , const Mixt
         cout << endl;
 #       endif
 
-        // calcul des melanges de lois d'observation (poids deduits de la restauration)
+        // computation of the mixtures of observation distributions (weights deduced from the restoration)
 
         for (i = 0;i < mixt->nb_output_process;i++) {
           if (mixt->categorical_process[i]) {
@@ -1006,7 +1027,7 @@ Mixture* Vectors::mixture_estimation(StatError &error , ostream &os , const Mixt
         }
       }
 
-      // calcul de la vraisemblance du modele
+      // computation of the log-likelihood of the model
 
       vec->likelihood = mixt->likelihood_computation(*this);
 
@@ -1026,7 +1047,7 @@ Mixture* Vectors::mixture_estimation(StatError &error , ostream &os , const Mixt
       }
 #     endif
 
-      // calcul des melanges de lois d'observation (poids estimes)
+      // computation of the mixtures of observation distributions (estimated weights)
 
       for (i = 0;i < mixt->nb_output_process;i++) {
         if (mixt->categorical_process[i]) {
@@ -1043,6 +1064,13 @@ Mixture* Vectors::mixture_estimation(StatError &error , ostream &os , const Mixt
           mixt->continuous_parametric_process[i]->weight = new Distribution(*(mixt->weight));
         }
       }
+
+#     ifdef MESSAGE
+      if ((nb_variable == 1) && (mixt->nb_component == 2) && (mixt->continuous_parametric_process[0])) {
+        continuous_parametric_estimation(0 , mixt->continuous_parametric_process[0]->ident);
+      }
+#     endif
+
     }
   }
 
@@ -1050,20 +1078,26 @@ Mixture* Vectors::mixture_estimation(StatError &error , ostream &os , const Mixt
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Estimation of a mixture of univariate gamma, inverse Gaussian or
+ *         Gaussian distributions with tied parameters using the EM algorithm.
  *
- *  Estimation des parametres d'un melange gamma ou gaussien univarie a parametres lies
- *  a partir d'un echantillon de vecteurs par l'algorithme EM.
+ *  \param[in]  error              reference on a StatError object,
+ *  \param[in]  os                 stream,
+ *  \param[in]  nb_component       number of components,
+ *  \param[in]  ident              component identifiers (GAMMA/INVERSE_GAUSSIAN/GAUSSIAN),
+ *  \param[in]  mean               mean and of the 1st component,
+ *  \param[in]  standard_deviation shape parameter (GAMMA) / scale parameter (INVERSE_GAUSSIAN) /
+ *                                 standard deviation (GAUSSIAN) of the 1st component,
+ *  \param[in]  tied_mean          flag tied means,
+ *  \param[in]  variance_factor    type of relationship between the variances (CONVOLUTION_FACTOR/SCALING_FACTOR)
+ *  \param[in]  assignment         flag for the computation of the optimal assignments,
+ *  \param[in]  nb_iter            number of iterations,
  *
- *  arguments : reference sur un objet StatError, stream, nombre de composantes,
- *              identificateur des composantes (GAMMA / INVERSE_GAUSSIAN / GAUSSIAN),
- *              moyenne et parametre de forme de la premiere composante (GAMMA) /
- *              moyenne et parametre d'echelle de la premiere composante (INVERSE_GAUSSIAN) /
- *              moyenne et ecart-type de la premiere composante (GAUSSIAN), flag moyennes liees,
- *              type de lien entre les variances (CONVOLUTION_FACTOR / SCALING_FACTOR)
- *              flag sur le calcul des affectations optimales, nombre d'iterations.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] mixt               multivariate mixture of distributions.
+ */
+/*--------------------------------------------------------------*/
 
 Mixture* Vectors::mixture_estimation(StatError &error , ostream &os , int nb_component ,
                                      int ident , double mean , double standard_deviation ,
@@ -1093,19 +1127,25 @@ Mixture* Vectors::mixture_estimation(StatError &error , ostream &os , int nb_com
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Estimation of a multivariate mixture of distributions using the MCEM algorithm.
  *
- *  Estimation des parametres d'un melange multivarie
- *  a partir d'un echantillon de vecteurs par l'algorithme MCEM.
+ *  \param[in]  error             reference on a StatError object,
+ *  \param[in]  os                stream,
+ *  \param[in]  imixt             initial mixture,
+ *  \param[in]  known_component   flags component estimation,
+ *  \param[in]  common_dispersion common dispersion parameter (continuous observation processes),
+ *  \param[in]  variance_factor   type of relationship between the variances (CONVOLUTION_FACTOR/SCALING_FACTOR),
+ *  \param[in]  min_nb_assignment minimum number of assignments of generated individuals,
+ *  \param[in]  max_nb_assignment maximum number of assignments of generated individuals,
+ *  \param[in]  parameter         parameter for the assignments of the generated individuals,
+ *  \param[in]  assignment        flag for the computation of the optimal assignments,
+ *  \param[in]  nb_iter           number of iterations,
  *
- *  arguments : reference sur un objet StatError, stream, melange initial,
- *              flags estimation des composantes,
- *              parametres de dispersion communs (processus d'observation continus),
- *              type de lien entre les variances des lois gaussiennes (CONVOLUTION_FACTOR / SCALING_FACTOR),
- *              parametres pour le nombre d'affectation des individus simulees,
- *              flag sur le calcul des affectations optimales, nombre d'iterations.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] mixt              multivariate mixture of distributions.
+ */
+/*--------------------------------------------------------------*/
 
 Mixture* Vectors::mixture_stochastic_estimation(StatError &error , ostream &os , const Mixture &imixt ,
                                                 bool known_component , bool common_dispersion ,
@@ -1130,7 +1170,7 @@ Mixture* Vectors::mixture_stochastic_estimation(StatError &error , ostream &os ,
   mixt = NULL;
   error.init();
 
-  // test nombre de valeurs observees par variable
+  // test number of values per variable
 
   status = false;
   for (i = 0;i < nb_variable;i++) {
@@ -1206,7 +1246,7 @@ Mixture* Vectors::mixture_stochastic_estimation(StatError &error , ostream &os ,
 
   if (status) {
 
-    // creation du melange multivarie
+    // construction of the multivariate mixture of distributions
 
     mixt = new Mixture(imixt , false);
 
@@ -1222,7 +1262,7 @@ Mixture* Vectors::mixture_stochastic_estimation(StatError &error , ostream &os ,
     cout << *mixt;
 #   endif
 
-    // creation des structures de donnees de l'algorithme
+    // construction of the data structures of the algorithm
  
     component_proba = new double[mixt->nb_component];
     component_cumul = new double[mixt->nb_component];
@@ -1298,7 +1338,7 @@ Mixture* Vectors::mixture_stochastic_estimation(StatError &error , ostream &os ,
       previous_likelihood = likelihood;
       likelihood = 0.;
 
-      // calcul du nombre d'affectations des individus simulees
+      // computation of the number of assignments of generated individuals
 
       if (min_nb_assignment + (int)::round(parameter * iter) < max_nb_assignment) {
         nb_assignment = min_nb_assignment + (int)::round(parameter * iter);
@@ -1312,7 +1352,7 @@ Mixture* Vectors::mixture_stochastic_estimation(StatError &error , ostream &os ,
 
       iter++;
 
-      // initialisation des quantites de reestimation
+      // initialization of the reestimation quantitities
 
       for (i = 0;i < mixt->nb_component;i++) {
         weight_reestim->frequency[i] = 0.;
@@ -1341,7 +1381,7 @@ Mixture* Vectors::mixture_stochastic_estimation(StatError &error , ostream &os ,
       for (i = 0;i < nb_vector;i++) {
         norm = 0.;
 
-        // calcul des probabilites des composantes
+        // computation of the component posterior probabilities
 
         for (j = 0;j < mixt->nb_component;j++) {
           component_proba[j] = 1.;
@@ -1395,11 +1435,11 @@ Mixture* Vectors::mixture_stochastic_estimation(StatError &error , ostream &os ,
           for (j = 0;j < nb_assignment;j++) {
             k = cumul_method(mixt->nb_component , component_cumul);
 
-            // accumulation des quantites de reestimation des poids
+            // accumulation of the reestimation quantitities of the weights
 
             (weight_reestim->frequency[k])++;
 
-            // accumulation des quantites de reestimation des lois d'observation
+            // accumulation of the reestimation quantitities of the observation distributions
 
             if (!known_component) {
               for (m = 0;m < mixt->nb_output_process;m++) {
@@ -1423,12 +1463,12 @@ Mixture* Vectors::mixture_stochastic_estimation(StatError &error , ostream &os ,
 
       if (likelihood != D_INF) {
 
-        // reestimation des poids
+        // reestimation of the weights
 
         reestimation(mixt->nb_component , weight_reestim->frequency ,
                      mixt->weight->mass , MIN_PROBABILITY , false);
 
-        // reestimation des lois d'observation
+        // reestimation of the observation distributions
 
         if (!known_component) {
           for (i = 0;i < mixt->nb_output_process;i++) {
@@ -1641,7 +1681,7 @@ Mixture* Vectors::mixture_stochastic_estimation(StatError &error , ostream &os ,
       reestimation(mixt->nb_component , weight_reestim->frequency ,
                    mixt->weight->mass , MIN_PROBABILITY , true);
 
-      // reestimation des lois d'observation categorielles
+      // reestimation of the categorical observation distributions
 
       if (!known_component) {
         for (i = 0;i < mixt->nb_output_process;i++) {
@@ -1660,7 +1700,7 @@ Mixture* Vectors::mixture_stochastic_estimation(StatError &error , ostream &os ,
       }
     }
 
-    // destruction des structures de donnees de l'algorithme
+    // destruction of the data structures of the algorithm
 
     delete [] component_proba;
     delete [] component_cumul;
@@ -1723,7 +1763,7 @@ Mixture* Vectors::mixture_stochastic_estimation(StatError &error , ostream &os ,
         cout << endl;
 #       endif
 
-        // calcul des melanges de lois d'observation (poids deduits de la restauration)
+        // computation of the mixtures of observation distributions (weights deduced from the restoration)
 
         for (i = 0;i < mixt->nb_output_process;i++) {
           if (mixt->categorical_process[i]) {
@@ -1769,7 +1809,7 @@ Mixture* Vectors::mixture_stochastic_estimation(StatError &error , ostream &os ,
         }
       }
 
-      // calcul de la vraisemblance du modele
+      // computation of the log-likelihood of the model
 
       vec->likelihood = mixt->likelihood_computation(*this);
 
@@ -1789,7 +1829,7 @@ Mixture* Vectors::mixture_stochastic_estimation(StatError &error , ostream &os ,
       }
 #     endif
 
-      // calcul des melanges de lois d'observation (poids estimes)
+      // computation of the mixtures of observation distributions (estimated weights)
 
       for (i = 0;i < mixt->nb_output_process;i++) {
         if (mixt->categorical_process[i]) {
@@ -1813,21 +1853,29 @@ Mixture* Vectors::mixture_stochastic_estimation(StatError &error , ostream &os ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Estimation of a mixture of univariate gamma, inverse Gaussian or
+ *         Gaussian distributions with tied parameters using the MCEM algorithm.
  *
- *  Estimation des parametres d'un melange gamma ou gaussien univarie a parametres lies
- *  a partir d'un echantillon de vecteurs par l'algorithme MCEM.
+ *  \param[in]  error              reference on a StatError object,
+ *  \param[in]  os                 stream,
+ *  \param[in]  nb_component       number of components,
+ *  \param[in]  ident              component identifiers (GAMMA/INVERSE_GAUSSIAN/GAUSSIAN),
+ *  \param[in]  mean               mean and of the 1st component,
+ *  \param[in]  standard_deviation shape parameter (GAMMA) / scale parameter (INVERSE_GAUSSIAN) /
+ *  \param[in]                     standard deviation (GAUSSIAN) of the 1st component,
+ *  \param[in]  tied_mean          flag tied means,
+ *  \param[in]  variance_factor    type of relationship between the variances (CONVOLUTION_FACTOR/SCALING_FACTOR)
+ *  \param[in]  min_nb_assignment  minimum number of assignments of generated individuals,
+ *  \param[in]  max_nb_assignment  maximum number of assignments of generated individuals,
+ *  \param[in]  parameter          parameter for the assignments of the generated individuals,
+ *  \param[in]  assignment         flag for the computation of the optimal assignments,
+ *  \param[in]  nb_iter            number of iterations,
  *
- *  arguments : reference sur un objet StatError, stream, nombre de composantes,
- *              identificateur des composantes (GAMMA / INVERSE_GAUSSIAN / GAUSSIAN),
- *              moyenne et parametre de forme de la premiere composante (GAMMA) /
- *              moyenne et parametre d'echelle de la premiere composante (INVERSE_GAUSSIAN) /
- *              moyenne et ecart-type de la premiere composante (GAUSSIAN), flag moyennes liees,
- *              type de lien entre les variances (CONVOLUTION_FACTOR / SCALING_FACTOR)
- *              parametres pour le nombre d'affectation des individus simulees,
- *              flag sur le calcul des affectations optimales, nombre d'iterations.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] mixt               multivariate mixture of distributions.
+ */
+/*--------------------------------------------------------------*/
 
 Mixture* Vectors::mixture_stochastic_estimation(StatError &error , ostream &os , int nb_component ,
                                                 int ident , double mean , double standard_deviation ,
@@ -1859,16 +1907,16 @@ Mixture* Vectors::mixture_stochastic_estimation(StatError &error , ostream &os ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Assignment of the individuals to the most probable component of
+ *         a multivariate mixture of distributions and computation of
+ *         the associated posterior probabilities and entropies
  *
- *  Affectation des individus aux composantes les plus probables
- *  pour un melange de lois multivariees et calcul des probabilites a posteriori et
- *  des entropies associees.
- *
- *  arguments : reference sur un objet MixtureData, flag affectation
- *              des individus aux composantes.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] reference on a MixtureData object,
+ *  \param[in] flag assignment of individuals to components.
+ */
+/*--------------------------------------------------------------*/
 
 void Mixture::individual_assignment(MixtureData &vec , bool assignment) const
 
@@ -1981,13 +2029,16 @@ void Mixture::individual_assignment(MixtureData &vec , bool assignment) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Simulation using a multivariate mixture of distributions.
  *
- *  Simulation par un melange de lois.
+ *  \param[in]  error     reference on a StatError object,
+ *  \param[in]  nb_vector sample size,
  *
- *  arguments : reference sur un objet StatError, effectif.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] vec       sample generated by a multivariate mixture of distributions.
+ */
+/*--------------------------------------------------------------*/
 
 MixtureData* Mixture::simulation(StatError &error , int nb_vector) const
 
@@ -2010,7 +2061,7 @@ MixtureData* Mixture::simulation(StatError &error , int nb_vector) const
 
   else {
 
-    // creation d'un objet MixtureData
+    // construction of a MixtureData object
 
     itype = new variable_nature[nb_output_process + 1];
 
@@ -2129,12 +2180,12 @@ MixtureData* Mixture::simulation(StatError &error , int nb_vector) const
 
     for (i = 0;i < vec->nb_vector;i++) {
 
-      // ponderation
+      // weight
 
       j = mixt->weight->simulation();
       vec->int_vector[i][0] = j;
 
-      // composantes
+      // component
 
       for (k = 0;k < mixt->nb_output_process;k++) {
         if (mixt->categorical_process[k]) {
@@ -2161,7 +2212,7 @@ MixtureData* Mixture::simulation(StatError &error , int nb_vector) const
       }
     }
 
-    // extraction des caracteristiques des vecteurs simules
+    // extraction of the characteristics of the generated data
 
     vec->min_value_computation(0);
     vec->max_value_computation(0);
@@ -2178,7 +2229,7 @@ MixtureData* Mixture::simulation(StatError &error , int nb_vector) const
     vec->build_observation_frequency_distribution(mixt->nb_component);
     vec->build_observation_histogram(mixt->nb_component);
 
-    // calcul des vraisemblances, des probabilites a posteriori et des entropies
+    // computation of log-likelihoods, posterior probabilies and entropies
 
     mixt->individual_assignment(*vec , false);
 
@@ -2186,7 +2237,7 @@ MixtureData* Mixture::simulation(StatError &error , int nb_vector) const
     vec->likelihood = mixt->likelihood_computation(*observed_vec);
     delete observed_vec;
 
-    // calcul des melanges de lois d'observation (poids deduits de la restauration)
+    // computation of the mixtures of observation distributions (weights deduced from the restoration)
 
     for (i = 0;i < mixt->nb_output_process;i++) {
       if (mixt->categorical_process[i]) {

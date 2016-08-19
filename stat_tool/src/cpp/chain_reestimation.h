@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -47,24 +47,23 @@ namespace stat_tool {
 
 /****************************************************************
  *
- *  Definition de la classe :
+ *  Class definition
  */
 
 
   template <typename Type>
-  class ChainReestimation {  // structure de donnees correspondant a une chaine de Markov
+  class ChainReestimation {  // data structure corresponding to a Markov chain
 
     friend std::ostream& operator<<(std::ostream &os , const ChainReestimation<Type> &chain_data)
     { return chain_data.print(os); }
 
   public :
 
-    process_type type;      // ORDINARY/EQUILIBRIUM
-    int nb_state;           // nombre d'etats
-    int nb_row;             // nombre de lignes de la matrice des frequences
-                            // de transition
-    Type *initial;          // frequences des etats initiaux
-    Type **transition;      // matrice des frequences des transition
+    process_type type;      // process type (ORDINARY/EQUILIBRIUM)
+    int nb_state;           // number of states
+    int nb_row;             // number of rows of the transition frequency matrix
+    Type *initial;          // initial state frequencies
+    Type **transition;      // transition frequency matrix
 
     void init();
     void copy(const ChainReestimation<Type> &chain_data);

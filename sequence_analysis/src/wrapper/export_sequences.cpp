@@ -1123,11 +1123,11 @@ public:
   }
 
   static Sequences*
-  pointwise_average(const Sequences &seq, bool circular, bool standard_deviation,
-      sequence_type output, const char *path, output_format format)
+  pointwise_average(const Sequences &seq, bool circular, bool robust , bool dispersion,
+      bool frequency_correction, sequence_type output, const char *path, output_format format)
   {
     SIMPLE_METHOD_TEMPLATE_1(seq, pointwise_average, Sequences,
-        circular, standard_deviation, output, path, format);
+        circular, robust, dispersion, frequency_correction, output, path, format);
   }
 
   static Sequences*
@@ -1426,14 +1426,14 @@ public:
   }
 
   static bool
-  select_step(Sequences &input, int variable, double step)
+  select_bin_width(Sequences &input, int variable, double bin_width)
   {
     StatError error;
     bool ret;
 
 
 
-    ret = input.select_step(error, variable, step);
+    ret = input.select_bin_width(error, variable, bin_width);
     if (!ret)
       sequence_analysis::wrap_util::throw_error(error);
     return ret;
@@ -1508,7 +1508,7 @@ class_sequences()
    DEF_RETURN_VALUE("moving_average", SequencesWrap::moving_average,args("nb_point" ,"filter" , "variable" , "begin_end" , "output"),"Moving average from an array")
    DEF_RETURN_VALUE("moving_average_from_distribution", SequencesWrap::moving_average_from_distribution,args("nb_point" ,"filter" , "variable" , "begin_end" , "output"),"Moving average fron distribution ")
    DEF_RETURN_VALUE("partial_autocorrelation_computation", SequencesWrap::partial_autocorrelation_computation, args("variable", "itype", "max_lag"),"Transcode")
-   DEF_RETURN_VALUE("pointwise_average", SequencesWrap::pointwise_average, args("circular", "standard_deviation", "output", "path", "format"), "Pointwise average")
+   DEF_RETURN_VALUE("pointwise_average", SequencesWrap::pointwise_average, args("circular", "robust", "dispersion", "output", "path", "format"), "Pointwise average")
    DEF_RETURN_VALUE("recurrence_time_sequences", SequencesWrap::recurrence_time_sequences,args("variable", "value"),"Recurrence time sequences")
    DEF_RETURN_VALUE("remove_run",SequencesWrap::remove_run, args("variable","ivalue", "position", "max_run_length"), "see RemoveRun")
    DEF_RETURN_VALUE("round", SequencesWrap::round, args("variable", "mode"),"round variable")
@@ -1544,7 +1544,7 @@ class_sequences()
    DEF_RETURN_VALUE("segment_profile_plotable_write", SequencesWrap::segment_profile_plotable_write, args("identifier", "nb_segment", "model_type", "output"), "Write segment_profile")
 
     .def("segment_profile_write", SequencesWrap::segment_profile_write, args("sequences", "iidentifier","nb_segment", "model_type" , "output" ,"format","segmentation","nb_segmentation"), "segment profile write for Display")
-    .def("select_step", SequencesWrap::select_step, args("variable", "step"), "select_step on sequences")
+    .def("select_bin_width", SequencesWrap::select_bin_width, args("variable", "bin_width"), "select_bin_width on sequences")
    DEF_RETURN_VALUE("get_marginal_histogram", SequencesWrap::get_marginal_histogram, args("variable"), "get_marginal_histogram wrapper")
 
 

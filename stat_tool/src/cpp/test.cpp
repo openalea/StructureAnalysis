@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -55,13 +55,14 @@ static const double  CRITICAL_PROBABILITY_FACTOR = 1.2;
 
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the Test class.
  *
- *  Constructeur de la classe Test.
- *
- *  arguments : identificateur, unilateral/bilateral.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] iident    identifier,
+ *  \param[in] ione_side flag one side/two sides.
+ */
+/*--------------------------------------------------------------*/
 
 Test::Test(test_distribution iident , bool ione_side)
 
@@ -75,14 +76,17 @@ Test::Test(test_distribution iident , bool ione_side)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the Test class.
  *
- *  Constructeur de la classe Test.
- *
- *  arguments : identificateur, unilateral/bilateral, nombres de degres de liberte ,
- *              valeur.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] iident    identifier,
+ *  \param[in] ione_side flag one side/two sides,
+ *  \param[in] idf1      degrees of freedom,
+ *  \param[in] idf2      degrees of freedom,
+ *  \param[in] ivalue    value.
+ */
+/*--------------------------------------------------------------*/
 
 Test::Test(test_distribution iident , bool ione_side , int idf1 , int idf2 , double ivalue)
 
@@ -96,14 +100,18 @@ Test::Test(test_distribution iident , bool ione_side , int idf1 , int idf2 , dou
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the Test class.
  *
- *  Constructeur de la classe Test.
- *
- *  arguments : identificateur, unilateral/bilateral, nombres de degres de liberte,
- *              valeur, probabilite critique.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] iident                identifier,
+ *  \param[in] ione_side             flag one side/two sides,
+ *  \param[in] idf1                  degrees of freedom,
+ *  \param[in] idf2                  degrees of freedom,
+ *  \param[in] ivalue                value,
+ *  \param[in] icritical_probability critical probability.
+ */
+/*--------------------------------------------------------------*/
 
 Test::Test(test_distribution iident , bool ione_side , int idf1 , int idf2 , double ivalue ,
            double icritical_probability)
@@ -176,13 +184,13 @@ Test::Test(test_distribution iident , bool ione_side , int idf1 , int idf2 , dou
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Construction by copy of a Test object.
  *
- *  Construction par copie d'un objet Test.
- *
- *  argument : reference sur un objet Test.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] test reference on a Test object.
+ */
+/*--------------------------------------------------------------*/
 
 void Test::copy(const Test &test)
 
@@ -196,13 +204,15 @@ void Test::copy(const Test &test)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Assignment operator of the Test class.
  *
- *  Operateur d'assignement de la classe Test.
+ *  \param[in]  test reference on a Test object,
  *
- *  argument : reference sur un objet Test.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] this Test object.
+ */
+/*--------------------------------------------------------------*/
 
 Test& Test::operator=(const Test &test)
 
@@ -215,13 +225,15 @@ Test& Test::operator=(const Test &test)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of the results of a test.
  *
- *  Ecriture des resultats d'un test parametrique.
- *
- *  arguments : stream, flag commentaire, flag resultat de reference.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os             stream,
+ *  \param[in]     comment_flag   flag comment,
+ *  \param[in]     reference_flag flag reference result.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& Test::ascii_print(ostream &os , bool comment_flag , bool reference_flag) const
 
@@ -351,13 +363,14 @@ ostream& Test::ascii_print(ostream &os , bool comment_flag , bool reference_flag
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of the results of a test at the spreadsheet format.
  *
- *  Ecriture des resultats d'un test parametrique au format tableur.
- *
- *  arguments : stream, flag resultat de reference.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os             stream,
+ *  \param[in]     reference_flag flag reference result.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& Test::spreadsheet_print(ostream &os , bool reference_flag) const
 
@@ -476,12 +489,12 @@ ostream& Test::spreadsheet_print(ostream &os , bool reference_flag) const
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Calcul de la probabilite critique a partir de la valeur
- *  prise par une variable normale centree reduite.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the critical probability from the value
+ *         taken by a standard Gaussian random variable.
+ */
+/*--------------------------------------------------------------*/
 
 void Test::standard_normal_critical_probability_computation()
 
@@ -497,12 +510,12 @@ void Test::standard_normal_critical_probability_computation()
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Calcul de la valeur prise par une variable normale centree reduite
- *  a partir de la probabilite critique.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the value taken by a standard Gaussian random variable
+ *         from the critical probability.
+ */
+/*--------------------------------------------------------------*/
 
 void Test::standard_normal_value_computation()
 
@@ -514,12 +527,12 @@ void Test::standard_normal_value_computation()
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Calcul de la probabilite critique a partir de la valeur prise
- *  par une variable du chi2.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of la critical probability from the value taken
+ *         a Chi2 random variable.
+ */
+/*--------------------------------------------------------------*/
 
 void Test::chi2_critical_probability_computation()
 
@@ -537,12 +550,12 @@ void Test::chi2_critical_probability_computation()
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Calcul de la valeur prise par une variable du chi2 a partir
- *  de la probabilite critique.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the value taken by a Chi2 random variable from
+ *         the critical probability.
+ */
+/*--------------------------------------------------------------*/
 
 void Test::chi2_value_computation()
 
@@ -560,12 +573,12 @@ void Test::chi2_value_computation()
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Calcul de la probabilite critique a partir de la valeur prise
- *  par une variable F.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the critical probability from the value taken
+ *         a F random variable.
+ */
+/*--------------------------------------------------------------*/
 
 void Test::F_critical_probability_computation()
 
@@ -583,12 +596,12 @@ void Test::F_critical_probability_computation()
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Calcul de la valeur prise par une variable F a partir de
- *  la probabilite critique.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the value taken by a F random variable from
+ *         the critical probability.
+ */
+/*--------------------------------------------------------------*/
 
 void Test::F_value_computation()
 
@@ -606,12 +619,12 @@ void Test::F_value_computation()
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Calcul de la probabilite critique a partir de la valeur prise
- *  par une variable t.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the critical probability from the value taken by
+ *         a Student's t-random variable.
+ */
+/*--------------------------------------------------------------*/
 
 void Test::t_critical_probability_computation()
 
@@ -644,12 +657,12 @@ void Test::t_critical_probability_computation()
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Calcul de la valeur prise par une variable t a partir de
- *  la probabilite critique.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the value taken by a Student's t-random variable from
+ *         the critical probability.
+ */
+/*--------------------------------------------------------------*/
 
 void Test::t_value_computation()
 

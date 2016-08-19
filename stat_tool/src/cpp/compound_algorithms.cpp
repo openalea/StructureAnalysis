@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -48,15 +48,16 @@ namespace stat_tool {
 
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of a compound distribution.
  *
- *  Calcul d'une loi composee.
- *
- *  arguments : nombre minimum de valeurs, seuil sur la fonction de repartition,
- *              flags pour le calcul de la loi de la somme et
- *              pour le calcul de la loi elementaire.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] min_nb_value    lower bound of the support,
+ *  \param[in] cumul_threshold threshold on the cumulative distribution function,
+ *  \param[in] sum_flag        flag for the computation of the sum distribution,
+ *  \param[in] dist_flag       flag for the computation of the basis distribution.
+ */
+/*--------------------------------------------------------------*/
 
 void Compound::computation(int min_nb_value , double cumul_threshold ,
                            bool sum_flag , bool dist_flag)
@@ -66,7 +67,7 @@ void Compound::computation(int min_nb_value , double cumul_threshold ,
   DiscreteParametric *power_dist;
 
 
-  // calcul de la loi de la somme et de la loi elementaire
+  // computation of the sum distribution and the basis distribution
 
   if (sum_flag) {
     sum_distribution->computation(1 , CUMUL_THRESHOLD);
@@ -75,8 +76,8 @@ void Compound::computation(int min_nb_value , double cumul_threshold ,
     distribution->computation(min_nb_value , cumul_threshold);
   }
 
-  // calcul des puissances de convolution de la loi elementaire et
-  // calcul de la loi composee resultante
+  // computation of convolution powers of the basis distribution and
+  // computation of the resulting compound distribution
 
   power_dist = new DiscreteParametric((sum_distribution->nb_value - 1) * (distribution->nb_value - 1) + 1 ,
                                       distribution->ident);
@@ -134,16 +135,17 @@ void Compound::computation(int min_nb_value , double cumul_threshold ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of a compound distribution.
  *
- *  Calcul d'une loi composee.
- *
- *  arguments : pointeur sur les puissances de convolution de la loi elementaire,
- *              nombre minimum de valeurs, seuil sur la fonction de repartition,
- *              flags pour le calcul de la loi de la somme et
- *              pour le calcul de la loi elementaire.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] power_dist      pointer on the convolution powers of the the basis distribution,
+ *  \param[in] min_nb_value    lower bound of the support,
+ *  \param[in] cumul_threshold threshold on the cumulative distribution function,
+ *  \param[in] sum_flag        flag for the computation of the sum distribution,
+ *  \param[in] dist_flag       flag for the computation of the basis distribution.
+ */
+/*--------------------------------------------------------------*/
 
 void Compound::computation(DiscreteParametric **power_dist , int min_nb_value ,
                            double cumul_threshold , bool sum_flag , bool dist_flag)
@@ -153,7 +155,7 @@ void Compound::computation(DiscreteParametric **power_dist , int min_nb_value ,
   int sum_nb_value , min;
 
 
-  // calcul de la loi de la somme et de la loi elementaire
+  // computation of the sum distribution and of the basis distribution
 
   sum_nb_value = sum_distribution->nb_value;
   if (sum_flag) {
@@ -163,7 +165,7 @@ void Compound::computation(DiscreteParametric **power_dist , int min_nb_value ,
     distribution->computation(min_nb_value , cumul_threshold);
   }
 
-  // calcul des puissance de convolution de la loi elementaire
+  // computation of convolution powers of the basis distribution
 
   if (dist_flag) {
     min = MAX(sum_distribution->offset - 1 , 1);
@@ -209,7 +211,7 @@ void Compound::computation(DiscreteParametric **power_dist , int min_nb_value ,
     }
   }
 
-  // calcul de la loi composee resultante
+  // computation of the resulting compound distribution
 
   if (sum_distribution->offset == 0) {
     offset = 0;
@@ -240,15 +242,16 @@ void Compound::computation(DiscreteParametric **power_dist , int min_nb_value ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of reestimation quantities (E-step of the EM algorithm).
  *
- *  Calcul des quantites de reestimation (estimateur EM).
- *
- *  arguments : reference sur la loi empirique,
- *              pointeurs sur les puissances de convolution
- *              de la loi elementaire et sur les quantites de reestimation.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] histo       reference on the frequency distribution,
+ *  \param[in] power_dist  pointer on the convolution powers of the basis distribution 
+ *  \param[in] sum_reestim pointer on the reestimation quantities of the sum distribution
+ *  \param[in] reestim     pointer on the reestimation quantities of the basis distribution.
+ */
+/*--------------------------------------------------------------*/
 
 void Compound::expectation_step(const FrequencyDistribution &histo ,
                                 DiscreteParametric **power_dist ,
@@ -262,7 +265,7 @@ void Compound::expectation_step(const FrequencyDistribution &histo ,
 
   term = new double[sum_distribution->nb_value];
 
-  // initialisation
+  // initializations
 
   if (sum_reestim) {
     for (i = 0;i < sum_reestim->alloc_nb_value;i++) {
@@ -279,7 +282,7 @@ void Compound::expectation_step(const FrequencyDistribution &histo ,
   for (i = histo.offset;i < histo.nb_value;i++) {
     if (histo.frequency[i] > 0) {
 
-      // calcul du denominateur
+      // computation of the normalizing term (denominator)
 
       denom = 0.;
       if (sum_distribution->offset == 0) {
@@ -304,7 +307,7 @@ void Compound::expectation_step(const FrequencyDistribution &histo ,
 
       if (denom > 0.) {
 
-        // accumulation des quantites de reestimation de la loi de la somme
+        // accumulation of reestimation quantities for the sum distribution
 
         if (sum_reestim) {
           for (j = sum_distribution->offset;j < sum_distribution->nb_value;j++) {
@@ -312,7 +315,7 @@ void Compound::expectation_step(const FrequencyDistribution &histo ,
           }
         }
 
-        // accumulation des quantites de reestimation de la loi elementaire
+        // accumulation of reestimation quantities for the basis distribution
 
         if (reestim) {
           for (j = distribution->offset;j <= MIN(i , distribution->nb_value - 1);j++) {
@@ -366,29 +369,36 @@ void Compound::expectation_step(const FrequencyDistribution &histo ,
 
 # ifdef DEBUG
   if (sum_reestim) {
-    cout << "\nquantites de reestimation loi de la somme :" << *sum_reestim << endl;
+    cout << "\nsum distribution reestimation quantities:" << *sum_reestim << endl;
   }
   if (reestim) {
-    cout << "\nquantites de reestimation loi elementaire :" << *reestim << endl;
+    cout << "\nbasis distribution reestimation quantities:" << *reestim << endl;
   }
 # endif
 
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Estimation of a compound distribution using the EM  algorithm.
  *
- *  Estimation des parametres d'une loi composee par l'algorithme EM.
+ *  \param[in]  error     reference on a StatError object,
+ *  \param[in]  os        stream,
+ *  \param[in]  sum_dist  reference on the sum distribution,
+ *  \param[in]  dist      reference on the basis distribution,
+ *  \param[in]  type      type of the unknown distribution (SUM/ELEMENTARY),
+ *  \param[in]  estimator estimator type (likelihood, penalized likelihood or
+ *                        estimation of a parametric distribution),
+ *  \param[in]  nb_iter   number of iterations,
+ *  \param[in]  weight    penalty weight,
+ *  \param[in]  pen_type  penalty type,
+ *  \param[in]  outside   management of side effects (zero outside the support or
+ *                        continuation of the distribution),
  *
- *  arguments : references sur un objet StatError, stream, references sur les lois,
- *              type de la loi inconnue (SUM/ELEMENTARY),
- *              type d'estimateur (vraisemblance, vraisemblance penalisee ou
- *              estimation d'une loi parametrique), nombre d'iterations,
- *              poids de la penalisation, type de penalisation,
- *              type de gestion des effets de bord (zero a l'exterieur du support ou
- *              prolongation de la loi).
- *
- *--------------------------------------------------------------*/
+ *  \param[out] compound  compound distribution.
+ */
+/*--------------------------------------------------------------*/
 
 Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream &os ,
                                                      const DiscreteParametric &sum_dist ,
@@ -424,7 +434,7 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream 
 
   if (status) {
 
-    // creation d'un objet Compound
+    // construction of a Compound object
 
     compound = new Compound(sum_dist , dist , type);
     compound->compound_data = new CompoundData(*this , *compound);
@@ -470,8 +480,8 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream 
       break;
     }
 
-    // creation des puissances de convolution de la loi elementaire et
-    // des quantites de reestimation
+    // construction of convolution powers of the basis distribution and
+    // of reestimation quantities
 
     sum_nb_value = compound->sum_distribution->alloc_nb_value;
 
@@ -506,7 +516,7 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream 
     do {
       i++;
 
-      // calcul des quantites de reestimation
+      // computation of reestimation quantities
 
       switch (type) {
 
@@ -537,7 +547,7 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream 
       }
       }
 
-      // calcul de la loi composee estime et de la log-vraisemblance correspondante
+      // computation of the estimated compound distribution and of the corresponding log-likelihood
 
       compound->computation(power_dist , nb_value , COMPOUND_THRESHOLD ,
                             sum_compute , dist_compute);
@@ -615,7 +625,7 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream 
         do {
           i++;
 
-          // calcul des quantites de reestimation
+          // computation of the reestimation quantities
 
           switch (type) {
 
@@ -645,7 +655,7 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream 
             likelihood = D_INF;
           }
 
-          // calcul de la loi composee estime et de la log-vraisemblance correspondante
+          // computation of the estimated compound distribution and of the corresponding log-likelihood
 
           else {
             compound->computation(power_dist , nb_value , COMPOUND_THRESHOLD ,
@@ -705,7 +715,7 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream 
 
     if (likelihood != D_INF) {
 
-      // mise a jour du nombre de parametres inconnus
+      // update of the number of free parameters
 
       switch (type) {
       case SUM :
@@ -746,19 +756,26 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream 
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Estimation of a compound distribution using the EM algorithm.
  *
- *  Estimation des parametres d'une loi composee par l'algorithme EM.
+ *  \param[in]  error         reference on a StatError object,
+ *  \param[in]  os            stream,
+ *  \param[in]  known_dist    reference on the known distribution,
+ *  \param[in]  type          type of the unknown distribution (SUM/ELEMENTARY),
+ *  \param[in]  min_inf_bound minimum lower bound of the support of the unknown distribution,
+ *  \param[in]  estimator     estimator type (likelihood, penalized likelihood or
+ *                            estimation of a parametric distribution),
+ *  \param[in]  nb_iter       number of iterations,
+ *  \param[in]  weight        penalty weight ,
+ *  \param[in]  pen_type      penalty type,
+ *  \param[in]  outside       management of side effects (zero outside the support or
+ *                            continuation of the distribution),
  *
- *  arguments : references sur un objet StatError, stream, reference sur la loi connue,
- *              type de la loi inconnue (SUM/ELEMENTARY),
- *              borne inferieure minimum de la loi inconnue, type d'estimateur
- *              (vraisemblance, vraisemblance penalisee ou estimation d'une loi parametrique),
- *              nombre d'iterations, poids de la penalisation, type de penalisation,
- *              type de gestion des effets de bord (zero a l'exterieur du support ou
- *              prolongation de la loi).
- *
- *--------------------------------------------------------------*/
+ *  \param[out] compound      compound distribution.
+ */
+/*--------------------------------------------------------------*/
 
 Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream &os ,
                                                      const DiscreteParametric &known_dist ,
@@ -822,13 +839,16 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream 
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Simulation using a compound distribution.
  *
- *  Simulation par une loi composee.
+ *  \param[in]  error          reference on a StatError object,
+ *  \param[in]  nb_element     sample size,
  *
- *  arguments : reference sur un objet StatError, effectif.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] compound_histo sample generated by a compound distribution.
+ */
+/*--------------------------------------------------------------*/
 
 CompoundData* Compound::simulation(StatError &error , int nb_element) const
 
@@ -847,14 +867,14 @@ CompoundData* Compound::simulation(StatError &error , int nb_element) const
 
   else {
 
-    // creation d'un objet CompoundData
+    // construction of a CompoundData object
 
     compound_histo = new CompoundData(*this);
     compound_histo->compound = new Compound(*this , false);
 
     for (i = 0;i < nb_element;i++) {
 
-      // loi de la somme
+      // sum distribution
 
       nb_dist = sum_distribution->simulation();
       (compound_histo->sum_frequency_distribution->frequency[nb_dist])++;
@@ -862,19 +882,19 @@ CompoundData* Compound::simulation(StatError &error , int nb_element) const
       sum = 0;
       for (j = 0;j < nb_dist;j++) {
 
-        // loi elementaire
+        // basis distribution
 
         value = distribution->simulation();
         sum += value;
         (compound_histo->frequency_distribution->frequency[value])++;
       }
 
-      // loi resultante
+      // resulting compound distribution
 
       (compound_histo->frequency[sum])++;
     }
 
-    // extraction des caracteristiques des lois empiriques
+    // computation of frequency distribution characteristics
 
     compound_histo->nb_value_computation();
     compound_histo->offset_computation();

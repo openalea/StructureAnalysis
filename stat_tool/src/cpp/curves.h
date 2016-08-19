@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -48,16 +48,15 @@ namespace stat_tool {
 
 /****************************************************************
  *
- *  Constantes :
+ *  Constants
  */
 
 
-  const int MAX_FREQUENCY = 50;          // effectif maximum pour lisser les courbes
-  const int MAX_RANGE = 2;               // demi-largeur maximum de la fenetre de lissage
+  const int MAX_FREQUENCY = 50;          // maximum frequency for smoothing the curves
+  const int MAX_RANGE = 2;               // maximum half-width of the smoothing window
 
-  const int PLOT_NB_CURVE = 12;          // nombre maximum des courbes (sortie Gnuplot)
-  const int PLOT_MIN_FREQUENCY = 10;     // effectif minimum pour afficher les points
-                                         // des courbes (sortie Gnuplot)
+  const int PLOT_NB_CURVE = 12;          // maximum number of curves (Gnuplot output)
+  const int PLOT_MIN_FREQUENCY = 10;     // minimum frequency for plotting curve points (Gnuplot output)
 
   enum curve_transformation {
     CURVE_COPY ,
@@ -68,22 +67,22 @@ namespace stat_tool {
 
 /****************************************************************
  *
- *  Definition des classes :
+ *  Class definition
  */
 
 
-  class Curves {          // famille de courbes avec effectif
+  class Curves {          // family of curves with frequencies
 
     friend std::ostream& operator<<(std::ostream& , const Curves&);
 
   public :
 
-    int nb_curve;           // nombre de courbes
-    int length;             // longueur des courbes
-    int offset;             // abscisse des premiers points definis
-    int *index_parameter;   // parametres d'index explicites
-    int *frequency;         // effectifs correspondant a chaque abscisse
-    double **point;         // points des courbes
+    int nb_curve;           // number of curves
+    int length;             // curve length
+    int offset;             // index of the beginning of the curves
+    int *index_parameter;   // explicit index parameters
+    int *frequency;         // frequencies for each index
+    double **point;         // curves
 
     void copy(const Curves&);
     void smooth(const Curves &curves , int max_frequency);

@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -53,10 +53,10 @@ namespace stat_tool {
 
 
 /*--------------------------------------------------------------*
- *
- *  Constructeur par defaut de la classe Compound.
- *
- *--------------------------------------------------------------*/
+/**
+ *  \brief Default constructor of the Compound class.
+ */
+/*--------------------------------------------------------------*/
 
 Compound::Compound()
 
@@ -67,14 +67,15 @@ Compound::Compound()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the Compound class.
  *
- *  Constructeur de la classe Compound.
- *
- *  arguments : references sur la loi de la somme et sur la loi elementaire.
- *              seuil sur la fonction de repartition.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] sum_dist        reference on the sum distribution,
+ *  \param[in] dist            reference on the basis distribution,
+ *  \param[in] cumul_threshold threshold on the cumulative distribution function.
+ */
+/*--------------------------------------------------------------*/
 
 Compound::Compound(const DiscreteParametric &sum_dist , const DiscreteParametric &dist ,
                    double cumul_threshold)
@@ -91,14 +92,15 @@ Compound::Compound(const DiscreteParametric &sum_dist , const DiscreteParametric
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the Compound class.
  *
- *  Constructeur de la classe Compound.
- *
- *  arguments : references sur la loi de la somme et sur la loi elementaire.
- *              type de la loi inconnue.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] sum_dist reference on the sum distribution,
+ *  \param[in] dist     reference on the basis distribution,
+ *  \param[in] type     type of the unknown distribution.
+ */
+/*--------------------------------------------------------------*/
 
 Compound::Compound(const DiscreteParametric &sum_dist , const DiscreteParametric &dist ,
                    compound_distribution type)
@@ -133,14 +135,14 @@ Compound::Compound(const DiscreteParametric &sum_dist , const DiscreteParametric
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Copy of a Compound object.
  *
- *  Copie d'un objet Compound.
- *
- *  arguments : reference sur un objet Compound,
- *              flag copie de l'objet CompoundData.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] compound  reference on a Compound object,
+ *  \param[in] data_flag flag copy of the included CompoundData object.
+ */
+/*--------------------------------------------------------------*/
 
 void Compound::copy(const Compound &compound , bool data_flag)
 
@@ -157,11 +159,11 @@ void Compound::copy(const Compound &compound , bool data_flag)
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Destructeur de la classe Compound.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Destructor of the Compound class.
+ */
+/*--------------------------------------------------------------*/
 
 Compound::~Compound()
 
@@ -173,13 +175,15 @@ Compound::~Compound()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Assignment operator of the Compound class.
  *
- *  Operateur d'assignement de la classe Compound.
+ *  \param[in]  compound reference on a Compound object,
  *
- *  argument : reference sur un objet Compound.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] this     Compound object.
+ */
+/*--------------------------------------------------------------*/
 
 Compound& Compound::operator=(const Compound &compound)
 
@@ -201,13 +205,15 @@ Compound& Compound::operator=(const Compound &compound)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Extraction of the data part of a Compound object.
  *
- *  Extraction de la partie "donnees" d'un objet Compound.
+ *  \param[in]  error          reference on a StatError object.
  *
- *  argument : reference sur un objet StatError.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] compound_histo frequency distributions corresponding to a compound distribution.
+ */
+/*--------------------------------------------------------------*/
 
 CompoundData* Compound::extract_data(StatError &error) const
 
@@ -231,14 +237,17 @@ CompoundData* Compound::extract_data(StatError &error) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Construction of a Compound object from a file.
  *
- *  Construction d'un objet Compound a partir d'un fichier.
+ *  \param[in]  error           reference on a StatError object,
+ *  \param[in]  path            file path,
+ *  \param[in]  cumul_threshold threshold on the cumulative distribution function,
  *
- *  arguments : reference sur un objet StatError, path,
- *              seuil sur la fonction de repartition.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] compound        compound distribution.
+ */
+/*--------------------------------------------------------------*/
 
 Compound* Compound::ascii_read(StatError &error , const string path , double cumul_threshold)
 
@@ -286,8 +295,7 @@ Compound* Compound::ascii_read(StatError &error , const string path , double cum
 
       while (!((token = next()).isNull())) {
 
-        // test mots cles COMPOUND_DISTRIBUTION / SUM_DISTRIBUTION /
-        // ELEMENTARY_DISTRIBUTION
+        // test COMPOUND_DISTRIBUTION/SUM_DISTRIBUTION/ELEMENTARY_DISTRIBUTION key words
 
         if (i == 0) {
           switch (read_line) {
@@ -390,13 +398,13 @@ Compound* Compound::ascii_read(StatError &error , const string path , double cum
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing on a single line of a Compound object.
  *
- *  Ecriture sur une ligne d'un objet Compound.
- *
- *  argument : stream.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os stream.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& Compound::line_write(ostream &os) const
 
@@ -408,15 +416,17 @@ ostream& Compound::line_write(ostream &os) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a compound distribution and the associated frequency
+ *         distributions in a file.
  *
- *  Ecriture d'une loi composee et de la structure de donnees associee
- *  dans un fichier.
- *
- *  arguments : stream, pointeur sur un objet CompoundData,
- *              flag niveau de detail, flag fichier.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os             stream,
+ *  \param[in]     compound_histo pointeur on a CompoundData object,
+ *  \param[in]     exhaustive     flag detail level,
+ *  \param[in]     file_flag      flag file output.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& Compound::ascii_write(ostream &os , const CompoundData *compound_histo ,
                                bool exhaustive , bool file_flag) const
@@ -555,13 +565,14 @@ ostream& Compound::ascii_write(ostream &os , const CompoundData *compound_histo 
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a Compound object.
  *
- *  Ecriture d'un objet Compound.
- *
- *  arguments : stream, flag niveau de detail.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os         stream,
+ *  \param[in]     exhaustive flag detail level.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& Compound::ascii_write(ostream &os , bool exhaustive) const
 
@@ -570,14 +581,17 @@ ostream& Compound::ascii_write(ostream &os , bool exhaustive) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a Compound object in a file.
  *
- *  Ecriture d'un objet Compound dans un fichier.
+ *  \param[in]  error      reference on a StatError object,
+ *  \param[in]  path       file path,
+ *  \param[in]  exhaustive flag detail level,
  *
- *  arguments : reference sur un objet StatError, path,
- *              flag niveau de detail.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] status     error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool Compound::ascii_write(StatError &error , const string path ,
                            bool exhaustive) const
@@ -603,14 +617,15 @@ bool Compound::ascii_write(StatError &error , const string path ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a compound distribution and the associated frequency
+ *         distributions in a file at the spreadsheet format.
  *
- *  Ecriture d'une loi composee  et de la structure de donnees associee
- *  dans un fichier au format tableur.
- *
- *  arguments : stream, pointeur sur une famille de lois empiriques.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os             stream,
+ *  \param[in]     compound_histo pointeur on a CompoundData object.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& Compound::spreadsheet_write(ostream &os , const CompoundData *compound_histo) const
 
@@ -707,13 +722,16 @@ ostream& Compound::spreadsheet_write(ostream &os , const CompoundData *compound_
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a Compound object in a file at the spreadsheet format.
  *
- *  Ecriture d'un objet Compound dans un fichier au format tableur.
+ *  \param[in]  error  reference on a StatError object,
+ *  \param[in]  path   file path,
  *
- *  arguments : reference sur un objet StatError, path.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] status error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool Compound::spreadsheet_write(StatError &error , const string path) const
 
@@ -738,14 +756,18 @@ bool Compound::spreadsheet_write(StatError &error , const string path) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Plot of a compound distribution and the associated
+ *         frequency distributions using Gnuplot.
  *
- *  Sortie Gnuplot d'une loi composee et de la structure de donnees associee.
+ *  \param[in]  prefix         file prefix,
+ *  \param[in]  title          figure title,
+ *  \param[in]  compound_histo pointeur on a CompoundData object,
  *
- *  arguments : prefixe des fichiers, titre des figures,
- *              pointeur sur une famille de lois empiriques.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] status         error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool Compound::plot_write(const char *prefix , const char *title ,
                           const CompoundData *compound_histo) const
@@ -760,7 +782,7 @@ bool Compound::plot_write(const char *prefix , const char *title ,
   ostringstream data_file_name;
 
 
-  // ecriture du fichier de donnees
+  // writing of data file
 
   data_file_name << prefix << ".dat";
 
@@ -796,7 +818,7 @@ bool Compound::plot_write(const char *prefix , const char *title ,
                                    NULL , 0 , NULL);
   }
 
-  // ecriture du fichier de commandes et du fichier d'impression
+  // writing of script files
 
   if (status) {
     for (i = 0;i < 2;i++) {
@@ -934,14 +956,17 @@ bool Compound::plot_write(const char *prefix , const char *title ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Plot of a Compound object using Gnuplot.
  *
- *  Sortie Gnuplot d'un objet Compound.
+ *  \param[in]  error  reference on a StatError object,
+ *  \param[in]  prefix file prefix,
+ *  \param[in]  title  figure title,
  *
- *  arguments : reference sur un objet StatError, prefixe des fichiers,
- *              titre des figures.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] status error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool Compound::plot_write(StatError &error , const char *prefix ,
                           const char *title) const
@@ -959,13 +984,15 @@ bool Compound::plot_write(StatError &error , const char *prefix ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Plot of a compound distribution and associated frequency distributions.
  *
- *  Sortie graphique d'une loi composee et de la structure de donnees associee.
+ *  \param[in]  compound_histo pointeur on a CompoundData object,
  *
- *  argument : pointeur sur un objet CompoundData.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] plot_set       plots.
+ */
+/*--------------------------------------------------------------*/
 
 MultiPlotSet* Compound::get_plotable(const CompoundData *compound_histo) const
 
@@ -988,7 +1015,7 @@ MultiPlotSet* Compound::get_plotable(const CompoundData *compound_histo) const
 
   plot.border = "15 lw 0";
 
-  // 1ere vue : loi composee
+  // compound distribution
 
   xmax = nb_value - 1;
   if ((cumul[xmax] > 1. - DOUBLE_ERROR) &&
@@ -1034,7 +1061,7 @@ MultiPlotSet* Compound::get_plotable(const CompoundData *compound_histo) const
 
   if (compound_histo) {
 
-    // 2eme vue : fonctions de repartition
+    // cumulative distribution functions
 
     plot[1].xrange = Range(0 , xmax);
     plot[1].yrange = Range(0. , 1.);
@@ -1070,7 +1097,7 @@ MultiPlotSet* Compound::get_plotable(const CompoundData *compound_histo) const
     i = 1;
   }
 
-  // 2eme vue : loi de la somme
+  // sum distribution
 
   xmax = sum_distribution->nb_value - 1;
   if ((sum_distribution->cumul[xmax] > 1. - DOUBLE_ERROR) &&
@@ -1119,7 +1146,7 @@ MultiPlotSet* Compound::get_plotable(const CompoundData *compound_histo) const
 
   i++;
 
-  // 3eme vue : loi elementaire
+  // basis distribution
 
   xmax = distribution->nb_value - 1;
   if ((distribution->cumul[xmax] > 1. - DOUBLE_ERROR) &&
@@ -1171,11 +1198,13 @@ MultiPlotSet* Compound::get_plotable(const CompoundData *compound_histo) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Plot of a Compound object.
  *
- *  Sortie graphique d'un objet Compound.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] plots.
+ */
+/*--------------------------------------------------------------*/
 
 MultiPlotSet* Compound::get_plotable() const
 
@@ -1184,11 +1213,11 @@ MultiPlotSet* Compound::get_plotable() const
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Constructeur par defaut de la classe CompoundData.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Default constructor of the CompoundData class.
+ */
+/*--------------------------------------------------------------*/
 
 CompoundData::CompoundData()
 
@@ -1199,14 +1228,14 @@ CompoundData::CompoundData()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the CompoundData class.
  *
- *  Constructeur de la classe CompoundData.
- *
- *  arguments : reference sur un objet FrequencyDistribution et
- *              sur un objet Compound.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] histo     reference on a FrequencyDistribution object,
+ *  \param[in] icompound reference on a Compound object.
+ */
+/*--------------------------------------------------------------*/
 
 CompoundData::CompoundData(const FrequencyDistribution &histo , const Compound &icompound)
 :FrequencyDistribution(histo)
@@ -1219,13 +1248,13 @@ CompoundData::CompoundData(const FrequencyDistribution &histo , const Compound &
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the CompoundData class.
  *
- *  Constructeur de la classe CompoundData.
- *
- *  argument : reference sur un objet Compound.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] icompound reference on a Compound object.
+ */
+/*--------------------------------------------------------------*/
 
 CompoundData::CompoundData(const Compound &icompound)
 :FrequencyDistribution(icompound)
@@ -1238,14 +1267,14 @@ CompoundData::CompoundData(const Compound &icompound)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Copy of a CompoundData object.
  *
- *  Copie d'un objet CompoundData.
- *
- *  arguments : reference sur un objet CompoundData,
- *              flag copie de l'objet Compound.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] compound_histo reference on a CompoundData object,
+ *  \param[in] model_flag     flag copy of the included Compound object.
+ */
+/*--------------------------------------------------------------*/
 
 void CompoundData::copy(const CompoundData &compound_histo , bool model_flag)
 
@@ -1262,11 +1291,11 @@ void CompoundData::copy(const CompoundData &compound_histo , bool model_flag)
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Destructeur de la classe CompoundData.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Destructor of the CompoundData class.
+ */
+/*--------------------------------------------------------------*/
 
 CompoundData::~CompoundData()
 
@@ -1278,13 +1307,15 @@ CompoundData::~CompoundData()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Assignment operator of the CompoundData class.
  *
- *  Operateur d'assignement de la classe CompoundData.
+ *  \param[in]  compound_histo reference on a CompoundData object,
  *
- *  argument : reference sur un objet CompoundData.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] this           CompoundData object.
+ */
+/*--------------------------------------------------------------*/
 
 CompoundData& CompoundData::operator=(const CompoundData &compound_histo)
 
@@ -1305,14 +1336,17 @@ CompoundData& CompoundData::operator=(const CompoundData &compound_histo)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Extraction of the sum frequency distribution or of
+ *         the basis frequency distribution.
  *
- *  Extraction de la loi empirique de la somme ou
- *  de la loi empirique elementaire.
+ *  \param[in]  error  reference on a StatError object,
+ *  \param[in]  type   frequency distribution type,
  *
- *  arguments : reference sur un objet StatError, type de loi empirique.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] phisto frequency distribution corresponding to the sum or the basis distribution.
+ */
+/*--------------------------------------------------------------*/
 
 DiscreteDistributionData* CompoundData::extract(StatError &error , compound_distribution type) const
 
@@ -1353,13 +1387,13 @@ DiscreteDistributionData* CompoundData::extract(StatError &error , compound_dist
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing on a single line of a CompoundData object.
  *
- *  Ecriture sur une ligne d'un objet CompoundData.
- *
- *  argument : stream.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os stream.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& CompoundData::line_write(ostream &os) const
 
@@ -1372,13 +1406,14 @@ ostream& CompoundData::line_write(ostream &os) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief writing of a CompoundData object.
  *
- *  Ecriture d'un objet CompoundData.
- *
- *  arguments : stream, flag niveau de detail.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os         stream,
+ *  \param[in]     exhaustive flag detail level.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& CompoundData::ascii_write(ostream &os , bool exhaustive) const
 
@@ -1391,14 +1426,17 @@ ostream& CompoundData::ascii_write(ostream &os , bool exhaustive) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a CompoundData object in a file .
  *
- *  Ecriture d'un objet CompoundData dans un fichier.
+ *  \param[in]  error      reference on a StatError object,
+ *  \param[in]  path       file path,
+ *  \param[in]  exhaustive flag detail level,
  *
- *  arguments : reference sur un objet StatError, path,
- *              flag niveau de detail.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] status     error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool CompoundData::ascii_write(StatError &error , const string path ,
                                bool exhaustive) const
@@ -1427,13 +1465,16 @@ bool CompoundData::ascii_write(StatError &error , const string path ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a CompoundData object in a file at the spreadsheet format.
  *
- *  Ecriture d'un objet CompoundData dans un fichier au format tableur.
+ *  \param[in]  error  reference on a StatError object,
+ *  \param[in]  path   file path,
  *
- *  arguments : reference sur un objet StatError, path.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] status error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool CompoundData::spreadsheet_write(StatError &error , const string path) const
 
@@ -1461,14 +1502,17 @@ bool CompoundData::spreadsheet_write(StatError &error , const string path) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Plot of a CompoundData object using Gnuplot.
  *
- *  Sortie Gnuplot d'un objet CompoundData.
+ *  \param[in]  error  reference on a StatError object,
+ *  \param[in]  prefix file prefix,
+ *  \param[in]  title  figure title,
  *
- *  arguments : reference sur un objet StatError, prefixe des fichiers,
- *              titre des figures.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] status error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool CompoundData::plot_write(StatError &error , const char *prefix ,
                               const char *title) const
@@ -1491,11 +1535,13 @@ bool CompoundData::plot_write(StatError &error , const char *prefix ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Plot of a CompoundData object.
  *
- *  Sortie graphique d'un objet CompoundData.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] plot_set plots.
+ */
+/*--------------------------------------------------------------*/
 
 MultiPlotSet* CompoundData::get_plotable() const
 

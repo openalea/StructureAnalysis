@@ -12,6 +12,7 @@ options.Add(BoolVariable('DEBUG', 'my debug', 0))
 tools = ['boost_python', 'qt4', 'vplants.tool', 'install', 'vplants.stat_tool']
 
 env = ALEASolution(options, tools)
+env.AppendUnique(CXXFLAGS=['-x', 'c++', '-std=c++0x'])
 
 # Build stage
 prefix = env['build_prefix']

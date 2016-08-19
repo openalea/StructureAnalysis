@@ -829,12 +829,12 @@ public:
   }
 
   static bool
-  select_step(Vectors &input, int variable, double step)
+  select_bin_width(Vectors &input, int variable, double bin_width)
   {
     StatError error;
     bool ret;
 
-    ret = input.select_step(error, variable, step);
+    ret = input.select_bin_width(error, variable, bin_width);
     if (!ret)
       stat_tool::wrap_util::throw_error(error);
     return ret;
@@ -974,8 +974,8 @@ class_vectors()
       "Save vector data into a file")
   .def("spreadsheet_write", WRAP::spreadsheet_write,
       "Save data into CSV file")
-  .def("select_step", WRAP::select_step, 
-    args("variable", "step"), "select_step(step) refedine the step of the histogram. Step must be >0")
+  .def("select_bin_width", WRAP::select_bin_width, 
+    args("variable", "bin_width"), "select_bin_width(bin_width) redefine the bin_width of the histogram. bin_width must be >0")
   DEF_RETURN_VALUE("get_marginal_histogram", WRAP::get_marginal_histogram, 
     args("variable"), "get_marginal_histogram(nb_variable) construct marginal histogram of the vector given for the variable provided. The variable must be >=0 and less than nb_variable.")
 

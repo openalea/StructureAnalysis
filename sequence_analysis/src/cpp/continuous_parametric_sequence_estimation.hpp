@@ -75,7 +75,7 @@ void MarkovianSequences::gamma_estimation(Type ***state_sequence_count , int var
 
 {
   register int i , j , k;
-  double diff , log_geometric_mean , *zero_mass , *mean , *variance;
+  double buff , diff , log_geometric_mean , *zero_mass , *mean , *variance;
   Type *state_frequency;
 
 
@@ -162,9 +162,10 @@ void MarkovianSequences::gamma_estimation(Type ***state_sequence_count , int var
   }
 
   for (i = 0;i < process->nb_state;i++) {
-    if (state_frequency[i] > 0) {
-      variance[i] /= state_frequency[i];
-//      variance[i] /= (state_frequency[i] - 1);
+//    if (state_frequency[i] > 0) {
+//      variance[i] /= state_frequency[i];
+    if (state_frequency[i] > 1) {
+      variance[i] /= (state_frequency[i] - 1);
     }
   }
 
@@ -178,7 +179,8 @@ void MarkovianSequences::gamma_estimation(Type ***state_sequence_count , int var
     }
 #   endif
 
-    if (state_frequency[i] > 0) {
+//    if (state_frequency[i] > 0) {
+    if (state_frequency[i] > 1) {
       if (zero_mass[i] / state_frequency[i] > GAMMA_ZERO_FREQUENCY_THRESHOLD) {
         process->observation[i]->shape = 0;
         process->observation[i]->scale = D_DEFAULT;
@@ -188,27 +190,27 @@ void MarkovianSequences::gamma_estimation(Type ***state_sequence_count , int var
         if (variance[i] > 0.) {
 /*          if (sqrt(variance[i]) < mean[i] * GAMMA_VARIATION_COEFF_THRESHOLD) {
             variance[i] = mean[i] * mean[i] * GAMMA_VARIATION_COEFF_THRESHOLD * GAMMA_VARIATION_COEFF_THRESHOLD;
-          } */
-
-//          process->observation[i]->shape = mean[i] * mean[i] / variance[i];
-//          process->observation[i]->scale = variance[i] / mean[i];
+          }
+          process->observation[i]->shape = mean[i] * mean[i] / variance[i];
+          process->observation[i]->scale = variance[i] / mean[i]; */
 
           // Hawang & Huang (2012), Ann. Inst. Statist. Math. 54(4), 840-847
 
-          process->observation[i]->shape = mean[i] * mean[i] / variance[i] - 1. / (double)state_frequency[i];
-          process->observation[i]->scale = mean[i] / process->observation[i]->shape;
-
-#         ifdef DEBUG    // essai pour eviter les très petits parametres de forme
-          if ((process->observation[i]->shape < 1.) && (mean[i] < 5.)) {
-            process->observation[i]->shape = 1.;
-            process->observation[i]->scale = mean[i] / process->observation[i]->shape;
+          buff = mean[i] * mean[i] / variance[i];
+          if (buff > GAMMA_INVERSE_SAMPLE_SIZE_FACTOR / (double)state_frequency[i]) {
+            process->observation[i]->shape = buff - 1. / (double)state_frequency[i];
           }
-#         endif
+          else {
+            process->observation[i]->shape = buff;
+          }
+/*          if (process->observation[i]->shape < GAMMA_MIN_SHAPE_PARAMETER) {
+            process->observation[i]->shape = GAMMA_MIN_SHAPE_PARAMETER;
+          } */
+          process->observation[i]->scale = mean[i] / process->observation[i]->shape;
 
           if ((process->observation[i]->shape >= GAMMA_SHAPE_PARAMETER_THRESHOLD) &&
               (state_frequency[i] < GAMMA_FREQUENCY_THRESHOLD)) {
             log_geometric_mean = 0.;
-            state_frequency[i] = 0;
 
             switch (type[variable]) {
 
@@ -217,7 +219,6 @@ void MarkovianSequences::gamma_estimation(Type ***state_sequence_count , int var
                 for (k = 0;k < length[j];k++) {
                   if (int_sequence[j][variable][k] > 0) {
                     log_geometric_mean += state_sequence_count[j][k][i] * log(int_sequence[j][variable][k]);
-                    state_frequency[i] += state_sequence_count[j][k][i];
                   }
                 }
               }
@@ -229,7 +230,6 @@ void MarkovianSequences::gamma_estimation(Type ***state_sequence_count , int var
                 for (k = 0;k < length[j];k++) {
                   if (real_sequence[j][variable][k] > 0.) {
                     log_geometric_mean += state_sequence_count[j][k][i] * log(real_sequence[j][variable][k]);
-                    state_frequency[i] += state_sequence_count[j][k][i];
                   }
                 }
               }
@@ -237,8 +237,8 @@ void MarkovianSequences::gamma_estimation(Type ***state_sequence_count , int var
             }
             }
 
-            log_geometric_mean /= state_frequency[i];
-/*            j = 0;   a revoir
+            log_geometric_mean /= (state_frequency[i] - zero_mass[i]);
+/*            j = 0;   to be reworked
 
 #           ifdef DEBUG
             cout << "\n" << STAT_word[STATW_STATE] << " " << i << "   "
@@ -303,7 +303,7 @@ void MarkovianSequences::zero_inflated_gamma_estimation(Type ***state_sequence_c
 
 {
   register int i , j , k;
-  double diff , log_geometric_mean , *zero_mass , *mean , *variance;
+  double buff , diff , log_geometric_mean , *zero_mass , *mean , *variance;
   Type *state_frequency;
 
 
@@ -394,9 +394,10 @@ void MarkovianSequences::zero_inflated_gamma_estimation(Type ***state_sequence_c
   }
 
   for (i = 0;i < process->nb_state;i++) {
-    if (state_frequency[i] > 0) {
-      variance[i] /= state_frequency[i];
-//      variance[i] /= (state_frequency[i] - 1);
+//    if (state_frequency[i] > 0) {
+//      variance[i] /= state_frequency[i];
+    if (state_frequency[i] > 1) {
+      variance[i] /= (state_frequency[i] - 1);
     }
   }
 
@@ -411,26 +412,26 @@ void MarkovianSequences::zero_inflated_gamma_estimation(Type ***state_sequence_c
       else {
         process->observation[i]->zero_probability = zero_mass[i] / (zero_mass[i] + state_frequency[i]);
 
-        if (variance[i] > 0.) {
+        if ((variance[i] > 0.) && (state_frequency[i] > 1)) {
 /*          if (sqrt(variance[i]) < mean[i] * GAMMA_VARIATION_COEFF_THRESHOLD) {
             variance[i] = mean[i] * mean[i] * GAMMA_VARIATION_COEFF_THRESHOLD * GAMMA_VARIATION_COEFF_THRESHOLD;
-          } */
-
-//          process->observation[i]->shape = mean[i] * mean[i] / variance[i];
-//          process->observation[i]->scale = variance[i] / mean[i];
+          }
+          process->observation[i]->shape = mean[i] * mean[i] / variance[i];
+          process->observation[i]->scale = variance[i] / mean[i]; */
 
           // Hawang & Huang (2012), Ann. Inst. Statist. Math. 54(4), 840-847
 
-          process->observation[i]->shape = mean[i] * mean[i] / variance[i] - 1. / (double)state_frequency[i];
-          process->observation[i]->scale = mean[i] / process->observation[i]->shape;
-
-#         ifdef DEBUG    // essai pour eviter la bimodalite
-          if ((iter > 5) && (process->observation[i]->zero_probability > 0.5) &&
-              (process->observation[i]->shape > 1.)) {
-            process->observation[i]->shape = 1.;
-            process->observation[i]->scale = mean[i] / process->observation[i]->shape;
+          buff = mean[i] * mean[i] / variance[i];
+          if (buff > GAMMA_INVERSE_SAMPLE_SIZE_FACTOR / (double)state_frequency[i]) {
+            process->observation[i]->shape = buff - 1. / (double)state_frequency[i];
           }
-#         endif
+          else {
+            process->observation[i]->shape = buff;
+          }
+/*          if (process->observation[i]->shape < GAMMA_MIN_SHAPE_PARAMETER) {
+            process->observation[i]->shape = GAMMA_MIN_SHAPE_PARAMETER;
+          } */
+          process->observation[i]->scale = mean[i] / process->observation[i]->shape;
 
           if ((process->observation[i]->shape >= GAMMA_SHAPE_PARAMETER_THRESHOLD) &&
               (state_frequency[i] < GAMMA_FREQUENCY_THRESHOLD)) {
@@ -462,7 +463,7 @@ void MarkovianSequences::zero_inflated_gamma_estimation(Type ***state_sequence_c
             }
 
             log_geometric_mean /= state_frequency[i];
-/*            j = 0;   a revoir
+/*            j = 0;   to be reworked
 
 #           ifdef DEBUG
             cout << "\n" << STAT_word[STATW_STATE] << " " << i << "   "
@@ -722,8 +723,9 @@ void MarkovianSequences::gaussian_estimation(Type ***state_sequence_count , int 
     }
 
     for (i = 0;i < process->nb_state;i++) {
-      if (state_frequency[i] > 1) {
+//      if (state_frequency[i] > 0) {
 //        variance[i] /= state_frequency[i];
+      if (state_frequency[i] > 1) {
         variance[i] /= (state_frequency[i] - 1);
         process->observation[i]->dispersion = sqrt(variance[i]);
         if (process->observation[i]->dispersion / process->observation[i]->location < GAUSSIAN_MIN_VARIATION_COEFF) {
@@ -876,9 +878,13 @@ void MarkovianSequences::von_mises_estimation(Type ***state_sequence_count , int
         if (process->unit == DEGREE) {
           mean_direction[i][3] *= (180 / M_PI);
         }
+
+        process->observation[i]->location = mean_direction[i][3];
       }
 
-      process->observation[i]->location = mean_direction[i][3];
+      else {
+        process->observation[i]->location = D_INF;
+      }
     }
 
     else {
@@ -1144,8 +1150,14 @@ void MarkovianSequences::linear_model_estimation(Type ***state_sequence_count , 
     if (state_frequency[i] > 0) {
       process->observation[i]->slope = covariance[i] / index_parameter_variance[i];
       process->observation[i]->intercept = mean[i] - process->observation[i]->slope * index_parameter_mean[i];
-      process->observation[i]->correlation = covariance[i] / sqrt(variance[i] * index_parameter_variance[i]);
+      if (variance[i] > 0.) {
+        process->observation[i]->correlation = covariance[i] / sqrt(variance[i] * index_parameter_variance[i]);
+      }
+      else {
+        process->observation[i]->correlation = 0.;
+      }
     }
+
     else {
       process->observation[i]->slope = D_INF;
       process->observation[i]->intercept = D_INF;

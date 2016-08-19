@@ -1079,7 +1079,7 @@ void HiddenSemiMarkov::forward_backward(SemiMarkovData &seq) const
  *
  *--------------------------------------------------------------*/
 
-double HiddenSemiMarkov::forward_backward(const MarkovianSequences &seq , int index , ostream *os ,
+double HiddenSemiMarkov::forward_backward(MarkovianSequences &seq , int index , ostream *os ,
                                           MultiPlotSet *plot_set , state_profile output ,
                                           output_format format , double &max_marginal_entropy ,
                                           double &entropy1) const
@@ -1937,6 +1937,10 @@ double HiddenSemiMarkov::forward_backward(const MarkovianSequences &seq , int in
 
       pstate++;
     }
+
+    seq.min_value[0] = 0;
+    seq.max_value[0] = nb_state - 1;
+    seq.build_marginal_frequency_distribution(0);
 
     state_seq_likelihood = SemiMarkov::likelihood_computation(seq , index);
 

@@ -37,6 +37,7 @@
 
 
 #include <string>
+#include <vector>
 #include <sstream>
 #include <iomanip>
 
@@ -1140,6 +1141,40 @@ MarkovianSequences* MarkovianSequences::merge(StatError &error , int nb_sample ,
 
 /*--------------------------------------------------------------*
  *
+ *  Fusion d'objets MarkovianSequences.
+ *
+ *  arguments : reference sur un objet StatError, nombre d'objets MarkovianSequences,
+ *              pointeurs sur les objets MarkovianSequences.
+ *
+ *--------------------------------------------------------------*/
+
+MarkovianSequences* MarkovianSequences::merge(StatError &error , int nb_sample ,
+                                              const vector<MarkovianSequences> iseq) const
+
+{
+  register int i;
+  MarkovianSequences *seq;
+  const MarkovianSequences **pseq;
+
+
+  pseq = new const MarkovianSequences*[nb_sample];
+  for (i = 0;i < nb_sample;i++) {
+    pseq[i] = new MarkovianSequences(iseq[i]);
+  }
+
+  seq = merge(error , nb_sample , pseq);
+
+  for (i = 0;i < nb_sample;i++) {
+    delete pseq[i];
+  }
+  delete [] pseq;
+
+  return seq;
+}
+
+
+/*--------------------------------------------------------------*
+ *
  *  Regroupement des valeurs d'une variable.
  *
  *  arguments : reference sur un objet StatError, indice de la variable,
@@ -1350,6 +1385,23 @@ MarkovianSequences* MarkovianSequences::transcode(StatError &error , int ivariab
   }
 
   return seq;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Transcodage des categories d'une variable entiere.
+ *
+ *  arguments : reference sur un objet StatError, indice de la variable,
+ *              table de transcodage des categories, flag pour ajouter une variable.
+ *
+ *--------------------------------------------------------------*/
+
+MarkovianSequences* MarkovianSequences::transcode(StatError &error , int ivariable ,
+                                                  vector<int> category , bool add_variable) const
+
+{
+  return transcode(error , ivariable , category.data() , add_variable);
 }
 
 
@@ -1642,6 +1694,24 @@ MarkovianSequences* MarkovianSequences::cluster(StatError &error , int ivariable
 
 /*--------------------------------------------------------------*
  *
+ *  Regroupement des categories d'une variable entiere.
+ *
+ *  arguments : reference sur un objet StatError, indice de la variable,
+ *              nombres de classes, bornes pour regrouper les categories,
+ *              flag pour ajouter une variable.
+ *
+ *--------------------------------------------------------------*/
+
+MarkovianSequences* MarkovianSequences::cluster(StatError &error , int ivariable , int nb_class ,
+                                                vector<int> ilimit , bool add_variable) const
+
+{
+  return cluster(error , ivariable , nb_class , ilimit.data() , add_variable);
+}
+
+
+/*--------------------------------------------------------------*
+ *
  *  Regroupement des valeurs d'une variable reelle.
  *
  *  arguments : reference sur un objet StatError, indice de la variable,
@@ -1727,6 +1797,23 @@ MarkovianSequences* MarkovianSequences::cluster(StatError &error , int variable 
   }
 
   return seq;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Regroupement des valeurs d'une variable reelle.
+ *
+ *  arguments : reference sur un objet StatError, indice de la variable,
+ *              nombre de classes, bornes pour regrouper les valeurs.
+ *
+ *--------------------------------------------------------------*/
+
+MarkovianSequences* MarkovianSequences::cluster(StatError &error , int variable ,
+                                                int nb_class , vector<double> ilimit) const
+
+{
+  return cluster(error , variable , nb_class , ilimit.data());
 }
 
 
@@ -1883,6 +1970,24 @@ MarkovianSequences* MarkovianSequences::select_variable(StatError &error , int i
   }
 
   return seq;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Selection de variables.
+ *
+ *  arguments : reference sur un objet StatError, nombre de variables,
+ *              indices des variables, flag pour conserver ou rejeter
+ *              les variables selectionnees.
+ *
+ *--------------------------------------------------------------*/
+
+MarkovianSequences* MarkovianSequences::select_variable(StatError &error , int inb_variable ,
+                                                        vector<int> ivariable , bool keep) const
+
+{
+  return select_variable(error , inb_variable , ivariable.data() , keep);
 }
 
 
@@ -2174,6 +2279,41 @@ MarkovianSequences* MarkovianSequences::merge_variable(StatError &error , int nb
 
     delete [] pseq;
   }
+
+  return seq;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Concatenation des variables d'objets MarkovianSequences.
+ *
+ *  arguments : reference sur un objet StatError, nombre d'objets MarkovianSequences,
+ *              pointeurs sur les objets MarkovianSequences,
+ *              echantillon de reference pour les identificateurs.
+ *
+ *--------------------------------------------------------------*/
+
+MarkovianSequences* MarkovianSequences::merge_variable(StatError &error , int nb_sample ,
+                                                       const vector<MarkovianSequences> iseq , int ref_sample) const
+
+{
+  register int i;
+  MarkovianSequences *seq;
+  const MarkovianSequences **pseq;
+
+
+  pseq = new const MarkovianSequences*[nb_sample];
+  for (i = 0;i < nb_sample;i++) {
+    pseq[i] = new MarkovianSequences(iseq[i]);
+  }
+
+  seq = merge_variable(error , nb_sample , pseq , ref_sample);
+
+  for (i = 0;i < nb_sample;i++) {
+    delete pseq[i];
+  }
+  delete [] pseq;
 
   return seq;
 }
@@ -3635,10 +3775,10 @@ void MarkovianSequences::build_observation_frequency_distribution(int nb_state)
  *
  *--------------------------------------------------------------*/
 
-void MarkovianSequences::build_observation_histogram(int variable , int nb_state , double step)
+void MarkovianSequences::build_observation_histogram(int variable , int nb_state , double bin_width)
 
 {
-  if ((!observation_histogram[variable]) || (step != observation_histogram[variable][0]->step)) {
+  if ((!observation_histogram[variable]) || (bin_width != observation_histogram[variable][0]->bin_width)) {
     register int i , j;
     int *pstate , *pioutput;
     double imin_value , *proutput;
@@ -3646,17 +3786,17 @@ void MarkovianSequences::build_observation_histogram(int variable , int nb_state
 
     // construction de l'histogramme
 
-    if (step == D_DEFAULT) {
-      step = marginal_histogram[variable]->step;
+    if (bin_width == D_DEFAULT) {
+      bin_width = marginal_histogram[variable]->bin_width;
     }
-    imin_value = floor(min_value[variable] / step) * step;
+    imin_value = floor(min_value[variable] / bin_width) * bin_width;
 
     if (observation_histogram[variable]) {
       for (i = 0;i < nb_state;i++) {
-        observation_histogram[variable][i]->nb_category = (int)floor((max_value[variable] - imin_value) / step) + 1;
+        observation_histogram[variable][i]->nb_bin = (int)floor((max_value[variable] - imin_value) / bin_width) + 1;
 
         delete [] observation_histogram[variable][i]->frequency;
-        observation_histogram[variable][i]->frequency = new int[observation_histogram[variable][i]->nb_category];
+        observation_histogram[variable][i]->frequency = new int[observation_histogram[variable][i]->nb_bin];
       }
     }
 
@@ -3664,7 +3804,7 @@ void MarkovianSequences::build_observation_histogram(int variable , int nb_state
       observation_histogram[variable] = new Histogram*[nb_state];
 
       for (i = 0;i < nb_state;i++) {
-        observation_histogram[variable][i] = new Histogram((int)floor((max_value[variable] - imin_value) / step) + 1 , false);
+        observation_histogram[variable][i] = new Histogram((int)floor((max_value[variable] - imin_value) / bin_width) + 1 , false);
 
         observation_histogram[variable][i]->nb_element = marginal_distribution[0]->frequency[i];
         observation_histogram[variable][i]->type = type[variable];
@@ -3720,15 +3860,15 @@ void MarkovianSequences::build_observation_histogram(int variable , int nb_state
     }
 
     for (i = 0;i < nb_state;i++) {
-      observation_histogram[variable][i]->step = step;
+      observation_histogram[variable][i]->bin_width = bin_width;
       observation_histogram[variable][i]->min_value = imin_value;
-      observation_histogram[variable][i]->max_value = ceil(max_value[variable] / step) * step;
+      observation_histogram[variable][i]->max_value = ceil(max_value[variable] / bin_width) * bin_width;
     }
 
     // calcul des frequences
 
     for (i = 0;i < nb_state;i++) {
-      for (j = 0;j < observation_histogram[variable][i]->nb_category;j++) {
+      for (j = 0;j < observation_histogram[variable][i]->nb_bin;j++) {
         observation_histogram[variable][i]->frequency[j] = 0;
       }
     }
@@ -3740,8 +3880,8 @@ void MarkovianSequences::build_observation_histogram(int variable , int nb_state
         pstate = int_sequence[i][0];
         pioutput = int_sequence[i][variable];
         for (j = 0;j < length[i];j++) {
-//          (observation_histogram[variable][*pstate++]->frequency[(int)((*pioutput++ - imin_value) / step)])++;
-          (observation_histogram[variable][*pstate++]->frequency[(int)floor((*pioutput++ - imin_value) / step)])++;
+//          (observation_histogram[variable][*pstate++]->frequency[(int)((*pioutput++ - imin_value) / bin_width)])++;
+          (observation_histogram[variable][*pstate++]->frequency[(int)floor((*pioutput++ - imin_value) / bin_width)])++;
         }
       }
       break;
@@ -3752,8 +3892,8 @@ void MarkovianSequences::build_observation_histogram(int variable , int nb_state
         pstate = int_sequence[i][0];
         proutput = real_sequence[i][variable];
         for (j = 0;j < length[i];j++) {
-//          (observation_histogram[variable][*pstate++]->frequency[(int)((*proutput++ - imin_value) / step)]++;
-          (observation_histogram[variable][*pstate++]->frequency[(int)floor((*proutput++ - imin_value) / step)])++;
+//          (observation_histogram[variable][*pstate++]->frequency[(int)((*proutput++ - imin_value) / bin_width)]++;
+          (observation_histogram[variable][*pstate++]->frequency[(int)floor((*proutput++ - imin_value) / bin_width)])++;
         }
       }
       break;
@@ -3788,7 +3928,7 @@ void MarkovianSequences::build_observation_histogram(int nb_state)
     for (i = 1;i < nb_variable;i++) {
       observation_histogram[i] = NULL;
       if (marginal_histogram[i]) {
-        build_observation_histogram(i , nb_state , marginal_histogram[i]->step);
+        build_observation_histogram(i , nb_state , marginal_histogram[i]->bin_width);
       }
     }
   }
@@ -3805,8 +3945,8 @@ void MarkovianSequences::build_observation_histogram(int nb_state)
  *
  *--------------------------------------------------------------*/
 
-bool MarkovianSequences::select_step(StatError &error , int variable ,
-                                     double step , double imin_value)
+bool MarkovianSequences::select_bin_width(StatError &error , int variable ,
+                                          double bin_width , double imin_value)
 
 {
   bool status = true;
@@ -3826,12 +3966,12 @@ bool MarkovianSequences::select_step(StatError &error , int variable ,
       status = false;
       error.update(STAT_error[STATR_MARGINAL_HISTOGRAM]);
     }
-    if ((step <= 0.) || ((type[variable] != REAL_VALUE) &&
-         (type[variable] != AUXILIARY) && ((int)step != step))) {
+    if ((bin_width <= 0.) || ((type[variable] != REAL_VALUE) &&
+         (type[variable] != AUXILIARY) && ((int)bin_width != bin_width))) {
       status = false;
-      error.update(STAT_error[STATR_HISTOGRAM_STEP]);
+      error.update(STAT_error[STATR_HISTOGRAM_BIN_WIDTH]);
     }
-    if ((imin_value != D_INF) && ((imin_value <= min_value[variable] - step) ||
+    if ((imin_value != D_INF) && ((imin_value <= min_value[variable] - bin_width) ||
          (imin_value > min_value[variable]) || ((type[variable] != REAL_VALUE) &&
           (type[variable] != AUXILIARY) && ((int)imin_value != imin_value)))) {
       status = false;
@@ -3840,10 +3980,10 @@ bool MarkovianSequences::select_step(StatError &error , int variable ,
   }
 
   if (status) {
-    build_marginal_histogram(variable , step , imin_value);
+    build_marginal_histogram(variable , bin_width , imin_value);
 
     if ((observation_histogram) && (observation_histogram[variable])) {
-      build_observation_histogram(variable , marginal_distribution[0]->nb_value , step);
+      build_observation_histogram(variable , marginal_distribution[0]->nb_value , bin_width);
     }
   }
 
@@ -5563,8 +5703,8 @@ bool MarkovianSequences::plot_print(const char *prefix , const char *title , int
           out_file << "set ytics 0,1" << endl;
         }
 
-        out_file << "plot [" << marginal_histogram[variable]->min_value - marginal_histogram[variable]->step << ":"
-                 << marginal_histogram[variable]->max_value + marginal_histogram[variable]->step << "] [0:"
+        out_file << "plot [" << marginal_histogram[variable]->min_value - marginal_histogram[variable]->bin_width << ":"
+                 << marginal_histogram[variable]->max_value + marginal_histogram[variable]->bin_width << "] [0:"
                  << (int)(marginal_histogram[variable]->max * YSCALE) + 1 << "] \""
                  << label((data_file_name[1].str()).c_str()) << "\" using 1:2 title \""
                  << STAT_label[STATL_VARIABLE] << " " << variable + 1 << " "
@@ -5857,8 +5997,8 @@ void MarkovianSequences::plotable_write(MultiPlotSet &plot , int &index , int va
 
     // vue : histogramme marginal
 
-    plot[index].xrange = Range(marginal_histogram[variable]->min_value - marginal_histogram[variable]->step ,
-                               marginal_histogram[variable]->max_value + marginal_histogram[variable]->step);
+    plot[index].xrange = Range(marginal_histogram[variable]->min_value - marginal_histogram[variable]->bin_width ,
+                               marginal_histogram[variable]->max_value + marginal_histogram[variable]->bin_width);
     plot[index].yrange = Range(0 , ceil(marginal_histogram[variable]->max * YSCALE));
 
     if (ceil(marginal_histogram[variable]->max * YSCALE) < TIC_THRESHOLD) {

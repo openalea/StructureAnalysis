@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -56,11 +56,11 @@ extern int* pattern_sort(int nb_pattern , double *distance , int nb_sorted_patte
 
 
 
-/*--------------------------------------------------------------*
- *
- *  Constructeur par defaut de la classe Dendrogram.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Default constructor of the Dendrogram class.
+ */
+/*--------------------------------------------------------------*/
 
 Dendrogram::Dendrogram()
 
@@ -84,13 +84,14 @@ Dendrogram::Dendrogram()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the Dendrogram class.
  *
- *  Constructeur de la classe Dendrogram.
- *
- *  arguments : reference sur un objet DistanceMatrix, echelle.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] dist_matrix reference on a DistanceMatrix object,
+ *  \param[in] iscale      scale.
+ */
+/*--------------------------------------------------------------*/
 
 Dendrogram::Dendrogram(const DistanceMatrix &dist_matrix , cluster_scale iscale)
 
@@ -148,13 +149,13 @@ Dendrogram::Dendrogram(const DistanceMatrix &dist_matrix , cluster_scale iscale)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Copy of a Dendrogram object.
  *
- *  Copie d'un objet Dendrogram.
- *
- *  argument : reference sur un objet Dendrogram.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] dendrogram reference on a Dendrogram object.
+ */
+/*--------------------------------------------------------------*/
 
 void Dendrogram::copy(const Dendrogram &dendrogram)
 
@@ -224,11 +225,11 @@ void Dendrogram::copy(const Dendrogram &dendrogram)
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Destruction des champs d'un objet Dendrogram.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Destruction of the data members of a Dendrogram object.
+ */
+/*--------------------------------------------------------------*/
 
 void Dendrogram::remove()
 
@@ -264,11 +265,11 @@ void Dendrogram::remove()
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Destructeur de la classe Dendrogram.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Destructor of the Dendrogram class.
+ */
+/*--------------------------------------------------------------*/
 
 Dendrogram::~Dendrogram()
 
@@ -277,13 +278,15 @@ Dendrogram::~Dendrogram()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Assignment operator of the Dendrogram class.
  *
- *  Operateur d'assignement de la classe Dendrogram.
+ *  \param[in] dendrogram reference on a Dendrogram object,
  *
- *  argument : reference sur un objet Dendrogram.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] this      Dendrogram object.
+ */
+/*--------------------------------------------------------------*/
 
 Dendrogram& Dendrogram::operator=(const Dendrogram &dendrogram)
 
@@ -297,13 +300,13 @@ Dendrogram& Dendrogram::operator=(const Dendrogram &dendrogram)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing on a single line of a Dendrogram object.
  *
- *  Ecriture sur une ligne d'un objet Dendrogram.
- *
- *  argument : stream.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os stream.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& Dendrogram::line_write(ostream &os) const
 
@@ -330,11 +333,13 @@ ostream& Dendrogram::line_write(ostream &os) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Sort of the between-cluster distances.
  *
- *  Mise en ordre des distances entre groupes.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] ordered_distance ordered distances.
+ */
+/*--------------------------------------------------------------*/
 
 double* Dendrogram::distance_ordering() const
 
@@ -384,13 +389,14 @@ double* Dendrogram::distance_ordering() const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a Dendrogram object.
  *
- *  Ecriture d'un objet Dendrogram.
- *
- *  arguments : stream, niveau de detail.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os         stream,
+ *  \param[in]     exhaustive detail level.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& Dendrogram::ascii_write(ostream &os , bool exhaustive) const
 
@@ -406,7 +412,7 @@ ostream& Dendrogram::ascii_write(ostream &os , bool exhaustive) const
 
   os << distance_matrix->nb_row << " " << distance_matrix->label << "s" << endl;
 
-  // calcul des largeurs des colonnes
+  // computation of the column width
 
   width[0] = column_width(distance_matrix->nb_row) + 1;
   width[1] = column_width(distance_matrix->nb_row - 1 , child_distance + distance_matrix->nb_row);
@@ -434,10 +440,10 @@ ostream& Dendrogram::ascii_write(ostream &os , bool exhaustive) const
   }
   width[1] += ASCII_SPACE;
 
-  // ecriture (i) de la distance entre groupes fils, (ii) de la distance intra-groupe,
-  // (iii) de la distance inter-groupe, (iv) de la distance entre les formes les plus distantes
-  // a l'interieur du groupe (diametre), (v) de la distance entre les formes les plus proches
-  // entre ce groupe et un autre (separation), (vi) de la composition du groupe
+  // writing of (i) the distances between child clusters, (ii) the wihin-cluster distances,
+  // (iii) the between-cluster distances, (iv) the distances between the farthest individuals
+  // within a cluster (diameter), (v) the distances between the closest individuals belonging to
+  // two different clusters (separation) and (vi) the cluster compositions
 
   os << "\n        | " << STAT_label[STATL_CHILD] << " "  << STAT_label[STATL_CLUSTER] << " "
      << STAT_label[STATL_DISTANCE] << " | " << STAT_label[STATL_WITHIN] << "-" << STAT_label[STATL_CLUSTER] << " "
@@ -471,7 +477,7 @@ ostream& Dendrogram::ascii_write(ostream &os , bool exhaustive) const
 
   ordered_distance = distance_ordering();
 
-  // calcul des largeurs des colonnes
+  // computation of the column width
 
   max_identifier = 0;
   for (i = 0;i < distance_matrix->nb_row;i++) {
@@ -482,7 +488,7 @@ ostream& Dendrogram::ascii_write(ostream &os , bool exhaustive) const
 
   width[0] = column_width(max_identifier);
 
-  // ecriture des distances ordonnees
+  // writing of ordered distances
 
   os << "\n" << STAT_label[STATL_DENDROGRAM_SCALE] << ": ";
   switch (scale) {
@@ -506,7 +512,7 @@ ostream& Dendrogram::ascii_write(ostream &os , bool exhaustive) const
   }
   os << endl;
 
-  // ecriture du dendrogramme
+  // writing of the dendrogram
 
   switch (scale) {
   case CHILD_CLUSTER_DISTANCE :
@@ -612,13 +618,17 @@ ostream& Dendrogram::ascii_write(ostream &os , bool exhaustive) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a Dendrogram object in a file.
  *
- *  Ecriture d'un objet Dendrogram dans un fichier.
+ *  \param[in]  error      reference on a StatError object,
+ *  \param[in]  path       file path,
+ *  \param[in]  exhaustive detail level,
  *
- *  arguments : reference sur un objet StatError, path, niveau de detail.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] status     error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool Dendrogram::ascii_write(StatError &error , const string path ,
                              bool exhaustive) const
@@ -644,13 +654,16 @@ bool Dendrogram::ascii_write(StatError &error , const string path ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a Dendrogram object in a file at the spreadsheet format.
  *
- *  Ecriture d'un objet Dendrogram dans un fichier au format tableur.
+ *  \param[in]  error  reference on a StatError object,
+ *  \param[in]  path   file path,
  *
- *  arguments : reference sur un objet StatError, path.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] status error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool Dendrogram::spreadsheet_write(StatError &error , const string path) const
 
@@ -673,10 +686,10 @@ bool Dendrogram::spreadsheet_write(StatError &error , const string path) const
 
     out_file << distance_matrix->nb_row << " " << distance_matrix->label << "s" << endl;
 
-    // ecriture (i) de la distance entre groupes fils, (ii) de la distance intra-groupe,
-    // (iii) de la distance inter-groupe, (iv) de la distance entre les formes les plus distantes
-    // a l'interieur du groupe (diametre), (v) de la distance entre les formes les plus proches
-    // entre ce groupe et un autre (separation), (vi) de la composition du groupe
+    // writing of (i) the distances between child clusters, (ii) the wihin-cluster distances,
+    // (iii) the between-cluster distances, (iv) the distances between the farthest individuals
+    // within a cluster (diameter), (v) the distances between the closest individuals belonging to
+    // two different clusters (separation) and (vi) the cluster compositions
 
     out_file << "\n\t" << STAT_label[STATL_CHILD] << " " << STAT_label[STATL_CLUSTER] << " "
              << STAT_label[STATL_DISTANCE] << "\t" << STAT_label[STATL_WITHIN] << "-" << STAT_label[STATL_CLUSTER] << " "
@@ -702,7 +715,7 @@ bool Dendrogram::spreadsheet_write(StatError &error , const string path) const
 
     ordered_distance = distance_ordering();
 
-    // ecriture des distances ordonnees
+    // writing of the ordered distances
 
     out_file << "\n" << STAT_label[STATL_DENDROGRAM_SCALE] << "\t";
     switch (scale) {
@@ -736,11 +749,11 @@ bool Dendrogram::spreadsheet_write(StatError &error , const string path) const
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Calcul de l'arborescence a partir des compositions des groupes.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the dendrogram on the basis of the cluster compositions.
+ */
+/*--------------------------------------------------------------*/
 
 void Dendrogram::tree_computation()
 
@@ -772,14 +785,15 @@ void Dendrogram::tree_computation()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the agglomerative/divisive coefficient (Kaufman & Rousseeuw, pp. 212, 263).
  *
- *  Calcul du coefficient d'agglomeration / de division
- *  (Kaufman & Rousseeuw, pp. 212, 263).
+ *  \param[in]  iscale dendrogram distance scale,
  *
- *  argument : echelle.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] coeff  agglomerative/divisive coefficient.
+ */
+/*--------------------------------------------------------------*/
 
 double Dendrogram::coefficient_computation(cluster_scale iscale) const
 
@@ -812,11 +826,13 @@ double Dendrogram::coefficient_computation(cluster_scale iscale) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the agglomerative/divisive coefficient.
  *
- *  Calcul du coefficient d'agglomeration / de division.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] coeff agglomerative/divisive coefficient.
+ */
+/*--------------------------------------------------------------*/
 
 double Dendrogram::coefficient_computation() const
 
@@ -825,14 +841,16 @@ double Dendrogram::coefficient_computation() const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Agglomerative hierarchical clustering algorithm (Kaufman & Rousseeuw, pp. 199-208).
  *
- *  Algorithmes de clustering hierarchique par agglomeration des groupes
- *  (Kaufman & Rousseeuw, pp. 199-208).
+ *  \param[in]  strategy   algorihm type,
+ *  \param[in]  criterion  cluster merging criterion,
  *
- *  arguments : type d'algorihme, critere pour le groupement.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] dendrogram Dendrogram object.
+ */
+/*--------------------------------------------------------------*/
 
 Dendrogram* DistanceMatrix::agglomerative_hierarchical_clustering(hierarchical_strategy strategy ,
                                                                   linkage criterion) const
@@ -847,7 +865,7 @@ Dendrogram* DistanceMatrix::agglomerative_hierarchical_clustering(hierarchical_s
   Dendrogram *dendrogram;
 
 
-  dist_matrix = new DistanceMatrix(*this , (test_symmetry() ? 'c' : 's'));
+  dist_matrix = new DistanceMatrix(*this , (test_symmetry() ? COPY : SYMMETRIZATION));
 
 # ifdef DEBUG
   if (!(test_symmetry())) {
@@ -857,7 +875,7 @@ Dendrogram* DistanceMatrix::agglomerative_hierarchical_clustering(hierarchical_s
 
   dendrogram = new Dendrogram(*dist_matrix , (criterion != FARTHEST_NEIGHBOR ? CHILD_CLUSTER_DISTANCE : DIAMETER));
 
-  // initialisation des structures de donnees de l'algorithme
+  // initialization of the data structures of the algorithm
 
   clusters = new Clusters(*dist_matrix , nb_row);
 
@@ -913,7 +931,7 @@ Dendrogram* DistanceMatrix::agglomerative_hierarchical_clustering(hierarchical_s
   if (strategy == ORDERING) {
     cumul_distance = new double[nb_row];
 
-    // tri par distance moyenne croissante aux autres formes
+    // sort by increasing average distance to the other individuals
 
     for (i = 0;i < nb_row;i++) {
       cumul_distance[i] = stat_tool::cumul_distance_computation(nb_column , dist_matrix->distance[i]);
@@ -941,7 +959,7 @@ Dendrogram* DistanceMatrix::agglomerative_hierarchical_clustering(hierarchical_s
       cout << endl;
 #     endif
 
-      // recherche de la distance minimum courante
+      // determination of the current minimum distance
 
       switch (strategy) {
 
@@ -1060,7 +1078,7 @@ Dendrogram* DistanceMatrix::agglomerative_hierarchical_clustering(hierarchical_s
 
     (clusters->nb_cluster)--;
 
-    // mise a jour de la matrice des distances
+    // update of the between-cluster distance matrix
 
     for (j = 0;j < nb_row - i - 1;j++) {
       if (j < index2) {
@@ -1132,7 +1150,7 @@ Dendrogram* DistanceMatrix::agglomerative_hierarchical_clustering(hierarchical_s
       }
     }
 
-    // mise a jour de la composition du groupe
+    // update of the cluster composition
 
     for (j = 0;j < clusters->cluster_nb_pattern[index2];j++) {
       cluster_pattern[index1][clusters->cluster_nb_pattern[index1] + j] = cluster_pattern[index2][j];
@@ -1162,7 +1180,7 @@ Dendrogram* DistanceMatrix::agglomerative_hierarchical_clustering(hierarchical_s
     cout << endl;
 #   endif
 
-    // calcul du diametre et de la separation du groupe
+    // computation of the cluster diameter and separation
 
     dendrogram->max_within_cluster_distance[nb_row + i] = clusters->max_within_cluster_distance_computation(normalized_pattern_distance , clusters->assignment[cluster_pattern[index1][0]]);
     if (i < nb_row - 2) {
@@ -1170,7 +1188,7 @@ Dendrogram* DistanceMatrix::agglomerative_hierarchical_clustering(hierarchical_s
     }
   }
 
-  // calcul de l'arborescence des groupes
+  // computation of the dendrogram
 
   dendrogram->tree_computation();
 
@@ -1209,12 +1227,13 @@ Dendrogram* DistanceMatrix::agglomerative_hierarchical_clustering(hierarchical_s
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Divisive hierarchical clustering algorithm (Kaufman & Rousseeuw, pp. 253-259).
  *
- *  Algorithme de clustering hierarchique par division des groupes
- *  (Kaufman & Rousseeuw, pp. 253-259).
- *
- *--------------------------------------------------------------*/
+ *  \param[out] dendrogram Dendrogram object.
+ */
+/*--------------------------------------------------------------*/
 
 Dendrogram* DistanceMatrix::divisive_hierarchical_clustering() const
 
@@ -1228,7 +1247,7 @@ Dendrogram* DistanceMatrix::divisive_hierarchical_clustering() const
   Dendrogram *dendrogram;
 
 
-  dist_matrix = new DistanceMatrix(*this , (test_symmetry() ? 'c' : 's'));
+  dist_matrix = new DistanceMatrix(*this , (test_symmetry() ? COPY : SYMMETRIZATION));
 
 # ifdef DEBUG
   if (!(test_symmetry())) {
@@ -1238,7 +1257,7 @@ Dendrogram* DistanceMatrix::divisive_hierarchical_clustering() const
 
   dendrogram = new Dendrogram(*dist_matrix , DIAMETER);
 
-  // initialisation des structures de donnees de l'algorithme
+  // initialization of the data structures of the algorithm
 
   clusters = new Clusters(*dist_matrix , nb_row);
   clusters->nb_cluster = 1;
@@ -1277,7 +1296,7 @@ Dendrogram* DistanceMatrix::divisive_hierarchical_clustering() const
 
     else {
 
-      // recherche du groupe de diametre maximum
+      // determination of the cluster of maximum diameter
 
       dendrogram->max_within_cluster_distance[nb_row + i] = 0.;
       for (j = 0;j <= nb_row - i - 2;j++) {
@@ -1306,7 +1325,7 @@ Dendrogram* DistanceMatrix::divisive_hierarchical_clustering() const
 
       if (dendrogram->max_within_cluster_distance[nb_row + i] > 0.) {
 
-        // extraction de la matrice des distances correspondant au groupe selectionne
+        // extraction of the distance matrix corresponding to the selected cluster
 
         passignment1 = clusters->assignment;
         j = 0;
@@ -1338,7 +1357,7 @@ Dendrogram* DistanceMatrix::divisive_hierarchical_clustering() const
     if (dendrogram->max_within_cluster_distance[nb_row + i] > 0.) {
       step_clusters = new Clusters(*step_dist_matrix , 2);
 
-      // recherche de la forme la plus excentree appartenant au groupe selectionne
+      // determination of the most outlying individual within the selected cluster
 
       max_cumul_distance = 0.;
 
@@ -1354,7 +1373,7 @@ Dendrogram* DistanceMatrix::divisive_hierarchical_clustering() const
       }
 
 #     ifdef DEBUG
-      cout << "\nOutlying pattern: " << outlying_pattern << endl;
+      cout << "\nOutlying individual: " << outlying_pattern << endl;
 #     endif
 
       passignment2 = step_clusters->assignment;
@@ -1363,12 +1382,12 @@ Dendrogram* DistanceMatrix::divisive_hierarchical_clustering() const
       }
       step_clusters->assignment[outlying_pattern] = 1;
 
-      // partition en 2 groupes du groupe selectionne
+      // partition in 2 clusters of the selected cluster
 
       step_clusters->algorithmic_step_1();
       step_clusters->cluster_distance_computation_1();
 
-      // mise a jour des compositions des groupes
+      // update of the cluster compositions
 
       for (j = 0;j < dendrogram->cluster_nb_pattern[nb_row + i];j++) {
         dendrogram->cluster_pattern[nb_row + i][j] = cluster_index[j];
@@ -1402,7 +1421,7 @@ Dendrogram* DistanceMatrix::divisive_hierarchical_clustering() const
 
     else {
 
-      // mise a jour des compositions des groupes
+      // update of the cluster compositions
 
       passignment1 = clusters->assignment;
       j = 0;
@@ -1422,11 +1441,11 @@ Dendrogram* DistanceMatrix::divisive_hierarchical_clustering() const
     }
   }
 
-  // calcul de l'arborescence des groupes
+  // computation of the dendrogram
 
   dendrogram->tree_computation();
 
-  // remise en ordre des groupes
+  // re-ordering of clusters
 
   for (i = nb_row;i < 2 * nb_row - 1;i++) {
     for (j = 0;j < dendrogram->cluster_nb_pattern[dendrogram->child[i][0]];j++) {
@@ -1454,15 +1473,20 @@ Dendrogram* DistanceMatrix::divisive_hierarchical_clustering() const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Hierarchical clustering algorithms.
  *
- *  Algorithmes de clustering hierarchique.
+ *  \param[in]  error      reference on a StatError object,
+ *  \param[in]  os         stream,
+ *  \param[in]  strategy   algorithm type (AGGLOMERATIVE/DIVISIVE/ORDERING),
+ *  \param[in]  criterion  cluster merging criterion (agglomerative algorithm),
+ *  \param[in]  path       file path,
+ *  \param[in]  format     output format (ASCII/SPREADSHEET),
  *
- *  arguments : reference sur un objet StatError, stream, type d'algorithme,
- *              critere pour le groupement (algorithme par agglomeration),
- *              path, format (ASCII/SPREADSHEET).
- *
- *--------------------------------------------------------------*/
+ *  \param[out] dendrogram Dendrogram object.
+ */
+/*--------------------------------------------------------------*/
 
 bool DistanceMatrix::hierarchical_clustering(StatError &error , ostream &os ,
                                              hierarchical_strategy strategy , linkage criterion ,
@@ -1488,7 +1512,7 @@ bool DistanceMatrix::hierarchical_clustering(StatError &error , ostream &os ,
       dendrogram = divisive_hierarchical_clustering();
     }
 
-    // ecriture des resultats
+    // writing of results
 
 #   ifdef MESSAGE
     dendrogram->ascii_write(os);

@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -52,33 +52,34 @@ namespace stat_tool {
 
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Construction of a Histogram object.
  *
- *  Construction d'un objet Histogram.
- *
- *  arguments : nombre de categories, flag initialisation.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] inb_bin   number of bins,
+ *  \param[in] init_flag flag initialization.
+ */
+/*--------------------------------------------------------------*/
 
-Histogram::Histogram(int inb_category , bool init_flag)
+Histogram::Histogram(int inb_bin , bool init_flag)
 
 {
   nb_element = I_DEFAULT;
-  nb_category = inb_category;
-  step = D_DEFAULT;
+  nb_bin = inb_bin;
+  bin_width = D_DEFAULT;
   max = 0;
 
-  if (nb_category == 0) {
+  if (nb_bin == 0) {
     frequency = NULL;
   }
 
   else {
-    frequency = new int[nb_category];
+    frequency = new int[nb_bin];
 
     if (init_flag) {
       register int i;
 
-      for (i = 0;i < nb_category;i++) {
+      for (i = 0;i < nb_bin;i++) {
         frequency[i] = 0;
       }
     }
@@ -90,13 +91,13 @@ Histogram::Histogram(int inb_category , bool init_flag)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Construction of an Histogram object from a FrequencyDistribution object.
  *
- *  Construction d'un objet Histogram a partir d'un objet FrequencyDistribution.
- *
- *  argument : reference sur un objet FrequencyDistribution.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] histo reference on a FrequencyDistribution object.
+ */
+/*--------------------------------------------------------------*/
 
 Histogram::Histogram(const FrequencyDistribution &histo)
 
@@ -107,15 +108,15 @@ Histogram::Histogram(const FrequencyDistribution &histo)
   nb_element = histo.nb_element;
   max = histo.max;
 
-  step = histo.min_interval_computation();
+  bin_width = histo.min_interval_computation();
 
-  nb_category = (histo.nb_value - 1 - histo.offset) / step + 1;
-  frequency = new int[nb_category];
+  nb_bin = (histo.nb_value - 1 - histo.offset) / bin_width + 1;
+  frequency = new int[nb_bin];
 
   i = histo.offset;
-  for (j = 0;j < nb_category;j++) {
+  for (j = 0;j < nb_bin;j++) {
     frequency[j] = histo.frequency[i];
-    i += step;
+    i += bin_width;
   }
 
   type = INT_VALUE;
@@ -125,13 +126,13 @@ Histogram::Histogram(const FrequencyDistribution &histo)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Copy of an Histogram object.
  *
- *  Copie d'un objet Histogram.
- *
- *  argument : reference sur un objet Histogram.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] reference on a Histogram object.
+ */
+/*--------------------------------------------------------------*/
 
 void Histogram::copy(const Histogram &histo)
 
@@ -140,13 +141,13 @@ void Histogram::copy(const Histogram &histo)
 
 
   nb_element = histo.nb_element;
-  nb_category = histo.nb_category;
-  step = histo.step;
+  nb_bin = histo.nb_bin;
+  bin_width = histo.bin_width;
   max = histo.max;
 
-  frequency = new int[nb_category];
+  frequency = new int[nb_bin];
 
-  for (i = 0;i < nb_category;i++) {
+  for (i = 0;i < nb_bin;i++) {
     frequency[i] = histo.frequency[i];
   }
 
@@ -156,11 +157,11 @@ void Histogram::copy(const Histogram &histo)
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Destructeur de la classe Histogram.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Destructor of the Histogram class.
+ */
+/*--------------------------------------------------------------*/
 
 Histogram::~Histogram()
 
@@ -169,13 +170,15 @@ Histogram::~Histogram()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Assignment operator of the Histogram class.
  *
- *  Operateur d'assignement de la classe Histogram.
+ *  \param[in]  histo reference on a Histogram object,
  *
- *  argument : reference sur un objet Histogram.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] this  Histogram object.
+ */
+/*--------------------------------------------------------------*/
 
 Histogram& Histogram::operator=(const Histogram &histo)
 
@@ -190,13 +193,16 @@ Histogram& Histogram::operator=(const Histogram &histo)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of a column width for real values.
  *
- *  Calcul de la largeur d'une colonne de reels.
+ *  \param[in]  min_value minimum value,
+ *  \param[in]  max_value maximum value,
  *
- *  arguments : valeur minimum, valeur maximum.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] max_width column width.
+ */
+/*--------------------------------------------------------------*/
 
 int column_width(double min_value , double max_value)
 
@@ -223,13 +229,14 @@ int column_width(double min_value , double max_value)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a histogram.
  *
- *  Ecriture d'un histogramme.
- *
- *  arguments : stream, flag commentaire.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os           stream,
+ *  \param[in]     comment_flag flag comment.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& Histogram::ascii_print(ostream &os , bool comment_flag) const
 
@@ -242,22 +249,22 @@ ostream& Histogram::ascii_print(ostream &os , bool comment_flag) const
 
   old_adjust = os.setf(ios::right , ios::adjustfield);
 
-  // calcul des largeurs des colonnes
+  // computation of column widths
 
   switch (type) {
   case INT_VALUE :
     first_value = min_value;
     break;
   case REAL_VALUE :
-    first_value = min_value + step / 2;
+    first_value = min_value + bin_width / 2;
     break;
   }
 
-  width[0] = column_width(first_value , first_value + (nb_category - 1) * step);
+  width[0] = column_width(first_value , first_value + (nb_bin - 1) * bin_width);
   width[1] = column_width(max) + ASCII_SPACE;
 
   value = first_value;
-  for (i = 0;i < nb_category;i++) {
+  for (i = 0;i < nb_bin;i++) {
 //    if (frequency[i] > 0) {
       if (comment_flag) {
         os << "# ";
@@ -266,7 +273,7 @@ ostream& Histogram::ascii_print(ostream &os , bool comment_flag) const
       os << setw(width[1]) << frequency[i];
       os << endl;
 //    }
-    value += step;
+    value += bin_width;
   }
 
   os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
@@ -275,13 +282,13 @@ ostream& Histogram::ascii_print(ostream &os , bool comment_flag) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a histogram at the spreadsheet format.
  *
- *  Ecriture d'un histogramme au format tableur.
- *
- *  argument : stream.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os stream.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& Histogram::spreadsheet_print(ostream &os) const
 
@@ -295,28 +302,30 @@ ostream& Histogram::spreadsheet_print(ostream &os) const
     value = min_value;
     break;
   case REAL_VALUE :
-    value = min_value + step / 2;
+    value = min_value + bin_width / 2;
     break;
   }
 
-  for (i = 0;i < nb_category;i++) {
+  for (i = 0;i < nb_bin;i++) {
 //    if (frequency[i] > 0) {
       os << value << "\t" << frequency[i] << endl;
 //    }
-    value += step;
+    value += bin_width;
   }
 
   return os;
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a histogram at the Gnuplot format.
  *
- *  Ecriture d'un histogramme au format Gnuplot.
+ *  \param[in]  path   file path,
  *
- *  argument : path.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] status error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool Histogram::plot_print(const char *path) const
 
@@ -335,14 +344,14 @@ bool Histogram::plot_print(const char *path) const
       value = min_value;
       break;
     case REAL_VALUE :
-      value = min_value + step / 2;
+      value = min_value + bin_width / 2;
       break;
     }
 
-    out_file << value - step << " " << 0 << endl;
-    for (i = 0;i < nb_category;i++) {
+    out_file << value - bin_width << " " << 0 << endl;
+    for (i = 0;i < nb_bin;i++) {
       out_file << value << " " << frequency[i] << endl;
-      value += step;
+      value += bin_width;
     }
     out_file << value << " " << 0 << endl;
   }
@@ -351,13 +360,13 @@ bool Histogram::plot_print(const char *path) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a histogram at the plotable format.
  *
- *  Ecriture d'un histogramme.
- *
- *  argument : reference sur un objet SinglePlot.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] plot reference on a SinglePlot object.
+ */
+/*--------------------------------------------------------------*/
 
 void Histogram::plotable_write(SinglePlot &plot) const
 
@@ -371,24 +380,24 @@ void Histogram::plotable_write(SinglePlot &plot) const
     value = min_value;
     break;
   case REAL_VALUE :
-    value = min_value + step / 2;
+    value = min_value + bin_width / 2;
     break;
   }
 
-  plot.add_point(value - step , 0);
-  for (i = 0;i < nb_category;i++) {
+  plot.add_point(value - bin_width , 0);
+  for (i = 0;i < nb_bin;i++) {
     plot.add_point(value , frequency[i]);
-    value += step;
+    value += bin_width;
   }
   plot.add_point(value , 0);
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Recherche de la frequence maximum d'un histogramme.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Determination of the maximum bin frequency for a histogram.
+ */
+/*--------------------------------------------------------------*/
 
 void Histogram::max_computation()
 
@@ -397,7 +406,7 @@ void Histogram::max_computation()
 
 
   max = 0;
-  for (i = 0;i < nb_category;i++) {
+  for (i = 0;i < nb_bin;i++) {
     if (frequency[i] > max) {
       max = frequency[i];
     }
@@ -405,11 +414,13 @@ void Histogram::max_computation()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of a cumulative distribution function from a histogram.
  *
- *  Calcul de la fonction de repartition deduite d'un histogramme.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] cumul cumulative distribution function.
+ */
+/*--------------------------------------------------------------*/
 
 double* Histogram::cumul_computation() const
 
@@ -418,10 +429,10 @@ double* Histogram::cumul_computation() const
   double *cumul;
 
 
-  cumul = new double[nb_category];
+  cumul = new double[nb_bin];
 
   cumul[0] = (double)frequency[0] / (double)nb_element;
-  for (i = 1;i < nb_category;i++) {
+  for (i = 1;i < nb_bin;i++) {
     cumul[i] = cumul[i - 1] + (double)frequency[i] / (double)nb_element;
   }
 

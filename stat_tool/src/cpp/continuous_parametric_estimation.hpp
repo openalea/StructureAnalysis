@@ -44,6 +44,8 @@
 
 #include <boost/math/special_functions/digamma.hpp>
 
+#include <boost/math/distributions/gamma.hpp>
+
 #include "stat_tool/markovian.h"
 #include "stat_tool/vectors.h"
 #include "stat_tool/stat_label.h"
@@ -59,14 +61,16 @@ extern double von_mises_concentration_computation(double mean_direction);
 
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Estimation of parameters of gamma observation distributions.
  *
- *  Estimation of parameters of gamma observation distributions.
- *
- *  arguments: state counts, variable, pointer on a continuous observation process,
- *             EM iteration.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] component_vector_count component counts,
+ *  \param[in] variable               variable index,
+ *  \param[in] process                pointer on a continuous observation process,
+ *  \param[in] iter                   EM iteration.
+ */
+/*--------------------------------------------------------------*/
 
 template <typename Type>
 void Vectors::gamma_estimation(Type **component_vector_count , int variable ,
@@ -74,7 +78,7 @@ void Vectors::gamma_estimation(Type **component_vector_count , int variable ,
 
 {
   register int i , j;
-  double diff , log_geometric_mean , *zero_mass , *mean , *variance;
+  double buff , diff , log_geometric_mean , *zero_mass , *mean , *variance;
   Type *component_frequency;
 
 
@@ -153,9 +157,10 @@ void Vectors::gamma_estimation(Type **component_vector_count , int variable ,
   }
 
   for (i = 0;i < process->nb_state;i++) {
-    if (component_frequency[i] > 0) {
-      variance[i] /= component_frequency[i];
-//      variance[i] /= (component_frequency[i] - 1);
+//    if (component_frequency[i] > 0) {
+//      variance[i] /= component_frequency[i];
+    if (component_frequency[i] > 1) {
+      variance[i] /= (component_frequency[i] - 1);
     }
   }
 
@@ -169,7 +174,8 @@ void Vectors::gamma_estimation(Type **component_vector_count , int variable ,
     }
 #   endif
 
-    if (component_frequency[i] > 0) {
+//    if (component_frequency[i] > 0) {
+    if (component_frequency[i] > 1) {
       if (zero_mass[i] / component_frequency[i] > GAMMA_ZERO_FREQUENCY_THRESHOLD) {
         process->observation[i]->shape = 0;
         process->observation[i]->scale = D_DEFAULT;
@@ -179,27 +185,47 @@ void Vectors::gamma_estimation(Type **component_vector_count , int variable ,
         if (variance[i] > 0.) {
 /*          if (sqrt(variance[i]) < mean[i] * GAMMA_VARIATION_COEFF_THRESHOLD) {
             variance[i] = mean[i] * mean[i] * GAMMA_VARIATION_COEFF_THRESHOLD * GAMMA_VARIATION_COEFF_THRESHOLD;
-          } */
-
-//          process->observation[i]->shape = mean[i] * mean[i] / variance[i];
-//          process->observation[i]->scale = variance[i] / mean[i];
+          }
+          process->observation[i]->shape = mean[i] * mean[i] / variance[i];
+          process->observation[i]->scale = variance[i] / mean[i]; */
 
           // Hawang & Huang (2012), Ann. Inst. Statist. Math. 54(4), 840-847
 
-          process->observation[i]->shape = mean[i] * mean[i] / variance[i] - 1. / (double)component_frequency[i];
+          buff = mean[i] * mean[i] / variance[i];
+          if (buff >  GAMMA_INVERSE_SAMPLE_SIZE_FACTOR / (double)component_frequency[i]) {
+            process->observation[i]->shape = buff - 1. / (double)component_frequency[i];
+          }
+          else {
+            process->observation[i]->shape = buff;
+          }
+/*          if (process->observation[i]->shape < GAMMA_MIN_SHAPE_PARAMETER) {
+            process->observation[i]->shape = GAMMA_MIN_SHAPE_PARAMETER;
+          } */
           process->observation[i]->scale = mean[i] / process->observation[i]->shape;
 
-#         ifdef DEBUG    // essai pour eviter les très petits parametres de forme
-          if ((process->observation[i]->shape < 1.) && (mean[i] < 5.)) {
-            process->observation[i]->shape = 1.;
-            process->observation[i]->scale = mean[i] / process->observation[i]->shape;
+#         ifdef MESSAGE
+          if (buff <=  GAMMA_INVERSE_SAMPLE_SIZE_FACTOR / (double)component_frequency[i]) {
+            cout << "\n" << STAT_word[STATW_COMPONENT] << " " << i << "   "
+                 << STAT_word[STATW_SHAPE] << " : " << process->observation[i]->shape << "   "
+                 << STAT_word[STATW_SCALE] << " : " << process->observation[i]->scale << " |  ";
+
+            boost::math::gamma_distribution<double> dist(process->observation[i]->shape , process->observation[i]->scale);
+
+            cout << pdf(dist , 0.) << " " << pdf(dist , CONTINUOUS_POSITIVE_INF_BOUND) << " |  "
+                 << cdf(dist , 0.) << " " << cdf(dist , CONTINUOUS_POSITIVE_INF_BOUND) << endl;
           }
 #         endif
 
           if ((process->observation[i]->shape >= GAMMA_SHAPE_PARAMETER_THRESHOLD) &&
               (component_frequency[i] < GAMMA_FREQUENCY_THRESHOLD)) {
+
+#           ifdef DEBUG
+            cout << STAT_word[STATW_COMPONENT] << " " << i << "   "
+                 << STAT_word[STATW_SHAPE] << " : " << process->observation[i]->shape << "   "
+                 << STAT_word[STATW_SCALE] << " : " << process->observation[i]->scale;
+#           endif
+
             log_geometric_mean = 0.;
-            component_frequency[i] = 0;
 
             switch (type[variable]) {
 
@@ -207,7 +233,6 @@ void Vectors::gamma_estimation(Type **component_vector_count , int variable ,
               for (j = 0;j < nb_vector;j++) {
                 if (int_vector[j][variable] > 0) {
                   log_geometric_mean += component_vector_count[j][i] * log(int_vector[j][variable]);
-                  component_frequency[i] += component_vector_count[j][i];
                 }
               }
               break;
@@ -217,21 +242,14 @@ void Vectors::gamma_estimation(Type **component_vector_count , int variable ,
               for (j = 0;j < nb_vector;j++) {
                 if (real_vector[j][variable] > 0.) {
                   log_geometric_mean += component_vector_count[j][i] * log(real_vector[j][variable]);
-                  component_frequency[i] += component_vector_count[j][i];
                 }
               }
               break;
             }
             }
 
-            log_geometric_mean /= component_frequency[i];
-/*            j = 0;   a revoir
-
-#           ifdef DEBUG
-            cout << "\n" << STAT_word[STATW_COMPONENT] << " " << i << "   "
-                 << STAT_word[STATW_SHAPE] << " : " << process->observation[i]->shape << "   "
-                 << STAT_word[STATW_SCALE] << " : " << process->observation[i]->scale << endl;
-#           endif
+            log_geometric_mean /= (component_frequency[i] - zero_mass[i]);
+/*            j = 0;   to be reworked
 
             do {
               process->observation[i]->scale = exp(log_geometric_mean - digamma(process->observation[i]->shape));
@@ -252,6 +270,12 @@ void Vectors::gamma_estimation(Type **component_vector_count , int variable ,
             diff = log(mean[i]) - log_geometric_mean;
             process->observation[i]->shape = (1 + sqrt(1 + 4 * diff / 3)) / (4 * diff);
             process->observation[i]->scale = mean[i] / process->observation[i]->shape;
+
+#           ifdef DEBUG
+            cout << " | " << STAT_word[STATW_SHAPE] << " : " << process->observation[i]->shape << "   "
+                 << STAT_word[STATW_SCALE] << " : " << process->observation[i]->scale << endl;
+#           endif
+
           }
         }
 
@@ -275,15 +299,18 @@ void Vectors::gamma_estimation(Type **component_vector_count , int variable ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Estimation of parameters of gamma observation distributions:
+ *         tied shape parameters and eventually tied scale parameters.
  *
- *  Estimation of parameters of gamma observation distributions:
- *  tied shape parameters and eventually tied scale parameters.
- *
- *  arguments: state counts, variable, pointer on a continuous observation process,
- *             tying rule, EM iteration.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] component_vector_count component counts,
+ *  \param[in] variable               variable index,
+ *  \param[in] process                pointer on a continuous observation process,
+ *  \param[in] variance_factor        tying rule,
+ *  \param[in] iter                   EM iteration.
+ */
+/*--------------------------------------------------------------*/
 
 template <typename Type>
 void Vectors::tied_gamma_estimation(Type **component_vector_count , int variable ,
@@ -292,7 +319,7 @@ void Vectors::tied_gamma_estimation(Type **component_vector_count , int variable
 
 {
   register int i , j;
-  double diff , variance , log_geometric_mean , *mean , *factor;
+  double buff , diff , variance , log_geometric_mean , *mean , *factor;
   Type *component_frequency;
 
 
@@ -469,7 +496,16 @@ void Vectors::tied_gamma_estimation(Type **component_vector_count , int variable
 
       // Hawang & Huang (2012), Ann. Inst. Statist. Math. 54(4), 840-847
 
-      process->observation[0]->shape = mean[0] * mean[0] / variance - 1. / (double)component_frequency[0];
+      buff = mean[0] * mean[0] / variance;
+      if (buff > GAMMA_INVERSE_SAMPLE_SIZE_FACTOR / (double)component_frequency[0]) {
+        process->observation[0]->shape = buff - 1. / (double)component_frequency[0];
+      }
+      else {
+        process->observation[0]->shape = buff;
+      }
+/*      if (process->observation[0]->shape < GAMMA_MIN_SHAPE_PARAMETER) {
+        process->observation[0]->shape = GAMMA_MIN_SHAPE_PARAMETER;
+      } */
       process->observation[0]->scale = mean[0] / process->observation[0]->shape;
 
       for (i = 1;i < process->nb_state;i++) {
@@ -612,13 +648,15 @@ void Vectors::tied_gamma_estimation(Type **component_vector_count , int variable
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Estimation of parameters of inverse Gaussian observation distributions.
  *
- *  Estimation of parameters of inverse Gaussian observation distributions.
- *
- *  arguments: state counts, variable, pointer on a continuous observation process.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] component_vector_count component counts,
+ *  \param[in] variable               variable index,
+ *  \param[in] process                pointer on a continuous observation process.
+ */
+/*--------------------------------------------------------------*/
 
 template <typename Type>
 void Vectors::inverse_gaussian_estimation(Type **component_vector_count , int variable ,
@@ -716,15 +754,17 @@ void Vectors::inverse_gaussian_estimation(Type **component_vector_count , int va
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Estimation of parameters of inverse Gaussian observation distributions:
+ *         tied variances and eventually tied means.
  *
- *  Estimation of parameters of inverse Gaussian observation distributions:
- *  tied variances and eventually tied means.
- *
- *  arguments: state counts, variable, pointer on a continuous observation process,
- *             tying rule for the variance.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] component_vector_count component counts,
+ *  \param[in] variable               variable index,
+ *  \param[in] process                pointer on a continuous observation process,
+ *  \param[in] variance_factor        tying rule for the variance.
+ */
+/*--------------------------------------------------------------*/
 
 template <typename Type>
 void Vectors::tied_inverse_gaussian_estimation(Type **component_vector_count , int variable ,
@@ -1005,13 +1045,15 @@ void Vectors::tied_inverse_gaussian_estimation(Type **component_vector_count , i
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Estimation of parameters of Gaussian observation distributions.
  *
- *  Estimation of parameters of Gaussian observation distributions.
- *
- *  arguments: state counts, variable, pointer on a continuous observation process.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] component_vector_count component counts,
+ *  \param[in] variable               variable index,
+ *  \param[in] process                pointer on a continuous observation process.
+ */
+/*--------------------------------------------------------------*/
 
 template <typename Type>
 void Vectors::gaussian_estimation(Type **component_vector_count , int variable ,
@@ -1096,8 +1138,9 @@ void Vectors::gaussian_estimation(Type **component_vector_count , int variable ,
     }
 
     for (i = 0;i < process->nb_state;i++) {
-      if (component_frequency[i] > 1) {
+//      if (component_frequency[i] > 0) {
 //        variance[i] /= component_frequency[i];
+      if (component_frequency[i] > 1) {
         variance[i] /= (component_frequency[i] - 1);
         process->observation[i]->dispersion = sqrt(variance[i]);
         if (process->observation[i]->dispersion / process->observation[i]->location < GAUSSIAN_MIN_VARIATION_COEFF) {
@@ -1156,15 +1199,17 @@ void Vectors::gaussian_estimation(Type **component_vector_count , int variable ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Estimation of parameters of Gaussian observation distributions:
+ *         tied variances and eventually tied means.
  *
- *  Estimation of parameters of Gaussian observation distributions:
- *  tied variances and eventually tied means.
- *
- *  arguments: state counts, variable, pointer on a continuous observation process,
- *             tying rule for the variance.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] component_vector_count component counts,
+ *  \param[in] variable               variable index,
+ *  \param[in] process                pointer on a continuous observation process,
+ *  \param[in] variance_factor        tying rule for the variance.
+ */
+/*--------------------------------------------------------------*/
 
 template <typename Type>
 void Vectors::tied_gaussian_estimation(Type **component_vector_count , int variable ,
@@ -1345,13 +1390,15 @@ void Vectors::tied_gaussian_estimation(Type **component_vector_count , int varia
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Estimation of parameters of von Mises observation distributions.
  *
- *  Estimation of parameters of von Mises observation distributions.
- *
- *  arguments: state counts, variable, pointer on a continuous observation process.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] component_vector_count component counts,
+ *  \param[in] variable               variable index,
+ *  \param[in] process                pointer on a continuous observation process.
+ */
+/*--------------------------------------------------------------*/
 
 template <typename Type>
 void Vectors::von_mises_estimation(Type **component_vector_count , int variable ,
@@ -1431,9 +1478,13 @@ void Vectors::von_mises_estimation(Type **component_vector_count , int variable 
         if (process->unit == DEGREE) {
           mean_direction[i][3] *= (180 / M_PI);
         }
+
+        process->observation[i]->location = mean_direction[i][3];
       }
 
-      process->observation[i]->location = mean_direction[i][3];
+      else {
+        process->observation[i]->location = D_INF;
+      }
     }
 
     else {

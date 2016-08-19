@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -53,17 +53,18 @@ namespace stat_tool {
 
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the CategoricalProcess class.
  *
- *  Constructeur de la classe CategoricalProcess.
- *
- *  arguments : nombre d'etats, nombre de valeurs,
- *              flag sur les lois d'observation.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] inb_state        number of states,
+ *  \param[in] inb_value        number of categories,
+ *  \param[in] observation_flag flag on the construction of the observation distributions.
+ */
+/*--------------------------------------------------------------*/
 
 CategoricalProcess::CategoricalProcess(int inb_state , int inb_value ,
-                                       int observation_flag)
+                                       bool observation_flag)
 
 {
   nb_state = inb_state;
@@ -90,14 +91,15 @@ CategoricalProcess::CategoricalProcess(int inb_state , int inb_value ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the CategoricalProcess class.
  *
- *  Constructeur de la classe CategoricalProcess.
- *
- *  arguments : nombre d'etats, nombre de valeurs,
- *              probabilites d'observation.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] inb_state               number of states,
+ *  \param[in] inb_value               number of categories,
+ *  \param[in] observation_probability pointer on the observation probabilities.
+ */
+/*--------------------------------------------------------------*/
 
 CategoricalProcess::CategoricalProcess(int inb_state , int inb_value ,
                                        double **observation_probability)
@@ -130,13 +132,14 @@ CategoricalProcess::CategoricalProcess(int inb_state , int inb_value ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the CategoricalProcess class.
  *
- *  Constructeur de la classe CategoricalProcess.
- *
- *  arguments : nombre d'etats, lois d'observation.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] inb_state    number of states,
+ *  \param[in] pobservation pointer on the observation distributions.
+ */
+/*--------------------------------------------------------------*/
 
 CategoricalProcess::CategoricalProcess(int inb_state , Distribution **pobservation)
 
@@ -163,13 +166,13 @@ CategoricalProcess::CategoricalProcess(int inb_state , Distribution **pobservati
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Copy of a CategoricalProcess object.
  *
- *  Copie d'un objet CategoricalProcess.
- *
- *  argument : reference sur un objet CategoricalProcess.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] process reference on a CategoricalProcess object.
+ */
+/*--------------------------------------------------------------*/
 
 void CategoricalProcess::copy(const CategoricalProcess &process)
 
@@ -211,11 +214,11 @@ void CategoricalProcess::copy(const CategoricalProcess &process)
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Destruction des champs d'un objet CategoricalProcess.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Destruction of the data members of a CategoricalProcess object.
+ */
+/*--------------------------------------------------------------*/
 
 void CategoricalProcess::remove()
 
@@ -244,11 +247,11 @@ void CategoricalProcess::remove()
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Destructeur de la classe CategoricalProcess.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Destructor of the CategoricalProcess class.
+ */
+/*--------------------------------------------------------------*/
 
 CategoricalProcess::~CategoricalProcess()
 
@@ -257,13 +260,15 @@ CategoricalProcess::~CategoricalProcess()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Assignment operator of the CategoricalProcess class.
  *
- *  Operateur d'assignement de la classe CategoricalProcess.
+ *  \param[in]  process reference on a CategoricalProcess object,
  *
- *  argument : reference sur un objet CategoricalProcess.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] this    CategoricalProcess object.
+ */
+/*--------------------------------------------------------------*/
 
 CategoricalProcess& CategoricalProcess::operator=(const CategoricalProcess &process)
 
@@ -277,15 +282,20 @@ CategoricalProcess& CategoricalProcess::operator=(const CategoricalProcess &proc
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Analysis of the format of categorical observation distributions.
  *
- *  Analyse du format des lois d'observation.
+ *  \param[in]  error    reference on a StatError object,
+ *  \param[in]  in_file  stream,
+ *  \param[in]  line     reference on the file line index,
+ *  \param[in]  nb_state number of states,
+ *  \param[in]  model    model type,
+ *  \param[in]  hidden   flag on the overlap of observation distributions,
  *
- *  arguments : reference sur un objet StatError, stream,
- *              reference sur l'indice de la ligne lue, nombre d'etats,
- *              type de modele , flag sur le recouvrement.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] process  CategoricalProcess object.
+ */
+/*--------------------------------------------------------------*/
 
 CategoricalProcess* CategoricalProcess::parsing(StatError &error , ifstream &in_file ,
                                                 int &line , int nb_state , model_type model ,
@@ -342,7 +352,7 @@ CategoricalProcess* CategoricalProcess::parsing(StatError &error , ifstream &in_
 
       case 0 : {
 
-        // test mot cle COMPONENT / STATE
+        // test COMPONENT/STATE keyword
 
         if ((token == STAT_word[STATW_STATE]) || (token == STAT_word[STATW_COMPONENT])) {
           type = PSTATE;
@@ -380,7 +390,7 @@ CategoricalProcess* CategoricalProcess::parsing(StatError &error , ifstream &in_
           cumul = 0.;
         }
 
-        // test mot cle OUTPUT
+        // test OUTPUT keyword
 
         else if (token == STAT_word[STATW_OUTPUT]) {
           type = POUTPUT;
@@ -394,7 +404,7 @@ CategoricalProcess* CategoricalProcess::parsing(StatError &error , ifstream &in_
         break;
       }
 
-      // test indice de la composante ou de l'etat / de l'observation
+      // test component/state index or observation category
 
       case 1 : {
         switch (type) {
@@ -446,7 +456,7 @@ CategoricalProcess* CategoricalProcess::parsing(StatError &error , ifstream &in_
       case 2 : {
         switch (type) {
 
-        // test mot cle OBSERVATION_DISTRIBUTION
+        // test OBSERVATION_DISTRIBUTION keyword
 
         case PSTATE : {
           if (token != STAT_word[STATW_OBSERVATION_DISTRIBUTION]) {
@@ -456,7 +466,7 @@ CategoricalProcess* CategoricalProcess::parsing(StatError &error , ifstream &in_
           break;
         }
 
-        // test separateur
+        // test separator
 
         case POUTPUT : {
           if (token != ":") {
@@ -470,7 +480,7 @@ CategoricalProcess* CategoricalProcess::parsing(StatError &error , ifstream &in_
         break;
       }
 
-      // test valeur de la probabilite d'observation
+      // test observation probability value
 
       case 3 : {
         if (type == POUTPUT) {
@@ -526,7 +536,7 @@ CategoricalProcess* CategoricalProcess::parsing(StatError &error , ifstream &in_
   }
   nb_value = i + 1;
 
-  // test valeurs consecutives
+  // test consecutive categories
 
   for (i = 0;i < nb_value;i++) {
     if (!defined_output[i]) {
@@ -539,7 +549,7 @@ CategoricalProcess* CategoricalProcess::parsing(StatError &error , ifstream &in_
   if (status) {
     process = new CategoricalProcess(nb_state , nb_value , observation_probability);
 
-    // test recouvrement ou pas entre les lois d'observation
+    // test overlap or not of observation distributions
 
     lstatus = process->test_hidden();
 
@@ -568,16 +578,20 @@ CategoricalProcess* CategoricalProcess::parsing(StatError &error , ifstream &in_
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Analysis of the format of observation distributions
+ *         for a collection of categorical observation processes.
  *
- *  Analyse du format des lois d'observation pour les
- *  differents processus d'observation.
+ *  \param[in]  error             reference on a StatError object,
+ *  \param[in]  in_file           stream,
+ *  \param[in]  line              reference on the file line index,
+ *  \param[in]  nb_state          number of states,
+ *  \param[in]  nb_output_process number of observation processes.
  *
- *  arguments : reference sur un objet StatError, stream,
- *              reference sur l'indice de la ligne lue, nombre d'etats,
- *              nombre de processus d'observation.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] process           categorical observation processes.
+ */
+/*--------------------------------------------------------------*/
 
 CategoricalProcess** CategoricalProcess::old_parsing(StatError &error , ifstream &in_file ,
                                                      int &line , int nb_state ,
@@ -614,7 +628,7 @@ CategoricalProcess** CategoricalProcess::old_parsing(StatError &error , ifstream
 
     while (!((token = next()).isNull())) {
 
-      // test mot cle OBSERVATION_PROBABILITIES
+      // test OBSERVATION_PROBABILITIES keyword
 
       if (i == 0) {
         if (token != STAT_word[STATW_OBSERVATION_PROBABILITIES]) {
@@ -653,7 +667,7 @@ CategoricalProcess** CategoricalProcess::old_parsing(StatError &error , ifstream
     while (!((token = next()).isNull())) {
       switch (i) {
 
-      // test nombre de processus d'observation
+      // test number of observation processes
 
       case 0 : {
         lstatus = locale.stringToNum(token , &value);
@@ -673,7 +687,7 @@ CategoricalProcess** CategoricalProcess::old_parsing(StatError &error , ifstream
         break;
       }
 
-      // test mot cle VARIABLE(S)
+      // test VARIABLE(S) keyword
 
       case 1 : {
         if (token != STAT_word[nb_output_process == 1 ? STATW_VARIABLE : STATW_VARIABLES]) {
@@ -728,7 +742,7 @@ CategoricalProcess** CategoricalProcess::old_parsing(StatError &error , ifstream
       while (!((token = next()).isNull())) {
         switch (i) {
 
-        // test mot cle VARIABLE
+        // test VARIABLE keyword
 
         case 0 : {
           if (token == STAT_word[STATW_VARIABLE]) {
@@ -741,7 +755,7 @@ CategoricalProcess** CategoricalProcess::old_parsing(StatError &error , ifstream
           break;
         }
 
-        // test indice du processus d'observation
+        // test observation process index
 
         case 1 : {
           lstatus = locale.stringToNum(token , &value);
@@ -793,15 +807,18 @@ CategoricalProcess** CategoricalProcess::old_parsing(StatError &error , ifstream
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a CategoricalProcess object.
  *
- *  Ecriture d'un objet CategoricalProcess.
- *
- *  arguments : stream, pointeurs sur les lois d'observation et
- *              la loi marginale empiriques, flag niveau de detail,
- *              flag fichier, type de modele.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os                    stream,
+ *  \param[in]     empirical_observation pointer on the observation frequency distributions,
+ *  \param[in]     marginal_distribution pointer on the marginal frequency distribution,
+ *  \param[in]     exhaustive            flag detail level,
+ *  \param[in]     file_flag             flag file,
+ *  \param[in]     model                 model type.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& CategoricalProcess::ascii_print(ostream &os , FrequencyDistribution **empirical_observation ,
                                          FrequencyDistribution *marginal_distribution ,
@@ -820,7 +837,7 @@ ostream& CategoricalProcess::ascii_print(ostream &os , FrequencyDistribution **e
 
     for (i = 0;i < nb_state;i++) {
 
-      // lois d'observation
+      // observation distributions
 
       os << "\n";
       switch (model) {
@@ -872,7 +889,7 @@ ostream& CategoricalProcess::ascii_print(ostream &os , FrequencyDistribution **e
       }
     }
 
-    // calcul de la largeur de colonne
+    // computation of the column width
 
     width[0]= column_width(nb_state - 1) + ASCII_SPACE;
 
@@ -885,7 +902,7 @@ ostream& CategoricalProcess::ascii_print(ostream &os , FrequencyDistribution **e
     }
     width[1] += ASCII_SPACE;
 
-    // matrice des probabilites d'observation
+    // observation probability matrix
 
     os << "\n";
     if (file_flag) {
@@ -1067,16 +1084,18 @@ ostream& CategoricalProcess::ascii_print(ostream &os , FrequencyDistribution **e
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a CategoricalProcess object at the spreadsheet format.
  *
- *  Ecriture d'un objet CategoricalProcess au format tableur.
- *
- *  arguments : stream, pointeurs sur les lois d'observation et
- *              la loi marginale empiriques empiriques, type de modele.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os                    stream,
+ *  \param[in]     empirical_observation pointer on the observation frequency distributions,
+ *  \param[in]     marginal_distribution pointer on the marginal frequency distribution,
+ *  \param[in]     model                 model type.
+ */
+/*--------------------------------------------------------------*/
 
-ostream& CategoricalProcess::spreadsheet_print(ostream &os , FrequencyDistribution **empirical_observation ,
+ostream& CategoricalProcess::spreadsheet_print(ostream &os ,FrequencyDistribution **empirical_observation ,
                                                FrequencyDistribution *marginal_distribution ,
                                                model_type model) const
 
@@ -1239,16 +1258,20 @@ ostream& CategoricalProcess::spreadsheet_print(ostream &os , FrequencyDistributi
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Plot of a CategoricalProcess object using Gnuplot.
  *
- *  Sortie Gnuplot d'un objet CategoricalProcess.
+ *  \param[in]  prefix                file prefix,
+ *  \param[in]  title                 figure title,
+ *  \param[in]  process               observation process index,
+ *  \param[in]  empirical_observation pointer on the observation frequency distributions,
+ *  \param[in]  marginal_distribution pointer on the marginal frequency distribution,
+ *  \param[in]  model                 model type,
  *
- *  arguments : prefixe des fichiers, titre des figures,
- *              indice du processus d'observation,
- *              pointeur sur les lois d'observation empiriques et
- *              la loi marginale empiriques, type de modele.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] status                error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool CategoricalProcess::plot_print(const char *prefix , const char *title , int process ,
                                     FrequencyDistribution **empirical_observation ,
@@ -1267,7 +1290,7 @@ bool CategoricalProcess::plot_print(const char *prefix , const char *title , int
     ostringstream data_file_name;
 
 
-    // ecriture des fichiers de donnees
+    // writing of data files
 
     pdist = new const Distribution*[3 * nb_state + 2];
     dist_nb_value = new int[3 * nb_state + 2];
@@ -1324,7 +1347,7 @@ bool CategoricalProcess::plot_print(const char *prefix , const char *title , int
 
     if (status) {
 
-      // ecriture des fichiers de commandes et des fichiers d'impression
+      // writing of script files
 
       for (i = 0;i < 2;i++) {
         ostringstream file_name[2];
@@ -1538,16 +1561,18 @@ bool CategoricalProcess::plot_print(const char *prefix , const char *title , int
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Plot of a CategoricalProcess object.
  *
- *  Sortie graphique d'un objet CategoricalProcess.
- *
- *  arguments : reference sur un objet MultiPlotSet, indice du MultiPlot,
- *              indice du processus d'observation,
- *              pointeurs sur les lois d'observation empiriques et
- *              la loi marginale empiriques, type de modele.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] plot                  reference on a MultiPlotSet object,
+ *  \param[in] index                 MultiPlot index,
+ *  \param[in] process               observation process index,
+ *  \param[in] empirical_observation pointer on the observation frequency distributions,
+ *  \param[in] marginal_distribution pointer on the marginal frequency distribution,
+ *  \param[in] model                 model type.
+ */
+/*--------------------------------------------------------------*/
 
 void CategoricalProcess::plotable_write(MultiPlotSet &plot , int &index , int process ,
                                         FrequencyDistribution **empirical_observation ,
@@ -1563,7 +1588,7 @@ void CategoricalProcess::plotable_write(MultiPlotSet &plot , int &index , int pr
 
     plot.variable_nb_viewpoint[process] = 1;
 
-    // calcul du nombre de vues
+    // computation of the number of plots
 
 /*    if (empirical_observation) {
       nb_plot_set = nb_state;
@@ -1584,7 +1609,7 @@ void CategoricalProcess::plotable_write(MultiPlotSet &plot , int &index , int pr
     if (empirical_observation) {
       for (i = 0;i < nb_state;i++) {
 
-        // vue : ajustement loi d'observation
+        // observation distribution fit
 
         plot.variable[index] = process;
         plot.viewpoint[index] = OBSERVATION;
@@ -1653,7 +1678,7 @@ void CategoricalProcess::plotable_write(MultiPlotSet &plot , int &index , int pr
 
     else {
 
-      // vue : lois d'observation
+      // observation distributions
 
       plot.variable[index] = process;
       plot.viewpoint[index] = OBSERVATION;
@@ -1701,7 +1726,7 @@ void CategoricalProcess::plotable_write(MultiPlotSet &plot , int &index , int pr
     if (marginal_distribution) {
       if ((weight) && (mixture)) {
 
-        // vue : ajustement melange de lois d'observation
+        // fit of mixture of observation distributions (theoretical weights)
 
         title.str("");
         title << STAT_label[STATL_OUTPUT_PROCESS] << " " << process << " - "
@@ -1758,7 +1783,7 @@ void CategoricalProcess::plotable_write(MultiPlotSet &plot , int &index , int pr
 
       if ((restoration_weight) && (restoration_mixture)) {
 
-        // vue : ajustement melange de lois d'observation (poids deduits de la restauration)
+        // fit of mixture of observation distributions (weights deduced from the restoration)
 
         title.str("");
         if (process > 0) {
@@ -1819,11 +1844,13 @@ void CategoricalProcess::plotable_write(MultiPlotSet &plot , int &index , int pr
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief test of the overlap between the categories observed in each state.
  *
- *  test recouvrement entre les valeurs observees dans chaque etat.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] hidden hidden process or not.
+ */
+/*--------------------------------------------------------------*/
 
 bool CategoricalProcess::test_hidden() const
 
@@ -1851,13 +1878,13 @@ bool CategoricalProcess::test_hidden() const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Application of a threshold on the observation probabilities.
  *
- *  Application d'un seuil sur les probabilites d'observation.
- *
- *  argument : probabilite minimum.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] minimum probability.
+ */
+/*--------------------------------------------------------------*/
 
 void CategoricalProcess::thresholding(double min_probability)
 
@@ -1912,12 +1939,14 @@ void CategoricalProcess::thresholding(double min_probability)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Permutation of observation distributions. The permutation validity
+ *         should be checked by the calling function.
  *
- *  Application d'une permutation des etats. La validite de la 
- *  permutation doit etre verifiee par la procedure appelante.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] permut permutation.
+ */
+/*--------------------------------------------------------------*/
 
 void CategoricalProcess::state_permutation(int *permut) const
 
@@ -1926,25 +1955,26 @@ void CategoricalProcess::state_permutation(int *permut) const
   Distribution **pobservation = new Distribution*[nb_state];
 
 
-  for (i= 0;i < nb_state;i++) {
-    pobservation[permut[i]]= observation[i];
+  for (i = 0;i < nb_state;i++) {
+    pobservation[permut[i]] = observation[i];
   }
-  for (i= 0;i < nb_state;i++) {
-    observation[i]= pobservation[i];
+  for (i = 0;i < nb_state;i++) {
+    observation[i] = pobservation[i];
   }
   delete [] pobservation;
-  pobservation= NULL;
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the number of free parameters of a categorical
+ *         observation process.
  *
- *  Calcul du nombre de parametres independants d'un processus
- *  d'observation categoriel.
+ *  \param[in]  min_probability minimum probability,
  *
- *  argument : probabilite minimum.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] nb_parameter number of free parameters.
+ */
+/*--------------------------------------------------------------*/
 
 int CategoricalProcess::nb_parameter_computation(double min_probability) const
 
@@ -1967,13 +1997,15 @@ int CategoricalProcess::nb_parameter_computation(double min_probability) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of a mixture of categorical observation distributions.
  *
- *  Calcul d'un melange de lois d'observation.
+ *  \param[in]  pweight pointer on the weight distribution,
  *
- *  argument : loi des poids.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] mixture mixture of categorical observation distributions.
+ */
+/*--------------------------------------------------------------*/
 
 Distribution* CategoricalProcess::mixture_computation(Distribution *pweight)
 
@@ -2003,11 +2035,11 @@ Distribution* CategoricalProcess::mixture_computation(Distribution *pweight)
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Initialisation des probabilites d'observation.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Initialization of the observation probabilities.
+ */
+/*--------------------------------------------------------------*/
 
 void CategoricalProcess::init()
 
@@ -2027,7 +2059,7 @@ void CategoricalProcess::init()
     cumul += *pmass++;
   }
 
-  // initialisation uniforme des probabilites d'observation
+  // uniform initialization of the observation probabilities
 
   if (cumul > 1. - DOUBLE_ERROR) {
     for (i = 0;i < nb_state;i++) {
@@ -2059,7 +2091,7 @@ void CategoricalProcess::init()
     }
   }
 
-  // perturbation des lois d'observation
+  // perturbation of the observation distributions
 
   nb_noise = nb_value;
 

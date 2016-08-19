@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -49,13 +49,13 @@ namespace stat_tool {
 
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the StatError class.
  *
- *  Constructeur de la classe StatError.
- *
- *  argument : nombre maximum d'erreurs.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] imax_nb_error maximum number of errors.
+ */
+/*--------------------------------------------------------------*/
 
 StatError::StatError(int imax_nb_error)
 
@@ -76,11 +76,11 @@ StatError::StatError(int imax_nb_error)
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Destructeur de la classe StatError.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Destructor of the StatError class.
+ */
+/*--------------------------------------------------------------*/
 
 StatError::~StatError()
 
@@ -100,13 +100,14 @@ StatError::~StatError()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a StatError object.
  *
- *  Ecriture d'un objet StatError.
- *
- *  arguments : stream, type des erreurs (ERROR/WARNING).
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os   stream,
+ *  \param[in]     type type (ERROR/WARNING).
+ */
+/*--------------------------------------------------------------*/
 
 ostream& StatError::ascii_write(ostream &os , error_type type) const
 
@@ -141,13 +142,15 @@ ostream& StatError::ascii_write(ostream &os , error_type type) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Update of a StatError object.
  *
- *  Mise a jour d'un objet StatError.
- *
- *  arguments : label, ligne, colonne.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] ilabel  label,
+ *  \param[in] iline   line,
+ *  \param[in] icolumn column.
+ */
+/*--------------------------------------------------------------*/
 
 void StatError::update(const char *ilabel , int iline , int icolumn)
 
@@ -161,13 +164,16 @@ void StatError::update(const char *ilabel , int iline , int icolumn)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Update of a StatError object.
  *
- *  Mise a jour d'un objet StatError.
- *
- *  arguments : label, correction, ligne, colonne.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] ilabel     label,
+ *  \param[in] correction correction,
+ *  \param[in] iline      line,
+ *  \param[in] icolumn    column.
+ */
+/*--------------------------------------------------------------*/
 
 void StatError::correction_update(const char *ilabel , const char *correction ,
                                   int iline , int icolumn)
@@ -187,13 +193,16 @@ void StatError::correction_update(const char *ilabel , const char *correction ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Update of a StatError object.
  *
- *  Mise a jour d'un objet StatError.
- *
- *  arguments : label, correction, ligne, colonne.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] ilabel     label,
+ *  \param[in] correction correction,
+ *  \param[in] iline      line,
+ *  \param[in] icolumn    column.
+ */
+/*--------------------------------------------------------------*/
 
 void StatError::correction_update(const char *ilabel , int correction ,
                                   int iline , int icolumn)

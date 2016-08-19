@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -50,15 +50,17 @@ void reestimation(int nb_value , Type *reestim , double *pmass ,
 
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Reestimation des probabilites d'une loi discrete.
  *
- *  Reestimation des probabilites d'une loi discrete.
- *
- *  arguments : nombre de valeurs, pointeurs sur les quantites
- *              de reestimation et sur les probabilites de la loi discrete,
- *              probabilite minimum, flag pour reestimer des probabilites nulles.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] nb_value         number of values,
+ *  \param[in] reestim          pointer on the reestimation quantities,
+ *  \param[in] pmass            pointer on the probability mass function,
+ *  \param[in] min_probability  minimum probability,
+ *  \param[in] null_probability flag for reestimating null probabilities.
+ */
+/*--------------------------------------------------------------*/
 
 template <typename Type>
 void reestimation(int nb_value , Type *reestim , double *pmass ,

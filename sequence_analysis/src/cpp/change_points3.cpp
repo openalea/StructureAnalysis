@@ -64,18 +64,25 @@ extern double log_binomial_coefficient(int inf_bound , double parameter , int va
 
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the N most probable segmentations of a single sequence or
+ *         a sample of sequences.
  *
- *  Computation of the N most probable segmentations of a single sequence or
- *  a sample of sequences.
+ *  \param[in]  index                   sequence index,
+ *  \param[in]  nb_segment              number of segments,
+ *  \param[in]  model_type              segment model types,
+ *  \param[in]  common_contrast         flag contrast functions common to the individuals,
+ *  \param[in]  shape_parameter         negative binomial shape parameters,
+ *  \param[in]  irank                   ranks (ordinal variables),
+ *  \param[in]  os                      stream,
+ *  \param[in]  format                  file format (ASCII/SPREADSHEET),
+ *  \param[in]  inb_segmentation        number of segmentations,
+ *  \param[in]  likelihood              log-likelihood of the multiple change-point model,
  *
- *  arguments: sequence index, number of segments, segment model types,
- *             flag contrast functions common to the individuals,
- *             negative binomial distribution parameters,
- *             ranks (ordinal variables), stream, file format (ASCII/SPREADSHEET),
- *             number of segmentations, data likelihood.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] segmentation_likelihood log-likelihood of the optimal segmentation.
+ */
+/*--------------------------------------------------------------*/
 
 double Sequences::N_segmentation(int index , int nb_segment , segment_model *model_type ,
                                  bool common_contrast , double *shape_parameter ,
@@ -87,9 +94,9 @@ double Sequences::N_segmentation(int index , int nb_segment , segment_model *mod
   register int i , j , k , m;
   int seq_length , brank , previous_rank , count , nb_cell , *inf_bound_parameter ,
       *seq_index_parameter , *rank , *change_point , *psegment , ***optimal_length , ***optimal_rank;
-  double buff , segmentation_likelihood , *nb_segmentation , *seq_mean , **hyperparam ,
+  double buff , segmentation_likelihood , *nb_segmentation , **hyperparam , **seq_mean ,
          **nb_segmentation_forward , ***factorial , ***binomial_coeff , ***forward , ***mean ,
-         ***variance , ***intercept , ***slope;
+         ***variance , ***intercept , ***slope , ***autoregressive_coeff;
   long double *contrast , likelihood_cumul , posterior_probability_cumul;
 
 # ifdef MESSAGE
@@ -103,10 +110,13 @@ double Sequences::N_segmentation(int index , int nb_segment , segment_model *mod
   factorial = new double**[nb_variable];
   inf_bound_parameter = new int[nb_variable];
   binomial_coeff = new double**[nb_variable];
-
+  seq_mean = new double*[nb_variable];
   hyperparam = new double*[nb_variable];
 
   for (i = 1;i < nb_variable;i++) {
+
+    // computation of log of factorials for Poisson models
+
     if ((model_type[i - 1] == POISSON_CHANGE) || (model_type[i - 1] == BAYESIAN_POISSON_CHANGE)) {
       factorial[i] = new double*[nb_sequence];
       for (j = 0;j < nb_sequence;j++) {
@@ -125,6 +135,8 @@ double Sequences::N_segmentation(int index , int nb_segment , segment_model *mod
     else {
       factorial[i] = NULL;
     }
+
+    // computation of log of binomial coefficients for negative binomial models
 
     if ((model_type[i - 1] == NEGATIVE_BINOMIAL_0_CHANGE) || (model_type[i - 1] == NEGATIVE_BINOMIAL_1_CHANGE)) {
       switch (model_type[i - 1]) {
@@ -155,6 +167,67 @@ double Sequences::N_segmentation(int index , int nb_segment , segment_model *mod
       binomial_coeff[i] = NULL;
     }
 
+    // computation of sequence means for Gaussian change in the variance models
+
+    if (model_type[i - 1] == VARIANCE_CHANGE) {
+      if ((index != I_DEFAULT) || (!common_contrast)) {
+        seq_mean[i] = new double[nb_sequence];
+
+        if (type[i] != REAL_VALUE) {
+          for (j = 0;j < nb_sequence;j++) {
+            if ((index == I_DEFAULT) || (index == j)) {
+              seq_mean[i][j] = 0.;
+              for (k = 0;k < length[j];k++) {
+                seq_mean[i][j] += int_sequence[j][i][k];
+              }
+              seq_mean[i][j] /= length[j];
+            }
+          }
+        }
+
+        else {
+          for (j = 0;j < nb_sequence;j++) {
+            if ((index == I_DEFAULT) || (index == j)) {
+              seq_mean[i][j] = 0.;
+              for (k = 0;k < length[j];k++) {
+                seq_mean[i][j] += real_sequence[j][i][k];
+              }
+              seq_mean[i][j] /= length[j];
+            }
+          }
+        }
+      }
+
+      else {
+        seq_mean[i] = new double[1];
+        seq_mean[i][0] = 0.;
+
+        if (type[i] != REAL_VALUE) {
+          for (j = 0;j < length[0];j++) {
+            for (k = 0;k < nb_sequence;k++) {
+              seq_mean[i][0] += int_sequence[k][i][j];
+            }
+          }
+        }
+
+        else {
+          for (j = 0;j < length[0];j++) {
+            for (k = 0;k < nb_sequence;k++) {
+              seq_mean[i][0] += real_sequence[k][i][j];
+            }
+          }
+        }
+
+        seq_mean[i][0] /= (nb_sequence * length[0]);
+      }
+    }
+
+    else {
+      seq_mean[i] = NULL;
+    }
+
+    // computation of hyperparameters for Bayesian Poisson and Gaussian models
+
     if (model_type[i - 1] == BAYESIAN_POISSON_CHANGE) {
       hyperparam[i] = new double[2];
       gamma_hyperparameter_computation(index , i , hyperparam[i]);
@@ -167,8 +240,6 @@ double Sequences::N_segmentation(int index , int nb_segment , segment_model *mod
       hyperparam[i] = NULL;
     }
   }
-
-  seq_mean = new double[nb_variable];
 
   seq_length = length[index == I_DEFAULT ? 0 : index];
 
@@ -222,6 +293,7 @@ double Sequences::N_segmentation(int index , int nb_segment , segment_model *mod
   variance = new double**[nb_variable];
   intercept = new double**[nb_variable];
   slope = new double**[nb_variable];
+  autoregressive_coeff = new double**[nb_variable];
 
   for (i = 1;i < nb_variable;i++) {
     if ((model_type[i - 1] == POISSON_CHANGE) || (model_type[i - 1] == NEGATIVE_BINOMIAL_0_CHANGE) ||
@@ -281,6 +353,36 @@ double Sequences::N_segmentation(int index , int nb_segment , segment_model *mod
         variance[i][0] = new double[nb_segment];
       }
     }
+
+    else if (model_type[i - 1] == AUTOREGRESSIVE_MODEL_CHANGE) {
+      if ((index != I_DEFAULT) || (!common_contrast)) {
+        mean[i] = new double*[nb_sequence];
+        autoregressive_coeff[i] = new double*[nb_sequence];
+        variance[i] = new double*[nb_sequence];
+
+        for (j = 0;j < nb_sequence;j++) {
+          if ((index == I_DEFAULT) || (index == j)) {
+            mean[i][j] = new double[nb_segment];
+            autoregressive_coeff[i][j] = new double[nb_segment];
+            variance[i][j] = new double[nb_segment];
+          }
+          else {
+            mean[i][j] = NULL;
+            autoregressive_coeff[i][j] = NULL;
+            variance[i][j] = NULL;
+          }
+        }
+      }
+
+      else {
+        mean[i] = new double*[1];
+        mean[i][0] = new double[nb_segment];
+        autoregressive_coeff[i] = new double*[1];
+        autoregressive_coeff[i][0] = new double[nb_segment];
+        variance[i] = new double*[1];
+        variance[i][0] = new double[nb_segment];
+      }
+    }
   }
 
   active_cell = new bool*[seq_length];
@@ -318,23 +420,6 @@ double Sequences::N_segmentation(int index , int nb_segment , segment_model *mod
   }
 # endif
 
-  for (i = 1;i < nb_variable;i++) {
-    if (model_type[i - 1] == VARIANCE_CHANGE) {
-      seq_mean[i] = 0.;
-      if (type[i] != REAL_VALUE) {
-        for (j = 0;j < length[index];j++) {
-          seq_mean[i] += int_sequence[index][i][j];
-        }
-      }
-      else {
-        for (j = 0;j < length[index];j++) {
-          seq_mean[i] += real_sequence[index][i][j];
-        }
-      }
-      seq_mean[i] /= length[index];
-    }
-  }
-
 # ifdef DEBUG
   for (i = 0;i < nb_segment;i++) {
     nb_segmentation[i] = 1;
@@ -348,8 +433,8 @@ double Sequences::N_segmentation(int index , int nb_segment , segment_model *mod
     // computation of segment contrast functions (log-likelihoods or sum of squared deviations)
 
     forward_contrast(i , index , model_type , common_contrast , factorial ,
-                     shape_parameter , binomial_coeff , seq_index_parameter ,
-                     seq_mean , hyperparam , irank , contrast);
+                     shape_parameter , binomial_coeff , seq_mean , seq_index_parameter ,
+                     hyperparam , irank , contrast);
 
 #   ifdef DEBUG
     for (j = i - 1;j >= 0;j--) {
@@ -550,7 +635,7 @@ double Sequences::N_segmentation(int index , int nb_segment , segment_model *mod
     for (j = 1;j < nb_variable;j++) {
       piecewise_linear_function(index , j , nb_segment , model_type[j - 1] , common_contrast ,
                                 change_point , seq_index_parameter , NULL , mean[j] , variance[j] ,
-                                NULL , intercept[j] , slope[j]);
+                                NULL , intercept[j] , slope[j] , autoregressive_coeff[j]);
     }
 
     if ((model_type[0] == MEAN_CHANGE) || (model_type[0] == INTERCEPT_SLOPE_CHANGE)) {
@@ -667,7 +752,8 @@ double Sequences::N_segmentation(int index , int nb_segment , segment_model *mod
       for (j = 1;j < nb_variable;j++) {
         piecewise_linear_function_ascii_print(os , index , j , nb_segment , model_type[j - 1] ,
                                               common_contrast , change_point , seq_index_parameter ,
-                                              mean[j] , variance[j] , intercept[j] , slope[j]);
+                                              mean[j] , variance[j] , intercept[j] , slope[j] ,
+                                              autoregressive_coeff[j]);
       }
       }
       break;
@@ -683,10 +769,10 @@ double Sequences::N_segmentation(int index , int nb_segment , segment_model *mod
       if (likelihood != D_INF) {
         os << exp(forward[seq_length - 1][nb_segment - 1][i] - likelihood) << "\t";
         if (boost::math::isnan(likelihood_cumul)) {
-          os << posterior_probability_cumul;
+          os << likelihood_cumul / exp(likelihood);
         }
         else {
-          os << likelihood_cumul / exp(likelihood);
+          os << posterior_probability_cumul;
         }
       }
       else {
@@ -697,7 +783,8 @@ double Sequences::N_segmentation(int index , int nb_segment , segment_model *mod
       for (j = 1;j < nb_variable;j++) {
         piecewise_linear_function_spreadsheet_print(os , index , j , nb_segment , model_type[j - 1] ,
                                                     common_contrast , change_point , seq_index_parameter ,
-                                                    mean[j] , variance[j] , intercept[j] , slope[j]);
+                                                    mean[j] , variance[j] , intercept[j] , slope[j] ,
+                                                    autoregressive_coeff[j]);
       }
 
       if (((model_type[0] == MEAN_CHANGE) || (model_type[0] == INTERCEPT_SLOPE_CHANGE)) &&
@@ -953,17 +1040,16 @@ double Sequences::N_segmentation(int index , int nb_segment , segment_model *mod
       }
       delete [] binomial_coeff[i];
     }
+
+    delete [] seq_mean[i];
+    delete [] hyperparam[i];
   }
   delete [] factorial;
   delete [] inf_bound_parameter;
   delete [] binomial_coeff;
-
-  for (i = 1;i < nb_variable;i++) {
-    delete [] hyperparam[i];
-  }
+  delete [] seq_mean;
   delete [] hyperparam;
 
-  delete [] seq_mean;
   if (index_param_type == IMPLICIT_TYPE) {
     delete [] seq_index_parameter;
   }
@@ -1048,12 +1134,35 @@ double Sequences::N_segmentation(int index , int nb_segment , segment_model *mod
       delete [] slope[i];
       delete [] variance[i];
     }
+
+    else if (model_type[i - 1] == AUTOREGRESSIVE_MODEL_CHANGE) {
+      if ((index != I_DEFAULT) || (!common_contrast)) {
+        for (j = 0;j < nb_sequence;j++) {
+          if ((index == I_DEFAULT) || (index == j)) {
+            delete [] mean[i][j];
+            delete [] autoregressive_coeff[i][j];
+            delete [] variance[i][j];
+          }
+        }
+      }
+
+      else {
+        delete [] mean[i][0];
+        delete [] autoregressive_coeff[i][0];
+        delete [] variance[i][0];
+      }
+
+      delete [] mean[i];
+      delete [] autoregressive_coeff[i];
+      delete [] variance[i];
+    }
   }
 
   delete [] mean;
   delete [] variance;
   delete [] intercept;
   delete [] slope;
+  delete [] autoregressive_coeff;
 
   for (i = 0;i < seq_length;i++) {
     delete [] active_cell[i];
@@ -1080,19 +1189,26 @@ double Sequences::N_segmentation(int index , int nb_segment , segment_model *mod
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation by maximization of segment or change-point profiles for
+ *         a single sequence or a sample of sequences.
  *
- *  Computation by maximization of segment or change-point profiles for
- *  a single sequence or a sample of sequences.
+ *  \param[in]  index                   sequence index,
+ *  \param[in]  nb_segment              number of segments,
+ *  \param[in]  model_type              segment model types,
+ *  \param[in]  common_contrast         flag contrast functions common to the individuals,
+ *  \param[in]  shape_parameter         negative binomial shape parameters,
+ *  \param[in]  rank                    ranks (ordinal variables),
+ *  \param[in]  os                      stream,
+ *  \param[in]  plot_set                pointer on a MultiPlotSet object,
+ *  \param[in]  output                  output type,
+ *  \param[in]  format                  output format (ASCII/SPREADSHEET/GNUPLOT/PLOT),
+ *  \param[in]  likelihood              log-likelihood of the multiple change-point model,
  *
- *  arguments: sequence index, number of segments, segment model types,
- *             flag contrast functions common to the individuals,
- *             negative binomial distribution parameters,
- *             ranks (ordinal variables), stream, pointer on a MultiPlotSet object,
- *             output type, output format (ASCII/SPREADSHEET/GNUPLOT/PLOT),
- *             data likelihood.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] segmentation_likelihood log-likelihood of the optimal segmentation.
+ */
+/*--------------------------------------------------------------*/
 
 double Sequences::forward_backward_dynamic_programming(int index , int nb_segment ,
                                                        segment_model *model_type , bool common_contrast ,
@@ -1105,7 +1221,7 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
   register int i , j , k , m;
   int seq_length , count , *inf_bound_parameter , *seq_index_parameter , *change_point , *psegment ,
        **optimal_length;
-  double buff , segmentation_likelihood , backward_max , *seq_mean , **hyperparam , **forward ,
+  double buff , segmentation_likelihood , backward_max , **seq_mean , **hyperparam , **forward ,
          **backward , **backward_output , **output_piecewise_function , ***piecewise_function ,
          ***factorial , ***binomial_coeff;
   long double *contrast;
@@ -1114,11 +1230,14 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
   factorial = new double**[nb_variable];
   inf_bound_parameter = new int[nb_variable];
   binomial_coeff = new double**[nb_variable];
-
-  hyperparam = new double*[nb_variable];
+  seq_mean = new double*[nb_variable];
   seq_index_parameter = NULL;
+  hyperparam = new double*[nb_variable];
 
   for (i = 1;i < nb_variable;i++) {
+
+    // computation of log of factorials for Poisson models
+
     if ((model_type[i - 1] == POISSON_CHANGE) || (model_type[i - 1] == BAYESIAN_POISSON_CHANGE)) {
       factorial[i] = new double*[nb_sequence];
       for (j = 0;j < nb_sequence;j++) {
@@ -1137,6 +1256,8 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
     else {
       factorial[i] = NULL;
     }
+
+    // computation of log of binomial coefficients for negative binomial models
 
     if ((model_type[i - 1] == NEGATIVE_BINOMIAL_0_CHANGE) || (model_type[i - 1] == NEGATIVE_BINOMIAL_1_CHANGE)) {
       switch (model_type[i - 1]) {
@@ -1166,6 +1287,80 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
     else {
       binomial_coeff[i] = NULL;
     }
+
+    // computation of sequence means for Gaussian change in the variance models
+
+    if (model_type[i - 1] == VARIANCE_CHANGE) {
+      if ((index != I_DEFAULT) || (!common_contrast)) {
+        seq_mean[i] = new double[nb_sequence];
+
+        if (type[i] != REAL_VALUE) {
+          for (j = 0;j < nb_sequence;j++) {
+            if ((index == I_DEFAULT) || (index == j)) {
+              seq_mean[i][j] = 0.;
+              for (k = 0;k < length[j];k++) {
+                seq_mean[i][j] += int_sequence[j][i][k];
+              }
+              seq_mean[i][j] /= length[j];
+            }
+          }
+        }
+
+        else {
+          for (j = 0;j < nb_sequence;j++) {
+            if ((index == I_DEFAULT) || (index == j)) {
+              seq_mean[i][j] = 0.;
+              for (k = 0;k < length[j];k++) {
+                seq_mean[i][j] += real_sequence[j][i][k];
+              }
+              seq_mean[i][j] /= length[j];
+            }
+          }
+        }
+      }
+
+      else {
+        seq_mean[i] = new double[1];
+        seq_mean[i][0] = 0.;
+
+        if (type[i] != REAL_VALUE) {
+          for (j = 0;j < length[0];j++) {
+            for (k = 0;k < nb_sequence;k++) {
+              seq_mean[i][0] += int_sequence[k][i][j];
+            }
+          }
+        }
+
+        else {
+          for (j = 0;j < length[0];j++) {
+            for (k = 0;k < nb_sequence;k++) {
+              seq_mean[i][0] += real_sequence[k][i][j];
+            }
+          }
+        }
+
+        seq_mean[i][0] /= (nb_sequence * length[0]);
+      }
+    }
+
+    else {
+      seq_mean[i] = NULL;
+    }
+
+    if (((i == 1) && (model_type[0] == INTERCEPT_SLOPE_CHANGE)) ||
+        ((model_type[i - 1] == LINEAR_MODEL_CHANGE) && (!seq_index_parameter))) {
+      if (index_param_type == IMPLICIT_TYPE) {
+        seq_index_parameter = new int[seq_length];
+        for (j = 0;j < seq_length;j++) {
+          seq_index_parameter[j] = j;
+        }
+      }
+      else {
+        seq_index_parameter = index_parameter[index == I_DEFAULT ? 0 : index];
+      }
+    }
+
+    // computation of hyperparameters for Bayesian Poisson and Gaussian models
 
     if (model_type[i - 1] == BAYESIAN_POISSON_CHANGE) {
       hyperparam[i] = new double[2];
@@ -1227,38 +1422,6 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
     }
   }
 
-  seq_mean = new double[nb_variable];
-
-  for (i = 1;i < nb_variable;i++) {
-    if (model_type[i - 1] == VARIANCE_CHANGE) {
-      seq_mean[i] = 0.;
-      if (type[i] != REAL_VALUE) {
-        for (j = 0;j < length[index];j++) {
-          seq_mean[i] += int_sequence[index][i][j];
-        }
-      }
-      else {
-        for (j = 0;j < length[index];j++) {
-          seq_mean[i] += real_sequence[index][i][j];
-        }
-      }
-      seq_mean[i] /= length[index];
-    }
-
-    if (((i == 1) && (model_type[0] == INTERCEPT_SLOPE_CHANGE)) ||
-        ((model_type[i - 1] == LINEAR_MODEL_CHANGE) && (!seq_index_parameter))) {
-      if (index_param_type == IMPLICIT_TYPE) {
-        seq_index_parameter = new int[seq_length];
-        for (j = 0;j < seq_length;j++) {
-          seq_index_parameter[j] = j;
-        }
-      }
-      else {
-        seq_index_parameter = index_parameter[index == I_DEFAULT ? 0 : index];
-      }
-    }
-  }
-
   // forward recurrence
 
   for (i = 0;i < seq_length;i++) {
@@ -1266,8 +1429,8 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
     // computation of segment contrast functions (log-likelihoods or sum of squared deviations)
 
     forward_contrast(i , index , model_type , common_contrast , factorial ,
-                     shape_parameter , binomial_coeff , seq_index_parameter ,
-                     seq_mean , hyperparam , rank , contrast);
+                     shape_parameter , binomial_coeff , seq_mean , seq_index_parameter ,
+                     hyperparam , rank , contrast);
 
     for (j = 0;j < nb_segment;j++) {
       forward[i][j] = D_INF;
@@ -1331,8 +1494,8 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
       // computation of segment contrast functions (log-likelihoods or sum of squared deviations)
 
       backward_contrast(i , index , model_type , common_contrast , factorial ,
-                        shape_parameter , binomial_coeff , seq_index_parameter ,
-                        seq_mean , hyperparam , rank , contrast);
+                        shape_parameter , binomial_coeff , seq_mean , seq_index_parameter ,
+                        hyperparam , rank , contrast);
 
       for (j = 0;j < nb_segment;j++) {
         backward_output[i][j] = D_INF;
@@ -1720,17 +1883,16 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
       }
       delete [] binomial_coeff[i];
     }
+
+    delete [] seq_mean[i];
+    delete [] hyperparam[i];
   }
   delete [] factorial;
   delete [] inf_bound_parameter;
   delete [] binomial_coeff;
-
-  for (i = 1;i < nb_variable;i++) {
-    delete [] hyperparam[i];
-  }
+  delete [] seq_mean;
   delete [] hyperparam;
 
-  delete [] seq_mean;
   if (index_param_type == IMPLICIT_TYPE) {
     delete [] seq_index_parameter;
   }
@@ -1776,19 +1938,26 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the N most probable segmentations, of segment/change-point profiles and
+ *         of entropy profiles for a single sequence or a sample of sequences.
  *
- *  Computation of the N most probable segmentations, of segment/change-point profiles and
- *  of entropy profiles for a single sequence or a sample of sequences.
+ *  \param[in]  error           reference on a StatError object,
+ *  \param[in]  os              stream,
+ *  \param[in]  iidentifier     sequence identifier,
+ *  \param[in]  nb_segment      number of segments,
+ *  \param[in]  model_type      segment model types,
+ *  \param[in]  common_contrast flag contrast functions common to the individuals,
+ *  \param[in]  shape_parameter negative binomial shape parameters,
+ *  \param[in]  output          output type,
+ *  \param[in]  format          output format (ASCII/SPREADSHEET),
+ *  \param[in]  segmentation    method for computing segmentations (FORWARD_DYNAMIC_PROGRAMMING/ FORWARD_BACKWARD_SAMPLING),
+ *  \param[in]  nb_segmentation number of segmentations,
  *
- *  arguments: reference on a StatError object, stream, sequence identifier,
- *             number of segments, segment model types,
- *             flag contrast functions common to the individuals,
- *             negative binomial distribution parameters, output type,
- *             output format (ASCII/SPREADSHEET), method for computing segmentations 
- *             (FORWARD_DYNAMIC_PROGRAMMING/ FORWARD_BACKWARD_SAMPLING), number of segmentations.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] status          error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool Sequences::segment_profile_write(StatError &error , ostream &os , int iidentifier ,
                                       int nb_segment , segment_model *model_type ,
@@ -1800,7 +1969,7 @@ bool Sequences::segment_profile_write(StatError &error , ostream &os , int iiden
   bool status = true;
   register int i , j;
   int index;
-  double likelihood = D_INF , segmentation_likelihood , **rank;
+  double segment_length_max , likelihood = D_INF , segmentation_likelihood , **rank;
   Sequences *seq;
 
 
@@ -1937,7 +2106,8 @@ bool Sequences::segment_profile_write(StatError &error , ostream &os , int iiden
 
     if ((model_type[0] != MEAN_CHANGE) && (model_type[0] != INTERCEPT_SLOPE_CHANGE)) {
       likelihood = seq->forward_backward(index , nb_segment , model_type , common_contrast ,
-                                         shape_parameter , rank , &os , NULL , output , format);
+                                         shape_parameter , rank , &os , NULL ,
+                                         segment_length_max , output , format);
     }
     segmentation_likelihood = seq->forward_backward_dynamic_programming(index , nb_segment , model_type ,
                                                                         common_contrast , shape_parameter ,
@@ -1973,20 +2143,61 @@ bool Sequences::segment_profile_write(StatError &error , ostream &os , int iiden
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the N most probable segmentations, of segment/change-point profiles and
+ *         of entropy profiles for a single sequence or a sample of sequences.
  *
- *  Computation of the N most probable segmentations, of segment/change-point profiles and
- *  of entropy profiles for a single sequence or a sample of sequences and
- *  writing of the results in a file.
+ *  \param[in]  error           reference on a StatError object,
+ *  \param[in]  os              stream,
+ *  \param[in]  iidentifier     sequence identifier,
+ *  \param[in]  nb_segment      number of segments,
+ *  \param[in]  model_type      segment model types,
+ *  \param[in]  common_contrast flag contrast functions common to the individuals,
+ *  \param[in]  shape_parameter negative binomial shape parameters,
+ *  \param[in]  output          output type,
+ *  \param[in]  format          output format (ASCII/SPREADSHEET),
+ *  \param[in]  segmentation    method for computing segmentations (FORWARD_DYNAMIC_PROGRAMMING/ FORWARD_BACKWARD_SAMPLING),
+ *  \param[in]  nb_segmentation number of segmentations,
  *
- *  arguments: reference on a StatError object, path, sequence identifier,
- *             number of segments, segment model types,
- *             flag contrast functions common to the individuals,
- *             negative binomial distribution parameters, output type,
- *             file format (ASCII/SPREADSHEET), method for computing segmentations
- *             (FORWARD_DYNAMIC_PROGRAMMING/FORWARD_BACKWARD_SAMPLING), number of segmentations.
+ *  \param[out]                 error status.
+ */
+/*--------------------------------------------------------------*/
+
+bool Sequences::segment_profile_write(StatError &error , ostream &os , int iidentifier ,
+                                      int nb_segment , vector<segment_model> model_type ,
+                                      bool common_contrast , vector<double> shape_parameter ,
+                                      change_point_profile output , output_format format ,
+                                      latent_structure_algorithm segmentation , int nb_segmentation) const
+
+{
+  return segment_profile_write(error , os , iidentifier , nb_segment , model_type.data() ,
+                               common_contrast , shape_parameter.data() , output ,
+                               format , segmentation , nb_segmentation);
+}
+
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the N most probable segmentations, of segment/change-point profiles and
+ *         of entropy profiles for a single sequence or a sample of sequences and
+ *         writing of the results in a file.
  *
- *--------------------------------------------------------------*/
+ *  \param[in]  error           reference on a StatError object,
+ *  \param[in]  path            file path,
+ *  \param[in]  iidentifier     sequence identifier,
+ *  \param[in]  nb_segment      number of segments,
+ *  \param[in]  model_type      segment model types,
+ *  \param[in]  common_contrast flag contrast functions common to the individuals,
+ *  \param[in]  shape_parameter negative binomial shape parameters,
+ *  \param[in]  output          output type,
+ *  \param[in]  format          file format (ASCII/SPREADSHEET),
+ *  \param[in]  segmentation    method for computing segmentations (FORWARD_DYNAMIC_PROGRAMMING/FORWARD_BACKWARD_SAMPLING),
+ *  \param[in]  nb_segmentation number of segmentations,
+ *
+ *  \param[out] status          error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool Sequences::segment_profile_write(StatError &error , const string path , int iidentifier ,
                                       int nb_segment , segment_model *model_type ,
@@ -2016,19 +2227,60 @@ bool Sequences::segment_profile_write(StatError &error , const string path , int
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the N most probable segmentations, of segment/change-point profiles and
+ *         of entropy profiles for a single sequence or a sample of sequences and
+ *         writing of the results in a file.
  *
- *  Computation of segment/change-point profiles and of entropy profiles for
- *  a single sequence or a sample of sequences and plot of the profiles 
- *  at the Gnuplot format.
+ *  \param[in]  error           reference on a StatError object,
+ *  \param[in]  path            file path,
+ *  \param[in]  iidentifier     sequence identifier,
+ *  \param[in]  nb_segment      number of segments,
+ *  \param[in]  model_type      segment model types,
+ *  \param[in]  common_contrast flag contrast functions common to the individuals,
+ *  \param[in]  shape_parameter negative binomial shape parameters,
+ *  \param[in]  output          output type,
+ *  \param[in]  format          file format (ASCII/SPREADSHEET),
+ *  \param[in]  segmentation    method for computing segmentations (FORWARD_DYNAMIC_PROGRAMMING/FORWARD_BACKWARD_SAMPLING),
+ *  \param[in]  nb_segmentation number of segmentations,
  *
- *  arguments: reference on a StatError object, file prefix,
- *             sequence identifier, number of segments, segment model types,
- *             flag contrast functions common to the individuals,
- *             negative binomial distribution parameters, output type,
- *             figure title.
+ *  \param[out]                 error status.
+ */
+/*--------------------------------------------------------------*/
+
+bool Sequences::segment_profile_write(StatError &error , const string path , int iidentifier ,
+                                      int nb_segment , vector<segment_model> model_type ,
+                                      bool common_contrast , vector<double> shape_parameter ,
+                                      change_point_profile output , output_format format ,
+                                      latent_structure_algorithm segmentation , int nb_segmentation) const
+
+{
+  return segment_profile_write(error , path , iidentifier , nb_segment , model_type.data() ,
+                               common_contrast , shape_parameter.data() , output ,
+                               format , segmentation , nb_segmentation);
+}
+
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of segment/change-point profiles and of entropy profiles for
+ *         a single sequence or a sample of sequences and plot of the profiles 
+ *         at the Gnuplot format.
  *
- *--------------------------------------------------------------*/
+ *  \param[in]  error           reference on a StatError object,
+ *  \param[in]  prefix          file prefix,
+ *  \param[in]  iidentifier     sequence identifier,
+ *  \param[in]  nb_segment      number of segments,
+ *  \param[in]  model_type      segment model types,
+ *  \param[in]  common_contrast flag contrast functions common to the individuals,
+ *  \param[in]  shape_parameter negative binomial shape parameters,
+ *  \param[in]  output          output type,
+ *  \param[in]  title           figure title,
+ *
+ *  \param[out] status          error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool Sequences::segment_profile_plot_write(StatError &error , const char *prefix , int iidentifier ,
                                            int nb_segment , segment_model *model_type ,
@@ -2039,7 +2291,7 @@ bool Sequences::segment_profile_plot_write(StatError &error , const char *prefix
   bool status = true;
   register int i , j , k , m;
   int index , seq_length , *seq_index_parameter;
-  double likelihood = D_INF , segmentation_likelihood , **rank;
+  double segment_length_max , likelihood = D_INF , segmentation_likelihood , **rank;
   Sequences *seq;
   ostringstream data_file_name[2];
   ofstream *out_data_file;
@@ -2185,7 +2437,7 @@ bool Sequences::segment_profile_plot_write(StatError &error , const char *prefix
       if ((model_type[0] != MEAN_CHANGE) && (model_type[0] != INTERCEPT_SLOPE_CHANGE)) {
         likelihood = seq->forward_backward(index , nb_segment , model_type , common_contrast ,
                                            shape_parameter , rank , out_data_file , NULL ,
-                                           output , GNUPLOT);
+                                           segment_length_max , output , GNUPLOT);
         out_data_file->close();
         delete out_data_file;
 
@@ -2428,6 +2680,27 @@ bool Sequences::segment_profile_plot_write(StatError &error , const char *prefix
             if (title) {
               out_file << title << " - ";
             }
+            out_file << SEQ_label[SEQL_SEGMENT_LENGTH] << " " << STAT_label[STATL_DISTRIBUTIONS] << "\"\n\n";
+
+            out_file << "plot [" << 0 << ":" << seq_length - nb_segment + 1 << "] [0:" << segment_length_max << "] ";
+            for (k = 0;k < nb_segment;k++) {
+              out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using "
+                       << 2 * nb_segment + k + 1 << " title \""
+                       << SEQ_label[SEQL_SEGMENT] << " " << k << "\" with linespoints" << ",\\" << endl;
+            }
+            out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using "
+                     << 3 * nb_segment + 1 << " title \""
+                     << SEQ_label[SEQL_PRIOR_SEGMENT_LENGTH] << "\" with linespoints" << endl;
+
+            if (i == 0) {
+              out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
+            }
+            out_file << endl;
+
+            out_file << "set title \"";
+            if (title) {
+              out_file << title << " - ";
+            }
             out_file << SEQ_label[SEQL_BEGIN_CONDITIONAL_ENTROPY] << "\"\n\n";
 
             out_file << "plot [" << seq_index_parameter[0] << ":"
@@ -2435,7 +2708,7 @@ bool Sequences::segment_profile_plot_write(StatError &error , const char *prefix
                      << "] [0:" << log(2.) << "] ";
             for (k = MAX(1 , nb_segment - 3);k < nb_segment;k++) {
               out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using "
-                       << 1 << " : " << 2 * nb_segment + k << " title \"" << k + 1 << " "
+                       << 1 << " : " << 3 * nb_segment + k + 1 << " title \"" << k + 1 << " "
                        << SEQ_label[SEQL_SEGMENTS] << "\" with linespoints";
               if (k < nb_segment - 1) {
                 out_file << ",\\";
@@ -2459,7 +2732,7 @@ bool Sequences::segment_profile_plot_write(StatError &error , const char *prefix
                      << "] [0:" << log(2.) << "] ";
             for (k = MAX(1 , nb_segment - 3);k < nb_segment;k++) {
               out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using "
-                       << 1 << " : " << 3 * nb_segment + k - 1 << " title \"" << k + 1 << " "
+                       << 1 << " : " << 4 * nb_segment + k << " title \"" << k + 1 << " "
                        << SEQ_label[SEQL_SEGMENTS] << "\" with linespoints";
               if (k < nb_segment - 1) {
                 out_file << ",\\";
@@ -2482,13 +2755,13 @@ bool Sequences::segment_profile_plot_write(StatError &error , const char *prefix
                      << seq_index_parameter[seq_length - 1]
                      << "] [0:" << log(2.) << "] "
                      << "\"" << label((data_file_name[1].str()).c_str()) << "\" using "
-                     << 1 << " : " << 3 * nb_segment - 1 << " title \""
+                     << 1 << " : " << 4 * nb_segment << " title \""
                      << SEQ_label[SEQL_BEGIN_CONDITIONAL_ENTROPY] << "\" with linespoints,\\" << endl;
             out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using "
-                     << 1 << " : " << 4 * nb_segment - 2 << " title \""
+                     << 1 << " : " << 5 * nb_segment - 1 << " title \""
                      << SEQ_label[SEQL_END_CONDITIONAL_ENTROPY] << "\" with linespoints,\\" << endl;
             out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using "
-                     << 1 << " : " << 4 * nb_segment - 1 << " title \""
+                     << 1 << " : " << 5 * nb_segment << " title \""
                      << SEQ_label[SEQL_CHANGE_POINT_ENTROPY] << "\" with linespoints" << endl;
           }
 
@@ -2517,17 +2790,22 @@ bool Sequences::segment_profile_plot_write(StatError &error , const char *prefix
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of segment/change-point profiles and of entropy profiles for
+ *         a single sequence or a sample of sequences and plot of the profiles.
  *
- *  Computation of segment/change-point profiles and of entropy profiles for
- *  a single sequence or a sample of sequences and plot of the profiles.
+ *  \param[in]  error           reference on a StatError object,
+ *  \param[in]  iidentifier     sequence identifier,
+ *  \param[in]  nb_segment      number of segments,
+ *  \param[in]  model_type      segment model types,
+ *  \param[in]  common_contrast flag contrast functions common to the individuals,
+ *  \param[in]  shape_parameter negative binomial shape parameters,
+ *  \param[in]  output          output type,
  *
- *  arguments: reference on a StatError object, sequence identifier,
- *             number of segments, segment model types,
- *             flag contrast functions common to the individuals,
- *             negative binomial distribution parameters, output type.
- *
- *--------------------------------------------------------------*/
+ *  \param[out] plot_set        plots.
+ */
+/*--------------------------------------------------------------*/
 
 MultiPlotSet* Sequences::segment_profile_plotable_write(StatError &error , int iidentifier ,
                                                         int nb_segment , segment_model *model_type ,
@@ -2538,7 +2816,7 @@ MultiPlotSet* Sequences::segment_profile_plotable_write(StatError &error , int i
   bool status = true;
   register int i , j , k;
   int index , nb_plot_set , segmentation_index , seq_length;
-  double likelihood = D_INF , segmentation_likelihood , **rank;
+  double segment_length_max , likelihood = D_INF , segmentation_likelihood , **rank;
   Sequences *seq;
   ostringstream title , legend;
   MultiPlotSet *plot_set;
@@ -2656,7 +2934,7 @@ MultiPlotSet* Sequences::segment_profile_plotable_write(StatError &error , int i
   if (status) {
     seq = new Sequences(*this , ADD_STATE_VARIABLE);
 
-    // calcul du number of vues
+    // computation of the number of plots
 
     nb_plot_set = 1;
     for (i = 1;i < seq->nb_variable;i++) {
@@ -2669,7 +2947,7 @@ MultiPlotSet* Sequences::segment_profile_plotable_write(StatError &error , int i
       }
     }
     if ((model_type[0] != MEAN_CHANGE) && (model_type[0] != INTERCEPT_SLOPE_CHANGE)) {
-      nb_plot_set += 5;
+      nb_plot_set += 6;
     }
 
     plot_set = new MultiPlotSet(nb_plot_set);
@@ -2694,7 +2972,7 @@ MultiPlotSet* Sequences::segment_profile_plotable_write(StatError &error , int i
     if ((model_type[0] != MEAN_CHANGE) && (model_type[0] != INTERCEPT_SLOPE_CHANGE)) {
       likelihood = seq->forward_backward(index , nb_segment , model_type ,common_contrast ,
                                          shape_parameter , rank , NULL , plot_set ,
-                                         output , PLOT);
+                                         segment_length_max , output , PLOT);
     }
 
 #   ifdef DEBUG
@@ -2886,6 +3164,25 @@ MultiPlotSet* Sequences::segment_profile_plotable_write(StatError &error , int i
         }
         i++;
 
+        // segment length distributions
+
+        title.str("");
+        title << SEQ_label[SEQL_SEGMENT_LENGTH] << " " << STAT_label[STATL_DISTRIBUTIONS];
+        plot[i].title = title.str();
+
+        for (j = 0;j < nb_segment;j++) {
+          legend  << SEQ_label[SEQL_SEGMENT] << " " << i;
+          plot[i][j].legend = legend.str();
+
+          plot[i][j].style = "linespoints";
+        }
+
+        legend  << SEQ_label[SEQL_PRIOR_SEGMENT_LENGTH];
+        plot[i][nb_segment].legend = legend.str();
+
+        plot[i][nb_segment].style = "linespoints";
+        i++;
+
         // profiles of entropies conditional on the past
 
         plot[i].title = SEQ_label[SEQL_BEGIN_CONDITIONAL_ENTROPY];
@@ -2986,6 +3283,34 @@ MultiPlotSet* Sequences::segment_profile_plotable_write(StatError &error , int i
   }
 
   return plot_set;
+}
+
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of segment/change-point profiles and of entropy profiles for
+ *         a single sequence or a sample of sequences and plot of the profiles.
+ *
+ *  \param[in]  error           reference on a StatError object,
+ *  \param[in]  iidentifier     sequence identifier,
+ *  \param[in]  nb_segment      number of segments,
+ *  \param[in]  model_type      segment model types,
+ *  \param[in]  common_contrast flag contrast functions common to the individuals,
+ *  \param[in]  shape_parameter negative binomial shape parameters,
+ *  \param[in]  output          output type,
+ *
+ *  \param[out]                 plots.
+ */
+/*--------------------------------------------------------------*/
+
+MultiPlotSet* Sequences::segment_profile_plotable_write(StatError &error , int iidentifier ,
+                                                        int nb_segment , vector<segment_model> model_type ,
+                                                        bool common_contrast , vector<double> shape_parameter ,
+                                                        change_point_profile output) const
+
+{
+  return segment_profile_plotable_write(error , iidentifier , nb_segment , model_type.data() ,
+                                        common_contrast , shape_parameter.data() , output);
 }
 
 

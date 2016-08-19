@@ -1055,7 +1055,7 @@ double DiscreteParametric::sup_norm_distance_computation(const DiscreteParametri
       overlap += MIN(mass[i] , dist.mass[i]);
     }
 
-    cout << "\nSup norm distance: " << distance << " " << 1. - overlap << endl;
+    cout << "\n" << STAT_label[STATL_SUP_NORM_DISTANCE] << ": " << distance << " " << 1. - overlap << endl;
 #   endif
   }
 

@@ -50,45 +50,41 @@ namespace stat_tool {
 
 /****************************************************************
  *
- *  Constantes :
+ *  Constants
  */
 
 
-  const int NB_STATE = 100;              // nombre maximum d'etats d'une chaine de Markov
-  const int ORDER = 8;                   // ordre maximum d'une chaine de Markov
-  const double MIN_PROBABILITY = 1.e-5;  // probabilite minimum
-  const double THRESHOLDING_FACTOR = 0.8;  // facteur pour le seuillage des probabilites
-  const int NB_PARAMETER = 100000;       // nombre maximum de parametres d'une chaine de Markov
-  const int NB_OUTPUT_PROCESS = 10;      // nombre maximum de processus d'observation
-  const int NB_OUTPUT = 25;              // nombre maximum d'observations par etat (cas categoriel)
-  const double OBSERVATION_THRESHOLD = 0.999;  // seuil sur la fonction de repartition pour borner
+  const int NB_STATE = 100;              // maximum number of states of a Markov chain
+  const int ORDER = 8;                   // maximum order of a Markov chain
+  const double MIN_PROBABILITY = 1.e-5;  // minimum initial/transition/categorical observation probability
+  const double THRESHOLDING_FACTOR = 0.8;  // factor for the thresholding of probabilities
+  const int NB_PARAMETER = 100000;       // maximum number of parameters of a Markov chain
+  const int NB_OUTPUT_PROCESS = 15;      // maximum number of observation processes
+  const int NB_OUTPUT = 25;              // maximum number of observed categories par state (categorical case)
+  const double OBSERVATION_THRESHOLD = 0.999;  // threshold on la fonction de repartition pour borner
                                                // une loi d'observation discrete parametrique
 
-  const double ACCESSIBILITY_THRESHOLD = 1.e-6;  // seuil pour stopper l'algorithme
-                                                 // de calcul de l'accessibilite des etats
-  const int ACCESSIBILITY_LENGTH = 100;  // longueur maximum de sequence pour l'algorithme
-                                         // de calcul de l'accessibilite des etats
+  const double ACCESSIBILITY_THRESHOLD = 1.e-6;  // threshold for stopping the probabilistic algorithm
+                                                 // for computing state accessibility
+  const int ACCESSIBILITY_LENGTH = 100;  // maximum sequence length for the probabilistic algorithm
+                                         // for computing state accessibility
 
-  const double NOISE_PROBABILITY = 0.05;  // perturbation des probabilites d'observation
-  const double MEAN_SHIFT_COEFF = 0.1;   // coefficient pour decaler les lois d'observations
-                                         // continus parametriques
+  const double NOISE_PROBABILITY = 0.05;  // perturbation of observation probabilities
+  const double MEAN_SHIFT_COEFF = 0.1;   // coefficient for shifting continuous observation distributions
 
-  const int MIN_NB_ELEMENT = 10;         // taille minimum de l'echantillon construit par arrondi
-  const int OBSERVATION_COEFF = 10;      // coefficient arrondi estimateur pour les lois
-                                         // d'observation parametriques
+  const int MIN_NB_ELEMENT = 10;         // minimum size of the sample built by rounding
+  const int OBSERVATION_COEFF = 10;      // rounding coefficient for the parametric observation distribution estimator
 
-  const int GAMMA_MAX_NB_DECIMAL = 6;     // nombre maximum de decimales pour la simulation
-                                          // d'une loi gamma
-  const int INVERSE_GAUSSIAN_MAX_NB_DECIMAL = 6;  // nombre maximum de decimales pour la simulation
-                                                  // d'une loi inverse Gaussian
-  const int GAUSSIAN_MAX_NB_DECIMAL = 6;  // nombre maximum de decimales pour la simulation
-                                          // d'une loi Gaussian
-  const int DEGREE_DECIMAL_SCALE = 10;   // facteur pour determiner le nombre de decimales
-                                         // pour la simulation d'une loi de Von Mises en degrees
-  const int RADIAN_DECIMAL_SCALE = 1000;  // facteur pour determiner le nombre de decimales
-                                          // pour la simulation d'une loi de Von Mises en radians
+  const int GAMMA_MAX_NB_DECIMAL = 6;     // maximum number of decimals for the simulation of a gamma distribution
+  const int INVERSE_GAUSSIAN_MAX_NB_DECIMAL = 6;  // maximum number of decimals for the simulation
+                                                  // of an inverse Gaussian distribution
+  const int GAUSSIAN_MAX_NB_DECIMAL = 6;  // maximum number of decimals for the simulation of a Gaussian distribution
+  const int DEGREE_DECIMAL_SCALE = 10;   // factor for determining the number of decimals
+                                         // for the simulation of a von Mises distribution in degrees
+  const int RADIAN_DECIMAL_SCALE = 1000;  // factor for determining the number of decimals
+                                          // for the simulation of a von Mises distribution in radians
 
-  // const double SELF_TRANSITION = 0.9;    probabilite de rester dans un etat initiale
+  // const double SELF_TRANSITION = 0.9;    initial self-tranistion
 
   enum state_type {
     TRANSIENT ,
@@ -129,35 +125,32 @@ namespace stat_tool {
 
 /****************************************************************
  *
- *  Definition des classes :
+ *  Class definition
  */
 
 
   class ChainData;
 
 
-  class Chain {           // chaine de Markov
+  class Chain {           // Markov chain
 
     friend std::ostream& operator<<(std::ostream &os , const Chain &chain)
     { return chain.ascii_print(os , true); }
 
   public :
 
-    process_type type;      // ORDINARY/EQUILIBRIUM
-    int nb_state;           // nombre d'etats
-    int nb_row;             // nombre de lignes de la matrice
-                            // des probabilites de transition
-    bool **accessibility;   // matrice d'accessibilite des etats
-    int nb_component;       // nombre de classes
-    int *component_nb_state;  // nombre d'etats par classe
+    process_type type;      // process type (ORDINARY/EQUILIBRIUM)
+    int nb_state;           // number of states
+    int nb_row;             // number of rows of the transition transition matrix
+    bool **accessibility;   // state accessibility matrix
+    int nb_component;       // number of classes
+    int *component_nb_state;  // number of states per class
     int **component;        // classes
-    state_type *stype;      // types des etats (TRANSIENT/RECURRENT/ABSORBING)
-    double *initial;        // probabilites initiales
-    double *cumul_initial;  // fonction de repartition correspondant
-                            // au probabilites initiales
-    double **transition;    // matrice des probabilites de transition
-    double **cumul_transition;  // fonctions de repartition correspondant aux lignes
-                                // de la matrice des probabilites de transition
+    state_type *stype;      // state types (TRANSIENT/RECURRENT/ABSORBING)
+    double *initial;        // initial probabilities
+    double *cumul_initial;  // cumulative initial distribution function
+    double **transition;    // transition probability matrix
+    double **cumul_transition;  // cumulative transition distribution functions
 
     void parameter_copy(const Chain&);
     void copy(const Chain&);
@@ -198,8 +191,7 @@ namespace stat_tool {
 
 
 
-  class ChainData : public ChainReestimation<int> {  // structure de donnees correspondant a
-                                                     // une chaine de Markov
+  class ChainData : public ChainReestimation<int> {  // data structure corresponding to a Markov chain
   public :
 
     ChainData(process_type itype , int inb_state , int inb_row , bool init_flag = false)
@@ -213,23 +205,23 @@ namespace stat_tool {
 
 
 
-  class CategoricalProcess {  // processus d'observation categoriel
+  class CategoricalProcess {  // categorical observation process
 
   public :
 
-    int nb_state;           // nombre d'etats
-    int nb_value;           // nombre de valeurs
-    Distribution **observation;  // lois d'observation
-    Distribution *weight;   // poids theoriques des lois d'observation
-    Distribution *mixture;  // melange de lois d'observation
-    Distribution *restoration_weight;  // poids des lois d'observation
-                                       // deduits de la restoration
-    Distribution *restoration_mixture;  // melange de lois d'observation
+    int nb_state;           // number of states
+    int nb_value;           // number of categories
+    Distribution **observation;  // observation distributions
+    Distribution *weight;   // theoretical weights of observation distributions
+    Distribution *mixture;  // mixture of observation distributions
+    Distribution *restoration_weight;  // weights of observation distributions
+                                       // deduced from the restoration
+    Distribution *restoration_mixture;  // mixture of observation distributions
 
     void copy(const CategoricalProcess &process);
     void remove();
 
-    CategoricalProcess(int inb_state = 0 , int inb_value = 0 , int observation_flag = false);
+    CategoricalProcess(int inb_state = 0 , int inb_value = 0 , bool observation_flag = false);
     CategoricalProcess(int inb_state , int inb_value , double **observation_probability);
     CategoricalProcess(int inb_state , Distribution **pobservation);
     CategoricalProcess(const CategoricalProcess &process)
@@ -261,7 +253,7 @@ namespace stat_tool {
 
     bool test_hidden() const;
     void thresholding(double min_probability);
-    void state_permutation(int *permut) const;  // permutation des etats - revoir avec J.-B.
+    void state_permutation(int *permut) const;  // permutation of states - to be rework with J.-B.
     int nb_parameter_computation(double min_probability) const;
     Distribution* mixture_computation(Distribution *pweight);
     void init();
@@ -269,18 +261,18 @@ namespace stat_tool {
 
 
 
-  class DiscreteParametricProcess {  // processus d'observation discret parametrique
+  class DiscreteParametricProcess {  // discrete parametric observation process
 
   public :
 
-    int nb_state;           // nombre d'etats
-    int nb_value;           // nombre de valeurs
-    DiscreteParametric **observation;  // lois d'observation
-    Distribution *weight;   // poids theoriques des lois d'observation
-    Distribution *mixture;  // melange de lois d'observation
-    Distribution *restoration_weight;  // poids des lois d'observation
-                                       // deduits de la restoration
-    Distribution *restoration_mixture;  // melange de lois d'observation
+    int nb_state;           // number of states
+    int nb_value;           // number of values
+    DiscreteParametric **observation;  // observation distributions
+    Distribution *weight;   // theoretical weights of observation distributions
+    Distribution *mixture;  // mixture of observation distributions
+    Distribution *restoration_weight;  // weights of observation distributions
+                                       // deduced from the restoration
+    Distribution *restoration_mixture;  // mixture of observation distributions
 
     void copy(const DiscreteParametricProcess &process);
     void remove();
@@ -313,7 +305,7 @@ namespace stat_tool {
                         model_type model = HIDDEN_MARKOV) const;
 
     void nb_value_computation();
-    void state_permutation(int *permut) const;  // permutation des etats - revoir avec J.-B.
+    void state_permutation(int *permut) const;  // permutation of states - to be rework with J.-B.
     int nb_parameter_computation() const;
     double mean_computation(Distribution *pweight) const;
     double variance_computation(Distribution *pweight , double mean = D_INF) const;
@@ -323,19 +315,19 @@ namespace stat_tool {
 
 
 
-  class ContinuousParametricProcess {  // processus d'observation continu parametrique
+  class ContinuousParametricProcess {  // continuous parametric observation process
 
   public :
 
-    int nb_state;           // nombre d'etats
-    continuous_parametric ident;  // identificateur des lois d'observation
-    bool tied_location;     // moyennes lies ou non  (GAMMA / GAUSSIAN)
-    bool tied_dispersion;   // parametres de dispersion lies ou non (GAMMA / GAUSSIAN / VON_MISES)
-    angle_unit unit;        // unite (degre/radian) pour les lois de von Mises
-    ContinuousParametric **observation;  // lois d'observation
-    Distribution *weight;   // poids theorique des lois d'observation
-    Distribution *restoration_weight;  // poids des lois d'observation
-                                       // deduits de la restoration
+    int nb_state;           // number of states
+    continuous_parametric ident;  // identifiers of observation distributions
+    bool tied_location;     // flag tied means  (GAMMA / GAUSSIAN)
+    bool tied_dispersion;   // flag tied dispersion parameters (GAMMA / GAUSSIAN / VON_MISES)
+    angle_unit unit;        // unit (degree/radian) for von Mises distributions
+    ContinuousParametric **observation;  // observation distributions
+    Distribution *weight;   // theoretical weights of observation distributions
+    Distribution *restoration_weight;  // weights of observation distributions
+                                       // deduced from the restoration
 
     void copy(const ContinuousParametricProcess &process);
     void remove();

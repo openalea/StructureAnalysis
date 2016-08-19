@@ -40,6 +40,7 @@
 #include <math.h>
 
 #include <string>
+#include <vector>
 #include <sstream>
 #include <iomanip>
 
@@ -49,6 +50,8 @@
 #include "tool/config.h"
 
 #include "stat_tool/stat_label.h"
+
+#include "stat_tool/quantile_computation.hpp"
 
 #include "sequences.h"
 #include "sequence_label.h"
@@ -338,6 +341,39 @@ Sequences* Sequences::merge(StatError &error , int nb_sample , const Sequences *
     delete [] pseq;
     delete [] phisto;
   }
+
+  return seq;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Fusion d'objets Sequences.
+ *
+ *  arguments : reference sur un objet StatError, nombre d'objets Sequences,
+ *              pointeurs sur les objets Sequences.
+ *
+ *--------------------------------------------------------------*/
+
+Sequences* Sequences::merge(StatError &error , int nb_sample , const vector<Sequences> iseq) const
+
+{
+  register int i;
+  Sequences *seq;
+  const Sequences **pseq;
+
+
+  pseq = new const Sequences*[nb_sample];
+  for (i = 0;i < nb_sample;i++) {
+    pseq[i] = new Sequences(iseq[i]);
+  }
+
+  seq = merge(error , nb_sample , pseq);
+
+  for (i = 0;i < nb_sample;i++) {
+    delete pseq[i];
+  }
+  delete [] pseq;
 
   return seq;
 }
@@ -876,7 +912,7 @@ void Sequences::cluster(const Sequences &seq , int variable , int step , roundin
     min_value[variable] = seq.min_value[variable] / step;
     max_value[variable] = seq.max_value[variable] / step;
 
-    build_marginal_histogram(variable , seq.marginal_histogram[variable]->step / step);
+    build_marginal_histogram(variable , seq.marginal_histogram[variable]->bin_width / step);
 
     if ((variable + 1 < nb_variable) && (type[variable + 1] == AUXILIARY)) {
       for (i = 0;i < nb_sequence;i++) {
@@ -1160,6 +1196,22 @@ Sequences* Sequences::transcode(StatError &error , int variable , int *category)
 
 /*--------------------------------------------------------------*
  *
+ *  Transcodage des categories d'une variable entiere.
+ *
+ *  arguments : reference sur un objet StatError, indice de la variable,
+ *              table de transcodage des categories.
+ *
+ *--------------------------------------------------------------*/
+
+Sequences* Sequences::transcode(StatError &error , int variable , vector<int> category) const
+
+{
+  return transcode(error , variable , category.data());
+}
+
+
+/*--------------------------------------------------------------*
+ *
  *  Regroupement des valeurs d'une variable entiere.
  *
  *  arguments : reference sur un objet StatError, indice de la variable,
@@ -1280,6 +1332,23 @@ Sequences* Sequences::cluster(StatError &error , int variable ,
 
 /*--------------------------------------------------------------*
  *
+ *  Regroupement des valeurs d'une variable entiere.
+ *
+ *  arguments : reference sur un objet StatError, indice de la variable,
+ *              nombre de classes, bornes pour regrouper les valeurs.
+ *
+ *--------------------------------------------------------------*/
+
+Sequences* Sequences::cluster(StatError &error , int variable ,
+                              int nb_class , vector<int> ilimit) const
+
+{
+  return cluster(error , variable , nb_class , ilimit.data());
+}
+
+
+/*--------------------------------------------------------------*
+ *
  *  Regroupement des valeurs d'une variable reelle.
  *
  *  arguments : reference sur un objet Sequences, indice de la variable,
@@ -1386,6 +1455,23 @@ Sequences* Sequences::cluster(StatError &error , int variable ,
   }
 
   return seq;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Regroupement des valeurs d'une variable reelle.
+ *
+ *  arguments : reference sur un objet StatError, indice de la variable,
+ *              nombre de classes, bornes pour regrouper les valeurs.
+ *
+ *--------------------------------------------------------------*/
+
+Sequences* Sequences::cluster(StatError &error , int variable ,
+                              int nb_class , vector<double> ilimit) const
+
+{
+  return cluster(error , variable , nb_class , ilimit.data());
 }
 
 
@@ -2138,6 +2224,24 @@ Sequences* Sequences::select_individual(StatError &error , int inb_sequence ,
 
 /*--------------------------------------------------------------*
  *
+ *  Selection de sequences par l'identificateur.
+ *
+ *  arguments : reference sur un objet StatError, nombre de sequences,
+ *              identificateur des sequences, flag pour conserver ou rejeter
+ *              les sequences selectionnees.
+ *
+ *--------------------------------------------------------------*/
+
+Sequences* Sequences::select_individual(StatError &error , int inb_sequence ,
+                                        vector<int> iidentifier , bool keep) const
+
+{
+  return select_individual(error , inb_sequence , iidentifier.data() , keep);
+}
+
+
+/*--------------------------------------------------------------*
+ *
  *  Copie d'un objet Sequences avec transformation du parametre d'index implicite
  *  en parametre d'index explicite.
  *
@@ -2344,6 +2448,24 @@ Sequences* Sequences::select_variable(StatError &error , int inb_variable ,
   }
 
   return seq;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Selection de variables.
+ *
+ *  arguments : reference sur un objet StatError, nombre de variables,
+ *              indices des variables, flag pour conserver ou rejeter
+ *              les variables selectionnees.
+ *
+ *--------------------------------------------------------------*/
+
+Sequences* Sequences::select_variable(StatError &error , int inb_variable ,
+                                      vector<int> ivariable , bool keep) const
+
+{
+  return select_variable(error , inb_variable , ivariable.data() , keep);
 }
 
 
@@ -2612,6 +2734,41 @@ Sequences* Sequences::merge_variable(StatError &error , int nb_sample ,
 
     delete [] pseq;
   }
+
+  return seq;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Concatenation des variables d'objets Sequences.
+ *
+ *  arguments : reference sur un objet StatError, nombre d'objets Sequences,
+ *              pointeurs sur les objets Sequences, echantillon de reference pour
+ *              les identificateurs.
+ *
+ *--------------------------------------------------------------*/
+
+Sequences* Sequences::merge_variable(StatError &error , int nb_sample ,
+                                     const vector<Sequences> iseq , int ref_sample) const
+
+{
+  register int i;
+  Sequences *seq;
+  const Sequences **pseq;
+
+
+  pseq = new const Sequences*[nb_sample];
+  for (i = 0;i < nb_sample;i++) {
+    pseq[i] = new Sequences(iseq[i]);
+  }
+
+  seq = merge_variable(error , nb_sample , pseq , ref_sample);
+
+  for (i = 0;i < nb_sample;i++) {
+    delete pseq[i];
+  }
+  delete [] pseq;
 
   return seq;
 }
@@ -3304,7 +3461,7 @@ Sequences* Sequences::index_parameter_extract(StatError &error , int min_index_p
               *pindex_param = *cindex_param;
             }
             else {
-              *pindex_param = max_index_parameter;
+              *pindex_param = (index_interval->variance == 0. ? max_index_parameter + index_interval->mean : max_index_parameter);
             }
           }
         }
@@ -3824,6 +3981,25 @@ Sequences* Sequences::segmentation_extract(StatError &error , int variable ,
   }
 
   return seq;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Extraction par segmentation d'un objet Sequences.
+ *
+ *  arguments : reference sur un objet StatError, indice de la variable,
+ *              nombre de valeurs, valeurs, flag segments correspondant aux valeurs
+ *              selectionnees ou non, segments concatenes par sequence ou non.
+ *
+ *--------------------------------------------------------------*/
+
+Sequences* Sequences::segmentation_extract(StatError &error , int variable ,
+                                           int nb_value , vector<int> ivalue , bool keep ,
+                                           bool concatenation) const
+
+{
+  return segmentation_extract(error , variable , nb_value , ivalue.data() , keep , concatenation);
 }
 
 
@@ -4959,6 +5135,24 @@ Sequences* Sequences::moving_average(StatError &error , int nb_point , double *f
  *
  *  Filtrage de type moyenne mobile des sequences.
  *
+ *  arguments : reference sur un objet StatError, demi-largeur du filtre,
+ *              filtre, indice de la variable, debut/fin garde ou pas,
+ *              tendance ou residus (par soustraction ou par division).
+ *
+ *--------------------------------------------------------------*/
+
+Sequences* Sequences::moving_average(StatError &error , int nb_point , vector<double> filter ,
+                                     int variable , bool begin_end , sequence_type output) const
+
+{
+  return moving_average(error , nb_point , filter.data() , variable , begin_end , output);
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Filtrage de type moyenne mobile des sequences.
+ *
  *  arguments : reference sur un objet StatError, loi symmetrique,
  *              indice de la variable, debut/fin supprime ou pas,
  *              tendance ou residus (par soustraction ou par division).
@@ -5009,7 +5203,7 @@ Sequences* Sequences::moving_average(StatError &error , const Distribution &dist
  *--------------------------------------------------------------*/
 
 bool Sequences::pointwise_average_ascii_print(StatError &error , const string path ,
-                                              int *size , bool standard_deviation ,
+                                              int *size , bool dispersion ,
                                               sequence_type output) const
 
 {
@@ -5033,7 +5227,7 @@ bool Sequences::pointwise_average_ascii_print(StatError &error , const string pa
 
     old_adjust = out_file.flags(ios::adjustfield);
 
-    if (standard_deviation) {
+    if (dispersion) {
 
 #     ifdef MESSAGE
       normal normal_dist;
@@ -5063,7 +5257,7 @@ bool Sequences::pointwise_average_ascii_print(StatError &error , const string pa
     // calcul des largeurs des colonnes
 
     inb_sequence = nb_sequence;
-    if (standard_deviation) {
+    if (dispersion) {
       inb_sequence--;
     }
 
@@ -5071,7 +5265,7 @@ bool Sequences::pointwise_average_ascii_print(StatError &error , const string pa
 
     for (i = 0;i < nb_variable;i++) {
       width[i] = column_width(length[0] , real_sequence[0][i]);
-      if (standard_deviation) {
+      if (dispersion) {
         buff = column_width(length[nb_sequence - 1] , real_sequence[nb_sequence - 1][i]);
         if (buff > width[i]) {
           width[i] = buff;
@@ -5124,7 +5318,7 @@ bool Sequences::pointwise_average_ascii_print(StatError &error , const string pa
       }
 
       out_file << "   " << STAT_label[STATL_MEAN];
-      if (standard_deviation) {
+      if (dispersion) {
         out_file << "   " << STAT_label[STATL_MEAN_CONFIDENCE_INTERVAL]
                  << "   " << STAT_label[STATL_STANDARD_DEVIATION];
       }
@@ -5142,7 +5336,7 @@ bool Sequences::pointwise_average_ascii_print(StatError &error , const string pa
         out_file << setw(width[nb_variable]) << (index_parameter ? index_parameter[0][j] : j) << "  "
                  << setw(width[i]) << real_sequence[0][i][j];
 
-        if (standard_deviation) {
+        if (dispersion) {
           if (size[j] > 1) {
 //            half_confidence_interval = standard_normal_value * real_sequence[nb_sequence - 1][i][j] / sqrt((double)size[j]);
             half_confidence_interval = t_value[j] * real_sequence[nb_sequence - 1][i][j] / sqrt((double)size[j]);
@@ -5217,7 +5411,7 @@ bool Sequences::pointwise_average_ascii_print(StatError &error , const string pa
  *--------------------------------------------------------------*/
 
 bool Sequences::pointwise_average_spreadsheet_print(StatError &error , const string path ,
-                                                    int *size , bool standard_deviation ,
+                                                    int *size , bool dispersion ,
                                                     sequence_type output) const
 
 {
@@ -5238,7 +5432,7 @@ bool Sequences::pointwise_average_spreadsheet_print(StatError &error , const str
   else {
     status = true;
 
-    if (standard_deviation) {
+    if (dispersion) {
 //      normal normal_dist;
 //      standard_normal_value = quantile(complement(normal_dist , 0.025));
 
@@ -5276,7 +5470,7 @@ bool Sequences::pointwise_average_spreadsheet_print(StatError &error , const str
       }
 
       out_file << "\t" << STAT_label[STATL_MEAN];
-      if (standard_deviation) {
+      if (dispersion) {
         out_file << "\t" << STAT_label[STATL_MEAN_CONFIDENCE_INTERVAL]
                  << "\t\t" << STAT_label[STATL_STANDARD_DEVIATION];
       }
@@ -5284,7 +5478,7 @@ bool Sequences::pointwise_average_spreadsheet_print(StatError &error , const str
 
       if (nb_sequence < POINTWISE_AVERAGE_NB_SEQUENCE) {
         inb_sequence = nb_sequence;
-        if (standard_deviation) {
+        if (dispersion) {
           inb_sequence--;
         }
 
@@ -5299,7 +5493,7 @@ bool Sequences::pointwise_average_spreadsheet_print(StatError &error , const str
         out_file << (index_parameter ? index_parameter[0][j] : j)
                  << "\t" << real_sequence[0][i][j];
 
-        if (standard_deviation) {
+        if (dispersion) {
           if (size[j] > 1) {
 //            half_confidence_interval = standard_normal_value * real_sequence[nb_sequence - 1][i][j] / sqrt((double)size[j]);
             half_confidence_interval = t_value[j] * real_sequence[nb_sequence - 1][i][j] / sqrt((double)size[j]);
@@ -5359,25 +5553,28 @@ bool Sequences::pointwise_average_spreadsheet_print(StatError &error , const str
  *  Calcul de la sequence des moyennes (et des ecart-types).
  *
  *  arguments : reference sur un objet StatError, flag donnees circulaires,
- *              flag calcul des ecart-types,
+ *              flag computation of robust location and dispersion measures
+ *              flag computation of dispersion measures,
+ *              flag correction related to the frequencies for categorical variables,
  *              sortie (sequences, residus ou residus standardisees),
  *              path, format (ASCII/SPREADSHEET).
  *
  *--------------------------------------------------------------*/
 
-Sequences* Sequences::pointwise_average(StatError &error , bool circular ,
-                                        bool standard_deviation , sequence_type output ,
-                                        const string path , output_format format) const
+Sequences* Sequences::pointwise_average(StatError &error , bool circular , bool robust ,
+                                        bool dispersion , bool frequency_correction ,
+                                        sequence_type output , const string path ,
+                                        output_format format) const
 
 {
   bool status = true;
   register int i , j , k;
   int inb_sequence , min_identifier , max_identifier , *iidentifier , *ilength ,
-      *pindex_param , *size;
+      *pindex_param , *size , *index , *int_sample , *pisample;
   variable_nature *itype;
   angle_unit unit;
-  double diff , *prsequence , *pmean , *pstandard_deviation , *pmean_direction1 ,
-         *pmean_direction2 , ***mean_direction;
+  double diff , *prsequence , *plocation , *pdispersion , *real_sample , *prsample ,
+         *pmean_direction1 , *pmean_direction2 , ***mean_direction;
   Sequences *seq;
 
 
@@ -5407,11 +5604,11 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular ,
   }
 
   if (status) {
-    if ((output == STANDARDIZED_RESIDUAL) && (!standard_deviation)) {
-      standard_deviation = true;
+    if ((output == STANDARDIZED_RESIDUAL) && (!dispersion)) {
+      dispersion = true;
     }
 
-    inb_sequence = nb_sequence + (standard_deviation ? 2 : 1);
+    inb_sequence = nb_sequence + (dispersion ? 2 : 1);
 
     iidentifier = new int[inb_sequence];
 
@@ -5426,7 +5623,7 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular ,
 
     iidentifier[0] = min_identifier - 1;
 
-    if (standard_deviation) {
+    if (dispersion) {
       max_identifier = identifier[nb_sequence - 1];
       for (i = 0;i < nb_sequence - 1;i++) {
         if (identifier[i] > max_identifier) {
@@ -5455,7 +5652,7 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular ,
       ilength[0] = max_length;
     }
 
-    if (standard_deviation) {
+    if (dispersion) {
       ilength[inb_sequence - 1] = ilength[0];
     }
 
@@ -5479,7 +5676,7 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular ,
         }
       }
 
-      if (standard_deviation) {
+      if (dispersion) {
         for (i = 0;i < seq->length[seq->nb_sequence - 1];i++) {
           seq->index_parameter[seq->nb_sequence - 1][i] = seq->index_parameter[0][i];
         }
@@ -5497,7 +5694,7 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular ,
       seq->index_interval_computation();
     }
 
-    // calcul des tailles d'echantillons
+    // computation of sample size for each index parameter value
 
     size = new int[seq->length[0]];
 
@@ -5518,99 +5715,47 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular ,
       }
     }
 
+    if (robust) {
+      if (index_parameter) {
+        index = new int[nb_sequence];
+      }
+      else {
+        index = NULL;
+      }
+      int_sample = new int[nb_sequence];
+      real_sample = new double[nb_sequence];
+    }
+
     switch (circular) {
 
     case false : {
 
-      // calcul des moyennes
+      switch (robust) {
 
-      for (i = 0;i < seq->nb_variable;i++) {
-        for (j = 0;j < seq->length[0];j++) {
-          seq->real_sequence[0][i][j] = 0.;
-        }
-      }
+      case false : {
 
-      if (index_parameter) {
-        for (i = 0;i < nb_sequence;i++) {
-          for (j = 0;j < nb_variable;j++) {
-            pindex_param = seq->index_parameter[0];
-            prsequence = seq->real_sequence[0][j];
+        // computation of means
 
-            if (type[j] != REAL_VALUE) {
-              for (k = 0;k < length[i];k++) {
-                while (*pindex_param < index_parameter[i][k]) {
-                  pindex_param++;
-                  prsequence++;
-                }
-                pindex_param++;
-                *prsequence++ += int_sequence[i][j][k];
-              }
-            }
-
-            else {
-              for (k = 0;k < length[i];k++) {
-                while (*pindex_param < index_parameter[i][k]) {
-                  pindex_param++;
-                  prsequence++;
-                }
-                pindex_param++;
-                *prsequence++ += real_sequence[i][j][k];
-              }
-            }
-          }
-        }
-      }
-
-      else {
-        for (i = 0;i < nb_sequence;i++) {
-          for (j = 0;j < nb_variable;j++) {
-            if (type[j] != REAL_VALUE) {
-              for (k = 0;k < length[i];k++) {
-                seq->real_sequence[0][j][k] += int_sequence[i][j][k];
-              }
-            }
-
-            else {
-              for (k = 0;k < length[i];k++) {
-                seq->real_sequence[0][j][k] += real_sequence[i][j][k];
-              }
-            }
-          }
-        }
-      }
-
-      for (i = 0;i < seq->nb_variable;i++) {
-        for (j = 0;j < seq->length[0];j++) {
-          seq->real_sequence[0][i][j] /= size[j];
-        }
-      }
-
-      // calcul des ecart-types
-
-      if (standard_deviation) {
         for (i = 0;i < seq->nb_variable;i++) {
-          for (j = 0;j < seq->length[seq->nb_sequence - 1];j++) {
-            seq->real_sequence[seq->nb_sequence - 1][i][j] = 0.;
+          for (j = 0;j < seq->length[0];j++) {
+            seq->real_sequence[0][i][j] = 0.;
           }
         }
 
         if (index_parameter) {
           for (i = 0;i < nb_sequence;i++) {
             for (j = 0;j < nb_variable;j++) {
-              pindex_param = seq->index_parameter[seq->nb_sequence - 1];
-              prsequence = seq->real_sequence[seq->nb_sequence - 1][j];
-              pmean = seq->real_sequence[0][j];
+              pindex_param = seq->index_parameter[0];
+              prsequence = seq->real_sequence[0][j];
 
               if (type[j] != REAL_VALUE) {
                 for (k = 0;k < length[i];k++) {
                   while (*pindex_param < index_parameter[i][k]) {
                     pindex_param++;
                     prsequence++;
-                    pmean++;
                   }
                   pindex_param++;
-                  diff = int_sequence[i][j][k] - *pmean++;
-                  *prsequence++ += diff * diff;
+                  *prsequence++ += int_sequence[i][j][k];
                 }
               }
 
@@ -5619,11 +5764,9 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular ,
                   while (*pindex_param < index_parameter[i][k]) {
                     pindex_param++;
                     prsequence++;
-                    pmean++;
                   }
                   pindex_param++;
-                  diff = real_sequence[i][j][k] - *pmean++;
-                  *prsequence++ += diff * diff;
+                  *prsequence++ += real_sequence[i][j][k];
                 }
               }
             }
@@ -5635,15 +5778,13 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular ,
             for (j = 0;j < nb_variable;j++) {
               if (type[j] != REAL_VALUE) {
                 for (k = 0;k < length[i];k++) {
-                  diff = int_sequence[i][j][k] - seq->real_sequence[0][j][k];
-                  seq->real_sequence[seq->nb_sequence - 1][j][k] += diff * diff;
+                  seq->real_sequence[0][j][k] += int_sequence[i][j][k];
                 }
               }
 
               else {
                 for (k = 0;k < length[i];k++) {
-                  diff = real_sequence[i][j][k] - seq->real_sequence[0][j][k];
-                  seq->real_sequence[seq->nb_sequence - 1][j][k] += diff * diff;
+                  seq->real_sequence[0][j][k] += real_sequence[i][j][k];
                 }
               }
             }
@@ -5651,14 +5792,236 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular ,
         }
 
         for (i = 0;i < seq->nb_variable;i++) {
-          for (j = 0;j < seq->length[seq->nb_sequence - 1];j++) {
-            if (size[j] > 1) {
-              seq->real_sequence[seq->nb_sequence - 1][i][j] = sqrt(seq->real_sequence[seq->nb_sequence - 1][i][j] /
-                                                                    (size[j] - 1));
+          for (j = 0;j < seq->length[0];j++) {
+            seq->real_sequence[0][i][j] /= size[j];
+          }
+        }
+
+        // computation of standard deviations
+
+        if (dispersion) {
+          for (i = 0;i < seq->nb_variable;i++) {
+            for (j = 0;j < seq->length[seq->nb_sequence - 1];j++) {
+              seq->real_sequence[seq->nb_sequence - 1][i][j] = 0.;
+            }
+          }
+
+          if (index_parameter) {
+            for (i = 0;i < nb_sequence;i++) {
+              for (j = 0;j < nb_variable;j++) {
+                pindex_param = seq->index_parameter[seq->nb_sequence - 1];
+                prsequence = seq->real_sequence[seq->nb_sequence - 1][j];
+                plocation = seq->real_sequence[0][j];
+
+                if (type[j] != REAL_VALUE) {
+                  for (k = 0;k < length[i];k++) {
+                    while (*pindex_param < index_parameter[i][k]) {
+                      pindex_param++;
+                      prsequence++;
+                      plocation++;
+                    }
+                    pindex_param++;
+                    diff = int_sequence[i][j][k] - *plocation++;
+                    *prsequence++ += diff * diff;
+                  }
+                }
+
+                else {
+                  for (k = 0;k < length[i];k++) {
+                    while (*pindex_param < index_parameter[i][k]) {
+                      pindex_param++;
+                      prsequence++;
+                      plocation++;
+                    }
+                    pindex_param++;
+                    diff = real_sequence[i][j][k] - *plocation++;
+                    *prsequence++ += diff * diff;
+                  }
+                }
+              }
+            }
+          }
+
+          else {
+            for (i = 0;i < nb_sequence;i++) {
+              for (j = 0;j < nb_variable;j++) {
+                if (type[j] != REAL_VALUE) {
+                  for (k = 0;k < length[i];k++) {
+                    diff = int_sequence[i][j][k] - seq->real_sequence[0][j][k];
+                    seq->real_sequence[seq->nb_sequence - 1][j][k] += diff * diff;
+                  }
+                }
+
+                else {
+                  for (k = 0;k < length[i];k++) {
+                    diff = real_sequence[i][j][k] - seq->real_sequence[0][j][k];
+                    seq->real_sequence[seq->nb_sequence - 1][j][k] += diff * diff;
+                  }
+                }
+              }
+            }
+          }
+
+          for (i = 0;i < seq->nb_variable;i++) {
+            for (j = 0;j < seq->length[seq->nb_sequence - 1];j++) {
+              if (size[j] > 1) {
+                seq->real_sequence[seq->nb_sequence - 1][i][j] = sqrt(seq->real_sequence[seq->nb_sequence - 1][i][j] /
+                                                                      (size[j] - 1));
+              }
             }
           }
         }
+        break;
       }
+
+      case true : {
+
+        // computation of medians
+
+        if (index_parameter) {
+          for (i = 0;i < nb_variable;i++) {
+            for (j = 0;j < nb_sequence;j++) {
+              index[j] = 0;
+            }
+
+            if (type[i] != REAL_VALUE) {
+              for (j = 0;j < seq->length[0];j++) {
+                pisample = int_sample;
+                for (k = 0;k < nb_sequence;k++) {
+                  while ((index[k] < length[k]) && (index_parameter[k][index[k]] < seq->index_parameter[0][j])) {
+                    index[k]++;
+                  }
+                  if ((index[k] < length[k]) && (index_parameter[k][index[k]] == seq->index_parameter[0][j])) {
+                    *pisample++ = int_sequence[k][i][index[k]];
+                  }
+                }
+
+                seq->real_sequence[0][i][j] = quantile_computation(size[j] , int_sample , 0.5 , frequency_correction);
+              }
+            }
+
+            else {
+              for (j = 0;j < seq->length[0];j++) {
+                prsample = real_sample;
+                for (k = 0;k < nb_sequence;k++) {
+                  while ((index[k] < length[k]) && (index_parameter[k][index[k]] < seq->index_parameter[0][j])) {
+                    index[k]++;
+                  }
+                  if ((index[k] < length[k]) && (index_parameter[k][index[k]] == seq->index_parameter[0][j])) {
+                    *prsample++ = real_sequence[k][i][index[k]];
+                  }
+                }
+
+                seq->real_sequence[0][i][j] = quantile_computation(size[j] , real_sample , 0.5 , false);
+              }
+            }
+          }
+        }
+
+        else {
+          for (i = 0;i < nb_variable;i++) {
+            if (type[i] != REAL_VALUE) {
+              for (j = 0;j < max_length;j++) {
+                pisample = int_sample;
+                for (k = 0;k < nb_sequence;k++) {
+                  if (j < length[k]) {
+                    *pisample++ = int_sequence[k][i][j];
+                  }
+                }
+
+                seq->real_sequence[0][i][j] = quantile_computation(size[j] , int_sample , 0.5 , frequency_correction);
+              }
+            }
+
+            else {
+              for (j = 0;j < max_length;j++) {
+                prsample = real_sample;
+                for (k = 0;k < nb_sequence;k++) {
+                  if (j < length[k]) {
+                    *prsample++ = real_sequence[k][i][j];
+                  }
+                }
+
+                seq->real_sequence[0][i][j] = quantile_computation(size[j] , real_sample , 0.5 , false);
+              }
+            }
+          }
+        }
+
+        // computation of mean absolute deviations from the median
+
+        if (dispersion) {
+          for (i = 0;i < seq->nb_variable;i++) {
+            for (j = 0;j < seq->length[seq->nb_sequence - 1];j++) {
+              seq->real_sequence[seq->nb_sequence - 1][i][j] = 0.;
+            }
+          }
+
+          if (index_parameter) {
+            for (i = 0;i < nb_sequence;i++) {
+              for (j = 0;j < nb_variable;j++) {
+                pindex_param = seq->index_parameter[seq->nb_sequence - 1];
+                prsequence = seq->real_sequence[seq->nb_sequence - 1][j];
+                plocation = seq->real_sequence[0][j];
+
+                if (type[j] != REAL_VALUE) {
+                  for (k = 0;k < length[i];k++) {
+                    while (*pindex_param < index_parameter[i][k]) {
+                      pindex_param++;
+                      prsequence++;
+                      plocation++;
+                    }
+                    pindex_param++;
+                    *prsequence++ += fabs(int_sequence[i][j][k] - *plocation++);
+                  }
+                }
+
+                else {
+                  for (k = 0;k < length[i];k++) {
+                    while (*pindex_param < index_parameter[i][k]) {
+                      pindex_param++;
+                      prsequence++;
+                      plocation++;
+                    }
+                    pindex_param++;
+                    *prsequence++ += fabs(real_sequence[i][j][k] - *plocation++);
+                  }
+                }
+              }
+            }
+          }
+
+          else {
+            for (i = 0;i < nb_sequence;i++) {
+              for (j = 0;j < nb_variable;j++) {
+                if (type[j] != REAL_VALUE) {
+                  for (k = 0;k < length[i];k++) {
+                    seq->real_sequence[seq->nb_sequence - 1][j][k] += fabs(int_sequence[i][j][k] - seq->real_sequence[0][j][k]);
+                  }
+                }
+
+                else {
+                  for (k = 0;k < length[i];k++) {
+                    seq->real_sequence[seq->nb_sequence - 1][j][k] += fabs(real_sequence[i][j][k] - seq->real_sequence[0][j][k]);
+                  }
+                }
+              }
+            }
+          }
+
+          for (i = 0;i < seq->nb_variable;i++) {
+            for (j = 0;j < seq->length[seq->nb_sequence - 1];j++) {
+              if (size[j] > 1) {
+                seq->real_sequence[seq->nb_sequence - 1][i][j] = seq->real_sequence[seq->nb_sequence - 1][i][j] /
+                                                                 (size[j] - 1);
+              }
+            }
+          }
+        }
+        break;
+      }
+      }
+
       break;
     }
 
@@ -5808,7 +6171,7 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular ,
 
       // calcul des ecart-types
 
-      if (standard_deviation) {
+      if (dispersion) {
         for (i = 0;i < seq->nb_variable;i++) {
           for (j = 0;j < seq->length[0];j++) {
             if (mean_direction[i][2][j] > 0.) {
@@ -5869,16 +6232,16 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular ,
           for (i = 0;i < nb_sequence;i++) {
             for (j = 0;j < nb_variable;j++) {
               pindex_param = seq->index_parameter[0];
-              pmean = seq->real_sequence[0][j];
+              plocation = seq->real_sequence[0][j];
 
               if (type[j] != REAL_VALUE) {
                 for (k = 0;k < length[i];k++) {
                   while (*pindex_param < index_parameter[i][k]) {
                     pindex_param++;
-                    pmean++;
+                    plocation++;
                   }
                   pindex_param++;
-                  seq->real_sequence[i + 1][j][k] = int_sequence[i][j][k] - *pmean++;
+                  seq->real_sequence[i + 1][j][k] = int_sequence[i][j][k] - *plocation++;
                 }
               }
 
@@ -5886,10 +6249,10 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular ,
                 for (k = 0;k < length[i];k++) {
                   while (*pindex_param < index_parameter[i][k]) {
                     pindex_param++;
-                    pmean++;
+                    plocation++;
                   }
                   pindex_param++;
-                  seq->real_sequence[i + 1][j][k] = real_sequence[i][j][k] - *pmean++;
+                  seq->real_sequence[i + 1][j][k] = real_sequence[i][j][k] - *plocation++;
                 }
               }
             }
@@ -5921,24 +6284,24 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular ,
           for (i = 0;i < nb_sequence;i++) {
             for (j = 0;j < nb_variable;j++) {
               pindex_param = seq->index_parameter[0];
-              pmean = seq->real_sequence[0][j];
+              plocation = seq->real_sequence[0][j];
 
               if (type[j] != REAL_VALUE) {
                 for (k = 0;k < length[i];k++) {
                   while (*pindex_param < index_parameter[i][k]) {
                     pindex_param++;
-                    pmean++;
+                    plocation++;
                   }
 
                   pindex_param++;
-                  if (fabs(int_sequence[i][j][k] - *pmean) <= 180) {
-                    seq->real_sequence[i + 1][j][k] = int_sequence[i][j][k] - *pmean++;
+                  if (fabs(int_sequence[i][j][k] - *plocation) <= 180) {
+                    seq->real_sequence[i + 1][j][k] = int_sequence[i][j][k] - *plocation++;
                   }
-                  else if (int_sequence[i][j][k] - *pmean > 180) {
-                    seq->real_sequence[i + 1][j][k] = int_sequence[i][j][k] - *pmean++ - 360;
+                  else if (int_sequence[i][j][k] - *plocation > 180) {
+                    seq->real_sequence[i + 1][j][k] = int_sequence[i][j][k] - *plocation++ - 360;
                   }
                   else {
-                    seq->real_sequence[i + 1][j][k] = int_sequence[i][j][k] - *pmean++ + 360;
+                    seq->real_sequence[i + 1][j][k] = int_sequence[i][j][k] - *plocation++ + 360;
                   }
                 }
               }
@@ -5950,18 +6313,18 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular ,
                   for (k = 0;k < length[i];k++) {
                     while (*pindex_param < index_parameter[i][k]) {
                       pindex_param++;
-                      pmean++;
+                      plocation++;
                     }
 
                     pindex_param++;
-                    if (fabs(int_sequence[i][j][k] - *pmean) <= 180) {
-                      seq->real_sequence[i + 1][j][k] = int_sequence[i][j][k] - *pmean++;
+                    if (fabs(int_sequence[i][j][k] - *plocation) <= 180) {
+                      seq->real_sequence[i + 1][j][k] = int_sequence[i][j][k] - *plocation++;
                     }
-                    else if (int_sequence[i][j][k] - *pmean > 180) {
-                      seq->real_sequence[i + 1][j][k] = int_sequence[i][j][k] - *pmean++ - 360;
+                    else if (int_sequence[i][j][k] - *plocation > 180) {
+                      seq->real_sequence[i + 1][j][k] = int_sequence[i][j][k] - *plocation++ - 360;
                     }
                     else {
-                      seq->real_sequence[i + 1][j][k] = int_sequence[i][j][k] - *pmean++ + 360;
+                      seq->real_sequence[i + 1][j][k] = int_sequence[i][j][k] - *plocation++ + 360;
                     }
                   }
                   break;
@@ -5971,18 +6334,18 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular ,
                   for (k = 0;k < length[i];k++) {
                     while (*pindex_param < index_parameter[i][k]) {
                       pindex_param++;
-                      pmean++;
+                      plocation++;
                     }
 
                     pindex_param++;
-                    if (fabs(real_sequence[i][j][k] - *pmean) <= M_PI) {
-                      seq->real_sequence[i + 1][j][k] = real_sequence[i][j][k] - *pmean++;
+                    if (fabs(real_sequence[i][j][k] - *plocation) <= M_PI) {
+                      seq->real_sequence[i + 1][j][k] = real_sequence[i][j][k] - *plocation++;
                     }
-                    else if (real_sequence[i][j][k] - *pmean > M_PI) {
-                      seq->real_sequence[i + 1][j][k] = real_sequence[i][j][k] - *pmean++ - 2 * M_PI;
+                    else if (real_sequence[i][j][k] - *plocation > M_PI) {
+                      seq->real_sequence[i + 1][j][k] = real_sequence[i][j][k] - *plocation++ - 2 * M_PI;
                     }
                     else {
-                      seq->real_sequence[i + 1][j][k] = real_sequence[i][j][k] - *pmean++ + 2 * M_PI;
+                      seq->real_sequence[i + 1][j][k] = real_sequence[i][j][k] - *plocation++ + 2 * M_PI;
                     }
                   }
                   break;
@@ -6060,26 +6423,26 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular ,
         for (i = 0;i < nb_sequence;i++) {
           for (j = 0;j < nb_variable;j++) {
             pindex_param = seq->index_parameter[0];
-            pmean = seq->real_sequence[0][j];
-            pstandard_deviation = seq->real_sequence[seq->nb_sequence - 1][j];
+            plocation = seq->real_sequence[0][j];
+            pdispersion = seq->real_sequence[seq->nb_sequence - 1][j];
 
             if (type[j] != REAL_VALUE) {
               for (k = 0;k < length[i];k++) {
                 while (*pindex_param < index_parameter[i][k]) {
                   pindex_param++;
-                  pmean++;
-                  pstandard_deviation++;
+                  plocation++;
+                  pdispersion++;
                 }
                 pindex_param++;
-                if (*pstandard_deviation > 0.) {
-                  seq->real_sequence[i + 1][j][k] = (int_sequence[i][j][k] - *pmean) /
-                                                    *pstandard_deviation;
+                if (*pdispersion > 0.) {
+                  seq->real_sequence[i + 1][j][k] = (int_sequence[i][j][k] - *plocation) /
+                                                    *pdispersion;
                 }
                 else {
                   seq->real_sequence[i + 1][j][k] = 0.;
                 }
-                pmean++;
-                pstandard_deviation++;
+                plocation++;
+                pdispersion++;
               }
             }
 
@@ -6087,19 +6450,19 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular ,
               for (k = 0;k < length[i];k++) {
                 while (*pindex_param < index_parameter[i][k]) {
                   pindex_param++;
-                  pmean++;
-                  pstandard_deviation++;
+                  plocation++;
+                  pdispersion++;
                 }
                 pindex_param++;
-                if (*pstandard_deviation > 0.) {
-                  seq->real_sequence[i + 1][j][k] = (real_sequence[i][j][k] - *pmean) /
-                                                    *pstandard_deviation;
+                if (*pdispersion > 0.) {
+                  seq->real_sequence[i + 1][j][k] = (real_sequence[i][j][k] - *plocation) /
+                                                    *pdispersion;
                 }
                 else {
                   seq->real_sequence[i + 1][j][k] = 0.;
                 }
-                pmean++;
-                pstandard_deviation++;
+                plocation++;
+                pdispersion++;
               }
             }
           }
@@ -6139,7 +6502,7 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular ,
     }
     }
 
-    if ((output == SEQUENCE) && (!standard_deviation)) {
+    if ((output == SEQUENCE) && (!dispersion)) {
       for (i = 0;i < seq->nb_variable;i++) {
         seq->min_value[i] = min_value[i];
         seq->max_value[i] = max_value[i];
@@ -6162,11 +6525,11 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular ,
       switch (format) {
       case ASCII :
         status = seq->pointwise_average_ascii_print(error , path , size ,
-                                                    standard_deviation , output);
+                                                    dispersion , output);
         break;
       case SPREADSHEET :
         status = seq->pointwise_average_spreadsheet_print(error , path , size ,
-                                                          standard_deviation , output);
+                                                          dispersion , output);
         break;
       }
 
@@ -6180,6 +6543,12 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular ,
     }
 
     delete [] size;
+
+    if (robust) {
+      delete [] index;
+      delete [] int_sample;
+      delete [] real_sample;
+    }
   }
 
   return seq;
@@ -7112,10 +7481,10 @@ void Sequences::build_marginal_frequency_distribution(int variable)
  *
  *--------------------------------------------------------------*/
 
-void Sequences::build_marginal_histogram(int variable , double step , double imin_value)
+void Sequences::build_marginal_histogram(int variable , double bin_width , double imin_value)
 
 {
-  if ((!marginal_histogram[variable]) || (step != marginal_histogram[variable]->step) ||
+  if ((!marginal_histogram[variable]) || (bin_width != marginal_histogram[variable]->bin_width) ||
       (imin_value != D_INF)) {
     register int i , j;
     int *pisequence;
@@ -7124,42 +7493,42 @@ void Sequences::build_marginal_histogram(int variable , double step , double imi
 
     // construction de l'histogramme
 
-    if (step == D_DEFAULT) {
-      step = MAX(::round((max_value[variable] - min_value[variable]) * HISTOGRAM_FREQUENCY / cumul_length) , 1);
+    if (bin_width == D_DEFAULT) {
+      bin_width = MAX(::round((max_value[variable] - min_value[variable]) * HISTOGRAM_FREQUENCY / cumul_length) , 1);
 
 #     ifdef MESSAGE
       cout << "\n" << STAT_label[STATL_VARIABLE] << " " << variable + 1 << " - "
-           << STAT_label[STATL_STEP] << ": " << step << endl;
+           << STAT_label[STATL_BIN_WIDTH] << ": " << bin_width << endl;
 //           << " (" << min_value[variable] << ", " << max_value[variable] << ")"
 #     endif
 
     }
 
     if (imin_value == D_INF) {
-      imin_value = floor(min_value[variable] / step) * step;
+      imin_value = floor(min_value[variable] / bin_width) * bin_width;
     }
 
     if (marginal_histogram[variable]) {
-      marginal_histogram[variable]->nb_category = (int)floor((max_value[variable] - imin_value) / step) + 1;
+      marginal_histogram[variable]->nb_bin = (int)floor((max_value[variable] - imin_value) / bin_width) + 1;
 
       delete [] marginal_histogram[variable]->frequency;
-      marginal_histogram[variable]->frequency = new int[marginal_histogram[variable]->nb_category];
+      marginal_histogram[variable]->frequency = new int[marginal_histogram[variable]->nb_bin];
     }
 
     else {
-      marginal_histogram[variable] = new Histogram((int)floor((max_value[variable] - imin_value) / step) + 1 , false);
+      marginal_histogram[variable] = new Histogram((int)floor((max_value[variable] - imin_value) / bin_width) + 1 , false);
 
       marginal_histogram[variable]->nb_element = cumul_length;
       marginal_histogram[variable]->type = type[variable];
     }
 
-    marginal_histogram[variable]->step = step;
+    marginal_histogram[variable]->bin_width = bin_width;
     marginal_histogram[variable]->min_value = imin_value;
-    marginal_histogram[variable]->max_value = ceil(max_value[variable] / step) * step;
+    marginal_histogram[variable]->max_value = ceil(max_value[variable] / bin_width) * bin_width;
 
     // calcul des frequences
 
-    for (i = 0;i < marginal_histogram[variable]->nb_category;i++) {
+    for (i = 0;i < marginal_histogram[variable]->nb_bin;i++) {
       marginal_histogram[variable]->frequency[i] = 0;
     }
 
@@ -7167,8 +7536,8 @@ void Sequences::build_marginal_histogram(int variable , double step , double imi
       for (i = 0;i < nb_sequence;i++) {
         pisequence = int_sequence[i][variable];
         for (j = 0;j < length[i];j++) {
-//          (marginal_histogram[variable]->frequency[(int)((*pisequence++ - imin_value) / step)])++;
-          (marginal_histogram[variable]->frequency[(int)floor((*pisequence++ - imin_value) / step)])++;
+//          (marginal_histogram[variable]->frequency[(int)((*pisequence++ - imin_value) / bin_width)])++;
+          (marginal_histogram[variable]->frequency[(int)floor((*pisequence++ - imin_value) / bin_width)])++;
         }
       }
     }
@@ -7177,8 +7546,8 @@ void Sequences::build_marginal_histogram(int variable , double step , double imi
       for (i = 0;i < nb_sequence;i++) {
         prsequence = real_sequence[i][variable];
         for (j = 0;j < length[i];j++) {
-//          (marginal_histogram[variable]->frequency[(int)((*prsequence++ - imin_value) / step)])++;
-          (marginal_histogram[variable]->frequency[(int)floor((*prsequence++ - imin_value) / step)])++;
+//          (marginal_histogram[variable]->frequency[(int)((*prsequence++ - imin_value) / bin_width)])++;
+          (marginal_histogram[variable]->frequency[(int)floor((*prsequence++ - imin_value) / bin_width)])++;
         }
       }
     }
@@ -7197,8 +7566,8 @@ void Sequences::build_marginal_histogram(int variable , double step , double imi
  *
  *--------------------------------------------------------------*/
 
-bool Sequences::select_step(StatError &error , int variable ,
-                            double step , double imin_value)
+bool Sequences::select_bin_width(StatError &error , int variable ,
+                                 double bin_width , double imin_value)
 
 {
   bool status = true;
@@ -7218,11 +7587,11 @@ bool Sequences::select_step(StatError &error , int variable ,
       status = false;
       error.update(STAT_error[STATR_MARGINAL_HISTOGRAM]);
     }
-    if ((step <= 0.) || ((type[variable] != REAL_VALUE) && ((int)step != step))) {
+    if ((bin_width <= 0.) || ((type[variable] != REAL_VALUE) && ((int)bin_width != bin_width))) {
       status = false;
-      error.update(STAT_error[STATR_HISTOGRAM_STEP]);
+      error.update(STAT_error[STATR_HISTOGRAM_BIN_WIDTH]);
     }
-    if ((imin_value != D_INF) && ((imin_value <= min_value[variable] - step) ||
+    if ((imin_value != D_INF) && ((imin_value <= min_value[variable] - bin_width) ||
          (imin_value > min_value[variable]) || ((type[variable] != REAL_VALUE) &&
           ((int)imin_value != imin_value)))) {
       status = false;
@@ -7231,7 +7600,7 @@ bool Sequences::select_step(StatError &error , int variable ,
   }
 
   if (status) {
-    build_marginal_histogram(variable , step , imin_value);
+    build_marginal_histogram(variable , bin_width , imin_value);
   }
 
   return status;
