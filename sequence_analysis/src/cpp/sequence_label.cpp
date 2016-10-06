@@ -41,7 +41,7 @@ namespace sequence_analysis {
 
 /****************************************************************
  *
- *  Mots cles (format des fichiers) :
+ *  Key words (file format)
  */
 
 
@@ -82,7 +82,7 @@ const char *SEQ_index_parameter_word[] = {
 
 /****************************************************************
  *
- *  Labels :
+ *  Labels
  */
 
 
@@ -236,6 +236,7 @@ const char *SEQ_label[] = {
   "piecewise linear function" ,
   "confidence intervals" ,
   "autoregressive coefficient" ,
+  "95% confidence limits for a null autoregressive coefficient" ,
   "number of segments" ,
   "posterior probability" ,
   "dimension jump" ,
@@ -272,7 +273,7 @@ const char *SEQ_label[] = {
 
 /****************************************************************
  *
- *  Messages d'erreur pour l'analyse des fichiers :
+ *  Error messages for lexical analysis of files
  */
 
 
@@ -294,7 +295,7 @@ const char *SEQ_parsing[] = {
 
 /****************************************************************
  *
- *  Messages d'erreur de traitement :
+ *  Error messages
  */
 
 

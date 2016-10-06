@@ -60,9 +60,9 @@ namespace stat_tool {
   const double THRESHOLDING_FACTOR = 0.8;  // factor for the thresholding of probabilities
   const int NB_PARAMETER = 100000;       // maximum number of parameters of a Markov chain
   const int NB_OUTPUT_PROCESS = 15;      // maximum number of observation processes
-  const int NB_OUTPUT = 25;              // maximum number of observed categories par state (categorical case)
-  const double OBSERVATION_THRESHOLD = 0.999;  // threshold on la fonction de repartition pour borner
-                                               // une loi d'observation discrete parametrique
+  const int NB_OUTPUT = 25;              // maximum number of observed categories per state (categorical case)
+  const double OBSERVATION_THRESHOLD = 0.999;  // threshold on the cumulative distribution function for bounding
+                                               // a discrete parametric observation distribution
 
   const double ACCESSIBILITY_THRESHOLD = 1.e-6;  // threshold for stopping the probabilistic algorithm
                                                  // for computing state accessibility
@@ -131,26 +131,27 @@ namespace stat_tool {
 
   class ChainData;
 
+  /// \brief Markov chain
 
-  class Chain {           // Markov chain
+  class Chain {
 
     friend std::ostream& operator<<(std::ostream &os , const Chain &chain)
     { return chain.ascii_print(os , true); }
 
   public :
 
-    process_type type;      // process type (ORDINARY/EQUILIBRIUM)
-    int nb_state;           // number of states
-    int nb_row;             // number of rows of the transition transition matrix
-    bool **accessibility;   // state accessibility matrix
-    int nb_component;       // number of classes
-    int *component_nb_state;  // number of states per class
-    int **component;        // classes
-    state_type *stype;      // state types (TRANSIENT/RECURRENT/ABSORBING)
-    double *initial;        // initial probabilities
-    double *cumul_initial;  // cumulative initial distribution function
-    double **transition;    // transition probability matrix
-    double **cumul_transition;  // cumulative transition distribution functions
+    process_type type;      ///< process type (ORDINARY/EQUILIBRIUM)
+    int nb_state;           ///< number of states
+    int nb_row;             ///< number of rows of the transition probability matrix
+    bool **accessibility;   ///< state accessibility matrix
+    int nb_component;       ///< number of classes
+    int *component_nb_state;  ///< numbers of states per class
+    int **component;        ///< classes
+    state_type *stype;      ///< state types (TRANSIENT/RECURRENT/ABSORBING)
+    double *initial;        ///< initial probabilities
+    double *cumul_initial;  ///< cumulative initial distribution function
+    double **transition;    ///< transition probability matrix
+    double **cumul_transition;  ///< cumulative transition distribution functions
 
     void parameter_copy(const Chain&);
     void copy(const Chain&);
@@ -173,7 +174,7 @@ namespace stat_tool {
     void log_computation();
 
     bool** logic_transition_computation() const;
-    bool connex_component_research(StatError &error , bool **ilogic_transition = NULL) const;
+    bool strongly_connected_component_research(StatError &error , bool **ilogic_transition = NULL) const;
     void graph_accessibility_computation(bool **ilogic_transition);
     void probability_accessibility_computation();
     void component_computation(bool **ilogic_transition = NULL);
@@ -191,7 +192,9 @@ namespace stat_tool {
 
 
 
-  class ChainData : public ChainReestimation<int> {  // data structure corresponding to a Markov chain
+  /// \brief Data structure corresponding to a Markov chain
+
+  class ChainData : public ChainReestimation<int> {
   public :
 
     ChainData(process_type itype , int inb_state , int inb_row , bool init_flag = false)
@@ -205,18 +208,20 @@ namespace stat_tool {
 
 
 
-  class CategoricalProcess {  // categorical observation process
+  /// \brief Categorical observation process
+
+  class CategoricalProcess {
 
   public :
 
-    int nb_state;           // number of states
-    int nb_value;           // number of categories
-    Distribution **observation;  // observation distributions
-    Distribution *weight;   // theoretical weights of observation distributions
-    Distribution *mixture;  // mixture of observation distributions
-    Distribution *restoration_weight;  // weights of observation distributions
-                                       // deduced from the restoration
-    Distribution *restoration_mixture;  // mixture of observation distributions
+    int nb_state;           ///< number of states
+    int nb_value;           ///< number of categories
+    Distribution **observation;  ///< categorical observation distributions
+    Distribution *weight;   ///< theoretical weights of observation distributions
+    Distribution *mixture;  ///< mixture of observation distributions
+    Distribution *restoration_weight;  ///< weights of observation distributions
+                                       ///< deduced from the restoration
+    Distribution *restoration_mixture;  ///< mixture of observation distributions
 
     void copy(const CategoricalProcess &process);
     void remove();
@@ -261,18 +266,20 @@ namespace stat_tool {
 
 
 
-  class DiscreteParametricProcess {  // discrete parametric observation process
+  /// \brief Discrete parametric observation process
+
+  class DiscreteParametricProcess {
 
   public :
 
-    int nb_state;           // number of states
-    int nb_value;           // number of values
-    DiscreteParametric **observation;  // observation distributions
-    Distribution *weight;   // theoretical weights of observation distributions
-    Distribution *mixture;  // mixture of observation distributions
-    Distribution *restoration_weight;  // weights of observation distributions
-                                       // deduced from the restoration
-    Distribution *restoration_mixture;  // mixture of observation distributions
+    int nb_state;           ///< number of states
+    int nb_value;           ///< number of values
+    DiscreteParametric **observation;  ///< discrete parametric observation distributions
+    Distribution *weight;   ///< theoretical weights of observation distributions
+    Distribution *mixture;  ///< mixture of observation distributions
+    Distribution *restoration_weight;  ///< weights of observation distributions
+                                       ///< deduced from the restoration
+    Distribution *restoration_mixture;  ///< mixture of observation distributions
 
     void copy(const DiscreteParametricProcess &process);
     void remove();
@@ -315,19 +322,21 @@ namespace stat_tool {
 
 
 
-  class ContinuousParametricProcess {  // continuous parametric observation process
+  /// \brief Continuous parametric observation process
+
+  class ContinuousParametricProcess {
 
   public :
 
-    int nb_state;           // number of states
-    continuous_parametric ident;  // identifiers of observation distributions
-    bool tied_location;     // flag tied means  (GAMMA / GAUSSIAN)
-    bool tied_dispersion;   // flag tied dispersion parameters (GAMMA / GAUSSIAN / VON_MISES)
-    angle_unit unit;        // unit (degree/radian) for von Mises distributions
-    ContinuousParametric **observation;  // observation distributions
-    Distribution *weight;   // theoretical weights of observation distributions
-    Distribution *restoration_weight;  // weights of observation distributions
-                                       // deduced from the restoration
+    int nb_state;           ///< number of states
+    continuous_parametric ident;  ///< identifiers of observation distributions
+    bool tied_location;     ///< flag tied means  (gamma, Gaussian)
+    bool tied_dispersion;   ///< flag tied dispersion parameters (gamma, Gaussian, von Mises)
+    angle_unit unit;        ///< unit (degree/radian) for von Mises distributions
+    ContinuousParametric **observation;  ///< continuous observation distributions
+    Distribution *weight;   ///< theoretical weights of observation distributions
+    Distribution *restoration_weight;  ///< weights of observation distributions
+                                       ///< deduced from the restoration
 
     void copy(const ContinuousParametricProcess &process);
     void remove();

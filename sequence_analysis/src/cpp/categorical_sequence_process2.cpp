@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -53,18 +53,20 @@ namespace sequence_analysis {
 
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a CategoricalSequenceProcess object.
  *
- *  Ecriture d'un objet CategoricalSequenceProcess.
- *
- *  arguments : stream, indice du processus d'observation,
- *              pointeurs sur les lois d'observation empiriques,
- *              la loi marginale empiriques et
- *              les caracteristiques des sequences observees,
- *              flag niveau de detail, flag fichier ,
- *              pointeurs sur les lois de l'intervalle de temps residuel.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os                    stream,
+ *  \param[in]     process               observation process index,
+ *  \param[in]     empirical_observation pointer on the observation frequency distributions,
+ *  \param[in]     marginal_distribution pointer on the marginal frequency distribution,
+ *  \param[in]     characteristics       pointer on the observed sequences characteristics,
+ *  \param[in]     exhaustive            flag detail level,
+ *  \param[in]     file_flag             flag file,
+ *  \param[in]     forward               pointer on the forward sojourn time distributions.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& CategoricalSequenceProcess::ascii_print(ostream &os , int process ,
                                                  FrequencyDistribution **empirical_observation ,
@@ -109,7 +111,7 @@ ostream& CategoricalSequenceProcess::ascii_print(ostream &os , int process ,
       }
     }
 
-    // calcul des largeurs des colonnes
+    // computation of the column widths
 
     width[0] = column_width(nb_state - 1) + ASCII_SPACE;
 
@@ -122,7 +124,7 @@ ostream& CategoricalSequenceProcess::ascii_print(ostream &os , int process ,
     }
     width[1] += ASCII_SPACE;
 
-    // ecriture de la matrice des probabilites d'observation
+    // writing of the observation probability matrix
 
     os << "\n";
     if (file_flag) {
@@ -811,17 +813,18 @@ ostream& CategoricalSequenceProcess::ascii_print(ostream &os , int process ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a CategoricalSequenceProcess object at the spreadsheet format.
  *
- *  Ecriture d'un objet CategoricalSequenceProcess au format tableur.
- *
- *  arguments : stream, indice du processus d'observation,
- *              pointeurs sur les lois d'observation empiriques,
- *              la loi marginale empiriques empiriques,
- *              sur les caracteristiques des sequences observees et
- *              sur les lois de l'intervalle de temps residuel.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os                    stream,
+ *  \param[in]     process               observation process index,
+ *  \param[in]     empirical_observation pointer on the observation frequency distributions,
+ *  \param[in]     marginal_distribution pointer on the marginal frequency distribution,
+ *  \param[in]     characteristics       pointer on the observed sequences characteristics,
+ *  \param[in]     forward               pointer on the forward sojourn time distributions.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& CategoricalSequenceProcess::spreadsheet_print(ostream &os , int process ,
                                                        FrequencyDistribution **empirical_observation ,
@@ -1379,19 +1382,22 @@ ostream& CategoricalSequenceProcess::spreadsheet_print(ostream &os , int process
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Plot of a CategoricalSequenceProcess object using Gnuplot.
  *
- *  Sortie Gnuplot d'un objet CategoricalSequenceProcess.
+ *  \param[in] prefix                file prefix,
+ *  \param[in] title                 figure title,
+ *  \param[in] process               observation process index,
+ *  \param[in] empirical_observation pointer on the observation frequency distributions,
+ *  \param[in] marginal_distribution pointer on the marginal frequency distribution,
+ *  \param[in] characteristics       pointer on the observed sequences characteristics,
+ *  \param[in] length_distribution   pointer on the sequence length frequency distribution,
+ *  \param[in] forward               pointer on the forward sojourn time distributions.
  *
- *  arguments : prefixe des fichiers, titre des figures,
- *              indice du processus d'observation,
- *              pointeurs sur les lois d'observation empiriques,
- *              la loi marginale empiriques,
- *              les caracteristiques des sequences observees,
- *              la loi empirique des longueurs des sequences et
- *              les lois de l'intervalle de temps residuel.
- *
- *--------------------------------------------------------------*/
+ *  \return                          error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool CategoricalSequenceProcess::plot_print(const char *prefix , const char *title , int process ,
                                             FrequencyDistribution **empirical_observation ,
@@ -1411,7 +1417,7 @@ bool CategoricalSequenceProcess::plot_print(const char *prefix , const char *tit
   ostringstream data_file_name[2];
 
 
-  // ecriture des fichiers de donnees
+  // writing of the data files
 
   if ((index_value) || (characteristics)) {
     if (characteristics) {
@@ -1670,7 +1676,7 @@ bool CategoricalSequenceProcess::plot_print(const char *prefix , const char *tit
 
     if (status) {
 
-      // ecriture des fichiers de commandes et des fichiers d'impression
+      // writing of the script files
 
       for (i = 0;i < 2;i++) {
         ostringstream file_name[2];
@@ -2872,19 +2878,20 @@ bool CategoricalSequenceProcess::plot_print(const char *prefix , const char *tit
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Plot of a CategoricalSequenceProcess object.
  *
- *  Sortie graphique d'un objet CategoricalSequenceProcess.
- *
- *  arguments : reference sur un objet MultiPlotSet, indice du MultiPlot,
- *              indice du processus d'observation,
- *              pointeurs sur les lois d'observation empiriques,
- *              la loi marginale empiriques,
- *              les caracteristiques des sequences observees,
- *              la loi empirique des longueurs des sequences et
- *              les lois de l'intervalle de temps residuel.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] plot                  reference on a MultiPlotSet object,
+ *  \param[in] index                 MultiPlot index,
+ *  \param[in] process               observation process index,
+ *  \param[in] empirical_observation pointer on the observation frequency distributions,
+ *  \param[in] marginal_distribution pointer on the marginal frequency distribution,
+ *  \param[in] characteristics       pointer on the observed sequences characteristics,
+ *  \param[in] length_distribution   pointer on the sequence length frequency distribution,
+ *  \param[in] forward               pointer on the forward sojourn time distributions.
+ */
+/*--------------------------------------------------------------*/
 
 void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index , int process ,
                                                 FrequencyDistribution **empirical_observation ,
@@ -2901,7 +2908,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
   ostringstream title , legend;
 
 
-  // calcul du nombre de vues
+  // computation of the number of plots
 
 /*  nb_plot_set = 0;
 
@@ -3034,7 +3041,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
 
     if (characteristics->index_value->frequency[index_length - 1] < MAX_FREQUENCY) {
 
-      // vue : ajustement intensite lissee
+      // fit of smoothed intensities
 
       plot.variable[index] = process;
       plot.viewpoint[index] = INTENSITY;
@@ -3086,7 +3093,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
       index++;
     }
 
-    // vue : ajustement intensite
+    // fit of intensities
 
     plot.variable[index] = process;
     plot.viewpoint[index] = INTENSITY;
@@ -3132,7 +3139,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
     }
     index++;
 
-    // vue : loi empirique des longueurs des sequences
+    // sequence length frequency distribution
 
     plot.variable[index] = process;
     plot.viewpoint[index] = INTENSITY;
@@ -3161,7 +3168,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
 
   else {
 
-    // vue : intensite theorique
+    // theoretical intensity
 
     plot.variable[index] = process;
     plot.viewpoint[index] = INTENSITY;
@@ -3198,7 +3205,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
     for (i = 0;i < nb_value;i++) {
       if ((first_occurrence) && (first_occurrence[i])) {
 
-        // vue : ajustement loi du temps avant la 1ere occurrence d'un etat/observation
+        // fit of the distribution of the time to the 1st occurrence of a state/observation
 
         plot.variable[index] = process;
         plot.viewpoint[index] = FIRST_OCCURRENCE;
@@ -3256,7 +3263,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
       else if ((characteristics) && (i < characteristics->nb_value) &&
                (characteristics->first_occurrence[i]->nb_element > 0)) {
 
-        // vue : loi empirique du temps avant la 1ere occurrence d'un etat/observation
+        // frequency distribution of the time to the 1st occurrence of a state/observation
 
         plot.variable[index] = process;
         plot.viewpoint[index] = FIRST_OCCURRENCE;
@@ -3296,7 +3303,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
     for (i = 0;i < nb_value;i++) {
       if ((recurrence_time) && (recurrence_time[i])) {
 
-        // vue : ajustement loi empirique du temps de retour dans un etat/observation
+        // fit of the distribution of the recurrence time in a state/observation
 
         plot.variable[index] = process;
         plot.viewpoint[index] = RECURRENCE_TIME;
@@ -3354,7 +3361,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
       else if ((characteristics) && (i < characteristics->nb_value) &&
                (characteristics->recurrence_time[i]->nb_element > 0)) {
 
-        // vue : loi empirique du temps de retour dans un etat/observation
+        // frequency distribution of the recurrence time in a state/observation
 
         plot.variable[index] = process;
         plot.viewpoint[index] = RECURRENCE_TIME;
@@ -3394,7 +3401,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
     for (i = 0;i < nb_value;i++) {
       if ((sojourn_time) && (sojourn_time[i])) {
 
-        // vue : ajustement loi du temps de sejour dans un etat/observation
+        // fit of the distribution of the sojourn time in a state/observation
 
         plot.variable[index] = process;
         plot.viewpoint[index] = SOJOURN_TIME;
@@ -3453,7 +3460,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
       else if ((characteristics) && (i < characteristics->nb_value) &&
                (characteristics->sojourn_time[i]->nb_element > 0)) {
 
-        // vue : loi empirique du temps de sejour dans un etat/observation
+        // frequency distribution of the sojourn time in a state/observation
 
         plot.variable[index] = process;
         plot.viewpoint[index] = SOJOURN_TIME;
@@ -3492,7 +3499,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
           (characteristics->initial_run[i]->nb_element > 0)) {
         if ((forward) && (forward[i])) {
 
-          // vue : ajustement loi du temps de sejour residuel
+          // fit of the distribution of the sojourn time in the first visited state
 
           plot.variable[index] = process;
           plot.viewpoint[index] = SOJOURN_TIME;
@@ -3536,7 +3543,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
 
         else {
 
-          // vue : loi empirique du temps de sejour dans le 1ere etat rencontre
+          // frequency distribution of the sojourn time in the first visited state
 
           plot.variable[index] = process;
           plot.viewpoint[index] = SOJOURN_TIME;
@@ -3574,7 +3581,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
 
       if ((forward) && (forward[i])) {
 
-        // vue : ajustement loi du temps de sejour dans le dernier etat/observation rencontre
+        // fit of the distribution of the sojourn time in the last visited state/observation
 
         plot.variable[index] = process;
         plot.viewpoint[index] = SOJOURN_TIME;
@@ -3633,7 +3640,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
       else if ((characteristics) && (i < characteristics->nb_value) &&
                (characteristics->final_run[i]->nb_element > 0)) {
 
-        // vue : loi empirique du temps de sejour dans le dernier etat/observation rencontre
+        // frequency distribution of the sojourn time in the last visited state/observation
 
         plot.variable[index] = process;
         plot.viewpoint[index] = SOJOURN_TIME;
@@ -3675,7 +3682,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
     for (i = 0;i < nb_value;i++) {
       if (nb_run) {
 
-        // vue : ajustement loi du nombre de series d'un etat/observation par sequence
+        // fit of the distribution of the number of runs of a state/observation per sequence
 
         plot.variable[index] = process;
         plot.viewpoint[index] = COUNTING;
@@ -3746,7 +3753,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
                (characteristics->nb_run) &&
                (characteristics->nb_run[i]->nb_element > 0)) {
 
-        // vue : loi empirique du nombre de series d'un etat/observation par sequence
+        // frequency distribution of the number of runs of a state/observation per sequence
 
         plot.variable[index] = process;
         plot.viewpoint[index] = COUNTING;
@@ -3782,7 +3789,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
 
       if (nb_occurrence) {
 
-        // vue : ajustement loi du nombre d'occurrences d'un etat/observation par sequence
+        // fit of the distribution of the number of occurrences of a state/observation per sequence
 
         plot.variable[index] = process;
         plot.viewpoint[index] = COUNTING;
@@ -3853,7 +3860,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
                (characteristics->nb_occurrence) &&
                (characteristics->nb_occurrence[i]->nb_element > 0)) {
 
-        // vue : loi empirique du nombre d'occurrences d'un etat/observation par sequence
+        // frequency distribution of the number of occurrences of a state/observation per sequence
 
         plot.variable[index] = process;
         plot.viewpoint[index] = COUNTING;
@@ -3890,7 +3897,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
 
     if ((characteristics) && (characteristics->nb_run) && (characteristics->nb_occurrence)) {
 
-      // vue : loi empirique des longueurs des sequences
+      // sequence length frequency distribution
 
       plot.variable[index] = process;
       plot.viewpoint[index] = COUNTING;
@@ -3922,7 +3929,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
     if (empirical_observation) {
       for (i = 0;i < nb_state;i++) {
 
-        // vue : ajustement loi d'observation
+        // fit of observation distributions
 
         plot.variable[index] = process;
         plot.viewpoint[index] = OBSERVATION;
@@ -3976,7 +3983,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
 
     else {
 
-      // vue : lois d'observation
+      // observation distributions
 
       plot.variable[index] = process;
       plot.viewpoint[index] = OBSERVATION;
@@ -4017,7 +4024,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
     if (marginal_distribution) {
       if ((weight) && (mixture)) {
 
-        // vue : ajustement melange de lois d'observation
+        // fit of the mixture of observation distributions (theoretical weights)
 
         title.str("");
         title << STAT_label[STATL_OUTPUT_PROCESS] << " " << process << " - "
@@ -4067,7 +4074,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
 
       if ((restoration_weight) && (restoration_mixture)) {
 
-        // vue : ajustement melange de lois d'observation (poids issus de la restauration)
+        // fit of the mixture of observation distributions (restoration weights)
 
         title.str("");
         if (process > 0) {

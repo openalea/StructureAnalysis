@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -46,13 +46,13 @@ namespace sequence_analysis {
 
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the length-biased distribution from the inter-event distribution.
  *
- *  Calcul de la loi biaisee par la longueur a partir de la loi inter-evenement.
- *
- *  argument : loi inter-evenement.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] inter_event inter-event distribution.
+ */
+/*--------------------------------------------------------------*/
 
 void LengthBias::computation(const DiscreteParametric &inter_event)
 
@@ -70,7 +70,7 @@ void LengthBias::computation(const DiscreteParametric &inter_event)
   }
   imass = inter_event.mass + offset;
 
-  // calcul de la quantite de normalisation
+  // computation of the normalization quantity
 
   if (ident == CATEGORICAL) {
     norm = inter_event.mean;
@@ -79,7 +79,7 @@ void LengthBias::computation(const DiscreteParametric &inter_event)
     norm = parametric_mean_computation();
   }
 
-  // calcul des probabilites des valeurs
+  // computation of the probability mass function
 
   for (i = offset;i < nb_value;i++) {
     *pmass++ = i * *imass++ / norm;
@@ -93,14 +93,15 @@ void LengthBias::computation(const DiscreteParametric &inter_event)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the backward recurrence time distribution from
+ *         the inter-event distribution.
  *
- *  Calcul de la loi de l'intervalle de temps apres le dernier evenement
- *  a partir de la loi inter-evenement.
- *
- *  arguments : loi inter-evenement, loi du temps d'observation.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] inter_event inter-event distribution,
+ *  \param[in] time        observation period distribution.
+ */
+/*--------------------------------------------------------------*/
 
 void Backward::computation(const DiscreteParametric &inter_event , const Distribution &time)
 
@@ -115,7 +116,7 @@ void Backward::computation(const DiscreteParametric &inter_event , const Distrib
   pmass = mass;
   icumul = inter_event.cumul;
 
-  // calcul de la quantite de normalisation
+  // computation of the normalization quantity
 
   if (ident == CATEGORICAL) {
     norm = inter_event.mean;
@@ -124,7 +125,7 @@ void Backward::computation(const DiscreteParametric &inter_event , const Distrib
     norm = parametric_mean_computation();
   }
 
-  // calcul des probabilites des valeurs
+  // computation of the probability mass function
 
   tmass = time.mass;
   tcumul = time.cumul;
@@ -156,14 +157,14 @@ void Backward::computation(const DiscreteParametric &inter_event , const Distrib
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the number of events distribution from
+ *         the inter-event distribution.
  *
- *  Calcul de la loi du nombre d'evenements correspondant a
- *  une loi quelconque comme loi inter-evenement.
- *
- *  argument : reference sur la loi inter-evenement.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] inter_event reference on the inter-event distribution.
+ */
+/*--------------------------------------------------------------*/
 
 void NbEvent::computation(DiscreteParametric &inter_event)
 
@@ -175,7 +176,7 @@ void NbEvent::computation(DiscreteParametric &inter_event)
   Forward *forward;
 
 
-  // calcul du nombre de valeurs
+  // computation of the number of values
 
   switch (type) {
   case ORDINARY :
@@ -206,16 +207,16 @@ void NbEvent::computation(DiscreteParametric &inter_event)
       if (i == 0) {
         switch (type) {
 
-        // processus de renouvellement ordinaire :
-        // temps avant le 1er evenement distribue selon la loi inter-evenement
+        // ordinary renewal process: time to the 1st event distributed according to
+        // the inter-event distribution
 
         case ORDINARY : {
           nevent_time->mass_copy(inter_event , time + 1);
           break;
         }
 
-        // processus de renouvellement en equilibre :
-        // temps avant le 1er evenement distribue selon la loi "forward"
+        // equilibrium renewal process: time to the 1st event distributed according to
+        // the forward recurrence time distribution
 
         case EQUILIBRIUM : {
           forward = new Forward(inter_event);
@@ -237,7 +238,7 @@ void NbEvent::computation(DiscreteParametric &inter_event)
           break;
         }
 
-        // calcul de la loi du temps de (n+1) evenements
+        // computation of the time to the (n+1)th events distribution
 
         if ((j == 1) && (ident != CATEGORICAL)) {
           nevent_time->mass_copy(inter_event , time + 1);
@@ -310,13 +311,12 @@ void NbEvent::computation(DiscreteParametric &inter_event)
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Calcul rapide (O(n)), dans le cas d'un processus de renouvellement
- *  ordinaire, de la loi du nombre d'evenements correspondant a
- *  une loi binomiale comme loi inter-evenement.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Fast computation (O(n)) in the case of an ordinary renewal process of
+ *         the number of events distribution from a binomial inter-event distribution.
+ */
+/*--------------------------------------------------------------*/
 
 void NbEvent::binomial_computation()
 
@@ -333,8 +333,7 @@ void NbEvent::binomial_computation()
   pmass = mass;
   pcumul = cumul;
 
-  // calcul de la probabilite de succes a la puissance de
-  // (borne superieure - borne inferieure)
+  // computation of the success probability at the power (upper bound - lower bound)
 
   k_success = 1.;
   for (j = 0;j < sup_bound - inf_bound;j++) {
@@ -342,8 +341,7 @@ void NbEvent::binomial_computation()
   }
   main_term = k_success;
 
-  // valeurs telles que (temps d'observation + 1) > (i + 1) * (borne superieure)
-  // de probabilite nulle
+  // values of null probability such that (observation period + 1) > (i + 1) * (upper bound)
 
   i = 0;
   while (time + 1 > (i + 1) * sup_bound) {
@@ -353,7 +351,7 @@ void NbEvent::binomial_computation()
     i++;
   }
 
-  // calcul de la premiere valeur de probabilite > 0. (calcul exhaustif)
+  // computation of the first non-null probability value (exhaustive computation)
 
   main_subset = (i + 1) * (sup_bound - inf_bound);
   main_set = main_subset;
@@ -375,13 +373,13 @@ void NbEvent::binomial_computation()
   i++;
   rapid_index = i;
 
-  // calcul rapide des probabilites des valeurs suivantes
+  // fast computation of the probability masses for the following values
 
   while (i < nb_value) {
 
-    // calcul des termes principaux
+    // computation of the main terms
 
-    // calcul du 1er terme
+    // computation of the 1st term
 
     if (i > rapid_index) {
       if (inf_bound == 0) {
@@ -402,7 +400,7 @@ void NbEvent::binomial_computation()
     }
     *++pmass = main_term;
 
-    // calcul des (j - borne inferieure - 1) termes suivants
+    // computation of the (j - lower bound - 1) following terms
 
     for (j = 1;j <= sup_bound - inf_bound - 1;j++) {
       main_set++;
@@ -411,9 +409,9 @@ void NbEvent::binomial_computation()
       *pmass += main_term;
     }
 
-    // calcul des termes correspondant a la borne inferieure
+    // computation of the terms corresponding to the lower bound
 
-    // calcul du 1er terme
+    // computation of the 1st term
 
     if (inf_bound > 0) {
       inf_bound_subset = main_subset;
@@ -423,7 +421,7 @@ void NbEvent::binomial_computation()
       *pmass += inf_bound_term;
     }
 
-    // calcul des (borne inferieure - 1) termes suivants
+    // computation of the (lower bound - 1) following terms
 
     if (inf_bound > 1) {
       nb_term = inf_bound - 1;
@@ -438,7 +436,7 @@ void NbEvent::binomial_computation()
       }
     }
 
-    // mise a jour le la fonction de repartition
+    // update of the cumulative distribution function
 
     pcumul++;
     *pcumul = *(pcumul - 1) + *pmass;
@@ -452,14 +450,13 @@ void NbEvent::binomial_computation()
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Calcul rapide (O(n)), dans le cas d'un processus de renouvellement
- *  ordinaire, de la loi du nombre  d'evenements correspondant
- *  a une loi binomiale negative comme loi inter-evenement. Ce calcul
- *  n'est valable que si le parametre est entier.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Fast computation (O(n)) in the case of an ordinary renewal process of
+ *         the number of events distribution from a negative binomial inter-event distribution.
+ *         This computation requires an integer-valued negative binomial shape parameter.
+ */
+/*--------------------------------------------------------------*/
 
 void NbEvent::negative_binomial_computation()
 
@@ -474,7 +471,7 @@ void NbEvent::negative_binomial_computation()
 
   pmass = mass;
 
-  // calcul des termes pour nombre d'evenements = 0
+  // computation of the terms for number of events = 0
 
   main_term = 1.;
   for (i = 0;i < parameter;i++) {
@@ -493,14 +490,14 @@ void NbEvent::negative_binomial_computation()
   *pmass = 1. - *pmass;
   pmass++;
 
-  // calcul des probabilites des valeurs de 1 a (temps d'observation / borne inferieure)
+  // computation of probability masses for values from 1 to (observation period / lower bound)
 
   for (i = 1;i < nb_value;i++) {
     *pmass = 0.;
 
-    // calcul des termes correspondant a la borne inferieure
+    // computation of the terms corresponding to the lower bound
 
-    // calcul du 1er terme
+    // computation of the 1st term
 
     if (inf_bound > 1) {
       if (i == 1) {
@@ -516,7 +513,7 @@ void NbEvent::negative_binomial_computation()
       }
       *pmass += inf_bound_term;
 
-      // calcul des (borne inferieure - 2) termes suivants
+      // computation of the (lower bound - 2) following terms
 
       if (inf_bound > 2) {
         for (j = 0;j < inf_bound - 2;j++) {
@@ -528,9 +525,9 @@ void NbEvent::negative_binomial_computation()
       }
     }
 
-    // calcul des termes principaux
+    // computation of the main terms
 
-    // calcul du 1er terme
+    // computation of the 1st term
 
     if (i == 1) {
       main_subset++;
@@ -555,7 +552,7 @@ void NbEvent::negative_binomial_computation()
     }
     *pmass += main_term;
 
-    // calcul des (k-1) termes suivant
+    // computation of the (k - 1) following terms
 
     if (parameter > 1) {
       for (j = 1;j <= (int)parameter - 1;j++) {
@@ -582,15 +579,15 @@ void NbEvent::negative_binomial_computation()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation in the case of an ordinary renewal process of
+ *         the number of events distribution from a parametric inter-event
+ *         distribution (binomial, Poisson, negative binomial).
  *
- *  Calcul dans le cas dans le cas d'un processus de renouvellement
- *  ordinaire de la loi du nombre d'evenements correspondant a une loi
- *  inter-evenement parametrique (binomiale negative, binomiale, Poisson).
- *
- *  argument : reference sur la loi inter-evenement.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] inter_event reference on an inter-event distribution.
+ */
+/*--------------------------------------------------------------*/
 
 void NbEvent::ordinary_computation(DiscreteParametric &inter_event)
 
@@ -619,11 +616,11 @@ void NbEvent::ordinary_computation(DiscreteParametric &inter_event)
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Calcul des probabilites de non-evenement/evenement fonction du temps.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of non-event/event probabilities as a function of time.
+ */
+/*--------------------------------------------------------------*/
 
 void Renewal::index_event_computation()
 
@@ -682,21 +679,20 @@ void Renewal::index_event_computation()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the distributions of a renewal process from
+ *         the inter-event distribution.
+ *         time interval: length-biased distribution,
+ *                        backward and forward recurrence time distributions,
+ *        count: number of events distributions and resulting mixture,
+ *        intensity: no-event/event probabilities as a function of time.
  *
- *  Calcul des lois d'un processus de renouvellement a partir
- *  d'une loi quelconque comme loi inter-evenement.
- *  intervalle : loi inter-evenement, loi biaisee par la longueur,
- *               loi de l'intervalle de temps apres le dernier evenement,
- *               loi de l'intervalle de temps residuel,
- *  comptage : melange de lois du nombre d'evenements,
- *  intensite.
- *
- *  arguments : flag pour le calcul de la loi inter-evenement,
- *              type de processus (ORDINARY/EQUILIBRIUM),
- *              pointeur sur la loi du temps d'observation.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] inter_event_flag flag for the computation of the inter-event distribution,
+ *  \param[in] itype            renewal process type (ORDINARY/EQUILIBRIUM),
+ *  \param[in] dtime            pointer on the observation period distribution.
+ */
+/*--------------------------------------------------------------*/
 
 void Renewal::computation(bool inter_event_flag , process_type itype , const Distribution *dtime)
 
@@ -711,8 +707,8 @@ void Renewal::computation(bool inter_event_flag , process_type itype , const Dis
     itype = type;
   }
 
-  // calcul de la loi inter-evenement, de la loi biaisee par la longueur et
-  // de la loi de l'intervalle de temps residuel
+  // computation of the inter-event distribution, the length-biased distribution and
+  // the forward recurrence time distribution
 
   if (inter_event_flag) {
     inter_event->computation(1 , RENEWAL_THRESHOLD);
@@ -795,11 +791,11 @@ void Renewal::computation(bool inter_event_flag , process_type itype , const Dis
     mixture = new Distribution(nb_value);
   }
 
-  // calcul de la loi du temps apres le dernier evenement
+  // computation of the backward recurrence time distribution
 
   backward->computation(*inter_event , *time);
 
-  // creation et initialisation des variables "fonction de repartition"
+  // construction and initialization of the cumulative distribution functions
 
   cumul = new double[time->nb_value];
   previous_cumul = new double[time->nb_value];
@@ -817,7 +813,7 @@ void Renewal::computation(bool inter_event_flag , process_type itype , const Dis
     pcumul2++;
   }
 
-  // calcul du nombre de valeurs des lois du nombre d'evenements et de la loi resultante
+  // computation of the number of values of the number of events distributions and the resulting mixture
 
   tmass = time->mass + time->offset;
 
@@ -850,8 +846,7 @@ void Renewal::computation(bool inter_event_flag , process_type itype , const Dis
     power = pnevent_time;
   }
 
-  // calcul des lois du nombre d'evenements et du melange resultant
-
+  // computation of the number of events distributions and the ressulting mixture
 
   pmass = mixture->mass;
 
@@ -888,7 +883,7 @@ void Renewal::computation(bool inter_event_flag , process_type itype , const Dis
           forward_power->cumul_computation();
         }
 
-        // calcul de la loi du temps de (n+1) evenements
+        // computation of the time to the (n+1)th event distribution
 
         power->ident = inter_event->ident;
 
@@ -934,7 +929,7 @@ void Renewal::computation(bool inter_event_flag , process_type itype , const Dis
       }
     }
 
-    // calcul des lois du nombre d'evenements et de la loi resultante
+    // computation of the number of events distributions and the resulting mixture
 
     tmass = time->mass + time->offset;
     pcumul1 = cumul + time->offset;

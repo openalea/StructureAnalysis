@@ -5,5 +5,8 @@ build-scons
 *.so
 *.pyc
 *.dblite
+*.ps
+stat_tool/doc/html/
+stat_tool/doc/latex/
 options.py
 /.project

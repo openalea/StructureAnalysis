@@ -1725,7 +1725,7 @@ VariableOrderMarkovChain* VariableOrderMarkovChain::parsing(StatError &error , i
       case 1 : {
         if (token != STAT_word[STATW_STATES]) {
           status = false;
-          error.correction_update(STAT_parsing[STATP_KEY_WORD] , STAT_word[STATW_STATES] , line , i + 1);
+          error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_STATES] , line , i + 1);
         }
         break;
       }
@@ -1779,14 +1779,14 @@ VariableOrderMarkovChain* VariableOrderMarkovChain::parsing(StatError &error , i
             if ((type == ORDINARY) && (read_line == 0)) {
               if (token != STAT_word[STATW_INITIAL_PROBABILITIES]) {
                 status = false;
-                error.correction_update(STAT_parsing[STATP_KEY_WORD] , STAT_word[STATW_INITIAL_PROBABILITIES] , line);
+                error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_INITIAL_PROBABILITIES] , line);
               }
             }
 
             else {
               if (token != STAT_word[STATW_TRANSITION_PROBABILITIES]) {
                 status = false;
-                error.correction_update(STAT_parsing[STATP_KEY_WORD] , STAT_word[STATW_TRANSITION_PROBABILITIES] , line);
+                error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_TRANSITION_PROBABILITIES] , line);
               }
             }
           }
@@ -2065,10 +2065,10 @@ VariableOrderMarkovChain* VariableOrderMarkovChain::parsing(StatError &error , i
 
       markov->build_non_terminal();
 
-      // test etats atteignables
+      // test accessible states
 
       logic_transition = markov->logic_transition_computation();
-      status = markov->connex_component_research(error , logic_transition);
+      status = markov->strongly_connected_component_research(error , logic_transition);
 
       if (status) {
 
@@ -3585,7 +3585,7 @@ VariableOrderMarkov* VariableOrderMarkov::ascii_read(StatError &error ,
             ostringstream correction_message;
             correction_message << SEQ_word[SEQW_MARKOV_CHAIN] << " or "
                                << SEQ_word[SEQW_EQUILIBRIUM_MARKOV_CHAIN];
-            error.correction_update(STAT_parsing[STATP_KEY_WORD] ,
+            error.correction_update(STAT_parsing[STATP_KEYWORD] ,
                                     (correction_message.str()).c_str() , line);
           }
         }
@@ -3636,7 +3636,7 @@ VariableOrderMarkov* VariableOrderMarkov::ascii_read(StatError &error ,
             if (i == 0) {
               if (token != STAT_word[STATW_OUTPUT_PROCESS]) {
                 status = false;
-                error.correction_update(STAT_parsing[STATP_KEY_WORD] , STAT_word[STATW_OUTPUT_PROCESS] , line);
+                error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_OUTPUT_PROCESS] , line);
               }
             }
 

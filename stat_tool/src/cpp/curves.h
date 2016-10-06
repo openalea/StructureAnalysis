@@ -71,18 +71,20 @@ namespace stat_tool {
  */
 
 
-  class Curves {          // family of curves with frequencies
+  /// \brief Family of curves with frequencies
+
+  class Curves {
 
     friend std::ostream& operator<<(std::ostream& , const Curves&);
 
   public :
 
-    int nb_curve;           // number of curves
-    int length;             // curve length
-    int offset;             // index of the beginning of the curves
-    int *index_parameter;   // explicit index parameters
-    int *frequency;         // frequencies for each index
-    double **point;         // curves
+    int nb_curve;           ///< number of curves
+    int length;             ///< curve length
+    int offset;             ///< index of the beginning of the curves
+    int *index_parameter;   ///< explicit index parameters
+    int *frequency;         ///< frequency for each index
+    double **point;         ///< curves
 
     void copy(const Curves&);
     void smooth(const Curves &curves , int max_frequency);

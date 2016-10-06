@@ -217,9 +217,9 @@ ContinuousParametricProcess::~ContinuousParametricProcess()
 /**
  *  \brief Assignment operator of the ContinuousParametricProcess class.
  *
- *  \param[in]  process reference on a ContinuousParametricProcess object,
+ *  \param[in] process reference on a ContinuousParametricProcess object.
  *
- *  \param[out] this    ContinuousParametricProcess object.
+ *  \return            ContinuousParametricProcess object.
  */
 /*--------------------------------------------------------------*/
 
@@ -239,14 +239,14 @@ ContinuousParametricProcess& ContinuousParametricProcess::operator=(const Contin
 /**
  *  \brief Analysis of the format of continuous observation distributions.
  *
- *  \param[in]   error      reference on a StatError object,
- *  \param[in]   in_file    stream,
- *  \param[in]   line       reference on the file line index,
- *  \param[in]   nb_state   number of states,
- *  \param[in]   model      model type,
- *  \param[in]   last_ident identifier of the last distribution in the list.
+ *  \param[in] error      reference on a StatError object,
+ *  \param[in] in_file    stream,
+ *  \param[in] line       reference on the file line index,
+ *  \param[in] nb_state   number of states,
+ *  \param[in] model      model type,
+ *  \param[in] last_ident identifier of the last distribution in the list.
  *
- *  \param[out] process    ContinuousParametricProcess object.
+ *  \return               ContinuousParametricProcess object.
  */
 /*--------------------------------------------------------------*/
 
@@ -299,7 +299,7 @@ ContinuousParametricProcess* ContinuousParametricProcess::parsing(StatError &err
           case MIXTURE : {
             if (token != STAT_word[STATW_COMPONENT]) {
               status = false;
-              error.correction_update(STAT_parsing[STATP_KEY_WORD] ,
+              error.correction_update(STAT_parsing[STATP_KEYWORD] ,
                                       STAT_word[STATW_COMPONENT] , line , j + 1);
             }
             break;
@@ -308,7 +308,7 @@ ContinuousParametricProcess* ContinuousParametricProcess::parsing(StatError &err
           case HIDDEN_MARKOV : {
             if (token != STAT_word[STATW_STATE]) {
               status = false;
-              error.correction_update(STAT_parsing[STATP_KEY_WORD] ,
+              error.correction_update(STAT_parsing[STATP_KEYWORD] ,
                                       STAT_word[STATW_STATE] , line , j + 1);
             }
             break;
@@ -346,7 +346,7 @@ ContinuousParametricProcess* ContinuousParametricProcess::parsing(StatError &err
           if ((token != STAT_word[STATW_OBSERVATION_DISTRIBUTION]) &&
               (token != STAT_word[STATW_OBSERVATION_MODEL])) {
             status = false;
-            error.correction_update(STAT_parsing[STATP_KEY_WORD] ,
+            error.correction_update(STAT_parsing[STATP_KEYWORD] ,
                                     STAT_word[STATW_OBSERVATION_DISTRIBUTION] , line , j + 1);
           }
           break;
@@ -418,9 +418,9 @@ ContinuousParametricProcess* ContinuousParametricProcess::parsing(StatError &err
  *  \brief Writing of a ContinuousParametricProcess object.
  *
  *  \param[in,out] os                       stream,
- *  \param[in]     observation_histogram    pointer on the observation histograms
- *  \param[in]     observation_distribution pointer on the observation frequency distributions
- *  \param[in]     marginal_histogram       pointer on the marginal histogram 
+ *  \param[in]     observation_histogram    pointer on the observation histograms,
+ *  \param[in]     observation_distribution pointer on the observation frequency distributions,
+ *  \param[in]     marginal_histogram       pointer on the marginal histogram,
  *  \param[in]     marginal_distribution    pointer on the marginal frequency distribution,
  *  \param[in]     exhaustive               flag detail level,
  *  \param[in]     file_flag                flag file,
@@ -750,7 +750,7 @@ ostream& ContinuousParametricProcess::ascii_print(ostream &os , Histogram **obse
             observation_cumul = observation_distribution[i]->cumul_computation();
           }
 
-          // computation of column widths
+          // computation of the column widths
 
           if (observation_histogram) {
             width[1] = column_width(observation_histogram[i]->max) + ASCII_SPACE;
@@ -906,7 +906,7 @@ ostream& ContinuousParametricProcess::ascii_print(ostream &os , Histogram **obse
 
     if (exhaustive) {
 
-     // computation of column widths
+     // computation of the column widths
 
       if (marginal_histogram) {
         width[1] = column_width(marginal_histogram->max) + ASCII_SPACE;
@@ -1013,7 +1013,7 @@ ostream& ContinuousParametricProcess::ascii_print(ostream &os , Histogram **obse
 
       if (exhaustive) {
 
-       // computation of column widths
+       // computation of the column widths
 
         width[2] = column_width(nb_step , frequency[nb_state] , nb_element);
         for (i = 0;i < nb_state;i++) {
@@ -1194,7 +1194,7 @@ ostream& ContinuousParametricProcess::ascii_print(ostream &os , Histogram **obse
 
       if (exhaustive) {
 
-       // computation of column widths
+       // computation of the column widths
 
         width[2] = column_width(nb_step , frequency[nb_state] , nb_element);
         for (i = 0;i < nb_state;i++) {
@@ -2147,7 +2147,7 @@ ostream& ContinuousParametricProcess::spreadsheet_print(ostream &os , Histogram 
       }
       os << endl;
 
-      // computation of the mixture of continuous distributions (restoration weights)
+      // computation of the mixture of continuous observation distributions (restoration weights)
 
       for (i = 0;i < nb_step;i++) {
         frequency[nb_state][i] = 0.;
@@ -2310,14 +2310,14 @@ ostream& ContinuousParametricProcess::spreadsheet_print(ostream &os , Histogram 
 /**
  *  \brief Computation of q-q plot.
  *
- *  \param[in]  min_value       minimum value,
- *  \param[in]  step            step,
- *  \param[in]  nb_step         number of steps of the theoretical cdf,
- *  \param[in]  theoretical_cdf pointer on the theoretical cumultative distribution function,
- *  \param[in]  nb_value        number of observed values,
- *  \param[in]  empirical_cdf   pointer on the empirical cumultative distribution function,
+ *  \param[in] min_value       minimum value,
+ *  \param[in] step            step,
+ *  \param[in] nb_step         number of steps of the theoretical cdf,
+ *  \param[in] theoretical_cdf pointer on the theoretical cumultative distribution function,
+ *  \param[in] nb_value        number of observed values,
+ *  \param[in] empirical_cdf   pointer on the empirical cumultative distribution function.
  *
- *  \param[out] qqplot          q-q plot.
+ *  \return                    q-q plot.
  */
 /*--------------------------------------------------------------*/
 
@@ -2364,11 +2364,11 @@ double** q_q_plot_computation(double min_value , double step ,
 /**
  *  \brief Writing of a q-q plot at the Gnuplot format.
  *
- *  \param[in]  path     file path,
- *  \param[in]  nb_value number of observed values,
- *  \param[in]  qqplot   pointer on the q-q plot,
+ *  \param[in] path     file path,
+ *  \param[in] nb_value number of observed values,
+ *  \param[in] qqplot   pointer on the q-q plot.
  *
- *  \param[out] status   error status.
+ *  \return             error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -2400,18 +2400,18 @@ bool q_q_plot_print(const char *path , int nb_value , double **qqplot)
 /**
  *  \brief Plot of a ContinuousParametricProcess object at the Gnuplot format.
  *
- *  \param[in]  prefix                   file prefix,
- *  \param[in]  title                    figure title,
- *  \param[in]  process                  observation process index,
- *  \param[in]  observation_histogram    pointer on the observation histograms,
- *  \param[in]  observation_distribution pointer on the observation frequency distributions,
- *  \param[in]  marginal_histogram       pointer on the marginal histogram,
- *  \param[in]  marginal_distribution    pointer on the marginal frequency distribution,
- *  \param[in]  nb_value                 number of values,
- *  \param[in]  empirical_cdf            pointer on the empirical cumulative distribution function,
- *  \param[in]  model                    model type,
+ *  \param[in] prefix                   file prefix,
+ *  \param[in] title                    figure title,
+ *  \param[in] process                  observation process index,
+ *  \param[in] observation_histogram    pointer on the observation histograms,
+ *  \param[in] observation_distribution pointer on the observation frequency distributions,
+ *  \param[in] marginal_histogram       pointer on the marginal histogram,
+ *  \param[in] marginal_distribution    pointer on the marginal frequency distribution,
+ *  \param[in] nb_value                 number of values,
+ *  \param[in] empirical_cdf            pointer on the empirical cumulative distribution function,
+ *  \param[in] model                    model type.
  *
- *  \param[out] status                   error status.
+ *  \return                             error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -2893,7 +2893,7 @@ bool ContinuousParametricProcess::plot_print(const char *prefix , const char *ti
       }
     }
 
-    // writing of data files
+    // writing of the data files
 
     value = min_value;
     for (i = 0;i < nb_step;i++) {
@@ -3039,7 +3039,7 @@ bool ContinuousParametricProcess::plot_print(const char *prefix , const char *ti
       }
     }
 
-    // writing of script files
+    // writing of the script files
 
     for (i = 0;i < 2;i++) {
       ostringstream file_name[2];
@@ -3392,14 +3392,14 @@ void q_q_plotable_write(SinglePlot &plot , int nb_value , double **qqplot)
 
 /*--------------------------------------------------------------*/
 /**
- *  \briefPlot of a ContinuousParametricProcess object.
+ *  \brief Plot of a ContinuousParametricProcess object.
  *
  *  \param[in] plot                     reference on a MultiPlotSet object,
  *  \param[in] index                    MultiPlot index,
  *  \param[in] process                  observation process index,
  *  \param[in] observation_histogram    pointer on the observation histograms,
  *  \param[in] observation_distribution pointer on the observation frequency distributions,
- *  \param[in] marginal_histogram       pointer on the marginal histogram
+ *  \param[in] marginal_histogram       pointer on the marginal histogram,
  *  \param[in] marginal_distribution    pointer on the marginal frequency distribution,
  *  \param[in] nb_value                 number of values,
  *  \param[in] empirical_cdf            pointer on the empirical cumulative distribution function,
@@ -3847,7 +3847,7 @@ void ContinuousParametricProcess::plotable_write(MultiPlotSet &plot , int &index
   if ((observation_histogram) || (observation_distribution)) {
     for (i = 0;i < nb_state;i++) {
 
-      // observation distribution fit
+      // fit of observation distribution
 
       plot.variable[index] = process;
 //      plot.viewpoint[index] = OBSERVATION;
@@ -3995,7 +3995,7 @@ void ContinuousParametricProcess::plotable_write(MultiPlotSet &plot , int &index
 
     if (weight) {
 
-      // fit of mixture of observation distributions (theoretical weights)
+      // fit of the mixture of observation distributions (theoretical weights)
 
       for (i = 0;i < nb_step;i++) {
         frequency[nb_state][i] = 0.;
@@ -4129,7 +4129,7 @@ void ContinuousParametricProcess::plotable_write(MultiPlotSet &plot , int &index
 
     if (restoration_weight) {
 
-      // fit of mixture of observation distributions (restoration weights)
+      // fit of the mixture of observation distributions (restoration weights)
 
       for (i = 0;i < nb_step;i++) {
         frequency[nb_state][i] = 0.;
@@ -4295,7 +4295,7 @@ void ContinuousParametricProcess::plotable_write(MultiPlotSet &plot , int &index
  *  \brief Computation of the number of free parameters of a continuous
  *         observation process.
  *
- *  \param[out] nb_parameter number of free parameters.
+ *  \return number of free parameters.
  */
 /*--------------------------------------------------------------*/
 
@@ -4338,9 +4338,9 @@ int ContinuousParametricProcess::nb_parameter_computation() const
  *  \brief Computation of the mean of a mixture of continuous 
  *         observation distributions.
  *
- *  \param[in]  pweight pointer on the weight distribution,
+ *  \param[in] pweight pointer on the weight distribution.
  *
- *  \param[out] mean    mixture mean.
+ *  \return            mixture mean.
  */
 /*--------------------------------------------------------------*/
 
@@ -4401,10 +4401,10 @@ double ContinuousParametricProcess::mean_computation(Distribution *pweight) cons
  *  \brief Computation of the variance of a mixture of continuous 
  *         observation distributions.
  *
- *  \param[in]  pweight pointer on weight distribution,
- *  \param[in]  mean    mean,
+ *  \param[in] pweight pointer on weight distribution,
+ *  \param[in] mean    mean.
  *
- *  \param[out] mean    mixture variance.
+ *  \return            mixture variance.
  */
 /*--------------------------------------------------------------*/
 

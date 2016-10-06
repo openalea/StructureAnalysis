@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -48,10 +48,11 @@ namespace stat_tool {
 
   class DiscreteDistributionData;
 
+  /// \brief Discrete parametric distribution
 
-  class DiscreteParametricModel : public StatInterface , public DiscreteParametric {  // loi discrete parametrique
+  class DiscreteParametricModel : public StatInterface , public DiscreteParametric {
 
-    friend class Distribution;  // Hack pour Windows
+    friend class Distribution;  // Hack for Windows
     friend class FrequencyDistribution;
     friend class DiscreteDistributionData;
 
@@ -60,7 +61,7 @@ namespace stat_tool {
 
   private :
 
-    DiscreteDistributionData *frequency_distribution;  // pointeur sur un objet DiscreteDistributionData
+    DiscreteDistributionData *frequency_distribution;  // pointer on a DiscreteDistributionData object
 
     std::ostream& ascii_write(std::ostream &os , const DiscreteDistributionData *histo ,
                               bool exhaustive , bool file_flag) const;
@@ -112,7 +113,9 @@ namespace stat_tool {
 
 
 
-  class DiscreteDistributionData : public StatInterface , public FrequencyDistribution {  // loi discrete empirique
+  // \brief Frequency distribution
+
+  class DiscreteDistributionData : public StatInterface , public FrequencyDistribution {
 
     friend class DiscreteParametricModel;
 
@@ -121,7 +124,7 @@ namespace stat_tool {
 
   private :
 
-    DiscreteParametricModel *distribution;  // pointeur sur un objet DiscreteParametricModel
+    DiscreteParametricModel *distribution;  // pointer on a DiscreteParametricModel object
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive , bool file_flag) const;
 

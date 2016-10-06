@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -50,23 +50,23 @@ namespace sequence_analysis {
 
 /****************************************************************
  *
- *  Constantes :
+ *  Constants
  */
 
 
-  const int DEFAULT_TIME = 20;           // temps d'observation par defaut
-  const int MAX_TIME = 500;              // temps d'observation maximum
-  const int PLOT_NEVENT_TIME = 10;       // nombre maximum de lois du temps avant
-                                         // le n-eme evenement affichees (sortie Gnuplot)
-  const int PLOT_NB_TIME = 5;            // nombre maximum de lois du nombre d'evenements
-                                         // affichees dans le cas de melange (sortie Gnuplot)
+  const int DEFAULT_TIME = 20;           // default observation period
+  const int MAX_TIME = 500;              // maximum observation period
+  const int PLOT_NEVENT_TIME = 10;       // maximum number of time to the nth event distributions
+                                         // plotted (Gnuplot output)
+  const int PLOT_NB_TIME = 5;            // maximum number of distributions of the number of events plotted
+                                         // with the mixture of the number of events distributions (Gnuplot output)
 
-  const double RENEWAL_THRESHOLD = 0.99999;  // seuil sur la fonction de repartition
-                                             // pour borner une loi
-  const double RB_THRESHOLD = 2000.;     // seuil pour utiliser le calcul rapide de la loi du
-                                         // nombre d'ev correspondant a une loi binomiale
-  const double RNB_THRESHOLD = 2000.;    // seuil pour utiliser le calcul rapide de la loi du
-                                         // nombre d'ev correspondant a une loi binomiale negative
+  const double RENEWAL_THRESHOLD = 0.99999;  // threshold on the cumulative distribution function for determining
+                                             // the upper bound of the support of the inter-event distribution
+  const double RB_THRESHOLD = 2000.;     // threshold for using the fast computation of the number of events distribution
+                                         // from a binomial inter-event distribution
+  const double RNB_THRESHOLD = 2000.;    // threshold for using the fast computation of the number of events distribution
+                                         // from a negative binomiale inter-event distribution
 
   enum renewal_distribution {
     INTER_EVENT ,
@@ -78,24 +78,26 @@ namespace sequence_analysis {
     NB_EVENT_MIXTURE
   };
 
-  const double MIN_NB_EVENT = 0.4;       // nombre d'evenements moyen minimum
-  const double MIN_INTER_EVENT = 1.;     // temps moyen minimum entre 2 evenements
-  const double RENEWAL_INIT_PROBABILITY = 0.001;  // seuil pour l'initialisation de la probabilite
-  const int RENEWAL_COEFF = 10;          // coefficient arrondi estimateur
+  const double MIN_NB_EVENT = 0.4;       // minimum mean number of events
+  const double MIN_INTER_EVENT = 1.;     // minimum mean time interval between events
+  const double RENEWAL_INIT_PROBABILITY = 0.001;  // threshold for probability initialization
+  const int RENEWAL_COEFF = 10;          // rounding coefficient for the estimator
 
-  const double MEAN_COEFF = 2.;          // coefficient sur la moyenne pour compenser le biais par la longueur
+  const double MEAN_COEFF = 2.;          // coefficient on the mean for compensating the length bias
 
-  const int RENEWAL_NB_ELEMENT = 1000000;  // taille maximum de l'echantillon pour la simulation
+  const int RENEWAL_NB_ELEMENT = 1000000;  // maximum sample size for simulation
 
 
 
 /****************************************************************
  *
- *  Definition des classes :
+ *  Class definition
  */
 
 
-  class LengthBias : public stat_tool::DiscreteParametric {  // loi biaisee par la longueur
+  /// \brief Length-biased distribution
+
+  class LengthBias : public stat_tool::DiscreteParametric {
 
   public :
 
@@ -113,7 +115,9 @@ namespace sequence_analysis {
 
 
 
-  class Backward : public stat_tool::DiscreteParametric {  // loi de l'intervalle de temps apres le dernier evenement
+  /// \brief Backward recurrence time distribution
+
+  class Backward : public stat_tool::DiscreteParametric {
 
   public :
 
@@ -129,12 +133,14 @@ namespace sequence_analysis {
 
 
 
-  class NbEvent : public stat_tool::DiscreteParametric {  // loi du nombre d'evenements
+  /// \brief Number of events distribution
+
+  class NbEvent : public stat_tool::DiscreteParametric {
 
   public :
 
-    stat_tool::process_type type;  // ORDINARY/EQUILIBRIUM
-    int time;               // temps d'observation
+    stat_tool::process_type type;  ///< renewal process type (ORDINARY/EQUILIBRIUM)
+    int time;               ///< observation period
 
     NbEvent(stat_tool::process_type itype = stat_tool::EQUILIBRIUM , int itime = 0 , int inb_value = 0 ,
             stat_tool::discrete_parametric iident = stat_tool::CATEGORICAL ,
@@ -156,8 +162,9 @@ namespace sequence_analysis {
   class TimeEvents;
   class RenewalData;
 
+  /// \brief Renewal process
 
-  class Renewal : public stat_tool::StatInterface {  // processus de renouvellement
+  class Renewal : public stat_tool::StatInterface {
 
     friend class RenewalIterator;
     friend class TimeEvents;
@@ -168,20 +175,19 @@ namespace sequence_analysis {
 
   private :
 
-    int nb_iterator;        // nombre d'iterateurs pointant sur l'objet
-    RenewalData *renewal_data;  // pointeur sur un objet RenewalData
-    stat_tool::process_type type;  // ORDINARY/EQUILIBRIUM
-    int nb_event_max;       // borne max sur le nombre d'evenements
-    stat_tool::Distribution *time;  // loi du temps d'observation
-    stat_tool::DiscreteParametric *inter_event;  // loi inter-evenement
-    LengthBias *length_bias;  // loi biaisee par la longueur
-    Backward *backward;     // loi de l'intervalle de temps apres le dernier evenement
-    stat_tool::Forward *forward;  // loi de l'intervalle de temps residuel
-    stat_tool::DiscreteParametric **nevent_time;  // lois du temps avant le n-eme evenement
-    NbEvent **nb_event;    // lois du nombre d'evenements
-                           // pour un temps d'observation donne
-    stat_tool::Distribution *mixture;  // melange de lois du nombre d'evenements
-    stat_tool::Curves *index_event;  // probabilites de non-evenement/evenement fonction du temps
+    int nb_iterator;        ///< number of iterators pointing on the Renewal object
+    RenewalData *renewal_data;  ///< pointer on a RenewalData object
+    stat_tool::process_type type;  ///< renewal process type (ORDINARY/EQUILIBRIUM)
+    int nb_event_max;       ///< maximum number of events
+    stat_tool::Distribution *time;  ///< observation period distribution
+    stat_tool::DiscreteParametric *inter_event;  ///< inter-event distribution
+    LengthBias *length_bias;  ///< length-biased distribution
+    Backward *backward;     ///< backward recurrence time distribution
+    stat_tool::Forward *forward;  ///< forward recurrence time distribution
+    stat_tool::DiscreteParametric **nevent_time;  ///< time to the nth event distributions
+    NbEvent **nb_event;    ///< number of events distributions for the different observation periods
+    stat_tool::Distribution *mixture;  ///< mixture of the number of events distributions
+    stat_tool::Curves *index_event;  ///< no-event/event probabilities as a function of time
 
     void init(int inf_bound , int sup_bound , double parameter , double probability);
     void init(stat_tool::discrete_parametric ident , int inf_bound , int sup_bound ,
@@ -251,7 +257,7 @@ namespace sequence_analysis {
     RenewalData* simulation(stat_tool::StatError &error , stat_tool::process_type itype ,
                             int nb_element , const TimeEvents &itimev) const;
 
-    // acces membres de la classe
+    // class member access
 
     int get_nb_iterator() const { return nb_iterator; }
     RenewalData* get_renewal_data() const { return renewal_data; }
@@ -269,15 +275,17 @@ namespace sequence_analysis {
 
 
 
-  class RenewalIterator {  // iterateur processus de renouvellement
+  /// \brief Renewal process iterator for asynchronous simulation
+
+  class RenewalIterator {
 
   private :
 
-    Renewal *renewal;       // pointeur sur un objet Renewal
-    int interval;           // intervalle de temps
-    int counter;            // compteur
-    int length;             // longueur de la sequence
-    int *sequence;          // sequence
+    Renewal *renewal;       ///< pointer on a Renewal object
+    int interval;           ///< time interval between events
+    int counter;            ///< counter
+    int length;             ///< sequence length
+    int *sequence;          ///< sequence of events
 
     void copy(const RenewalIterator &iter);
 
@@ -291,7 +299,7 @@ namespace sequence_analysis {
 
     void simulation(int ilength = 1 , stat_tool::process_type type = stat_tool::DEFAULT_TYPE);
 
-    // acces membres de la classe
+    // class member access
 
     Renewal* get_renewal() const { return renewal; }
     int get_interval() const { return interval; }
@@ -302,7 +310,9 @@ namespace sequence_analysis {
 
 
 
-  class TimeEvents : public stat_tool::StatInterface {  // echantillons {temps, nombre d'evenements, effectif}
+  /// \brief Triplets {observation period, number of events, frequency}
+
+  class TimeEvents : public stat_tool::StatInterface {
 
     friend class stat_tool::FrequencyDistribution;
     friend class Renewal;
@@ -312,16 +322,14 @@ namespace sequence_analysis {
 
   protected :
 
-    int nb_element;         // effectif total
-    int nb_class;           // nombre de classes
-    int *time;              // temps d'observation
-    int *nb_event;          // nombre d'evenements
-    int *frequency;         // effectif de chacune des classes
-                            // {temps, nombre d'evenements}
-    stat_tool::FrequencyDistribution *htime;  // loi empirique du temps d'observation
-    stat_tool::FrequencyDistribution **hnb_event;  // lois empiriques du nombre d'evenements
-                                                   // pour un temps d'observation donne
-    stat_tool::FrequencyDistribution *mixture;  // loi empirique du nombre d'evenements
+    int nb_element;         ///< sample size
+    int nb_class;           ///< number of classes
+    int *time;              ///< observation period
+    int *nb_event;          ///< number of events
+    int *frequency;         ///< frequency of each pair {observation period, number of events}
+    stat_tool::FrequencyDistribution *htime;  ///< observation period frequency distribution
+    stat_tool::FrequencyDistribution **hnb_event;  ///< number of events frequency distributions for the different observation periods
+    stat_tool::FrequencyDistribution *mixture;  ///< mixture of the number of events frequency distributions
 
     void build_frequency_distribution();
     void build_sample();
@@ -394,7 +402,7 @@ namespace sequence_analysis {
                         stat_tool::penalty_type pen_type = stat_tool::SECOND_DIFFERENCE ,
                         stat_tool::side_effect outside = stat_tool::ZERO) const;
 
-    // acces membres de la classe
+    // class member access
 
     int get_nb_element() const { return nb_element; }
     int get_nb_class() const { return nb_class; }
@@ -405,8 +413,10 @@ namespace sequence_analysis {
 
 
 
-  class RenewalData : public TimeEvents {  // donnees correspondant a
-                                           // un processus de renouvellement
+  /// \brief Data structure corresponding to a renewal process
+
+  class RenewalData : public TimeEvents {
+
     friend class Renewal;
     friend class Sequences;
 
@@ -415,18 +425,16 @@ namespace sequence_analysis {
 
   private :
 
-    Renewal *renewal;       // pointeur sur un objet Renewal
-    stat_tool::process_type type;  // ORDINARY/EQUILIBRIUM
-    int *length;            // longueurs des sequences
-    int **sequence;         // sequences
-    stat_tool::FrequencyDistribution *inter_event; // intervalles de temps entre 2 evenements
-    stat_tool::FrequencyDistribution *within;  // intervalles de temps entre 2 evenements a l'interieur
-                                               // de la periode d'observation
-    stat_tool::FrequencyDistribution *length_bias;  // intervalles de temps entre 2 evenements
-                                                    // recouvrant une date d'observation
-    stat_tool::FrequencyDistribution *backward;  // intervalles de temps apres le dernier evenement
-    stat_tool::FrequencyDistribution *forward;  // intervalles de temps residuel
-    stat_tool::Curves *index_event;  // probabilites de non-evenement/evenement fonction du temps
+    Renewal *renewal;       ///< pointer on a Renewal object
+    stat_tool::process_type type;  ///< renewal process type (ORDINARY/EQUILIBRIUM)
+    int *length;            ///< sequence length
+    int **sequence;         ///< sequences of events
+    stat_tool::FrequencyDistribution *inter_event; ///< inter-event frequency distribution
+    stat_tool::FrequencyDistribution *within;  ///< frequency distribution of time intervals between events within the observation period
+    stat_tool::FrequencyDistribution *length_bias;  ///< length-biased frequency distribution
+    stat_tool::FrequencyDistribution *backward;  ///< backward recurrence time frequency distribution
+    stat_tool::FrequencyDistribution *forward;  ///< forward recurrence time frequency distribution
+    stat_tool::Curves *index_event;  ///< empirical no-event/event probabilities as a function of time
 
     void copy(const RenewalData &timev , bool model_flag = true);
     void remove();
@@ -476,7 +484,7 @@ namespace sequence_analysis {
                         stat_tool::penalty_type pen_type = stat_tool::SECOND_DIFFERENCE ,
                         stat_tool::side_effect outside = stat_tool::ZERO) const;
 
-    // acces membres de la classe
+    // class member access
 
     Renewal* get_renewal() const { return renewal; }
     stat_tool::process_type get_type() const { return type; }

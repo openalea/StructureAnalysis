@@ -58,7 +58,7 @@ namespace stat_tool {
 /**
  *  \brief Computation of the Spearman rank correlation coefficient matrix.
  *
- *  \param[out] correlation correlation matrix.
+ *  \return correlation matrix.
  */
 /*--------------------------------------------------------------*/
 
@@ -76,7 +76,7 @@ double** Vectors::spearman_rank_correlation_computation() const
       correlation[i] = new double[nb_variable];
     }
 
-    // computation of the main term and of the correction terms for ties
+    // computation of the main term and the correction terms for ties
 
     main_term = nb_vector * ((double)nb_vector * (double)nb_vector - 1);
 
@@ -136,7 +136,7 @@ double** Vectors::spearman_rank_correlation_computation() const
 /**
  *  \brief Computation of the Kendall rank correlation coefficient matrix.
  *
- *  \param[out] correlation correlation matrix.
+ *  \return correlation matrix.
  */
 /*--------------------------------------------------------------*/
 
@@ -154,7 +154,7 @@ double** Vectors::kendall_rank_correlation_computation() const
       correlation[i] = new double[nb_variable];
     }
 
-    // computation of the main term and of the correction terms for ties
+    // computation of the main term and the correction terms for ties
 
     nb_pair = nb_vector * ((double)nb_vector - 1);
 
@@ -175,7 +175,7 @@ double** Vectors::kendall_rank_correlation_computation() const
     for (i = 0;i < nb_variable;i++) {
       correlation[i][i] = 1.;
 
-      // computation of an order on the individuals on the basis of the values taken by the first variable
+      // computation of an order on the individuals on the basis of the values taken by the 1st variable
 
       cumul_frequency = new int[marginal_distribution[i]->nb_value];
       current_frequency = new int[marginal_distribution[i]->nb_value];
@@ -271,7 +271,7 @@ double** Vectors::kendall_rank_correlation_computation() const
  *
  *  \param[in,out] os          stream,
  *  \param[in]     correl_type rank correlation coefficient type (SPEARMAN/KENDALL),
- *  \param[in]     correlation pointeur on the rank correlation coefficients.
+ *  \param[in]     correlation pointer on the rank correlation coefficients.
  */
 /*--------------------------------------------------------------*/
 
@@ -389,7 +389,7 @@ ostream& Vectors::rank_correlation_ascii_write(ostream &os , correlation_type co
  *  \param[in] correl_type rank correlation coefficient type (SPEARMAN/KENDALL),
  *  \param[in] correlation pointer on the rank correlation coefficients.
  *
- *  \param[out] status     error status.
+ *  \return                error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -424,10 +424,10 @@ bool Vectors::rank_correlation_ascii_write(StatError &error , const string path 
  *
  *  \param[in] error       reference on a StatError object,
  *  \param[in] os          stream,
- *  \param[in] correl_type rank correlation coefficient type (SPEARMAN / KENDALL),
+ *  \param[in] correl_type rank correlation coefficient type (SPEARMAN/KENDALL),
  *  \param[in] path        file path.
  *
- *  \param[out] status     error status.
+ *  \return                error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -500,7 +500,7 @@ bool Vectors::rank_correlation_computation(StatError &error , ostream &os ,
 /**
  *  \brief Computation of the Spearman rank correlation coefficient between 2 variables.
  *
- *  \param[out] correlation correlation coefficient.
+ *  \return correlation coefficient.
  */
 /*--------------------------------------------------------------*/
 
@@ -557,7 +557,7 @@ double Vectors::spearman_rank_single_correlation_computation() const
 /**
  *  \brief Computation of the Kendall rank correlation coefficient between 2 variables.
  *
- *  \param[out] correlation correlation coefficient.
+ *  \return correlation coefficient.
  */
 /*--------------------------------------------------------------*/
 
@@ -570,7 +570,7 @@ double Vectors::kendall_rank_single_correlation_computation() const
   double sum , correlation , nb_pair , correction[2];
 
 
-  // computation of the main term and of the correction terms for ties
+  // computation of the main term and the correction terms for ties
 
   nb_pair = nb_vector * ((double)nb_vector - 1);
 
@@ -594,7 +594,7 @@ double Vectors::kendall_rank_single_correlation_computation() const
 
     frequency = joint_frequency_computation(0 , 1);
 
-    // computation concordant and discordant pairs
+    // computation of concordant and discordant pairs
 
     for (i = marginal_distribution[0]->offset;i < marginal_distribution[0]->nb_value;i++) {
       for (j = marginal_distribution[1]->offset;j < marginal_distribution[1]->nb_value;j++) {
@@ -622,7 +622,7 @@ double Vectors::kendall_rank_single_correlation_computation() const
 
   else {
 
-    // computation of an order on the individuals on the basis of the values taken by the first variable
+    // computation of an order on the individuals on the basis of the values taken by the 1st variable
 
     cumul_frequency = new int[marginal_distribution[0]->nb_value];
     current_frequency = new int[marginal_distribution[0]->nb_value];
@@ -669,13 +669,13 @@ double Vectors::kendall_rank_single_correlation_computation() const
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Comparison of vectors.
+ *  \brief Comparison of vectors (computation of the matrix of pairwise distances between vectors).
  *
- *  \param[in]  error           reference on a StatError object
- *  \param[in]  ivector_dist    reference on a VectorDistance object,
- *  \param[in]  standardization flag standardization (only for variables of the same type),
+ *  \param[in] error           reference on a StatError object,
+ *  \param[in] ivector_dist    reference on a VectorDistance object,
+ *  \param[in] standardization flag standardization (only for variables of the same type).
  *
- *  \param[out] dist_matrix     matrix of pairwise distances between individuals.
+ *  \return                    DistanceMatrix object.
  */
 /*--------------------------------------------------------------*/
 
@@ -998,10 +998,10 @@ DistanceMatrix* Vectors::comparison(StatError &error , const VectorDistance &ive
  *  \brief Computation of the frequencies corresponding to the joint distribution of
  *         2 variables.
  *
- *  \param[in]  variable1 variable 1 index,
- *  \param[in]  variable2 variable 2 index,
+ *  \param[in] variable1 variable 1 index,
+ *  \param[in] variable2 variable 2 index.
  *
- *  \param[out] frequency joint frequency distribution.
+ *  \return              joint frequency distribution.
  */
 /*--------------------------------------------------------------*/
 
@@ -1040,7 +1040,7 @@ int** Vectors::joint_frequency_computation(int variable1 , int variable2) const
  *  \param[in]     frequency         pointer on the contingency table,
  *  \param[in]     deviation         pointer on the deviations to the independence assumption,
  *  \param[in]     chi2_contribution pointer on the contributions to the chi2 value,
- *  \param[in]     test              reference on the result of a chi2 test,
+ *  \param[in]     test              reference on a Test object,
  *  \param[in]     file_flag         file flag.
  */
 /*--------------------------------------------------------------*/
@@ -1158,16 +1158,16 @@ ostream& Vectors::contingency_table_ascii_write(ostream &os , int variable1 , in
 /**
  *  \brief Writing of a contingency table in a file.
  *
- *  \param[in]  error             reference on a StatError object,
- *  \param[in]  path              file path,
- *  \param[in]  variable1         variable 1  index,
- *  \param[in]  variable2         variable 2  index,
- *  \param[in]  frequency         pointer on the contingency table,
- *  \param[in]  deviation         pointer on the deviations to the independence assumption,
- *  \param[in]  chi2_contribution pointer on the contributions to the chi2 value,
- *  \param[in]  test              reference on the result of a chi2 test,
+ *  \param[in] error             reference on a StatError object,
+ *  \param[in] path              file path,
+ *  \param[in] variable1         variable 1  index,
+ *  \param[in] variable2         variable 2  index,
+ *  \param[in] frequency         pointer on the contingency table,
+ *  \param[in] deviation         pointer on the deviations to the independence assumption,
+ *  \param[in] chi2_contribution pointer on the contributions to the chi2 value,
+ *  \param[in] test              reference on a Test object.
  *
- *  \param[out] status            error status.
+ *  \return                      error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -1202,16 +1202,16 @@ bool Vectors::contingency_table_ascii_write(StatError &error , const string path
 /**
  *  \brief Writing of a contingency table in a file at the spreadsheet format.
  *
- *  \param[in]  error             reference on a StatError object,
- *  \param[in]  path              file path,
- *  \param[in]  variable1         variable 1 index,
- *  \param[in]  variable2         variable 2 index,
- *  \param[in]  frequency         pointer on the contingency table,
- *  \param[in]  deviation         pointer on the deviations to the independence assumption,
- *  \param[in]  chi2_contribution pointer on the contributions to the chi2 value,
- *  \param[in]  test              reference on the result of a chi2 test,
+ *  \param[in] error             reference on a StatError object,
+ *  \param[in] path              file path,
+ *  \param[in] variable1         variable 1 index,
+ *  \param[in] variable2         variable 2 index,
+ *  \param[in] frequency         pointer on the contingency table,
+ *  \param[in] deviation         pointer on the deviations to the independence assumption,
+ *  \param[in] chi2_contribution pointer on the contributions to the chi2 value,
+ *  \param[in] test              reference on the result of a chi2 test.
  *
- *  \param[out] status            error status.
+ *  \return                      error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -1303,14 +1303,14 @@ bool Vectors::contingency_table_spreadsheet_write(StatError &error , const strin
 /**
  *  \brief Computation of a contingency table for 2 categorical variables.
  *
- *  \param[in]  error     reference on a StatError object,
- *  \param[in]  os        stream,
- *  \param[in]  variable1 variable 1 index,
- *  \param[in]  variable2 variable 2 index,
- *  \param[in]  path      file path,
- *  \param[in]  format    file format (ASCII/SPREADSHEET),
+ *  \param[in] error     reference on a StatError object,
+ *  \param[in] os        stream,
+ *  \param[in] variable1 variable 1 index,
+ *  \param[in] variable2 variable 2 index,
+ *  \param[in] path      file path,
+ *  \param[in] format    file format (ASCII/SPREADSHEET).
  *
- *  \param[out] status    error status.
+ *  \return              error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -1701,7 +1701,7 @@ ostream& Vectors::variance_analysis_ascii_write(ostream &os , int type , const V
     }
     width[2] += ASCII_SPACE;
 
-    // writing of the frequency distributions and of the cumulative distribution functions
+    // writing of the frequency distributions and the cumulative distribution functions
 
     os << "\n  ";
     for (i = marginal_distribution[0]->offset;i < marginal_distribution[0]->nb_value;i++) {
@@ -1776,7 +1776,7 @@ ostream& Vectors::variance_analysis_ascii_write(ostream &os , int type , const V
 
   case NUMERIC : {
 
-    // variance analysis table
+    // table of variance analysis
 
     square_sum[0] = 0.;
     square_sum[1] = 0.;
@@ -1848,13 +1848,13 @@ ostream& Vectors::variance_analysis_ascii_write(ostream &os , int type , const V
 /**
  *  \brief Writing of the results of a one-way analysis of variance in a file.
  *
- *  \param[in]  error         reference on a StatError object,
- *  \param[in]  path          file path,
- *  \param[in]  response_type response variable type (ORDINAL/NUMERIC),
- *  \param[in]  value_vec     pointer on the sub-samples for each level of the explanatory variable,
- *  \param[in]  exhaustive    flag detail level,
+ *  \param[in] error         reference on a StatError object,
+ *  \param[in] path          file path,
+ *  \param[in] response_type response variable type (ORDINAL/NUMERIC),
+ *  \param[in] value_vec     pointer on the sub-samples for each level of the explanatory variable,
+ *  \param[in] exhaustive    flag detail level.
  *
- *  \param[out] status        error status.
+ *  \return                  error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -1887,12 +1887,12 @@ bool Vectors::variance_analysis_ascii_write(StatError &error , const string path
  *  \brief Writing of the results of a one-way variance analysis in a file
  *         at the spreadsheet format.
  *
- *  \param[in]  error         reference on a StatError object,
- *  \param[in]  path          file path,
- *  \param[in]  response_type response variable type (ORDINAL/NUMERIC),
- *  \param[in]  value_vec     pointer on the sub-samples for each level of the explanatory variable,
+ *  \param[in] error         reference on a StatError object,
+ *  \param[in] path          file path,
+ *  \param[in] response_type response variable type (ORDINAL/NUMERIC),
+ *  \param[in] value_vec     pointer on the sub-samples for each level of the explanatory variable.
  *
- *  \param[out] status        error status.
+ *  \return                  error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -2070,7 +2070,7 @@ bool Vectors::variance_analysis_spreadsheet_write(StatError &error , const strin
 
     case NUMERIC : {
 
-      // variance analysis table
+      // table of variance analysis
 
       square_sum[0] = 0.;
       square_sum[1] = 0.;
@@ -2132,15 +2132,15 @@ bool Vectors::variance_analysis_spreadsheet_write(StatError &error , const strin
 /**
  *  \brief One-way analysis of variance.
  *
- *  \param[in]  error             reference on a StatError object,
- *  \param[in]  os                stream,
- *  \param[in]  class_variable    explanatory variable index,
- *  \param[in]  response_variable response_variable index,
- *  \param[in]  response_type     response variable type (ORDINAL/NUMERIC),
- *  \param[in]  path              file path,
- *  \param[in]  format            file format (ASCII/SPREADSHEET),
+ *  \param[in] error             reference on a StatError object,
+ *  \param[in] os                stream,
+ *  \param[in] class_variable    explanatory variable index,
+ *  \param[in] response_variable response variable index,
+ *  \param[in] response_type     response variable type (ORDINAL/NUMERIC),
+ *  \param[in] path              file path,
+ *  \param[in] format            file format (ASCII/SPREADSHEET).
  *
- *  \param[out] status            error status.
+ *  \return                      error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -2285,11 +2285,11 @@ bool Vectors::variance_analysis(StatError &error , ostream &os , int class_varia
 /**
  *  \brief Computation of sup norm distance between two empirical continuous distributions.
  *
- *  \param[in]  error  reference on a StatError objet,
- *  \param[in]  os     stream,
- *  \param[in]  ivec   reference on a Vector object,
+ *  \param[in] error  reference on a StatError object,
+ *  \param[in] os     stream,
+ *  \param[in] ivec   reference on a Vector object.
  *
- *  \param[out] status error status.
+ *  \return           error status.
  */
 /*--------------------------------------------------------------*/
 

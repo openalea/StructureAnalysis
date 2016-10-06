@@ -54,7 +54,7 @@ namespace stat_tool {
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Construction of a Histogram object.
+ *  \brief Construction of an Histogram object.
  *
  *  \param[in] inb_bin   number of bins,
  *  \param[in] init_flag flag initialization.
@@ -130,7 +130,7 @@ Histogram::Histogram(const FrequencyDistribution &histo)
 /**
  *  \brief Copy of an Histogram object.
  *
- *  \param[in] reference on a Histogram object.
+ *  \param[in] reference on an Histogram object.
  */
 /*--------------------------------------------------------------*/
 
@@ -174,9 +174,9 @@ Histogram::~Histogram()
 /**
  *  \brief Assignment operator of the Histogram class.
  *
- *  \param[in]  histo reference on a Histogram object,
+ *  \param[in] histo reference on an Histogram object.
  *
- *  \param[out] this  Histogram object.
+ *  \return          Histogram object.
  */
 /*--------------------------------------------------------------*/
 
@@ -197,10 +197,10 @@ Histogram& Histogram::operator=(const Histogram &histo)
 /**
  *  \brief Computation of a column width for real values.
  *
- *  \param[in]  min_value minimum value,
- *  \param[in]  max_value maximum value,
+ *  \param[in] min_value minimum value,
+ *  \param[in] max_value maximum value.
  *
- *  \param[out] max_width column width.
+ *  \return              column width.
  */
 /*--------------------------------------------------------------*/
 
@@ -231,7 +231,7 @@ int column_width(double min_value , double max_value)
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Writing of a histogram.
+ *  \brief Writing of an histogram.
  *
  *  \param[in,out] os           stream,
  *  \param[in]     comment_flag flag comment.
@@ -249,7 +249,7 @@ ostream& Histogram::ascii_print(ostream &os , bool comment_flag) const
 
   old_adjust = os.setf(ios::right , ios::adjustfield);
 
-  // computation of column widths
+  // computation of the column widths
 
   switch (type) {
   case INT_VALUE :
@@ -284,7 +284,7 @@ ostream& Histogram::ascii_print(ostream &os , bool comment_flag) const
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Writing of a histogram at the spreadsheet format.
+ *  \brief Writing of an histogram at the spreadsheet format.
  *
  *  \param[in,out] os stream.
  */
@@ -319,11 +319,11 @@ ostream& Histogram::spreadsheet_print(ostream &os) const
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Writing of a histogram at the Gnuplot format.
+ *  \brief Writing of an histogram at the Gnuplot format.
  *
- *  \param[in]  path   file path,
+ *  \param[in] path file path.
  *
- *  \param[out] status error status.
+ *  \return         error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -362,7 +362,7 @@ bool Histogram::plot_print(const char *path) const
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Writing of a histogram at the plotable format.
+ *  \brief Writing of an histogram at the plotable format.
  *
  *  \param[in] plot reference on a SinglePlot object.
  */
@@ -395,7 +395,7 @@ void Histogram::plotable_write(SinglePlot &plot) const
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Determination of the maximum bin frequency for a histogram.
+ *  \brief Determination of the maximum bin frequency for an histogram.
  */
 /*--------------------------------------------------------------*/
 
@@ -416,9 +416,9 @@ void Histogram::max_computation()
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Computation of a cumulative distribution function from a histogram.
+ *  \brief Computation of a cumulative distribution function from an histogram.
  *
- *  \param[out] cumul cumulative distribution function.
+ *  \return cumulative distribution function.
  */
 /*--------------------------------------------------------------*/
 

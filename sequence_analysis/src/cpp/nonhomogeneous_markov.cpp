@@ -285,7 +285,7 @@ Function* Function::parsing(StatError &error , ifstream &in_file , int &line ,
 
           if (j == MONOMOLECULAR + 1) {
             status = false;
-            error.update(STAT_parsing[STATP_KEY_WORD] , line , i + 1);
+            error.update(STAT_parsing[STATP_KEYWORD] , line , i + 1);
           }
           else {
             nb_parameter = 3;
@@ -299,7 +299,7 @@ Function* Function::parsing(StatError &error , ifstream &in_file , int &line ,
         case 1 : {
           if (token != STAT_word[STATW_FUNCTION]) {
             status = false;
-            error.correction_update(STAT_parsing[STATP_KEY_WORD] , STAT_word[STATW_FUNCTION] , line , i + 1);
+            error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_FUNCTION] , line , i + 1);
           }
           break;
         }
@@ -314,7 +314,7 @@ Function* Function::parsing(StatError &error , ifstream &in_file , int &line ,
         case 0 : {
           if (token != STAT_word[STATW_PARAMETER]) {
             status = false;
-            error.correction_update(STAT_parsing[STATP_KEY_WORD] , STAT_word[STATW_PARAMETER] , line , i + 1);
+            error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_PARAMETER] , line , i + 1);
           }
           break;
         }
@@ -1109,7 +1109,7 @@ NonhomogeneousMarkov* NonhomogeneousMarkov::ascii_read(StatError &error , const 
         if (i == 0) {
           if (token != SEQ_word[SEQW_NONHOMOGENEOUS_MARKOV_CHAIN]) {
             status = false;
-            error.update(STAT_parsing[STATP_KEY_WORD] , line);
+            error.update(STAT_parsing[STATP_KEYWORD] , line);
           }
         }
 
@@ -1165,7 +1165,7 @@ NonhomogeneousMarkov* NonhomogeneousMarkov::ascii_read(StatError &error , const 
             case 0 : {
               if (token != STAT_word[STATW_STATE]) {
                 status = false;
-                error.correction_update(STAT_parsing[STATP_KEY_WORD] , STAT_word[STATW_STATE] , line , j + 1);
+                error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_STATE] , line , j + 1);
               }
               break;
             }
@@ -1185,7 +1185,7 @@ NonhomogeneousMarkov* NonhomogeneousMarkov::ascii_read(StatError &error , const 
               break;
             }
 
-            // test mot cle HOMOGENEOUS / NONHOMOGENEOUS
+            // test mot cle HOMOGENEOUS/NONHOMOGENEOUS
 
             case 2 : {
               if (token == SEQ_word[SEQW_HOMOGENEOUS]) {
@@ -1197,7 +1197,7 @@ NonhomogeneousMarkov* NonhomogeneousMarkov::ascii_read(StatError &error , const 
                 }
                 else {
                   status = false;
-                  error.update(STAT_parsing[STATP_KEY_WORD] , line , j + 1);
+                  error.update(STAT_parsing[STATP_KEYWORD] , line , j + 1);
                 }
               }
               break;

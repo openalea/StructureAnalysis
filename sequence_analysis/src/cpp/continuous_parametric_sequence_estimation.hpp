@@ -60,14 +60,16 @@ namespace sequence_analysis {
 
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Estimation of gamma observation distributions.
  *
- *  Estimation of parameters of gamma observation distributions.
- *
- *  arguments : state counts, variable, pointer on a continuous observation process,
- *              EM iteration.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] state_sequence_count state counts,
+ *  \param[in] variable             variable index,
+ *  \param[in] process              pointer on a ContinuousParametricProcess object,
+ *  \param[in] iter                 EM iteration.
+ */
+/*--------------------------------------------------------------*/
 
 template <typename Type>
 void MarkovianSequences::gamma_estimation(Type ***state_sequence_count , int variable ,
@@ -288,14 +290,16 @@ void MarkovianSequences::gamma_estimation(Type ***state_sequence_count , int var
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Estimation of zero-inflated gamma observation distributions.
  *
- *  Estimation of parameters of zero-inflated gamma observation distributions.
- *
- *  arguments: state counts, variable, pointer on a continuous observation process,
- *             EM iteration.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] state_sequence_count state counts,
+ *  \param[in] variable             variable index,
+ *  \param[in] process              pointer on a ContinuousParametricProcess object,
+ *  \param[in  iter                 EM iteration.
+ */
+/*--------------------------------------------------------------*/
 
 template <typename Type>
 void MarkovianSequences::zero_inflated_gamma_estimation(Type ***state_sequence_count , int variable ,
@@ -512,13 +516,15 @@ void MarkovianSequences::zero_inflated_gamma_estimation(Type ***state_sequence_c
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Estimation of inverse Gaussian observation distributions.
  *
- *  Estimation of parameters of inverse Gaussian observation distributions.
- *
- *  arguments: state counts, variable, pointer on a continuous observation process.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] state_sequence_count state counts,
+ *  \param[in] variable             variable index,
+ *  \param[in] process              pointer on a ContinuousParametricProcess object.
+ */
+/*--------------------------------------------------------------*/
 
 template <typename Type>
 void MarkovianSequences::inverse_gaussian_estimation(Type ***state_sequence_count , int variable ,
@@ -624,13 +630,15 @@ void MarkovianSequences::inverse_gaussian_estimation(Type ***state_sequence_coun
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Estimation of Gaussian observation distributions.
  *
- *  Estimation of parameters of Gaussian observation distributions.
- *
- *  arguments: state counts, variable, pointer on a continuous observation process.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] state_sequence_count state counts,
+ *  \param[in] variable             variable index,
+ *  \param[in] process              pointer on a ContinuousParametricProcess object.
+ */
+/*--------------------------------------------------------------*/
 
 template <typename Type>
 void MarkovianSequences::gaussian_estimation(Type ***state_sequence_count , int variable ,
@@ -788,13 +796,15 @@ void MarkovianSequences::gaussian_estimation(Type ***state_sequence_count , int 
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Estimation of von Mises observation distributions.
  *
- *  Estimation of parameters of von Mises observation distributions.
- *
- *  arguments: state counts, variable, pointer on a continuous observation process.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] state_sequence_count state counts,
+ *  \param[in] variable             variable index,
+ *  \param[in] process              pointer on a ContinuousParametricProcess object.
+ */
+/*--------------------------------------------------------------*/
 
 template <typename Type>
 void MarkovianSequences::von_mises_estimation(Type ***state_sequence_count , int variable ,
@@ -932,13 +942,15 @@ void MarkovianSequences::von_mises_estimation(Type ***state_sequence_count , int
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Estimation of Gaussian linear trend observation models.
  *
- *  Estimation of parameters of Gaussian linear trend observation models
- *
- *  arguments: state counts, variable, pointer on a continuous observation process.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] state_sequence_count state counts,
+ *  \param[in] variable             variable index,
+ *  \param[in] process              pointer on a ContinuousParametricProcess object.
+ */
+/*--------------------------------------------------------------*/
 
 template <typename Type>
 void MarkovianSequences::linear_model_estimation(Type ***state_sequence_count , int variable ,

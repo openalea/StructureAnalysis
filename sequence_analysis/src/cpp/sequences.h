@@ -53,24 +53,24 @@ namespace sequence_analysis {
 
 /****************************************************************
  *
- *  Constantes :
+ *  Constants
  */
 
 
-  const int DEFAULT_LENGTH = 20;         // longueur par defaut d'une sequence
+  const int DEFAULT_LENGTH = 20;         // default sequence length
 
-  const int SEQUENCE_NB_VARIABLE = 30;   // nombre maximum de variables observees
+  const int SEQUENCE_NB_VARIABLE = 30;   // maximum number of variables
 
-  const int PLOT_NB_SEQUENCE = 200;      // nombre maximum de sequences visualisees (sortie Gnuplot)
-  const int PLOT_LEGEND_NB_SEQUENCE = 15;  // nombre maximum de sequences identifiees (sortie Gnuplot)
+  const int PLOT_NB_SEQUENCE = 200;      // maximum number of plotted sequences (Gnuplot output)
+  const int PLOT_LEGEND_NB_SEQUENCE = 15;  // maximum number of labeled sequences (Gnuplot output)
   const double GROWTH_FACTOR = 1.;       // growth factor for computing the first relative growth rate
 
   enum index_parameter_type {
-    IMPLICIT_TYPE ,                      // parametre d'index implicite
-    TIME ,                               // parametre d'index temps
-    TIME_INTERVAL ,                      // parametre d'index intervalle de temps
-    POSITION ,                           // parametre d'index position
-    POSITION_INTERVAL                    // parametre d'index intervalle inter-position
+    IMPLICIT_TYPE ,                      // implicit index parameter
+    TIME ,                               // time
+    TIME_INTERVAL ,                      // time interval
+    POSITION ,                           // position
+    POSITION_INTERVAL                    // between-position interval
   };
 
   enum sequence_pattern {
@@ -116,10 +116,10 @@ namespace sequence_analysis {
   };
 
   enum memory_tree_selection {
-    CTM_BIC ,                            // algorithme Context Tree Maximizing/BIC
-    CTM_KT ,                             // algorithme Context Tree Maximizing/Krichevsky-Trofimov
-    LOCAL_BIC ,                          // algorithme d'elagage recursif/BIC 
-    CONTEXT                              // algorithme Context
+    CTM_BIC ,                            // Context Tree Maximizing/BIC algorithm
+    CTM_KT ,                             // Context Tree Maximizing/Krichevsky-Trofimov algorithm
+    LOCAL_BIC ,                          // recursive pruning/BIC algorithm
+    CONTEXT                              // Context algorithm
   };
 
   enum transition_estimator {
@@ -142,53 +142,54 @@ namespace sequence_analysis {
     LINEAR_MODEL_CHANGE ,
     INTERCEPT_SLOPE_CHANGE ,
     AUTOREGRESSIVE_MODEL_CHANGE ,
+    STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE ,
     BAYESIAN_POISSON_CHANGE ,
     BAYESIAN_GAUSSIAN_CHANGE
   };
 
-  const double PRIOR_VARIANCE_FACTOR = 100.;  // facteur pour deduire la variance
-                                              // de la loi a priori gamma
-  const double PRIOR_SAMPLE_SIZE = 1.;  // hyperparametre de la loi gaussiennne-gamma
-  const double PRIOR_DEGREES_OF_FREEDOM = 2.;  // hyperparametre de la loi gaussiennne-gamma
-  const double PRIOR_DISPERSION_FACTOR = 10.;  // facteur pour deduire la somme des carres
-                                               // des ecarts de la loi a priori
-  const int PRIOR_PRECISION = 2;         // precision hyperparametres
+  const double PRIOR_VARIANCE_FACTOR = 100.;  // factor for deducing the variance of
+                                              // the gamma prior distribution
+  const double PRIOR_SAMPLE_SIZE = 1.;  // hyperparameter of the Gaussian-gamma prior distribution
+  const double PRIOR_DEGREES_OF_FREEDOM = 2.;  // hyperparameter of the Gaussian-gamma prior distribution
+  const double PRIOR_DISPERSION_FACTOR = 10.;  // factor for deducing the sum of squared deviations
+                                               // of the prior distribution
+  const int PRIOR_PRECISION = 2;         // hyperparameter precision
 
-  const double MAX_NB_WORD = 1.e7;       // nombre maximum de mots
+  const double MAX_NB_WORD = 1.e7;       // maximum number of words
 
-  const double STATIONARY_PROBABILITY_THRESHOLD = 1.e-8;  // seuil pour le calcul des probabilites
-                                                          // stationnaires d'un modele en equilibre
-  const int STATIONARY_PROBABILITY_LENGTH = 10000;  // longueur maximum pour le calcul des probabilites
-                                                    // stationnaires d'un modele en equilibre
-  const double LEAVE_INCREMENT = 1.e-6;  // seuil pour stopper le calcul de la probabilite
-                                         // de quitter un etat/observation sans possibilite d'y revenir
+  const double STATIONARY_PROBABILITY_THRESHOLD = 1.e-8;  // threshold for the computation of the stationary distribution
+                                                          // of an equilibrium model
+  const int STATIONARY_PROBABILITY_LENGTH = 10000;  // maximum length for the computation of the stationary distribution
+                                                    // of an equilibrium model
+  const double LEAVE_INCREMENT = 1.e-6;  // threshold for stopping the computation of the probability
+                                         // of leaving definitively a state/observed category
 
-  const double CTM_BIC_THRESHOLD = 6.;   // seuil pour elaguer les memoires
-  const double CTM_KT_THRESHOLD = 12.;   // seuil pour elaguer les memoires
-  const double LOCAL_BIC_THRESHOLD = 10.;  // seuil pour elaguer les memoires
-  const double CONTEXT_THRESHOLD = 5.;  // seuil pour elaguer les memoires
+  const double CTM_BIC_THRESHOLD = 6.;   // threshold for memory pruning
+  const double CTM_KT_THRESHOLD = 12.;   // threshold for memory pruning
+  const double LOCAL_BIC_THRESHOLD = 10.;  // threshold for memory pruning
+  const double CONTEXT_THRESHOLD = 5.;  // threshold for memory pruning
 
-  const int MIN_NB_STATE_SEQUENCE = 1;   // nombre de sequences d'etats 1ere iteration de l'algorithme MCEM
-  const int MAX_NB_STATE_SEQUENCE = 10;  // nombre de sequences d'etats maximum pour l'algorithme MCEM
-  const double NB_STATE_SEQUENCE_PARAMETER = 1.;  // parametre nombre de sequences d'etats pour l'algorithme MCEM
+  const int MIN_NB_STATE_SEQUENCE = 1;   // number of state sequences, 1st iteration of the MCEM algorithm
+  const int MAX_NB_STATE_SEQUENCE = 10;  // maximum number of state sequences (MCEM algorithm)
+  const double NB_STATE_SEQUENCE_PARAMETER = 1.;  // parameter for the number of state sequences (MCEM algorithm)
 
-  const double OCCUPANCY_THRESHOLD = 0.99999;  // seuil sur la fonction de repartition
-                                               // pour borner une loi d'occupation d'un etat
-  const double OCCUPANCY_MEAN = 10.;     // temps moyen d'occupation d'un etat
+  const double OCCUPANCY_THRESHOLD = 0.99999;  // threshold on the cumulative distribution function for determining
+                                               // the upper bound of the support of a state occupancy distribution
+  const double OCCUPANCY_MEAN = 10.;     // mean state occupancy
 
-  const int POSTERIOR_PROBABILITY_NB_SEQUENCE = 300;  // nombre maximum de sequences pour la sortie des probabilites
-                                                      // a posteriori des sequences d'etats les plus probables
+  const int POSTERIOR_PROBABILITY_NB_SEQUENCE = 300;  // maximum number of sequences for the output of
+                                                      // the posterior probabilities of the most probable state sequences
 
-  const int NB_STATE_SEQUENCE = 10;      // nombre de sequences d'etats calculees
+  const int NB_STATE_SEQUENCE = 10;      // number of computed state sequences
 
-  const int COUNT_MAX_LENGTH = 10000;    // longueur maximum des sequences pour l'extraction des comptages
-  const int COUNTING_MAX_LENGTH = 500;   // longueur maximum des sequences pour le calcul des lois de comptage
+  const int COUNT_MAX_LENGTH = 10000;    // maximum sequence length for the extraction of the count frequency distributions
+  const int COUNTING_MAX_LENGTH = 500;   // maximum sequence length for the computation of the count distributions
 
-  const int NB_SEQUENCE = 100000;        // nombre maximum de sequences simulees
-  const int MAX_LENGTH = 1000000;        // longueur maximum des sequences simulees
-  const int CUMUL_LENGTH = 1000000;      // longueur maximum cumulee des sequences simulees
+  const int NB_SEQUENCE = 100000;        // maximum number of generated sequences
+  const int MAX_LENGTH = 1000000;        // maximum generated sequence length
+  const int CUMUL_LENGTH = 1000000;      // maximum cumulative generated sequence length
 
-  const double RESIDUAL_STANDARD_DEVIATION_COEFF = 1.e-6;  // seuil pour l'estimation de l'ecart type residuel
+  const double RESIDUAL_STANDARD_DEVIATION_COEFF = 1.e-6;  // threshold for the estimation of the residual standard deviation
 
   enum sequence_type {
     SEQUENCE ,
@@ -230,18 +231,14 @@ namespace sequence_analysis {
     BEGIN_END_GAP
   };
 
-  const int NB_ALIGNMENT = 1000000;      // nombre maximum d'alignements
-  const int DISPLAY_NB_ALIGNMENT = 30;   // nombre maximum d'alignements
-                                         // pour la sortie detaillee ecran
-  const int FILE_NB_ALIGNMENT = 300;     // nombre maximum d'alignements
-                                         // pour la sortie detaillee fichier
+  const int NB_ALIGNMENT = 1000000;      // maximum number of alignments
+  const int DISPLAY_NB_ALIGNMENT = 30;   // maximum number of alignments for the detailed displayed output
+  const int FILE_NB_ALIGNMENT = 300;     // maximum number of alignments for the detailed file output
 
-  const double INDEL_FACTOR_1 = 0.51;    // facteur pour deduire le cout d'elision/insertion -
-                                         // alignement simple
-  const double INDEL_FACTOR_N = 0.51;    // facteur pour deduire le cout d'elision/insertion -
-                                         // alignement multiple
-  const double TRANSPOSITION_FACTOR = 0.;  // facteur pour deduire le cout de transposition
-  const double INDEL_DISTANCE = 1.0;     // cout d'elision/insertion
+  const double INDEL_FACTOR_1 = 0.51;    // factor for deducing the insertion/deletion cost - simple alignement
+  const double INDEL_FACTOR_N = 0.51;    // factor for deducing le cout d'insertion/deletion cost - multiple alignement
+  const double TRANSPOSITION_FACTOR = 0.;  // factor for deducing the transposition cost
+  const double INDEL_DISTANCE = 1.0;     // insertion/deletion cost
 
   enum change_point_profile {
     CHANGE_POINT ,
@@ -250,10 +247,10 @@ namespace sequence_analysis {
 
   const double CHANGE_POINT_UNCERTAINTY_PROBABILITY = 0.05;  // probability for defining change-point uncertainty intervals
   const int SEQUENCE_MAX_NB_COLUMN = 20; // threshold for the writing of sequences in text files
-  const double ROUNDOFF_ERROR = 1.e-10;  // erreur sur une somme de doubles
-  const int PENALTY_SHAPE_SCALING_FACTOR = 100;  // facteur d'echelle pour l'affichage des pentes de log-vraisemblances
-  const int NB_SEGMENTATION = 10;        // nombre de segmentations calculees
-  const int SLOPE_NB_SEGMENT_RANGE = 5;  // nombre minimum de points pour calculer la pente des vraisemblances
+  const double ROUNDOFF_ERROR = 1.e-10;  // error on a sum of doubles
+  const int PENALTY_SHAPE_SCALING_FACTOR = 100;  // scaling factor for the plot of log-likelihoods
+  const int NB_SEGMENTATION = 10;        // number of computed segmentations
+  const int SLOPE_NB_SEGMENT_RANGE = 5;  // minimum number of points for computing the log-likelihood slope
   const double SLOPE_STEP = 0.01;        // slope step for the dimension jump method
   const double MAX_SLOPE = 100.;         // maximum slope for the dimension jump method
   const int MIN_DIMENSION_JUMP = 3;      // minimum dimension jump
@@ -263,24 +260,23 @@ namespace sequence_analysis {
     EXACT
   };
 
-  const double FREQUENCY_RATIO = 0.1;    // rapport des frequences pour stopper le calcul
-                                         // de la fonction de correlation
-//   const int CORRELATION_MIN_FREQUENCY = 20;  frequence minimum pour stopper le calcul
-                                             // de la fonction de correlation
+  const double FREQUENCY_RATIO = 0.1;    // frequency ratio for stopping the computation of
+                                         // the correlation function
+//   const int CORRELATION_MIN_FREQUENCY = 20;  minimum frequency for stopping the computation of
+                                             // the correlation function
 
-  const int MAX_DIFFERENCING_ORDER = 3;  // ordre maximum de differenciation
-  const int POINTWISE_AVERAGE_NB_SEQUENCE = 250;  // nombre maximum de sequences ecrites
-                                                  // pour la sortie fichier
-  const int ABSORBING_RUN_LENGTH = 5;    // longueur par defaut de la serie finale absorbante
-  const int MAX_ABSORBING_RUN_LENGTH = 20;  // longueur maximum de la serie finale absorbante
-  const double ABSORBING_RUN_STANDARD_DEVIATION_FACTOR = 10.;  // facteur pour definir l'ecart-type
-                                                               // des series finales absorbantes reelles
+  const int MAX_DIFFERENCING_ORDER = 3;  // maximum differentiation order
+  const int POINTWISE_AVERAGE_NB_SEQUENCE = 250;  // maximum number of written sequences for the file output
+  const int ABSORBING_RUN_LENGTH = 5;    // default length of the final absorbing run
+  const int MAX_ABSORBING_RUN_LENGTH = 20;  // maximum length of the final absorbing run
+  const double ABSORBING_RUN_STANDARD_DEVIATION_FACTOR = 10.;  // factor for defining the standard deviation of
+                                                               // true final absorbing runs
 
 
 
 /****************************************************************
  *
- *  Definition des classes :
+ *  Class definition
  */
 
 
@@ -298,23 +294,24 @@ namespace sequence_analysis {
   class Sequences;
   class SequenceCharacteristics;
 
-  class Switching_sequence;  // ajout par Florence Chaubert
+  class Switching_sequence;  // addition of Florence Chaubert
 
+  /// \brief Categorical observation process for sequences
 
-  class CategoricalSequenceProcess : public stat_tool::CategoricalProcess {  // processus d'observation categoriel
-                                                                             // pour des sequences
+  class CategoricalSequenceProcess : public stat_tool::CategoricalProcess {  
+
   public :
 
-    stat_tool::Distribution *length;  // loi des longueurs des sequences
-    stat_tool::Curves *index_value;  // probabilites des valeurs en fonction de l'index
-    double *no_occurrence;  // probabilite de ne pas observer une valeur
-    stat_tool::Distribution **first_occurrence;  // lois du temps avant la premiere occurrence d'une valeur
-    double *leave;          // probabilite de quitter une valeur
-    stat_tool::Distribution **recurrence_time;  // lois du temps de retour dans une valeur
-    double *absorption;     // probabilite d'etre absorbe par une valeur
-    stat_tool::DiscreteParametric **sojourn_time;  // lois du temps de sejour dans un valeur
-    stat_tool::Distribution **nb_run;  // lois du nombre de series par sequence des valeurs
-    stat_tool::Distribution **nb_occurrence;  // lois du nombre d'occurrences par sequence des valeurs
+    stat_tool::Distribution *length;  ///< sequence length distribution
+    stat_tool::Curves *index_value;  ///< probabilities of each category as a function of the index parameter
+    double *no_occurrence;  ///< probabilities of not observing each category
+    stat_tool::Distribution **first_occurrence;  ///< time to the 1st occurrence distributions
+    double *leave;          ///< probabilities of leaving definitively each category
+    stat_tool::Distribution **recurrence_time;  ///< recurrence time distributions
+    double *absorption;     ///< absorbing probabilities
+    stat_tool::DiscreteParametric **sojourn_time;  ///< sojourn time distributions
+    stat_tool::Distribution **nb_run;  ///< number of runs per sequence distributions
+    stat_tool::Distribution **nb_occurrence;  ///< number of occurrences per sequence distributions
 
     void create_characteristic(const stat_tool::Distribution &ilength , bool* homogeneity ,
                                bool counting_flag = true);
@@ -368,7 +365,9 @@ namespace sequence_analysis {
 
 
 
-  class Correlation : public stat_tool::StatInterface , public stat_tool::Curves {  // fonctions de correlation
+  /// \brief Correlation functions
+
+  class Correlation : public stat_tool::StatInterface , public stat_tool::Curves {
 
     friend class VariableOrderMarkovChain;
     friend class VariableOrderMarkov;
@@ -379,11 +378,11 @@ namespace sequence_analysis {
 
   private :
 
-    stat_tool::correlation_type type;  // type de coefficient (PEARSON/SPEARMAN/KENDALL)
-    correlation_variable_type *variable_type;  // types de variables (OBSERVED/THEORETICAL STATE/OUTPUT)
-    int *variable1;         // 1ere variables
-    int *variable2;         // 2eme variables
-    double *white_noise;    // fonction theorique pour un bruit blanc filtre
+    stat_tool::correlation_type type;  ///<  correlation coefficient type (PEARSON/SPEARMAN/KENDALL)
+    correlation_variable_type *variable_type;  ///< variable types (OBSERVED/THEORETICAL STATE/OUTPUT)
+    int *variable1;         ///< 1st variables
+    int *variable2;         ///< 2nd variables
+    double *white_noise;    ///< theoretical correlation function for a filtered white noise
 
     void copy(const Correlation &correl);
     void remove();
@@ -414,7 +413,7 @@ namespace sequence_analysis {
     bool white_noise_correlation(stat_tool::StatError &error , const stat_tool::Distribution &dist);
     bool white_noise_correlation(stat_tool::StatError &error , int order);
 
-    // acces membres de la classe
+    // class member access
 
     int get_type() const { return type; }
     correlation_variable_type get_variable_type(int index) const { return variable_type[index]; }
@@ -429,33 +428,34 @@ namespace sequence_analysis {
   class TimeEvents;
   class RenewalData;
 
+  /// \brief Sequences
 
-  class Sequences : public stat_tool::StatInterface {  // sequences
+  class Sequences : public stat_tool::StatInterface {
 
     friend std::ostream& operator<<(std::ostream &os , const Sequences &seq)
     { return seq.ascii_write(os); }
 
   protected :
 
-    int nb_sequence;        // nombre de sequences
-    int *identifier;        // identificateurs des sequences
-    int max_length;         // longueur maximum des sequences
-    int cumul_length;       // longueur cumulee des sequences
-    int *length;            // longueurs des sequences
-    stat_tool::FrequencyDistribution *length_distribution;  // loi empirique des longueurs des sequences
-    int **vertex_identifier;  // identificateurs des vertex d'un MTG associe
-    index_parameter_type index_param_type;  // type du parametre d'index (TIME/POSITION)
-    stat_tool::FrequencyDistribution *index_parameter_distribution;  // loi empirique des parametres d'index explicites
-    stat_tool::FrequencyDistribution *index_interval;  // intervalles entre parametres d'index explicites
-    int **index_parameter;  // parametres d'index explicites
-    int nb_variable;        // nombre de variables
-    stat_tool::variable_nature *type;  // type de chaque variable (INT_VALUE/REAL_VALUE/STATE)
-    double *min_value;      // valeurs minimums
-    double *max_value;      // valeurs maximums
-    stat_tool::FrequencyDistribution **marginal_distribution;  // lois marginales empiriques
-    stat_tool::Histogram **marginal_histogram;  // histogrammes marginaux
-    int ***int_sequence;    // sequences, variables entieres
-    double ***real_sequence;  // sequences, variables reelles
+    int nb_sequence;        ///< number of sequences
+    int *identifier;        ///< sequence identifiers
+    int max_length;         ///< maximum sequence length
+    int cumul_length;       ///< cumulative sequence length
+    int *length;            ///< sequence lengths
+    stat_tool::FrequencyDistribution *length_distribution;  ///< sequence length frequency distribution
+    int **vertex_identifier;  ///< identifiers of vertices of an associated MTG
+    index_parameter_type index_param_type;  ///< index parameter type (TIME/POSITION)
+    stat_tool::FrequencyDistribution *index_parameter_distribution;  ///< explicit index parameter frequency distribution
+    stat_tool::FrequencyDistribution *index_interval;  ///< frequency distribution of the intervals between explicit index parameters
+    int **index_parameter;  ///< explicit index parameters
+    int nb_variable;        ///< number of variables
+    stat_tool::variable_nature *type;  ///< variable types (INT_VALUE/REAL_VALUE/STATE)
+    double *min_value;      ///<  minimum value for each variable
+    double *max_value;      ///<  maximum value for each variable
+    stat_tool::FrequencyDistribution **marginal_distribution;  ///< marginal frequency distributions
+    stat_tool::Histogram **marginal_histogram;  ///< marginal histograms
+    int ***int_sequence;    ///< sequences, integer-valued variables
+    double ***real_sequence;  ///< sequences, real-valued variables
 
     void init(int inb_sequence , int *iidentifier , int *ilength , int **ivertex_identifier ,
               index_parameter_type iindex_param_type , int inb_variable , stat_tool::variable_nature *itype ,
@@ -480,9 +480,9 @@ namespace sequence_analysis {
     void cluster(const Sequences &seq , int variable , int nb_class , double *limit);
     void select_variable(const Sequences &seq , int *variable);
 
-    bool pointwise_average_ascii_print(stat_tool::StatError &error , const std::string path , int *size ,
+    bool pointwise_average_ascii_print(stat_tool::StatError &error , const std::string path , int *frequency ,
                                        bool dispersion , sequence_type output) const;
-    bool pointwise_average_spreadsheet_print(stat_tool::StatError &error , const std::string path , int *size ,
+    bool pointwise_average_spreadsheet_print(stat_tool::StatError &error , const std::string path , int *frequency ,
                                              bool dispersion , sequence_type output) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive , bool comment_flag) const;
@@ -666,9 +666,9 @@ namespace sequence_analysis {
     { init(inb_sequence , iidentifier , ilength , ivertex_identifier ,
            iindex_param_type , inb_variable , itype ,
            vertex_identifier_copy , init_flag); }
-    Sequences(int inb_sequence , int *iidentifier , int *ilength , index_parameter_type iindex_param_type ,  // interface AML
+    Sequences(int inb_sequence , int *iidentifier , int *ilength , index_parameter_type iindex_param_type ,  // AML interface
               int inb_variable , stat_tool::variable_nature itype , int ***iint_sequence);
-    Sequences(int inb_sequence , int *iidentifier , int *ilength , int inb_variable ,  // interface AML
+    Sequences(int inb_sequence , int *iidentifier , int *ilength , int inb_variable ,  // AML interface
               double ***ireal_sequence);
     Sequences(int inb_sequence , int *iidentifier , int *ilength , int **ivertex_identifier ,
               index_parameter_type iindex_param_type , int **iindex_parameter , int inb_variable ,
@@ -936,7 +936,7 @@ namespace sequence_analysis {
                                                             bool common_contrast , std::vector<double> shape_parameter ,
                                                             change_point_profile output = SEGMENT) const;
 
-    // acces membres de la classe
+    // class member access
 
     int get_nb_sequence() const { return nb_sequence; }
     int get_identifier(int iseq) const { return identifier[iseq]; }
@@ -967,26 +967,22 @@ namespace sequence_analysis {
 
 
 
-  class SequenceCharacteristics {  // caracteristiques des sequences pour une variable
+  /// \brief Sequence characteristics for a categorical variable
+
+  class SequenceCharacteristics {
 
   public :
 
-    int nb_value;           // nombre de valeurs a partir de 0
-    stat_tool::Curves *index_value;    // probabilites des valeurs en fonction de l'index
-    stat_tool::Curves *explicit_index_value;    // probabilites des valeurs en fonction de l'index explicite
-    stat_tool::FrequencyDistribution **first_occurrence;  // lois empiriques du temps avant la premiere
-                                                          // occurrence d'une valeur
-    stat_tool::FrequencyDistribution **recurrence_time;  // lois empiriques du temps de retour dans une valeur
-    stat_tool::FrequencyDistribution **sojourn_time;  // lois empiriques du temps de sejour dans une valeur
-                                                      // (series completes)
-    stat_tool::FrequencyDistribution **initial_run;  // lois empiriques du temps de sejour dans une valeur
-                                                     // (series initiales censurees a gauche)
-    stat_tool::FrequencyDistribution **final_run;  // lois empiriques du temps de sejour dans une valeur
-                                                   // (series finales censurees a droite)
-    stat_tool::FrequencyDistribution **nb_run;  // lois empiriques du nombre de series 
-                                                //par sequence des valeurs
-    stat_tool::FrequencyDistribution **nb_occurrence;  // lois empiriques du nombre d'occurrences
-                                                       // par sequence des valeurs
+    int nb_value;           ///< number of categories
+    stat_tool::Curves *index_value;    ///< empirical probabilities of each category as a function of the index parameter
+    stat_tool::Curves *explicit_index_value;    ///< empirical probabilities of each category as a function of the explicit index parameter
+    stat_tool::FrequencyDistribution **first_occurrence;  ///< time to the 1st occurrence frequency distributions
+    stat_tool::FrequencyDistribution **recurrence_time;  ///< recurrence time frequency distributions
+    stat_tool::FrequencyDistribution **sojourn_time;  ///< complete sojourn time frequency distributions
+    stat_tool::FrequencyDistribution **initial_run;  ///< left-censored sojourn time frequency distributions
+    stat_tool::FrequencyDistribution **final_run;  ///< right-censored sojourn time frequency distributions
+    stat_tool::FrequencyDistribution **nb_run;  ///< number of runs per sequence frequency distributions
+    stat_tool::FrequencyDistribution **nb_occurrence;  ///< number of occurrences per sequence frequency distributions
 
     void copy(const SequenceCharacteristics &characteristics);
     void reverse(const SequenceCharacteristics &characteristics);
@@ -1017,7 +1013,9 @@ namespace sequence_analysis {
 
   class Function;
 
-  class SelfTransition : public stat_tool::Curves {  // probabilites de rester dans un etat en fonction de l'index
+  /// \brief Self-transition probabilitiy as a function of the index parameter
+
+  class SelfTransition : public stat_tool::Curves {
 
   public :
 
@@ -1033,8 +1031,10 @@ namespace sequence_analysis {
   class VariableOrderMarkovChain;
   class VariableOrderMarkovChainData;
 
-  class MarkovianSequences : public Sequences {  // trajectoires correspondant a
-                                                 // un processus markovien
+  /// \brief Sequences potentially generated by a (hidden) Markovian process
+
+  class MarkovianSequences : public Sequences {
+
     friend class VariableOrderMarkovChain;
     friend class VariableOrderMarkov;
     friend class HiddenVariableOrderMarkov;
@@ -1047,12 +1047,11 @@ namespace sequence_analysis {
 
   protected :
 
-    double *min_interval;   // intervalles minimums entre 2 valeurs
-    SelfTransition **self_transition;  // probabilites de rester dans un etat
-                                       // en fonction de l'index
-    stat_tool::FrequencyDistribution ***observation_distribution;  // lois empiriques d'observation
-    stat_tool::Histogram ***observation_histogram;  // histogrammes d'observation
-    SequenceCharacteristics **characteristics;  // caracteristiques pour une variable donnee
+    double *min_interval;   ///< minimum intervals between 2 values
+    SelfTransition **self_transition;  ///< self transition probability as a function of the index parameter
+    stat_tool::FrequencyDistribution ***observation_distribution;  ///< observation frequency distributions
+    stat_tool::Histogram ***observation_histogram;  ///< observation histograms
+    SequenceCharacteristics **characteristics;  ///< characteristics for categorical variables
 
     void init();
     void copy(const MarkovianSequences &seq , initial_run param = UNCHANGED);
@@ -1344,7 +1343,7 @@ namespace sequence_analysis {
                     stat_tool::latent_structure_algorithm algorithm = stat_tool::FORWARD ,
                     const std::string path = "") const;
 
-    // acces membres de la classe
+    // class member access
 
     stat_tool::Curves* get_self_transition(int state) const { return self_transition[state]; }
     stat_tool::FrequencyDistribution*** get_observation_distribution() const

@@ -308,9 +308,9 @@ VectorDistance::~VectorDistance()
 /**
  *  \brief Assignment operator of the VectorDistance class.
  *
- *  \param[in]  vector_dist reference on a VectorDistance object,
+ *  \param[in] vector_dist reference on a VectorDistance object.
  *
- *  \param[out] this        VectorDistance object.
+ *  \return                VectorDistance object.
  */
 /*--------------------------------------------------------------*/
 
@@ -330,10 +330,10 @@ VectorDistance& VectorDistance::operator=(const VectorDistance &vector_dist)
 /**
  *  \brief Construction of a VectorDistance object from a file.
  *
- *  \param[in]  error       reference on a StatError object,
- *  \param[in]  path        file path,
+ *  \param[in] error reference on a StatError object,
+ *  \param[in] path  file path.
  *
- *  \param[out] vector_dist VectorDistance object.
+ *  \return          VectorDistance object.
  */
 /*--------------------------------------------------------------*/
 
@@ -407,12 +407,12 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
           break;
         }
 
-        // test VARIABLE(S) key word
+        // test VARIABLE(S) keyword
 
         case 1 : {
           if (token != STAT_word[nb_variable == 1 ? STATW_VARIABLE : STATW_VARIABLES]) {
             status = false;
-            error.correction_update(STAT_parsing[STATP_KEY_WORD] ,
+            error.correction_update(STAT_parsing[STATP_KEYWORD] ,
                                     STAT_word[nb_variable == 1 ? STATW_VARIABLE : STATW_VARIABLES] , line , i + 1);
           }
           break;
@@ -460,12 +460,12 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
         while (!((token = next()).isNull())) {
           switch (i) {
 
-          // test DISTANCE key word
+          // test DISTANCE keyword
 
           case 0 : {
             if (token != STAT_word[STATW_DISTANCE]) {
               status = false;
-              error.correction_update(STAT_parsing[STATP_KEY_WORD] , STAT_word[STATW_DISTANCE] , line , i + 1);
+              error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_DISTANCE] , line , i + 1);
             }
             break;
           }
@@ -480,7 +480,7 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
             break;
           }
 
-          // test key word defining the distance type
+          // test keyword defining the distance type
 
           case 2 : {
             for (j = ABSOLUTE_VALUE;j <= QUADRATIC;j++) {
@@ -492,7 +492,7 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
 
             if (j == QUADRATIC + 1) {
               status = false;
-              error.update(STAT_parsing[STATP_KEY_WORD] , line , i + 1);
+              error.update(STAT_parsing[STATP_KEYWORD] , line , i + 1);
             }
             break;
           }
@@ -608,7 +608,7 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
               break;
             }
 
-            // test key word corresponding to the variable type
+            // test keyword corresponding to the variable type
 
             case 3 : {
               if ((variable >= 0) && (variable < nb_variable)) {
@@ -621,18 +621,18 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
 
                 if (j == CIRCULAR + 1) {
                   status = false;
-                  error.update(STAT_parsing[STATP_KEY_WORD] , line , i + 1);
+                  error.update(STAT_parsing[STATP_KEYWORD] , line , i + 1);
                 }
               }
               break;
             }
 
-            // test WEIGHT key word
+            // test WEIGHT keyword
 
             case 4 : {
               if (token != STAT_word[STATW_WEIGHT]) {
                 status = false;
-                error.correction_update(STAT_parsing[STATP_KEY_WORD] , STAT_word[STATW_WEIGHT] , line , i + 1);
+                error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_WEIGHT] , line , i + 1);
               }
               break;
             }
@@ -675,11 +675,11 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
 
           case 1 : {
 
-            // test CATEGORIES key word
+            // test CATEGORIES keyword
 
             if ((i == 1) && (token != STAT_word[STATW_CATEGORIES])) {
               status = false;
-              error.update(STAT_parsing[STATP_KEY_WORD] , line , i + 1);
+              error.update(STAT_parsing[STATP_KEYWORD] , line , i + 1);
             }
 
             break;
@@ -708,12 +708,12 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
 
             switch (i) {
 
-            // test PERIOD key word
+            // test PERIOD keyword
 
             case 0 : {
               if (token != STAT_word[STATW_PERIOD]) {
                 status = false;
-                error.correction_update(STAT_parsing[STATP_KEY_WORD] , STAT_word[STATW_PERIOD] , line , i + 1);
+                error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_PERIOD] , line , i + 1);
               }
               break;
             }
@@ -1030,9 +1030,9 @@ bool VectorDistance::plot_write(StatError &error , const char *prefix ,
 /**
  *  \brief Computation of the maximum distance for each category
  *
- *  \param[in]  variable              variable index,
+ *  \param[in] variable variable index.
  *
- *  \param[out] max_category_distance maximum distances.
+ *  \return             maximum distances.
  */
 /*--------------------------------------------------------------*/
 

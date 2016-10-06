@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -53,15 +53,16 @@ namespace sequence_analysis {
 
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Construction of the distributions of a CategoricalSequenceProcess object
+ *         except the observation distributions.
  *
- *  creation des lois d'un objet CategoricalSequenceProcess
- *  a l'exception des lois d'observation.
- *
- *  arguments : loi des longueurs des sequences, homogeneite des etats,
- *              flag sur les lois de comptage.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] ilength       sequence length distribution,
+ *  \param[in] homogeneity   state homogeneity,
+ *  \param[in] counting_flag flag counting distributions.
+ */
+/*--------------------------------------------------------------*/
 
 void CategoricalSequenceProcess::create_characteristic(const Distribution &ilength ,
                                                        bool *homogeneity ,
@@ -185,15 +186,16 @@ void CategoricalSequenceProcess::create_characteristic(const Distribution &ileng
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Construction of the distributions of a CategoricalSequenceProcess object
+ *         except the observation distributions.
  *
- *  creation des lois d'un objet CategoricalSequenceProcess
- *  a l'exception des lois d'observation.
- *
- *  arguments : loi des longueurs des sequences, flags sur les lois
- *              de temps de sejour et sur les lois de comptage.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] ilength           sequence length distribution,
+ *  \param[in] sojourn_time_flag flag sojourn time distributions,
+ *  \param[in] counting_flag     flag counting distributions.
+ */
+/*--------------------------------------------------------------*/
 
 void CategoricalSequenceProcess::create_characteristic(const Distribution &ilength ,
                                                        bool sojourn_time_flag , bool counting_flag)
@@ -309,14 +311,15 @@ void CategoricalSequenceProcess::create_characteristic(const Distribution &ileng
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the CategoricalSequenceProcess class.
  *
- *  Constructeur de la classe CategoricalSequenceProcess.
- *
- *  arguments : nombre d'etats, nombre de valeurs,
- *              flag sur les lois d'observation.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] inb_state        number of states,
+ *  \param[in] inb_value        number of categories,
+ *  \param[in] observation_flag flag observation distributions.
+ */
+/*--------------------------------------------------------------*/
 
 CategoricalSequenceProcess::CategoricalSequenceProcess(int inb_state , int inb_value ,
                                                        int observation_flag)
@@ -336,13 +339,14 @@ CategoricalSequenceProcess::CategoricalSequenceProcess(int inb_state , int inb_v
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the CategoricalSequenceProcess class.
  *
- *  Constructeur de la classe CategoricalSequenceProcess.
- *
- *  arguments : nombre d'etats, lois d'occupation des etats.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] inb_state number of states,
+ *  \param[in] occupancy state occupancy distributions.
+ */
+/*--------------------------------------------------------------*/
 
 CategoricalSequenceProcess::CategoricalSequenceProcess(int inb_state ,
                                                        DiscreteParametric **occupancy)
@@ -379,14 +383,14 @@ CategoricalSequenceProcess::CategoricalSequenceProcess(int inb_state ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Construction of a CategoricalSequenceProcess object from
+ *         a CategoricalProcess object.
  *
- *  Construction d'un objet CategoricalSequenceProcess a partir
- *  d'un objet CategoricalProcess.
- *
- *  argument : reference sur un objet CategoricalProcess.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] process reference on a CategoricalProcess object.
+ */
+/*--------------------------------------------------------------*/
 
 CategoricalSequenceProcess::CategoricalSequenceProcess(const CategoricalProcess &process)
 :CategoricalProcess(process)
@@ -405,14 +409,14 @@ CategoricalSequenceProcess::CategoricalSequenceProcess(const CategoricalProcess 
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Copy of a CategoricalSequenceProcess object.
  *
- *  Copie d'un objet CategoricalSequenceProcess.
- *
- *  arguments : reference sur un objet CategoricalSequenceProcess,
- *              flag copie des lois caracteristiques.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] process             reference on a CategoricalSequenceProcess object,
+ *  \param[in] characteristic_flag flag copy of the characteristic distributions.
+ */
+/*--------------------------------------------------------------*/
 
 void CategoricalSequenceProcess::copy(const CategoricalSequenceProcess &process ,
                                       bool characteristic_flag)
@@ -542,14 +546,14 @@ void CategoricalSequenceProcess::copy(const CategoricalSequenceProcess &process 
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Copy of the state occupancy distributions.
  *
- *  Copie des lois d'occupation des etats.
- *
- *  arguments : reference sur un objet CategoricalSequenceProcess,
- *              nombre de valeurs allouees pour les lois d'occupation des etats.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] process            reference on a CategoricalSequenceProcess object,
+ *  \param[in] occupancy_nb_value number of allocated values for the state occupancy distributions.
+ */
+/*--------------------------------------------------------------*/
 
 void CategoricalSequenceProcess::init_occupancy(const CategoricalSequenceProcess &process ,
                                                 int occupancy_nb_value)
@@ -588,16 +592,16 @@ void CategoricalSequenceProcess::init_occupancy(const CategoricalSequenceProcess
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor by copy of the CategoricalSequenceProcess class.
  *
- *  Constructeur par copie de la classe CategoricalSequenceProcess.
- *
- *  arguments : reference sur un objet CategoricalSequenceProcess,
- *              type de manipulation (CATEGORICAL_SEQUENCE_PROCESS_COPY/INIT_OCCUPANCY),
- *              parametre (flag sur le calcul des lois caracteristiques /
- *              nombre de valeurs allouees pour les lois d'occupation des etats).
- *
- *--------------------------------------------------------------*/
+ *  \param[in] process   reference on a CategoricalSequenceProcess object,
+ *  \param[in] transform type of transform (CATEGORICAL_SEQUENCE_PROCESS_COPY/INIT_OCCUPANCY),
+ *  \param[in] param     flag on the computation of the characteristic distributions/
+ *                       number of allocated values for the state occupancy distributions.
+ */
+/*--------------------------------------------------------------*/
 
 CategoricalSequenceProcess::CategoricalSequenceProcess(const CategoricalSequenceProcess &process ,
                                                        categorical_sequence_process_transformation transform ,
@@ -616,11 +620,11 @@ CategoricalSequenceProcess::CategoricalSequenceProcess(const CategoricalSequence
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Destruction des champs d'un objet CategoricalSequenceProcess.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Destruction of the data members of a CategoricalSequenceProcess object.
+ */
+/*--------------------------------------------------------------*/
 
 void CategoricalSequenceProcess::remove()
 
@@ -705,11 +709,11 @@ void CategoricalSequenceProcess::remove()
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Destructeur de la classe CategoricalSequenceProcess.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Destructor of the CategoricalSequenceProcess class.
+ */
+/*--------------------------------------------------------------*/
 
 CategoricalSequenceProcess::~CategoricalSequenceProcess()
 
@@ -718,13 +722,15 @@ CategoricalSequenceProcess::~CategoricalSequenceProcess()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Assignment operator of the CategoricalSequenceProcess class.
  *
- *  Operateur d'assignement de la classe CategoricalSequenceProcess.
+ *  \param[in] process reference on a CategoricalSequenceProcess object.
  *
- *  argument : reference sur un objet CategoricalSequenceProcess.
- *
- *--------------------------------------------------------------*/
+ *  \return            CategoricalSequenceProcess object.
+ */
+/*--------------------------------------------------------------*/
 
 CategoricalSequenceProcess& CategoricalSequenceProcess::operator=(const CategoricalSequenceProcess &process)
 
@@ -741,13 +747,16 @@ CategoricalSequenceProcess& CategoricalSequenceProcess::operator=(const Categori
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief test model hidden.
  *
- *  test modele cache
+ *  \param[in] nb_output_process number of observation processes,
+ *  \param[in] process           pointer on the observation processes.
  *
- *  arguments : nombre de processus d'observation, pointeurs sur ces processus.
- *
- *--------------------------------------------------------------*/
+ *  \return                      model hidden or not.
+ */
+/*--------------------------------------------------------------*/
 
 bool CategoricalSequenceProcess::test_hidden(int nb_output_process , CategoricalSequenceProcess **process)
 
@@ -774,15 +783,19 @@ bool CategoricalSequenceProcess::test_hidden(int nb_output_process , Categorical
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Analysis of the format of state occupancy distributions.
  *
- *  Analyse du format des lois d'occupation des etats.
+ *  \param[in] error           reference on a StatError object,
+ *  \param[in] in_file         stream,
+ *  \param[in] line            reference on the file line index,
+ *  \param[in] chain           reference on a Chain object,
+ *  \param[in] cumul_threshold threshold on the cumulative distribution function.
  *
- *  arguments : reference sur un objet StatError, stream,
- *              reference sur l'indice de la ligne lue et sur un objet Chain,
- *              seuil sur la fonction de repartition.
- *
- *--------------------------------------------------------------*/
+ *  \return                    CategoricalSequenceProcess object.
+ */
+/*--------------------------------------------------------------*/
 
 CategoricalSequenceProcess* CategoricalSequenceProcess::occupancy_parsing(StatError &error , ifstream &in_file ,
                                                                           int &line , const Chain &chain ,
@@ -826,17 +839,17 @@ CategoricalSequenceProcess* CategoricalSequenceProcess::occupancy_parsing(StatEr
         while (!((token = next()).isNull())) {
           switch (j) {
 
-          // test mot cle STATE
+          // test STATE keyword
 
           case 0 : {
             if (token != STAT_word[STATW_STATE]) {
               status = false;
-              error.correction_update(STAT_parsing[STATP_KEY_WORD] , STAT_word[STATW_STATE] , line , j + 1);
+              error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_STATE] , line , j + 1);
             }
             break;
           }
 
-          // test indice de l'etat
+          // test state index
 
           case 1 : {
             lstatus = locale.stringToNum(token , &index);
@@ -851,12 +864,12 @@ CategoricalSequenceProcess* CategoricalSequenceProcess::occupancy_parsing(StatEr
             break;
           }
 
-          // test mot cle OCCUPANCY_DISTRIBUTION
+          // test OCCUPANCY_DISTRIBUTION keyword
 
           case 2 : {
             if (token != SEQ_word[SEQW_OCCUPANCY_DISTRIBUTION]) {
               status = false;
-              error.correction_update(STAT_parsing[STATP_KEY_WORD] , SEQ_word[SEQW_OCCUPANCY_DISTRIBUTION] , line , j + 1);
+              error.correction_update(STAT_parsing[STATP_KEYWORD] , SEQ_word[SEQW_OCCUPANCY_DISTRIBUTION] , line , j + 1);
             }
             break;
           }
@@ -900,11 +913,13 @@ CategoricalSequenceProcess* CategoricalSequenceProcess::occupancy_parsing(StatEr
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the marginal state distribution for an ordinary process.
  *
- *  Calcul de la distribution marginale des etats pour un processus ordinaire.
- *
- *--------------------------------------------------------------*/
+ *  \return Distribution object.
+ */
+/*--------------------------------------------------------------*/
 
 Distribution* CategoricalSequenceProcess::weight_computation() const
 

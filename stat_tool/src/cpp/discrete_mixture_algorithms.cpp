@@ -52,7 +52,7 @@ namespace stat_tool {
 /**
  *  \brief Computation of the information quantity of a DiscreteMixtureData object.
  *
- *  \param[out] information information quantity.
+ *  \return information quantity.
  */
 /*--------------------------------------------------------------*/
 
@@ -90,9 +90,9 @@ double DiscreteMixtureData::information_computation() const
  *  \brief Computation of the log-likelihood of a mixture of
  *         discrete distributions for a DiscreteMixtureData object.
  *
- *  \param[in]  mixt_histo reference on un DiscreteMixtureData object,
+ *  \param[in] mixt_histo reference on a DiscreteMixtureData object.
  *
- *  \param[out] likelihood log-likelihood.
+ *  \return               log-likelihood.
  */
 /*--------------------------------------------------------------*/
 
@@ -129,7 +129,7 @@ double DiscreteMixture::likelihood_computation(const DiscreteMixtureData &mixt_h
  *
  *  \param[in] min_nb_value     lower bound of the component support,
  *  \param[in] cumul_threshold  threshold on the cumulative distribution function,
- *  \param[in] component_flag   flag for the component computation,
+ *  \param[in] component_flag   flag for the component computation.
  */
 /*--------------------------------------------------------------*/
 
@@ -194,10 +194,10 @@ void DiscreteMixture::computation(int min_nb_value , double cumul_threshold , bo
  *  \brief Initialization of a mixture of discrete distributions on the basis of
  *         a frequency distribution.
  *
- *  \param[in] histo          reference on a frequency distribution,
+ *  \param[in] histo          reference on a FrequencyDistribution object,
  *  \param[in] estimate       flags on the known components,
  *  \param[in] min_inf_bound  minimum lower bound of the support,
- *  \param[in] component_flag flag on the component shift.
+ *  \param[in] component_flag flag on the component lower bounds.
  */
 /*--------------------------------------------------------------*/
 
@@ -384,7 +384,7 @@ void DiscreteMixture::expectation_step(DiscreteMixtureData *mixt_histo , int nb_
 /*--------------------------------------------------------------*/
 /**
  *  \brief Correction of component frequency distributions in the case of
- *         a binomial or a Poisson distribution
+ *         a binomial or a Poisson distribution.
  *
  *  \param[in] mixt_histo    pointer on a DiscreteMixtureData object,
  *  \param[in] estimate      flags on the known components,
@@ -464,7 +464,7 @@ void DiscreteMixture::variance_correction(DiscreteMixtureData *mixt_histo ,
  *  \brief Test of the component order in the case of a mixture combining
  *         components of different parametric families.
  *
- *  \param[out] order components ordered or not.
+ *  \return components ordered or not.
  */
 /*--------------------------------------------------------------*/
 
@@ -498,15 +498,15 @@ bool DiscreteMixture::component_order_test() const
 /**
  *  \brief Estimation of a mixture of parametric discrete distributions using the EM algorithm.
  *
- *  \param[in]  error          reference on a StatError object,
- *  \param[in]  imixt          pointer on the known components,
- *  \param[in]  estimate       flags on the known  components,
- *  \param[in]  min_inf_bound  minimum lower bound of the mixture support,
- *  \param[in]  mixt_flag      flag on the lower bound of the mixture support,
- *  \param[in]  component_flag flag on the lower boundsof the component supports,
- *  \param[in]  weight_step    step for weight initialization,
+ *  \param[in] error          reference on a StatError object,
+ *  \param[in] imixt          pointer on the known components,
+ *  \param[in] estimate       flags on the known  components,
+ *  \param[in] min_inf_bound  minimum lower bound of the mixture support,
+ *  \param[in] mixt_flag      flag on the lower bound of the mixture support,
+ *  \param[in] component_flag flag on the lower bounds of the component supports,
+ *  \param[in] weight_step    step for weight initialization.
  *
- *  \param[out] mixt           mixture of parametric discrete distributions.
+ *  \return                   DiscreteMixture object.
  */
 /*--------------------------------------------------------------*/
 
@@ -608,7 +608,7 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
             }
           }
 
-          // computation of the estimated mixture and of the corresponding log-likelihood,
+          // computation of the estimated mixture and the corresponding log-likelihood,
           // test of the component order in the case of an heterogeneous mixture
 
           mixt->computation(nb_value);
@@ -705,14 +705,14 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
 /**
  *  \brief Estimation of a mixture of parametric discrete distributions using the EM algorithm.
  *
- *  \param[in]  error          reference on a StatError object,
- *  \param[in]  imixt          pointer on the known components,
- *  \param[in]  min_inf_bound  minimum lower bound of the mixture support,
- *  \param[in]  mixt_flag      flag on the lower bound of the mixture support,
- *  \param[in]  component_flag flag on the lower bounds of the component supports,
- *  \param[in]  weight_step    step for weight initialization,
+ *  \param[in] error          reference on a StatError object,
+ *  \param[in] imixt          pointer on the known components,
+ *  \param[in] min_inf_bound  minimum lower bound of the mixture support,
+ *  \param[in] mixt_flag      flag on the lower bound of the mixture support,
+ *  \param[in] component_flag flag on the lower bounds of the component supports,
+ *  \param[in] weight_step    step for weight initialization.
  *
- *  \param[out] mixt           mixture of parametric discrete distributions.
+ *  \return                   DiscreteMixture object.
  */
 /*--------------------------------------------------------------*/
 
@@ -741,15 +741,15 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
 /**
  *  \brief Estimation of a mixture of parametric discrete distributions using the EM algorithm.
  *
- *  \param[in]  error          reference on a StatError object,
- *  \param[in]  nb_component   number of components,
- *  \param[in]  ident          component identifiers,
- *  \param[in]  min_inf_bound  minimum lower bound of the mixture support,
- *  \param[in]  mixt_flag      flag on the lower bound of the mixture support,
- *  \param[in]  component_flag flag on the lower bounds of the component supports,
- *  \param[in]  weight_step    step for weight initialization,
+ *  \param[in] error          reference on a StatError object,
+ *  \param[in] nb_component   number of components,
+ *  \param[in] ident          component identifiers,
+ *  \param[in] min_inf_bound  minimum lower bound of the mixture support,
+ *  \param[in] mixt_flag      flag on the lower bound of the mixture support,
+ *  \param[in] component_flag flag on the lower bounds of the component supports,
+ *  \param[in] weight_step    step for weight initialization.
  *
- *  \param[out] mixt           mixture of parametric discrete distributions.
+ *  \return                   DiscreteMixture object.
  */
 /*--------------------------------------------------------------*/
 
@@ -798,15 +798,15 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
 /**
  *  \brief Estimation of a mixture of parametric discrete distributions using the EM algorithm.
  *
- *  \param[in]  error          reference on a StatError object,
- *  \param[in]  nb_component   number of components,
- *  \param[in]  ident          component identifiers,
- *  \param[in]  min_inf_bound  minimum lower bound of the mixture support,
- *  \param[in]  mixt_flag      flag on the lower bound of the mixture support,
- *  \param[in]  component_flag flag on the lower bounds of the component supports,
- *  \param[in]  weight_step    step for weight initialization,
+ *  \param[in] error          reference on a StatError object,
+ *  \param[in] nb_component   number of components,
+ *  \param[in] ident          component identifiers,
+ *  \param[in] min_inf_bound  minimum lower bound of the mixture support,
+ *  \param[in] mixt_flag      flag on the lower bound of the mixture support,
+ *  \param[in] component_flag flag on the lower bounds of the component supports,
+ *  \param[in] weight_step    step for weight initialization.
  *
- *  \param[out]                mixture of parametric discrete distributions.
+ *  \return                   DiscreteMixture object.
  */
 /*--------------------------------------------------------------*/
 
@@ -826,18 +826,18 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
  *  \brief Estimation of the number of components of a mixture of parametric discrete
  *         distributions using the EM algorithm and a model selection criterion.
  *
- *  \param[in]  error            reference on a StatError object,
- *  \param[in]  os               stream,
- *  \param[in]  min_nb_component minimum number of components
- *  \param[in]  max_nb_component maximum number of components,
- *  \param[in]  ident            component identifiers,
- *  \param[in]  min_inf_bound    minimum lower bound of the mixture support,
- *  \param[in]  mixt_flag        flag on the lower bound of the mixture support,
- *  \param[in]  component_flag   flag on the lower bounds of the component supports,
- *  \param[in]  criterion        criterion for the selection of the number of components (AIC(c)/BIC(c)),
- *  \param[in]  weight_step      step for weight initialization,
+ *  \param[in] error            reference on a StatError object,
+ *  \param[in] os               stream,
+ *  \param[in] min_nb_component minimum number of components
+ *  \param[in] max_nb_component maximum number of components,
+ *  \param[in] ident            component identifiers,
+ *  \param[in] min_inf_bound    minimum lower bound of the mixture support,
+ *  \param[in] mixt_flag        flag on the lower bound of the mixture support,
+ *  \param[in] component_flag   flag on the lower bounds of the component supports,
+ *  \param[in] criterion        criterion for the selection of the number of components (AIC(c)/BIC(c)),
+ *  \param[in] weight_step      step for weight initialization.
  *
- *  \param[out] mixt             mixture of parametric discrete distributions.
+ *  \return                     DiscreteMixture object.
  */
 /*--------------------------------------------------------------*/
 
@@ -1036,18 +1036,18 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
  *  \brief Estimation of the number of components of a mixture of parametric discrete
  *         distributions using the EM algorithm and a model selection criterion.
  *
- *  \param[in]  error            reference on a StatError object,
- *  \param[in]  os               stream,
- *  \param[in]  min_nb_component minimum number of components
- *  \param[in]  max_nb_component maximum number of components,
- *  \param[in]  ident            component identifiers,
- *  \param[in]  min_inf_bound    minimum lower bound of the mixture support,
- *  \param[in]  mixt_flag        flag on the lower bound of the mixture support,
- *  \param[in]  component_flag   flag on the lower bounds of the component supports,
- *  \param[in]  criterion        criterion for the selection of the number of components (AIC(c)/BIC(c)),
- *  \param[in]  weight_step      step for weight initialization,
+ *  \param[in] error            reference on a StatError object,
+ *  \param[in] os               stream,
+ *  \param[in] min_nb_component minimum number of components
+ *  \param[in] max_nb_component maximum number of components,
+ *  \param[in] ident            component identifiers,
+ *  \param[in] min_inf_bound    minimum lower bound of the mixture support,
+ *  \param[in] mixt_flag        flag on the lower bound of the mixture support,
+ *  \param[in] component_flag   flag on the lower bounds of the component supports,
+ *  \param[in] criterion        criterion for the selection of the number of components (AIC(c)/BIC(c)),
+ *  \param[in] weight_step      step for weight initialization.
  *
- *  \param[out]                  mixture of parametric discrete distributions.
+ *  \return                     DiscreteMixture object.
  */
 /*--------------------------------------------------------------*/
 
@@ -1068,10 +1068,10 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
 /**
  *  \brief Simulation using a mixture of discrete distributions.
  *
- *  \param[in]  error      reference on a StatError object,
- *  \param[in]  nb_element sample size,
+ *  \param[in] error      reference on a StatError object,
+ *  \param[in] nb_element sample size.
  *
- *  \param[out] mixt_histo sample generated by a mixture of discrete distributions.
+ *  \return               DiscreteMixtureData object.
  */
 /*--------------------------------------------------------------*/
 

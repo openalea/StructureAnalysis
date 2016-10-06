@@ -59,7 +59,7 @@ namespace stat_tool {
   const double NEGATIVE_BINOMIAL_PARAMETER = 20.;  // initial parameter for a negative binomial distribution
   const double MIN_WEIGHT_STEP = 0.1;    // minimum step for weight initialization
   const double MAX_WEIGHT_STEP = 0.5;    // maximum step for weight initialization
-  const int DISCRETE_MIXTURE_COEFF = 2;           // rounding  coefficient for the estimator
+  const int DISCRETE_MIXTURE_COEFF = 2;           // rounding coefficient for the estimator
   const double DISCRETE_MIXTURE_LIKELIHOOD_DIFF = 1.e-5;  // threshold for stopping the EM iterations
   const int DISCRETE_MIXTURE_NB_ITER = 500;        // maximum number of EM iterations
 
@@ -73,8 +73,9 @@ namespace stat_tool {
 
   class DiscreteMixtureData;
 
+  /// \brief Mixture of discrete distributions
 
-  class DiscreteMixture : public StatInterface , public Distribution {  // mixture of discrete distributions
+  class DiscreteMixture : public StatInterface , public Distribution {
 
     friend class FrequencyDistribution;
     friend class DiscreteMixtureData;
@@ -84,10 +85,10 @@ namespace stat_tool {
 
   private :
 
-    DiscreteMixtureData *mixture_data;  // pointer on a DiscreteMixtureData object
-    int nb_component;       // number of components
-    DiscreteParametric *weight;  // weight distribution
-    DiscreteParametric **component; // components
+    DiscreteMixtureData *mixture_data;  ///< pointer on a DiscreteMixtureData object
+    int nb_component;       ///< number of components
+    DiscreteParametric *weight;  ///< weight distribution
+    DiscreteParametric **component; ///< components
 
     void copy(const DiscreteMixture &mixt , bool data_flag = true);
     void remove();
@@ -154,8 +155,10 @@ namespace stat_tool {
 
 
 
-  class DiscreteMixtureData : public StatInterface , public FrequencyDistribution {  // data structure corresponding to
-                                                                                     // a mixture of discrete distributions
+  /// \brief Data structure corresponding to a mixture of discrete distributions
+
+  class DiscreteMixtureData : public StatInterface , public FrequencyDistribution {
+
     friend class FrequencyDistribution;
     friend class DiscreteMixture;
 
@@ -164,10 +167,10 @@ namespace stat_tool {
 
   private :
 
-    DiscreteMixture *mixture;  // pointer on a DiscreteMixture object
-    int nb_component;       // number of components
-    FrequencyDistribution *weight;  // weight frequency distribution
-    FrequencyDistribution **component;  // component frequency distributions
+    DiscreteMixture *mixture;  ///< pointer on a DiscreteMixture object
+    int nb_component;       ///< number of components
+    FrequencyDistribution *weight;  ///< weight frequency distribution
+    FrequencyDistribution **component;  ///< component frequency distributions
 
     void copy(const DiscreteMixtureData &mixt_histo , bool model_flag = true);
     void remove();

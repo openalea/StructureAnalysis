@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -51,13 +51,13 @@ namespace sequence_analysis {
 
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Default constructor of the SequenceCharacteristics class.
  *
- *  Constructeur par defaut de la classe SequenceCharacteristics.
- *
- *  argument : nombre de valeurs.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] number of categories.
+ */
+/*--------------------------------------------------------------*/
 
 SequenceCharacteristics::SequenceCharacteristics(int inb_value)
 
@@ -78,15 +78,15 @@ SequenceCharacteristics::SequenceCharacteristics(int inb_value)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the SequenceCharacteristics class adding/removing
+ *         initial run frequency distributions.
  *
- *  Constructeur de la classe SequenceCharacteristics avec ajout/suppression
- *  des lois empiriques de temps de sejour initial.
- *
- *  arguments : reference sur un objet SequenceCharacteristics,
- *              flag construction des lois empiriques de temps de sejour initial.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] characteristics  reference on a SequenceCharacteristics object,
+ *  \param[in] initial_run_flag flag construction of the initial run frequency distributions.
+ */
+/*--------------------------------------------------------------*/
 
 SequenceCharacteristics::SequenceCharacteristics(const SequenceCharacteristics &characteristics ,
                                                  bool initial_run_flag)
@@ -165,14 +165,13 @@ SequenceCharacteristics::SequenceCharacteristics(const SequenceCharacteristics &
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Copy of the sequence characteristics for a categorical variable.
  *
- *  Copie des caracteristiques d'un echantillon de sequences
- *  pour une variable donnee.
- *
- *  argument : reference sur un objet SequenceCharacteristics.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] characteristics reference on a SequenceCharacteristics object.
+ */
+/*--------------------------------------------------------------*/
 
 void SequenceCharacteristics::copy(const SequenceCharacteristics &characteristics)
 
@@ -242,14 +241,14 @@ void SequenceCharacteristics::copy(const SequenceCharacteristics &characteristic
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Copy of the unaffected sequence characteristics for a categorical variable
+ *         in the case of the reversing of the direction of sequences.
  *
- *  Copie des caracteristiques inchangees d'un echantillon de sequences
- *  pour une variable donnee dans le cas d'une inversion des sequences.
- *
- *  argument : reference sur un objet SequenceCharacteristics.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] characteristics reference on a SequenceCharacteristics object.
+ */
+/*--------------------------------------------------------------*/
 
 void SequenceCharacteristics::reverse(const SequenceCharacteristics &characteristics)
 
@@ -308,14 +307,14 @@ void SequenceCharacteristics::reverse(const SequenceCharacteristics &characteris
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor by copy of the SequenceCharacteristics class.
  *
- *  Constructeur par copie de la classe SequenceCharacteristics.
- *
- *  arguments : reference sur un objet SequenceCharacteristics,
- *              type de transformation.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] characteristics reference on a SequenceCharacteristics object,
+ *  \param[in] transform       type of transform.
+ */
+/*--------------------------------------------------------------*/
 
 SequenceCharacteristics::SequenceCharacteristics(const SequenceCharacteristics &characteristics ,
                                                  sequence_transformation transform)
@@ -332,11 +331,11 @@ SequenceCharacteristics::SequenceCharacteristics(const SequenceCharacteristics &
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Destructeur des champs de la classe SequenceCharacteristics.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Destructor of the data members of the SequenceCharacteristics class.
+ */
+/*--------------------------------------------------------------*/
 
 void SequenceCharacteristics::remove()
 
@@ -398,11 +397,11 @@ void SequenceCharacteristics::remove()
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Destructeur de la classe SequenceCharacteristics.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Destructor of the SequenceCharacteristics class.
+ */
+/*--------------------------------------------------------------*/
 
 SequenceCharacteristics::~SequenceCharacteristics()
 
@@ -411,13 +410,15 @@ SequenceCharacteristics::~SequenceCharacteristics()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Assignment operator of the SequenceCharacteristics class.
  *
- *  Operateur d'assignement de la classe SequenceCharacteristics.
+ *  \param[in] characteristics reference on a SequenceCharacteristics object.
  *
- *  argument : reference sur un objet SequenceCharacteristics.
- *
- *--------------------------------------------------------------*/
+ *  \return                    SequenceCharacteristics object.
+ */
+/*--------------------------------------------------------------*/
 
 SequenceCharacteristics& SequenceCharacteristics::operator=(const SequenceCharacteristics &characteristics)
 
@@ -431,15 +432,15 @@ SequenceCharacteristics& SequenceCharacteristics::operator=(const SequenceCharac
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Construction of the sojourn time frequency distributions for a categorical variable.
  *
- *  Creation des lois empiriques de temps de sejour dans une valeur
- *  pour une variable donnee.
- *
- *  arguments : longueur maximum des sequences, flag sur la creation
- *              des lois empiriques de temps de sejour initial.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] max_length       maximum sequence length,
+ *  \param[in] initial_run_flag flag on the construction of
+ *                              the initial run frequency distributions.
+ */
+/*--------------------------------------------------------------*/
 
 void SequenceCharacteristics::create_sojourn_time_frequency_distribution(int max_length , int initial_run_flag)
 
@@ -466,14 +467,17 @@ void SequenceCharacteristics::create_sojourn_time_frequency_distribution(int max
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a SequenceCharacteristics object.
  *
- *  Ecriture d'un objet SequenceCharacteristics.
- *
- *  arguments : stream, type de la variable, loi empirique
- *              des longueurs des sequences, flag niveau de detail, flag fichier.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os                  stream,
+ *  \param[in]     type                variable type,
+ *  \param[in]     length_distribution sequence length frequency distribution,
+ *  \param[in]     exhaustive          flag detail level,
+ *  \param[in]     comment_flag        flag file.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& SequenceCharacteristics::ascii_print(ostream &os , int type ,
                                               const FrequencyDistribution &length_distribution ,
@@ -663,14 +667,15 @@ ostream& SequenceCharacteristics::ascii_print(ostream &os , int type ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a SequenceCharacteristics object at the spreadsheet format.
  *
- *  Ecriture d'un objet SequenceCharacteristics au format tableur.
- *
- *  arguments : stream, type de la variable, loi empirique
- *              des longueurs des sequences.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os                  stream,
+ *  \param[in]     type                variable type,
+ *  \param[in]     length_distribution sequence length frequency distribution.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& SequenceCharacteristics::spreadsheet_print(ostream &os , int type ,
                                                     const FrequencyDistribution &length_distribution) const
@@ -817,15 +822,20 @@ ostream& SequenceCharacteristics::spreadsheet_print(ostream &os , int type ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Plot of a SequenceCharacteristics object using Gnuplot.
  *
- *  Sortie Gnuplot d'un objet Sequences_characteristics.
+ *  \param[in] prefix              file prefix,
+ *  \param[in] title               figure title,
+ *  \param[in] variable            variable index,
+ *  \param[in] nb_variable         number of variables,
+ *  \param[in] type                variable type,
+ *  \param[in] length_distribution sequence length frequency distribution.
  *
- *  arguments : prefixe des fichiers, titre des figures, indice de la variable,
- *              nombre de variables, type de la variable,
- *              loi empirique des longueurs des sequences.
- *
- *--------------------------------------------------------------*/
+ *  \return                        error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool SequenceCharacteristics::plot_print(const char *prefix , const char *title ,
                                          int variable , int nb_variable , int type ,
@@ -840,7 +850,7 @@ bool SequenceCharacteristics::plot_print(const char *prefix , const char *title 
   ostringstream data_file_name[3];
 
 
-  // ecriture des fichiers de donnees
+  // writing of data files
 
   data_file_name[0] << prefix << variable + 1 << 0 << ".dat";
 
@@ -903,7 +913,7 @@ bool SequenceCharacteristics::plot_print(const char *prefix , const char *title 
 
     length_distribution.plot_print((data_file_name[1].str()).c_str() , nb_histo , phisto);
 
-    // ecriture des fichiers de commandes et des fichiers d'impression
+    // writing of script files
 
     for (i = 0;i < 2;i++) {
       ostringstream file_name[2];
@@ -1537,15 +1547,17 @@ bool SequenceCharacteristics::plot_print(const char *prefix , const char *title 
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Plot of a SequenceCharacteristics object.
  *
- *  Sortie graphique d'un objet Sequences_characteristics.
- *
- *  arguments : reference sur un objet MultiPlotSet, indice du MultiPlot,
- *              indice et type de la variable,
- *              loi empirique des longueurs des sequences.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] plot                reference on a MultiPlotSet object,
+ *  \param[in] index               MultiPlot index,
+ *  \param[in] variable            variable index,
+ *  \param[in] type                variable type,
+ *  \param[in] length_distribution sequence length frequency distribution.
+ */
+/*--------------------------------------------------------------*/
 
 void SequenceCharacteristics::plotable_write(MultiPlotSet &plot , int &index ,
                                              int variable , int type ,
@@ -1561,7 +1573,7 @@ void SequenceCharacteristics::plotable_write(MultiPlotSet &plot , int &index ,
 
   index_length = index_value->plot_length_computation();
 
-  // calcul du nombre de vues
+  // computation of the number of plots
 
   /*  nb_plot_set = 2;
   if (index_value->frequency[index_length - 1] < MAX_FREQUENCY) {
@@ -1611,7 +1623,7 @@ void SequenceCharacteristics::plotable_write(MultiPlotSet &plot , int &index ,
 
   if (index_value->frequency[index_length - 1] < MAX_FREQUENCY) {
 
-    // vue : intensite lissee
+    // smoothed intensity
 
     plot.variable[index] = variable;
     plot.viewpoint[index] = INTENSITY;
@@ -1649,7 +1661,7 @@ void SequenceCharacteristics::plotable_write(MultiPlotSet &plot , int &index ,
     index++;
   }
 
-  // vue : intensite
+  // intensity
 
   plot.variable[index] = variable;
   plot.viewpoint[index] = INTENSITY;
@@ -1683,7 +1695,7 @@ void SequenceCharacteristics::plotable_write(MultiPlotSet &plot , int &index ,
 
   if (explicit_index_value) {
 
-    // vue : intensite fonction d'un parametre d'index explicite
+    // intensity as a function of the explicit index parameter
 
     plot.variable[index] = variable;
     plot.viewpoint[index] = INTENSITY;
@@ -1718,7 +1730,7 @@ void SequenceCharacteristics::plotable_write(MultiPlotSet &plot , int &index ,
     index++;
   }
 
-  // vue : loi empirique des longueurs des sequences
+  // sequence length frequency distribution
 
   plot.variable[index] = variable;
   plot.viewpoint[index] = INTENSITY;
@@ -1744,7 +1756,7 @@ void SequenceCharacteristics::plotable_write(MultiPlotSet &plot , int &index ,
   length_distribution.plotable_frequency_write(plot[index][0]);
   index++;
 
-  // vue : lois empiriques du temps avant 1ere occurrence d'une observation
+  // frequency distributions of the time to the 1st occurrence of a category
 
   plot.variable[index] = variable;
   plot.viewpoint[index] = FIRST_OCCURRENCE;
@@ -1756,7 +1768,7 @@ void SequenceCharacteristics::plotable_write(MultiPlotSet &plot , int &index ,
   title << SEQ_label[SEQL_FIRST_OCCURRENCE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTIONS];
   plot[index].title = title.str();
 
-  // calcul du temps maximum et de la frequence maximum
+  // computation of the maximum time to the 1st occurrence and the maximum frequency
 
   nb_histo = 0;
   max_nb_value = 0;
@@ -1819,7 +1831,7 @@ void SequenceCharacteristics::plotable_write(MultiPlotSet &plot , int &index ,
   for (i = 0;i < nb_value;i++) {
     if (first_occurrence[i]->nb_element > 0) {
 
-      // vue : loi empirique du temps avant la 1ere occurrence d'une observation
+      // frequency distribution of the time to the 1st occurrence of a category
 
       plot.variable[index] = variable;
       plot.viewpoint[index] = FIRST_OCCURRENCE;
@@ -1854,7 +1866,7 @@ void SequenceCharacteristics::plotable_write(MultiPlotSet &plot , int &index ,
     }
   }
 
-  // vue : lois empiriques du temps de retour dans une observation
+  // frequency distributions of the recurrence time in a category
 
   plot.variable[index] = variable;
   plot.viewpoint[index] = RECURRENCE_TIME;
@@ -1866,7 +1878,7 @@ void SequenceCharacteristics::plotable_write(MultiPlotSet &plot , int &index ,
   title << SEQ_label[SEQL_RECURRENCE_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTIONS];
   plot[index].title = title.str();
 
-  // calcul du temps maximum et de la frequence maximum
+  // computation of the maximum recurrence time and the maximum frequency
 
   nb_histo = 0;
   max_nb_value = 0;
@@ -1929,7 +1941,7 @@ void SequenceCharacteristics::plotable_write(MultiPlotSet &plot , int &index ,
   for (i = 0;i < nb_value;i++) {
     if (recurrence_time[i]->nb_element > 0) {
 
-      // vue : loi empirique du temps de retour dans une observation
+      // frequency distribution of the recurrence time in a category
 
       plot.variable[index] = variable;
       plot.viewpoint[index] = RECURRENCE_TIME;
@@ -1965,7 +1977,7 @@ void SequenceCharacteristics::plotable_write(MultiPlotSet &plot , int &index ,
     }
   }
 
-  // vue : lois empiriques du temps de sejour dans une observation
+  // frequency distributions of the sojourn time in a category
 
   plot.variable[index] = variable;
   plot.viewpoint[index] = SOJOURN_TIME;
@@ -1977,7 +1989,7 @@ void SequenceCharacteristics::plotable_write(MultiPlotSet &plot , int &index ,
   title << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTIONS];
   plot[index].title = title.str();
 
-  // calcul du temps maximum et de la frequence maximum
+  // computation of the maximum sojourn time and the maximum frequency
 
   nb_histo = 0;
   max_nb_value = 0;
@@ -2040,7 +2052,7 @@ void SequenceCharacteristics::plotable_write(MultiPlotSet &plot , int &index ,
   for (i = 0;i < nb_value;i++) {
     if (sojourn_time[i]->nb_element > 0) {
 
-      // vue : loi empirique du temps de sejour dans une observation
+      // frequency distribution of the sojourn time in a category
 
       plot.variable[index] = variable;
       plot.viewpoint[index] = SOJOURN_TIME;
@@ -2077,7 +2089,7 @@ void SequenceCharacteristics::plotable_write(MultiPlotSet &plot , int &index ,
 
     if ((initial_run) && (initial_run[i]->nb_element > 0)) {
 
-      // vue : loi empirique du temps de sejour dans la 1ere observation rencontree
+      // frequency distribution of the sojourn time in the first observed value
 
       plot.variable[index] = variable;
       plot.viewpoint[index] = SOJOURN_TIME;
@@ -2115,7 +2127,7 @@ void SequenceCharacteristics::plotable_write(MultiPlotSet &plot , int &index ,
 
     if (final_run[i]->nb_element > 0) {
 
-      // vue : loi empirique du temps de sejour dans la derniere observation rencontree
+      // frequency distribution of the sojourn time in the last observed value
 
       plot.variable[index] = variable;
       plot.viewpoint[index] = SOJOURN_TIME;
@@ -2152,7 +2164,7 @@ void SequenceCharacteristics::plotable_write(MultiPlotSet &plot , int &index ,
 
   if ((nb_run) && (nb_occurrence)) {
 
-    // vue : lois empiriques du nombre de series d'une observation
+    // frequency distributions of the number of runs of a category per sequence
 
     plot.variable[index] = variable;
     plot.viewpoint[index] = COUNTING;
@@ -2165,7 +2177,7 @@ void SequenceCharacteristics::plotable_write(MultiPlotSet &plot , int &index ,
           << STAT_label[STATL_FREQUENCY_DISTRIBUTIONS];
     plot[index].title = title.str();
 
-    // calcul du nombre de series maximum et de la frequence maximum
+    // computation of the maximum number of runs and the maximum frequency
 
     nb_histo = 0;
     max_nb_value = 0;
@@ -2225,7 +2237,7 @@ void SequenceCharacteristics::plotable_write(MultiPlotSet &plot , int &index ,
     }
     index++;
 
-    // vue : lois empiriques du nombre d'occurrences d'une observation
+    // frequency distributions of the number of occurrences of a category per sequence
 
     plot.variable[index] = variable;
     plot.viewpoint[index] = COUNTING;
@@ -2238,7 +2250,7 @@ void SequenceCharacteristics::plotable_write(MultiPlotSet &plot , int &index ,
           << STAT_label[STATL_FREQUENCY_DISTRIBUTIONS];
     plot[index].title = title.str();
 
-    // calcul du nombre d'occurrences maximum et de la frequence maximum
+    // computation of the maximum number of occurrences and the maximum frequency
 
     nb_histo = 0;
     max_nb_value = 0;
@@ -2301,7 +2313,7 @@ void SequenceCharacteristics::plotable_write(MultiPlotSet &plot , int &index ,
     for (i = 0;i < nb_value;i++) {
       if ((nb_run[i]->nb_element > 0) && (nb_occurrence[i]->nb_element > 0)) {
 
-        // vue : loi empirique du nombre de series d'une observation par sequence
+        // frequency distribution of the number of runs of a category per sequence
 
         plot.variable[index] = variable;
         plot.viewpoint[index] = COUNTING;
@@ -2335,7 +2347,7 @@ void SequenceCharacteristics::plotable_write(MultiPlotSet &plot , int &index ,
         nb_run[i]->plotable_frequency_write(plot[index][0]);
         index++;
 
-        // vue : loi empirique du nombre d'occurrences d'une observation par sequence
+        // frequency distribution of the number of occurrences of a category per sequence
 
         plot.variable[index] = variable;
         plot.viewpoint[index] = COUNTING;
@@ -2371,7 +2383,7 @@ void SequenceCharacteristics::plotable_write(MultiPlotSet &plot , int &index ,
       }
     }
 
-    // vue : loi empirique des longueurs des sequences
+    // sequence length frequency distribution
 
     plot.variable[index] = variable;
     plot.viewpoint[index] = COUNTING;

@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -52,11 +52,11 @@ namespace sequence_analysis {
 
 
 
-/*--------------------------------------------------------------*
- *
- *  Constructeur par defaut de la classe Sequences.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Default constructor of the Sequences class.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences::Sequences()
 
@@ -89,13 +89,14 @@ Sequences::Sequences()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the Sequences class.
  *
- *  Constructeur de la classe Sequences.
- *
- *  arguments : nombre de sequences, nombre de variables.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] inb_sequence number of sequences,
+ *  \param[in] inb_variable number of variables.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences::Sequences(int inb_sequence , int inb_variable)
 
@@ -155,16 +156,21 @@ Sequences::Sequences(int inb_sequence , int inb_variable)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Initialization of a Sequences object.
  *
- *  Initialisation d'un objet Sequences.
- *
- *  arguments : nombre de sequences, identificateurs des sequences,
- *              longueurs des sequences, identificateurs des vertex d'un MTG associe,
- *              type de parametre d'index, nombre de variables, type de chaque variable,
- *              flag copy of vertex identifiers, flag initialization.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] inb_sequence           number of sequences,
+ *  \param[in] iidentifier            sequence identifiers,
+ *  \param[in] ilength                sequence lengths,
+ *  \param[in] ivertex_identifier     vertex identifiers of the associated MTG,
+ *  \param[in] iindex_param_type      index parameter type,
+ *  \param[in] inb_variable           number of variables,
+ *  \param[in] itype                  variable types,
+ *  \param[in] vertex_identifier_copy flag copy of vertex identifiers,
+ *  \param[in] init_flag              flag initialization.
+ */
+/*--------------------------------------------------------------*/
 
 void Sequences::init(int inb_sequence , int *iidentifier , int *ilength ,
                      int **ivertex_identifier , index_parameter_type iindex_param_type ,
@@ -288,14 +294,17 @@ void Sequences::init(int inb_sequence , int *iidentifier , int *ilength ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Initialization of a Sequences object.
  *
- *  Initialisation d'un objet Sequences.
- *
- *  arguments : nombre de sequences, identificateurs des sequences,
- *              longueurs des sequences, nombre de variables, flag initialisation.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] inb_sequence number of sequences,
+ *  \param[in] iidentifier  sequence identifiers,
+ *  \param[in] ilength      sequence lengths,
+ *  \param[in] inb_variable number of variables,
+ *  \param[in] init_flag    flag initialization.
+ */
+/*--------------------------------------------------------------*/
 
 void Sequences::init(int inb_sequence , int *iidentifier , int *ilength ,
                      int inb_variable , bool init_flag)
@@ -369,16 +378,19 @@ void Sequences::init(int inb_sequence , int *iidentifier , int *ilength ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the Sequences class.
  *
- *  Constructeur de la classe Sequences.
- *
- *  arguments : nombre de sequences, identificateurs des sequences,
- *              longueurs des sequences, type de parametre d'index (TIME/POSITION),
- *              nombre de variables, type des variables,
- *              (parametres d'index et) sequences entieres.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] inb_sequence      number of sequences,
+ *  \param[in] iidentifier       sequence identifiers,
+ *  \param[in] ilength           sequence lengths,
+ *  \param[in] iindex_param_type index parameter type (TIME/POSITION),
+ *  \param[in] inb_variable      number of variables,
+ *  \param[in] itype             variable type,
+ *  \param[in] iint_sequence     (index parameters and) integer-valued sequences.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences::Sequences(int inb_sequence , int *iidentifier , int *ilength ,
                      index_parameter_type iindex_param_type , int inb_variable ,
@@ -441,14 +453,17 @@ Sequences::Sequences(int inb_sequence , int *iidentifier , int *ilength ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the Sequences class.
  *
- *  Constructeur de la classe Sequences.
- *
- *  arguments : nombre de sequences, identificateurs des sequences, longueurs des sequences,
- *              nombre de variables, sequences reelles.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] inb_sequence   number of sequences,
+ *  \param[in] iidentifier    sequence identifiers,
+ *  \param[in] ilength        sequence lengths,
+ *  \param[in] inb_variable   number of variables,
+ *  \param[in] ireal_sequence real-valued sequences.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences::Sequences(int inb_sequence , int *iidentifier , int *ilength ,
                      int inb_variable , double ***ireal_sequence)
@@ -484,17 +499,22 @@ Sequences::Sequences(int inb_sequence , int *iidentifier , int *ilength ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the Sequences class.
  *
- *  Constructeur de la classe Sequences.
- *
- *  arguments : nombre de sequences, identificateurs des sequences,
- *              longueurs des sequences, identificateurs des vertex d'un MTG associe,
- *              type du parametre d'index (TIME/POSITION),
- *              parametres d'index, nombre de variables, type des variables,
- *              sequences entieres, sequences reelles.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] inb_sequence       number of sequences,
+ *  \param[in] iidentifier        sequence identifiers,
+ *  \param[in] ilength            sequence lengths,
+ *  \param[in] ivertex_identifier vertex identifiers of the associated MTG,
+ *  \param[in] iindex_param_type  index parameter type (TIME/POSITION),
+ *  \param[in] iindex_parameter   index parameters,
+ *  \param[in] inb_variable       number of variables,
+ *  \param[in] itype              variable type,
+ *  \param[in] iint_sequence      integer-valued sequences,
+ *  \param[in] ireal_sequence     real-valued sequences.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences::Sequences(int inb_sequence , int *iidentifier , int *ilength ,
                      int **ivertex_identifier , index_parameter_type iindex_param_type ,
@@ -566,14 +586,16 @@ Sequences::Sequences(int inb_sequence , int *iidentifier , int *ilength ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the Sequences class.
  *
- *  Constructeur de la classe Sequences.
- *
- *  arguments : loi empirique des longueurs des sequences, nombre de variables,
- *              type de chaque variable, flag initialisation.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] ilength_distribution sequence length frequency distribution,
+ *  \param[in] inb_variable         number of variables,
+ *  \param[in] itype                variable types,
+ *  \param[in] init_flag            flag initialization.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences::Sequences(const FrequencyDistribution &ilength_distribution ,
                      int inb_variable , variable_nature *itype , bool init_flag)
@@ -669,13 +691,13 @@ Sequences::Sequences(const FrequencyDistribution &ilength_distribution ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Construction of a Sequences object from a RenewalData object.
  *
- *  Construction d'un objet Sequences a partir d'un objet RenewalData.
- *
- *  argument : reference sur un objet RenewalData.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] timev reference on a RenewalData object.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences::Sequences(const RenewalData &timev)
 
@@ -737,14 +759,15 @@ Sequences::Sequences(const RenewalData &timev)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the Sequences class.
  *
- *  Constructeur de la classe Sequences.
- *
- *  argument : reference sur un objet Sequences, indice de la variable,
- *             type de la variable selectionnee.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] seq      reference on a Sequences object,
+ *  \param[in] variable variable index,
+ *  \param[in] itype    selected variable type.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences::Sequences(const Sequences &seq , int variable , variable_nature itype)
 
@@ -885,14 +908,15 @@ Sequences::Sequences(const Sequences &seq , int variable , variable_nature itype
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the Sequences class.
  *
- *  Constructeur de la classe Sequences.
- *
- *  arguments : reference sur un objet Sequences, nombre de sequences,
- *              indices des sequences selectionnees.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] seq          reference on a Sequences object,
+ *  \param[in] inb_sequence number of sequences,
+ *  \param[in] index        selected sequence indices.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences::Sequences(const Sequences &seq , int inb_sequence , int *index)
 
@@ -1013,14 +1037,14 @@ Sequences::Sequences(const Sequences &seq , int inb_sequence , int *index)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Construction of a Sequences object adding auxiliary variables.
  *
- *  Construction d'un objet Sequences avec ajout de variables auxilliaires.
- *
- *  arguments : reference sur un objet Sequences, flags sur l'ajout
- *              des variables auxilliaires.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] seq       reference on a Sequences object,
+ *  \param[in] auxiliary flags on the addition of auxiliary variables.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences::Sequences(const Sequences &seq , bool *auxiliary)
 
@@ -1173,13 +1197,13 @@ Sequences::Sequences(const Sequences &seq , bool *auxiliary)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Copy of a Sequences object.
  *
- *  Copie d'un objet Sequences.
- *
- *  argument : reference sur un objet Sequences.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] seq reference on a Sequences object.
+ */
+/*--------------------------------------------------------------*/
 
 void Sequences::copy(const Sequences &seq)
 
@@ -1306,13 +1330,13 @@ void Sequences::copy(const Sequences &seq)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Copy of a Sequences object reversing the direction of sequences.
  *
- *  Copie d'un objet Sequences avec inversion du sens de parcours des sequences.
- *
- *  arguments : reference sur un objet Sequences.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] seq reference on a Sequences object.
+ */
+/*--------------------------------------------------------------*/
 
 void Sequences::reverse(const Sequences &seq)
 
@@ -1469,13 +1493,13 @@ void Sequences::reverse(const Sequences &seq)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Copy of a Sequences object adding a state variable.
  *
- *  Copie d'un objet Sequences avec ajout d'une variable d'etat.
- *
- *  argument : reference sur un objet Sequences.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] seq reference on a Sequences object.
+ */
+/*--------------------------------------------------------------*/
 
 void Sequences::add_state_variable(const Sequences &seq)
 
@@ -1616,14 +1640,14 @@ void Sequences::add_state_variable(const Sequences &seq)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Copy of a Sequences object transforming the implicit index parameters in
+ *         explicit index parameters.
  *
- *  Copie d'un objet Sequences avec transformation du parametre d'index implicite
- *  en parametre d'index explicite.
- *
- *  argument : reference sur un objet Sequences.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] seq reference on a Sequences object.
+ */
+/*--------------------------------------------------------------*/
 
 void Sequences::explicit_index_parameter(const Sequences &seq)
 
@@ -1648,13 +1672,13 @@ void Sequences::explicit_index_parameter(const Sequences &seq)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Copy of a Sequences object removing the index parameters.
  *
- *  Copie d'un objet Sequences avec suppression du parametre d'index.
- *
- *  argument : reference sur un objet Sequences.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] seq reference on a Sequences object.
+ */
+/*--------------------------------------------------------------*/
 
 void Sequences::remove_index_parameter(const Sequences &seq)
 
@@ -1754,13 +1778,14 @@ void Sequences::remove_index_parameter(const Sequences &seq)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor by copy of the Sequences class.
  *
- *  Constructeur par copie de la classe Sequences.
- *
- *  arguments : reference sur un objet Sequences, type de transformation.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] seq       reference on a Sequences object,
+ *  \param[in] transform type of transform.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences::Sequences(const Sequences &seq , sequence_transformation transform)
 
@@ -1785,11 +1810,11 @@ Sequences::Sequences(const Sequences &seq , sequence_transformation transform)
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Destruction des champs d'un objet Sequences.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Destruction of the data members of a Sequences object.
+ */
+/*--------------------------------------------------------------*/
 
 void Sequences::remove()
 
@@ -1859,11 +1884,11 @@ void Sequences::remove()
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Destructeur de la classe Sequences.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Destructor of the Sequences class.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences::~Sequences()
 
@@ -1872,13 +1897,15 @@ Sequences::~Sequences()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Assignment operator of the Sequences class.
  *
- *  Operateur d'assignement de la classe Sequences.
+ *  \param[in] seq reference on a Sequences object.
  *
- *  argument : reference sur un objet Sequences.
- *
- *--------------------------------------------------------------*/
+ *  \return        Sequences object.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences& Sequences::operator=(const Sequences &seq)
 
@@ -1892,13 +1919,16 @@ Sequences& Sequences::operator=(const Sequences &seq)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Extraction of the marginal frequency distribution for a positive integer-valued variable.
  *
- *  Extraction de la loi marginale empirique pour une variable entiere.
+ *  \param[in] error    reference on a StatError object,
+ *  \param[in] variable variable index.
  *
- *  arguments : reference sur un objet StatError, variable.
- *
- *--------------------------------------------------------------*/
+ *  \return             DiscreteDistributionData object.
+ */
+/*--------------------------------------------------------------*/
 
 DiscreteDistributionData* Sequences::extract(StatError &error , int variable) const
 
@@ -1939,13 +1969,15 @@ DiscreteDistributionData* Sequences::extract(StatError &error , int variable) co
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Construction of a Vectors object from a Sequences object.
  *
- *  Construction d'un object Vectors a partir d'un objet Sequences.
+ *  \param[in] index_variable flag index parameter variable.
  *
- *  argument : flag variable d'index.
- *
- *--------------------------------------------------------------*/
+ *  \return                   Vectors object.
+ */
+/*--------------------------------------------------------------*/
 
 Vectors* Sequences::build_vectors(bool index_variable) const
 
@@ -2042,14 +2074,19 @@ Vectors* Sequences::build_vectors(bool index_variable) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Extraction of global measures (length, time to the 1st occurrence of a value,
+ *         number of runs or occurrences of a value, mean, cumulative value) for each sequence.
  *
- *  Extraction de mesures globales (longueur, temps avant la 1ere occurrence
- *  d'une valeur, nombre de series/d'occurrences d'une valeur) par sequence.
+ *  \param[in] error    reference on a StatError object,
+ *  \param[in] pattern  measure type,
+ *  \param[in] variable variable index,
+ *  \param[in] value    value.
  *
- *  arguments : reference sur un objet StatError, type, variable, valeur.
- *
- *--------------------------------------------------------------*/
+ *  \return             Vectors object.
+ */
+/*--------------------------------------------------------------*/
 
 Vectors* Sequences::extract_vectors(StatError &error , sequence_pattern pattern ,
                                     int variable , int value) const
@@ -2230,7 +2267,7 @@ Vectors* Sequences::extract_vectors(StatError &error , sequence_pattern pattern 
     }
 
     case SOJOURN_TIME_PATTERN : {
-      if ((index_param_type == TIME) && (index_interval->variance > 0.)) {  // pour les suivis de croissance manguier
+      if ((index_param_type == TIME) && (index_interval->variance > 0.)) {  // for the mango growth follow-ups
         for (i = 0;i < nb_sequence;i++) {
           int_vector[i][0] = -1;
           if (int_sequence[i][variable][0] == value) {
@@ -2333,13 +2370,15 @@ Vectors* Sequences::extract_vectors(StatError &error , sequence_pattern pattern 
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Construction of a MarkovianSequences object from a Sequences object.
  *
- *  Construction d'un objet MarkovianSequences a partir d'un objet Sequences.
+ *  \param[in] error reference on a StatError object.
  *
- *  argument : reference sur un objet StatError.
- *
- *--------------------------------------------------------------*/
+ *  \return          MarkovianSequences object.
+ */
+/*--------------------------------------------------------------*/
 
 MarkovianSequences* Sequences::markovian_sequences(StatError &error) const
 
@@ -2406,14 +2445,17 @@ MarkovianSequences* Sequences::markovian_sequences(StatError &error) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Checking of (strictly) increasing index parameters within sequences.
  *
- *  Verification du caractere (strictement) croissant des parametres d'index.
+ *  \param[in] error         reference on a StatError object,
+ *  \param[in] strict        flag stricty increasing or not,
+ *  \param[in] pattern_label label.
  *
- *  arguments : reference sur un objet StatError, flag croissance strict ou non,
- *              label de l'objet.
- *
- *--------------------------------------------------------------*/
+ *  \return                  error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool Sequences::increasing_index_parameter_checking(StatError &error , bool strict ,
                                                     const char *pattern_label) const
@@ -2441,15 +2483,19 @@ bool Sequences::increasing_index_parameter_checking(StatError &error , bool stri
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Checking of (strictly) increasing sequences.
  *
- *  Verification du caractere (strictement) croissant des sequences
- *  pour une variable entiere.
+ *  \param[in] error          reference on a StatError object,
+ *  \param[in] variable       variable index,
+ *  \param[in] strict         flag stricty increasing or not,
+ *  \param[in] pattern_label  pattern label,
+ *  \param[in] variable_label variable label.
  *
- *  arguments : reference sur un objet StatError, indice de la variable,
- *              flag croissance strict ou non, labels de l'objet et de la variable.
- *
- *--------------------------------------------------------------*/
+ *  \return                   error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool Sequences::increasing_sequence_checking(StatError &error , int variable , bool strict ,
                                              const char *pattern_label , const char *variable_label) const
@@ -2500,13 +2546,16 @@ bool Sequences::increasing_sequence_checking(StatError &error , int variable , b
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Checking of a Sequences object.
  *
- *  Verification d'un objet Sequences.
+ *  \param[in] error         reference on a StatError object,
+ *  \param[in] pattern_label label.
  *
- *  arguments : reference sur un objet StatError, label.
- *
- *--------------------------------------------------------------*/
+ *  \return                  error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool Sequences::check(StatError &error , const char *pattern_label)
 
@@ -2555,15 +2604,20 @@ bool Sequences::check(StatError &error , const char *pattern_label)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Extraction of a TimeEvents object from a Sequences object.
  *
- *  Extraction d'un objet TimeEvents a partir d'un objet Sequences.
+ *  \param[in] error         reference on a StatError object,
+ *  \param[in] variable      variable index,
+ *  \param[in] begin_date    begin date,
+ *  \param[in] end_date      end date,
+ *  \param[in] previous_date previous date,
+ *  \param[in] next_date     next date.
  *
- *  arguments : reference sur un objet StatError, indice de la variable,
- *              nombre d'evenements, dates de debut et de fin,
- *              dates precedente et suivante.
- *
- *--------------------------------------------------------------*/
+ *  \return                  TimeEvents object.
+ */
+/*--------------------------------------------------------------*/
 
 TimeEvents* Sequences::extract_time_events(StatError &error , int variable ,
                                            int begin_date , int end_date ,
@@ -2688,14 +2742,18 @@ TimeEvents* Sequences::extract_time_events(StatError &error , int variable ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Extraction of a RenewalData object from a Sequences object.
  *
- *  Extraction d'un objet RenewalData a partir d'un objet Sequences.
+ *  \param[in] error                 reference on a StatError object,
+ *  \param[in] variable              variable index,
+ *  \param[in] begin_index_parameter begin index parameter.
+ *  \param[in] end_index_parameter   end index parameter.
  *
- *  arguments : reference sur un objet StatError, indice de la variable,
- *              nombre d'evenements, index de debut et de fin.
- *
- *--------------------------------------------------------------*/
+ *  \return                          RenewalData object.
+ */
+/*--------------------------------------------------------------*/
 
 RenewalData* Sequences::extract_renewal_data(StatError &error , int variable ,
                                              int begin_index_parameter , int end_index_parameter) const
@@ -2786,8 +2844,8 @@ RenewalData* Sequences::extract_renewal_data(StatError &error , int variable ,
       }
     }
 
-    // construction des echantillons {temps, nombre d'evenements, frequence} et
-    // des lois empiriques du temps d'observation et du nombre d'evenements
+    // construction of the triplets {observation period, number of events, frequency}, of
+    // the observation period frequency distribution and the number of events frequency distributions
 
     ptime -= nb_element;
     pnb_event -= nb_element;
@@ -2796,9 +2854,9 @@ RenewalData* Sequences::extract_renewal_data(StatError &error , int variable ,
     delete [] ptime;
     delete [] pnb_event;
 
-    // extraction des caracteristiques des lois empiriques des intervalles de temps entre 2 evenements,
-    // des intervalles de temps entre 2 evenements compris entre les 2 dates d'observation,
-    // des intervalles de temps apres le dernier evenement, des intervalles de temps residuel
+    // extraction of the characteristics of the inter-event frequency distribution,
+    // the frequency distribution of time intervals between events within the observation period,
+    // the backward and forward recurrence time frequency distributions,
 
     timev->within->nb_value_computation();
     timev->within->offset_computation();

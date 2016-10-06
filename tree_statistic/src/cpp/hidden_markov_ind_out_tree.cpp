@@ -1205,7 +1205,7 @@ Stat_trees::hidden_markov_ind_out_tree_ascii_read(StatError& error,
                      ostringstream correction_message;
                      correction_message << STAT_TREES_word[TREESTATW_HIDDEN_MARKOV_IND_OUT_TREE] << " or "
                                         << STAT_TREES_word[TREESTATW_EQUILIBRIUM_HIDDEN_MARKOV_IND_OUT_TREE];
-                     error.correction_update(STAT_parsing[STATP_KEY_WORD], (correction_message.str()).c_str(), line);
+                     error.correction_update(STAT_parsing[STATP_KEYWORD], (correction_message.str()).c_str(), line);
                   }
             }
            i++;

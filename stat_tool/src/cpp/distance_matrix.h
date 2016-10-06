@@ -53,7 +53,7 @@ namespace stat_tool {
 
   const int ASCII_NB_INDIVIDUAL = 10;    // maximum number of individuals for displaying the results of
                                          // individual alignments
-  const double PLOT_YMARGIN = 0.1;       // Y margin for the plotting of distances
+  const double PLOT_YMARGIN = 0.1;       // y axis margin for the plotting of distances
 
   const double DISTANCE_ROUNDNESS = 1.e-12;  // distance rounding
 
@@ -96,11 +96,13 @@ namespace stat_tool {
  *  Class definition
  */
 
+
   class Clusters;
   class Dendrogram;
 
+  /// \brief Distance matrix
 
-  class DistanceMatrix : public StatInterface {  // distance matrix
+  class DistanceMatrix : public StatInterface {
 
     friend class Clusters;
     friend class Dendrogram;
@@ -110,23 +112,23 @@ namespace stat_tool {
 
   protected :
 
-    int nb_row;             // number of rows
-    int nb_column;          // number of columns
-    int *row_identifier;    // row identifiers
-    int *column_identifier;  // colum identifiers
-    double **distance;      // distances
-    int **length;           // lengths
-    double **deletion_distance;  // deletion distances
-    int **nb_deletion;      // numbers of deletions
-    double **insertion_distance;  // insertion distances
-    int **nb_insertion;     // numbers of insertions
-    int **nb_match;         // numbers of matches
-    double **substitution_distance;  // substitution distances
-    int **nb_substitution;  // numbers of substitutions
-    double **transposition_distance;  // transposition distances
-    int **nb_transposition;  // numbers of transpositions
-    int label_size;         // label size
-    char *label;            // label
+    int nb_row;             ///< number of rows
+    int nb_column;          ///< number of columns
+    int *row_identifier;    ///< row identifiers
+    int *column_identifier;  ///< column identifiers
+    double **distance;      ///< distances
+    int **length;           ///< lengths
+    double **deletion_distance;  ///< deletion distances
+    int **nb_deletion;      ///< numbers of deletions
+    double **insertion_distance;  ///< insertion distances
+    int **nb_insertion;     ///< numbers of insertions
+    int **nb_match;         ///< numbers of matches
+    double **substitution_distance;  ///< substitution distances
+    int **nb_substitution;  ///< numbers of substitutions
+    double **transposition_distance;  ///< transposition distances
+    int **nb_transposition;  ///< numbers of transpositions
+    int label_size;         ///< label size
+    char *label;            ///< label
 
     void copy(const DistanceMatrix &dist_matrix , matrix_transform transform = COPY);
     void remove();
@@ -239,7 +241,9 @@ namespace stat_tool {
 
 
 
-  class Clusters : public DistanceMatrix {  // partitioning clustering results
+  /// \brief Partitioning clustering results
+
+  class Clusters : public DistanceMatrix {
 
     friend class DistanceMatrix;
 
@@ -248,13 +252,13 @@ namespace stat_tool {
 
   private :
 
-    DistanceMatrix *distance_matrix;  // pointer on a DistanceMatrix object
-    int nb_pattern;         // number of individuals
-    int nb_cluster;         // number of clusters
-    int *cluster_nb_pattern;  // cluster sizes
-    int *assignment;        // individual assignments
-    double **pattern_distance;  // individual-cluster distances
-    int **pattern_length;   // individual lengths
+    DistanceMatrix *distance_matrix;  ///< pointer on a DistanceMatrix object
+    int nb_pattern;         ///< number of individuals
+    int nb_cluster;         ///< number of clusters
+    int *cluster_nb_pattern;  ///< cluster sizes
+    int *assignment;        ///< individual assignments
+    double **pattern_distance;  ///< individual-cluster distances
+    int **pattern_length;   ///< individual lengths
 
     void copy(const Clusters &clusters);
     void remove();
@@ -320,7 +324,9 @@ namespace stat_tool {
 
 
 
-  class Dendrogram : public StatInterface {  // hierarchical clustering results
+  /// \brief Hierarchical clustering results
+
+  class Dendrogram : public StatInterface {
 
     friend class DistanceMatrix;
 
@@ -329,18 +335,18 @@ namespace stat_tool {
 
   private :
 
-    DistanceMatrix *distance_matrix;  // pointer on a DistanceMatrix object
-    cluster_scale scale;    // scale for representing the distances between clusters
-    int nb_cluster;         // number of clusters
-    int *cluster_nb_pattern;  // cluster sizes
-    int **cluster_pattern;  // cluster compositions
-    int *parent;            // parent node
-    int **child;            // child nodes
-    double *child_distance;  // distances between the two merged clusters
-    double *within_cluster_distance;  // within-cluster distances
-    double *between_cluster_distance;  // between-cluster distances
-    double *max_within_cluster_distance;  // diameters
-    double *min_between_cluster_distance;  // separations
+    DistanceMatrix *distance_matrix;  ///< pointer on a DistanceMatrix object
+    cluster_scale scale;    ///< scale for representing the distances between clusters
+    int nb_cluster;         ///< number of clusters
+    int *cluster_nb_pattern;  ///< cluster sizes
+    int **cluster_pattern;  ///< cluster compositions
+    int *parent;            ///< parent node
+    int **child;            ///< child nodes
+    double *child_distance;  ///< distances between the two merged clusters
+    double *within_cluster_distance;  ///< within-cluster distances
+    double *between_cluster_distance;  ///< between-cluster distances
+    double *max_within_cluster_distance;  ///< diameters
+    double *min_between_cluster_distance;  ///< separations
 
     void copy(const Dendrogram &dendrogram);
     void remove();

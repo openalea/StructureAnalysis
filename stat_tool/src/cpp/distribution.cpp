@@ -421,9 +421,9 @@ Distribution::~Distribution()
 /**
  *  \brief Assignment operator of the Distribution class.
  *
- *  \param[in]  dist reference on a Distribution object.
+ *  \param[in] dist reference on a Distribution object.
  *
- *  \param[out] this Distribution object.
+ *  \return         Distribution object.
  */
 /*--------------------------------------------------------------*/
 
@@ -445,9 +445,9 @@ Distribution& Distribution::operator=(const Distribution &dist)
 /**
  *  \brief Equality operator of the Distribution class.
  *
- *  \param[in]  dist   reference on a Distribution object.
+ *  \param[in] dist reference on a Distribution object.
  *
- *  \param[out] status equality or not of the discrete distributions.
+ *  \return         equality or not of the discrete distributions.
  */
 /*--------------------------------------------------------------*/
 
@@ -480,7 +480,7 @@ bool Distribution::operator==(const Distribution &dist) const
  *  \brief Writing of the characteristics of a discrete distribution.
  *
  *  \param[in,out] os           stream,
- *  \param[in]     shape        flag writing of shape descriptors,
+ *  \param[in]     shape        flag on the writing of the shape characteristics,
  *  \param[in]     comment_flag flag comment.
  */
 /*--------------------------------------------------------------*/
@@ -511,11 +511,11 @@ ostream& Distribution::ascii_characteristic_print(ostream &os , bool shape , boo
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Computation of the column width of an integer value.
+ *  \brief Computation of the column width for an integer value.
  *
- *  \param[in]  value value.
+ *  \param[in] value value.
  *
- *  \param[out]       column width.
+ *  \return          column width.
  */
 /*--------------------------------------------------------------*/
 
@@ -530,12 +530,12 @@ int column_width(int value)
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Computation of the column width of integer values.
+ *  \brief Computation of the column width for integer values.
  *
- *  \param[in]  min_value minimum value,
- *  \param[in]  max_value maximum value.
+ *  \param[in] min_value minimum value,
+ *  \param[in] max_value maximum value.
  *
- *  \param[out] max_width column width.
+ *  \return              column width.
  */
 /*--------------------------------------------------------------*/
 
@@ -566,13 +566,13 @@ int column_width(int min_value , int max_value)
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Computation of the column width of real values.
+ *  \brief Computation of the column width for real values.
  *
- *  \param[in]  nb_value  number of values,
- *  \param[in]  value     pointer on the values,
- *  \param[in]  scale     scaling factor.
+ *  \param[in] nb_value number of values,
+ *  \param[in] value    pointer on the values,
+ *  \param[in] scale    scaling factor.
  *
- *  \param[out] max_width column width.
+ *  \return             column width.
  */
 /*--------------------------------------------------------------*/
 
@@ -598,7 +598,7 @@ int column_width(int nb_value , const double *value , double scale)
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Writing of a discrete distribution and of frequency distribution.
+ *  \brief Writing of a discrete distribution and a frequency distribution.
  *
  *  \param[in,out] os            stream,
  *  \param[in]     comment_flag  flag comment,
@@ -707,7 +707,7 @@ ostream& Distribution::ascii_print(ostream &os , bool comment_flag , bool cumul_
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Writing of a family of a discrete distributions and a frequency distribution.
+ *  \brief Writing of a family of discrete distributions and a frequency distribution.
  *
  *  \param[in,out] os           stream,
  *  \param[in]     nb_dist      number of distributions,
@@ -755,7 +755,7 @@ ostream& Distribution::ascii_print(ostream &os , int nb_dist , const Distributio
     }
   }
 
-  // computation of the column width
+  // computation of the column widths
 
   width[0] = column_width(ascii_nb_value - 1);
   if (histo) {
@@ -850,7 +850,7 @@ ostream& Distribution::ascii_print(ostream &os , int nb_dist , const Distributio
  *  \brief Writing of the characteristics of a discrete distribution at the spreadsheet format.
  *
  *  \param[in,out] os    stream,
- *  \param[in]     shape flag writing of the shape descriptors.
+ *  \param[in]     shape flag on the writing of the shape characteristics.
  */
 /*--------------------------------------------------------------*/
 
@@ -1092,9 +1092,9 @@ ostream& Distribution::spreadsheet_print(ostream &os , int nb_dist , const Distr
 /**
  *  \brief Computation of the number of plotted values (Gnuplot output).
  *
- *  \param[in]  histo         pointer a frequency distribution,
+ *  \param[in] histo pointer a frequency distribution.
  *
- *  \param[out] plot_nb_value number of plotted values.
+ *  \return          number of plotted values.
  */
 /*--------------------------------------------------------------*/
 
@@ -1124,11 +1124,11 @@ int Distribution::plot_nb_value_computation(const FrequencyDistribution *histo) 
 /**
  *  \brief Writing of a discrete distribution at the Gnuplot format.
  *
- *  \param[in]  path          file path,
- *  \param[in]  concentration pointer on the concentration function,
- *  \param[in]  scale         scaling factor,
+ *  \param[in] path          file path,
+ *  \param[in] concentration pointer on the concentration function,
+ *  \param[in] scale         scaling factor.
  *
- *  \param[out] status        error status.
+ *  \return                  error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -1170,10 +1170,10 @@ bool Distribution::plot_print(const char *path , double *concentration ,
  *  \brief Writing of a discrete distribution and a frequency distribution
  *         at the Gnuplot format.
  *
- *  \param[in]  path   file path,
- *  \param[in]  histo  pointer on a frequency distribution,
+ *  \param[in] path  file path,
+ *  \param[in] histo pointer on a frequency distribution.
  *
- *  \param[out] status error status.
+ *  \return          error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -1223,15 +1223,15 @@ bool Distribution::plot_print(const char *path , const FrequencyDistribution *hi
  *  \brief Writing of a family of a discrete distributions and a family of
  *         frequency distributions at the Gnuplot format.
  *
- *  \param[in]  path          file path,
- *  \param[in]  nb_dist       number of distributions,
- *  \param[in]  dist          pointer on the discrete distributions,
- *  \param[in]  scale         scaling factors,
- *  \param[in]  dist_nb_value number of values of the distributions,
- *  \param[in]  nb_histo      number of frequency distributions,
- *  \param[in]  histo         pointer on the frequency distributions,
+ *  \param[in] path          file path,
+ *  \param[in] nb_dist       number of distributions,
+ *  \param[in] dist          pointer on the discrete distributions,
+ *  \param[in] scale         scaling factors,
+ *  \param[in] dist_nb_value number of values of the distributions,
+ *  \param[in] nb_histo      number of frequency distributions,
+ *  \param[in] histo         pointer on the frequency distributions.
  *
- *  \param[out] status        error status.
+ *  \return                  error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -1324,13 +1324,13 @@ bool plot_print(const char *path , int nb_dist , const Distribution **dist ,
  *  \brief Writing of family of cumulative distribution functions for their matching
  *         at the Gnuplot format
  *
- *  \param[in]  path     file path,
- *  \param[in]  nb_cumul number of cumulative distribution functions,
- *  \param[in]  offset   pointer on the lowest values,
- *  \param[in]  nb_value pointer on the number of values,
- *  \param[in]  cumul    pointer on the cumulative distribution functions,
+ *  \param[in] path     file path,
+ *  \param[in] nb_cumul number of cumulative distribution functions,
+ *  \param[in] offset   pointer on the lowest values,
+ *  \param[in] nb_value pointer on the number of values,
+ *  \param[in] cumul    pointer on the cumulative distribution functions.
  *
- *  \param[out] status   error status.
+ *  \return             error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -1382,11 +1382,11 @@ bool cumul_matching_plot_print(const char *path , int nb_cumul , int *offset ,
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Extraction of a file name label.
+ *  \brief Extraction of a file name label (Gnuplot output).
  *
- *  \param[in]  file_name  file name,
+ *  \param[in] file_name file name.
  *
- *  \param[out] pfile_name label.
+ *  \return              label.
  */
 /*--------------------------------------------------------------*/
 
@@ -1421,13 +1421,13 @@ char* label(const char *file_name)
  *         - matching of cumulative distribution functions,
  *         - concentration curves.
  *
- *  \param[in]  error   reference on a StatError object,
- *  \param[in]  prefix  file prefix,
- *  \param[in]  nb_dist number of distributions,
- *  \param[in]  idist   pointer on the discrete distributions,
- *  \param[in]  title   figure title,
+ *  \param[in] error   reference on a StatError object,
+ *  \param[in] prefix  file prefix,
+ *  \param[in] nb_dist number of distributions,
+ *  \param[in] idist   pointer on the discrete distributions,
+ *  \param[in] title   figure title.
  *
- *  \param[out] status  error status.
+ *  \return            error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -1463,7 +1463,7 @@ bool Distribution::plot_write(StatError &error , const char *prefix , int nb_dis
       dist[i] = idist[i - 1];
     }
 
-    // writing of data files
+    // writing of the data files
 
     data_file_name = new ostringstream[nb_dist + 1];
 
@@ -1747,7 +1747,7 @@ void Distribution::plotable_mass_write(SinglePlot &plot , double scale) const
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Writing of the cumulative distribution function of a discrete distribution.
+ *  \brief Writing of the cumulative discrete distribution.
  *
  *  \param[in] plot reference on a SinglePlot object.
  */
@@ -1828,11 +1828,11 @@ void Distribution::plotable_concentration_write(SinglePlot &plot) const
  *         - matching of cumulative distribution functions,
  *         - concentration curves.
  *
- *  \param[in]  error    reference on a StatError object,
- *  \param[in]  nb_dist  number of distributions,
- *  \param[in]  idist    pointer on the discrete distributions,
+ *  \param[in] error   reference on a StatError object,
+ *  \param[in] nb_dist number of distributions,
+ *  \param[in] idist   pointer on the discrete distributions.
  *
- *  \param[out] plot_set plots.
+ *  \return            MultiPlotSet object.
  */
 /*--------------------------------------------------------------*/
 
@@ -2060,7 +2060,7 @@ MultiPlotSet* Distribution::get_plotable_distributions(StatError &error , int nb
 /**
  *  \brief Plot of a discrete distribution.
  *
- *  \param[out]        plots.
+ *  \return MultiPlotSet object.
  */
 /*--------------------------------------------------------------*/
 
@@ -2111,10 +2111,10 @@ ostream& Distribution::survival_ascii_write(ostream &os) const
  *  \brief Computation ofs survival rates from a discrete distribution and
  *         writing of the result in a file.
  *
- *  \param[in]  error  reference on a StatError object,
- *  \param[in]  path   file path,
+ *  \param[in] error reference on a StatError object,
+ *  \param[in] path  file path.
  *
- *  \param[out] status error status.
+ *  \return          error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -2146,10 +2146,10 @@ bool Distribution::survival_ascii_write(StatError &error , const string path) co
  *  \brief Computation of survival rates from a discrete distribution and
  *         writing of the result in a file at the spreadsheet format.
  *
- *  \param[in]  error  reference on a StatError object,
- *  \param[in]  path   file path,
+ *  \param[in] error reference on a StatError object,
+ *  \param[in] path  file path.
  *
- *  \param[out] status error status.
+ *  \return          error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -2195,10 +2195,10 @@ bool Distribution::survival_spreadsheet_write(StatError &error , const string pa
  *  \brief Writing of a discrete distribution and the associated survivor function
  *         at the Gnuplot format.
  *
- *  \param[in]  path     file path,
- *  \param[in]  survivor pointer on la survivor function,
+ *  \param[in] path     file path,
+ *  \param[in] survivor pointer on the survivor function.
  *
- *  \param[out] status    error status.
+ *  \return             error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -2227,11 +2227,11 @@ bool Distribution::survival_plot_print(const char *path , double *survivor) cons
  *  \brief Computation of the survival rates from a discrete distribution and
  *         plot of the result using Gnuplot.
  *
- *  \param[in]  error  reference on a StatError object,
- *  \param[in]  prefix file prefix,
- *  \param[in]  title  figure title,
+ *  \param[in] error  reference on a StatError object,
+ *  \param[in] prefix file prefix,
+ *  \param[in] title  figure title.
  *
- *  \param[out] status error status.
+ *  \return           error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -2387,9 +2387,9 @@ void Distribution::plotable_survivor_write(SinglePlot &plot) const
  *  \brief Computation of survival rates from a discrete distribution and
  *         plot of the result.
  *
- *  \param[in]  error    reference on a StatError object,
+ *  \param[in] error reference on a StatError object.
  *
- *  \param[out] plot_set plots.
+ *  \return          MultiPlotSet object.
  */
 /*--------------------------------------------------------------*/
 
@@ -2586,7 +2586,7 @@ void Distribution::offset_computation()
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Computation of the probability at the mode of the distribution.
+ *  \brief Extraction of the probability at the mode of the distribution.
  */
 /*--------------------------------------------------------------*/
 
@@ -2659,7 +2659,7 @@ void Distribution::variance_computation()
 /**
  *  \brief Computation of the mean absolute deviation of a discrete distribution.
  *
- *  \param[out] mean_absolute_deviation mean absolute deviation.
+ *  \return mean absolute deviation.
  */
 /*--------------------------------------------------------------*/
 
@@ -2690,7 +2690,7 @@ double Distribution::mean_absolute_deviation_computation() const
 /**
  *  \brief Computation of the coefficient of skewness of a discrete distribution.
  *
- *  \param[out] skewness coefficient of skewness.
+ *  \return coefficient of skewness.
  */
 /*--------------------------------------------------------------*/
 
@@ -2722,7 +2722,7 @@ double Distribution::skewness_computation() const
  *  \brief Computation of the excess kurtosis of a discrete distribution:
  *         excess kurtosis = coefficient of kurtosis - 3.
  *
- *  \param[out] kurtosis excess kurtosis.
+ *  \return excess kurtosis.
  */
 /*--------------------------------------------------------------*/
 
@@ -2756,7 +2756,7 @@ double Distribution::kurtosis_computation() const
 /**
  *  \brief Computation of the information quantity of a discrete distribution.
  *
- *  \param[out] information information quantity.
+ *  \return information quantity.
  */
 /*--------------------------------------------------------------*/
 
@@ -2790,7 +2790,7 @@ double Distribution::information_computation() const
 /**
  *  \brief Computation of the sum of squared first-order differences.
  *
- *  \param[out] first_difference_norm sum of squared first-order differences.
+ *  \return sum of squared first-order differences.
  */
 /*--------------------------------------------------------------*/
 
@@ -2817,7 +2817,7 @@ double Distribution::first_difference_norm_computation() const
 /**
  *  \brief Computation of the sum of squared second-order differences.
  *
- *  \param[out] second_difference_norm sum of squared second-order differences.
+ *  \return sum of squared second-order differences.
  */
 /*--------------------------------------------------------------*/
 
@@ -2893,6 +2893,8 @@ void Distribution::cumul_computation()
 /*--------------------------------------------------------------*/
 /**
  *  \brief Computation of the survivor function of a discrete distribution.
+ *
+ *  \return survivor function.
  */
 /*--------------------------------------------------------------*/
 
@@ -2919,6 +2921,8 @@ double* Distribution::survivor_function_computation() const
 /*--------------------------------------------------------------*/
 /**
  *  \brief Computation of the concentration function of a discrete distribution.
+ *
+ *  \return concentration function.
  */
 /*--------------------------------------------------------------*/
 
@@ -2952,6 +2956,8 @@ double* Distribution::concentration_function_computation() const
 /*--------------------------------------------------------------*/
 /**
  *  \brief Computation of the coefficient of concentration of a discrete distribution.
+ *
+ *  \return coefficient of concentration.
  */
 /*--------------------------------------------------------------*/
 
@@ -3001,6 +3007,8 @@ double Distribution::concentration_computation() const
 /*--------------------------------------------------------------*/
 /**
  *  \brief Computation of the distance between 2 discrete distributions (1 - overlap).
+ *
+ *  \return overlap distance.
  */
 /*--------------------------------------------------------------*/
 
@@ -3022,7 +3030,7 @@ double Distribution::overlap_distance_computation(const Distribution &dist) cons
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Computation the log-probability mass function.
+ *  \brief Computation of the log-probability mass function.
  *
  *  \param[in] nb_value number of values,
  *  \param[in] pmass    pointer on the probability mass function,

@@ -129,15 +129,15 @@ Mixture::Mixture(int inb_component , int inb_output_process , int *nb_value)
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Constructor of the Mixture class (univariate gamma, inverse gaussien or gaussien with tied parameters).
+ *  \brief Constructor of the Mixture class (univariate gamma, inverse Gaussian or Gaussian with tied parameters).
  *
  *  \param[in] inb_component      number of components,
- *  \param[in] ident              component identifiers (GAMMA / INVERSE_GAUSSIAN / GAUSSIAN),
+ *  \param[in] ident              component identifiers,
  *  \param[in] mean               mean of the 1st component,
- *  \param[in] standard_deviation shape parameter (GAMMA) / scale parameter (INVERSE_GAUSSIAN) /
- *  \param[in]                    standard deviation (GAUSSIAN) of the 1st component,
+ *  \param[in] standard_deviation shape parameter (gamma) / scale parameter (inverse Gaussian) /
+ *  \param[in]                    standard deviation (Gaussian) of the 1st component,
  *  \param[in] tied_mean          flag tied means,
- *  \param[in] variance_factor    type of link between the variances (CONVOLUTION_FACTOR / SCALING_FACTOR).
+ *  \param[in] variance_factor    type of link between the variances (CONVOLUTION_FACTOR/SCALING_FACTOR).
  */
 /*--------------------------------------------------------------*/
 
@@ -407,9 +407,9 @@ Mixture::~Mixture()
 /**
  *  \brief Assignment operator of the Mixture class.
  *
- *  \param[in]  mixt reference on a Mixture object,
+ *  \param[in] mixt reference on a Mixture object.
  *
- *  \param[out] this Mixture object.
+ *  \return         Mixture object.
  */
 /*--------------------------------------------------------------*/
 
@@ -429,11 +429,11 @@ Mixture& Mixture::operator=(const Mixture &mixt)
 /**
  *  \brief Extraction of a discrete parametric component.
  *
- *  \param[in]  error    reference on a StatError object,
- *  \param[in]  variable variable index,
- *  \param[in]  index    component index,
+ *  \param[in] error    reference on a StatError object,
+ *  \param[in] variable variable index,
+ *  \param[in] index    component index.
  *
- *  \param[out] dist     discrete parametric component.
+ *  \return             DiscreteParametricModel object.
  */
 /*--------------------------------------------------------------*/
 
@@ -522,11 +522,11 @@ DiscreteParametricModel* Mixture::extract(StatError &error , int variable , int 
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Extraction of the data part of a Mixture object.
+ *  \brief Extraction of the MixtureData object included in a Mixture object.
  *
- *  \param[in]  error reference on a StatError object,
+ *  \param[in] error reference on a StatError object.
  *
- *  \param[out] vec   data corresponding to a mixture of distributions.
+ *  \return          MixtureData object.
  */
 /*--------------------------------------------------------------*/
 
@@ -562,9 +562,9 @@ MixtureData* Mixture::extract_data(StatError &error) const
 /**
  *  \brief Application of a threshold on the parameters of a multivariate mixture.
  *
- *  \param[in]  min_probability minimum probability,
+ *  \param[in] min_probability minimum probability.
  *
- *  \param[out] mixt            Mixture object.
+ *  \return                    Mixture object.
  */
 /*--------------------------------------------------------------*/
 
@@ -591,11 +591,11 @@ Mixture* Mixture::thresholding(double min_probability) const
 /**
  *  \brief Construction of a Mixture object from a file.
  *
- *  \param[in]  error           reference on a StatError object,
- *  \param[in]  path            file path,
- *  \param[in]  cumul_threshold threshold on the cumulative distribution function,
+ *  \param[in] error           reference on a StatError object,
+ *  \param[in] path            file path,
+ *  \param[in] cumul_threshold threshold on the cumulative distribution function.
  *
- *  \param[out] mixt            Mixture object.
+ *  \return                    Mixture object.
  */
 /*--------------------------------------------------------------*/
 
@@ -649,12 +649,12 @@ Mixture* Mixture::ascii_read(StatError &error , const string path , double cumul
       while (!((token = next()).isNull())) {
         switch (i) {
 
-        // test MIXTURE key word
+        // test MIXTURE keyword
 
         case 0 : {
           if (token != STAT_word[STATW_MIXTURE]) {
             status = false;
-            error.correction_update(STAT_parsing[STATP_KEY_WORD] , STAT_word[STATW_MIXTURE] , line , i + 1);
+            error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_MIXTURE] , line , i + 1);
           }
           break;
         }
@@ -674,12 +674,12 @@ Mixture* Mixture::ascii_read(StatError &error , const string path , double cumul
           break;
         }
 
-        // test COMPONENTS key word
+        // test COMPONENTS keyword
 
         case 2 : {
           if (token != STAT_word[STATW_COMPONENTS]) {
             status = false;
-            error.correction_update(STAT_parsing[STATP_KEY_WORD] , STAT_word[STATW_COMPONENTS] , line , i + 1);
+            error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_COMPONENTS] , line , i + 1);
           }
           break;
         }
@@ -727,12 +727,12 @@ Mixture* Mixture::ascii_read(StatError &error , const string path , double cumul
         if (read_line == 0) {
           while (!((token = next()).isNull())) {
 
-            // test WEIGHTS key word
+            // test WEIGHTS keyword
 
             if (i == 0) {
               if (token != STAT_word[STATW_WEIGHTS]) {
                 status = false;
-                error.correction_update(STAT_parsing[STATP_KEY_WORD] , STAT_word[STATW_WEIGHTS] , line);
+                error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_WEIGHTS] , line);
               }
             }
 
@@ -841,12 +841,12 @@ Mixture* Mixture::ascii_read(StatError &error , const string path , double cumul
               break;
             }
 
-            // test OUTPUT_PROCESS(ES) key word
+            // test OUTPUT_PROCESS(ES) keyword
 
             case 1 : {
               if (token != STAT_word[nb_output_process == 1 ? STATW_OUTPUT_PROCESS : STATW_OUTPUT_PROCESSES]) {
                 status = false;
-                error.correction_update(STAT_parsing[STATP_KEY_WORD] ,
+                error.correction_update(STAT_parsing[STATP_KEYWORD] ,
                                         STAT_word[nb_output_process == 1 ? STATW_OUTPUT_PROCESS : STATW_OUTPUT_PROCESSES] , line , i + 1);
               }
               break;
@@ -901,7 +901,7 @@ Mixture* Mixture::ascii_read(StatError &error , const string path , double cumul
             while (!((token = next()).isNull())) {
               switch (i) {
 
-              // test OUTPUT_PROCESS key word
+              // test OUTPUT_PROCESS keyword
 
               case 0 : {
                 if (token == STAT_word[STATW_OUTPUT_PROCESS]) {
@@ -909,7 +909,7 @@ Mixture* Mixture::ascii_read(StatError &error , const string path , double cumul
                 }
                 else {
                   status = false;
-                  error.correction_update(STAT_parsing[STATP_KEY_WORD] , STAT_word[STATW_OUTPUT_PROCESS] , line , i + 1);
+                  error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_OUTPUT_PROCESS] , line , i + 1);
                 }
                 break;
               }
@@ -939,7 +939,7 @@ Mixture* Mixture::ascii_read(StatError &error , const string path , double cumul
                 break;
               }
 
-              // test CATEGORICAL/DISCRETE_PARAMETRIC/CONTINUOUS_PARAMETRIC key word
+              // test CATEGORICAL/DISCRETE_PARAMETRIC/CONTINUOUS_PARAMETRIC keyword
 
               case 3 : {
                 if ((token == STAT_word[STATW_CATEGORICAL]) ||
@@ -960,7 +960,7 @@ Mixture* Mixture::ascii_read(StatError &error , const string path , double cumul
                   correction_message << STAT_word[STATW_CATEGORICAL] << " or "
                                      << STAT_word[STATW_DISCRETE_PARAMETRIC] << " or "
                                      << STAT_word[STATW_CONTINUOUS_PARAMETRIC];
-                  error.correction_update(STAT_parsing[STATP_KEY_WORD] , (correction_message.str()).c_str() , line , i + 1);
+                  error.correction_update(STAT_parsing[STATP_KEYWORD] , (correction_message.str()).c_str() , line , i + 1);
                 }
                 break;
               }
@@ -1374,11 +1374,11 @@ ostream& Mixture::ascii_write(ostream &os , bool exhaustive) const
 /**
  *  \brief Writing of a Mixture object in a file.
  *
- *  \param[in]  error      reference on a StatError object,
- *  \param[in]  path       file path,
- *  \param[in]  exhaustive flag detail level,
+ *  \param[in] error      reference on a StatError object,
+ *  \param[in] path       file path,
+ *  \param[in] exhaustive flag detail level.
  *
- *  \param[out] status     error status.
+ *  \return               error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -1605,10 +1605,10 @@ ostream& Mixture::spreadsheet_write(ostream &os , const MixtureData *vec) const
 /**
  *  \brief Writing of a Mixture object in a file at the spreadsheet format.
  *
- *  \param[in]  error  reference on a StatError object,
- *  \param[in]  path   file path,
+ *  \param[in] error reference on a StatError object,
+ *  \param[in] path  file path.
  *
- *  \param[out] status error status.
+ *  \return          error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -1639,11 +1639,11 @@ bool Mixture::spreadsheet_write(StatError &error , const string path) const
 /**
  *  \brief Plot of a Mixture object and the associated data structure using Gnuplot.
  *
- *  \param[in]  prefix file prefix,
- *  \param[in]  title  figure title,
- *  \param[in]  vec    pointer on a MixtureData object,
+ *  \param[in] prefix file prefix,
+ *  \param[in] title  figure title,
+ *  \param[in] vec    pointer on a MixtureData object.
  *
- *  \param[out] status error status.
+ *  \return           error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -1660,14 +1660,14 @@ bool Mixture::plot_write(const char *prefix , const char *title ,
   ostringstream data_file_name;
 
 
-  // writing of data file
+  // writing of the data file
 
   data_file_name << prefix << 0 << ".dat";
   status = weight->plot_print((data_file_name.str()).c_str() , (vec ? vec->marginal_distribution[0] : NULL));
 
   if (status) {
 
-    // writing of script files
+    // writing of the script files
 
     for (i = 0;i < 2;i++) {
       ostringstream file_name[2];
@@ -1785,11 +1785,11 @@ bool Mixture::plot_write(const char *prefix , const char *title ,
 /**
  *  \brief Plot of a Mixture object using Gnuplot.
  *
- *  \param[in]  error  reference on a StatError object,
- *  \param[in]  prefix file prefix,
- *  \param[in]  title  figure title,
+ *  \param[in] error  reference on a StatError object,
+ *  \param[in] prefix file prefix,
+ *  \param[in] title  figure title.
  *
- *  \param[out] status error status.
+ *  \return           error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -1813,9 +1813,9 @@ bool Mixture::plot_write(StatError &error , const char *prefix ,
 /**
  *  \brief Plot of a Mixture object and the associated data structure.
  *
- *  \param[in]  vec      pointer on a MixtureData object,
+ *  \param[in] vec pointer on a MixtureData object.
  *
- *  \param[out] plot_set plots.
+ *  \return        MultiPlotSet object.
  */
 /*--------------------------------------------------------------*/
 
@@ -1973,7 +1973,7 @@ MultiPlotSet* Mixture::get_plotable(const MixtureData *vec) const
 /**
  *  \brief Plot of a Mixture object.
  *
- *  \param[out] plot_set plots.
+ *  \return MultiPlotSet object.
  */
 /*--------------------------------------------------------------*/
 
@@ -1986,11 +1986,11 @@ MultiPlotSet* Mixture::get_plotable() const
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Computation of the number of free parameters of a Mixture object.
+ *  \brief Computation of the number of parameters of a Mixture object.
  *
- *  \param[in]  min_probability minimum probability,
+ *  \param[in] min_probability minimum probability.
  *
- *  \param[out] nb_parameter    number of free parameters.
+ *  \return                    number of parameters.
  */
 /*--------------------------------------------------------------*/
 
@@ -2074,8 +2074,8 @@ MixtureData::MixtureData(int inb_vector , int inb_variable ,
 /**
  *  \brief Construction of a MixtureData object from a Vectors object.
  *
- *  \param[in] vec                   reference sur un objet Vectors,
- *  \param[in] vector_transformation type of transform(VECTOR_COPY/ADD_COMPONENT_VARIABLE).
+ *  \param[in] vec       reference on a Vectors object,
+ *  \param[in] transform type of transform(VECTOR_COPY/ADD_COMPONENT_VARIABLE).
  */
 /*--------------------------------------------------------------*/
 
@@ -2191,7 +2191,7 @@ void MixtureData::copy(const MixtureData &vec , bool model_flag)
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Destructor of the data members of the MixtureData class.
+ *  \brief Destruction of the data members of the MixtureData class.
  */
 /*--------------------------------------------------------------*/
 
@@ -2249,9 +2249,9 @@ MixtureData::~MixtureData()
 /**
  *  \brief Assignment operator of the MixtureData class.
  *
- *  \param[in]  vec  reference on a MixtureData object,
+ *  \param[in] vec  reference on a MixtureData object.
  *
- *  \param[out] this MixtureData object.
+ *  \return         MixtureData object.
  */
 /*--------------------------------------------------------------*/
 
@@ -2324,11 +2324,11 @@ void MixtureData::state_variable_init(variable_nature itype)
 /**
  *  \brief Extraction of an empirical component.
  *
- *  \param[in]  error    reference on a StatError object,
- *  \param[in]  variable variable index,
- *  \param[in]  index    component index,
+ *  \param[in] error    reference on a StatError object,
+ *  \param[in] variable variable index,
+ *  \param[in] index    component index.
  *
- *  \param[out] histo    empirical component.
+ *  \return             DiscreteDistributionData object.
  */
 /*--------------------------------------------------------------*/
 
@@ -2408,7 +2408,7 @@ DiscreteDistributionData* MixtureData::extract(StatError &error , int variable ,
  *  \brief Writing of a MixtureData object.
  *
  *  \param[in,out] os         stream,
- *  \param[in]     exhaustive flag niveau de detail.
+ *  \param[in]     exhaustive flag detail level.
  */
 /*--------------------------------------------------------------*/
 
@@ -2427,11 +2427,11 @@ ostream& MixtureData::ascii_write(ostream &os , bool exhaustive) const
 /**
  *  \brief Writing of a MixtureData object in a file.
  *
- *  \param[in]  error       reference on a StatError object,
- *  \param[in]  path        file path,
- *  \param[in]  exhaustive  flag detail level,
+ *  \param[in] error       reference on a StatError object,
+ *  \param[in] path        file path,
+ *  \param[in] exhaustive  flag detail level.
  *
- *  \param[out] status      error status.
+ *  \return                error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -2484,11 +2484,11 @@ ostream& MixtureData::ascii_data_write(ostream &os , bool exhaustive) const
 /**
  *  \brief Writing of a MixtureData object in a file.
  *
- *  \param[in]  error      reference on a StatError object,
- *  \param[in]  path       file path,
- *  \param[in]  exhaustive flag detail level,
+ *  \param[in] error      reference on a StatError object,
+ *  \param[in] path       file path,
+ *  \param[in] exhaustive flag detail level.
  *
- *  \param[out] status     error status.
+ *  \return               error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -2521,10 +2521,10 @@ bool MixtureData::ascii_data_write(StatError &error , const string path ,
 /**
  *  \brief Writing of a MixtureData object in a file at the spreadsheet format.
  *
- *  \param[in]  error  reference on a StatError object,
- *  \param[in]  path   file path,
+ *  \param[in] error reference on a StatError object,
+ *  \param[in] path  file path.
  *
- *  \param[out] status error status.
+ *  \return          error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -2558,11 +2558,11 @@ bool MixtureData::spreadsheet_write(StatError &error , const string path) const
 /**
  *  \brief Plot of a MixtureData object using Gnuplot.
  *
- *  \param[in]  error  reference on a StatError object,
- *  \param[in]  prefix file prefix,
- *  \param[in]  title  figure title,
+ *  \param[in] error  reference on a StatError object,
+ *  \param[in] prefix file prefix,
+ *  \param[in] title  figure title.
  *
- *  \param[out] status error status.
+ *  \return           error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -2591,7 +2591,7 @@ bool MixtureData::plot_write(StatError &error , const char *prefix ,
 /**
  *  \brief Plot of a MixtureData object.
  *
- *  \param[out] plot_set plots.
+ *  \return MultiPlotSet object.
  */
 /*--------------------------------------------------------------*/
 
@@ -2616,7 +2616,7 @@ MultiPlotSet* MixtureData::get_plotable() const
 /**
  *  \brief Computation of the information quantity.
  *
- *  \param[out] information information quantity.
+ *  \return information quantity.
  */
 /*--------------------------------------------------------------*/
 
@@ -2643,7 +2643,7 @@ double MixtureData::information_computation() const
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Cumul of observations for a variable.
+ *  \brief Update of the observation frequency distributions for a variable.
  *
  *  \param[in] variable     variable index,
  *  \param[in] nb_component number of components.
@@ -2763,7 +2763,7 @@ void MixtureData::build_observation_histogram(int variable , int nb_component , 
         observation_histogram[variable][i]->type = type[variable];
       }
 
-      // computation des valeurs minimums et maximums par etat
+      // computation of the minimum and maximum values for each component
 
 /*      for (i = 0;i < nb_component;i++) {
         observation_histogram[variable][i]->min_value = max_value[variable];
@@ -2804,7 +2804,7 @@ void MixtureData::build_observation_histogram(int variable , int nb_component , 
       observation_histogram[variable][i]->max_value = ceil(max_value[variable] / bin_width) * bin_width;
     }
 
-    // frequency computation
+    // computation of frequencies
 
     for (i = 0;i < nb_component;i++) {
       for (j = 0;j < observation_histogram[variable][i]->nb_bin;j++) {
@@ -2868,15 +2868,15 @@ void MixtureData::build_observation_histogram(int nb_component)
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Change of the bin width of the marginal histogram and of
+ *  \brief Change of the bin width of the marginal histogram and
  *         the observation histograms for a variable.
  *
- *  \param[in]  error      reference on a StatError object,
- *  \param[in]  variable   variable index,
- *  \param[in]  bin_width  bin width,
- *  \param[in]  imin_value minimum value,
+ *  \param[in] error      reference on a StatError object,
+ *  \param[in] variable   variable index,
+ *  \param[in] bin_width  bin width,
+ *  \param[in] imin_value minimum value.
  *
- *  \param[out] status     error status.
+ *  \return               error status.
  */
 /*--------------------------------------------------------------*/
 

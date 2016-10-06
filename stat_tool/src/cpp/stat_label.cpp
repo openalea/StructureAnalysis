@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -41,7 +41,7 @@ namespace stat_tool {
 
 /****************************************************************
  *
- *  Mots cles (format des fichiers) :
+ *  keywords (file format)
  */
 
 
@@ -90,15 +90,15 @@ const char *STAT_word[] = {
 
   "OUTPUT_PROCESS" ,
   "OUTPUT_PROCESSES" ,
-  "NONPARAMETRIC" ,   // pour compatibilite ascendante
+  "NONPARAMETRIC" ,   // for ascending compatibility
   "CATEGORICAL" ,
-  "PARAMETRIC" ,   // pour compatibilite ascendante
+  "PARAMETRIC" ,   // for ascending compatibility
   "DISCRETE_PARAMETRIC" ,
   "CONTINUOUS_PARAMETRIC" ,
   "OBSERVATION_DISTRIBUTION" ,
   "OBSERVATION_MODEL" ,
 
-  "OBSERVATION_PROBABILITIES" ,   // pour compatibilite ascendante
+  "OBSERVATION_PROBABILITIES" ,   // for ascending compatibility
 
   "OUTPUT"
 };
@@ -190,7 +190,7 @@ const char *STAT_variable_word[] = {
   "INT" ,
   "REAL" ,
   "STATE" ,
-  "VALUE" ,         // pour compatibilite ascendante
+  "VALUE" ,         // for ascending compatibility
 //  "NB_INTERNODE" ,
   "AUXILIARY"
 };
@@ -199,7 +199,7 @@ const char *STAT_variable_word[] = {
 
 /****************************************************************
  *
- *  Labels :
+ *  Labels
  */
 
 
@@ -421,12 +421,12 @@ const char *STAT_label[] = {
 
 /****************************************************************
  *
- *  Messages d'erreur pour l'analyse des fichiers :
+ *  Error messages for lexical analysis of files
  */
 
 
 const char *STAT_parsing[] = {
-  "bad key word" ,
+  "bad keyword" ,
   "format error" ,
 
   "bad distribution name" ,
@@ -484,7 +484,7 @@ const char *STAT_parsing[] = {
 
 /****************************************************************
  *
- *  Messages d'erreur de traitement :
+ *  Error messages
  */
 
 

@@ -56,14 +56,13 @@ namespace stat_tool {
 
   const int CONVOLUTION_NB_DISTRIBUTION = 10;  // maximum number of elementary distributions
   const double CONVOLUTION_THRESHOLD = 0.9999;  // threshold on the cumulative distribution function
-                                                // for determining the support upper bound
+                                                // for determining the upper bound of the support
 
   const double CONVOLUTION_INIT_PROBABILITY = 0.001;  // threshold for probability initialization
   const double CONVOLUTION_LIKELIHOOD_DIFF = 1.e-5;  // threshold for stopping EM iterations
   const int CONVOLUTION_NB_ITER = 10000;  // maximum number of EM iterations
-  const double CONVOLUTION_DIFFERENCE_WEIGHT = 0.5;  // default weight of the penalty
-                                                   // (first- or 2nd-order difference cass)
-  const double CONVOLUTION_ENTROPY_WEIGHT = 0.1;  // default weight of the penalty (entropy case)
+  const double CONVOLUTION_DIFFERENCE_WEIGHT = 0.5;  // default penalty weight (1st- or 2nd-order difference cases)
+  const double CONVOLUTION_ENTROPY_WEIGHT = 0.1;  // default penalty weight (entropy case)
   const int CONVOLUTION_COEFF = 10;      // rounding coefficient for the estimator
 
 
@@ -76,8 +75,9 @@ namespace stat_tool {
 
   class ConvolutionData;
 
+  /// \brief Convolution of discrete distributions
 
-  class Convolution : public StatInterface , public Distribution {  // convolution of discrete distributions
+  class Convolution : public StatInterface , public Distribution {
 
     friend class FrequencyDistribution;
     friend class ConvolutionData;
@@ -87,9 +87,9 @@ namespace stat_tool {
 
   private :
 
-    ConvolutionData *convolution_data;  // pointer on a ConvolutionData object
-    int nb_distribution;    // number of elementary distributions
-    DiscreteParametric **distribution;  // elementary distributions
+    ConvolutionData *convolution_data;  ///< pointer on a ConvolutionData object
+    int nb_distribution;    ///< number of elementary distributions
+    DiscreteParametric **distribution;  ///< elementary distributions
 
     void copy(const Convolution &convol , bool data_flag = true);
     void remove();
@@ -146,8 +146,10 @@ namespace stat_tool {
 
 
 
-  class ConvolutionData : public StatInterface , public FrequencyDistribution {  // data structure corresponding to
-                                                                                 // a convolution of discrete distributions
+  /// \brief Data structure corresponding to a convolution of discrete distributions
+
+  class ConvolutionData : public StatInterface , public FrequencyDistribution {
+
     friend class FrequencyDistribution;
     friend class Convolution;
 
@@ -156,9 +158,9 @@ namespace stat_tool {
 
   private :
 
-    Convolution *convolution;  // pointer on a Convolution object
-    int nb_distribution;       // number of elementary frequency distributions
-    FrequencyDistribution **frequency_distribution;  // elementary frequency distributions
+    Convolution *convolution;  ///< pointer on a Convolution object
+    int nb_distribution;       ///< number of elementary frequency distributions
+    FrequencyDistribution **frequency_distribution;  ///< elementary frequency distributions
 
     void copy(const ConvolutionData &convol_histo , bool model_flag = true);
     void remove();

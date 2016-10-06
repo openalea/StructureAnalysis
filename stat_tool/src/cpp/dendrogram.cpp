@@ -89,7 +89,7 @@ Dendrogram::Dendrogram()
  *  \brief Constructor of the Dendrogram class.
  *
  *  \param[in] dist_matrix reference on a DistanceMatrix object,
- *  \param[in] iscale      scale.
+ *  \param[in] iscale      cluster distance scale.
  */
 /*--------------------------------------------------------------*/
 
@@ -282,9 +282,9 @@ Dendrogram::~Dendrogram()
 /**
  *  \brief Assignment operator of the Dendrogram class.
  *
- *  \param[in] dendrogram reference on a Dendrogram object,
+ *  \param[in] dendrogram reference on a Dendrogram object.
  *
- *  \param[out] this      Dendrogram object.
+ *  \return               Dendrogram object.
  */
 /*--------------------------------------------------------------*/
 
@@ -337,7 +337,7 @@ ostream& Dendrogram::line_write(ostream &os) const
 /**
  *  \brief Sort of the between-cluster distances.
  *
- *  \param[out] ordered_distance ordered distances.
+ *  \return ordered distances.
  */
 /*--------------------------------------------------------------*/
 
@@ -412,7 +412,7 @@ ostream& Dendrogram::ascii_write(ostream &os , bool exhaustive) const
 
   os << distance_matrix->nb_row << " " << distance_matrix->label << "s" << endl;
 
-  // computation of the column width
+  // computation of the column widths
 
   width[0] = column_width(distance_matrix->nb_row) + 1;
   width[1] = column_width(distance_matrix->nb_row - 1 , child_distance + distance_matrix->nb_row);
@@ -622,11 +622,11 @@ ostream& Dendrogram::ascii_write(ostream &os , bool exhaustive) const
 /**
  *  \brief Writing of a Dendrogram object in a file.
  *
- *  \param[in]  error      reference on a StatError object,
- *  \param[in]  path       file path,
- *  \param[in]  exhaustive detail level,
+ *  \param[in] error      reference on a StatError object,
+ *  \param[in] path       file path,
+ *  \param[in] exhaustive detail level.
  *
- *  \param[out] status     error status.
+ *  \return               error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -658,10 +658,10 @@ bool Dendrogram::ascii_write(StatError &error , const string path ,
 /**
  *  \brief Writing of a Dendrogram object in a file at the spreadsheet format.
  *
- *  \param[in]  error  reference on a StatError object,
- *  \param[in]  path   file path,
+ *  \param[in] error reference on a StatError object,
+ *  \param[in] path  file path.
  *
- *  \param[out] status error status.
+ *  \return          error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -789,9 +789,9 @@ void Dendrogram::tree_computation()
 /**
  *  \brief Computation of the agglomerative/divisive coefficient (Kaufman & Rousseeuw, pp. 212, 263).
  *
- *  \param[in]  iscale dendrogram distance scale,
+ *  \param[in] iscale cluster distance scale,
  *
- *  \param[out] coeff  agglomerative/divisive coefficient.
+ *  \return agglomerative/divisive coefficient.
  */
 /*--------------------------------------------------------------*/
 
@@ -830,7 +830,7 @@ double Dendrogram::coefficient_computation(cluster_scale iscale) const
 /**
  *  \brief Computation of the agglomerative/divisive coefficient.
  *
- *  \param[out] coeff agglomerative/divisive coefficient.
+ *  \return agglomerative/divisive coefficient.
  */
 /*--------------------------------------------------------------*/
 
@@ -845,10 +845,10 @@ double Dendrogram::coefficient_computation() const
 /**
  *  \brief Agglomerative hierarchical clustering algorithm (Kaufman & Rousseeuw, pp. 199-208).
  *
- *  \param[in]  strategy   algorihm type,
- *  \param[in]  criterion  cluster merging criterion,
+ *  \param[in] strategy  algorithm type,
+ *  \param[in] criterion cluster merging criterion.
  *
- *  \param[out] dendrogram Dendrogram object.
+ *  \return              Dendrogram object.
  */
 /*--------------------------------------------------------------*/
 
@@ -1150,7 +1150,7 @@ Dendrogram* DistanceMatrix::agglomerative_hierarchical_clustering(hierarchical_s
       }
     }
 
-    // update of the cluster composition
+    // update of the cluster compositions
 
     for (j = 0;j < clusters->cluster_nb_pattern[index2];j++) {
       cluster_pattern[index1][clusters->cluster_nb_pattern[index1] + j] = cluster_pattern[index2][j];
@@ -1180,7 +1180,7 @@ Dendrogram* DistanceMatrix::agglomerative_hierarchical_clustering(hierarchical_s
     cout << endl;
 #   endif
 
-    // computation of the cluster diameter and separation
+    // computation of the cluster diameters and separations
 
     dendrogram->max_within_cluster_distance[nb_row + i] = clusters->max_within_cluster_distance_computation(normalized_pattern_distance , clusters->assignment[cluster_pattern[index1][0]]);
     if (i < nb_row - 2) {
@@ -1231,7 +1231,7 @@ Dendrogram* DistanceMatrix::agglomerative_hierarchical_clustering(hierarchical_s
 /**
  *  \brief Divisive hierarchical clustering algorithm (Kaufman & Rousseeuw, pp. 253-259).
  *
- *  \param[out] dendrogram Dendrogram object.
+ *  \return Dendrogram object.
  */
 /*--------------------------------------------------------------*/
 
@@ -1477,14 +1477,14 @@ Dendrogram* DistanceMatrix::divisive_hierarchical_clustering() const
 /**
  *  \brief Hierarchical clustering algorithms.
  *
- *  \param[in]  error      reference on a StatError object,
- *  \param[in]  os         stream,
- *  \param[in]  strategy   algorithm type (AGGLOMERATIVE/DIVISIVE/ORDERING),
- *  \param[in]  criterion  cluster merging criterion (agglomerative algorithm),
- *  \param[in]  path       file path,
- *  \param[in]  format     output format (ASCII/SPREADSHEET),
+ *  \param[in] error     reference on a StatError object,
+ *  \param[in] os        stream,
+ *  \param[in] strategy  algorithm type (AGGLOMERATIVE/DIVISIVE/ORDERING),
+ *  \param[in] criterion cluster merging criterion (agglomerative algorithm),
+ *  \param[in] path      file path,
+ *  \param[in] format    output format (ASCII/SPREADSHEET).
  *
- *  \param[out] dendrogram Dendrogram object.
+ *  \return              Dendrogram object.
  */
 /*--------------------------------------------------------------*/
 

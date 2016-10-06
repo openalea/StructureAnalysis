@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -55,14 +55,20 @@ namespace sequence_analysis {
 
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the NbEvent class.
  *
- *  Constructeur de la classe NbEvent.
- *
- *  arguments : type, temps d'observation, nombre de valeurs,
- *              identificateur et parametres de la loi.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] itype        renewal process type (ORDINARY/EQUILIBRIUM),
+ *  \param[in] itime        observation period,
+ *  \param[in] inb_value    number of values,
+ *  \param[in] iident       distribution identifier,
+ *  \param[in] iinf_bound   lower bound,
+ *  \param[in] isup_bound   upper bound (binomial, uniform),
+ *  \param[in] iparameter   parameter (Poisson, negative binomial),
+ *  \param[in] iprobability probability (binomial, negative binomial).
+ */
+/*--------------------------------------------------------------*/
 
 NbEvent::NbEvent(process_type itype , int itime , int inb_value , discrete_parametric iident ,
                  int iinf_bound , int isup_bound , double iparameter , double iprobability)
@@ -74,13 +80,15 @@ NbEvent::NbEvent(process_type itype , int itime , int inb_value , discrete_param
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the NbEvent class.
  *
- *  Constructeur de la classe NbEvent.
- *
- *  arguments : type, temps d'observation, reference sur un objet DiscreteParametric.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] itype       renewal process type (ORDINARY/EQUILIBRIUM),
+ *  \param[in] itime       observation period,
+ *  \param[in] inter_event reference on a DiscreteParametric object.
+ */
+/*--------------------------------------------------------------*/
 
 NbEvent::NbEvent(process_type itype , int itime , DiscreteParametric &inter_event)
 
@@ -115,13 +123,14 @@ NbEvent::NbEvent(process_type itype , int itime , DiscreteParametric &inter_even
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor by copy of the NbEvent class.
  *
- *  Constructeur par copie de la classe NbEvent.
- *
- *  arguments : reference sur un objet NbEvent, nombre de valeurs allouees.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] nb_event        reference on a NbEvent object,
+ *  \param[in] ialloc_nb_value number of allocated values.
+ */
+/*--------------------------------------------------------------*/
 
 NbEvent::NbEvent(const NbEvent &nb_event , int ialloc_nb_value)
 :DiscreteParametric(nb_event , DISTRIBUTION_COPY , ialloc_nb_value)
@@ -132,14 +141,13 @@ NbEvent::NbEvent(const NbEvent &nb_event , int ialloc_nb_value)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Initialization of the renewal process type (ORDINARY/EQUILIBRIUM).
  *
- *  Initialisation du type (ORDINARY/EQUILIBRIUM)
- *  d'un processus de renouvellement.
- *
- *  argument : type.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] itype renewal process type.
+ */
+/*--------------------------------------------------------------*/
 
 void Renewal::type_init(process_type itype)
 
@@ -159,13 +167,16 @@ void Renewal::type_init(process_type itype)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Initialization of the inter-event distribution parameters.
  *
- *  Initialisation des parametres des lois d'un processus de renouvellement.
- *
- *  arguments : parametres d'une loi.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] inf_bound   lower bound,
+ *  \param[in] sup_bound   upper bound (binomial, uniform),
+ *  \param[in] parameter   parameter (Poisson, negative binomial),
+ *  \param[in] probability probability (binomial, negative binomial).
+ */
+/*--------------------------------------------------------------*/
 
 void Renewal::init(int inf_bound , int sup_bound , double parameter , double probability)
 
@@ -186,14 +197,17 @@ void Renewal::init(int inf_bound , int sup_bound , double parameter , double pro
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Initialization of the identifier and parameters of the inter-event distribution.
  *
- *  Initialisation de l'identificateur et des parametres des lois
- *  d'un processus de renouvellement.
- *
- *  arguments : identificateur et parametres d'une loi.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] ident       distribution identifier,
+ *  \param[in] inf_bound   lower bound,
+ *  \param[in] sup_bound   upper bound (binomial, uniform),
+ *  \param[in] parameter   parameter (Poisson, negative binomial),
+ *  \param[in] probability probability (binomial, negative binomial).
+ */
+/*--------------------------------------------------------------*/
 
 void Renewal::init(discrete_parametric ident , int inf_bound , int sup_bound ,
                    double parameter , double probability)
@@ -215,11 +229,11 @@ void Renewal::init(discrete_parametric ident , int inf_bound , int sup_bound ,
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Constructeur par defaut de la classe Renewal.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Default constructor of the Renewal class.
+ */
+/*--------------------------------------------------------------*/
 
 Renewal::Renewal()
 
@@ -246,14 +260,15 @@ Renewal::Renewal()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the Renewal class.
  *
- *  Constructeur de la classe Renewal.
- *
- *  arguments : type, reference sur la loi empirique du temps d'observation et
- *              sur la loi inter-evenement.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] itype        renewal process type (ORDINARY/EQUILIBRIUM),
+ *  \param[in] htime        reference on the observation period frequency distribution,
+ *  \param[in] iinter_event reference on on the inter-event distribution.
+ */
+/*--------------------------------------------------------------*/
 
 Renewal::Renewal(process_type itype , const FrequencyDistribution &htime ,
                  const DiscreteParametric &iinter_event)
@@ -320,14 +335,15 @@ Renewal::Renewal(process_type itype , const FrequencyDistribution &htime ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the Renewal class.
  *
- *  Constructeur de la classe Renewal.
- *
- *  arguments : type, references sur la loi du temps d'observation et
- *              sur la loi inter-evenement.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] itype        renewal process type,
+ *  \param[in] itime        reference on the observation distribution,
+ *  \param[in] iinter_event reference on the inter-event distribution.
+ */
+/*--------------------------------------------------------------*/
 
 Renewal::Renewal(process_type itype , const Distribution &itime ,
                  const DiscreteParametric &iinter_event)
@@ -391,13 +407,14 @@ Renewal::Renewal(process_type itype , const Distribution &itime ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the Renewal class.
  *
- *  Constructeur de la classe Renewal.
- *
- *  arguments : references sur un objet RenewalData et sur la loi inter-evenement.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] irenewal_data reference on a RenewalData object,
+ *  \param[in] iinter_event  reference on the inter-event distribution.
+ */
+/*--------------------------------------------------------------*/
 
 Renewal::Renewal(const RenewalData &irenewal_data , const DiscreteParametric &iinter_event)
 
@@ -461,14 +478,14 @@ Renewal::Renewal(const RenewalData &irenewal_data , const DiscreteParametric &ii
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Copy of a Renewal object.
  *
- *  Copie d'un objet Renewal.
- *
- *  arguments : reference sur un objet Renewal.
- *              flag copie de l'objet renewal_data.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] renew     reference on a Renewal object,
+ *  \param[in] data_flag flag copy of the included RenewalData object.
+ */
+/*--------------------------------------------------------------*/
 
 void Renewal::copy(const Renewal &renew , bool data_flag)
 
@@ -528,11 +545,11 @@ void Renewal::copy(const Renewal &renew , bool data_flag)
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Destruction des champs d'un objet Renewal.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Destruction of the data members of a Renewal object.
+ */
+/*--------------------------------------------------------------*/
 
 void Renewal::remove()
 
@@ -571,11 +588,11 @@ void Renewal::remove()
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Destructeur de la classe Renewal.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Destructor of the Renewal class.
+ */
+/*--------------------------------------------------------------*/
 
 Renewal::~Renewal()
 
@@ -584,12 +601,12 @@ Renewal::~Renewal()
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Destruction d'un objet Renewal en tenant compte du nombre
- *  d'iterateurs pointant dessus.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Destruction of a Renewal object taking account of
+ *         the number of iterators pointing to it.
+ */
+/*--------------------------------------------------------------*/
 
 void Renewal::conditional_delete()
 
@@ -600,13 +617,15 @@ void Renewal::conditional_delete()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Assignment operator of the Renewal class.
  *
- *  Operateur d'assignement de la classe Renewal.
+ *  \param[in] renew reference on a Renewal object.
  *
- *  argument : reference sur un objet Renewal.
- *
- *--------------------------------------------------------------*/
+ *  \return          Renewal object.
+ */
+/*--------------------------------------------------------------*/
 
 Renewal& Renewal::operator=(const Renewal &renew)
 
@@ -620,14 +639,17 @@ Renewal& Renewal::operator=(const Renewal &renew)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Extraction of a distribution.
  *
- *  Extraction d'une loi.
+ *  \param[in] error     reference on a StatError object,
+ *  \param[in] dist_type distribution type,
+ *  \param[in] itime     observation period.
  *
- *  arguments : reference sur un objet StatError, type de loi,
- *              temps d'observation.
- *
- *--------------------------------------------------------------*/
+ *  \return              DiscreteParametricModel object.
+ */
+/*--------------------------------------------------------------*/
 
 DiscreteParametricModel* Renewal::extract(StatError &error , renewal_distribution dist_type ,
                                           int itime) const
@@ -725,15 +747,18 @@ DiscreteParametricModel* Renewal::extract(StatError &error , renewal_distributio
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Construction of a Renewal object on the basis of an inter-event distribution.
  *
- *  Construction d'un objet Renewal a partir d'une loi inter-evenement.
+ *  \param[in] error       reference on a StatError object,
+ *  \param[in] inter_event reference on the inter-event distribution,
+ *  \param[in] type        renewal process type (ORDINARY/EQUILIBRIUM),
+ *  \param[in] time        observation period.
  *
- *  arguments : reference sur un objet StatError, reference sur la loi inter-evenement,
- *              type du processus (ORDINARY/EQUILIBRIUM),
- *              temps d'observation.
- *
- *--------------------------------------------------------------*/
+ *  \return                Renewal object.
+ */
+/*--------------------------------------------------------------*/
 
 Renewal* Renewal::building(StatError &error , const DiscreteParametric &inter_event ,
                            process_type type , int time)
@@ -768,16 +793,19 @@ Renewal* Renewal::building(StatError &error , const DiscreteParametric &inter_ev
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Construction of a Renewal object from a file.
  *
- *  Construction d'un objet Renewal a partir d'un fichier.
+ *  \param[in] error           reference on a StatError object,
+ *  \param[in] path            file path,
+ *  \param[in] type            renewal process type (ORDINARY/EQUILIBRIUM),
+ *  \param[in] time            observation period,
+ *  \param[in] cumul_threshold threshold on the cumulative inter-event distribution function.
  *
- *  arguments : reference sur un objet StatError, path,
- *              type du processus (ORDINARY/EQUILIBRIUM),
- *              temps d'observation, seuil sur la fonction de repartition
- *              de la loi inter-evenement.
- *
- *--------------------------------------------------------------*/
+ *  \return                    Renewal object.
+ */
+/*--------------------------------------------------------------*/
 
 Renewal* Renewal::ascii_read(StatError &error , const string path ,
                              process_type type , int time , double cumul_threshold)
