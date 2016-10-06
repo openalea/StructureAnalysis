@@ -84,25 +84,24 @@ namespace stat_tool {
   class DiscreteParametric;
   class ContinuousParametric;
 
+  /// \brief Frequency distribution with integer or real (for EM algorithms) frequencies
 
   template <typename Type>
-  class Reestimation {    // frequency distribution with integer or real (for EM estimators) frequencies
+  class Reestimation {
 
     friend std::ostream& operator<<(std::ostream &os , const Reestimation<Type> &histo)
     { return histo.print(os); }
 
   public :
 
-    int nb_value;           // number of values from 0
-    int alloc_nb_value;     // number of allocated values
-    int offset;             // number of values of null frequencies from 0
-    /// sample size
-    Type nb_element;        // sample size
-    /// maximal frequency
-    Type max;               // maximum frequency
-    double mean;            // mean
-    double variance;        // variance
-    Type *frequency;        // frequencies for each value
+    int nb_value;           ///< number of values from 0
+    int alloc_nb_value;     ///< number of allocated values
+    int offset;             ///< number of values of null frequencies from 0
+    Type nb_element;        ///< sample size
+    Type max;               ///< maximum frequency
+    double mean;            ///< mean
+    double variance;        ///< variance
+    Type *frequency;        ///< frequency for each value
 
     void init(int inb_value);
     void copy(const Reestimation<Type> &histo);

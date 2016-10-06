@@ -59,12 +59,12 @@ double quantile_computation(int nb_individual , Type *value , double cumul ,
 /**
  *  \brief Computation of a quantile for a discrete or continuous sample.
  *
- *  \param[in]  nb_individual        sample size,
- *  \param[in]  value                pointer on the values,
- *  \param[in]  cumul                value of the cumulative distribution function,
- *  \param[in]  frequency_correction flag correction related to the frequencies for categorical variables,
+ *  \param[in] nb_individual        sample size,
+ *  \param[in] value                pointer on the values,
+ *  \param[in] cumul                value of the cumulative distribution function,
+ *  \param[in] frequency_correction flag correction related to the frequencies for categorical variables.
  *
- *  \param[out] quantile             quantile.
+ *  \return                         quantile.
  */
 /*--------------------------------------------------------------*/
 
@@ -113,7 +113,7 @@ double quantile_computation(int nb_individual , Type *value , double cumul ,
       min_value = bvalue;
     }
 
-    // determination of the individuals taking the current minimum value
+    // selection of the individuals taking the current minimum value
 
     for (j = 0;j < nb_individual;j++) {
       if (value[j] == min_value) {

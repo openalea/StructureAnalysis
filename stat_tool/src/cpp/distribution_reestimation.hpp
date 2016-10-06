@@ -52,7 +52,7 @@ void reestimation(int nb_value , Type *reestim , double *pmass ,
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Reestimation des probabilites d'une loi discrete.
+ *  \brief Reestimation of the probability masses of a discrete distribution.
  *
  *  \param[in] nb_value         number of values,
  *  \param[in] reestim          pointer on the reestimation quantities,

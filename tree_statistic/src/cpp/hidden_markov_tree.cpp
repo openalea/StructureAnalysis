@@ -6651,7 +6651,7 @@ HiddenMarkovTree* Stat_trees::hidden_markov_tree_ascii_read(StatError& error,
                      status= false;
                      ostringstream correction_message;
                      correction_message << STAT_TREES_word[TREESTATW_HIDDEN_MARKOV_TREE];
-                     error.correction_update (STAT_parsing[STATP_KEY_WORD],
+                     error.correction_update (STAT_parsing[STATP_KEYWORD],
                                              (correction_message.str()).c_str(),
                                              line);
                   }
@@ -6743,7 +6743,7 @@ HiddenMarkovTree* Stat_trees::hidden_markov_tree_ascii_read(StatError& error,
                         if (token != STAT_word[nb_output_process == 1 ? STATW_OUTPUT_PROCESS : STATW_OUTPUT_PROCESSES])
                         {
                            status = false;
-                           error.correction_update(STAT_parsing[STATP_KEY_WORD] ,
+                           error.correction_update(STAT_parsing[STATP_KEYWORD] ,
                                                    STAT_word[nb_output_process == 1 ? STATW_OUTPUT_PROCESS : STATW_OUTPUT_PROCESSES],
                                                    line, i+1);
                         }
@@ -6813,7 +6813,7 @@ HiddenMarkovTree* Stat_trees::hidden_markov_tree_ascii_read(StatError& error,
                            else
                            {
                               status= false;
-                              error.correction_update(STAT_parsing[STATP_KEY_WORD], STAT_word[STATW_OUTPUT_PROCESS],
+                              error.correction_update(STAT_parsing[STATP_KEYWORD], STAT_word[STATW_OUTPUT_PROCESS],
                                                       line, i+1);
                            }
                            break;
@@ -6866,7 +6866,7 @@ HiddenMarkovTree* Stat_trees::hidden_markov_tree_ascii_read(StatError& error,
                                                     << STAT_word[STATW_DISCRETE_PARAMETRIC] << " or "
                                                     << STAT_word[STATW_NONPARAMETRIC] << " or "  // pour compatibilite ascendante
                                                     << STAT_word[STATW_PARAMETRIC];
-                                 error.correction_update(STAT_parsing[STATP_KEY_WORD],
+                                 error.correction_update(STAT_parsing[STATP_KEYWORD],
                                                          (correction_message.str()).c_str(),
                                                          line, i+1);
                                }

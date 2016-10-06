@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -54,13 +54,13 @@ namespace sequence_analysis {
 
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing on a single line of a Renewal object.
  *
- *  Ecriture sur une ligne d'un objet Renewal.
- *
- *  argument : stream.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os stream.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& Renewal::line_write(ostream &os) const
 
@@ -83,14 +83,16 @@ ostream& Renewal::line_write(ostream &os) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a renewal process and the associated data structure.
  *
- *  Ecriture d'un processus de renouvellement et de la structure de donnees associee.
- *
- *  arguments : stream, pointeur sur un objet RenewalData,
- *              flag niveau de detail, flag fichier.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os         stream,
+ *  \param[in]     timev      pointer on a RenewalData object,
+ *  \param[in]     exhaustive flag detail level,
+ *  \param[in]     file_flag  flag file.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& Renewal::ascii_write(ostream &os , const RenewalData *timev ,
                               bool exhaustive , bool file_flag) const
@@ -115,7 +117,7 @@ ostream& Renewal::ascii_write(ostream &os , const RenewalData *timev ,
     break;
   }
 
-  // ecriture de la loi inter-evenement
+  // writing of the inter-event distribution
 
   os << "\n";
   if (file_flag) {
@@ -165,7 +167,7 @@ ostream& Renewal::ascii_write(ostream &os , const RenewalData *timev ,
 
       pdist[0] = inter_event;
 
-      // ecriture de la loi empirique des intervalles de temps a l'interieur de la periode d'observation
+      // writing of the frequency distribution of time intervals between events within the observation period
 
       os << "\n";
       if (file_flag) {
@@ -189,7 +191,7 @@ ostream& Renewal::ascii_write(ostream &os , const RenewalData *timev ,
         inter_event->Distribution::ascii_print(os , file_flag , true , false , timev->within);
       }
 
-      // ecriture de la loi biaisee par la longueur
+      // writing of the length-biased distribution
 
       if (timev->length_bias) {
         os << "\n";
@@ -224,7 +226,7 @@ ostream& Renewal::ascii_write(ostream &os , const RenewalData *timev ,
                                                timev->length_bias , true);
       }
 
-      // ecriture de la loi des intervalles de temps apres le dernier evenement
+      // writing of the backward recurrence time distribution
 
       os << "\n";
       if (file_flag) {
@@ -261,7 +263,7 @@ ostream& Renewal::ascii_write(ostream &os , const RenewalData *timev ,
       backward->Distribution::ascii_print(os , 1 , pdist , scale , file_flag , true ,
                                           timev->backward , true);
 
-      // ecriture de la loi des intervalles de temps residuel
+      // writing of the forward recurrence time distribution
 
       os << "\n";
       if (file_flag) {
@@ -305,9 +307,8 @@ ostream& Renewal::ascii_write(ostream &os , const RenewalData *timev ,
 
   if ((exhaustive) && ((!timev) || (!(timev->length_bias)))) {
 
-    // ecriture de la loi inter-evenement, de la loi biaisee par la longueur,
-    // de la loi des intervalles de temps apres le dernier evenement et
-    // de la loi des intervalles de temps residuel
+    // writing of the inter-event distribution, the length-biased distribution,
+    // the backward and forward recurrence time distributions
 
     os << "\n";
     if (file_flag) {
@@ -363,7 +364,7 @@ ostream& Renewal::ascii_write(ostream &os , const RenewalData *timev ,
 
   if (exhaustive) {
 
-    // ecriture des lois du temps avant le neme evenement
+    // writing of the distributions of the time to the nth event
 
     inf = (timev ? timev->mixture->offset : mixture->offset);
     if (inf < 1) {
@@ -400,7 +401,7 @@ ostream& Renewal::ascii_write(ostream &os , const RenewalData *timev ,
     }
   }
 
-  // ecriture des lois du nombre d'evenements
+  // writing of the number of events distributions
 
   for (i = time->offset;i < time->nb_value;i++) {
     if (time->mass[i] > 0.) {
@@ -586,7 +587,7 @@ ostream& Renewal::ascii_write(ostream &os , const RenewalData *timev ,
 
   if (time->variance > 0.) {
 
-    // ecriture du melange de lois du nombre d'evenements
+    // writing of the mixture of number of events distributions
 
     if (exhaustive) {
       os << "\n";
@@ -762,7 +763,7 @@ ostream& Renewal::ascii_write(ostream &os , const RenewalData *timev ,
       delete [] scale;
     }
 
-    // ecriture temps d'observation
+    // writing of the observation period frequency distribution
 
     if (timev) {
       os << "\n";
@@ -785,7 +786,7 @@ ostream& Renewal::ascii_write(ostream &os , const RenewalData *timev ,
 
   if (exhaustive) {
 
-    // ecriture des probabilites de non-evenement/evenement fonction du temps
+    // writing of no-event/event probabilities as a function of the index parameter
 
     os << "\n";
     if (file_flag) {
@@ -808,7 +809,7 @@ ostream& Renewal::ascii_write(ostream &os , const RenewalData *timev ,
 
     index_event->ascii_print(os , file_flag , (((timev) && (timev->index_event)) ? timev->index_event : NULL));
 
-    // ecriture des sequences d'evenements
+    // writing of the sequences of events
 
     if ((timev) && (timev->sequence)) {
       os << "\n";
@@ -842,13 +843,14 @@ ostream& Renewal::ascii_write(ostream &os , const RenewalData *timev ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a Renewal object.
  *
- *  Ecriture d'un objet Renewal.
- *
- *  arguments : stream, flag niveau de detail.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os         stream,
+ *  \param[in]     exhaustive flag detail level.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& Renewal::ascii_write(ostream &os , bool exhaustive) const
 
@@ -857,14 +859,17 @@ ostream& Renewal::ascii_write(ostream &os , bool exhaustive) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a Renewal object in a file.
  *
- *  Ecriture d'un objet Renewal dans un fichier.
+ *  \param[in] error      reference on a StatError object,
+ *  \param[in] path       file path,
+ *  \param[in] exhaustive flag detail level.
  *
- *  arguments : reference sur un objet StatError, path,
- *              flag niveau de detail.
- *
- *--------------------------------------------------------------*/
+ *  \return               error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool Renewal::ascii_write(StatError &error , const string path ,
                           bool exhaustive) const
@@ -890,14 +895,14 @@ bool Renewal::ascii_write(StatError &error , const string path ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a renewal process and the associated data structure at the spreadsheet format.
  *
- *  Ecriture d'un processus de renouvellement et de la structure
- *  de donnees associee au format tableur.
- *
- *  arguments : stream, pointeur sur un objet RenewalData.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out]  os    stream,
+ *  \param[in]      timev pointer on a RenewalData object.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& Renewal::spreadsheet_write(ostream &os , const RenewalData *timev) const
 
@@ -930,7 +935,7 @@ ostream& Renewal::spreadsheet_write(ostream &os , const RenewalData *timev) cons
     break;
   }
 
-  // ecriture de la loi inter-evenement
+  // writing of the inter-event distribution
 
   os << "\n" << SEQ_label[SEQL_INTER_EVENT] << " " << STAT_label[STATL_DISTRIBUTION] << endl;
   inter_event->spreadsheet_print(os);
@@ -960,7 +965,7 @@ ostream& Renewal::spreadsheet_write(ostream &os , const RenewalData *timev) cons
 
     pdist[0] = inter_event;
 
-    // ecriture de la loi empirique des intervalles de temps a l'interieur de la periode d'observation
+    // writing of the frequency distribution of time intervals between events within the observation period
 
     os << "\n" << STAT_label[STATL_OBSERVATION_INTER_EVENT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
     timev->within->spreadsheet_characteristic_print(os);
@@ -976,7 +981,7 @@ ostream& Renewal::spreadsheet_write(ostream &os , const RenewalData *timev) cons
       inter_event->Distribution::spreadsheet_print(os , true , false , false , timev->within);
     }
 
-    // ecriture de la loi biaisee par la longueur
+    // writing of the length-biased distribution
 
     if (timev->length_bias) {
       os << "\n" << SEQ_label[SEQL_LENGTH_BIASED] << " " << STAT_label[STATL_DISTRIBUTION] << endl;
@@ -998,7 +1003,7 @@ ostream& Renewal::spreadsheet_write(ostream &os , const RenewalData *timev) cons
                                                    timev->length_bias , true);
     }
 
-    // ecriture de la loi des intervalles de temps apres le dernier evenement
+    // writing of the backward recurrence time distribution
 
     os << "\n" << STAT_label[STATL_BACKWARD] << " " << SEQ_label[SEQL_RECURRENCE_TIME] << " "
        << STAT_label[STATL_DISTRIBUTION] << endl;
@@ -1022,7 +1027,7 @@ ostream& Renewal::spreadsheet_write(ostream &os , const RenewalData *timev) cons
     backward->Distribution::spreadsheet_print(os , 1 , pdist , scale , true ,
                                               timev->backward , true);
 
-    // ecriture de la loi des intervalles de temps residuel
+    // writing of the forward recurrence time distribution
 
     os << "\n" << STAT_label[STATL_FORWARD] << " " << SEQ_label[SEQL_RECURRENCE_TIME]
        << " " << STAT_label[STATL_DISTRIBUTION] << endl;
@@ -1052,9 +1057,8 @@ ostream& Renewal::spreadsheet_write(ostream &os , const RenewalData *timev) cons
 
   if ((!timev) || (!(timev->length_bias))) {
 
-    // ecriture de la loi inter-evenement, de la loi biaisee par la longueur
-    // de la loi des intervalles de temps apres le dernier evenement et
-    // de la loi des intervalles de temps residuel
+    // writing of the inter-event distribution, the length-biased distribution
+    // the backward and forward recurrence time distributions
 
     os << "\n" << SEQ_label[SEQL_LENGTH_BIASED] << " " << STAT_label[STATL_DISTRIBUTION] << endl;
     length_bias->spreadsheet_characteristic_print(os);
@@ -1089,7 +1093,7 @@ ostream& Renewal::spreadsheet_write(ostream &os , const RenewalData *timev) cons
     delete [] scale;
   }
 
-  // ecriture des lois du temps avant le neme evenement
+  // writing of the distributions of the time to the nth event
 
   inf = (timev ? timev->mixture->offset : mixture->offset);
   if (inf < 1) {
@@ -1121,7 +1125,7 @@ ostream& Renewal::spreadsheet_write(ostream &os , const RenewalData *timev) cons
     delete [] scale;
   }
 
-  // ecriture des lois du nombre d'evenements
+  // writing of the number of events distributions
 
   for (i = time->offset;i < time->nb_value;i++) {
     if (time->mass[i] > 0.) {
@@ -1236,7 +1240,7 @@ ostream& Renewal::spreadsheet_write(ostream &os , const RenewalData *timev) cons
 
   if (time->variance > 0.) {
 
-    // ecriture du melange de lois du nombre d'evenements
+    // writing of the mixture of number of events distributions
 
     os << "\n" << SEQ_label[SEQL_NB_EVENT_MIXTURE] << endl;
     mixture->spreadsheet_characteristic_print(os);
@@ -1352,7 +1356,7 @@ ostream& Renewal::spreadsheet_write(ostream &os , const RenewalData *timev) cons
     delete [] pdist;
     delete [] scale;
 
-    // ecriture temps d'observation
+    // writing of the observation period frequency distribution
 
     if (timev) {
       os << "\n" << SEQ_label[SEQL_OBSERVATION_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
@@ -1363,7 +1367,7 @@ ostream& Renewal::spreadsheet_write(ostream &os , const RenewalData *timev) cons
     }
   }
 
-  // ecriture des probabilites de non-evenement/evenement fonction du temps
+  // writing of no-event/event probabilities as a function of time
 
   os << "\n";
   if ((timev) && (timev->index_event)) {
@@ -1385,13 +1389,16 @@ ostream& Renewal::spreadsheet_write(ostream &os , const RenewalData *timev) cons
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a Renewal object in a file at the spreadsheet format.
  *
- *  Ecriture d'un objet Renewal dans un fichier au format tableur.
+ *  \param[in] error reference on a StatError object,
+ *  \param[in] path  file path.
  *
- *  arguments : reference sur un objet StatError, path.
- *
- *--------------------------------------------------------------*/
+ *  \return          error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool Renewal::spreadsheet_write(StatError &error , const string path) const
 
@@ -1416,14 +1423,17 @@ bool Renewal::spreadsheet_write(StatError &error , const string path) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Plot of a renewal process using Gnuplot.
  *
- *  Sortie Gnuplot d'un processus de renouvellement.
+ *  \param[in] prefix file prefix,
+ *  \param[in] title  figure title,
+ *  \param[in] timev  pointer on a RenewalData object.
  *
- *  arguments : prefixe des fichiers, titre des figures,
- *              pointeur sur un objet RenewalData.
- *
- *--------------------------------------------------------------*/
+ *  \return           error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool Renewal::plot_write(const char *prefix , const char *title ,
                          const RenewalData *timev) const
@@ -1438,7 +1448,7 @@ bool Renewal::plot_write(const char *prefix , const char *title ,
   ostringstream *data_file_name;
 
 
-  // ecriture des fichiers de donnees
+  // writing of the data files
 
   nb_file = 2;
   if ((!timev) || (!(timev->length_bias))) {
@@ -1631,7 +1641,7 @@ bool Renewal::plot_write(const char *prefix , const char *title ,
     index_event->plot_print((data_file_name[nb_file - 1].str()).c_str() , index_event->length ,
                             (((timev) && (timev->index_event)) ? timev->index_event : NULL));
 
-    // ecriture du fichier de commandes et du fichier d'impression
+    // writing of the script files
 
     for (i = 0;i < 2;i++) {
       j = 1;
@@ -1990,14 +2000,17 @@ bool Renewal::plot_write(const char *prefix , const char *title ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Plot of a Renewal object using Gnuplot.
  *
- *  Sortie Gnuplot d'un objet Renewal.
+ *  \param[in] error  reference on a StatError object,
+ *  \param[in] prefix file prefix,
+ *  \param[in] title  figure title.
  *
- *  arguments : reference sur un objet StatError, prefixe des fichiers,
- *              titre des figures.
- *
- *--------------------------------------------------------------*/
+ *  \return           error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool Renewal::plot_write(StatError &error , const char *prefix ,
                          const char *title) const
@@ -2015,13 +2028,15 @@ bool Renewal::plot_write(StatError &error , const char *prefix ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Plot of a renewal process.
  *
- *  Sortie graphique d'un processus de renouvellement.
+ *  \param[in] timev pointer on a RenewalData object.
  *
- *  argument : pointeur sur un objet RenewalData.
- *
- *--------------------------------------------------------------*/
+ *  \return          MultiPlotSet object.
+ */
+/*--------------------------------------------------------------*/
 
 MultiPlotSet* Renewal::get_plotable(const RenewalData *timev) const
 
@@ -2098,7 +2113,7 @@ MultiPlotSet* Renewal::get_plotable(const RenewalData *timev) const
   if ((timev) && (timev->within) && (timev->backward) && (timev->forward)) {
     if (timev->inter_event) {
 
-      // vue : loi inter-evenement ajustee
+      // fit of the inter-event distribution
 
       plot[i].xrange = Range(0 , inter_event->nb_value - 1);
       plot[i].yrange = Range(0 , ceil(MAX(timev->inter_event->max ,
@@ -2131,8 +2146,8 @@ MultiPlotSet* Renewal::get_plotable(const RenewalData *timev) const
 
     if (timev->within->nb_element > 0) {
 
-      // vue : loi empirique de l'intervalle de temps entre 2 evenements a l'interieur
-      // de la periode d'observation ajustee par la loi inter-evenement
+      // frequency distribution of time intervals between events within the observation period
+      // fitted by the inter-event distribution
 
       plot[i].xrange = Range(0 , inter_event->nb_value - 1);
       plot[i].yrange = Range(0 , ceil(MAX(timev->within->max ,
@@ -2165,7 +2180,7 @@ MultiPlotSet* Renewal::get_plotable(const RenewalData *timev) const
 
     if (timev->length_bias) {
 
-      // vue : loi biaisee par la longueur ajustee
+      // fit of the length-biased distribution
 
       plot[i].xrange = Range(0 , inter_event->nb_value - 1);
 
@@ -2206,7 +2221,7 @@ MultiPlotSet* Renewal::get_plotable(const RenewalData *timev) const
       i++;
     }
 
-    // vue : loi de l'intervalle de temps apres le dernier evenement ajustee
+    // fit of the backward recurrence time distribution
 
     plot[i].xrange = Range(0 , inter_event->nb_value - 1);
 
@@ -2248,7 +2263,7 @@ MultiPlotSet* Renewal::get_plotable(const RenewalData *timev) const
     inter_event->plotable_mass_write(plot[i][2] , timev->backward->nb_element);
     i++;
 
-    // vue : loi de l'intervalle de temps residuel ajustee
+    // fit of the forward recurrence time distribution
 
     plot[i].xrange = Range(0 , inter_event->nb_value - 1);
 
@@ -2293,8 +2308,8 @@ MultiPlotSet* Renewal::get_plotable(const RenewalData *timev) const
 
   if ((!timev) || (!(timev->length_bias))) {
 
-    // vue : loi inter-evenement, loi biaisee par la longueur, loi de l'intervalle de temps
-    // apres le dernier evenement et loi de l'intervalle de temps residuel
+    // inter-event distribution, length-biased distribution,
+    // backward and forward recurrence time distributions
 
     plot[i].xrange = Range(0 , inter_event->nb_value - 1);
 
@@ -2352,7 +2367,7 @@ MultiPlotSet* Renewal::get_plotable(const RenewalData *timev) const
 
   if (inf < sup) {
 
-    // vue : lois du temps avant le neme evenement
+    // distributions of the time to the nth event
 
     plot[i].xrange = Range(0 , nevent_time[sup - 1]->nb_value - 1);
     plot[i].yrange = Range(0. , MIN(nevent_time[inf]->max * YSCALE , 1.));
@@ -2378,7 +2393,7 @@ MultiPlotSet* Renewal::get_plotable(const RenewalData *timev) const
 
   if ((time->variance > 0.) && (timev)) {
 
-    // vue : loi empirique des temps d'observation
+    // observation period frequency distribution
 
     plot[i].xrange = Range(0 , timev->htime->nb_value - 1);
     plot[i].yrange = Range(0 , ceil(timev->htime->max * YSCALE));
@@ -2405,7 +2420,7 @@ MultiPlotSet* Renewal::get_plotable(const RenewalData *timev) const
   if (nb_time <= PLOT_NB_TIME) {
     if (!timev) {
 
-      // vue : lois du nombre d'evenements
+      // number of events distributions
 
       plot[i].xrange = Range(0 , nb_event[time->nb_value - 1]->nb_value - 1);
       plot[i].yrange = Range(0. , MIN(nb_event[time->offset]->max * YSCALE , 1.));
@@ -2439,7 +2454,7 @@ MultiPlotSet* Renewal::get_plotable(const RenewalData *timev) const
       for (j = time->offset;j < time->nb_value;j++) {
         if (time->mass[j] > 0.) {
 
-          // vue : loi du nombre d'evenements ajustee
+          // fit of the number of events distribution
 
           plot[i].xrange = Range(0 , nb_event[j]->nb_value - 1);
           plot[i].yrange = Range(0 , ceil(MAX(timev->hnb_event[j]->max ,
@@ -2470,7 +2485,7 @@ MultiPlotSet* Renewal::get_plotable(const RenewalData *timev) const
           nb_event[j]->plotable_mass_write(plot[i][1] , timev->hnb_event[j]->nb_element);
           i++;
 
-          // vue : fonctions de repartition des lois du nombre d'evenements
+          // number of events cumulative distribution function
 
           title.str("");
           title << SEQ_label[SEQL_NB_EVENT] << " " << SEQ_label[SEQL_DURING] << " "
@@ -2549,7 +2564,7 @@ MultiPlotSet* Renewal::get_plotable(const RenewalData *timev) const
     i++;
   }
 
-  // vue : probabilites de non-evenement/evenement fonction du temps ajustees
+  // fit of no-event/event probabilities as a function of time
 
   plot[i].xrange = Range(index_event->offset , index_event->length - 1);
   plot[i].yrange = Range(0. , 1.);
@@ -2609,11 +2624,13 @@ MultiPlotSet* Renewal::get_plotable(const RenewalData *timev) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Plot of a renewal process.
  *
- *  Sortie graphique d'un processus de renouvellement.
- *
- *--------------------------------------------------------------*/
+ *  \return MultiPlotSet object.
+ */
+/*--------------------------------------------------------------*/
 
 MultiPlotSet* Renewal::get_plotable() const
 

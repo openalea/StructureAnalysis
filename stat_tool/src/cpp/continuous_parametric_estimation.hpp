@@ -63,11 +63,11 @@ extern double von_mises_concentration_computation(double mean_direction);
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Estimation of parameters of gamma observation distributions.
+ *  \brief Estimation of gamma observation distributions.
  *
  *  \param[in] component_vector_count component counts,
  *  \param[in] variable               variable index,
- *  \param[in] process                pointer on a continuous observation process,
+ *  \param[in] process                pointer on a ContinuousParametricProcess object,
  *  \param[in] iter                   EM iteration.
  */
 /*--------------------------------------------------------------*/
@@ -301,12 +301,12 @@ void Vectors::gamma_estimation(Type **component_vector_count , int variable ,
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Estimation of parameters of gamma observation distributions:
+ *  \brief Estimation of gamma observation distributions:
  *         tied shape parameters and eventually tied scale parameters.
  *
  *  \param[in] component_vector_count component counts,
  *  \param[in] variable               variable index,
- *  \param[in] process                pointer on a continuous observation process,
+ *  \param[in] process                pointer on a ContinuousParametricProcess object,
  *  \param[in] variance_factor        tying rule,
  *  \param[in] iter                   EM iteration.
  */
@@ -650,11 +650,11 @@ void Vectors::tied_gamma_estimation(Type **component_vector_count , int variable
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Estimation of parameters of inverse Gaussian observation distributions.
+ *  \brief Estimation of inverse Gaussian observation distributions.
  *
  *  \param[in] component_vector_count component counts,
  *  \param[in] variable               variable index,
- *  \param[in] process                pointer on a continuous observation process.
+ *  \param[in] process                pointer on a ContinuousParametricProcess object.
  */
 /*--------------------------------------------------------------*/
 
@@ -761,7 +761,7 @@ void Vectors::inverse_gaussian_estimation(Type **component_vector_count , int va
  *
  *  \param[in] component_vector_count component counts,
  *  \param[in] variable               variable index,
- *  \param[in] process                pointer on a continuous observation process,
+ *  \param[in] process                pointer on a ContinuousParametricProcess object,
  *  \param[in] variance_factor        tying rule for the variance.
  */
 /*--------------------------------------------------------------*/
@@ -1047,11 +1047,11 @@ void Vectors::tied_inverse_gaussian_estimation(Type **component_vector_count , i
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Estimation of parameters of Gaussian observation distributions.
+ *  \brief Estimation of Gaussian observation distributions.
  *
  *  \param[in] component_vector_count component counts,
  *  \param[in] variable               variable index,
- *  \param[in] process                pointer on a continuous observation process.
+ *  \param[in] process                pointer on a ContinuousParametricProcess object.
  */
 /*--------------------------------------------------------------*/
 
@@ -1206,7 +1206,7 @@ void Vectors::gaussian_estimation(Type **component_vector_count , int variable ,
  *
  *  \param[in] component_vector_count component counts,
  *  \param[in] variable               variable index,
- *  \param[in] process                pointer on a continuous observation process,
+ *  \param[in] process                pointer on a ContinuousParametricProcess object,
  *  \param[in] variance_factor        tying rule for the variance.
  */
 /*--------------------------------------------------------------*/
@@ -1392,11 +1392,11 @@ void Vectors::tied_gaussian_estimation(Type **component_vector_count , int varia
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Estimation of parameters of von Mises observation distributions.
+ *  \brief Estimation of von Mises observation distributions.
  *
  *  \param[in] component_vector_count component counts,
  *  \param[in] variable               variable index,
- *  \param[in] process                pointer on a continuous observation process.
+ *  \param[in] process                pointer on a ContinuousParametricProcess object.
  */
 /*--------------------------------------------------------------*/
 

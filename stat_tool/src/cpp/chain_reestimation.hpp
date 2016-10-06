@@ -229,9 +229,9 @@ ChainReestimation<Type>::~ChainReestimation()
 /**
  *  \brief Assignment operator of the ChainReestimation class.
  *
- *  \param[in]  chain_data reference on a ChainReestimation object,
+ *  \param[in] chain_data reference on a ChainReestimation object.
  *
- *  \param[out] this       ChainReestimation object.
+ *  \return               ChainReestimation object.
  */
 /*--------------------------------------------------------------*/
 

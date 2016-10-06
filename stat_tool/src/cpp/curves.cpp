@@ -72,11 +72,11 @@ Curves::Curves()
 /**
  *  \brief Constructor of the Curves class.
  *
- *  \param[in] inb_curve       number of curves,
- *  \param[in] ilength         curve length,
- *  \param[in] frequency_flag  flag on the frequencies,
+ *  \param[in] inb_curve            number of curves,
+ *  \param[in] ilength              curve length,
+ *  \param[in] frequency_flag       flag on the frequencies,
  *  \param[in] index_parameter_flag flag on the index parameters,
- *  \param[in] init_flag       flag initialization.
+ *  \param[in] init_flag            flag initialization.
  */
 /*--------------------------------------------------------------*/
 
@@ -270,7 +270,7 @@ void Curves::copy(const Curves &curves)
  *  \brief Copy of a Curves object with curve smoothing.
  *
  *  \param[in] curves        reference on a Curves object,
- *  \param[in] max_frequency threshold on the frequencies for the smoothing .
+ *  \param[in] max_frequency threshold on the frequencies for the smoothing.
  */
 /*--------------------------------------------------------------*/
 
@@ -425,9 +425,9 @@ Curves::~Curves()
 /**
  *  \brief Assignment operator of the Curves class.
  *
- *  \param[in]  curves reference on a Curves object,
+ *  \param[in] curves reference on a Curves object.
  *
- *  \param[out] this   Curves object.
+ *  \return           Curves object.
  */
 /*--------------------------------------------------------------*/
 
@@ -463,7 +463,7 @@ ostream& Curves::ascii_print(ostream &os , bool file_flag , const Curves *curves
 
   old_adjust = os.setf(ios::right , ios::adjustfield);
 
-  // computation of column width
+  // computation of the column width
 
   if (frequency) {
     nb_column++;
@@ -584,7 +584,7 @@ ostream& Curves::spreadsheet_print(ostream &os , const Curves *curves) const
 /**
  *  \brief Computation of the curve length to be plotted (Gnuplot output).
  *
- *  \param[out] plot_length curve length.
+ *  \return curve length.
  */
 /*--------------------------------------------------------------*/
 
@@ -611,12 +611,12 @@ int Curves::plot_length_computation() const
 /**
  *  \brief Writing of 2 families of curves at the Gnuplot format.
  *
- *  \param[in]  path     file path,
- *  \param[in]  ilength  curve length,
- *  \param[in]  curves_0 pointer on a Curves object,
- *  \param[in]  curves_1 pointer on a Curves object,
+ *  \param[in] path     file path,
+ *  \param[in] ilength  curve length,
+ *  \param[in] curves_0 pointer on a Curves object,
+ *  \param[in] curves_1 pointer on a Curves object.
  *
- *  \param[out] status   error status.
+ *  \return             error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -727,7 +727,7 @@ void Curves::plotable_write(MultiPlot &plot) const
 
 /*--------------------------------------------------------------*/
 /**
- *  Writing of frequencies.
+ *  \brief Writing of frequencies.
  *
  *  \param[in] plot reference on a SinglePlot object.
  */
@@ -802,7 +802,7 @@ ostream& operator<<(ostream &os , const Curves &curves)
 /**
  *  \brief Computation of the maximum frequency of a Curves object.
  *
- *  \param[out] max_frequency maximum frequency.
+ *  \return maximum frequency.
  */
 /*--------------------------------------------------------------*/
 
@@ -832,7 +832,7 @@ int Curves::max_frequency_computation() const
 /**
  *  \brief Computation of the cumulative frequency of a Curves object.
  *
- *  \param[out] nb_element cumulative frequency.
+ *  \return cumulative frequency.
  */
 /*--------------------------------------------------------------*/
 
@@ -860,9 +860,9 @@ int Curves::nb_element_computation() const
 /**
  *  \brief Computation of the curve mean.
  *
- *  \param[in]  index curve index,
+ *  \param[in] index curve index.
  *
- *  \param[out] mean  mean.
+ *  \return          mean.
  */
 /*--------------------------------------------------------------*/
 
@@ -890,12 +890,12 @@ double Curves::mean_computation(int index) const
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Computation of the total variation.
+ *  \brief Computation of the total variation for a curve.
  *
- *  \param[in]  index            curve index,
- *  \param[in]  mean             mean,
+ *  \param[in] index curve index,
+ *  \param[in] mean  mean.
  *
- *  \param[out] total_square_sum total variation.
+ *  \return          total variation.
  */
 /*--------------------------------------------------------------*/
 
@@ -922,10 +922,10 @@ double Curves::total_square_sum_computation(int index , double mean) const
 /**
  *  \brief Writing of a curve and the corresponding standardized residuals at the Gnuplot format.
  *
- *  \param[in]  path              file path,
- *  \param[in]  standard_residual pointer on the standardized residuals,
+ *  \param[in] path              file path,
+ *  \param[in] standard_residual pointer on the standardized residuals.
  *
- *  \param[out] status            error status.
+ *  \return                      error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -940,7 +940,7 @@ bool Curves::plot_print_standard_residual(const char *path , double *standard_re
   if (out_file) {
     status = true;
 
-    // writing of reponses observees et des residus standardises
+    // writing of observed responses and standardized residuals
 
     for (i = 0;i < length;i++) {
       if (frequency[i] > 0) {

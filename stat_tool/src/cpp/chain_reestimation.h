@@ -51,19 +51,21 @@ namespace stat_tool {
  */
 
 
+  /// \brief Data structure corresponding to a Markov chain
+
   template <typename Type>
-  class ChainReestimation {  // data structure corresponding to a Markov chain
+  class ChainReestimation {
 
     friend std::ostream& operator<<(std::ostream &os , const ChainReestimation<Type> &chain_data)
     { return chain_data.print(os); }
 
   public :
 
-    process_type type;      // process type (ORDINARY/EQUILIBRIUM)
-    int nb_state;           // number of states
-    int nb_row;             // number of rows of the transition frequency matrix
-    Type *initial;          // initial state frequencies
-    Type **transition;      // transition frequency matrix
+    process_type type;      ///< process type (ORDINARY/EQUILIBRIUM)
+    int nb_state;           ///< number of states
+    int nb_row;             ///< number of rows of the transition frequency matrix
+    Type *initial;          ///< initial state frequencies
+    Type **transition;      ///< transition frequency matrix
 
     void init();
     void copy(const ChainReestimation<Type> &chain_data);

@@ -69,7 +69,7 @@ extern bool cumul_matching_plot_print(const char *path , int nb_cumul , int *off
  *
  *  \param[in,out] os            stream,
  *  \param[in]     nb_histo      number of frequency distributions,
- *  \param[in]     ihisto        pointer on a frequency distributions,
+ *  \param[in]     ihisto        pointer on the frequency distributions,
  *  \param[in]     type          variable type (NOMINAL/ORDINAL/NUMERIC),
  *  \param[in]     dissimilarity dissimilarities.
  */
@@ -323,14 +323,14 @@ ostream& FrequencyDistribution::dissimilarity_ascii_write(ostream &os , int nb_h
 /**
  *  \brief Writing of the results of a comparison of frequency distributions in a file.
  *
- *  \param[in]  error         reference on a StatError object,
- *  \param[in]  path          file path,
- *  \param[in]  nb_histo      number of frequency distributions,
- *  \param[in]  ihisto        pointer on the frequency distributions,
- *  \param[in]  type          variable type (NOMINAL/ORDINAL/NUMERIC),
- *  \param[in]  dissimilarity dissimilarities,
+ *  \param[in] error         reference on a StatError object,
+ *  \param[in] path          file path,
+ *  \param[in] nb_histo      number of frequency distributions,
+ *  \param[in] ihisto        pointer on the frequency distributions,
+ *  \param[in] type          variable type (NOMINAL/ORDINAL/NUMERIC),
+ *  \param[in] dissimilarity dissimilarities.
  *
- *  \param[out] status        error status.
+ *  \return                  error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -364,14 +364,14 @@ bool FrequencyDistribution::dissimilarity_ascii_write(StatError &error , const s
  *  \brief Writing des results of a comparison of frequency distributions in a file
  *         at the spreadsheet format.
  *
- *  \param[in]  error         reference on a StatError object,
- *  \param[in]  path          file path,
- *  \param[in]  nb_histo      number of frequency distributions,
- *  \param[in]  ihisto        pointer on the frequency distributions,
- *  \param[in]  type          variable type (NOMINAL/ORDINAL/NUMERIC),
- *  \param[in]  dissimilarity dissimilarities,
+ *  \param[in] error         reference on a StatError object,
+ *  \param[in] path          file path,
+ *  \param[in] nb_histo      number of frequency distributions,
+ *  \param[in] ihisto        pointer on the frequency distributions,
+ *  \param[in] type          variable type (NOMINAL/ORDINAL/NUMERIC),
+ *  \param[in] dissimilarity dissimilarities.
  *
- *  \param[out] status        error status.
+ *  \return                  error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -432,7 +432,7 @@ bool FrequencyDistribution::dissimilarity_spreadsheet_write(StatError &error , c
                << information / histo[i]->nb_element << "\n" << endl;
     }
 
-    // writing of the frequency distributions, cumulative distribution functions and the concentration curves
+    // writing of the frequency distributions, cumulative distribution functions and concentration curves
 
     cumul = new double*[nb_histo];
     for (i = 0;i < nb_histo;i++) {
@@ -613,10 +613,10 @@ bool FrequencyDistribution::dissimilarity_spreadsheet_write(StatError &error , c
 /**
  *  \brief Kruskal-Wallis test (analysis of variance on ranks).
  *
- *  \param[in]  nb_histo number of frequency distributions,
- *  \param[in]  ihisto   pointer on the frequency distributions,
+ *  \param[in] nb_histo number of frequency distributions,
+ *  \param[in] ihisto   pointer on the frequency distributions.
  *
- *  \param[out] test     Test object.
+ *  \return             Test object.
  */
 /*--------------------------------------------------------------*/
 
@@ -687,15 +687,15 @@ Test* FrequencyDistribution::kruskal_wallis_test(int nb_histo , const FrequencyD
 /**
  *  \brief Comparison of frequency distributions.
  *
- *  \param[in]  error    reference on a StatError object,
- *  \param[in]  os       stream,
- *  \param[in]  nb_histo number of frequency distributions,
- *  \param[in]  ihisto   pointer on the frequency distributions,
- *  \param[in]  type     variable type (NOMINAL/ORDINAL/NUMERIC),
- *  \param[in]  path     file path,
- *  \param[in]  format   file format (ASCII/SPREADSHEET),
+ *  \param[in] error    reference on a StatError object,
+ *  \param[in] os       stream,
+ *  \param[in] nb_histo number of frequency distributions,
+ *  \param[in] ihisto   pointer on the frequency distributions,
+ *  \param[in] type     variable type (NOMINAL/ORDINAL/NUMERIC),
+ *  \param[in] path     file path,
+ *  \param[in] format   file format (ASCII/SPREADSHEET).
  *
- *  \param[out] status   error status.
+ *  \return             error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -770,7 +770,7 @@ bool FrequencyDistribution::comparison(StatError &error , ostream &os , int nb_h
       }
     }
 
-    // computation of column widths
+    // computation of the column widths
 
     width[0] = column_width(nb_histo);
 
@@ -876,15 +876,15 @@ bool FrequencyDistribution::comparison(StatError &error , ostream &os , int nb_h
 /**
  *  \brief Comparison of frequency distributions.
  *
- *  \param[in]  error    reference on a StatError object,
- *  \param[in]  os       stream,
- *  \param[in]  nb_histo number of frequency distributions,
- *  \param[in]  ihisto   pointer on the frequency distributions,
- *  \param[in]  type     variable type (NOMINAL/ORDINAL/NUMERIC),
- *  \param[in]  path     file path,
- *  \param[in]  format   file format (ASCII/SPREADSHEET),
+ *  \param[in] error    reference on a StatError object,
+ *  \param[in] os       stream,
+ *  \param[in] nb_histo number of frequency distributions,
+ *  \param[in] ihisto   pointer on the frequency distributions,
+ *  \param[in] type     variable type (NOMINAL/ORDINAL/NUMERIC),
+ *  \param[in] path     file path,
+ *  \param[in] format   file format (ASCII/SPREADSHEET).
  *
- *  \param[out] status   error status.
+ *  \return             error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -1010,11 +1010,11 @@ void FrequencyDistribution::t_comparison(ostream &os , const FrequencyDistributi
 /**
  *  \brief Wilcoxon-Mann-Whitney test of distribution comparison.
  *
- *  \param[in]  error  reference on a StatError object,
- *  \param[in]  os     stream,
- *  \param[in]  ihisto reference on a frequency distribution.
+ *  \param[in] error  reference on a StatError object,
+ *  \param[in] os     stream,
+ *  \param[in] ihisto reference on a frequency distribution.
  *
- *  \param[out] status error status.
+ *  \return           error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -1134,13 +1134,13 @@ bool FrequencyDistribution::wilcoxon_mann_whitney_comparison(StatError &error , 
  *         - matching of cumulative distribution functions,
  *         - concentration curves.
  *
- *  \param[in]  error    reference on a StatError object,
- *  \param[in]  prefix   file prefix,
- *  \param[in]  nb_histo number of frequency distributions,
- *  \param[in]  ihisto   pointer on the frequency distributions,
- *  \param[in]  title    figure title,
+ *  \param[in] error    reference on a StatError object,
+ *  \param[in] prefix   file prefix,
+ *  \param[in] nb_histo number of frequency distributions,
+ *  \param[in] ihisto   pointer on the frequency distributions,
+ *  \param[in] title    figure title.
  *
- *  \param[out] status   error status.
+ *  \return             error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -1176,7 +1176,7 @@ bool FrequencyDistribution::plot_write(StatError &error , const char *prefix , i
       histo[i] = ihisto[i - 1];
     }
 
-    // writing of data files
+    // writing of the data files
 
     data_file_name = new ostringstream[nb_histo + 2];
 
@@ -1220,7 +1220,7 @@ bool FrequencyDistribution::plot_write(StatError &error , const char *prefix , i
         poffset[i] = histo[i]->offset;
         pnb_value[i] = histo[i]->nb_value;
 
-        // computation of the cumulative distribution functions and the concentration curves
+        // computation of the cumulative distribution functions and concentration curves
 
         cumul[i] = histo[i]->cumul_computation();
         concentration[i] = histo[i]->concentration_function_computation();
@@ -1284,7 +1284,7 @@ bool FrequencyDistribution::plot_write(StatError &error , const char *prefix , i
 
     if (status) {
 
-      // writing of script files
+      // writing of the script files
 
       for (i = 0;i < 2;i++) {
         ostringstream file_name[2];
@@ -1549,11 +1549,11 @@ bool FrequencyDistribution::plot_write(StatError &error , const char *prefix , i
  *         - matching of cumulative distribution functions,
  *         - concentration curves.
  *
- *  \param[in]  error    reference on a StatError object,
- *  \param[in]  nb_histo number of frequency distributions,
- *  \param[in]  ihisto   pointer on the frequency distributions,
+ *  \param[in] error    reference on a StatError object,
+ *  \param[in] nb_histo number of frequency distributions,
+ *  \param[in] ihisto   pointer on the frequency distributions.
  *
- *  \param[out] plot_set plots.
+ *  \return             plots.
  */
 /*--------------------------------------------------------------*/
 
@@ -1884,7 +1884,7 @@ MultiPlotSet* FrequencyDistribution::get_plotable_frequency_distributions(StatEr
 /**
  *  \brief Plot of a frequency distribution.
  *
- *  \param[out] plot_set plots.
+ *  \return MultiPlotSet object.
  */
 /*--------------------------------------------------------------*/
 
@@ -1927,7 +1927,7 @@ DiscreteDistributionData::DiscreteDistributionData(const FrequencyDistribution &
  *         a FrequencyDistribution and a DiscreteParametric objects.
  *
  *  \param[in] histo reference on a FrequencyDistribution object,
- *  \param[in] dist  pointer on un DiscreteParametric objet.
+ *  \param[in] dist  pointer on a DiscreteParametric object.
  */
 /*--------------------------------------------------------------*/
 
@@ -1947,7 +1947,7 @@ DiscreteDistributionData::DiscreteDistributionData(const FrequencyDistribution &
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Copy constructor of the DiscreteDistributionData class.
+ *  \brief Constructor by copy of the DiscreteDistributionData class.
  *
  *  \param[in] histo      reference on a DiscreteDistributionData object,
  *  \param[in] model_flag flag copy of the included DiscreteParametricModel object.
@@ -1983,11 +1983,11 @@ DiscreteDistributionData::~DiscreteDistributionData()
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Assignement operator of the DiscreteDistributionData class.
+ *  \brief Assignment operator of the DiscreteDistributionData class.
  *
- *  \param[in]  histo reference on a DiscreteDistributionData object,
+ *  \param[in] histo reference on a DiscreteDistributionData object.
  *
- *  \param[out] this  DiscreteDistributionData object.
+ *  \return          DiscreteDistributionData object.
  */
 /*--------------------------------------------------------------*/
 
@@ -2016,9 +2016,9 @@ DiscreteDistributionData& DiscreteDistributionData::operator=(const DiscreteDist
  *  \brief Extraction of the DiscreteParametricModel object included in
  *         a DiscreteDistributionData object.
  *
- *  \param[in]  error reference on a StatError object.
+ *  \param[in] error reference on a StatError object.
  *
- *  \param[out] dist  DiscreteParametricModel object.
+ *  \return          DiscreteParametricModel object.
  */
 /*--------------------------------------------------------------*/
 
@@ -2049,8 +2049,8 @@ DiscreteParametricModel* DiscreteDistributionData::extract_model(StatError &erro
  *  \brief Construction of a FrequencyDistribution object from a file.
  *         Format: n rows with ordered value and associated frequency.
  *
- *  \param[in]  error reference on a StatError object,
- *  \param[in]  path  file path.
+ *  \param[in] error reference on a StatError object,
+ *  \param[in] path  file path.
  */
 /*--------------------------------------------------------------*/
 
@@ -2146,7 +2146,7 @@ DiscreteDistributionData* DiscreteDistributionData::ascii_read(StatError &error 
         i++;
       }
 
-      // test 2 numbers per line
+      // test 2 items per line
 
       if ((i > 0) && (i != 2)) {
         status = false;
@@ -2279,11 +2279,11 @@ ostream& DiscreteDistributionData::ascii_write(ostream &os , bool exhaustive) co
 /**
  *  \brief Writing of a DiscreteDistributionData object in a file.
  *
- *  \param[in]  error      reference on a StatError object,
- *  \param[in]  path       file path,
- *  \param[in]  exhaustive flag detail level,
+ *  \param[in] error      reference on a StatError object,
+ *  \param[in] path       file path,
+ *  \param[in] exhaustive flag detail level.
  *
- *  \param[out] status     error status.
+ *  \return               error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -2315,10 +2315,10 @@ bool DiscreteDistributionData::ascii_write(StatError &error , const string path 
 /**
  *  \brief Writing of a DiscreteDistributionData object in a file at the spreadsheet format.
  *
- *  \param[in]  error  reference on a StatError object,
- *  \param[in]  path   file path,
+ *  \param[in] error reference on a StatError object,
+ *  \param[in] path  file path.
  *
- *  \param[out] status error status.
+ *  \return          error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -2377,11 +2377,11 @@ bool DiscreteDistributionData::spreadsheet_write(StatError &error , const string
 /**
  *  \brief Plot of a DiscreteDistributionData object using Gnuplot.
  *
- *  \param[in]  error  reference on a StatError object,
- *  \param[in]  prefix file prefix,
- *  \param[in]  title  figure title,
+ *  \param[in] error  reference on a StatError object,
+ *  \param[in] prefix file prefix,
+ *  \param[in] title  figure title.
  *
- *  \param[out] status error status.
+ *  \return           error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -2408,7 +2408,7 @@ bool DiscreteDistributionData::plot_write(StatError &error , const char *prefix 
 /**
  *  \brief Plot of a DiscreteDistributionData object.
  *
- *  \param[out] plot_set plots.
+ *  \return MultiPlotSet object.
  */
 /*--------------------------------------------------------------*/
 

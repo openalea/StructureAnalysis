@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -65,14 +65,17 @@ namespace sequence_analysis {
 
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Merging of Sequences objects.
  *
- *  Fusion d'objets Sequences.
+ *  \param[in] error     reference on a StatError object,
+ *  \param[in] nb_sample number of Sequences objects,
+ *  \param[in] iseq      pointer on the Sequences objects.
  *
- *  arguments : reference sur un objet StatError, nombre d'objets Sequences,
- *              pointeurs sur les objets Sequences.
- *
- *--------------------------------------------------------------*/
+ *  \return              Sequences object.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences* Sequences::merge(StatError &error , int nb_sample , const Sequences **iseq) const
 
@@ -136,14 +139,14 @@ Sequences* Sequences::merge(StatError &error , int nb_sample , const Sequences *
       pseq[i] = iseq[i - 1];
     }
 
-    // calcul du nombre de sequences
+    // computation of the number of sequences
 
     inb_sequence = 0;
     for (i = 0;i < nb_sample;i++) {
       inb_sequence += pseq[i]->nb_sequence;
     }
 
-    // comparaison des identificateurs des sequences
+    // comparison of the sequence identifiers
 
     iidentifier = new int[inb_sequence];
 
@@ -173,7 +176,7 @@ Sequences* Sequences::merge(StatError &error , int nb_sample , const Sequences *
       cumul_nb_sequence += pseq[j]->nb_sequence;
     }
 
-    // copie des longueurs des sequences
+    // copy of sequence lengths
 
     ilength = new int[inb_sequence];
 
@@ -184,7 +187,7 @@ Sequences* Sequences::merge(StatError &error , int nb_sample , const Sequences *
       }
     }
 
-    // comparaison des identificateurs des vertex
+    // comparison of vertex identifiers
 
     for (i = 0;i < nb_sample;i++) {
       if (!(pseq[i]->vertex_identifier)) {
@@ -284,7 +287,7 @@ Sequences* Sequences::merge(StatError &error , int nb_sample , const Sequences *
       seq->index_interval = new FrequencyDistribution(nb_sample , phisto);
     }
 
-    // copie des valeurs
+    // copy of values
 
     i = 0;
     for (j = 0;j < nb_sample;j++) {
@@ -346,14 +349,17 @@ Sequences* Sequences::merge(StatError &error , int nb_sample , const Sequences *
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Merging of Sequences objects.
  *
- *  Fusion d'objets Sequences.
+ *  \param[in] error     reference on a StatError object,
+ *  \param[in] nb_sample number of Sequences objects,
+ *  \param[in] iseq      pointer on the Sequences objects.
  *
- *  arguments : reference sur un objet StatError, nombre d'objets Sequences,
- *              pointeurs sur les objets Sequences.
- *
- *--------------------------------------------------------------*/
+ *  \return              Sequences object.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences* Sequences::merge(StatError &error , int nb_sample , const vector<Sequences> iseq) const
 
@@ -379,14 +385,17 @@ Sequences* Sequences::merge(StatError &error , int nb_sample , const vector<Sequ
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Shifting of values of a variable.
  *
- *  Translation des valeurs d'une variable.
+ *  \param[in] error       reference on a StatError object,
+ *  \param[in] variable    variable index,
+ *  \param[in] shift_param integer shifting parameter.
  *
- *  arguments : reference sur un objet StatError, indice de la variable,
- *              parametre de translation.
- *
- *--------------------------------------------------------------*/
+ *  \return                Sequences object.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences* Sequences::shift(StatError &error , int variable , int shift_param) const
 
@@ -438,7 +447,7 @@ Sequences* Sequences::shift(StatError &error , int variable , int shift_param) c
 
     switch (seq->type[variable]) {
 
-    // translation des valeurs entieres
+    // shifting of integer values
 
     case INT_VALUE : {
       for (i = 0;i < seq->nb_sequence;i++) {
@@ -449,7 +458,7 @@ Sequences* Sequences::shift(StatError &error , int variable , int shift_param) c
       break;
     }
 
-    // translation des valeurs reelles
+    // shifting of real values
 
     case REAL_VALUE : {
       for (i = 0;i < seq->nb_sequence;i++) {
@@ -495,14 +504,17 @@ Sequences* Sequences::shift(StatError &error , int variable , int shift_param) c
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Shifting of values of a real-valued variable.
  *
- *  Translation des valeurs d'une variable reelle.
+ *  \param[in] error       reference on a StatError object,
+ *  \param[in] variable    variable index,
+ *  \param[in] shift_param real shifting parameter.
  *
- *  arguments : reference sur un objet StatError, indice de la variable,
- *              parametre de translation.
- *
- *--------------------------------------------------------------*/
+ *  \return                Sequences object.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences* Sequences::shift(StatError &error , int variable , double shift_param) const
 
@@ -532,7 +544,7 @@ Sequences* Sequences::shift(StatError &error , int variable , double shift_param
   if (status) {
     seq = new Sequences(*this , variable , type[variable]);
 
-    // translation des valeurs reelles
+    // shifting of real values
 
     for (i = 0;i < seq->nb_sequence;i++) {
       for (j = 0;j < seq->length[i];j++) {
@@ -561,14 +573,18 @@ Sequences* Sequences::shift(StatError &error , int variable , double shift_param
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Thresholding of values of a variable.
  *
- *  Seuillage des valeurs d'une variable.
+ *  \param[in] error     reference on a StatError object,
+ *  \param[in] variable  variable index,
+ *  \param[in] threshold integer threshold,
+ *  \param[in] mode      mode (ABOVE/BELOW).
  *
- *  arguments : reference sur un objet StatError, indice de la variable,
- *              seuil, mode (ABOVE/BELOW).
- *
- *--------------------------------------------------------------*/
+ *  \return              Sequences object.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences* Sequences::thresholding(StatError &error , int variable , int threshold ,
                                    threshold_direction mode) const
@@ -626,7 +642,7 @@ Sequences* Sequences::thresholding(StatError &error , int variable , int thresho
 
     switch (seq->type[variable]) {
 
-    // seuillage des valeurs entieres
+    // thresholding of integer values
 
     case INT_VALUE : {
       switch (mode) {
@@ -663,7 +679,7 @@ Sequences* Sequences::thresholding(StatError &error , int variable , int thresho
       break;
     }
 
-    // seuillage des valeurs reelles
+    // thresholding of real values
 
     case REAL_VALUE : {
       switch (mode) {
@@ -725,14 +741,18 @@ Sequences* Sequences::thresholding(StatError &error , int variable , int thresho
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Thresholding of values of a real-valued variable.
  *
- *  Seuillage des valeurs d'une variable reelle.
+ *  \param[in] error     reference on a StatError object,
+ *  \param[in] variable  variable index,
+ *  \param[in] threshold real threshold,
+ *  \param[in] mode      mode (ABOVE/BELOW).
  *
- *  arguments : reference sur un objet StatError, indice de la variable,
- *              seuil, mode (ABOVE/BELOW).
- *
- *--------------------------------------------------------------*/
+ *  \return              Sequences object.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences* Sequences::thresholding(StatError &error , int variable , double threshold ,
                                    threshold_direction mode) const
@@ -777,7 +797,7 @@ Sequences* Sequences::thresholding(StatError &error , int variable , double thre
   if (status) {
     seq = new Sequences(*this , variable , type[variable]);
 
-    // seuillage des valeurs reelles
+    // thresholding of real values
 
     switch (mode) {
 
@@ -823,14 +843,16 @@ Sequences* Sequences::thresholding(StatError &error , int variable , double thre
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Clustering of values of a variable.
  *
- *  Regroupement des valeurs d'une variable.
- *
- *  arguments : reference sur un objet Sequences, indice de la variable,
- *              pas de regroupement, mode (FLOOR/ROUND/CEIL).
- *
- *--------------------------------------------------------------*/
+ *  \param[in] seq      reference on a Sequences object,
+ *  \param[in] variable variable index,
+ *  \param[in] step     clustering step,
+ *  \param[in] mode     mode (FLOOR/ROUND/CEIL).
+ */
+/*--------------------------------------------------------------*/
 
 void Sequences::cluster(const Sequences &seq , int variable , int step , rounding mode)
 
@@ -840,7 +862,7 @@ void Sequences::cluster(const Sequences &seq , int variable , int step , roundin
 
   switch (type[variable]) {
 
-  // regroupement des valeurs entieres
+  // clustering of integer values
 
   case INT_VALUE : {
     switch (mode) {
@@ -900,7 +922,7 @@ void Sequences::cluster(const Sequences &seq , int variable , int step , roundin
     break;
   }
 
-  // regroupement des valeurs reelles
+  // clustering of real values
 
   case REAL_VALUE : {
     for (i = 0;i < nb_sequence;i++) {
@@ -930,14 +952,18 @@ void Sequences::cluster(const Sequences &seq , int variable , int step , roundin
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Clustering of values of a variable.
  *
- *  Regroupement des valeurs d'une variable.
+ *  \param[in] error    reference on a StatError object,
+ *  \param[in] variable variable index,
+ *  \param[in] step     clustering step,
+ *  \param[in] mode     mode (FLOOR/ROUND/CEIL).
  *
- *  arguments : reference sur un objet StatError, indice de la variable,
- *              pas de regroupement, mode (FLOOR/ROUND/CEIL).
- *
- *--------------------------------------------------------------*/
+ *  \return             Sequences object.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences* Sequences::cluster(StatError &error , int variable , int step , rounding mode) const
 
@@ -988,15 +1014,18 @@ Sequences* Sequences::cluster(StatError &error , int variable , int step , round
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Transcoding of categories of an integer-valued variable.
  *
- *  Transcodage des categories d'une variable entiere.
- *
- *  arguments : reference sur un objet Sequences, indice de la variable,
- *              plus petit et plus grand categories, table de transcodage des categories,
- *              flag pour ajouter une variable.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] seq          reference on a Sequences object,
+ *  \param[in] ivariable    variable index,
+ *  \param[in] min_category lowest category,
+ *  \param[in] max_category highest category,
+ *  \param[in] category     transcoding table,
+ *  \param[in] add_variable flag for adding a variable.
+ */
+/*--------------------------------------------------------------*/
 
 void Sequences::transcode(const Sequences &seq , int ivariable , int min_category ,
                           int max_category , int *category , bool add_variable)
@@ -1038,7 +1067,7 @@ void Sequences::transcode(const Sequences &seq , int ivariable , int min_categor
     for (j = 0;j < nb_variable;j++) {
       if ((type[j] != REAL_VALUE) && (type[j] != AUXILIARY)) {
 
-        // transcodage des categories
+        // transcoding of categories
 
         if (j == variable) {
           for (k = 0;k < length[i];k++) {
@@ -1047,7 +1076,7 @@ void Sequences::transcode(const Sequences &seq , int ivariable , int min_categor
           }
         }
 
-        // copie des valeurs entieres
+        // copy of integer values
 
         else {
           for (k = 0;k < length[i];k++) {
@@ -1056,7 +1085,7 @@ void Sequences::transcode(const Sequences &seq , int ivariable , int min_categor
         }
       }
 
-      // copie des valeurs reelles
+      // copy of real values
 
       else {
         for (k = 0;k < length[i];k++) {
@@ -1089,14 +1118,17 @@ void Sequences::transcode(const Sequences &seq , int ivariable , int min_categor
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Transcoding of categories of an integer-valued variable.
  *
- *  Transcodage des categories d'une variable entiere.
+ *  \param[in] error    reference on a StatError object,
+ *  \param[in] variable variable index,
+ *  \param[in] category transcoding table.
  *
- *  arguments : reference sur un objet StatError, indice de la variable,
- *              table de transcodage des categories.
- *
- *--------------------------------------------------------------*/
+ *  \return             Sequences object.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences* Sequences::transcode(StatError &error , int variable , int *category) const
 
@@ -1194,14 +1226,17 @@ Sequences* Sequences::transcode(StatError &error , int variable , int *category)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Transcoding of categories of an integer-valued variable.
  *
- *  Transcodage des categories d'une variable entiere.
+ *  \param[in] error    reference on a StatError object,
+ *  \param[in] variable variable index,
+ *  \param[in] category transcoding table.
  *
- *  arguments : reference sur un objet StatError, indice de la variable,
- *              table de transcodage des categories.
- *
- *--------------------------------------------------------------*/
+ *  \return             Sequences object.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences* Sequences::transcode(StatError &error , int variable , vector<int> category) const
 
@@ -1210,14 +1245,18 @@ Sequences* Sequences::transcode(StatError &error , int variable , vector<int> ca
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Partitioning of values of a variable.
  *
- *  Regroupement des valeurs d'une variable entiere.
+ *  \param[in] error     reference on a StatError object, 
+ *  \param[in] variable  variable index,
+ *  \param[in] nb_class  number of classes,
+ *  \param[in] ilimit    integer limits between classes (beginning of classes).
  *
- *  arguments : reference sur un objet StatError, indice de la variable,
- *              nombre de classes, bornes pour regrouper les valeurs.
- *
- *--------------------------------------------------------------*/
+ *  \return              Sequences object.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences* Sequences::cluster(StatError &error , int variable ,
                               int nb_class , int *ilimit) const
@@ -1330,14 +1369,18 @@ Sequences* Sequences::cluster(StatError &error , int variable ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Partitioning of values of a variable.
  *
- *  Regroupement des valeurs d'une variable entiere.
+ *  \param[in] error    reference on a StatError object,
+ *  \param[in] variable variable index,
+ *  \param[in] nb_class number of classes,
+ *  \param[in] ilimit   integer limits between classes (beginning of classes).
  *
- *  arguments : reference sur un objet StatError, indice de la variable,
- *              nombre de classes, bornes pour regrouper les valeurs.
- *
- *--------------------------------------------------------------*/
+ *  \return             Sequences object.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences* Sequences::cluster(StatError &error , int variable ,
                               int nb_class , vector<int> ilimit) const
@@ -1347,14 +1390,16 @@ Sequences* Sequences::cluster(StatError &error , int variable ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Partitioning of values of a real-valued variable.
  *
- *  Regroupement des valeurs d'une variable reelle.
- *
- *  arguments : reference sur un objet Sequences, indice de la variable,
- *              nombre de classes, bornes pour regrouper les valeurs.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] seq      reference on a Sequences object,
+ *  \param[in] variable variable index,
+ *  \param[in] nb_class number of classes,
+ *  \param[in] limit    real limits between classes (beginning of classes).
+ */
+/*--------------------------------------------------------------*/
 
 void Sequences::cluster(const Sequences &seq , int variable , int nb_class , double *limit)
 
@@ -1362,7 +1407,7 @@ void Sequences::cluster(const Sequences &seq , int variable , int nb_class , dou
   register int i , j , k;
 
 
-  // regroupement des valeurs reelles
+  // grouping of real values
 
   for (i = 0;i < nb_sequence;i++) {
     for (j = 0;j < length[i];j++) {
@@ -1382,14 +1427,18 @@ void Sequences::cluster(const Sequences &seq , int variable , int nb_class , dou
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Partitioning of values of a real-valued variable.
  *
- *  Regroupement des valeurs d'une variable reelle.
+ *  \param[in] error    reference on a StatError object,
+ *  \param[in] variable variable index,
+ *  \param[in] nb_class number of classes,
+ *  \param[in] ilimit   real limits between classes (beginning of classes).
  *
- *  arguments : reference sur un objet StatError, indice de la variable,
- *              nombre de classes, bornes pour regrouper les valeurs.
- *
- *--------------------------------------------------------------*/
+ *  \return             Sequences object.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences* Sequences::cluster(StatError &error , int variable ,
                               int nb_class , double *ilimit) const
@@ -1458,14 +1507,18 @@ Sequences* Sequences::cluster(StatError &error , int variable ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Partitioning of values of a real-valued variable.
  *
- *  Regroupement des valeurs d'une variable reelle.
+ *  \param[in] error    reference on a StatError object,
+ *  \param[in] variable variable index,
+ *  \param[in] nb_class number of classes,
+ *  \param[in] ilimit   real limits between classes (beginning of classes).
  *
- *  arguments : reference sur un objet StatError, indice de la variable,
- *              nombre de classes, bornes pour regrouper les valeurs.
- *
- *--------------------------------------------------------------*/
+ *  \return             Sequences object.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences* Sequences::cluster(StatError &error , int variable ,
                               int nb_class , vector<double> ilimit) const
@@ -1475,13 +1528,17 @@ Sequences* Sequences::cluster(StatError &error , int variable ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Scaling of a variable.
  *
- *  Changement d'unite d'une variable.
+ *  \param[in] error         reference on a StatError object,
+ *  \param[in] variable      variable index,
+ *  \param[in] scaling_coeff integer scaling factor.
  *
- *  arguments : reference sur un objet StatError, variable, facteur d'echelle.
- *
- *--------------------------------------------------------------*/
+ *  \return                  Sequences object.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences* Sequences::scaling(StatError &error , int variable , int scaling_coeff) const
 
@@ -1528,7 +1585,7 @@ Sequences* Sequences::scaling(StatError &error , int variable , int scaling_coef
 
     switch (seq->type[variable]) {
 
-    // mise a l'echelle des valeurs entieres
+    // scaling of integer values
 
     case INT_VALUE : {
       for (i = 0;i < seq->nb_sequence;i++) {
@@ -1539,7 +1596,7 @@ Sequences* Sequences::scaling(StatError &error , int variable , int scaling_coef
       break;
     }
 
-    // mise a l'echelle des valeurs reelles
+    // scaling of real values
 
     case REAL_VALUE : {
       for (i = 0;i < seq->nb_sequence;i++) {
@@ -1572,13 +1629,17 @@ Sequences* Sequences::scaling(StatError &error , int variable , int scaling_coef
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Scaling of a variable.
  *
- *  Changement d'unite d'une variable.
+ *  \param[in] error         reference on a StatError object,
+ *  \param[in] variable      variable index,
+ *  \param[in] scaling_coeff real scaling factor.
  *
- *  arguments : reference sur un objet StatError, variable, facteur d'echelle.
- *
- *--------------------------------------------------------------*/
+ *  \return                  Sequences object.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences* Sequences::scaling(StatError &error , int variable , double scaling_coeff) const
 
@@ -1617,7 +1678,7 @@ Sequences* Sequences::scaling(StatError &error , int variable , double scaling_c
 
     switch (type[variable]) {
 
-    // mise a l'echelle des valeurs entieres
+    // scaling of integer values
 
     case INT_VALUE : {
       for (i = 0;i < seq->nb_sequence;i++) {
@@ -1628,7 +1689,7 @@ Sequences* Sequences::scaling(StatError &error , int variable , double scaling_c
       break;
     }
 
-    // mise a l'echelle des valeurs reelles
+    // scaling of real values
 
     case REAL_VALUE : {
       for (i = 0;i < seq->nb_sequence;i++) {
@@ -1661,14 +1722,17 @@ Sequences* Sequences::scaling(StatError &error , int variable , double scaling_c
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Rounding of values of a real-valued variable.
  *
- *  Arrondi des valeurs d'une variable reelle.
+ *  \param[in] error    reference on a StatError object,
+ *  \param[in] variable variable index,
+ *  \param[in] mode     mode (FLOOR/ROUND/CEIL).
  *
- *  arguments : reference sur un objet StatError, indice de la variable,
- *              mode (FLOOR/ROUND/CEIL).
- *
- *--------------------------------------------------------------*/
+ *  \return             Sequences object.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences* Sequences::round(StatError &error , int variable , rounding mode) const
 
@@ -1767,7 +1831,7 @@ Sequences* Sequences::round(StatError &error , int variable , rounding mode) con
     for (i = 0;i < seq->nb_sequence;i++) {
       for (j = 0;j < seq->nb_variable;j++) {
 
-        // copie des valeurs entieres
+        // copy of integer values
 
         if ((type[j] != REAL_VALUE) && (type[j] != AUXILIARY)) {
           for (k = 0;k < seq->length[i];k++) {
@@ -1777,7 +1841,7 @@ Sequences* Sequences::round(StatError &error , int variable , rounding mode) con
 
         else {
 
-          // arrondi des valeurs reelles
+          // rounding of real values
 
           if (((variable == I_DEFAULT) && (type[j] == REAL_VALUE)) || (variable == j)) {
             switch (mode) {
@@ -1805,7 +1869,7 @@ Sequences* Sequences::round(StatError &error , int variable , rounding mode) con
             }
           }
 
-          // copie des valeurs reelles
+          // copy of real values
 
           else {
             for (k = 0;k < seq->length[i];k++) {
@@ -1854,15 +1918,19 @@ Sequences* Sequences::round(StatError &error , int variable , rounding mode) con
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Selection of sequences taking values in a given range for the index parameter.
  *
- *  Selection de sequences sur les valeurs prises par le parametre d'index.
+ *  \param[in] error               reference on a StatError object,
+ *  \param[in] os                  stream,
+ *  \param[in] min_index_parameter lowest index parameter,
+ *  \param[in] max_index_parameter highest index parameter,
+ *  \param[in] keep                flag for keeping or rejecting the selected sequences.
  *
- *  arguments : reference sur un objet StatError, stream,
- *              bornes sur les parametres d'index,
- *              flag pour conserver ou rejeter les sequences selectionnees.
- *
- *--------------------------------------------------------------*/
+ *  \return                        Sequences object.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences* Sequences::index_parameter_select(StatError &error , ostream &os ,
                                              int min_index_parameter ,
@@ -1898,7 +1966,7 @@ Sequences* Sequences::index_parameter_select(StatError &error , ostream &os ,
 
   if (status) {
 
-    // selection des sequences
+    // selection of sequences
 
     iidentifier = new int[nb_sequence];
     index = new int[nb_sequence];
@@ -1927,7 +1995,7 @@ Sequences* Sequences::index_parameter_select(StatError &error , ostream &os ,
       error.update(STAT_error[STATR_EMPTY_SAMPLE]);
     }
 
-    // copie des sequences
+    // copy of sequences
 
     if (status) {
       if (inb_sequence <= DISPLAY_NB_INDIVIDUAL) {
@@ -1949,15 +2017,20 @@ Sequences* Sequences::index_parameter_select(StatError &error , ostream &os ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Selection of sequences taking values in a given range for a variable.
  *
- *  Selection de sequences sur les valeurs prises par une variable.
+ *  \param[in] error      reference on a StatError object,
+ *  \param[in] os         stream,
+ *  \param[in] variable   variable index,
+ *  \param[in] imin_value lowest integer value,
+ *  \param[in] imax_value highest integer value,
+ *  \param[in] keep       flag for keeping or rejecting the selected sequences.
  *
- *  arguments : reference sur un objet StatError, stream, indice de la variable,
- *              bornes sur les valeurs, flag pour conserver ou rejeter
- *              les sequences selectionnees.
- *
- *--------------------------------------------------------------*/
+ *  \return               Sequences object.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences* Sequences::value_select(StatError &error , ostream &os , int variable ,
                                    int imin_value , int imax_value , bool keep) const
@@ -2004,7 +2077,7 @@ Sequences* Sequences::value_select(StatError &error , ostream &os , int variable
 
   if (status) {
 
-    // selection des sequences
+    // selection of sequences
 
     iidentifier = new int[nb_sequence];
     index = new int[nb_sequence];
@@ -2055,7 +2128,7 @@ Sequences* Sequences::value_select(StatError &error , ostream &os , int variable
       error.update(STAT_error[STATR_EMPTY_SAMPLE]);
     }
 
-    // copie des sequences
+    // copy of sequences
 
     if (status) {
       if (inb_sequence <= DISPLAY_NB_INDIVIDUAL) {
@@ -2077,15 +2150,20 @@ Sequences* Sequences::value_select(StatError &error , ostream &os , int variable
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Selection of sequences taking values in a given range for a real-valued variable.
  *
- *  Selection de sequences sur les valeurs prises par une variable reelle.
+ *  \param[in] error      reference on a StatError object,
+ *  \param[in] os         stream,
+ *  \param[in] variable   variable index,
+ *  \param[in] imin_value lowest real value,
+ *  \param[in] imax_value highest real value,
+ *  \param[in] keep       flag for keeping or rejecting the selected sequences.
  *
- *  arguments : reference sur un objet StatError, stream, indice de la variable,
- *              bornes sur les valeurs, flag pour conserver ou rejeter
- *              les sequences selectionnees.
- *
- *--------------------------------------------------------------*/
+ *  \return               Sequences object.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences* Sequences::value_select(StatError &error , ostream &os , int variable ,
                                    double imin_value , double imax_value , bool keep) const
@@ -2127,7 +2205,7 @@ Sequences* Sequences::value_select(StatError &error , ostream &os , int variable
 
   if (status) {
 
-    // selection des sequences
+    // selection of sequences
 
     iidentifier = new int[nb_sequence];
     index = new int[nb_sequence];
@@ -2156,7 +2234,7 @@ Sequences* Sequences::value_select(StatError &error , ostream &os , int variable
       error.update(STAT_error[STATR_EMPTY_SAMPLE]);
     }
 
-    // copie des sequences
+    // copy of sequences
 
     if (status) {
       if (inb_sequence <= DISPLAY_NB_INDIVIDUAL) {
@@ -2178,15 +2256,18 @@ Sequences* Sequences::value_select(StatError &error , ostream &os , int variable
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Selection of sequences by their identifiers.
  *
- *  Selection de sequences par l'identificateur.
+ *  \param[in] error        reference on a StatError object,
+ *  \param[in] inb_sequence number of sequences,
+ *  \param[in] iidentifier  sequence identifiers,
+ *  \param[in] keep         flag for keeping or rejecting the selected individuals.
  *
- *  arguments : reference sur un objet StatError, nombre de sequences,
- *              identificateur des sequences, flag pour conserver ou rejeter
- *              les sequences selectionnees.
- *
- *--------------------------------------------------------------*/
+ *  \return                 Sequences object.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences* Sequences::select_individual(StatError &error , int inb_sequence ,
                                         int *iidentifier , bool keep) const
@@ -2222,15 +2303,18 @@ Sequences* Sequences::select_individual(StatError &error , int inb_sequence ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Selection of sequences by their identifiers.
  *
- *  Selection de sequences par l'identificateur.
+ *  \param[in] error        reference on a StatError object,
+ *  \param[in] inb_sequence number of sequences,
+ *  \param[in] iidentifier  sequence identifiers,
+ *  \param[in] keep         flag for keeping or rejecting the selected sequences.
  *
- *  arguments : reference sur un objet StatError, nombre de sequences,
- *              identificateur des sequences, flag pour conserver ou rejeter
- *              les sequences selectionnees.
- *
- *--------------------------------------------------------------*/
+ *  \return                 Sequences object.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences* Sequences::select_individual(StatError &error , int inb_sequence ,
                                         vector<int> iidentifier , bool keep) const
@@ -2240,14 +2324,16 @@ Sequences* Sequences::select_individual(StatError &error , int inb_sequence ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Copy of a Sequences object transforming the implicit index parameters in
+ *         explicit index parameters.
  *
- *  Copie d'un objet Sequences avec transformation du parametre d'index implicite
- *  en parametre d'index explicite.
+ *  \param[in] error reference on a StatError object.
  *
- *  argument : reference sur un objet StatError.
- *
- *--------------------------------------------------------------*/
+ *  \return          Sequences object.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences* Sequences::explicit_index_parameter(StatError &error) const
 
@@ -2269,13 +2355,15 @@ Sequences* Sequences::explicit_index_parameter(StatError &error) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Removing of the index parameters.
  *
- *  Suppression du parametre d'index.
+ *  \param[in] error reference on a StatError object.
  *
- *  argument : reference sur un objet StatError.
- *
- *--------------------------------------------------------------*/
+ *  \return          Sequences object.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences* Sequences::remove_index_parameter(StatError &error) const
 
@@ -2297,13 +2385,14 @@ Sequences* Sequences::remove_index_parameter(StatError &error) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Selection of variables.
  *
- *  Selection de variables.
- *
- *  arguments : reference sur un objet Sequences, indices des variables.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] seq      reference on a Sequences object,
+ *  \param[in] variable variable indices.
+ */
+/*--------------------------------------------------------------*/
 
 void Sequences::select_variable(const Sequences &seq , int *variable)
 
@@ -2328,7 +2417,7 @@ void Sequences::select_variable(const Sequences &seq , int *variable)
     }
   }
 
-  // copie des valeurs
+  // copy of values
 
   for (i = 0;i < nb_sequence;i++) {
     for (j = 0;j < nb_variable;j++) {
@@ -2360,15 +2449,18 @@ void Sequences::select_variable(const Sequences &seq , int *variable)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Selection of variables.
  *
- *  Selection de variables.
+ *  \param[in] error        reference on a StatError object,
+ *  \param[in] inb_variable number of variables,
+ *  \param[in] ivariable    variable indices,
+ *  \param[in] keep         flag for keeping or rejecting the selected variables.
  *
- *  arguments : reference sur un objet StatError, nombre de variables,
- *              indices des variables, flag pour conserver ou rejeter
- *              les variables selectionnees.
- *
- *--------------------------------------------------------------*/
+ *  \return                 Sequences object.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences* Sequences::select_variable(StatError &error , int inb_variable ,
                                       int *ivariable , bool keep) const
@@ -2451,15 +2543,18 @@ Sequences* Sequences::select_variable(StatError &error , int inb_variable ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Selection of variables.
  *
- *  Selection de variables.
+ *  \param[in] error        reference on a StatError object,
+ *  \param[in] inb_variable number of variables,
+ *  \param[in] ivariable    variable indices,
+ *  \param[in] keep         flag for keeping or rejecting the selected variables.
  *
- *  arguments : reference sur un objet StatError, nombre de variables,
- *              indices des variables, flag pour conserver ou rejeter
- *              les variables selectionnees.
- *
- *--------------------------------------------------------------*/
+ *  \return                 Sequences object.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences* Sequences::select_variable(StatError &error , int inb_variable ,
                                       vector<int> ivariable , bool keep) const
@@ -2469,15 +2564,18 @@ Sequences* Sequences::select_variable(StatError &error , int inb_variable ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Merging of variables of Sequences objects.
  *
- *  Concatenation des variables d'objets Sequences.
+ *  \param[in] error      reference on a StatError object,
+ *  \param[in] nb_sample  number of Sequences objects,
+ *  \param[in] iseq       pointer on the Sequences objects,
+ *  \param[in] ref_sample reference Sequences object for the identifiers.
  *
- *  arguments : reference sur un objet StatError, nombre d'objets Sequences,
- *              pointeurs sur les objets Sequences, echantillon de reference pour
- *              les identificateurs.
- *
- *--------------------------------------------------------------*/
+ *  \return               Sequences object.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences* Sequences::merge_variable(StatError &error , int nb_sample ,
                                      const Sequences **iseq , int ref_sample) const
@@ -2587,7 +2685,7 @@ Sequences* Sequences::merge_variable(StatError &error , int nb_sample ,
       inb_variable += iseq[i - 1]->nb_variable;
     }
 
-    // comparaison des identificateurs des sequences
+    // comparison of sequence identifiers
 
     if (ref_sample == I_DEFAULT) {
       for (i = 0;i < nb_sequence;i++) {
@@ -2614,7 +2712,7 @@ Sequences* Sequences::merge_variable(StatError &error , int nb_sample ,
       iidentifier = pseq[ref_sample]->identifier;
     }
 
-    // comparaison des identificateurs des vertex
+    // comparison of vertex identifiers
 
     if (ref_sample == I_DEFAULT) {
       for (i = 0;i < nb_sample;i++) {
@@ -2692,7 +2790,7 @@ Sequences* Sequences::merge_variable(StatError &error , int nb_sample ,
       }
     }
 
-    // copie des valeurs
+    // copy of values
 
     for (i = 0;i < nb_sequence;i++) {
       inb_variable = 0;
@@ -2739,15 +2837,18 @@ Sequences* Sequences::merge_variable(StatError &error , int nb_sample ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Merging of variables of Sequences objects.
  *
- *  Concatenation des variables d'objets Sequences.
+ *  \param[in] error      reference on a StatError object,
+ *  \param[in] nb_sample  number of Sequences objects,
+ *  \param[in] iseq       pointer on the Sequences objects,
+ *  \param[in] ref_sample reference Sequences object for the identifiers.
  *
- *  arguments : reference sur un objet StatError, nombre d'objets Sequences,
- *              pointeurs sur les objets Sequences, echantillon de reference pour
- *              les identificateurs.
- *
- *--------------------------------------------------------------*/
+ *  \return               Sequences object.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences* Sequences::merge_variable(StatError &error , int nb_sample ,
                                      const vector<Sequences> iseq , int ref_sample) const
@@ -2774,13 +2875,17 @@ Sequences* Sequences::merge_variable(StatError &error , int nb_sample ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Variable shift.
  *
- *  Decalage d'une variable.
+ *  \param[in] error    reference on a StatError object,
+ *  \param[in] variable variable index,
+ *  \param[in] lag      lag.
  *
- *  arguments : reference sur un objet StatError, indice de la variable, decalage.
- *
- *--------------------------------------------------------------*/
+ *  \return             Sequences object.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences* Sequences::shift_variable(StatError &error , int variable , int lag) const
 
@@ -2825,7 +2930,7 @@ Sequences* Sequences::shift_variable(StatError &error , int variable , int lag) 
 
   if (status) {
 
-    // calcul de la longueur des sequences
+    // computation of the sequence lengths
 
     iidentifier = new int[nb_sequence];
     ilength = new int[nb_sequence];
@@ -2884,7 +2989,7 @@ Sequences* Sequences::shift_variable(StatError &error , int variable , int lag) 
       seq->index_interval_computation();
     }
 
-    // copie des valeurs
+    // copy of values
 
     for (i = 0;i < seq->nb_sequence;i++) {
       for (j = 0;j < seq->nb_variable;j++) {
@@ -2944,13 +3049,15 @@ Sequences* Sequences::shift_variable(StatError &error , int variable , int lag) 
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Reversing of the direction of sequences.
  *
- *  Inversion du sens de parcours des sequences.
+ *  \param[in] error reference on a StatError object.
  *
- *  argument : reference sur un objet StatError.
- *
- *--------------------------------------------------------------*/
+ *  \return          Sequences object.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences* Sequences::reverse(StatError &error) const
 
@@ -2973,14 +3080,19 @@ Sequences* Sequences::reverse(StatError &error) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Selection of sequences on a sequence length criterion.
  *
- *  Selection des sequences sur un critere de longueur.
+ *  \param[in] error       reference on a StatError object,
+ *  \param[in] os          stream,
+ *  \param[in] min_length  lowest sequence length,
+ *  \param[in] imax_length highest sequence length,
+ *  \param[in] keep        flag for keeping or rejecting the selected sequences.
  *
- *  arguments : reference sur un objet StatError, stream, bornes sur la longueur,
- *              flag pour conserver ou rejeter les sequences selectionnees.
- *
- *--------------------------------------------------------------*/
+ *  \return                Sequences object.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences* Sequences::length_select(StatError &error , ostream &os , int min_length ,
                                     int imax_length , bool keep) const
@@ -3006,7 +3118,7 @@ Sequences* Sequences::length_select(StatError &error , ostream &os , int min_len
 
   if (status) {
 
-    // selection des sequences
+    // selection of sequences
 
     iidentifier = new int[nb_sequence];
     index = new int[nb_sequence];
@@ -3031,7 +3143,7 @@ Sequences* Sequences::length_select(StatError &error , ostream &os , int min_len
       error.update(STAT_error[STATR_EMPTY_SAMPLE]);
     }
 
-    // copie des sequences selectionnees
+    // copy of selected sequences
 
     if (status) {
       if (inb_sequence <= DISPLAY_NB_INDIVIDUAL) {
@@ -3053,15 +3165,19 @@ Sequences* Sequences::length_select(StatError &error , ostream &os , int min_len
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Removing of the first/last run for a given value.
  *
- *  Suppression des premieres/dernieres series d'une valeur donne.
+ *  \param[in] error          reference on a StatError object,
+ *  \param[in] variable       variable index,
+ *  \param[in] ivalue         value,
+ *  \param[in] position       position (BEGIN_RUN/END_RUN),
+ *  \param[in] max_run_length maximum length of the removed runs.
  *
- *  arguments : reference sur un objet StatError, indice de la variable,
- *              valeur, position (BEGIN_RUN/END_RUN),
- *              longueur maximum de la serie supprimee.
- *
- *--------------------------------------------------------------*/
+ *  \return                   Sequences object.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences* Sequences::remove_run(StatError &error , int variable , int ivalue ,
                                  run_position position , int max_run_length) const
@@ -3134,7 +3250,7 @@ Sequences* Sequences::remove_run(StatError &error , int variable , int ivalue ,
 
   if (status) {
 
-    // calcul de la longueur des sequences
+    // computation of the sequence lengths
 
     iidentifier = new int[nb_sequence];
     ilength = new int[nb_sequence];
@@ -3249,7 +3365,7 @@ Sequences* Sequences::remove_run(StatError &error , int variable , int ivalue ,
       seq->index_interval_computation();
     }
 
-    // copie des valeurs
+    // copy of values
 
     for (i = 0;i < seq->nb_sequence;i++) {
       for (j = 0;j < seq->nb_variable;j++) {
@@ -3305,14 +3421,17 @@ Sequences* Sequences::remove_run(StatError &error , int variable , int ivalue ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Extraction of sub-sequences.
  *
- *  Extraction de sous-sequences.
+ *  \param[in] error               reference on a StatError object,
+ *  \param[in] min_index_parameter lowest index parameter,
+ *  \param[in] max_index_parameter highest index parameter.
  *
- *  arguments : reference sur un objet StatError, parametres d'index minimum et
- *              maximum dans la sequence.
- *
- *--------------------------------------------------------------*/
+ *  \return                        Sequences object.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences* Sequences::index_parameter_extract(StatError &error , int min_index_parameter ,
                                               int max_index_parameter) const
@@ -3342,14 +3461,14 @@ Sequences* Sequences::index_parameter_extract(StatError &error , int min_index_p
 
   if (status) {
 
-    // selection des sequences
+    // selection of sequences
 
     iidentifier = new int[nb_sequence];
     ilength = new int[nb_sequence];
     index = new int[nb_sequence];
     inb_sequence = 0;
 
-    // parametre d'index explicite
+    // explicit index parameters
 
     if (index_parameter) {
       first_index = new int[nb_sequence];
@@ -3399,7 +3518,7 @@ Sequences* Sequences::index_parameter_extract(StatError &error , int min_index_p
       }
     }
 
-    // parametre d'index implicite
+    // implicit index parameters
 
     else {
       if (max_index_parameter == I_DEFAULT) {
@@ -3428,7 +3547,7 @@ Sequences* Sequences::index_parameter_extract(StatError &error , int min_index_p
       error.update(STAT_error[STATR_EMPTY_SAMPLE]);
     }
 
-    // extraction des sous-sequences
+    // extraction of sub-sequences
 
     if (status) {
       seq = new Sequences(inb_sequence , iidentifier , ilength , vertex_identifier ,
@@ -3467,7 +3586,7 @@ Sequences* Sequences::index_parameter_extract(StatError &error , int min_index_p
         }
       }
 
-      // copie des valeurs
+      // copy of values
 
       for (i = 0;i < seq->nb_sequence;i++) {
         for (j = 0;j < seq->nb_variable;j++) {
@@ -3529,15 +3648,20 @@ Sequences* Sequences::index_parameter_extract(StatError &error , int min_index_p
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Extraction by segmentation of a Sequences object.
  *
- *  Extraction par segmentation d'un objet Sequences.
+ *  \param[in] error         reference on a StatError object,
+ *  \param[in] variable      variable index,
+ *  \param[in] nb_value      number of values,
+ *  \param[in] ivalue        values,
+ *  \param[in] keep          flag for keeping or rejecting the selected segments,
+ *  \param[in] concatenation segments merged by sequence or not.
  *
- *  arguments : reference sur un objet StatError, indice de la variable,
- *              nombre de valeurs, valeurs, flag segments correspondant aux valeurs
- *              selectionnees ou non, segments concatenes par sequence ou non.
- *
- *--------------------------------------------------------------*/
+ *  \return                  Sequences object.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences* Sequences::segmentation_extract(StatError &error , int variable ,
                                            int nb_value , int *ivalue , bool keep ,
@@ -3696,7 +3820,7 @@ Sequences* Sequences::segmentation_extract(StatError &error , int variable ,
     }
     }
 
-    // initialisations
+    // initializations
 
     segment_length = new int[cumul_length];
 
@@ -3705,7 +3829,7 @@ Sequences* Sequences::segmentation_extract(StatError &error , int variable ,
       segment_begin[i] = 0;
     }
 
-    // recherche des sequences a extraire
+    // search for the sub-sequences to be extracted
 
     i = -1;
 
@@ -3780,7 +3904,7 @@ Sequences* Sequences::segmentation_extract(StatError &error , int variable ,
     }
     }
 
-    // creation de l'objet Sequences
+    // construction of the Sequences object
 
     seq = new Sequences(inb_sequence , NULL , sequence_length , vertex_identifier ,
                         index_param_type , nb_variable - 1 , itype , false);
@@ -3848,7 +3972,7 @@ Sequences* Sequences::segmentation_extract(StatError &error , int variable ,
       seq->index_interval_computation();
     }
 
-    // copie des valeurs
+    // copy of values
 
     i = -1;
     for (j = 0;j < nb_segment;j++) {
@@ -3929,7 +4053,7 @@ Sequences* Sequences::segmentation_extract(StatError &error , int variable ,
     }
 
 #   ifdef MESSAGE
-    if ((seq->index_param_type == TIME) && (seq->index_interval->variance > 0.)) {  // pour les suivis de croissance manguier
+    if ((seq->index_param_type == TIME) && (seq->index_interval->variance > 0.)) {  // for the mango growth follow-ups
       double average_diff , individual_mean , global_mean , diff , individual_variance , global_variance;
 
       for (i = 0;i < seq->nb_variable;i++) {
@@ -3984,15 +4108,20 @@ Sequences* Sequences::segmentation_extract(StatError &error , int variable ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Extraction by segmentation of a Sequences object.
  *
- *  Extraction par segmentation d'un objet Sequences.
+ *  \param[in] error         reference on a StatError object,
+ *  \param[in] variable      variable index,
+ *  \param[in] nb_value      number of values,
+ *  \param[in] ivalue        values,
+ *  \param[in] keep          flag for keeping or rejecting the selected segments,
+ *  \param[in] concatenation segments merged by sequence or not.
  *
- *  arguments : reference sur un objet StatError, indice de la variable,
- *              nombre de valeurs, valeurs, flag segments correspondant aux valeurs
- *              selectionnees ou non, segments concatenes par sequence ou non.
- *
- *--------------------------------------------------------------*/
+ *  \return                  Sequences object.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences* Sequences::segmentation_extract(StatError &error , int variable ,
                                            int nb_value , vector<int> ivalue , bool keep ,
@@ -4003,13 +4132,16 @@ Sequences* Sequences::segmentation_extract(StatError &error , int variable ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Summation of successive values along sequences.
  *
- *  Cumul des valeurs successives des sequences.
+ *  \param[in] error    reference on a StatError object,
+ *  \param[in] variable variable index.
  *
- *  arguments : reference sur un objet StatError, indice de la variable.
- *
- *--------------------------------------------------------------*/
+ *  \return             Sequences object.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences* Sequences::cumulate(StatError &error , int variable) const
 
@@ -4078,7 +4210,7 @@ Sequences* Sequences::cumulate(StatError &error , int variable) const
       }
     }
 
-   // cumul des valeurs
+   // summation of values
 
     for (i = 0;i < nb_sequence;i++) {
       j = 0;
@@ -4115,14 +4247,17 @@ Sequences* Sequences::cumulate(StatError &error , int variable) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief First-order differencing of sequences.
  *
- *  Differenciation au 1er ordre des sequences.
+ *  \param[in] error         reference on a StatError object,
+ *  \param[in] variable      variable index,
+ *  \param[in] first_element 1st element of the sequence kept or not.
  *
- *  arguments : reference sur un objet StatError, indice de la variable,
- *              premier element de la sequence garde ou pas.
- *
- *--------------------------------------------------------------*/
+ *  \return                  Sequences object.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences* Sequences::difference(StatError &error , int variable , bool first_element) const
 
@@ -4272,7 +4407,7 @@ Sequences* Sequences::difference(StatError &error , int variable , bool first_el
       }
     }
 
-    // differenciation des sequences
+    // differencing of sequences
 
     if ((index_param_type != IMPLICIT_TYPE) && ((index_interval->mean != 1.) ||
          (index_interval->variance > 0.))) {
@@ -4378,14 +4513,16 @@ Sequences* Sequences::difference(StatError &error , int variable , bool first_el
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of relative growth rates on the basis of cumulative dimensions.
  *
- *  Computation of relative growth rates on the basis of cumulative dimensions.
+ *  \param[in] error         reference on a StatError object,
+ *  \param[in] growth_factor growth factor for computing the first relative growth rate.
  *
- *  arguments : reference on an object StatError, growth factor for
- *              computing the first relative growth rate.
- *
- *--------------------------------------------------------------*/
+ *  \return                  Sequences object.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences* Sequences::relative_growth_rate(StatError &error , double growth_factor) const
 
@@ -4461,7 +4598,7 @@ Sequences* Sequences::relative_growth_rate(StatError &error , double growth_fact
       seq->index_interval = new FrequencyDistribution(*index_interval);
     }
 
-    // computaton of relative growth rate
+    // computaton of relative growth rates
 
     if ((index_param_type != IMPLICIT_TYPE) && ((index_interval->mean != 1.) ||
          (index_interval->variance > 0.))) {
@@ -4587,13 +4724,16 @@ Sequences* Sequences::relative_growth_rate(StatError &error , double growth_fact
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Normalization of sequences.
  *
- *  Normalisation des sequences.
+ *  \param[in] error    reference on a StatError object,
+ *  \param[in] variable variable index.
  *
- *  arguments : reference sur un objet StatError, indice de la variable.
- *
- *--------------------------------------------------------------*/
+ *  \return             Sequences object.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences* Sequences::sequence_normalization(StatError &error , int variable) const
 
@@ -4678,7 +4818,7 @@ Sequences* Sequences::sequence_normalization(StatError &error , int variable) co
       }
     }
 
-   // normalisation des sequences
+   // normalization of sequences
 
     for (i = 0;i < nb_sequence;i++) {
       for (j = 0;j < nb_variable;j++) {
@@ -4738,15 +4878,20 @@ Sequences* Sequences::sequence_normalization(StatError &error , int variable) co
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Filtering of sequences using a symmetric smoothing filter.
  *
- *  Filtrage de type moyenne mobile des sequences.
+ *  \param[in] error     reference on a StatError object,
+ *  \param[in] nb_point  filter half width,
+ *  \param[in] filter    filter,
+ *  \param[in] variable  variable index,
+ *  \param[in] begin_end begin and end kept or not,
+ *  \param[in] output    trend, substraction residuals or division residuals.
  *
- *  arguments : reference sur un objet StatError, demi-largeur du filtre,
- *              filtre, indice de la variable, debut/fin garde ou pas,
- *              tendance ou residus (par soustraction ou par division).
- *
- *--------------------------------------------------------------*/
+ *  \return              Sequences object.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences* Sequences::moving_average(StatError &error , int nb_point , double *filter ,
                                      int variable , bool begin_end , sequence_type output) const
@@ -4900,7 +5045,7 @@ Sequences* Sequences::moving_average(StatError &error , int nb_point , double *f
       }
     }
 
-    // filtrage de type moyenne mobile
+    // filtering using a symmetric smoothing filter
 
     for (i = 0;i < nb_sequence;i++) {
       j = 0;
@@ -5131,15 +5276,20 @@ Sequences* Sequences::moving_average(StatError &error , int nb_point , double *f
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Filtering of sequences using a symmetric smoothing filter.
  *
- *  Filtrage de type moyenne mobile des sequences.
+ *  \param[in] error     reference on a StatError object,
+ *  \param[in] nb_point  filter half width,
+ *  \param[in] filter    filter,
+ *  \param[in] variable  variable index,
+ *  \param[in] begin_end begin and end kept or not,
+ *  \param[in] output    trend, substraction residuals or division residuals.
  *
- *  arguments : reference sur un objet StatError, demi-largeur du filtre,
- *              filtre, indice de la variable, debut/fin garde ou pas,
- *              tendance ou residus (par soustraction ou par division).
- *
- *--------------------------------------------------------------*/
+ *  \return              Sequences object.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences* Sequences::moving_average(StatError &error , int nb_point , vector<double> filter ,
                                      int variable , bool begin_end , sequence_type output) const
@@ -5149,15 +5299,19 @@ Sequences* Sequences::moving_average(StatError &error , int nb_point , vector<do
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Filtering of sequences using a symmetric smoothing filter.
  *
- *  Filtrage de type moyenne mobile des sequences.
+ *  \param[in] error     reference on a StatError object,
+ *  \param[in] dist      symmetric discrete distribution,
+ *  \param[in] variable  variable index,
+ *  \param[in] begin_end begin and end kept or not,
+ *  \param[in] output    trend, substraction residuals or division residuals.
  *
- *  arguments : reference sur un objet StatError, loi symmetrique,
- *              indice de la variable, debut/fin supprime ou pas,
- *              tendance ou residus (par soustraction ou par division).
- *
- *--------------------------------------------------------------*/
+ *  \return              Sequences object.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences* Sequences::moving_average(StatError &error , const Distribution &dist ,
                                      int variable , bool begin_end , sequence_type output) const
@@ -5192,18 +5346,23 @@ Sequences* Sequences::moving_average(StatError &error , const Distribution &dist
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of pointwise mean, median or mean direction of sequences and
+ *         associated dispersion measures.
  *
- *  Ecriture des sequences de moyennes et d'ecart-types.
+ *  \param[in] error      reference on a StatError object,
+ *  \param[in] path       file path,
+ *  \param[in] frequency  frequencies for successive index parameter values,
+ *  \param[in] dispersion flag computation of dispersion measures,
+ *  \param[in] output     output (sequences, residuals or standardized residuals).
  *
- *  arguments : reference sur un objet StatError, path,
- *              tailles d'echantillons, flag calcul des ecart-types,
- *              sortie (sequences, residus ou residus standardisees).
- *
- *--------------------------------------------------------------*/
+ *  \return               error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool Sequences::pointwise_average_ascii_print(StatError &error , const string path ,
-                                              int *size , bool dispersion ,
+                                              int *frequency , bool dispersion ,
                                               sequence_type output) const
 
 {
@@ -5237,15 +5396,15 @@ bool Sequences::pointwise_average_ascii_print(StatError &error , const string pa
 
       t_value = new double[length[0]];
       for (i = 0;i < length[0];i++) {
-        if (size[i] > 1) {
-//          t_value[i] = t_value_computation(false , size[i] - 1 , 0.05);
-          students_t students_dist(size[i] - 1);
+        if (frequency[i] > 1) {
+//          t_value[i] = t_value_computation(false , frequency[i] - 1 , 0.05);
+          students_t students_dist(frequency[i] - 1);
           t_value[i] = quantile(complement(students_dist , 0.025));
         }
       }
 
 #     ifdef MESSAGE
-      cout << " | " << t_value[0] << " " << size[0] << endl;
+      cout << " | " << t_value[0] << " " << frequency[0] << endl;
 #     endif
 
     }
@@ -5254,7 +5413,7 @@ bool Sequences::pointwise_average_ascii_print(StatError &error , const string pa
       t_value = NULL;
     }
 
-    // calcul des largeurs des colonnes
+    // computation of the column widths
 
     inb_sequence = nb_sequence;
     if (dispersion) {
@@ -5322,7 +5481,7 @@ bool Sequences::pointwise_average_ascii_print(StatError &error , const string pa
         out_file << "   " << STAT_label[STATL_MEAN_CONFIDENCE_INTERVAL]
                  << "   " << STAT_label[STATL_STANDARD_DEVIATION];
       }
-      out_file << "   " << STAT_label[STATL_SAMPLE_SIZE];
+      out_file << "   " << STAT_label[STATL_FREQUENCY];
 
       if (nb_sequence < POINTWISE_AVERAGE_NB_SEQUENCE) {
         out_file << "   ";
@@ -5337,9 +5496,9 @@ bool Sequences::pointwise_average_ascii_print(StatError &error , const string pa
                  << setw(width[i]) << real_sequence[0][i][j];
 
         if (dispersion) {
-          if (size[j] > 1) {
-//            half_confidence_interval = standard_normal_value * real_sequence[nb_sequence - 1][i][j] / sqrt((double)size[j]);
-            half_confidence_interval = t_value[j] * real_sequence[nb_sequence - 1][i][j] / sqrt((double)size[j]);
+          if (frequency[j] > 1) {
+//            half_confidence_interval = standard_normal_value * real_sequence[nb_sequence - 1][i][j] / sqrt((double)frequency[j]);
+            half_confidence_interval = t_value[j] * real_sequence[nb_sequence - 1][i][j] / sqrt((double)frequency[j]);
             out_file << setw(width[i]) << real_sequence[0][i][j] - half_confidence_interval
                      << setw(width[i]) << real_sequence[0][i][j] + half_confidence_interval;
           }
@@ -5352,7 +5511,7 @@ bool Sequences::pointwise_average_ascii_print(StatError &error , const string pa
           out_file << setw(width[i]) << real_sequence[nb_sequence - 1][i][j];
         }
 
-        out_file << setw(width[nb_variable + 1]) << size[j];
+        out_file << setw(width[nb_variable + 1]) << frequency[j];
  
         if (inb_sequence - 1 < POINTWISE_AVERAGE_NB_SEQUENCE) {
           out_file << "   ";
@@ -5400,18 +5559,23 @@ bool Sequences::pointwise_average_ascii_print(StatError &error , const string pa
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of the pointwise mean, median or mean direction of sequences and
+ *         associated dispersion measures at the spreadsheet format.
  *
- *  Ecriture des sequences de moyennes et d'ecart-types au format tableur.
+ *  \param[in] error      reference on a StatError object,
+ *  \param[in] path       file path,
+ *  \param[in] frequency  frequencies for successive index parameter values,
+ *  \param[in] dispersion flag computation of dispersion measures,
+ *  \param[in] output     output (sequences, residuals or standardized residuals).
  *
- *  arguments : reference sur un objet StatError, path,
- *              tailles d'echantillons, flag calcul des ecart-types,
- *              sortie (sequences, residus ou residus standardisees).
- *
- *--------------------------------------------------------------*/
+ *  \return               error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool Sequences::pointwise_average_spreadsheet_print(StatError &error , const string path ,
-                                                    int *size , bool dispersion ,
+                                                    int *frequency , bool dispersion ,
                                                     sequence_type output) const
 
 {
@@ -5438,9 +5602,9 @@ bool Sequences::pointwise_average_spreadsheet_print(StatError &error , const str
 
       t_value = new double[length[0]];
       for (i = 0;i < length[0];i++) {
-        if (size[i] > 1) {
-//          t_value[i] = t_value_computation(false , size[i] - 1 , 0.05);
-          students_t students_dist(size[i] - 1);
+        if (frequency[i] > 1) {
+//          t_value[i] = t_value_computation(false , frequency[i] - 1 , 0.05);
+          students_t students_dist(frequency[i] - 1);
           t_value[i] = quantile(complement(students_dist , 0.025));
         }
       }
@@ -5474,7 +5638,7 @@ bool Sequences::pointwise_average_spreadsheet_print(StatError &error , const str
         out_file << "\t" << STAT_label[STATL_MEAN_CONFIDENCE_INTERVAL]
                  << "\t\t" << STAT_label[STATL_STANDARD_DEVIATION];
       }
-      out_file << "\t" << STAT_label[STATL_SAMPLE_SIZE];
+      out_file << "\t" << STAT_label[STATL_FREQUENCY];
 
       if (nb_sequence < POINTWISE_AVERAGE_NB_SEQUENCE) {
         inb_sequence = nb_sequence;
@@ -5494,9 +5658,9 @@ bool Sequences::pointwise_average_spreadsheet_print(StatError &error , const str
                  << "\t" << real_sequence[0][i][j];
 
         if (dispersion) {
-          if (size[j] > 1) {
-//            half_confidence_interval = standard_normal_value * real_sequence[nb_sequence - 1][i][j] / sqrt((double)size[j]);
-            half_confidence_interval = t_value[j] * real_sequence[nb_sequence - 1][i][j] / sqrt((double)size[j]);
+          if (frequency[j] > 1) {
+//            half_confidence_interval = standard_normal_value * real_sequence[nb_sequence - 1][i][j] / sqrt((double)frequency[j]);
+            half_confidence_interval = t_value[j] * real_sequence[nb_sequence - 1][i][j] / sqrt((double)frequency[j]);
             out_file << "\t" << real_sequence[0][i][j] - half_confidence_interval
                      << "\t" << real_sequence[0][i][j] + half_confidence_interval;
           }
@@ -5508,7 +5672,7 @@ bool Sequences::pointwise_average_spreadsheet_print(StatError &error , const str
           out_file << "\t" << real_sequence[nb_sequence - 1][i][j];
         }
 
-        out_file << "\t" << size[j];
+        out_file << "\t" << frequency[j];
  
         if (inb_sequence - 1 < POINTWISE_AVERAGE_NB_SEQUENCE) {
           out_file << "\t";
@@ -5548,18 +5712,23 @@ bool Sequences::pointwise_average_spreadsheet_print(StatError &error , const str
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the pointwise mean, median or mean direction of sequences and
+ *         associated dispersion measures.
  *
- *  Calcul de la sequence des moyennes (et des ecart-types).
+ *  \param[in] error                reference on a StatError object,
+ *  \param[in] circular             flag circular variables,
+ *  \param[in] robust               flag computation of robust location and dispersion measures
+ *  \param[in] dispersion           flag computation of dispersion measures,
+ *  \param[in] frequency_correction flag correction related to the frequencies for categorical variables,
+ *  \param[in] output               output (sequences, residuals or standardized residuals),
+ *  \param[in] path                 file path,
+ *  \param[in] format               format (ASCII/SPREADSHEET).
  *
- *  arguments : reference sur un objet StatError, flag donnees circulaires,
- *              flag computation of robust location and dispersion measures
- *              flag computation of dispersion measures,
- *              flag correction related to the frequencies for categorical variables,
- *              sortie (sequences, residus ou residus standardisees),
- *              path, format (ASCII/SPREADSHEET).
- *
- *--------------------------------------------------------------*/
+ *  \return                         Sequences object.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences* Sequences::pointwise_average(StatError &error , bool circular , bool robust ,
                                         bool dispersion , bool frequency_correction ,
@@ -5570,7 +5739,7 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular , bool 
   bool status = true;
   register int i , j , k;
   int inb_sequence , min_identifier , max_identifier , *iidentifier , *ilength ,
-      *pindex_param , *size , *index , *int_sample , *pisample;
+      *pindex_param , *frequency , *index , *int_sample , *pisample;
   variable_nature *itype;
   angle_unit unit;
   double diff , *prsequence , *plocation , *pdispersion , *real_sample , *prsample ,
@@ -5694,24 +5863,24 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular , bool 
       seq->index_interval_computation();
     }
 
-    // computation of sample size for each index parameter value
+    // computation of frequencies for each index parameter value
 
-    size = new int[seq->length[0]];
+    frequency = new int[seq->length[0]];
 
     if (index_parameter) {
       pindex_param = seq->index_parameter[0];
       i = 0;
       for (j = index_parameter_distribution->offset;j < index_parameter_distribution->nb_value;j++) {
         if (index_parameter_distribution->frequency[j] > 0) {
-          size[i++] = index_parameter_distribution->frequency[j];
+          frequency[i++] = index_parameter_distribution->frequency[j];
         }
       }
     }
 
     else {
-      size[0] = nb_sequence;
+      frequency[0] = nb_sequence;
       for (i = 1;i < max_length;i++) {
-        size[i] = size[i - 1] - length_distribution->frequency[i];
+        frequency[i] = frequency[i - 1] - length_distribution->frequency[i];
       }
     }
 
@@ -5793,7 +5962,7 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular , bool 
 
         for (i = 0;i < seq->nb_variable;i++) {
           for (j = 0;j < seq->length[0];j++) {
-            seq->real_sequence[0][i][j] /= size[j];
+            seq->real_sequence[0][i][j] /= frequency[j];
           }
         }
 
@@ -5864,9 +6033,9 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular , bool 
 
           for (i = 0;i < seq->nb_variable;i++) {
             for (j = 0;j < seq->length[seq->nb_sequence - 1];j++) {
-              if (size[j] > 1) {
+              if (frequency[j] > 1) {
                 seq->real_sequence[seq->nb_sequence - 1][i][j] = sqrt(seq->real_sequence[seq->nb_sequence - 1][i][j] /
-                                                                      (size[j] - 1));
+                                                                      (frequency[j] - 1));
               }
             }
           }
@@ -5896,7 +6065,7 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular , bool 
                   }
                 }
 
-                seq->real_sequence[0][i][j] = quantile_computation(size[j] , int_sample , 0.5 , frequency_correction);
+                seq->real_sequence[0][i][j] = quantile_computation(frequency[j] , int_sample , 0.5 , frequency_correction);
               }
             }
 
@@ -5912,7 +6081,7 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular , bool 
                   }
                 }
 
-                seq->real_sequence[0][i][j] = quantile_computation(size[j] , real_sample , 0.5 , false);
+                seq->real_sequence[0][i][j] = quantile_computation(frequency[j] , real_sample , 0.5 , false);
               }
             }
           }
@@ -5929,7 +6098,7 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular , bool 
                   }
                 }
 
-                seq->real_sequence[0][i][j] = quantile_computation(size[j] , int_sample , 0.5 , frequency_correction);
+                seq->real_sequence[0][i][j] = quantile_computation(frequency[j] , int_sample , 0.5 , frequency_correction);
               }
             }
 
@@ -5942,7 +6111,7 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular , bool 
                   }
                 }
 
-                seq->real_sequence[0][i][j] = quantile_computation(size[j] , real_sample , 0.5 , false);
+                seq->real_sequence[0][i][j] = quantile_computation(frequency[j] , real_sample , 0.5 , false);
               }
             }
           }
@@ -6011,9 +6180,9 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular , bool 
 
           for (i = 0;i < seq->nb_variable;i++) {
             for (j = 0;j < seq->length[seq->nb_sequence - 1];j++) {
-              if (size[j] > 1) {
+              if (frequency[j] > 1) {
                 seq->real_sequence[seq->nb_sequence - 1][i][j] = seq->real_sequence[seq->nb_sequence - 1][i][j] /
-                                                                 (size[j] - 1);
+                                                                 (frequency[j] - 1);
               }
             }
           }
@@ -6027,7 +6196,7 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular , bool 
 
     case true : {
 
-      // choix de l'unite
+      // choice of the angle unit
 
       unit = RADIAN;
       for (i = 0;i < nb_variable;i++) {
@@ -6037,7 +6206,7 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular , bool 
         }
       }
 
-      // calcul des directions moyennes
+      // computation of mean directions
 
       mean_direction = new double**[seq->nb_variable];
       for (i = 0;i < seq->nb_variable;i++) {
@@ -6146,8 +6315,8 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular , bool 
 
       for (i = 0;i < seq->nb_variable;i++) {
         for (j = 0;j < seq->length[0];j++) {
-          mean_direction[i][0][j] /= size[j];
-          mean_direction[i][1][j] /= size[j];
+          mean_direction[i][0][j] /= frequency[j];
+          mean_direction[i][1][j] /= frequency[j];
 
           mean_direction[i][2][j] = sqrt(mean_direction[i][0][j] * mean_direction[i][0][j] +
                                          mean_direction[i][1][j] * mean_direction[i][1][j]);
@@ -6169,7 +6338,7 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular , bool 
         }
       }
 
-      // calcul des ecart-types
+      // computation of circular standard deviations
 
       if (dispersion) {
         for (i = 0;i < seq->nb_variable;i++) {
@@ -6201,7 +6370,7 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular , bool 
 
     switch (output) {
 
-    // copie des sequences
+    // copy of sequences
 
     case SEQUENCE : {
       for (i = 0;i < nb_sequence;i++) {
@@ -6222,7 +6391,7 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular , bool 
       break;
     }
 
-    // calcul des residus
+    // computation of residuals
 
     case SUBTRACTION_RESIDUAL : {
       switch (circular) {
@@ -6416,7 +6585,7 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular , bool 
       break;
     }
 
-    // calcul des residus standardises
+    // computation of standardized residuals
 
     case STANDARDIZED_RESIDUAL : {
       if (index_parameter) {
@@ -6519,16 +6688,16 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular , bool 
       seq->build_marginal_histogram(i);
     }
 
-    // ecriture des sequences de moyennes et d'ecart-types
+    // writing of pointwise mean, median or mean direction of sequences and associated dispersion measures
 
     if (!path.empty()) {
       switch (format) {
       case ASCII :
-        status = seq->pointwise_average_ascii_print(error , path , size ,
+        status = seq->pointwise_average_ascii_print(error , path , frequency ,
                                                     dispersion , output);
         break;
       case SPREADSHEET :
-        status = seq->pointwise_average_spreadsheet_print(error , path , size ,
+        status = seq->pointwise_average_spreadsheet_print(error , path , frequency ,
                                                           dispersion , output);
         break;
       }
@@ -6542,7 +6711,7 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular , bool 
       }
     }
 
-    delete [] size;
+    delete [] frequency;
 
     if (robust) {
       delete [] index;
@@ -6555,14 +6724,18 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular , bool 
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the recurrence time sequences for a value taken by
+ *         an integer-valued variable.
  *
- *  Calcul des sequences des temps de retour pour une valeur prise
- *  par une variable entiere.
+ *  \param[in] error    reference on a StatError object,
+ *  \param[in] variable variable index,
+ *  \param[in] value    value.
  *
- *  arguments : reference sur un objet StatError, indice de la variable, valeur.
- *
- *--------------------------------------------------------------*/
+ *  \return             Sequences object.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences* Sequences::recurrence_time_sequences(StatError &error , int variable , int value) const
 
@@ -6616,7 +6789,7 @@ Sequences* Sequences::recurrence_time_sequences(StatError &error , int variable 
   if (status) {
     seq = new Sequences(nb_sequence , 1);
 
-    // calcul des sequences des temps de retour
+    // computation of the recurrence time sequences
 
     inb_sequence = 0;
 
@@ -6658,13 +6831,16 @@ Sequences* Sequences::recurrence_time_sequences(StatError &error , int variable 
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of sojourn time sequences for an integer-valued variable.
  *
- *  Calcul des sequences des temps de sejour par une variable entiere.
+ *  \param[in] error    reference on a StatError object,
+ *  \param[in] variable variable index.
  *
- *  arguments : reference sur un objet StatError, indice de la variable.
- *
- *--------------------------------------------------------------*/
+ *  \return             Sequences object.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences* Sequences::sojourn_time_sequences(StatError &error , int variable) const
 
@@ -6711,10 +6887,10 @@ Sequences* Sequences::sojourn_time_sequences(StatError &error , int variable) co
     seq = new Sequences(nb_sequence , identifier , length , NULL ,
                         IMPLICIT_TYPE , 2 , itype);
 
-    // calcul des sequences de temps de sejour
+    // computation of sojourn time sequences
 
-    if ((index_param_type == TIME) && (index_interval->variance > 0.)) {  // pour les suivis de croissance manguier
-      for (i = 0;i < nb_sequence;i++) {                                   // et les pousses d'arabidopsis
+    if ((index_param_type == TIME) && (index_interval->variance > 0.)) {  // for the mango growth follow-ups and
+      for (i = 0;i < nb_sequence;i++) {                                   // the Arabidopsis rosettes
         pstate = seq->int_sequence[i][0];
         psequence = seq->int_sequence[i][1];
         begin_run = index_parameter_distribution->offset;
@@ -6783,14 +6959,16 @@ Sequences* Sequences::sojourn_time_sequences(StatError &error , int variable) co
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Discretization of positions.
  *
- *  Discretisation des positions.
+ *  \param[in] error reference on a StatError object,
+ *  \param[in] step  discretization step.
  *
- *  arguments : reference sur un objet StatError,
- *              pas de discretisation.
- *
- *--------------------------------------------------------------*/
+ *  \return          Sequences object.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences* Sequences::transform_position(StatError &error , int step) const
 
@@ -6834,7 +7012,7 @@ Sequences* Sequences::transform_position(StatError &error , int step) const
     seq = new Sequences(nb_sequence , identifier , ilength , nb_variable);
     delete [] ilength;
 
-    // extraction des sequences
+    // extraction of sequences
 
     pisequence = new int*[nb_variable];
 
@@ -6894,13 +7072,15 @@ Sequences* Sequences::transform_position(StatError &error , int step) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Crossing of sequences.
  *
- *  Croisement des sequences.
+ *  \param[in] error reference on a StatError object.
  *
- *  argument : reference sur un objet StatError.
- *
- *--------------------------------------------------------------*/
+ *  \return          Sequences object.
+ */
+/*--------------------------------------------------------------*/
 
 Sequences* Sequences::cross(StatError &error) const
 
@@ -6960,7 +7140,7 @@ Sequences* Sequences::cross(StatError &error) const
                         nb_variable , type);
     delete [] ilength;
 
-    // constitution des sequences croisees
+    // construction of crossed sequences
 
     for (i = 0;i < seq->nb_sequence;i++) {
       j = 0;
@@ -7005,999 +7185,6 @@ Sequences* Sequences::cross(StatError &error) const
   }
 
   return seq;
-}
-
-
-/*--------------------------------------------------------------*
- *
- *  Calcul de la longueur maximum des sequences.
- *
- *--------------------------------------------------------------*/
-
-void Sequences::max_length_computation()
-
-{
-  register int i;
-
-
-  max_length = length[0];
-  for (i = 1;i < nb_sequence;i++) {
-    if (length[i] > max_length) {
-      max_length = length[i];
-    }
-  }
-}
-
-
-/*--------------------------------------------------------------*
- *
- *  Calcul de la longueur cumulee des sequences.
- *
- *--------------------------------------------------------------*/
-
-void Sequences::cumul_length_computation()
-
-{
-  register int i;
-
-
-  cumul_length = 0;
-  for (i = 0;i < nb_sequence;i++) {
-    cumul_length += length[i];
-  }
-}
-
-
-/*--------------------------------------------------------------*
- *
- *  Construction de la loi empirique des longueurs des sequences.
- *
- *--------------------------------------------------------------*/
-
-void Sequences::build_length_frequency_distribution()
-
-{
-  register int i;
-
-
-  length_distribution = new FrequencyDistribution(max_length + 1);
-
-  length_distribution->nb_element = nb_sequence;
-  for (i = 0;i < nb_sequence;i++) {
-    (length_distribution->frequency[length[i]])++;
-  }
-
-  length_distribution->nb_value_computation();
-  length_distribution->offset_computation();
-  length_distribution->max_computation();
-  length_distribution->mean_computation();
-  length_distribution->variance_computation();
-}
-
-
-/*--------------------------------------------------------------*
- *
- *  Calcul des temps a partir des intervalles de temps /
- *  calcul des positions a partir des intervalles inter-positions.
- *
- *--------------------------------------------------------------*/
-
-void Sequences::index_parameter_computation()
-
-{
-  if ((index_param_type == TIME_INTERVAL) || (index_param_type == POSITION_INTERVAL)) {
-    register int i , j;
-
-
-    switch (index_param_type) {
-    case TIME_INTERVAL :
-      index_param_type = TIME;
-      break;
-    case POSITION_INTERVAL :
-      index_param_type = POSITION;
-      break;
-    }
-
-    for (i = 0;i < nb_sequence;i++) {
-      for (j = 1;j < (index_param_type == POSITION ? length[i] + 1 : length[i]);j++) {
-        index_parameter[i][j] += index_parameter[i][j - 1];
-      }
-    }
-  }
-}
-
-
-/*--------------------------------------------------------------*
- *
- *  Calcul de la valeur minimum prise par le parametre d'index.
- *
- *--------------------------------------------------------------*/
-
-int Sequences::min_index_parameter_computation() const
-
-{
-  register int i;
-  int min_index_parameter = I_DEFAULT;
-
-
-  if (index_parameter) {
-    min_index_parameter = index_parameter[0][0];
-    for (i = 1;i < nb_sequence;i++) {
-      if (index_parameter[i][0] < min_index_parameter) {
-        min_index_parameter = index_parameter[i][0];
-      }
-    }
-  }
-
-  return min_index_parameter;
-}
-
-
-/*--------------------------------------------------------------*
- *
- *  Calcul de la valeur maximum prise par le parametre d'index.
- *
- *  argument : flag derniere position.
- *
- *--------------------------------------------------------------*/
-
-int Sequences::max_index_parameter_computation(bool last_position) const
-
-{
-  register int i;
-  int max_index_parameter = I_DEFAULT;
-
-
-  if (index_parameter) {
-    if ((index_param_type == TIME) || (last_position)) {
-      max_index_parameter = index_parameter[0][length[0] - 1];
-      for (i = 1;i < nb_sequence;i++) {
-        if (index_parameter[i][length[i] - 1] > max_index_parameter) {
-          max_index_parameter = index_parameter[i][length[i] - 1];
-        }
-      }
-    }
-
-    else {
-      max_index_parameter = index_parameter[0][length[0]];
-      for (i = 1;i < nb_sequence;i++) {
-        if (index_parameter[i][length[i]] > max_index_parameter) {
-          max_index_parameter = index_parameter[i][length[i]];
-        }
-      }
-    }
-  }
-
-  return max_index_parameter;
-}
-
-
-/*--------------------------------------------------------------*
- *
- *  Calcul de la loi empirique des parametres d'index.
- *
- *--------------------------------------------------------------*/
-
-void Sequences::build_index_parameter_frequency_distribution()
-
-{
-  if (index_parameter) {
-    register int i , j;
-
-
-    index_parameter_distribution = new FrequencyDistribution(max_index_parameter_computation() + 1);
-
-    for (i = 0;i < nb_sequence;i++) {
-      for (j = 0;j < (index_param_type == POSITION ? length[i] + 1 : length[i]);j++) {
-        (index_parameter_distribution->frequency[index_parameter[i][j]])++;
-      }
-    }
-
-    index_parameter_distribution->offset_computation();
-    index_parameter_distribution->nb_element = cumul_length;
-    if (index_param_type == POSITION) {
-      index_parameter_distribution->nb_element += nb_sequence;
-    }
-    index_parameter_distribution->max_computation();
-    index_parameter_distribution->mean_computation();
-    index_parameter_distribution->variance_computation();
-  }
-}
-
-
-/*--------------------------------------------------------------*
- *
- *  Extraction de la loi empirique des intervalles entre index successifs.
- *
- *--------------------------------------------------------------*/
-
-void Sequences::index_interval_computation()
-
-{
-//  if ((index_param_type == TIME) || ((index_param_type == POSITION) &&
-//       (type[0] != NB_INTERNODE))) {
-  if ((index_param_type == TIME) || (index_param_type == POSITION)) {
-    register int i , j;
-
-
-    index_interval = new FrequencyDistribution(max_index_parameter_computation(true) + 1);
-
-    // constitution de la loi empirique des intervalles entre index successifs
-
-    for (i = 0;i < nb_sequence;i++) {
-      for (j = 1;j < length[i];j++) {
-        (index_interval->frequency[index_parameter[i][j] - index_parameter[i][j - 1]])++;
-      }
-    }
-
-    index_interval->nb_value_computation();
-    index_interval->offset_computation();
-    index_interval->nb_element = cumul_length - nb_sequence;
-    index_interval->max_computation();
-    index_interval->mean_computation();
-    index_interval->variance_computation();
-  }
-}
-
-
-/*--------------------------------------------------------------*
- *
- *  Extraction de la loi empirique des intervalles entre index successifs
- *  pour une valeur d'une variable entiere.
- *
- *  arguments : reference sur un objet StatError, indice de la variable, valeur.
- *
- *--------------------------------------------------------------*/
-
-FrequencyDistribution* Sequences::value_index_interval_computation(StatError &error , int variable ,
-                                                                   int value) const
-
-{
-  bool status = true;
-  register int i , j;
-  int previous_index_param , *pindex_param , *pisequence;
-  FrequencyDistribution *value_index_interval;
-
-
-  value_index_interval = NULL;
-  error.init();
-
-  if ((index_param_type != TIME) && (index_param_type != POSITION)) {
-    status = false;
-    error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
-  }
-
-  if ((variable < 1) || (variable > nb_variable)) {
-    status = false;
-    error.update(STAT_error[STATR_VARIABLE_INDEX]);
-  }
-
-  else {
-    variable--;
-
-    if (!marginal_distribution[variable]) {
-      status = false;
-      ostringstream error_message;
-      error_message << STAT_label[STATL_VARIABLE] << " " << variable + 1 << ": "
-                    << STAT_error[STATR_MARGINAL_FREQUENCY_DISTRIBUTION];
-      error.update((error_message.str()).c_str());
-    }
-
-    else if ((value < marginal_distribution[variable]->offset) ||
-             (value >= marginal_distribution[variable]->nb_value) ||
-             (marginal_distribution[variable]->frequency[value] <= 1)) {
-      status = false;
-      error.update(SEQ_error[SEQR_VALUE]);
-    }
-  }
-
-  if (status) {
-    value_index_interval = new FrequencyDistribution(max_index_parameter_computation(true) + 1);
-
-    for (i = 0;i < nb_sequence;i++) {
-      pindex_param = index_parameter[i];
-      pisequence = int_sequence[i][variable];
-      previous_index_param = I_DEFAULT;
-
-      for (j = 0;j < length[i];j++) {
-        if (*pisequence == value) {
-          if (previous_index_param != I_DEFAULT) {
-            (value_index_interval->frequency[*pindex_param - previous_index_param])++;
-          }
-          previous_index_param = *pindex_param;
-        }
-
-        pindex_param++;
-        pisequence++;
-      }
-    }
-
-    // extraction des caracteristiques de la loi empirique
-
-    value_index_interval->nb_value_computation();
-    value_index_interval->offset_computation();
-    value_index_interval->nb_element_computation();
-
-    if (value_index_interval->nb_element == 0) {
-      delete value_index_interval;
-      value_index_interval = NULL;
-      error.update(STAT_error[STATR_EMPTY_SAMPLE]);
-    }
-
-    else {
-      value_index_interval->max_computation();
-      value_index_interval->mean_computation();
-      value_index_interval->variance_computation();
-    }
-  }
-
-  return value_index_interval;
-}
-
-
-/*--------------------------------------------------------------*
- *
- *  Calcul de la valeur minimum prise par une variable.
- *
- *  argument : indice de la variable.
- *
- *--------------------------------------------------------------*/
-
-void Sequences::min_value_computation(int variable)
-
-{
-  register int i , j;
-
-
-  if ((type[variable] != REAL_VALUE) && (type[variable] != AUXILIARY)) {
-    min_value[variable] = int_sequence[0][variable][0];
-
-    for (i = 0;i < nb_sequence;i++) {
-      for (j = 0;j < length[i];j++) {
-        if (int_sequence[i][variable][j] < min_value[variable]) {
-          min_value[variable] = int_sequence[i][variable][j];
-        }
-      }
-    }
-  }
-
-  else {
-    min_value[variable] = real_sequence[0][variable][0];
-
-    for (i = 0;i < nb_sequence;i++) {
-      for (j = 0;j < length[i];j++) {
-        if (real_sequence[i][variable][j] < min_value[variable]) {
-          min_value[variable] = real_sequence[i][variable][j];
-        }
-      }
-    }
-  }
-}
-
-
-/*--------------------------------------------------------------*
- *
- *  Calcul de la valeur maximum prise par une variable.
- *
- *  argument : indice de la variable.
- *
- *--------------------------------------------------------------*/
-
-void Sequences::max_value_computation(int variable)
-
-{
-  register int i , j;
-
-
-  if ((type[variable] != REAL_VALUE) && (type[variable] != AUXILIARY)) {
-    max_value[variable] = int_sequence[0][variable][0];
-
-    for (i = 0;i < nb_sequence;i++) {
-      for (j = 0;j < length[i];j++) {
-        if (int_sequence[i][variable][j] > max_value[variable]) {
-          max_value[variable] = int_sequence[i][variable][j];
-        }
-      }
-    }
-  }
-
-  else {
-    max_value[variable] = real_sequence[0][variable][0];
-
-    for (i = 0;i < nb_sequence;i++) {
-      for (j = 0;j < length[i];j++) {
-        if (real_sequence[i][variable][j] > max_value[variable]) {
-          max_value[variable] = real_sequence[i][variable][j];
-        }
-      }
-    }
-  }
-}
-
-
-/*--------------------------------------------------------------*
- *
- *  Calcul de la loi marginale empirique pour une variable entiere positive.
- *
- *  argument : indice de la variable.
- *
- *--------------------------------------------------------------*/
-
-void Sequences::marginal_frequency_distribution_computation(int variable)
-
-{
-  register int i , j;
-
-
-  for (i = 0;i < marginal_distribution[variable]->nb_value;i++) {
-    marginal_distribution[variable]->frequency[i] = 0;
-  }
-
-  for (i = 0;i < nb_sequence;i++) {
-    for (j = 0;j < length[i];j++) {
-      (marginal_distribution[variable]->frequency[int_sequence[i][variable][j]])++;
-    }
-  }
-
-  marginal_distribution[variable]->offset = (int)min_value[variable];
-  marginal_distribution[variable]->nb_element_computation();
-//  marginal_distribution[variable]->nb_element = cumul_length;
-  marginal_distribution[variable]->max_computation();
-  marginal_distribution[variable]->mean_computation();
-  marginal_distribution[variable]->variance_computation();
-}
-
-
-/*--------------------------------------------------------------*
- *
- *  Construction de la loi marginale empirique pour une variable entiere positive.
- *
- *  argument : indice de la variable.
- *
- *--------------------------------------------------------------*/
-
-void Sequences::build_marginal_frequency_distribution(int variable)
-
-{
-  if (type[variable] != AUXILIARY) {
-    if ((type[variable] != REAL_VALUE) && (min_value[variable] >= 0) &&
-        (max_value[variable] <= MARGINAL_DISTRIBUTION_MAX_VALUE)) {
-      marginal_distribution[variable] = new FrequencyDistribution((int)max_value[variable] + 1);
-      marginal_frequency_distribution_computation(variable);
-    }
-
-    else {
-      build_marginal_histogram(variable);
-    }
-  }
-}
-
-
-/*--------------------------------------------------------------*
- *
- *  Construction de l'histogramme marginal pour une variable.
- *
- *  arguments : indice de la variable, pas de regroupement, valeur minimum.
- *
- *--------------------------------------------------------------*/
-
-void Sequences::build_marginal_histogram(int variable , double bin_width , double imin_value)
-
-{
-  if ((!marginal_histogram[variable]) || (bin_width != marginal_histogram[variable]->bin_width) ||
-      (imin_value != D_INF)) {
-    register int i , j;
-    int *pisequence;
-    double *prsequence;
-
-
-    // construction de l'histogramme
-
-    if (bin_width == D_DEFAULT) {
-      bin_width = MAX(::round((max_value[variable] - min_value[variable]) * HISTOGRAM_FREQUENCY / cumul_length) , 1);
-
-#     ifdef MESSAGE
-      cout << "\n" << STAT_label[STATL_VARIABLE] << " " << variable + 1 << " - "
-           << STAT_label[STATL_BIN_WIDTH] << ": " << bin_width << endl;
-//           << " (" << min_value[variable] << ", " << max_value[variable] << ")"
-#     endif
-
-    }
-
-    if (imin_value == D_INF) {
-      imin_value = floor(min_value[variable] / bin_width) * bin_width;
-    }
-
-    if (marginal_histogram[variable]) {
-      marginal_histogram[variable]->nb_bin = (int)floor((max_value[variable] - imin_value) / bin_width) + 1;
-
-      delete [] marginal_histogram[variable]->frequency;
-      marginal_histogram[variable]->frequency = new int[marginal_histogram[variable]->nb_bin];
-    }
-
-    else {
-      marginal_histogram[variable] = new Histogram((int)floor((max_value[variable] - imin_value) / bin_width) + 1 , false);
-
-      marginal_histogram[variable]->nb_element = cumul_length;
-      marginal_histogram[variable]->type = type[variable];
-    }
-
-    marginal_histogram[variable]->bin_width = bin_width;
-    marginal_histogram[variable]->min_value = imin_value;
-    marginal_histogram[variable]->max_value = ceil(max_value[variable] / bin_width) * bin_width;
-
-    // calcul des frequences
-
-    for (i = 0;i < marginal_histogram[variable]->nb_bin;i++) {
-      marginal_histogram[variable]->frequency[i] = 0;
-    }
-
-    if ((type[variable] != REAL_VALUE) && (type[variable] != AUXILIARY)) {
-      for (i = 0;i < nb_sequence;i++) {
-        pisequence = int_sequence[i][variable];
-        for (j = 0;j < length[i];j++) {
-//          (marginal_histogram[variable]->frequency[(int)((*pisequence++ - imin_value) / bin_width)])++;
-          (marginal_histogram[variable]->frequency[(int)floor((*pisequence++ - imin_value) / bin_width)])++;
-        }
-      }
-    }
-
-    else {
-      for (i = 0;i < nb_sequence;i++) {
-        prsequence = real_sequence[i][variable];
-        for (j = 0;j < length[i];j++) {
-//          (marginal_histogram[variable]->frequency[(int)((*prsequence++ - imin_value) / bin_width)])++;
-          (marginal_histogram[variable]->frequency[(int)floor((*prsequence++ - imin_value) / bin_width)])++;
-        }
-      }
-    }
-
-    marginal_histogram[variable]->max_computation();
-  }
-}
-
-
-/*--------------------------------------------------------------*
- *
- *  Changement du pas de regroupement de l'histogramme marginal.
- *
- *  arguments : reference sur un objet StatError, indice de la variable,
- *              pas de regroupement, valeur minimum.
- *
- *--------------------------------------------------------------*/
-
-bool Sequences::select_bin_width(StatError &error , int variable ,
-                                 double bin_width , double imin_value)
-
-{
-  bool status = true;
-
-
-  error.init();
-
-  if ((variable < 1) || (variable > nb_variable)) {
-    status = false;
-    error.update(STAT_error[STATR_VARIABLE_INDEX]);
-  }
-
-  else {
-    variable--;
-
-    if (!marginal_histogram[variable]) {
-      status = false;
-      error.update(STAT_error[STATR_MARGINAL_HISTOGRAM]);
-    }
-    if ((bin_width <= 0.) || ((type[variable] != REAL_VALUE) && ((int)bin_width != bin_width))) {
-      status = false;
-      error.update(STAT_error[STATR_HISTOGRAM_BIN_WIDTH]);
-    }
-    if ((imin_value != D_INF) && ((imin_value <= min_value[variable] - bin_width) ||
-         (imin_value > min_value[variable]) || ((type[variable] != REAL_VALUE) &&
-          ((int)imin_value != imin_value)))) {
-      status = false;
-      error.update(STAT_error[STATR_HISTOGRAM_MIN_VALUE]);
-    }
-  }
-
-  if (status) {
-    build_marginal_histogram(variable , bin_width , imin_value);
-  }
-
-  return status;
-}
-
-
-/*--------------------------------------------------------------*
- *
- *  Calcul de la moyenne d'une variable.
- *
- *  argument : indice de la variable.
- *
- *--------------------------------------------------------------*/
-
-double Sequences::mean_computation(int variable) const
-
-{
-  register int i , j;
-  double mean;
-
-
-  if (marginal_distribution[variable]) {
-    mean = marginal_distribution[variable]->mean;
-  }
-
-  else {
-    mean = 0.;
-
-    if ((type[variable] != REAL_VALUE) && (type[variable] != AUXILIARY)) {
-      for (i = 0;i < nb_sequence;i++) {
-        for (j = 0;j < length[i];j++) {
-          mean += int_sequence[i][variable][j];
-        }
-      }
-    }
-
-    else {
-      for (i = 0;i < nb_sequence;i++) {
-        for (j = 0;j < length[i];j++) {
-          mean += real_sequence[i][variable][j];
-        }
-      }
-    }
-
-    mean /= cumul_length;
-  }
-
-  return mean;
-}
-
-
-/*--------------------------------------------------------------*
- *
- *  Calcul de la variance d'une variable.
- *
- *  arguments : indice de la variable, moyenne.
- *
- *--------------------------------------------------------------*/
-
-double Sequences::variance_computation(int variable , double mean) const
-
-{
-  register int i , j;
-  double variance , diff;
-
-
-  if (marginal_distribution[variable]) {
-    variance = marginal_distribution[variable]->variance;
-  }
-
-  else {
-    variance = 0.;
-
-    if (cumul_length > 1) {
-      if ((type[variable] != REAL_VALUE) && (type[variable] != AUXILIARY)) {
-        for (i = 0;i < nb_sequence;i++) {
-          for (j = 0;j < length[i];j++) {
-            diff = int_sequence[i][variable][j] - mean;
-            variance += diff * diff;
-          }
-        }
-      }
-
-      else {
-        for (i = 0;i < nb_sequence;i++) {
-          for (j = 0;j < length[i];j++) {
-            diff = real_sequence[i][variable][j] - mean;
-            variance += diff * diff;
-          }
-        }
-      }
-
-      variance /= (cumul_length - 1);
-    }
-  }
-
-  return variance;
-}
-
-
-/*--------------------------------------------------------------*
- *
- *  Calcul de l'ecart absolu moyen d'une variable.
- *
- *  arguments : indice de la variable, moyenne.
- *
- *--------------------------------------------------------------*/
-
-double Sequences::mean_absolute_deviation_computation(int variable , double mean) const
-
-{
-  register int i , j;
-  double mean_absolute_deviation ;
-
-
-  if (marginal_distribution[variable]) {
-    mean_absolute_deviation = marginal_distribution[variable]->mean_absolute_deviation_computation();
-  }
-
-  else {
-    mean_absolute_deviation = 0.;
-
-    if ((type[variable] != REAL_VALUE) && (type[variable] != AUXILIARY)) {
-      for (i = 0;i < nb_sequence;i++) {
-        for (j = 0;j < length[i];j++) {
-          mean_absolute_deviation += fabs(int_sequence[i][variable][j] - mean);
-        }
-      }
-    }
-
-    else {
-      for (i = 0;i < nb_sequence;i++) {
-        for (j = 0;j < length[i];j++) {
-          mean_absolute_deviation += fabs(real_sequence[i][variable][j] - mean);
-        }
-      }
-    }
-
-    mean_absolute_deviation /= cumul_length;
-  }
-
-  return mean_absolute_deviation;
-}
-
-
-/*--------------------------------------------------------------*
- *
- *  Calcul de la difference absolue moyenne d'une variable.
- *
- *  argument : indice de la variable.
- *
- *--------------------------------------------------------------*/
-
-double Sequences::mean_absolute_difference_computation(int variable) const
-
-{
-  register int i , j , k , m;
-  double mean_absolute_difference;
-
-
-  mean_absolute_difference = 0.;
-
-  if (cumul_length > 1) {
-    if ((type[variable] != REAL_VALUE) && (type[variable] != AUXILIARY)) {
-      for (i = 0;i < nb_sequence;i++) {
-        for (j = 0;j < length[i];j++) {
-          for (k = j + 1;k < length[i];k++) {
-            mean_absolute_difference += abs(int_sequence[i][variable][j] -
-                                            int_sequence[i][variable][k]);
-          }
-        }
-
-        for (j = i + 1;j < nb_sequence;j++) {
-          for (k = 0;k < length[i];k++) {
-            for (m = 0;m < length[j];m++) {
-              mean_absolute_difference += abs(int_sequence[i][variable][k] -
-                                              int_sequence[j][variable][m]);
-            }
-          }
-        }
-      }
-    }
-
-    else {
-      for (i = 0;i < nb_sequence;i++) {
-        for (j = 0;j < length[i];j++) {
-          for (k = j + 1;k < length[i];k++) {
-            mean_absolute_difference += fabs(real_sequence[i][variable][j] -
-                                             real_sequence[i][variable][k]);
-          }
-        }
-
-        for (j = i + 1;j < nb_sequence;j++) {
-          for (k = 0;k < length[i];k++) {
-            for (m = 0;m < length[j];m++) {
-              mean_absolute_difference += fabs(real_sequence[i][variable][k] -
-                                               real_sequence[j][variable][m]);
-            }
-          }
-        }
-      }
-    }
-
-    mean_absolute_difference = 2 * mean_absolute_difference /
-                               (cumul_length * (double)(cumul_length - 1));
-  }
-
-  return mean_absolute_difference;
-}
-
-
-/*--------------------------------------------------------------*
- *
- *  Calcul du coefficient d'asymetrie d'une variable.
- *
- *  arguments : indice de la variable, moyenne, variance.
- *
- *--------------------------------------------------------------*/
-
-double Sequences::skewness_computation(int variable , double mean , double variance) const
-
-{
-  register int i , j;
-  double skewness , diff;
-
-
-  if (marginal_distribution[variable]) {
-    skewness = marginal_distribution[variable]->skewness_computation();
-  }
-
-  else {
-    skewness = 0.;
-
-    if ((cumul_length > 2) && (variance > 0.)) {
-      if ((type[variable] != REAL_VALUE) && (type[variable] != AUXILIARY)) {
-        for (i = 0;i < nb_sequence;i++) {
-          for (j = 0;j < length[i];j++) {
-            diff = int_sequence[i][variable][j] - mean;
-            skewness += diff * diff * diff;
-          }
-        }
-      }
-
-      else {
-        for (i = 0;i < nb_sequence;i++) {
-          for (j = 0;j < length[i];j++) {
-            diff = real_sequence[i][variable][j] - mean;
-            skewness += diff * diff * diff;
-          }
-        }
-      }
-
-      skewness = skewness * cumul_length / ((cumul_length - 1) *
-                  (double)(cumul_length - 2) * pow(variance , 1.5));
-    }
-  }
-
-  return skewness;
-}
-
-
-/*--------------------------------------------------------------*
- *
- *  Calcul de l'exces d'applatissement d'une variable :
- *  exces d'applatissement = coefficient d'applatissement - 3.
- *
- *  arguments : indice de la variable, moyenne, variance.
- *
- *--------------------------------------------------------------*/
-
-double Sequences::kurtosis_computation(int variable , double mean , double variance) const
-
-{
-  register int i , j;
-  double kurtosis , diff;
-
-
-  if (marginal_distribution[variable]) {
-    kurtosis = marginal_distribution[variable]->kurtosis_computation();
-  }
-
-  else {
-    if (variance == 0.) {
-      kurtosis = -2.;
-    }
-
-    else {
-      kurtosis = 0.;
-
-      if ((type[variable] != REAL_VALUE) && (type[variable] != AUXILIARY)) {
-        for (i = 0;i < nb_sequence;i++) {
-          for (j = 0;j < length[i];j++) {
-            diff = int_sequence[i][variable][j] - mean;
-            kurtosis += diff * diff * diff * diff;
-          }
-        }
-      }
-
-      else {
-        for (i = 0;i < nb_sequence;i++) {
-          for (j = 0;j < length[i];j++) {
-            diff = real_sequence[i][variable][j] - mean;
-            kurtosis += diff * diff * diff * diff;
-          }
-        }
-      }
-
-      kurtosis = kurtosis / ((cumul_length - 1) * variance * variance) - 3.;
-    }
-  }
-
-  return kurtosis;
-}
-
-
-/*--------------------------------------------------------------*
- *
- *  Calcul de la direction moyenne d'une variable circulaire.
- *
- *  arguments : indice de la variable, unite (DEGREE/RADIAN).
- *
- *--------------------------------------------------------------*/
-
-double* Sequences::mean_direction_computation(int variable , angle_unit unit) const
-
-{
-  register int i , j;
-  double *mean_direction;
-
-
-  mean_direction = new double[4];
-//  mean_direction = new double[2];
-
-  mean_direction[0] = 0.;
-  mean_direction[1] = 0.;
-
-  switch (type[variable]) {
-
-  case INT_VALUE : {
-    for (i = 0;i < nb_sequence;i++) {
-      for (j = 0;j < length[i];j++) {
-        mean_direction[0] += cos(int_sequence[i][variable][j] * M_PI / 180);
-        mean_direction[1] += sin(int_sequence[i][variable][j] * M_PI / 180);
-      }
-    }
-    break;
-  }
-
-  case REAL_VALUE : {
-    switch (unit) {
-
-    case DEGREE : {
-      for (i = 0;i < nb_sequence;i++) {
-        for (j = 0;j < length[i];j++) {
-          mean_direction[0] += cos(real_sequence[i][variable][j] * M_PI / 180);
-          mean_direction[1] += sin(real_sequence[i][variable][j] * M_PI / 180);
-        }
-      }
-      break;
-    }
-
-    case RADIAN : {
-      for (i = 0;i < nb_sequence;i++) {
-        for (j = 0;j < length[i];j++) {
-          mean_direction[0] += cos(real_sequence[i][variable][j]);
-          mean_direction[1] += sin(real_sequence[i][variable][j]);
-        }
-      }
-      break;
-    }
-    }
-    break;
-  }
-  }
-
-  mean_direction[0] /= cumul_length;
-  mean_direction[1] /= cumul_length;
-
-  mean_direction[2] = sqrt(mean_direction[0] * mean_direction[0] +
-                           mean_direction[1] * mean_direction[1]);
-
-  if (mean_direction[2] > 0.) {
-    mean_direction[3] = atan(mean_direction[1] / mean_direction[0]);
-
-    if (mean_direction[0] < 0.) {
-      mean_direction[3] += M_PI;
-    }
-    if (unit == DEGREE) {
-      mean_direction[3] *= (180 / M_PI);
-    }
-  }
-
-  else {
-    mean_direction[3] = D_DEFAULT;
-  }
-
-  return mean_direction;
 }
 
 

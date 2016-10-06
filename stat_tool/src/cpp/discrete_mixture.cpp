@@ -164,7 +164,7 @@ DiscreteMixture::DiscreteMixture(int inb_component , vector<double> iweight ,
  *
  *  \param[in] mixt           reference on a DiscreteMixture object,
  *  \param[in] component_flag flags on the components to be copied,
- *  \param[in] inb_value      upper bound on the support.
+ *  \param[in] inb_value      upper bound of the support.
  */
 /*--------------------------------------------------------------*/
 
@@ -299,9 +299,9 @@ DiscreteMixture::~DiscreteMixture()
 /**
  *  \brief Assignment operator of the DiscreteMixture class.
  *
- *  \param[in]  mixt reference on a DiscreteMixture object,
+ *  \param[in] mixt reference on a DiscreteMixture object.
  *
- *  \param[out] this DiscreteMixture object.
+ *  \return         DiscreteMixture object.
  */
 /*--------------------------------------------------------------*/
 
@@ -325,10 +325,10 @@ DiscreteMixture& DiscreteMixture::operator=(const DiscreteMixture &mixt)
 /**
  *  \brief Extraction of a component.
  *
- *  \param[in]  error      reference on a StatError object,
- *  \param[in]  index      component index.
+ *  \param[in] error reference on a StatError object,
+ *  \param[in] index component index.
  *
- *  \param[out] pcomponent mixture component.
+ *  \return          DiscreteParametricModel object.
  */
 /*--------------------------------------------------------------*/
 
@@ -357,9 +357,9 @@ DiscreteParametricModel* DiscreteMixture::extract(StatError &error , int index) 
 /**
  *  \brief Extraction of the DiscreteMixtureData object included in a DiscreteMixture object.
  *
- *  \param[in]  error      reference on a StatError object,
+ *  \param[in] error reference on a StatError object.
  *
- *  \param[out] mixt_histo frequency distributions corresponding to a mixture of discrete distributions.
+ *  \return          DiscreteMixtureData object.
  */
 /*--------------------------------------------------------------*/
 
@@ -389,12 +389,12 @@ DiscreteMixtureData* DiscreteMixture::extract_data(StatError &error) const
 /**
  *  \brief Construction of a DiscreteMixture object on the basis of weights and components.
  *
- *  \param[in]  error        reference on a StatError object,
- *  \param[in]  nb_component number of components,
- *  \param[in]  weight       component weights,
- *  \param[in]  component    pointer on the components,
+ *  \param[in] error        reference on a StatError object,
+ *  \param[in] nb_component number of components,
+ *  \param[in] weight       component weights,
+ *  \param[in] component    pointer on the components.
  *
- *  \param[out] mixt         mixture of parametric discrete distributions.
+ *  \return                 DiscreteMixture object.
  */
 /*--------------------------------------------------------------*/
 
@@ -442,12 +442,12 @@ DiscreteMixture* DiscreteMixture::building(StatError &error , int nb_component ,
 /**
  *  \brief Construction of a DiscreteMixture object on the basis of weights and components.
  *
- *  \param[in]  error        reference on a StatError object,
- *  \param[in]  nb_component number of components,
- *  \param[in]  weight       component weights,
- *  \param[in]  component    pointer on the components.
+ *  \param[in] error        reference on a StatError object,
+ *  \param[in] nb_component number of components,
+ *  \param[in] weight       component weights,
+ *  \param[in] component    pointer on the components.
  *
- *  \param[out] mixt         mixture of parametric discrete distributions.
+ *  \return                 mixture of parametric discrete distributions.
  */
 /*--------------------------------------------------------------*/
 
@@ -495,11 +495,11 @@ DiscreteMixture* DiscreteMixture::building(StatError &error , int nb_component ,
 /**
  *  \brief Construction of a DiscreteMixture object from a file.
  *
- *  \param[in]  error           reference on a StatError object,
- *  \param[in]  path            file path,
- *  \param[in]  cumul_threshold threshold on the cumulative distribution function,
+ *  \param[in] error           reference on a StatError object,
+ *  \param[in] path            file path,
+ *  \param[in] cumul_threshold threshold on the cumulative distribution function.
  *
- *  \param[out] mixt            mixture of parametric discrete distributions.
+ *  \return                    DiscreteMixture object.
  */
 /*--------------------------------------------------------------*/
 
@@ -550,12 +550,12 @@ DiscreteMixture* DiscreteMixture::ascii_read(StatError &error , const string pat
       while (!((token = next()).isNull())) {
         switch (i) {
 
-        // test MIXTURE key word
+        // test MIXTURE keyword
 
         case 0 : {
           if (token != STAT_word[STATW_MIXTURE]) {
             status = false;
-            error.correction_update(STAT_parsing[STATP_KEY_WORD] , STAT_word[STATW_MIXTURE] , line , i + 1);
+            error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_MIXTURE] , line , i + 1);
           }
           break;
         }
@@ -575,12 +575,12 @@ DiscreteMixture* DiscreteMixture::ascii_read(StatError &error , const string pat
           break;
         }
 
-        // test DISTRIBUTIONS key word
+        // test DISTRIBUTIONS keyword
 
         case 2 : {
           if (token != STAT_word[STATW_DISTRIBUTIONS]) {
             status = false;
-            error.correction_update(STAT_parsing[STATP_KEY_WORD] , STAT_word[STATW_DISTRIBUTIONS] , line , i + 1);
+            error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_DISTRIBUTIONS] , line , i + 1);
           }
           break;
         }
@@ -631,12 +631,12 @@ DiscreteMixture* DiscreteMixture::ascii_read(StatError &error , const string pat
           while (!((token = next()).isNull())) {
             switch (j) {
 
-            // test DISTRIBUTION key word
+            // test DISTRIBUTION keyword
 
             case 0 : {
               if (token != STAT_word[STATW_DISTRIBUTION]) {
                 status = false;
-                error.correction_update(STAT_parsing[STATP_KEY_WORD] , STAT_word[STATW_DISTRIBUTION] , line , j + 1);
+                error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_DISTRIBUTION] , line , j + 1);
               }
               break;
             }
@@ -776,7 +776,7 @@ ostream& DiscreteMixture::line_write(ostream &os) const
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Writing of a mixture with the associated frequency distributions.
+ *  \brief Writing of a mixture and the associated frequency distributions.
  *
  *  \param[in,out] os         stream,
  *  \param[in]     mixt_histo pointer on a DiscreteMixtureData object,
@@ -1057,11 +1057,11 @@ ostream& DiscreteMixture::ascii_write(ostream &os , bool exhaustive) const
 /**
  *  \brief Writing of a DiscreteMixture object in a file.
  *
- *  \param[in]  error      reference on a StatError object,
- *  \param[in]  path       file path,
- *  \param[in]  exhaustive flag detail level,
+ *  \param[in] error      reference on a StatError object,
+ *  \param[in] path       file path,
+ *  \param[in] exhaustive flag detail level.
  *
- *  \param[out] status     error status.
+ *  \return               error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -1091,7 +1091,7 @@ bool DiscreteMixture::ascii_write(StatError &error , const string path ,
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Writing  of a mixture with the associated frequency distributions
+ *  \brief Writing  of a mixture and the associated frequency distributions
  *         in a file at the spreadsheet format.
  *
  *  \param[in,out] os         stream,
@@ -1268,10 +1268,10 @@ ostream& DiscreteMixture::spreadsheet_write(ostream &os , const DiscreteMixtureD
 /**
  *  \brief Writing of a DiscreteMixture object in a file at the spreadsheet format.
  *
- *  \param[in]  error  reference on a StatError object,
- *  \param[in]  path   file path,
+ *  \param[in] error reference on a StatError object,
+ *  \param[in] path  file path.
  *
- *  \param[out] status error status.
+ *  \return          error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -1300,13 +1300,13 @@ bool DiscreteMixture::spreadsheet_write(StatError &error , const string path) co
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Plot of a mixture with the associated frequency distributions using Gnuplot.
+ *  \brief Plot of a mixture and the associated frequency distributions using Gnuplot.
  *
- *  \param[in]  prefix     file prefix,
- *  \param[in]  title      figure title,
- *  \param[in]  mixt_histo pointer on a DiscreteMixtureData object,
+ *  \param[in] prefix     file prefix,
+ *  \param[in] title      figure title,
+ *  \param[in] mixt_histo pointer on a DiscreteMixtureData object.
  *
- *  \param[out] status     error status.
+ *  \return               error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -1323,7 +1323,7 @@ bool DiscreteMixture::plot_write(const char *prefix , const char *title ,
   ostringstream data_file_name[DISCRETE_MIXTURE_NB_COMPONENT + 1];
 
 
-  // writing of data files
+  // writing of the data files
 
   data_file_name[0] << prefix << ".dat";
 
@@ -1372,7 +1372,7 @@ bool DiscreteMixture::plot_write(const char *prefix , const char *title ,
                             scale , NULL , 0 , NULL);
     }
 
-    // writing of script files
+    // writing of the script files
 
     for (i = 0;i < 2;i++) {
       ostringstream file_name[2];
@@ -1504,11 +1504,11 @@ bool DiscreteMixture::plot_write(const char *prefix , const char *title ,
 /**
  *  \brief Plot of a DiscreteMixture object using Gnuplot.
  *
- *  \param[in]  error  reference on a StatError object,
- *  \param[in]  prefix file prefix,
- *  \param[in]  title  figures title,
+ *  \param[in] error  reference on a StatError object,
+ *  \param[in] prefix file prefix,
+ *  \param[in] title  figures title.
  *
- *  \param[out] status error status.
+ *  \return           error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -1530,11 +1530,11 @@ bool DiscreteMixture::plot_write(StatError &error , const char *prefix ,
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Plot of a mixture with the associated frequency distributions.
+ *  \brief Plot of a mixture and the associated frequency distributions.
  *
- *  \param[in]  mixt_histo pointer on a DiscreteMixtureData object,
+ *  \param[in] mixt_histo pointer on a DiscreteMixtureData object.
  *
- *  \param[out] plot_set   plots.
+ *  \return               MultiPlotSet object.
  */
 /*--------------------------------------------------------------*/
 
@@ -1572,7 +1572,7 @@ MultiPlotSet* DiscreteMixture::get_plotable(const DiscreteMixtureData *mixt_hist
 
   plot.border = "15 lw 0";
 
-  // fitted mixture
+  // fit of the mixture
 
   xmax = nb_value - 1;
   if ((cumul[xmax] > 1. - DOUBLE_ERROR) &&
@@ -1696,7 +1696,7 @@ MultiPlotSet* DiscreteMixture::get_plotable(const DiscreteMixtureData *mixt_hist
     for (j = 0;j < nb_component;j++) {
       if (mixt_histo->component[j]->nb_element > 0) {
 
-        // fitted components
+        // fit of the components
 
         xmax = component[j]->nb_value - 1;
         if ((component[j]->cumul[xmax] > 1. - DOUBLE_ERROR) &&
@@ -1744,7 +1744,7 @@ MultiPlotSet* DiscreteMixture::get_plotable(const DiscreteMixtureData *mixt_hist
 /**
  *  \brief Plot of a DiscreteMixture object.
  *
- *  \param[out] plots.
+ *  \return MultiPlotSet object.
  */
 /*--------------------------------------------------------------*/
 
@@ -1759,7 +1759,7 @@ MultiPlotSet* DiscreteMixture::get_plotable() const
 /**
  *  \brief Computation of the number of free parameters.
  *
- *  \param[out] nb_parameter number of free parameters.
+ *  \return number of free parameters.
  */
 /*--------------------------------------------------------------*/
 
@@ -1782,7 +1782,7 @@ int DiscreteMixture::nb_parameter_computation() const
 /**
  *  \brief Computation of an adaptative penalty.
  *
- *  \param[out] penalty adaptative penalty.
+ *  \return adaptative penalty.
  */
 /*--------------------------------------------------------------*/
 
@@ -1980,9 +1980,9 @@ DiscreteMixtureData::~DiscreteMixtureData()
 /**
  *  \brief Assignment operator of the DiscreteMixtureData class.
  *
- *  \param[in]  mixt_histo reference on a DiscreteMixtureData object,
+ *  \param[in] mixt_histo reference on a DiscreteMixtureData object.
  *
- *  \param[out] this       DiscreteMixtureData object.
+ *  \return               DiscreteMixtureData object.
  */
 /*--------------------------------------------------------------*/
 
@@ -2003,12 +2003,12 @@ DiscreteMixtureData& DiscreteMixtureData::operator=(const DiscreteMixtureData &m
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Extraction of an empirical component.
+ *  \brief Extraction of a component frequency distribution.
  *
- *  \param[in]  error reference on a StatError object,
- *  \param[in]  index component index,
+ *  \param[in] error reference on a StatError object,
+ *  \param[in] index component index.
  *
- *  \param[out] pcomponent frequency distribution corresponding to a mixture component.
+ *  \return          DiscreteDistributionData object.
  */
 /*--------------------------------------------------------------*/
 
@@ -2086,11 +2086,11 @@ ostream& DiscreteMixtureData::ascii_write(ostream &os , bool exhaustive) const
 /**
  *  \brief Writing of a DiscreteMixtureData object in a file.
  *
- *  \param[in]  error      reference on a StatError object,
- *  \param[in]  path       file path,
- *  \param[in]  exhaustive flag detail level,
+ *  \param[in] error      reference on a StatError object,
+ *  \param[in] path       file path,
+ *  \param[in] exhaustive flag detail level.
  *
- *  \param[out] status     error status.
+ *  \return               error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -2125,10 +2125,10 @@ bool DiscreteMixtureData::ascii_write(StatError &error , const string path ,
 /**
  *  \brief Writing of a DiscreteMixtureData object in a file at the spreadsheet format.
  *
- *  \param[in]  error  reference on a StatError object,
- *  \param[in]  path   file path,
+ *  \param[in] error reference on a StatError object,
+ *  \param[in] path  file path.
  *
- *  \param[out] status error status.
+ *  \return          error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -2162,11 +2162,11 @@ bool DiscreteMixtureData::spreadsheet_write(StatError &error , const string path
 /**
  *  \brief Plot of a DiscreteMixtureData object using Gnuplot.
  *
- *  \param[in]  error  reference on a StatError object,
- *  \param[in]  prefix file prefix,
- *  \param[in]  title  figure title,
+ *  \param[in] error  reference on a StatError object,
+ *  \param[in] prefix file prefix,
+ *  \param[in] title  figure title.
  *
- *  \param[out] status error status.
+ *  \return           error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -2195,7 +2195,7 @@ bool DiscreteMixtureData::plot_write(StatError &error , const char *prefix ,
 /**
  *  \brief Plot of a DiscreteMixtureData object.
  *
- *  \param[out] plot_set plots.
+ *  \return MultiPlotSet object.
  */
 /*--------------------------------------------------------------*/
 

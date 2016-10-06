@@ -46,11 +46,11 @@ namespace sequence_analysis {
 
 /****************************************************************
  *
- *  Identificateurs des mots cles (format des fichiers) :
+ *  Key word identifiers (file format)
  */
 
 
-  enum sequence_analysis_key_word {
+  enum sequence_analysis_keyword {
     SEQW_MARKOV_CHAIN ,
     SEQW_EQUILIBRIUM_MARKOV_CHAIN ,
     SEQW_HIDDEN_MARKOV_CHAIN ,
@@ -82,7 +82,7 @@ namespace sequence_analysis {
 
 /****************************************************************
  *
- *  Identificateurs des labels :
+ *  Label identifiers
  */
 
 
@@ -236,6 +236,7 @@ namespace sequence_analysis {
     SEQL_PIECEWISE_LINEAR_FUNCTION ,
     SEQL_CONFIDENCE_INTERVALS ,
     SEQL_AUTOREGRESSIVE_COEFF ,
+    SEQL_NULL_AUTOREGRESSIVE_COEFF_95_CONFIDENCE_LIMIT ,
     SEQL_NB_SEGMENT ,
     SEQL_POSTERIOR_PROBABILITY ,
     SEQL_DIMENSION_JUMP ,
@@ -275,7 +276,7 @@ namespace sequence_analysis {
 
 /****************************************************************
  *
- *  Identificateurs des messages d'erreur pour l'analyse des fichiers :
+ *  Identifiers of error messages for lexical analysis of files
  */
 
 
@@ -300,7 +301,7 @@ namespace sequence_analysis {
 
 /****************************************************************
  *
- *  Identificateurs des messages d'erreur de traitement :
+ *  Identifiers of error messages
  */
 
 

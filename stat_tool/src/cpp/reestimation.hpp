@@ -61,7 +61,7 @@ namespace stat_tool {
 /**
  *  \brief Construction of a Reestimation object.
  *
- *  \param[in] number of possible values from 0.
+ *  \param[in] number of values from 0.
  */
 /*--------------------------------------------------------------*/
 
@@ -204,9 +204,9 @@ Reestimation<Type>::~Reestimation()
 /**
  *  \brief Assignment operator of the Reestimation class.
  *
- *  \param[in]  histo reference on a Reestimation object,
+ *  \param[in] histo reference on a Reestimation object.
  *
- *  \param[out] this  Reestimation object.
+ *  \return          Reestimation object.
  */
 /*--------------------------------------------------------------*/
 
@@ -229,7 +229,7 @@ Reestimation<Type>& Reestimation<Type>::operator=(const Reestimation<Type> &hist
  *  \brief Writing of the characteristics of a Reestimation object.
  *
  *  \param[in,out] os           stream,
- *  \param[in]     shape        flag writing of shape descriptors,
+ *  \param[in]     shape        flag on the writing of the shape characteristics,
  *  \param[in]     comment_flag flag comments.
  */
 /*--------------------------------------------------------------*/
@@ -300,7 +300,7 @@ ostream& Reestimation<Type>::ascii_circular_characteristic_print(ostream &os ,
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Visualization of a Reestimation object.
+ *  \brief Display of a Reestimation object.
  *
  *  \param[in,out] os stream.
  */
@@ -334,7 +334,7 @@ ostream& Reestimation<Type>::print(ostream &os) const
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Computation of the number of possible values from 0.
+ *  \brief Computation of the number of values from 0.
  */
 /*--------------------------------------------------------------*/
 
@@ -356,7 +356,7 @@ void Reestimation<Type>::nb_value_computation()
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Computation of the number of values of null frequencies from 0.
+ *  \brief Computation of the number of values of null frequency from 0.
  */
 /*--------------------------------------------------------------*/
 
@@ -483,7 +483,7 @@ void Reestimation<Type>::variance_computation(bool bias)
 /**
  *  \brief Computation of the mean absolute deviation.
  *
- *  \param[out] mean_absolute_deviation mean absolute deviation.
+ *  \return mean absolute deviation.
  */
 /*--------------------------------------------------------------*/
 
@@ -511,7 +511,7 @@ double Reestimation<Type>::mean_absolute_deviation_computation() const
 /**
  *  \brief Computation of the log of the geometric mean.
  *
- *  \param[out] log_geometric_mean log geometric mean.
+ *  \return log geometric mean.
  */
 /*--------------------------------------------------------------*/
 
@@ -539,7 +539,7 @@ double Reestimation<Type>::log_geometric_mean_computation() const
 /**
  *  \brief Computation of the coefficient of skewness.
  *
- *  \param[out] skewness coefficient of skewness.
+ *  \return coefficient of skewness.
  */
 /*--------------------------------------------------------------*/
 
@@ -574,7 +574,7 @@ double Reestimation<Type>::skewness_computation() const
  *  \brief Computation of the excess kurtosis:
  *         excess kurtosis = coefficient of kurtosis - 3.
  *
- *  \param[out] kurtosis excess kurtosis.
+ *  \return excess kurtosis.
  */
 /*--------------------------------------------------------------*/
 
@@ -657,7 +657,7 @@ void Reestimation<Type>::mean_direction_computation(double *mean_direction) cons
 /**
  *  \brief Computation of the information quantity.
  *
- *  \param[out] information information quantity.
+ *  \return information quantity.
  */
 /*--------------------------------------------------------------*/
 
@@ -682,13 +682,13 @@ double Reestimation<Type>::information_computation() const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
 /**
  *  \brief Computation of the log-likelihood of a discrete distribution for a sample.
  *
- *  \param[in]  dist       reference on a Distribution object.
+ *  \param[in] dist reference on a Distribution object.
  *
- *  \param[out] likelihood log-likelihood.
+ *  \return         log-likelihood.
  */
 /*--------------------------------------------------------------*/
 
@@ -732,7 +732,7 @@ double Reestimation<Type>::likelihood_computation(const Distribution &dist) cons
 /**
  *  \brief Estimation of a categorical distribution on the basis of a frequency distribution.
  *
- *  \param[in] dist pointer on a discrete distribution.
+ *  \param[in] dist pointer on a Distribution object.
  */
 /*--------------------------------------------------------------*/
 
@@ -768,7 +768,7 @@ void Reestimation<Type>::distribution_estimation(Distribution *dist) const
  *  \brief Estimation of a discrete distribution on the basis of a frequency distribution
  *         using a penalized likelihood estimator.
  *
- *  \param[in] dist     pointer on a discrete distribution,
+ *  \param[in] dist     pointer on a Distribution object,
  *  \param[in] weight   penalty weight,
  *  \param[in] pen_type penalty type (first- or second-order difference or entropy),
  *  \param[in] penalty  penalty,
@@ -927,11 +927,11 @@ void Reestimation<Type>::penalized_likelihood_estimation(Distribution *dist , do
  *  \brief Estimation of the parameters of a shifted binomial distribution on the basis of
  *         a frequency distribution.
  *
- *  \param[in]  dist               parametric discrete distribution,
- *  \param[in]  min_inf_bound      minimum lower bound of the support,
- *  \param[in]  min_inf_bound_flag flag on the distribution shift,
+ *  \param[in] dist               pointer on a DiscreteParametric object,
+ *  \param[in] min_inf_bound      minimum lower bound of the support,
+ *  \param[in] min_inf_bound_flag flag on the distribution shift.
  *
- *  \param[out] max_likelihood     maximized log-likelihood.
+ *  \return                       maximized log-likelihood.
  */
 /*--------------------------------------------------------------*/
 
@@ -1064,12 +1064,12 @@ double Reestimation<Type>::binomial_estimation(DiscreteParametric *dist , int mi
  *  \brief Estimation of the parameters of a shifted Poisson distribution on the basis of
  *         a frequency distribution.
  *
- *  \param[in]  dist               parametric discrete distribution,
- *  \param[in]  min_inf_bound      minimum lower bound of the support,
- *  \param[in]  min_inf_bound_flag flag on the distribution shift,
- *  \param[in]  cumul_threshold    threshold on the cumulative distribution function,
+ *  \param[in] dist               pointer on a DiscreteParametric object,
+ *  \param[in] min_inf_bound      minimum lower bound of the support,
+ *  \param[in] min_inf_bound_flag flag on the distribution shift,
+ *  \param[in] cumul_threshold    threshold on the cumulative distribution function.
  *
- *  \param[out] max_likelihood     maximized log-likelihood.
+ *  \return                       maximized log-likelihood.
  */
 /*--------------------------------------------------------------*/
 
@@ -1150,12 +1150,12 @@ double Reestimation<Type>::poisson_estimation(DiscreteParametric *dist , int min
  *  \brief Estimation of the parameters of a shifted negative binomial distribution 
  *         on the basis of a frequency distribution.
  *
- *  \param[in]  dist               parametric discrete distribution,
- *  \param[in]  min_inf_bound      minimum lower bound of the support,
- *  \param[in]  min_inf_bound_flag flag on the distribution shift,
- *  \param[in]  cumul_threshold    threshold on the cumulative distribution function,
+ *  \param[in] dist               pointer on a DiscreteParametric object,
+ *  \param[in] min_inf_bound      minimum lower bound of the support,
+ *  \param[in] min_inf_bound_flag flag on the distribution shift,
+ *  \param[in] cumul_threshold    threshold on the cumulative distribution function.
  *
- *  \param[out] max_likelihood     maximized log-likelihood.
+ *  \return                       maximized log-likelihood.
  */
 /*--------------------------------------------------------------*/
 
@@ -1244,12 +1244,12 @@ double Reestimation<Type>::negative_binomial_estimation(DiscreteParametric *dist
  *  \brief Estimation of the parameters of a discrete parametric distribution
  *         (binomial, Poisson, negative binomial) on the basis of a frequency distribution.
  *
- *  \param[in]  dist               parametric discrete distribution,
- *  \param[in]  min_inf_bound      minimum lower bound of the support,
- *  \param[in]  min_inf_bound_flag flag on the distribution shift,
- *  \param[in]  cumul_threshold    threshold on the cumulative distribution function,
+ *  \param[in] dist               pointer on a DiscreteParametric object,
+ *  \param[in] min_inf_bound      minimum lower bound of the support,
+ *  \param[in] min_inf_bound_flag flag on the distribution shift,
+ *  \param[in] cumul_threshold    threshold on the cumulative distribution function.
  *
- *  \param[out] max_likelihood     maximized log-likelihood.
+ *  \return                       maximized log-likelihood.
  */
 /*--------------------------------------------------------------*/
 
@@ -1282,12 +1282,12 @@ double Reestimation<Type>::parametric_estimation(DiscreteParametric *dist , int 
  *  \brief Estimation of the type and parameters of a discrete parametric distribution
  *         (binomial, Poisson, negative binomial) on the basis of a frequency distribution.
  *
- *  \param[in]  dist               parametric discrete distribution,
- *  \param[in]  min_inf_bound      minimum lower bound of the support,
- *  \param[in]  min_inf_bound_flag flag on the distribution shift,
- *  \param[in]  cumul_threshold    threshold on the cumulative distribution function,
+ *  \param[in] dist               pointer on a DiscreteParametric object,
+ *  \param[in] min_inf_bound      minimum lower bound of the support,
+ *  \param[in] min_inf_bound_flag flag on the distribution shift,
+ *  \param[in] cumul_threshold    threshold on the cumulative distribution function.
  *
- *  \param[out] max_likelihood     maximized log-likelihood.
+ *  \return                       maximized log-likelihood.
  */
 /*--------------------------------------------------------------*/
 
@@ -1339,11 +1339,11 @@ double Reestimation<Type>::type_parametric_estimation(DiscreteParametric *dist ,
  *  \brief Estimation of the type and parameters of a discrete parametric distribution
  *         (binomial, Poisson, negative binomial) on the basis of a frequency distribution.
  *
- *  \param[in]  min_inf_bound      minimum lower bound of the support,
- *  \param[in]  min_inf_bound_flag flag on the distribution shift,
- *  \param[in]  cumul_threshold    threshold on the cumulative distribution function,
+ *  \param[in] min_inf_bound      minimum lower bound of the support,
+ *  \param[in] min_inf_bound_flag flag on the distribution shift,
+ *  \param[in] cumul_threshold    threshold on the cumulative distribution function.
  *
- *  \param[out] dist               discrete parametric distribution.
+ *  \return                       discrete parametric distribution.
  */
 /*--------------------------------------------------------------*/
 
@@ -1356,11 +1356,11 @@ DiscreteParametric* Reestimation<Type>::type_parametric_estimation(int min_inf_b
   DiscreteParametric *dist;
 
 
-  // creation of a DiscreteParametric object
+  // construction of a DiscreteParametric object
 
   dist = new DiscreteParametric((int)(nb_value * SAMPLE_NB_VALUE_COEFF));
 
-  // estimation des parametres de la loi
+  // parameter estimation
 
   likelihood = type_parametric_estimation(dist , min_inf_bound , min_inf_bound_flag , cumul_threshold);
 
@@ -1380,7 +1380,7 @@ DiscreteParametric* Reestimation<Type>::type_parametric_estimation(int min_inf_b
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Combination of the reestimation quantities of the distribution and of
+ *  \brief Combination of the reestimation quantities of the basis time interval distribution and
  *         the length-biased distribution (equilibrium stochastic process).
  *
  *  \param[in] length_bias_reestim pointer on the reestimation quantities of the length-biased distribution,
@@ -1414,7 +1414,7 @@ void Reestimation<Type>::equilibrium_process_combination(const Reestimation<Type
 /*--------------------------------------------------------------*/
 /**
  *  \brief Estimation of a discrete distribution on the basis of the reestimation quantities of
- *         the distribution and of the length-biased distribution (equilibrium stochastic process).
+ *         the basis time interval distribution and the length-biased distribution (equilibrium stochastic process).
  *
  *  \param[in] length_bias_reestim pointer on the reestimation quantities of the length-biased distribution,
  *  \param[in] dist                distribution,
@@ -1463,7 +1463,7 @@ void Reestimation<Type>::equilibrium_process_estimation(const Reestimation<Type>
 /*--------------------------------------------------------------*/
 /**
  *  \brief Estimation of a discrete distribution on the basis of the reestimation quantities of
- *         the distribution and of the length-biased distribution using
+ *         the basis time interval distribution and the length-biased distribution using
  *         a penalized likelihood estimator (equilibrium stochastic process).
  *
  *  \param[in] length_bias_reestim pointer on the reestimation quantities of the length-biased distribution,
@@ -1681,8 +1681,7 @@ void Reestimation<Type>::state_occupancy_estimation(const Reestimation<Type> *fi
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Estimation of the parameters of a gamma distribution on the basis of
- *         a frequency distribution.
+ *  \brief Estimation of a gamma distribution on the basis of a frequency distribution.
  *
  *  \param[in] dist continuous distribution,
  *  \param[in] iter EM iteration.
@@ -1772,8 +1771,8 @@ void Reestimation<Type>::gamma_estimation(ContinuousParametric *dist , int iter)
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Estimation of the parameters of a zero-inflated gamma distribution
- *         on the basis of a frequency distribution.
+ *  \brief Estimation of a zero-inflated gamma distribution on the basis of
+ *         a frequency distribution.
  *
  *  \param[in] dist continuous distribution,
  *  \param[in] iter EM iteration.
@@ -1876,8 +1875,8 @@ void Reestimation<Type>::zero_inflated_gamma_estimation(ContinuousParametric *di
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Estimation of the parameters of an inverse Gaussian distribution
- *         on the basis of a frequency distribution.
+ *  \brief Estimation of an inverse Gaussian distribution on the basis of
+ *         a frequency distribution.
  *
  *  \param[in] dist continuous distribution.
  */

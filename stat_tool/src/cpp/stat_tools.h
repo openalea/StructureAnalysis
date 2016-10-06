@@ -51,7 +51,7 @@ namespace stat_tool {
 
 /****************************************************************
  *
- *  Macros :
+ *  Macros
  */
 
 
@@ -67,7 +67,7 @@ namespace stat_tool {
 
 /****************************************************************
  *
- *  Constantes :
+ *  Constants
  */
 
 
@@ -81,11 +81,11 @@ namespace stat_tool {
     PLOT
   };
 
-  const int I_DEFAULT = -1;              // int par defaut
-  const double D_DEFAULT = -1.;          // double par defaut
-  const double D_INF = -1.e37;           // plus petit nombre reel
-  const double DOUBLE_ERROR = 1.e-6;     // erreur sur une somme de doubles
-//  const double DOUBLE_ERROR = 5.e-6;     erreur sur une somme de doubles
+  const int I_DEFAULT = -1;              // default int
+  const double D_DEFAULT = -1.;          // default double
+  const double D_INF = -1.e37;           // smallest  real number
+  const double DOUBLE_ERROR = 1.e-6;     // error on a sum of doubles
+//  const double DOUBLE_ERROR = 5.e-6;      error on a sum of doubles
 
   enum test_distribution {
     STANDARD_NORMAL ,
@@ -97,8 +97,8 @@ namespace stat_tool {
   const int NB_CRITICAL_PROBABILITY = 2;
   const double ref_critical_probability[NB_CRITICAL_PROBABILITY] = {0.05 , 0.01};
 
-  const int NB_VALUE = 1000;             // nombre de valeurs prises par une v.a.
-  const int SAMPLE_NB_VALUE = NB_VALUE;  // nombre de valeurs d'un echantillon
+  const int NB_VALUE = 1000;             // number of values of a discrete variable
+  const int SAMPLE_NB_VALUE = NB_VALUE;  // number of values of a discrete sample 
 
   enum frequency_distribution_transformation {
     FREQUENCY_DISTRIBUTION_COPY ,
@@ -118,7 +118,7 @@ namespace stat_tool {
     POISSON ,
     NEGATIVE_BINOMIAL ,
     UNIFORM ,
-    MULTINOMIAL                          // ajout par Florence Chaubert
+    MULTINOMIAL                          // addition by Florence Chaubert
   };
 
   enum distribution_transformation {
@@ -202,140 +202,132 @@ namespace stat_tool {
   };
 
   enum variable_nature {
-    INT_VALUE ,                          // observation entiere
-    REAL_VALUE ,                         // observation reelle
-    STATE ,                              // etat
-    OLD_INT_VALUE ,                      // pour compatibilite ascendante
-//    NB_INTERNODE ,                        nombre d'entrenoeuds axe porte
-    AUXILIARY                            // variable auxiliaire (lissage/moyenne par segment)
+    INT_VALUE ,                          // integer-valued variable
+    REAL_VALUE ,                         // real-valued variable
+    STATE ,                              // state variable
+    OLD_INT_VALUE ,                      // for ascending compatibility
+//    NB_INTERNODE ,                        number of internodes (lateral axes)
+    AUXILIARY                            // auxiliary variable (smoothing/piecewise linear function)
   };
 
-  const int MAX_INF_BOUND = 10000;       // borne inferieure maximum
-  const int MAX_DIFF_BOUND = 10000;      // difference maximum entre les bornes
-                                         // inferieure et superieure
-  const double MAX_MEAN = 10000.;        // moyenne maximum
+  // Discrete parametric distributions
 
-  const double B_PROBABILITY = 0.8;      // seuil pour utiliser le calcul descendant de la loi binomiale
-  const double B_THRESHOLD = 1000.;      // seuil pour utiliser le calcul en log de la loi binomiale
-  const double P_THRESHOLD = 90.;        // seuil pour utiliser le calcul en log de la loi de Poisson
-  const double NB_THRESHOLD = 500.;      // seuil pour utiliser le calcul en log de la loi binomiale negative
+  const int MAX_INF_BOUND = 10000;       // maximum lower bound
+  const int MAX_DIFF_BOUND = 10000;      // maximum difference between lower and upper bounds
+  const double MAX_MEAN = 10000.;        // maximum mean
 
-  const double SAMPLE_NB_VALUE_COEFF = 5.;  // facteur pour deduire le nombre de valeurs prises
-                                            // par une v.a. du nombre de valeurs d'un echantillon
-  const int INF_BOUND_MARGIN = 5;        // plage de recherche pour la borne inferieure
-  const int SUP_BOUND_MARGIN = 3;        // plage de recherche pour la borne superieure
-  const double POISSON_RATIO = 0.7;      // rapport moyenne/variance minimum pour
-                                         // estimer une loi de Poisson
-  const double POISSON_RANGE = 0.1;      // plage de variation pour choisir une loi de
-                                         // Poisson par dilatation de l'echelle des temps
-  const double NB_VALUE_COEFF = 2.;      // facteur pour deduire le nombre de valeurs prises par une v.a.
-                                         // du nombre de valeurs prises par une v.a. initiale
+  const double B_PROBABILITY = 0.8;      // threshold for using the backward computation of the binomial probability mass function
+  const double B_THRESHOLD = 1000.;      // threshold for using the computation in log of the binomial probability mass function
+  const double P_THRESHOLD = 90.;        // threshold for using the computation in log of the Poisson probability mass function
+  const double NB_THRESHOLD = 500.;      // threshold for using the computation in log of the negative binomial probability mass function
 
-  const int MIN_RANGE = 10;              // intervalle de definition minimum
-                                         // pour appliquer la methode du rejet
-  const double MAX_SURFACE = 3.;         // surface maximum pour appliquer la methode du rejet
-  const int DIST_NB_ELEMENT = 1000000;   // taille maximum de l'echantillon pour la simulation
+  const double SAMPLE_NB_VALUE_COEFF = 5.;  // factor for deducing the number of possible values of a distribution
+                                            // from the number of possible values of a frequency distribution
+  const int INF_BOUND_MARGIN = 5;        // range of values for the lower bound
+  const int SUP_BOUND_MARGIN = 3;        // range of values for the upper bound
+  const double POISSON_RATIO = 0.7;      // minimum mean/variance ratio for estimating a Poisson distribution
+  const double POISSON_RANGE = 0.1;      // range for selecting a Poisson distribution by time scaling of
+                                         // another discrete distribution
+  const double NB_VALUE_COEFF = 2.;      // factor for deducing the number of values of a distribution from
+                                         // the number of values of an initial distribution
 
-  const int NB_COMPLETE_INTERVAL = 3;    // nombre minimum d'intervalles de temps complets
-  const double RENEWAL_LIKELIHOOD_DIFF = 1.e-5;  // seuil pour stopper les iterations EM
-  const int RENEWAL_NB_ITER = 10000;     // nombre maximum d'iterations EM
-  const double RENEWAL_DIFFERENCE_WEIGHT = 0.5;  // poids par defaut de la penalisation
-                                               // (cas des differences 1ere ou 2nde)
-  const double RENEWAL_ENTROPY_WEIGHT = 0.05;  // poids par defaut de la penalisation (cas de l'entropie)
-  const double MAX_VALUE_COEFF = 10.;    // coefficient pour deduire la valeur maximum de la loi inter-evenement
+  const int MIN_RANGE = 10;              // minimum interval of values for applying the rejection sampling method
+  const double MAX_SURFACE = 3.;         // maximum surface for applying the rejection sampling method
+  const int DIST_NB_ELEMENT = 1000000;   // maximum sample size for simulation
 
-  const double CONTINUOUS_POSITIVE_INF_BOUND = 1.e-12; // inf bound of positive continous distribution support (bug boost C++)
+  // Renewal process estimated on the basis of time interval data
 
-  const double GAMMA_TAIL = 1.e-3;       // traine de la loi Gamma
-  const int GAMMA_NB_STEP = 1000;        // nombre de pas pour le calcul de la loi Gamma
-  const int GAMMA_NB_SUB_STEP = 10;      // nombre de pas pour le calcul de la loi Gamma
-//  const int GAMMA_MIN_MEAN = 0.1;        // moyenne minimum de la loi gamma
+  const int NB_COMPLETE_INTERVAL = 3;    // minimum number of complete time intervals
+  const double RENEWAL_LIKELIHOOD_DIFF = 1.e-5;  // threshold for stopping the EM iterations
+  const int RENEWAL_NB_ITER = 10000;     // maximum number of EM iterations
+  const double RENEWAL_DIFFERENCE_WEIGHT = 0.5;  // default penalty weight (1st- or 2nd-order difference cases)
+  const double RENEWAL_ENTROPY_WEIGHT = 0.05;  // default penalty weight (entropy case)
+  const double MAX_VALUE_COEFF = 10.;    // coefficient for deducing the maximum value of an inter-event distribution
+
+  // Continuous parametric distributions
+
+  const double CONTINUOUS_POSITIVE_INF_BOUND = 1.e-12; // inf bound of positive continuous distribution support (bug boost C++)
+
+  const double GAMMA_TAIL = 1.e-3;       // gamma distribution tail
+  const int GAMMA_NB_STEP = 1000;        // number of steps for computing a discretized gamma distribution
+  const int GAMMA_NB_SUB_STEP = 10;      // number of sub-steps for computing a discretized gamma distribution
+//  const int GAMMA_MIN_MEAN = 0.1;        // minimum mean of the gamma distribution
   const double GAMMA_INVERSE_SAMPLE_SIZE_FACTOR = 5.;  // factor for the gamma distribution corrected moment estimator
-  const double GAMMA_MIN_SHAPE_PARAMETER = 0.1;  // parametre de forme minimum de la loi gamma
-  const double GAMMA_DEFAULT_SCALE_PARAMETER = 1;  // parametre d'echelle par defaut de la loi gamma
-  const double GAMMA_ZERO_FREQUENCY_THRESHOLD = 0.999;  // seuil sur la frequence relative de 0
-                                                        // pour l'estimation des parametres de la loi gamma
-  const double GAMMA_SHAPE_PARAMETER_THRESHOLD = 3.;  // seuil sur la valeur du parametre de forme
-                                                      // pour l'estimation des parametres de la loi gamma
-  const double GAMMA_FREQUENCY_THRESHOLD = 100.;  // seuil sur la frequence pour l'estimation des parametres de la loi gamma
-  const double GAMMA_ITERATION_FACTOR = 0.5;  // facteur pour l'estimation des parametres de la loi gamma
-  const int GAMMA_MAX_NB_ITERATION = 5;  // nombre maximum d'iterations pour l'estimation des parametres de la loi gamma
-//  const double GAMMA_VARIATION_COEFF_THRESHOLD = 1.e-2;  seuil sur le coefficient de variation pour l'estimation
-//                                                         des parametres de la loi gamma
+  const double GAMMA_MIN_SHAPE_PARAMETER = 0.1;  // minimum shape parameter (gamma distribution)
+  const double GAMMA_DEFAULT_SCALE_PARAMETER = 1;  // default scale parameter (gamma distribution)
+  const double GAMMA_ZERO_FREQUENCY_THRESHOLD = 0.999;  // threshold on the zero relative frequency (gamma distribution estimation)
+  const double GAMMA_SHAPE_PARAMETER_THRESHOLD = 3.;  // threshold on the shape parameter (gamma distribution estimation)
+  const double GAMMA_FREQUENCY_THRESHOLD = 100.;  // threshold on the frequency (gamma distribution estimation)
+  const double GAMMA_ITERATION_FACTOR = 0.5;  // factor (gamma distribution estimation)
+  const int GAMMA_MAX_NB_ITERATION = 5;  // maximum number of iterations (gamma distribution estimation)
+//  const double GAMMA_VARIATION_COEFF_THRESHOLD = 1.e-2;  threshold on le coefficient de variation (gamma distribution estimation)
 
-  const double INVERSE_GAUSSIAN_TAIL = 1.e-3;   // traine de la loi inverse Gaussian
-  const int INVERSE_GAUSSIAN_NB_STEP = 1000;    // nombre de pas pour le calcul de la loi inverse Gaussian
-  const int INVERSE_GAUSSIAN_NB_SUB_STEP = 10;  // nombre de pas pour le calcul de la loi inverse Gaussian
+  const double INVERSE_GAUSSIAN_TAIL = 1.e-3;   // inverse Gaussian distribution tail
+  const int INVERSE_GAUSSIAN_NB_STEP = 1000;    // number of steps for computing a discretized inverse Gaussian distribution
+  const int INVERSE_GAUSSIAN_NB_SUB_STEP = 10;  // number of steps for computing a discretized inverse Gaussian distribution
 
-  const double GAUSSIAN_TAIL = 5.e-4;    // traine de la loi de Gauss
-  const int GAUSSIAN_NB_STEP = 1000;     // nombre de pas pour le calcul de la loi de Gauss
-  const int GAUSSIAN_NB_SUB_STEP = 10;   // nombre de pas pour le calcul de la loi de Gauss
-  const double GAUSSIAN_MIN_VARIATION_COEFF = 1.e-3;  // coefficient de variation minimum pour l'estimation
-                                                      // de l'ecart-type de la loi de Gauss
+  const double GAUSSIAN_TAIL = 5.e-4;    // Gaussian distribution tail
+  const int GAUSSIAN_NB_STEP = 1000;     // number of steps for computing a discretized Gaussian distribution
+  const int GAUSSIAN_NB_SUB_STEP = 10;   // number of steps for computing a discretized Gaussian distribution
+  const double GAUSSIAN_MIN_VARIATION_COEFF = 1.e-3;  // minimum coefficient of variation (Gaussian distribution estimation)
 
-  const int VON_MISES_NB_STEP = 3600;    // nombre de pas pour le calcul de la loi de von Mises
-  const int VON_MISES_NB_SUB_STEP = 10;  // nombre de pas pour le calcul de la loi de von Mises
-//  const double VON_MISES_CONCENTRATION_THRESHOLD = 10.;  seuil sur le parametre de concentration pour appliquer
-//                                                         l'approximation gaussienne pour le calcul de la loi de von Mises
+  const int VON_MISES_NB_STEP = 3600;    // number of steps for computing a discretized von Mises distribution
+  const int VON_MISES_NB_SUB_STEP = 10;  // number of steps for computing a discretized von Mises distribution
+//  const double VON_MISES_CONCENTRATION_THRESHOLD = 10.;  threshold on the concentration parameter for applying
+//                                                         the Gaussian approximation for computing a von Mises distribution
 
-  const int CHI2_FREQUENCY = 2;          // effectif theorique minimum pour un
-                                         // test d'ajustement du Chi2
+  const int CHI2_FREQUENCY = 2;          // minimum theoretical sample size for a Chi2 goodness of fit test
 
-  const int MARGINAL_DISTRIBUTION_MAX_VALUE = 25000;  // valeur maximum pour la construction
-                                                      // de la loi marginale
-  const int HISTOGRAM_FREQUENCY = 10;    // frequence moyenne pour definir le pas de regroupement
-                                         // d'un histogramme
-  const double SKEWNESS_ROUNDNESS = 1.e-2;  // arrondi sur le coefficient d'asymetrie
+  const int MARGINAL_DISTRIBUTION_MAX_VALUE = 25000;  // maximum value for the building of a marginal frequency distribution
+  const int HISTOGRAM_FREQUENCY = 10;    // average frequency for defining the bin width of an histogram
+  const double SKEWNESS_ROUNDNESS = 1.e-2;  // rounding on the coefficient of skewness
 
-  const int NB_ERROR = 10;               // nombre maximum d'erreurs prises en compte
+  const int NB_ERROR = 10;               // maximum number of recorded errors
 
-  const int LINE_NB_CHARACTER = 100;     // nombre de caracteres par ligne pour les sequences
+  const int LINE_NB_CHARACTER = 100;     // number of characters per line for sequences
 
-  const int ASCII_NB_VALUE = 15;         // nombre de valeurs maximum (sortie ASCII)
-  const int ASCII_SPACE = 2;             // nombre d'espaces entre 2 colonnes (sortie ASCII)
-  const double ASCII_ROUNDNESS = 1.e-5;  // arrondi sur la fonction de repartition
-                                         // pour borner une loi (sortie ASCII)
+  const int ASCII_NB_VALUE = 15;         // maximum number of values (ASCII display)
+  const int ASCII_SPACE = 2;             // number of empty spaces between 2 columns (ASCII display)
+  const double ASCII_ROUNDNESS = 1.e-5;  // rounding on the cumulative distribution function
+                                         // for bounding a distribution (ASCII display)
+  const double SPREADSHEET_ROUNDNESS = 1.e-7;  // rounding on the cumulative distribution function
+                                               // for bounding a distribution (spreadsheet output)
+  const int DISPLAY_NB_INDIVIDUAL = 50;  // maximum number of displayed individuals
 
-  const double SPREADSHEET_ROUNDNESS = 1.e-7;  // arrondi sur la fonction de repartition
-                                               // pour borner une loi (sortie tableur)
-
-  const int DISPLAY_NB_INDIVIDUAL = 50;  // nombre maximum d'individus selectionnes affiches
-
-  const int PLOT_NB_DISTRIBUTION = 15;   // nombre maximum de lois affichees (sortie graphique)
-  const int PLOT_NB_HISTOGRAM = 15;      // nombre maximum d'histogrammes affiches (sortie graphique)
-  const double PLOT_ROUNDNESS = 1.e-5;   // arrondi sur la fonction de repartition
-                                         // pour borner une loi (sortie graphique)
-  const double PLOT_SHIFT = 0.2;         // decalage entre 2 histogrammes (sortie graphique)
-  const double PLOT_MAX_SHIFT = 0.5;     // decalage maximum entre le premier et le dernier
-                                         // histogramme (sortie graphique)
-  const int TIC_THRESHOLD = 10;          // nombre de graduations minimum pour echelle
-                                         // automatique (sortie graphique)
-  const double PLOT_MASS_THRESHOLD = 1.e-3;  // valeur minimale pour afficher un 0 apres la derniere
-                                             // valeur possible (sortie graphique)
-  const double YSCALE = 1.1;             // facteur d'echelle axe y (sortie graphique)
-  const double PLOT_RANGE_RATIO = 4.;    // seuil pour l'affichage a partir de 0
+  const int PLOT_NB_DISTRIBUTION = 15;   // maximum number of plotted distributions
+  const int PLOT_NB_HISTOGRAM = 15;      // maximum number of plotted histograms
+  const double PLOT_ROUNDNESS = 1.e-5;   // rounding on the cumulative distribution function
+                                         // for bounding a plotted distribution
+  const double PLOT_SHIFT = 0.2;         // shift between 2 plotted frequency distributions
+  const double PLOT_MAX_SHIFT = 0.5;     // maximum shift between the first and last plotted frequency distributions
+  const int TIC_THRESHOLD = 10;          // minimum number of plotted graduations
+  const double PLOT_MASS_THRESHOLD = 1.e-3;  // minimum value for plotting a zero mass after the last possible value
+  const double YSCALE = 1.1;             // scale factor for y axis in plots
+  const double PLOT_RANGE_RATIO = 4.;    // threshold for plotting from 0
 
 
 
 /****************************************************************
  *
- *  Definition des classes :
+ *  Class definition
  */
 
 
-  class Test {            // test d'hypothese
+  /// \brief Test of hypothesis
+
+  class Test {
 
     friend std::ostream& operator<<(std::ostream &os , const Test &test)
     { return test.ascii_print(os); }
 
   public :
 
-    test_distribution ident;  // identificateur (Normale / Chi2 / F / t)
-    bool one_side;          // unilateral / bilateral
-    int df1;                // nombre de degres de liberte (Chi2 / F / t)
-    int df2;                // nombre de degres de liberte (F)
-    double value;           // valeur
-    double critical_probability;  // probabilite critique
+    test_distribution ident;  ///< identifier (Normal/Chi2/F/Student's t)
+    bool one_side;          ///< one-sided/two-sided
+    int df1;                ///< degrees of freedom (Chi2/F/Student's t)
+    int df2;                ///< degrees of freedom (F)
+    double value;           ///< statistic value
+    double critical_probability;  ///< critical probability
 
     void copy(const Test &test);
 
@@ -363,18 +355,20 @@ namespace stat_tool {
 
 
 
-  class StatError {       // erreurs
+  /// \brief Class for error management
+
+  class StatError {
 
     friend std::ostream& operator<<(std::ostream &os , const StatError &error)
     { return error.ascii_write(os , ERROR); }
 
   private :
 
-    int nb_error;           // nombre d'erreurs
-    int max_nb_error;       // nombre maximum d'erreurs
-    int *line;              // no de ligne
-    int *column;            // no de colonne
-    char **label;           // messages d'erreur
+    int nb_error;           ///< number of errors
+    int max_nb_error;       ///< maximum  number of errors
+    int *line;              ///< line indices
+    int *column;            ///< column indices
+    char **label;           ///< error messages
 
   public :
 
@@ -390,7 +384,7 @@ namespace stat_tool {
     void correction_update(const char *ilabel , int correction ,
                            int iline = 0 , int icolumn = 0);
 
-    // acces membres de la classe
+    // class member access
 
     int get_nb_error() const { return nb_error; }
     int get_max_nb_error() const { return max_nb_error; }
@@ -398,7 +392,9 @@ namespace stat_tool {
 
 
 
-  class StatInterface {  // classe abstraite pour les interfaces
+  /// \brief Abstract class defining a common interface
+
+  class StatInterface {
 
   public :
 
@@ -422,24 +418,24 @@ namespace stat_tool {
   class FrequencyDistribution;
   class DiscreteParametricModel;
 
+  /// \brief Discrete distribution
 
-  class Distribution {    // loi de probabilite discrete
+  class Distribution {
 
     friend std::ostream& operator<<(std::ostream& , const Distribution&);
 
   public :
 
-    int nb_value;           // nombre de valeurs a partir de 0
-    int alloc_nb_value;     // nombre de valeurs allouees
-    int offset;             // nombre de valeurs de probabilite nulle a partir de 0
-    double max;             // probabilite maximum
-    double complement;      // probabilite complementaire
-                            // (> 0. dans le cas d'une loi impropre)
-    double mean;            // moyenne
-    double variance;        // variance
-    int nb_parameter;       // nombre de parametres inconnus
-    double *mass;           // probabilites de chaque valeur
-    double *cumul;          // fonction de repartition
+    int nb_value;           ///< number of values from 0
+    int alloc_nb_value;     ///< number of allocated values
+    int offset;             ///< number of values of null probability from 0
+    double max;             ///< maximum probability
+    double complement;      ///< complementary probability (> 0. for improper distributions)
+    double mean;            ///< mean
+    double variance;        ///< variance
+    int nb_parameter;       ///< number of free parameters
+    double *mass;           ///< probability mass function
+    double *cumul;          ///< cumulative distribution function
 
     void mass_copy(const Distribution &dist , int inb_value = I_DEFAULT);
     void equal_size_copy(const Distribution &dist);
@@ -562,18 +558,19 @@ namespace stat_tool {
 
   class Forward;
 
+  /// \brief Discrete parametric distribution
 
-  class DiscreteParametric : public Distribution {  // loi de probabilite discrete parametrique
+  class DiscreteParametric : public Distribution {
 
       friend std::ostream& operator<<(std::ostream& , const DiscreteParametric&);
 
   public :
 
-    discrete_parametric ident;  // identificateur
-    int inf_bound;          // borne inferieure
-    int sup_bound;          // borne superieure (binomiale / uniforme)
-    double parameter;       // parametre (Poisson / binomiale negative)
-    double probability;     // probabilite de succes (binomiale / binomiale negative)
+    discrete_parametric ident;  ///< identifier
+    int inf_bound;          ///< lower bound
+    int sup_bound;          ///< upper bound (binomial, uniform)
+    double parameter;       ///< parameter (Poisson, negative binomial)
+    double probability;     ///< probability of success (binomial, negative binomial)
 
     void init(int iinf_bound , int isup_bound , double iparameter , double iprobability);
     void init(discrete_parametric iident , int iinf_bound , int isup_bound ,
@@ -650,15 +647,15 @@ namespace stat_tool {
                                                   const FrequencyDistribution &final_run) const;
     double state_occupancy_likelihood_computation(const Forward &forward ,  // sequence_analysis
                                                   const FrequencyDistribution &sojourn_time ,
-                                                  const FrequencyDistribution &final_run ,
                                                   const FrequencyDistribution &initial_run ,
+                                                  const FrequencyDistribution &final_run ,
                                                   const FrequencyDistribution &single_run) const;
     void expectation_step(const FrequencyDistribution &sojourn_time ,  // sequence_analysis
                           const FrequencyDistribution &final_run ,
                           Reestimation<double> *occupancy_reestim , int iter) const;
     void expectation_step(const FrequencyDistribution &sojourn_time ,
-                          const FrequencyDistribution &final_run ,
                           const FrequencyDistribution &initial_run ,
+                          const FrequencyDistribution &final_run ,
                           const FrequencyDistribution &single_run ,
                           Reestimation<double> *occupancy_reestim ,
                           Reestimation<double> *length_bias_reestim ,
@@ -668,7 +665,9 @@ namespace stat_tool {
 
 
 
-  class Forward : public DiscreteParametric {  // loi de l'intervalle de temps residuel
+  /// \brief Forward recurrence or sojourn time distribution
+
+  class Forward : public DiscreteParametric {
 
   public :
 
@@ -692,8 +691,9 @@ namespace stat_tool {
   class Compound;
   class DiscreteMixture;
 
+  /// \brief Frequency distribution
 
-  class FrequencyDistribution : public Reestimation<int> {  // loi discrete empirique
+  class FrequencyDistribution : public Reestimation<int> {
 
   public :
 
@@ -889,35 +889,36 @@ namespace stat_tool {
 
   class Histogram;
 
+  /// \brief Continuous parametric distribution
 
-  class ContinuousParametric {  // loi de probabilite continue parametrique
+  class ContinuousParametric {
 
 //    friend std::ostream& operator<<(std::ostream &os , const ContinuousParametric &dist)
 //    { return dist.ascii_print(os); }
 
   public :
 
-    continuous_parametric ident;  // identificateur
+    continuous_parametric ident;  ///< identifier
     union {
-      double shape;         // shape parameter (GAMMA, ZERO_INFLATED_GAMMA)
-      double location;      // mean (GAUSSIAN, INVERSE_GAUSSIAN), mean direction (VON_MISES),
-      double intercept;     // LINEAR_MODEL
+      double shape;         ///< shape parameter (gamma, zero-inflated gamma)
+      double location;      ///< mean (Gaussian, inverse Gaussian), mean direction (von Mises),
+      double intercept;     ///< for linear model
     };
     union {
-      double scale;         // scale parameter (GAMMA, INVERSE_GAUSSIAN, ZERO_INFLATED_GAMMA)
-      double dispersion;    // standard deviation (GAUSSIAN), concentration (VON_MISES),
+      double scale;         ///< scale parameter (gamma, inverse Gaussian, zero-inflated gamma)
+      double dispersion;    ///< standard deviation (Gaussian, linear model), concentration (von Mises),
     };
     union {
-      double zero_probability;  // zero probability (ZERO_INFLATED_GAMMA)
-      double slope;           // LINEAR_MODEL
+      double zero_probability;  ///< zero probability (zero-inflated gamma)
+      double slope;           ///< for linear model
     };
-    double min_value;       // minimum value
-    double max_value;       // maximum value
-    angle_unit unit;        // unit (degree/radian) for the von Mises distribution
-    double slope_standard_deviation;  // LINEAR_MODEL
-    double sample_size;     // LINEAR_MODEL
-    double correlation;     // LINEAR_MODEL
-    double *cumul;          // cumulative distribution function (von Mises distribution)
+    double min_value;       ///< minimum value
+    double max_value;       ///< maximum value
+    angle_unit unit;        ///< unit (degree/radian - von Mises)
+    double slope_standard_deviation;  ///< for linear model
+    double sample_size;     ///< for linear model
+    double correlation;     ///< for linear model
+    double *cumul;          ///< cumulative distribution function (von Mises)
 
     void copy(const ContinuousParametric &dist);
 
@@ -971,18 +972,20 @@ namespace stat_tool {
 
 
 
-  class Histogram {         // histogramme
+  /// \brief Histogram
+
+  class Histogram {
 
   public :
 
-    int nb_element;         // effectif total
-    int nb_bin;             // number of bins
-    double bin_width;       // pas de regroupement
-    int max;                // frequence maximum
-    int *frequency;         // frequences
-    int type;               // type de la variable (INT_VALUE/REAL_VALUE)
-    double min_value;       // valeur minimum
-    double max_value;       // valeur maximum
+    int nb_element;         ///< sample size
+    int nb_bin;             ///< number of bins
+    double bin_width;       ///< constant bin width
+    int max;                ///< maximum frequency
+    int *frequency;         ///< frequency for each bin
+    int type;               ///< variable type (INT_VALUE/REAL_VALUE)
+    double min_value;       ///< minimum value
+    double max_value;       ///< maximum value
 
     void copy(const Histogram &histo);
 

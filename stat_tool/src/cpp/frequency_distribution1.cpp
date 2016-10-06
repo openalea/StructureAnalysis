@@ -119,7 +119,7 @@ void FrequencyDistribution::shift(const FrequencyDistribution &histo , int shift
   int *cfrequency;
 
 
-  // computation of the characteristics of the frequency distribution
+  // computation of the frequency distribution characteristics
 
   nb_element = histo.nb_element;
   nb_value = histo.nb_value + shift_param;
@@ -129,7 +129,7 @@ void FrequencyDistribution::shift(const FrequencyDistribution &histo , int shift
   mean = histo.mean + shift_param;
   variance = histo.variance;
 
-  // copie des frequences
+  // copy of frequencies
 
   frequency = new int[nb_value];
 
@@ -255,9 +255,9 @@ FrequencyDistribution::FrequencyDistribution(const FrequencyDistribution &histo 
 /**
  *  \brief Equality operator of the FrequencyDistribution class.
  *
- *  \param[in]  histo  reference on a FrequencyDistribution object,
+ *  \param[in] histo reference on a FrequencyDistribution object.
  *
- *  \param[out] status equality or not of the frequency distributions.
+ *  \return          equality or not of the frequency distributions.
  */
 /*--------------------------------------------------------------*/
 
@@ -290,10 +290,10 @@ bool FrequencyDistribution::operator==(const FrequencyDistribution &histo) const
 /**
  *  \brief Merging of FrequencyDistribution objects.
  *
- *  \param[in]  nb_sample number of FrequencyDistribution objects,
- *  \param[in]  ihisto    pointer on the FrequencyDistribution objects,
+ *  \param[in] nb_sample number of FrequencyDistribution objects,
+ *  \param[in] ihisto    pointer on the FrequencyDistribution objects.
  *
- *  \param[out] histo     FrequencyDistribution object.
+ *  \return              FrequencyDistribution object.
  */
 /*--------------------------------------------------------------*/
 
@@ -329,10 +329,10 @@ DiscreteDistributionData* FrequencyDistribution::merge(int nb_sample ,
 /**
  *  \brief Shifting of a frequency distribution.
  *
- *  \param[in]  error       reference on a StatError object,
- *  \param[in]  shift_param shifting parameter,
+ *  \param[in] error       reference on a StatError object,
+ *  \param[in] shift_param shifting parameter.
  *
- *  \param[out] histo       DiscreteDistributionData object.
+ *  \return                DiscreteDistributionData object.
  */
 /*--------------------------------------------------------------*/
 
@@ -364,11 +364,11 @@ DiscreteDistributionData* FrequencyDistribution::shift(StatError &error ,
 /**
  *  \brief clustering of values of a frequency distribution.
  *
- *  \param[in]  error reference on a StatError object,
- *  \param[in]  step  clustering step,
- *  \param[in]  mode  mode (FLOOR/ROUND/CEIL),
+ *  \param[in] error reference on a StatError object,
+ *  \param[in] step  clustering step,
+ *  \param[in] mode  mode (FLOOR/ROUND/CEIL).
  *
- *  \param[out] histo DiscreteDistributionData object.
+ *  \return          DiscreteDistributionData object.
  */
 /*--------------------------------------------------------------*/
 
@@ -399,12 +399,12 @@ DiscreteDistributionData* FrequencyDistribution::cluster(StatError &error , int 
  *  \brief clustering of values of a frequency distribution using
  *         an information quantity criterion.
  *
- *  \param[in]  error reference on a StatError object,
- *  \param[in]  ratio proportion of the information quantity of
- *                    the initial frequency distribution,
- *  \param[in]  stream,
+ *  \param[in] error reference on a StatError object,
+ *  \param[in] ratio proportion of the information quantity of
+ *                   the initial frequency distribution,
+ *  \param[in] os    stream.
  *
- *  \param[out] histo DiscreteDistributionData object.
+ *  \return          DiscreteDistributionData object.
  */
 /*--------------------------------------------------------------*/
 
@@ -512,13 +512,13 @@ DiscreteDistributionData* FrequencyDistribution::cluster(StatError &error , doub
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief clustering of values of a frequency distribution.
+ *  \brief Partitioning of values of a frequency distribution.
  *
- *  \param[in]  error    reference on a StatError object,
- *  \param[in]  nb_class number of classes,
- *  \param[in]  ilimit   limits between classes (beginning of classes),
+ *  \param[in] error    reference on a StatError object,
+ *  \param[in] nb_class number of classes,
+ *  \param[in] ilimit   limits between classes (beginning of classes).
  *
- *  \param[out] histo    DiscreteDistributionData object.
+ *  \return             DiscreteDistributionData object.
  */
 /*--------------------------------------------------------------*/
 
@@ -558,7 +558,7 @@ DiscreteDistributionData* FrequencyDistribution::cluster(StatError &error , int 
     if (status) {
       histo = new DiscreteDistributionData(nb_class);
 
-      // clustering of values
+      // partitioning of values
 
       pfrequency = histo->frequency - 1;
       cfrequency = frequency;
@@ -588,13 +588,13 @@ DiscreteDistributionData* FrequencyDistribution::cluster(StatError &error , int 
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief clustering of values of a frequency distribution.
+ *  \brief Partitioning of values of a frequency distribution.
  *
- *  \param[in]  error    reference on a StatError object,
- *  \param[in]  nb_class number of classes,
- *  \param[in]  ilimit   limits between classes (beginning of classes),
+ *  \param[in] error    reference on a StatError object,
+ *  \param[in] nb_class number of classes,
+ *  \param[in] ilimit   limits between classes (beginning of classes).
  *
- *  \param[out]          DiscreteDistributionData object.
+ *  \return             DiscreteDistributionData object.
  */
 /*--------------------------------------------------------------*/
 
@@ -610,10 +610,10 @@ DiscreteDistributionData* FrequencyDistribution::cluster(StatError &error , int 
 /**
  *  \brief Transcoding of categories.
  *
- *  \param[in]  error    reference on a StatError object,
- *  \param[in]  category transcoding table,
+ *  \param[in] error    reference on a StatError object,
+ *  \param[in] category transcoding table.
  *
- *  \param[out] histo    DiscreteDistributionData object.
+ *  \return             DiscreteDistributionData object.
  */
 /*--------------------------------------------------------------*/
 
@@ -714,10 +714,10 @@ DiscreteDistributionData* FrequencyDistribution::transcode(StatError &error ,
 /**
  *  \brief Transcoding of categories.
  *
- *  \param[in]  error    reference on a StatError object,
- *  \param[in]  category transcoding table.
+ *  \param[in] error    reference on a StatError object,
+ *  \param[in] category transcoding table.
  *
- *  \param[out]          DiscreteDistributionData object.
+ *  \return             DiscreteDistributionData object.
  */
 /*--------------------------------------------------------------*/
 
@@ -733,12 +733,12 @@ DiscreteDistributionData* FrequencyDistribution::transcode(StatError &error ,
 /**
  *  \brief Selection of a range of values.
  *
- *  \param[in]  error     reference on a StatError object,
- *  \param[in]  min_value lowest value,
- *  \param[in]  max_value highest value,
- *  \param[in]  keep      flag for keeping or rejecting the selected values,
+ *  \param[in] error     reference on a StatError object,
+ *  \param[in] min_value lowest value,
+ *  \param[in] max_value highest value,
+ *  \param[in] keep      flag for keeping or rejecting the selected values.
  *
- *  \param[out] histo     DiscreteDistributionData object.
+ *  \return              DiscreteDistributionData object.
  */
 /*--------------------------------------------------------------*/
 
@@ -938,10 +938,10 @@ ostream& FrequencyDistribution::ascii_write(ostream &os , bool exhaustive ,
 /**
  *  \brief Writing of a FrequencyDistribution object in a file.
  *
- *  \param[in]  error  reference on a StatError object,
- *  \param[in]  path   file path,
+ *  \param[in] error reference on a StatError object,
+ *  \param[in] path  file path.
  *
- *  \param[out] status error status.
+ *  \return          error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -973,7 +973,7 @@ bool FrequencyDistribution::ascii_write(StatError &error , const string path) co
  *  \brief Writing of the characteristics of a frequency distribution at the spreadsheet format.
  *
  *  \param[in,out] os    stream,
- *  \param[in]     shape flag writing of shape characteristics.
+ *  \param[in]     shape flag on the writing of the shape characteristics.
  */
 /*--------------------------------------------------------------*/
 
@@ -1083,12 +1083,12 @@ ostream& FrequencyDistribution::spreadsheet_print(ostream &os , bool cumul_flag 
 /**
  *  \brief Writing of a frequency distribution at the Gnuplot format.
  *
- *  \param[in]  path          file path,
- *  \param[in]  cumul         pointer on the cumulative distribution function,
- *  \param[in]  concentration pointer on the concentration function,
- *  \param[in]  shift         shift of the frequency distribution.
+ *  \param[in] path          file path,
+ *  \param[in] cumul         pointer on the cumulative distribution function,
+ *  \param[in] concentration pointer on the concentration function,
+ *  \param[in] shift         shift of the frequency distribution.
  *
- *  \param[out] status        error status.
+ *  \return                  error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -1136,11 +1136,11 @@ bool FrequencyDistribution::plot_print(const char *path , double *cumul ,
 /**
  *  \brief Writing of a family of frequency distributions at the Gnuplot format.
  *
- *  \param[in]  path     file path,
- *  \param[in]  nb_histo number of frequency distributions,
- *  \param[in]  histo    pointer on the frequency distributions.
+ *  \param[in] path     file path,
+ *  \param[in] nb_histo number of frequency distributions,
+ *  \param[in] histo    pointer on the frequency distributions.
  *
- *  \param[out] status   error status.
+ *  \return             error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -1395,10 +1395,10 @@ ostream& FrequencyDistribution::survival_ascii_write(ostream &os) const
  *  \brief Computation of the survival rates from a frequency distribution and
  *         writing of the result in a file.
  *
- *  \param[in]  error  reference on a StatError object,
- *  \param[in]  path   file path,
+ *  \param[in] error reference on a StatError object,
+ *  \param[in] path  file path.
  *
- *  \param[out] status error status.
+ *  \return          error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -1430,10 +1430,10 @@ bool FrequencyDistribution::survival_ascii_write(StatError &error , const string
  *  \brief Computation of the survival rates from a frequency distribution and
  *         writing of the result in a file at the spreadsheet format.
  *
- *  \param[in]  error  reference on a StatError object,
- *  \param[in]  path   file path.
+ *  \param[in] error reference on a StatError object,
+ *  \param[in] path  file path.
  *
- *  \param[out] status error status.
+ *  \return          error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -1480,10 +1480,10 @@ bool FrequencyDistribution::survival_spreadsheet_write(StatError &error , const 
  *  \brief Writing of a frequency distribution, the deduced probability mass and
  *         survivor functions at the Gnuplot format.
  *
- *  \param[in]  path     file path,
- *  \param[in]  survivor pointer on the survivor function,
+ *  \param[in] path     file path,
+ *  \param[in] survivor pointer on the survivor function.
  *
- *  \param[out] status    error status.
+ *  \return             error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -1513,11 +1513,11 @@ bool FrequencyDistribution::survival_plot_print(const char *path , double *survi
  *  \brief Computation of the survival rates from a frequency distribution and
  *         plot of the result using Gnuplot.
  *
- *  \param[in]  error  reference on a StatError object,
- *  \param[in]  prefix file prefix,
- *  \param[in]  title  figure title,
+ *  \param[in] error  reference on a StatError object,
+ *  \param[in] prefix file prefix,
+ *  \param[in] title  figure title.
  *
- *  \param[out] status error status.
+ *  \return           error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -1541,7 +1541,7 @@ bool FrequencyDistribution::survival_plot_write(StatError &error , const char *p
 
   else {
 
-    // writing of data files
+    // writing of the data files
 
     data_file_name[0] << prefix << 0 << ".dat";
     survivor = survivor_function_computation();
@@ -1560,7 +1560,7 @@ bool FrequencyDistribution::survival_plot_write(StatError &error , const char *p
       data_file_name[1] << prefix << 1 << ".dat";
       survival_rate->plot_print((data_file_name[1].str()).c_str());
 
-      // writing of script files
+      // writing of the script files
 
       for (i = 0;i < 2;i++) {
         ostringstream file_name[2];
@@ -1692,9 +1692,9 @@ void FrequencyDistribution::plotable_survivor_write(SinglePlot &plot) const
  *  \brief Computation of the survival rates from a frequency distribution and
  *         plot of the result.
  *
- *  \param[in]  error    reference on a StatError object,
+ *  \param[in] error reference on a StatError object.
  *
- *  \param[out] plot_set plots.
+ *  \return          plots.
  */
 /*--------------------------------------------------------------*/
 
@@ -1804,9 +1804,9 @@ MultiPlotSet* FrequencyDistribution::survival_get_plotable(StatError &error) con
  *  \brief Computation de la cumulative distribution function deduced from
  *         a frequency distribution.
  *
- *  \param[in]  scale scaling factor,
+ *  \param[in] scale scaling factor.
  *
- *  \param[out] cumul cumulative distribution function.
+ *  \return          cumulative distribution function.
  */
 /*--------------------------------------------------------------*/
 
@@ -1839,9 +1839,9 @@ double* FrequencyDistribution::cumul_computation(double scale) const
 /**
  *  \brief Computation of the survivor function deduced from a frequency distribution.
  *
- *  \param[in]  scale             scaling factor,
+ *  \param[in] scale scaling factor.
  *
- *  \param[out] survivor_function survivor function.
+ *  \return          survivor function.
  */
 /*--------------------------------------------------------------*/
 
@@ -1874,9 +1874,9 @@ double* FrequencyDistribution::survivor_function_computation(double scale) const
 /**
  *  \brief Computation of the concentration function deduced from a frequency distribution.
  *
- *  \param[in]  scale                  scaling factor,
+ *  \param[in] scale scaling factor.
  *
- *  \param[out] concentration_function concentration function.
+ *  \return          concentration function.
  */
 /*--------------------------------------------------------------*/
 
@@ -1917,7 +1917,7 @@ double* FrequencyDistribution::concentration_function_computation(double scale) 
 /**
  *  \brief Computation of the coefficient of concentration of a frequency distribution.
  *
- *  \param[out] concentration coefficient of concentration.
+ *  \return coefficient of concentration.
  */
 /*--------------------------------------------------------------*/
 
@@ -1984,7 +1984,7 @@ void FrequencyDistribution::update(const Reestimation<double> *reestim , int inb
   double scale , sum , max_frequency , *real_frequency;
 
 
-  // copy of the real frequency distribution reel and scaling
+  // copy of the real frequency distribution and scaling
 
   real_frequency = new double[reestim->nb_value];
 
@@ -2045,9 +2045,9 @@ void FrequencyDistribution::update(const Reestimation<double> *reestim , int inb
  *  \brief Computation of a frequency distribution from an initial frequency distribution
  *         by scaling frequencies.
  *
- *  \param[in]  inb_element cumulative frequencies,
+ *  \param[in] inb_element cumulative frequencies.
  *
- *  \param[out] histo       scaled frequency distribution.
+ *  \return                scaled frequency distribution.
  */
 /*--------------------------------------------------------------*/
 
@@ -2119,7 +2119,7 @@ FrequencyDistribution* FrequencyDistribution::frequency_scale(int inb_element) c
 /**
  *  \brief Computation of ranks of values on the basis of a frequency distribution.
  *
- *  \param[out] rank ranks.
+ *  \return ranks.
  */
 /*--------------------------------------------------------------*/
 
@@ -2145,9 +2145,9 @@ double* FrequencyDistribution::rank_computation() const
 /**
  *  \brief Computation of the cumulative frequency distribution function.
  *
- *  \param[in]  cdf (values, cumulative frequency distribution function).
+ *  \param[in] cdf (values, cumulative frequency distribution function).
  *
- *  \param[out] i   number of values.
+ *  \return        number of values.
  */
 /*--------------------------------------------------------------*/
 
@@ -2181,7 +2181,7 @@ int FrequencyDistribution::cumulative_distribution_function_computation(double *
 /**
  *  \brief Computation of the minimum interval between 2 values.
  *
- *  \param[out] min_interval minimum interval.
+ *  \return minimum interval.
  */
 /*--------------------------------------------------------------*/
 
@@ -2212,10 +2212,10 @@ int FrequencyDistribution::min_interval_computation() const
 /**
  *  \brief Computation of the log-likelihood of a continuous distribution for a frequency distribution.
  *
- *  \param[in]  dist         reference on a ContinuousParametric object,
- *  \param[in]  min_interval minimum interval between 2 values,
+ *  \param[in] dist         reference on a ContinuousParametric object,
+ *  \param[in] min_interval minimum interval between 2 values.
  *
- *  \param[out] likelihood   log-likelihood.
+ *  \return                 log-likelihood.
  */
 /*--------------------------------------------------------------*/
 

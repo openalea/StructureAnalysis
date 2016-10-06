@@ -155,7 +155,7 @@ void Compound::computation(DiscreteParametric **power_dist , int min_nb_value ,
   int sum_nb_value , min;
 
 
-  // computation of the sum distribution and of the basis distribution
+  // computation of the sum distribution and the basis distribution
 
   sum_nb_value = sum_distribution->nb_value;
   if (sum_flag) {
@@ -246,7 +246,7 @@ void Compound::computation(DiscreteParametric **power_dist , int min_nb_value ,
 /**
  *  \brief Computation of reestimation quantities (E-step of the EM algorithm).
  *
- *  \param[in] histo       reference on the frequency distribution,
+ *  \param[in] histo       reference on a FrequencyDistribution object,
  *  \param[in] power_dist  pointer on the convolution powers of the basis distribution 
  *  \param[in] sum_reestim pointer on the reestimation quantities of the sum distribution
  *  \param[in] reestim     pointer on the reestimation quantities of the basis distribution.
@@ -282,7 +282,7 @@ void Compound::expectation_step(const FrequencyDistribution &histo ,
   for (i = histo.offset;i < histo.nb_value;i++) {
     if (histo.frequency[i] > 0) {
 
-      // computation of the normalizing term (denominator)
+      // computation of the normalizing term
 
       denom = 0.;
       if (sum_distribution->offset == 0) {
@@ -381,22 +381,22 @@ void Compound::expectation_step(const FrequencyDistribution &histo ,
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Estimation of a compound distribution using the EM  algorithm.
+ *  \brief Estimation of a compound distribution using the EM algorithm.
  *
- *  \param[in]  error     reference on a StatError object,
- *  \param[in]  os        stream,
- *  \param[in]  sum_dist  reference on the sum distribution,
- *  \param[in]  dist      reference on the basis distribution,
- *  \param[in]  type      type of the unknown distribution (SUM/ELEMENTARY),
- *  \param[in]  estimator estimator type (likelihood, penalized likelihood or
- *                        estimation of a parametric distribution),
- *  \param[in]  nb_iter   number of iterations,
- *  \param[in]  weight    penalty weight,
- *  \param[in]  pen_type  penalty type,
- *  \param[in]  outside   management of side effects (zero outside the support or
- *                        continuation of the distribution),
+ *  \param[in] error     reference on a StatError object,
+ *  \param[in] os        stream,
+ *  \param[in] sum_dist  reference on the sum distribution,
+ *  \param[in] dist      reference on the basis distribution,
+ *  \param[in] type      unknown distribution type (SUM/ELEMENTARY),
+ *  \param[in] estimator estimator type (likelihood, penalized likelihood or
+ *                       estimation of a parametric distribution),
+ *  \param[in] nb_iter   number of iterations,
+ *  \param[in] weight    penalty weight,
+ *  \param[in] pen_type  penalty type,
+ *  \param[in] outside   management of side effects (zero outside the support or
+ *                       continuation of the distribution).
  *
- *  \param[out] compound  compound distribution.
+ *  \return              Compound object.
  */
 /*--------------------------------------------------------------*/
 
@@ -480,8 +480,8 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream 
       break;
     }
 
-    // construction of convolution powers of the basis distribution and
-    // of reestimation quantities
+    // construction of the convolution powers of the basis distribution and
+    // the reestimation quantities
 
     sum_nb_value = compound->sum_distribution->alloc_nb_value;
 
@@ -516,7 +516,7 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream 
     do {
       i++;
 
-      // computation of reestimation quantities
+      // computation of the reestimation quantities
 
       switch (type) {
 
@@ -547,7 +547,7 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream 
       }
       }
 
-      // computation of the estimated compound distribution and of the corresponding log-likelihood
+      // computation of the estimated compound distribution and the corresponding log-likelihood
 
       compound->computation(power_dist , nb_value , COMPOUND_THRESHOLD ,
                             sum_compute , dist_compute);
@@ -655,7 +655,7 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream 
             likelihood = D_INF;
           }
 
-          // computation of the estimated compound distribution and of the corresponding log-likelihood
+          // computation of the estimated compound distribution and the corresponding log-likelihood
 
           else {
             compound->computation(power_dist , nb_value , COMPOUND_THRESHOLD ,
@@ -760,20 +760,20 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream 
 /**
  *  \brief Estimation of a compound distribution using the EM algorithm.
  *
- *  \param[in]  error         reference on a StatError object,
- *  \param[in]  os            stream,
- *  \param[in]  known_dist    reference on the known distribution,
- *  \param[in]  type          type of the unknown distribution (SUM/ELEMENTARY),
- *  \param[in]  min_inf_bound minimum lower bound of the support of the unknown distribution,
- *  \param[in]  estimator     estimator type (likelihood, penalized likelihood or
- *                            estimation of a parametric distribution),
- *  \param[in]  nb_iter       number of iterations,
- *  \param[in]  weight        penalty weight ,
- *  \param[in]  pen_type      penalty type,
- *  \param[in]  outside       management of side effects (zero outside the support or
- *                            continuation of the distribution),
+ *  \param[in] error         reference on a StatError object,
+ *  \param[in] os            stream,
+ *  \param[in] known_dist    reference on the known distribution,
+ *  \param[in] type          unknown distribution type (SUM/ELEMENTARY),
+ *  \param[in] min_inf_bound minimum lower bound of the support of the unknown distribution,
+ *  \param[in] estimator     estimator type (likelihood, penalized likelihood or
+ *                           estimation of a parametric distribution),
+ *  \param[in] nb_iter       number of iterations,
+ *  \param[in] weight        penalty weight ,
+ *  \param[in] pen_type      penalty type,
+ *  \param[in] outside       management of side effects (zero outside the support or
+ *                           continuation of the distribution).
  *
- *  \param[out] compound      compound distribution.
+ *  \return                  Compound object.
  */
 /*--------------------------------------------------------------*/
 
@@ -843,10 +843,10 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream 
 /**
  *  \brief Simulation using a compound distribution.
  *
- *  \param[in]  error          reference on a StatError object,
- *  \param[in]  nb_element     sample size,
+ *  \param[in] error      reference on a StatError object,
+ *  \param[in] nb_element sample size.
  *
- *  \param[out] compound_histo sample generated by a compound distribution.
+ *  \return               sample generated by a compound distribution.
  */
 /*--------------------------------------------------------------*/
 

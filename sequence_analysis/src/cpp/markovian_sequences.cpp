@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -57,11 +57,11 @@ namespace sequence_analysis {
 
 
 
-/*--------------------------------------------------------------*
- *
- *  Constructeur par defaut de la classe MarkovianSequences.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Default constructor of the MarkovianSequences class.
+ */
+/*--------------------------------------------------------------*/
 
 MarkovianSequences::MarkovianSequences()
 
@@ -75,11 +75,11 @@ MarkovianSequences::MarkovianSequences()
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Initialisation par defaut des champs de la classe MarkovianSequences.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Default initialization of the data members of the MarkovianSequences class.
+ */
+/*--------------------------------------------------------------*/
 
 void MarkovianSequences::init()
 
@@ -103,13 +103,13 @@ void MarkovianSequences::init()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Construction of a MarkovianSequences object from a Sequences object.
  *
- *  Construction d'un objet MarkovianSequences a partir d'un objet Sequences.
- *
- *  argument : reference sur un objet Sequences.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] seq reference sur un objet Sequences.
+ */
+/*--------------------------------------------------------------*/
 
 MarkovianSequences::MarkovianSequences(const Sequences &seq)
 :Sequences(seq)
@@ -129,14 +129,14 @@ MarkovianSequences::MarkovianSequences(const Sequences &seq)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Construction of a MarkovianSequences object adding auxiliary variables.
  *
- *  Construction d'un objet MarkovianSequences avec ajout de variables auxilliaires.
- *
- *  argument : reference sur un objet MarkovianSequences,
- *             flags sur l'ajout des variables auxilliaires.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] seq       reference on a MarkovianSequences object,
+ *  \param[in] auxiliary flags on the addition of auxiliary variables.
+ */
+/*--------------------------------------------------------------*/
 
 MarkovianSequences::MarkovianSequences(const MarkovianSequences &seq , bool *auxiliary)
 :Sequences(seq , auxiliary)
@@ -174,14 +174,14 @@ MarkovianSequences::MarkovianSequences(const MarkovianSequences &seq , bool *aux
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Copy of a MarkovianSequences object.
  *
- *  Copie d'un objet MarkovianSequences.
- *
- *  arguments : reference sur un objet MarkovianSequences,
- *              ajout/suppression des lois empiriques de temps de sejour initial.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] seq   reference on a MarkovianSequences object,
+ *  \param[in] param addition/removing of the initial run length frequency distributions.
+ */
+/*--------------------------------------------------------------*/
 
 void MarkovianSequences::copy(const MarkovianSequences &seq , initial_run param)
 
@@ -289,13 +289,13 @@ void MarkovianSequences::copy(const MarkovianSequences &seq , initial_run param)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Copy of a MarkovianSequences object reversing the direction of sequences.
  *
- *  Copie d'un objet MarkovianSequences avec inversion du sens de parcours des sequences.
- *
- *  arguments : reference sur un objet MarkovianSequences.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] seq reference on a MarkovianSequences object.
+ */
+/*--------------------------------------------------------------*/
 
 void MarkovianSequences::reverse(const MarkovianSequences &seq)
 
@@ -375,14 +375,14 @@ void MarkovianSequences::reverse(const MarkovianSequences &seq)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Copy of a MarkovianSequences object adding a state variable.
  *
- *  Copie d'un objet MarkovianSequences avec ajout d'une variable d'etat.
- *
- *  arguments : reference sur un objet MarkovianSequences,
- *              ajout/suppression des lois empiriques de temps de sejour initial.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] seq   reference on a MarkovianSequences object,
+ *  \param[in] param addition/removing of the initial run length frequency distributions.
+ */
+/*--------------------------------------------------------------*/
 
 void MarkovianSequences::add_state_variable(const MarkovianSequences &seq , initial_run param)
 
@@ -436,14 +436,15 @@ void MarkovianSequences::add_state_variable(const MarkovianSequences &seq , init
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor by copy of the MarkovianSequences class.
  *
- *  Constructeur par copie de la classe MarkovianSequences.
- *
- *  arguments : reference sur un objet MarkovianSequences, type de transformation,
- *              ajout/suppression des lois empiriques de temps de sejour initial.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] seq       reference on a MarkovianSequences object,
+ *  \param[in] transform type of transform,
+ *  \param[in] param     addition/removing of the initial run length frequency distributions.
+ */
+/*--------------------------------------------------------------*/
 
 MarkovianSequences::MarkovianSequences(const MarkovianSequences &seq , sequence_transformation transform ,
                                        initial_run param)
@@ -478,11 +479,11 @@ MarkovianSequences::MarkovianSequences(const MarkovianSequences &seq , sequence_
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Destructeur des champs de la classe MarkovianSequences.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Destructor of data members of the MarkovianSequences class.
+ */
+/*--------------------------------------------------------------*/
 
 void MarkovianSequences::remove()
 
@@ -532,11 +533,11 @@ void MarkovianSequences::remove()
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Destructeur de la classe MarkovianSequences.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Destructor of the MarkovianSequences class.
+ */
+/*--------------------------------------------------------------*/
 
 MarkovianSequences::~MarkovianSequences()
 
@@ -545,13 +546,15 @@ MarkovianSequences::~MarkovianSequences()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Assignement operator of the MarkovianSequences class.
  *
- *  Operateur d'assignement de la classe MarkovianSequences.
+ *  \param[in] seq reference on a MarkovianSequences object.
  *
- *  argument : reference sur un objet MarkovianSequences.
- *
- *--------------------------------------------------------------*/
+ *  \return        MarkovianSequences object.
+ */
+/*--------------------------------------------------------------*/
 
 MarkovianSequences& MarkovianSequences::operator=(const MarkovianSequences &seq)
 
@@ -568,13 +571,13 @@ MarkovianSequences& MarkovianSequences::operator=(const MarkovianSequences &seq)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Initialization of a state variable (1st variable).
  *
- *  Initialisation de la 1ere variable.
- *
- *  argument : type de la 1ere variable (STATE / INT_VALUE / REAL_VALUE).
- *
- *--------------------------------------------------------------*/
+ *  \param[in] itype 1st variable type (STATE/INT_VALUE/REAL_VALUE).
+ */
+/*--------------------------------------------------------------*/
 
 void MarkovianSequences::state_variable_init(variable_nature itype)
 
@@ -627,14 +630,18 @@ void MarkovianSequences::state_variable_init(variable_nature itype)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Extraction of a frequency distribution.
  *
- *  Extraction d'un loi empirique.
+ *  \param[in] error    reference on a StatError object,
+ *  \param[in] type     frequency distribution type,
+ *  \param[in] variable variable index,
+ *  \param[in] value    value.
  *
- *  arguments : reference sur un objet StatError, type de loi empirique,
- *              variable, valeur.
- *
- *--------------------------------------------------------------*/
+ *  \return             DiscreteDistributionData object.
+ */
+/*--------------------------------------------------------------*/
 
 DiscreteDistributionData* MarkovianSequences::extract(StatError &error , process_distribution type ,
                                                       int variable , int value) const
@@ -744,14 +751,17 @@ DiscreteDistributionData* MarkovianSequences::extract(StatError &error , process
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Merging of MarkovianSequences objects.
  *
- *  Fusion d'objets MarkovianSequences.
+ *  \param[in] error     reference on a StatError object,
+ *  \param[in] nb_sample number of MarkovianSequences objects,
+ *  \param[in] iseq      pointer on the MarkovianSequences objects.
  *
- *  arguments : reference sur un objet StatError, nombre d'objets MarkovianSequences,
- *              pointeurs sur les objets MarkovianSequences.
- *
- *--------------------------------------------------------------*/
+ *  \return              MarkovianSequences object.
+ */
+/*--------------------------------------------------------------*/
 
 MarkovianSequences* MarkovianSequences::merge(StatError &error , int nb_sample ,
                                               const MarkovianSequences **iseq) const
@@ -817,14 +827,14 @@ MarkovianSequences* MarkovianSequences::merge(StatError &error , int nb_sample ,
       pseq[i] = iseq[i - 1];
     }
 
-    // calcul du nombre de sequences
+    // computation of the number of sequences
 
     inb_sequence = 0;
     for (i = 0;i < nb_sample;i++) {
       inb_sequence += pseq[i]->nb_sequence;
     }
 
-    // comparaison des identificateurs des sequences
+    // comparison of sequence identifiers
 
     iidentifier = new int[inb_sequence];
 
@@ -854,7 +864,7 @@ MarkovianSequences* MarkovianSequences::merge(StatError &error , int nb_sample ,
       cumul_nb_sequence += pseq[j]->nb_sequence;
     }
 
-    // copie des longueurs des sequences
+    // copy of sequence lengths
 
     ilength = new int[inb_sequence];
 
@@ -865,7 +875,7 @@ MarkovianSequences* MarkovianSequences::merge(StatError &error , int nb_sample ,
       }
     }
 
-    // comparaison des identificateurs des vertex
+    // comparison of vertex identifiers
 
     for (i = 0;i < nb_sample;i++) {
       if (!(pseq[i]->vertex_identifier)) {
@@ -961,7 +971,7 @@ MarkovianSequences* MarkovianSequences::merge(StatError &error , int nb_sample ,
       seq->index_interval = new FrequencyDistribution(nb_sample , phisto);
     }
 
-    // copie des valeurs
+    // copy of values
 
     i = 0;
     for (j = 0;j < nb_sample;j++) {
@@ -1139,14 +1149,17 @@ MarkovianSequences* MarkovianSequences::merge(StatError &error , int nb_sample ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Merging of MarkovianSequences objects.
  *
- *  Fusion d'objets MarkovianSequences.
+ *  \param[in] error     reference on a StatError object,
+ *  \param[in] nb_sample number of MarkovianSequences objects,
+ *  \param[in] iseq      pointer on the MarkovianSequences objects.
  *
- *  arguments : reference sur un objet StatError, nombre d'objets MarkovianSequences,
- *              pointeurs sur les objets MarkovianSequences.
- *
- *--------------------------------------------------------------*/
+ *  \return              MarkovianSequences object.
+ */
+/*--------------------------------------------------------------*/
 
 MarkovianSequences* MarkovianSequences::merge(StatError &error , int nb_sample ,
                                               const vector<MarkovianSequences> iseq) const
@@ -1173,14 +1186,18 @@ MarkovianSequences* MarkovianSequences::merge(StatError &error , int nb_sample ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Clustering of values of a variable.
  *
- *  Regroupement des valeurs d'une variable.
+ *  \param[in] error    reference on a StatError object,
+ *  \param[in] variable variable index,
+ *  \param[in] step     clustering step,
+ *  \param[in] mode     mode (FLOOR/ROUND/CEIL).
  *
- *  arguments : reference sur un objet StatError, indice de la variable,
- *              pas de regroupement, mode (FLOOR/ROUND/CEIL).
- *
- *--------------------------------------------------------------*/
+ *  \return             MarkovianSequences object.
+ */
+/*--------------------------------------------------------------*/
 
 MarkovianSequences* MarkovianSequences::cluster(StatError &error , int variable ,
                                                 int step , rounding mode) const
@@ -1247,14 +1264,18 @@ MarkovianSequences* MarkovianSequences::cluster(StatError &error , int variable 
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Transcoding of categories of an integer-valued variable.
  *
- *  Transcodage des categories d'une variable entiere.
+ *  \param[in] error        reference on a StatError object,
+ *  \param[in] ivariable    variable index,
+ *  \param[in] category     transcoding table,
+ *  \param[in] add_variable flag for adding a variable.
  *
- *  arguments : reference sur un objet StatError, indice de la variable,
- *              table de transcodage des categories, flag pour ajouter une variable.
- *
- *--------------------------------------------------------------*/
+ *  \return                 MarkovianSequences object.
+ */
+/*--------------------------------------------------------------*/
 
 MarkovianSequences* MarkovianSequences::transcode(StatError &error , int ivariable ,
                                                   int *category , bool add_variable) const
@@ -1388,14 +1409,18 @@ MarkovianSequences* MarkovianSequences::transcode(StatError &error , int ivariab
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Transcoding of categories of an integer-valued variable.
  *
- *  Transcodage des categories d'une variable entiere.
+ *  \param[in] error        reference on a StatError object,
+ *  \param[in] ivariable    variable index,
+ *  \param[in] category     transcoding table,
+ *  \param[in] add_variable flag for adding a variable.
  *
- *  arguments : reference sur un objet StatError, indice de la variable,
- *              table de transcodage des categories, flag pour ajouter une variable.
- *
- *--------------------------------------------------------------*/
+ *  \return                 MarkovianSequences object.
+ */
+/*--------------------------------------------------------------*/
 
 MarkovianSequences* MarkovianSequences::transcode(StatError &error , int ivariable ,
                                                   vector<int> category , bool add_variable) const
@@ -1405,14 +1430,16 @@ MarkovianSequences* MarkovianSequences::transcode(StatError &error , int ivariab
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Transcoding of categories of an integer-valued variable.
  *
- *  Transcodage des categories d'une variable entiere.
+ *  \param[in] error   reference on a StatError object,
+ *  \param[in] process reference on a CategoricalSequenceProcess object.
  *
- *  arguments : references sur un objet StatError et
- *              sur un objet CategoricalSequenceProcess.
- *
- *--------------------------------------------------------------*/
+ *  \return            MarkovianSequences object.
+ */
+/*--------------------------------------------------------------*/
 
 MarkovianSequences* MarkovianSequences::transcode(StatError &error ,
                                                   const CategoricalSequenceProcess *process) const
@@ -1439,14 +1466,18 @@ MarkovianSequences* MarkovianSequences::transcode(StatError &error ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Removing of the non-represented values of an integer-valued variable.
  *
- *  Suppression des valeurs non-representees d'une variable entiere.
+ *  \param[in] error        reference on a StatError object,
+ *  \param[in] os           stream,
+ *  \param[in] ivariable    variable index,
+ *  \param[in] add_variable flag for adding a variable.
  *
- *  arguments : reference sur un objet StatError, stream, indice de la variable,
- *              flag pour ajouter une variable.
- *
- *--------------------------------------------------------------*/
+ *  \return                 MarkovianSequences object.
+ */
+/*--------------------------------------------------------------*/
 
 MarkovianSequences* MarkovianSequences::consecutive_values(StatError &error , ostream &os ,
                                                            int ivariable , bool add_variable) const
@@ -1569,15 +1600,19 @@ MarkovianSequences* MarkovianSequences::consecutive_values(StatError &error , os
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Partitioning of values of an integer-valued variable.
  *
- *  Regroupement des categories d'une variable entiere.
+ *  \param[in] error        reference on a StatError object,
+ *  \param[in] ivariable    variable index,
+ *  \param[in] nb_class     number of classes,
+ *  \param[in] ilimit       integer limits between classes (beginning of classes),
+ *  \param[in] add_variable flag for adding a variable.
  *
- *  arguments : reference sur un objet StatError, indice de la variable,
- *              nombres de classes, bornes pour regrouper les categories,
- *              flag pour ajouter une variable.
- *
- *--------------------------------------------------------------*/
+ *  \return                 MarkovianSequences object.
+ */
+/*--------------------------------------------------------------*/
 
 MarkovianSequences* MarkovianSequences::cluster(StatError &error , int ivariable , int nb_class ,
                                                 int *ilimit , bool add_variable) const
@@ -1692,15 +1727,19 @@ MarkovianSequences* MarkovianSequences::cluster(StatError &error , int ivariable
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Partitioning of values of an integer-valued variable.
  *
- *  Regroupement des categories d'une variable entiere.
+ *  \param[in] error        reference on a StatError object,
+ *  \param[in] ivariable    variable index,
+ *  \param[in] nb_class     number of classes,
+ *  \param[in] ilimit       integer limits between classes (beginning of classes),
+ *  \param[in] add_variable flag for adding a variable.
  *
- *  arguments : reference sur un objet StatError, indice de la variable,
- *              nombres de classes, bornes pour regrouper les categories,
- *              flag pour ajouter une variable.
- *
- *--------------------------------------------------------------*/
+ *  \return                 MarkovianSequences object.
+ */
+/*--------------------------------------------------------------*/
 
 MarkovianSequences* MarkovianSequences::cluster(StatError &error , int ivariable , int nb_class ,
                                                 vector<int> ilimit , bool add_variable) const
@@ -1710,14 +1749,18 @@ MarkovianSequences* MarkovianSequences::cluster(StatError &error , int ivariable
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Partitioning of values of a real-valued variable.
  *
- *  Regroupement des valeurs d'une variable reelle.
+ *  \param[in] error    reference on a StatError object,
+ *  \param[in] variable variable index,
+ *  \param[in] nb_class number of classes,
+ *  \param[in] ilimit   real limits between classes (beginning of classes).
  *
- *  arguments : reference sur un objet StatError, indice de la variable,
- *              nombre de classes, bornes pour regrouper les valeurs.
- *
- *--------------------------------------------------------------*/
+ *  \return             MarkovianSequences object.
+ */
+/*--------------------------------------------------------------*/
 
 MarkovianSequences* MarkovianSequences::cluster(StatError &error , int variable ,
                                                 int nb_class , double *ilimit) const
@@ -1800,14 +1843,18 @@ MarkovianSequences* MarkovianSequences::cluster(StatError &error , int variable 
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Partitioning of values of a real-valued variable.
  *
- *  Regroupement des valeurs d'une variable reelle.
+ *  \param[in] error    reference on a StatError object,
+ *  \param[in] variable variable index,
+ *  \param[in] nb_class number of classes,
+ *  \param[in] ilimit   real limits between classes (beginning of classes).
  *
- *  arguments : reference sur un objet StatError, indice de la variable,
- *              nombre de classes, bornes pour regrouper les valeurs.
- *
- *--------------------------------------------------------------*/
+ *  \return             MarkovianSequences object.
+ */
+/*--------------------------------------------------------------*/
 
 MarkovianSequences* MarkovianSequences::cluster(StatError &error , int variable ,
                                                 int nb_class , vector<double> ilimit) const
@@ -1817,14 +1864,16 @@ MarkovianSequences* MarkovianSequences::cluster(StatError &error , int variable 
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Copy of a MarkovianSequences object transforming the implicit index parameters in
+ *         explicit index parameters.
  *
- *  Copie d'un objet MarkovianSequences avec transformation du parametre d'index implicite
- *  en parametre d'index explicite.
+ *  \param[in] error reference on a StatError object.
  *
- *  argument : reference sur un objet StatError.
- *
- *--------------------------------------------------------------*/
+ *  \return          MarkovianSequences object.
+ */
+/*--------------------------------------------------------------*/
 
 MarkovianSequences* MarkovianSequences::explicit_index_parameter(StatError &error) const
 
@@ -1846,13 +1895,15 @@ MarkovianSequences* MarkovianSequences::explicit_index_parameter(StatError &erro
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Removing of the index parameters.
  *
- *  Suppression du parametre d'index.
+ *  \param[in] error reference on a StatError object.
  *
- *  argument : reference sur un objet StatError.
- *
- *--------------------------------------------------------------*/
+ *  \return          MarkovianSequences object.
+ */
+/*--------------------------------------------------------------*/
 
 MarkovianSequences* MarkovianSequences::remove_index_parameter(StatError &error) const
 
@@ -1874,15 +1925,18 @@ MarkovianSequences* MarkovianSequences::remove_index_parameter(StatError &error)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Selection of variables.
  *
- *  Selection de variables.
+ *  \param[in] error        reference on a StatError object,
+ *  \param[in] inb_variable number of variables,
+ *  \param[in] ivariable    variable indices,
+ *  \param[in] keep         flag for keeping or rejecting the selected variables.
  *
- *  arguments : reference sur un objet StatError, nombre de variables,
- *              indices des variables, flag pour conserver ou rejeter
- *              les variables selectionnees.
- *
- *--------------------------------------------------------------*/
+ *  \return                 MarkovianSequences object.
+ */
+/*--------------------------------------------------------------*/
 
 MarkovianSequences* MarkovianSequences::select_variable(StatError &error , int inb_variable ,
                                                         int *ivariable , bool keep) const
@@ -1973,15 +2027,18 @@ MarkovianSequences* MarkovianSequences::select_variable(StatError &error , int i
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Selection of variables.
  *
- *  Selection de variables.
+ *  \param[in] error        reference on a StatError object,
+ *  \param[in] inb_variable number of variables,
+ *  \param[in] ivariable    variable indices,
+ *  \param[in] keep         flag for keeping or rejecting the selected variables.
  *
- *  arguments : reference sur un objet StatError, nombre de variables,
- *              indices des variables, flag pour conserver ou rejeter
- *              les variables selectionnees.
- *
- *--------------------------------------------------------------*/
+ *  \return                 MarkovianSequences object.
+ */
+/*--------------------------------------------------------------*/
 
 MarkovianSequences* MarkovianSequences::select_variable(StatError &error , int inb_variable ,
                                                         vector<int> ivariable , bool keep) const
@@ -1991,11 +2048,13 @@ MarkovianSequences* MarkovianSequences::select_variable(StatError &error , int i
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Removing of the 1st variable.
  *
- *  Suppression de la 1ere variable.
- *
- *--------------------------------------------------------------*/
+ *  \return MarkovianSequences object.
+ */
+/*--------------------------------------------------------------*/
 
 MarkovianSequences* MarkovianSequences::remove_variable_1() const
 
@@ -2032,15 +2091,18 @@ MarkovianSequences* MarkovianSequences::remove_variable_1() const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Merging of variables of MarkovianSequences objects.
  *
- *  Concatenation des variables d'objets MarkovianSequences.
+ *  \param[in] error      reference on a StatError object,
+ *  \param[in] nb_sample  number of MarkovianSequences objects,
+ *  \param[in] iseq       pointer on the MarkovianSequences objects,
+ *  \param[in] ref_sample reference MarkovianSequences object for the identifiers.
  *
- *  arguments : reference sur un objet StatError, nombre d'objets MarkovianSequences,
- *              pointeurs sur les objets MarkovianSequences,
- *              echantillon de reference pour les identificateurs.
- *
- *--------------------------------------------------------------*/
+ *  \return               MarkovianSequences object.
+ */
+/*--------------------------------------------------------------*/
 
 MarkovianSequences* MarkovianSequences::merge_variable(StatError &error , int nb_sample ,
                                                        const MarkovianSequences **iseq , int ref_sample) const
@@ -2126,7 +2188,7 @@ MarkovianSequences* MarkovianSequences::merge_variable(StatError &error , int nb
       inb_variable += iseq[i - 1]->nb_variable;
     }
 
-    // comparaison des identificateurs des sequences
+    // comparison of sequence identifiers
 
     if (ref_sample == I_DEFAULT) {
       for (i = 0;i < nb_sequence;i++) {
@@ -2153,7 +2215,7 @@ MarkovianSequences* MarkovianSequences::merge_variable(StatError &error , int nb
       iidentifier = pseq[ref_sample]->identifier;
     }
 
-    // comparaison des identificateurs des vertex
+    // comparison of vertex identifiers
 
     if (ref_sample == I_DEFAULT) {
       for (i = 0;i < nb_sample;i++) {
@@ -2231,7 +2293,7 @@ MarkovianSequences* MarkovianSequences::merge_variable(StatError &error , int nb
       }
     }
 
-    // copie des valeurs
+    // copy of values
 
     for (i = 0;i < nb_sequence;i++) {
       inb_variable = 0;
@@ -2284,15 +2346,18 @@ MarkovianSequences* MarkovianSequences::merge_variable(StatError &error , int nb
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Merging of variables of MarkovianSequences objects.
  *
- *  Concatenation des variables d'objets MarkovianSequences.
+ *  \param[in] error      reference on a StatError object,
+ *  \param[in] nb_sample  number of MarkovianSequences objects,
+ *  \param[in] iseq       pointer on the MarkovianSequences objects,
+ *  \param[in] ref_sample reference MarkovianSequences object for the identifiers.
  *
- *  arguments : reference sur un objet StatError, nombre d'objets MarkovianSequences,
- *              pointeurs sur les objets MarkovianSequences,
- *              echantillon de reference pour les identificateurs.
- *
- *--------------------------------------------------------------*/
+ *  \return               MarkovianSequences object.
+ */
+/*--------------------------------------------------------------*/
 
 MarkovianSequences* MarkovianSequences::merge_variable(StatError &error , int nb_sample ,
                                                        const vector<MarkovianSequences> iseq , int ref_sample) const
@@ -2319,13 +2384,15 @@ MarkovianSequences* MarkovianSequences::merge_variable(StatError &error , int nb
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Copy of sequences with extraction of the initial runs.
  *
- *  Copie des sequence avec extraction des temps de sejour initiaux.
+ *  \param[in] error reference on a StatError object.
  *
- *  argument : reference sur un objet StatError.
- *
- *--------------------------------------------------------------*/
+ *  \return          MarkovianSequences object.
+ */
+/*--------------------------------------------------------------*/
 
  MarkovianSequences* MarkovianSequences::initial_run_computation(StatError &error) const
 
@@ -2355,15 +2422,18 @@ MarkovianSequences* MarkovianSequences::merge_variable(StatError &error , int nb
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Addition of an absorbing run at the end of each sequence.
  *
- *  Addition of an absorbing run at the end of each sequence.
+ *  \param[in] error           reference on a StatError object,
+ *  \param[in] run_length      absorbing run length,
+ *  \param[in] sequence_length sequence length,
+ *  \param[in] add_variable    flag for adding a binary variable (0: data, 1: end absorbing run).
  *
- *  arguments : reference on a StatError object, end absorbing run length,
- *              sequence length, flag for adding a categorical variable
- *              (0: data, 1: end absorbing run).
- *
- *--------------------------------------------------------------*/
+ *  \return                    MarkovianSequences object.
+ */
+/*--------------------------------------------------------------*/
 
 MarkovianSequences* MarkovianSequences::add_absorbing_run(StatError &error , int run_length ,
                                                           int sequence_length , bool add_variable) const
@@ -2500,7 +2570,7 @@ MarkovianSequences* MarkovianSequences::add_absorbing_run(StatError &error , int
           }
 
 #         ifdef DEBUG
-          if (run_length == 1) {  // pour UCs Fuji/Braeburn
+          if (run_length == 1) {  // for Fuji/Braeburn GUs
             if ((j == 0) || (j == 1)) {
               seq->int_sequence[i][j][seq->length[i] - 1] = seq->int_sequence[i][j][seq->length[i] - 2];
             }
@@ -2589,15 +2659,17 @@ MarkovianSequences* MarkovianSequences::add_absorbing_run(StatError &error , int
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Construction of auxiliary variables corresponding to
+ *         restored state sequences.
  *
- *  Construction des variables auxilliaires correspondant a
- *  la restauration des sequences.
+ *  \param[in] discrete_process   pointer on DiscreteParametricProcess objects,
+ *  \param[in] continuous_process pointer on ContinuousParametricProcess objects.
  *
- *  arguments : pointeurs sur des objets DiscreteParametricProcess et
- *              sur des objets ContinuousParametricProcess.
- *
- *--------------------------------------------------------------*/
+ *  \return                       MarkovianSequences object.
+ */
+/*--------------------------------------------------------------*/
 
 MarkovianSequences* MarkovianSequences::build_auxiliary_variable(DiscreteParametricProcess **discrete_process ,
                                                                  ContinuousParametricProcess **continuous_process) const
@@ -2733,14 +2805,17 @@ MarkovianSequences* MarkovianSequences::build_auxiliary_variable(DiscreteParamet
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Building of residual sequences on the basis of restored state sequences.
  *
- *  buidling of residual sequences on the basis of restored state sequences.
+ *  \param[in] categorical_process pointer on CategoricalSequenceProcess objects,
+ *  \param[in] discrete_process    pointer on DiscreteParametricProcess objects,
+ *  \param[in] continuous_process  pointer on ContinuousParametricProcess objects.
  *
- *  arguments: pointers on CategoricalSequenceProcess, DiscreteParametricProcess and
- *             ContinuousParametricProcess objects.
- *
- *--------------------------------------------------------------*/
+ *  \return                        MarkovianSequences object.
+ */
+/*--------------------------------------------------------------*/
 
 MarkovianSequences* MarkovianSequences::residual_sequences(CategoricalSequenceProcess **categorical_process ,
                                                            DiscreteParametricProcess **discrete_process ,
@@ -2960,14 +3035,16 @@ MarkovianSequences* MarkovianSequences::residual_sequences(CategoricalSequencePr
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Split of sequences in equal length segments.
  *
- *  Segmentation of sequences.
+ *  \param[in] error reference on a StatError object,
+ *  \param[in] step  sequence lengths.
  *
- *  arguments : reference sur un objet StatError,
- *              longueur des sequences.
- *
- *--------------------------------------------------------------*/
+ *  \return          MarkovianSequences object.
+ */
+/*--------------------------------------------------------------*/
 
 MarkovianSequences* MarkovianSequences::split(StatError &error , int step) const
 
@@ -3008,7 +3085,7 @@ MarkovianSequences* MarkovianSequences::split(StatError &error , int step) const
                                  index_param_type , nb_variable , type);
     delete [] ilength;
 
-    // copie des sequences
+    // copy of sequences
 
     inb_sequence = 0;
     for (i = 0;i < nb_sequence;i++) {
@@ -3075,13 +3152,16 @@ MarkovianSequences* MarkovianSequences::split(StatError &error , int step) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the cumulative frequency distribution function for a variable.
  *
- *  Calcul de la fonction de repartition empirique pour une variable.
+ *  \param[in] variable variable index,
+ *  \param[in] cdf      (value, cumulative distribution function).
  *
- *  arguments : indice de la variable, (valeurs, fonction de repartition).
- *
- *--------------------------------------------------------------*/
+ *  \return             number of values.
+ */
+/*--------------------------------------------------------------*/
 
 int MarkovianSequences::cumulative_distribution_function_computation(int variable , double **cdf) const
 
@@ -3107,7 +3187,7 @@ int MarkovianSequences::cumulative_distribution_function_computation(int variabl
     case INT_VALUE : {
       do {
 
-        // recherche de la valeur minimum courante
+        // search for the current minimum value
 
         if (cumul == 0) {
           int_value = (int)min_value[variable];
@@ -3126,8 +3206,8 @@ int MarkovianSequences::cumulative_distribution_function_computation(int variabl
           int_value = int_min;
         }
 
-        // recherche du nombre de vecteurs prenant pour la variable selectionnee
-        // la valeur minimum courante
+        // determination of the number of vectors taken the current minimum value
+        // for the selected variable
 
         frequency = 0;
         for (j = 0;j < nb_sequence;j++) {
@@ -3150,7 +3230,7 @@ int MarkovianSequences::cumulative_distribution_function_computation(int variabl
     case REAL_VALUE : {
       do {
 
-        // recherche de la valeur minimum courante
+        // search for the current minimum value
 
         if (cumul == 0) {
           real_value = min_value[variable];
@@ -3169,8 +3249,8 @@ int MarkovianSequences::cumulative_distribution_function_computation(int variabl
           real_value = real_min;
         }
 
-        // recherche du nombre de vecteurs prenant pour la variable selectionnee
-        // la valeur minimum courante
+        // determination of the number of vectors taken the current minimum value
+        // for the selected variable
 
         frequency = 0;
         for (j = 0;j < nb_sequence;j++) {
@@ -3204,13 +3284,17 @@ int MarkovianSequences::cumulative_distribution_function_computation(int variabl
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the cumulative frequency distribution function for a variable.
  *
- *  Calcul de la fonction de repartition empirique pour un etat et une variable.
+ *  \param[in] variable variable index,
+ *  \param[in] state    state,
+ *  \param[in] cdf      (value, cumulative distribution function).
  *
- *  arguments : indice de la variable, etat, (valeurs, fonction de repartition).
- *
- *--------------------------------------------------------------*/
+ *  \return             number of values.
+ */
+/*--------------------------------------------------------------*/
 
 int MarkovianSequences::cumulative_distribution_function_computation(int variable , int state ,
                                                                      double **cdf) const
@@ -3237,7 +3321,7 @@ int MarkovianSequences::cumulative_distribution_function_computation(int variabl
     case INT_VALUE : {
       do {
 
-        // recherche de la valeur minimum courante
+        // search for the current minimum value
 
         if (cumul == 0) {
           int_value = (int)min_value[variable];
@@ -3257,8 +3341,8 @@ int MarkovianSequences::cumulative_distribution_function_computation(int variabl
           int_value = int_min;
         }
 
-        // recherche du nombre de vecteurs prenant pour la variable selectionnee
-        // la valeur minimum courante
+        // determination of the number of vectors taken the current minimum value
+        // for the selected variable
 
         frequency = 0;
         for (j = 0;j < nb_sequence;j++) {
@@ -3283,7 +3367,7 @@ int MarkovianSequences::cumulative_distribution_function_computation(int variabl
     case REAL_VALUE : {
       do {
 
-        // recherche de la valeur minimum courante
+        // search for the current minimum value
 
         if (cumul == 0) {
           real_value = min_value[variable];
@@ -3303,8 +3387,8 @@ int MarkovianSequences::cumulative_distribution_function_computation(int variabl
           real_value = real_min;
         }
 
-        // recherche du nombre de vecteurs prenant pour la variable selectionnee
-        // la valeur minimum courante
+        // determination of the number of vectors taken the current minimum value
+        // for the selected variable
 
         frequency = 0;
         for (j = 0;j < nb_sequence;j++) {
@@ -3332,13 +3416,13 @@ int MarkovianSequences::cumulative_distribution_function_computation(int variabl
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the minimum interval between 2 values for a variable.
  *
- *  Calcul de l'intervalle minimum entre 2 valeurs pour une variable.
- *
- *  argument : indice de la variable.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] variable variable index.
+ */
+/*--------------------------------------------------------------*/
 
 void MarkovianSequences::min_interval_computation(int variable)
 
@@ -3362,7 +3446,7 @@ void MarkovianSequences::min_interval_computation(int variable)
     case INT_VALUE : {
       do {
 
-        // recherche de la valeur minimum courante
+        // search for the current minimum value
 
         if (i == 0) {
           int_value = (int)min_value[variable];
@@ -3385,8 +3469,8 @@ void MarkovianSequences::min_interval_computation(int variable)
           int_value = int_min;
         }
 
-        // recherche du nombre de vecteurs prenant pour la variable selectionnee
-        // la valeur minimum courante
+        // determination of the number of vectors taken the current minimum value
+        // for the selected variable
 
         for (j = 0;j < nb_sequence;j++) {
           for (k = 0;k < length[j];k++) {
@@ -3409,7 +3493,7 @@ void MarkovianSequences::min_interval_computation(int variable)
 
       do {
 
-        // recherche de la valeur minimum courante
+        // search for the current minimum value
 
         if (i == 0) {
           real_value = min_value[variable];
@@ -3435,8 +3519,8 @@ void MarkovianSequences::min_interval_computation(int variable)
           real_value = real_min;
         }
 
-        // recherche du nombre de vecteurs prenant pour la variable selectionnee
-        // la valeur minimum courante
+        // determination of the number of vectors taken the current minimum value
+        // for the selected variable
 
         frequency[j] = 0;
         for (k = 0;k < nb_sequence;k++) {
@@ -3451,7 +3535,7 @@ void MarkovianSequences::min_interval_computation(int variable)
       }
       while (i < cumul_length);
 
-      // recherche de la frequence mediane
+      // search for the median frequency
 
       nb_value = j;
       selected_value = new bool[nb_value];
@@ -3484,7 +3568,7 @@ void MarkovianSequences::min_interval_computation(int variable)
            << min_interval[variable] << " " << frequency[index[nb_value / 2]];
 #     endif
 
-      // a finaliser
+      // to be finalized
 
       if (frequency[index[nb_value / 2]] == 1) {
         min_interval[variable] = 0.;
@@ -3504,12 +3588,11 @@ void MarkovianSequences::min_interval_computation(int variable)
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Calcul de la quantite d'information en faisant l'hypothese
- *  de variables aleatoires independantes et equidistribuees.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the information quantity assuming i.i.d. variables.
+ */
+/*--------------------------------------------------------------*/
 
 double MarkovianSequences::iid_information_computation() const
 
@@ -3532,14 +3615,14 @@ double MarkovianSequences::iid_information_computation() const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Extraction of samples corresponding to the changes in self-transition probability
+ *         for a state of a non-homogeneous Markov chain.
  *
- *  Calcul des echantillons correspondant a l'evolution des probabilites
- *  de rester dans un etat donne d'une chaine de Markov non-homogene.
- *
- *  argument : etat.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] state state.
+ */
+/*--------------------------------------------------------------*/
 
 void MarkovianSequences::self_transition_computation(int state)
 
@@ -3586,12 +3669,12 @@ void MarkovianSequences::self_transition_computation(int state)
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Calcul des echantillons correspondant a l'evolution des probabilites
- *  de rester dans un etat donne d'une chaine de Markov non-homogene.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Extraction of samples corresponding to the changes in self-transition probability
+ *         for states of a non-homogeneous Markov chain.
+ */
+/*--------------------------------------------------------------*/
 
 void MarkovianSequences::self_transition_computation()
 
@@ -3611,14 +3694,14 @@ void MarkovianSequences::self_transition_computation()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Extraction of samples corresponding to the changes in self-transition probability
+ *         for states of a non-homogeneous Markov chain.
  *
- *  Calcul des echantillons correspondant a l'evolution des probabilites
- *  de rester dans un etat donne d'une chaine de Markov non-homogene.
- *
- *  argument : homogeneite des etats.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] homogeneity state homogeneities.
+ */
+/*--------------------------------------------------------------*/
 
 void MarkovianSequences::self_transition_computation(bool *homogeneity)
 
@@ -3645,11 +3728,14 @@ void MarkovianSequences::self_transition_computation(bool *homogeneity)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the marginal state frequency distribution from
+ *         the restored state sequences.
  *
- *  Calcul de la distribution marginale des etats a partir de la restauration.
- *
- *--------------------------------------------------------------*/
+ *  \return Distribution object.
+ */
+/*--------------------------------------------------------------*/
 
 Distribution* MarkovianSequences::weight_computation() const
 
@@ -3679,13 +3765,14 @@ Distribution* MarkovianSequences::weight_computation() const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Update of the observation frequency distributions for a variable.
  *
- *  Accumulation des observations (pour une variable donnee).
- *
- *  arguments : indice de la variable, nombre d'etats.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] variable variable index,
+ *  \param[in] nb_state number of states.
+ */
+/*--------------------------------------------------------------*/
 
 void MarkovianSequences::observation_frequency_distribution_computation(int variable ,
                                                                         int nb_state)
@@ -3695,7 +3782,7 @@ void MarkovianSequences::observation_frequency_distribution_computation(int vari
   int *pstate , *poutput;
 
 
-  // initialisation des lois empiriques
+  // initialization of the frequency distributions
 
   for (i = 0;i < nb_state;i++) {
     for (j = 0;j < marginal_distribution[variable]->nb_value;j++) {
@@ -3703,7 +3790,7 @@ void MarkovianSequences::observation_frequency_distribution_computation(int vari
     }
   }
 
-  // mise a jour des lois empiriques
+  // update of the frequency distributions
 
   for (i = 0;i < nb_sequence;i++) {
     pstate = int_sequence[i][0];
@@ -3713,7 +3800,7 @@ void MarkovianSequences::observation_frequency_distribution_computation(int vari
     }
   }
 
-  // extraction des caracteristiques des lois empiriques
+  // computation of the frequency distribution characteristics
 
   for (i = 0;i < nb_state;i++) {
     if (!characteristics[variable]) {
@@ -3731,13 +3818,13 @@ void MarkovianSequences::observation_frequency_distribution_computation(int vari
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Construction of the observation frequency distributions.
  *
- *  Construction des lois empiriques d'observation.
- *
- *  argument : nombre d'etats.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] nb_state number of states.
+ */
+/*--------------------------------------------------------------*/
 
 void MarkovianSequences::build_observation_frequency_distribution(int nb_state)
 
@@ -3767,13 +3854,15 @@ void MarkovianSequences::build_observation_frequency_distribution(int nb_state)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Construction of the observation histograms for a variable.
  *
- *  Construction des histogrammes d'observation pour une variable.
- *
- *  arguments : indice de la variable, nombre d'etats, pas de regroupement.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] variable  variable index,
+ *  \param[in] nb_state  number of states, 
+ *  \param[in] bin_width bin width.
+ */
+/*--------------------------------------------------------------*/
 
 void MarkovianSequences::build_observation_histogram(int variable , int nb_state , double bin_width)
 
@@ -3784,7 +3873,7 @@ void MarkovianSequences::build_observation_histogram(int variable , int nb_state
     double imin_value , *proutput;
 
 
-    // construction de l'histogramme
+    // construction of the histograms
 
     if (bin_width == D_DEFAULT) {
       bin_width = marginal_histogram[variable]->bin_width;
@@ -3810,7 +3899,7 @@ void MarkovianSequences::build_observation_histogram(int variable , int nb_state
         observation_histogram[variable][i]->type = type[variable];
       }
 
-      // calcul des valeurs minimums et maximums par etat
+      // computation of the minimum and maximum values for each state
 
 /*      for (i = 0;i < nb_state;i++) {
         observation_histogram[variable][i]->min_value = max_value[variable];
@@ -3865,7 +3954,7 @@ void MarkovianSequences::build_observation_histogram(int variable , int nb_state
       observation_histogram[variable][i]->max_value = ceil(max_value[variable] / bin_width) * bin_width;
     }
 
-    // calcul des frequences
+    // update of the histogram bin frequencies
 
     for (i = 0;i < nb_state;i++) {
       for (j = 0;j < observation_histogram[variable][i]->nb_bin;j++) {
@@ -3907,13 +3996,13 @@ void MarkovianSequences::build_observation_histogram(int variable , int nb_state
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Construction of the observation histograms.
  *
- *  Construction des histogrammes d'observation.
- *
- *  argument : nombre d'etats.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] number of states.
+ */
+/*--------------------------------------------------------------*/
 
 void MarkovianSequences::build_observation_histogram(int nb_state)
 
@@ -3935,15 +4024,19 @@ void MarkovianSequences::build_observation_histogram(int nb_state)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Change of the bin width of the marginal histogram and of
+ *         the observation histograms for a variable.
  *
- *  Changement du pas de regroupement de l'histogramme marginal et
- *  des histogrammes d'observation pour une variable donnee.
+ *  \param[in] error      reference on a StatError object,
+ *  \param[in] variable   variable index,
+ *  \param[in] bin_width  bin_width bin width,
+ *  \param[in] imin_value minimum value.
  *
- *  arguments : reference sur un objet StatError, indice de la variable,
- *              pas de regroupement, valeur minimum.
- *
- *--------------------------------------------------------------*/
+ *  \return               error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool MarkovianSequences::select_bin_width(StatError &error , int variable ,
                                           double bin_width , double imin_value)
@@ -3991,13 +4084,15 @@ bool MarkovianSequences::select_bin_width(StatError &error , int variable ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Test of the overlap of values observed in the different states.
  *
- *  test recouvrement entre les valeurs observees dans chaque etat.
+ *  \param[in] variable variable index.
  *
- *  argument : indice de la variable.
- *
- *--------------------------------------------------------------*/
+ *  \return             state variable hidden or not.
+ */
+/*--------------------------------------------------------------*/
 
 bool MarkovianSequences::test_hidden(int variable) const
 
@@ -4052,14 +4147,14 @@ bool MarkovianSequences::test_hidden(int variable) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Extraction of the probabilities of each value as a function of
+ *         the index for a variable.
  *
- *  Extraction des probabilites de chaque valeur entiere en fonction de l'index
- *  (pour une variable donnee).
- *
- *  argument : indice de la variable.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] variable variable index.
+ */
+/*--------------------------------------------------------------*/
 
 void MarkovianSequences::build_index_value(int variable)
 
@@ -4068,13 +4163,13 @@ void MarkovianSequences::build_index_value(int variable)
   int total , *frequency;
 
 
-  // creation d'un objet Curves
+  // construction of a Curves object
 
   characteristics[variable]->index_value = new Curves(marginal_distribution[variable]->nb_value ,
                                                       max_length , true , false , false);
   frequency = new int[marginal_distribution[variable]->nb_value];
 
-  // calcul des probabilites de chaque valeur en fonction de l'index
+  // computation of the probabilities of each value as a function of the index parameter
 
   for (i = 0;i < max_length;i++) {
     for (j = 0;j < marginal_distribution[variable]->nb_value;j++) {
@@ -4101,14 +4196,14 @@ void MarkovianSequences::build_index_value(int variable)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Extraction of the probabilities of each value as a function of
+ *         the explicit index for a variable.
  *
- *  Extraction des probabilites de chaque valeur entiere en fonction de l'index
- *  (pour une variable donnee).
- *
- *  argument : indice de la variable.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] variable variable index.
+ */
+/*--------------------------------------------------------------*/
 
 void MarkovianSequences::build_explicit_index_value(int variable)
 
@@ -4117,7 +4212,7 @@ void MarkovianSequences::build_explicit_index_value(int variable)
   int total , *frequency , *index;
 
 
-  // creation d'un objet Curves
+  // construction of a Curves object
 
   i = 0;
   for (j = index_parameter_distribution->offset;j < index_parameter_distribution->nb_value;j++) {
@@ -4131,7 +4226,7 @@ void MarkovianSequences::build_explicit_index_value(int variable)
   frequency = new int[marginal_distribution[variable]->nb_value];
   index = new int[nb_sequence];
 
-  // calcul des probabilites de chaque valeur en fonction de l'index explicite
+  // computation of the probabilities of each value as a function of the explicit index parameter
 
   for (i = 0;i < nb_sequence;i++) {
     index[i] = 0;
@@ -4175,14 +4270,14 @@ void MarkovianSequences::build_explicit_index_value(int variable)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Construction of the frequency distributions of the times to the 1st occurrence of
+ *         each value of an integer variable.
  *
- *  Construction des lois empiriques du temps avant la 1ere occurrence
- *  d'une valeur entiere (pour une variable donnee).
- *
- *  argument : indice de la variable.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] variable variable index.
+ */
+/*--------------------------------------------------------------*/
 
 void MarkovianSequences::build_first_occurrence_frequency_distribution(int variable)
 
@@ -4193,7 +4288,7 @@ void MarkovianSequences::build_first_occurrence_frequency_distribution(int varia
   FrequencyDistribution **first_occurrence;
 
 
-  // creation des lois empiriques
+  // construction of the frequency distributions
 
   first_occurrence = new FrequencyDistribution*[marginal_distribution[variable]->nb_value];
   for (i = 0;i < marginal_distribution[variable]->nb_value;i++) {
@@ -4205,7 +4300,7 @@ void MarkovianSequences::build_first_occurrence_frequency_distribution(int varia
     characteristics[variable]->first_occurrence[i] = new FrequencyDistribution(max_length);
   } */
 
-  // mise a jour des lois empiriques
+  // update of the frequency distributions
 
   occurrence = new bool[marginal_distribution[variable]->nb_value];
 
@@ -4234,7 +4329,7 @@ void MarkovianSequences::build_first_occurrence_frequency_distribution(int varia
 
   delete [] occurrence;
 
-  // extraction des caracteristiques des lois empiriques
+  // computation of the frequency distribution characteristics
 
   for (i = 0;i < marginal_distribution[variable]->nb_value;i++) {
     first_occurrence[i]->nb_value_computation();
@@ -4263,14 +4358,14 @@ void MarkovianSequences::build_first_occurrence_frequency_distribution(int varia
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Construction of the frequency distributions of recurrence times in
+ *         each value of an integer variable.
  *
- *  Construction des lois empiriques du temps de retour dans une valeur entiere
- *  (pour une variable donnee).
- *
- *  argument : indice de la variable.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] variable variable index.
+ */
+/*--------------------------------------------------------------*/
 
 void MarkovianSequences::build_recurrence_time_frequency_distribution(int variable)
 
@@ -4280,7 +4375,7 @@ void MarkovianSequences::build_recurrence_time_frequency_distribution(int variab
   FrequencyDistribution **recurrence_time;
 
 
-  // creation des lois empiriques
+  // construction of the frequency distributions
 
   recurrence_time = new FrequencyDistribution*[marginal_distribution[variable]->nb_value];
   for (i = 0;i < marginal_distribution[variable]->nb_value;i++) {
@@ -4292,7 +4387,7 @@ void MarkovianSequences::build_recurrence_time_frequency_distribution(int variab
     characteristics[variable]->recurrence_time[i] = new FrequencyDistribution(max_length);
   } */
 
-  // mise a jour des lois empiriques
+  // update of the frequency distributions
 
   index = new int[marginal_distribution[variable]->nb_value];
 
@@ -4313,7 +4408,7 @@ void MarkovianSequences::build_recurrence_time_frequency_distribution(int variab
 
   delete [] index;
 
-  // extraction des caracteristiques des lois empiriques
+  // computation of the frequency distribution characteristics
 
   for (i = 0;i < marginal_distribution[variable]->nb_value;i++) {
     recurrence_time[i]->nb_value_computation();
@@ -4342,15 +4437,15 @@ void MarkovianSequences::build_recurrence_time_frequency_distribution(int variab
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Construction of the frequency distributions of sojourn times in
+ *         each value of an integer variable.
  *
- *  Construction des lois empiriques du temps de sejour dans une valeur entiere
- *  (pour une variable donnee).
- *
- *  arguments : indice de la variable, flag sur la creation des lois empiriques
- *              de temps de sejour initial.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] variable         variable index,
+ *  \param[in] initial_run_flag flag on the construction of left-censored sojourn time frequency distributions.
+ */
+/*--------------------------------------------------------------*/
 
 void MarkovianSequences::build_sojourn_time_frequency_distribution(int variable , int initial_run_flag)
 
@@ -4365,7 +4460,7 @@ void MarkovianSequences::build_sojourn_time_frequency_distribution(int variable 
   FrequencyDistribution **sojourn_time , **initial_run , **final_run;
 
 
-  // creation des lois empiriques
+  // construction of the frequency distributions
 
   sojourn_time = new FrequencyDistribution*[marginal_distribution[variable]->nb_value];
   for (i = 0;i < marginal_distribution[variable]->nb_value;i++) {
@@ -4384,7 +4479,7 @@ void MarkovianSequences::build_sojourn_time_frequency_distribution(int variable 
     final_run[i] = new FrequencyDistribution(max_length + 1);
   }
 
-  // mise a jour des lois empiriques
+  // update of the frequency distributions
 
   for (i = 0;i < nb_sequence;i++) {
     pisequence = int_sequence[i][variable];
@@ -4410,7 +4505,7 @@ void MarkovianSequences::build_sojourn_time_frequency_distribution(int variable 
     (final_run[*pisequence]->frequency[run_length])++;
   }
 
-  // extraction des caracteristiques des lois empiriques
+  // computation of the frequency distribution characteristics
 
   for (i = 0;i < marginal_distribution[variable]->nb_value;i++) {
     sojourn_time[i]->nb_value_computation();
@@ -4466,14 +4561,14 @@ void MarkovianSequences::build_sojourn_time_frequency_distribution(int variable 
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Update of the frequency distributions of sojourn times in
+ *         each value of an integer variable.
  *
- *  Accumulation du temps de sejour dans une valeur entiere
- *  (pour une variable donnee).
- *
- *  argument : indice de la variable.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] variable variable index.
+ */
+/*--------------------------------------------------------------*/
 
 void MarkovianSequences::sojourn_time_frequency_distribution_computation(int variable)
 
@@ -4482,7 +4577,7 @@ void MarkovianSequences::sojourn_time_frequency_distribution_computation(int var
   int run_length , *pisequence;
 
 
-  // initialisation des lois empiriques
+  // initialization of the frequency distributions
 
   for (i = 0;i < marginal_distribution[variable]->nb_value;i++) {
     characteristics[variable]->sojourn_time[i]->offset = 1;
@@ -4509,7 +4604,7 @@ void MarkovianSequences::sojourn_time_frequency_distribution_computation(int var
     }
   }
 
-  // mise a jour des lois empiriques
+  // update of the frequency distributions
 
   for (i = 0;i < nb_sequence;i++) {
     pisequence = int_sequence[i][variable];
@@ -4535,7 +4630,7 @@ void MarkovianSequences::sojourn_time_frequency_distribution_computation(int var
     (characteristics[variable]->final_run[*pisequence]->frequency[run_length])++;
   }
 
-  // extraction des caracteristiques des lois empiriques
+  // computation of the frequency distribution characteristics
 
   for (i = 0;i < marginal_distribution[variable]->nb_value;i++) {
     characteristics[variable]->sojourn_time[i]->nb_value_computation();
@@ -4568,14 +4663,17 @@ void MarkovianSequences::sojourn_time_frequency_distribution_computation(int var
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Update of the frequency distributions of censored sojourn times in
+ *         each value of an integer variable.
  *
- *  Accumulation du temps de sejour censures dans un etat.
- *
- *  arguments : pointeurs sur les lois empiriques des temps de sejour initiaux et finaux et
- *              des longueurs des sequences dans le cas d'un seul etat visite.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] initial_run pointer on the left-censored sojourn time frequency distributions,
+ *  \param[in] final_run   pointer on the right-censored sojourn time frequency distributions,
+ *  \param[in] single_run  pointer on the sequence length frequency distributions for the case of
+ *                         a single visited state.
+ */
+/*--------------------------------------------------------------*/
 
 void MarkovianSequences::censored_sojourn_time_frequency_distribution_computation(FrequencyDistribution **initial_run ,
                                                                                   FrequencyDistribution **final_run ,
@@ -4612,7 +4710,8 @@ void MarkovianSequences::censored_sojourn_time_frequency_distribution_computatio
     }
   }
 
-  // extraction des caracteristiques des lois empiriques des temps de sejour censures
+  // computation of the characteristics of the left- and right-censored sojourn time frequency distributions
+  // and single run frequency distributions
 
   for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
     initial_run[i]->nb_value_computation();
@@ -4655,14 +4754,14 @@ void MarkovianSequences::censored_sojourn_time_frequency_distribution_computatio
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Construction of the frequency distributions of the numbers of runs
+ *         per sequence of each value of an integer variable.
  *
- *  Construction des lois empiriques du nombre de series d'une valeur entiere
- *  par sequence (pour une variable donnee).
- *
- *  argument : indice de la variable.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] variable variable index.
+ */
+/*--------------------------------------------------------------*/
 
 void MarkovianSequences::build_nb_run_frequency_distribution(int variable)
 
@@ -4672,7 +4771,7 @@ void MarkovianSequences::build_nb_run_frequency_distribution(int variable)
   FrequencyDistribution **nb_run;
 
 
-  // creation des lois empiriques
+  // construction of the frequency distributions
 
   nb_run = new FrequencyDistribution*[marginal_distribution[variable]->nb_value];
   for (i = 0;i < marginal_distribution[variable]->nb_value;i++) {
@@ -4686,7 +4785,7 @@ void MarkovianSequences::build_nb_run_frequency_distribution(int variable)
                                                                      max_length / 2 : max_length / 2 + 1) + 1);
   } */
 
-  // mise a jour des lois empiriques
+  // update of the frequency distributions
 
   count = new int[marginal_distribution[variable]->nb_value];
 
@@ -4712,7 +4811,7 @@ void MarkovianSequences::build_nb_run_frequency_distribution(int variable)
 
   delete [] count;
 
-  // extraction des caracteristiques des lois empiriques
+  // computation of the frequency distribution characteristics
 
   for (i = 0;i < marginal_distribution[variable]->nb_value;i++) {
     nb_run[i]->nb_value_computation();
@@ -4741,14 +4840,14 @@ void MarkovianSequences::build_nb_run_frequency_distribution(int variable)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Construction of the frequency distributions of the numbers of occurrences
+ *         per sequence of each value of an integer variable.
  *
- *  Construction des lois empiriques du nombre d'occurrences
- *  d'une valeur entiere par sequence (pour une variable donnee).
- *
- *  argument : indice de la variable.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] variable variable index.
+ */
+/*--------------------------------------------------------------*/
 
 void MarkovianSequences::build_nb_occurrence_frequency_distribution(int variable)
 
@@ -4758,7 +4857,7 @@ void MarkovianSequences::build_nb_occurrence_frequency_distribution(int variable
   FrequencyDistribution **nb_occurrence;
 
 
-  // creation des lois empiriques
+  // construction of the frequency distributions
 
   nb_occurrence = new FrequencyDistribution*[marginal_distribution[variable]->nb_value];
   for (i = 0;i < marginal_distribution[variable]->nb_value;i++) {
@@ -4770,7 +4869,7 @@ void MarkovianSequences::build_nb_occurrence_frequency_distribution(int variable
     characteristics[variable]->nb_occurrence[i] = new FrequencyDistribution(max_length + 1);
   } */
 
-  // mise a jour des lois empiriques
+  // update of the frequency distributions
 
   count = new int[marginal_distribution[variable]->nb_value];
 
@@ -4792,7 +4891,7 @@ void MarkovianSequences::build_nb_occurrence_frequency_distribution(int variable
 
   delete [] count;
 
-  // extraction des caracteristiques des lois empiriques
+  // computation of the frequency distribution characteristics
 
   for (i = 0;i < marginal_distribution[variable]->nb_value;i++) {
     nb_occurrence[i]->nb_value_computation();
@@ -4821,22 +4920,21 @@ void MarkovianSequences::build_nb_occurrence_frequency_distribution(int variable
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Extraction of the characteristics of sequences for categorical variables.
+ *         Computation of the number of values, construction of the marginal frequency distribution,
+ *         of the probabilities of each value as a function of the index parameter,
+ *         construction of the frequency distributions of the times to the 1st occurrence of each value,
+ *         of the recurrence times in each value, of the sojourn times in each value,
+ *         of the number of runs of each value per sequence,
+ *         of the number of occurrences of each value per sequence.
  *
- *  Extraction des caracteristiques d'un echantillon de sequences pour
- *  les variables entieres ayant un petit nombre de valeurs positives consecutives.
- *
- *  Calcul du nombre de valeurs et de la loi marginale empirique des valeurs,
- *  extraction des probabilites des valeurs en fonction de l'index,
- *  construction des lois empiriques du temps avant la 1ere occurrence d'une valeur,
- *  du temps de retour dans une valeur, du temps de sejour dans une valeur,
- *  du nombre de series d'une valeur par sequence et
- *  du nombre d'occurrences d'une valeur par sequence.
- *
- *  argument : indice de la variable, flags sur la construction des lois empiriques
- *             du temps de sejour et de temps de sejour initial.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] variable          variable index,
+ *  \param[in] sojourn_time_flag flag on the construction of sojourn time frequency distributions
+ *  \param[in] initial_run_flag  flag on the construction of left-censored sojourn time frequency distributions.
+ */
+/*--------------------------------------------------------------*/
 
 void MarkovianSequences::build_characteristic(int variable , bool sojourn_time_flag ,
                                               bool initial_run_flag)
@@ -4900,14 +4998,21 @@ void MarkovianSequences::build_characteristic(int variable , bool sojourn_time_f
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Count of words of fixed length.
  *
- *  Comptage des frequences des mots de longueur donnee.
+ *  \param[in] error         reference on a StatError object,
+ *  \param[in] os            stream,
+ *  \param[in] variable      variable index,
+ *  \param[in] word_length   word length,
+ *  \param[in] begin_state   begin state,
+ *  \param[in] end_state     end state,
+ *  \param[in] min_frequency minimum frequency.
  *
- *  argument : reference sur un objet StatError, stream, indice de la variable,
- *             longueur des mots, etats de debut et de fin, frequence minimum.
- *
- *--------------------------------------------------------------*/
+ *  \return                  error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool MarkovianSequences::word_count(StatError &error , ostream &os , int variable ,
                                     int word_length , int begin_state , int end_state ,
@@ -5012,7 +5117,7 @@ bool MarkovianSequences::word_count(StatError &error , ostream &os , int variabl
         if (((begin_state == I_DEFAULT) || (int_sequence[i][variable][j] == begin_state)) &&
             ((end_state == I_DEFAULT) || (int_sequence[i][variable][j + word_length - 1] == end_state))) {
 
-          // calcul de la valeur du mot
+          // computation of the word score
 
           pisequence = int_sequence[i][variable] + j;
           value = 0;
@@ -5020,7 +5125,7 @@ bool MarkovianSequences::word_count(StatError &error , ostream &os , int variabl
             value += *pisequence++ * power[k];
           }
 
-          // recherche du mot
+          // word search
 
           for (k = 0;k < nb_word;k++) {
             if (value == word_value[k]) {
@@ -5029,7 +5134,7 @@ bool MarkovianSequences::word_count(StatError &error , ostream &os , int variabl
             }
           }
 
-          // creation du mot
+          // word construction
 
           if (k == nb_word) {
             frequency[nb_word] = 1;
@@ -5046,7 +5151,7 @@ bool MarkovianSequences::word_count(StatError &error , ostream &os , int variabl
       }
     }
 
-    // tri des mots par frequence decroissante
+    // sort of words by decreasing frequencies
 
     index = new int[nb_word];
     selected_word = new bool[nb_word];
@@ -5078,7 +5183,7 @@ bool MarkovianSequences::word_count(StatError &error , ostream &os , int variabl
       }
     }
 
-    // sortie
+    // output
 
     old_adjust = os.setf(ios::right , ios::adjustfield);
 
@@ -5115,13 +5220,15 @@ bool MarkovianSequences::word_count(StatError &error , ostream &os , int variabl
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a MarkovianSequences object.
  *
- *  Ecriture d'un objet MarkovianSequences.
- *
- *  arguments : stream, flag niveau de detail, flag fichier.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os           stream,
+ *  \param[in]     exhaustive   flag detail level,
+ *  \param[in]     comment_flag flag file.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& MarkovianSequences::ascii_write(ostream &os , bool exhaustive , bool comment_flag) const
 
@@ -5348,13 +5455,14 @@ ostream& MarkovianSequences::ascii_write(ostream &os , bool exhaustive , bool co
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a MarkovianSequences object.
  *
- *  Ecriture d'un objet MarkovianSequences.
- *
- *  arguments : stream, flag niveau de detail.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os         stream,
+ *  \param[in]     exhaustive flag detail level.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& MarkovianSequences::ascii_write(ostream &os , bool exhaustive) const
 
@@ -5363,14 +5471,17 @@ ostream& MarkovianSequences::ascii_write(ostream &os , bool exhaustive) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a MarkovianSequences object in a file.
  *
- *  Ecriture d'un objet MarkovianSequences dans un fichier.
+ *  \param[in] error      reference on a StatError object,
+ *  \param[in] path       file path,
+ *  \param[in] exhaustive flag detail level.
  *
- *  arguments : reference sur un objet StatError, path,
- *              flag niveau de detail.
- *
- *--------------------------------------------------------------*/
+ *  \return               error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool MarkovianSequences::ascii_write(StatError &error , const string path ,
                                      bool exhaustive) const
@@ -5396,13 +5507,15 @@ bool MarkovianSequences::ascii_write(StatError &error , const string path ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a MarkovianSequences object.
  *
- *  Ecriture d'un objet MarkovianSequences.
- *
- *  arguments : stream, format (ligne/colonne), flag niveau de detail.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os         stream,
+ *  \param[in]     format     format (LINE/COLUMN/VECTOR/POSTERIOR_PROBABILITY),
+ *  \param[in]     exhaustive flag detail level.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& MarkovianSequences::ascii_data_write(ostream &os , output_sequence_format format ,
                                               bool exhaustive) const
@@ -5415,14 +5528,18 @@ ostream& MarkovianSequences::ascii_data_write(ostream &os , output_sequence_form
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a MarkovianSequences object in a file.
  *
- *  Ecriture d'un objet MarkovianSequences dans un fichier.
+ *  \param[in] error      reference on a StatError object,
+ *  \param[in] path       file path,
+ *  \param[in] format     format (LINE/COLUMN/VECTOR/POSTERIOR_PROBABILITY),
+ *  \param[in] exhaustive flag detail level.
  *
- *  arguments : reference sur un objet StatError, path,
- *              format (ligne/colonne), flag niveau de detail.
- *
- *--------------------------------------------------------------*/
+ *  \return               error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool MarkovianSequences::ascii_data_write(StatError &error , const string path ,
                                           output_sequence_format format , bool exhaustive) const
@@ -5451,13 +5568,16 @@ bool MarkovianSequences::ascii_data_write(StatError &error , const string path ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a MarkovianSequences object in a file at the spreadsheet format.
  *
- *  Ecriture d'un objet MarkovianSequences dans un fichier au format tableur.
+ *  \param[in] error reference on a StatError object,
+ *  \param[in] path  file path.
  *
- *  arguments : reference sur un objet StatError, path.
- *
- *--------------------------------------------------------------*/
+ *  \return          error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool MarkovianSequences::spreadsheet_write(StatError &error , const string path) const
 
@@ -5581,15 +5701,19 @@ bool MarkovianSequences::spreadsheet_write(StatError &error , const string path)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Plot of a MarkovianSequences object using Gnuplot for a variable
+ *         in the case of the absence of the characteristic distributions.
  *
- *  Sortie Gnuplot d'un objet MarkovianSequences pour une variable donnee
- *  dans le cas d'absence de lois caracteristiques.
+ *  \param[in] prefix      file prefix,
+ *  \param[in] title       figure title,
+ *  \param[in] variable    variable index,
+ *  \param[in] nb_variable number of variables.
  *
- *  arguments : prefixe des fichiers, titre des figures, indice de la variable,
- *              nombre de variables.
- *
- *--------------------------------------------------------------*/
+ *  \return                error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool MarkovianSequences::plot_print(const char *prefix , const char *title , int variable ,
                                     int nb_variable) const
@@ -5602,7 +5726,7 @@ bool MarkovianSequences::plot_print(const char *prefix , const char *title , int
   ostringstream data_file_name[2];
 
 
-  // ecriture du fichier de donnees
+  // writing of the data files
 
   data_file_name[0] << prefix << variable + 1 << 0 << ".dat";
 
@@ -5622,6 +5746,8 @@ bool MarkovianSequences::plot_print(const char *prefix , const char *title , int
       data_file_name[1] << prefix << variable + 1 << 1 << ".dat";
       marginal_histogram[variable]->plot_print((data_file_name[1].str()).c_str());
     }
+
+    // writing of the script files
 
     for (i = 0;i < 2;i++) {
       ostringstream file_name[2];
@@ -5781,14 +5907,17 @@ bool MarkovianSequences::plot_print(const char *prefix , const char *title , int
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Plot of a MarkovianSequences object using Gnuplot.
  *
- *  Sortie Gnuplot d'un objet MarkovianSequences.
+ *  \param[in] error  reference on a StatError object,
+ *  \param[in] prefix file prefix,
+ *  \param[in] title  figure title.
  *
- *  arguments : reference sur un objet StatError, prefixe des fichiers,
- *              titre des figures.
- *
- *--------------------------------------------------------------*/
+ *  \return           error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool MarkovianSequences::plot_write(StatError &error , const char *prefix ,
                                     const char *title) const
@@ -5829,7 +5958,7 @@ bool MarkovianSequences::plot_write(StatError &error , const char *prefix ,
         }
       }
 
-      // ecriture des fichiers de commandes et des fichiers d'impression
+      // writing of the script files
 
       for (i = 0;i < 2;i++) {
         ostringstream file_name[2];
@@ -5940,14 +6069,16 @@ bool MarkovianSequences::plot_write(StatError &error , const char *prefix ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Plot of a MarkovianSequences object for a variable
+ *         in the case of the absence of the characteristic distributions.
  *
- *  Sortie graphique d'un objet MarkovianSequences pour une variable donnee
- *  dans le cas d'absence de lois caracteristiques.
- *
- *  arguments : indice de la variable, nombre de variables.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] plot     reference on a MultiPlotSet object,
+ *  \param[in] index    MultiPlot index,
+ *  \param[in] variable variable index.
+ */
+/*--------------------------------------------------------------*/
 
 void MarkovianSequences::plotable_write(MultiPlotSet &plot , int &index , int variable) const
 
@@ -5967,7 +6098,7 @@ void MarkovianSequences::plotable_write(MultiPlotSet &plot , int &index , int va
 
   if (marginal_distribution[variable]) {
 
-    // vue : loi marginale empirique
+    // marginal frequency distribution
 
     plot.variable[index] = variable;
 
@@ -5995,7 +6126,7 @@ void MarkovianSequences::plotable_write(MultiPlotSet &plot , int &index , int va
 
   else if (marginal_histogram[variable]) {
 
-    // vue : histogramme marginal
+    // marginal histogram
 
     plot[index].xrange = Range(marginal_histogram[variable]->min_value - marginal_histogram[variable]->bin_width ,
                                marginal_histogram[variable]->max_value + marginal_histogram[variable]->bin_width);
@@ -6019,7 +6150,7 @@ void MarkovianSequences::plotable_write(MultiPlotSet &plot , int &index , int va
 
   index++;
 
-  // vue : loi empirique des longueurs des sequences
+  // sequence length frequency distribution
 
   plot.variable[index] = variable;
 
@@ -6046,7 +6177,7 @@ void MarkovianSequences::plotable_write(MultiPlotSet &plot , int &index , int va
 
   if (index_parameter_distribution) {
 
-    // vue : loi empirique des parametres d'index
+    // index parameter frequency distribution
 
     plot.variable[index] = variable;
 
@@ -6074,11 +6205,13 @@ void MarkovianSequences::plotable_write(MultiPlotSet &plot , int &index , int va
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Plot of a MarkovianSequences object.
  *
- *  Sortie graphique d'un objet MarkovianSequences.
- *
- *--------------------------------------------------------------*/
+ *  \return MultiPlotSet object.
+ */
+/*--------------------------------------------------------------*/
 
 MultiPlotSet* MarkovianSequences::get_plotable() const
 
@@ -6089,7 +6222,7 @@ MultiPlotSet* MarkovianSequences::get_plotable() const
   MultiPlotSet *plot_set;
 
 
-  // calcul du nombre de vues
+  // computation of the number of plots
 
   nb_plot_set = 0;
 
@@ -6177,7 +6310,7 @@ MultiPlotSet* MarkovianSequences::get_plotable() const
     for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
       if (self_transition[i]) {
 
-        // vue : probabilites de rester dans l'etat i indexees
+        // self-transition probability as a function of the index parameter
 
         if (nb_variable > 1) {
           title.str("");
@@ -6204,7 +6337,7 @@ MultiPlotSet* MarkovianSequences::get_plotable() const
         self_transition[i]->plotable_write(0 , plot[index][0]);
         index++;
 
-        // vue : loi empirique des comptages de transition indexes
+        // frequency distributions of indexed transition counts
 
         if (nb_variable > 1) {
           title.str("");
@@ -6254,13 +6387,15 @@ MultiPlotSet* MarkovianSequences::get_plotable() const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a fitted observation linear trend model at the spreadsheet format.
  *
- *  Ecriture d'un modele lineaire d'observation de type tendance ajuste au format tableur.
- *
- *  arguments : stream, variable, pointeur sur un processus d'observation continu.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os       stream,
+ *  \param[in]     variable variable index,
+ *  \param[in]     process  pointer on a continuous observation process.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& MarkovianSequences::linear_model_spreadsheet_print(ostream &os , int variable ,
                                                             ContinuousParametricProcess *process) const
@@ -6587,14 +6722,18 @@ ostream& MarkovianSequences::linear_model_spreadsheet_print(ostream &os , int va
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Plot of a fitted observation linear trend model using Gnuplot.
  *
- *  Sortie Gnuplot d'un modele lineaire d'observation de type tendance ajuste.
+ *  \param[in] prefix   file prefix,
+ *  \param[in] title    figure title,
+ *  \param[in] variable variable index,
+ *  \param[in] process  pointer on a continuous observation process.
  *
- *  arguments : prefixe des fichiers, titre des figures, variable,
- *              pointeur sur un processus d'observation continu.
- *
- *--------------------------------------------------------------*/
+ *  \return             error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool MarkovianSequences::linear_model_plot_print(const char *prefix , const char *title , int variable ,
                                                  ContinuousParametricProcess *process) const
@@ -6608,7 +6747,7 @@ bool MarkovianSequences::linear_model_plot_print(const char *prefix , const char
   ofstream *out_data_file[NB_STATE + 1];
 
 
-  // ecriture des fichier de donnees
+  // writing of data files
 
   state_min_index_parameter = new int[process->nb_state + 1];
   state_max_index_parameter = new int[process->nb_state + 1];
@@ -6951,7 +7090,7 @@ bool MarkovianSequences::linear_model_plot_print(const char *prefix , const char
 
   if (status) {
 
-    // ecriture du fichiers de commandes et du fichiers d'impression
+    // writing of the script files
 
     for (i = 0;i < 2;i++) {
       ostringstream file_name[2];
@@ -7076,14 +7215,16 @@ bool MarkovianSequences::linear_model_plot_print(const char *prefix , const char
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Plot of a fitted observation linear trend model.
  *
- *  Sortie graphique d'un modele lineaire d'observation de type tendance ajuste.
- *
- *  arguments : prefixe des fichiers, indice du MultiPlot, variable,
- *              pointeur sur un processus d'observation continu.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] plot     file prefix,
+ *  \param[in] index    MultiPlot index,
+ *  \param[in] variable variable index,
+ *  \param[in] process  pointer on a continuous observation process.
+ */
+/*--------------------------------------------------------------*/
 
 void MarkovianSequences::linear_model_plotable_write(MultiPlotSet &plot , int &index , int variable ,
                                                      ContinuousParametricProcess *process) const
@@ -7096,7 +7237,7 @@ void MarkovianSequences::linear_model_plotable_write(MultiPlotSet &plot , int &i
   ostringstream title , legend;
 
 
-  // calcul des bornes
+  // computation of bounds
 
   state_min_index_parameter = new int[process->nb_state + 1];
   state_max_index_parameter = new int[process->nb_state + 1];
@@ -7295,7 +7436,7 @@ void MarkovianSequences::linear_model_plotable_write(MultiPlotSet &plot , int &i
   title.str("");
   title << STAT_label[STATL_OUTPUT_PROCESS] << " " << process_index;
 
-  // vues observations et fonction lineaire par etat
+  // linear function and observations for each state
 
   if (type[0] == STATE) {
     for (i = 0;i < process->nb_state;i++) {
@@ -7392,7 +7533,7 @@ void MarkovianSequences::linear_model_plotable_write(MultiPlotSet &plot , int &i
     }
   }
 
-  // vue observations et fonctions lineaires
+  // linear functions and pooled observations
 
   plot[index + plot_offset].title = title.str();
 
@@ -7503,14 +7644,15 @@ void MarkovianSequences::linear_model_plotable_write(MultiPlotSet &plot , int &i
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a MarkovianSequences object in a file at the MTG format.
  *
- *  Ecriture d'un objet MarkovianSequences dans un fichier au format MTG.
- *
- *  arguments : reference sur un objet StatError, path,
- *              type de chaque variable (NOMINAL/NUMERIC).
- *
- *--------------------------------------------------------------*/
+ *  \param[in] error reference on a StatError object,
+ *  \param[in] path  file path,
+ *  \param[in] itype variable types (NOMINAL/NUMERIC).
+ */
+/*--------------------------------------------------------------*/
 
 bool MarkovianSequences::mtg_write(StatError &error , const string path , variable_type *itype) const
 
@@ -7530,7 +7672,7 @@ bool MarkovianSequences::mtg_write(StatError &error , const string path , variab
   else {
     status = true;
 
-    // ecriture de l'entete
+    // writing of the header
 
     out_file << "CODE:\tFORM-A" << endl;
 
@@ -7583,7 +7725,7 @@ bool MarkovianSequences::mtg_write(StatError &error , const string path , variab
 
     out_file << "\nFEATURES:\nNAME\tTYPE" << endl;
 
-    // ecriture du code topologique
+    // writing of the topological code
 
     out_file << "\nMTG:\nENTITY-CODE\n" << endl;
 

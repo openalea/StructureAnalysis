@@ -72,19 +72,21 @@ namespace stat_tool {
  */
 
 
-  class RegressionKernel {  // regression kernel class
+  /// \brief Regression kernel class
+
+  class RegressionKernel {
 
   public :
 
-    parametric_function ident;  // identifier of the regression function
-    int min_value;          // minimum value
-    int max_value;          // maximum value
-    double regression_df;   // degrees of freedom regression
-    double residual_df;     // degrees of freedom residuals
-    int nb_parameter;       // number of parameters
-    double *parameter;      // parameters
+    parametric_function ident;  ///< identifier of the regression function
+    int min_value;          ///< minimum value
+    int max_value;          ///< maximum value
+    double regression_df;   ///< degrees of freedom regression
+    double residual_df;     ///< degrees of freedom residuals
+    int nb_parameter;       ///< number of parameters
+    double *parameter;      ///< parameters
 //    double step;             step for representing the regression function
-    double *point;          // points
+    double *point;          ///< points
 
     void copy(const RegressionKernel&);
     void remove();
@@ -110,7 +112,9 @@ namespace stat_tool {
 
 
 
-  class Regression : public StatInterface , public RegressionKernel {  // regression function
+  /// \brief Regression function
+
+  class Regression : public StatInterface , public RegressionKernel {
 
     friend class Vectors;
 
@@ -119,9 +123,9 @@ namespace stat_tool {
 
   private :
 
-    Vectors *vectors;       // pointer on a Vectors object
-    int nb_vector;          // number of individuals
-    double *residual;       // residuals
+    Vectors *vectors;       ///< pointer on a Vectors object
+    int nb_vector;          ///< number of individuals
+    double *residual;       ///< residuals
 
     void copy(const Regression&);
     void remove();

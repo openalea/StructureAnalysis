@@ -52,29 +52,29 @@ namespace stat_tool {
 
 /****************************************************************
  *
- *  Constantes :
+ *  Constants
  */
 
 
-  const int VECTOR_NB_VARIABLE = 60;     // nombre maximum de variables
-  const int DISTANCE_NB_VECTOR = 2000;   // nombre maximum de vecteurs pour le calcul
-                                         // d'une matrice des distances
-  const int SUP_NORM_DISTANCE_NB_VECTOR = 10;   // nombre minimum de vecteurs pour le calcul
-                                                // de la distance sup norm
-  const int CONTINGENCY_NB_VALUE = 100;  // nombre maximum de valeurs pour le calcul
-                                         // d'un tableau de contingence
-  const int DISPLAY_CONTINGENCY_NB_VALUE = 20;  // nombre maximum de valeurs pour l'affichage
-                                                // d'un tableau de contingence
-  const int VARIANCE_ANALYSIS_NB_VALUE = 100;  // nombre maximum de niveaux pour l'analyse de variance
-  const int DISPLAY_CONDITIONAL_NB_VALUE = 100;  // nombre maximum de valeurs pour l'affichage
-                                                 // des lois conditionnelles
-  const int PLOT_NB_VALUE = 30;          // seuil pour l'ecriture des frequences (sortie Gnuplot)
+  const int VECTOR_NB_VARIABLE = 60;     // maximum number of variables
+  const int DISTANCE_NB_VECTOR = 2000;   // maximum number of vectors for the computation
+                                         // of a matrix of pairwise distances
+  const int SUP_NORM_DISTANCE_NB_VECTOR = 10;   // minimum number of vectors for the computation
+                                                // of the sup norm distance
+  const int CONTINGENCY_NB_VALUE = 100;  // maximum number of categories for the computation
+                                         // of a contingency table
+  const int DISPLAY_CONTINGENCY_NB_VALUE = 20;  // maximum number of categories for the display of
+                                                // a contingency table
+  const int VARIANCE_ANALYSIS_NB_VALUE = 100;  // maximum number of levels for the analysis of variance
+  const int DISPLAY_CONDITIONAL_NB_VALUE = 100;  // maximum number of values of the display of
+                                                 // the conditional distributions
+  const int PLOT_NB_VALUE = 30;          // threshold for the writing of frequencies (Gnuplot output)
 
-  const int NB_CATEGORY = 50;            // nombre maximum de categories
+  const int NB_CATEGORY = 50;            // maximum number of categories
 
-  const int MIN_NB_ASSIGNMENT = 1;   // nombre d'affectations des individus 1ere iteration de l'algorithme MCEM
-  const int MAX_NB_ASSIGNMENT = 10;  // nombre d'affectations des individus  maximum pour l'algorithme MCEM
-  const double NB_ASSIGNMENT_PARAMETER = 1.;  // parametre nombre d'affectations des individus pour l'algorithme MCEM
+  const int MIN_NB_ASSIGNMENT = 1;   // minimum number of assignments of individuals (1st iteration of the MCEM algorithm)
+  const int MAX_NB_ASSIGNMENT = 10;  // maximum number of assignments of individuals (MCEM algorithm)
+  const double NB_ASSIGNMENT_PARAMETER = 1.;  // parameter for the number of assignments of individuals (MCEM algorithm)
 
   enum vector_transformation {
     VECTOR_COPY ,
@@ -113,7 +113,7 @@ namespace stat_tool {
 
 /****************************************************************
  *
- *  Definition des classes :
+ *  Class definition
  */
 
 
@@ -121,8 +121,9 @@ namespace stat_tool {
   class Regression;
   class VectorDistance;
 
+  /// \brief Vectors with integer- and real-valued variables
 
-  class Vectors : public StatInterface {  // vecteurs
+  class Vectors : public StatInterface {
 
     friend class Regression;
     friend class Mixture;
@@ -132,19 +133,19 @@ namespace stat_tool {
 
   protected :
 
-    int nb_vector;          // nombre de vecteurs
-    int *identifier;        // identificateurs des vecteurs
-    int nb_variable;        // nombre de variables
-    variable_nature *type;  // type de chaque variable (INT_VALUE/REAL_VALUE)
-    double *min_value;      // valeurs minimums
-    double *max_value;      // valeurs maximums
-    double *min_interval;   // intervalles minimums entre 2 valeurs
-    FrequencyDistribution **marginal_distribution;  // lois marginales empiriques
-    Histogram **marginal_histogram;  // histogrammes marginaux
-    double *mean;           // vecteur moyenne
-    double **covariance;    // matrice de variance-covariance
-    int **int_vector;       // vecteurs, variables entieres [individual index][variable]
-    double **real_vector;   // vecteurs, variables reelles  [individual index][variable]
+    int nb_vector;          ///< number of vectors
+    int *identifier;        ///< vector identifiers
+    int nb_variable;        ///< number of variables
+    variable_nature *type;  ///< variable types (INT_VALUE/REAL_VALUE)
+    double *min_value;      ///< minimum value for each variable
+    double *max_value;      ///< maximum value for each variable
+    double *min_interval;   ///< minimum interval between 2 values for each variable
+    FrequencyDistribution **marginal_distribution;  ///< marginal frequency distributions
+    Histogram **marginal_histogram;  ///< marginal histograms
+    double *mean;           ///< mean vector
+    double **covariance;    ///< variance-covariance matrix
+    int **int_vector;       ///< vectors, integer-valued variables
+    double **real_vector;   ///< vectors, real-valued variables
 
     void init(int inb_vector , int *iidentifier , int inb_variable ,
               variable_nature *itype , bool init_flag);
@@ -250,8 +251,8 @@ namespace stat_tool {
     Vectors (int inb_vector , int *iidentifier , int inb_variable , variable_nature *itype ,
              bool init_flag = false)
     { init(inb_vector , iidentifier , inb_variable , itype , init_flag); }
-    Vectors(int inb_vector , int *iidentifier , int inb_variable , int **iint_vector);  // interface AML
-    Vectors(int inb_vector , int *iidentifier , int inb_variable , double **ireal_vector);  // interface AML
+    Vectors(int inb_vector , int *iidentifier , int inb_variable , int **iint_vector);  // AML interface
+    Vectors(int inb_vector , int *iidentifier , int inb_variable , double **ireal_vector);  // AML interface
     Vectors(int inb_vector , int *iidentifier , int inb_variable , variable_nature *itype ,
             int **iint_vector , double **ireal_vector , bool variable_index = true);
     Vectors(const Vectors &vec , int variable , variable_nature itype);
@@ -389,7 +390,7 @@ namespace stat_tool {
                                            double parameter = NB_ASSIGNMENT_PARAMETER ,
                                            bool assignment = true , int nb_iter = I_DEFAULT) const;
 
-    // acces membres de la classe
+    // class member access
 
     int get_nb_vector() const { return nb_vector; }
     int get_identifier(int ivec) const { return identifier[ivec]; }
@@ -412,8 +413,9 @@ namespace stat_tool {
 
 
 
-  class VectorDistance : public StatInterface {  // parametres de definition
-                                                 // d'une distance entre vecteurs
+  /// \brief Parameterization of a distance between vectors with heterogeneous variables
+
+  class VectorDistance : public StatInterface {
 
     friend class Vectors;
 
@@ -422,14 +424,14 @@ namespace stat_tool {
 
   private :
 
-    int nb_variable;        // nombre de variables
-    metric distance_type;   // type de distance (ABSOLUTE_VALUE/QUADRATIC)
-    variable_type *var_type;  // type de chaque variable (NOMINAL/ORDINAL/NUMERIC/CIRCULAR)
-    double *weight;         // poids de chaque variable
-    double *dispersion;     // quantite pour la standardisation
-    int *nb_value;          // nombre de valeurs par variable
-    double ***category_distance;  // matrice des distances entre categories
-    int *period;            // periode (variable circulaire)
+    int nb_variable;        ///< number of variables
+    metric distance_type;   ///< distance type (ABSOLUTE_VALUE/QUADRATIC)
+    variable_type *var_type;  ///< variable types (NOMINAL/ORDINAL/NUMERIC/CIRCULAR)
+    double *weight;         ///< weight of each variable
+    double *dispersion;     ///< dispersion quantities for the standardization
+    int *nb_value;          ///< number of values for each variable
+    double ***category_distance;  ///< matrices of distances between categories (for categorical variables)
+    int *period;            ///< periods (for circular variables)
 
     void copy(const VectorDistance &param);
     void remove();
@@ -453,7 +455,7 @@ namespace stat_tool {
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
 
-    // fonctions pour la compatibilite avec la classe StatInterface
+    // functions for the compatibility with the StatInterface class
 
     bool ascii_write(StatError &error , const std::string path , bool exhaustive = false) const;
     bool spreadsheet_write(StatError &error , const std::string path) const;
@@ -465,7 +467,7 @@ namespace stat_tool {
     void dispersion_computation(int variable , const FrequencyDistribution *marginal_distribution ,
                                 double *rank = NULL) const;
 
-    // acces membres de la classe
+    // class member access
 
     int get_nb_variable() const { return nb_variable; }
     metric get_distance_type() const { return distance_type; }
@@ -487,7 +489,6 @@ namespace stat_tool {
                          int *selected_identifier , bool keep);
   int* select_variable(int nb_variable , int nb_selected_variable ,
                        int *selected_variable , bool keep);
-
 
 
 };  // namespace stat_tool

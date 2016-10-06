@@ -215,9 +215,9 @@ RegressionKernel::~RegressionKernel()
 /**
  *  \brief Assignment operator of the RegressionKernel class.
  *
- *  \param[in]  regression reference on a RegressionKernel object,
+ *  \param[in] regression reference on a RegressionKernel object.
  *
- *  \param[out] this       RegressionKernel object.
+ *  \return               RegressionKernel object.
  */
 /*--------------------------------------------------------------*/
 
@@ -375,9 +375,9 @@ ostream& RegressionKernel::spreadsheet_print(ostream &os) const
 /**
  *  \brief Writing of the regression function (Gnuplot output).
  *
- *  \param[in]  path   file path,
+ *  \param[in] path file path.
  *
- *  \param[out] status error status.
+ *  \return         error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -483,7 +483,7 @@ void RegressionKernel::computation()
 /**
  *  \brief Computation of the minimum value of a regression function.
  *
- *  \param[out] min minimum value.
+ *  \return minimum value.
  */
 /*--------------------------------------------------------------*/
 
@@ -512,7 +512,7 @@ double RegressionKernel::min_computation() const
 /**
  *  \brief Computation of the maximum value of a regression function.
  *
- *  \param[out] max maximum value.
+ *  \return maximum value.
  */
 /*--------------------------------------------------------------*/
 
@@ -660,9 +660,9 @@ Regression::~Regression()
 /**
  *  \brief Assignment operator of the Regression class.
  *
- *  \param[in]  regression reference on a Regression object,
+ *  \param[in] regression reference on a Regression object.
  *
- *  \param[out] this       Regression object.
+ *  \return               Regression object.
  */
 /*--------------------------------------------------------------*/
 
@@ -722,7 +722,7 @@ ostream& Regression::ascii_write(ostream &os , bool exhaustive) const
 
   old_adjust = os.setf(ios::right , ios::adjustfield);
 
-  // writing of marginal distributions
+  // writing of the marginal distributions
 
   os << nb_vector << " " << STAT_label[nb_vector == 1 ? STATL_VECTOR : STATL_VECTORS] << endl;
 
@@ -767,7 +767,7 @@ ostream& Regression::ascii_write(ostream &os , bool exhaustive) const
 
   if (ident == LINEAR_FUNCTION) {
 
-    // writing of regression function parameters
+    // writing of the regression function parameters
 
     df[0] = regression_df;
     df[1] = residual_df;
@@ -867,7 +867,7 @@ ostream& Regression::ascii_write(ostream &os , bool exhaustive) const
     os << square_sum[0] + square_sum[1] << " | " << square_sum[2] << endl;
 #   endif
 
-    // writing of variance analysis table
+    // writing of the table of variance analysis
 
     width[0] = column_width(nb_vector - 1) + ASCII_SPACE;
     width[1] = column_width(3 , square_sum) + ASCII_SPACE;
@@ -990,11 +990,11 @@ ostream& Regression::ascii_write(ostream &os , bool exhaustive) const
 /**
  *  \brief Writing of a Regression object in a file.
  *
- *  \param[in]  error      reference on a StatError object,
- *  \param[in]  path       file path,
- *  \param[in]  exhaustive flag detail level,
+ *  \param[in] error      reference on a StatError object,
+ *  \param[in] path       file path,
+ *  \param[in] exhaustive flag detail level.
  *
- *  \param[out] status     error status.
+ *  \return               error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -1026,10 +1026,10 @@ bool Regression::ascii_write(StatError &error , const string path ,
 /**
  *  \brief Writing of a Regression object in a file at the spreadsheet format.
  *
- *  \param[in]  error  reference on a StatError object,
- *  \param[in]  path   file path,
+ *  \param[in] error reference on a StatError object,
+ *  \param[in] path  file path.
  *
- *  \param[out] status error status.
+ *  \return          error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -1054,7 +1054,7 @@ bool Regression::spreadsheet_write(StatError &error , const string path) const
   else {
     status = true;
 
-    // writing of marginal distributions
+    // writing of the marginal distributions
 
     out_file << nb_vector << "\t" << STAT_label[nb_vector == 1 ? STATL_VECTOR : STATL_VECTORS] << endl;
 
@@ -1097,7 +1097,7 @@ bool Regression::spreadsheet_write(StatError &error , const string path) const
 
     if (ident == LINEAR_FUNCTION) {
 
-      // writing of regression function parameters
+      // writing of the regression function parameters
 
       df[0] = regression_df;
       df[1] = residual_df;
@@ -1179,7 +1179,7 @@ bool Regression::spreadsheet_write(StatError &error , const string path) const
 
     case LINEAR_FUNCTION : {
 
-      // writing of variance analysis table
+      // writing of the table of variance analysis
 
       out_file << "\n" << STAT_label[STATL_VARIANCE_ANALYSIS] << endl;
       out_file << STAT_label[STATL_VARIATION_SOURCE] << "\t" << STAT_label[STATL_FREEDOM_DEGREES] << "\t"
@@ -1253,11 +1253,11 @@ bool Regression::spreadsheet_write(StatError &error , const string path) const
 /**
  *  \brief Plot of a Regression object using Gnuplot.
  *
- *  \param[in]  error  reference on a StatError object,
- *  \param[in]  prefix file prefix,
- *  \param[in]  title  figure title,
+ *  \param[in] error  reference on a StatError object,
+ *  \param[in] prefix file prefix,
+ *  \param[in] title  figure title.
  *
- *  \param[out] status error status.
+ *  \return           error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -1276,7 +1276,7 @@ bool Regression::plot_write(StatError &error , const char *prefix ,
 
   error.init();
 
-  // writing of data files
+  // writing of the data files
 
   data_file_name[0] << prefix << 0 << ".dat";
   status = plot_print((data_file_name[0].str()).c_str());
@@ -1287,7 +1287,7 @@ bool Regression::plot_write(StatError &error , const char *prefix ,
 
   else {
 
-    // computation of standardized residuals
+    // computation of the standardized residuals
 
     residual_mean = residual_mean_computation();
     residual_standard_deviation = sqrt(residual_variance_computation(residual_mean));
@@ -1310,7 +1310,7 @@ bool Regression::plot_write(StatError &error , const char *prefix ,
     vectors->plot_print((data_file_name[1].str()).c_str() , standard_residual);
     delete [] standard_residual;
 
-    // writing of script files
+    // writing of the script files
 
     min_response = MIN(min_computation() , vectors->min_value[1]);
     max_response = MAX(max_computation() , vectors->max_value[1]);
@@ -1458,7 +1458,7 @@ bool Regression::plot_write(StatError &error , const char *prefix ,
 /**
  *  \brief Plot of a Regression object.
  *
- *  \param[out] plot_set plots.
+ *  \return MultiPlotSet object.
  */
 /*--------------------------------------------------------------*/
 
@@ -1622,7 +1622,7 @@ MultiPlotSet* Regression::get_plotable() const
 /**
  *  \brief Computation of the variation explained by a regression function.
  *
- *  \param[out] regression_square_sum regression square sum.
+ *  \return regression square sum.
  */
 /*--------------------------------------------------------------*/
 
@@ -1670,9 +1670,9 @@ void Regression::residual_computation()
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Computation of the residual mean,
+ *  \brief Computation of the residual mean.
  *
- *  \param[out] residual_mean residual mean.
+ *  \return residual mean.
  */
 /*--------------------------------------------------------------*/
 
@@ -1697,9 +1697,9 @@ double Regression::residual_mean_computation() const
 /**
  *  \brief Computation of the residual variance.
  *
- *  \param[in]  residual_mean     residual mean,
+ *  \param[in] residual_mean residual mean.
  *
- *  \param[out] residual_variance residual variance.
+ *  \return                  residual variance.
  */
 /*--------------------------------------------------------------*/
 
@@ -1727,7 +1727,7 @@ double Regression::residual_variance_computation(double residual_mean) const
 /**
  *  \brief Computation of the residual square sum.
  *
- *  \param[out] residual_square_sum residual square sum.
+ *  \return residual square sum.
  */
 /*--------------------------------------------------------------*/
 
@@ -1751,11 +1751,11 @@ double Regression::residual_square_sum_computation() const
 /**
  *  \brief Linear regression.
  *
- *  \param[in]  error                reference on a StatError object,
- *  \param[in]  explanatory_variable explanatory variable index,
- *  \param[in]  response_variable    response variable index,
+ *  \param[in] error                reference on a StatError object,
+ *  \param[in] explanatory_variable explanatory variable index,
+ *  \param[in] response_variable    response variable index.
  *
- *  \param[out] regression           linear regression.
+ *  \return                         Regression object.
  */
 /*--------------------------------------------------------------*/
 
@@ -1819,7 +1819,7 @@ Regression* Vectors::linear_regression(StatError &error , int explanatory_variab
     regression->parameter[1] = regression->vectors->covariance[0][1] / regression->vectors->covariance[0][0];
     regression->parameter[0] = regression->vectors->mean[1] - regression->vectors->mean[0] * regression->parameter[1];
 
-    // computation of the regression function and of residuals
+    // computation of the regression function and residuals
 
     regression->computation();
     regression->residual_computation();
@@ -1833,14 +1833,14 @@ Regression* Vectors::linear_regression(StatError &error , int explanatory_variab
 /**
  *  \brief Nonparametric moving-average regression.
  *
- *  \param[in]  error                reference on a StatError object,
- *  \param[in]  explanatory_variable explanatory variable index,
- *  \param[in]  response_variable    response variable index,
- *  \param[in]  nb_point             filter half width,
- *  \param[in]  filter               filter,
- *  \param[in]  algorithm            response computation: AVERAGING/LEAST_SQUARES,
+ *  \param[in] error                reference on a StatError object,
+ *  \param[in] explanatory_variable explanatory variable index,
+ *  \param[in] response_variable    response variable index,
+ *  \param[in] nb_point             filter half width,
+ *  \param[in] filter               filter,
+ *  \param[in] algorithm            response computation (AVERAGING/LEAST_SQUARES).
  *
- *  \param[out] regression           nonparametric regression.
+ *  \return                         Regression object.
  */
 /*--------------------------------------------------------------*/
 
@@ -2146,13 +2146,13 @@ Regression* Vectors::moving_average(StatError &error , int explanatory_variable 
 /**
  *  \brief Nonparametric moving-average regression.
  *
- *  \param[in]  error                reference on a StatError object,
- *  \param[in]  explanatory_variable explanatory variable index,
- *  \param[in]  response_variable    response variable index,
- *  \param[in]  dist                 symmetric distribution,
- *  \param[in]  algorithm            response computation: AVERAGING/LEAST_SQUARES,
+ *  \param[in] error                reference on a StatError object,
+ *  \param[in] explanatory_variable explanatory variable index,
+ *  \param[in] response_variable    response variable index,
+ *  \param[in] dist                 symmetric distribution,
+ *  \param[in] algorithm            response computation (AVERAGING/LEAST_SQUARES).
  *
- *  \param[out] regression           nonparametric regression.
+ *  \return                         Regression object.
  */
 /*--------------------------------------------------------------*/
 
@@ -2194,13 +2194,13 @@ Regression* Vectors::moving_average(StatError &error , int explanatory_variable 
 /**
  *  \brief Nonparametric k-nearest-neighbor regression.
  *
- *  \param[in]  error                reference on a StatError object,
- *  \param[in]  explanatory_variable explanatory variable index,
- *  \param[in]  response_variable    response variable index,
- *  \param[in]  span                 neighboring proportion with respect to the sample size,
- *  \param[in]  weighting            flag neighbor weighting,
+ *  \param[in] error                reference on a StatError object,
+ *  \param[in] explanatory_variable explanatory variable index,
+ *  \param[in] response_variable    response variable index,
+ *  \param[in] span                 neighboring proportion with respect to the sample size,
+ *  \param[in] weighting            flag neighbor weighting.
  *
- *  \param[out] regression           nonparametric regression.
+ *  \return                         Regression object.
  */
 /*--------------------------------------------------------------*/
 

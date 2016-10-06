@@ -52,7 +52,7 @@ namespace stat_tool {
 
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
 /**
  *  \brief Default constructor of the Compound class.
  */
@@ -98,7 +98,7 @@ Compound::Compound(const DiscreteParametric &sum_dist , const DiscreteParametric
  *
  *  \param[in] sum_dist reference on the sum distribution,
  *  \param[in] dist     reference on the basis distribution,
- *  \param[in] type     type of the unknown distribution.
+ *  \param[in] type     unknown distribution type.
  */
 /*--------------------------------------------------------------*/
 
@@ -179,9 +179,9 @@ Compound::~Compound()
 /**
  *  \brief Assignment operator of the Compound class.
  *
- *  \param[in]  compound reference on a Compound object,
+ *  \param[in] compound reference on a Compound object.
  *
- *  \param[out] this     Compound object.
+ *  \return             Compound object.
  */
 /*--------------------------------------------------------------*/
 
@@ -209,9 +209,9 @@ Compound& Compound::operator=(const Compound &compound)
 /**
  *  \brief Extraction of the data part of a Compound object.
  *
- *  \param[in]  error          reference on a StatError object.
+ *  \param[in] error reference on a StatError object.
  *
- *  \param[out] compound_histo frequency distributions corresponding to a compound distribution.
+ *  \return          CompoundData object.
  */
 /*--------------------------------------------------------------*/
 
@@ -241,11 +241,11 @@ CompoundData* Compound::extract_data(StatError &error) const
 /**
  *  \brief Construction of a Compound object from a file.
  *
- *  \param[in]  error           reference on a StatError object,
- *  \param[in]  path            file path,
- *  \param[in]  cumul_threshold threshold on the cumulative distribution function,
+ *  \param[in] error           reference on a StatError object,
+ *  \param[in] path            file path,
+ *  \param[in] cumul_threshold threshold on the cumulative distribution function.
  *
- *  \param[out] compound        compound distribution.
+ *  \return                    Compound object.
  */
 /*--------------------------------------------------------------*/
 
@@ -295,7 +295,7 @@ Compound* Compound::ascii_read(StatError &error , const string path , double cum
 
       while (!((token = next()).isNull())) {
 
-        // test COMPOUND_DISTRIBUTION/SUM_DISTRIBUTION/ELEMENTARY_DISTRIBUTION key words
+        // test COMPOUND_DISTRIBUTION/SUM_DISTRIBUTION/ELEMENTARY_DISTRIBUTION keywords
 
         if (i == 0) {
           switch (read_line) {
@@ -303,7 +303,7 @@ Compound* Compound::ascii_read(StatError &error , const string path , double cum
           case 0 : {
             if (token != STAT_word[STATW_COMPOUND]) {
               status = false;
-              error.correction_update(STAT_parsing[STATP_KEY_WORD] , STAT_word[STATW_COMPOUND] , line);
+              error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_COMPOUND] , line);
             }
             break;
           }
@@ -311,7 +311,7 @@ Compound* Compound::ascii_read(StatError &error , const string path , double cum
           case 1 : {
             if (token != STAT_word[STATW_SUM]) {
               status = false;
-              error.correction_update(STAT_parsing[STATP_KEY_WORD] , STAT_word[STATW_SUM] , line);
+              error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_SUM] , line);
             }
             break;
           }
@@ -319,7 +319,7 @@ Compound* Compound::ascii_read(StatError &error , const string path , double cum
           case 2 : {
             if (token != STAT_word[STATW_ELEMENTARY]) {
               status = false;
-              error.correction_update(STAT_parsing[STATP_KEY_WORD] , STAT_word[STATW_ELEMENTARY] , line);
+              error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_ELEMENTARY] , line);
             }
             break;
           }
@@ -422,7 +422,7 @@ ostream& Compound::line_write(ostream &os) const
  *         distributions in a file.
  *
  *  \param[in,out] os             stream,
- *  \param[in]     compound_histo pointeur on a CompoundData object,
+ *  \param[in]     compound_histo pointer on a CompoundData object,
  *  \param[in]     exhaustive     flag detail level,
  *  \param[in]     file_flag      flag file output.
  */
@@ -585,11 +585,11 @@ ostream& Compound::ascii_write(ostream &os , bool exhaustive) const
 /**
  *  \brief Writing of a Compound object in a file.
  *
- *  \param[in]  error      reference on a StatError object,
- *  \param[in]  path       file path,
- *  \param[in]  exhaustive flag detail level,
+ *  \param[in] error      reference on a StatError object,
+ *  \param[in] path       file path,
+ *  \param[in] exhaustive flag detail level.
  *
- *  \param[out] status     error status.
+ *  \return               error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -623,7 +623,7 @@ bool Compound::ascii_write(StatError &error , const string path ,
  *         distributions in a file at the spreadsheet format.
  *
  *  \param[in,out] os             stream,
- *  \param[in]     compound_histo pointeur on a CompoundData object.
+ *  \param[in]     compound_histo pointer on a CompoundData object.
  */
 /*--------------------------------------------------------------*/
 
@@ -726,10 +726,10 @@ ostream& Compound::spreadsheet_write(ostream &os , const CompoundData *compound_
 /**
  *  \brief Writing of a Compound object in a file at the spreadsheet format.
  *
- *  \param[in]  error  reference on a StatError object,
- *  \param[in]  path   file path,
+ *  \param[in] error reference on a StatError object,
+ *  \param[in] path  file path.
  *
- *  \param[out] status error status.
+ *  \return          error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -761,11 +761,11 @@ bool Compound::spreadsheet_write(StatError &error , const string path) const
  *  \brief Plot of a compound distribution and the associated
  *         frequency distributions using Gnuplot.
  *
- *  \param[in]  prefix         file prefix,
- *  \param[in]  title          figure title,
- *  \param[in]  compound_histo pointeur on a CompoundData object,
+ *  \param[in] prefix         file prefix,
+ *  \param[in] title          figure title,
+ *  \param[in] compound_histo pointer on a CompoundData object.
  *
- *  \param[out] status         error status.
+ *  \return                   error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -782,7 +782,7 @@ bool Compound::plot_write(const char *prefix , const char *title ,
   ostringstream data_file_name;
 
 
-  // writing of data file
+  // writing of the data file
 
   data_file_name << prefix << ".dat";
 
@@ -818,7 +818,7 @@ bool Compound::plot_write(const char *prefix , const char *title ,
                                    NULL , 0 , NULL);
   }
 
-  // writing of script files
+  // writing of the script files
 
   if (status) {
     for (i = 0;i < 2;i++) {
@@ -960,11 +960,11 @@ bool Compound::plot_write(const char *prefix , const char *title ,
 /**
  *  \brief Plot of a Compound object using Gnuplot.
  *
- *  \param[in]  error  reference on a StatError object,
- *  \param[in]  prefix file prefix,
- *  \param[in]  title  figure title,
+ *  \param[in] error  reference on a StatError object,
+ *  \param[in] prefix file prefix,
+ *  \param[in] title  figure title.
  *
- *  \param[out] status error status.
+ *  \return           error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -986,11 +986,11 @@ bool Compound::plot_write(StatError &error , const char *prefix ,
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Plot of a compound distribution and associated frequency distributions.
+ *  \brief Plot of a compound distribution and the associated frequency distributions.
  *
- *  \param[in]  compound_histo pointeur on a CompoundData object,
+ *  \param[in] compound_histo pointer on a CompoundData object.
  *
- *  \param[out] plot_set       plots.
+ *  \return                   MultiPlotSet object.
  */
 /*--------------------------------------------------------------*/
 
@@ -1202,7 +1202,7 @@ MultiPlotSet* Compound::get_plotable(const CompoundData *compound_histo) const
 /**
  *  \brief Plot of a Compound object.
  *
- *  \param[out] plots.
+ *  \return MultiPlotSet object.
  */
 /*--------------------------------------------------------------*/
 
@@ -1311,9 +1311,9 @@ CompoundData::~CompoundData()
 /**
  *  \brief Assignment operator of the CompoundData class.
  *
- *  \param[in]  compound_histo reference on a CompoundData object,
+ *  \param[in] compound_histo reference on a CompoundData object.
  *
- *  \param[out] this           CompoundData object.
+ *  \return                   CompoundData object.
  */
 /*--------------------------------------------------------------*/
 
@@ -1341,10 +1341,10 @@ CompoundData& CompoundData::operator=(const CompoundData &compound_histo)
  *  \brief Extraction of the sum frequency distribution or of
  *         the basis frequency distribution.
  *
- *  \param[in]  error  reference on a StatError object,
- *  \param[in]  type   frequency distribution type,
+ *  \param[in] error reference on a StatError object,
+ *  \param[in] type  frequency distribution type.
  *
- *  \param[out] phisto frequency distribution corresponding to the sum or the basis distribution.
+ *  \return          DiscreteDistributionData object.
  */
 /*--------------------------------------------------------------*/
 
@@ -1430,11 +1430,11 @@ ostream& CompoundData::ascii_write(ostream &os , bool exhaustive) const
 /**
  *  \brief Writing of a CompoundData object in a file .
  *
- *  \param[in]  error      reference on a StatError object,
- *  \param[in]  path       file path,
- *  \param[in]  exhaustive flag detail level,
+ *  \param[in] error      reference on a StatError object,
+ *  \param[in] path       file path,
+ *  \param[in] exhaustive flag detail level.
  *
- *  \param[out] status     error status.
+ *  \return               error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -1469,10 +1469,10 @@ bool CompoundData::ascii_write(StatError &error , const string path ,
 /**
  *  \brief Writing of a CompoundData object in a file at the spreadsheet format.
  *
- *  \param[in]  error  reference on a StatError object,
- *  \param[in]  path   file path,
+ *  \param[in] error reference on a StatError object,
+ *  \param[in] path  file path.
  *
- *  \param[out] status error status.
+ *  \return          error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -1506,11 +1506,11 @@ bool CompoundData::spreadsheet_write(StatError &error , const string path) const
 /**
  *  \brief Plot of a CompoundData object using Gnuplot.
  *
- *  \param[in]  error  reference on a StatError object,
- *  \param[in]  prefix file prefix,
- *  \param[in]  title  figure title,
+ *  \param[in] error  reference on a StatError object,
+ *  \param[in] prefix file prefix,
+ *  \param[in] title  figure title.
  *
- *  \param[out] status error status.
+ *  \return           error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -1539,7 +1539,7 @@ bool CompoundData::plot_write(StatError &error , const char *prefix ,
 /**
  *  \brief Plot of a CompoundData object.
  *
- *  \param[out] plot_set plots.
+ *  \return MultiPlotSet object.
  */
 /*--------------------------------------------------------------*/
 

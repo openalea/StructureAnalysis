@@ -60,16 +60,19 @@ namespace stat_tool {
 
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the ContinuousParametric class.
  *
- *  Constructeur de la classe ContinuousParametric.
- *
- *  arguments : identificateur, parametres de localisation et de dispersion (Gaussian ou von Mises)/
- *              de forme et d'echelle (gamma), probabilite pour 0 (zero-inflated gamma),
- *              intercept, pente et parametre de dispersion (modele lineaire)
- *              unite (loi de von Mises).
- *
- *--------------------------------------------------------------*/
+ *  \param[in] iident            identifier,
+ *  \param[in] ilocation         location parameter (Gaussian, inverse Gaussian, von Mises),
+ *                               shape parameter (gamma, zero-inflated gamma) or intercept (linear model),
+ *  \param[in] idispersion       dispersion parameter (Gaussian, von Mises, linear model) or
+ *                               scale parameter (gamma, zero-inflated gamma, inverse Gaussian),
+ *  \param[in] izero_probability zero probability (zero-inflated gamma) or slope (linear model),
+ *  \param[in] iunit             angle unit (von Mises).
+ */
+/*--------------------------------------------------------------*/
 
 ContinuousParametric::ContinuousParametric(continuous_parametric iident , double ilocation ,
                                            double idispersion , double izero_probability ,
@@ -93,13 +96,13 @@ ContinuousParametric::ContinuousParametric(continuous_parametric iident , double
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Copy of a ContinuousParametric object.
  *
- *  Copie d'un objet ContinuousParametric.
- *
- *  argument : reference sur un objet ContinuousParametric.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] dist reference on a ContinuousParametric object.
+ */
+/*--------------------------------------------------------------*/
 
 void ContinuousParametric::copy(const ContinuousParametric &dist)
 
@@ -134,11 +137,11 @@ void ContinuousParametric::copy(const ContinuousParametric &dist)
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Destructeur de la classe ContinuousParametric.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Destructor of the ContinuousParametric class.
+ */
+/*--------------------------------------------------------------*/
 
 ContinuousParametric::~ContinuousParametric()
 
@@ -147,13 +150,15 @@ ContinuousParametric::~ContinuousParametric()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Assignment operator of the ContinuousParametric class.
  *
- *  Operateur d'assignement de la classe ContinuousParametric.
+ *  \param[in] dist reference on a ContinuousParametric object.
  *
- *  argument : reference sur un objet ContinuousParametric.
- *
- *--------------------------------------------------------------*/
+ *  \return         ContinuousParametric object.
+ */
+/*--------------------------------------------------------------*/
 
 ContinuousParametric& ContinuousParametric::operator=(const ContinuousParametric &dist)
 
@@ -167,15 +172,18 @@ ContinuousParametric& ContinuousParametric::operator=(const ContinuousParametric
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Analysis of the format of a ContinuousParametric object.
  *
- *  Analyse du format d'un objet ContinuousParametric.
+ *  \param[in] error      reference on a StatError object,
+ *  \param[in] in_file    stream,
+ *  \param[in] line       reference on the file line index,
+ *  \param[in] last_ident identifier of the last distribution in the list.
  *
- *  arguments : reference sur un objet StatError, stream,
- *              reference sur l'indice de la ligne lue, identificateur
- *              de la derniere loi dans la liste.
- *
- *--------------------------------------------------------------*/
+ *  \return               ContinuousParametric object.
+ */
+/*--------------------------------------------------------------*/
 
 ContinuousParametric* ContinuousParametric::parsing(StatError &error , ifstream &in_file ,
                                                     int &line , continuous_parametric last_ident)
@@ -225,7 +233,7 @@ ContinuousParametric* ContinuousParametric::parsing(StatError &error , ifstream 
 
     while (!((token = next()).isNull())) {
 
-      // test nom de la loi
+      // test distribution name
 
       if (i == 0) {
         for (j = GAMMA;j <= last_ident;j++) {
@@ -241,7 +249,7 @@ ContinuousParametric* ContinuousParametric::parsing(StatError &error , ifstream 
         }
       }
 
-      // test nom du parametre
+      // test parameter name
 
       else {
         switch ((i - 1) % 3) {
@@ -249,8 +257,8 @@ ContinuousParametric* ContinuousParametric::parsing(StatError &error , ifstream 
         case 0 : {
           switch ((i - 1) / 3) {
 
-          // 1er parametre : parametre de forme (gamma), moyenne (Gaussian, inverse Gaussian), direction moyenne (von Mises),
-          // probabilite pour 0 (zero-inflated gamma), intercept (modele lineaire)
+          // 1st parameter: shape parameter (gamma), mean (Gaussian, inverse Gaussian), mean direction (von Mises),
+          // zero probability (zero-inflated gamma), intercept (linear model)
 
           case 0 : {
             if ((ident == GAMMA) && (token != STAT_word[STATW_SHAPE])) {
@@ -280,8 +288,8 @@ ContinuousParametric* ContinuousParametric::parsing(StatError &error , ifstream 
             break;
           }
 
-          // 2eme parametre : parametre d'echelle (gamma, inverse Gaussian), ecart-type (Gaussian),
-          // concentration (von Mises), parametre de forme (zero-inflated gamma), pente (modele lineaire)
+          // 2nd parameter: scale parameter (gamma, inverse Gaussian), standard deviation (Gaussian),
+          // concentration (von Mises), shape parameter (zero-inflated gamma), slope (linear model)
 
           case 1 : {
             if (((ident == GAMMA) || (ident == INVERSE_GAUSSIAN)) && (token != STAT_word[STATW_SCALE])) {
@@ -311,7 +319,7 @@ ContinuousParametric* ContinuousParametric::parsing(StatError &error , ifstream 
             break;
           }
 
-          // 3eme parametre : parametre d'echelle (zeo_inflated gamma), ecart-type (modele lineaire)
+          // 3rd parameter: scale parameter (zero-inflated gamma), residual standard deviation (linear model)
 
           case 2 : {
             if ((ident == ZERO_INFLATED_GAMMA) && (token != STAT_word[STATW_SCALE])) {
@@ -330,7 +338,7 @@ ContinuousParametric* ContinuousParametric::parsing(StatError &error , ifstream 
           break;
         }
 
-        // test separateur
+        // test separator
 
         case 1 : {
           if (token != ":") {
@@ -340,13 +348,13 @@ ContinuousParametric* ContinuousParametric::parsing(StatError &error , ifstream 
           break;
         }
 
-        // test valeur du parametre
+        // test parameter value
 
         case 2 : {
           switch ((i - 1) / 3) {
 
-          // 1er parametre : parametre de forme (gamma), moyenne (inverse Gaussian, Gaussian), direction moyenne (von Mises),
-          // probabilite pour 0 (zero-inflated gamma), intercept (modele lineaire)
+          // 1st parameter: shape parameter (gamma), mean (inverse Gaussian, Gaussian), mean direction (von Mises),
+          // zero probability (zero-inflated gamma), intercept (linear model)
 
           case 0 : {
             if (ident == GAMMA) {
@@ -380,8 +388,8 @@ ContinuousParametric* ContinuousParametric::parsing(StatError &error , ifstream 
             break;
           }
 
-          // 2eme parametre : parametre d'echelle (gamma, inverse Gaussian), ecart-type (Gaussian),
-          // concentration (von Mises), parametre de forme (zero-inflated gamma), pente (modele lineaire)
+          // 2nd parameter: scale parameter (gamma, inverse Gaussian), standard deviation (Gaussian),
+          // concentration (von Mises), shape parameter (zero-inflated gamma), slope (linear model)
 
           case 1 : {
             if ((ident == GAMMA) || (ident == INVERSE_GAUSSIAN)) {
@@ -411,7 +419,7 @@ ContinuousParametric* ContinuousParametric::parsing(StatError &error , ifstream 
             break;
           }
 
-          // 3eme parametre : parametre d'echelle (zero-inflated gamma), ecart-type (modele lineaire)
+          // 3rd parameter: scale parameter (zero-inflated gamma), residual standard deviation (linear model)
 
           case 2 : {
             if (ident == ZERO_INFLATED_GAMMA) {
@@ -468,13 +476,14 @@ ContinuousParametric* ContinuousParametric::parsing(StatError &error , ifstream 
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of the parameters of a continuous distribution.
  *
- *  Ecriture des parametres d'une loi continue.
- *
- *  arguments : stream, flag commentaire.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os        stream,
+ *  \param[in]     file_flag flag comment.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& ContinuousParametric::ascii_parameter_print(ostream &os , bool file_flag) const
 
@@ -562,13 +571,14 @@ ostream& ContinuousParametric::ascii_parameter_print(ostream &os , bool file_fla
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of the characteristics of a continuous distribution.
  *
- *  Ecriture des caracteristiques d'une loi continue.
- *
- *  arguments : stream, flag commentaire.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os        stream,
+ *  \param[in]     file_flag flag comment.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& ContinuousParametric::ascii_characteristic_print(ostream &os , bool file_flag) const
 
@@ -675,15 +685,17 @@ ostream& ContinuousParametric::ascii_characteristic_print(ostream &os , bool fil
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a continuous distribution.
  *
- *  Ecriture d'une loi continue.
- *
- *  arguments : stream, flag commentaire, flags sur l'ecriture de la fonction
- *              de repartition, pointeurs sur un objet Histogram et
- *              sur un objet FrequencyDistribution.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os         stream,
+ *  \param[in]     file_flag  flag comment,
+ *  \param[in]     cumul_flag flag on the writing of the cumulative distribution function,
+ *  \param[in]     histo1     pointer on an Histogram object,
+ *  \param[in]     histo2     pointer on a FrequencyDistribution object.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& ContinuousParametric::ascii_print(ostream &os , bool file_flag ,
                                            bool cumul_flag , const Histogram *histo1 ,
@@ -794,7 +806,7 @@ ostream& ContinuousParametric::ascii_print(ostream &os , bool file_flag ,
       }
     }
 
-    // calcul d'une loi continue discretisee
+    // computation of a discretized continuous distribution 
 
     switch (ident) {
 
@@ -955,7 +967,7 @@ ostream& ContinuousParametric::ascii_print(ostream &os , bool file_flag ,
     }
     }
 
-    // calcul des largeurs des colonnes
+    // computation of the column widths
 
     width[0] = column_width(min_value , max_value);
 
@@ -1045,13 +1057,13 @@ ostream& ContinuousParametric::ascii_print(ostream &os , bool file_flag ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of the parameters of a continuous distribution at the spreadsheet format.
  *
- *  Ecriture des parametres d'une loi continue au format tableur.
- *
- *  argument : stream.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os stream.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& ContinuousParametric::spreadsheet_parameter_print(ostream &os) const
 
@@ -1127,13 +1139,13 @@ ostream& ContinuousParametric::spreadsheet_parameter_print(ostream &os) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of the characteristics of a continuous distribution at the spreadsheet format.
  *
- *  Ecriture des caracteristiques d'une loi continue au format tableur.
- *
- *  argument : stream.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os stream.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& ContinuousParametric::spreadsheet_characteristic_print(ostream &os) const
 
@@ -1218,15 +1230,16 @@ ostream& ContinuousParametric::spreadsheet_characteristic_print(ostream &os) con
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a continuous distribution at the spreadsheet format.
  *
- *  Ecriture d'une loi continue au format tableur.
- *
- *  arguments : stream, flag sur l'ecriture de la fonction de repartition,
- *              pointeurs sur un objet Histogram et
- *              sur un objet FrequencyDistribution.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os         stream,
+ *  \param[in]     cumul_flag flag on the writing of the cumulative distribution function,
+ *  \param[in]     histo1     pointer on an Histogram object,
+ *  \param[in]     histo2     pointer on a FrequencyDistribution object.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& ContinuousParametric::spreadsheet_print(ostream &os , bool cumul_flag ,
                                                  const Histogram *histo1 ,
@@ -1334,7 +1347,7 @@ ostream& ContinuousParametric::spreadsheet_print(ostream &os , bool cumul_flag ,
       }
     }
 
-    // calcul d'une loi continue discretisee
+    // computation of a discretized continuous distribution
 
     switch (ident) {
 
@@ -1542,13 +1555,13 @@ ostream& ContinuousParametric::spreadsheet_print(ostream &os , bool cumul_flag ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of the parameters of a continuous distribution at the Gnuplot format.
  *
- *  Ecriture des parametres d'une loi continue au format Gnuplot.
- *
- *  argument : stream.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os stream.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& ContinuousParametric::plot_title_print(ostream &os) const
 
@@ -1586,14 +1599,17 @@ ostream& ContinuousParametric::plot_title_print(ostream &os) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a continuous distribution at the Gnuplot format.
  *
- *  Ecriture d'une loi continue au format Gnuplot.
+ *  \param[in] path   file path,
+ *  \param[in] histo1 pointer on an Histogram object,
+ *  \param[in] histo2 pointer on a FrequencyDistribution object.
  *
- *  arguments : path, pointeurs sur un objet Histogram et
- *              sur un objet FrequencyDistribution.
- *
- *--------------------------------------------------------------*/
+ *  \return           error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool ContinuousParametric::plot_print(const char *path , const Histogram *histo1 ,
                                       const FrequencyDistribution *histo2)
@@ -1737,7 +1753,7 @@ bool ContinuousParametric::plot_print(const char *path , const Histogram *histo1
         step = buff;
       }
 
-/*     calcul complet
+/*     computation complet
 
       nb_step = (int)((max_value - min_value) / step) + 1;
       frequency = new double[nb_step];
@@ -1889,14 +1905,17 @@ bool ContinuousParametric::plot_print(const char *path , const Histogram *histo1
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a q-q plot at the Gnuplot format.
  *
- *  Ecriture d'un q-q plot au format Gnuplot.
+ *  \param[in] path          file path,
+ *  \param[in] nb_value      number of values,
+ *  \param[in] empirical_cdf pointer on the empirical cumulative distribution function.
  *
- *  arguments : path, nombre de valeurs, pointeur sur la fonction
- *              de repartition empirique.
- *
- *--------------------------------------------------------------*/
+ *  \return                  error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool ContinuousParametric::q_q_plot_print(const char *path , int nb_value ,
                                           double **empirical_cdf) const
@@ -1926,15 +1945,15 @@ bool ContinuousParametric::q_q_plot_print(const char *path , int nb_value ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Plot of a continuous distribution.
  *
- *  Sortie graphique d'une loi continue.
- *
- *  arguments : reference sur un objet SinglePlot,
- *              pointeurs sur un objet Histogram et
- *              sur un objet FrequencyDistribution.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] plot   reference on a SinglePlot object,
+ *  \param[in] histo1 pointer on an Histogram object,
+ *  \param[in] histo2 pointer on a FrequencyDistribution object.
+ */
+/*--------------------------------------------------------------*/
 
 void ContinuousParametric::plotable_write(SinglePlot &plot , const Histogram *histo1 ,
                                           const FrequencyDistribution *histo2)
@@ -2211,14 +2230,15 @@ void ContinuousParametric::plotable_write(SinglePlot &plot , const Histogram *hi
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Plot of a q-q plot.
  *
- *  Sortie graphique d'un q-q plot.
- *
- *  arguments : reference sur un objet SinglePlot, nombre de valeurs,
- *              pointeur sur la fonction de repartition empirique.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] plot          reference on a SinglePlot object,
+ *  \param[in] nb_value      number of values,
+ *  \param[in] empirical_cdf pointer on the empirical cumulative distribution function.
+ */
+/*--------------------------------------------------------------*/
 
 void ContinuousParametric::q_q_plotable_write(SinglePlot &plot , int nb_value ,
                                               double **empirical_cdf) const
@@ -2240,11 +2260,13 @@ void ContinuousParametric::q_q_plotable_write(SinglePlot &plot , int nb_value ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the number of parameters of a continuous distribution.
  *
- *  Computation of the number of parameters of a continuous distribution.
- *
- *--------------------------------------------------------------*/
+ *  \return number of parameters.
+ */
+/*--------------------------------------------------------------*/
 
 int ContinuousParametric::nb_parameter_computation() const
 
@@ -2307,13 +2329,16 @@ int ContinuousParametric::nb_parameter_computation() const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the density of a von Mises distribution integrated on an interval.
  *
- *  Calcul de la densite d'une loi de von Mises integree sur un intervalle.
+ *  \param[in] inf lower bound,
+ *  \param[in] sup upper bound.
  *
- *  arguments : bornes de l'intervalle.
- *
- *--------------------------------------------------------------*/
+ *  \return        integrated density.
+ */
+/*--------------------------------------------------------------*/
 
 double ContinuousParametric::von_mises_mass_computation(double inf , double sup) const
 
@@ -2358,13 +2383,16 @@ double ContinuousParametric::von_mises_mass_computation(double inf , double sup)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the density of a distribution integrated on an interval.
  *
- *  Calcul de la densite integree sur un intervalle.
+ *  \param[in] inf lower bound,
+ *  \param[in] sup upper bound.
  *
- *  arguments : bornes de l'intervalle.
- *
- *--------------------------------------------------------------*/
+ *  \return        integrated density.
+ */
+/*--------------------------------------------------------------*/
 
 double ContinuousParametric::mass_computation(double inf , double sup) const
 
@@ -2531,11 +2559,11 @@ double ContinuousParametric::mass_computation(double inf , double sup) const
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Calcul de la fonction de repartition d'une loi de von Mises.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the cumulative distribution function of a von Mises distribution.
+ */
+/*--------------------------------------------------------------*/
 
 void ContinuousParametric::von_mises_cumul_computation()
 
@@ -2612,13 +2640,16 @@ void ContinuousParametric::von_mises_cumul_computation()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of a q-q plot.
  *
- *  Calcul d'un q-q plot.
+ *  \param[in] nb_value      number of values,
+ *  \param[in] empirical_cdf pointer on the empirical cumulative distribution function.
  *
- *  arguments : nombre de valeurs, pointeur sur la fonction de repartition empirique.
- *
- *--------------------------------------------------------------*/
+ *  \return                  q-q plot.
+ */
+/*--------------------------------------------------------------*/
 
 double** ContinuousParametric::q_q_plot_computation(int nb_value ,
                                                     double **empirical_cdf) const
@@ -2746,14 +2777,18 @@ double** ContinuousParametric::q_q_plot_computation(int nb_value ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the distance between 2 continuous distributions
+ *         (sup of the absolute difference between the cumulative distribution functions
+ *          in the case of non-crossing cumulative distribution functions; in the general case,
+ *          sum of sup on intervals between 2 crossings of cumulative distribution functions).
  *
- *  Calcul de la distance entre deux lois continues (sup de la difference
- *  absolue des fonctions de repartition dans le cas de fonctions de repartition
- *  ne se croisant pas; sinon somme des sup avant et apres croisement
- *  de la difference des fonctions de repartition).
+ *  \param[in] dist reference on a ContinuousParametric object.
  *
- *--------------------------------------------------------------*/
+ *  \return         distance between 2 continuous distributions
+ */
+/*--------------------------------------------------------------*/
 
 double ContinuousParametric::sup_norm_distance_computation(ContinuousParametric &dist)
 
@@ -2980,7 +3015,7 @@ double ContinuousParametric::sup_norm_distance_computation(ContinuousParametric 
     break;
   }
 
-  case VON_MISES : {   // bug concentration faible
+  case VON_MISES : {   // bug small concentration
     int inf , sup;
 
     if (!cumul) {
@@ -3225,13 +3260,16 @@ double ContinuousParametric::sup_norm_distance_computation(ContinuousParametric 
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the log-likelihood of a continuous distribution for a sample.
  *
- *  .
+ *  \param[in] variable variable index,
+ *  \param[in] dist     pointer on a ContinuousParametric object.
  *
- *  arguments: variable, pointer on a distribution.
- *
- *--------------------------------------------------------------*/
+ *  \return             log-likelihood.
+ */
+/*--------------------------------------------------------------*/
 
 double Vectors::likelihood_computation(int variable , const ContinuousParametric &dist) const
 
@@ -3318,13 +3356,16 @@ double Vectors::likelihood_computation(int variable , const ContinuousParametric
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Estimation of the parameters of a gamma distribution.
  *
- *  Estimation of parameters of a gamma distribution.
+ *  \param[in] variable variable index,
+ *  \param[in] dist     pointer on a ContinuousParametric object.
  *
- *  arguments: variable, pointer on a distribution.
- *
- *--------------------------------------------------------------*/
+ *  \return             log-likelihood of the estimated distribution.
+ */
+/*--------------------------------------------------------------*/
 
 double Vectors::gamma_estimation(int variable , ContinuousParametric *dist) const
 
@@ -3462,13 +3503,16 @@ double Vectors::gamma_estimation(int variable , ContinuousParametric *dist) cons
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Estimation of the parameters of an inverse Gaussian distribution.
  *
- *  Estimation of parameters of an inverse Gaussian distribution.
+ *  \param[in] variable variable index,
+ *  \param[in] dist     pointer on a ContinuousParametric object.
  *
- *  arguments: variable, pointer on a continuous distribution.
- *
- *--------------------------------------------------------------*/
+ *  \return             log-likelihood of the estimated distribution.
+ */
+/*--------------------------------------------------------------*/
 
 double Vectors::inverse_gaussian_estimation(int variable , ContinuousParametric *dist) const
 
@@ -3517,13 +3561,16 @@ double Vectors::inverse_gaussian_estimation(int variable , ContinuousParametric 
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Estimation of the parameters of a Gaussian distribution.
  *
- *  Estimation of parameters of a Gaussian distribution.
+ *  \param[in] variable variable index,
+ *  \param[in] dist     pointer on a ContinuousParametric object.
  *
- *  arguments: variable, pointer on a distribution.
- *
- *--------------------------------------------------------------*/
+ *  \return             log-likelihood of the estimated distribution.
+ */
+/*--------------------------------------------------------------*/
 
 double Vectors::gaussian_estimation(int variable , ContinuousParametric *dist) const
 
@@ -3546,13 +3593,16 @@ double Vectors::gaussian_estimation(int variable , ContinuousParametric *dist) c
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Estimation of the parameters of a von Mises distribution.
  *
- *  Estimation of parameters of a von Mises distribution.
+ *  \param[in] variable variable index,
+ *  \param[in] dist     pointer on a ContinuousParametric object.
  *
- *  arguments: variable, pointer on a distribution.
- *
- *--------------------------------------------------------------*/
+ *  \return             log-likelihood of the estimated distribution.
+ */
+/*--------------------------------------------------------------*/
 
 double Vectors::von_mises_estimation(int variable , ContinuousParametric *dist) const
 
@@ -3628,13 +3678,16 @@ double Vectors::von_mises_estimation(int variable , ContinuousParametric *dist) 
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Estimation of the parameters of a continuous parametric distribution.
  *
- *  Estimation of parameters of a continuous parametric distribution.
+ *  \param[in] variable variable index,
+ *  \param[in] ident    identifier of a continuous parametric distribution.
  *
- *  arguments: variable, identifier of a continuous parametric distribution.
- *
- *--------------------------------------------------------------*/
+ *  \return             log-likelihood of the estimated distribution.
+ */
+/*--------------------------------------------------------------*/
 
 double Vectors::continuous_parametric_estimation(int variable , continuous_parametric ident) const
 
@@ -3680,11 +3733,13 @@ double Vectors::continuous_parametric_estimation(int variable , continuous_param
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Simulation using a continuous distribution.
  *
- *  Simulation d'une loi continue.
- *
- *--------------------------------------------------------------*/
+ *  \return generated value.
+ */
+/*--------------------------------------------------------------*/
 
 double ContinuousParametric::simulation()
 

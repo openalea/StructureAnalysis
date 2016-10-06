@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -46,11 +46,11 @@ namespace stat_tool {
 
 /****************************************************************
  *
- *  Identificateurs des mots cles (format des fichiers) :
+ *  Key word identifiers (file format)
  */
 
 
-  enum stat_tool_key_word {
+  enum stat_tool_keyword {
     STATW_INF_BOUND ,
     STATW_SUP_BOUND ,
     STATW_PARAMETER ,
@@ -95,15 +95,15 @@ namespace stat_tool {
 
     STATW_OUTPUT_PROCESS ,
     STATW_OUTPUT_PROCESSES ,
-    STATW_NONPARAMETRIC ,   // pour compatibilite ascendante
+    STATW_NONPARAMETRIC ,   // for ascending compatibility
     STATW_CATEGORICAL ,
-    STATW_PARAMETRIC ,   // pour compatibilite ascendante
+    STATW_PARAMETRIC ,   // for ascending compatibility
     STATW_DISCRETE_PARAMETRIC ,
     STATW_CONTINUOUS_PARAMETRIC ,
     STATW_OBSERVATION_DISTRIBUTION ,
     STATW_OBSERVATION_MODEL ,
 
-    STATW_OBSERVATION_PROBABILITIES ,  // pour compatibilite ascendante
+    STATW_OBSERVATION_PROBABILITIES ,  // for ascending compatibility
 
     STATW_OUTPUT
   };
@@ -125,7 +125,7 @@ namespace stat_tool {
 
 /****************************************************************
  *
- *  Identificateurs des labels :
+ *  Label identifiers
  */
 
 
@@ -350,12 +350,12 @@ namespace stat_tool {
 
 /****************************************************************
  *
- *  Identificateurs des messages d'erreur pour l'analyse des fichiers :
+ *  Identifiers of error messages for lexical analysis of files
  */
 
 
   enum stat_tool_parsing {
-    STATP_KEY_WORD ,
+    STATP_KEYWORD ,
     STATP_FORMAT ,
 
     STATP_DISTRIBUTION_NAME ,
@@ -415,7 +415,7 @@ namespace stat_tool {
 
 /****************************************************************
  *
- *  Identificateurs des messages d'erreur de traitement :
+ *  Identifiers of error messages
  */
 
 

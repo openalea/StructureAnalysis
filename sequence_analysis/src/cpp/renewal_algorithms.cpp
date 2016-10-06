@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -51,11 +51,11 @@ namespace sequence_analysis {
 
 
 
-/*--------------------------------------------------------------*
- *
- *  Calcul de la quantite d'information d'un objet TimeEvents.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the information quantity of a TimeEvents object.
+ */
+/*--------------------------------------------------------------*/
 
 double TimeEvents::information_computation() const
 
@@ -86,14 +86,14 @@ double TimeEvents::information_computation() const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the log-likelihood of a mixture of number of events distributions
+ *         for pairs {observation period, number of events}.
  *
- *  Calcul de la  vraisemblance d'echantillons {temps, nombre d'evenements}
- *  pour une melange de lois du nombre d'evenements donne.
- *
- *  argument : reference sur un objet TimeEvents.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] timev reference on a TimeEvents object.
+ */
+/*--------------------------------------------------------------*/
 
 double Renewal::likelihood_computation(const TimeEvents &timev) const
 
@@ -124,15 +124,15 @@ double Renewal::likelihood_computation(const TimeEvents &timev) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the inter-event distribution reestimation quantities
+ *         (EM estimator of an ordinary renewal process on the basis of count data).
  *
- *  Calcul des quantites de reestimation correspondant a la loi inter-evenement
- *  (estimateur EM d'un processus de renouvellement ordinaire a partir de donnees de comptage).
- *
- *  arguments : reference sur les echantillons {temps, nombre d'evenements},
- *              pointeur sur les quantites de reestimation.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] timev               reference on the pairs {observation period, number of events},
+ *  \param[in] inter_event_reestim pointeur on the reestimation quantities.
+ */
+/*--------------------------------------------------------------*/
 
 void Renewal::expectation_step(const TimeEvents &timev ,
                                Reestimation<double> *inter_event_reestim) const
@@ -143,7 +143,7 @@ void Renewal::expectation_step(const TimeEvents &timev ,
   double num , denom , *ifrequency , *pmass;
 
 
-  // initialisation
+  // initialization
 
   ifrequency = inter_event_reestim->frequency;
   for (i = 0;i < inter_event_reestim->alloc_nb_value;i++) {
@@ -156,7 +156,7 @@ void Renewal::expectation_step(const TimeEvents &timev ,
 
   for (i = 0;i < timev.nb_class;i++) {
 
-    // cas pas d'evenement
+    // case no event
 
     if (*pnb_event == 0) {
       min_time = MAX(inter_event->offset , *ptime + 1);
@@ -174,7 +174,7 @@ void Renewal::expectation_step(const TimeEvents &timev ,
       }
     }
 
-    // cas au moins 1 evenement
+    // case number of events > 0
 
     else {
       denom = 0.;
@@ -191,7 +191,7 @@ void Renewal::expectation_step(const TimeEvents &timev ,
         for (j = inter_event->offset;j < inter_event->nb_value;j++) {
           num = 0.;
 
-          // cas 1 evenement : intervalle complet
+          // case number of events = 1: complet time interval
 
           if (*pnb_event == 1) {
             if ((*ptime - j >= 0) && (*ptime - j < nevent_time[*pnb_event]->nb_value)) {
@@ -199,7 +199,7 @@ void Renewal::expectation_step(const TimeEvents &timev ,
             }
           }
 
-          // cas plus de 1 evenement : intervalles complets
+          // case number of events > 1: complete time intervals
 
           else {
             if (*ptime - j >= nevent_time[*pnb_event - 1]->offset) {
@@ -213,7 +213,7 @@ void Renewal::expectation_step(const TimeEvents &timev ,
             }
           }
 
-          // intervalle tronque
+          // right-censored time interval
 
           if ((max_time > *ptime - j) && (max_time >= nevent_time[*pnb_event]->offset)) {
             num += nevent_time[*pnb_event]->cumul[max_time];
@@ -243,24 +243,25 @@ void Renewal::expectation_step(const TimeEvents &timev ,
   cout << "\n" << (timev.mixture->mean + 1) * timev.nb_element << " | "
        << " " << inter_event_reestim->nb_element << endl;
 
-  cout << "\nquantites de reestimation loi inter_evenement :" << *inter_event_reestim << endl;
+  cout << "\nthe reestimation quantities inter-event distribution:" << *inter_event_reestim << endl;
 # endif
 
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the inter-event distribution reestimation quantities
+ *         (EM estimator of an equilibrium renewal process on the basis of count data).
  *
- *  Calcul des quantites de reestimation correspondant a la loi inter-evenement
- *  (estimateur EM d'un processus de renouvellement en equilibre a partir de donnees de comptage).
- *
- *  arguments : reference sur les echantillons {temps, nombre d'evenements},
- *              pointeurs sur les quantites de reestimation de la loi inter-evenement et
- *              de la loi biaisee par la longueur, type d'estimateur,
- *              combinaison ou non des quantites de reestimation,
- *              methode de calcul de la moyenne de la loi inter-evenement.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] timev               reference on the pairs {observation period, number of events},
+ *  \param[in] inter_event_reestim pointeur on the inter-event distribution reestimation quantities,
+ *  \param[in] length_bias_reestim pointeur on the length-biased distribution reestimation quantities,
+ *  \param[in] estimator           estimator type (complete or partial likelihood),
+ *  \param[in] combination         combination or not of the reestimation quantities,
+ *  \param[in] mean_estimator      method of computation of the inter-event distribution mean.
+ */
+/*--------------------------------------------------------------*/
 
 void Renewal::expectation_step(const TimeEvents &timev ,
                                Reestimation<double> *inter_event_reestim ,
@@ -275,7 +276,7 @@ void Renewal::expectation_step(const TimeEvents &timev ,
          *lfrequency , *pmass;
 
 
-  // initialisations
+  // initializations
 
   ifrequency = inter_event_reestim->frequency;
   for (i = 0;i < inter_event_reestim->alloc_nb_value;i++) {
@@ -295,7 +296,7 @@ void Renewal::expectation_step(const TimeEvents &timev ,
 
   for (i = 0;i < timev.nb_class;i++) {
 
-    // cas pas d'evenement
+    // case no event
 
     if (*pnb_event == 0) {
       if ((estimator == COMPLETE_LIKELIHOOD) && (*ptime + 1 < inter_event->nb_value)) {
@@ -311,7 +312,7 @@ void Renewal::expectation_step(const TimeEvents &timev ,
       }
     }
 
-    // cas au moins 1 evenement
+    // case number of events > 0
 
     else {
       denom = 0.;
@@ -321,7 +322,7 @@ void Renewal::expectation_step(const TimeEvents &timev ,
 
       if (denom > 0.) {
 
-        // intervalle tronque initial
+        // left-censored time interval
 
 /*        if (estimator == COMPLETE_LIKELIHOOD) {
           lfrequency = length_bias_reestim->frequency + inter_event->offset;
@@ -331,7 +332,7 @@ void Renewal::expectation_step(const TimeEvents &timev ,
           for (j = 1;j < inter_event->nb_value;j++) {
             if (j <= *ptime) {
 
-              // cas 1 evenement
+              // case 1 event
 
               if (*pnb_event == 1) {
                 if (*ptime - j < aux_nevent_time[*pnb_event]->nb_value) {
@@ -339,7 +340,7 @@ void Renewal::expectation_step(const TimeEvents &timev ,
                 }
               }
 
-              // cas plus de 1 evenement
+              // case number of events > 1
 
               else {
                 if (*ptime - j >= aux_nevent_time[*pnb_event - 1]->offset) {
@@ -371,7 +372,7 @@ void Renewal::expectation_step(const TimeEvents &timev ,
         for (j = inter_event->offset;j < inter_event->nb_value;j++) {
           complete_num = 0.;
 
-          // cas plus de 1 evenement : intervalles complets
+          // case number of events > 1: complete time intervals
 
           if (*pnb_event > 1) {
             if (*ptime - j >= nevent_time[*pnb_event - 1]->offset) {
@@ -385,7 +386,7 @@ void Renewal::expectation_step(const TimeEvents &timev ,
             }
           }
 
-          // intervalles tronques initial et final
+          // left- and right-censored time intervals
 
           censored_num = 0.;
           if ((max_time > *ptime - j) && (max_time >= nevent_time[*pnb_event]->offset)) {
@@ -454,8 +455,8 @@ void Renewal::expectation_step(const TimeEvents &timev ,
     cout << "\n" << timev.nb_element << " | "  << length_bias_reestim->nb_element << " || "
          << timev.mixture->mean * timev.nb_element << " | " << " " << inter_event_reestim->nb_element << endl;
 
-    cout << "\nquantites de reestimation loi inter_evenement :" << *inter_event_reestim << endl;
-    cout << "\nquantites de reestimation loi biaisee par la longueur :" << *length_bias_reestim << endl;
+    cout << "\nthe reestimation quantities inter-event distribution:" << *inter_event_reestim << endl;
+    cout << "\nthe reestimation quantities length-biased distribution:" << *length_bias_reestim << endl;
 #   endif
 
   }
@@ -491,29 +492,34 @@ void Renewal::expectation_step(const TimeEvents &timev ,
   }
 
 # ifdef DEBUG
-  cout << "\nquantites de reestimation loi inter_evenement :" << *inter_event_reestim << endl;
+  cout << "\nthe reestimation quantities inter-event distribution:" << *inter_event_reestim << endl;
 # endif
 
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Estimation of a renewal process on the basis of pairs
+ *         {observation period, number of events} using the EM algorithm.
  *
- *  Estimation des parametres d'un processus de renouvellement par l'algorithme EM
- *  a partir d'echantillons {temps d'observation, nombre d'evenements}.
+ *  \param[in] error                 reference on a StatError object,
+ *  \param[in] os                    stream,
+ *  \param[in] type                  renewal process type (ORDINARY/EQUILIBRIUM),
+ *  \param[in] iinter_event          reference on the initial inter-event distribution,
+ *  \param[in] estimator             estimator type (maximum likelihood or penalized likelihood or
+ *                                   estimation of a parametric distribution),
+ *  \param[in] nb_iter               number of iterations,
+ *  \param[in] equilibrium_estimator estimator type in the case of an equilibrium renewal process,
+ *  \param[in] mean_estimator        method of computation of the inter-event distribution mean,
+ *  \param[in] weight                penalty weight,
+ *  \param[in] pen_type              penalty type,
+ *  \param[in] outside               management of side effects (zero outside the support or
+ *                                   continuation of the distribution).
  *
- *  arguments : reference sur un objet StatError, stream,
- *              type de processus (ORDINARY/EQUILIBRIUM),
- *              reference sur la loi inter-evenement initiale,
- *              type d'estimateur (vraisemblance, vraisemblance penalisee ou
- *              estimation d'une loi parametrique), nombre d'iterations,
- *              type d'estimateur dans le cas d'un processus de renouvellement en equilibre,
- *              methode de calcul de la moyenne de la loi inter-evenement,
- *              poids de la penalisation, type de penalisation,
- *              type de gestion des effets de bord (zero a l'exterieur du support ou
- *              prolongation de la loi).
- *
- *--------------------------------------------------------------*/
+ *  \return                          Renewal object.
+ */
+/*--------------------------------------------------------------*/
 
 Renewal* TimeEvents::estimation(StatError &error , ostream &os , process_type type ,
                                 const DiscreteParametric &iinter_event , estimation_criterion estimator ,
@@ -562,7 +568,7 @@ Renewal* TimeEvents::estimation(StatError &error , ostream &os , process_type ty
   if (status) {
     information = information_computation();
 
-    // creation du processus de renouvellement
+    // construction of a Renewal object
 
     renew = new Renewal(type , *htime , iinter_event);
     renew->renewal_data = new RenewalData(*this , type);
@@ -606,7 +612,7 @@ Renewal* TimeEvents::estimation(StatError &error , ostream &os , process_type ty
     do {
       i++;
 
-      // calcul des quantites de reestimation
+      // computation of the reestimation quantities
 
       switch (type) {
       case ORDINARY :
@@ -665,8 +671,7 @@ Renewal* TimeEvents::estimation(StatError &error , ostream &os , process_type ty
         }
       }
 
-      // calcul du melange de lois du nombre d'evenements et
-      // de la log-vraisemblance correspondante
+      // computation of the mixture of number of events distributions and the associated log-likelihood
 
       renew->computation();
 
@@ -714,7 +719,7 @@ Renewal* TimeEvents::estimation(StatError &error , ostream &os , process_type ty
         do {
           i++;
 
-          // calcul des quantites de reestimation
+          // computation of the reestimation quantities
 
           switch (type) {
           case ORDINARY :
@@ -736,8 +741,7 @@ Renewal* TimeEvents::estimation(StatError &error , ostream &os , process_type ty
             likelihood = D_INF;
           }
 
-          // calcul du melange de lois du nombre d'evenements et
-          // de la log-vraisemblance correspondante
+          // computation of the mixture of number of events distributions and the associated log-likelihood
 
           else {
             renew->init(pinter_ev->ident , pinter_ev->inf_bound , pinter_ev->sup_bound ,
@@ -795,7 +799,7 @@ Renewal* TimeEvents::estimation(StatError &error , ostream &os , process_type ty
 
     if (likelihood != D_INF) {
 
-      // mise a jour du nombre de parametres inconnus
+      // update of the number of free parameters
 
       pinter_ev->nb_parameter_update();
       for (i = renew->time->offset;i < renew->time->nb_value;i++) {
@@ -817,22 +821,27 @@ Renewal* TimeEvents::estimation(StatError &error , ostream &os , process_type ty
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Estimation a renewal process on the basis of pairs
+ *         {observation period, number of events} using the EM algorithm.
  *
- *  Estimation des parametres d'un processus de renouvellement par l'algorithme EM
- *  a partir d'echantillons {temps d'observation, nombre d'evenements}.
+ *  \param[in] error                 reference on a StatError object,
+ *  \param[in] os                    stream,
+ *  \param[in] type                  renewal process type (ORDINARY/EQUILIBRIUM),
+ *  \param[in] estimator type        (maximum likelihood or penalized likelihood or
+ *                                   estimation of a parametric distribution),
+ *  \param[in] nb_iter               number of iterations,
+ *  \param[in] equilibrium_estimator estimator type in the case of an equilibrium renewal process,
+ *  \param[in] mean_estimator        method of computation of the inter-event distribution mean,
+ *  \param[in] weight                penalty weight,
+ *  \param[in] pen_type              penalty type,
+ *  \param[in] outside               management of side effects (zero outside the support or
+ *                                   continuation of the distribution).
  *
- *  arguments : reference sur un objet StatError, stream,
- *              type de processus (ORDINARY/EQUILIBRIUM),
- *              type d'estimateur (vraisemblance, vraisemblance penalisee ou
- *              estimation d'une loi parametrique), nombre d'iterations,
- *              type d'estimateur dans le cas d'un processus de renouvellement en equilibre,
- *              methode de calcul de la moyenne de la loi inter-evenement,
- *              poids de la penalisation, type de penalisation,
- *              type de gestion des effets de bord (zero a l'exterieur du support ou
- *              prolongation de la loi).
- *
- *--------------------------------------------------------------*/
+ *  \return                          Renewal object.
+ */
+/*--------------------------------------------------------------*/
 
 Renewal* TimeEvents::estimation(StatError &error , ostream &os , process_type type ,
                                 estimation_criterion estimator , int nb_iter ,
@@ -870,20 +879,25 @@ Renewal* TimeEvents::estimation(StatError &error , ostream &os , process_type ty
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Estimation of an equilibrium renewal process on the basis of
+ *         time interval data using the EM algorithm.
  *
- *  Estimation des parametres d'un processus de renouvellement en equilibre
- *  par l'algorithme EM a partir de donnees d'intervalles de temps.
+ *  \param[in] error          reference on a StatError object,
+ *  \param[in] os             stream,
+ *  \param[in] iinter_event   reference on the initial inter-event distribution,
+ *  \param[in] estimator      estimator type (maximum likelihood or penalized likelihood),
+ *  \param[in] nb_iter        number of iterations,
+ *  \param[in] mean_estimator method of computation of the inter-event distribution mean,
+ *  \param[in] weight         penalty weight,
+ *  \param[in] pen_type       penalty type,
+ *  \param[in] outside        management of side effects (zero outside the support or
+ *                            continuation of the distribution).
  *
- *  arguments : reference sur un objet StatError, stream,
- *              reference sur la loi inter-evenement initiale, type d'estimateur
- *              (vraisemblance ou vraisemblance penalisee), nombre d'iterations,
- *              methode de calcul de la moyenne de la loi inter-evenement,
- *              poids de la penalisation, type de penalisation,
- *              type de gestion des effets de bord (zero a l'exterieur du support ou
- *              prolongation de la loi).
- *
- *--------------------------------------------------------------*/
+ *  \return                   Renewal object.
+ */
+/*--------------------------------------------------------------*/
 
 Renewal* RenewalData::estimation(StatError &error , ostream &os ,
                                  const DiscreteParametric &iinter_event ,
@@ -987,19 +1001,24 @@ Renewal* RenewalData::estimation(StatError &error , ostream &os ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Estimation of an equilibrium renewal process on the basis of
+ *         time interval data using the EM algorithm.
  *
- *  Estimation des parametres d'un processus de renouvellement en equilibre
- *  par l'algorithme EM a partir de donnees d'intervalles de temps.
+ *  \param[in] error          reference on a StatError object,
+ *  \param[in] os             stream,
+ *  \param[in] estimator      estimator type (maximum likelihood or penalized likelihood),
+ *  \param[in] nb_iter        number of iterations,
+ *  \param[in] mean_estimator method of computation of the inter-event distribution mean,
+ *  \param[in] weight         penalty weight,
+ *  \param[in] pen_type       penalty type,
+ *  \param[in] outside        management of side effects (zero outside the support or
+ *                            continuation of the distribution).
  *
- *  arguments : reference sur un objet StatError, stream, type d'estimateur
- *              (vraisemblance ou vraisemblance penalisee), nombre d'iterations,
- *              methode de calcul de la moyenne de la loi inter-evenement,
- *              poids de la penalisation, type de penalisation,
- *              type de gestion des effets de bord (zero a l'exterieur du support ou
- *              prolongation de la loi).
- *
- *--------------------------------------------------------------*/
+ *  \return                   Renewal object.
+ */
+/*--------------------------------------------------------------*/
 
 Renewal* RenewalData::estimation(StatError &error , ostream &os , estimation_criterion estimator ,
                                  int nb_iter , duration_distribution_mean_estimator mean_estimator ,
@@ -1034,15 +1053,17 @@ Renewal* RenewalData::estimation(StatError &error , ostream &os , estimation_cri
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Simulation using a renewal process.
  *
- *  Simulation par un processus de renouvellement.
+ *  \param[in] error  reference on a StatError object,
+ *  \param[in] itype  renewal process type (ORDINARY/EQUILIBRIUM),
+ *  \param[in] ihtime observation frequency distribution.
  *
- *  arguments : reference sur un objet StatError,
- *              type de simulation (ORDINARY/EQUILIBRIUM),
- *              loi empirique du temps d'observation.
- *
- *--------------------------------------------------------------*/
+ *  \return           RenewalData object.
+ */
+/*--------------------------------------------------------------*/
 
 RenewalData* Renewal::simulation(StatError &error , process_type itype ,
                                  const FrequencyDistribution &ihtime) const
@@ -1082,7 +1103,7 @@ RenewalData* Renewal::simulation(StatError &error , process_type itype ,
       compute = false;
     }
 
-    // creation d'un objet RenewalData
+    // construction of a RenewalData object
 
     timev = new RenewalData(itype , *this);
 
@@ -1101,7 +1122,7 @@ RenewalData* Renewal::simulation(StatError &error , process_type itype ,
       break;
     }
 
-    // 1er au n-eme evenement
+    // 1st to nth event
 
     ptime = new int[ihtime.nb_element];
     pnb_event = new int[ihtime.nb_element];
@@ -1110,7 +1131,7 @@ RenewalData* Renewal::simulation(StatError &error , process_type itype ,
     for (j = ihtime.offset;j < ihtime.nb_value;j++) {
       for (k = 0;k < ihtime.frequency[j];k++) {
 
-        // temps avant le 1er evenement (processus de renouvellement en equilibre)
+        // time to the 1st event (equilibrium renewal process)
 
         if (itype == EQUILIBRIUM) {
           if (i == 0) {
@@ -1124,14 +1145,14 @@ RenewalData* Renewal::simulation(StatError &error , process_type itype ,
           time_interval = cumul_time;
         }
 
-        // temps d'observation
+        // observation period
 
         *ptime = j;
 
         timev->length[i] = *ptime + 1 - offset;
         timev->sequence[i] = new int[timev->length[i]];
 
-        // temps avant le 1er evenement (processus de renouvellement ordinaire)
+        // time to the 1st event (ordinary renewal process)
 
         if (itype == ORDINARY) {
           time_interval = renew->inter_event->simulation();
@@ -1189,17 +1210,17 @@ RenewalData* Renewal::simulation(StatError &error , process_type itype ,
     ptime -= ihtime.nb_element;
     pnb_event -= ihtime.nb_element;
 
-    // construction des echantillons {temps, nombre d'evenements, frequence} et
-    // des lois empiriques du temps d'observation et du nombre d'evenements
+    // construction of the triplets {observation period, number of events, frequency} and of
+    // the observation period frequency distribution and number of events frequency distributions
 
     timev->build(ihtime.nb_element , ptime , pnb_event);
     delete [] ptime;
     delete [] pnb_event;
 
-    // extraction des caracteristiques des lois empiriques des intervalles de temps entre 2 evenements,
-    // des intervalles de temps entre 2 evenements a l'interieur de la periode d'observation,
-    // des intervalles de temps recouvrant une date d'observation,
-    // des intervalles de temps apres le dernier evenement, des intervalles de temps residuel
+    // extraction of the characteristics of the inter-event frequency distribution,
+    // the frequency distribution of time intervals between events within the observation period,
+    // the length-biased frequency distribution,
+    // the backward and forward recurrence time frequency distributions,
 
     timev->inter_event->nb_value_computation();
     timev->inter_event->offset_computation();
@@ -1236,7 +1257,7 @@ RenewalData* Renewal::simulation(StatError &error , process_type itype ,
     timev->forward->mean_computation();
     timev->forward->variance_computation();
 
-    // extraction des probabilites de non-evenement/evenement fonction du temps
+    // extraction of no-event/event probabilities as a function of time
 
     timev->build_index_event(offset);
 
@@ -1250,15 +1271,18 @@ RenewalData* Renewal::simulation(StatError &error , process_type itype ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Simulation using a renewal process.
  *
- *  Simulation par un processus de renouvellement.
+ *  \param[in] error      reference on a StatError object,
+ *  \param[in] itype      renewal process type (ORDINARY/EQUILIBRIUM),
+ *  \param[in] nb_element sample size,
+ *  \param[in] itime      observation period.
  *
- *  arguments : reference sur un objet StatError,
- *              type de simulation (ORDINARY/EQUILIBRIUM),
- *              nombre d'echantillons, temps d'observation.
- *
- *--------------------------------------------------------------*/
+ *  \return               RenewalData object.
+ */
+/*--------------------------------------------------------------*/
 
 RenewalData* Renewal::simulation(StatError &error , process_type itype ,
                                  int nb_element , int itime) const
@@ -1301,15 +1325,18 @@ RenewalData* Renewal::simulation(StatError &error , process_type itype ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Simulation using a renewal process.
  *
- *  Simulation par un processus de renouvellement.
+ *  \param[in] error      reference on a StatError object,
+ *  \param[in] itype      renewal process type (ORDINARY/EQUILIBRIUM),
+ *  \param[in] nb_element sample size,
+ *  \param[in] itimev     reference on a TimeEvents object.
  *
- *  arguments : reference sur un objet StatError,
- *              type de simulation (ORDINARY/EQUILIBRIUM),
- *              nombre d'echantillons, reference sur un objet TimeEvents.
- *
- *--------------------------------------------------------------*/
+ *  \return               RenewalData object.
+ */
+/*--------------------------------------------------------------*/
 
 RenewalData* Renewal::simulation(StatError &error , process_type itype ,
                                  int nb_element , const TimeEvents &itimev) const
@@ -1337,13 +1364,14 @@ RenewalData* Renewal::simulation(StatError &error , process_type itype ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the RenewalIterator class.
  *
- *  Constructeur de la classe RenewalIterator.
- *
- *  arguments : pointeur sur un objet Renewal, longueur de la sequence.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] irenewal pointer on a Renewal object,
+ *  \param[in] ilength  sequence length.
+ */
+/*--------------------------------------------------------------*/
 
 RenewalIterator::RenewalIterator(Renewal *irenewal , int ilength)
 
@@ -1359,13 +1387,13 @@ RenewalIterator::RenewalIterator(Renewal *irenewal , int ilength)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Copy of a RenewalIterator object.
  *
- *  Copie d'un objet RenewalIterator.
- *
- *  argument : reference sur un objet RenewalIterator.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] iter reference on a RenewalIterator object.
+ */
+/*--------------------------------------------------------------*/
 
 void RenewalIterator::copy(const RenewalIterator &iter)
 
@@ -1391,11 +1419,11 @@ void RenewalIterator::copy(const RenewalIterator &iter)
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Destructeur de la classe RenewalIterator.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Destructor of the RenewalIterator class.
+ */
+/*--------------------------------------------------------------*/
 
 RenewalIterator::~RenewalIterator()
 
@@ -1405,13 +1433,15 @@ RenewalIterator::~RenewalIterator()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Assignment operator of the RenewalIterator class.
  *
- *  Operateur d'assignement de la classe RenewalIterator.
+ *  \param[in] iter reference on a RenewalIterator object.
  *
- *  argument : reference sur un objet RenewalIterator.
- *
- *--------------------------------------------------------------*/
+ *  \return         RenewalIterator object.
+ */
+/*--------------------------------------------------------------*/
 
 RenewalIterator& RenewalIterator::operator=(const RenewalIterator &iter)
 
@@ -1427,14 +1457,14 @@ RenewalIterator& RenewalIterator::operator=(const RenewalIterator &iter)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Simulation using a renewal process.
  *
- *  Simulation par un processus de renouvellement.
- *
- *  arguments : longueur de la sequence,
- *              type d'initialisation (ORDINARY/EQUILIBRIUM).
- *
- *--------------------------------------------------------------*/
+ *  \param[in] ilength sequence length,
+ *  \param[in] type    renewal process type (ORDINARY/EQUILIBRIUM).
+ */
+/*--------------------------------------------------------------*/
 
 void RenewalIterator::simulation(int ilength , process_type type)
 

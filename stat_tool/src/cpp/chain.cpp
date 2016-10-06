@@ -289,7 +289,7 @@ void Chain::copy(const Chain &chain)
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Destruction of Chain object data members.
+ *  \brief Destruction of the data members of a Chain object.
  */
 /*--------------------------------------------------------------*/
 
@@ -353,9 +353,9 @@ Chain::~Chain()
 /**
  *  \brief Assignment operator of the Chain class.
  *
- *  \param[in]  chain reference on a Chain object,
+ *  \param[in] chain reference on a Chain object.
  *
- *  \param[out] this  Chain object.
+ *  \return          Chain object.
  */
 /*--------------------------------------------------------------*/
 
@@ -375,12 +375,12 @@ Chain& Chain::operator=(const Chain &chain)
 /**
  *  \brief Analysis of the format of a Chain object.
  *
- *  \param[in]  error   reference on a StatError object,
- *  \param[in]  in_file stream,
- *  \param[in]  line    reference on the file line index,
- *  \param[in]  type    process type (ORDINARY/EQUILIBRIUM),
+ *  \param[in] error   reference on a StatError object,
+ *  \param[in] in_file stream,
+ *  \param[in] line    reference on the file line index,
+ *  \param[in] type    process type (ORDINARY/EQUILIBRIUM).
  *
- *  \param[out] chain   Chain object.
+ *  \return            Chain object.
  */
 /*--------------------------------------------------------------*/
 
@@ -440,12 +440,12 @@ Chain* Chain::parsing(StatError &error , ifstream &in_file , int &line , process
         break;
       }
 
-      // test STATES key word
+      // test STATES keyword
 
       case 1 : {
         if (token != STAT_word[STATW_STATES]) {
           status = false;
-          error.correction_update(STAT_parsing[STATP_KEY_WORD] , STAT_word[STATW_STATES] , line , i + 1);
+          error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_STATES] , line , i + 1);
         }
         break;
       }
@@ -492,20 +492,20 @@ Chain* Chain::parsing(StatError &error , ifstream &in_file , int &line , process
       if ((read_line == 0) || ((type == ORDINARY) && (read_line == 2))) {
         while (!((token = next()).isNull())) {
 
-          // test INITIAL_PROBABILITIES / TRANSITION_PROBABILITIES key word
+          // test INITIAL_PROBABILITIES/TRANSITION_PROBABILITIES keywords
 
           if (i == 0) {
             if ((type == ORDINARY) && (read_line == 0)) {
               if (token != STAT_word[STATW_INITIAL_PROBABILITIES]) {
                 status = false;
-                error.correction_update(STAT_parsing[STATP_KEY_WORD] , STAT_word[STATW_INITIAL_PROBABILITIES] , line);
+                error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_INITIAL_PROBABILITIES] , line);
               }
             }
 
             else {
               if (token != STAT_word[STATW_TRANSITION_PROBABILITIES]) {
                 status = false;
-                error.correction_update(STAT_parsing[STATP_KEY_WORD] , STAT_word[STATW_TRANSITION_PROBABILITIES] , line);
+                error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_TRANSITION_PROBABILITIES] , line);
               }
             }
           }
@@ -582,12 +582,12 @@ Chain* Chain::parsing(StatError &error , ifstream &in_file , int &line , process
 
     if (status) {
 
-      // test reachable states
+      // test accessible states
 
-      status = chain->connex_component_research(error);
+      status = chain->strongly_connected_component_research(error);
 
       logic_transition = chain->logic_transition_computation();
-      status = chain->connex_component_research(error , logic_transition);
+      status = chain->strongly_connected_component_research(error , logic_transition);
 
       if (status) {
 

@@ -927,10 +927,10 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostrea
               do {
                 j++;
 
-                // calcul des quantites de reestimation de la loi d'occupation de l'etat
+                // computation of the reestimation quantities of the state occupancy distribution
 
                 occupancy->expectation_step(*(seq->characteristics[0]->sojourn_time[i]) ,
-                                            *(final_run[i]) , *(initial_run[i]) ,
+                                            *(initial_run[i]) , *(final_run[i]) ,
                                             *(single_run[i]) , occupancy_reestim ,
                                             length_bias_reestim , j);
 
@@ -949,7 +949,7 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostrea
 
                 previous_likelihood = likelihood;
                 likelihood = occupancy->state_occupancy_likelihood_computation(*forward , *(seq->characteristics[0]->sojourn_time[i]) ,
-                                                                               *(final_run[i]) , *(initial_run[i]) ,
+                                                                               *(initial_run[i]) , *(final_run[i]) ,
                                                                                *(single_run[i]));
 
 #               ifdef MESSAGE
@@ -986,7 +986,7 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostrea
                   // calcul des quantites de reestimation de la loi d'occupation de l'etat
 
                   occupancy->expectation_step(*(seq->characteristics[0]->sojourn_time[i]) ,
-                                              *(final_run[i]) , *(initial_run[i]) ,
+                                              *(initial_run[i]) , *(final_run[i]) ,
                                               *(single_run[i]) , occupancy_reestim ,
                                               length_bias_reestim , j , true , mean_estimator);
 
@@ -1006,7 +1006,7 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostrea
 
                     previous_likelihood = likelihood;
                     likelihood = occupancy->state_occupancy_likelihood_computation(*forward , *(seq->characteristics[0]->sojourn_time[i]) ,
-                                                                                   *(final_run[i]) , *(initial_run[i]) ,
+                                                                                   *(initial_run[i]) , *(final_run[i]) ,
                                                                                    *(single_run[i]));
 
                     if (likelihood < previous_likelihood) {

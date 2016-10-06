@@ -229,7 +229,7 @@ HiddenVariableOrderMarkov* HiddenVariableOrderMarkov::ascii_read(StatError &erro
             ostringstream correction_message;
             correction_message << SEQ_word[SEQW_HIDDEN_MARKOV_CHAIN] << " or "
                                << SEQ_word[SEQW_EQUILIBRIUM_HIDDEN_MARKOV_CHAIN];
-            error.correction_update(STAT_parsing[STATP_KEY_WORD] ,
+            error.correction_update(STAT_parsing[STATP_KEYWORD] ,
                                     (correction_message.str()).c_str() , line);
           }
         }
@@ -304,7 +304,7 @@ HiddenVariableOrderMarkov* HiddenVariableOrderMarkov::ascii_read(StatError &erro
             case 1 : {
               if (token != STAT_word[nb_output_process == 1 ? STATW_OUTPUT_PROCESS : STATW_OUTPUT_PROCESSES]) {
                 status = false;
-                error.correction_update(STAT_parsing[STATP_KEY_WORD] ,
+                error.correction_update(STAT_parsing[STATP_KEYWORD] ,
                                         STAT_word[nb_output_process == 1 ? STATW_OUTPUT_PROCESS : STATW_OUTPUT_PROCESSES] , line , i + 1);
               }
               break;
@@ -367,7 +367,7 @@ HiddenVariableOrderMarkov* HiddenVariableOrderMarkov::ascii_read(StatError &erro
                 }
                 else {
                   status = false;
-                  error.correction_update(STAT_parsing[STATP_KEY_WORD] , STAT_word[STATW_OUTPUT_PROCESS] , line , i + 1);
+                  error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_OUTPUT_PROCESS] , line , i + 1);
                 }
                 break;
               }
@@ -418,7 +418,7 @@ HiddenVariableOrderMarkov* HiddenVariableOrderMarkov::ascii_read(StatError &erro
                   correction_message << STAT_word[STATW_CATEGORICAL] << " or "
                                      << STAT_word[STATW_DISCRETE_PARAMETRIC] << " or "
                                      << STAT_word[STATW_CONTINUOUS_PARAMETRIC];
-                  error.correction_update(STAT_parsing[STATP_KEY_WORD] , (correction_message.str()).c_str() , line , i + 1);
+                  error.correction_update(STAT_parsing[STATP_KEYWORD] , (correction_message.str()).c_str() , line , i + 1);
                 }
                 break;
               }

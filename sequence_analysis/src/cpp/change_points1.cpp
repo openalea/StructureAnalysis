@@ -42,6 +42,7 @@
 
 #include <boost/math/special_functions/gamma.hpp>
 #include <boost/math/special_functions/binomial.hpp>
+#include <boost/math/distributions/normal.hpp>
 
 #include "tool/config.h"
 
@@ -61,10 +62,10 @@ namespace sequence_analysis {
 /**
  *  \brief Determination of the width of a column of reals.
  *
- *  \param[in]  nb_value  number of values,
- *  \param[in]  value     pointer on real values,
+ *  \param[in] nb_value number of values,
+ *  \param[in] value    pointer on real values.
  *
- *  \param[out] max_width column width.
+ *  \return             column width.
  */
 /*--------------------------------------------------------------*/
 
@@ -92,9 +93,9 @@ int column_width(int nb_value , const long double *value)
 /**
  *  \brief Computation of the log of the factorial of a value.
  *
- *  \param[in]  value         value,
+ *  \param[in] value value.
  *
- *  \param[out] log_factorial log of the factorial of a value.
+ *  \return          log of the factorial of a value.
  */
 /*--------------------------------------------------------------*/
 
@@ -119,11 +120,11 @@ double log_factorial(int value)
  *  \brief Computation of the log of a binomial coefficient for
  *         a negative binomial distribution.
  *
- *  \param[in]  inf_bound inf bound of the support,
- *  \param[in]  parameter shape parameter,
- *  \param[in]  value     value,
+ *  \param[in] inf_bound inf bound to the support,
+ *  \param[in] parameter shape parameter,
+ *  \param[in] value     value.
  *
- *  \param[out] log_coeff log of a binomial coefficient.
+ *  \return              log of a binomial coefficient.
  */
 /*--------------------------------------------------------------*/
 
@@ -301,12 +302,12 @@ void Sequences::gaussian_gamma_hyperparameter_computation(int index , int variab
 /**
  *  \brief Computation of the number of free parameters.
  *
- *  \param[in]  index           sequence index,
- *  \param[in]  nb_segment      number of segments,
- *  \param[in]  model_type      segment model types,
- *  \param[in]  common_contrast flag contrast functions common to the individuals,
+ *  \param[in] index           sequence index,
+ *  \param[in] nb_segment      number of segments,
+ *  \param[in] model_type      segment model types,
+ *  \param[in] common_contrast flag contrast functions common to the individuals.
  *
- *  \param[out] nb_parameter    number of free parameters.
+ *  \return                    number of free parameters.
  */
 /*--------------------------------------------------------------*/
 
@@ -419,7 +420,7 @@ int Sequences::nb_parameter_computation(int index , int nb_segment , segment_mod
           nb_parameter += 2 * nb_segment;
         }
         else {
-          nb_parameter += 2 * nb_sequence * nb_segment;
+          nb_parameter += nb_sequence * 2 * nb_segment;
         }
       }
 
@@ -437,7 +438,16 @@ int Sequences::nb_parameter_computation(int index , int nb_segment , segment_mod
           nb_parameter += 3 * nb_segment;
         }
         else {
-          nb_parameter += 3 * nb_sequence * nb_segment;
+          nb_parameter += nb_sequence * 3 * nb_segment;
+        }
+      }
+
+      else if (model_type[i - 1] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE) {
+        if ((index != I_DEFAULT) || (common_contrast)) {
+          nb_parameter += 2 * nb_segment + 1;
+        }
+        else {
+          nb_parameter += nb_sequence * (2 * nb_segment + 1);
         }
       }
     }
@@ -453,13 +463,13 @@ int Sequences::nb_parameter_computation(int index , int nb_segment , segment_mod
 /**
  *  \brief Computation of the log-likelihood in the case of a single segment.
  *
- *  \param[in]  index           sequence index,
- *  \param[in]  model_type      segment model types,
- *  \param[in]  common_contrast flag contrast functions common to the individuals,
- *  \param[in]  shape_parameter negative binomial shape parameters,
- *  \param[in]  rank            ranks (ordinal variables),
+ *  \param[in] index           sequence index,
+ *  \param[in] model_type      segment model types,
+ *  \param[in] common_contrast flag contrast functions common to the individuals,
+ *  \param[in] shape_parameter negative binomial shape parameters,
+ *  \param[in] rank            ranks (for ordinal variables).
  *
- *  \param[out] likelihood      log-likelihood of the single-segment model.
+ *  \return                    log-likelihood of the single-segment model.
  */
 /*--------------------------------------------------------------*/
 
@@ -498,6 +508,7 @@ double Sequences::one_segment_likelihood(int index , segment_model *model_type ,
     if (((i == 1) && ((model_type[0] == MEAN_CHANGE) || (model_type[0] == INTERCEPT_SLOPE_CHANGE))) ||
         (((model_type[i - 1] == GAUSSIAN_CHANGE) || (model_type[i - 1] == VARIANCE_CHANGE) ||
           (model_type[i - 1] == LINEAR_MODEL_CHANGE) || (model_type[i - 1] == AUTOREGRESSIVE_MODEL_CHANGE) ||
+          (model_type[i - 1] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE) ||
           (model_type[i - 1] == ORDINAL_GAUSSIAN_CHANGE)) && (!residual))) {
       residual = new long double[nb_sequence];
     }
@@ -1006,7 +1017,8 @@ double Sequences::one_segment_likelihood(int index , segment_model *model_type ,
       }
     }
 
-    else if (model_type[i - 1] == AUTOREGRESSIVE_MODEL_CHANGE) {
+    else if ((model_type[i - 1] == AUTOREGRESSIVE_MODEL_CHANGE) ||
+             (model_type[i - 1] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE)) {
       if ((index != I_DEFAULT) || (!common_contrast)) {
         if (type[i] != REAL_VALUE) {
           for (j = 0;j < nb_sequence;j++) {
@@ -1028,11 +1040,9 @@ double Sequences::one_segment_likelihood(int index , segment_model *model_type ,
                 autocovariance += diff * shifted_diff;
               }
 
+              residual[j] = square_sum;
               if (shifted_square_sum > 0.) {
-                residual[j] = square_sum - autocovariance * autocovariance / shifted_square_sum;
-              }
-              else {
-                residual[j] = 0.;
+                residual[j] -= autocovariance * autocovariance / shifted_square_sum;
               }
             }
           }
@@ -1058,11 +1068,9 @@ double Sequences::one_segment_likelihood(int index , segment_model *model_type ,
                 autocovariance += diff * shifted_diff;
               }
 
+              residual[j] = square_sum;
               if (shifted_square_sum > 0.) {
-                residual[j] = square_sum - autocovariance * autocovariance / shifted_square_sum;
-              }
-              else {
-                residual[j] = 0.;
+                residual[j] -= autocovariance * autocovariance / shifted_square_sum;
               }
             }
           }
@@ -1130,11 +1138,9 @@ double Sequences::one_segment_likelihood(int index , segment_model *model_type ,
           }
         }
 
+        residual[0] = square_sum;
         if (shifted_square_sum > 0.) {
-          residual[0] = square_sum - autocovariance * autocovariance / shifted_square_sum;
-        }
-        else {
-          residual[0] = 0.;
+          residual[0] -= autocovariance * autocovariance / shifted_square_sum;
         }
 
 //        if (residual[0] > 0.) {
@@ -1173,8 +1179,7 @@ double Sequences::one_segment_likelihood(int index , segment_model *model_type ,
     }
 
     if ((model_type[i - 1] == GAUSSIAN_CHANGE) || (model_type[i - 1] == VARIANCE_CHANGE) ||
-        (model_type[i - 1] == LINEAR_MODEL_CHANGE) || (model_type[i - 1] == AUTOREGRESSIVE_MODEL_CHANGE) ||
-        (model_type[i - 1] == ORDINAL_GAUSSIAN_CHANGE)) {
+        (model_type[i - 1] == LINEAR_MODEL_CHANGE) || (model_type[i - 1] == ORDINAL_GAUSSIAN_CHANGE)) {
       if ((index != I_DEFAULT) || (!common_contrast)) {
         for (j = 0;j < nb_sequence;j++) {
           if ((index == I_DEFAULT) || (index == j)) {
@@ -1272,26 +1277,26 @@ double Sequences::one_segment_likelihood(int index , segment_model *model_type ,
 /**
  *  \brief Computation of piecewise linear functions.
  *
- *  \param[in]  index                     sequence index,
- *  \param[in]  variable                  variable index,
- *  \param[in]  nb_segment                number of segments,
- *  \param[in]  model_type                segment model type,
- *  \param[in]  common_contrast           flag contrast functions common to the individuals,
- *  \param[in]  change_point              change points,
- *  \param[in]  seq_index_parameter       index parameters,
- *  \param[in]  piecewise_function        piecewise linear functions,
- *  \param[in]  imean                     segment means,
- *  \param[in]  variance                  segment variances or residual variances,
- *  \param[in]  global_variance           global variance or residual variance,
- *  \param[in]  iintercept                segment intercepts,
- *  \param[in]  islope                    segment slopes,
- *  \param[in]  autoregressive_coeff      segment autoregressive coefficient,
- *  \param[in]  correlation               segment correlation coefficients,
- *  \param[in]  slope_standard_deviation  segment slope standard deviations,
- *  \param[in]  iindex_parameter_mean     segment index parameter mean
- *  \param[in]  iindex_parameter_variance segment index parameter variance,
+ *  \param[in] index                     sequence index,
+ *  \param[in] variable                  variable index,
+ *  \param[in] nb_segment                number of segments,
+ *  \param[in] model_type                segment model type,
+ *  \param[in] common_contrast           flag contrast functions common to the individuals,
+ *  \param[in] change_point              change points,
+ *  \param[in] seq_index_parameter       index parameters,
+ *  \param[in] piecewise_function        piecewise linear functions,
+ *  \param[in] imean                     segment means,
+ *  \param[in] variance                  segment variances or residual variances,
+ *  \param[in] global_variance           global variance or residual variance,
+ *  \param[in] iintercept                segment intercepts,
+ *  \param[in] islope                    segment slopes,
+ *  \param[in] autoregressive_coeff      segment autoregressive coefficient,
+ *  \param[in] correlation               segment correlation coefficients,
+ *  \param[in] slope_standard_deviation  segment slope standard deviations,
+ *  \param[in] iindex_parameter_mean     segment index parameter mean
+ *  \param[in] iindex_parameter_variance segment index parameter variance.
  *
- *  \param[out] likelihood                log-likelihood of the piecewise linear function.
+ *  \return                              log-likelihood of the piecewise linear function.
  */
 /*--------------------------------------------------------------*/
 
@@ -1308,15 +1313,14 @@ double Sequences::piecewise_linear_function(int index , int variable , int nb_se
   double likelihood , mean , diff , diff_sum , index_parameter_mean , response_mean , shifted_diff ,
          slope , intercept;
   long double square_sum , global_square_sum , index_parameter_variance , response_variance , covariance ,
-              shifted_square_sum , autocovariance;
+              shifted_square_sum , autocovariance , global_shifted_square_sum , global_autocovariance;
 
 
   if ((model_type == POISSON_CHANGE) || (model_type == NEGATIVE_BINOMIAL_0_CHANGE) ||
       (model_type == NEGATIVE_BINOMIAL_1_CHANGE) || (model_type == GAUSSIAN_CHANGE) ||
       (model_type == MEAN_CHANGE) || (model_type == VARIANCE_CHANGE) ||
       (model_type == BAYESIAN_POISSON_CHANGE) || (model_type == BAYESIAN_GAUSSIAN_CHANGE)) {
-    if (((model_type == GAUSSIAN_CHANGE) || (model_type == MEAN_CHANGE)) &&
-        ((variance) || (global_variance))) {
+    if (((model_type == GAUSSIAN_CHANGE) || (model_type == VARIANCE_CHANGE)) && ((variance) || (global_variance))) {
       likelihood = 0.;
     }
     else {
@@ -1330,20 +1334,38 @@ double Sequences::piecewise_linear_function(int index , int variable , int nb_se
     if ((index != I_DEFAULT) || (!common_contrast)) {
       for (i = 0;i < nb_sequence;i++) {
         if ((index == I_DEFAULT) || (index == i)) {
-          for (j = 0;j < nb_segment;j++) {
+          if (model_type == VARIANCE_CHANGE) {
             mean = 0.;
 
             if (type[variable] != REAL_VALUE) {
-              for (k = change_point[j];k < change_point[j + 1];k++) {
-                mean += int_sequence[i][variable][k];
+              for (j = 0;j < length[i];j++) {
+                mean += int_sequence[i][variable][j];
               }
             }
             else {
-              for (k = change_point[j];k < change_point[j + 1];k++) {
-                mean += real_sequence[i][variable][k];
+              for (j = 0;j < length[i];j++) {
+                mean += real_sequence[i][variable][j];
               }
             }
-            mean /= (change_point[j + 1] - change_point[j]);
+            mean /= length[i];
+          }
+
+          for (j = 0;j < nb_segment;j++) {
+            if (model_type != VARIANCE_CHANGE) {
+              mean = 0.;
+
+              if (type[variable] != REAL_VALUE) {
+                for (k = change_point[j];k < change_point[j + 1];k++) {
+                  mean += int_sequence[i][variable][k];
+                }
+              }
+              else {
+                for (k = change_point[j];k < change_point[j + 1];k++) {
+                  mean += real_sequence[i][variable][k];
+                }
+              }
+              mean /= (change_point[j + 1] - change_point[j]);
+            }
 
             if (imean) {
               imean[i][j] = mean;
@@ -1376,7 +1398,7 @@ double Sequences::piecewise_linear_function(int index , int variable , int nb_se
                 }
                 variance[i][j] = square_sum / ((change_point[j + 1] - change_point[j]) - 1);
 
-                if ((model_type == GAUSSIAN_CHANGE) && (likelihood != D_INF)) {
+                if (((model_type == GAUSSIAN_CHANGE) || (model_type == VARIANCE_CHANGE)) && (likelihood != D_INF)) {
                   if (square_sum > (change_point[j + 1] - change_point[j]) * ROUNDOFF_ERROR) {
                     likelihood -= ((double)(change_point[j + 1] - change_point[j]) / 2.) * (log(square_sum /
                                     (change_point[j + 1] - change_point[j])) + log(2 * M_PI) + 1);
@@ -1393,24 +1415,46 @@ double Sequences::piecewise_linear_function(int index , int variable , int nb_se
     }
 
     else {
-      for (i = 0;i < nb_segment;i++) {
+      if (model_type == VARIANCE_CHANGE) {
         mean = 0.;
 
         if (type[variable] != REAL_VALUE) {
-          for (j = change_point[i];j < change_point[i + 1];j++) {
-            for (k = 0;k < nb_sequence;k++) {
-              mean += int_sequence[k][variable][j];
+          for (i = 0;i < length[0];i++) {
+            for (j = 0;j < nb_sequence;j++) {
+              mean += int_sequence[j][variable][i];
             }
           }
         }
         else {
-          for (j = change_point[i];j < change_point[i + 1];j++) {
-            for (k = 0;k < nb_sequence;k++) {
-              mean += real_sequence[k][variable][j];
+          for (i = 0;i < length[0];i++) {
+            for (j = 0;j < nb_sequence;j++) {
+              mean += real_sequence[j][variable][i];
             }
           }
         }
-        mean /= (nb_sequence * (change_point[i + 1] - change_point[i]));
+        mean /= (nb_sequence * length[0]);
+      }
+
+      for (i = 0;i < nb_segment;i++) {
+        if (model_type != VARIANCE_CHANGE) {
+          mean = 0.;
+
+          if (type[variable] != REAL_VALUE) {
+            for (j = change_point[i];j < change_point[i + 1];j++) {
+              for (k = 0;k < nb_sequence;k++) {
+                mean += int_sequence[k][variable][j];
+              }
+            }
+          }
+          else {
+            for (j = change_point[i];j < change_point[i + 1];j++) {
+              for (k = 0;k < nb_sequence;k++) {
+                mean += real_sequence[k][variable][j];
+              }
+            }
+          }
+          mean /= (nb_sequence * (change_point[i + 1] - change_point[i]));
+        }
 
         if (imean) {
           imean[0][i] = mean;
@@ -1448,7 +1492,7 @@ double Sequences::piecewise_linear_function(int index , int variable , int nb_se
           }
           variance[0][i] = square_sum / (nb_sequence * (change_point[i + 1] - change_point[i]) - 1);
 
-          if ((model_type == GAUSSIAN_CHANGE) && (likelihood != D_INF)) {
+          if (((model_type == GAUSSIAN_CHANGE) || (model_type == VARIANCE_CHANGE)) && (likelihood != D_INF)) {
             if (square_sum > nb_sequence * (change_point[i + 1] - change_point[i]) * ROUNDOFF_ERROR) {
               likelihood -= ((double)(nb_sequence * (change_point[i + 1] - change_point[i])) / 2.) * (log(square_sum /
                               (nb_sequence * (change_point[i + 1] - change_point[i]))) + log(2 * M_PI) + 1);
@@ -1471,12 +1515,23 @@ double Sequences::piecewise_linear_function(int index , int variable , int nb_se
 
       if (model_type == MEAN_CHANGE) {
         if (index != I_DEFAULT) {
-          likelihood = -((double)length[index] / 2.) * (log(global_square_sum /
-                          length[index]) + log(2 * M_PI) + 1);
+          if (global_square_sum > length[index] * ROUNDOFF_ERROR) {
+            likelihood = -((double)length[index] / 2.) * (log(global_square_sum /
+                            length[index]) + log(2 * M_PI) + 1);
+          }
+          else {
+            likelihood = D_INF;
+          }
         }
+
         else {
-          likelihood = -((double)(nb_sequence * length[0]) / 2.) * (log(global_square_sum /
-                          (nb_sequence * length[0])) + log(2 * M_PI) + 1);
+          if (global_square_sum > nb_sequence * length[0] * ROUNDOFF_ERROR) {
+            likelihood = -((double)(nb_sequence * length[0]) / 2.) * (log(global_square_sum /
+                            (nb_sequence * length[0])) + log(2 * M_PI) + 1);
+          }
+          else {
+            likelihood = D_INF;
+          }
         }
       }
     }
@@ -1777,31 +1832,55 @@ double Sequences::piecewise_linear_function(int index , int variable , int nb_se
     }
   }
 
-  else if (model_type == AUTOREGRESSIVE_MODEL_CHANGE) {
-    if (variance) {
+  else if ((model_type == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE)) {
+    if ((autoregressive_coeff) && ((variance) || (global_variance))) {
       likelihood = 0.;
     }
     else {
       likelihood = D_INF;
     }
 
+    if (global_variance) {
+      global_square_sum = 0.;
+      global_shifted_square_sum = 0.;
+      global_autocovariance = 0.;
+    }
+
     if ((index != I_DEFAULT) || (!common_contrast)) {
       for (i = 0;i < nb_sequence;i++) {
         if ((index == I_DEFAULT) || (index == i)) {
-          for (j = 0;j < nb_segment;j++) {
+          if (model_type == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE) {
             mean = 0.;
 
             if (type[variable] != REAL_VALUE) {
-              for (k = change_point[j];k < change_point[j + 1];k++) {
-                mean += int_sequence[i][variable][k];
+              for (j = 0;j < length[i];j++) {
+                mean += int_sequence[i][variable][j];
               }
             }
             else {
-              for (k = change_point[j];k < change_point[j + 1];k++) {
-                mean += real_sequence[i][variable][k];
+              for (j = 0;j < length[i];j++) {
+                mean += real_sequence[i][variable][j];
               }
             }
-            mean /= (change_point[j + 1] - change_point[j]);
+            mean /= length[i];
+          }
+
+          for (j = 0;j < nb_segment;j++) {
+            if (model_type == AUTOREGRESSIVE_MODEL_CHANGE) {
+              mean = 0.;
+
+              if (type[variable] != REAL_VALUE) {
+                for (k = change_point[j];k < change_point[j + 1];k++) {
+                  mean += int_sequence[i][variable][k];
+                }
+              }
+              else {
+                for (k = change_point[j];k < change_point[j + 1];k++) {
+                  mean += real_sequence[i][variable][k];
+                }
+              }
+              mean /= (change_point[j + 1] - change_point[j]);
+            }
 
             if (imean) {
               imean[i][j] = mean;
@@ -1812,7 +1891,7 @@ double Sequences::piecewise_linear_function(int index , int variable , int nb_se
               }
             }
 
-            if ((variance) && (autoregressive_coeff)) {
+            if ((autoregressive_coeff) && ((variance) || (global_variance))) {
               square_sum = 0.;
               shifted_square_sum = 0.;
               autocovariance = 0.;
@@ -1833,6 +1912,12 @@ double Sequences::piecewise_linear_function(int index , int variable , int nb_se
                   shifted_square_sum += shifted_diff * shifted_diff;
                   autocovariance += diff * shifted_diff;
                 }
+              }
+
+              if (global_variance) {
+                global_square_sum += square_sum;
+                global_shifted_square_sum += shifted_square_sum;
+                global_autocovariance += autocovariance;
               }
 
               if (shifted_square_sum > 0.) {
@@ -1857,24 +1942,46 @@ double Sequences::piecewise_linear_function(int index , int variable , int nb_se
     }
 
     else {
-      for (i = 0;i < nb_segment;i++) {
+      if (model_type == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE) {
         mean = 0.;
 
         if (type[variable] != REAL_VALUE) {
-          for (j = change_point[i];j < change_point[i + 1];j++) {
-            for (k = 0;k < nb_sequence;k++) {
-              mean += int_sequence[k][variable][j];
+          for (i = 0;i < length[0];i++) {
+            for (j = 0;j < nb_sequence;j++) {
+              mean += int_sequence[j][variable][i];
             }
           }
         }
         else {
-          for (j = change_point[i];j < change_point[i + 1];j++) {
-            for (k = 0;k < nb_sequence;k++) {
-              mean += real_sequence[k][variable][j];
+          for (i = 0;i < length[0];i++) {
+            for (j = 0;j < nb_sequence;j++) {
+              mean += real_sequence[j][variable][i];
             }
           }
         }
-        mean /= (nb_sequence * (change_point[i + 1] - change_point[i]));
+        mean /= (nb_sequence * length[0]);
+      }
+
+      for (i = 0;i < nb_segment;i++) {
+        if (model_type == AUTOREGRESSIVE_MODEL_CHANGE) {
+          mean = 0.;
+
+          if (type[variable] != REAL_VALUE) {
+            for (j = change_point[i];j < change_point[i + 1];j++) {
+              for (k = 0;k < nb_sequence;k++) {
+                mean += int_sequence[k][variable][j];
+              }
+            }
+          }
+          else {
+            for (j = change_point[i];j < change_point[i + 1];j++) {
+              for (k = 0;k < nb_sequence;k++) {
+                mean += real_sequence[k][variable][j];
+              }
+            }
+          }
+          mean /= (nb_sequence * (change_point[i + 1] - change_point[i]));
+        }
 
         if (imean) {
           imean[0][i] = mean;
@@ -1887,7 +1994,7 @@ double Sequences::piecewise_linear_function(int index , int variable , int nb_se
           }
         }
 
-        if ((autoregressive_coeff) && (variance)) {
+        if ((autoregressive_coeff) && ((variance) || (global_variance))) {
           square_sum = 0.;
           shifted_square_sum = 0.;
           autocovariance = 0.;
@@ -1914,6 +2021,12 @@ double Sequences::piecewise_linear_function(int index , int variable , int nb_se
             }
           }
 
+          if (global_variance) {
+            global_square_sum += square_sum;
+            global_shifted_square_sum += shifted_square_sum;
+            global_autocovariance += autocovariance;
+          }
+
           if (shifted_square_sum > 0.) {
             autoregressive_coeff[0][i] = autocovariance / shifted_square_sum;
             square_sum -= autocovariance * autocovariance / shifted_square_sum;
@@ -1930,6 +2043,19 @@ double Sequences::piecewise_linear_function(int index , int variable , int nb_se
             }
           }
         }
+      }
+    }
+
+    if (global_variance) {
+      global_variance[variable] = global_square_sum;
+      if (global_shifted_square_sum > 0.) {
+        global_variance[variable] -= global_autocovariance * global_autocovariance / global_shifted_square_sum;
+      }
+      if (index != I_DEFAULT) {
+        global_variance[variable] /= (length[index] - 2 * nb_segment);
+      }
+      else {
+        global_variance[variable] /= (nb_sequence * length[0] - 2 * nb_segment);
       }
     }
   }
@@ -2236,19 +2362,25 @@ ostream& Sequences::piecewise_linear_function_ascii_print(ostream &os , int inde
     }
   }
 
-  else if (model_type == AUTOREGRESSIVE_MODEL_CHANGE) {
+  else if ((model_type == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE)) {
+    normal dist;
+    double standard_normal_value = quantile(complement(dist , 0.025));
+
     if (nb_variable > 2) {
       os << STAT_label[STATL_VARIABLE] << " " << variable << "   ";
     }
     os << SEQ_label[SEQL_SEGMENT] << " " << STAT_label[STATL_MEAN] << ", "
-       << SEQ_label[SEQL_AUTOREGRESSIVE_COEFF] << ", "
+       << SEQ_label[SEQL_AUTOREGRESSIVE_COEFF] << " (" 
+       << SEQ_label[SEQL_NULL_AUTOREGRESSIVE_COEFF_95_CONFIDENCE_LIMIT] << "), "
        << STAT_label[STATL_STANDARD_DEVIATION] << ": ";
 
-    if ((index == I_DEFAULT) && (!common_contrast)) {
+    if ((index != I_DEFAULT) || (!common_contrast)) {
       for (i = 0;i < nb_sequence;i++) {
         if ((index == I_DEFAULT) || (index == i)) {
           for (j = 0;j < nb_segment;j++) {
-            os << mean[i][j] << " " << autoregressive_coeff[i][j] << " " << sqrt(variance[i][j]);
+            os << mean[i][j] << " " << autoregressive_coeff[i][j] << " (-/+"
+               << standard_normal_value / sqrt((double)(change_point[j + 1] - change_point[j])) << ") "
+               << sqrt(variance[i][j]);
             if (j < nb_segment - 1) {
               os << " | ";
             }
@@ -2262,7 +2394,9 @@ ostream& Sequences::piecewise_linear_function_ascii_print(ostream &os , int inde
 
     else {
       for (i = 0;i < nb_segment;i++) {
-        os << mean[0][i] << " " << autoregressive_coeff[0][i] << " " << sqrt(variance[0][i]);
+        os << mean[0][i] << " " << autoregressive_coeff[0][i] << " (-/+"
+           << standard_normal_value / sqrt((double)nb_sequence * (change_point[i + 1] - change_point[i])) << ") "
+           << sqrt(variance[0][i]);
         if (i < nb_segment - 1) {
           os << " | ";
         }
@@ -2413,19 +2547,25 @@ ostream& Sequences::piecewise_linear_function_spreadsheet_print(ostream &os , in
     os << endl;
   }
 
-  else if (model_type == AUTOREGRESSIVE_MODEL_CHANGE) {
+  else if ((model_type == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE)) {
+    normal dist;
+    double standard_normal_value = quantile(complement(dist , 0.025));
+
     if (nb_variable > 2) {
       os << STAT_label[STATL_VARIABLE] << "\t" << variable << "\t";
     }
     os << SEQ_label[SEQL_SEGMENT] << "\t" << STAT_label[STATL_MEAN] << "\t"
        << SEQ_label[SEQL_AUTOREGRESSIVE_COEFF] << "\t"
+       << SEQ_label[SEQL_NULL_AUTOREGRESSIVE_COEFF_95_CONFIDENCE_LIMIT] << "\t"
        << STAT_label[STATL_STANDARD_DEVIATION];
 
     if ((index != I_DEFAULT) || (!common_contrast)) {
       for (i = 0;i < nb_sequence;i++) {
         if ((index == I_DEFAULT) || (index == i)) {
           for (j = 0;j < nb_segment;j++) {
-            os << "\t" << mean[i][j] << "\t"  << autoregressive_coeff[i][j] << "\t" << sqrt(variance[i][j]) << "\t";
+            os << "\t" << mean[i][j] << "\t"  << autoregressive_coeff[i][j] << "\t-/+"
+               << standard_normal_value / sqrt((double)(change_point[j + 1] - change_point[j])) << "\t"
+               << sqrt(variance[i][j]) << "\t";
           }
           if ((index == I_DEFAULT) && (i < nb_sequence - 1)) {
             os << "\t";
@@ -2436,7 +2576,9 @@ ostream& Sequences::piecewise_linear_function_spreadsheet_print(ostream &os , in
 
     else {
       for (i = 0;i < nb_segment;i++) {
-        os << "\t" << mean[0][i] << "\t" << autoregressive_coeff[0][i] << "\t" << sqrt(variance[0][i]) << "\t";
+        os << "\t" << mean[0][i] << "\t" << autoregressive_coeff[0][i] << "\t-/+"
+           << standard_normal_value / sqrt((double)nb_sequence * (change_point[i + 1] - change_point[i])) << "\t"
+           << sqrt(variance[0][i]) << "\t";
       }
     }
     os << endl;
@@ -2720,15 +2862,15 @@ double Sequences::continuous_piecewise_linear_function(ostream &os , int index ,
 /**
  *  \brief Output of a segmentation of a single sequence or a sample of sequences.
  *
- *  \param[in]  nb_segment      number of segments,
- *  \param[in]  model_type      segment model types,
- *  \param[in]  common_contrast flag contrast functions common to the individuals,
- *  \param[in]  os              stream,
- *  \param[in]  output          output type (sequence or residuals),
- *  \param[in]  ichange_point   change points,
- *  \param[in]  continuity      flag continuous piecewise linear function,
+ *  \param[in] nb_segment      number of segments,
+ *  \param[in] model_type      segment model types,
+ *  \param[in] common_contrast flag contrast functions common to the individuals,
+ *  \param[in] os              stream,
+ *  \param[in] output          output type (sequence or residuals),
+ *  \param[in] ichange_point   change points,
+ *  \param[in] continuity      flag continuous piecewise linear function.
  *
- *  \param[out] seq             sequences.
+ *  \return                    Sequences object.
  */
 /*--------------------------------------------------------------*/
 
@@ -2885,7 +3027,7 @@ Sequences* Sequences::segmentation_output(int nb_segment , segment_model *model_
       }
     }
 
-    else if (model_type[i - 1] == AUTOREGRESSIVE_MODEL_CHANGE) {
+    else if ((model_type[i - 1] == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type[i - 1] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE)) {
       switch (common_contrast) {
 
       case false : {
@@ -2915,8 +3057,8 @@ Sequences* Sequences::segmentation_output(int nb_segment , segment_model *model_
 
     if ((((i == 1) && ((model_type[0] == MEAN_CHANGE) || (model_type[0] == INTERCEPT_SLOPE_CHANGE))) ||
          (model_type[i - 1] == GAUSSIAN_CHANGE) || (model_type[i - 1] == LINEAR_MODEL_CHANGE) ||
-         (model_type[i - 1] == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type[i - 1] == BAYESIAN_GAUSSIAN_CHANGE)) &&
-        (!global_variance)) {
+         (model_type[i - 1] == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type[i - 1] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE) ||
+         (model_type[i - 1] == BAYESIAN_GAUSSIAN_CHANGE)) && (!global_variance)) {
       global_variance = new double[nb_variable];
     }
   }
@@ -2930,6 +3072,7 @@ Sequences* Sequences::segmentation_output(int nb_segment , segment_model *model_
           (model_type[i - 1] == NEGATIVE_BINOMIAL_1_CHANGE) || (model_type[i - 1] == GAUSSIAN_CHANGE) ||
           (model_type[0] == MEAN_CHANGE) || (model_type[i - 1] == LINEAR_MODEL_CHANGE) ||
           (model_type[0] == INTERCEPT_SLOPE_CHANGE) || (model_type[i - 1] == AUTOREGRESSIVE_MODEL_CHANGE) ||
+          (model_type[i - 1] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE) ||
           (model_type[i - 1] == BAYESIAN_POISSON_CHANGE) || (model_type[i - 1] == BAYESIAN_GAUSSIAN_CHANGE)) {
         piecewise_function_flag[i] = true;
       }
@@ -2946,8 +3089,8 @@ Sequences* Sequences::segmentation_output(int nb_segment , segment_model *model_
         (model_type[i - 1] == NEGATIVE_BINOMIAL_1_CHANGE) || (model_type[i - 1] == GAUSSIAN_CHANGE) ||
         (model_type[0] == MEAN_CHANGE) || (model_type[i - 1] == VARIANCE_CHANGE) ||
         (model_type[i - 1] == LINEAR_MODEL_CHANGE) || (model_type[0] == INTERCEPT_SLOPE_CHANGE) ||
-        (model_type[i - 1] == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type[i - 1] == BAYESIAN_POISSON_CHANGE) ||
-        (model_type[i - 1] == BAYESIAN_GAUSSIAN_CHANGE)) {
+        (model_type[i - 1] == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type[i - 1] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE) ||
+        (model_type[i - 1] == BAYESIAN_POISSON_CHANGE) || (model_type[i - 1] == BAYESIAN_GAUSSIAN_CHANGE)) {
       likelihood = piecewise_linear_function((nb_sequence == 1 ? 0 : I_DEFAULT) , i , nb_segment ,
                                               model_type[i - 1] , common_contrast , change_point ,
                                               seq_index_parameter , NULL , mean[i] , variance[i] ,
@@ -2957,7 +3100,9 @@ Sequences* Sequences::segmentation_output(int nb_segment , segment_model *model_
                                               index_parameter_variance[i]);
 #     ifdef MESSAGE
       if (((i == 1) && ((model_type[0] == MEAN_CHANGE) || (model_type[0] == INTERCEPT_SLOPE_CHANGE))) ||
-          (model_type[i - 1] == GAUSSIAN_CHANGE) || (model_type[i - 1] == LINEAR_MODEL_CHANGE)) {
+          (model_type[i - 1] == GAUSSIAN_CHANGE) || (model_type[i - 1] == VARIANCE_CHANGE) ||
+          (model_type[i - 1] == LINEAR_MODEL_CHANGE) || (model_type[i - 1] == AUTOREGRESSIVE_MODEL_CHANGE) ||
+          (model_type[i - 1] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE)) {
         os << "\n2 * " << STAT_label[STATL_LIKELIHOOD] << ": " << 2 * likelihood << endl;
       }
 #     endif
@@ -3007,7 +3152,7 @@ Sequences* Sequences::segmentation_output(int nb_segment , segment_model *model_
                                           index_parameter_mean[i] , index_parameter_variance[i]);
 
     if ((model_type[i - 1] == GAUSSIAN_CHANGE) || (model_type[0] == MEAN_CHANGE) ||
-        (model_type[0] == VARIANCE_CHANGE) || (model_type[i - 1] == BAYESIAN_GAUSSIAN_CHANGE)) {
+        (model_type[i - 1] == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type[i - 1] == BAYESIAN_GAUSSIAN_CHANGE)) {
       if (nb_segment > 1) {
         change_point_amplitude = 0.;
 
@@ -3031,13 +3176,10 @@ Sequences* Sequences::segmentation_output(int nb_segment , segment_model *model_
            << change_point_amplitude << "   ";
       }
 
-      if ((model_type[i - 1] == GAUSSIAN_CHANGE) || (model_type[0] == MEAN_CHANGE) ||
-          (model_type[i - 1] == BAYESIAN_GAUSSIAN_CHANGE)) {
-        os << SEQ_label[SEQL_GLOBAL_STANDARD_DEVIATION] << ": " << sqrt(global_variance[i]);
-        if (nb_segment > 1) {
-          os << "   " << STAT_label[STATL_RATIO] << ": "
-             << change_point_amplitude / sqrt(global_variance[i]);
-        }
+      os << SEQ_label[SEQL_GLOBAL_STANDARD_DEVIATION] << ": " << sqrt(global_variance[i]);
+      if (nb_segment > 1) {
+        os << "   " << STAT_label[STATL_RATIO] << ": "
+           << change_point_amplitude / sqrt(global_variance[i]);
       }
       os << endl;
     }
@@ -3096,7 +3238,7 @@ Sequences* Sequences::segmentation_output(int nb_segment , segment_model *model_
               }
             }
 
-            else if (model_type[k - 1] == AUTOREGRESSIVE_MODEL_CHANGE) {
+            else if ((model_type[k - 1] == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type[k - 1] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE)) {
               if (type[k] != REAL_VALUE) {
                 for (m = 0;m < nb_segment;m++) {
                   seq->real_sequence[i][j][change_point[m]] = mean[k][i][m];
@@ -3159,7 +3301,7 @@ Sequences* Sequences::segmentation_output(int nb_segment , segment_model *model_
               }
             }
 
-            else if (model_type[k - 1] == AUTOREGRESSIVE_MODEL_CHANGE) {
+            else if ((model_type[k - 1] == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type[k - 1] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE)) {
               if (type[k] != REAL_VALUE) {
                 for (m = 0;m < nb_segment;m++) {
                   seq->real_sequence[i][j][change_point[m]] = mean[k][0][m];
@@ -3216,7 +3358,7 @@ Sequences* Sequences::segmentation_output(int nb_segment , segment_model *model_
               }
             }
 
-            else if (model_type[j - 1] == AUTOREGRESSIVE_MODEL_CHANGE) {
+            else if ((model_type[j - 1] == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type[j - 1] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE)) {
               for (k = 0;k < nb_segment;k++) {
                 real_sequence[i][j][change_point[k]] = int_sequence[i][j][change_point[k]] - mean[j][i][k];
                 for (m = change_point[k] + 1;m < change_point[k + 1];m++) {
@@ -3247,7 +3389,7 @@ Sequences* Sequences::segmentation_output(int nb_segment , segment_model *model_
               }
             }
 
-            else if (model_type[j - 1] == AUTOREGRESSIVE_MODEL_CHANGE) {
+            else if ((model_type[j - 1] == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type[j - 1] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE)) {
               for (k = 0;k < nb_segment;k++) {
                 for (m = change_point[k + 1] - 1;m > change_point[k];m--) {
                   real_sequence[i][j][m] -= (mean[j][i][k] + autoregressive_coeff[j][i][k] *
@@ -3284,7 +3426,7 @@ Sequences* Sequences::segmentation_output(int nb_segment , segment_model *model_
               }
             }
 
-            else if (model_type[j - 1] == AUTOREGRESSIVE_MODEL_CHANGE) {
+            else if ((model_type[j - 1] == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type[j - 1] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE)) {
               for (k = 0;k < nb_segment;k++) {
                 real_sequence[i][j][change_point[k]] = int_sequence[i][j][change_point[k]] - mean[j][0][k];
                 for (m = change_point[k] + 1;m < change_point[k + 1];m++) {
@@ -3315,7 +3457,7 @@ Sequences* Sequences::segmentation_output(int nb_segment , segment_model *model_
               }
             }
 
-            else if (model_type[j - 1] == AUTOREGRESSIVE_MODEL_CHANGE) {
+            else if ((model_type[j - 1] == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type[j - 1] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE)) {
               for (k = 0;k < nb_segment;k++) {
                 for (m = change_point[k + 1] - 1;m > change_point[k];m--) {
                   real_sequence[i][j][m] -= (mean[j][0][k] + autoregressive_coeff[j][0][k] *
@@ -3363,7 +3505,7 @@ Sequences* Sequences::segmentation_output(int nb_segment , segment_model *model_
               }
             }
 
-            else if (model_type[j - 1] == AUTOREGRESSIVE_MODEL_CHANGE) {
+            else if ((model_type[j - 1] == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type[j - 1] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE)) {
               for (k = 0;k < nb_segment;k++) {
                 if (mean[j][i][k] != 0.) {
                   real_sequence[i][j][change_point[k]] = int_sequence[i][j][change_point[k]] / mean[j][i][k];
@@ -3413,7 +3555,7 @@ Sequences* Sequences::segmentation_output(int nb_segment , segment_model *model_
               }
             }
 
-            else if (model_type[j - 1] == AUTOREGRESSIVE_MODEL_CHANGE){
+            else if ((model_type[j - 1] == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type[j - 1] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE)) {
               for (k = 0;k < nb_segment;k++) {
                 for (m = change_point[k + 1] - 1;m > change_point[k];m--) {
                   if (mean[j][i][k] + autoregressive_coeff[j][i][k] * (real_sequence[i][j][m - 1] - mean[j][i][k]) != 0.) {
@@ -3461,7 +3603,7 @@ Sequences* Sequences::segmentation_output(int nb_segment , segment_model *model_
               }
             }
 
-            else if  (model_type[j - 1] == AUTOREGRESSIVE_MODEL_CHANGE){
+            else if ((model_type[j - 1] == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type[j - 1] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE)) {
               for (k = 0;k < nb_segment;k++) {
                 if (mean[j][0][k] != 0.) {
                   real_sequence[i][j][change_point[k]] = int_sequence[i][j][change_point[k]] / mean[j][0][k];
@@ -3511,7 +3653,7 @@ Sequences* Sequences::segmentation_output(int nb_segment , segment_model *model_
               }
             }
 
-            else if (model_type[j - 1] == AUTOREGRESSIVE_MODEL_CHANGE) {
+            else if ((model_type[j - 1] == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type[j - 1] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE)) {
               for (k = 0;k < nb_segment;k++) {
                 for (m = change_point[k + 1] - 1;m > change_point[k];m--) {
                   if (mean[j][0][k] + autoregressive_coeff[j][0][k] * (real_sequence[i][j][m - 1] - mean[j][0][k]) != 0.) {
@@ -3619,7 +3761,7 @@ Sequences* Sequences::segmentation_output(int nb_segment , segment_model *model_
       delete [] index_parameter_variance[i];
     }
 
-    else if (model_type[i - 1] == AUTOREGRESSIVE_MODEL_CHANGE) {
+    else if ((model_type[i - 1] == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type[i - 1] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE)) {
       switch (common_contrast) {
 
       case false : {
@@ -3708,18 +3850,18 @@ Sequences* Sequences::segmentation_output(int nb_segment , segment_model *model_
 /**
  *  \brief Segmentation of a single sequence or a sample of sequences.
  *
- *  \param[in]  error           reference on a StatError object,
- *  \param[in]  os              stream,
- *  \param[in]  iidentifier     sequence identifier,
- *  \param[in]  nb_segment      number of segments,
- *  \param[in]  ichange_point   change points,
- *  \param[in]  model_type      segment model types,
- *  \param[in]  common_contrast flag contrast functions common to the individuals,
- *  \param[in]  shape_parameter negative binomial shape parameters,
- *  \param[in]  output          output (sequence or residuals),
- *  \param[in]  continuity      flag continuous piecewise linear function,
+ *  \param[in] error           reference on a StatError object,
+ *  \param[in] os              stream,
+ *  \param[in] iidentifier     sequence identifier,
+ *  \param[in] nb_segment      number of segments,
+ *  \param[in] ichange_point   change points,
+ *  \param[in] model_type      segment model types,
+ *  \param[in] common_contrast flag contrast functions common to the individuals,
+ *  \param[in] shape_parameter negative binomial shape parameters,
+ *  \param[in] output          output (sequence or residuals),
+ *  \param[in] continuity      flag continuous piecewise linear function.
  *
- *  \param[out] oseq            sequences.
+ *  \return                    Sequences object.
  */
 /*--------------------------------------------------------------*/
 
@@ -3928,9 +4070,10 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
         }
       }
 
-      // computation of sequence means for Gaussian change in the variance model
+      // computation of sequence means for Gaussian change in the variance model or
+      // stationary piecewise autoregressive models
 
-      if (model_type[i] == VARIANCE_CHANGE) {
+      if ((model_type[i] == VARIANCE_CHANGE) || (model_type[i] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE)) {
         if ((index != I_DEFAULT) || (!common_contrast)) {
           seq_mean[i] = new double[nb_sequence];
 
@@ -4012,6 +4155,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
       if (((i == 0) && ((model_type[0] == MEAN_CHANGE) || (model_type[0] == INTERCEPT_SLOPE_CHANGE))) ||
           (((model_type[i] == GAUSSIAN_CHANGE) || (model_type[i] == VARIANCE_CHANGE) ||
             (model_type[i] == LINEAR_MODEL_CHANGE) || (model_type[i] == AUTOREGRESSIVE_MODEL_CHANGE) ||
+            (model_type[i] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE) ||
             (model_type[i] == ORDINAL_GAUSSIAN_CHANGE)) && (!residual))) {
         residual = new long double*[nb_sequence];
         if ((index != I_DEFAULT) || (!common_contrast)) {
@@ -4652,8 +4796,11 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
                     autocovariance += diff * shifted_diff;
                   }
 
-                  if ((change_point[k + 1] - change_point[k] > 2) && (shifted_square_sum > 0.)) {
-                    residual[j][k] = square_sum - autocovariance * autocovariance / shifted_square_sum; 
+                  if (change_point[k + 1] - change_point[k] > 2) {
+                    residual[j][k] = square_sum; 
+                    if (shifted_square_sum > 0.) {
+                      residual[j][k] -= autocovariance * autocovariance / shifted_square_sum; 
+                    }
                   }
                   else {
                     residual[j][k] = 0.;
@@ -4684,34 +4831,17 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
                     autocovariance += diff * shifted_diff;
                   }
 
-                  if ((change_point[k + 1] - change_point[k] > 2) && (shifted_square_sum > 0.)) {
-                    residual[j][k] = square_sum - autocovariance * autocovariance / shifted_square_sum; 
+                  if (change_point[k + 1] - change_point[k] > 2) {
+                    residual[j][k] = square_sum; 
+                    if (shifted_square_sum > 0.) {
+                      residual[j][k] -= autocovariance * autocovariance / shifted_square_sum; 
+                    }
                   }
                   else {
                     residual[j][k] = 0.;
                   }
                 }
               }
-            }
-          }
-
-          for (j = 0;j < nb_sequence;j++) {
-            if ((index == I_DEFAULT) || (index == j)) {
-              for (k = 0;k < nb_segment;k++) {
-//                if (residual[j][k] > 0.) {
-                if (residual[j][k] > (change_point[k + 1] - change_point[k] - 1) * ROUNDOFF_ERROR) {
-                  segmentation_likelihood -= ((double)(change_point[k + 1] - change_point[k] - 1) / 2.) * (logl(residual[j][k] /
-                                               (change_point[k + 1] - change_point[k] - 1)) + log(2 * M_PI) + 1);
-                }
-                else {
-                  segmentation_likelihood = D_INF;
-                  break;
-                }
-              }
-            }
-
-            if (segmentation_likelihood == D_INF) {
-              break;
             }
           }
         }
@@ -4740,11 +4870,9 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
                 }
               }
 
+              residual[0][j] = square_sum;
               if (shifted_square_sum > 0.) {
-                residual[0][j] = square_sum - autocovariance * autocovariance / shifted_square_sum;
-              }
-              else {
-                residual[0][j] = 0.;
+                residual[0][j] -= autocovariance * autocovariance / shifted_square_sum;
               }
             }
           }
@@ -4772,24 +4900,119 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
                 }
               }
 
+              residual[0][j] = square_sum;
               if (shifted_square_sum > 0.) {
-                residual[0][j] = square_sum - autocovariance * autocovariance / shifted_square_sum;
+                residual[0][j] -= autocovariance * autocovariance / shifted_square_sum;
               }
-              else {
-                residual[0][j] = 0.;
+            }
+          }
+        }
+      }
+
+
+      else if (model_type[i] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE) {
+        if ((index != I_DEFAULT) || (!common_contrast)) {
+          if (type[i] != REAL_VALUE) {
+            for (j = 0;j < nb_sequence;j++) {
+              if ((index == I_DEFAULT) || (index == j)) {
+                for (k = 0;k < nb_segment;k++) {
+                  square_sum = 0.;
+                  shifted_square_sum = 0.;
+                  autocovariance = 0.;
+                  for (m = change_point[k] + 1;m < change_point[k + 1];m++) {
+                    diff = int_sequence[j][i][m] - seq_mean[i][j];
+                    shifted_diff = int_sequence[j][i][m - 1] - seq_mean[i][j];
+                    square_sum += diff * diff;
+                    shifted_square_sum += shifted_diff * shifted_diff;
+                    autocovariance += diff * shifted_diff;
+                  }
+
+                  if (change_point[k + 1] - change_point[k] > 2) {
+                    residual[j][k] = square_sum; 
+                    if (shifted_square_sum > 0.) {
+                      residual[j][k] -= autocovariance * autocovariance / shifted_square_sum; 
+                    }
+                  }
+                  else {
+                    residual[j][k] = 0.;
+                  }
+                }
               }
             }
           }
 
-          for (j = 0;j < nb_segment;j++) {
-//            if (residual[0][j] > 0.) {
-            if (residual[0][j] > nb_sequence * (change_point[j + 1] - change_point[j] - 1) * ROUNDOFF_ERROR) {
-              segmentation_likelihood -= ((double)(nb_sequence * (change_point[j + 1] - change_point[j] - 1)) / 2.) * (logl(residual[0][j] /
-                                           (nb_sequence * (change_point[j + 1] - change_point[j] - 1))) + log(2 * M_PI) + 1);
+          else {
+            for (j = 0;j < nb_sequence;j++) {
+              if ((index == I_DEFAULT) || (index == j)) {
+                for (k = 0;k < nb_segment;k++) {
+                  square_sum = 0.;
+                  shifted_square_sum = 0.;
+                  autocovariance = 0.;
+                  for (m = change_point[k] + 1;m < change_point[k + 1];m++) {
+                    diff = real_sequence[j][i][m] - seq_mean[i][j];
+                    shifted_diff = real_sequence[j][i][m - 1] - seq_mean[i][j];
+                    square_sum += diff * diff;
+                    shifted_square_sum += shifted_diff * shifted_diff;
+                    autocovariance += diff * shifted_diff;
+                  }
+
+                  if (change_point[k + 1] - change_point[k] > 2) {
+                    residual[j][k] = square_sum; 
+                    if (shifted_square_sum > 0.) {
+                      residual[j][k] -= autocovariance * autocovariance / shifted_square_sum; 
+                    }
+                  }
+                  else {
+                    residual[j][k] = 0.;
+                  }
+                }
+              }
             }
-            else {
-              segmentation_likelihood = D_INF;
-              break;
+          }
+        }
+
+        else {
+          if (type[i] != REAL_VALUE) {
+            for (j = 0;j < nb_segment;j++) {
+              square_sum = 0.;
+              shifted_square_sum = 0.;
+              autocovariance = 0.;
+              for (k = change_point[j] + 1;k < change_point[j + 1];k++) {
+                for (m = 0;m < nb_sequence;m++) {
+                  diff = int_sequence[m][i][k] - seq_mean[i][0];
+                  shifted_diff = int_sequence[m][i][k - 1] - seq_mean[i][0];
+                  square_sum += diff * diff;
+                  shifted_square_sum += shifted_diff * shifted_diff;
+                  autocovariance += diff * shifted_diff;
+                }
+              }
+
+              residual[0][j] = square_sum;
+              if (shifted_square_sum > 0.) {
+                residual[0][j] -= autocovariance * autocovariance / shifted_square_sum;
+              }
+            }
+          }
+
+          else {
+            for (j = 0;j < nb_segment;j++) {
+              square_sum = 0.;
+              shifted_square_sum = 0.;
+              autocovariance = 0.;
+              for (k = change_point[j] + 1;k < change_point[j + 1];k++) {
+                for (m = 0;m < nb_sequence;m++) {
+                  diff = real_sequence[m][i][k] - seq_mean[i][0];
+                  shifted_diff = real_sequence[m][i][k - 1] - seq_mean[i][0];
+                  square_sum += diff * diff;
+                  shifted_square_sum += shifted_diff * shifted_diff;
+                  autocovariance += diff * shifted_diff;
+                }
+              }
+
+              residual[0][j] = square_sum;
+              if (shifted_square_sum > 0.) {
+                residual[0][j] -= autocovariance * autocovariance / shifted_square_sum;
+              }
             }
           }
         }
@@ -4857,6 +5080,44 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
 /*              segmentation_likelihood -= ((double)(nb_sequence * (change_point[j + 1] - change_point[j])) / 2.) * (logl(residual[0][j] /
                                            (nb_sequence * (change_point[j + 1] - change_point[j]))) + log(2 * M_PI)) +
                                          (double)(nb_sequence * (change_point[j + 1] - change_point[j])) / 2.; */
+            }
+            else {
+              segmentation_likelihood = D_INF;
+              break;
+            }
+          }
+        }
+      }
+
+      else if ((model_type[i] == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type[i] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE)) {
+        if ((index != I_DEFAULT) || (!common_contrast)) {
+          for (j = 0;j < nb_sequence;j++) {
+            if ((index == I_DEFAULT) || (index == j)) {
+              for (k = 0;k < nb_segment;k++) {
+//                if (residual[j][k] > 0.) {
+                if (residual[j][k] > (change_point[k + 1] - change_point[k] - 1) * ROUNDOFF_ERROR) {
+                  segmentation_likelihood -= ((double)(change_point[k + 1] - change_point[k] - 1) / 2.) * (logl(residual[j][k] /
+                                               (change_point[k + 1] - change_point[k] - 1)) + log(2 * M_PI) + 1);
+                }
+                else {
+                  segmentation_likelihood = D_INF;
+                  break;
+                }
+              }
+            }
+
+            if (segmentation_likelihood == D_INF) {
+              break;
+            }
+          }
+        }
+
+        else {
+          for (j = 0;j < nb_segment;j++) {
+//            if (residual[0][j] > 0.) {
+            if (residual[0][j] > nb_sequence * (change_point[j + 1] - change_point[j] - 1) * ROUNDOFF_ERROR) {
+              segmentation_likelihood -= ((double)(nb_sequence * (change_point[j + 1] - change_point[j] - 1)) / 2.) * (logl(residual[0][j] /
+                                           (nb_sequence * (change_point[j + 1] - change_point[j] - 1))) + log(2 * M_PI) + 1);
             }
             else {
               segmentation_likelihood = D_INF;
@@ -5009,18 +5270,18 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
 /**
  *  \brief Segmentation of a single sequence or a sample of sequences.
  *
- *  \param[in]  error           reference on a StatError object,
- *  \param[in]  os              stream,
- *  \param[in]  iidentifier     sequence identifier,
- *  \param[in]  nb_segment      number of segments,
- *  \param[in]  ichange_point   change points,
- *  \param[in]  model_type      segment model types,
- *  \param[in]  common_contrast flag contrast functions common to the individuals,
- *  \param[in]  shape_parameter negative binomial shape parameters,
- *  \param[in]  output          output (sequence or residuals),
- *  \param[in]  continuity      flag continuous piecewise linear function,
+ *  \param[in] error           reference on a StatError object,
+ *  \param[in] os              stream,
+ *  \param[in] iidentifier     sequence identifier,
+ *  \param[in] nb_segment      number of segments,
+ *  \param[in] ichange_point   change points,
+ *  \param[in] model_type      segment model types,
+ *  \param[in] common_contrast flag contrast functions common to the individuals,
+ *  \param[in] shape_parameter negative binomial shape parameters,
+ *  \param[in] output          output (sequence or residuals),
+ *  \param[in] continuity      flag continuous piecewise linear function.
  *
- *  \param[out]                 sequences.
+ *  \return                    Sequences object.
  */
 /*--------------------------------------------------------------*/
 
@@ -5032,1875 +5293,6 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
 {
   return segmentation(error , os , iidentifier , nb_segment , ichange_point.data() , model_type.data() ,
                       common_contrast , shape_parameter.data() , output , continuity);
-}
-
-
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the contrast functions within a forward recursion.
- *
- *  \param[in] time                time instant,
- *  \param[in] index               sequence index,
- *  \param[in] model_type          segment model types,
- *  \param[in] common_contrast     flag contrast functions common to the individuals,
- *  \param[in] factorial           log factorial for Poisson models,
- *  \param[in] shape_parameter     negative binomial shape parameters,
- *  \param[in] binomial_coeff      log binomial coefficients for negative binomial models,
- *  \param[in] seq_mean            sequence means for Gaussian change in the variance models,
- *  \param[in] seq_index_parameter index parameters,
- *  \param[in] hyperparam          hyperparameters for Bayesian models,
- *  \param[in] rank                ranks for ordinal variables,
- *  \param[in] contrast            contrast functions,
- *  \param[in] nb_segment          number of segments for bounding time loops.
- */
-/*--------------------------------------------------------------*/
-
-void Sequences::forward_contrast(int time , int index , segment_model *model_type , bool common_contrast ,
-                                 double ***factorial , double *shape_parameter , double ***binomial_coeff ,
-                                 double **seq_mean , int *seq_index_parameter , double **hyperparam ,
-                                 double **rank , long double *contrast , int nb_segment) const
-
-{
-  register int i , j , k , m;
-  int max_nb_value , count , *frequency , *inf_bound_parameter;
-  double sum , factorial_sum , proba , binomial_coeff_sum , diff , index_parameter_sum ,
-         index_parameter_diff , shifted_diff , range_diff , mean , buff;
-  long double index_parameter_square_sum , square_sum , mix_square_sum , shifted_square_sum ,
-              autocovariance , prior_contrast , **residual;
-
-
-  // initializations
-
-  max_nb_value = 0;
-  inf_bound_parameter = new int[nb_variable];
-  residual = NULL;
-
-  for (i = 1;i < nb_variable;i++) {
-    if ((model_type[i - 1] == CATEGORICAL_CHANGE) && (marginal_distribution[i]->nb_value > max_nb_value)) {
-      max_nb_value = marginal_distribution[i]->nb_value;
-    }
-
-    if ((model_type[i - 1] == NEGATIVE_BINOMIAL_0_CHANGE) || (model_type[i - 1] == NEGATIVE_BINOMIAL_1_CHANGE)) {
-      switch (model_type[i - 1]) {
-      case NEGATIVE_BINOMIAL_0_CHANGE :
-        inf_bound_parameter[i - 1] = 0;
-        break;
-      case NEGATIVE_BINOMIAL_1_CHANGE :
-        inf_bound_parameter[i - 1] = 1;
-        break;
-      }
-    }
-
-    if (((i == 1) && ((model_type[0] == MEAN_CHANGE) || (model_type[0] == INTERCEPT_SLOPE_CHANGE))) ||
-        (((model_type[i - 1] == GAUSSIAN_CHANGE) || (model_type[i - 1] == VARIANCE_CHANGE) ||
-          (model_type[i - 1] == LINEAR_MODEL_CHANGE) || (model_type[i - 1] == AUTOREGRESSIVE_MODEL_CHANGE) ||
-          (model_type[i - 1] == ORDINAL_GAUSSIAN_CHANGE)) && (!residual))) {
-      residual = new long double*[MAX(nb_sequence , 2)];
-      if ((index != I_DEFAULT) || (!common_contrast)) {
-        for (j = 0;j < nb_sequence;j++) {
-          if ((index == I_DEFAULT) || (index == j)) {
-            residual[j] = new long double[time + 1];
-          }
-          else {
-            residual[j] = NULL;
-          }
-        }
-      }
-      else {
-        residual[0] = new long double[time + 1];
-      }
-    }
-  }
-
-  if (max_nb_value > 0) {
-    frequency = new int[max_nb_value];
-  }
-  else {
-    frequency = NULL;
-  }
-
-  // computation of segment contrast functions (log-likelihoods or sum of squared deviations)
-
-  for (i = nb_segment;i <= time;i++) {
-    contrast[i] = 0.;
-  }
-
-  for (i = 1;i < nb_variable;i++) {
-    if (model_type[i - 1] == CATEGORICAL_CHANGE) {
-      if ((index != I_DEFAULT) || (!common_contrast)) {
-        for (j = 0;j < nb_sequence;j++) {
-          if ((index == I_DEFAULT) || (index == j)) {
-            for (k = 0;k < marginal_distribution[i]->nb_value;k++) {
-              frequency[k] = 0;
-            }
-
-            frequency[int_sequence[j][i][time]]++;
-
-#           ifdef MESSAGE
-            sum = 0.;
-#           endif
-
-            for (k = time - 1;k >= nb_segment;k--) {
-
-#             ifdef MESSAGE
-              sum += (time - k) * log((double)(time - k) / (double)(time - k + 1)) +
-                     log((double)(frequency[int_sequence[j][i][k]] + 1) / (double)(time - k + 1));
-              if (frequency[int_sequence[j][i][k]] > 0) {
-                sum -= frequency[int_sequence[j][i][k]] *
-                       log((double)frequency[int_sequence[j][i][k]] / (double)(frequency[int_sequence[j][i][k]] + 1));
-              }
-/*              frequency[int_sequence[j][i][k]]++;
-
-              if (contrast[k] != D_INF) {
-                contrast[k] += sum;
-              } */
-#             endif
-
-              frequency[int_sequence[j][i][k]]++;
-              if (contrast[k] != D_INF) {
-                buff = 0.;
-                for (m = 0;m < marginal_distribution[i]->nb_value;m++) {
-                  if (frequency[m] > 0) {
-//                    contrast[k] += frequency[m] * log((double)frequency[m] / (double)(time - k + 1));
-                    buff += frequency[m] * log((double)frequency[m] / (double)(time - k + 1));
-                  }
-                }
-                contrast[k] += buff;
-
-#               ifdef MESSAGE
-                if ((buff < sum - DOUBLE_ERROR) || (buff > sum + DOUBLE_ERROR)) {
-                  cout << "\nERROR: " << k << " " << time << " " << j << " | " << buff << " " << sum << endl;
-                }
-#               endif
-
-              }
-            }
-          }
-        }
-      }
-
-      else {
-        for (j = 0;j < marginal_distribution[i]->nb_value;j++) {
-          frequency[j] = 0;
-        }
-
-        for (j = time;j >= nb_segment;j--) {
-          for (k = 0;k < nb_sequence;k++) {
-            frequency[int_sequence[k][i][j]]++;
-          }
-
-          if (contrast[j] != D_INF) {
-            for (k = 0;k < marginal_distribution[i]->nb_value;k++) {
-              if (frequency[k] > 0) {
-                contrast[j] += frequency[k] * log((double)frequency[k] / (double)(nb_sequence * (time - j + 1)));
-              }
-            }
-          }
-        }
-      }
-    }
-
-    else if (model_type[i - 1] == POISSON_CHANGE) {
-/*      for (j = 0;j < nb_sequence;j++) {
-        if ((index == I_DEFAULT) || (index == j)) {
-          factorial[i][j][time] = log_factorial(int_sequence[j][i][time]);
-        }
-      } */
-
-      if ((index != I_DEFAULT) || (!common_contrast)) {
-        for (j = 0;j < nb_sequence;j++) {
-          if ((index == I_DEFAULT) || (index == j)) {
-            sum = 0.;
-            factorial_sum = 0.;
-
-            for (k = time;k >= nb_segment;k--) {
-              sum += int_sequence[j][i][k];
-              factorial_sum += factorial[i][j][k];
-              if ((contrast[k] != D_INF) && (sum > 0.)) {
-                contrast[k] += sum * (log(sum / (time - k + 1)) - 1) - factorial_sum;
-              }
-            }
-          }
-        }
-      }
-
-      else {
-        sum = 0.;
-        factorial_sum = 0.;
-
-        for (j = time;j >= nb_segment;j--) {
-          for (k = 0;k < nb_sequence;k++) {
-            sum += int_sequence[k][i][j];
-            factorial_sum += factorial[i][k][j];
-          }
-
-          if ((contrast[j] != D_INF) && (sum > 0.)) {
-            contrast[j] += sum * (log(sum / (nb_sequence * (time - j + 1))) - 1) - factorial_sum;
-          }
-        }
-      }
-    }
-
-    else if ((model_type[i - 1] == NEGATIVE_BINOMIAL_0_CHANGE) || (model_type[i - 1] == NEGATIVE_BINOMIAL_1_CHANGE)) {
-/*      for (j = 0;j < nb_sequence;j++) {
-        if ((index == I_DEFAULT) || (index == j)) {
-          binomial_coeff[i][j][time] = log_binomial_coefficient(inf_bound_parameter[i - 1] , shape_parameter[i - 1] ,
-                                                                int_sequence[j][i][time]);
-        }
-      } */
-
-      if ((index != I_DEFAULT) || (!common_contrast)) {
-        for (j = 0;j < nb_sequence;j++) {
-          if ((index == I_DEFAULT) || (index == j)) {
-            sum = 0.;
-            binomial_coeff_sum = 0.;
-
-            for (k = time;k >= nb_segment;k--) {
-              sum += int_sequence[j][i][k];
-              binomial_coeff_sum += binomial_coeff[i][j][k];
-
-              if (contrast[k] != D_INF) {
-                if (sum > inf_bound_parameter[i - 1] * (time - k + 1)) {
-                  proba = shape_parameter[i - 1] * (time - k + 1) /
-                          ((shape_parameter[i - 1] - inf_bound_parameter[i - 1]) * (time - k + 1) + sum);
-                  contrast[k] += binomial_coeff_sum + shape_parameter[i - 1] * (time - k + 1) * log(proba) +
-                                 (sum - inf_bound_parameter[i - 1] * (time - k + 1)) * log(1. - proba);
-                }
-                else {
-                  contrast[k] = D_INF;
-                }
-              }
-            }
-          }
-        }
-      }
-
-      else {
-        sum = 0.;
-        binomial_coeff_sum = 0.;
-
-        for (j = time;j >= nb_segment;j--) {
-          for (k = 0;k < nb_sequence;k++) {
-            sum += int_sequence[k][i][j];
-            binomial_coeff_sum += binomial_coeff[i][k][j];
-          }
-
-          if (contrast[j] != D_INF) {
-            if (sum > inf_bound_parameter[i - 1] * nb_sequence * (time - j + 1)) {
-              proba = shape_parameter[i - 1] * nb_sequence * (time - j + 1) /
-                      ((shape_parameter[i - 1] - inf_bound_parameter[i - 1]) * nb_sequence * (time - j + 1) + sum);
-              contrast[j] += binomial_coeff_sum + shape_parameter[i - 1] * nb_sequence * (time - j + 1) * log(proba) +
-                             (sum - inf_bound_parameter[i - 1] * nb_sequence * (time - j + 1)) * log(1. - proba);
-            }
-            else {
-              contrast[j] = D_INF;
-            }
-          }
-        }
-      }
-    }
-
-    else if ((model_type[i - 1] == GAUSSIAN_CHANGE) || (model_type[0] == MEAN_CHANGE)) {
-      if ((index != I_DEFAULT) || (!common_contrast)) {
-        if (type[i] != REAL_VALUE) {
-          for (j = 0;j < nb_sequence;j++) {
-            if ((index == I_DEFAULT) || (index == j)) {
-              square_sum = 0.;
-              sum = int_sequence[j][i][time];
-              residual[j][time] = 0.;
-
-              for (k = time - 1;k >= nb_segment;k--) {
-                diff = int_sequence[j][i][k] - sum / (time - k);
-                square_sum += ((double)(time - k) / (double)(time - k + 1)) * diff * diff;
-                sum += int_sequence[j][i][k];
-                residual[j][k] = square_sum;
-              }
-            }
-          }
-        }
-
-        else {
-          for (j = 0;j < nb_sequence;j++) {
-            if ((index == I_DEFAULT) || (index == j)) {
-              square_sum = 0.;
-              sum = real_sequence[j][i][time];
-              residual[j][time] = 0.;
-
-              for (k = time - 1;k >= nb_segment;k--) {
-                diff = real_sequence[j][i][k] - sum / (time - k);
-                square_sum += ((double)(time - k) / (double)(time - k + 1)) * diff * diff;
-                sum += real_sequence[j][i][k];
-                residual[j][k] = square_sum;
-              }
-            }
-          }
-        }
-
-#       ifdef DEBUG
-        for (j = 0;j < nb_sequence;j++) {
-          if ((index == I_DEFAULT) || (index == j)) {
-            cout << time << " | ";
-            for (k = time;k >= nb_segment;k--) {
-              cout << residual[j][k] << " ";
-            }
-            cout << endl;
-          }
-        }
-#       endif
-
-      }
-
-      else {
-        square_sum = 0.;
-        sum = 0.;
-        count = 0;
-
-        if (type[i] != REAL_VALUE) {
-          for (j = time;j >= nb_segment;j--) {
-            for (k = 0;k < nb_sequence;k++) {
-              if (count > 0) {
-                diff = int_sequence[k][i][j] - sum / count;
-                square_sum += ((double)count / (double)(count + 1)) * diff * diff;
-              }
-              count++;
-              sum += int_sequence[k][i][j];
-            }
-            residual[0][j] = square_sum;
-          }
-        }
-
-        else {
-          for (j = time;j >= nb_segment;j--) {
-            for (k = 0;k < nb_sequence;k++) {
-              if (count > 0) {
-                diff = real_sequence[k][i][j] - sum / count;
-                square_sum += ((double)count / (double)(count + 1)) * diff * diff;
-              }
-              count++;
-              sum += real_sequence[k][i][j];
-            }
-            residual[0][j] = square_sum;
-          }
-        }
-
-#       ifdef MESSAGE
-
-        // alternative implementation
-
-        square_sum = 0.;
-        sum = 0.;
-
-        residual[1] = new long double[length[0]];
-
-        if (type[i] != REAL_VALUE) {
-          for (j = time;j >= nb_segment;j--) {
-            for (k = 0;k < nb_sequence;k++) {
-              sum += int_sequence[k][i][j];
-              square_sum += int_sequence[k][i][j] * int_sequence[k][i][j];
-            }
-            residual[1][j] = square_sum - sum * sum / (nb_sequence * (time - j + 1));
-          }
-        }
-
-        else {
-          for (j = time;j >= nb_segment;j--) {
-            for (k = 0;k < nb_sequence;k++) {
-              sum += real_sequence[k][i][j];
-              square_sum += real_sequence[k][i][j] * real_sequence[k][i][j];
-            }
-            residual[1][j] = square_sum - sum * sum / (nb_sequence * (time - j + 1));
-          }
-        }
-
-        for (j = time;j >= nb_segment;j--) {
-          if ((residual[1][j] < residual[0][j] - DOUBLE_ERROR) || (residual[1][j] > residual[0][j] + DOUBLE_ERROR)) {
-            cout << "\nERROR: " << time << " " << j << " | " << residual[1][j] << " " << residual[0][j] << endl;
-          }
-        }
-
-        delete [] residual[1];
-
-#       endif
-      }
-    }
-
-    else if (model_type[i - 1] == VARIANCE_CHANGE) {
-      if ((index != I_DEFAULT) || (!common_contrast)) {
-        if (type[i] != REAL_VALUE) {
-          for (j = 0;j < nb_sequence;j++) {
-            if ((index == I_DEFAULT) || (index == j)) {
-              square_sum = 0.;
-              for (k = time;k >= nb_segment;k--) {
-                diff = int_sequence[j][i][k] - seq_mean[i][j];
-                square_sum += diff * diff;
-                residual[j][k] = square_sum;
-              }
-            }
-          }
-        }
-
-        else {
-          for (j = 0;j < nb_sequence;j++) {
-            if ((index == I_DEFAULT) || (index == j)) {
-              square_sum = 0.;
-              for (k = time;k >= nb_segment;k--) {
-                diff = real_sequence[j][i][k] - seq_mean[i][j];
-                square_sum += diff * diff;
-                residual[j][k] = square_sum;
-              }
-            }
-          }
-        }
-      }
-
-      else {
-        square_sum = 0.;
-
-        if (type[i] != REAL_VALUE) {
-          for (j = time;j >= nb_segment;j--) {
-            for (k = 0;k < nb_sequence;k++) {
-              diff = int_sequence[k][i][j] - seq_mean[i][0];
-              square_sum += diff * diff;
-            }
-            residual[0][j] = square_sum;
-          }
-        }
-
-        else {
-          for (j = time;j >= nb_segment;j--) {
-            for (k = 0;k < nb_sequence;k++) {
-              diff = real_sequence[k][i][j] - seq_mean[i][0];
-              square_sum += diff * diff;
-            }
-            residual[0][j] = square_sum;
-          }
-        }
-      }
-    }
-
-    else if ((model_type[i - 1] == LINEAR_MODEL_CHANGE) || (model_type[0] == INTERCEPT_SLOPE_CHANGE)) {
-      if ((index != I_DEFAULT) || (!common_contrast)) {
-        if (type[i] != REAL_VALUE) {
-          for (j = 0;j < nb_sequence;j++) {
-            if ((index == I_DEFAULT) || (index == j)) {
-              index_parameter_square_sum = 0.;
-              square_sum = 0.;
-              mix_square_sum = 0.;
-              index_parameter_sum = seq_index_parameter[time];
-              sum = int_sequence[j][i][time];
-              residual[j][time] = 0.;
-
-              for (k = time - 1;k >= nb_segment;k--) {
-                index_parameter_diff = seq_index_parameter[k] - index_parameter_sum / (time - k);
-                index_parameter_square_sum += ((double)(time - k) / (double)(time - k + 1)) *
-                                               index_parameter_diff * index_parameter_diff;
-                diff = int_sequence[j][i][k] - sum / (time - k);
-                square_sum += ((double)(time - k) / (double)(time - k + 1)) * diff * diff;
-                mix_square_sum += ((double)(time - k) / (double)(time - k + 1)) * index_parameter_diff * diff;
-                index_parameter_sum += seq_index_parameter[k];
-                sum += int_sequence[j][i][k];
-
-                if ((k < time - 1) && (index_parameter_square_sum > 0.)) {
-                  residual[j][k] = square_sum - mix_square_sum * mix_square_sum / index_parameter_square_sum;
-                }
-                else {
-                  residual[j][k] = 0.;
-                }
-              }
-            }
-          }
-        }
-
-        else {
-          for (j = 0;j < nb_sequence;j++) {
-            if ((index == I_DEFAULT) || (index == j)) {
-              index_parameter_square_sum = 0.;
-              square_sum = 0.;
-              mix_square_sum = 0.;
-              index_parameter_sum = seq_index_parameter[time];
-              sum = real_sequence[j][i][time];
-              residual[j][time] = 0.;
-
-              for (k = time - 1;k >= nb_segment;k--) {
-                index_parameter_diff = seq_index_parameter[k] - index_parameter_sum / (time - k);
-                index_parameter_square_sum += ((double)(time - k) / (double)(time - k + 1)) *
-                                              index_parameter_diff * index_parameter_diff;
-                diff = real_sequence[j][i][k] - sum / (time - k);
-                square_sum += ((double)(time - k) / (double)(time - k + 1)) * diff * diff;
-                mix_square_sum += ((double)(time - k) / (double)(time - k + 1)) * index_parameter_diff * diff;
-                index_parameter_sum += seq_index_parameter[k];
-                sum += real_sequence[j][i][k];
-
-                if ((k < time - 1) && (index_parameter_square_sum > 0.)) {
-                  residual[j][k] = square_sum - mix_square_sum * mix_square_sum / index_parameter_square_sum;
-                }
-                else {
-                  residual[j][k] = 0.;
-                }
-              }
-            }
-          }
-        }
-      }
-
-      else {
-        index_parameter_square_sum = 0.;
-        index_parameter_sum = nb_sequence * seq_index_parameter[time];
-        square_sum = 0.;
-        mix_square_sum = 0.;
-        count = 1;
-        residual[0][time] = 0.;
-
-        if (type[i] != REAL_VALUE) {
-          sum = int_sequence[0][i][time];
-          for (j = 1;j < nb_sequence;j++) {
-            diff = int_sequence[j][i][time] - sum / count;
-            square_sum += ((double)count / (double)(count + 1)) * diff * diff;
-            count++;
-            sum += int_sequence[j][i][time];
-          }
-
-          for (j = time - 1;j >= nb_segment;j--) {
-            for (k = 0;k < nb_sequence;k++) {
-              index_parameter_diff = seq_index_parameter[j] - index_parameter_sum / count;
-              index_parameter_square_sum += ((double)count / (double)(count + 1)) *
-                                            index_parameter_diff * index_parameter_diff;
-              diff = int_sequence[k][i][j] - sum / count;
-              square_sum += ((double)count / (double)(count + 1)) * diff * diff;
-              mix_square_sum += ((double)count / (double)(count + 1)) * index_parameter_diff * diff;
-              count++;
-              index_parameter_sum += seq_index_parameter[j];
-              sum += int_sequence[k][i][j];
-            }
-
-            if (index_parameter_square_sum > 0.) {
-              residual[0][j] = square_sum - mix_square_sum * mix_square_sum / index_parameter_square_sum;
-            }
-            else {
-              residual[0][j] = 0.;
-            }
-          }
-        }
-
-        else {
-          sum = real_sequence[0][i][time];
-          for (j = 1;j < nb_sequence;j++) {
-            diff = real_sequence[j][i][time] - sum / count;
-            square_sum += ((double)count / (double)(count + 1)) * diff * diff;
-            count++;
-            sum += real_sequence[j][i][time];
-          }
-
-          for (j = time - 1;j >= nb_segment;j--) {
-            for (k = 0;k < nb_sequence;k++) {
-              index_parameter_diff = seq_index_parameter[j] - index_parameter_sum / count;
-              index_parameter_square_sum += ((double)count / (double)(count + 1)) *
-                                            index_parameter_diff * index_parameter_diff;
-              diff = real_sequence[k][i][j] - sum / count;
-              square_sum += ((double)count / (double)(count + 1)) * diff * diff;
-              mix_square_sum += ((double)count / (double)(count + 1)) * index_parameter_diff * diff;
-              count++;
-              index_parameter_sum += seq_index_parameter[j];
-              sum += real_sequence[k][i][j];
-            }
-
-            if (index_parameter_square_sum > 0.) {
-              residual[0][j] = square_sum - mix_square_sum * mix_square_sum / index_parameter_square_sum;
-            }
-            else {
-              residual[0][j] = 0.;
-            }
-          }
-        }
-      }
-    }
-
-    else if (model_type[i - 1] == AUTOREGRESSIVE_MODEL_CHANGE) {
-      if ((index != I_DEFAULT) || (!common_contrast)) {
-        if (type[i] != REAL_VALUE) {
-          for (j = 0;j < nb_sequence;j++) {
-            if ((index == I_DEFAULT) || (index == j)) {
-              sum = int_sequence[j][i][time];
-              residual[j][time] = 0.;
-
-              if (time - 1 >= nb_segment) {
-                diff = int_sequence[j][i][time - 1] - int_sequence[j][i][time];
-                square_sum = diff * diff / 4.;
-                shifted_square_sum = square_sum;
-                autocovariance = -square_sum;
-                sum += int_sequence[j][i][time - 1];
-                residual[j][time - 1] = 0.;
-              }
-
-              for (k = time - 2;k >= nb_segment;k--) {
-                diff = int_sequence[j][i][k] - sum / (time - k);
-                square_sum += ((double)(time - k) / ((double)(time - k + 1) * (time - k + 1))) * diff * diff;
-                shifted_square_sum += ((double)(time - k) / ((double)(time - k + 1) * (time - k + 1))) * diff * diff -
-                                      (2. / (double)(time - k + 1)) * diff * (int_sequence[j][i][k] - int_sequence[j][i][time]);
-                autocovariance += ((double)(time - k) / ((double)(time - k + 1) * (time - k + 1))) * diff * diff -
-                                  (1. / (double)(time - k + 1)) * diff * (int_sequence[j][i][k] - int_sequence[j][i][time]);
-                sum += int_sequence[j][i][k];
-
-                if (shifted_square_sum != 0.) {
-                  residual[j][k] = square_sum - autocovariance * autocovariance / shifted_square_sum;
-                }
-                else {
-                  residual[j][k] = 0.;
-                }
-              }
-            }
-          }
-        }
-
-        else {
-          for (j = 0;j < nb_sequence;j++) {
-            if ((index == I_DEFAULT) || (index == j)) {
-              sum = real_sequence[j][i][time];
-              residual[j][time] = 0.;
-
-              if (time - 1 >= nb_segment) {
-                diff = real_sequence[j][i][time - 1] - real_sequence[j][i][time];
-                square_sum = diff * diff / 4.;
-                shifted_square_sum = square_sum;
-                autocovariance = -square_sum;
-                sum += real_sequence[j][i][time - 1];
-                residual[j][time - 1] = 0.;
-              }
-
-              for (k = time - 2;k >= nb_segment;k--) {
-                diff = real_sequence[j][i][k] - sum / (time - k);
-                square_sum += ((double)(time - k) / ((double)(time - k + 1) * (time - k + 1))) * diff * diff;
-                shifted_square_sum += ((double)(time - k) / ((double)(time - k + 1) * (time - k + 1))) * diff * diff -
-                                      (2. / (double)(time - k + 1)) * diff * (real_sequence[j][i][k] - real_sequence[j][i][time]);
-                autocovariance += ((double)(time - k) / ((double)(time - k + 1) * (time - k + 1))) * diff * diff -
-                                  (1. / (double)(time - k + 1)) * diff * (real_sequence[j][i][k] - real_sequence[j][i][time]);
-                sum += real_sequence[j][i][k];
-
-                if (shifted_square_sum != 0.) {
-                  residual[j][k] = square_sum - autocovariance * autocovariance / shifted_square_sum;
-                }
-                else {
-                  residual[j][k] = 0.;
-                }
-              }
-            }
-          }
-        }
-
-#       ifdef DEBUG
-        for (j = 0;j < nb_sequence;j++) {
-          if ((index == I_DEFAULT) || (index == j)) {
-            cout << time << " | ";
-            for (k = time;k >= nb_segment;k--) {
-              cout << residual[j][k] << " ";
-            }
-            cout << endl;
-          }
-        }
-#       endif
-
-        for (j = 0;j < nb_sequence;j++) {
-          if ((index == I_DEFAULT) || (index == j)) {
-            for (k = time - 2;k >= nb_segment;k--) {
-              if (contrast[k] != D_INF) {
-//                if (residual[j][k] > 0.) {
-                if (residual[j][k] > (time - k) * ROUNDOFF_ERROR) {
-                  contrast[k] -= ((double)(time - k) / 2.) * (logl(residual[j][k] /
-                                   (time - k)) + log(2 * M_PI) + 1);
-                }
-                else {
-                  contrast[k] = D_INF;
-                }
-              }
-            }
-          }
-        }
-      }
-
-      else {
-        residual[0][time] = 0.;
-
-        if (type[i] != REAL_VALUE) {
-          sum = 0.;
-          for (j = 0;j < nb_sequence;j++) {
-            sum += int_sequence[j][i][time];
-          }
-
-          if (time - 1 >= nb_segment) {
-            for (j = 0;j < nb_sequence;j++) {
-              sum += int_sequence[j][i][time - 1];
-            }
-            mean = sum / (nb_sequence * 2);
-
-            square_sum = 0.;
-            shifted_square_sum = 0.;
-            autocovariance = 0.;
-            for (k = 0;k < nb_sequence;k++) {
-              diff = int_sequence[j][i][time] - mean;
-              shifted_diff = int_sequence[j][i][time - 1] - mean;
-              square_sum += diff * diff;
-              shifted_square_sum += shifted_diff * shifted_diff;
-              autocovariance += diff * shifted_diff;
-            }
-
-            if (shifted_square_sum != 0.) {
-              residual[0][time - 1] = square_sum - autocovariance * autocovariance / shifted_square_sum;
-            }
-            else {
-              residual[0][time - 1] = 0.;
-            }
-          }
-
-          for (j = time - 2;j >= nb_segment;j--) {
-            mean = sum / (nb_sequence * (time - j));
-            diff = 0.;
-            range_diff = 0.;
-            for (k = 0;k < nb_sequence;k++) {
-              diff += int_sequence[k][i][j] - mean;
-              range_diff += int_sequence[k][i][j] - int_sequence[k][i][time];
-            }
-
-            square_sum += ((double)(time - j) / ((double)nb_sequence * (time - j + 1) * (time - j + 1))) * diff * diff;
-            shifted_square_sum += ((double)(time - j) / ((double)nb_sequence * (time - j + 1) * (time - j + 1))) * diff * diff -
-                                  (2. / (double)(time - j + 1)) * diff * range_diff;
-            autocovariance += ((double)(time - j) / ((double)nb_sequence * (time - j + 1) * (time - j + 1))) * diff * diff -
-                              (1. / (double)(time - j + 1)) * diff * range_diff;
-
-            if (shifted_square_sum != 0.) {
-              residual[0][j] = square_sum - autocovariance * autocovariance / shifted_square_sum;
-            }
-            else {
-              residual[0][j] = 0.;
-            }
-          }
-        }
-
-        else {
-          sum = 0.;
-          for (j = 0;j < nb_sequence;j++) {
-            sum += real_sequence[j][i][time];
-          }
-
-          if (time - 1 >= nb_segment) {
-            for (j = 0;j < nb_sequence;j++) {
-              sum += real_sequence[j][i][time - 1];
-            }
-            mean = sum / (nb_sequence * 2);
-
-            square_sum = 0.;
-            shifted_square_sum = 0.;
-            autocovariance = 0.;
-            for (k = 0;k < nb_sequence;k++) {
-              diff = real_sequence[j][i][time] - mean;
-              shifted_diff = real_sequence[j][i][time - 1] - mean;
-              square_sum += diff * diff;
-              shifted_square_sum += shifted_diff * shifted_diff;
-              autocovariance += diff * shifted_diff;
-            }
-
-            if (shifted_square_sum != 0.) {
-              residual[0][time - 1] = square_sum - autocovariance * autocovariance / shifted_square_sum;
-            }
-            else {
-              residual[0][time - 1] = 0.;
-            }
-          }
-
-          for (j = time - 2;j >= nb_segment;j--) {
-            mean = sum / (nb_sequence * (time - j));
-            diff = 0.;
-            range_diff = 0.;
-            for (k = 0;k < nb_sequence;k++) {
-              diff += real_sequence[k][i][j] - mean;
-              range_diff += real_sequence[k][i][j] - real_sequence[k][i][time];
-            }
-
-            square_sum += ((double)(time - j) / ((double)nb_sequence * (time - j + 1) * (time - j + 1))) * diff * diff;
-            shifted_square_sum += ((double)(time - j) / ((double)nb_sequence * (time - j + 1) * (time - j + 1))) * diff * diff -
-                                  (2. / (double)(time - j + 1)) * diff * range_diff;
-            autocovariance += ((double)(time - j) / ((double)nb_sequence * (time - j + 1) * (time - j + 1))) * diff * diff -
-                              (1. / (double)(time - j + 1)) * diff * range_diff;
-
-            if (shifted_square_sum != 0.) {
-              residual[0][j] = square_sum - autocovariance * autocovariance / shifted_square_sum;
-            }
-            else {
-              residual[0][j] = 0.;
-            }
-          }
-        }
-
-        for (j = time - 1;j >= nb_segment;j--) {
-          if (contrast[j] != D_INF) {
-//            if (residual[0][j] > 0.) {
-            if (residual[0][j] > nb_sequence * (time - j) * ROUNDOFF_ERROR) {
-              contrast[j] -= ((double)(nb_sequence * (time - j)) / 2.) * (logl(residual[0][j] /
-                               (nb_sequence * (time - j))) + log(2 * M_PI) + 1);
-            }
-            else {
-              contrast[j] = D_INF;
-            }
-          }
-        }
-      }
-    }
-
-    else if (model_type[i - 1] == BAYESIAN_POISSON_CHANGE) {
-      prior_contrast = -lgamma(hyperparam[i][0]) + hyperparam[i][0] * log(hyperparam[i][1]);
-      factorial[i][index][time] = log_factorial(int_sequence[index][i][time]);
-
-      sum = 0.;
-      factorial_sum = 0.;
-      for (j = time;j >= nb_segment;j--) {
-        sum += int_sequence[index][i][j];
-        factorial_sum += factorial[i][index][j];
-        if (contrast[j] != D_INF) {
-          contrast[j] += prior_contrast - factorial_sum + lgamma(hyperparam[i][0] + sum) -
-                         (hyperparam[i][0] + sum) * log(hyperparam[i][1] + time - j + 1);
-        }
-      }
-    }
-
-    else if (model_type[i - 1] == BAYESIAN_GAUSSIAN_CHANGE) {
-      prior_contrast = log(hyperparam[i][1]) / 2 - lgamma(hyperparam[i][2] / 2) +
-                       hyperparam[i][2] * log(hyperparam[i][3] / 2) / 2;
-
-      if (type[i] != REAL_VALUE) {
-        square_sum = 0.;
-        sum = int_sequence[index][i][time];
-        if (contrast[time] != D_INF) {
-          diff = hyperparam[i][0] - sum;
-          contrast[time] += prior_contrast - log(2 * M_PI) / 2 -
-                            log(hyperparam[i][1] + 1) / 2 + lgamma((hyperparam[i][2] + 1) / 2) -
-                            (hyperparam[i][2] + 1) *
-                            log((hyperparam[i][3] + hyperparam[i][1] *
-                                 diff * diff / (hyperparam[i][1] + 1)) / 2) / 2;
-        }
-
-        for (j = time - 1;j >= nb_segment;j--) {
-          diff = int_sequence[index][i][j] - sum / (time - j);
-          square_sum += ((double)(time - j) / (double)(time - j + 1)) * diff * diff;
-          sum += int_sequence[index][i][j];
-          if (contrast[j] != D_INF) {
-            diff = hyperparam[i][0] - sum / (time - j + 1);
-            contrast[j] += prior_contrast - (time - j + 1) * log(2 * M_PI) / 2 -
-                           log(hyperparam[i][1] + time - j + 1) / 2 +
-                           lgamma((hyperparam[i][2] + time - j + 1) / 2) -
-                           (hyperparam[i][2] + time - j + 1) *
-                           logl((hyperparam[i][3] + square_sum + hyperparam[i][1] * (time - j + 1) *
-                                 diff * diff / (hyperparam[i][1] + time - j + 1)) / 2) / 2;
-          }
-        }
-      }
-
-      else {
-        square_sum = 0.;
-        sum = real_sequence[index][i][time];
-        if (contrast[time] != D_INF) {
-          diff = hyperparam[i][0] - sum;
-          contrast[time] += prior_contrast - log(2 * M_PI) / 2 -
-                            log(hyperparam[i][1] + 1) / 2 + lgamma((hyperparam[i][2] + 1) / 2) -
-                            (hyperparam[i][2] + 1) *
-                            log((hyperparam[i][3] + hyperparam[i][1] *
-                                 diff * diff / (hyperparam[i][1] + 1)) / 2) / 2;
-        }
-
-        for (j = time - 1;j >= nb_segment;j--) {
-          diff = real_sequence[index][i][j] - sum / (time - j);
-          square_sum += ((double)(time - j) / (double)(time - j + 1)) * diff * diff;
-          sum += real_sequence[index][i][j];
-          if (contrast[j] != D_INF) {
-            diff = hyperparam[i][0] - sum / (time - j + 1);
-            contrast[j] += prior_contrast - (time - j + 1) * log(2 * M_PI) / 2 -
-                           log(hyperparam[i][1] + time - j + 1) / 2 +
-                           lgamma((hyperparam[i][2] + time - j + 1) / 2) -
-                           (hyperparam[i][2] + time - j + 1) *
-                           logl((hyperparam[i][3] + square_sum + hyperparam[i][1] * (time - j + 1) *
-                                 diff * diff / (hyperparam[i][1] + time - j + 1)) / 2) / 2;
-          }
-        }
-      }
-    }
-
-    else if (model_type[i - 1] == ORDINAL_GAUSSIAN_CHANGE) {
-      square_sum = 0.;
-      sum = rank[i][int_sequence[index][i][time]];
-      residual[index][time] = 0.;
-
-      for (j = time - 1;j >= nb_segment;j--) {
-        diff = rank[i][int_sequence[index][i][j]] - sum / (time - j);
-        square_sum += ((double)(time - j) / (double)(time - j + 1)) * diff * diff;
-        sum += rank[i][int_sequence[index][i][j]];
-        residual[index][j] = square_sum;
-      }
-    }
-
-    if ((model_type[0] == MEAN_CHANGE) || (model_type[0] == INTERCEPT_SLOPE_CHANGE)) {
-      if ((index != I_DEFAULT) || (!common_contrast)) {
-        for (j = 0;j < nb_sequence;j++) {
-          if ((index == I_DEFAULT) || (index == j)) {
-            for (k = time - 1;k >= nb_segment;k--) {
-              contrast[k] -= residual[j][k];
-            }
-          }
-        }
-      }
-
-      else {
-        for (j = time;j >= nb_segment;j--) {
-          contrast[j] -= residual[0][j];
-        }
-      }
-    }
-
-    else if ((model_type[i - 1] == GAUSSIAN_CHANGE) || (model_type[i - 1] == LINEAR_MODEL_CHANGE) ||
-             (model_type[i - 1] == VARIANCE_CHANGE) || (model_type[i - 1] == ORDINAL_GAUSSIAN_CHANGE)) {
-      if ((index != I_DEFAULT) || (!common_contrast)) {
-        for (j = 0;j < nb_sequence;j++) {
-          if ((index == I_DEFAULT) || (index == j)) {
-            for (k = time;k >= nb_segment;k--) {
-              if (contrast[k] != D_INF) {
-//                if (residual[j][k] > 0.) {
-                if (residual[j][k] > (time - k + 1) * ROUNDOFF_ERROR) {
-                  contrast[k] -= ((double)(time - k + 1) / 2.) * (logl(residual[j][k] /
-                                   (time - k + 1)) + log(2 * M_PI) + 1);
-/*                  contrast[k] -= ((double)(time - k + 1) / 2.) * (logl(residual[j][k] /
-                                   (time - k)) + log(2 * M_PI)) + (double)(time - k) / 2.; */
-                }
-                else {
-                  contrast[k] = D_INF;
-                }
-              }
-            }
-          }
-        }
-      }
-
-      else {
-        for (j = time;j >= nb_segment;j--) {
-          if (contrast[j] != D_INF) {
-//            if (residual[0][j] > 0.) {
-            if (residual[0][j] > nb_sequence * (time - j + 1) * ROUNDOFF_ERROR) {
-              contrast[j] -= ((double)(nb_sequence * (time - j + 1)) / 2.) * (logl(residual[0][j] /
-                               (nb_sequence * (time - j + 1))) + log(2 * M_PI) + 1);
-            }
-            else {
-              contrast[j] = D_INF;
-            }
-          }
-        }
-      }
-    }
-  }
-
-# ifdef DEBUG
-  for (i = time - 1;i >= nb_segment;i--) {
-    cout << contrast[i] << "  ";
-  }
-  cout << endl;
-# endif
-
-  delete [] frequency;
-  delete [] inf_bound_parameter;
-
-  if (residual) {
-    if ((index != I_DEFAULT) || (!common_contrast)) {
-      for (i = 0;i < nb_sequence;i++) {
-        delete [] residual[i];
-      }
-    }
-    else {
-      delete [] residual[0];
-    }
-    delete [] residual;
-  }
-}
-
-
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the contrast functions within a backward recursion.
- *
- *  \param[in] time                time instant,
- *  \param[in] index               sequence index,
- *  \param[in] model_type          segment model types,
- *  \param[in] common_contrast     flag contrast functions common to the individuals,
- *  \param[in] factorial           log factorials for Poisson models,
- *  \param[in] shape_parameter     negative binomial shape parameters,
- *  \param[in] binomial_coeff      log binomial coefficients for negative binomial models,
- *  \param[in] seq_mean            sequence means for Gaussian change in the variance models,
- *  \param[in] seq_index_parameter index parameters,
- *  \param[in] hyperparam          hyperparameters for Bayesian models,
- *  \param[in] rank                ranks for ordinal variables,
- *  \param[in] contrast            contrast functions.
- */
-/*--------------------------------------------------------------*/
-
-void Sequences::backward_contrast(int time , int index , segment_model *model_type , bool common_contrast ,
-                                  double ***factorial , double *shape_parameter , double ***binomial_coeff ,
-                                  double **seq_mean , int *seq_index_parameter , double **hyperparam ,
-                                  double **rank , long double *contrast) const
-
-{
-  register int i , j , k , m;
-  int max_nb_value , count , *frequency , *inf_bound_parameter;
-  double sum , factorial_sum , proba , binomial_coeff_sum , diff , index_parameter_sum ,
-         index_parameter_diff , shifted_diff , range_diff , mean , buff;
-  long double index_parameter_square_sum , square_sum , mix_square_sum , shifted_square_sum ,
-              autocovariance , prior_contrast , **residual;
-
-
-  // initializations
-
-  max_nb_value = 0;
-  inf_bound_parameter = new int[nb_variable];
-  residual = NULL;
-
-  for (i = 1;i < nb_variable;i++) {
-    if ((model_type[i - 1] == CATEGORICAL_CHANGE) && (marginal_distribution[i]->nb_value > max_nb_value)) {
-      max_nb_value = marginal_distribution[i]->nb_value;
-    }
-
-    if ((model_type[i - 1] == NEGATIVE_BINOMIAL_0_CHANGE) || (model_type[i - 1] == NEGATIVE_BINOMIAL_1_CHANGE)) {
-      switch (model_type[i - 1]) {
-      case NEGATIVE_BINOMIAL_0_CHANGE :
-        inf_bound_parameter[i - 1] = 0;
-        break;
-      case NEGATIVE_BINOMIAL_1_CHANGE :
-        inf_bound_parameter[i - 1] = 1;
-        break;
-      }
-    }
-
-    if (((i == 1) && ((model_type[0] == MEAN_CHANGE) || (model_type[0] == INTERCEPT_SLOPE_CHANGE))) ||
-        (((model_type[i - 1] == GAUSSIAN_CHANGE) || (model_type[i - 1] == VARIANCE_CHANGE) ||
-          (model_type[i - 1] == LINEAR_MODEL_CHANGE) || (model_type[i - 1] == AUTOREGRESSIVE_MODEL_CHANGE) ||
-          (model_type[i - 1] == ORDINAL_GAUSSIAN_CHANGE)) && (!residual))) {
-      residual = new long double*[MAX(nb_sequence , 2)];
-      if ((index != I_DEFAULT) || (!common_contrast)) {
-        for (j = 0;j < nb_sequence;j++) {
-          if ((index == I_DEFAULT) || (index == j)) {
-            residual[j] = new long double[length[j]];
-          }
-          else {
-            residual[j] = NULL;
-          }
-        }
-      }
-      else {
-        residual[0] = new long double[length[0]];
-      }
-    }
-  }
-
-  if (max_nb_value > 0) {
-    frequency = new int[max_nb_value];
-  }
-  else {
-    frequency = NULL;
-  }
-
-  // computation of segment contrast functions (log-likelihoods or sum of squared deviations)
-
-  for (i = time;i < length[index == I_DEFAULT ? 0 : index];i++) {
-    contrast[i] = 0.;
-  }
-
-  for (i = 1;i < nb_variable;i++) {
-    if (model_type[i - 1] == CATEGORICAL_CHANGE) {
-      if ((index != I_DEFAULT) || (!common_contrast)) {
-        for (j = 0;j < nb_sequence;j++) {
-          if ((index == I_DEFAULT) || (index == j)) {
-            for (k = 0;k < marginal_distribution[i]->nb_value;k++) {
-              frequency[k] = 0;
-            }
-
-            frequency[int_sequence[j][i][time]]++;
-//            sum = 0.;
-
-            for (k = time + 1;k < length[j];k++) {
-              frequency[int_sequence[j][i][k]]++;
-              if (contrast[k] != D_INF) {
-                for (m = 0;m < marginal_distribution[i]->nb_value;m++) {
-                  if (frequency[m] > 0) {
-                    contrast[k] += frequency[m] * log((double)frequency[m] / (double)(k - time + 1));
-                  }
-                }
-              }
-
-/*              sum += (k - time) * log((double)(k - time) / (double)(k - time + 1)) +
-                     log((double)(frequency[int_sequence[j][i][k]] + 1) / (double)(k - time + 1));
-              if (frequency[int_sequence[j][i][k]] > 0) {
-                sum -= frequency[int_sequence[j][i][k]] *
-                       log((double)frequency[int_sequence[j][i][k]] / (double)(frequency[int_sequence[j][i][k]] + 1));
-              }
-              frequency[int_sequence[j][i][k]]++;
-
-              if (contrast[k] != D_INF) {
-                contrast[k] += sum;
-              } */
-            }
-          }
-        }
-      }
-
-      else {
-        for (j = 0;j < marginal_distribution[i]->nb_value;j++) {
-          frequency[j] = 0;
-        }
-
-        for (j = time;j < length[0];j++) {
-          for (k = 0;k < nb_sequence;k++) {
-            frequency[int_sequence[k][i][j]]++;
-          }
-
-          if (contrast[j] != D_INF) {
-            for (k = 0;k < marginal_distribution[i]->nb_value;k++) {
-              if (frequency[k] > 0) {
-                contrast[j] += frequency[k] * log((double)frequency[k] / (double)(nb_sequence * (j - time + 1)));
-              }
-            }
-          }
-        }
-      }
-    }
-
-    else if (model_type[i - 1] == POISSON_CHANGE) {
-      if ((index != I_DEFAULT) || (!common_contrast)) {
-        for (j = 0;j < nb_sequence;j++) {
-          if ((index == I_DEFAULT) || (index == j)) {
-            sum = 0.;
-            factorial_sum = 0.;
-
-            for (k = time;k < length[j];k++) {
-              sum += int_sequence[j][i][k];
-              factorial_sum += factorial[i][j][k];
-              if ((contrast[k] != D_INF) && (sum > 0.)) {
-                contrast[k] += sum * (log(sum / (k - time + 1)) - 1) - factorial_sum;
-              }
-            }
-          }
-        }
-      }
-
-      else {
-        sum = 0.;
-        factorial_sum = 0.;
-
-        for (j = time;j < length[0];j++) {
-          for (k = 0;k < nb_sequence;k++) {
-            sum += int_sequence[k][i][j];
-            factorial_sum += factorial[i][k][j];
-          }
-
-          if ((contrast[j] != D_INF) && (sum > 0.)) {
-            contrast[j] += sum * (log(sum / (nb_sequence * (j - time + 1))) - 1) - factorial_sum;
-          }
-        }
-      }
-    }
-
-    else if ((model_type[i - 1] == NEGATIVE_BINOMIAL_0_CHANGE) || (model_type[i - 1] == NEGATIVE_BINOMIAL_1_CHANGE)) {
-      if ((index != I_DEFAULT) || (!common_contrast)) {
-        for (j = 0;j < nb_sequence;j++) {
-          if ((index == I_DEFAULT) || (index == j)) {
-            sum = 0.;
-            binomial_coeff_sum = 0.;
-
-            for (k = time;k < length[j];k++) {
-              sum += int_sequence[j][i][k];
-              binomial_coeff_sum += binomial_coeff[i][j][k];
-
-              if (contrast[k] != D_INF) {
-                if (sum > inf_bound_parameter[i - 1] * (k - time + 1)) {
-                  proba = shape_parameter[i - 1] * (k - time + 1) /
-                          ((shape_parameter[i - 1] - inf_bound_parameter[i - 1]) * (k - time + 1) + sum);
-                  contrast[k] += binomial_coeff_sum + shape_parameter[i - 1] * (k - time + 1) * log(proba) +
-                                 (sum - inf_bound_parameter[i - 1] * (k - time + 1)) * log(1. - proba);
-                }
-                else {
-                  contrast[k] = D_INF;
-                }
-              }
-            }
-          }
-        }
-      }
-
-      else {
-        sum = 0.;
-        binomial_coeff_sum = 0.;
-
-        for (j = time;j < length[0];j++) {
-          for (k = 0;k < nb_sequence;k++) {
-            sum += int_sequence[k][i][j];
-            binomial_coeff_sum += binomial_coeff[i][k][j];
-          }
-
-          if (contrast[j] != D_INF) {
-            if (sum > inf_bound_parameter[i - 1] * nb_sequence * (j - time + 1)) {
-              proba = shape_parameter[i - 1] * nb_sequence * (j - time + 1) /
-                      ((shape_parameter[i - 1] - inf_bound_parameter[i - 1]) * nb_sequence * (j - time + 1) + sum);
-              contrast[j] += binomial_coeff_sum + shape_parameter[i - 1] * nb_sequence * (j - time + 1) * log(proba) +
-                             (sum - inf_bound_parameter[i - 1] * nb_sequence * (j - time + 1)) * log(1. - proba);
-            }
-            else {
-              contrast[j] = D_INF;
-            }
-          }
-        }
-      }
-    }
-
-    else if ((model_type[i - 1] == GAUSSIAN_CHANGE) || (model_type[0] == MEAN_CHANGE)) {
-      if ((index != I_DEFAULT) || (!common_contrast)) {
-        if (type[i] != REAL_VALUE) {
-          for (j = 0;j < nb_sequence;j++) {
-            if ((index == I_DEFAULT) || (index == j)) {
-              square_sum = 0.;
-              sum = int_sequence[j][i][time];
-              residual[j][time] = 0.;
-
-              for (k = time + 1;k < length[j];k++) {
-                diff = int_sequence[j][i][k] - sum / (k - time);
-                square_sum += ((double)(k - time) / (double)(k - time + 1)) * diff * diff;
-                sum += int_sequence[j][i][k];
-                residual[j][k] = square_sum;
-              }
-            }
-          }
-        }
-
-        else {
-          for (j = 0;j < nb_sequence;j++) {
-            if ((index == I_DEFAULT) || (index == j)) {
-              square_sum = 0.;
-              sum = real_sequence[j][i][time];
-              residual[j][time] = 0.;
-
-              for (k = time + 1;k < length[j];k++) {
-                diff = real_sequence[j][i][k] - sum / (k - time);
-                square_sum += ((double)(k - time) / (double)(k - time + 1)) * diff * diff;
-                sum += real_sequence[j][i][k];
-                residual[j][k] = square_sum;
-              }
-            }
-          }
-        }
-      }
-
-      else {
-        square_sum = 0.;
-        sum = 0.;
-        count = 0;
-
-        if (type[i] != REAL_VALUE) {
-          for (j = time;j < length[0];j++) {
-            for (k = 0;k < nb_sequence;k++) {
-              if (count > 0) {
-                diff = int_sequence[k][i][j] - sum / count;
-                square_sum += ((double)count / (double)(count + 1)) * diff * diff;
-              }
-              count++;
-              sum += int_sequence[k][i][j];
-            }
-            residual[0][j] = square_sum;
-          }
-        }
-
-        else {
-          for (j = time;j < length[0];j++) {
-            for (k = 0;k < nb_sequence;k++) {
-              if (count > 0) {
-                diff = real_sequence[k][i][j] - sum / count;
-                square_sum += ((double)count / (double)(count + 1)) * diff * diff;
-              }
-              count++;
-              sum += real_sequence[k][i][j];
-            }
-            residual[0][j] = square_sum;
-          }
-        }
-      }
-    }
-
-    else if (model_type[i - 1] == VARIANCE_CHANGE) {
-      if ((index != I_DEFAULT) || (!common_contrast)) {
-        if (type[i] != REAL_VALUE) {
-          for (j = 0;j < nb_sequence;j++) {
-            if ((index == I_DEFAULT) || (index == j)) {
-              square_sum = 0.;
-              for (k = time;k < length[j];k++) {
-                diff = int_sequence[j][i][k] - seq_mean[i][j];
-                square_sum += diff * diff;
-                residual[j][k] = square_sum;
-              }
-            }
-          }
-        }
-
-        else {
-          for (j = 0;j < nb_sequence;j++) {
-            if ((index == I_DEFAULT) || (index == j)) {
-              square_sum = 0.;
-              for (k = time;k < length[j];k++) {
-                diff = real_sequence[j][i][k] - seq_mean[i][j];
-                square_sum += diff * diff;
-                residual[j][k] = square_sum;
-              }
-            }
-          }
-        }
-      }
-
-      else {
-        square_sum = 0.;
-
-        if (type[i] != REAL_VALUE) {
-          for (j = time;j < length[0];j++) {
-            for (k = 0;k < nb_sequence;k++) {
-              diff = int_sequence[k][i][j] - seq_mean[i][0];
-              square_sum += diff * diff;
-            }
-            residual[0][j] = square_sum;
-          }
-        }
-
-        else {
-          for (j = time;j < length[0];j++) {
-            for (k = 0;k < nb_sequence;k++) {
-              diff = real_sequence[k][i][j] - seq_mean[i][0];
-              square_sum += diff * diff;
-            }
-            residual[0][j] = square_sum;
-          }
-        }
-      }
-    }
-
-    else if ((model_type[i - 1] == LINEAR_MODEL_CHANGE) || (model_type[0] == INTERCEPT_SLOPE_CHANGE)) {
-      if ((index != I_DEFAULT) || (!common_contrast)) {
-        if (type[i] != REAL_VALUE) {
-          for (j = 0;j < nb_sequence;j++) {
-            if ((index == I_DEFAULT) || (index == j)) {
-              index_parameter_square_sum = 0.;
-              square_sum = 0.;
-              mix_square_sum = 0.;
-              index_parameter_sum = seq_index_parameter[time];
-              sum = int_sequence[j][i][time];
-              residual[j][time] = 0.;
-
-              for (k = time + 1;k < length[j];k++) {
-                index_parameter_diff = seq_index_parameter[k] - index_parameter_sum / (k - time);
-                index_parameter_square_sum += ((double)(k - time) / (double)(k - time + 1)) *
-                                              index_parameter_diff * index_parameter_diff;
-                diff = int_sequence[j][i][k] - sum / (k - time);
-                square_sum += ((double)(k - time) / (double)(k - time + 1)) * diff * diff;
-                mix_square_sum += ((double)(k - time) / (double)(k - time + 1)) * index_parameter_diff * diff;
-                index_parameter_sum += seq_index_parameter[k];
-                sum += int_sequence[j][i][k];
-
-                if ((k > time + 1) && (index_parameter_square_sum > 0.)) {
-                  residual[j][k] = square_sum - mix_square_sum * mix_square_sum / index_parameter_square_sum;
-                }
-                else {
-                  residual[j][k] = 0.;
-                }
-              }
-            }
-          }
-        }
-
-        else {
-          for (j = 0;j < nb_sequence;j++) {
-            if ((index == I_DEFAULT) || (index == j)) {
-              index_parameter_square_sum = 0.;
-              square_sum = 0.;
-              mix_square_sum = 0.;
-              index_parameter_sum = seq_index_parameter[time];
-              sum = real_sequence[j][i][time];
-              residual[j][time] = 0.;
-
-              for (k = time + 1;k < length[j];k++) {
-                index_parameter_diff = seq_index_parameter[k] - index_parameter_sum / (k - time);
-                index_parameter_square_sum += ((double)(k - time) / (double)(k - time + 1)) *
-                                              index_parameter_diff * index_parameter_diff;
-                diff = real_sequence[j][i][k] - sum / (k - time);
-                square_sum += ((double)(k - time) / (double)(k - time + 1)) * diff * diff;
-                mix_square_sum += ((double)(k - time) / (double)(k - time + 1)) * index_parameter_diff * diff;
-                index_parameter_sum += seq_index_parameter[k];
-                sum += real_sequence[j][i][k];
-
-                if ((k > time + 1) && (index_parameter_square_sum > 0.)) {
-                  residual[j][k] = square_sum - mix_square_sum * mix_square_sum / index_parameter_square_sum;
-                }
-                else {
-                  residual[j][k] = 0.;
-                }
-              }
-            }
-          }
-        }
-      }
-
-      else {
-        index_parameter_square_sum = 0.;
-        index_parameter_sum = nb_sequence * seq_index_parameter[time];
-        square_sum = 0.;
-        mix_square_sum = 0.;
-        count = 1;
-        residual[0][time] = 0.;
-
-        if (type[i] != REAL_VALUE) {
-          sum = int_sequence[0][i][time];
-          for (j = 1;j < nb_sequence;j++) {
-            diff = int_sequence[j][i][time] - sum / count;
-            square_sum += ((double)count / (double)(count + 1)) * diff * diff;
-            count++;
-            sum += int_sequence[j][i][time];
-          }
-
-          for (j = time + 1;j < length[0];j++) {
-            for (k = 0;k < nb_sequence;k++) {
-              index_parameter_diff = seq_index_parameter[j] - index_parameter_sum / count;
-              index_parameter_square_sum += ((double)count / (double)(count + 1)) *
-                                            index_parameter_diff * index_parameter_diff;
-              diff = int_sequence[k][i][j] - sum / count;
-              square_sum += ((double)count / (double)(count + 1)) * diff * diff;
-              mix_square_sum += ((double)count / (double)(count + 1)) * index_parameter_diff * diff;
-              count++;
-              index_parameter_sum += seq_index_parameter[j];
-              sum += int_sequence[k][i][j];
-            }
-
-            if (index_parameter_square_sum > 0.) {
-              residual[0][j] = square_sum - mix_square_sum * mix_square_sum / index_parameter_square_sum;
-            }
-            else {
-              residual[0][j] = 0.;
-            }
-          }
-        }
-
-        else {
-          sum = real_sequence[0][i][time];
-          for (j = 1;j < nb_sequence;j++) {
-            diff = real_sequence[j][i][time] - sum / count;
-            square_sum += ((double)count / (double)(count + 1)) * diff * diff;
-            count++;
-            sum += real_sequence[j][i][time];
-          }
-
-          for (j = time + 1;j < length[0];j++) {
-            for (k = 0;k < nb_sequence;k++) {
-              index_parameter_diff = seq_index_parameter[j] - index_parameter_sum / count;
-              index_parameter_square_sum += ((double)count / (double)(count + 1)) *
-                                            index_parameter_diff * index_parameter_diff;
-              diff = real_sequence[k][i][j] - sum / count;
-              square_sum += ((double)count / (double)(count + 1)) * diff * diff;
-              mix_square_sum += ((double)count / (double)(count + 1)) * index_parameter_diff * diff;
-              count++;
-              index_parameter_sum += seq_index_parameter[j];
-              sum += real_sequence[k][i][j];
-            }
-
-            if (index_parameter_square_sum > 0.) {
-              residual[0][j] = square_sum - mix_square_sum * mix_square_sum / index_parameter_square_sum;
-            }
-            else {
-              residual[0][j] = 0.;
-            }
-          }
-        }
-      }
-    }
-
-    else if (model_type[i - 1] == AUTOREGRESSIVE_MODEL_CHANGE) {
-      if ((index != I_DEFAULT) || (!common_contrast)) {
-        if (type[i] != REAL_VALUE) {
-          for (j = 0;j < nb_sequence;j++) {
-            if ((index == I_DEFAULT) || (index == j)) {
-              sum = int_sequence[j][i][time];
-              residual[j][time] = 0.;
-
-              if (time + 1 < length[j]) {
-                diff = int_sequence[j][i][time + 1] - int_sequence[j][i][time];
-                square_sum = diff * diff / 4.;
-                shifted_square_sum = square_sum;
-                autocovariance = -square_sum;
-                sum += int_sequence[j][i][time + 1];
-                residual[j][time + 1] = 0.;
-              }
-
-              for (k = time + 2;k < length[j];k++) {
-                diff = int_sequence[j][i][k] - sum / (k - time);
-                square_sum += ((double)(k - time) / ((double)(k - time + 1) * (k - time + 1))) * diff * diff -
-                              (2. / (double)(k - time + 1)) * diff * (int_sequence[j][i][k] - int_sequence[j][i][time]);
-                shifted_square_sum += ((double)(k - time) / ((double)(k - time + 1) * (k - time + 1))) * diff * diff;
-                autocovariance += ((double)(k - time) / ((double)(k - time + 1) * (k - time + 1))) * diff * diff -
-                                  (1. / (double)(k - time + 1)) * diff * (int_sequence[j][i][k] - int_sequence[j][i][time]);
-                sum += int_sequence[j][i][k];
-
-                if (shifted_square_sum != 0.) {
-                  residual[j][k] = square_sum - autocovariance * autocovariance / shifted_square_sum;
-                }
-                else {
-                  residual[j][k] = 0.;
-                }
-              }
-            }
-          }
-        }
-
-        else {
-          for (j = 0;j < nb_sequence;j++) {
-            if ((index == I_DEFAULT) || (index == j)) {
-              sum = real_sequence[j][i][time];
-              residual[j][time] = 0.;
-
-              if (time + 1 < length[j]) {
-                diff = real_sequence[j][i][time + 1] - real_sequence[j][i][time];
-                square_sum = diff * diff / 4.;
-                shifted_square_sum = square_sum;
-                autocovariance = -square_sum;
-                sum += real_sequence[j][i][time + 1];
-                residual[j][time + 1] = 0.;
-              }
-
-              for (k = time + 2;k < length[j];k++) {
-                diff = real_sequence[j][i][k] - sum / (k - time);
-                square_sum += ((double)(k - time) / ((double)(k - time + 1) * (k - time + 1))) * diff * diff -
-                              (2. / (double)(k - time + 1)) * diff * (real_sequence[j][i][k] - real_sequence[j][i][time]);
-                shifted_square_sum += ((double)(k - time) / ((double)(k - time + 1) * (k - time + 1))) * diff * diff;
-                autocovariance += ((double)(k - time) / ((double)(k - time + 1) * (k - time + 1))) * diff * diff -
-                                  (1. / (double)(k - time + 1)) * diff * (real_sequence[j][i][k] - real_sequence[j][i][time]);
-                sum += real_sequence[j][i][k];
-
-                if (shifted_square_sum != 0.) {
-                  residual[j][k] = square_sum - autocovariance * autocovariance / shifted_square_sum;
-                }
-                else {
-                  residual[j][k] = 0.;
-                }
-              }
-            }
-          }
-        }
-
-        for (j = 0;j < nb_sequence;j++) {
-          if ((index == I_DEFAULT) || (index == j)) {
-            for (k = time + 2;k < length[j];k++) {
-              if (contrast[k] != D_INF) {
-//                if (residual[j][k] > 0.) {
-                if (residual[j][k] > (k - time) * ROUNDOFF_ERROR) {
-                  contrast[k] -= ((double)(k - time) / 2.) * (logl(residual[j][k] /
-                                   (k - time)) + log(2 * M_PI) + 1);
-                }
-                else {
-                  contrast[k] = D_INF;
-                }
-              }
-            }
-          }
-        }
-      }
-
-      else {
-        residual[0][time] = 0.;
-
-        if (type[i] != REAL_VALUE) {
-          sum = 0.;
-          for (j = 0;j < nb_sequence;j++) {
-            sum += int_sequence[j][i][time];
-          }
-
-          if (time + 1 < length[0]) {
-            for (j = 0;j < nb_sequence;j++) {
-              sum += int_sequence[j][i][time + 1];
-            }
-            mean = sum / (nb_sequence * 2);
-
-            square_sum = 0.;
-            shifted_square_sum = 0.;
-            autocovariance = 0.;
-            for (k = 0;k < nb_sequence;k++) {
-              diff = int_sequence[j][i][time + 1] - mean;
-              shifted_diff = int_sequence[j][i][time] - mean;
-              square_sum += diff * diff;
-              shifted_square_sum += shifted_diff * shifted_diff;
-              autocovariance += diff * shifted_diff;
-            }
-
-            if (shifted_square_sum != 0.) {
-              residual[0][time + 1] = square_sum - autocovariance * autocovariance / shifted_square_sum;
-            }
-            else {
-              residual[0][time + 1] = 0.;
-            }
-          }
-
-          for (j = time + 2;j < length[0];j++) {
-            mean = sum / (nb_sequence * (j - time));
-            diff = 0.;
-            range_diff = 0.;
-            for (k = 0;k < nb_sequence;k++) {
-              diff += int_sequence[k][i][j] - mean;
-              range_diff += int_sequence[k][i][j] - int_sequence[k][i][time];
-            }
-
-            square_sum += ((double)(j - time) / ((double)nb_sequence * (j - time + 1) * (j - time + 1))) * diff * diff -
-                          (2. / (double)(j - time + 1)) * diff * range_diff;
-            shifted_square_sum += ((double)(j - time) / ((double)nb_sequence * (j - time + 1) * (j - time + 1))) * diff * diff;
-            autocovariance += ((double)(j - time) / ((double)nb_sequence * (j - time + 1) * (j - time + 1))) * diff * diff -
-                              (1. / (double)(j - time + 1)) * diff * range_diff;
-
-            if (shifted_square_sum != 0.) {
-              residual[0][j] = square_sum - autocovariance * autocovariance / shifted_square_sum;
-            }
-            else {
-              residual[0][j] = 0.;
-            }
-          }
-        }
-
-        else {
-          sum = 0.;
-          for (j = 0;j < nb_sequence;j++) {
-            sum += real_sequence[j][i][time];
-          }
-
-          if (time + 1 < length[0]) {
-            for (j = 0;j < nb_sequence;j++) {
-              sum += real_sequence[j][i][time + 1];
-            }
-            mean = sum / (nb_sequence * 2);
-
-            square_sum = 0.;
-            shifted_square_sum = 0.;
-            autocovariance = 0.;
-            for (k = 0;k < nb_sequence;k++) {
-              diff = real_sequence[j][i][time + 1] - mean;
-              shifted_diff = real_sequence[j][i][time] - mean;
-              square_sum += diff * diff;
-              shifted_square_sum += shifted_diff * shifted_diff;
-              autocovariance += diff * shifted_diff;
-            }
-
-            if (shifted_square_sum != 0.) {
-              residual[0][time + 1] = square_sum - autocovariance * autocovariance / shifted_square_sum;
-            }
-            else {
-              residual[0][time + 1] = 0.;
-            }
-          }
-
-          for (j = time + 2;j < length[0];j++) {
-            mean = sum / (nb_sequence * (j - time));
-            diff = 0.;
-            range_diff = 0.;
-            for (k = 0;k < nb_sequence;k++) {
-              diff += real_sequence[k][i][j] - mean;
-              range_diff += real_sequence[k][i][j] - real_sequence[k][i][time];
-            }
-
-            square_sum += ((double)(j - time) / ((double)nb_sequence * (j - time + 1) * (j - time + 1))) * diff * diff -
-                          (2. / (double)(j - time + 1)) * diff * range_diff;
-            shifted_square_sum += ((double)(j - time) / ((double)nb_sequence * (j - time + 1) * (j - time + 1))) * diff * diff;
-            autocovariance += ((double)(j - time) / ((double)nb_sequence * (j - time + 1) * (j - time + 1))) * diff * diff -
-                              (1. / (double)(j - time + 1)) * diff * range_diff;
-
-            if (shifted_square_sum != 0.) {
-              residual[0][j] = square_sum - autocovariance * autocovariance / shifted_square_sum;
-            }
-            else {
-              residual[0][j] = 0.;
-            }
-          }
-        }
-
-        for (j = time + 1;j < length[0];j++) {
-          if (contrast[j] != D_INF) {
-//            if (residual[0][j] > 0.) {
-            if (residual[0][j] > nb_sequence * (j - time) * ROUNDOFF_ERROR) {
-              contrast[j] -= ((double)(nb_sequence * (j - time)) / 2.) * (logl(residual[0][j] /
-                               (nb_sequence * (j - time))) + log(2 * M_PI) + 1);
-            }
-            else {
-              contrast[j] = D_INF;
-            }
-          }
-        }
-      }
-    }
-
-    else if (model_type[i - 1] == BAYESIAN_POISSON_CHANGE) {
-      prior_contrast = -lgamma(hyperparam[i][0]) + hyperparam[i][0] * log(hyperparam[i][1]);
-
-      sum = 0.;
-      factorial_sum = 0.;
-      for (j = time;j < length[index];j++) {
-        sum += int_sequence[index][i][j];
-        factorial_sum += factorial[i][index][j];
-        if (contrast[j] != D_INF) {
-          contrast[j] += prior_contrast - factorial_sum + lgamma(hyperparam[i][0] + sum) -
-                         (hyperparam[i][0] + sum) * log(hyperparam[i][1] + j - time + 1);
-        }
-      }
-    }
-
-    else if (model_type[i - 1] == BAYESIAN_GAUSSIAN_CHANGE) {
-      prior_contrast = log(hyperparam[i][1]) / 2 - lgamma(hyperparam[i][2] / 2) +
-                       hyperparam[i][2] * log(hyperparam[i][3] / 2) / 2;
-
-      if (type[i] != REAL_VALUE) {
-        square_sum = 0.;
-        sum = int_sequence[index][i][time];
-        if (contrast[time] != D_INF) {
-          diff = hyperparam[i][0] - sum;
-          contrast[time] += prior_contrast - log(2 * M_PI) / 2 -
-                            log(hyperparam[i][1] + 1) / 2 + lgamma((hyperparam[i][2] + 1) / 2) -
-                            (hyperparam[i][2] + 1) *
-                            log((hyperparam[i][3] + hyperparam[i][1] *
-                                 diff * diff / (hyperparam[i][1] + 1)) / 2) / 2;
-        }
-
-        for (j = time + 1;j < length[index];j++) {
-          diff = int_sequence[index][i][j] - sum / (j - time);
-          square_sum += ((double)(j - time) / (double)(j - time + 1)) * diff * diff;
-          sum += int_sequence[index][i][j];
-          if (contrast[j] != D_INF) {
-            diff = hyperparam[i][0] - sum / (j - time + 1);
-            contrast[j] += prior_contrast - (j - time + 1) * log(2 * M_PI) / 2 -
-                           log(hyperparam[i][1] + j - time + 1) / 2 +
-                           lgamma((hyperparam[i][2] + j - time + 1) / 2) -
-                           (hyperparam[i][2] + j - time + 1) *
-                           logl((hyperparam[i][3] + square_sum + hyperparam[i][1] * (j - time + 1) *
-                                 diff * diff / (hyperparam[i][1] + j - time + 1)) / 2) / 2;
-          }
-        }
-      }
-
-      else {
-        square_sum = 0.;
-        sum = real_sequence[index][i][time];
-        if (contrast[time] != D_INF) {
-          diff = hyperparam[i][0] - sum;
-          contrast[time] += prior_contrast - log(2 * M_PI) / 2 -
-                            log(hyperparam[i][1] + 1) / 2 + lgamma((hyperparam[i][2] + 1) / 2) -
-                            (hyperparam[i][2] + 1) *
-                            log((hyperparam[i][3] + hyperparam[i][1] *
-                                 diff * diff / (hyperparam[i][1] + 1)) / 2) / 2;
-        }
-
-        for (j = time + 1;j < length[index];j++) {
-          diff = real_sequence[index][i][j] - sum / (j - time);
-          square_sum += ((double)(j - time) / (double)(j - time + 1)) * diff * diff;
-          sum += real_sequence[index][i][j];
-          if (contrast[j] != D_INF) {
-            diff = hyperparam[i][0] - sum / (j - time + 1);
-            contrast[j] += prior_contrast - (j - time + 1) * log(2 * M_PI) / 2 -
-                           log(hyperparam[i][1] + j - time + 1) / 2 +
-                           lgamma((hyperparam[i][2] + j - time + 1) / 2) -
-                           (hyperparam[i][2] + j - time + 1) *
-                           logl((hyperparam[i][3] + square_sum + hyperparam[i][1] * (j - time + 1) *
-                                 diff * diff / (hyperparam[i][1] + j - time + 1)) / 2) / 2;
-          }
-        }
-      }
-    }
-
-    else if (model_type[i - 1] == ORDINAL_GAUSSIAN_CHANGE) {
-      square_sum = 0.;
-      sum = rank[i][int_sequence[index][i][time]];
-      residual[index][time] = 0.;
-
-      for (j = time + 1;j < length[index];j++) {
-        diff = rank[i][int_sequence[index][i][j]] - sum / (j - time);
-        square_sum += ((double)(j - time) / (double)(j - time + 1)) * diff * diff;
-        sum += rank[i][int_sequence[index][i][j]];
-        residual[index][j] = square_sum;
-      }
-    }
-
-    if ((model_type[0] == MEAN_CHANGE) || (model_type[0] == INTERCEPT_SLOPE_CHANGE)) {
-      if ((index != I_DEFAULT) || (!common_contrast)) {
-        for (j = 0;j < nb_sequence;j++) {
-          if ((index == I_DEFAULT) || (index == j)) {
-            for (k = time + 1;k < length[j];k++) {
-              contrast[k] -= residual[j][k];
-            }
-          }
-        }
-      }
-
-      else {
-        for (j = time;j < length[0];j++) {
-          contrast[j] -= residual[0][j];
-        }
-      }
-    }
-
-    else if ((model_type[i - 1] == GAUSSIAN_CHANGE) || (model_type[i - 1] == LINEAR_MODEL_CHANGE) ||
-             (model_type[i - 1] == VARIANCE_CHANGE) || (model_type[i - 1] == ORDINAL_GAUSSIAN_CHANGE)) {
-      if ((index != I_DEFAULT) || (!common_contrast)) {
-        for (j = 0;j < nb_sequence;j++) {
-          if ((index == I_DEFAULT) || (index == j)) {
-            for (k = time;k < length[j];k++) {
-              if (contrast[k] != D_INF) {
-//                if (residual[j][k] > 0.) {
-                if (residual[j][k] > (k - time + 1) * ROUNDOFF_ERROR) {
-                  contrast[k] -= ((double)(k - time + 1) / 2.) * (logl(residual[j][k] /
-                                   (k - time + 1)) + log(2 * M_PI) + 1);
-/*                  contrast[k] -= ((double)(k - time + 1) / 2.) * (logl(residual[j][k] /
-                                   (k - time)) + log(2 * M_PI)) + (double)(k - time) / 2.; */
-                }
-                else {
-                  contrast[k] = D_INF;
-                }
-              }
-            }
-          }
-        }
-      }
-
-       else {
-        for (j = time;j < length[0];j++) {
-          if (contrast[j] != D_INF) {
-//            if (residual[0][j] > 0.) {
-            if (residual[0][j] > nb_sequence * (j - time + 1) * ROUNDOFF_ERROR) {
-              contrast[j] -= ((double)(nb_sequence * (j - time + 1)) / 2.) * (logl(residual[0][j] /
-                               (nb_sequence * (j - time + 1))) + log(2 * M_PI) + 1);
-            }
-            else {
-              contrast[j] = D_INF;
-            }
-          }
-        }
-      }
-    }
-  }
-
-# ifdef DEBUG
-  for (i = time;i < length[index == I_DEFAULT ? 0 : index];i++) {
-    cout << contrast[i] << "  ";
-  }
-  cout << endl;
-# endif
-
-  delete [] frequency;
-  delete [] inf_bound_parameter;
-
-  if (residual) {
-    if ((index != I_DEFAULT) || (!common_contrast)) {
-      for (i = 0;i < nb_sequence;i++) {
-        delete [] residual[i];
-      }
-    }
-    else {
-      delete [] residual[0];
-    }
-    delete [] residual;
-  }
 }
 
 

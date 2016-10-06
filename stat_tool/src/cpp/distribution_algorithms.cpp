@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -56,15 +56,15 @@ namespace stat_tool {
 
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Convolution of 2 distributions (the convolution can be put in one of the 2 distributions).
  *
- *  Convolution de 2 lois (le resultat de la convolution peut 
- *  etre mis dans l'une des 2 lois).
- *
- *  arguments : references sur les 2 lois, nombre de valeurs
- *              de la loi resultante.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] dist1     reference on the 1st distribution,
+ *  \param[in] dist2     reference on the 2nd distribution,
+ *  \param[in] inb_value number of values of the convolution.
+ */
+/*--------------------------------------------------------------*/
 
 void Distribution::convolution(Distribution &dist1 , Distribution &dist2 , int inb_value)
 
@@ -108,13 +108,14 @@ void Distribution::convolution(Distribution &dist1 , Distribution &dist2 , int i
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the probability mass function of a binomial distribution.
  *
- *  Calcul d'une loi binomiale.
- *
- *  arguments : nombre de valeurs, mode de calcul (STANDARD/RENEWAL).
- *
- *--------------------------------------------------------------*/
+ *  \param[in] inb_value number of values,
+ *  \param[in] mode      computation mode (STANDARD/RENEWAL).
+ */
+/*--------------------------------------------------------------*/
 
 void DiscreteParametric::binomial_computation(int inb_value , distribution_computation mode)
 
@@ -135,7 +136,7 @@ void DiscreteParametric::binomial_computation(int inb_value , distribution_compu
     break;
   }
 
-  // valeurs de probabilite nulle avant la borne inferieure
+  // null probability values before the lower bound of the support
 
   for (i = 0;i < MIN(nb_value , inf_bound);i++) {
     mass[i] = 0.;
@@ -147,11 +148,11 @@ void DiscreteParametric::binomial_computation(int inb_value , distribution_compu
     if (probability <= B_PROBABILITY) {
       subset = 0;
 
-      // cas calcul direct
+      // case direct computation
 
       if ((sup_bound - inf_bound) / failure < B_THRESHOLD) {
 
-        // calcul de la probabilite de la borne inferieure
+        // computation of the lower bound probability
 
         term = 1.;
         for (i = 0;i < sup_bound - inf_bound;i++) {
@@ -159,7 +160,7 @@ void DiscreteParametric::binomial_computation(int inb_value , distribution_compu
         }
         mass[inf_bound] = term;
 
-        // calcul des probabilites des valeurs suivantes
+        // computation of the probabilities for the successive values (forward recurrence)
 
         ratio = success / failure;
 
@@ -171,16 +172,16 @@ void DiscreteParametric::binomial_computation(int inb_value , distribution_compu
         }
       }
 
-      // cas calcul en log
+      // case computation in log
 
       else {
 
-        // calcul de la probabilite de la borne inferieure
+        // computation of the lower bound probability
 
         term = (sup_bound - inf_bound) * log(failure);
         mass[inf_bound] = exp(term);
 
-        // calcul des probabilites des valeurs suivantes
+        // computation of the probabilities for the successive values (forward recurrence)
 
         ratio = log(success / failure);
 
@@ -196,11 +197,11 @@ void DiscreteParametric::binomial_computation(int inb_value , distribution_compu
     else {
       subset = set - 1;
 
-      // cas calcul direct
+      // case direct computation
 
       if ((sup_bound - inf_bound) / success < B_THRESHOLD) {
 
-        // calcul de la probabilite de la borne superieure
+        // computation of the upper bound probability
 
         term = 1.;
         for (i = 0;i < sup_bound - inf_bound;i++) {
@@ -210,7 +211,7 @@ void DiscreteParametric::binomial_computation(int inb_value , distribution_compu
           mass[sup_bound] = term;
         }
 
-        // calcul des probabilites des valeurs precedentes
+        // computation of the probabilities for the successive values (backward recurrence)
 
         ratio = failure / success;
 
@@ -224,18 +225,18 @@ void DiscreteParametric::binomial_computation(int inb_value , distribution_compu
         }
       }
 
-      // cas calcul en log
+      // case computation in log
 
       else {
 
-        // calcul de la probabilite de la borne superieure
+        // computation of the upper bound probability
 
         term = (sup_bound - inf_bound) * log(success);
         if (sup_bound < nb_value) {
           mass[sup_bound] = exp(term);
         }
 
-        // calcul des probabilites des valeurs precedentes
+        // computation of the probabilities for the successive values (backward recurrence)
 
         ratio = log(failure / success);
 
@@ -269,17 +270,17 @@ void DiscreteParametric::binomial_computation(int inb_value , distribution_compu
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the probability mass function of a Poisson distribution.
+ *         The number of values is determined using a threshold on the cumulative
+ *         distribution function or using a predefined bound.
  *
- *  Calcul d'une loi de Poisson, loi definie sur
- *  [borne inferieure , ... , infini]. On fixe le nombre de valeurs,
- *  soit a partir d'un seuil calcule sur la fonction de repartition,
- *  soit a partir d'une borne predefinie.
- *
- *  arguments : nombre de valeurs, seuil sur la fonction de repartition,
- *              mode de calcul (STANDARD/RENEWAL).
- *
- *--------------------------------------------------------------*/
+ *  \param[in] inb_value       number of values,
+ *  \param[in] cumul_threshold threshold on the cumulative distribution function,
+ *  \param[in] mode            computation mode (STANDARD/RENEWAL).
+ */
+/*--------------------------------------------------------------*/
 
 void DiscreteParametric::poisson_computation(int inb_value , double cumul_threshold ,
                                              distribution_computation mode)
@@ -294,11 +295,11 @@ void DiscreteParametric::poisson_computation(int inb_value , double cumul_thresh
 
   switch (mode) {
 
-  // cas calcul complet
+  // case complete computation
 
   case STANDARD : {
 
-    // valeurs de probabilite nulle avant la borne inferieure
+    // null probability values before the lower bound of the support
 
     for (i = 0;i < inf_bound;i++) {
       *pmass++ = 0.;
@@ -307,16 +308,16 @@ void DiscreteParametric::poisson_computation(int inb_value , double cumul_thresh
 
     i = 1;
 
-    // cas calcul direct
+    // case direct computation
 
     if (parameter < P_THRESHOLD) {
 
-      // calcul de la probabilite de la borne inferieure
+      // computation of the lower bound probability
 
       *pmass = exp(-parameter);
       *pcumul = *pmass;
 
-      // calcul des probabilites des valeurs suivantes
+      // computation of the probabilities for the successive values (forward recurrence)
 
       while (((*pcumul < cumul_threshold) || (i + inf_bound < inb_value)) &&
              (i + inf_bound < alloc_nb_value)) {
@@ -328,17 +329,17 @@ void DiscreteParametric::poisson_computation(int inb_value , double cumul_thresh
       }
     }
 
-    // cas calcul en log
+    // case computation in log
 
     else {
 
-      // calcul de la probabilite de la borne inferieure
+      // computation of the lower bound probability
 
       num = -parameter;
       *pmass = exp(num);
       *pcumul = *pmass;
 
-      // calcul des probabilites des valeurs suivantes
+      // computation of the probabilities for the successive values (forward recurrence)
 
       log_parameter = log(parameter);
       denom = 0.;
@@ -358,11 +359,11 @@ void DiscreteParametric::poisson_computation(int inb_value , double cumul_thresh
     break;
   }
 
-  // cas calcul incomplet (renouvellement)
+  // case incomplete computation (renewal process)
 
   case RENEWAL : {
 
-    // valeurs de probabilite nulle avant la borne inferieure
+    // null probability values before the lower bound of the support
 
     for (i = 0;i < MIN(inb_value , inf_bound);i++) {
       *pmass++ = 0.;
@@ -372,16 +373,16 @@ void DiscreteParametric::poisson_computation(int inb_value , double cumul_thresh
     if (inb_value > inf_bound) {
       i = 1;
 
-      // cas calcul direct
+      // case direct computation
 
       if (parameter < P_THRESHOLD) {
 
-        // calcul de la probabilite de la borne inferieure
+        // computation of the lower bound probability
 
         *pmass = exp(-parameter);
         *pcumul = *pmass;
 
-        // calcul des probabilites des valeurs suivantes
+        // computation of the probabilities for the successive values (forward recurrence)
 
         while ((*pcumul < cumul_threshold) && (i + inf_bound < inb_value)) {
           pmass++;
@@ -392,17 +393,17 @@ void DiscreteParametric::poisson_computation(int inb_value , double cumul_thresh
         }
       }
 
-      // cas calcul en log
+      // case computation in log
 
       else {
 
-        // calcul de la probabilite de la borne inferieure
+        // computation of the lower bound probability
 
         num = -parameter;
         *pmass = exp(num);
         *pcumul = *pmass;
 
-        // calcul des probabilites des valeurs suivantes
+        // computation of the probabilities for the successive values (forward recurrence)
 
         log_parameter = log(parameter);
         denom = 0.;
@@ -442,17 +443,17 @@ void DiscreteParametric::poisson_computation(int inb_value , double cumul_thresh
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the probability mass function of a negative binomial distribution.
+ *         The number of values is determined using a threshold on the cumulative
+ *         distribution function or using a predefined bound.
  *
- *  Calcul d'une loi binomiale negative, loi definie sur
- *  [borne inferieure , ... , infini]. On fixe le nombre de valeurs,
- *  soit a partir d'un seuil calcule sur la fonction de repartition,
- *  soit a partir d'une borne predefinie.
- *
- *  arguments : nombre de valeurs, seuil sur la fonction de repartition,
- *              mode de calcul (STANDARD/RENEWAL).
- *
- *--------------------------------------------------------------*/
+ *  \param[in] inb_value       number of values,
+ *  \param[in] cumul_threshold threshold on the cumulative distribution function,
+ *  \param[in] mode            computation mode (STANDARD/RENEWAL).
+ */
+/*--------------------------------------------------------------*/
 
 void DiscreteParametric::negative_binomial_computation(int inb_value , double cumul_threshold ,
                                                        distribution_computation mode)
@@ -468,11 +469,11 @@ void DiscreteParametric::negative_binomial_computation(int inb_value , double cu
 
   switch (mode) {
 
-    // cas calcul complet
+    // case complete computation
 
     case STANDARD : {
 
-    // valeurs de probabilite nulle avant la borne inferieure
+    // null probability values before the lower bound of the support
 
     for (i = 0;i < inf_bound;i++) {
       *pmass++ = 0.;
@@ -483,17 +484,17 @@ void DiscreteParametric::negative_binomial_computation(int inb_value , double cu
     subset = parameter - 1.;
     set = subset;
 
-    // cas calcul direct
+    // case direct computation
 
     if (sqrt(parameter) / success < NB_THRESHOLD) {
 
-      // calcul de la probabilite de la borne inferieure
+      // computation of the lower bound probability
 
       term = pow(success , parameter);
       *pmass = term;
       *pcumul = *pmass;
 
-      // calcul des probabilites des valeurs suivantes
+      // computation of the probabilities for the successive values (forward recurrence)
 
       while (((*pcumul < cumul_threshold) || (i < inb_value)) &&
              (i < alloc_nb_value)) {
@@ -507,17 +508,17 @@ void DiscreteParametric::negative_binomial_computation(int inb_value , double cu
       }
     }
 
-    // cas calcul en log
+    // case computation in log
 
     else {
 
-      // calcul de la probabilite de la borne inferieure
+      // computation of the lower bound probability
 
       term = parameter * log(success);
       *pmass = exp(term);
       *pcumul = *pmass;
 
-      // calcul des probabilites des valeurs suivantes
+      // computation of the probabilities for the successive values (forward recurrence)
 
       log_failure = log(failure);
 
@@ -535,11 +536,11 @@ void DiscreteParametric::negative_binomial_computation(int inb_value , double cu
     break;
   }
 
-  // cas calcul incomplet (renouvellement)
+  // case incomplete computation (renewal process)
 
   case RENEWAL : {
 
-    // valeurs de probabilite nulle avant la borne inferieure
+    // null probability values before the lower bound of the support
 
     for (i = 0;i < MIN(inf_bound , inb_value);i++) {
       *pmass++ = 0.;
@@ -551,17 +552,17 @@ void DiscreteParametric::negative_binomial_computation(int inb_value , double cu
       subset = parameter - 1.;
       set = subset;
 
-      // cas calcul direct
+      // case direct computation
 
       if (sqrt(parameter) / success < NB_THRESHOLD) {
 
-        // calcul de la probabilite de la borne inferieure
+        // computation of the lower bound probability
 
         term = pow(success , parameter);
         *pmass = term;
         *pcumul = *pmass;
 
-        // calcul des probabilites de valeurs suivantes
+        // computation of the probabilities for the successive values (forward recurrence)
 
         while ((*pcumul < cumul_threshold) && (i < inb_value)) {
           set++;
@@ -574,17 +575,17 @@ void DiscreteParametric::negative_binomial_computation(int inb_value , double cu
         }
       }
 
-      // cas calcul en log
+      // case computation in log
 
       else {
 
-        // calcul de la probabilite de la borne inferieure
+        // computation of the lower bound probability
 
         term = parameter * log(success);
         *pmass = exp(term);
         *pcumul = *pmass;
 
-        // calcul des probabilites des valeurs suivantes
+        // computation of the probabilities for the successive values (forward recurrence)
 
         log_failure = log(failure);
 
@@ -622,11 +623,11 @@ void DiscreteParametric::negative_binomial_computation(int inb_value , double cu
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Calcul d'une loi uniforme.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the probability mass function of a discrete uniform distribution.
+ */
+/*--------------------------------------------------------------*/
 
 void DiscreteParametric::uniform_computation()
 
@@ -651,15 +652,21 @@ void DiscreteParametric::uniform_computation()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the number of values of a parametric discrete distribution
+ *         (binomial, Poisson, negative binomial, uniform).
  *
- *  Calcul du nombre de valeurs d'une loi discrete elementaire.
+ *  \param[in] ident           distribution identifier,
+ *  \param[in] inf_bound       lower bound of the support,
+ *  \param[in] sup_bound       upper bound of the support (binomial or uniform distribution),
+ *  \param[in] parameter       parameter (negative binomial distribution),
+ *  \param[in] probability     probability (binomial or negative binomial distribution),
+ *  \param[in] cumul_threshold threshold on the cumulative distribution function.
  *
- *  arguments : identificateur, bornes inferieure et superieure,
- *              parametre, probabilite,
- *              seuil sur la fonction de repartition.
- *
- *--------------------------------------------------------------*/
+ *  \return number of values
+ */
+/*--------------------------------------------------------------*/
 
 int DiscreteParametric::nb_value_computation(discrete_parametric ident , int inf_bound , int sup_bound ,
                                              double parameter , double probability , double cumul_threshold)
@@ -687,15 +694,15 @@ int DiscreteParametric::nb_value_computation(discrete_parametric ident , int inf
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the probability mass function of a parametric discrete distribution
+ *         (binomial, Poisson, negative binomial, uniform).
  *
- *  Calcul d'une loi discrete elementaire (binomiale, Poisson,
- *  binomiale negative, ou uniforme).
- *
- *  arguments : nombre minimum de valeurs,
- *              seuil sur la fonction de repartition.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] min_nb_value    minimum number of values,
+ *  \param[in] cumul_threshold threshold on the cumulative distribution function.
+ */
+/*--------------------------------------------------------------*/
 
 void DiscreteParametric::computation(int min_nb_value , double cumul_threshold)
 
@@ -723,14 +730,14 @@ void DiscreteParametric::computation(int min_nb_value , double cumul_threshold)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the forward recurrence or sojourn time distribution on the basis of
+ *         the recurrence or sojourn time distribution.
  *
- *  Calcul de la loi de l'intervalle de temps residuel a partir
- *  de la loi de temps de retour/sejour.
- *
- *  argument : loi de temps de retour/sejour.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] dist recurrence or sojourn time distribution.
+ */
+/*--------------------------------------------------------------*/
 
 void Forward::computation(const DiscreteParametric &dist)
 
@@ -743,7 +750,7 @@ void Forward::computation(const DiscreteParametric &dist)
   nb_value = dist.nb_value;
   mass[0] = 0.;
 
-  // calcul de la quantite de normalisation
+  // computation of the normalization quantity
 
   if (ident == CATEGORICAL) {
     norm = dist.mean;
@@ -752,7 +759,7 @@ void Forward::computation(const DiscreteParametric &dist)
     norm = parametric_mean_computation();
   }
 
-  // calcul des probabilites des valeurs
+  // computation of the probability mass function
 
   for (i = 1;i < nb_value;i++) {
     mass[i] = (1. - dist.cumul[i - 1]) / norm;
@@ -766,13 +773,15 @@ void Forward::computation(const DiscreteParametric &dist)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the log-likelihood of the survival function of a given distribution.
  *
- *  Calcul de la vraisemblance pour la fonction de survie d'une loi donnee.
+ *  \param[in] histo reference on a FrequencyDistribution object.
  *
- *  argument : reference sur un objet FrequencyDistribution.
- *
- *--------------------------------------------------------------*/
+ *  \return          log-likelihood.
+ */
+/*--------------------------------------------------------------*/
 
 double Distribution::survivor_likelihood_computation(const FrequencyDistribution &histo) const
 
@@ -805,13 +814,15 @@ double Distribution::survivor_likelihood_computation(const FrequencyDistribution
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the chi2 value for a discrete distribution fit (Chi2 goodness of fit test).
  *
- *  Calcul de la valeur du chi2 pour une loi.
+ *  \param[in] histo reference on a FrequencyDistribution object.
  *
- *  argument : reference sur un objet FrequencyDistribution.
- *
- *--------------------------------------------------------------*/
+ *  \return          chi2 value.
+ */
+/*--------------------------------------------------------------*/
 
 double Distribution::chi2_value_computation(const FrequencyDistribution &histo) const
 
@@ -862,14 +873,15 @@ double Distribution::chi2_value_computation(const FrequencyDistribution &histo) 
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Grouping of successive values, computation of the degrees of freedom and
+ *         the chi2 value (Chi2 goodness of fit test).
  *
- *  Regroupement des valeurs, calcul du nombre de degres de liberte et
- *  de la valeur du chi2.
- *
- *  arguments : reference sur un objet FrequencyDistribution et sur un objet Test.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] histo reference on a FrequencyDistribution object,
+ *  \param[in] test  reference on a Test object.
+ */
+/*--------------------------------------------------------------*/
 
 void Distribution::chi2_degree_of_freedom(const FrequencyDistribution &histo , Test &test) const
 
@@ -883,7 +895,7 @@ void Distribution::chi2_degree_of_freedom(const FrequencyDistribution &histo , T
 
   if ((histo.offset >= offset) && (histo.nb_value <= nb_value)) {
 
-    // creation et initialisation des objets Distribution et FrequencyDistribution
+    // construction and initialization of a Distribution and a FrequencyDistribution object
 
     filter_dist = new Distribution(nb_value);
     filter_dist->offset = offset;
@@ -892,7 +904,7 @@ void Distribution::chi2_degree_of_freedom(const FrequencyDistribution &histo , T
     filter_histo = new FrequencyDistribution(histo.nb_value);
     filter_histo->nb_element = histo.nb_element;
 
-    // regroupement des valeurs
+    // grouping of values
 
     filter_mass = filter_dist->mass + offset;
     filter_frequency = filter_histo->frequency + offset;
@@ -928,8 +940,7 @@ void Distribution::chi2_degree_of_freedom(const FrequencyDistribution &histo , T
     filter_dist->nb_value = j;
     filter_dist->cumul_computation();
 
-    // mise a jour du nombre de degres de libertes et calcul de
-    // la valeur du chi2
+    // update of the degrees of freedom and computation of the chi2 value
 
     test.df1 = filter_dist->nb_value - filter_dist->offset -
                filter_dist->nb_parameter - 1;
@@ -950,13 +961,14 @@ void Distribution::chi2_degree_of_freedom(const FrequencyDistribution &histo , T
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Chi2 goodness of fit test for a discrete distribution.
  *
- *  Test d'ajustement d'une loi.
- *
- *  arguments : reference sur un objet FrequencyDistribution et sur un objet Test.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] histo reference on a FrequencyDistribution object,
+ *  \param[in] test  reference on a Test object.
+ */
+/*--------------------------------------------------------------*/
 
 void Distribution::chi2_fit(const FrequencyDistribution &histo , Test &test) const
 
@@ -970,13 +982,16 @@ void Distribution::chi2_fit(const FrequencyDistribution &histo , Test &test) con
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Truncation of a distribution.
  *
- *  Troncature d'une loi.
+ *  \param[in] error      reference on a StatError object,
+ *  \param[in] imax_value maximum value.
  *
- *  arguments : reference sur un objet StatError, valeur maximum.
- *
- *--------------------------------------------------------------*/
+ *  \return               DiscreteParametricModel object.
+ */
+/*--------------------------------------------------------------*/
 
 DiscreteParametricModel* Distribution::truncate(StatError &error , int imax_value) const
 
@@ -994,7 +1009,7 @@ DiscreteParametricModel* Distribution::truncate(StatError &error , int imax_valu
 
   else {
 
-    // creation d'un objet DiscreteParametricModel
+    // construction of a DiscreteParametricModel object
 
     dist = new DiscreteParametricModel(MIN(imax_value + 1 , nb_value));
 
@@ -1015,14 +1030,16 @@ DiscreteParametricModel* Distribution::truncate(StatError &error , int imax_valu
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Fit of a distribution.
  *
- *  Ajustement d'une loi.
+ *  \param[in] error reference on a StatError object,
+ *  \param[in] idist reference on a DiscreteParametric object.
  *
- *  arguments : references sur un objet StatError et
- *              sur un objet DiscreteParametric.
- *
- *--------------------------------------------------------------*/
+ *  \return          DiscreteParametricModel object.
+ */
+/*--------------------------------------------------------------*/
 
 DiscreteParametricModel* FrequencyDistribution::fit(StatError &error ,
                                                     const DiscreteParametric &idist) const
@@ -1046,15 +1063,18 @@ DiscreteParametricModel* FrequencyDistribution::fit(StatError &error ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Estimation of a discrete parametric distribution (binomial, Poisson or negative binomial).
  *
- *  Estimation des parametres d'une loi discrete elementaire
- *  (binomiale negative, binomiale, Poisson).
+ *  \param[in] ident           distribution identifier,
+ *  \param[in] min_inf_bound   minimum lower bound,
+ *  \param[in] flag            flag on the estimation of the lower bound,
+ *  \param[in] cumul_threshold threshold on the cumulative distribution function.
  *
- *  arguments : identificateur de la loi, borne inferieure minimum,
- *              flag sur la borne inferieure, seuil sur la fonction de repartition.
- *
- *--------------------------------------------------------------*/
+ *  \return                    DiscreteParametric object.
+ */
+/*--------------------------------------------------------------*/
 
 DiscreteParametric* FrequencyDistribution::parametric_estimation(discrete_parametric ident , int min_inf_bound ,
                                                                  bool flag , double cumul_threshold) const
@@ -1064,16 +1084,16 @@ DiscreteParametric* FrequencyDistribution::parametric_estimation(discrete_parame
   DiscreteParametric *dist;
 
 
-  // creation d'un objet DiscreteParametric
+  // construction of a DiscreteParametric object
 
   dist = new DiscreteParametric((int)(nb_value * SAMPLE_NB_VALUE_COEFF) , ident);
 
-  // estimation des parametres de la loi
+  // parameter estimation
 
   likelihood = Reestimation<int>::parametric_estimation(dist , min_inf_bound ,
                                                         flag , cumul_threshold);
 
-  // mise a jour de la loi estimee
+  // update of the estimated distribution
 
   if (likelihood != D_INF) {
     dist->computation(nb_value , cumul_threshold);
@@ -1087,16 +1107,19 @@ DiscreteParametric* FrequencyDistribution::parametric_estimation(discrete_parame
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Estimation of a discrete parametric distribution (binomial, Poisson or negative binomial).
  *
- *  Estimation des parametres d'une loi discrete elementaire
- *  (binomiale negative, binomiale, Poisson).
+ *  \param[in] error           reference on a StatError object,
+ *  \param[in] ident           distribution identifier,
+ *  \param[in] min_inf_bound   minimum lower bound,
+ *  \param[in] flag            flag on the estimation of the lower bound,
+ *  \param[in] cumul_threshold threshold on the cumulative distribution function.
  *
- *  arguments : reference sur un objet StatError, identificateur de la loi,
- *              borne inferieure minimum, flag sur la borne inferieure,
- *              seuil sur la fonction de repartition.
- *
- *--------------------------------------------------------------*/
+ *  \return                    DiscreteParametricModel object.
+ */
+/*--------------------------------------------------------------*/
 
 DiscreteParametricModel* FrequencyDistribution::parametric_estimation(StatError &error , discrete_parametric ident ,
                                                                       int min_inf_bound , bool flag ,
@@ -1116,23 +1139,23 @@ DiscreteParametricModel* FrequencyDistribution::parametric_estimation(StatError 
 
   else {
 
-    // creation d'un objet DiscreteParametricModel
+    // construction of a DiscreteParametricModel object
 
     dist = new DiscreteParametricModel((int)(nb_value * SAMPLE_NB_VALUE_COEFF) , ident);
     dist->frequency_distribution = new DiscreteDistributionData(*this);
 
-    // estimation des parametres de la loi
+    // parameter estimation
 
     likelihood = Reestimation<int>::parametric_estimation(dist , min_inf_bound ,
                                                           flag , cumul_threshold);
 
     if (likelihood != D_INF) {
 
-      // mise a jour de la loi estimee
+      // update of the estimated distribution
 
       dist->computation(nb_value , cumul_threshold);
 
-      // mise a jour du nombre de parametres inconnus
+      // update of the number of free parameters
 
       dist->nb_parameter_update();
       if (!flag) {
@@ -1151,15 +1174,18 @@ DiscreteParametricModel* FrequencyDistribution::parametric_estimation(StatError 
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Estimation of a discrete parametric distribution (binomial, Poisson or negative binomial).
  *
- *  Estimation des parametres d'une loi discrete elementaire
- *  (binomiale negative, binomiale, Poisson).
+ *  \param[in] error           reference on a StatError object,
+ *  \param[in] min_inf_bound   minimum lower bound,
+ *  \param[in] flag            flag on the estimation of the lower bound,
+ *  \param[in] cumul_threshold threshold on the cumulative distribution function.
  *
- *  arguments : reference sur un objet StatError, borne inferieure minimum,
- *              flag sur la borne inferieure, seuil sur la fonction de repartition.
- *
- *--------------------------------------------------------------*/
+ *  \return                    DiscreteParametricModel object.
+ */
+/*--------------------------------------------------------------*/
 
 DiscreteParametricModel* FrequencyDistribution::type_parametric_estimation(StatError &error ,
                                                                            int min_inf_bound , bool flag ,
@@ -1179,23 +1205,23 @@ DiscreteParametricModel* FrequencyDistribution::type_parametric_estimation(StatE
 
   else {
 
-    // creation d'un objet DiscreteParametricModel
+    // construction of a DiscreteParametricModel object
 
     dist = new DiscreteParametricModel((int)(nb_value * SAMPLE_NB_VALUE_COEFF));
     dist->frequency_distribution = new DiscreteDistributionData(*this);
 
-    // estimation des parametres de la loi
+    // parameter estimation
 
     likelihood = Reestimation<int>::type_parametric_estimation(dist , min_inf_bound ,
                                                                flag , cumul_threshold);
 
     if (likelihood != D_INF) {
 
-      // mise a jour de la loi estimee
+      // update of the estimated distribution
 
       dist->computation(nb_value , cumul_threshold);
 
-      // mise a jour du nombre de parametres inconnus
+      // update of the number of free parameters
 
       dist->nb_parameter_update();
       if (!flag) {
@@ -1214,16 +1240,17 @@ DiscreteParametricModel* FrequencyDistribution::type_parametric_estimation(StatE
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the penalty terms in the framework of a penalized likelihood approach.
  *
- *  Calcul des termes de penalisation dans le cadre d'une approche
- *  de penalisation de la vraisemblance.
- *
- *  arguments : poids de la penalisation, type de penalisation (difference 1ere,
- *              seconde ou entropy), type de gestion des effets de bord
- *              (zero a l'exterieur du support ou prolongation de la loi).
- *
- *--------------------------------------------------------------*/
+ *  \param[in] weight   penalty weight,
+ *  \param[in] pen_type penalty type (1st order, 2nd order difference or entropy),
+ *  \param[in] penalty  penalties,
+ *  \param[in] outside  management of side effects (zero outside the support or
+ *                      continuation of the distribution).
+ */
+/*--------------------------------------------------------------*/
 
 void Distribution::penalty_computation(double weight , penalty_type pen_type ,
                                        double *penalty , side_effect outside) const
@@ -1319,15 +1346,15 @@ void Distribution::penalty_computation(double weight , penalty_type pen_type ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Reestimation of the parameters of a discrete distribution
+ *         (binomial, Poisson or negative binomial).
  *
- *  Reestimation des parametres d'une loi discrete elementaire
- *  (binomiale, Poisson, binomiale negative).
- *
- *  arguments : reference sur les quantites de reestimation,
- *              nombre de parametres reestimes (binomiale negative).
- *
- *--------------------------------------------------------------*/
+ *  \param[in] reestim  reference on the reestimation quantities,
+ *  \param[in] nb_estim number of reestimated parameters (negative binomial).
+ */
+/*--------------------------------------------------------------*/
 
 void DiscreteParametric::reestimation(const Reestimation<double> *reestim , int nb_estim)
 
@@ -1382,16 +1409,19 @@ void DiscreteParametric::reestimation(const Reestimation<double> *reestim , int 
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Simulation using the cumulative distribution function.
+ *         The median is used to determine the direction of the algorithm
+ *         (forward from the lower bound or backward from the highest value).
  *
- *  Simulation par une loi discrete en utilisant la fonction de repartition.
- *  On teste le terme median de la fonction de repartition pour savoir
- *  ou commencer la recherche.
+ *  \param[in] nb_value number of values,
+ *  \param[in] cumul    pointer on the cumulative distribution function,
+ *  \param[in] scale    scaling factor.
  *
- *  arguments : nombre de valeurs, pointeur sur la fonction de repartition,
- *              facteur d'echelle.
- *
- *--------------------------------------------------------------*/
+ *  \return             generated value.
+ */
+/*--------------------------------------------------------------*/
 
 int cumul_method(int nb_value , const double *cumul , double scale)
 
@@ -1422,11 +1452,13 @@ int cumul_method(int nb_value , const double *cumul , double scale)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Simulation using the cumulative distribution function.
  *
- *  Simulation par une loi discrete en utilisant la fonction de repartition
- *
- *--------------------------------------------------------------*/
+ *  \return generated value.
+ */
+/*--------------------------------------------------------------*/
 
 int Distribution::simulation() const
 
@@ -1440,15 +1472,16 @@ int Distribution::simulation() const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Simulation using the rejection sampling method.
+ *         Principle: A point (x, Px) is drawn in the rectangle [xmin, xmax] x [0. ,Pmax].
+ *         If the point is below the distribution, the x value is kept;
+ *         If not, a new point is drawn.
  *
- *  Simulation par une loi discrete par la methode du rejet.
- *  Principe : on tire un point (x,Px) dans le rectangle
- *  [xmin,xmax] [0.,Pmax]. Si le point est sous la courbe, on
- *  garde la realisation correspondante (abscisse x), sinon,
- *  on retire un nouveau point.
- *
- *--------------------------------------------------------------*/
+ *  \return generated value.
+ */
+/*--------------------------------------------------------------*/
 
 int DiscreteParametric::simulation() const
 
@@ -1476,13 +1509,16 @@ int DiscreteParametric::simulation() const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Building of a frequency distribution by simulating a discrete parametric distribution.
  *
- *  Constitution d'un echantillon par simulation d'une loi parametrique.
+ *  \param[in] error      reference on a StatError object,
+ *  \param[in] nb_element sample size.
  *
- *  arguments : reference sur un objet StatError, effectif.
- *
- *--------------------------------------------------------------*/
+ *  \return               DiscreteDistributionData object.
+ */
+/*--------------------------------------------------------------*/
 
 DiscreteDistributionData* DiscreteParametricModel::simulation(StatError &error ,
                                                               int nb_element) const
@@ -1501,7 +1537,7 @@ DiscreteDistributionData* DiscreteParametricModel::simulation(StatError &error ,
 
   else {
 
-    // creation de la loi empirique
+    // construction of the frequency distribution
 
     histo = new DiscreteDistributionData(*this);
     histo->distribution = new DiscreteParametricModel(*this , false);
@@ -1512,7 +1548,7 @@ DiscreteDistributionData* DiscreteParametricModel::simulation(StatError &error ,
       (histo->frequency[DiscreteParametric::simulation()])++;
     }
 
-    // extraction des caracteristiques de la loi empirique
+    // extraction of the frequency distribution characteristics
 
     histo->nb_value_computation();
     histo->offset_computation();
@@ -1526,15 +1562,19 @@ DiscreteDistributionData* DiscreteParametricModel::simulation(StatError &error ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the log-likelihood of a discrete-time renewal process for time interval data.
  *
- *  Calcul de la vraisemblance des donnees d'intervalles de temps.
+ *  \param[in] forward_dist forward recurrence time distribution,
+ *  \param[in] within       complete time interval frequency distribution,
+ *  \param[in] backward     backward recurrence time frequency distribution,
+ *  \param[in] forward      forward recurrence time frequency distribution,
+ *  \param[in] no_event     observation period frequency distribution for the case of no event.
  *
- *  arguments : loi de l'intervalle de temps residuel, lois empiriques des intervalles
- *              de temps complets, censures a gauche, a droite et
- *              de la longueur de la periode d'observation dans le cas 0 evenement.
- *
- *--------------------------------------------------------------*/
+ *  \return                 log-likelihood.
+ */
+/*--------------------------------------------------------------*/
 
 double DiscreteParametric::renewal_likelihood_computation(const Forward &forward_dist ,
                                                           const FrequencyDistribution &within ,
@@ -1589,18 +1629,20 @@ double DiscreteParametric::renewal_likelihood_computation(const Forward &forward
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the reestimation quantities corresponding to the inter-event distribution
+ *         (EM algorithm of an equilibrium renewal process estimated on the basis of time interval data).
  *
- *  Calcul des quantites de reestimation correspondant a la loi inter-evenement
- *  (estimateur EM d'un processus de renouvellement en equilibre a partir
- *   de donnees d'intervalles de temps).
- *
- *  arguments : lois empiriques des intervalles de temps complets, censures a gauche,
- *              a droite et de la longueur de la periode d'observation dans le cas 0 evenement,
- *              pointeurs sur les quantites de reestimation de la loi inter-evenement et
- *              de la loi biaisee par la longueur.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] within              complete time interval frequency distribution,
+ *  \param[in] backward            backward recurrence time frequency distribution,
+ *  \param[in] forward             forward recurrence time frequency distribution,
+ *  \param[in] no_event            observation period frequency distribution for the case of no event,
+ *  \param[in] inter_event_reestim pointer on the reestimation quantities of the inter-event distribution
+ *  \param[in] length_bias_reestim pointer on the reestimation quantities of the length-biased distribution,
+ *  \param[in] iter                EM iteration.
+ */
+/*--------------------------------------------------------------*/
 
 void DiscreteParametric::expectation_step(const FrequencyDistribution &within ,
                                           const FrequencyDistribution &backward ,
@@ -1615,7 +1657,7 @@ void DiscreteParametric::expectation_step(const FrequencyDistribution &within ,
   double sum , *ifrequency , *lfrequency , *pmass , *pcumul , *norm;
 
 
-  // initialisations
+  // initializations
 
   ifrequency = inter_event_reestim->frequency;
   lfrequency = length_bias_reestim->frequency;
@@ -1624,7 +1666,7 @@ void DiscreteParametric::expectation_step(const FrequencyDistribution &within ,
     *lfrequency++ = 0.;
   }
 
-  // calcul des quantites de reestimation de la loi inter-evenement
+  // computation of the reestimation quantities of the inter-event distribution
 
   ifrequency = inter_event_reestim->frequency + within.offset;
   pfrequency = within.frequency + within.offset;
@@ -1646,7 +1688,7 @@ void DiscreteParametric::expectation_step(const FrequencyDistribution &within ,
     *ifrequency++ += *pmass++ * sum;
   }
 
-  // calcul des quantites de reestimation de la loi biaisee par la longueur
+  // computation of the reestimation quantities of the length-biased distribution
 
   pfrequency = forward.frequency + forward.offset;
   pcumul = cumul + forward.offset - 1;
@@ -1726,22 +1768,24 @@ void DiscreteParametric::expectation_step(const FrequencyDistribution &within ,
     length_bias_reestim->mean_computation();
     length_bias_reestim->variance_computation();
 
-    cout << "\nquantites de reestimation loi inter_evenement :" << *inter_event_reestim << endl;
-    cout << "\nquantites de reestimation loi biaisee par la longueur :" << *length_bias_reestim << endl;
+    cout << "\nreestimation quantities of the inter-event distribution:" << *inter_event_reestim << endl;
+    cout << "\nreestimation quantities of the length-biased distribution:" << *length_bias_reestim << endl;
   }
 # endif
 
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the mean of a distribution by interval bissection.
  *
- *  Calcul de la moyenne d'une loi par bissection d'intervalle.
+ *  \param[in] distribution_reestim pointer on the reestimation quantities of the distribution
+ *  \param[in] length_bias_reestim  pointer on the reestimation quantities of the length-biased distribution.
  *
- *  arguments : pointeurs sur les quantites de reestimation de la loi et
- *              de la loi biaisee par la longueur.
- *
- *--------------------------------------------------------------*/
+ *  \return                         distribution mean.
+ */
+/*--------------------------------------------------------------*/
 
 double interval_bisection(Reestimation<double> *distribution_reestim ,
                           Reestimation<double> *length_bias_reestim)
@@ -1755,7 +1799,7 @@ double interval_bisection(Reestimation<double> *distribution_reestim ,
 # endif
 
 
-  // initialisations : calculs des 2 premieres valeurs
+  // initializations: computation of the first two values
 
   dfrequency = distribution_reestim->frequency + distribution_reestim->offset;
   lfrequency = length_bias_reestim->frequency + distribution_reestim->offset;
@@ -1807,22 +1851,29 @@ double interval_bisection(Reestimation<double> *distribution_reestim ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Estimation of an equilibrium renewal process on the basis of time interval data
+ *         using the EM algorithm.
  *
- *  Estimation des parametres d'un processus de renouvellement en equilibre
- *  par l'algorithme EM a partir de donnees d'intervalles de temps.
+ *  \param[in] error             reference on a StatError object,
+ *  \param[in] os                stream,
+ *  \param[in] backward          backward recurrence time frequency distribution,
+ *  \param[in] forward           forward recurrence time frequency distribution,
+ *  \param[in] no_event          observation period frequency distribution for the case of no event,
+ *  \param[in] iinter_event      reference on the initial inter-event distribution,
+ *  \param[in] estimator         estimator type (likelihood or penalized likelihood),
+ *  \param[in] nb_iter           number of iterations,
+ *  \param[in] mean_estimator    method for the computation of the mean of the inter-event distribution,
+ *  \param[in] weight            penalty weight,
+ *  \param[in] pen_type          penalty type,
+ *  \param[in] outside           management of side effects (zero outside the support or
+ *                               continuation of the distribution),
+ *  \param[in] iinter_event_mean mean of the inter-event distribution.
  *
- *  arguments : reference sur un objet StatError, stream, lois empiriques des intervalles
- *              de temps censures a gauche, a droite et de la longueur
- *              de la periode d'observation dans le cas 0 evenement,
- *              reference sur la loi inter-evenement initiale, type d'estimateur
- *              (vraisemblance ou vraisemblance penalisee), nombre d'iterations,
- *              methode de calcul de la moyenne de la loi inter-evenement,
- *              poids de la penalisation, type de penalisation,
- *              type de gestion des effets de bord (zero a l'exterieur du support ou
- *              prolongation de la loi), moyenne de la loi inter-evenement.
- *
- *--------------------------------------------------------------*/
+ *  \return                      DiscreteParametricModel object.
+ */
+/*--------------------------------------------------------------*/
 
 DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , ostream &os ,
                                                            const FrequencyDistribution &backward ,
@@ -1993,7 +2044,7 @@ DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , os
     }
 #   endif
 
-    // creation de la loi inter-evenement
+    // construction of the inter-event distribution
 
     inter_event = new DiscreteParametricModel(iinter_event , this);
     inter_event->init(CATEGORICAL , I_DEFAULT , I_DEFAULT , D_DEFAULT , D_DEFAULT);
@@ -2169,21 +2220,27 @@ DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , os
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Estimation of an equilibrium renewal process on the basis of time interval data
+ *         using the EM algorithm.
  *
- *  Estimation des parametres d'un processus de renouvellement en equilibre
- *  par l'algorithme EM a partir de donnees d'intervalles de temps.
+ *  \param[in] error          reference on a StatError object,
+ *  \param[in] os             stream,
+ *  \param[in] backward       backward recurrence time frequency distribution,
+ *  \param[in] forward        forward recurrence time frequency distribution,
+ *  \param[in] no_event       observation period frequency distribution for the case of no event,
+ *  \param[in] estimator      estimator type (likelihood or penalized likelihood),
+ *  \param[in] nb_iter        number of iterations,
+ *  \param[in] mean_estimator method for the computation of the mean of the inter-event distribution,
+ *  \param[in] weight         penalty weight,
+ *  \param[in] pen_type       penalty type,
+ *  \param[in] outside        management of side effects (zero outside the support or
+ *                            continuation of the distribution).
  *
- *  arguments : reference sur un objet StatError, stream, lois empiriques des intervalles
- *              de temps censures a gauche, a droite et de la longueur de la periode
- *              d'observation dans le cas 0 evenement, type d'estimateur
- *              (vraisemblance ou vraisemblance penalisee), nombre d'iterations,
- *              methode de calcul de la moyenne de la loi inter-evenement,
- *              poids de la penalisation, type de penalisation,
- *              type de gestion des effets de bord (zero a l'exterieur du support ou
- *              prolongation de la loi).
- *
- *--------------------------------------------------------------*/
+ *  \return                   DiscreteParametricModel object.
+ */
+/*--------------------------------------------------------------*/
 
 DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , ostream &os ,
                                                            const FrequencyDistribution &backward ,
@@ -2258,14 +2315,17 @@ DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , os
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the log-likelihood of a state occupancy distribution of
+ *         an ordinary semi-Markov chain.
  *
- *  Calcul de la vraisemblance des temps de sejour dans un etat pour
- *  une semi-chaine de Markov ordinaire.
+ *  \param[in] sojourn_time frequency distribution of complete sojourn times,
+ *  \param[in] final_run    frequency distribution of right-censored sojourn times.
  *
- *  arguments : lois empiriques des temps de sejour complets et censures a droite.
- *
- *--------------------------------------------------------------*/
+ *  \return                 log-likelihood of the estimated distribution.
+ */
+/*--------------------------------------------------------------*/
 
 double DiscreteParametric::state_occupancy_likelihood_computation(const FrequencyDistribution &sojourn_time ,
                                                                   const FrequencyDistribution &final_run) const
@@ -2291,21 +2351,26 @@ double DiscreteParametric::state_occupancy_likelihood_computation(const Frequenc
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the log-likelihood of a state occupancy distribution of
+ *         an equilibrium semi-Markov chain.
  *
- *  Calcul de la vraisemblance des temps de sejour dans un etat pour
- *  une semi-chaine de Markov en equilibre.
+ *  \param[in] forward      forward sojourn time distribution,
+ *  \param[in] sojourn_time frequency distribution of complete sojourn times,
+ *  \param[in] initial_run  frequency distribution of left-censored sojourn times,
+ *  \param[in] final_run    frequency distribution of right-censored sojourn times,
+ *  \param[in] single_run   frequency distribution of sequence lengths for the case of
+ *                          a single visited state.
  *
- *  arguments : loi de l'intervalle de temps residuel, lois empiriques des temps
- *              de sejour complets, censures a droite, a gauche et
- *              de la longueur des sequences dans le cas d'un seul etat visite.
- *
- *--------------------------------------------------------------*/
+ *  \return                 log-likelihood of the estimated distribution.
+ */
+/*--------------------------------------------------------------*/
 
 double DiscreteParametric::state_occupancy_likelihood_computation(const Forward &forward ,
                                                                   const FrequencyDistribution &sojourn_time ,
-                                                                  const FrequencyDistribution &final_run ,
                                                                   const FrequencyDistribution &initial_run ,
+                                                                  const FrequencyDistribution &final_run ,
                                                                   const FrequencyDistribution &single_run) const
 
 {
@@ -2347,15 +2412,17 @@ double DiscreteParametric::state_occupancy_likelihood_computation(const Forward 
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the reestimation quantities of a state occupancy distribution
+ *         (EM estimator of an ordinary semi-Markov chain).
  *
- *  Calcul des quantites de reestimation correspondant a la loi d'occupation d'un etat
- *  (estimateur EM d'une semi-chaine de Markov ordinaire).
- *
- *  arguments : lois empiriques des temps de sejour complets et censures a droite,
- *              pointeurs sur les quantites de reestimation de la loi d'occupation de l'etat.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] sojourn_time      frequency distribution of complete sojourn times,
+ *  \param[in] final_run         frequency distribution of right-censored sojourn times,
+ *  \param[in] occupancy_reestim pointer on the reestimation quantities of the state occupancy distribution,
+ *  \param[in] iter              EM iteration.
+ */
+/*--------------------------------------------------------------*/
 
 void DiscreteParametric::expectation_step(const FrequencyDistribution &sojourn_time ,
                                           const FrequencyDistribution &final_run ,
@@ -2367,14 +2434,14 @@ void DiscreteParametric::expectation_step(const FrequencyDistribution &sojourn_t
   double sum , *ofrequency , *pmass , *pcumul;
 
 
-  // initialisations
+  // initializations
 
   ofrequency = occupancy_reestim->frequency;
   for (i = 0;i < occupancy_reestim->alloc_nb_value;i++) {
     *ofrequency++ = 0.;
   }
 
-  // calcul des quantites de reestimation de la loi d'occupation de l'etat
+  // computation of the reestimation quantities of the state occupancy distribution
 
   ofrequency = occupancy_reestim->frequency + sojourn_time.offset;
   pfrequency = sojourn_time.frequency + sojourn_time.offset;
@@ -2407,29 +2474,34 @@ void DiscreteParametric::expectation_step(const FrequencyDistribution &sojourn_t
     occupancy_reestim->mean_computation();
     occupancy_reestim->variance_computation();
 
-    cout << "\nquantites de reestimation loi d'occupation de l'etat :" << *occupancy_reestim << endl;
+    cout << "\nreestimation quantities of the state occupancy distribution:" << *occupancy_reestim << endl;
   }
 # endif
 
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the reestimation quantities of a state occupancy distribution
+ *         (EM estimator of an equilibrium semi-Markov chain).
  *
- *  Calcul des quantites de reestimation correspondant a la loi d'occupation d'un etat
- *  (estimateur EM d'une semi-chaine de Markov en equilibre).
- *
- *  arguments : lois empiriques des temps de sejour complets, censures a droite, a gauche et
- *              de la longueur des sequences dans le cas d'un seul etat visite,
- *              pointeurs sur les quantites de reestimation de la loi d'occupation de l'etat et
- *              de la loi biaisee par la longueur, combinaison ou non des quantites de reestimation,
- *              methode de calcul de la moyenne de la loi d'occupation de l'etat.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] sojourn_time        frequency distribution of complete sojourn times,
+ *  \param[in] initial_run         frequency distribution of left-censored sojourn times,
+ *  \param[in] final_run           frequency distribution of right-censored sojourn times,
+ *  \param[in] single_run          frequency distribution of sequence lengths for the case of
+ *                                 a single visited state,
+ *  \param[in] occupancy_reestim   pointer on the reestimation quantities of the state occupancy distribution,
+ *  \param[in] length_bias_reestim pointer on the reestimation quantities of the length-biased distribution,
+ *  \param[in] iter                EM iteration,
+ *  \param[in] combination         combination or not of the reestimation quantities,
+ *  \param[in] mean_estimator      method for the computation of the mean of the state occupancy distribution.
+ */
+/*--------------------------------------------------------------*/
 
 void DiscreteParametric::expectation_step(const FrequencyDistribution &sojourn_time ,
-                                          const FrequencyDistribution &final_run ,
                                           const FrequencyDistribution &initial_run ,
+                                          const FrequencyDistribution &final_run ,
                                           const FrequencyDistribution &single_run ,
                                           Reestimation<double> *occupancy_reestim ,
                                           Reestimation<double> *length_bias_reestim ,
@@ -2442,7 +2514,7 @@ void DiscreteParametric::expectation_step(const FrequencyDistribution &sojourn_t
   double sum , occupancy_mean , *ofrequency , *lfrequency , *pmass , *pcumul , *norm;
 
 
-  // initialisations
+  // initializations
 
   ofrequency = occupancy_reestim->frequency;
   lfrequency = length_bias_reestim->frequency;
@@ -2451,7 +2523,7 @@ void DiscreteParametric::expectation_step(const FrequencyDistribution &sojourn_t
     *lfrequency++ = 0.;
   }
 
-  // calcul des quantites de reestimation de la loi d'occupation de l'etat
+  // computation of the reestimation quantities of the state occupancy distribution
 
   ofrequency = occupancy_reestim->frequency + sojourn_time.offset;
   pfrequency = sojourn_time.frequency + sojourn_time.offset;
@@ -2475,7 +2547,7 @@ void DiscreteParametric::expectation_step(const FrequencyDistribution &sojourn_t
     }
   }
 
-  // calcul des quantites de reestimation de la loi biaisee par la longueur
+  // computation of the reestimation quantities of the length-biased distribution
 
   if (initial_run.nb_element > 0) {
     pfrequency = initial_run.frequency + initial_run.offset;
@@ -2557,8 +2629,8 @@ void DiscreteParametric::expectation_step(const FrequencyDistribution &sojourn_t
     length_bias_reestim->mean_computation();
     length_bias_reestim->variance_computation();
 
-    cout << "\nquantites de reestimation loi d'occupation de l'etat :" << *occupancy_reestim << endl;
-    cout << "\nquantites de reestimation loi biaisee par la longueur :" << *length_bias_reestim << endl;
+    cout << "\nreestimation quantities of the state occupancy distribution:" << *occupancy_reestim << endl;
+    cout << "\nreestimation quantities of the length-biased distribution:" << *length_bias_reestim << endl;
   }
 # endif
 
@@ -2581,7 +2653,7 @@ void DiscreteParametric::expectation_step(const FrequencyDistribution &sojourn_t
 #   ifdef DEBUG
     if ((iter < 10) || ((iter < 100) && (iter % 10 == 0)) ||
         ((iter < 1000) && (iter % 100 == 0)) || (iter % 1000 == 0)) {
-      cout << "\nquantites de reestimation loi d'occupation de l'etat :" << *occupancy_reestim << endl;
+      cout << "\nreestimation quantities of the state occupancy distribution:" << *occupancy_reestim << endl;
     }
 #   endif
 

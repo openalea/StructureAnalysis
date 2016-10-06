@@ -264,9 +264,9 @@ CategoricalProcess::~CategoricalProcess()
 /**
  *  \brief Assignment operator of the CategoricalProcess class.
  *
- *  \param[in]  process reference on a CategoricalProcess object,
+ *  \param[in] process reference on a CategoricalProcess object.
  *
- *  \param[out] this    CategoricalProcess object.
+ *  \return            CategoricalProcess object.
  */
 /*--------------------------------------------------------------*/
 
@@ -286,14 +286,14 @@ CategoricalProcess& CategoricalProcess::operator=(const CategoricalProcess &proc
 /**
  *  \brief Analysis of the format of categorical observation distributions.
  *
- *  \param[in]  error    reference on a StatError object,
- *  \param[in]  in_file  stream,
- *  \param[in]  line     reference on the file line index,
- *  \param[in]  nb_state number of states,
- *  \param[in]  model    model type,
- *  \param[in]  hidden   flag on the overlap of observation distributions,
+ *  \param[in] error    reference on a StatError object,
+ *  \param[in] in_file  stream,
+ *  \param[in] line     reference on the file line index,
+ *  \param[in] nb_state number of states,
+ *  \param[in] model    model type,
+ *  \param[in] hidden   flag on the overlap of observation distributions.
  *
- *  \param[out] process  CategoricalProcess object.
+ *  \return             CategoricalProcess object.
  */
 /*--------------------------------------------------------------*/
 
@@ -362,7 +362,7 @@ CategoricalProcess* CategoricalProcess::parsing(StatError &error , ifstream &in_
           case MIXTURE : {
             if (token != STAT_word[STATW_COMPONENT]) {
               status = false;
-              error.correction_update(STAT_parsing[STATP_KEY_WORD] ,
+              error.correction_update(STAT_parsing[STATP_KEYWORD] ,
                                       STAT_word[STATW_COMPONENT] , line , i + 1);
             }
             break;
@@ -371,7 +371,7 @@ CategoricalProcess* CategoricalProcess::parsing(StatError &error , ifstream &in_
           case HIDDEN_MARKOV : {
             if (token != STAT_word[STATW_STATE]) {
               status = false;
-              error.correction_update(STAT_parsing[STATP_KEY_WORD] ,
+              error.correction_update(STAT_parsing[STATP_KEYWORD] ,
                                       STAT_word[STATW_STATE] , line , i + 1);
             }
             break;
@@ -398,7 +398,7 @@ CategoricalProcess* CategoricalProcess::parsing(StatError &error , ifstream &in_
 
         else {
           status = false;
-          error.update(STAT_parsing[STATP_KEY_WORD] , line , i + 1);
+          error.update(STAT_parsing[STATP_KEYWORD] , line , i + 1);
         }
 
         break;
@@ -461,7 +461,7 @@ CategoricalProcess* CategoricalProcess::parsing(StatError &error , ifstream &in_
         case PSTATE : {
           if (token != STAT_word[STATW_OBSERVATION_DISTRIBUTION]) {
             status = false;
-            error.correction_update(STAT_parsing[STATP_KEY_WORD] , STAT_word[STATW_OBSERVATION_DISTRIBUTION] , line , i + 1);
+            error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_OBSERVATION_DISTRIBUTION] , line , i + 1);
           }
           break;
         }
@@ -583,13 +583,13 @@ CategoricalProcess* CategoricalProcess::parsing(StatError &error , ifstream &in_
  *  \brief Analysis of the format of observation distributions
  *         for a collection of categorical observation processes.
  *
- *  \param[in]  error             reference on a StatError object,
- *  \param[in]  in_file           stream,
- *  \param[in]  line              reference on the file line index,
- *  \param[in]  nb_state          number of states,
- *  \param[in]  nb_output_process number of observation processes.
+ *  \param[in] error             reference on a StatError object,
+ *  \param[in] in_file           stream,
+ *  \param[in] line              reference on the file line index,
+ *  \param[in] nb_state          number of states,
+ *  \param[in] nb_output_process number of observation processes.
  *
- *  \param[out] process           categorical observation processes.
+ *  \return                      categorical observation processes.
  */
 /*--------------------------------------------------------------*/
 
@@ -633,7 +633,7 @@ CategoricalProcess** CategoricalProcess::old_parsing(StatError &error , ifstream
       if (i == 0) {
         if (token != STAT_word[STATW_OBSERVATION_PROBABILITIES]) {
           status = false;
-          error.correction_update(STAT_parsing[STATP_KEY_WORD] , STAT_word[STATW_OBSERVATION_PROBABILITIES] , line);
+          error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_OBSERVATION_PROBABILITIES] , line);
         }
       }
 
@@ -692,7 +692,7 @@ CategoricalProcess** CategoricalProcess::old_parsing(StatError &error , ifstream
       case 1 : {
         if (token != STAT_word[nb_output_process == 1 ? STATW_VARIABLE : STATW_VARIABLES]) {
           status = false;
-          error.correction_update(STAT_parsing[STATP_KEY_WORD] ,
+          error.correction_update(STAT_parsing[STATP_KEYWORD] ,
                                   STAT_word[nb_output_process == 1 ? STATW_VARIABLE : STATW_VARIABLES] , line , i + 1);
         }
         break;
@@ -750,7 +750,7 @@ CategoricalProcess** CategoricalProcess::old_parsing(StatError &error , ifstream
           }
           else {
             status = false;
-            error.correction_update(STAT_parsing[STATP_KEY_WORD] , STAT_word[STATW_VARIABLE] , line , i + 1);
+            error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_VARIABLE] , line , i + 1);
           }
           break;
         }
@@ -1262,14 +1262,14 @@ ostream& CategoricalProcess::spreadsheet_print(ostream &os ,FrequencyDistributio
 /**
  *  \brief Plot of a CategoricalProcess object using Gnuplot.
  *
- *  \param[in]  prefix                file prefix,
- *  \param[in]  title                 figure title,
- *  \param[in]  process               observation process index,
- *  \param[in]  empirical_observation pointer on the observation frequency distributions,
- *  \param[in]  marginal_distribution pointer on the marginal frequency distribution,
- *  \param[in]  model                 model type,
+ *  \param[in] prefix                file prefix,
+ *  \param[in] title                 figure title,
+ *  \param[in] process               observation process index,
+ *  \param[in] empirical_observation pointer on the observation frequency distributions,
+ *  \param[in] marginal_distribution pointer on the marginal frequency distribution,
+ *  \param[in] model                 model type.
  *
- *  \param[out] status                error status.
+ *  \return                          error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -1290,7 +1290,7 @@ bool CategoricalProcess::plot_print(const char *prefix , const char *title , int
     ostringstream data_file_name;
 
 
-    // writing of data files
+    // writing of the data files
 
     pdist = new const Distribution*[3 * nb_state + 2];
     dist_nb_value = new int[3 * nb_state + 2];
@@ -1347,7 +1347,7 @@ bool CategoricalProcess::plot_print(const char *prefix , const char *title , int
 
     if (status) {
 
-      // writing of script files
+      // writing of the script files
 
       for (i = 0;i < 2;i++) {
         ostringstream file_name[2];
@@ -1609,7 +1609,7 @@ void CategoricalProcess::plotable_write(MultiPlotSet &plot , int &index , int pr
     if (empirical_observation) {
       for (i = 0;i < nb_state;i++) {
 
-        // observation distribution fit
+        // fit of observation distribution
 
         plot.variable[index] = process;
         plot.viewpoint[index] = OBSERVATION;
@@ -1726,7 +1726,7 @@ void CategoricalProcess::plotable_write(MultiPlotSet &plot , int &index , int pr
     if (marginal_distribution) {
       if ((weight) && (mixture)) {
 
-        // fit of mixture of observation distributions (theoretical weights)
+        // fit of the mixture of observation distributions (theoretical weights)
 
         title.str("");
         title << STAT_label[STATL_OUTPUT_PROCESS] << " " << process << " - "
@@ -1783,7 +1783,7 @@ void CategoricalProcess::plotable_write(MultiPlotSet &plot , int &index , int pr
 
       if ((restoration_weight) && (restoration_mixture)) {
 
-        // fit of mixture of observation distributions (weights deduced from the restoration)
+        // fit of the mixture of observation distributions (weights deduced from the restoration)
 
         title.str("");
         if (process > 0) {
@@ -1848,7 +1848,7 @@ void CategoricalProcess::plotable_write(MultiPlotSet &plot , int &index , int pr
 /**
  *  \brief test of the overlap between the categories observed in each state.
  *
- *  \param[out] hidden hidden process or not.
+ *  \return hidden process or not.
  */
 /*--------------------------------------------------------------*/
 
@@ -1970,9 +1970,9 @@ void CategoricalProcess::state_permutation(int *permut) const
  *  \brief Computation of the number of free parameters of a categorical
  *         observation process.
  *
- *  \param[in]  min_probability minimum probability,
+ *  \param[in] min_probability minimum probability.
  *
- *  \param[out] nb_parameter number of free parameters.
+ *  \return                    number of free parameters.
  */
 /*--------------------------------------------------------------*/
 
@@ -2001,9 +2001,9 @@ int CategoricalProcess::nb_parameter_computation(double min_probability) const
 /**
  *  \brief Computation of a mixture of categorical observation distributions.
  *
- *  \param[in]  pweight pointer on the weight distribution,
+ *  \param[in] pweight pointer on the weight distribution.
  *
- *  \param[out] mixture mixture of categorical observation distributions.
+ *  \return            mixture of categorical observation distributions.
  */
 /*--------------------------------------------------------------*/
 

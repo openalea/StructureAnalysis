@@ -60,7 +60,7 @@ static const double  CRITICAL_PROBABILITY_FACTOR = 1.2;
  *  \brief Constructor of the Test class.
  *
  *  \param[in] iident    identifier,
- *  \param[in] ione_side flag one side/two sides.
+ *  \param[in] ione_side flag one-sided/two-sided.
  */
 /*--------------------------------------------------------------*/
 
@@ -81,7 +81,7 @@ Test::Test(test_distribution iident , bool ione_side)
  *  \brief Constructor of the Test class.
  *
  *  \param[in] iident    identifier,
- *  \param[in] ione_side flag one side/two sides,
+ *  \param[in] ione_side flag one-sided/two-sided,
  *  \param[in] idf1      degrees of freedom,
  *  \param[in] idf2      degrees of freedom,
  *  \param[in] ivalue    value.
@@ -105,7 +105,7 @@ Test::Test(test_distribution iident , bool ione_side , int idf1 , int idf2 , dou
  *  \brief Constructor of the Test class.
  *
  *  \param[in] iident                identifier,
- *  \param[in] ione_side             flag one side/two sides,
+ *  \param[in] ione_side             flag one-sided/two-sided,
  *  \param[in] idf1                  degrees of freedom,
  *  \param[in] idf2                  degrees of freedom,
  *  \param[in] ivalue                value,
@@ -208,9 +208,9 @@ void Test::copy(const Test &test)
 /**
  *  \brief Assignment operator of the Test class.
  *
- *  \param[in]  test reference on a Test object,
+ *  \param[in] test reference on a Test object.
  *
- *  \param[out] this Test object.
+ *  \return         Test object.
  */
 /*--------------------------------------------------------------*/
 
@@ -529,7 +529,7 @@ void Test::standard_normal_value_computation()
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Computation of la critical probability from the value taken
+ *  \brief Computation of la critical probability from the value taken by
  *         a Chi2 random variable.
  */
 /*--------------------------------------------------------------*/
@@ -575,7 +575,7 @@ void Test::chi2_value_computation()
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Computation of the critical probability from the value taken
+ *  \brief Computation of the critical probability from the value taken by
  *         a F random variable.
  */
 /*--------------------------------------------------------------*/

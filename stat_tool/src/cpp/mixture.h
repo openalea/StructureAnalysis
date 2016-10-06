@@ -53,7 +53,7 @@ namespace stat_tool {
  */
 
 
-  const int MIXTURE_NB_COMPONENT = NB_STATE;  // maximum number of composantes
+  const int MIXTURE_NB_COMPONENT = NB_STATE;  // maximum number of components
 
   const double MIXTURE_LIKELIHOOD_DIFF = 1.e-6;  // threshold for stopping the EM iterations
   const int MIXTURE_NB_ITER = 500;        // maximum number of EM iterations
@@ -72,8 +72,9 @@ namespace stat_tool {
 
   class MixtureData;
 
+  /// \brief Multivariate mixture of distributions
 
-  class Mixture : public StatInterface {  // multivariate mixture of distributions
+  class Mixture : public StatInterface {
 
     friend class Vectors;
     friend class MixtureData;
@@ -83,15 +84,15 @@ namespace stat_tool {
 
   private :
 
-    MixtureData *mixture_data;  // pointer on a MixtureData object
-    int nb_component;       // number of components
-    DiscreteParametric *weight;  // weight distribution
+    MixtureData *mixture_data;  ///< pointer on a MixtureData object
+    int nb_component;       ///< number of components
+    DiscreteParametric *weight;  ///< weight distribution
 //    int explanatory_variable;  categorical explanatory variable for the weights
 //    DiscreteParametric **category_weight;  component weights for the different categories
-    int nb_output_process;  // number of observation processes
-    CategoricalProcess **categorical_process;  // categorical observation processes categoriels
-    DiscreteParametricProcess **discrete_parametric_process;  // discrete parametric observation processes
-    ContinuousParametricProcess **continuous_parametric_process;  // continuous parametric observation processes
+    int nb_output_process;  ///< number of observation processes
+    CategoricalProcess **categorical_process;  ///< categorical observation processes
+    DiscreteParametricProcess **discrete_parametric_process;  ///< discrete parametric observation processes
+    ContinuousParametricProcess **continuous_parametric_process;  ///< continuous parametric observation processes
 
     Mixture(const DiscreteParametric *iweight , int inb_output_process ,
             CategoricalProcess **categorical_observation ,
@@ -165,8 +166,9 @@ namespace stat_tool {
 
 
 
-  class MixtureData : public Vectors {  // data structure corresponding to
-                                        // a multivariate mixture of distributions
+  /// \brief Data structure corresponding to a multivariate mixture of distributions
+
+  class MixtureData : public Vectors {
 
     friend class Vectors;
     friend class Mixture;
@@ -176,16 +178,16 @@ namespace stat_tool {
 
   private :
 
-    Mixture *mixture;       // pointer on a Mixture object
+    Mixture *mixture;       ///< pointer on a Mixture object
 //    int explanatory_variable;  categorical explanatory variable for the weights
 //    FrequencyDistribution **category_weight;  component weights for the different categories
-    FrequencyDistribution ***observation_distribution;  // observation frequency distributions
-    Histogram ***observation_histogram;  // observation histograms
-    double likelihood;      // log-likelihood of the observed data
-    double restoration_likelihood;  // log-likelihood of the restored data
-    double sample_entropy;  // sum of the entropy of the individual assignments
-    double *posterior_probability;  // posterior probabilities of the most probable assignments
-    double *entropy;        // entropy of the individual assignments
+    FrequencyDistribution ***observation_distribution;  ///< observation frequency distributions
+    Histogram ***observation_histogram;  ///< observation histograms
+    double likelihood;      ///< log-likelihood of the observed data
+    double restoration_likelihood;  ///< log-likelihood of the restored data
+    double sample_entropy;  ///< sum of the entropy of the individual assignments
+    double *posterior_probability;  ///< posterior probabilities of the most probable assignments
+    double *entropy;        ///< entropy of the individual assignments
 
     void copy(const MixtureData &vec , bool model_flag = true);
     void remove();

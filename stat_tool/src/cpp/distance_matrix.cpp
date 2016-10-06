@@ -338,7 +338,7 @@ DistanceMatrix::DistanceMatrix(const DistanceMatrix &dist_matrix , int inb_patte
   int nb_pattern , dnb_pattern , *didentifier , *index , *rindex , *cindex;
 
 
-  // calcul of line and row identifiers corresponding to the selected individuals
+  // computation of line and row identifiers corresponding to the selected individuals
 
   dnb_pattern = MAX(dist_matrix.nb_row , dist_matrix.nb_column);
   if (dist_matrix.nb_row > 1) {
@@ -664,8 +664,8 @@ DistanceMatrix::DistanceMatrix(const DistanceMatrix &dist_matrix , int nb_cluste
 /**
  *  \brief Copy of a DistanceMatrix object.
  *
- *  \param[in] reference on a DistanceMatrix object,
- *  \param[in] matrix transform (COPY/SYMMETRIZATION/UNNORMALIZATION).
+ *  \param[in] dist_matrix reference on a DistanceMatrix object,
+ *  \param[in] transform   matrix transform (COPY/SYMMETRIZATION/UNNORMALIZATION).
  */
 /*--------------------------------------------------------------*/
 
@@ -979,7 +979,7 @@ void DistanceMatrix::copy(const DistanceMatrix &dist_matrix , matrix_transform t
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Destruction of data members of a DistanceMatrix object.
+ *  \brief Destruction of the data members of a DistanceMatrix object.
  */
 /*--------------------------------------------------------------*/
 
@@ -1090,9 +1090,9 @@ DistanceMatrix::~DistanceMatrix()
 /**
  *  \brief Assignment operator of the DistanceMatrix class.
  *
- *  \param[in]  dist_matrix reference on a DistanceMatrix object,
+ *  \param[in] dist_matrix reference on a DistanceMatrix object.
  *
- *  \param[out] this        DistanceMatrix object.
+ *  \return                DistanceMatrix object.
  */
 /*--------------------------------------------------------------*/
 
@@ -1112,12 +1112,12 @@ DistanceMatrix& DistanceMatrix::operator=(const DistanceMatrix &dist_matrix)
 /**
  *  \brief Selection of individuals by their identifiers.
  *
- *  \param[in]  error       reference on a StatError object,
- *  \param[in]  inb_pattern number of individuals,
- *  \param[in]  iidentifier individual identifiers,
- *  \param[in]  keep        flag for keeping or rejecting the selected individuals,
+ *  \param[in] error       reference on a StatError object,
+ *  \param[in] inb_pattern number of individuals,
+ *  \param[in] iidentifier individual identifiers,
+ *  \param[in] keep        flag for keeping or rejecting the selected individuals.
  *
- *  \param[out] dist_matrix distance submatrix corresponding to the individuals selected.
+ *  \return                DistanceMatrix object.
  */
 /*--------------------------------------------------------------*/
 
@@ -1210,12 +1210,12 @@ DistanceMatrix* DistanceMatrix::select_individual(StatError &error , int inb_pat
 /**
  *  \brief Selection of individuals by their identifiers.
  *
- *  \param[in]  error       reference on a StatError object,
- *  \param[in]  inb_pattern number of individuals,
- *  \param[in]  iidentifier individual identifiers,
- *  \param[in]  keep        flag for keeping or rejecting the selected individuals,
+ *  \param[in] error       reference on a StatError object,
+ *  \param[in] inb_pattern number of individuals,
+ *  \param[in] iidentifier individual identifiers,
+ *  \param[in] keep        flag for keeping or rejecting the selected individuals,
  *
- *  \param[out]             distance submatrix corresponding to the individuals selected.
+ *  \return                DistanceMatrix object.
  */
 /*--------------------------------------------------------------*/
 
@@ -1231,9 +1231,9 @@ DistanceMatrix* DistanceMatrix::select_individual(StatError &error , int inb_pat
 /**
  *  \brief Symmetrization of a distance matrix.
  *
- *  \param[in]  error       reference on a StatError object,
+ *  \param[in] error reference on a StatError object.
  *
- *  \param[out] dist_matrix symmetrized distance matrix.
+ *  \return          DistanceMatrix object.
  */
 /*--------------------------------------------------------------*/
 
@@ -1261,9 +1261,9 @@ DistanceMatrix* DistanceMatrix::symmetrize(StatError &error) const
 /**
  *  \brief Unnormalization of a distance matrix.
  *
- *  \param[in]  error       reference on a StatError object,
+ *  \param[in] error reference on a StatError object.
  *
- *  \param[out] dist_matrix unnormalized distance matrix.
+ *  \return          DistanceMatrix object.
  */
 /*--------------------------------------------------------------*/
 
@@ -1455,13 +1455,13 @@ ostream& DistanceMatrix::property_print(double **normalized_distance ,
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Cumul of the terms of an integer-valued matrix.
+ *  \brief Summation of the terms of an integer-valued matrix.
  *
- *  \param[in]  nb_row    number of rows,
- *  \param[in]  nb_column number of columns,
- *  \param[in]  value     pointer on the integer-valued matrix,
+ *  \param[in] nb_row    number of rows,
+ *  \param[in] nb_column number of columns,
+ *  \param[in] value     pointer on the integer-valued matrix.
  *
- *  \param[out] cumul     cumul of terms.
+ *  \return              summation of terms.
  */
 /*--------------------------------------------------------------*/
 
@@ -1484,12 +1484,12 @@ int cumul_computation(int nb_row , int nb_column , int **value)
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Cumul of the terms of a distance vector.
+ *  \brief Summation of the terms of a distance vector.
  *
- *  \param[in]  dim            vector dimension,
- *  \param[in]  distance       pointer on the distance vector,
+ *  \param[in] dim      vector dimension,
+ *  \param[in] distance pointer on the distance vector.
  *
- *  \param[out] cumul_distance cumulative distance.
+ *  \return             cumulative distance.
  */
 /*--------------------------------------------------------------*/
 
@@ -1518,11 +1518,11 @@ double cumul_distance_computation(int dim , double *distance)
 /**
  *  \brief Sort of individuals by increasing distances.
  *
- *  \param[in]  nb_pattern        number of individuals,
- *  \param[in]  distance          distances,
- *  \param[in]  nb_sorted_pattern number of sorted individuals,
+ *  \param[in] nb_pattern        number of individuals,
+ *  \param[in] distance          distances,
+ *  \param[in] nb_sorted_pattern number of sorted individuals.
  *
- *  \param[out] index             sorted individual indices.
+ *  \return                      sorted individual indices.
  */
 /*--------------------------------------------------------------*/
 
@@ -1870,11 +1870,11 @@ ostream& DistanceMatrix::ascii_write(ostream &os , bool exhaustive) const
 /**
  *  \brief Writing of a DistanceMatrix object in a file.
  *
- *  \param[in]  error      reference on a StatError object,
- *  \param[in]  path       file path,
- *  \param[in]  exhaustive flag detail level,
+ *  \param[in] error      reference on a StatError object,
+ *  \param[in] path       file path,
+ *  \param[in] exhaustive flag detail level.
  *
- *  \param[out] status     error status.
+ *  \return               error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -2132,10 +2132,10 @@ ostream& DistanceMatrix::spreadsheet_write(ostream &os) const
 /**
  *  \brief Writing of a DistanceMatrix object in a file at the spreadsheet format.
  *
- *  \param[in]  error  reference on a StatError object,
- *  \param[in]  path   file path,
+ *  \param[in] error reference on a StatError object,
+ *  \param[in] path  file path.
  *
- *  \param[out] status error status.
+ *  \return          error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -2166,11 +2166,11 @@ bool DistanceMatrix::spreadsheet_write(StatError &error , const string path) con
 /**
  *  \brief Plot of a DistanceMatrix object using Gnuplot.
  *
- *  \param[in]  error  reference on a StatError object,
- *  \param[in]  prefix file prefix,
- *  \param[in]  title  figure title,
+ *  \param[in] error  reference on a StatError object,
+ *  \param[in] prefix file prefix,
+ *  \param[in] title  figure title.
  *
- *  \param[out] status error status.
+ *  \return           error status.
  */
 /*--------------------------------------------------------------*/
 
@@ -2236,7 +2236,7 @@ bool DistanceMatrix::plot_write(StatError &error , const char *prefix ,
 
     else {
 
-      // writing of data file
+      // writing of the data file
 
       data_file_name << prefix << ".dat";
       ofstream out_data_file((data_file_name.str()).c_str());
@@ -2257,7 +2257,7 @@ bool DistanceMatrix::plot_write(StatError &error , const char *prefix ,
           }
         }
 
-        // writing of script files
+        // writing of the script files
 
         for (i = 0;i < 2;i++) {
           ostringstream file_name[2];
@@ -2344,9 +2344,9 @@ bool DistanceMatrix::plot_write(StatError &error , const char *prefix ,
 /**
  *  \brief Plot of a DistanceMatrix object.
  *
- *  \param[in]  error    reference on a StatError object,
+ *  \param[in] error reference on a StatError object.
  *
- *  \param[out] plot_set plots.
+ *  \return          MultiPlotSet object.
  */
 /*--------------------------------------------------------------*/
 
@@ -2478,7 +2478,7 @@ MultiPlotSet* DistanceMatrix::get_plotable(StatError &error) const
 /**
  *  \brief Plot of a DistanceMatrix object.
  *
- *  \param[out] plots.
+ *  \return MultiPlotSet object.
  */
 /*--------------------------------------------------------------*/
 
@@ -2497,7 +2497,7 @@ MultiPlotSet* DistanceMatrix::get_plotable() const
 /**
  *  \brief Test of the symmetry of a distance matrix.
  *
- *  \param[out] symmetry flag symmetric matrix or not.
+ *  \return flag symmetric matrix or not.
  */
 /*--------------------------------------------------------------*/
 
@@ -2644,10 +2644,10 @@ void DistanceMatrix::update(int irow_identifier , int icolumn_identifier ,
 /**
  *  \brief Computation of a cumulative length.
  *
- *  \param[in]  row_flag     flag on the rows,
- *  \param[in]  column_flag  flag on the columns,
+ *  \param[in] row_flag    flag on the rows,
+ *  \param[in] column_flag flag on the columns.
  *
- *  \param[out] cumul_length cumulative length.
+ *  \return                cumulative length.
  */
 /*--------------------------------------------------------------*/
 
@@ -2676,10 +2676,10 @@ int DistanceMatrix::cumul_length_computation(bool *row_flag , bool *column_flag)
 /**
  *  \brief Computation of a cumulative distance.
  *
- *  \param[in]  row_flag       flag on the rows,
- *  \param[in]  column_flag    flag on the columns,
+ *  \param[in] row_flag    flag on the rows,
+ *  \param[in] column_flag flag on the columns.
  *
- *  \param[out] cumul_distance cumulative distance.
+ *  \return                cumulative distance.
  */
 /*--------------------------------------------------------------*/
 

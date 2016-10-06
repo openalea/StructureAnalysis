@@ -50,7 +50,7 @@ namespace stat_tool {
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Computation of a convolution of distributions.
+ *  \brief Computation of a convolution of discrete distributions.
  *
  *  \param[in] min_nb_value    upper bound of the elementary distribution supports,
  *  \param[in] cumul_threshold threshold on the cumulative distribution function,
@@ -93,7 +93,7 @@ void Convolution::computation(int min_nb_value , double cumul_threshold , bool *
 /**
  *  \brief Computation of reestimation quantities (E-step of EM algorithm).
  *
- *  \param[in] histo          reference on a frequency distribution,
+ *  \param[in] histo          reference on a FrequencyDistribution object,
  *  \param[in] partial_convol pointer on the partial convolutions, 
  *  \param[in] reestim        pointer on the reestimation quantities.
  */
@@ -148,19 +148,19 @@ void Convolution::expectation_step(const FrequencyDistribution &histo ,
 /**
  *  \brief Deconvolution of an elementary distribution using the EM algorithm.
  *
- *  \param[in]  error        reference on a StatError object,
- *  \param[in]  os           stream,
- *  \param[in]  known_dist   reference on the known distribution,
- *  \param[in]  unknown_dist reference on the unknown distribution,
- *  \param[in]  estimator    estimator type (likelihood, penalized likelihood or 
- *                           estimation of a parametric distribution),
- *  \param[in]  nb_iter      number of iterations,
- *  \param[in]  weight       penalty weight,
- *  \param[in]  pen_type     penalty type,
- *  \param[in]  outside      management of side effects (zero outside the support or
- *                           continuation of the distribution),
+ *  \param[in] error        reference on a StatError object,
+ *  \param[in] os           stream,
+ *  \param[in] known_dist   reference on the known distribution,
+ *  \param[in] unknown_dist reference on the unknown distribution,
+ *  \param[in] estimator    estimator type (likelihood, penalized likelihood or 
+ *                          estimation of a parametric distribution),
+ *  \param[in] nb_iter      number of iterations,
+ *  \param[in] weight       penalty weight,
+ *  \param[in] pen_type     penalty type,
+ *  \param[in] outside      management of side effects (zero outside the support or
+ *                          continuation of the distribution).
  *
- *  \param[out] convol       convolution of discrete distributions.
+ *  \return                 Convolution object.
  */
 /*--------------------------------------------------------------*/
 
@@ -227,8 +227,7 @@ Convolution* FrequencyDistribution::convolution_estimation(StatError &error , os
       weight *= nb_element;
     }
 
-    // initialization of partial convolutions and construction of
-    // reestimation quantities
+    // initialization of partial convolutions and construction of the reestimation quantities
 
     partial_convol[0] = convol->distribution[1];
     partial_convol[1] = convol->distribution[0];
@@ -250,7 +249,7 @@ Convolution* FrequencyDistribution::convolution_estimation(StatError &error , os
     do {
       i++;
 
-      // computation of reestimation quantities
+      // computation of the reestimation quantities
 
       convol->expectation_step(*this , partial_convol , reestim);
 
@@ -262,7 +261,7 @@ Convolution* FrequencyDistribution::convolution_estimation(StatError &error , os
                                                     pen_type , penalty , outside);
       }
 
-      // computation of the estimated convolution and of the corresponding log-likelihood
+      // computation of the estimated convolution and the corresponding log-likelihood
 
       convol->computation(nb_value);
       previous_likelihood = likelihood;
@@ -308,7 +307,7 @@ Convolution* FrequencyDistribution::convolution_estimation(StatError &error , os
         do {
           i++;
 
-          // computation of reestimation quantities
+          // computation of the reestimation quantities
 
           convol->expectation_step(*this , partial_convol , reestim);
           convol_histo->frequency_distribution[1]->update(reestim[1] ,
@@ -322,7 +321,7 @@ Convolution* FrequencyDistribution::convolution_estimation(StatError &error , os
             likelihood = D_INF;
           }
 
-          // computation of the estimated convolution and of the corresponding log-likelihood
+          // computation of the estimated convolution and the corresponding log-likelihood
 
           else {
             convol->computation(nb_value , CONVOLUTION_THRESHOLD , dist_flag);
@@ -398,19 +397,19 @@ Convolution* FrequencyDistribution::convolution_estimation(StatError &error , os
 /**
  *  \brief Deconvolution of an elementary distribution using the EM algorithm.
  *
- *  \param[in]  error         reference on a StatError object,
- *  \param[in]  os            stream,
- *  \param[in]  known_dist    reference on the known distribution,
- *  \param[in]  min_inf_bound minimum lower bound of the support,
- *  \param[in]  estimator     estimator type (likelihood, penalized likelihood or 
- *                            estimation of a parametric distribution),
- *  \param[in]  nb_iter       number of iterations,
- *  \param[in]  weight        penalty weight,
- *  \param[in]  pen_type      penalty type,
- *  \param[in]  outside       management of side effects (zero outside the support or
- *                            continuation of the distribution),
+ *  \param[in] error         reference on a StatError object,
+ *  \param[in] os            stream,
+ *  \param[in] known_dist    reference on the known distribution,
+ *  \param[in] min_inf_bound minimum lower bound of the support,
+ *  \param[in] estimator     estimator type (likelihood, penalized likelihood or 
+ *                           estimation of a parametric distribution),
+ *  \param[in] nb_iter       number of iterations,
+ *  \param[in] weight        penalty weight,
+ *  \param[in] pen_type      penalty type,
+ *  \param[in] outside       management of side effects (zero outside the support or
+ *                           continuation of the distribution).
  *
- *  \param[out] convol        convolution of discrete distributions.
+ *  \return                  Convolution object.
  */
 /*--------------------------------------------------------------*/
 
@@ -472,12 +471,12 @@ Convolution* FrequencyDistribution::convolution_estimation(StatError &error , os
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Simulation using a convolution of distributions.
+ *  \brief Simulation using a convolution of discrete distributions.
  *
- *  \param[in]  error        reference on a StatError object,
- *  \param[in]  nb_element   sample size,
+ *  \param[in] error       reference on a StatError object,
+ *  \param[in] nb_element  sample size.
  *
- *  \param[out] convol_histo sample generated by a convolution of discrete distributions.
+ *  \return                ConvolutionData object.
  */
 /*--------------------------------------------------------------*/
 

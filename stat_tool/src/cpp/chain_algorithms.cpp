@@ -165,9 +165,10 @@ void Chain::init(bool left_right , double self_transition)
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Construction of the matrix of possible transitions between states.
+ *  \brief Construction of the matrix of possible transitions between states
+ *         (adjacency matrix of the graph of possible transitions).
  *
- *  \param[out] logic_transition matrix of possible transitions.
+ *  \return matrix of possible transitions.
  */
 /*--------------------------------------------------------------*/
 
@@ -199,16 +200,16 @@ bool** Chain::logic_transition_computation() const
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Determination of connex components of a Markov chain.
+ *  \brief Determination of the strongly connected components of a Markov chain.
  *
- *  \param[in]  error             reference on a StatError object,
- *  \param[in]  ilogic_transition matrix of possible transitions between states,
+ *  \param[in] error             reference on a StatError object,
+ *  \param[in] ilogic_transition matrix of possible transitions between states.
  *
- *  \param[out] status            error status.
+ *  \return                      error status.
  */
 /*--------------------------------------------------------------*/
 
-bool Chain::connex_component_research(StatError &error , bool **ilogic_transition) const
+bool Chain::strongly_connected_component_research(StatError &error , bool **ilogic_transition) const
 
 {
   bool status = true , **logic_transition;
@@ -474,7 +475,7 @@ void Chain::probability_accessibility_computation()
            **ptransition , **uniform_transition;
 
 
-    // construction of the matrix accessibility
+    // construction of the accessibility matrix
 
     accessibility = new bool*[nb_state];
     for (i = 0;i < nb_state;i++) {
@@ -515,7 +516,7 @@ void Chain::probability_accessibility_computation()
       }
     }
 
-    // state accessibility computation
+    // computation of state accessibility
 
     state_seq = new double[nb_state];
     pstate_seq = new double[nb_state];
@@ -829,11 +830,11 @@ void Chain::thresholding(double min_probability , bool semi_markov)
 /**
  *  \brief Computation of the log-likelihood of a Markov chain.
  *
- *  \param[in]  chain_data   reference on a ChainData object,
- *  \param[in]  initial_flag flag inclusion or not of the initial distribution in
- *                           the log-likelihood computation,
+ *  \param[in] chain_data   reference on a ChainData object,
+ *  \param[in] initial_flag flag inclusion or not of the initial distribution in
+ *                          the log-likelihood computation.
  *
- *  \param[out] likelihood   log-likelihood.
+ *  \return                 log-likelihood.
  */
 /*--------------------------------------------------------------*/
 
@@ -894,9 +895,9 @@ double Chain::likelihood_computation(const ChainData &chain_data , bool initial_
 /**
  *  \brief Computation of the number of free transition probabilities.
  *
- *  \param[in]  min_probability minimum probability,
+ *  \param[in] min_probability minimum probability.
  *
- *  \param[out] nb_parameter    number of free transition probabilities.
+ *  \return                    number of free transition probabilities.
  */
 /*--------------------------------------------------------------*/
 
@@ -924,9 +925,9 @@ int Chain::nb_parameter_computation(double min_probability) const
 /**
  *  \brief Computation of the chi2 value for a Markov chain (goodness of fit test).
  *
- *  \param[in]  chain_data reference on a ChainData object,
+ *  \param[in] chain_data reference on a ChainData object.
  *
- *  \param[out] value      chi2 value.
+ *  \return               chi2 value.
  */
 /*--------------------------------------------------------------*/
 
@@ -1055,7 +1056,7 @@ void ChainData::estimation(Chain &chain) const
 /**
  *  \brief Computation of the number of free transition probabilities.
  *
- *  \param[out] nb_parameter number of free transition probabilities.
+ *  \return number of free transition probabilities.
  */
 /*--------------------------------------------------------------*/
 
