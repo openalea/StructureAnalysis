@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -41,7 +41,7 @@
 
 #include "stat_tool/stat_label.h"
 
-#include "stat_tool/distribution_reestimation.hpp"   // probleme compilateur C++ Windows
+#include "stat_tool/distribution_reestimation.hpp"   // problem compiler C++ Windows
 
 #include "hidden_semi_markov.h"
 #include "sequence_label.h"
@@ -55,16 +55,18 @@ namespace sequence_analysis {
 
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the log-likelihood of a hidden semi-Markov chain for sequences
+ *         using the forward algorithm.
  *
- *  Calcul de la vraisemblance de sequences pour une semi-chaine de Markov cachee
- *  par l'algorithme forward.
+ *  \param[in] seq                   reference on a MarkovianSequences object,
+ *  \param[in] posterior_probability pointer on the posterior probabilities of the most probable state sequences,
+ *  \param[in] index                 sequence index.
  *
- *  arguments : reference sur un objet MarkovianSequences, pointeur sur
- *              les probabilites a posteriori des sequences d'etats
- *              les plus probables, indice de la sequence.
- *
- *--------------------------------------------------------------*/
+ *  \return                          log-likelihood.
+ */
+/*--------------------------------------------------------------*/
 
 double HiddenSemiMarkov::likelihood_computation(const MarkovianSequences &seq ,
                                                 double *posterior_probability , int index) const
@@ -77,7 +79,7 @@ double HiddenSemiMarkov::likelihood_computation(const MarkovianSequences &seq ,
   DiscreteParametric *occupancy;
 
 
-  // verification de la compatibilite entre le modele et les donnees
+  // checking of the compatibility of the model with the data
 
   if (nb_output_process == seq.nb_variable) {
     for (i = 0;i < nb_output_process;i++) {
@@ -103,7 +105,7 @@ double HiddenSemiMarkov::likelihood_computation(const MarkovianSequences &seq ,
 
   if (likelihood != D_INF) {
 
-    // initialisations
+    // initializations
 
     length = (index == I_DEFAULT ? seq.max_length : seq.length[index]);
 
@@ -143,7 +145,7 @@ double HiddenSemiMarkov::likelihood_computation(const MarkovianSequences &seq ,
 
           for (k = 0;k < nb_state;k++) {
 
-            // calcul des probabilites d'observation
+            // computation of the observation probabilities
 
             observation[j][k] = 1.;
             for (m = 0;m < nb_output_process;m++) {
@@ -200,7 +202,7 @@ double HiddenSemiMarkov::likelihood_computation(const MarkovianSequences &seq ,
 
             switch (sojourn_type[k]) {
 
-            // cas etat semi-markovien
+            // case semi-Markovian state
 
             case SEMI_MARKOVIAN : {
               if (j == 0) {
@@ -215,7 +217,7 @@ double HiddenSemiMarkov::likelihood_computation(const MarkovianSequences &seq ,
               break;
             }
 
-            // cas etat markovien
+            // case Markovian state
 
             case MARKOVIAN : {
               if (j == 0) {
@@ -254,7 +256,7 @@ double HiddenSemiMarkov::likelihood_computation(const MarkovianSequences &seq ,
 
           for (k = 0;k < nb_state;k++) {
 
-            // cas etat semi-markovien
+            // case semi-Markovian state
 
             if (sojourn_type[k] == SEMI_MARKOVIAN) {
               occupancy = state_process->sojourn_time[k];
@@ -368,19 +370,25 @@ double HiddenSemiMarkov::likelihood_computation(const MarkovianSequences &seq ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Estimation of a hidden semi-Markov chain using the EM algorithm.
  *
- *  Estimation des parametres d'une semi-chaine de Markov cachee a partir d'un echantillon
- *  de sequences par l'algorithme EM.
+ *  \param[in] error             reference on a StatError object,
+ *  \param[in] os                stream,
+ *  \param[in] ihsmarkov         initial hidden semi-Markov chain,
+ *  \param[in] common_dispersion flag common dispersion parameter (continuous observation processes),
+ *  \param[in] estimator         estimator type for the reestimation of the state occupancy distributions
+ *                               (complete or partial likelihood),
+ *  \param[in] counting_flag     flag on the computation of the counting distributions,
+ *  \param[in] state_sequence    flag on the computation of the restored state sequences,
+ *  \param[in] nb_iter           number of iterations,
+ *  \param[in] mean_estimator    method for the computation of the state occupancy
+ *                               distribution mean (equilibrium semi-Markov chain).
  *
- *  arguments : reference sur un objet StatError, stream, semi-chaine de Markov cachee initiale,
- *              flag parametres de dispersion communs (processus d'observation continus),
- *              type d'estimateur pour la reestimation des lois d'occupation des etats,
- *              flags sur le calcul des lois de comptage et sur le calcul des sequences
- *              d'etats optimales, nombre d'iterations, methode de calcul de la moyenne
- *              des lois d'occupation des etats (semi-chaine de Markov cachee en equilibre).
- *
- *--------------------------------------------------------------*/
+ *  \return                      HiddenSemiMarkov object.
+ */
+/*--------------------------------------------------------------*/
 
 HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &error , ostream &os ,
                                                                     const HiddenSemiMarkov &ihsmarkov ,
@@ -420,7 +428,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
   hsmarkov = NULL;
   error.init();
 
-  // test nombre de valeurs observees par variable
+  // test number of values for each variable
 
   status = false;
   for (i = 0;i < nb_variable;i++) {
@@ -525,7 +533,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
       counting_flag = false;
     }
 
-    // creation de la semi-chaine de Markov cachee
+    // construction of the hidden semi-Markov chain
 
     hsmarkov = new HiddenSemiMarkov(ihsmarkov , false , (int)(max_length * SAMPLE_NB_VALUE_COEFF));
 
@@ -547,7 +555,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
     cout << *hsmarkov;
 #   endif
 
-    // creation des structures de donnees de l'algorithme
+    // construction of the data structures of the algorithm
 
     observation = new double*[max_length];
     for (i = 0;i < max_length;i++) {
@@ -727,7 +735,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
       previous_likelihood = likelihood;
       likelihood = 0.;
 
-      // initialisation des quantites de reestimation
+      // initialization of the reestimation quantities
 
       chain_reestim->init();
 
@@ -799,14 +807,14 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
           }
         }
 
-        // recurrence "forward"
+        // forward recurrence
 
         for (j = 0;j < length[i];j++) {
           norm[j] = 0.;
 
           for (k = 0;k < hsmarkov->nb_state;k++) {
 
-            // calcul des probabilites d'observation
+            // computation of the observation probabilities
 
             observation[j][k] = 1.;
             for (m = 0;m < hsmarkov->nb_output_process;m++) {
@@ -869,7 +877,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
 
             switch (hsmarkov->sojourn_type[k]) {
 
-            // cas etat semi-markovien
+            // case semi-Markovian state
 
             case SEMI_MARKOVIAN : {
               if (j == 0) {
@@ -884,7 +892,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
               break;
             }
 
-            // cas etat markovien
+            // case Markovian state
 
             case MARKOVIAN : {
               if (j == 0) {
@@ -923,7 +931,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
 
           for (k = 0;k < hsmarkov->nb_state;k++) {
 
-            // cas etat semi-markovien
+            // case semi-Markovian state
 
             if (hsmarkov->sojourn_type[k] == SEMI_MARKOVIAN) {
               occupancy = hsmarkov->state_process->sojourn_time[k];
@@ -1019,7 +1027,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
         cout << endl;
 #       endif
 
-        // recurrence "backward"
+        // backward recurrence
 
         for (j = 0;j < nb_variable;j++) {
           if (type[j] == INT_VALUE) {
@@ -1032,7 +1040,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
           backward[k] = forward[j][k];
           backward1[j][k] = backward[k];
 
-          // accumulation des quantites de reestimation des lois d'observation
+          // accumulation of the reestimation quantities of the observation distributions
 
           for (m = 0;m < hsmarkov->nb_output_process;m++) {
             if (observation_reestim[m]) {
@@ -1057,7 +1065,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
 
             switch (hsmarkov->sojourn_type[k]) {
 
-            // cas etat semi-markovien
+            // case semi-Markovian state
 
             case SEMI_MARKOVIAN : {
               occupancy = hsmarkov->state_process->sojourn_time[k];
@@ -1075,7 +1083,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
                     buff = backward1[j + m][k] * obs_product * occupancy->mass[m] /
                            forward[j + m][k];
 
-                    // accumulation des quantites de reestimation des lois d'occupation des etats
+                    // accumulation of the reestimation quantities of the state occupancy distributions
 
                     occupancy_reestim[k]->frequency[m] += buff * state_in[j][k];
                   }
@@ -1083,7 +1091,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
                   else {
                     buff = obs_product * (1. - occupancy->cumul[m - 1]);
 
-                    // accumulation des quantites de reestimation des lois d'occupation des etats
+                    // accumulation of the reestimation quantities of the state occupancy distributions
 
                     switch (estimator) {
 
@@ -1108,7 +1116,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
               break;
             }
 
-            // cas etat markovien
+            // case Markovian state
 
             case MARKOVIAN : {
               if (backward1[j + 1][k] > 0.) {
@@ -1131,14 +1139,14 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
               buff = auxiliary[m] * hsmarkov->transition[k][m] * forward[j][k];
               backward1[j][k] += buff;
 
-              // accumulation des quantites de reestimation des probabilites de transition
+              // accumulation of the reestimation quantities of the transition probabilities
 
               chain_reestim->transition[k][m] += buff;
             }
 
             switch (hsmarkov->sojourn_type[k]) {
 
-            // cas etat semi-markovien
+            // case semi-Markovian state
 
             case SEMI_MARKOVIAN : {
               backward[k] = backward[k] + backward1[j][k] - auxiliary[k] * state_in[j][k];
@@ -1151,7 +1159,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
               break;
             }
 
-            // cas etat markovien
+            // case Markovian state
 
             case MARKOVIAN : {
               backward[k] = backward1[j][k];
@@ -1159,7 +1167,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
             }
             }
 
-            // accumulation des quantites de reestimation des lois d'observation
+            // accumulation of the reestimation quantities of the observation distributions
 
             for (m = 0;m < hsmarkov->nb_output_process;m++) {
               if (observation_reestim[m]) {
@@ -1173,7 +1181,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
           }
         }
 
-        // accumulation des quantites de reestimation des probabilites initiales
+        // accumulation of the reestimation quantities of the initial probabilities
 
         if (hsmarkov->type == ORDINARY) {
           for (j = 0;j < hsmarkov->nb_state;j++) {
@@ -1181,7 +1189,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
           }
         }
 
-        // accumulation des quantites de reestimation des lois d'occupation des etats initiaux
+        // accumulation of the reestimation quantities of the initial state occupancy distributions
 
         if ((hsmarkov->type == ORDINARY) || (estimator == COMPLETE_LIKELIHOOD)) {
           for (j = 0;j < hsmarkov->nb_state;j++) {
@@ -1301,21 +1309,21 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
           nb_likelihood_decrease = 0;
         }
 
-        // reestimation des probabilites initiales
+        // reestimation of the initial probabilities
 
         if (hsmarkov->type == ORDINARY) {
           reestimation(hsmarkov->nb_state , chain_reestim->initial ,
                        hsmarkov->initial , MIN_PROBABILITY , false);
         }
 
-        // reestimation des probabilites de transition
+        // reestimation of the transition probabilities
 
         for (i = 0;i < hsmarkov->nb_state;i++) {
           reestimation(hsmarkov->nb_state , chain_reestim->transition[i] ,
                        hsmarkov->transition[i] , MIN_PROBABILITY , false);
         }
 
-        // reestimation des lois d'occupation des etats
+        // reestimation of the state occupancy distributions
 
         min_likelihood = 0.;
 
@@ -1479,7 +1487,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
           hsmarkov->initial_probability_computation();
         }
 
-        // reestimation des lois d'observation
+        // reestimation of the observation distributions
 
         for (i = 0;i < hsmarkov->nb_output_process;i++) {
           if (hsmarkov->categorical_process[i]) {
@@ -1691,14 +1699,14 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
       }
 #     endif
 
-      // reestimation des probabilites initiales
+      // reestimation of the initial probabilities
 
       if (hsmarkov->type == ORDINARY) {
         reestimation(hsmarkov->nb_state , chain_reestim->initial ,
                      hsmarkov->initial , MIN_PROBABILITY , true);
       }
 
-      // reestimation des probabilites de transition
+      // reestimation of the transition probabilities
 
       for (i = 0;i < hsmarkov->nb_state;i++) {
         reestimation(hsmarkov->nb_state , chain_reestim->transition[i] ,
@@ -1720,7 +1728,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
         }
       }
 
-      // reestimation des lois d'observation categorielles
+      // reestimation of the categorical observation distributions
 
       for (i = 0;i < hsmarkov->nb_output_process;i++) {
         if (hsmarkov->categorical_process[i]) {
@@ -1737,7 +1745,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
       }
     }
 
-    // destruction des structures de donnees de l'algorithme
+    // destruction of the data structures of the algorithm
 
     for (i = 0;i < max_length;i++) {
       delete [] observation[i];
@@ -1871,7 +1879,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
         seq->build_observation_frequency_distribution(hsmarkov->nb_state);
         seq->build_observation_histogram(hsmarkov->nb_state);
 
-        // calcul des lois d'occupation des etats
+        // computation of the state occupancy distributions
 
         for (i = 0;i < hsmarkov->nb_state;i++) {
           if (hsmarkov->sojourn_type[i] == SEMI_MARKOVIAN) {
@@ -1886,7 +1894,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
           }
         }
 
-        // calcul des melanges de lois d'observation (poids deduits de la restauration)
+        // computation of the mixtures of observation distributions (weights deduced from the restoration)
 
         weight = NULL;
 
@@ -1980,14 +1988,14 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
         }
       }
 
-      // calcul de la vraisemblance et des lois caracteristiques du modele
+      // computation of the log-likelihood and the characteristic distributions of the model
 
       seq->likelihood = hsmarkov->likelihood_computation(*this , seq->posterior_probability);
 
       hsmarkov->component_computation();
       hsmarkov->characteristic_computation(*seq , counting_flag , I_DEFAULT , false);
 
-      // calcul des melanges de lois d'observation (poids theoriques)
+      // computation of the mixtures of observation distributions (theoretical weights)
 
       weight = NULL;
 
@@ -2070,21 +2078,28 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Estimation of a hidden semi-Markov chain using the EM algorithm.
  *
- *  Estimation des parametres d'une semi-chaine de Markov cachee a partir
- *  d'un echantillon de sequences.
+ *  \param[in] error             reference on a StatError object,
+ *  \param[in] os                stream,
+ *  \param[in] itype             process type (ORDINARY/EQUILIBRIUM),
+ *  \param[in] nb_state          number of states,
+ *  \param[in] left_right        flag on the Markov chain structure,
+ *  \param[in] occupancy_mean    mean state occupancy,
+ *  \param[in] common_dispersion flag common dispersion parameter (continuous observation processes),
+ *  \param[in] estimator         estimator type for the reestimation of the state occupancy distributions
+ *                               (complete or partial likelihood),
+ *  \param[in] counting_flag     flag on the computation of the counting distributions,
+ *  \param[in] state_sequence    flag on the computation of the restored state sequences,
+ *  \param[in] nb_iter           number of iterations,
+ *  \param[in] mean_estimator    method for the computation of the state occupancy
+ *                               distribution mean (equilibrium semi-Markov chain).
  *
- *  arguments : reference sur un objet StatError, stream, type de processus
- *              (ORDINARY/EQUILIBRIUM), nombre d'etats de la chaine de Markov,
- *              flag sur la nature de la chaine de Markov, temps moyen d'occupation d'un etat,
- *              flag parametres de dispersion communs (processus d'observation continus),
- *              type d'estimateur pour la reestimation des lois d'occupation des etats,
- *              flags sur le calcul des lois de comptage et sur le calcul des sequences d'etats optimales,
- *              nombre d'iterations, methode de calcul de la moyenne des lois d'occupation des etats
- *              (semi-chaine de Markov cachee en equilibre).
- *
- *--------------------------------------------------------------*/
+ *  \return                      HiddenSemiMarkov object.
+ */
+/*--------------------------------------------------------------*/
 
 HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &error , ostream &os ,
                                                                     process_type itype , int nb_state ,
@@ -2137,11 +2152,11 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
 
     ihsmarkov = new HiddenSemiMarkov(itype , nb_state , nb_variable , nb_value);
 
-    // initialisation des parametres de la chaine de Markov
+    // initialization of the Markov chain parameters
 
     ihsmarkov->init(left_right , 0.);
 
-    // initialisation des lois d'occupations des etats
+    // initialization of the state occupancy distributions
 
     if (occupancy_mean == D_DEFAULT) {
       occupancy_mean = MAX(length_distribution->mean , OCCUPANCY_MEAN);
@@ -2178,7 +2193,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
       }
     }
 
-    // initialisation des lois d'observation
+    // initialization of the observation distributions
 
     for (i = 0;i < ihsmarkov->nb_output_process;i++) {
       if (ihsmarkov->categorical_process[i]) {
@@ -2208,19 +2223,26 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Estimation of a hidden semi-Markov chain using the MCEM algorithm.
  *
- *  Estimation des parametres d'une semi-chaine de Markov cachee a partir d'un echantillon
- *  de sequences par l'algorithme MCEM.
+ *  \param[in] error                  reference on a StatError object,
+ *  \param[in] os                     stream,
+ *  \param[in] ihsmarkov              initial hidden semi-Markov chain,
+ *  \param[in] common_dispersion      flag common dispersion parameter (continuous observation processes),
+ *  \param[in] min_nb_state_sequence  minimum number of generated sequences,
+ *  \param[in] max_nb_state_sequence  maximum number of generated sequences,
+ *  \param[in] parameter              parameter for defining the number of generated sequences,
+ *  \param[in] estimator              estimator type for the reestimation of the state occupancy distributions
+ *  \param[in]                        (complete or partial likelihood),
+ *  \param[in] counting_flag          flag on the computation of the counting distributions,
+ *  \param[in] state_sequence         flag on the computation of the restored state sequences,
+ *  \param[in] nb_iter                number of iterations.
  *
- *  arguments : reference sur un objet StatError, stream, semi-chaine de Markov cachee initiale,
- *              flag parametres de dispersion communs (processus d'observation continus),
- *              parametres pour le nombre de sequences d'etats simulees,
- *              type d'estimateur pour la reestimation des lois d'occupation des etats,
- *              flags sur le calcul des lois de comptage et sur le calcul
- *              des sequences d'etats optimales, nombre d'iterations.
- *
- *--------------------------------------------------------------*/
+ *  \return                           HiddenSemiMarkov object.
+ */
+/*--------------------------------------------------------------*/
 
 HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(StatError &error , ostream &os ,
                                                                                const HiddenSemiMarkov &ihsmarkov ,
@@ -2257,7 +2279,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
   hsmarkov = NULL;
   error.init();
 
-  // test nombre de valeurs observees par variable
+  // test number of values for each variable
 
   status = false;
   for (i = 0;i < nb_variable;i++) {
@@ -2367,7 +2389,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
       counting_flag = false;
     }
 
-    // creation de la semi-chaine de Markov cachee
+    // construction of the hidden semi-Markov chain
 
     hsmarkov = new HiddenSemiMarkov(ihsmarkov , false , (int)(max_length * SAMPLE_NB_VALUE_COEFF));
 
@@ -2389,7 +2411,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
     cout << *hsmarkov;
 #   endif
 
-    // creation des structures de donnees de l'algorithme
+    // construction of the data structures of the algorithm
 
     observation = new double*[max_length];
     for (i = 0;i < max_length;i++) {
@@ -2526,7 +2548,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
       previous_likelihood = likelihood;
       likelihood = 0.;
 
-      // calcul du nombre de sequences d'etats simulees
+      // computation of the number of generated state sequences
 
       if (min_nb_state_sequence + (int)::round(parameter * iter) < max_nb_state_sequence) {
         nb_state_sequence = min_nb_state_sequence + (int)::round(parameter * iter);
@@ -2540,7 +2562,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
 
       iter++;
 
-      // initialisation des quantites de reestimation
+      // initialization of the reestimation quantities
 
       chain_reestim->init();
 
@@ -2588,7 +2610,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
 
       for (i = 0;i < nb_sequence;i++) {
 
-        // recurrence "forward"
+        // forward recurrence
 
         for (j = 0;j < nb_variable;j++) {
           switch (type[j]) {
@@ -2606,7 +2628,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
 
           for (k = 0;k < hsmarkov->nb_state;k++) {
 
-            // calcul des probabilites d'observation
+            // computation of the observation probabilities
 
             observation[j][k] = 1.;
             for (m = 0;m < hsmarkov->nb_output_process;m++) {
@@ -2663,7 +2685,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
 
             switch (hsmarkov->sojourn_type[k]) {
 
-            // cas etat semi-markovien
+            // case semi-Markovian state
 
             case SEMI_MARKOVIAN : {
               if (j == 0) {
@@ -2678,7 +2700,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
               break;
             }
 
-            // cas etat markovien
+            // case Markovian state
 
             case MARKOVIAN : {
               if (j == 0) {
@@ -2717,7 +2739,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
 
           for (k = 0;k < hsmarkov->nb_state;k++) {
 
-            // cas etat semi-markovien
+            // case semi-Markovian state
 
             if (hsmarkov->sojourn_type[k] == SEMI_MARKOVIAN) {
               occupancy = hsmarkov->state_process->sojourn_time[k];
@@ -2812,7 +2834,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
         cout << endl;
 #       endif
 
-        // passes "backward"
+        // backward passes
 
         for (j = 0;j < nb_state_sequence;j++) {
           k = length[i] - 1;
@@ -2826,7 +2848,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
           cumul_computation(hsmarkov->nb_state , forward[k] , cumul_backward);
           *pstate = cumul_method(hsmarkov->nb_state , cumul_backward);
 
-          // accumulation des quantites de reestimation des lois d'observation
+          // accumulation of the reestimation quantities of the observation distributions
 
           for (m = 0;m < hsmarkov->nb_output_process;m++) {
             if (observation_reestim[m]) {
@@ -2840,7 +2862,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
 
           do {
 
-            // cas etat semi-markovien
+            // case semi-Markovian state
 
             if (hsmarkov->sojourn_type[*pstate] == SEMI_MARKOVIAN) {
               occupancy = hsmarkov->state_process->sojourn_time[*pstate];
@@ -2913,7 +2935,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
               }
 #             endif
 
-              // accumulation des quantites de reestimation des lois d'occupation des etats
+              // accumulation of the reestimation quantities of the state occupancy distributions
 
               if (k < length[i] - 1) {
                 if (state_occupancy < k + 1) {
@@ -2953,7 +2975,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
                 pstate--;
                 *pstate = *(pstate + 1);
 
-                // accumulation des quantites de reestimation des lois d'observation
+                // accumulation of the reestimation quantities of the observation distributions
 
                 for (n = 0;n < hsmarkov->nb_output_process;n++) {
                   if (observation_reestim[n]) {
@@ -2979,8 +3001,8 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
             cumul_computation(hsmarkov->nb_state , backward , cumul_backward);
             *--pstate = cumul_method(hsmarkov->nb_state , cumul_backward);
 
-            // accumulation des quantites de reestimation des probabilites de transition et
-            // des lois d'observation
+            // accumulation of the reestimation quantities of the transition probabilities and
+            // the observation distributions
 
             (chain_reestim->transition[*pstate][*(pstate + 1)])++;
 
@@ -3007,7 +3029,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
           }
           while (k > 0);
 
-          // accumulation des quantites de reestimation des probabilites initiales
+          // accumulation of the reestimation quantities of the initial probabilities
 
           if (hsmarkov->type == ORDINARY) {
             (chain_reestim->initial[*pstate])++;
@@ -3023,21 +3045,21 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
           nb_likelihood_decrease = 0;
         }
 
-        // reestimation des probabilites initiales
+        // reestimation of the initial probabilities
 
         if (hsmarkov->type == ORDINARY) {
           reestimation(hsmarkov->nb_state , chain_reestim->initial ,
                        hsmarkov->initial , MIN_PROBABILITY , false);
         }
 
-        // reestimation des probabilites de transition
+        // reestimation of the transition probabilities
 
         for (i = 0;i < hsmarkov->nb_state;i++) {
           reestimation(hsmarkov->nb_state , chain_reestim->transition[i] ,
                        hsmarkov->transition[i] , MIN_PROBABILITY , false);
         }
 
-        // reestimation des lois d'occupation des etats
+        // reestimation of the state occupancy distributions
 
         min_likelihood = 0.;
 
@@ -3163,7 +3185,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
           hsmarkov->initial_probability_computation();
         }
 
-        // reestimation des lois d'observation
+        // reestimation of the observation distributions
 
         for (i = 0;i < hsmarkov->nb_output_process;i++) {
           if (hsmarkov->categorical_process[i]) {
@@ -3367,14 +3389,14 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
       }
 #     endif
 
-      // reestimation des probabilites initiales
+      // reestimation of the initial probabilities
 
       if (hsmarkov->type == ORDINARY) {
         reestimation(hsmarkov->nb_state , chain_reestim->initial ,
                      hsmarkov->initial , MIN_PROBABILITY , true);
       }
 
-      // reestimation des probabilites de transition
+      // reestimation of the transition probabilities
 
       for (i = 0;i < hsmarkov->nb_state;i++) {
         reestimation(hsmarkov->nb_state , chain_reestim->transition[i] ,
@@ -3396,7 +3418,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
         }
       }
 
-      // reestimation des lois d'observation categorielles
+      // reestimation of the categorical observation distributions
 
       for (i = 0;i < hsmarkov->nb_output_process;i++) {
         if (hsmarkov->categorical_process[i]) {
@@ -3413,7 +3435,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
       }
     }
 
-    // destruction des structures de donnees de l'algorithme
+    // destruction of the data structures of the algorithm
 
     for (i = 0;i < max_length;i++) {
       delete [] observation[i];
@@ -3535,7 +3557,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
         seq->build_observation_frequency_distribution(hsmarkov->nb_state);
         seq->build_observation_histogram(hsmarkov->nb_state);
 
-        // calcul des lois d'occupation des etats
+        // computation of the state occupancy distributions
 
         for (i = 0;i < hsmarkov->nb_state;i++) {
           if (hsmarkov->sojourn_type[i] == SEMI_MARKOVIAN) {
@@ -3550,7 +3572,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
           }
         }
 
-        // calcul des melanges de lois d'observation (poids deduits de la restauration)
+        // computation of the mixtures of observation distributions (weights deduced from the restoration)
 
         weight = NULL;
 
@@ -3642,14 +3664,14 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
         }
       }
 
-      // calcul de la vraisemblance et des lois caracteristiques du modele
+      // computation of the log-likelihood and the characteristic distributions of the model
 
       seq->likelihood = hsmarkov->likelihood_computation(*this , seq->posterior_probability);
 
       hsmarkov->component_computation();
       hsmarkov->characteristic_computation(*seq , counting_flag , I_DEFAULT , false);
 
-      // calcul des melanges de lois d'observation (poids theoriques)
+      // computation of the mixtures of observation distributions (theoretical weights)
 
       weight = NULL;
 
@@ -3687,8 +3709,8 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
 
       delete weight;
 
-      // mise a jour des tailles d'echantillons pour les intervalles de confiance sur les pentes et
-      // les coefficients de correlation
+      // update of the sample sizes for the computation of the confidence intervals on the slopes and
+      // the correlation coefficients (linear observation model)
 
       for (i = 0;i < hsmarkov->nb_output_process;i++) {
         if (hsmarkov->continuous_parametric_process[i]->ident == LINEAR_MODEL) {
@@ -3740,21 +3762,29 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Estimation of a hidden semi-Markov chain using the MCEM algorithm.
  *
- *  Estimation des parametres d'une semi-chaine de Markov cachee a partir
- *  d'un echantillon de sequences.
+ *  \param[in] error                 reference on a StatError object,
+ *  \param[in] os                    stream,
+ *  \param[in] itype                 process type (ORDINARY/EQUILIBRIUM),
+ *  \param[in] nb_state              number of states,
+ *  \param[in] left_right            flag on the Markov chain structure,
+ *  \param[in] occupancy_mean        mean state occupancy,
+ *  \param[in] common_dispersion     flag common dispersion parameter (continuous observation processes),
+ *  \param[in] min_nb_state_sequence minimum number of generated sequences,
+ *  \param[in] max_nb_state_sequence maximum number of generated sequences,
+ *  \param[in] parameter             parameter for defining the number of generated sequences,
+ *  \param[in] estimator             estimator type for the reestimation of the state occupancy distributions
+ *                                   (complete or partial likelihood),
+ *  \param[in] counting_flag         flag on the computation of the counting distributions,
+ *  \param[in] state_sequence        flag on the computation of the restored state sequences,
+ *  \param[in] nb_iter               number of iterations.
  *
- *  arguments : reference sur un objet StatError, stream, type de processus
- *              (ORDINARY/EQUILIBRIUM), nombre d'etats de la chaine de Markov,
- *              flag sur la nature de la chaine de Markov, temps moyen d'occupation d'un etat,
- *              flag parametres de dispersion communs (processus d'observation continus),
- *              parametres pour le nombre de sequences d'etats simulees,
- *              type d'estimateur pour la reestimation des lois d'occupation des etats,
- *              flags sur le calcul des lois de comptage et sur le calcul
- *              des sequences d'etats optimales, nombre d'iterations.
- *
- *--------------------------------------------------------------*/
+ *  \return                          HiddenSemiMarkov object.
+ */
+/*--------------------------------------------------------------*/
 
 HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(StatError &error , ostream &os ,
                                                                                process_type itype , int nb_state ,
@@ -3810,11 +3840,11 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
 
     ihsmarkov = new HiddenSemiMarkov(itype , nb_state , nb_variable , nb_value);
 
-    // initialisation des parametres de la chaine de Markov
+    // initialization of the Markov chain parameters
 
     ihsmarkov->init(left_right , 0.);
 
-    // initialisation des lois d'occupations des etats
+    // initialization of the state occupancy distributions
 
     if (occupancy_mean == D_DEFAULT) {
       occupancy_mean = MAX(length_distribution->mean , OCCUPANCY_MEAN);
@@ -3851,7 +3881,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
       }
     }
 
-    // initialisation des lois d'observation
+    // initialization of the observation distributions
 
     for (i = 0;i < ihsmarkov->nb_output_process;i++) {
       if (ihsmarkov->categorical_process[i]) {

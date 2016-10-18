@@ -362,7 +362,7 @@ Convolution* FrequencyDistribution::convolution_estimation(StatError &error , os
 
     if (likelihood != D_INF) {
 
-      // update of the number of free parametres
+      // update of the number of free parameters
 
       convol->distribution[1]->nb_parameter_update();
       convol->nb_parameter = convol->distribution[1]->nb_parameter;

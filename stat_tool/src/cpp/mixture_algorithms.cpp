@@ -41,7 +41,7 @@
 #include "mixture.h"
 #include "stat_label.h"
 
-#include "stat_tool/distribution_reestimation.hpp"   // probleme compilateur C++ Windows
+#include "stat_tool/distribution_reestimation.hpp"   // problem compiler C++ Windows
 
 using namespace std;
 using namespace boost::math;

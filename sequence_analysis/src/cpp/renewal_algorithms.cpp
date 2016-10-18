@@ -130,7 +130,7 @@ double Renewal::likelihood_computation(const TimeEvents &timev) const
  *         (EM estimator of an ordinary renewal process on the basis of count data).
  *
  *  \param[in] timev               reference on the pairs {observation period, number of events},
- *  \param[in] inter_event_reestim pointeur on the reestimation quantities.
+ *  \param[in] inter_event_reestim pointer on the reestimation quantities.
  */
 /*--------------------------------------------------------------*/
 
@@ -255,11 +255,11 @@ void Renewal::expectation_step(const TimeEvents &timev ,
  *         (EM estimator of an equilibrium renewal process on the basis of count data).
  *
  *  \param[in] timev               reference on the pairs {observation period, number of events},
- *  \param[in] inter_event_reestim pointeur on the inter-event distribution reestimation quantities,
- *  \param[in] length_bias_reestim pointeur on the length-biased distribution reestimation quantities,
+ *  \param[in] inter_event_reestim pointer on the inter-event distribution reestimation quantities,
+ *  \param[in] length_bias_reestim pointer on the length-biased distribution reestimation quantities,
  *  \param[in] estimator           estimator type (complete or partial likelihood),
  *  \param[in] combination         combination or not of the reestimation quantities,
- *  \param[in] mean_estimator      method of computation of the inter-event distribution mean.
+ *  \param[in] mean_estimator      method for the computation of the inter-event distribution mean (equilibrium renewel process).
  */
 /*--------------------------------------------------------------*/
 

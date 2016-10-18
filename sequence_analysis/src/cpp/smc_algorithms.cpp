@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -57,11 +57,11 @@ namespace sequence_analysis {
 
 
 
-/*--------------------------------------------------------------*
- *
- *  Calcul de la loi stationnaire pour une semi-chaine de Markov en equilibre.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the stationary distribution for an equilibrium semi-Markov chain.
+ */
+/*--------------------------------------------------------------*/
 
 void SemiMarkovChain::initial_probability_computation()
 
@@ -93,7 +93,7 @@ void SemiMarkovChain::initial_probability_computation()
 
       switch (sojourn_type[j]) {
 
-      // cas etat semi-markovien
+      // case semi-Markovian state
 
       case SEMI_MARKOVIAN : {
         if (i == 0) {
@@ -117,7 +117,7 @@ void SemiMarkovChain::initial_probability_computation()
         break;
       }
 
-      // cas etat markovien
+      // case Markovian state
 
       case MARKOVIAN : {
         if (i == 0) {
@@ -160,14 +160,14 @@ void SemiMarkovChain::initial_probability_computation()
   for (j = 0;j < nb_state;j++) {
     switch (sojourn_type[j]) {
 
-    // cas etat semi-markovien
+    // case semi-Markovian state
 
     case SEMI_MARKOVIAN :
       initial[j] = state_in[i - 1][j] - state_out[j] + state[j];
 //      initial[j] = state[j];
       break;
 
-    // cas etat markovien
+    // case Markovian state
 
     case MARKOVIAN :
       initial[j] = state_in[i - 1][j];
@@ -176,8 +176,8 @@ void SemiMarkovChain::initial_probability_computation()
     }
   }
 
-  // renormalisation pour tenir compte des seuils appliques sur
-  // les fonctions de repartition des lois d'occupation des etats
+  // renormalization for taking account of the thresholds applied on
+  // the cumulative state occupancy distribution functions
 
   sum = 0.;
   for (i = 0;i < nb_state;i++) {
@@ -197,13 +197,16 @@ void SemiMarkovChain::initial_probability_computation()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the log-likelihood of a semi-Markov chain for sequences.
  *
- *  Calcul de la vraisemblance de sequences pour une semi-chaine de Markov.
+ *  \param[in] seq   reference on a MarkovianSequences object,
+ *  \param[in] index sequence index.
  *
- *  arguments : reference sur un objet MarkovianSequences, indice de la sequence.
- *
- *--------------------------------------------------------------*/
+ *  \return          log-likelihood.
+ */
+/*--------------------------------------------------------------*/
 
 double SemiMarkov::likelihood_computation(const MarkovianSequences &seq , int index) const
 
@@ -213,7 +216,7 @@ double SemiMarkov::likelihood_computation(const MarkovianSequences &seq , int in
   double likelihood = 0. , proba , **proutput;
 
 
-  // verification de la compatibilite entre le modele et les donnees
+  // checking of the compatibility of the model with the data
 
   if (nb_output_process + 1 == seq.nb_variable) {
     if (state_process->nb_value < seq.marginal_distribution[0]->nb_value) {
@@ -399,13 +402,15 @@ double SemiMarkov::likelihood_computation(const MarkovianSequences &seq , int in
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the log-likelihood of a semi-Markov chain for sequences.
  *
- *  Calcul de la vraisemblance de sequences pour une semi-chaine de Markov.
+ *  \param[in] seq reference on a SemiMarkovData object.
  *
- *  argument : reference sur un objet SemiMarkovData.
- *
- *--------------------------------------------------------------*/
+ *  \return        log-likelihood.
+ */
+/*--------------------------------------------------------------*/
 
 double SemiMarkov::likelihood_computation(const SemiMarkovData &seq) const
 
@@ -416,7 +421,7 @@ double SemiMarkov::likelihood_computation(const SemiMarkovData &seq) const
   FrequencyDistribution **initial_run , **final_run , **single_run;
 
 
-  // verification de la compatibilite entre le modele et les donnees
+  // checking of the compatibility of the model with the data
 
   if (nb_output_process + 1 == seq.nb_variable) {
     if ((!(seq.marginal_distribution[0])) || (nb_state < seq.marginal_distribution[0]->nb_value)) {
@@ -455,7 +460,7 @@ double SemiMarkov::likelihood_computation(const SemiMarkovData &seq) const
     if (likelihood != D_INF) {
       if (type == EQUILIBRIUM) {
 
-        // creation des lois empiriques des temps de sejour censures
+        // construction of the censored sojourn time frequency distributions
 
         initial_run = new FrequencyDistribution*[seq.marginal_distribution[0]->nb_value];
         for (i = 0;i < seq.marginal_distribution[0]->nb_value;i++) {
@@ -472,7 +477,7 @@ double SemiMarkov::likelihood_computation(const SemiMarkovData &seq) const
           single_run[i] = new FrequencyDistribution(seq.max_length + 1);
         }
 
-        // mise a jour des lois empiriques des temps de sejour censures
+        // update of the censored sojourn time frequency distributions
 
         seq.censored_sojourn_time_frequency_distribution_computation(initial_run , final_run , single_run);
       }
@@ -614,14 +619,14 @@ double SemiMarkov::likelihood_computation(const SemiMarkovData &seq) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Counting of initial states and transitions.
  *
- *  Comptage des etats initiaux et des transitions.
- *
- *  arguments : reference sur un objet ChainData,
- *              flags sur les probabilites de rester dans un etat.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] chain_data reference on a ChainData object,
+ *  \param[in] smarkov    flags on the self-transition probabilities.
+ */
+/*--------------------------------------------------------------*/
 
 void MarkovianSequences::transition_count_computation(const ChainData &chain_data ,
                                                       const SemiMarkov *smarkov) const
@@ -641,7 +646,7 @@ void MarkovianSequences::transition_count_computation(const ChainData &chain_dat
     }
   }
 
-  // extraction des etats initiaux et des transitions
+  // extraction of initial states and transitions
 
   for (i = 0;i < nb_sequence;i++) {
     pstate = int_sequence[i][0];
@@ -663,13 +668,13 @@ void MarkovianSequences::transition_count_computation(const ChainData &chain_dat
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Construction of the initial state and transition counts.
  *
- *  Construction des comptages des etats initiaux et des transitions.
- *
- *  argument : flags sur les probabilites de rester dans un etat.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] smarkov flags on the self-transition probabilities.
+ */
+/*--------------------------------------------------------------*/
 
 void SemiMarkovData::build_transition_count(const SemiMarkov *smarkov)
 
@@ -680,19 +685,23 @@ void SemiMarkovData::build_transition_count(const SemiMarkov *smarkov)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Estimation of a semi-Markov chain.
  *
- *  Estimation des parametres d'une semi-chaine de Markov
- *  a partir d'un echantillon de sequences.
+ *  \param[in] error          reference on a StatError object,
+ *  \param[in] os             stream,
+ *  \param[in] itype          process type (ORDINARY/EQUILIBRIUM),
+ *  \param[in] estimator      estimator type for the reestimation of the state occupancy distribution
+ *                            (complete or partial likelihood),
+ *  \param[in] counting_flag  flag on the computation of the counting distributions,
+ *  \param[in] nb_iter        number of iterations,
+ *  \param[in] mean_estimator method for the computation of the state occupancy
+ *                            distribution mean (equilibrium semi-Markov chain).
  *
- *  arguments : reference sur un objet StatError, stream,
- *              type de processus (ORDINARY/EQUILIBRIUM),
- *              type d'estimateur pour la reestimation des lois d'occupation des etats,
- *              flag sur le calcul des lois de comptage, nombre d'iterations,
- *              methode de calcul de la moyenne des lois d'occupation des etats
- *              (semi-chaine de Markov en equilibre).
- *
- *--------------------------------------------------------------*/
+ *  \return                   SemiMarkov object.
+ */
+/*--------------------------------------------------------------*/
 
 SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostream &os , process_type itype ,
                                                        censoring_estimator estimator , bool counting_flag , int nb_iter ,
@@ -793,7 +802,7 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostrea
 
     if (itype == EQUILIBRIUM) {
 
-      // creation des lois empiriques des temps de sejour censures
+      // construction of the censored sojourn time frequency distributions
 
       initial_run = new FrequencyDistribution*[marginal_distribution[0]->nb_value];
       for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
@@ -810,7 +819,7 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostrea
         single_run[i] = new FrequencyDistribution(max_length + 1);
       }
 
-      // mise a jour des lois empiriques des temps de sejour censures
+      // update of the censored sojourn time frequency distributions
 
       censored_sojourn_time_frequency_distribution_computation(initial_run , final_run , single_run);
     }
@@ -835,7 +844,7 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostrea
       }
     }
 
-    // estimation des parametres de la chaine de Markov sous-jacente
+    // estimation of the Markov chain parameters
 
     seq->chain_data->estimation(*smarkov);
     smarkov->component_computation();
@@ -848,7 +857,7 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostrea
 
     else {
 
-      // estimation des lois d'occupation des etats
+      // estimation of the state occupancy distributions
 
       if (estimator != PARTIAL_LIKELIHOOD) {
         occupancy_survivor = new int[max_length];
@@ -882,7 +891,7 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostrea
           else if ((estimator != PARTIAL_LIKELIHOOD) && (itype == EQUILIBRIUM) && 
                    ((initial_run[i]->nb_element > 0) || (single_run[i]->nb_element > 0))) {
 
-            //  initialisation de la loi d'occupation de l'etat
+            //  initialization of the state occupancy distribution
 
             prun[0] = seq->characteristics[0]->sojourn_time[i];
             prun[1] = seq->characteristics[0]->sojourn_time[i];
@@ -983,7 +992,7 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostrea
                 do {
                   j++;
 
-                  // calcul des quantites de reestimation de la loi d'occupation de l'etat
+                  // computation of the reestimation quantities of the state occupancy distribution
 
                   occupancy->expectation_step(*(seq->characteristics[0]->sojourn_time[i]) ,
                                               *(initial_run[i]) , *(final_run[i]) ,
@@ -1071,7 +1080,7 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostrea
               break;
             }
 
-            //  initialisation de la loi d'occupation de l'etat
+            //  initialization of the state occupancy distribution
 
             seq->characteristics[0]->sojourn_time[i]->state_occupancy_estimation(pfinal_run , occupancy_reestim ,
                                                                                  occupancy_survivor ,
@@ -1089,7 +1098,7 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostrea
             do {
               j++;
 
-              // calcul des quantites de reestimation de la loi d'occupation de l'etat
+              // computation of the reestimation quantities of the state occupancy distribution
 
               occupancy->expectation_step(*(seq->characteristics[0]->sojourn_time[i]) ,
                                           *pfinal_run , occupancy_reestim , j);
@@ -1130,7 +1139,7 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostrea
               do {
                 j++;
 
-                // calcul des quantites de reestimation de la loi d'occupation de l'etat
+                // computation of the reestimation quantities of the state occupancy distribution
 
                 occupancy->expectation_step(*(seq->characteristics[0]->sojourn_time[i]) ,
                                             *pfinal_run , occupancy_reestim , j);
@@ -1276,7 +1285,7 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostrea
         smarkov->initial_probability_computation();
       }
 
-      // estimation des lois d'observation
+      // estimation of categorical observation distributions
 
       if (smarkov->nb_output_process == 1) {
         seq->build_observation_frequency_distribution(smarkov->nb_state);
@@ -1286,7 +1295,7 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostrea
         }
       }
 
-      // calcul de la vraisemblance et des lois caracteristiques du modele
+      // computation of the log-likelihood and the characteristic distributions of the estimated semi-Markov chain
 
       seq->likelihood = smarkov->likelihood_computation(*seq);
 
@@ -1311,15 +1320,19 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostrea
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Comparison of semi-Markov chains for a sample of sequences.
  *
- *  Comparaison de differentes semi-chaines de Markov pour un ensemble
- *  de sequences.
+ *  \param[in] error    reference on a StatError object,
+ *  \param[in] os       stream,
+ *  \param[in] nb_model number of semi-Markov chains,
+ *  \param[in] ismarkov pointer on SemiMarkov objects,
+ *  \param[in] path     file path.
  *
- *  arguments : reference sur un objet StatError, stream, nombre de semi-chaines
- *              de Markov, pointeur sur les semi-chaines de Markov, path.
- *
- *--------------------------------------------------------------*/
+ *  \return             error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool MarkovianSequences::comparison(StatError &error , ostream &os , int nb_model ,
                                     const SemiMarkov **ismarkov , const string path) const
@@ -1425,7 +1438,7 @@ bool MarkovianSequences::comparison(StatError &error , ostream &os , int nb_mode
       likelihood[i] = new double[nb_model];
     }
 
-    // pour chaque sequence, calcul de la vraisemblance pour chaque modele possible
+    // for each sequence, computation of the log-likelihood for each model
 
     for (i = 0;i < nb_sequence;i++) {
       for (j = 0;j < nb_model;j++) {
@@ -1451,16 +1464,18 @@ bool MarkovianSequences::comparison(StatError &error , ostream &os , int nb_mode
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Simulation using a semi-Markov chain.
  *
- *  Simulation par une semi-chaine de Markov.
+ *  \param[in] error               reference on a StatError object,
+ *  \param[in] length_distribution sequence length frequency distribution,
+ *  \param[in] counting_flag       flag on the computation of the counting distributions,
+ *  \param[in] divergence_flag     flag on the computation of a Kullback-Leibler divergence.
  *
- *  arguments : reference sur un objet StatError,
- *              loi empirique des longueurs des sequences,
- *              flag sur le calcul des lois de comptage,
- *              flag calcul d'une divergence de Kullback-Leibler.
- *
- *--------------------------------------------------------------*/
+ *  \return                        SemiMarkovData object.
+ */
+/*--------------------------------------------------------------*/
 
 SemiMarkovData* SemiMarkov::simulation(StatError &error , const FrequencyDistribution &length_distribution ,
                                        bool counting_flag , bool divergence_flag) const
@@ -1510,7 +1525,7 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , const FrequencyDistrib
     }
     hidden = CategoricalSequenceProcess::test_hidden(nb_output_process , categorical_process);
 
-    // initialisations
+    // initializations
 
     itype = new variable_nature[nb_output_process + 1];
 
@@ -1708,7 +1723,7 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , const FrequencyDistrib
       }
     }
 
-    // extraction des caracteristiques des sequences simulees
+    // extraction of the characteristics of the generated sequences
 
     seq->min_value[0] = 0;
     seq->max_value[0] = nb_state - 1;
@@ -1737,7 +1752,7 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , const FrequencyDistrib
     if (!divergence_flag) {
       smarkov->characteristic_computation(*seq , counting_flag);
 
-      // calcul de la vraisemblance
+      // computation of the log-likelihood of the model for the generated sequences
 
       likelihood = smarkov->likelihood_computation(*seq);
 
@@ -1762,7 +1777,7 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , const FrequencyDistrib
       }
     }
 
-    // calcul des melanges de lois d'observation (poids theoriques et poids deduits de la restauration)
+    // computation of the mixtures of observation distributions (theoretical weights and weights deduced from the restoration)
 
     if (hidden) {
       weight = NULL;
@@ -1821,15 +1836,18 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , const FrequencyDistrib
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Simulation using a semi-Markov chain.
  *
- *  Simulation par une semi-chaine de Markov.
+ *  \param[in] error         reference on a StatError object,
+ *  \param[in] nb_sequence   number of sequences,
+ *  \param[in] length        sequence length,
+ *  \param[in] counting_flag flag on the computation of the counting distributions.
  *
- *  arguments : reference sur un objet StatError,
- *              nombre et longueur des sequences,
- *              flag sur le calcul des lois de comptage.
- *
- *--------------------------------------------------------------*/
+ *  \return                  SemiMarkovData object.
+ */
+/*--------------------------------------------------------------*/
 
 SemiMarkovData* SemiMarkov::simulation(StatError &error , int nb_sequence ,
                                        int length , bool counting_flag) const
@@ -1872,15 +1890,18 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , int nb_sequence ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Simulation using a semi-Markov chain.
  *
- *  Simulation par une semi-chaine de Markov.
+ *  \param[in] error         reference on a StatError object,
+ *  \param[in] nb_sequence   number of sequences,
+ *  \param[in] iseq          reference on a MarkovianSequences object,
+ *  \param[in] counting_flag flag on the computation of the counting distributions.
  *
- *  arguments : reference sur un objet StatError, nombre de sequences,
- *              reference sur un objet MarkovianSequences,
- *              flag sur le calcul des lois de comptage.
- *
- *--------------------------------------------------------------*/
+ *  \return                  SemiMarkovData object.
+ */
+/*--------------------------------------------------------------*/
 
 SemiMarkovData* SemiMarkov::simulation(StatError &error , int nb_sequence ,
                                        const MarkovianSequences &iseq , bool counting_flag) const
@@ -1908,15 +1929,20 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , int nb_sequence ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of Kullback-Leibler divergences between semi-Markov chains.
  *
- *  Comparaison de semi-chaines de Markov par calcul de divergences de Kullback-Leibler.
+ *  \param[in] error               reference on a StatError object,
+ *  \param[in] os                  stream,
+ *  \param[in] nb_model            number of semi-Markov chains,
+ *  \param[in] ismarkov            pointer on SemiMarkov objects,
+ *  \param[in] length_distribution sequence length frequency distribution,
+ *  \param[in] path                file path.
  *
- *  arguments : reference sur un objet StatError, stream, nombre de semi-chaines
- *              de Markov, pointeur sur les semi-chaines de Markov,
- *              loi empirique des longueurs des sequences, path.
- *
- *--------------------------------------------------------------*/
+ *  \return                        DistanceMatrix object.
+ */
+/*--------------------------------------------------------------*/
 
 DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , ostream &os ,
                                                    int nb_model , const SemiMarkov **ismarkov ,
@@ -2061,7 +2087,7 @@ DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , ostream &o
 
     for (i = 0;i < nb_model;i++) {
 
-      // simulation d'un echantillon de sequences a partir d'une semi-chaine de Markov
+      // generation of a sample of sequences using a semi-Markov chain
 
       simul_seq = smarkov[i]->simulation(error , *length_distribution[i] , false , true);
 
@@ -2088,7 +2114,7 @@ DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , ostream &o
         iseq = simul_seq;
       }
 
-      // calcul des vraisemblances de l'echantillon pour chacune des semi-chaines de Markov
+      // computation of the log-likelihood of each semi-Markov chain for the sample of sequences
 
       for (j = 0;j < nb_model;j++) {
         if (j != i) {
@@ -2171,15 +2197,21 @@ DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , ostream &o
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of Kullback-Leibler divergences between semi-Markov chains.
  *
- *  Comparaison de semi-chaines de Markov par calcul de divergences de Kullback-Leibler.
+ *  \param[in] error       reference on a StatError object,
+ *  \param[in] os          stream,
+ *  \param[in] nb_model    number of semi-Markov chains,
+ *  \param[in] smarkov     pointer on SemiMarkov objects,
+ *  \param[in] nb_sequence number of generated sequences,
+ *  \param[in] length      sequence length,
+ *  \param[in] path        file path.
  *
- *  arguments : reference sur un objet StatError, stream, nombre de semi-chaines
- *              de Markov, pointeur sur les semi-chaines de Markov,
- *              nombre et longueur des sequences, path.
- *
- *--------------------------------------------------------------*/
+ *  \return                DistanceMatrix object.
+ */
+/*--------------------------------------------------------------*/
 
 DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , ostream &os ,
                                                    int nb_model , const SemiMarkov **smarkov ,
@@ -2236,15 +2268,21 @@ DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , ostream &o
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of Kullback-Leibler divergences between semi-Markov chains.
  *
- *  Comparaison de semi-chaines de Markov par calcul de divergences de Kullback-Leibler.
+ *  \param[in] error       reference on a StatError object,
+ *  \param[in] os          stream,
+ *  \param[in] nb_model    number of semi-Markov chains,
+ *  \param[in] smarkov     pointer on SemiMarkov objects,
+ *  \param[in] nb_sequence number of generated sequences,
+ *  \param[in] seq         pointer on MarkovianSequences objects,
+ *  \param[in] path        file path.
  *
- *  arguments : reference sur un objet StatError, stream, nombre de semi-chaines
- *              de Markov, pointeur sur les semi-chaines de Markov,
- *              pointeurs sur des objets MarkovianSequences, path.
- *
- *--------------------------------------------------------------*/
+ *  \return                DistanceMatrix object.
+ */
+/*--------------------------------------------------------------*/
 
 DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , ostream &os ,
                                                    int nb_model , const SemiMarkov **smarkov ,
@@ -2282,13 +2320,13 @@ DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , ostream &o
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the SemiMarkovIterator class.
  *
- *  Constructeur de la classe SemiMarkovIterator.
- *
- *  argument : pointeur sur un objet SemiMarkov.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] ismarkov pointer on a SemiMarkov object.
+ */
+/*--------------------------------------------------------------*/
 
 SemiMarkovIterator::SemiMarkovIterator(SemiMarkov *ismarkov)
 
@@ -2307,13 +2345,13 @@ SemiMarkovIterator::SemiMarkovIterator(SemiMarkov *ismarkov)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Copy of a SemiMarkovIterator object.
  *
- *  Copie d'un objet SemiMarkovIterator.
- *
- *  argument : reference sur un objet SemiMarkovIterator.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] iter reference on a SemiMarkovIterator object.
+ */
+/*--------------------------------------------------------------*/
 
 void SemiMarkovIterator::copy(const SemiMarkovIterator &iter)
 
@@ -2327,11 +2365,11 @@ void SemiMarkovIterator::copy(const SemiMarkovIterator &iter)
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Destructeur de la classe SemiMarkovIterator.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Destructor of the SemiMarkovIterator class.
+ */
+/*--------------------------------------------------------------*/
 
 SemiMarkovIterator::~SemiMarkovIterator()
 
@@ -2340,13 +2378,15 @@ SemiMarkovIterator::~SemiMarkovIterator()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Assignment operator of the SemiMarkovIterator class.
  *
- *  Operateur d'assignement de la classe SemiMarkovIterator.
+ *  \param[in] iter reference on a SemiMarkovIterator object.
  *
- *  argument : reference sur un objet SemiMarkovIterator.
- *
- *--------------------------------------------------------------*/
+ *  \return         SemiMarkovIterator object.
+ */
+/*--------------------------------------------------------------*/
 
 SemiMarkovIterator& SemiMarkovIterator::operator=(const SemiMarkovIterator &iter)
 
@@ -2360,13 +2400,17 @@ SemiMarkovIterator& SemiMarkovIterator::operator=(const SemiMarkovIterator &iter
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Simulation using a semi-Markov chain.
  *
- *  Simulation par une semi-chaine de Markov.
+ *  \param[in] int_seq        sequence,
+ *  \param[in] length         sequence length,
+ *  \param[in] initialization flag initialization.
  *
- *  arguments : sequence, longueur de la sequence, flag initialisation.
- *
- *--------------------------------------------------------------*/
+ *  \return                   error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool SemiMarkovIterator::simulation(int **int_seq , int length , bool initialization)
 
@@ -2473,13 +2517,16 @@ bool SemiMarkovIterator::simulation(int **int_seq , int length , bool initializa
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Simulation using a semi-Markov chain.
  *
- *  Simulation par une semi-chaine de Markov.
+ *  \param[in] length         sequence length,
+ *  \param[in] initialization flag initialization.
  *
- *  arguments : longueur de la sequence, flag initialisation.
- *
- *--------------------------------------------------------------*/
+ *  \return                   generated sequence.
+ */
+/*--------------------------------------------------------------*/
 
 int** SemiMarkovIterator::simulation(int length , bool initialization)
 

@@ -603,7 +603,7 @@ void NbEvent::ordinary_computation(DiscreteParametric &inter_event)
              (time * probability / ((1. - probability) * sqrt((double)(MAX(1 , inf_bound)))) < RNB_THRESHOLD)) {
 
 #     ifdef DEBUG
-      cout << "calcul algebrique" << endl;
+      cout << "algebric calculation" << endl;
 #     endif
 
       negative_binomial_computation();

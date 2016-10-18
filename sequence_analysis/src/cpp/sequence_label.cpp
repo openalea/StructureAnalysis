@@ -87,10 +87,10 @@ const char *SEQ_index_parameter_word[] = {
 
 
 const char *SEQ_label[] = {
-  "log-likelihood of the state sequence" ,
-  "log-likelihood of the state sequences" ,
-  "log-likelihood of the observed sequences" ,
-  "information of the sequences in the iid case" ,
+  "log-likelihood for the state sequence" ,
+  "log-likelihood for the state sequences" ,
+  "log-likelihood for the observed sequences" ,
+  "information quantity of the sequences in the i.i.d. case" ,
 
   "smoothed" ,
   "observed" ,
@@ -245,7 +245,7 @@ const char *SEQ_label[] = {
   "number of segmentations" ,
   "segmentations" ,
   "segmentation log-likelihood" ,
-  "log-likelihood of all the possible segmentations" ,
+  "log-likelihood for all the possible segmentations" ,
   "change-point uncertainty intervals" ,
   "posterior change-point probabilities" ,
   "posterior segment probabilities" ,

@@ -4617,7 +4617,7 @@ ostream& ContinuousParametricProcess::interval_computation(ostream &os)
       }
     }
 
-    // computation of posterior probabilites
+    // computation of posterior probabilities
 
     min_value = quantile(*dist[0] , GAUSSIAN_TAIL);
     for (i = 1;i < nb_state;i++) {

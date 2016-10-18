@@ -2805,7 +2805,7 @@ bool Sequences::segment_profile_plot_write(StatError &error , const char *prefix
  *  \param[in] shape_parameter negative binomial shape parameters,
  *  \param[in] output          output type.
  *
- *  \return                    plots.
+ *  \return                    MultiPlotSet object.
  */
 /*--------------------------------------------------------------*/
 

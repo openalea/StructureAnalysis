@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -49,32 +49,34 @@ namespace sequence_analysis {
 
 /****************************************************************
  *
- *  Constantes :
+ *  Constants
  */
 
 
-  const double SEMI_MARKOV_LIKELIHOOD_DIFF = 1.e-6;  // seuil pour stopper les iterations EM
-  const int EXPLORATION_NB_ITER = 10;    // nombre d'iterations de la phase d'exploration
-  const int STOCHASTIC_EXPLORATION_NB_ITER = 5;  // nombre d'iterations de la phase d'exploration
-  const int SEMI_MARKOV_NB_ITER = 500;   // nombre maximum d'iterations EM
+  const double SEMI_MARKOV_LIKELIHOOD_DIFF = 1.e-6;  // threshold for stopping the EM iterations
+  const int EXPLORATION_NB_ITER = 10;    // number of iterations, exploration phase
+  const int STOCHASTIC_EXPLORATION_NB_ITER = 5;  // number of iterations, exploration phase (MCEM algorithm)
+  const int SEMI_MARKOV_NB_ITER = 500;   // maximum number of EM iterations
 
-  const double MIN_SMOOTHED_PROBABILITY = 1.e-3;  // seuil sur les probabilites lissees
+  const double MIN_SMOOTHED_PROBABILITY = 1.e-3;  // threshold on the smoothed probabilities
 
   enum state_profile {
-    SSTATE ,                             // etat
-    IN_STATE ,                           // entree etat
-    OUT_STATE                            // sortie etat
+    SSTATE ,                             // state
+    IN_STATE ,                           // state entering
+    OUT_STATE                            // state exit
   };
 
 
 
 /****************************************************************
  *
- *  Definition des classes :
+ *  Class definition
  */
 
 
-  class HiddenSemiMarkov : public SemiMarkov {  // semi-chaine de Markov cachee
+  /// \brief Hidden semi-Markov chain
+
+  class HiddenSemiMarkov : public SemiMarkov {
 
     friend class MarkovianSequences;
 

@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -51,14 +51,15 @@ namespace sequence_analysis {
 
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Update of the transition distribution of a state for a nonhomogeneous Markov chain.
  *
- *  Mise a jour des probabilites de transition a partir d'un etat donne
- *  pour une chaine de Markov non-homogene.
- *
- *  arguments : etat, index, reference sur les probabilites de transition courante.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] state       state,
+ *  \param[in] index       sequence index,
+ *  \param[in] index_chain reference on the transition probabilities.
+ */
+/*--------------------------------------------------------------*/
 
 void NonhomogeneousMarkov::transition_update(int state , int index , Chain &index_chain) const
 
@@ -70,7 +71,7 @@ void NonhomogeneousMarkov::transition_update(int state , int index , Chain &inde
 
   pparam = self_transition[state]->parameter;
 
-  // mise a jour de la probabilite de rester dans un etat
+  // update of the self-transition probability
 
   switch (self_transition[state]->ident) {
   case LOGISTIC :
@@ -81,7 +82,7 @@ void NonhomogeneousMarkov::transition_update(int state , int index , Chain &inde
     break;
   }
 
-  // mise a jour des probabilites de passage
+  // update of the state change probabilities
 
   scale = (1. - index_chain.transition[state][state]) / (1. - transition[state][state]);
   for (i = 0;i < nb_state;i++) {
@@ -97,12 +98,12 @@ void NonhomogeneousMarkov::transition_update(int state , int index , Chain &inde
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Calcul des probabilites de chaque etat en fonction de l'index
- *  pour une chaine de Markov non-homogene.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the state probabilities as a function of
+ *         the index parameter for a nonhomogeneous Markov chain.
+ */
+/*--------------------------------------------------------------*/
 
 void NonhomogeneousMarkov::index_state_distribution()
 
@@ -114,21 +115,19 @@ void NonhomogeneousMarkov::index_state_distribution()
 
   index_state = process->index_value;
 
-  // initialisation de la matrice des probabilites de transition courante
+  // initialization of the transition probability matrix
 
   index_chain = new Chain(*this);
 
-  // initialisation des probabilites des etats
+  // initialization of the state probabilities
 
   for (i = 0;i < nb_state;i++) {
     index_state->point[i][0] = initial[i];
   }
 
-  // calcul des probabilites de chaque etat en fonction de l'index
-
   for (i = 1;i < index_state->length;i++) {
 
-    // prise en compte de l'evolution des probabilites de transition
+    // change in transition probabilities with the index parameter
 
     for (j = 0;j < nb_state;j++) {
       if (!homogeneity[j]) {
@@ -136,7 +135,7 @@ void NonhomogeneousMarkov::index_state_distribution()
       }
     }
 
-    // calcul des probabilites des etats
+    // computation of the state probabilities
 
     for (j = 0;j < nb_state;j++) {
       index_state->point[j][i] = 0.;
@@ -150,14 +149,15 @@ void NonhomogeneousMarkov::index_state_distribution()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the probability of not visiting a state
+ *         for a nonhomogeneous Markov chain.
  *
- *  Calcul de la probabilite de ne pas observer un etat
- *  d'une chaine de Markov non-homogene.
- *
- *  arguments : etat, seuil sur la somme des probabilites des etats.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] state     state,
+ *  \param[in] increment threshold on the sum of the state probabilities.
+ */
+/*--------------------------------------------------------------*/
 
 void NonhomogeneousMarkov::state_no_occurrence_probability(int state , double increment)
 
@@ -177,11 +177,11 @@ void NonhomogeneousMarkov::state_no_occurrence_probability(int state , double in
     Chain *index_chain;
 
 
-    // initialisation de la matrice des probabilites de transition courante
+    // initialization of the transition probability matrix
 
     index_chain = new Chain(*this);
 
-    // initialisation des probabilites des etats
+    // initialization of the state probabilities
 
     current_state = new double[nb_state];
     previous_state = new double[nb_state];
@@ -206,7 +206,7 @@ void NonhomogeneousMarkov::state_no_occurrence_probability(int state , double in
 
     while ((state_sum > increment) || (i < nb_state - 1)) {
 
-      // prise en compte de l'evolution des probabilites de transition
+      // change in transition probabilities with the index parameter
 
       for (j = 0;j < nb_state;j++) {
         if (!homogeneity[j]) {
@@ -214,14 +214,14 @@ void NonhomogeneousMarkov::state_no_occurrence_probability(int state , double in
         }
       }
 
-      // mise a jour des probabilites des etats
+      // update of the state probabilities
 
       for (j = 0;j < nb_state;j++) {
         previous_state[j] = current_state[j];
       }
 
-      // calcul des probabilites des etats et mise a jour
-      // de la probabilite de ne pas observer l'etat
+      // computation of the state probabilities and update of
+      // the probability of not visiting the selected state
 
       state_sum = 0.;
 
@@ -259,15 +259,16 @@ void NonhomogeneousMarkov::state_no_occurrence_probability(int state , double in
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the distribution of the time to the 1st occurrence of a state
+ *         for a nonhomogeneous Markov chain.
  *
- *  Calcul de la loi du temps avant la premiere occurrence d'un etat
- *  pour une chaine de Markov non-homogene.
- *
- *  arguments : etat, nombre minimum de valeurs,
- *              seuil sur la fonction de repartition.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] state           state,
+ *  \param[in] min_nb_value    minimum number of values,
+ *  \param[in] cumul_threshold threshold on the cumulative distribution function.
+ */
+/*--------------------------------------------------------------*/
 
 void NonhomogeneousMarkov::state_first_occurrence_distribution(int state , int min_nb_value ,
                                                                double cumul_threshold)
@@ -285,11 +286,11 @@ void NonhomogeneousMarkov::state_first_occurrence_distribution(int state , int m
   pmass = first_occurrence->mass;
   pcumul = first_occurrence->cumul;
 
-  // initialisation de la matrice des probabilites de transition courante
+  // initialization of the transition probability matrix
 
   index_chain = new Chain(*this);
 
-  // initialisation des probabilites des etats
+  // initialization of the state probabilities
 
   current_state = new double[nb_state];
   previous_state = new double[nb_state];
@@ -309,7 +310,7 @@ void NonhomogeneousMarkov::state_first_occurrence_distribution(int state , int m
   while (((*pcumul < cumul_threshold - first_occurrence->complement) || (i < min_nb_value)) &&
          (i < first_occurrence->alloc_nb_value)) {
 
-    // prise en compte de l'evolution des probabilites de transition
+    // change in transition probabilities with the index parameter
 
     for (j = 0;j < nb_state;j++) {
       if (!homogeneity[j]) {
@@ -317,13 +318,13 @@ void NonhomogeneousMarkov::state_first_occurrence_distribution(int state , int m
       }
     }
 
-    // mise a jour des probabilites des etats
+    // update of the state probabilities
 
     for (j = 0;j < nb_state;j++) {
       previous_state[j] = current_state[j];
     }
 
-    // calcul des probabilites des etats et de la valeur courante
+    // computation of the state probabilities and the current probabilty mass
 
     *++pmass = 0.;
 
@@ -347,7 +348,7 @@ void NonhomogeneousMarkov::state_first_occurrence_distribution(int state , int m
       }
     }
 
-    // mise a jour de la fonction de repartition
+    // update of the cumulative distribution function
 
     pcumul++;
     *pcumul = *(pcumul - 1) + *pmass;
@@ -375,15 +376,16 @@ void NonhomogeneousMarkov::state_first_occurrence_distribution(int state , int m
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the mixture of the distributions of the number of runs (RUN) or
+ *         occurrences (OCCURRENCE) of a state for a sequence length mixing distribution and
+ *         a nonhomogeneous Markov chain.
  *
- *  Calcul d'un melange de lois du nombre de series d'un etat (RUN)
- *  ou du nombre d'occurrences d'un etat (OCCURRENCE) d'une chaine de Markov non-homogene
- *  pour une distribution des longueurs de sequences donnee.
- *
- *  arguments : etat, type de forme.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] state   state,
+ *  \param[in] pattern count pattern type.
+ */
+/*--------------------------------------------------------------*/
 
 void NonhomogeneousMarkov::state_nb_pattern_mixture(int state , count_pattern pattern)
 
@@ -413,7 +415,7 @@ void NonhomogeneousMarkov::state_nb_pattern_mixture(int state , count_pattern pa
     *pmass++ = 0.;
   }
 
-  // initialisation de la matrice des probabilites de transition courante
+  // initialization of the transition probability matrix
 
   index_chain = new Chain(*this);
 
@@ -432,8 +434,8 @@ void NonhomogeneousMarkov::state_nb_pattern_mixture(int state , count_pattern pa
 
   for (i = 0;i < max_length;i++) {
 
-    // initialisation des probabilites des etats pour un nombre de formes donne
-    // de l'etat selectionne
+    // initialization of the state probabilities for a number of runs or occurrences of
+    // the selected state
 
     if (i == 0) {
       for (j = 0;j < nb_state;j++) {
@@ -450,7 +452,7 @@ void NonhomogeneousMarkov::state_nb_pattern_mixture(int state , count_pattern pa
 
     else {
 
-      // prise en compte de l'evolution des probabilites de transition
+      // change in transition probabilities with the index parameter
 
       for (j = 0;j < nb_state;j++) {
         if (!homogeneity[j]) {
@@ -458,7 +460,7 @@ void NonhomogeneousMarkov::state_nb_pattern_mixture(int state , count_pattern pa
         }
       }
 
-      // mise a jour des probabilites des etats
+      // update of the state probabilities
 
       for (j = 0;j < nb_state;j++) {
         for (k = 0;k < index_nb_pattern;k++) {
@@ -470,8 +472,8 @@ void NonhomogeneousMarkov::state_nb_pattern_mixture(int state , count_pattern pa
 
       for (j = 0;j < nb_state;j++) {
 
-        // calcul des probabilites des etats pour chaque nombre de formes
-        // de l'etat selectionne
+        // computation of the state probabilities for each number of runs or occurrences of
+        // the selected state
 
         for (k = 0;k < nb_state;k++) {
           switch (pattern) {
@@ -500,7 +502,8 @@ void NonhomogeneousMarkov::state_nb_pattern_mixture(int state , count_pattern pa
       index_nb_pattern++;
     }
 
-    // mise a jour du melange de lois du nombre de formes de l'etat selectionne
+    // update of the mixture of the distributions of the number of runs or
+    // occurrences of the selected state
 
     if (*++lmass > 0.) {
       pmass = pdist->mass;
@@ -536,13 +539,14 @@ void NonhomogeneousMarkov::state_nb_pattern_mixture(int state , count_pattern pa
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the characteristic distributions of a NonhomogeneousMarkov object.
  *
- *  Calcul des lois caracteristiques d'un objet NonhomogeneousMarkov.
- *
- *  arguments : longueur des sequences, flag sur le calcul des lois de comptage.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] length        sequence length,
+ *  \param[in] counting_flag flag on the computation of the counting distributions.
+ */
+/*--------------------------------------------------------------*/
 
 void NonhomogeneousMarkov::characteristic_computation(int length , bool counting_flag)
 
@@ -551,8 +555,6 @@ void NonhomogeneousMarkov::characteristic_computation(int length , bool counting
     register int i;
     DiscreteParametric dlength(UNIFORM , length , length , D_DEFAULT , D_DEFAULT);
 
-
-    // calcul des lois caracteristiques au niveau etat
 
     if ((!(process->length)) || (dlength != *(process->length))) {
       process->create_characteristic(dlength , homogeneity , counting_flag);
@@ -588,15 +590,15 @@ void NonhomogeneousMarkov::characteristic_computation(int length , bool counting
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the characteristic distributions of a NonhomogeneousMarkov object.
  *
- *  Calcul des lois caracteristiques d'un objet NonhomogeneousMarkov.
- *
- *  arguments : reference sur un objet NonhomogeneousMarkovData,
- *              flag sur le calcul des lois de comptage,
- *              flag pour tenir compte des longueurs.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] seq           reference on a NonhomogeneousMarkovData object,
+ *  \param[in] counting_flag flag on the computation of the counting distributions,
+ *  \param[in] length_flag   flag on the sequence length.
+ */
+/*--------------------------------------------------------------*/
 
 void NonhomogeneousMarkov::characteristic_computation(const NonhomogeneousMarkovData &seq ,
                                                       bool counting_flag , bool length_flag)
@@ -606,8 +608,6 @@ void NonhomogeneousMarkov::characteristic_computation(const NonhomogeneousMarkov
     register int i;
     Distribution dlength(*(seq.length_distribution));
 
-
-    // calcul des lois caracteristiques au niveau etat
 
     if ((!length_flag) || ((length_flag) && ((!(process->length)) ||
           (dlength != *(process->length))))) {
@@ -645,13 +645,15 @@ void NonhomogeneousMarkov::characteristic_computation(const NonhomogeneousMarkov
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the variation explained by the self-transition probability function.
  *
- *  Calcul de la variation expliquee par le modele.
+ *  \param[in] mean mean.
  *
- *  argument : moyenne.
- *
- *--------------------------------------------------------------*/
+ *  \return         regression square sum.
+ */
+/*--------------------------------------------------------------*/
 
 double Function::regression_square_sum_computation(double mean) const
 
@@ -678,13 +680,13 @@ double Function::regression_square_sum_computation(double mean) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the residuals of a self-transition probability function.
  *
- *  Calcul des residus.
- *
- *  argument : reference sur les probabilites de rester dans un etat.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] self_transition reference on the self-transition probability function for a state.
+ */
+/*--------------------------------------------------------------*/
 
 void Function::residual_computation(const SelfTransition &self_transition)
 
@@ -714,11 +716,13 @@ void Function::residual_computation(const SelfTransition &self_transition)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the mean of the residuals of a self-transition probability function.
  *
- *  Calcul de la moyenne des residus.
- *
- *--------------------------------------------------------------*/
+ *  \return residual mean.
+ */
+/*--------------------------------------------------------------*/
 
 double Function::residual_mean_computation() const
 
@@ -747,13 +751,15 @@ double Function::residual_mean_computation() const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the variance of the residuals of a self-transition probability function.
  *
- *  Calcul de la variance des residus.
+ *  \param[in] residual_mean residual mean.
  *
- *  argument : moyenne.
- *
- *--------------------------------------------------------------*/
+ *  \return                  residual variance.
+ */
+/*--------------------------------------------------------------*/
 
 double Function::residual_variance_computation(double residual_mean) const
 
@@ -784,11 +790,13 @@ double Function::residual_variance_computation(double residual_mean) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the sum of squared residuals of a self-transition probability function.
  *
- *  Calcul de la somme des carres des residus.
- *
- *--------------------------------------------------------------*/
+ *  \return residual square sum.
+ */
+/*--------------------------------------------------------------*/
 
 double Function::residual_square_sum_computation() const
 
@@ -814,12 +822,11 @@ double Function::residual_square_sum_computation() const
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Estimation des parametres de la fonction y = a / (1 + b * exp(-c * x))
- *  par regression.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Estimation of the parameters of the logistic function y = a / (1 + b * exp(-c * x)).
+ */
+/*--------------------------------------------------------------*/
 
 Function* SelfTransition::logistic_regression() const
 
@@ -836,7 +843,7 @@ Function* SelfTransition::logistic_regression() const
   function->regression_df = function->nb_parameter;
   function->residual_df = nb_element - function->nb_parameter;
 
-  // initialisations des parametres
+  // parameter initialization
 
   init_nb_element = (int)(START_RATIO *  nb_element);
   init_nb_element = MAX(init_nb_element , REGRESSION_NB_ELEMENT / 4);
@@ -889,7 +896,7 @@ Function* SelfTransition::logistic_regression() const
   cout << endl;
 # endif
 
-  // iterations (gradient sur les moindres-carres)
+  // least-square iterations
 
   iter = 0;
   do {
@@ -926,7 +933,7 @@ Function* SelfTransition::logistic_regression() const
     function->parameter[1] += GRADIENT_DESCENT_COEFF * correction[1] / nb_element;
     function->parameter[2] += GRADIENT_DESCENT_COEFF * correction[2] / (nb_element - frequency[0]);
 
-    // applications de seuils sur les parametres
+    // application of thresholds on parameters
 
     if (function->parameter[0] < MIN_PROBABILITY) {
       function->parameter[0] = MIN_PROBABILITY;
@@ -953,7 +960,7 @@ Function* SelfTransition::logistic_regression() const
   while (((previous_residual_square_sum - residual_square_sum) / residual_square_sum > RESIDUAL_SQUARE_SUM_DIFF) &&
          (iter < REGRESSION_NB_ITER));
 
-  // calcul de la fonction et des residus
+  // computation of the logistic function and the residuals
 
   function->computation();
   function->residual_computation(*this);
@@ -962,12 +969,11 @@ Function* SelfTransition::logistic_regression() const
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Estimation des parametres de la fonction y = a + b * exp(-c * x)
- *  par regression.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Estimation of the parameters of the monomolecular function y = a + b * exp(-c * x).
+ */
+/*--------------------------------------------------------------*/
 
 Function* SelfTransition::monomolecular_regression() const
 
@@ -984,7 +990,7 @@ Function* SelfTransition::monomolecular_regression() const
   function->regression_df = function->nb_parameter;
   function->residual_df = nb_element - function->nb_parameter;
 
-  // initialisations des parametres
+  // parameter initialization
 
   init_nb_element = (int)(START_RATIO * nb_element);
   init_nb_element = MAX(init_nb_element , REGRESSION_NB_ELEMENT / 4);
@@ -1037,7 +1043,7 @@ Function* SelfTransition::monomolecular_regression() const
   cout << endl;
 # endif
 
-  // iterations (gradient sur les moindres-carres)
+  // least-square iterations
 
   iter = 0;
   do {
@@ -1073,7 +1079,7 @@ Function* SelfTransition::monomolecular_regression() const
     function->parameter[1] += GRADIENT_DESCENT_COEFF * correction[1] / nb_element;
     function->parameter[2] += GRADIENT_DESCENT_COEFF * correction[2] / (nb_element - frequency[0]);
 
-    // applications de seuils sur les parametres
+    // application of thresholds on parameters
 
     if (function->parameter[0] < MIN_PROBABILITY) {
       function->parameter[0] = MIN_PROBABILITY;
@@ -1100,7 +1106,7 @@ Function* SelfTransition::monomolecular_regression() const
   while (((previous_residual_square_sum - residual_square_sum) / residual_square_sum > RESIDUAL_SQUARE_SUM_DIFF) &&
          (iter < REGRESSION_NB_ITER));
 
-  // calcul de la fonction et des residus
+  // computation of the monomolecular function and the residuals
 
   function->computation();
   function->residual_computation(*this);
@@ -1109,13 +1115,16 @@ Function* SelfTransition::monomolecular_regression() const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the log-likelihood of a nonhomogeneous Markov chain for sequences.
  *
- *  Calcul de la vraisemblance de sequences pour une chaine de Markov non-homogene.
+ *  \param[in] seq   reference on a MarkovianSequences object,
+ *  \param[in] index sequence index.
  *
- *  arguments : reference sur un objet MarkovianSequences, indice de la sequence.
- *
- *--------------------------------------------------------------*/
+ *  \return          log-likelihood.
+ */
+/*--------------------------------------------------------------*/
 
 double NonhomogeneousMarkov::likelihood_computation(const MarkovianSequences &seq , int index) const
 
@@ -1126,7 +1135,7 @@ double NonhomogeneousMarkov::likelihood_computation(const MarkovianSequences &se
   Chain *index_chain;
 
 
-  // verification de la compatibilite entre le modele et les donnees
+  // checking of the compatibility of the model with the data
 
   if (seq.nb_variable == 1) {
     if ((seq.marginal_distribution[0]) &&
@@ -1145,7 +1154,7 @@ double NonhomogeneousMarkov::likelihood_computation(const MarkovianSequences &se
     for (i = 0;i < seq.nb_sequence;i++) {
       if ((index == I_DEFAULT) || (index == i)) {
 
-        // initialisation de la matrice des probabilites de transition courante
+        // initialization of the transition probability matrix
 
         if (i > 0) {
           index_chain->parameter_copy(*this);
@@ -1164,7 +1173,7 @@ double NonhomogeneousMarkov::likelihood_computation(const MarkovianSequences &se
 
         for (j = 1;j < seq.length[i];j++) {
 
-          // prise en compte de l'evolution des probabilites de transition
+          // change in transition probabilities with the index parameter
 
           for (k = 0;k < nb_state;k++) {
             if (!homogeneity[k]) {
@@ -1197,11 +1206,11 @@ double NonhomogeneousMarkov::likelihood_computation(const MarkovianSequences &se
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Construction des comptages des etats initiaux et des transitions.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Construction of the initial state and transition counts.
+ */
+/*--------------------------------------------------------------*/
 
 void NonhomogeneousMarkovData::build_transition_count()
 
@@ -1212,16 +1221,17 @@ void NonhomogeneousMarkovData::build_transition_count()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Estimation of a nonhomogeneous Markov chain.
  *
- *  Estimation des parametres d'une chaine de Markov non-homogene
- *  a partir d'un echantillon de sequences.
+ *  \param[in] error         reference on a StatError object,
+ *  \param[in] ident         identifiers of the self-transition probability functions,
+ *  \param[in] counting_flag flag on the computation of the counting distributions.
  *
- *  arguments : reference sur un objet StatError,
- *              identificateurs evolution des probabilites de rester dans un etat,
- *              flag sur le calcul des lois de comptage.
- *
- *--------------------------------------------------------------*/
+ *  \return                  NonhomogeneousMarkov object.
+ */
+/*--------------------------------------------------------------*/
 
 NonhomogeneousMarkov* MarkovianSequences::nonhomogeneous_markov_estimation(StatError &error , parametric_function *ident ,
                                                                            bool counting_flag) const
@@ -1254,12 +1264,11 @@ NonhomogeneousMarkov* MarkovianSequences::nonhomogeneous_markov_estimation(StatE
     seq->state_variable_init();
     seq->build_transition_count();
 
-    // estimation des parametres de la chaine de Markov
+    // estimation of the Markov chain parameters
 
     seq->chain_data->estimation(*markov);
 
-    // estimation des fonctions d'evolution des probabilites de rester
-    // dans un etat
+    // estimation of the self-transition probability functions
 
     seq->self_transition_computation(markov->homogeneity);
 
@@ -1298,7 +1307,7 @@ NonhomogeneousMarkov* MarkovianSequences::nonhomogeneous_markov_estimation(StatE
       markov->self_transition = NULL;
     }
 
-    // calcul de la vraisemblance et des lois caracteristiques du modele
+    // computation of the log-likelihood and the characteristic distributions of the model
 
     seq->likelihood = markov->likelihood_computation(*seq);
 
@@ -1318,15 +1327,17 @@ NonhomogeneousMarkov* MarkovianSequences::nonhomogeneous_markov_estimation(StatE
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Simulation using a nonhomogeneous Markov chain.
  *
- *  Simulation par une chaine de Markov non-homogene.
+ *  \param[in] error               reference on a StatError object,
+ *  \param[in] length_distribution sequence length frequency distribution,
+ *  \param[in] counting_flag       flag on the computation of the counting distributions.
  *
- *  arguments : reference sur un objet StatError,
- *              loi empirique des longueurs des sequences,
- *              flag sur le calcul des lois de comptage.
- *
- *--------------------------------------------------------------*/
+ *  \return                        NonhomogeneousMarkovData object.
+ */
+/*--------------------------------------------------------------*/
 
 NonhomogeneousMarkovData* NonhomogeneousMarkov::simulation(StatError &error ,
                                                            const FrequencyDistribution &length_distribution ,
@@ -1371,7 +1382,7 @@ NonhomogeneousMarkovData* NonhomogeneousMarkov::simulation(StatError &error ,
 
   if (status) {
 
-    // initialisations
+    // initializations
 
     seq = new NonhomogeneousMarkovData(length_distribution);
     seq->type[0] = STATE;
@@ -1397,7 +1408,7 @@ NonhomogeneousMarkovData* NonhomogeneousMarkov::simulation(StatError &error ,
 
     for (i = 0;i < seq->nb_sequence;i++) {
 
-      // initialisation de la matrice des probabilites de transition courante
+      // initialization of the transition probability matrix
 
       index_chain->parameter_copy(*this);
 
@@ -1406,7 +1417,7 @@ NonhomogeneousMarkovData* NonhomogeneousMarkov::simulation(StatError &error ,
     
       for (j = 1;j < seq->length[i];j++) {
 
-        // prise en compte de l'evolution des probabilites de transition
+        // change in transition probabilities with the index parameter
 
         for (k = 0;k < markov->nb_state;k++) {
           if (!markov->homogeneity[k]) {
@@ -1422,7 +1433,7 @@ NonhomogeneousMarkovData* NonhomogeneousMarkov::simulation(StatError &error ,
     markov->remove_cumul();
     delete index_chain;
 
-    // extraction des caracteristiques des sequences simulees
+    // computation of the characteristics of the generated sequences
 
     for (i = 0;i < seq->nb_variable;i++) {
       seq->max_value_computation(i);
@@ -1450,7 +1461,7 @@ NonhomogeneousMarkovData* NonhomogeneousMarkov::simulation(StatError &error ,
 
     markov->characteristic_computation(*seq , counting_flag);
 
-    // calcul de la vraisemblance
+    // computation of the log-likelihood of the model for the generated sequences
 
     seq->likelihood = markov->likelihood_computation(*seq);
   }
@@ -1459,15 +1470,18 @@ NonhomogeneousMarkovData* NonhomogeneousMarkov::simulation(StatError &error ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Simulation using a nonhomogeneous Markov chain.
  *
- *  Simulation par une chaine de Markov non-homogene.
+ *  \param[in] error         reference on a StatError object,
+ *  \param[in] nb_sequence   number of sequences,
+ *  \param[in] length        sequence length,
+ *  \param[in] counting_flag flag on the computation of the counting distributions.
  *
- *  arguments : reference sur un objet StatError,
- *              nombre et longueur des sequences,
- *              flag sur le calcul des lois de comptage.
- *
- *--------------------------------------------------------------*/
+ *  \return                  NonhomogeneousMarkovData object.
+ */
+/*--------------------------------------------------------------*/
 
 NonhomogeneousMarkovData* NonhomogeneousMarkov::simulation(StatError &error , int nb_sequence ,
                                                            int length , bool counting_flag) const
@@ -1510,15 +1524,18 @@ NonhomogeneousMarkovData* NonhomogeneousMarkov::simulation(StatError &error , in
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Simulation using a nonhomogeneous Markov chain.
  *
- *  Simulation par une chaine de Markov non-homogene.
+ *  \param[in] error         reference on a StatError object,
+ *  \param[in] nb_sequence   number of sequences,
+ *  \param[in] iseq          reference on a MarkovianSequences object,
+ *  \param[in] counting_flag flag on the computation of the counting distributions.
  *
- *  arguments : reference sur un objet StatError, nombre de sequences,
- *              reference sur un objet MarkovianSequences,
- *              flag sur le calcul des lois de comptage.
- *
- *--------------------------------------------------------------*/
+ *  \return                  NonhomogeneousMarkovData object.
+ */
+/*--------------------------------------------------------------*/
 
 NonhomogeneousMarkovData* NonhomogeneousMarkov::simulation(StatError &error , int nb_sequence ,
                                                            const MarkovianSequences &iseq ,

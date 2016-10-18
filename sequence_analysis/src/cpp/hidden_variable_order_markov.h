@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -49,23 +49,25 @@ namespace sequence_analysis {
 
 /****************************************************************
  *
- *  Constantes :
+ *  Constants
  */
 
 
-  const double VARIABLE_ORDER_MARKOV_LIKELIHOOD_DIFF = 1.e-6;  // seuil pour stopper les iterations EM
-  const int VARIABLE_ORDER_MARKOV_NB_ITER = 100;  // nombre maximum d'iterations EM
+  const double VARIABLE_ORDER_MARKOV_LIKELIHOOD_DIFF = 1.e-6;  //  threshold for stopping the EM iterations
+  const int VARIABLE_ORDER_MARKOV_NB_ITER = 100;  // maximum number of EM iterations
 
 
 
 /****************************************************************
  *
- *  Definition des classes :
+ *  Class definition
  */
 
 
-  class HiddenVariableOrderMarkov : public VariableOrderMarkov {  // chaine de Markov
-                                                                  // d'ordre variable cachee
+  /// \brief hidden variable-order Markov chain
+
+  class HiddenVariableOrderMarkov : public VariableOrderMarkov {
+
     friend class MarkovianSequences;
 
     friend std::ostream& operator<<(std::ostream &os , const HiddenVariableOrderMarkov &hmarkov)

@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -57,15 +57,13 @@ namespace sequence_analysis {
 
 /****************************************************************
  *
- *  Constantes :
+ *  Constants
  */
 
 
-  const int MAX_LAG = 100;               // decalage maximum pour le calcul des coefficients
-                                         // d'autocorrelation
-  const int MEMORY_MIN_COUNT = 10;       // effectif minimum pour comparer
-                                         // une memoire a ses fils
-  const double LAPLACE_COEFF = 1.;       // coefficient pour l'estimateur de Laplace
+  const int MAX_LAG = 100;               // maximum lag for the computation of the autocorrelation coefficients
+  const int MEMORY_MIN_COUNT = 10;       // minimum count for comparing a memory and its children
+  const double LAPLACE_COEFF = 1.;       // Laplace estimator coefficient
 
   enum memory_type {
     NON_TERMINAL ,
@@ -78,24 +76,26 @@ namespace sequence_analysis {
 
 /****************************************************************
  *
- *  Definition des classes :
+ *  Class definition
  */
 
 
-  class VariableOrderMarkovChain : public stat_tool::Chain {  // chaine de Markov d'ordre variable
+  /// \brief Variable-order Markov chain
+
+  class VariableOrderMarkovChain : public stat_tool::Chain {
 
   public :
 
-    memory_type *memo_type;  // types des memoires (NON_TERMINAL/TERMINAL/COMPLETION)
-    int *order;             // ordres des memoires
-    int max_order;          // ordre maximum des memoires
-    int **state;            // etats composant les memoires
-    int *parent;            // memoires parent
-    int **child;            // memoires fils
-    int **next;             // memoires suivantes
-    int *nb_memory;         // nombre de memoires precedentes
-    int **previous;         // memoires precedentes
-    CategoricalSequenceProcess *state_process;  // processus d'etat
+    memory_type *memo_type;  ///< memory types (NON_TERMINAL/TERMINAL/COMPLETION)
+    int *order;             ///< memory orders
+    int max_order;          ///< maximum memory order
+    int **state;            ///< state succession for each memory 
+    int *parent;            ///< parent memories
+    int **child;            ///< child memories
+    int **next;             ///< next memories
+    int *nb_memory;         ///< number of previous memories
+    int **previous;         ///< previous memories
+    CategoricalSequenceProcess *state_process;  ///< state process
 
     void memory_tree_completion(const VariableOrderMarkovChain &markov);
     void build(const VariableOrderMarkovChain &markov);
@@ -163,16 +163,17 @@ namespace sequence_analysis {
   class VariableOrderMarkovChainData;
   class VariableOrderMarkovData;
 
+  /// \brief Variable-order Markov chain 
 
-  class VariableOrderMarkov : public stat_tool::StatInterface , protected VariableOrderMarkovChain {  // chaine de Markov
-                                                                                                      // d'ordre variable
+  class VariableOrderMarkov : public stat_tool::StatInterface , protected VariableOrderMarkovChain {
+
     friend class MarkovianSequences;
     friend class VariableOrderMarkovIterator;
     friend class VariableOrderMarkovChainData;
     friend class VariableOrderMarkovData;
-    friend class Stat_trees::MarkovOutTree;  // revoir avec J.B.
+    friend class Stat_trees::MarkovOutTree;  // to be reworked with J.B.
 
-    friend Stat_trees::MarkovOutTree* Stat_trees::markov_out_tree_parsing(stat_tool::StatError& error,  // revoir avec J.B.
+    friend Stat_trees::MarkovOutTree* Stat_trees::markov_out_tree_parsing(stat_tool::StatError& error,  // to be reworked with J.B.
                                                                           std::ifstream &in_file, int &line);
                                                              
     friend std::ostream& operator<<(std::ostream &os , const VariableOrderMarkov &markov)
@@ -180,12 +181,12 @@ namespace sequence_analysis {
 
   protected :
 
-    int nb_iterator;        // nombre d'iterateurs pointant sur l'objet
-    VariableOrderMarkovData *markov_data;  // pointeur sur un objet VariableOrderMarkovData
-    int nb_output_process;  // nombre de processus d'observation
-    CategoricalSequenceProcess **categorical_process;  // processus d'observation categoriels
-    stat_tool::DiscreteParametricProcess **discrete_parametric_process;  // processus d'observation discrets parametriques
-    stat_tool::ContinuousParametricProcess **continuous_parametric_process;  // processus d'observation continus parametriques
+    int nb_iterator;        ///< number of iterators pointing on the VariableOrderMarkov object
+    VariableOrderMarkovData *markov_data;  ///< pointer on a VariableOrderMarkovData object
+    int nb_output_process;  ///< number of observation processes
+    CategoricalSequenceProcess **categorical_process;  ///< categorical observation processes
+    stat_tool::DiscreteParametricProcess **discrete_parametric_process;  ///< discrete parametric observation processes
+    stat_tool::ContinuousParametricProcess **continuous_parametric_process;  ///< continuous parametric observation processes
 
     VariableOrderMarkov(const VariableOrderMarkovChain *pmarkov , int inb_output_process ,
                         stat_tool::CategoricalProcess **categorical_observation ,
@@ -304,7 +305,7 @@ namespace sequence_analysis {
                                                       const VariableOrderMarkov **markov , int nb_sequence ,
                                                       const MarkovianSequences **seq , const std::string path = "") const;
 
-    // acces membres de la classe
+    // class member access
 
     int get_nb_iterator() const { return nb_iterator; }
     VariableOrderMarkovData* get_markov_data() const { return markov_data; }
@@ -327,12 +328,14 @@ namespace sequence_analysis {
 
 
 
-  class VariableOrderMarkovIterator {  // iterateur chaine de Markov d'ordre variable
+  /// \brief Variable-order Markov chain iterator
+
+  class VariableOrderMarkovIterator {
 
   private :
 
-    VariableOrderMarkov *markov;  // pointeur sur un objet VariableOrderMarkov
-    int memory;             // memoire
+    VariableOrderMarkov *markov;  ///< pointer on a VariableOrderMarkov object
+    int memory;             ///< memory
 
     void copy(const VariableOrderMarkovIterator &it);
 
@@ -347,7 +350,7 @@ namespace sequence_analysis {
     bool simulation(int **int_seq , int ilength = 1 , bool initialization = false);
     int** simulation(int ilength = 1 , bool initialization = false);
 
-    // acces membres de la classe
+    // class member access
 
     VariableOrderMarkov* get_markov() const { return markov; }
     int get_memory() const { return memory; }
@@ -356,8 +359,9 @@ namespace sequence_analysis {
 
 
 
-  class VariableOrderMarkovChainData : public stat_tool::ChainData {  // structure de donnees correspondant
-                                                                      // a une chaine de Markov d'ordre variable
+  /// \brief Data structure corresponding to a variable-order Markov chain
+
+  class VariableOrderMarkovChainData : public stat_tool::ChainData {
 
   public :
 
@@ -371,8 +375,9 @@ namespace sequence_analysis {
 
 
 
-  class VariableOrderMarkovData : public MarkovianSequences {  // structure de donnees correspondant
-                                                               // a une chaine de Markov d'ordre variable
+  /// \brief Data structure corresponding to a variable-order Markov chain
+
+  class VariableOrderMarkovData : public MarkovianSequences {
 
     friend class MarkovianSequences;
     friend class VariableOrderMarkov;
@@ -383,14 +388,14 @@ namespace sequence_analysis {
 
   private :
 
-    VariableOrderMarkov *markov;  // pointeur sur un objet VariableOrderMarkov
-    VariableOrderMarkovChainData *chain_data;  // etats initaux et transitions
-    double likelihood;      // vraisemblance des sequences observees
-    double restoration_likelihood;  // vraisemblance des sequences restaurees
-    double sample_entropy;  // entropie des sequences d'etats
-    double *posterior_probability;  // probabilite a posteriori de la sequence d'etats la plus probable
-    double *entropy;        // entropie des sequences d'etats
-    double *nb_state_sequence;  // nombre de sequences d'etats
+    VariableOrderMarkov *markov;  ///< pointer on a VariableOrderMarkov object
+    VariableOrderMarkovChainData *chain_data;  ///< initial states and transition counts
+    double likelihood;      ///< log-likelihood for the observed sequences
+    double restoration_likelihood;  ///< log-likelihood for the restored state sequences
+    double sample_entropy;  ///< entropy of the state sequences for the sample
+    double *posterior_probability;  ///< posterior probabilities of the most probable state sequences
+    double *entropy;        ///< entropies of the state sequences
+    double *nb_state_sequence;  ///< numbers of state sequences
 
     void copy(const VariableOrderMarkovData &seq , bool model_flag = true);
     void observation_frequency_distribution_correction(FrequencyDistribution **corrected_observation ,
@@ -438,7 +443,7 @@ namespace sequence_analysis {
                                 bool begin = true , bool non_terminal = false);
     void order0_estimation(VariableOrderMarkov &markov) const;
 
-    // acces membres de la classe
+    // class member access
 
     VariableOrderMarkov* get_markov() const { return markov; }
     VariableOrderMarkovChainData* get_chain_data() const { return chain_data; }
