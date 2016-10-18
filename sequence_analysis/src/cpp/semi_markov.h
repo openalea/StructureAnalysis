@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -49,17 +49,16 @@ namespace sequence_analysis {
 
 /****************************************************************
  *
- *  Constantes :
+ *  Constants
  */
 
 
-  const int LEAVE_LENGTH = 10000;         // longueur maximum pour le calcul de
-                                          // la probabilite de quitter un etat
+  const int LEAVE_LENGTH = 10000;         // maximum length for the computation of the probability of
+                                          // leaving definitively a state
 
-  const double OCCUPANCY_LIKELIHOOD_DIFF = 1.e-5;  // seuil pour stopper les iterations EM
-  const int OCCUPANCY_NB_ITER = 10000;   // nombre maximum d'iterations EM
-  const int OCCUPANCY_COEFF = 10;        // coefficient arrondi estimateur pour les lois
-                                         // d'occupation des etats
+  const double OCCUPANCY_LIKELIHOOD_DIFF = 1.e-5;  // threshold for stopping the EM iterations
+  const int OCCUPANCY_NB_ITER = 10000;   // maximum number of EM iterations
+  const int OCCUPANCY_COEFF = 10;        // rounding coefficient for the state occupancy distribution estimator
 
   enum state_sojourn_type {
     MARKOVIAN ,
@@ -70,17 +69,19 @@ namespace sequence_analysis {
 
 /****************************************************************
  *
- *  Definition des classes :
+ *  Class definition
  */
 
 
-  class SemiMarkovChain : public stat_tool::Chain {  // semi-chaine de Markov
+  /// \brief Semi-Markov chain
+
+  class SemiMarkovChain : public stat_tool::Chain {
 
   public :
 
-    state_sojourn_type *sojourn_type;  //  MARKOVIAN/SEMI_MARKOVIAN
-    CategoricalSequenceProcess *state_process;  // processus d'etat
-    Forward **forward;      // lois de l'intervalle de temps residuel
+    state_sojourn_type *sojourn_type;  ///<  MARKOVIAN/SEMI_MARKOVIAN
+    CategoricalSequenceProcess *state_process;  ///< state process
+    Forward **forward;      ///< forward sojourn time distributions
 
     void copy(const SemiMarkovChain &smarkov , int param = stat_tool::I_DEFAULT);
     void remove();
@@ -112,8 +113,9 @@ namespace sequence_analysis {
 
   class SemiMarkovData;
 
+  /// \brief Semi-Markov chain
 
-  class SemiMarkov : public stat_tool::StatInterface , protected SemiMarkovChain {  // semi-chaine de Markov
+  class SemiMarkov : public stat_tool::StatInterface , protected SemiMarkovChain {
 
     friend class MarkovianSequences;
     friend class SemiMarkovIterator;
@@ -124,12 +126,12 @@ namespace sequence_analysis {
 
   protected :
 
-    int nb_iterator;        // nombre d'iterateurs pointant sur l'objet
-    SemiMarkovData *semi_markov_data;  // pointeur sur un objet SemiMarkovData
-    int nb_output_process;  // nombre de processus d'observation
-    CategoricalSequenceProcess **categorical_process;  // processus d'observation categoriels
-    stat_tool::DiscreteParametricProcess **discrete_parametric_process;  // processus d'observation discrets parametriques
-    stat_tool::ContinuousParametricProcess **continuous_parametric_process;  // processus d'observation continus parametriques
+    int nb_iterator;        ///< number of iterators pointing on the SemiMarkov object
+    SemiMarkovData *semi_markov_data;  ///< pointer on a SemiMarkovData object
+    int nb_output_process;  ///< number of observation processes
+    CategoricalSequenceProcess **categorical_process;  ///< categorical observation processes
+    stat_tool::DiscreteParametricProcess **discrete_parametric_process;  ///< discrete parametric observation processes
+    stat_tool::ContinuousParametricProcess **continuous_parametric_process;  ///< continuous parametric observation processes
 
     SemiMarkov(const stat_tool::Chain *pchain , const CategoricalSequenceProcess *poccupancy ,
                int inb_output_process , stat_tool::CategoricalProcess **pobservation ,
@@ -234,7 +236,7 @@ namespace sequence_analysis {
                                                       const SemiMarkov **smarkov , int nb_sequence ,
                                                       const MarkovianSequences **seq , const std::string path = "") const;
 
-    // acces membres de la classe
+    // class member access
 
     int get_nb_iterator() const { return nb_iterator; }
     SemiMarkovData* get_semi_markov_data() const { return semi_markov_data; }
@@ -254,15 +256,16 @@ namespace sequence_analysis {
   };
 
 
+  /// \brief Semi-Markov chain iterator for asynchronous simulation
 
-  class SemiMarkovIterator {  // iterateur semi-chaine de Markov
+  class SemiMarkovIterator {
 
   private :
 
-    SemiMarkov *semi_markov;  // pointeur sur un objet SemiMarkov
-    int state;              // etat
-    int occupancy;          // temps d'occupation de l'etat
-    int counter;            // compteur
+    SemiMarkov *semi_markov;  ///< pointer on a SemiMarkov object
+    int state;              ///< state
+    int occupancy;          ///< state occupancy
+    int counter;            ///< counter
 
     void copy(const SemiMarkovIterator &it);
 
@@ -277,7 +280,7 @@ namespace sequence_analysis {
     bool simulation(int **int_seq , int length = 1 , bool initialization = false);
     int** simulation(int length = 1 , bool initialization = false);
 
-    // acces membres de la classe
+    // class member access
 
     SemiMarkov* get_semi_markov() const { return semi_markov; }
     int get_state() const { return state; }
@@ -288,8 +291,9 @@ namespace sequence_analysis {
 
 
 
-  class SemiMarkovData : public MarkovianSequences {  // structure de donnees correspondant
-                                                      // a une semi-chaine de Markov
+  /// \brief Data structure corresponding to a semi-Markov chain
+
+  class SemiMarkovData : public MarkovianSequences {
 
     friend class MarkovianSequences;
     friend class SemiMarkov;
@@ -300,14 +304,14 @@ namespace sequence_analysis {
 
   private :
 
-    SemiMarkov *semi_markov;  // pointeur sur un objet SemiMarkov
-    stat_tool::ChainData *chain_data;  // etats initaux et transitions
-    double likelihood;      // vraisemblance des sequences observees
-    double restoration_likelihood;  // vraisemblance des sequences restaurees
-    double sample_entropy;  // entropie des sequences d'etats
-    double *posterior_probability;  // probabilite a posteriori de la sequence d'etats la plus probable
-    double *entropy;        // entropie des sequences d'etats
-    double *nb_state_sequence;  // nombre de sequences d'etats
+    SemiMarkov *semi_markov;  ///< pointer on a SemiMarkov object
+    stat_tool::ChainData *chain_data;  ///< initial states and transition counts
+    double likelihood;      ///< log-likelihood for the observed sequences
+    double restoration_likelihood;  ///< log-likelihood for the restored state sequences
+    double sample_entropy;  ///< entropy of the state sequences for the sample
+    double *posterior_probability;  ///< posterior probabilities of the most probable state sequences
+    double *entropy;        ///< entropies of the state sequences
+    double *nb_state_sequence;  ///< numbers of state sequences
 
     void copy(const SemiMarkovData &seq , bool model_flag = true);
 
@@ -345,7 +349,7 @@ namespace sequence_analysis {
 
     void build_transition_count(const SemiMarkov *smarkov = NULL);
 
-    // acces membres de la classe
+    // class member access
 
     SemiMarkov* get_semi_markov() const { return semi_markov; }
     stat_tool::ChainData* get_chain_data() const { return chain_data; }

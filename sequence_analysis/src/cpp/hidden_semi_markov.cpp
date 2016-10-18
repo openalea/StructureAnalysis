@@ -335,7 +335,7 @@ HiddenSemiMarkov* HiddenSemiMarkov::ascii_read(StatError &error , const string p
 
       while (!((token = next()).isNull())) {
 
-        // test (EQUILIBRIUM) HIDDEN_SEMI-MARKOV_CHAIN keyword
+        // test (EQUILIBRIUM_)HIDDEN_SEMI-MARKOV_CHAIN keyword
 
         if (i == 0) {
           if (token == SEQ_word[SEQW_HIDDEN_SEMI_MARKOV_CHAIN]) {
@@ -381,7 +381,7 @@ HiddenSemiMarkov* HiddenSemiMarkov::ascii_read(StatError &error , const string p
           status = false;
         }
 
-        // analysis of the format and reading of the observation processes
+        // analysis of the format and reading of the observation distributions
 
         switch (old_format) {
 

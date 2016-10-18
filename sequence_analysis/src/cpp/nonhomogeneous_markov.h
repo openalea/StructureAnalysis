@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -49,35 +49,34 @@ namespace sequence_analysis {
 
 /****************************************************************
  *
- *  Constantes :
+ *  Constants
  */
 
 
-  const double START_RATIO = 0.03;       // proportion de l'echantillon pour l'initialisation
-                                         // des parametres (debut)
-  const double END_RATIO = 0.1;          // proportion de l'echantillon pour l'initialisation
-                                         // des parametres (fin)
-  const int REGRESSION_NB_ELEMENT = 100;  // taille minimum de l'echantillon pour
-                                          // la regression non-lineare
-  const double GRADIENT_DESCENT_COEFF = 1.;  // coefficient algorithme de gradient
-  const double RESIDUAL_SQUARE_SUM_DIFF = 1.e-6;  // seuil pour stopper les iterations
-                                                  // de l'algorithme de gradient
-  const int REGRESSION_NB_ITER = 1000;   // nombre d'iterations pour la regression non-lineaire
+  const double START_RATIO = 0.03;       // sample proportion for the parameter initialization (beginning)
+  const double END_RATIO = 0.1;          // sample proportion for the parameter initialization (end)
+  const int REGRESSION_NB_ELEMENT = 100;  // minimum sample size for the nonlinear regression
+  const double GRADIENT_DESCENT_COEFF = 1.;  // coefficient for the gradient descent algorithm
+  const double RESIDUAL_SQUARE_SUM_DIFF = 1.e-6;  // threshold for stopping the iterations of
+                                                  // the gradient descent algorithm
+  const int REGRESSION_NB_ITER = 1000;   // number of iterations for the nonlinear regression estimation
 
 
 
 /****************************************************************
  *
- *  Definition des classes :
+ *  Class definition
  */
 
 
-  class Function : public stat_tool::RegressionKernel {  // fonction d'evolution des probabilites
-                                                         // de rester dans un etat
+  /// \brief Self-transition probability function
+
+  class Function : public stat_tool::RegressionKernel {
+
   public :
 
-    double *residual;       // residus
-    int *frequency;         // effectifs correspondant a chaque index
+    double *residual;       ///< residuals
+    int *frequency;         ///< frequency for each index
 
     void copy(const Function&);
     void remove();
@@ -108,8 +107,9 @@ namespace sequence_analysis {
 
   class NonhomogeneousMarkovData;
 
+  /// \brief Nonhomogeneous Markov chain
 
-  class NonhomogeneousMarkov : public stat_tool::StatInterface , protected stat_tool::Chain {  // chaine de Markov non-homogene
+  class NonhomogeneousMarkov : public stat_tool::StatInterface , protected stat_tool::Chain {
 
     friend class MarkovianSequences;
     friend class NonhomogeneousMarkovData;
@@ -119,10 +119,9 @@ namespace sequence_analysis {
 
   protected :
 
-    NonhomogeneousMarkovData *markov_data;  // pointeur sur un objet NonhomogeneousMarkovData
-    bool *homogeneity;      // homogeneite des etats
-    Function **self_transition;  // fonction d'evolution des probabilites
-                                 // de rester dans un etat
+    NonhomogeneousMarkovData *markov_data;  ///< pointer on a NonhomogeneousMarkovData object
+    bool *homogeneity;      ///< state homogeneities
+    Function **self_transition;  ///< self-transition probability functions
     CategoricalSequenceProcess *process;
 
     void copy(const NonhomogeneousMarkov &markov , bool data_flag = true ,
@@ -186,7 +185,7 @@ namespace sequence_analysis {
                                          const MarkovianSequences &iseq ,
                                          bool counting_flag = true) const;
 
-    // acces membres de la classe
+    // class member access
 
     NonhomogeneousMarkovData* get_markov_data() const { return markov_data; }
     bool get_homogeneity(int state) const { return homogeneity[state]; }
@@ -196,8 +195,9 @@ namespace sequence_analysis {
 
 
 
-  class NonhomogeneousMarkovData : public MarkovianSequences {  // structure de donnees correspondant
-                                                                // a une chaine de Markov non-homogene
+  /// \brief Data structure corresponding to a nonhomogeneous Markov chain
+
+  class NonhomogeneousMarkovData : public MarkovianSequences {
 
     friend class MarkovianSequences;
     friend class NonhomogeneousMarkov;
@@ -207,9 +207,9 @@ namespace sequence_analysis {
 
   private :
 
-    NonhomogeneousMarkov *markov;  // pointeur sur un objet NonhomogeneousMarkov
-    stat_tool::ChainData *chain_data;  // etats initaux et transitions
-    double likelihood;      // vraisemblance des sequences
+    NonhomogeneousMarkov *markov;  ///< pointer on a NonhomogeneousMarkov object
+    stat_tool::ChainData *chain_data;  ///< initial states and transitions
+    double likelihood;      ///< log-likelihood for the observed sequences
 
     void copy(const NonhomogeneousMarkovData &seq , bool model_flag = true);
 
@@ -237,7 +237,7 @@ namespace sequence_analysis {
 
     void build_transition_count();
 
-    // acces membres de la classe
+    // class member access
 
     NonhomogeneousMarkov* get_markov() const { return markov; }
     stat_tool::ChainData* get_chain_data() const { return chain_data; }

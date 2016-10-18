@@ -361,7 +361,7 @@ bool FrequencyDistribution::dissimilarity_ascii_write(StatError &error , const s
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Writing des results of a comparison of frequency distributions in a file
+ *  \brief Writing of the results of a comparison of frequency distributions in a file
  *         at the spreadsheet format.
  *
  *  \param[in] error         reference on a StatError object,
@@ -1598,7 +1598,7 @@ MultiPlotSet* FrequencyDistribution::get_plotable_frequency_distributions(StatEr
 
     for (i = 0;i < nb_histo;i++) {
 
-      // computation des cumulative distribution functions
+      // computation of the cumulative distribution functions
 
       cumul[i] = histo[i]->cumul_computation();
 

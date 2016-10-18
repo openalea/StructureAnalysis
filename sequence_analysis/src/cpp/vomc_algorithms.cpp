@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -60,12 +60,12 @@ namespace sequence_analysis {
 
 
 
-/*--------------------------------------------------------------*
- *
- *  Calcul des probabilites de transition correspondant aux memoires non-terminales
- *  pour une chaine de Markov d'ordre variable ordinaire.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the transition probabilities corresponding to the non-terminal memories
+ *         for an ordinary variable-order Markov chain.
+ */
+/*--------------------------------------------------------------*/
 
 void VariableOrderMarkovChain::non_terminal_transition_probability_computation()
 
@@ -87,7 +87,7 @@ void VariableOrderMarkovChain::non_terminal_transition_probability_computation()
 
   if ((i < nb_row) && (sum == 0.)) {
 
-    // initialisation des probabilites des memoires
+    // initialization of the probabilities of the memories
 
     memory = new double[nb_row];
     previous_memory = new double[nb_row];
@@ -101,7 +101,7 @@ void VariableOrderMarkovChain::non_terminal_transition_probability_computation()
       }
     }
 
-    // calcul des probabilites de chaque memoire en fonction de l'index
+    // computation of the probabilities of each memory as a function of the index parameter
 
     for (i = 1;i < nb_row;i++) {
       if (memo_type[i] == NON_TERMINAL) {
@@ -116,13 +116,13 @@ void VariableOrderMarkovChain::non_terminal_transition_probability_computation()
 
     do {
 
-      // mise a jour des probabilites des memoires
+      // update of the probabilities of the memories
 
       for (j = 1;j < nb_row;j++) {
         previous_memory[j] = memory[j];
       }
 
-      // calcul des probabilites des memoires
+      // computation of the probabilities of the memories
 
       for (j = 1;j < nb_row;j++) {
         memory[j] = 0.;
@@ -131,7 +131,7 @@ void VariableOrderMarkovChain::non_terminal_transition_probability_computation()
         }
       }
 
-      // calcul de la somme des differences absolues des probabilites des memoires
+      // computation of the sum of the absolute differences of the probabilities of the memories
 
       sum = 0.;
       for (j = 1;j < nb_row;j++) {
@@ -147,8 +147,7 @@ void VariableOrderMarkovChain::non_terminal_transition_probability_computation()
     cout << "LENGTH: " << i << endl;
 #   endif
 
-    // extraction des probabilites de transition correspondant
-    // aux memoires non-terminales
+    // extraction of the transition probabilities corresponding to the non-terminal memories
 
     for (i = nb_row - 1;i >= 1;i--) {
       if (child[i]) {
@@ -184,12 +183,11 @@ void VariableOrderMarkovChain::non_terminal_transition_probability_computation()
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Calcul de la loi stationnaire pour une chaine de Markov
- *  d'ordre variable en equilibre.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the stationary distribution for an equilibrium variable-order Markov chain.
+ */
+/*--------------------------------------------------------------*/
 
 void VariableOrderMarkovChain::initial_probability_computation()
 
@@ -199,7 +197,7 @@ void VariableOrderMarkovChain::initial_probability_computation()
   double sum , *memory , *previous_memory;
 
 
-  // initialisation des probabilites des memoires
+  // initialization of the probabilities of the memories
 
   memory = new double[nb_row];
   previous_memory = new double[nb_row];
@@ -213,20 +211,20 @@ void VariableOrderMarkovChain::initial_probability_computation()
     }
   }
 
-  // calcul des probabilites de chaque memoire en fonction de l'index
+  // computation of the probabilities of each memory as a function of the index parameter
 
   nb_terminal = (nb_row - 1) * (nb_state - 1) / nb_state + 1;
   i = 1;
 
   do {
 
-    // mise a jour des probabilites des memoires
+    // update of the probabilities of the memories
 
     for (j = 1;j < nb_row;j++) {
       previous_memory[j] = memory[j];
     }
 
-    // calcul des probabilites des memoires
+    // computation of the probabilities of the memories
 
     for (j = 1;j < nb_row;j++) {
       memory[j] = 0.;
@@ -235,7 +233,7 @@ void VariableOrderMarkovChain::initial_probability_computation()
       }
     }
 
-    // calcul de la somme des differences absolues des probabilites des memoires
+    // computation of the sum of the absolute differences of the probabilities of the memories
 
     sum = 0.;
     for (j = 1;j < nb_row;j++) {
@@ -261,13 +259,16 @@ void VariableOrderMarkovChain::initial_probability_computation()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the log-likelihood of a variable-order Markov chain for sequences.
  *
- *  Calcul de la vraisemblance de sequences pour une chaine de Markov d'ordre variable.
+ *  \param[in] seq   reference on a MarkovianSequences object,
+ *  \param[in] index sequence index.
  *
- *  arguments : reference sur un objet MarkovianSequences, indice de la sequence.
- *
- *--------------------------------------------------------------*/
+ *  \return          log-likelihood.
+ */
+/*--------------------------------------------------------------*/
 
 double VariableOrderMarkov::likelihood_computation(const MarkovianSequences &seq , int index) const
 
@@ -277,7 +278,7 @@ double VariableOrderMarkov::likelihood_computation(const MarkovianSequences &seq
   double likelihood = 0. , proba , **proutput;
 
 
-  // verification de la compatibilite entre le modele et les donnees
+  // checking of the compatibility of the model with the data
 
   if (nb_output_process + 1 == seq.nb_variable) {
     if (state_process->nb_value < seq.marginal_distribution[0]->nb_value) {
@@ -484,14 +485,16 @@ double VariableOrderMarkov::likelihood_computation(const MarkovianSequences &seq
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the log-likelihood of initial states and transitions
+ *         for a variable-order Markov chain.
  *
- *  Calcul de la vraisemblance des etats initiaux et des transitions
- *  pour une chaine de Markov d'ordre variable.
+ *  \param[in] chain_data reference on a VariableOrderMarkovChainData object.
  *
- *  argument : reference sur un objet VariableOrderMarkovChainData.
- *
- *--------------------------------------------------------------*/
+ *  \return               log-likelihood.
+ */
+/*--------------------------------------------------------------*/
 
 double VariableOrderMarkov::likelihood_computation(const VariableOrderMarkovChainData &chain_data) const
 
@@ -547,13 +550,15 @@ double VariableOrderMarkov::likelihood_computation(const VariableOrderMarkovChai
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Correction of the observation frequency distributions.
  *
- *  Correction des lois empiriques d'observation.
- *
- *  arguments : lois empiriques d'observation, indice de la variable, debut.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] corrected_observation reference on FrequencyDistribution objects,
+ *  \param[in] variable              variable index,
+ *  \param[in] start                 start.
+ */
+/*--------------------------------------------------------------*/
 
 void VariableOrderMarkovData::observation_frequency_distribution_correction(FrequencyDistribution **corrected_observation ,
                                                                             int variable , int start) const
@@ -571,7 +576,7 @@ void VariableOrderMarkovData::observation_frequency_distribution_correction(Freq
     }
   }
 
-  // extraction des caracteristiques des lois empiriques
+  // computation of the characteristics of the observation frequency distributions
 
   for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
     corrected_observation[i]->nb_value_computation();
@@ -587,13 +592,15 @@ void VariableOrderMarkovData::observation_frequency_distribution_correction(Freq
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the log-likelihood of a variable-order Markov chain for sequences.
  *
- *  Calcul de la vraisemblance de sequences pour une chaine de Markov d'ordre variable.
+ *  \param[in] seq reference on a VariableOrderMarkovData object.
  *
- *  argument : reference sur un objet VariableOrderMarkovData.
- *
- *--------------------------------------------------------------*/
+ *  \return        log-likelihood.
+ */
+/*--------------------------------------------------------------*/
 
 double VariableOrderMarkov::likelihood_computation(const VariableOrderMarkovData &seq) const
 
@@ -604,7 +611,7 @@ double VariableOrderMarkov::likelihood_computation(const VariableOrderMarkovData
   FrequencyDistribution **observation;
 
 
-  // verification de la compatibilite entre le modele et les donnees
+  // checking of the compatibility of the model with the data
 
   if (nb_output_process + 1 == seq.nb_variable) {
     if ((!(seq.marginal_distribution[0])) || (nb_state < seq.marginal_distribution[0]->nb_value)) {
@@ -735,16 +742,16 @@ double VariableOrderMarkov::likelihood_computation(const VariableOrderMarkovData
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Counting of initial states and transitions.
  *
- *  Comptage des etats initiaux et des transitions.
- *
- *  arguments : references sur un objet VariableOrderMarkovData et
-                sur un objet VariableOrderMarkov,
- *              flag pour prendre en compte le debut de la sequence,
- *              flag pour cumuler sur les memoires non-terminales.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] chain_data   reference on a VariableOrderMarkovChainData object,
+ *  \param[in] markov       reference on a VariableOrderMarkovChain object,
+ *  \param[in] begin        flag for taking account of the beginning of sequences,
+ *  \param[in] non_terminal flag for cumulating on the non-terminal memories.
+ */
+/*--------------------------------------------------------------*/
 
 void MarkovianSequences::transition_count_computation(const VariableOrderMarkovChainData &chain_data ,
                                                       const VariableOrderMarkovChain &markov ,
@@ -765,7 +772,7 @@ void MarkovianSequences::transition_count_computation(const VariableOrderMarkovC
     }
   }
 
-  // extraction des etats initiaux et des transitions
+  // extraction of initial states and transitions
 
   for (i = 0;i < nb_sequence;i++) {
     switch (markov.type) {
@@ -813,7 +820,7 @@ void MarkovianSequences::transition_count_computation(const VariableOrderMarkovC
     }
   }
 
-  // extraction des comptages des transitions correspondant aux memoires non-terminales
+  // extraction of the transition counts corresponding to non-terminal memories
 
   for (i = chain_data.nb_row - 1;i >= 1;i--) {
     if ((markov.memo_type[i] == COMPLETION) || (non_terminal)) {
@@ -825,15 +832,15 @@ void MarkovianSequences::transition_count_computation(const VariableOrderMarkovC
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Construction of initial state and transition counts.
  *
- *  Construction des comptages des etats initiaux et des transitions.
- *
- *  arguments : reference sur un objet VariableOrderMarkov,
- *              flag pour prendre en compte le debut de la sequence,
- *              flag pour cumuler sur les memoires non-terminales.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] markov       reference on a VariableOrderMarkovChain object,
+ *  \param[in] begin        flag for taking account of the beginning of sequences,
+ *  \param[in] non_terminal flag for cumulating on the non-terminal memories.
+ */
+/*--------------------------------------------------------------*/
 
 void VariableOrderMarkovData::build_transition_count(const VariableOrderMarkovChain &markov ,
                                                      bool begin , bool non_terminal)
@@ -844,17 +851,16 @@ void VariableOrderMarkovData::build_transition_count(const VariableOrderMarkovCh
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Estimation of a variable-order Markov chain from the initial state and transition counts.
  *
- *  Estimation des parametres d'une chaine de Markov d'ordre variable
- *  a partir des comptages des etats initiaux et des transitions.
- *
- *  arguments : reference sur un objet VariableOrderMarkov,
- *              flag pour estimer les probabilites de transition sur
- *              les memoires non-terminales, estimateur (maximum de vraisemblance,
- *              Laplace, Laplace adaptatif), coefficient estimateur de Laplace.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] markov        reference on a VariableOrderMarkovChain object,
+ *  \param[in] non_terminal  flag for estiming the transition probabilities on the non-terminal memories,
+ *  \param[in] estimator     estimator (maximum likelihood, Laplace, adaptative Laplace),
+ *  \param[in] laplace_coeff Laplace estimator coefficient.
+ */
+/*--------------------------------------------------------------*/
 
 void VariableOrderMarkovChainData::estimation(VariableOrderMarkovChain &markov , bool non_terminal ,
                                               transition_estimator estimator , double laplace_coeff) const
@@ -864,7 +870,7 @@ void VariableOrderMarkovChainData::estimation(VariableOrderMarkovChain &markov ,
   int sum , nb_parameter;
 
 
-  // estimation des probabilites initiales
+  // estimation of the initial probabilities
 
   if (markov.type == ORDINARY) {
     sum = 0;
@@ -877,7 +883,7 @@ void VariableOrderMarkovChainData::estimation(VariableOrderMarkovChain &markov ,
     }
   }
 
-  // estimation des probabilites de transition
+  // estimation of the transition probabilities
 
   for (i = 0;i < nb_row;i++) {
     if ((markov.memo_type[i] == TERMINAL) || ((markov.memo_type[i] == NON_TERMINAL) &&
@@ -918,7 +924,7 @@ void VariableOrderMarkovChainData::estimation(VariableOrderMarkovChain &markov ,
         break;
       }
 
-      // estimateur de Laplace
+      // Laplace estimator
 
       case LAPLACE : {
         for (j = 0;j < nb_state;j++) {
@@ -928,7 +934,7 @@ void VariableOrderMarkovChainData::estimation(VariableOrderMarkovChain &markov ,
         break;
       }
 
-      // estimateur de Laplace adaptatif (Vert, 2001)
+      // adaptative Laplace estimator (Vert, 2001)
 
       case ADAPTATIVE_LAPLACE : {
         if (sum > 0) {
@@ -946,7 +952,7 @@ void VariableOrderMarkovChainData::estimation(VariableOrderMarkovChain &markov ,
         break;
       }
 
-      // estimateur de Ristad 1 (1995)
+      // Ristad (1995) estimator 1
 
       case UNIFORM_SUBSET : {
         for (j = 0;j < nb_state;j++) {
@@ -967,7 +973,7 @@ void VariableOrderMarkovChainData::estimation(VariableOrderMarkovChain &markov ,
         break;
       }
 
-      // estimateur de Ristad 2 (1995)
+      // Ristad (1995) estimator 2
 
       case UNIFORM_CARDINALITY : {
         if (nb_parameter == nb_state) {
@@ -1012,13 +1018,13 @@ void VariableOrderMarkovChainData::estimation(VariableOrderMarkovChain &markov ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Estimation of a zero-order Markov chain.
  *
- *  Estimation des parametres d'une chaine de Markov d'ordre 0.
- *
- *  argument : reference sur un objet VariableOrderMarkov.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] markov reference on a VariableOrderMarkov object.
+ */
+/*--------------------------------------------------------------*/
 
 void VariableOrderMarkovData::order0_estimation(VariableOrderMarkov &markov) const
 
@@ -1053,22 +1059,26 @@ void VariableOrderMarkovData::order0_estimation(VariableOrderMarkov &markov) con
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Estimation of a variable-order Markov chain.
  *
- *  Estimation des parametres d'une chaine de Markov d'ordre variable a partir
- *  d'un echantillon de sequences.
+ *  \param[in] error                     reference on a StatError object,
+ *  \param[in] os                        stream,
+ *  \param[in] itype                     process type (ORDINARY/EQUILIBRIUM),
+ *  \param[in] min_order                 minimum order of the variable-order Markov chain,
+ *  \param[in] max_order                 maximum order of the variable-order Markov chain,
+ *  \param[in] algorithm                 algorithm (CTM_BIC/CTM_KT/LOCAL_BIC/CONTEXT),
+ *  \param[in] threshold                 threshold on the memory pruning,
+ *  \param[in] estimator                 estimator (maximum likelihood, Laplace, adaptative Laplace),
+ *  \param[in] global_initial_transition type of estimation of the initial transition probabilities (ordinary process case),
+ *  \param[in] global_sample             type of management of the sample size
+ *                                       (for the LOCAL_BIC or CONTEXT algorithm),
+ *  \param[in] counting_flag             flag on the computation of the counting distributions.
  *
- *  arguments : reference sur un objet StatError, stream,
- *              type de processus (ORDINARY/EQUILIBRIUM),
- *              ordres minimum et maximum de la chaine de Markov,
- *              algorithme (CTM_BIC/CTM_KT/LOCAL_BIC/CONTEXT), seuil pour l'elagage
- *              des memoires, estimateur (maximum de vraisemblance, Laplace,
- *              Laplace adaptatif), type d'estimation des probabilites de transition
- *              initiale (cas ordinaire), type de prise en compte de la taille
- *              de l'echantillon (pour algorithme LOCAL_BIC ou CONTEXT),
- *              flag sur le calcul des lois de comptage.
- *
- *--------------------------------------------------------------*/
+ *  \return                              VariableOrderMarkov object.
+ */
+/*--------------------------------------------------------------*/
 
 VariableOrderMarkov* MarkovianSequences::variable_order_markov_estimation(StatError &error , ostream &os ,
                                                                           process_type itype , int min_order , int max_order ,
@@ -1201,7 +1211,7 @@ VariableOrderMarkov* MarkovianSequences::variable_order_markov_estimation(StatEr
 
     markov = new VariableOrderMarkov(itype , marginal_distribution[0]->nb_value , max_order , true);
 
-    // comptage des transitions et calcul du nombre des parametres independants correspondant
+    // counting of transitions and computation of the corresponding number of free parameters
 
     chain_data = new VariableOrderMarkovChainData(markov->type , markov->nb_state , markov->nb_row);
     transition_count_computation(*chain_data , *markov , false , true);
@@ -1220,7 +1230,7 @@ VariableOrderMarkov* MarkovianSequences::variable_order_markov_estimation(StatEr
       }
     }
 
-    // estimateur de type BIC
+    // BIC-type estimator
 
     if (algorithm != CTM_KT) {
       for (i = 0;i < markov->nb_row;i++) {
@@ -1235,7 +1245,7 @@ VariableOrderMarkov* MarkovianSequences::variable_order_markov_estimation(StatEr
       }
     }
 
-    // estimateur de Krichevsky-Trofimov
+    // Krichevsky-Trofimov estimator
 
     else {
       for (i = 0;i < markov->nb_row;i++) {
@@ -1294,7 +1304,7 @@ VariableOrderMarkov* MarkovianSequences::variable_order_markov_estimation(StatEr
     }
 #   endif
 
-    // elagage de l'arborescence
+    // pruning of the memory tree
 
 #   ifdef MESSAGE
     if ((algorithm == CONTEXT) && (global_sample)) {
@@ -1322,7 +1332,7 @@ VariableOrderMarkov* MarkovianSequences::variable_order_markov_estimation(StatEr
         }
       }
 
-      // calcul du BIC ou de l'estimateur de Krichevsky-Trofimov maximum de chaque sous-arborescence
+      // computation of the maximum BIC or Krichevsky-Trofimov estimator for each memory sub-tree
 
       for (i = markov->nb_row - 1;i >= 0;i--) {
         if ((markov->memo_type[i] == NON_TERMINAL) && (nb_parameter[i] > 0) &&
@@ -1351,7 +1361,7 @@ VariableOrderMarkov* MarkovianSequences::variable_order_markov_estimation(StatEr
 
       }
 
-      // construction par chainage de l'arborescence des memoires
+      // construction by chaining of the memory tree
 
       nb_row = 1;
       for (i = 0;i < markov->nb_row;i++) {
@@ -1546,7 +1556,7 @@ VariableOrderMarkov* MarkovianSequences::variable_order_markov_estimation(StatEr
       }
     }
 
-    // copie des memoires conservees
+    // copy of the conserved memories
 
     i = 1;
     for (j = 1;j < markov->nb_row;j++) {
@@ -1669,7 +1679,7 @@ VariableOrderMarkov* MarkovianSequences::variable_order_markov_estimation(StatEr
       completed_markov->initial_probability_computation();
     }
 
-    // estimation des lois d'observation
+    // estimation of the categorical observation distributions
 
     if (completed_markov->nb_output_process == 1) {
       seq->build_observation_frequency_distribution(completed_markov->nb_state);
@@ -1699,7 +1709,7 @@ VariableOrderMarkov* MarkovianSequences::variable_order_markov_estimation(StatEr
     }
 #   endif
 
-    // calcul de la vraisemblance et des lois caracteristiques du modele
+    // computation of the log-likelihood and the characteristic distributions of the model
 
     seq->likelihood = completed_markov->likelihood_computation(*seq);
 
@@ -1724,17 +1734,18 @@ VariableOrderMarkov* MarkovianSequences::variable_order_markov_estimation(StatEr
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Estimation of a variable-order Markov chain.
  *
- *  Estimation des parametres d'une chaine de Markov d'ordre variable a partir
- *  d'un echantillon de sequences.
+ *  \param[in] error                     reference on a StatError object,
+ *  \param[in] imarkov                   reference on a VariableOrderMarkov object,
+ *  \param[in] global_initial_transition type of estimation of the initial transition probabilities (ordinary process case),
+ *  \param[in] counting_flag             flag on the computation of the counting distributions.
  *
- *  arguments : reference sur un objet StatError et
- *              sur un objet VariableOrderMarkov, type d'estimation
- *              des probabilites de transition initiale (cas ordinaire),
- *              flag sur le calcul des lois de comptage.
- *
- *--------------------------------------------------------------*/
+ *  \return                              VariableOrderMarkov object.
+ */
+/*--------------------------------------------------------------*/
 
 VariableOrderMarkov* MarkovianSequences::variable_order_markov_estimation(StatError &error ,
                                                                           const VariableOrderMarkov &imarkov,
@@ -1865,7 +1876,7 @@ VariableOrderMarkov* MarkovianSequences::variable_order_markov_estimation(StatEr
       markov->initial_probability_computation();
     }
 
-    // estimation des lois d'observation
+    // estimation of the categorical observation distributions
 
     if (markov->nb_output_process == 1) {
       seq->build_observation_frequency_distribution(markov->nb_state);
@@ -1875,7 +1886,7 @@ VariableOrderMarkov* MarkovianSequences::variable_order_markov_estimation(StatEr
       }
     }
 
-    // calcul de la vraisemblance et des lois caracteristiques du modele
+    // computation of the log-likelihood and the characteristic distributions of the model
 
     seq->likelihood = markov->likelihood_computation(*seq);
 
@@ -1900,18 +1911,19 @@ VariableOrderMarkov* MarkovianSequences::variable_order_markov_estimation(StatEr
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Estimation of a fixed-order  Markov chain.
  *
- *  Estimation des parametres d'une chaine de Markov d'ordre fixe a partir
- *  d'un echantillon de sequences.
+ *  \param[in] error                     reference on a StatError object,
+ *  \param[in] type                      process type (ORDINARY/EQUILIBRIUM),
+ *  \param[in] order                     Markov chain order,
+ *  \param[in] global_initial_transition type of estimation of the initial transition probabilities (ordinary process case),
+ *  \param[in] counting_flag             flag on the computation of the counting distributions.
  *
- *  arguments : reference sur un objet StatError,
- *              type de processus (ORDINARY/EQUILIBRIUM),
- *              ordre de la chaine de Markov, type d'estimation
- *              des probabilites de transition initiale (cas ordinaire),
- *              flag sur le calcul des lois de comptage.
- *
- *--------------------------------------------------------------*/
+ *  \return                              VariableOrderMarkov object.
+ */
+/*--------------------------------------------------------------*/
 
 VariableOrderMarkov* MarkovianSequences::variable_order_markov_estimation(StatError &error ,
                                                                           process_type type , int order ,
@@ -1951,13 +1963,14 @@ VariableOrderMarkov* MarkovianSequences::variable_order_markov_estimation(StatEr
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of transition counts.
  *
- *  Ecriture des comptage des transitions.
- *
- *  arguments : stream, flag pour prendre en compte le debut de la sequence.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] stream,
+ *  \param[in]     flag for taking account of the beginning of sequences.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& VariableOrderMarkov::transition_count_ascii_write(ostream &os , bool begin) const
 
@@ -2107,7 +2120,7 @@ ostream& VariableOrderMarkov::transition_count_ascii_write(ostream &os , bool be
   }
   os << endl;
 
-  // calcul des largeurs des colonnes
+  // computation of column widths
 
   width[1] = (begin ? column_width(nb_state , initial) : 0);
 
@@ -2174,7 +2187,7 @@ ostream& VariableOrderMarkov::transition_count_ascii_write(ostream &os , bool be
     }
   }
 
-  // calcul des intervalles de confiance sur les probabilites de transition
+  // computation of confidence intervals on the transition probabilities
 
   confidence_limit = new double*[nb_row];
   for (i = (begin ? 1 : 0);i < nb_row;i++) {
@@ -2202,7 +2215,7 @@ ostream& VariableOrderMarkov::transition_count_ascii_write(ostream &os , bool be
     }
   }
 
-  // calcul des largeurs des colonnes
+  // computation of column widths
 
   width[1] = 0;
   for (i = (begin ? 1 : 0);i < nb_row;i++) {
@@ -2255,7 +2268,7 @@ ostream& VariableOrderMarkov::transition_count_ascii_write(ostream &os , bool be
     }
   }
 
-  // calcul des vraisemblances
+  // computation of log-likelihoods
 
   if (begin) {
     initial_likelihood = new double[nb_state + 1];
@@ -2318,7 +2331,7 @@ ostream& VariableOrderMarkov::transition_count_ascii_write(ostream &os , bool be
       nb_parameter[i]--;
     }
 
-    // estimateur de Krichevsky-Trofimov
+    // Krichevsky-Trofimov estimator
 
     krichevsky_trofimov[i] = 0.;
 //    krichevsky_trofimov[i] = 1.;
@@ -2379,7 +2392,7 @@ ostream& VariableOrderMarkov::transition_count_ascii_write(ostream &os , bool be
     }
   }
 
-  // calcul des largeurs des colonnes
+  // computation of column widths
 
   if (begin) {
     width[1] = column_width(nb_state + 1 , initial_likelihood);
@@ -2565,15 +2578,20 @@ ostream& VariableOrderMarkov::transition_count_ascii_write(ostream &os , bool be
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Counting of transitions for successive orders.
  *
- *  Comptage des transitions pour differents ordres.
+ *  \param[in] error     reference on a StatError object,
+ *  \param[in] os        stream,
+ *  \param[in] max_order maximum order,
+ *  \param[in] begin     flag for taking account of the beginning of sequences,
+ *  \param[in] estimator estimator (maximum likelihood, Laplace, adaptative Laplace),
+ *  \param[in] path      file path.
  *
- *  arguments : indice de la variable, ordre maximum, flag pour prendre en compte
- *              le debut de la sequence, estimateur (maximum de vraisemblance,
- *              Laplace, Laplace adaptatif), path.
- *
- *--------------------------------------------------------------*/
+ *  \return              error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool MarkovianSequences::transition_count(StatError &error , ostream &os , int max_order ,
                                           bool begin , transition_estimator estimator ,
@@ -2660,16 +2678,18 @@ bool MarkovianSequences::transition_count(StatError &error , ostream &os , int m
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of the results of a comparison of models for a sample of sequences.
  *
- *  Ecriture des resultats d'une comparaison de modeles
- *  pour un ensemble de sequences.
- *
- *  arguments : stream, nombre de modeles, vraisemblances,
- *              label, flag niveau de detail,
- *              type d'algorithme (NO_LATENT_STRUCTURE/FORWARD/VITERBI).
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os         stream,
+ *  \param[in]     nb_model   number of models,
+ *  \param[in]     likelihood log-likelihoods,
+ *  \param[in]     label      model label,
+ *  \param[in]     exhaustive flag detail level,
+ *  \param[in]     algorithm  type of algorithm (NO_LATENT_STRUCTURE/FORWARD/VITERBI).
+ */
+/*--------------------------------------------------------------*/
 
 ostream& MarkovianSequences::likelihood_write(ostream &os , int nb_model , double **likelihood ,
                                               const char *label , bool exhaustive ,
@@ -2685,7 +2705,7 @@ ostream& MarkovianSequences::likelihood_write(ostream &os , int nb_model , doubl
 
   old_adjust = os.setf(ios::right , ios::adjustfield);
 
-  // calcul des largeurs des colonnes
+  // computation of column widths
 
   if (exhaustive) {
     width[0] = column_width(nb_sequence);
@@ -2709,7 +2729,7 @@ ostream& MarkovianSequences::likelihood_write(ostream &os , int nb_model , doubl
 
     width[2] = column_width(nb_model) + ASCII_SPACE;
 
-    // ecriture de la matrice des vraisemblances des sequences pour chacun des modeles
+    // writing of the matrix of log-likelihoods of each model for each sequence
 
     os << "             ";
     for (i = 0;i < nb_model;i++) {
@@ -2752,7 +2772,7 @@ ostream& MarkovianSequences::likelihood_write(ostream &os , int nb_model , doubl
     os << endl;
   }
 
-  // extraction des rangs des modeles pour chaque sequence
+  // extraction of model ranks for each sequence
 
   rank = new int*[nb_model];
   for (i = 0;i < nb_model;i++) {
@@ -2794,7 +2814,7 @@ ostream& MarkovianSequences::likelihood_write(ostream &os , int nb_model , doubl
     }
   }
 
-  // extraction des rangs des modeles pour l'ensemble des sequences
+  // extraction of model ranks for all the sequences
 
   rank_cumul = new int[nb_model];
 
@@ -2841,7 +2861,7 @@ ostream& MarkovianSequences::likelihood_write(ostream &os , int nb_model , doubl
     }
     os << "  (" << rank[i][nb_model] << ")";
 
-    // calcul de la vraisemblance d'un modele pour l'ensemble des sequences
+    // computation of the log-likelihood of a model for the sequences
 
     if (exhaustive) {
       likelihood_cumul = 0.;
@@ -2891,16 +2911,20 @@ ostream& MarkovianSequences::likelihood_write(ostream &os , int nb_model , doubl
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of the results of a comparison of models for a sample of sequences in a file.
  *
- *  Ecriture des resultats d'une comparaison de modeles
- *  pour un ensemble de sequences dans un fichier.
+ *  \param[in] error      reference on a StatError object,
+ *  \param[in] path       file path,
+ *  \param[in] nb_model   number of models,
+ *  \param[in] likelihood log-likelihoods,
+ *  \param[in] label      model label,
+ *  \param[in] algorithm  type of algorithm (NO_LATENT_STRUCTURE/FORWARD/VITERBI).
  *
- *  arguments : reference sur un objet StatError, path,
- *              nombre de modeles, vraisemblances, label,
- *              type d'algorithme (NO_LATENT_STRUCTURE/FORWARD/VITERBI).
- *
- *--------------------------------------------------------------*/
+ *  \return               error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool MarkovianSequences::likelihood_write(StatError &error , const string path ,
                                           int nb_model , double **likelihood , const char *label ,
@@ -2927,14 +2951,19 @@ bool MarkovianSequences::likelihood_write(StatError &error , const string path ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Comparison of variable-order Markov chains for a sample of sequences.
  *
- *  Comparaison de differentes chaines de Markov pour un ensemble de sequences.
+ *  \param[in] error    reference on a StatError object,
+ *  \param[in] os       stream,
+ *  \param[in] nb_model number of variable-order Markov chains,
+ *  \param[in] imarkov  pointer on VariableOrderMarkov objects,
+ *  \param[in] path     file path.
  *
- *  arguments : reference sur un objet StatError, stream, nombre de chaines de Markov,
- *              pointeur sur les chaines de Markov d'ordre variable, path.
- *
- *--------------------------------------------------------------*/
+ *  \return             error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool MarkovianSequences::comparison(StatError &error , ostream &os , int nb_model ,
                                     const VariableOrderMarkov **imarkov ,
@@ -3041,7 +3070,7 @@ bool MarkovianSequences::comparison(StatError &error , ostream &os , int nb_mode
       likelihood[i] = new double[nb_model];
     }
 
-    // pour chaque sequence, calcul de la vraisemblance pour chaque modele possible
+    // for each sequence, computation of the log-likelihood for each model
 
     for (i = 0;i < nb_sequence;i++) {
       for (j = 0;j < nb_model;j++) {
@@ -3067,16 +3096,18 @@ bool MarkovianSequences::comparison(StatError &error , ostream &os , int nb_mode
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Simulation using a variable-order Markov chain.
  *
- *  Simulation par une chaine de Markov d'ordre variable.
+ *  \param[in] error               reference on a StatError object,
+ *  \param[in] length_distribution sequence length frequency distribution,
+ *  \param[in] counting_flag       flag on the computation of the counting distributions,
+ *  \param[in] divergence_flag     flag on the computation of a Kullback-Leibler divergence.
  *
- *  arguments : reference sur un objet StatError,
- *              loi empirique des longueurs des sequences,
- *              flag sur le calcul des lois de comptage,
- *              flag calcul d'une divergence de Kullback-Leibler.
- *
- *--------------------------------------------------------------*/
+ *  \return                        VariableOrderMarkovData.
+ */
+/*--------------------------------------------------------------*/
 
 VariableOrderMarkovData* VariableOrderMarkov::simulation(StatError &error ,
                                                          const FrequencyDistribution &length_distribution ,
@@ -3128,7 +3159,7 @@ VariableOrderMarkovData* VariableOrderMarkov::simulation(StatError &error ,
     }
     hidden = CategoricalSequenceProcess::test_hidden(nb_output_process , categorical_process);
 
-    // initialisations
+    // initializations
 
     itype = new variable_nature[nb_output_process + 1];
 
@@ -3280,7 +3311,7 @@ VariableOrderMarkovData* VariableOrderMarkov::simulation(StatError &error ,
       }
     }
 
-    // extraction des caracteristiques des sequences simulees
+    // computation of the characteristics of the generated sequences
 
     seq->min_value[0] = 0;
     seq->max_value[0] = nb_state - 1;
@@ -3309,7 +3340,7 @@ VariableOrderMarkovData* VariableOrderMarkov::simulation(StatError &error ,
     if (!divergence_flag) {
       markov->characteristic_computation(*seq , counting_flag);
 
-      // calcul de la vraisemblance
+      // computation of the log-likelihood of the model for the generated sequences
 
       likelihood = markov->likelihood_computation(*seq);
 
@@ -3334,7 +3365,7 @@ VariableOrderMarkovData* VariableOrderMarkov::simulation(StatError &error ,
       }
     }
 
-    // calcul des melanges de lois d'observation (poids theoriques et poids deduits de la restauration)
+    // computation of the mixtures of observation distributions (theoretical weights and weights deduced from the restoration)
 
     if (hidden) {
       weight = markov->state_process->weight_computation();
@@ -3383,15 +3414,18 @@ VariableOrderMarkovData* VariableOrderMarkov::simulation(StatError &error ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Simulation using a variable-order Markov chain.
  *
- *  Simulation par une chaine de Markov d'ordre variable.
+ *  \param[in] error         reference on a StatError object,
+ *  \param[in] nb_sequence   number of sequences,
+ *  \param[in] length        sequence length,
+ *  \param[in] counting_flag flag on the computation of the counting distributions.
  *
- *  arguments : reference sur un objet StatError,
- *              nombre et longueur des sequences,
- *              flag sur le calcul des lois de comptage.
- *
- *--------------------------------------------------------------*/
+ *  \return                  VariableOrderMarkovData object.
+ */
+/*--------------------------------------------------------------*/
 
 VariableOrderMarkovData* VariableOrderMarkov::simulation(StatError &error ,
                                                          int nb_sequence , int length ,
@@ -3435,15 +3469,18 @@ VariableOrderMarkovData* VariableOrderMarkov::simulation(StatError &error ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Simulation using a variable-order Markov chain.
  *
- *  Simulation par une chaine de Markov d'ordre variable.
+ *  \param[in] error         reference on a StatError object,
+ *  \param[in] nb_sequence   number of sequences,
+ *  \param[in] iseq          reference on a MarkovianSequences object,
+ *  \param[in] counting_flag flag on the computation of the counting distributions.
  *
- *  arguments : reference sur un objet StatError, nombre de sequences,
- *              reference sur un objet MarkovianSequences,
- *              flag sur le calcul des lois de comptage.
- *
- *--------------------------------------------------------------*/
+ *  \return                  VariableOrderMarkovData object.
+ */
+/*--------------------------------------------------------------*/
 
 VariableOrderMarkovData* VariableOrderMarkov::simulation(StatError &error , int nb_sequence ,
                                                          const MarkovianSequences &iseq ,
@@ -3472,16 +3509,20 @@ VariableOrderMarkovData* VariableOrderMarkov::simulation(StatError &error , int 
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of Kullback-Leibler divergences between variable-order Markov chains.
  *
- *  Comparaison de chaines de Markov d'ordre variable par calcul
- *  de divergences de Kullback-Leibler.
+ *  \param[in] error               reference on a StatError object,
+ *  \param[in] os                  stream,
+ *  \param[in] nb_model            number of variable-order Markov chains,
+ *  \param[in] imarkov             pointer on VariableOrderMarkov objects,
+ *  \param[in] length_distribution sequence length frequency distribution,
+ *  \param[in] path                file path.
  *
- *  arguments : reference sur un objet StatError, stream, nombre de chaines
- *              de Markov, pointeur sur les chaines de Markov,
- *              loi empirique des longueurs des sequences, path.
- *
- *--------------------------------------------------------------*/
+ *  \return                        DistanceMatrix object.
+ */
+/*--------------------------------------------------------------*/
 
 DistanceMatrix* VariableOrderMarkov::divergence_computation(StatError &error , ostream &os , int nb_model ,
                                                             const VariableOrderMarkov **imarkov ,
@@ -3626,7 +3667,7 @@ DistanceMatrix* VariableOrderMarkov::divergence_computation(StatError &error , o
 
     for (i = 0;i < nb_model;i++) {
 
-      // simulation d'un echantillon de sequences a partir d'une chaine de Markov
+      // generation of a sample of sequences using a variable-order Markov chain
 
       simul_seq = markov[i]->simulation(error , *length_distribution[i] , false , true);
 
@@ -3653,7 +3694,7 @@ DistanceMatrix* VariableOrderMarkov::divergence_computation(StatError &error , o
         iseq = simul_seq;
       }
 
-      // calcul des vraisemblances de l'echantillon pour chacune des chaines de Markov
+      // computation of the log-likelihood of each variable-order Markov chain for the sample of sequences
 
       for (j = 0;j < nb_model;j++) {
         if (j != i) {
@@ -3736,16 +3777,21 @@ DistanceMatrix* VariableOrderMarkov::divergence_computation(StatError &error , o
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of Kullback-Leibler divergences between variable-order Markov chains.
  *
- *  Comparaison de chaines de Markov d'ordre variable par calcul
- *  de divergences de Kullback-Leibler.
+ *  \param[in] error       reference on a StatError object,
+ *  \param[in] os          stream,
+ *  \param[in] nb_model    number of variable-order Markov chains,
+ *  \param[in] markov      pointer on VariableOrderMarkov objects,
+ *  \param[in] nb_sequence number of sequences,
+ *  \param[in] length      sequence length,
+ *  \param[in] path        file path.
  *
- *  arguments : reference sur un objet StatError, stream, nombre de chaines
- *              de Markov, pointeur sur les chaines de Markov,
- *              nombre et longueur des sequences, path.
- *
- *--------------------------------------------------------------*/
+ *  \return                DistanceMatrix object.
+ */
+/*--------------------------------------------------------------*/
 
 DistanceMatrix* VariableOrderMarkov::divergence_computation(StatError &error , ostream &os , int nb_model ,
                                                             const VariableOrderMarkov **markov ,
@@ -3802,16 +3848,20 @@ DistanceMatrix* VariableOrderMarkov::divergence_computation(StatError &error , o
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of Kullback-Leibler divergences between variable-order Markov chains.
  *
- *  Comparaison de chaines de Markov d'ordre variable par calcul
- *  de divergences de Kullback-Leibler.
+ *  \param[in] error     reference on a StatError object,
+ *  \param[in] os        stream,
+ *  \param[in] nb_model  number of variable-order Markov chains,
+ *  \param[in] markov    pointer on VariableOrderMarkov objects,
+ *  \param[in] seq       pointer on MarkovianSequences objects,
+ *  \param[in] path      file path.
  *
- *  arguments : reference sur un objet StatError, stream, nombre de chaines
- *              de Markov, pointeur sur les chaines de Markov,
- *              pointeurs sur des objets MarkovianSequences, path.
- *
- *--------------------------------------------------------------*/
+ *  \return              DistanceMatrix object.
+ */
+/*--------------------------------------------------------------*/
 
 DistanceMatrix* VariableOrderMarkov::divergence_computation(StatError &error , ostream &os , int nb_model ,
                                                             const VariableOrderMarkov **markov ,
@@ -3849,13 +3899,13 @@ DistanceMatrix* VariableOrderMarkov::divergence_computation(StatError &error , o
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the VariableOrderMarkovIterator class.
  *
- *  Constructeur de la classe VariableOrderMarkovIterator.
- *
- *  argument : pointeur sur un objet VariableOrderMarkov.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] imarkov pointer on a VariableOrderMarkov object.
+ */
+/*--------------------------------------------------------------*/
 
 VariableOrderMarkovIterator::VariableOrderMarkovIterator(VariableOrderMarkov *imarkov)
 
@@ -3872,13 +3922,13 @@ VariableOrderMarkovIterator::VariableOrderMarkovIterator(VariableOrderMarkov *im
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Copy of a VariableOrderMarkovIterator object.
  *
- *  Copie d'un objet VariableOrderMarkovIterator.
- *
- *  argument : reference sur un objet VariableOrderMarkovIterator.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] iter reference on a VariableOrderMarkovIterator object.
+ */
+/*--------------------------------------------------------------*/
 
 void VariableOrderMarkovIterator::copy(const VariableOrderMarkovIterator &iter)
 
@@ -3890,11 +3940,11 @@ void VariableOrderMarkovIterator::copy(const VariableOrderMarkovIterator &iter)
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Destructeur de la classe VariableOrderMarkovIterator.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Destructor of the VariableOrderMarkovIterator class.
+ */
+/*--------------------------------------------------------------*/
 
 VariableOrderMarkovIterator::~VariableOrderMarkovIterator()
 
@@ -3903,13 +3953,15 @@ VariableOrderMarkovIterator::~VariableOrderMarkovIterator()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Assignment operator of the VariableOrderMarkovIterator class.
  *
- *  Operateur d'assignement de la classe VariableOrderMarkovIterator.
+ *  \param[in] iter reference on a VariableOrderMarkovIterator object.
  *
- *  argument : reference sur un objet VariableOrderMarkovIterator.
- *
- *--------------------------------------------------------------*/
+ *  \return         VariableOrderMarkovIterator object.
+ */
+/*--------------------------------------------------------------*/
 
 VariableOrderMarkovIterator& VariableOrderMarkovIterator::operator=(const VariableOrderMarkovIterator &iter)
 
@@ -3923,13 +3975,17 @@ VariableOrderMarkovIterator& VariableOrderMarkovIterator::operator=(const Variab
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Simulation using a variable-order Markov chain.
  *
- *  Simulation par une chaine de Markov d'ordre variable.
+ *  \param[in] int_seq        sequence,
+ *  \param[in] length         sequence length,
+ *  \param[in] initialization flag initialization.
  *
- *  arguments : sequence, longueur de la sequence, flag initialisation.
- *
- *--------------------------------------------------------------*/
+ *  \return                   error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool VariableOrderMarkovIterator::simulation(int **int_seq , int length , bool initialization)
 
@@ -4022,13 +4078,16 @@ bool VariableOrderMarkovIterator::simulation(int **int_seq , int length , bool i
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Simulation using a variable-order Markov chain.
  *
- *  Simulation par une chaine de Markov d'ordre variable.
+ *  \param[in] length         sequence length,
+ *  \param[in] initialization flag initialization.
  *
- *  arguments : longueur de la sequence, flag initialisation.
- *
- *--------------------------------------------------------------*/
+ *  \return                   generated sequence.
+ */
+/*--------------------------------------------------------------*/
 
 int** VariableOrderMarkovIterator::simulation(int length , bool initialization)
 
@@ -4054,13 +4113,15 @@ int** VariableOrderMarkovIterator::simulation(int length , bool initialization)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Correction of the log-likelihood of a variable-order Markov chain for sequences.
  *
- *  Correction de la vraisemblance de sequences pour une chaine de Markov.
+ *  \param[in] seq reference on a VariableOrderMarkovData object.
  *
- *  argument : reference sur un objet VariableOrderMarkovData.
- *
- *--------------------------------------------------------------*/
+ *  \return          log-likelihood.
+ */
+/*--------------------------------------------------------------*/
 
 double VariableOrderMarkov::likelihood_correction(const VariableOrderMarkovData &seq) const
 
@@ -4087,16 +4148,20 @@ double VariableOrderMarkov::likelihood_correction(const VariableOrderMarkovData 
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Estimation of a lumped Markov chain.
  *
- *  Estimation des parametres d'une chaine de Markov a partir
- *  d'un echantillon de sequences.
+ *  \param[in] error         reference on a StatError object,
+ *  \param[in] os            stream,
+ *  \param[in] category      transcoding table,
+ *  \param[in] criterion     model selection criterion (AIC(c)/BIC),
+ *  \param[in] order         Markov chain order,
+ *  \param[in] counting_flag flag on the computation of the counting distributions.
  *
- *  arguments : reference sur un objet StatError, stream,
- *              table de transcodage des categories, critere de selection (AIC(c)/BIC),
- *              ordre de la chaine de Markov, flag sur le calcul des lois de comptage.
- *
- *--------------------------------------------------------------*/
+ *  \return                  VariableOrderMarkov object.
+ */
+/*--------------------------------------------------------------*/
 
 VariableOrderMarkov* MarkovianSequences::lumpability_estimation(StatError &error , ostream &os , int *category ,
                                                                 model_selection_criterion criterion ,
@@ -4180,7 +4245,7 @@ VariableOrderMarkov* MarkovianSequences::lumpability_estimation(StatError &error
 
     if (markov) {
 
-      // calcul du terme de compensation
+      // computation of the compensation term
 
       switch (criterion) {
       case AIC :
@@ -4227,7 +4292,7 @@ VariableOrderMarkov* MarkovianSequences::lumpability_estimation(StatError &error
           double lumped_likelihood , lumped_penalized_likelihood;
 
 
-          // 2eme propriete d'aggregation (probabilites d'observation attachees aux transitions)
+          // 2nd lumpability property (two-state- i.e. transition-dependent observation probabilities)
 
           observation_data = new int**[seq->marginal_distribution[0]->nb_value];
           for (i = 0;i < seq->marginal_distribution[0]->nb_value;i++) {
@@ -4243,7 +4308,7 @@ VariableOrderMarkov* MarkovianSequences::lumpability_estimation(StatError &error
             }
           }
 
-          // accumulation des frequences d'observation
+          // accumulation of the observation frequencies
 
           for (i = 0;i < seq->nb_sequence;i++) {
             pstate = seq->int_sequence[i][0] + 1;
@@ -4255,8 +4320,8 @@ VariableOrderMarkov* MarkovianSequences::lumpability_estimation(StatError &error
             }
           }
 
-          // estimation des probabilites d'observation, calcul de la vraisemblance et
-          // du nombre de parametres independants
+          // estimation of the observation probabilities, computation of the log-likelihood and
+          // of the number of free parameters
 
           lumped_nb_parameter = lumped_markov->nb_parameter_computation() -
                                 lumped_markov->categorical_process[0]->nb_parameter_computation(0.);
@@ -4338,7 +4403,7 @@ VariableOrderMarkov* MarkovianSequences::lumpability_estimation(StatError &error
              << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("
              << STAT_criterion_word[criterion] << "): " << 2 * lumped_penalized_likelihood << endl;
 
-          // 3eme propriete d'aggregation (classique)
+          // 3rd lumpability property (output-state-dependent observation probabilities)
 
           for (i = 0;i < seq->marginal_distribution[0]->nb_value;i++) {
             for (j = 0;j < seq->marginal_distribution[1]->nb_value;j++) {
@@ -4349,7 +4414,7 @@ VariableOrderMarkov* MarkovianSequences::lumpability_estimation(StatError &error
             }
           }
 
-          // accumulation des frequences d'observation
+          // accumulation of the observation frequencies
 
           for (i = 0;i < seq->nb_sequence;i++) {
             pstate = seq->int_sequence[i][0] + 1;
@@ -4361,8 +4426,8 @@ VariableOrderMarkov* MarkovianSequences::lumpability_estimation(StatError &error
             }
           }
 
-          // estimation des probabilites d'observation, calcul de la vraisemblance et
-          // du nombre de parametres independants
+          // estimation of the observation probabilities, computation of the log-likelihood and
+          // of the number of free parameters
 
           lumped_nb_parameter = lumped_markov->nb_parameter_computation() -
                                 lumped_markov->categorical_process[0]->nb_parameter_computation(0.);
@@ -4499,7 +4564,7 @@ VariableOrderMarkov* MarkovianSequences::lumpability_estimation(StatError &error
       delete seq;
     }
 
-    // calcul des lois caracteristiques du modele
+    // computation of the characteristic distributions of the model
 
     markov->component_computation();
     markov->characteristic_computation(*(markov->markov_data) , counting_flag , I_DEFAULT , false);
@@ -4509,14 +4574,18 @@ VariableOrderMarkov* MarkovianSequences::lumpability_estimation(StatError &error
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Test of state lumpability for a Markov chain.
  *
- *  Test d'aggregation d'etats pour une chaine de Markov.
+ *  \param[in] error    reference on a StatError object,
+ *  \param[in] os       stream,
+ *  \param[in] category transcoding table,
+ *  \param[in] order    Markov chain order.
  *
- *  arguments : reference sur un objet StatError, stream,
- *              table de transcodage des categories, ordre de la chaine de Markov.
- *
- *--------------------------------------------------------------*/
+ *  \return             error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool MarkovianSequences::lumpability_test(StatError &error , ostream &os ,
                                           int *category , int order) const
@@ -4691,7 +4760,7 @@ bool MarkovianSequences::lumpability_test(StatError &error , ostream &os ,
       double lumped_likelihood , *pproba , ***observation_proba;
 
 
-      // 2eme propriete d'aggregation (probabilites d'observation attachees aux transitions)
+      // 2eme lumpability property (two-state- i.e. transition-dependent observation probabilities)
 
       observation_data = new int**[seq->marginal_distribution[0]->nb_value];
       observation_proba = new double**[seq->marginal_distribution[0]->nb_value];
@@ -4710,7 +4779,7 @@ bool MarkovianSequences::lumpability_test(StatError &error , ostream &os ,
         }
       }
 
-      // accumulation des frequences d'observation
+      // accumulation of the observation frequencies
 
       for (i = 0;i < seq->nb_sequence;i++) {
         pstate = seq->int_sequence[i][0] + 1;
@@ -4722,8 +4791,8 @@ bool MarkovianSequences::lumpability_test(StatError &error , ostream &os ,
         }
       }
 
-      // estimation des probabilites d'observation, calcul de la vraisemblance et
-      // du nombre de parametres independants
+      // estimation of the observation probabilities, computation of the log-likelihood and
+      // of the number of free parameters
 
       lumped_nb_parameter = lumped_markov->nb_parameter_computation() -
                             lumped_markov->categorical_process[0]->nb_parameter_computation(0.);
@@ -4823,7 +4892,7 @@ bool MarkovianSequences::lumpability_test(StatError &error , ostream &os ,
 
       delete test;
 
-      // 3eme propriete d'aggregation (classique)
+      // 3rd lumpability property (output-state-dependent observation probabilities)
 
       for (i = 0;i < seq->marginal_distribution[0]->nb_value;i++) {
         for (j = 0;j < seq->marginal_distribution[1]->nb_value;j++) {
@@ -4834,7 +4903,7 @@ bool MarkovianSequences::lumpability_test(StatError &error , ostream &os ,
         }
       }
 
-      // accumulation des frequences d'observation
+      // accumulation of the observation frequencies
 
       for (i = 0;i < seq->nb_sequence;i++) {
         pstate = seq->int_sequence[i][0] + 1;
@@ -4846,8 +4915,8 @@ bool MarkovianSequences::lumpability_test(StatError &error , ostream &os ,
         }
       }
 
-      // estimation des probabilites d'observation, calcul de la vraisemblance et
-      // du nombre de parametres independants
+      // estimation of the observation probabilities, computation of the log-likelihood and
+      // of the number of free parameters
 
       lumped_nb_parameter = lumped_markov->nb_parameter_computation() -
                             lumped_markov->categorical_process[0]->nb_parameter_computation(0.);

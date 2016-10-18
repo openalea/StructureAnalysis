@@ -114,9 +114,9 @@ void Sequences::forward_contrast(int time , int index , segment_model *model_typ
 
     if (((i == 1) && ((model_type[0] == MEAN_CHANGE) || (model_type[0] == INTERCEPT_SLOPE_CHANGE))) ||
         (((model_type[i - 1] == GAUSSIAN_CHANGE) || (model_type[i - 1] == VARIANCE_CHANGE) ||
-          (model_type[i - 1] == LINEAR_MODEL_CHANGE) || (model_type[i - 1] == AUTOREGRESSIVE_MODEL_CHANGE) ||
-          (model_type[i - 1] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE) ||
-          (model_type[i - 1] == ORDINAL_GAUSSIAN_CHANGE)) && (!residual))) {
+          (model_type[i - 1] == ORDINAL_GAUSSIAN_CHANGE) || (model_type[i - 1] == LINEAR_MODEL_CHANGE) ||
+          (model_type[i - 1] == AUTOREGRESSIVE_MODEL_CHANGE) ||
+          (model_type[i - 1] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE)) && (!residual))) {
       residual = new long double*[MAX(nb_sequence , 2)];
       if ((index != I_DEFAULT) || (!common_contrast)) {
         for (j = 0;j < nb_sequence;j++) {
@@ -495,6 +495,51 @@ void Sequences::forward_contrast(int time , int index , segment_model *model_typ
               square_sum += diff * diff;
             }
             residual[0][j] = square_sum;
+          }
+        }
+      }
+    }
+
+    else if (model_type[i - 1] == ORDINAL_GAUSSIAN_CHANGE) {
+      if ((index != I_DEFAULT) || (!common_contrast)) {
+        for (j = 0;j < nb_sequence;j++) {
+          if ((index == I_DEFAULT) || (index == j)) {
+            square_sum = 0.;
+            sum = rank[i][int_sequence[j][i][time]];
+            residual[j][time] = 0.;
+
+            for (k = time - 1;k >= nb_segment;k--) {
+              diff = rank[i][int_sequence[j][i][k]] - sum / (time - k);
+              square_sum += ((double)(time - k) / (double)(time - k + 1)) * diff * diff;
+              sum += rank[i][int_sequence[j][i][k]];
+              residual[j][k] = square_sum;
+
+              if (residual[j][k] == 0.) {
+                residual[j][k] = (time - k + 1) * MIN_RANK_SQUARE_SUM;
+              }
+            }
+          }
+        }
+      }
+
+      else {
+        square_sum = 0.;
+        sum = 0.;
+        count = 0;
+
+        for (j = time;j >= nb_segment;j--) {
+          for (k = 0;k < nb_sequence;k++) {
+            if (count > 0) {
+              diff = rank[i][int_sequence[k][i][j]] - sum / count;
+              square_sum += ((double)count / (double)(count + 1)) * diff * diff;
+            }
+            count++;
+            sum += rank[i][int_sequence[k][i][j]];
+          }
+          residual[0][j] = square_sum;
+
+          if (residual[0][j] == 0.) {
+            residual[0][j] = count * MIN_RANK_SQUARE_SUM;
           }
         }
       }
@@ -1062,19 +1107,6 @@ void Sequences::forward_contrast(int time , int index , segment_model *model_typ
       }
     }
 
-    else if (model_type[i - 1] == ORDINAL_GAUSSIAN_CHANGE) {
-      square_sum = 0.;
-      sum = rank[i][int_sequence[index][i][time]];
-      residual[index][time] = 0.;
-
-      for (j = time - 1;j >= nb_segment;j--) {
-        diff = rank[i][int_sequence[index][i][j]] - sum / (time - j);
-        square_sum += ((double)(time - j) / (double)(time - j + 1)) * diff * diff;
-        sum += rank[i][int_sequence[index][i][j]];
-        residual[index][j] = square_sum;
-      }
-    }
-
     if ((model_type[0] == MEAN_CHANGE) || (model_type[0] == INTERCEPT_SLOPE_CHANGE)) {
       if ((index != I_DEFAULT) || (!common_contrast)) {
         for (j = 0;j < nb_sequence;j++) {
@@ -1094,7 +1126,7 @@ void Sequences::forward_contrast(int time , int index , segment_model *model_typ
     }
 
     else if ((model_type[i - 1] == GAUSSIAN_CHANGE) || (model_type[i - 1] == VARIANCE_CHANGE) ||
-             (model_type[i - 1] == LINEAR_MODEL_CHANGE) || (model_type[i - 1] == ORDINAL_GAUSSIAN_CHANGE)) {
+             (model_type[i - 1] == ORDINAL_GAUSSIAN_CHANGE) || (model_type[i - 1] == LINEAR_MODEL_CHANGE)) {
       if ((index != I_DEFAULT) || (!common_contrast)) {
         for (j = 0;j < nb_sequence;j++) {
           if ((index == I_DEFAULT) || (index == j)) {
@@ -1252,9 +1284,9 @@ void Sequences::backward_contrast(int time , int index , segment_model *model_ty
 
     if (((i == 1) && ((model_type[0] == MEAN_CHANGE) || (model_type[0] == INTERCEPT_SLOPE_CHANGE))) ||
         (((model_type[i - 1] == GAUSSIAN_CHANGE) || (model_type[i - 1] == VARIANCE_CHANGE) ||
-          (model_type[i - 1] == LINEAR_MODEL_CHANGE) || (model_type[i - 1] == AUTOREGRESSIVE_MODEL_CHANGE) ||
+          (model_type[i - 1] == ORDINAL_GAUSSIAN_CHANGE) || (model_type[i - 1] == LINEAR_MODEL_CHANGE) ||
           (model_type[i - 1] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE) ||
-          (model_type[i - 1] == ORDINAL_GAUSSIAN_CHANGE)) && (!residual))) {
+          (model_type[i - 1] == AUTOREGRESSIVE_MODEL_CHANGE)) && (!residual))) {
       residual = new long double*[MAX(nb_sequence , 2)];
       if ((index != I_DEFAULT) || (!common_contrast)) {
         for (j = 0;j < nb_sequence;j++) {
@@ -1552,6 +1584,51 @@ void Sequences::backward_contrast(int time , int index , segment_model *model_ty
               square_sum += diff * diff;
             }
             residual[0][j] = square_sum;
+          }
+        }
+      }
+    }
+
+    else if (model_type[i - 1] == ORDINAL_GAUSSIAN_CHANGE) {
+      if ((index != I_DEFAULT) || (!common_contrast)) {
+        for (j = 0;j < nb_sequence;j++) {
+          if ((index == I_DEFAULT) || (index == j)) {
+            square_sum = 0.;
+            sum = rank[i][int_sequence[j][i][time]];
+            residual[j][time] = 0.;
+
+            for (k = time + 1;k < length[j];k++) {
+              diff = rank[i][int_sequence[j][i][k]] - sum / (k - time);
+              square_sum += ((double)(k - time) / (double)(k - time + 1)) * diff * diff;
+              sum += rank[i][int_sequence[j][i][k]];
+              residual[j][k] = square_sum;
+
+              if (residual[j][k] == 0.) {
+                residual[j][k] = (k - time + 1) * MIN_RANK_SQUARE_SUM;
+              }
+            }
+          }
+        }
+      }
+
+      else {
+        square_sum = 0.;
+        sum = 0.;
+        count = 0;
+
+        for (j = time;j < length[0];j++) {
+          for (k = 0;k < nb_sequence;k++) {
+            if (count > 0) {
+              diff = rank[i][int_sequence[k][i][j]] - sum / count;
+              square_sum += ((double)count / (double)(count + 1)) * diff * diff;
+            }
+            count++;
+            sum += rank[i][int_sequence[k][i][j]];
+          }
+          residual[0][j] = square_sum;
+
+          if (residual[0][j] == 0.) {
+            residual[0][j] = count * MIN_RANK_SQUARE_SUM;
           }
         }
       }
@@ -2064,19 +2141,6 @@ void Sequences::backward_contrast(int time , int index , segment_model *model_ty
       }
     }
 
-    else if (model_type[i - 1] == ORDINAL_GAUSSIAN_CHANGE) {
-      square_sum = 0.;
-      sum = rank[i][int_sequence[index][i][time]];
-      residual[index][time] = 0.;
-
-      for (j = time + 1;j < length[index];j++) {
-        diff = rank[i][int_sequence[index][i][j]] - sum / (j - time);
-        square_sum += ((double)(j - time) / (double)(j - time + 1)) * diff * diff;
-        sum += rank[i][int_sequence[index][i][j]];
-        residual[index][j] = square_sum;
-      }
-    }
-
     if ((model_type[0] == MEAN_CHANGE) || (model_type[0] == INTERCEPT_SLOPE_CHANGE)) {
       if ((index != I_DEFAULT) || (!common_contrast)) {
         for (j = 0;j < nb_sequence;j++) {
@@ -2096,7 +2160,7 @@ void Sequences::backward_contrast(int time , int index , segment_model *model_ty
     }
 
     else if ((model_type[i - 1] == GAUSSIAN_CHANGE) || (model_type[i - 1] == VARIANCE_CHANGE) ||
-             (model_type[i - 1] == LINEAR_MODEL_CHANGE) || (model_type[i - 1] == ORDINAL_GAUSSIAN_CHANGE)) {
+             (model_type[i - 1] == ORDINAL_GAUSSIAN_CHANGE) || (model_type[i - 1] == LINEAR_MODEL_CHANGE)) {
       if ((index != I_DEFAULT) || (!common_contrast)) {
         for (j = 0;j < nb_sequence;j++) {
           if ((index == I_DEFAULT) || (index == j)) {

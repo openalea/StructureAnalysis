@@ -959,7 +959,7 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , const Vect
           }
 
 #         ifdef DEBUG
-/*          cout << "\ninsertion/deletion cost des vecteurs de la sequence " << i << ": ";
+/*          cout << "\ninsertion/deletion cost of the vectors of the sequence " << i << ": ";
           for (j = 1;j <= length[i];j++) {
             cout << local_indel_distance[i][j] << " ";
           }

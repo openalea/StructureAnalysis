@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -63,11 +63,11 @@ namespace sequence_analysis {
 
 
 
-/*--------------------------------------------------------------*
- *
- *  Constructeur par defaut de la classe VariableOrderMarkovChain.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Default constructor of the VariableOrderMarkovChain class.
+ */
+/*--------------------------------------------------------------*/
 
 VariableOrderMarkovChain::VariableOrderMarkovChain()
 
@@ -89,13 +89,15 @@ VariableOrderMarkovChain::VariableOrderMarkovChain()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the VariableOrderMarkovChain class.
  *
- *  Constructeur de la classe VariableOrderMarkovChain.
- *
- *  arguments : type, nombre d'etats, nombres de memoires.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] itype     process type (ORDINARY/EQUILIBRIUM),
+ *  \param[in] inb_state number of states,
+ *  \param[in] inb_row   number of memories.
+ */
+/*--------------------------------------------------------------*/
 
 VariableOrderMarkovChain::VariableOrderMarkovChain(process_type itype , int inb_state , int inb_row)
 :Chain(itype , inb_state , inb_row , true)
@@ -124,13 +126,16 @@ VariableOrderMarkovChain::VariableOrderMarkovChain(process_type itype , int inb_
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the VariableOrderMarkovChain class.
  *
- *  Constructeur de la classe VariableOrderMarkovChain.
- *
- *  arguments : type, nombre d'etats, nombres de memoires, ordre maximum.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] itype      process type (ORDINARY/EQUILIBRIUM),
+ *  \param[in] inb_state  number of states,
+ *  \param[in] inb_row    number of memories,
+ *  \param[in] imax_order maximum order.
+ */
+/*--------------------------------------------------------------*/
 
 VariableOrderMarkovChain::VariableOrderMarkovChain(process_type itype , int inb_state ,
                                                    int inb_row , int imax_order)
@@ -161,13 +166,16 @@ VariableOrderMarkovChain::VariableOrderMarkovChain(process_type itype , int inb_
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Construction of a VariableOrderMarkovChain object of fixed order.
  *
- *  Construction d'un objet VariableOrderMarkovChain d'ordre fixe.
- *
- *  arguments : type, nombre d'etats, ordre, flag initialisation.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] itype     process type (ORDINARY/EQUILIBRIUM),
+ *  \param[in] inb_state number of states,
+ *  \param[in] iorder    order,
+ *  \param[in] init_flag flag initialization.
+ */
+/*--------------------------------------------------------------*/
 
 VariableOrderMarkovChain::VariableOrderMarkovChain(process_type itype , int inb_state ,
                                                    int iorder , bool init_flag)
@@ -184,7 +192,7 @@ VariableOrderMarkovChain::VariableOrderMarkovChain(process_type itype , int inb_
   parent = new int[nb_row];
   child = new int*[nb_row];
 
-  // racine (ordre 0)
+  // root (zero order)
 
   memo_type[0] = NON_TERMINAL;
   order[0] = 0;
@@ -194,7 +202,7 @@ VariableOrderMarkovChain::VariableOrderMarkovChain(process_type itype , int inb_
 
   for (i = 1;i < nb_row;i++) {
 
-    // cas augmentation de l'ordre
+    // case increase of the order
 
     if (order[i - 1] < max_order) {
       order[i] = order[i - 1] + 1;
@@ -217,7 +225,7 @@ VariableOrderMarkovChain::VariableOrderMarkovChain(process_type itype , int inb_
 
     else {
 
-      // cas ordre (maximum) stable
+      // case stable (maximum) order
 
       if (state[i - 1][order[i - 1] - 1] < nb_state - 1) {
         memo_type[i] = TERMINAL;
@@ -232,7 +240,7 @@ VariableOrderMarkovChain::VariableOrderMarkovChain(process_type itype , int inb_
         child[parent[i]][state[i][order[i] - 1]] = i;
       }
 
-      // cas diminution de l'ordre
+      // case decrease of the order
 
       else {
         memo_type[i] = NON_TERMINAL;
@@ -250,7 +258,7 @@ VariableOrderMarkovChain::VariableOrderMarkovChain(process_type itype , int inb_
         }
         state[i][order[i] - 1] = state[i - 1][order[i] - 1] + 1;
 
-        // recherche du noeud pere
+        // search for the parent vertex
 
         find_parent_memory(i);
       }
@@ -264,7 +272,7 @@ VariableOrderMarkovChain::VariableOrderMarkovChain(process_type itype , int inb_
     }
   }
 
-  // calcul des transitions entre memoires terminales
+  // computation of the transitions between terminal memories
 
   next = NULL;
   nb_memory = NULL;
@@ -276,13 +284,13 @@ VariableOrderMarkovChain::VariableOrderMarkovChain(process_type itype , int inb_
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Completion of the memory tree.
  *
- *  Completion de l'arborescence des memoires.
- *
- *  argument : reference sur un objet VariableOrderMarkovChain.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] markov reference on a VariableOrderMarkovChain object.
+ */
+/*--------------------------------------------------------------*/
 
 void VariableOrderMarkovChain::memory_tree_completion(const VariableOrderMarkovChain &markov)
 
@@ -307,7 +315,7 @@ void VariableOrderMarkovChain::memory_tree_completion(const VariableOrderMarkovC
   for (i = 1;i < markov.nb_row;i++) {
     if (markov.order[i] > 1) {
 
-      // recherche du noeud correspondant au plus grand prefixe propre
+      // search for the vertex corresponding to the longer proper prefix
 
       prefix = false;
 
@@ -344,7 +352,7 @@ void VariableOrderMarkovChain::memory_tree_completion(const VariableOrderMarkovC
 
         if (!prefix) {
 
-          // construction du noeud correspondant au plus grand prefixe propre
+          // construction of the vertex corresponding to the longer proper prefix
 
           completion->order[completion->nb_row] = markov.order[i] - 1;
           completion->state[completion->nb_row] = new int[completion->order[completion->nb_row]];
@@ -392,7 +400,7 @@ void VariableOrderMarkovChain::memory_tree_completion(const VariableOrderMarkovC
 
               if (!prefix) {
 
-                // construction du noeud correspondant au plus grand prefixe propre
+                // construction of the vertex corresponding of the longer proper prefix
 
                 completion->order[completion->nb_row] = j;
                 completion->state[completion->nb_row] = new int[completion->order[completion->nb_row]];
@@ -428,7 +436,7 @@ void VariableOrderMarkovChain::memory_tree_completion(const VariableOrderMarkovC
   }
 # endif
 
-  // recherche du noeud suivant dans l'ordonancement de l'arborescence completee
+  // search for the following vertex in the ordering of the completed memory tree 
 
   markov_next = new int[markov.nb_row];
   completion_next = new int[completion->nb_row];
@@ -438,7 +446,7 @@ void VariableOrderMarkovChain::memory_tree_completion(const VariableOrderMarkovC
 
     if ((markov.memo_type[i] == TERMINAL) && (markov.order[i] < markov.max_order - 1)) {
 
-      // recherche du 1er fils (etat 0) du noeud terminal
+      // search for the 1st child (state 0) of the terminal vertex
 
       for (j = 0;j < completion->nb_row;j++) {
         if (completion->order[j] == markov.order[i] + 1) {
@@ -460,7 +468,7 @@ void VariableOrderMarkovChain::memory_tree_completion(const VariableOrderMarkovC
   for (i = 0;i < completion->nb_row;i++) {
     completion_next[i] = I_DEFAULT;
 
-    // recherche du 1er fils (etat 0) du noeud cree
+    // search for the 1st child (state 0) of the built vertex
 
     if (completion->order[i] < markov.max_order - 1) {
       for (j = 0;j < completion->nb_row;j++) {
@@ -482,7 +490,7 @@ void VariableOrderMarkovChain::memory_tree_completion(const VariableOrderMarkovC
     if ((completion->order[i] == markov.max_order - 1) || (j == completion->nb_row)) {
       if (completion->state[i][completion->order[i] - 1] < markov.nb_state - 1) {
 
-        // recherche du frere (etat suivant) du noeud cree
+        // search for siblings (following states) of the built vertex
 
         for (j = 0;j < completion->nb_row;j++) {
           if (completion->order[j] == completion->order[i]) {
@@ -560,7 +568,7 @@ void VariableOrderMarkovChain::memory_tree_completion(const VariableOrderMarkovC
   }
 # endif
 
-  // copie des parametres
+  // copy of parameters
 
   type = markov.type;
   nb_state = markov.nb_state;
@@ -629,7 +637,7 @@ void VariableOrderMarkovChain::memory_tree_completion(const VariableOrderMarkovC
   nb_memory = NULL;
   previous = NULL;
 
-  // insertion des memoires dans l'arborescence
+  // insertion of the memories in the out-tree
 
   i = 0;
   for (j = 0;j < markov.nb_row;j++) {
@@ -695,7 +703,7 @@ void VariableOrderMarkovChain::memory_tree_completion(const VariableOrderMarkovC
       }
       while (k != I_DEFAULT);
 
-      // mise a jour des relations parent/enfants
+      // update of the relationships parent/children
 
       for (k = 0;k < bnb_memory;k++) {
         if (memo_type[k] == NON_TERMINAL) {
@@ -779,15 +787,15 @@ void VariableOrderMarkovChain::memory_tree_completion(const VariableOrderMarkovC
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Construction of a VariableOrderMarkovChain object with completion of
+ *         the memory tree, computation of the transition distributions for the non-terminal memories
+ *         (ordinary process) or computation of the stationary distribution (equilibrium process).
  *
- *  Construction d'un objet VariableOrderMarkovChain avec completion de l'arborescence
- *  des memoires, calcul des probabilites de transition des memoires non-terminales
- *  -processus ordinaire- ou calcul de la loi stationnaire -processus en equilibre-.
- *
- *  argument : reference sur un objet VariableOrderMarkovChain.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] markov reference on a VariableOrderMarkovChain object.
+ */
+/*--------------------------------------------------------------*/
 
 void VariableOrderMarkovChain::build(const VariableOrderMarkovChain &markov)
 
@@ -826,13 +834,13 @@ void VariableOrderMarkovChain::build(const VariableOrderMarkovChain &markov)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Copy of a VariableOrderMarkovChain object.
  *
- *  Copie d'un objet VariableOrderMarkovChain.
- *
- *  argument : reference sur un objet VariableOrderMarkovChain.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] markov reference on a VariableOrderMarkovChain object.
+ */
+/*--------------------------------------------------------------*/
 
 void VariableOrderMarkovChain::copy(const VariableOrderMarkovChain &markov)
 
@@ -928,11 +936,11 @@ void VariableOrderMarkovChain::copy(const VariableOrderMarkovChain &markov)
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Destruction des champs d'un objet VariableOrderMarkovChain.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Destruction of the data members of a VariableOrderMarkovChain object.
+ */
+/*--------------------------------------------------------------*/
 
 void VariableOrderMarkovChain::remove()
 
@@ -979,11 +987,11 @@ void VariableOrderMarkovChain::remove()
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Destructeur de la classe VariableOrderMarkovChain.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Destructor of the VariableOrderMarkovChain class.
+ */
+/*--------------------------------------------------------------*/
 
 VariableOrderMarkovChain::~VariableOrderMarkovChain()
 
@@ -992,13 +1000,15 @@ VariableOrderMarkovChain::~VariableOrderMarkovChain()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Assignment operator of the VariableOrderMarkovChain class.
  *
- *  Operateur d'assignement de la classe VariableOrderMarkovChain.
+ *  \param[in] markov reference on a VariableOrderMarkovChain object.
  *
- *  argument : reference sur un objet VariableOrderMarkovChain.
- *
- *--------------------------------------------------------------*/
+ *  \return           VariableOrderMarkovChain object.
+ */
+/*--------------------------------------------------------------*/
 
 VariableOrderMarkovChain& VariableOrderMarkovChain::operator=(const VariableOrderMarkovChain &markov)
 
@@ -1015,13 +1025,13 @@ VariableOrderMarkovChain& VariableOrderMarkovChain::operator=(const VariableOrde
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Search for the parent memory.
  *
- *  recherche de la memoire pere.
- *
- *  argument : indice de la memoire.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] index memory index.
+ */
+/*--------------------------------------------------------------*/
 
 void VariableOrderMarkovChain::find_parent_memory(int index)
 
@@ -1039,11 +1049,11 @@ void VariableOrderMarkovChain::find_parent_memory(int index)
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Construction des transitions entre memoires.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Construction of the transitions between memories.
+ */
+/*--------------------------------------------------------------*/
 
 void VariableOrderMarkovChain::build_memory_transition()
 
@@ -1117,11 +1127,11 @@ void VariableOrderMarkovChain::build_memory_transition()
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Extraction des memoires precedentes.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Extraction of the previous memories.
+ */
+/*--------------------------------------------------------------*/
 
 void VariableOrderMarkovChain::build_previous_memory()
 
@@ -1166,11 +1176,13 @@ void VariableOrderMarkovChain::build_previous_memory()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Checking that the set of terminal memories is suffix-free.
  *
- *  Verification que les memoires terminales est un ensemble libre de suffixe.
- *
- *--------------------------------------------------------------*/
+ *  \return suffix-free or not.
+ */
+/*--------------------------------------------------------------*/
 
 bool VariableOrderMarkovChain::check_free_suffix() const
 
@@ -1206,11 +1218,14 @@ bool VariableOrderMarkovChain::check_free_suffix() const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Construction of the matrix of possible transitions between states
+ *         (adjacency matrix of the graph of possible transitions).
  *
- *  Construction de la matrice des transitions possibles entre etats.
- *
- *--------------------------------------------------------------*/
+ *  \return matrix of possible transitions.
+ */
+/*--------------------------------------------------------------*/
 
 bool** VariableOrderMarkovChain::logic_transition_computation() const
 
@@ -1259,12 +1274,12 @@ bool** VariableOrderMarkovChain::logic_transition_computation() const
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Extraction des classes d'une chaine de Markov d'ordre variable
- *  a partir de l'accessibilite des etats.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Extraction of the variable-order Markov chain classes
+ *         (transient/recurrent/absorbing) from the state accessibility.
+ */
+/*--------------------------------------------------------------*/
 
 void VariableOrderMarkovChain::component_computation()
 
@@ -1284,11 +1299,11 @@ void VariableOrderMarkovChain::component_computation()
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Construction des memoires non-terminales.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Construction of the non-terminal memories.
+ */
+/*--------------------------------------------------------------*/
 
 void VariableOrderMarkovChain::build_non_terminal()
 
@@ -1312,7 +1327,7 @@ void VariableOrderMarkovChain::build_non_terminal()
     }
     bnb_memory = order[j] - 1 - k;
 
-    // insertion des memoires non-terminales
+    // insertion of the non-terminal memories
 
     for (k = order[j] - bnb_memory;k < order[j];k++) {
       memo_type[i] = NON_TERMINAL;
@@ -1330,7 +1345,7 @@ void VariableOrderMarkovChain::build_non_terminal()
       i++;
     }
 
-    // copie de la memoire terminale
+    // copy of the terminal memory
 
     memo_type[i] = TERMINAL;
     if (i < j) {
@@ -1343,7 +1358,7 @@ void VariableOrderMarkovChain::build_non_terminal()
       }
     }
 
-    // relations parent-enfant
+    // parent-children relationships
 
     for (k = 0;k < bnb_memory;k++) {
       parent[i - k] = i - k - 1;
@@ -1400,13 +1415,13 @@ void VariableOrderMarkovChain::build_non_terminal()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Application of a threshold on the variable-order Markov chain parameters.
  *
- *  Application d'un seuil sur les parametres d'une chaine de Markov d'ordre variable.
- *
- *  argument : probabilite minimum.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] min_probability minimum probability.
+ */
+/*--------------------------------------------------------------*/
 
 void VariableOrderMarkovChain::thresholding(double min_probability)
 
@@ -1534,11 +1549,11 @@ void VariableOrderMarkovChain::thresholding(double min_probability)
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Calcul de l'ordre maximum des memoires.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Determination of the maximum memory order.
+ */
+/*--------------------------------------------------------------*/
 
 void VariableOrderMarkovChain::max_order_computation()
 
@@ -1555,13 +1570,15 @@ void VariableOrderMarkovChain::max_order_computation()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the number of parameters of a VariableOrderMarkovChain object.
  *
- *  Calcul du nombre de parametres independants.
+ *  \param[in] min_probability minimum probability.
  *
- *  argument : probabilite minimum.
- *
- *--------------------------------------------------------------*/
+ *  \return                    number of parameters.
+ */
+/*--------------------------------------------------------------*/
 
 int VariableOrderMarkovChain::nb_parameter_computation(double min_probability) const
 
@@ -1570,7 +1587,7 @@ int VariableOrderMarkovChain::nb_parameter_computation(double min_probability) c
   int nb_parameter = 0;
 
 
-  // cas particulier ordre 0
+  // particular case order 0
 
   if (max_order == 1) {
     for (i = 0;i < nb_state - 1;i++) {
@@ -1616,15 +1633,17 @@ int VariableOrderMarkovChain::nb_parameter_computation(double min_probability) c
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the number of transient parameters corresponding to
+ *         the transition distributions attached to the non-terminal memories of
+ *         an ordinary variable-order Markov chain.
  *
- *  Calcul du nombre de parametres transitoires independants correspondant
- *  aux lois de transition des memoires non-terminales pour une chaine de Markov
- *  d'ordre variable ordinaire.
+ *  \param[in] min_probability minimum probability.
  *
- *  argument : probabilite minimum.
- *
- *--------------------------------------------------------------*/
+ *  \return                    number of transient parameters.
+ */
+/*--------------------------------------------------------------*/
 
 int VariableOrderMarkovChain::nb_transient_parameter_computation(double min_probability) const
 
@@ -1651,15 +1670,18 @@ int VariableOrderMarkovChain::nb_transient_parameter_computation(double min_prob
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Analysis of the format of a VariableOrderMarkovChain object.
  *
- *  Analyse du format d'un objet VariableOrderMarkovChain.
+ *  \param[in] error   reference on a StatError object,
+ *  \param[in] in_file stream,
+ *  \param[in] line    reference on the file line index,
+ *  \param[in] type    process type (ORDINARY/EQUILIBRIUM).
  *
- *  arguments : reference sur un objet StatError, stream,
- *              reference sur l'indice de la ligne lue, type du processus
- *              (ORDINARY/EQUILIBRIUM).
- *
- *--------------------------------------------------------------*/
+ *  \return            VariableOrderMarkovChain object.
+ */
+/*--------------------------------------------------------------*/
 
 VariableOrderMarkovChain* VariableOrderMarkovChain::parsing(StatError &error , ifstream &in_file ,
                                                             int &line , process_type type)
@@ -1680,7 +1702,7 @@ VariableOrderMarkovChain* VariableOrderMarkovChain::parsing(StatError &error , i
 
   markov = NULL;
 
-  // analyse ligne definissant le nombre d'etats
+  // analysis of the line defining the number of states
 
   while (buffer.readLine(in_file , false)) {
     line++;
@@ -1700,7 +1722,7 @@ VariableOrderMarkovChain* VariableOrderMarkovChain::parsing(StatError &error , i
     while (!((token = next()).isNull())) {
       switch (i) {
 
-      // test valeur nombre d'etats
+      // test number of states
 
       case 0 : {
         lstatus = locale.stringToNum(token , &value);
@@ -1720,7 +1742,7 @@ VariableOrderMarkovChain* VariableOrderMarkovChain::parsing(StatError &error , i
         break;
       }
 
-      // test mot cle STATES
+      // test STATES keyword
 
       case 1 : {
         if (token != STAT_word[STATW_STATES]) {
@@ -1751,8 +1773,8 @@ VariableOrderMarkovChain* VariableOrderMarkovChain::parsing(StatError &error , i
   if (status) {
     initial = new double[nb_state];
 
-    // 1ere passe : recherche du nombre de memoires terminales et de l'ordre maximum,
-    // analyse probabilites initiales, probabilites de transition et memoires
+    // 1st pass: search for the number of terminal memories and the maximum order,
+    // analysis of the initial probabilities, transition probabilities and memories
 
     read_line = 0;
     while (buffer.readLine(in_file , false)) {
@@ -1773,7 +1795,7 @@ VariableOrderMarkovChain* VariableOrderMarkovChain::parsing(StatError &error , i
       if ((read_line == 0) || ((type == ORDINARY) && (read_line == 2))) {
         while (!((token = next()).isNull())) {
 
-          // test mot cle INITIAL_PROBABILITIES / TRANSITION_PROBABILITIES
+          // test INITIAL_PROBABILITIES/TRANSITION_PROBABILITIES keyword
 
           if (i == 0) {
             if ((type == ORDINARY) && (read_line == 0)) {
@@ -1904,7 +1926,7 @@ VariableOrderMarkovChain* VariableOrderMarkovChain::parsing(StatError &error , i
 
                 else {
 
-                  // verification succession des memoires
+                  // checking of the memory succession
 
                   increase = true;
                   for (j = MIN(previous_order , order) - 1;j >= 0;j--) {
@@ -1933,7 +1955,7 @@ VariableOrderMarkovChain* VariableOrderMarkovChain::parsing(StatError &error , i
                     }
                   }
 
-                  // cas augmentation taille de la memoire ou taille de la memoire conservee
+                  // case increase of the memory length or stable memory length
 
                   if (order >= previous_order) {
                     for (j = order - 1;j >= previous_order;j--) {
@@ -1944,7 +1966,7 @@ VariableOrderMarkovChain* VariableOrderMarkovChain::parsing(StatError &error , i
                     }
                   }
 
-                  // cas reduction taille de la memoire
+                  // case decrease of the memory length
 
                   else {
                     for (j = order;j < previous_order;j++) {
@@ -1956,7 +1978,7 @@ VariableOrderMarkovChain* VariableOrderMarkovChain::parsing(StatError &error , i
                   }
                 }
 
-                // recherche derniere memoire
+                // search for the last memory
 
                 for (j = 0;j < order;j++) {
                   if (state[j] != nb_state - 1) {
@@ -1986,7 +2008,7 @@ VariableOrderMarkovChain* VariableOrderMarkovChain::parsing(StatError &error , i
       }
     }
 
-    // verification nombre de memoires
+    // checking of the number of memories
 
     nb_terminal = read_line - (type == ORDINARY ? 3 : 1);
     if ((nb_state > 2) && (nb_terminal % (nb_state - 1) != 1)) {
@@ -2007,7 +2029,7 @@ VariableOrderMarkovChain* VariableOrderMarkovChain::parsing(StatError &error , i
         }
       }
 
-      // 2eme passe : lecture des probabilites de transition et des memoires
+      // 2nd pass: reading of the transition probabilities and the memories
 
       memory = nb_non_terminal;
       line = tline;
@@ -2046,7 +2068,7 @@ VariableOrderMarkovChain* VariableOrderMarkovChain::parsing(StatError &error , i
             markov->state[memory][j] = state[markov->order[memory] - j - 1];
           }
 
-          // recherche derniere memoire
+          // search for the last memory
 
           for (j = 0;j < markov->order[memory];j++) {
             if (markov->state[memory][j] != nb_state - 1) {
@@ -2072,7 +2094,7 @@ VariableOrderMarkovChain* VariableOrderMarkovChain::parsing(StatError &error , i
 
       if (status) {
 
-        // test irreductibilite dans le cas en equilibre
+        // test irreducibility in the equilibrium process case
 
         markov->Chain::component_computation(logic_transition);
         if ((type == EQUILIBRIUM) && (markov->nb_component > 1)) {
@@ -2102,13 +2124,14 @@ VariableOrderMarkovChain* VariableOrderMarkovChain::parsing(StatError &error , i
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of the memory out-tree.
  *
- *  Sortie ASCII de l'arborescence des memoires.
- *
- *  arguments : stream, flag fichier.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os        stream,
+ *  \param[in]     file_flag flag file.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& VariableOrderMarkovChain::ascii_memory_tree_print(ostream &os , bool file_flag) const
 
@@ -2210,14 +2233,14 @@ ostream& VariableOrderMarkovChain::ascii_memory_tree_print(ostream &os , bool fi
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of the memory prefix in-tree.
  *
- *  Sortie ASCII de l'arborescence correspondant a la succession des memoires
- *  de taille croissante dans le graphe des transitions.
- *
- *  arguments : stream, flag fichier.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os        stream,
+ *  \param[in]     file_flag flag file.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& VariableOrderMarkovChain::ascii_transition_tree_print(ostream &os , bool file_flag) const
 
@@ -2228,7 +2251,7 @@ ostream& VariableOrderMarkovChain::ascii_transition_tree_print(ostream &os , boo
   long old_adjust;
 
 
-  // calcul du nombre de memoires suivantes de taille superieure
+  // computation of the number of following memories of higher length 
 
   nb_next_memory = new int[nb_row];
   root = new int[nb_row];
@@ -2261,7 +2284,7 @@ ostream& VariableOrderMarkovChain::ascii_transition_tree_print(ostream &os , boo
     }
   }
 
-  // calcul des racines
+  // computation of the roots
 
   nb_root = 0;
   for (i = 1;i < nb_row;i++) {
@@ -2278,7 +2301,7 @@ ostream& VariableOrderMarkovChain::ascii_transition_tree_print(ostream &os , boo
     }
   }
 
-  // calcul du nombre de memoires feuilles
+  // computation of the number of leaf memories
 
   for (i = max_order;i >= min_order + 1;i--) {
     for (j = 1;j < nb_row;j++) {
@@ -2423,13 +2446,14 @@ ostream& VariableOrderMarkovChain::ascii_transition_tree_print(ostream &os , boo
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of the variable-order Markov chain parameters.
  *
- *  Sortie ASCII des parametres de la chaine de Markov d'ordre variable.
- *
- *  arguments : stream, flag fichier.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os        stream,
+ *  \param[in]     file_flag flag file.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& VariableOrderMarkovChain::ascii_print(ostream &os , bool file_flag) const
 
@@ -2444,7 +2468,7 @@ ostream& VariableOrderMarkovChain::ascii_print(ostream &os , bool file_flag) con
 
   os << "\n" << nb_state << " " << STAT_word[STATW_STATES] << endl;
 
-  // calcul des largeurs des colonnes
+  // computation of the column width
 
   width = column_width((type == ORDINARY ? nb_state : nb_row) , initial);
 
@@ -2471,7 +2495,7 @@ ostream& VariableOrderMarkovChain::ascii_print(ostream &os , bool file_flag) con
 
   case EQUILIBRIUM : {
 
-    // extraction des probabilites stationnairees correspondant aux memoires completees
+    // computation of the stationary probabilities corresponding to the memories added by completion
 
     stationary_probability = new double[nb_row];
 
@@ -2684,13 +2708,13 @@ ostream& VariableOrderMarkovChain::ascii_print(ostream &os , bool file_flag) con
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of the variable-order Markov chain parameters at the spreadsheet format.
  *
- *  Sortie au format tableur des parametres de la chaine de Markov d'ordre variable.
- *
- *  argument : stream.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os stream.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& VariableOrderMarkovChain::spreadsheet_print(ostream &os) const
 
@@ -2714,7 +2738,7 @@ ostream& VariableOrderMarkovChain::spreadsheet_print(ostream &os) const
 
   case EQUILIBRIUM : {
 
-    // extraction des probabilites stationnairees correspondant aux memoires completees
+    // computation of the stationary probabilities corresponding to the memories added by completion
 
     stationary_probability = new double[nb_row];
 
@@ -2853,11 +2877,11 @@ ostream& VariableOrderMarkovChain::spreadsheet_print(ostream &os) const
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Constructeur par defaut de la classe VariableOrderMarkov.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Default constructor of the VariableOrderMarkov class.
+ */
+/*--------------------------------------------------------------*/
 
 VariableOrderMarkov::VariableOrderMarkov()
 
@@ -2872,13 +2896,15 @@ VariableOrderMarkov::VariableOrderMarkov()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the VariableOrderMarkov class.
  *
- *  Constructeur de la classe VariableOrderMarkov.
- *
- *  arguments : type, nombre d'etats, nombres de memoires.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] itype     process type (ORDINARY/EQUILIBRIUM),
+ *  \param[in] inb_state number of states,
+ *  \param[in] inb_row   number of memories.
+ */
+/*--------------------------------------------------------------*/
 
 VariableOrderMarkov::VariableOrderMarkov(process_type itype , int inb_state , int inb_row)
 :VariableOrderMarkovChain(itype , inb_state , inb_row)
@@ -2894,13 +2920,16 @@ VariableOrderMarkov::VariableOrderMarkov(process_type itype , int inb_state , in
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the VariableOrderMarkov class.
  *
- *  Constructeur de la classe VariableOrderMarkov.
- *
- *  arguments : type, nombre d'etats, nombres de memoires, ordre maximum.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] itype      process type (ORDINARY/EQUILIBRIUM),
+ *  \param[in] inb_state  number of states,
+ *  \param[in] inb_row    number of memories,
+ *  \param[in] imax_order maximum order.
+ */
+/*--------------------------------------------------------------*/
 
 VariableOrderMarkov::VariableOrderMarkov(process_type itype , int inb_state ,
                                          int inb_row , int imax_order)
@@ -2917,15 +2946,18 @@ VariableOrderMarkov::VariableOrderMarkov(process_type itype , int inb_state ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Construction of a VariableOrderMarkov object of fixed order.
  *
- *  Construction d'un objet VariableOrderMarkov d'ordre fixe.
- *
- *  arguments : type, nombre d'etats, ordre, flag initialisation,
- *              nombre de processus d'observation,
- *              nombre de valeurs observees par processus.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] itype              process type (ORDINARY/EQUILIBRIUM),
+ *  \param[in] inb_state          number of states,
+ *  \param[in] iorder             order,
+ *  \param[in] init_flag          flag initialization,
+ *  \param[in  inb_output_process number of observation processes,
+ *  \param[in  nb_value           number of observed values for the categorical observation process.
+ */
+/*--------------------------------------------------------------*/
 
 VariableOrderMarkov::VariableOrderMarkov(process_type itype , int inb_state ,
                                          int iorder , bool init_flag ,
@@ -2951,16 +2983,16 @@ VariableOrderMarkov::VariableOrderMarkov(process_type itype , int inb_state ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the VariableOrderMarkov class with completion of
+ *         the memory tree.
  *
- *  Constructeur de la classe VariableOrderMarkov avec completion
- *  de l'arborescence des memoires.
- *
- *  arguments : reference sur un objet VariableOrderMarkov,
- *              nombre de processus d'observation,
- *              nombre de valeurs observees par processus.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] markov             reference on a VariableOrderMarkov object,
+ *  \param[in] inb_output_process number of observation processes,
+ *  \param[in] nb_value           number of observed values for the categorical observation process.
+ */
+/*--------------------------------------------------------------*/
 
 VariableOrderMarkov::VariableOrderMarkov(const VariableOrderMarkov &markov ,
                                          int inb_output_process , int nb_value)
@@ -2994,16 +3026,16 @@ VariableOrderMarkov::VariableOrderMarkov(const VariableOrderMarkov &markov ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the VariableOrderMarkov class with completion of
+ *         the memory tree.
  *
- *  Constructeur de la classe VariableOrderMarkov avec completion
- *  de l'arborescence des memoires.
- *
- *  arguments : reference sur un objet VariableOrderMarkov,
- *              nombre de processus d'observation,
- *              nombre de valeurs observees par processus.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] markov             reference on a VariableOrderMarkov object,
+ *  \param[in] inb_output_process number of observation processes,
+ *  \param[in] nb_value           number of observed values for each observation process.
+ */
+/*--------------------------------------------------------------*/
 
 /* VariableOrderMarkov::VariableOrderMarkov(const VariableOrderMarkov &markov ,
                                          int inb_output_process , int *nb_value)
@@ -3051,16 +3083,16 @@ VariableOrderMarkov::VariableOrderMarkov(const VariableOrderMarkov &markov ,
 } */
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the VariableOrderMarkov class with completion of
+ *         the memory tree.
  *
- *  Constructeur de la classe VariableOrderMarkov avec completion
- *  de l'arborescence des memoires.
- *
- *  arguments : pointeur sur un objet VariableOrderMarkovChain,
- *              pointeur sur un objet CategoricalSequenceProcess,
- *              longueur des sequences.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] pmarkov      pointer on a VariableOrderMarkovChain object,
+ *  \param[in] pobservation pointer on a CategoricalSequenceProcess object,
+ *  \param[in] length       sequence length.
+ */
+/*--------------------------------------------------------------*/
 
 VariableOrderMarkov::VariableOrderMarkov(const VariableOrderMarkovChain *pmarkov ,
                                          const CategoricalProcess *pobservation , int length)
@@ -3088,14 +3120,14 @@ VariableOrderMarkov::VariableOrderMarkov(const VariableOrderMarkovChain *pmarkov
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Copy of a VariableOrderMarkov object.
  *
- *  Copie d'un objet VariableOrderMarkov.
- *
- *  arguments : reference sur un objet VariableOrderMarkov.
- *              flag copie de l'objet VariableOrderMarkovData.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] markov    reference on a VariableOrderMarkov object.
+ *  \param[in] data_flag flag copy of the included VariableOrderMarkovData object.
+ */
+/*--------------------------------------------------------------*/
 
 void VariableOrderMarkov::copy(const VariableOrderMarkov &markov , bool data_flag)
 
@@ -3167,11 +3199,11 @@ void VariableOrderMarkov::copy(const VariableOrderMarkov &markov , bool data_fla
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Destruction des champs d'un objet VariableOrderMarkov.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Destruction of the data members of a VariableOrderMarkov object.
+ */
+/*--------------------------------------------------------------*/
 
 void VariableOrderMarkov::remove()
 
@@ -3204,11 +3236,11 @@ void VariableOrderMarkov::remove()
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Destructeur de la classe VariableOrderMarkov.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Destructor of the VariableOrderMarkov class.
+ */
+/*--------------------------------------------------------------*/
 
 VariableOrderMarkov::~VariableOrderMarkov()
 
@@ -3217,12 +3249,12 @@ VariableOrderMarkov::~VariableOrderMarkov()
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Destruction d'un objet VariableOrderMarkov en tenant compte du nombre
- *  d'iterateurs pointant dessus.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Destruction of a VariableOrderMarkov object taking account of
+ *         the number of iterators pointing to it.
+ */
+/*--------------------------------------------------------------*/
 
 void VariableOrderMarkov::conditional_delete()
 
@@ -3233,13 +3265,15 @@ void VariableOrderMarkov::conditional_delete()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Assignment operator of the VariableOrderMarkov class.
  *
- *  Operateur d'assignement de la classe VariableOrderMarkov.
+ *  \param[in] markov reference on a VariableOrderMarkov object.
  *
- *  argument : reference sur un objet VariableOrderMarkov.
- *
- *--------------------------------------------------------------*/
+ *  \return           VariableOrderMarkov object.
+ */
+/*--------------------------------------------------------------*/
 
 VariableOrderMarkov& VariableOrderMarkov::operator=(const VariableOrderMarkov &markov)
 
@@ -3258,14 +3292,18 @@ VariableOrderMarkov& VariableOrderMarkov::operator=(const VariableOrderMarkov &m
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Extraction of a distribution.
  *
- *  Extraction d'une loi.
+ *  \param[in] error     reference on a StatError object,
+ *  \param[in] dist_type distribution type,
+ *  \param[in] variable  variable index,
+ *  \param[in] value     state or observation.
  *
- *  arguments : reference sur un objet StatError, type de loi,
- *              variable, etat ou observation.
- *
- *--------------------------------------------------------------*/
+ *  \return              DiscreteParametricModel object.
+ */
+/*--------------------------------------------------------------*/
 
 DiscreteParametricModel* VariableOrderMarkov::extract(StatError &error , process_distribution dist_type ,
                                                       int variable , int value) const
@@ -3445,13 +3483,16 @@ DiscreteParametricModel* VariableOrderMarkov::extract(StatError &error , process
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Extraction of the VariableOrderMarkovData object included in
+ *         a VariableOrderMarkov object.
  *
- *  Extraction de la partie "donnees" d'un objet VariableOrderMarkov.
+ *  \param[in] error reference on a StatError object.
  *
- *  argument : reference sur un objet StatError.
- *
- *--------------------------------------------------------------*/
+ *  \return          VariableOrderMarkovData object.
+ */
+/*--------------------------------------------------------------*/
 
 VariableOrderMarkovData* VariableOrderMarkov::extract_data(StatError &error) const
 
@@ -3481,13 +3522,15 @@ VariableOrderMarkovData* VariableOrderMarkov::extract_data(StatError &error) con
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Application of a threshold on the probability parameters of a variable-order Markov chain.
  *
- *  Application d'un seuil sur les parametres d'une chaine de Markov d'ordre variable.
+ *  \param[in] min_probability minimum probability.
  *
- *  argument : probabilite minimum.
- *
- *--------------------------------------------------------------*/
+ *  \return                    VariableOrderMarkov object.
+ */
+/*--------------------------------------------------------------*/
 
 VariableOrderMarkov* VariableOrderMarkov::thresholding(double min_probability) const
 
@@ -3509,14 +3552,17 @@ VariableOrderMarkov* VariableOrderMarkov::thresholding(double min_probability) c
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Construction of a VariableOrderMarkov object from a file.
  *
- *  Construction d'un objet VariableOrderMarkov a partir d'un fichier.
+ *  \param[in] error  reference on a StatError object,
+ *  \param[in] path   file path,
+ *  \param[in] length sequence length.
  *
- *  arguments : reference sur un objet StatError, path,
- *              longueur des sequences.
- *
- *--------------------------------------------------------------*/
+ *  \return           VariableOrderMarkov object.
+ */
+/*--------------------------------------------------------------*/
 
 VariableOrderMarkov* VariableOrderMarkov::ascii_read(StatError &error ,
                                                      const string path , int length)
@@ -3571,7 +3617,7 @@ VariableOrderMarkov* VariableOrderMarkov::ascii_read(StatError &error ,
 
       while (!((token = next()).isNull())) {
 
-        // test mot cle (EQUILIBRIUM) MARKOV_CHAIN
+        // test (EQUILIBRIUM_)MARKOV_CHAIN keyword
 
         if (i == 0) {
           if (token == SEQ_word[SEQW_MARKOV_CHAIN]) {
@@ -3604,13 +3650,13 @@ VariableOrderMarkov* VariableOrderMarkov::ascii_read(StatError &error ,
 
     if (type != DEFAULT_TYPE) {
 
-      // analyse du format et lecture de la chaine de Markov d'ordre variable
+      // analysis of the format and reading of the variable-order Markov chain
 
       imarkov = VariableOrderMarkovChain::parsing(error , in_file , line , type);
 
       if (imarkov) {
 
-        // analyse du format et lecture des lois d'observation
+        // analysis of the format and reading of the categorical observation distributions
 
         observation = NULL;
 
@@ -3631,7 +3677,7 @@ VariableOrderMarkov* VariableOrderMarkov::ascii_read(StatError &error ,
 
           while (!((token = next()).isNull())) {
 
-            // test mot cle OUTPUT_PROCESS
+            // test OUTPUT_PROCESS keyword
 
             if (i == 0) {
               if (token != STAT_word[STATW_OUTPUT_PROCESS]) {
@@ -3648,8 +3694,6 @@ VariableOrderMarkov* VariableOrderMarkov::ascii_read(StatError &error ,
               status = false;
               error.update(STAT_parsing[STATP_FORMAT] , line);
             }
-
-            // analyse du format et lecture des lois d'observation
 
             observation = CategoricalProcess::parsing(error , in_file , line ,
                                                       ((Chain*)imarkov)->nb_state ,
@@ -3699,13 +3743,13 @@ VariableOrderMarkov* VariableOrderMarkov::ascii_read(StatError &error ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing on a single line of a VariableOrderMarkov object.
  *
- *  Ecriture sur une ligne d'un objet VariableOrderMarkov.
- *
- *  argument : stream.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os stream.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& VariableOrderMarkov::line_write(ostream &os) const
 
@@ -3717,14 +3761,17 @@ ostream& VariableOrderMarkov::line_write(ostream &os) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a VariableOrderMarkov object and the associated data structure.
  *
- *  Ecriture d'un objet VariableOrderMarkov et de la structure de donnees associee.
- *
- *  arguments : stream, pointeur sur un objet VariableOrderMarkovData,
- *              flag niveau de detail, flag fichier, flag Markov cache.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os         stream,
+ *  \param[in]     seq        pointer on a VariableOrderMarkovData object,
+ *  \param[in]     exhaustive flag detail level,
+ *  \param[in]     file_flag  flag file,
+ *  \param[in]     hidden     flag hidden model.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& VariableOrderMarkov::ascii_write(ostream &os , const VariableOrderMarkovData *seq ,
                                           bool exhaustive , bool file_flag , bool hidden) const
@@ -3769,7 +3816,7 @@ ostream& VariableOrderMarkov::ascii_write(ostream &os , const VariableOrderMarko
   }
   }
 
-  // ecriture des parametres de la chaine de Markov d'ordre variable
+  // writing of the variable-order Markov chain parameters
 
   ascii_print(os , file_flag);
 
@@ -3990,7 +4037,7 @@ ostream& VariableOrderMarkov::ascii_write(ostream &os , const VariableOrderMarko
        << STAT_word[nb_output_process == 1 ? STATW_OUTPUT_PROCESS : STATW_OUTPUT_PROCESSES] << endl;
   }
 
-  // ecriture des lois associees a chaque processus d'observation
+  // writing of the distributions associated with each observation process
 
   if (hidden) {
     logic_transition = logic_transition_computation();
@@ -4161,7 +4208,7 @@ ostream& VariableOrderMarkov::ascii_write(ostream &os , const VariableOrderMarko
     double information;
 
 
-    // ecriture de la loi empirique des longueurs des sequences
+    // writing of the sequence length frequency distribution
 
     os << "\n";
     if (file_flag) {
@@ -4185,7 +4232,7 @@ ostream& VariableOrderMarkov::ascii_write(ostream &os , const VariableOrderMarko
     }
     os << SEQ_label[SEQL_CUMUL_LENGTH] << ": " << seq->cumul_length << endl;
 
-    // ecriture de la quantite d'information des sequences dans le cas iid
+    // writing of the information quantity of the observed sequences in the i.i.d. case
 
     for (i = 0;i < seq->nb_variable;i++) {
       if (seq->type[i] == REAL_VALUE) {
@@ -4204,7 +4251,7 @@ ostream& VariableOrderMarkov::ascii_write(ostream &os , const VariableOrderMarko
          << information / seq->cumul_length << ")" << endl;
     }
 
-    // ecriture des vraisemblances des sequences
+    // writing of the (penalized) log-likelihoods of the model for sequences
 
     switch (hidden) {
 
@@ -4360,13 +4407,14 @@ ostream& VariableOrderMarkov::ascii_write(ostream &os , const VariableOrderMarko
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a VariableOrderMarkov object.
  *
- *  Ecriture d'un objet VariableOrderMarkov.
- *
- *  arguments : stream, flag niveau de detail.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os         stream,
+ *  \param[in]     exhaustive flag detail level.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& VariableOrderMarkov::ascii_write(ostream &os , bool exhaustive) const
 
@@ -4375,14 +4423,17 @@ ostream& VariableOrderMarkov::ascii_write(ostream &os , bool exhaustive) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a VariableOrderMarkov object in a file.
  *
- *  Ecriture d'un objet VariableOrderMarkov dans un fichier.
+ *  \param[in] error      reference on a StatError object,
+ *  \param[in] path       file path,
+ *  \param[in] exhaustive flag detail level.
  *
- *  arguments : reference sur un objet StatError, path,
- *              flag niveau de detail.
- *
- *--------------------------------------------------------------*/
+ *  \return               error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool VariableOrderMarkov::ascii_write(StatError &error , const string path ,
                                       bool exhaustive) const
@@ -4408,15 +4459,16 @@ bool VariableOrderMarkov::ascii_write(StatError &error , const string path ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a VariableOrderMarkov object and the associated data structure
+ *         in a file at the spreadsheet format.
  *
- *  Ecriture d'un objet VariableOrderMarkov et de la structure de donnees associee
- *  dans un fichier au format tableur.
- *
- *  arguments : stream, pointeur sur un objet VariableOrderMarkovData,
- *              flag Markov cache.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os     stream,
+ *  \param[in]     seq    pointer on a VariableOrderMarkovData object,
+ *  \param[in]     hidden flag hidden model.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& VariableOrderMarkov::spreadsheet_write(ostream &os ,
                                                 const VariableOrderMarkovData *seq ,
@@ -4459,7 +4511,7 @@ ostream& VariableOrderMarkov::spreadsheet_write(ostream &os ,
   }
   }
 
-  // ecriture des parametres de la chaine de Markov d'ordre variable
+  // writing of the variable-order Markov chain parameters
 
   spreadsheet_print(os);
 
@@ -4472,7 +4524,7 @@ ostream& VariableOrderMarkov::spreadsheet_write(ostream &os ,
 
   state_process->spreadsheet_print(os , 0 , NULL , NULL , characteristics);
 
-  // ecriture des lois associees a chaque processus d'observation
+  // writing of the distributions associated with each observation process
 
   if (hidden) {
     os << "\n" << nb_output_process << "\t"
@@ -4608,7 +4660,7 @@ ostream& VariableOrderMarkov::spreadsheet_write(ostream &os ,
     double information;
 
 
-    // ecriture de la loi empirique des longueurs des sequences
+    // writing of the sequence length frequency distribution
 
     os << "\n" << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
     seq->length_distribution->spreadsheet_characteristic_print(os);
@@ -4618,7 +4670,7 @@ ostream& VariableOrderMarkov::spreadsheet_write(ostream &os ,
 
     os << "\n" << SEQ_label[SEQL_CUMUL_LENGTH] << "\t" << seq->cumul_length << endl;
 
-    // ecriture de la quantite d'information des sequences dans le cas iid
+    // writing of the information quantity of the observed sequences in the i.i.d. case
 
     for (i = 0;i < seq->nb_variable;i++) {
       if (seq->type[i] == REAL_VALUE) {
@@ -4633,7 +4685,7 @@ ostream& VariableOrderMarkov::spreadsheet_write(ostream &os ,
          << information / seq->cumul_length << endl;
     }
 
-    // ecriture des vraisemblances des sequences
+    // writing of the (penalized) log-likelihoods of the model for sequences
 
     switch (hidden) {
 
@@ -4727,13 +4779,16 @@ ostream& VariableOrderMarkov::spreadsheet_write(ostream &os ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a VariableOrderMarkov object in a file at the spreadsheet format.
  *
- *  Ecriture d'un objet VariableOrderMarkov dans un fichier au format tableur.
+ *  \param[in] error reference on a StatError object,
+ *  \param[in] path  file path.
  *
- *  arguments : reference sur un objet StatError, path.
- *
- *--------------------------------------------------------------*/
+ *  \return          error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool VariableOrderMarkov::spreadsheet_write(StatError &error , const string path) const
 
@@ -4758,15 +4813,18 @@ bool VariableOrderMarkov::spreadsheet_write(StatError &error , const string path
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Plot of a VariableOrderMarkov object and the associated data structure
+ *         using Gnuplot.
  *
- *  Sortie Gnuplot d'un objet VariableOrderMarkov et
- *  de la structure de donnees associee.
+ *  \param[in] prefix file prefix,
+ *  \param[in] title  figure title,
+ *  \param[in] seq    pointer on a VariableOrderMarkovData object.
  *
- *  arguments : prefixe des fichiers, titre des figures,
- *              pointeur sur les sequences observees.
- *
- *--------------------------------------------------------------*/
+ *  \return           error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool VariableOrderMarkov::plot_write(const char *prefix , const char *title ,
                                      const VariableOrderMarkovData *seq) const
@@ -4851,14 +4909,17 @@ bool VariableOrderMarkov::plot_write(const char *prefix , const char *title ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Plot of a VariableOrderMarkov object using Gnuplot.
  *
- *  Sortie Gnuplot d'un objet VariableOrderMarkov.
+ *  \param[in] error  reference on a StatError object,
+ *  \param[in] prefix file prefix,
+ *  \param[in] title  figure title.
  *
- *  arguments : reference sur un objet StatError, prefixe des fichiers,
- *              titre des figures.
- *
- *--------------------------------------------------------------*/
+ *  \return           error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool VariableOrderMarkov::plot_write(StatError &error , const char *prefix ,
                                      const char *title) const
@@ -4876,14 +4937,15 @@ bool VariableOrderMarkov::plot_write(StatError &error , const char *prefix ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Plot of a VariableOrderMarkov object and the associated data structure.
  *
- *  Sortie graphique d'un objet VariableOrderMarkov et
- *  de la structure de donnees associee.
+ *  \param[in] seq pointer on a VariableOrderMarkovData object.
  *
- *  arguments : pointeur sur les sequences observees.
- *
- *--------------------------------------------------------------*/
+ *  \return        MultiPlotSet object.
+ */
+/*--------------------------------------------------------------*/
 
 MultiPlotSet* VariableOrderMarkov::get_plotable(const VariableOrderMarkovData *seq) const
 
@@ -4903,7 +4965,7 @@ MultiPlotSet* VariableOrderMarkov::get_plotable(const VariableOrderMarkovData *s
     characteristics = NULL;
   }
 
-  // calcul du nombre de vues
+  // computation of the number of plots
 
   nb_plot_set = 0;
 
@@ -5206,11 +5268,13 @@ MultiPlotSet* VariableOrderMarkov::get_plotable(const VariableOrderMarkovData *s
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Plot of a VariableOrderMarkov object.
  *
- *  Sortie graphique d'un objet VariableOrderMarkov.
- *
- *--------------------------------------------------------------*/
+ *  \return MultiPlotSet object.
+ */
+/*--------------------------------------------------------------*/
 
 MultiPlotSet* VariableOrderMarkov::get_plotable() const
 
@@ -5219,13 +5283,15 @@ MultiPlotSet* VariableOrderMarkov::get_plotable() const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the number of parameters of a VariableOrderMarkov object.
  *
- *  Calcul du nombre de parametres independants.
+ *  \param[in] min_probability minimum probability.
  *
- *  argument : probabilite minimum.
- *
- *--------------------------------------------------------------*/
+ *  \return                    number of parameters.
+ */
+/*--------------------------------------------------------------*/
 
 int VariableOrderMarkov::nb_parameter_computation(double min_probability) const
 
@@ -5250,13 +5316,16 @@ int VariableOrderMarkov::nb_parameter_computation(double min_probability) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of an adaptative penalty.
  *
- *  Calcul d'une penalite adaptative.
+ *  \param[in] hidden          flag hidden model,
+ *  \param[in] min_probability minimum probability.
  *
- *  arguments : flag Markov cache, probabilite minimum.
- *
- *--------------------------------------------------------------*/
+ *  \return                    adaptative penalty.
+ */
+/*--------------------------------------------------------------*/
 
 double VariableOrderMarkov::penalty_computation(bool hidden , double min_probability) const
 
@@ -5417,11 +5486,11 @@ double VariableOrderMarkov::penalty_computation(bool hidden , double min_probabi
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Constructeur par defaut de la classe VariableOrderMarkovData.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Default constructor of the VariableOrderMarkovData class.
+ */
+/*--------------------------------------------------------------*/
 
 VariableOrderMarkovData::VariableOrderMarkovData()
 
@@ -5439,14 +5508,16 @@ VariableOrderMarkovData::VariableOrderMarkovData()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the VariableOrderMarkovData class.
  *
- *  Constructeur de la classe VariableOrderMarkovData.
- *
- *  arguments : loi empirique des longueurs des sequences, nombre de variables,
- *              type de chaque variable, flag initialisation.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] ilength_distribution sequence length frequency distribution,
+ *  \param[in] inb_variable         number of variables,
+ *  \param[in] itype                variable types,
+ *  \param[in] init_flag            flag initialization.
+ */
+/*--------------------------------------------------------------*/
 
 VariableOrderMarkovData::VariableOrderMarkovData(const FrequencyDistribution &ilength_distribution ,
                                                  int inb_variable , variable_nature *itype , bool init_flag)
@@ -5466,14 +5537,14 @@ VariableOrderMarkovData::VariableOrderMarkovData(const FrequencyDistribution &il
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Construction of a VariableOrderMarkovData object from
+ *         a MarkovianSequences object adding a state variable.
  *
- *  Construction d'un objet VariableOrderMarkovData a partir
- *  d'un objet MarkovianSequences avec ajout d'une variable d'etat.
- *
- *  argument : reference sur un objet MarkovianSequences.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] seq reference on a MarkovianSequences object.
+ */
+/*--------------------------------------------------------------*/
 
 VariableOrderMarkovData::VariableOrderMarkovData(const MarkovianSequences &seq)
 :MarkovianSequences(seq , ADD_STATE_VARIABLE , UNCHANGED)
@@ -5492,16 +5563,16 @@ VariableOrderMarkovData::VariableOrderMarkovData(const MarkovianSequences &seq)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Construction of a VariableOrderMarkovData object from
+ *         a MarkovianSequences object.
  *
- *  Construction d'un objet VariableOrderMarkovData a partir
- *  d'un objet MarkovianSequences.
- *
- *  arguments : reference sur un objet MarkovianSequences, type de transformation
- *              (SEQUENCE_COPY/ADD_STATE_VARIABLE),
- *              ajout/suppression des lois empiriques de temps de sejour initial.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] seq              reference on a MarkovianSequences object,
+ *  \param[in] transform        type of transform (SEQUENCE_COPY/ADD_STATE_VARIABLE),
+ *  \param[in] initial_run_flag addition/removing of the initial run length frequency distributions.
+ */
+/*--------------------------------------------------------------*/
 
 VariableOrderMarkovData::VariableOrderMarkovData(const MarkovianSequences &seq ,
                                                  sequence_transformation transform , bool initial_run_flag)
@@ -5521,14 +5592,14 @@ VariableOrderMarkovData::VariableOrderMarkovData(const MarkovianSequences &seq ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Copy of a VariableOrderMarkovData object.
  *
- *  Copie d'un objet VariableOrderMarkovData.
- *
- *  arguments : reference sur un objet VariableOrderMarkovData,
- *              flag copie de l'objet VariableOrderMarkov.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] seq        reference on a VariableOrderMarkovData object,
+ *  \param[in] model_flag flag copy of the included VariableOrderMarkov object.
+ */
+/*--------------------------------------------------------------*/
 
 void VariableOrderMarkovData::copy(const VariableOrderMarkovData &seq ,
                                    bool model_flag)
@@ -5587,11 +5658,11 @@ void VariableOrderMarkovData::copy(const VariableOrderMarkovData &seq ,
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Destructeur de la classe VariableOrderMarkovData.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Destructor of the VariableOrderMarkovData class.
+ */
+/*--------------------------------------------------------------*/
 
 VariableOrderMarkovData::~VariableOrderMarkovData()
 
@@ -5605,13 +5676,15 @@ VariableOrderMarkovData::~VariableOrderMarkovData()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Assignment operator of the VariableOrderMarkovData class.
  *
- *  Operateur d'assignement de la classe VariableOrderMarkovData.
+ *  \param[in] seq reference on a VariableOrderMarkovData object.
  *
- *  argument : reference sur un objet VariableOrderMarkovData.
- *
- *--------------------------------------------------------------*/
+ *  \return        VariableOrderMarkovData object.
+ */
+/*--------------------------------------------------------------*/
 
 VariableOrderMarkovData& VariableOrderMarkovData::operator=(const VariableOrderMarkovData &seq)
 
@@ -5636,14 +5709,18 @@ VariableOrderMarkovData& VariableOrderMarkovData::operator=(const VariableOrderM
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Extraction of a frequency distribution.
  *
- *  Extraction d'une loi empirique.
+ *  \param[in] error      reference on a StatError object,
+ *  \param[in] histo_type frequency distribution type,
+ *  \param[in] variable   variable index,
+ *  \param[in] value      state or observation.
  *
- *  arguments : reference sur un objet StatError, type de loi empirique,
- *              variable, etat ou observation.
- *
- *--------------------------------------------------------------*/
+ *  \return               DiscreteDistributionData object.
+ */
+/*--------------------------------------------------------------*/
 
 DiscreteDistributionData* VariableOrderMarkovData::extract(StatError &error , process_distribution histo_type ,
                                                            int variable , int value) const
@@ -5814,14 +5891,16 @@ DiscreteDistributionData* VariableOrderMarkovData::extract(StatError &error , pr
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Copy of a VariableOrderMarkovData object transforming
+ *         the implicit index parameters in explicit index parameters.
  *
- *  Copie d'un objet VariableOrderMarkovData avec transformation du parametre d'index implicite
- *  en parametre d'index explicite.
+ *  \param[in] error reference on a StatError object.
  *
- *  argument : reference sur un objet StatError.
- *
- *--------------------------------------------------------------*/
+ *  \return          VariableOrderMarkovData object.
+ */
+/*--------------------------------------------------------------*/
 
 VariableOrderMarkovData* VariableOrderMarkovData::explicit_index_parameter(StatError &error) const
 
@@ -5843,13 +5922,15 @@ VariableOrderMarkovData* VariableOrderMarkovData::explicit_index_parameter(StatE
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Removing of the index parameters.
  *
- *  Suppression du parametre d'index.
+ *  \param[in] error reference on a StatError object.
  *
- *  argument : reference sur un objet StatError.
- *
- *--------------------------------------------------------------*/
+ *  \return          VariableOrderMarkovData object.
+ */
+/*--------------------------------------------------------------*/
 
 VariableOrderMarkovData* VariableOrderMarkovData::remove_index_parameter(StatError &error) const
 
@@ -5871,14 +5952,16 @@ VariableOrderMarkovData* VariableOrderMarkovData::remove_index_parameter(StatErr
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Construction of the auxiliary variables corresponding to
+ *         the restored state sequences.
  *
- *  Construction des variables auxilliaires correspondant a
- *  la restauration des sequences d'etats optimales.
+ *  \param[in] error reference on a StatError object.
  *
- *  argument : reference sur un objet StatError.
- *
- *--------------------------------------------------------------*/
+ *  \return          VariableOrderMarkovData object.
+ */
+/*--------------------------------------------------------------*/
 
 MarkovianSequences* VariableOrderMarkovData::build_auxiliary_variable(StatError &error) const
 
@@ -5920,14 +6003,15 @@ MarkovianSequences* VariableOrderMarkovData::build_auxiliary_variable(StatError 
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Building of residual sequences on the basis of restored state sequences.
  *
- *  Construction de sequences residuelles correspondant a
- *  la restauration des sequences d'etats optimales.
+ *  \param[in] error reference on a StatError object.
  *
- *  argument : reference sur un objet StatError.
- *
- *--------------------------------------------------------------*/
+ *  \return          MarkovianSequences object.
+ */
+/*--------------------------------------------------------------*/
 
 MarkovianSequences* VariableOrderMarkovData::residual_sequences(StatError &error) const
 
@@ -5956,13 +6040,14 @@ MarkovianSequences* VariableOrderMarkovData::residual_sequences(StatError &error
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a VariableOrderMarkovData object.
  *
- *  Ecriture d'un objet VariableOrderMarkovData.
- *
- *  arguments : stream, flag niveau de detail.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os         stream,
+ *  \param[in]     exhaustive flag detail level.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& VariableOrderMarkovData::ascii_write(ostream &os , bool exhaustive) const
 
@@ -5976,14 +6061,17 @@ ostream& VariableOrderMarkovData::ascii_write(ostream &os , bool exhaustive) con
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a VariableOrderMarkovData object in a file.
  *
- *  Ecriture d'un objet VariableOrderMarkovData dans un fichier.
+ *  \param[in] error      reference on a StatError object,
+ *  \param[in] path       file path,
+ *  \param[in] exhaustive flag detail level.
  *
- *  arguments : reference sur un objet StatError, path,
- *              flag niveau de detail.
- *
- *--------------------------------------------------------------*/
+ *  \return               error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool VariableOrderMarkovData::ascii_write(StatError &error , const string path ,
                                           bool exhaustive) const
@@ -6013,13 +6101,15 @@ bool VariableOrderMarkovData::ascii_write(StatError &error , const string path ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a VariableOrderMarkovData object.
  *
- *  Ecriture d'un objet VariableOrderMarkovData.
- *
- *  arguments : stream, format (ligne/colonne), flag niveau de detail.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os         stream,
+ *  \param[in]     format     format (line/column),
+ *  \param[in]     exhaustive flag detail level.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& VariableOrderMarkovData::ascii_data_write(ostream &os , output_sequence_format format ,
                                                    bool exhaustive) const
@@ -6032,14 +6122,18 @@ ostream& VariableOrderMarkovData::ascii_data_write(ostream &os , output_sequence
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a VariableOrderMarkovData object in a file.
  *
- *  Ecriture d'un objet VariableOrderMarkovData dans un fichier.
+ *  \param[in] error      reference on a StatError object,
+ *  \param[in] path       file path,
+ *  \param[in] format     format (line/column),
+ *  \param[in] exhaustive flag detail level.
  *
- *  arguments : reference sur un objet StatError, path,
- *              format (ligne/colonne), flag niveau de detail.
- *
- *--------------------------------------------------------------*/
+ *  \return               error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool VariableOrderMarkovData::ascii_data_write(StatError &error , const string path ,
                                                output_sequence_format format , bool exhaustive) const
@@ -6068,13 +6162,16 @@ bool VariableOrderMarkovData::ascii_data_write(StatError &error , const string p
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a VariableOrderMarkovData object in a file at the spreadsheet format.
  *
- *  Ecriture d'un objet VariableOrderMarkovData dans un fichier au format tableur.
+ *  \param[in] error reference on a StatError object,
+ *  \param[in] path  file path.
  *
- *  arguments : reference sur un objet StatError, path.
- *
- *--------------------------------------------------------------*/
+ *  \return          error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool VariableOrderMarkovData::spreadsheet_write(StatError &error , const string path) const
 
@@ -6103,14 +6200,17 @@ bool VariableOrderMarkovData::spreadsheet_write(StatError &error , const string 
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Plot of a VariableOrderMarkovData object using Gnuplot.
  *
- *  Sortie Gnuplot d'un objet VariableOrderMarkovData.
+ *  \param[in] error  reference on a StatError object,
+ *  \param[in] prefix file prefix,
+ *  \param[in] title  figure title.
  *
- *  arguments : reference sur un objet StatError, prefixe des fichiers,
- *              titre des figures.
- *
- *--------------------------------------------------------------*/
+ *  \return           error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool VariableOrderMarkovData::plot_write(StatError &error , const char *prefix ,
                                          const char *title) const
@@ -6133,11 +6233,13 @@ bool VariableOrderMarkovData::plot_write(StatError &error , const char *prefix ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Plot of a VariableOrderMarkovData object.
  *
- *  Sortie graphique d'un objet VariableOrderMarkovData.
- *
- *--------------------------------------------------------------*/
+ *  \return MultiPlotSet object.
+ */
+/*--------------------------------------------------------------*/
 
 MultiPlotSet* VariableOrderMarkovData::get_plotable() const
 

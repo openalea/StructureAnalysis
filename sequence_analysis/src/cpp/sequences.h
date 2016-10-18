@@ -182,8 +182,8 @@ namespace sequence_analysis {
 
   const int NB_STATE_SEQUENCE = 10;      // number of computed state sequences
 
-  const int COUNT_MAX_LENGTH = 10000;    // maximum sequence length for the extraction of the count frequency distributions
-  const int COUNTING_MAX_LENGTH = 500;   // maximum sequence length for the computation of the count distributions
+  const int COUNTING_FREQUENCY_MAX_LENGTH = 10000;  // maximum sequence length for the extraction of the counting frequency distributions
+  const int COUNTING_MAX_LENGTH = 500;   // maximum sequence length for the computation of the counting distributions
 
   const int NB_SEQUENCE = 100000;        // maximum number of generated sequences
   const int MAX_LENGTH = 1000000;        // maximum generated sequence length
@@ -254,6 +254,7 @@ namespace sequence_analysis {
   const double SLOPE_STEP = 0.01;        // slope step for the dimension jump method
   const double MAX_SLOPE = 100.;         // maximum slope for the dimension jump method
   const int MIN_DIMENSION_JUMP = 3;      // minimum dimension jump
+  const double MIN_RANK_SQUARE_SUM = 1.e-2;  // default value in the case of a unique rank in a segment
 
   enum correlation_normalization {
     APPROXIMATED ,

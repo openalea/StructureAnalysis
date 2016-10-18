@@ -54,7 +54,7 @@ namespace stat_tool {
  *  \brief Initialization of Markov chain parameters.
  *
  *  \param[in] left_right      flag on the Markov chain structure,
- *  \param[in] self_transition self transition probability.
+ *  \param[in] self_transition self-transition probability.
  */
 /*--------------------------------------------------------------*/
 
@@ -330,7 +330,7 @@ bool Chain::strongly_connected_component_research(StatError &error , bool **ilog
 
 /*--------------------------------------------------------------*/
 /**
- *  Computation of the accessibility of Markov chain states (graph-based approach).
+ *  \brief Computation of the accessibility of Markov chain states (graph-based approach).
  *
  *  \param[in] ilogic_transition matrix of possible transitions between states.
  */
@@ -607,8 +607,8 @@ void Chain::probability_accessibility_computation()
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Extraction of Markov chain classes (transient/recurrent/absorbing)
- *         on the basis of state accessibility.
+ *  \brief Extraction of the Markov chain classes (transient/recurrent/absorbing)
+ *         from state accessibility.
  *
  *  \param[in] ilogic_transition matrix of possible transitions between states.
  */

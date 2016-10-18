@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -54,13 +54,13 @@ namespace sequence_analysis {
 
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the state sequence entropies using the forward-backward algorithm.
  *
- *  Calcul des entropies des sequences d'etats par l'algorithme forward-backward.
- *
- *  argument : reference sur un objet SemiMarkovData.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] seq reference on a SemiMarkovData object.
+ */
+/*--------------------------------------------------------------*/
 
 void HiddenSemiMarkov::forward_backward(SemiMarkovData &seq) const
 
@@ -78,7 +78,7 @@ void HiddenSemiMarkov::forward_backward(SemiMarkovData &seq) const
 # endif
 
 
-  // initialisations
+  // initializations
 
   seq.entropy = new double[seq.nb_sequence];
   seq.nb_state_sequence = new double[seq.nb_sequence];
@@ -164,7 +164,7 @@ void HiddenSemiMarkov::forward_backward(SemiMarkovData &seq) const
       }
     }
 
-    // recurrence "forward"
+    // forward recurrence
 
     seq_likelihood = 0.;
     for (j = 0;j < seq.length[i];j++) {
@@ -172,7 +172,7 @@ void HiddenSemiMarkov::forward_backward(SemiMarkovData &seq) const
 
       for (k = 0;k < nb_state;k++) {
 
-        // calcul des probabilites d'observation
+        // computation of the observation probabilities
 
         observation[j][k] = 1.;
         for (m = 0;m < nb_output_process;m++) {
@@ -229,7 +229,7 @@ void HiddenSemiMarkov::forward_backward(SemiMarkovData &seq) const
 
         switch (sojourn_type[k]) {
 
-        // cas etat semi-markovien 
+        // case semi-Markovian state 
 
         case SEMI_MARKOVIAN : {
           if (j == 0) {
@@ -244,7 +244,7 @@ void HiddenSemiMarkov::forward_backward(SemiMarkovData &seq) const
           break;
         }
 
-        // cas etat markovien
+        // case Markovian state
 
         case MARKOVIAN : {
           if (j == 0) {
@@ -285,7 +285,7 @@ void HiddenSemiMarkov::forward_backward(SemiMarkovData &seq) const
 
       for (k = 0;k < nb_state;k++) {
 
-        // cas etat semi-markovien
+        // case semi-Markovian state
 
         if (sojourn_type[k] == SEMI_MARKOVIAN) {
           occupancy = state_process->sojourn_time[k];
@@ -428,7 +428,7 @@ void HiddenSemiMarkov::forward_backward(SemiMarkovData &seq) const
         }
         } */
 
-      // recurrence "backward"
+      // backward recurrence
 
 #     ifdef MESSAGE
       entropy = 0.;
@@ -540,7 +540,7 @@ void HiddenSemiMarkov::forward_backward(SemiMarkovData &seq) const
 
           switch (sojourn_type[k]) {
 
-          // cas etat semi-markovien
+          // case semi-Markovian state
 
           case SEMI_MARKOVIAN : {
             occupancy = state_process->sojourn_time[k];
@@ -581,7 +581,7 @@ void HiddenSemiMarkov::forward_backward(SemiMarkovData &seq) const
             break;
           }
 
-          // cas etat markovien
+          // case Markovian state
 
           case MARKOVIAN : {
             if (backward1[j + 1][k] > 0.) {
@@ -611,7 +611,7 @@ void HiddenSemiMarkov::forward_backward(SemiMarkovData &seq) const
 
           switch (sojourn_type[k]) {
 
-          // cas etat semi-markovien
+          // case semi-Markovian state
 
           case SEMI_MARKOVIAN : {
             backward[j][k] = backward[j + 1][k] + backward1[j][k] - auxiliary[k] * state_in[j][k];
@@ -624,7 +624,7 @@ void HiddenSemiMarkov::forward_backward(SemiMarkovData &seq) const
             break;
           }
 
-          // cas etat markovien
+          // case Markovian state
 
           case MARKOVIAN : {
             backward[j][k] = backward1[j][k];
@@ -800,7 +800,7 @@ void HiddenSemiMarkov::forward_backward(SemiMarkovData &seq) const
       }
 #     endif
 
-      // calcul du nombre de sequences d'etats possibles
+      // computation of the number of state sequences
 
       for (j = 0;j < nb_output_process;j++) {
         switch (seq.type[j + 1]) {
@@ -813,12 +813,12 @@ void HiddenSemiMarkov::forward_backward(SemiMarkovData &seq) const
         }
       }
 
-      // recurrence "forward"
+      // forward recurrence
 
       for (j = 0;j < seq.length[i];j++) {
         for (k = 0;k < nb_state;k++) {
 
-          // calcul des probabilites d'observation
+          // computation of the observation probabilities
 
           observation[j][k] = 1.;
           for (m = 0;m < nb_output_process;m++) {
@@ -881,7 +881,7 @@ void HiddenSemiMarkov::forward_backward(SemiMarkovData &seq) const
 
           switch (sojourn_type[k]) {
 
-          // cas etat semi-markovien
+          // case semi-Markovian state
 
           case SEMI_MARKOVIAN : {
             occupancy = state_process->sojourn_time[k];
@@ -958,7 +958,7 @@ void HiddenSemiMarkov::forward_backward(SemiMarkovData &seq) const
             break;
           }
 
-          // cas etat markovien
+          // case Markovian state
 
           case MARKOVIAN : {
             if (observation[j][k] == 1.) {
@@ -1068,16 +1068,22 @@ void HiddenSemiMarkov::forward_backward(SemiMarkovData &seq) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of state and entropy profiles using the forward-backward algorithm.
  *
- *  Calcul des profils d'etats et d'entropie par l'algorithme forward-backward.
+ *  \param[in] seq                  reference on a MarkovianSequences object,
+ *  \param[in] index                sequence index,
+ *  \param[in] os                   stream,
+ *  \param[in] plot_set             pointer on a MultiPlotSet object,
+ *  \param[in] output               output type,
+ *  \param[in] format               output format (ASCII/SPREADSHEET/GNUPLOT/PLOT),
+ *  \param[in] max_marginal_entropy reference on the maximum marginal entropy,
+ *  \param[in] entropy1             reference on the entropy (for the plots).
  *
- *  arguments : reference sur un objet MarkovianSequences, indice de la sequence,
- *              stream, pointeur sur un objet MultiPlotSet, type de sortie, format de sortie
- *              (ASCII/SPREADSHEET/GNUPLOT/PLOT), references sur
- *              l'entropie marginale maximum et l'entropie (pour la visualisation).
- *
- *--------------------------------------------------------------*/
+ *  \return                         log-likelihood for the observed sequence.
+ */
+/*--------------------------------------------------------------*/
 
 double HiddenSemiMarkov::forward_backward(MarkovianSequences &seq , int index , ostream *os ,
                                           MultiPlotSet *plot_set , state_profile output ,
@@ -1096,7 +1102,7 @@ double HiddenSemiMarkov::forward_backward(MarkovianSequences &seq , int index , 
   DiscreteParametric *occupancy;
 
 
-  // initialisations
+  // initializations
 
   observation = new double*[seq.length[index]];
   for (i = 0;i < seq.length[index];i++) {
@@ -1194,7 +1200,7 @@ double HiddenSemiMarkov::forward_backward(MarkovianSequences &seq , int index , 
     }
   }
 
-  // recurrence "forward"
+  // forward recurrence
 
   seq_likelihood = 0.;
   for (i = 0;i < seq.length[index];i++) {
@@ -1202,7 +1208,7 @@ double HiddenSemiMarkov::forward_backward(MarkovianSequences &seq , int index , 
 
     for (j = 0;j < nb_state;j++) {
 
-      // calcul des probabilites d'observation
+      // computation of the observation probabilities
 
       observation[i][j] = 1.;
       for (k = 0;k < nb_output_process;k++) {
@@ -1259,7 +1265,7 @@ double HiddenSemiMarkov::forward_backward(MarkovianSequences &seq , int index , 
 
       switch (sojourn_type[j]) {
 
-      // cas etat semi-markovien 
+      // case semi-Markovian state 
 
       case SEMI_MARKOVIAN : {
         if (i == 0) {
@@ -1274,7 +1280,7 @@ double HiddenSemiMarkov::forward_backward(MarkovianSequences &seq , int index , 
         break;
       }
 
-      // cas etat markovien
+      // case Markovian state
 
       case MARKOVIAN : {
         if (i == 0) {
@@ -1315,7 +1321,7 @@ double HiddenSemiMarkov::forward_backward(MarkovianSequences &seq , int index , 
 
     for (j = 0;j < nb_state;j++) {
 
-      // cas etat semi-markovien
+      // case semi-Markovian state
 
       if (sojourn_type[j] == SEMI_MARKOVIAN) {
         occupancy = state_process->sojourn_time[j];
@@ -1457,7 +1463,7 @@ double HiddenSemiMarkov::forward_backward(MarkovianSequences &seq , int index , 
       }
     }
 
-    // recurrence "backward"
+    // backward recurrence
 
     for (i = 0;i < nb_output_process;i++) {
       switch (seq.type[i + 1]) {
@@ -1572,7 +1578,7 @@ double HiddenSemiMarkov::forward_backward(MarkovianSequences &seq , int index , 
 
         switch (sojourn_type[j]) {
 
-        // cas etat semi-markovien
+        // case semi-Markovian state
 
         case SEMI_MARKOVIAN : {
           occupancy = state_process->sojourn_time[j];
@@ -1624,7 +1630,7 @@ double HiddenSemiMarkov::forward_backward(MarkovianSequences &seq , int index , 
           break;
         }
 
-        // cas etat markovien
+        // case Markovian state
 
         case MARKOVIAN : {
           if (backward1[i + 1][j] > 0.) {
@@ -1656,7 +1662,7 @@ double HiddenSemiMarkov::forward_backward(MarkovianSequences &seq , int index , 
 
         switch (sojourn_type[j]) {
 
-        // cas etat semi-markovien
+        // case semi-Markovian state
 
         case SEMI_MARKOVIAN : {
           backward[i][j] = backward[i + 1][j] + backward1[i][j] - auxiliary[j] * state_in[i][j];
@@ -1669,7 +1675,7 @@ double HiddenSemiMarkov::forward_backward(MarkovianSequences &seq , int index , 
           break;
         }
 
-        // cas etat markovien
+        // case Markovian state
 
         case MARKOVIAN : {
           backward[i][j] = backward1[i][j];
@@ -1742,14 +1748,14 @@ double HiddenSemiMarkov::forward_backward(MarkovianSequences &seq , int index , 
         for (j = 0;j < nb_state;j++) {
           switch (sojourn_type[j]) {
 
-          // cas etat semi-markovien
+          // case semi-Markovian state
 
           case SEMI_MARKOVIAN : {
             backward_output[i + 1][j] = auxiliary[j] * state_in[i][j];
             break;
           }
 
-          // cas etat markovien
+          // case Markovian state
 
           case MARKOVIAN : {
             backward_output[i + 1][j] = 0.;
@@ -1770,14 +1776,14 @@ double HiddenSemiMarkov::forward_backward(MarkovianSequences &seq , int index , 
         for (j = 0;j < nb_state;j++) {
           switch (sojourn_type[j]) {
 
-          // cas etat semi-markovien
+          // case semi-Markovian state
 
           case SEMI_MARKOVIAN : {
             backward_output[i][j] = backward1[i][j];
             break;
           }
 
-          // cas etat markovien
+          // case Markovian state
 
           case MARKOVIAN : {
             backward_output[i][j] = 0.;
@@ -1922,7 +1928,7 @@ double HiddenSemiMarkov::forward_backward(MarkovianSequences &seq , int index , 
     }
 #   endif
 
-    // restauration
+    // restoration
 
     pstate = seq.int_sequence[index][0];
 
@@ -2064,7 +2070,7 @@ double HiddenSemiMarkov::forward_backward(MarkovianSequences &seq , int index , 
         }
       }
 
-      // calcul du nombre de sequences d'etats possibles
+      // computation of the number of state sequences
 
       for (i = 0;i < nb_output_process;i++) {
         switch (seq.type[i + 1]) {
@@ -2077,12 +2083,12 @@ double HiddenSemiMarkov::forward_backward(MarkovianSequences &seq , int index , 
         }
       }
 
-      // recurrence "forward"
+      // forward recurrence
 
       for (i = 0;i < seq.length[index];i++) {
         for (j = 0;j < nb_state;j++) {
 
-          // calcul des probabilites d'observation
+          // computation of the observation probabilities
 
           observation[i][j] = 1.;
           for (k = 0;k < nb_output_process;k++) {
@@ -2145,7 +2151,7 @@ double HiddenSemiMarkov::forward_backward(MarkovianSequences &seq , int index , 
 
           switch (sojourn_type[j]) {
 
-          // cas etat semi-markovien
+          // case semi-Markovian state
 
           case SEMI_MARKOVIAN : {
             occupancy = state_process->sojourn_time[j];
@@ -2222,7 +2228,7 @@ double HiddenSemiMarkov::forward_backward(MarkovianSequences &seq , int index , 
             break;
           }
 
-          // cas etat markovien
+          // case Markovian state
 
           case MARKOVIAN : {
             if (observation[i][j] == 1.) {
@@ -2305,7 +2311,7 @@ double HiddenSemiMarkov::forward_backward(MarkovianSequences &seq , int index , 
       double min_nb_state_sequence , smoothed_proba , cumul_smoothed_proba ,
              max_smoothed_proba , **backward2;
 
-      // recurrence "backward"
+      // backward recurrence
 
       min_nb_state_sequence = nb_state_sequence;
 
@@ -2326,7 +2332,7 @@ double HiddenSemiMarkov::forward_backward(MarkovianSequences &seq , int index , 
 
           switch (sojourn_type[j]) {
 
-          // cas etat semi-markovien
+          // case semi-Markovian state
 
           case SEMI_MARKOVIAN : {
             occupancy = state_process->sojourn_time[j];
@@ -2350,7 +2356,7 @@ double HiddenSemiMarkov::forward_backward(MarkovianSequences &seq , int index , 
             break;
           }
 
-          // cas etat markovien
+          // case Markovian state
 
           case MARKOVIAN : {
             if (observation[i + 1][j] == 1.) {
@@ -2372,7 +2378,7 @@ double HiddenSemiMarkov::forward_backward(MarkovianSequences &seq , int index , 
 
           switch (sojourn_type[j]) {
 
-          // cas etat semi-markovien
+          // case semi-Markovian state
 
           case SEMI_MARKOVIAN : {
 
@@ -2412,7 +2418,7 @@ double HiddenSemiMarkov::forward_backward(MarkovianSequences &seq , int index , 
             break;
           }
 
-          // cas etat markovien
+          // case Markovian state
 
           case MARKOVIAN : {
             backward2[i][j] = backward1[i][j] * forward1[i][j];
@@ -2548,16 +2554,20 @@ double HiddenSemiMarkov::forward_backward(MarkovianSequences &seq , int index , 
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Simulation of state sequences for an observed sequence using
+ *         the forward-backward algorithm for sampling.
  *
- *  Simulation de sequences d'etats correspondant a une sequence observee
- *  par l'algorithme forward-backward de simulation.
+ *  \param[in] seq               reference on a MarkovianSequences object,
+ *  \param[in] index             sequence index,
+ *  \param[in] os                stream,
+ *  \param[in] format            file format (ASCII/SPREADSHEET),
+ *  \param[in] nb_state_sequence number of state sequences.
  *
- *  arguments : reference sur un objet MarkovianSequences, indice de la sequence,
- *              stream, format de fichier (ASCII/SPREADSHEET),
- *              nombre de sequences d'etats.
- *
- *--------------------------------------------------------------*/
+ *  \return                      log-likelihood for the observed sequence.
+ */
+/*--------------------------------------------------------------*/
 
 double HiddenSemiMarkov::forward_backward_sampling(const MarkovianSequences &seq , int index ,
                                                    ostream &os , output_format format ,
@@ -2576,7 +2586,7 @@ double HiddenSemiMarkov::forward_backward_sampling(const MarkovianSequences &seq
 # endif
 
 
-  // initialisations
+  // initializations
 
   observation = new double*[seq.length[index]];
   for (i = 0;i < seq.length[index];i++) {
@@ -2626,7 +2636,7 @@ double HiddenSemiMarkov::forward_backward_sampling(const MarkovianSequences &seq
   }
 # endif
 
-  // recurrence "forward"
+  // forward recurrence
 
   seq_likelihood = 0.;
   for (i = 0;i < seq.length[index];i++) {
@@ -2634,7 +2644,7 @@ double HiddenSemiMarkov::forward_backward_sampling(const MarkovianSequences &seq
 
     for (j = 0;j < nb_state;j++) {
 
-      // calcul des probabilites d'observation
+      // computation of the observation probabilities
 
       observation[i][j] = 1.;
       for (k = 0;k < nb_output_process;k++) {
@@ -2691,7 +2701,7 @@ double HiddenSemiMarkov::forward_backward_sampling(const MarkovianSequences &seq
 
       switch (sojourn_type[j]) {
 
-      // cas etat semi-markovien 
+      // case semi-Markovian state 
 
       case SEMI_MARKOVIAN : {
         if (i == 0) {
@@ -2706,7 +2716,7 @@ double HiddenSemiMarkov::forward_backward_sampling(const MarkovianSequences &seq
         break;
       }
 
-      // cas etat markovien
+      // case Markovian state
 
       case MARKOVIAN : {
         if (i == 0) {
@@ -2745,7 +2755,7 @@ double HiddenSemiMarkov::forward_backward_sampling(const MarkovianSequences &seq
 
     for (j = 0;j < nb_state;j++) {
 
-      // cas etat semi-markovien
+      // case semi-Markovian state
 
       if (sojourn_type[j] == SEMI_MARKOVIAN) {
         occupancy = state_process->sojourn_time[j];
@@ -2825,7 +2835,7 @@ double HiddenSemiMarkov::forward_backward_sampling(const MarkovianSequences &seq
 
   if (seq_likelihood != D_INF) {
 
-    // passes "backward"
+    // backward passes
 
 #   ifdef MESSAGE
     cout << "\n";
@@ -2839,7 +2849,7 @@ double HiddenSemiMarkov::forward_backward_sampling(const MarkovianSequences &seq
 
       do {
 
-        // cas etat semi-markovien
+        // case semi-Markovian state
 
         if (sojourn_type[*pstate] == SEMI_MARKOVIAN) {
           occupancy = state_process->sojourn_time[*pstate];
@@ -3037,11 +3047,11 @@ double HiddenSemiMarkov::forward_backward_sampling(const MarkovianSequences &seq
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Calcul des logarithmes des parametres d'une semi-chaine de Markov cachee.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the log-parameters of a hidden semi-Markov chain.
+ */
+/*--------------------------------------------------------------*/
 
 void HiddenSemiMarkov::log_computation()
 
@@ -3099,15 +3109,17 @@ void HiddenSemiMarkov::log_computation()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the most probable state sequences using the Viterbi algorithm.
  *
- *  Calcul des sequences d'etats les plus probables par l'algorithme de Viterbi.
+ *  \param[in] seq                   reference on a MarkovianSequences object,
+ *  \param[in] posterior_probability pointer on the posterior probabilities of the most probable state sequences,
+ *  \param[in] index                 sequence index.
  *
- *  arguments : reference sur un objet MarkovianSequences,
- *              pointeur sur les probabilites a posteriori des sequences d'etats
- *              les plus probables, indice de la sequence.
- *
- *--------------------------------------------------------------*/
+ *  \return                          log-likelihood for the most probable state sequences.
+ */
+/*--------------------------------------------------------------*/
 
 double HiddenSemiMarkov::viterbi(const MarkovianSequences &seq ,
                                  double *posterior_probability , int index) const
@@ -3121,7 +3133,7 @@ double HiddenSemiMarkov::viterbi(const MarkovianSequences &seq ,
   DiscreteParametric *occupancy;
 
 
-  // initialisations
+  // initializations
 
   length = (index == I_DEFAULT ? seq.max_length : seq.length[index]);
 
@@ -3168,12 +3180,12 @@ double HiddenSemiMarkov::viterbi(const MarkovianSequences &seq ,
         }
       }
 
-      // recurrence "forward"
+      // forward recurrence
 
       for (j = 0;j < seq.length[i];j++) {
         for (k = 0;k < nb_state;k++) {
 
-          // calcul des probabilites d'observation
+          // computation of the observation probabilities
 
           observation[j][k] = 0.;
           for (m = 0;m < nb_output_process;m++) {
@@ -3245,7 +3257,7 @@ double HiddenSemiMarkov::viterbi(const MarkovianSequences &seq ,
 
           switch (sojourn_type[k]) {
 
-          // cas etat semi-markovien
+          // case semi-Markovian state
 
           case SEMI_MARKOVIAN : {
             occupancy = state_process->sojourn_time[k];
@@ -3322,7 +3334,7 @@ double HiddenSemiMarkov::viterbi(const MarkovianSequences &seq ,
             break;
           }
 
-          // cas etat markovien
+          // case Markovian state
 
           case MARKOVIAN : {
             if (j == 0) {
@@ -3384,7 +3396,7 @@ double HiddenSemiMarkov::viterbi(const MarkovianSequences &seq ,
         }
       }
 
-      // extraction de la vraisemblance du chemin optimal
+      // extraction of the log-likelihood for the most probable state sequence
 
       pstate = seq.int_sequence[i][0] + seq.length[i] - 1;
       forward_max = D_INF;
@@ -3411,7 +3423,7 @@ double HiddenSemiMarkov::viterbi(const MarkovianSequences &seq ,
         break;
       }
 
-      // restauration
+      // restoration of the most probable state sequence
 
       j = seq.length[i] - 1;
 
@@ -3468,13 +3480,13 @@ double HiddenSemiMarkov::viterbi(const MarkovianSequences &seq ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the most probable state sequences using the Viterbi algorithm.
  *
- *  Calcul des sequences d'etats les plus probables par l'algorithme de Viterbi.
- *
- *  argument : reference sur un objet SemiMarkovData.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] seq reference on a SemiMarkovData object.
+ */
+/*--------------------------------------------------------------*/
 
 void HiddenSemiMarkov::viterbi(SemiMarkovData &seq) const
 
@@ -3484,16 +3496,21 @@ void HiddenSemiMarkov::viterbi(SemiMarkovData &seq) const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the N most probable state sequences for
+ *         an observed sequence using the generalized Viterbi algorithm.
  *
- *  Calcul des N sequences d'etats les plus probables correspondant a
- *  une sequence observee par l'algorithme de Viterbi generalise.
+ *  \param[in] seq                reference on a MarkovianSequences object,
+ *  \param[in] index              sequence index,
+ *  \param[in] os                 stream,
+ *  \param[in] seq_likelihood     log-likelihood for the observed sequence,
+ *  \param[in] format             file format (ASCII/SPREADSHEET),
+ *  \param[in] inb_state_sequence number of state sequences.
  *
- *  arguments : reference sur un objet MarkovianSequences, indice de la sequence,
- *              stream, vraisemblance des donnees, format de fichier
- *              (ASCII/SPREADSHEET), nombre de sequences d'etats.
- *
- *--------------------------------------------------------------*/
+ *  \return                       log-likelihood for the most probable state sequence.
+ */
+/*--------------------------------------------------------------*/
 
 double HiddenSemiMarkov::generalized_viterbi(const MarkovianSequences &seq , int index ,
                                              ostream &os , double seq_likelihood ,
@@ -3510,7 +3527,7 @@ double HiddenSemiMarkov::generalized_viterbi(const MarkovianSequences &seq , int
   DiscreteParametric *occupancy;
 
 
-  // initialisations
+  // initializations
 
   observation = new double*[seq.length[index]];
   for (i = 0;i < seq.length[index];i++) {
@@ -3611,12 +3628,12 @@ double HiddenSemiMarkov::generalized_viterbi(const MarkovianSequences &seq , int
   }
 # endif
 
-  // recurrence "forward"
+  // forward recurrence
 
   for (i = 0;i < seq.length[index];i++) {
     for (j = 0;j < nb_state;j++) {
 
-      // calcul des probabilites d'observation
+      // computation of the observation probabilities
 
       observation[i][j] = 0.;
       for (k = 0;k < nb_output_process;k++) {
@@ -3688,7 +3705,7 @@ double HiddenSemiMarkov::generalized_viterbi(const MarkovianSequences &seq , int
 
       switch (sojourn_type[j]) {
 
-      // cas etat semi-markovien
+      // case semi-Markovian state
 
       case SEMI_MARKOVIAN : {
         occupancy = state_process->sojourn_time[j];
@@ -3786,7 +3803,7 @@ double HiddenSemiMarkov::generalized_viterbi(const MarkovianSequences &seq , int
         break;
       }
 
-      // cas etat markovien
+      // case Markovian state
 
       case MARKOVIAN : {
         for (k = 0;k < nb_state_sequence;k++) {
@@ -3903,7 +3920,7 @@ double HiddenSemiMarkov::generalized_viterbi(const MarkovianSequences &seq , int
     }
   }
 
-  // extraction de la vraisemblance du chemin optimal
+  // extraction of the log-likelihood for the most probable state sequence
 
   for (i = 0;i < nb_state;i++) {
     rank[i] = 0;
@@ -3929,7 +3946,7 @@ double HiddenSemiMarkov::generalized_viterbi(const MarkovianSequences &seq , int
       break;
     }
 
-    // restauration
+    // restoration of the most probable state sequence
 
     brank = rank[*pstate];
     rank[*pstate]++;
@@ -4166,15 +4183,21 @@ double HiddenSemiMarkov::generalized_viterbi(const MarkovianSequences &seq , int
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of state profiles using the Viterbi forward-backward algorithm.
  *
- *  Calcul des profils d'etats par l'algorithme de Viterbi forward-backward.
+ *  \param[in] seq            reference on a MarkovianSequences object,
+ *  \param[in] index          sequence index,
+ *  \param[in] os             stream,
+ *  \param[in] plot           pointer on a MultiPlot object,
+ *  \param[in] output         output type,
+ *  \param[in] format         output format (ASCII/SPREADSHEET/GNUPLOT/PLOT),
+ *  \param[in] seq_likelihood log-likelihood for the observed sequence.
  *
- *  arguments : reference sur un objet MarkovianSequences, indice de la sequence,
- *              stream, pointeur sur un objet MultiPlot, type de sortie, format de sortie
- *              (ASCII/SPREADSHEET/GNUPLOT/PLOT), vraisemblance des donnees.
- *
- *--------------------------------------------------------------*/
+ *  \return                   log-likelihood for the most probable state sequence.
+ */
+/*--------------------------------------------------------------*/
 
 double HiddenSemiMarkov::viterbi_forward_backward(const MarkovianSequences &seq , int index ,
                                                   ostream *os , MultiPlot *plot ,
@@ -4190,7 +4213,7 @@ double HiddenSemiMarkov::viterbi_forward_backward(const MarkovianSequences &seq 
   DiscreteParametric *occupancy;
 
 
-  // initialisations
+  // initializations
 
   observation = new double*[seq.length[index]];
   for (i = 0;i < seq.length[index];i++) {
@@ -4265,12 +4288,12 @@ double HiddenSemiMarkov::viterbi_forward_backward(const MarkovianSequences &seq 
     }
   }
 
-  // recurrence "forward"
+  // forward recurrence
 
   for (i = 0;i < seq.length[index];i++) {
     for (j = 0;j < nb_state;j++) {
 
-      // calcul des probabilites d'observation
+      // computation of the observation probabilities
 
       observation[i][j] = 0.;
       for (k = 0;k < nb_output_process;k++) {
@@ -4342,7 +4365,7 @@ double HiddenSemiMarkov::viterbi_forward_backward(const MarkovianSequences &seq 
 
       switch (sojourn_type[j]) {
 
-      // cas etat semi-markovien
+      // case semi-Markovian state
 
       case SEMI_MARKOVIAN : {
         occupancy = state_process->sojourn_time[j];
@@ -4427,7 +4450,7 @@ double HiddenSemiMarkov::viterbi_forward_backward(const MarkovianSequences &seq 
         break;
       }
 
-      // cas etat markovien
+      // case Markovian state
 
       case MARKOVIAN : {
         if (i == 0) {
@@ -4488,7 +4511,7 @@ double HiddenSemiMarkov::viterbi_forward_backward(const MarkovianSequences &seq 
     }
   }
 
-  // extraction de la vraisemblance du chemin optimal
+  // extraction of the log-likelihood for the most probable state sequence
 
 # ifdef MESSAGE
   pstate = state_sequence + seq.length[index] - 1;
@@ -4530,7 +4553,7 @@ double HiddenSemiMarkov::viterbi_forward_backward(const MarkovianSequences &seq 
     while (i >= 0);
 #   endif
 
-    // recurrence "backward"
+    // backward recurrence
 
     i = seq.length[index] - 1;
     for (j = 0;j < nb_state;j++) {
@@ -4546,7 +4569,7 @@ double HiddenSemiMarkov::viterbi_forward_backward(const MarkovianSequences &seq 
       for (j = 0;j < nb_state;j++) {
         switch (sojourn_type[j]) {
 
-        // cas etat semi-markovien
+        // case semi-Markovian state
 
         case SEMI_MARKOVIAN : {
           occupancy = state_process->sojourn_time[j];
@@ -4574,7 +4597,7 @@ double HiddenSemiMarkov::viterbi_forward_backward(const MarkovianSequences &seq 
               auxiliary[j] = occupancy_auxiliary[m];
             }
 
-            // transformation des vraisemblances "semi-markoviennes" en vraisemblances "markoviennes"
+            // transformation of semi-Markovian log-likelihoods in Markovian log-likelihoods
 
             if ((auxiliary[j] != D_INF) && (state_in[i][j] != D_INF)) {
               buff = auxiliary[j] + state_in[i][j];
@@ -4586,7 +4609,7 @@ double HiddenSemiMarkov::viterbi_forward_backward(const MarkovianSequences &seq 
           break;
         }
 
-        // cas etat markovien
+        // case Markovian state
 
         case MARKOVIAN : {
           if ((backward1[i + 1][j] != D_INF) && (observation[i + 1][j] != D_INF)) {
@@ -4623,7 +4646,7 @@ double HiddenSemiMarkov::viterbi_forward_backward(const MarkovianSequences &seq 
         for (j = 0;j < nb_state;j++) {
           switch (sojourn_type[j]) {
 
-          // cas etat semi-markovien
+          // case semi-Markovian state
 
           case SEMI_MARKOVIAN : {
             if ((auxiliary[j] != D_INF) && (state_in[i][j] != D_INF)) {
@@ -4635,7 +4658,7 @@ double HiddenSemiMarkov::viterbi_forward_backward(const MarkovianSequences &seq 
             break;
           }
 
-          // cas etat markovien
+          // case Markovian state
 
           case MARKOVIAN : {
             backward_output[i + 1][j] = D_INF;
@@ -4665,14 +4688,14 @@ double HiddenSemiMarkov::viterbi_forward_backward(const MarkovianSequences &seq 
         for (j = 0;j < nb_state;j++) {
           switch (sojourn_type[j]) {
 
-          // cas etat semi-markovien
+          // case semi-Markovian state
 
           case SEMI_MARKOVIAN : {
             backward_output[i][j] = backward[i][j];
             break;
           }
 
-          // cas etat markovien
+          // case Markovian state
 
           case MARKOVIAN : {
             backward_output[i][j] = D_INF;
@@ -4700,7 +4723,7 @@ double HiddenSemiMarkov::viterbi_forward_backward(const MarkovianSequences &seq 
       }
     }
 
-    // cas particulier de rester dans l'etat initial
+    // particular case of staying in the initial state
 
     for (i = 0;i < nb_state;i++) {
       if ((sojourn_type[i] == SEMI_MARKOVIAN) && (cumul_initial[i] != D_INF)) {
@@ -4744,7 +4767,7 @@ double HiddenSemiMarkov::viterbi_forward_backward(const MarkovianSequences &seq 
             auxiliary[i] = occupancy_auxiliary[k];
           }
 
-          // transformation des vraisemblances "semi-markoviennes" en vraisemblances "markoviennes"
+          // transformation of semi-Markovian log-likelihoods in Markovian log-likelihoods
 
           if (auxiliary[i] != D_INF) {
             buff = auxiliary[i] + cumul_initial[i];
@@ -4760,7 +4783,7 @@ double HiddenSemiMarkov::viterbi_forward_backward(const MarkovianSequences &seq 
       }
     }
 
-    // restauration
+    // restoration of the most probable state sequence
 
     pstate = seq.int_sequence[index][0];
 
@@ -4782,7 +4805,7 @@ double HiddenSemiMarkov::viterbi_forward_backward(const MarkovianSequences &seq 
       pstate++;
     }
 
-    //  normalisation
+    //  normalization
 
     for (i = 0;i < seq.length[index];i++) {
       for (j = 0;j < nb_state;j++) {
@@ -4955,21 +4978,26 @@ double HiddenSemiMarkov::viterbi_forward_backward(const MarkovianSequences &seq 
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of state and entropy profiles using the forward-backward algorithm,
+ *         of state profiles using the Viterbi forward-backward algorithm,
+ *         computation of the N most probable state sequences using the generalized Viterbi algorithm or
+ *         simulation of state sequences using the forward-backward algorithm for sampling and
+ *         writing of the results.
  *
- *  Calcul des profils d'etats et d'entropie par l'algorithme forward-backward,
- *  des profils d'etats par l'algorithme de Viterbi forward-backward,
- *  calcul des N sequences d'etats les plus probables par l'algorithme de Viterbi generalise ou
- *  simulation de sequences d'etats par l'algorithme forward-backward de simulation et
- *  ecriture des resultats.
+ *  \param[in] error             reference on a StatError object,
+ *  \param[in] os                stream,
+ *  \param[in] iseq              reference on a MarkovianSequences object,
+ *  \param[in] identifier        sequence identifier,
+ *  \param[in] output            output type,
+ *  \param[in] format            format (ASCII/SPREADSHEET),
+ *  \param[in] state_sequence    method for computing the state sequences (GENERALIZED_VITERBI/FORWARD_BACKWARD_SAMPLING),
+ *  \param[in] nb_state_sequence number of state sequences.
  *
- *  arguments : reference sur un objet StatError, stream, sequences,
- *              identificateur de la sequence, type de sortie,
- *              format (ASCII/SPREADSHEET),
- *              methode de calcul des sequences d'etats (GENERALIZED_VITERBI/
- *              FORWARD_BACKWARD_SAMPLING), nombre de sequences d'etats.
- *
- *--------------------------------------------------------------*/
+ *  \return                      error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool HiddenSemiMarkov::state_profile_write(StatError &error , ostream &os ,
                                            const MarkovianSequences &iseq , int identifier ,
@@ -5140,21 +5168,26 @@ bool HiddenSemiMarkov::state_profile_write(StatError &error , ostream &os ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of state and entropy profiles using the forward-backward algorithm,
+ *         of state profiles using the Viterbi forward-backward algorithm,
+ *         computation of the N most probable state sequences using the generalized Viterbi algorithm or
+ *         simulation of state sequences using the forward-backward algorithm for sampling and
+ *         writing of the results in a file.
  *
- *  Calcul des profils d'etats et d'entropie par l'algorithme forward-backward,
- *  des profils d'etats par l'algorithme de Viterbi forward-backward,
- *  calcul des N sequences d'etats les plus probables par l'algorithme de Viterbi generalise ou
- *  simulation de sequences d'etats par l'algorithme forward-backward de simulation et
- *  ecriture des resultats dans un fichier.
+ *  \param[in] error             reference on a StatError object,
+ *  \param[in] path              file path,
+ *  \param[in] iseq              reference on a MarkovianSequences object,
+ *  \param[in] identifier        sequence identifier,
+ *  \param[in] output            output type,
+ *  \param[in] format            file format (ASCII/SPREADSHEET),
+ *  \param[in] state_sequence    method for computing the state sequences (GENERALIZED_VITERBI/FORWARD_BACKWARD_SAMPLING),
+ *  \param[in] nb_state_sequence number of state sequences.
  *
- *  arguments : reference sur un objet StatError, path, sequences,
- *              identificateur de la sequence, type de sortie,
- *              format de fichier (ASCII/SPREADSHEET),
- *              methode de calcul des sequences d'etats (GENERALIZED_VITERBI/
- *              FORWARD_BACKWARD_SAMPLING), nombre de sequences d'etats.
- *
- *--------------------------------------------------------------*/
+ *  \return                      error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool HiddenSemiMarkov::state_profile_write(StatError &error , const string path ,
                                            const MarkovianSequences &iseq , int identifier ,
@@ -5182,20 +5215,24 @@ bool HiddenSemiMarkov::state_profile_write(StatError &error , const string path 
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of state and entropy profiles using the forward-backward algorithm,
+ *         of state profiles using the Viterbi forward-backward algorithm,
+ *         computation of the N most probable state sequences using the generalized Viterbi algorithm or
+ *         simulation of state sequences using the forward-backward algorithm for sampling and
+ *         writing of the results.
  *
- *  Calcul des profils d'etats et d'entropie par l'algorithme forward-backward,
- *  des profils d'etats par l'algorithme de Viterbi forward-backward,
- *  calcul des N sequences d'etats les plus probables par l'algorithme de Viterbi generalise ou
- *  simulation de sequences d'etats par l'algorithme forward-backward de simulation et
- *  ecriture des resultats.
+ *  \param[in] error             reference on a StatError object,
+ *  \param[in] os                stream,
+ *  \param[in] identifier        sequence identifier,
+ *  \param[in] output            output type,
+ *  \param[in] state_sequence    method for computing the state sequences (GENERALIZED_VITERBI/FORWARD_BACKWARD_SAMPLING),
+ *  \param[in] nb_state_sequence number of state sequences.
  *
- *  arguments : reference sur un objet StatError, stream,
- *              identificateur de la sequence, type de sortie,
- *              methode de calcul des sequences d'etats (GENERALIZED_VITERBI/
- *              FORWARD_BACKWARD_SAMPLING), nombre de sequences d'etats.
- *
- *--------------------------------------------------------------*/
+ *  \return                      error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool HiddenSemiMarkov::state_profile_ascii_write(StatError &error , ostream &os ,
                                                  int identifier , state_profile output ,
@@ -5221,20 +5258,25 @@ bool HiddenSemiMarkov::state_profile_ascii_write(StatError &error , ostream &os 
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of state and entropy profiles using the forward-backward algorithm,
+ *         of state profiles using the Viterbi forward-backward algorithm,
+ *         computation of the N most probable state sequences using the generalized Viterbi algorithm or
+ *         simulation of state sequences using the forward-backward algorithm for sampling and
+ *         writing of the results in a file.
  *
- *  Calcul des profils d'etats et d'entropie par l'algorithme forward-backward,
- *  des profils d'etats par l'algorithme de Viterbi forward-backward,
- *  calcul des N sequences d'etats les plus probables par l'algorithme de Viterbi generalise ou
- *  simulation de sequences d'etats par l'algorithme forward-backward de simulation et
- *  ecriture des resultats dans un fichier.
+ *  \param[in] error             reference on a StatError object,
+ *  \param[in] path              file path,
+ *  \param[in] identifier        sequence identifier,
+ *  \param[in] output            output type,
+ *  \param[in] format            file format (ASCII/SPREADSHEET),
+ *  \param[in] state_sequence    method for computing the state sequences (GENERALIZED_VITERBI/FORWARD_BACKWARD_SAMPLING),
+ *  \param[in] nb_state_sequence number of state sequences.
  *
- *  arguments : reference sur un objet StatError, path, identificateur de la sequence,
- *              type de sortie, format de fichier (ASCII/SPREADSHEET),
- *              methode de calcul des sequences d'etats (GENERALIZED_VITERBI/
- *              FORWARD_BACKWARD_SAMPLING), nombre de sequences d'etats.
- *
- *--------------------------------------------------------------*/
+ *  \return                      error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool HiddenSemiMarkov::state_profile_write(StatError &error , const string path , int identifier ,
                                            state_profile output , output_format format ,
@@ -5266,16 +5308,22 @@ bool HiddenSemiMarkov::state_profile_write(StatError &error , const string path 
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of state and entropy profiles using the forward-backward algorithm,
+ *         of state profiles using the Viterbi forward-backward algorithm and
+ *         plot of the results at the Gnuplot format.
  *
- *  Calcul des profils d'etats et d'entropie par l'algorithme forward-backward,
- *  des profils d'etats par l'algorithme de Viterbi forward-backward et
- *  affichage des resultats au format Gnuplot.
+ *  \param[in] error      reference on a StatError object,
+ *  \param[in] prefix     file prefix,
+ *  \param[in] iseq       reference on a MarkovianSequences object,
+ *  \param[in] identifier sequence identifier,
+ *  \param[in] output     output type,
+ *  \param[in] title      figure title.
  *
- *  arguments : reference sur un objet StatError, prefixe des fichiers, sequences,
- *              identificateur de la sequence, type de sortie, titre des figures.
- *
- *--------------------------------------------------------------*/
+ *  \return               error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool HiddenSemiMarkov::state_profile_plot_write(StatError &error , const char *prefix ,
                                                 const MarkovianSequences &iseq , int identifier ,
@@ -5380,7 +5428,7 @@ bool HiddenSemiMarkov::state_profile_plot_write(StatError &error , const char *p
 
   if (status) {
 
-    // ecriture des fichiers de donnees
+    // writing of the date files
 
     data_file_name[0] << prefix << 0 << ".dat";
     out_data_file = new ofstream((data_file_name[0].str()).c_str());
@@ -5421,7 +5469,7 @@ bool HiddenSemiMarkov::state_profile_plot_write(StatError &error , const char *p
         out_data_file->close();
         delete out_data_file;
 
-        // ecriture du fichier de commandes et du fichier d'impression
+        // writing of the script files
 
         for (i = 0;i < 2;i++) {
           ostringstream file_name[2];
@@ -5660,16 +5708,21 @@ bool HiddenSemiMarkov::state_profile_plot_write(StatError &error , const char *p
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of state and entropy profiles using the forward-backward algorithm,
+ *         of state profiles using the Viterbi forward-backward algorithm and
+ *         plot of the results at the Gnuplot format.
  *
- *  Calcul des profils d'etats et d'entropie par l'algorithme forward-backward,
- *  des profils d'etats par l'algorithme de Viterbi forward-backward et
- *  affichage des resultats au format Gnuplot.
+ *  \param[in] error      reference on a StatError object,
+ *  \param[in] prefix     file prefix,
+ *  \param[in] identifier sequence identifier,
+ *  \param[in] output     output type,
+ *  \param[in] title      figure title.
  *
- *  arguments : reference sur un objet StatError, prefixe des fichiers,
- *              identificateur de la sequence, type de sortie, titre des figures.
- *
- *--------------------------------------------------------------*/
+ *  \return               error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool HiddenSemiMarkov::state_profile_plot_write(StatError &error , const char *prefix , int identifier ,
                                                 state_profile output , const char *title) const
@@ -5693,16 +5746,20 @@ bool HiddenSemiMarkov::state_profile_plot_write(StatError &error , const char *p
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of state and entropy profiles using the forward-backward algorithm,
+ *         of state profiles using the Viterbi forward-backward algorithm and
+ *         plot of the profiles.
  *
- *  Calcul des profils d'etats et d'entropie par l'algorithme forward-backward,
- *  des profils d'etats par l'algorithme de Viterbi forward-backward et
- *  sortie graphique des profils.
+ *  \param[in] error      reference on a StatError object,
+ *  \param[in] iseq       reference on a MarkovianSequences object,
+ *  \param[in] identifier sequence identifier,
+ *  \param[in] output     output type.
  *
- *  arguments : reference sur un objet StatError, sequences,
- *              identificateur de la sequence, type de sortie.
- *
- *--------------------------------------------------------------*/
+ *  \return               MultiPlotSet object.
+ */
+/*--------------------------------------------------------------*/
 
 MultiPlotSet* HiddenSemiMarkov::state_profile_plotable_write(StatError &error ,
                                                              const MarkovianSequences &iseq ,
@@ -5837,7 +5894,7 @@ MultiPlotSet* HiddenSemiMarkov::state_profile_plotable_write(StatError &error ,
       state_seq_likelihood = hsmarkov->viterbi_forward_backward(*seq , index , NULL , &plot[0] ,
                                                                 output , PLOT , seq_likelihood);
 
-      // 1ere vue : probabilitees maximum
+      // maximum posterior probabilities
 
       switch (output) {
       case SSTATE :
@@ -5875,7 +5932,7 @@ MultiPlotSet* HiddenSemiMarkov::state_profile_plotable_write(StatError &error ,
         plot[0][i].style = "linespoints";
       }
 
-      // 2eme vue : probabilitees lissees
+      // smoothed probabilities
 
       switch (output) {
       case SSTATE :
@@ -5913,7 +5970,7 @@ MultiPlotSet* HiddenSemiMarkov::state_profile_plotable_write(StatError &error ,
         plot[1][i].style = "linespoints";
       }
 
-      // 3eme vue : profils d'entropies conditionnelles
+      // conditional entropy profiles
 
       if (seq->index_parameter) {
         plot[2].xrange = Range(seq->index_parameter[index][0] , seq->index_parameter[index][seq->length[index] - 1]);
@@ -5937,7 +5994,7 @@ MultiPlotSet* HiddenSemiMarkov::state_profile_plotable_write(StatError &error ,
       plot[2][1].legend = SEQ_label[SEQL_MARGINAL_ENTROPY];
       plot[2][1].style = "linespoints";
 
-      // 4eme vue : profils d'entropies partielles
+      // partial entropy profiles
 
       if (seq->index_parameter) {
         plot[3].xrange = Range(seq->index_parameter[index][0] , seq->index_parameter[index][seq->length[index] - 1]);
@@ -5967,16 +6024,19 @@ MultiPlotSet* HiddenSemiMarkov::state_profile_plotable_write(StatError &error ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of state and entropy profiles using the forward-backward algorithm,
+ *         of state profiles using the Viterbi forward-backward algorithm and
+ *         plot of the results.
  *
- *  Calcul des profils d'etats et d'entropie par l'algorithme forward-backward,
- *  des profils d'etats par l'algorithme de Viterbi forward-backward et
- *  sortie graphique des resultats.
+ *  \param[in] error      reference on a StatError object,
+ *  \param[in] identifier sequence identifier,
+ *  \param[in] output     output type.
  *
- *  arguments : reference sur un objet StatError,
- *              identificateur de la sequence, type de sortie.
- *
- *--------------------------------------------------------------*/
+ *  \return               MultiPlotSet object.
+ */
+/*--------------------------------------------------------------*/
 
 MultiPlotSet* HiddenSemiMarkov::state_profile_plotable_write(StatError &error , int identifier ,
                                                              state_profile output) const
@@ -5999,15 +6059,18 @@ MultiPlotSet* HiddenSemiMarkov::state_profile_plotable_write(StatError &error , 
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the most probable state sequences.
  *
- *  Calcul des sequences d'etats les plus probables.
+ *  \param[in] error               reference on a StatError object,
+ *  \param[in] os                  stream,
+ *  \param[in] iseq                reference on a MarkovianSequences object,
+ *  \param[in] characteristic_flag flag on the computation of the characteristic distributions.
  *
- *  arguments : reference sur un objet StatError, stream,
- *              reference sur un objet MarkovianSequences,
- *              flag sur le calcul des lois caracteristiques.
- *
- *--------------------------------------------------------------*/
+ *  \return                        SemiMarkovData object.
+ */
+/*--------------------------------------------------------------*/
 
 SemiMarkovData* HiddenSemiMarkov::state_sequence_computation(StatError &error , ostream &os ,
                                                              const MarkovianSequences &iseq ,
@@ -6105,8 +6168,8 @@ SemiMarkovData* HiddenSemiMarkov::state_sequence_computation(StatError &error , 
 
     delete hsmarkov;
 
-    // extraction des caracteristiques des sequences et
-    // calcul des lois caracteristiques du modele
+    // extraction of the characteristics of the sequences and
+    // computation of the characteristic distributions of the model
 
     if (seq->restoration_likelihood == D_INF) {
       delete seq;
@@ -6183,16 +6246,20 @@ SemiMarkovData* HiddenSemiMarkov::state_sequence_computation(StatError &error , 
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Comparison of hidden semi-Markov chains for a sample of sequences.
  *
- *  Comparaison de differentes semi-chaines de Markov cachees pour un ensemble
- *  de sequences.
+ *  \param[in] error     reference on a StatError object,
+ *  \param[in] os        stream,
+ *  \param[in] nb_model  number of hidden semi-Markov chains,
+ *  \param[in] ihsmarkov pointer on HiddenSemiMarkov objects,
+ *  \param[in] algorithm type of algorithm (FORWARD/VITERBI),
+ *  \param[in] path      file path.
  *
- *  arguments : reference sur un objet StatError, stream, nombre de semi-chaines
- *              de Markov cachees, pointeur sur les semi-chaines de Markov cachees,
- *              type d'algorithme (FORWARD/VITERBI), path.
- *
- *--------------------------------------------------------------*/
+ *  \return              error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool MarkovianSequences::comparison(StatError &error , ostream &os , int nb_model ,
                                     const HiddenSemiMarkov **ihsmarkov ,
@@ -6302,8 +6369,8 @@ bool MarkovianSequences::comparison(StatError &error , ostream &os , int nb_mode
       seq = new SemiMarkovData(*this);
     }
 
-    // pour chaque sequence, calcul de la vraisemblance (FORWARD) ou de la vraisemblance
-    // de la sequence d'etats la plus probable (VITERBI) pour chaque modele possible
+    // for each sequence, computation of the log-likelihood for the observed sequence (FORWARD) or
+    // of the log-likelihood for the most probable state sequence (VITERBI) for each model
 
     for (i = 0;i < nb_sequence;i++) {
       for (j = 0;j < nb_model;j++) {
@@ -6347,16 +6414,18 @@ bool MarkovianSequences::comparison(StatError &error , ostream &os , int nb_mode
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Simulation using a hidden semi-Markov chain.
  *
- *  Simulation par une semi-chaine de Markov cachee.
+ *  \param[in] error               reference on a StatError object,
+ *  \param[in] length_distribution sequence length frequency distribution,
+ *  \param[in] counting_flag       flag on the computation of the counting distributions,
+ *  \param[in] divergence_flag     flag on the computation of the Kullback-Leibler divergence.
  *
- *  arguments : reference sur un objet StatError,
- *              loi empirique des longueurs des sequences,
- *              flag sur le calcul des lois de comptage,
- *              flag calcul d'une divergence de Kullback-Leibler.
- *
- *--------------------------------------------------------------*/
+ *  \return                        SemiMarkovData object.
+ */
+/*--------------------------------------------------------------*/
 
 SemiMarkovData* HiddenSemiMarkov::simulation(StatError &error ,
                                              const FrequencyDistribution &length_distribution ,
@@ -6387,15 +6456,18 @@ SemiMarkovData* HiddenSemiMarkov::simulation(StatError &error ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Simulation using a hidden semi-Markov chain.
  *
- *  Simulation par une semi-chaine de Markov cachee.
+ *  \param[in] error         reference on a StatError object,
+ *  \param[in] nb_sequence   number of sequences,
+ *  \param[in] length        sequence length,
+ *  \param[in] counting_flag flag on the computation of the counting distributions.
  *
- *  arguments : reference sur un objet StatError,
- *              nombre et longueur des sequences,
- *              flag sur le calcul des lois de comptage.
- *
- *--------------------------------------------------------------*/
+ *  \return                  SemiMarkovData object.
+ */
+/*--------------------------------------------------------------*/
 
 SemiMarkovData* HiddenSemiMarkov::simulation(StatError &error , int nb_sequence ,
                                              int length , bool counting_flag) const
@@ -6425,15 +6497,18 @@ SemiMarkovData* HiddenSemiMarkov::simulation(StatError &error , int nb_sequence 
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Simulation using a hidden semi-Markov chain.
  *
- *  Simulation par une semi-chaine de Markov cachee.
+ *  \param[in] error         reference on a StatError object,
+ *  \param[in] nb_sequence   number of sequences,
+ *  \param[in] iseq          reference on a MarkovianSequences object,
+ *  \param[in] counting_flag flag on the computation of the counting distributions.
  *
- *  arguments : reference sur un objet StatError, nombre de sequences,
- *              reference sur un objet MarkovianSequences,
- *              flag sur le calcul des lois de comptage.
- *
- *--------------------------------------------------------------*/
+ *  \return                  SemiMarkovData object.
+ */
+/*--------------------------------------------------------------*/
 
 SemiMarkovData* HiddenSemiMarkov::simulation(StatError &error , int nb_sequence ,
                                              const MarkovianSequences &iseq , bool counting_flag) const
@@ -6463,16 +6538,20 @@ SemiMarkovData* HiddenSemiMarkov::simulation(StatError &error , int nb_sequence 
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of Kullback-Leibler divergences between hidden semi-Markov chains.
  *
- *  Comparaison de semi-chaines de Markov cachees par calcul de divergences
- *  de Kullback-Leibler.
+ *  \param[in] error               reference on a StatError object,
+ *  \param[in] os                  stream,
+ *  \param[in] nb_model            number of hidden semi-Markov chains,
+ *  \param[in] ihsmarkov           pointer on HiddenSemiMarkov objects,
+ *  \param[in] length_distribution sequence length frequency distribution,
+ *  \param[in] path                file path.
  *
- *  arguments : reference sur un objet StatError, stream, nombre de semi-chaines
- *              de Markov cachees, pointeur sur les semi-chaines de Markov cachees,
- *              loi empirique des longueurs des sequences, path.
- *
- *--------------------------------------------------------------*/
+ *  \return                        DistanceMatrix object.
+ */
+/*--------------------------------------------------------------*/
 
 DistanceMatrix* HiddenSemiMarkov::divergence_computation(StatError &error , ostream &os ,
                                                          int nb_model , const HiddenSemiMarkov **ihsmarkov ,
@@ -6609,7 +6688,7 @@ DistanceMatrix* HiddenSemiMarkov::divergence_computation(StatError &error , ostr
 
     for (i = 0;i < nb_model;i++) {
 
-      // simulation d'un echantillon de sequences a partir d'une semi-chaine de Markov cachee
+      // generation of a sample of sequences using a hidden semi-Markov chain
 
       simul_seq = hsmarkov[i]->simulation(error , *length_distribution[i] , false , true);
       seq = simul_seq->remove_variable_1();
@@ -6630,7 +6709,7 @@ DistanceMatrix* HiddenSemiMarkov::divergence_computation(StatError &error , ostr
 
       }
 
-      // calcul des vraisemblances de l'echantillon pour chacune des semi-chaines de Markov cachees
+      // computation of the log-likelihood of each hidden semi-Markov chain for the sample of sequences
 
       for (j = 0;j < nb_model;j++) {
         if (j != i) {
@@ -6700,16 +6779,21 @@ DistanceMatrix* HiddenSemiMarkov::divergence_computation(StatError &error , ostr
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of Kullback-Leibler divergences between hidden semi-Markov chains.
  *
- *  Comparaison de semi-chaines de Markov cachees par calcul de divergences
- *  de Kullback-Leibler.
+ *  \param[in] error       reference on a StatError object,
+ *  \param[in] os          stream,
+ *  \param[in] nb_model    number of hidden semi-Markov chains,
+ *  \param[in] hsmarkov    pointer on HiddenSemiMarkov objects,
+ *  \param[in] nb_sequence number of generated sequences,
+ *  \param[in] length      sequence length,
+ *  \param[in] path        file path.
  *
- *  arguments : reference sur un objet StatError, stream, nombre de semi-chaines
- *              de Markov cachees, pointeur sur les semi-chaines de Markov cachees,
- *              nombre et longueur des sequences, path.
- *
- *--------------------------------------------------------------*/
+ *  \return                DistanceMatrix object.
+ */
+/*--------------------------------------------------------------*/
 
 DistanceMatrix* HiddenSemiMarkov::divergence_computation(StatError &error , ostream &os ,
                                                          int nb_model , const HiddenSemiMarkov **hsmarkov ,
@@ -6766,16 +6850,21 @@ DistanceMatrix* HiddenSemiMarkov::divergence_computation(StatError &error , ostr
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of Kullback-Leibler divergences between hidden semi-Markov chains.
  *
- *  Comparaison de semi-chaines de Markov cachees par calcul de divergences
- *  de Kullback-Leibler.
+ *  \param[in] error       reference on a StatError object,
+ *  \param[in] os          stream,
+ *  \param[in] nb_model    number of hidden semi-Markov chains,
+ *  \param[in] hsmarkov    pointer on HiddenSemiMarkov objects,
+ *  \param[in] nb_sequence number of generated sequences,
+ *  \param[in] seq         pointer on MarkovianSequences objects,
+ *  \param[in] path        file path.
  *
- *  arguments : reference sur un objet StatError, stream, nombre de semi-chaines
- *              de Markov cachees, pointeur sur les semi-chaines de Markov cachees,
- *              pointeurs sur des objets MarkovianSequences, path.
- *
- *--------------------------------------------------------------*/
+ *  \return                DistanceMatrix object.
+ */
+/*--------------------------------------------------------------*/
 
 DistanceMatrix* HiddenSemiMarkov::divergence_computation(StatError &error , ostream &os ,
                                                          int nb_model , const HiddenSemiMarkov **hsmarkov ,

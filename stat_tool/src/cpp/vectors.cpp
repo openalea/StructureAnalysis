@@ -54,7 +54,7 @@
 #include "vectors.h"
 #include "stat_label.h"
 
-// #include "quantile_computation.h"   probleme compilateur C++ Windows
+// #include "quantile_computation.h"   problem compiler C++ Windows
 
 using namespace std;
 
@@ -4036,7 +4036,7 @@ bool Vectors::ascii_write(StatError &error , const string path , bool exhaustive
  *
  *  \param[in,out] os                    stream,
  *  \param[in]     comment_flag          flag comments,
- *  \param[in]     posterior_probability posterior probabilites of the optimal assignments.
+ *  \param[in]     posterior_probability posterior probabilities of the optimal assignments.
  *  \param[in]     entropy               assignment entropies.
  */
 /*--------------------------------------------------------------*/

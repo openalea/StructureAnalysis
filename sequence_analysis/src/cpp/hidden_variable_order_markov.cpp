@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -56,16 +56,18 @@ namespace sequence_analysis {
 
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the VariableOrderMarkov class.
  *
- *  Constructeur de la classe VariableOrderMarkov.
- *
- *  arguments : pointeur sur un objet VariableOrderMarkovChain,
- *              nombre de processus d'observation, pointeurs sur des objets
- *              CategoricalProcess, DiscreteParametricProcess et
- *              ContinuousParametricProcess, longueur des sequences.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] pmarkov                           pointer on a VariableOrderMarkovChain object,
+ *  \param[in] inb_output_process                number of observation processes,
+ *  \param[in] categorical_observation           pointer on CategoricalProcess objects,
+ *  \param[in] discrete_parametric_observation   pointer on DiscreteParametricProcess objects,
+ *  \param[in] continuous_parametric_observation pointer on ContinuousParametricProcess objects,
+ *  \param[in] length                            sequence length.
+ */
+/*--------------------------------------------------------------*/
 
 VariableOrderMarkov::VariableOrderMarkov(const VariableOrderMarkovChain *pmarkov , int inb_output_process ,
                                          CategoricalProcess **categorical_observation ,
@@ -110,22 +112,25 @@ VariableOrderMarkov::VariableOrderMarkov(const VariableOrderMarkovChain *pmarkov
 }
 
 
-/*--------------------------------------------------------------*
- *
- *  Destructeur de la classe HiddenVariableOrderMarkov.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Destructor of the HiddenVariableOrderMarkov class.
+ */
+/*--------------------------------------------------------------*/
 
 HiddenVariableOrderMarkov::~HiddenVariableOrderMarkov() {}
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Application of a threshold on the probability parameters of
+ *         a hidden variable-order Markov chain.
  *
- *  Application d'un seuil sur les parametres d'une chaine de Markov cachee.
+ *  \param[in] min_probability minimum probability.
  *
- *  argument : probabilite minimum.
- *
- *--------------------------------------------------------------*/
+ *  \return                    HiddenVariableOrderMarkov object.
+ */
+/*--------------------------------------------------------------*/
 
 HiddenVariableOrderMarkov* HiddenVariableOrderMarkov::thresholding(double min_probability) const
 
@@ -147,14 +152,18 @@ HiddenVariableOrderMarkov* HiddenVariableOrderMarkov::thresholding(double min_pr
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Construction of a HiddenVariableOrderMarkov object from a file.
  *
- *  Construction d'un objet HiddenVariableOrderMarkov a partir d'un fichier.
+ *  \param[in] error           reference on a StatError object,
+ *  \param[in] path            file path,
+ *  \param[in] length          sequence length,
+ *  \param[in] cumul_threshold threshold on the cumulative parametric distribution functions.
  *
- *  arguments : reference sur un objet StatError, path, longueur des sequences,
- *              seuil sur les fonctions de repartition des lois parametriques.
- *
- *--------------------------------------------------------------*/
+ *  \return                    HiddenVariableOrderMarkov object.
+ */
+/*--------------------------------------------------------------*/
 
 HiddenVariableOrderMarkov* HiddenVariableOrderMarkov::ascii_read(StatError &error ,
                                                                  const string path , int length ,
@@ -215,7 +224,7 @@ HiddenVariableOrderMarkov* HiddenVariableOrderMarkov::ascii_read(StatError &erro
 
       while (!((token = next()).isNull())) {
 
-        // test mot cle (EQUILIBRIUM) HIDDEN_MARKOV_CHAIN
+        // test (EQUILIBRIUM_)HIDDEN_MARKOV_CHAIN keyword
 
         if (i == 0) {
           if (token == SEQ_word[SEQW_HIDDEN_MARKOV_CHAIN]) {
@@ -248,11 +257,11 @@ HiddenVariableOrderMarkov* HiddenVariableOrderMarkov::ascii_read(StatError &erro
 
     if (type != DEFAULT_TYPE) {
 
-      // analyse du format et lecture de la chaine de Markov d'ordre variable
+      // analysis of the format and reading of the variable-order Markov chain
 
       imarkov = VariableOrderMarkovChain::parsing(error , in_file , line , type);
 
-      // analyse du format et lecture des lois d'observation
+      // analysis of the format and reading of the observation distributions
 
       if (imarkov) {
         nb_output_process = I_DEFAULT;
@@ -279,7 +288,7 @@ HiddenVariableOrderMarkov* HiddenVariableOrderMarkov::ascii_read(StatError &erro
           while (!((token = next()).isNull())) {
             switch (i) {
 
-            // test nombre de processus d'observation
+            // test number of observation processes
 
             case 0 : {
               lstatus = locale.stringToNum(token , &value);
@@ -299,7 +308,7 @@ HiddenVariableOrderMarkov* HiddenVariableOrderMarkov::ascii_read(StatError &erro
               break;
             }
 
-            // test mot cle OUTPUT_PROCESS(ES)
+            // test OUTPUT_PROCESS(ES) keyword
 
             case 1 : {
               if (token != STAT_word[nb_output_process == 1 ? STATW_OUTPUT_PROCESS : STATW_OUTPUT_PROCESSES]) {
@@ -359,7 +368,7 @@ HiddenVariableOrderMarkov* HiddenVariableOrderMarkov::ascii_read(StatError &erro
             while (!((token = next()).isNull())) {
               switch (i) {
 
-              // test mot cle OUTPUT_PROCESS
+              // test OUTPUT_PROCESS keyword
 
               case 0 : {
                 if (token == STAT_word[STATW_OUTPUT_PROCESS]) {
@@ -372,7 +381,7 @@ HiddenVariableOrderMarkov* HiddenVariableOrderMarkov::ascii_read(StatError &erro
                 break;
               }
 
-              // test indice du processus d'observation
+              // test observation process index
 
               case 1 : {
                 lstatus = locale.stringToNum(token , &value);
@@ -387,7 +396,7 @@ HiddenVariableOrderMarkov* HiddenVariableOrderMarkov::ascii_read(StatError &erro
                 break;
               }
 
-              // test separateur
+              // test separator
 
               case 2 : {
                 if (token != ":") {
@@ -397,7 +406,7 @@ HiddenVariableOrderMarkov* HiddenVariableOrderMarkov::ascii_read(StatError &erro
                 break;
               }
 
-              // test mot cle CATEGORICAL / DISCRETE_PARAMETRIC / CONTINUOUS_PARAMETRIC
+              // test CATEGORICAL/DISCRETE_PARAMETRIC/CONTINUOUS_PARAMETRIC keyword
 
               case 3 : {
                 if ((token == STAT_word[STATW_CATEGORICAL]) ||
@@ -506,13 +515,14 @@ HiddenVariableOrderMarkov* HiddenVariableOrderMarkov::ascii_read(StatError &erro
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a HiddenVariableOrderMarkov object in a file.
  *
- *  Ecriture d'un objet HiddenVariableOrderMarkov dans un fichier.
- *
- *  arguments : stream, flag niveau de detail.
- *
- *--------------------------------------------------------------*/
+ *  \param[in,out] os         stream,
+ *  \param[in]     exhaustive flag detail level.
+ */
+/*--------------------------------------------------------------*/
 
 ostream& HiddenVariableOrderMarkov::ascii_write(ostream &os , bool exhaustive) const
 
@@ -523,14 +533,17 @@ ostream& HiddenVariableOrderMarkov::ascii_write(ostream &os , bool exhaustive) c
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a HiddenVariableOrderMarkov object in a file.
  *
- *  Ecriture d'un objet HiddenVariableOrderMarkov dans un fichier.
+ *  \param[in] error      reference on a StatError object,
+ *  \param[in] path       file path,
+ *  \param[in] exhaustive flag detail level.
  *
- *  arguments : reference sur un objet StatError, path,
- *              flag niveau de detail.
- *
- *--------------------------------------------------------------*/
+ *  \return               error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool HiddenVariableOrderMarkov::ascii_write(StatError &error , const string path ,
                                             bool exhaustive) const
@@ -556,13 +569,17 @@ bool HiddenVariableOrderMarkov::ascii_write(StatError &error , const string path
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a HiddenVariableOrderMarkov object in a file
+ *         at the spreadsheet format.
  *
- *  Ecriture d'un objet HiddenVariableOrderMarkov dans un fichier au format tableur.
+ *  \param[in] error reference on a StatError object,
+ *  \param[in] path  file path.
  *
- *  arguments : reference sur un objet StatError, path.
- *
- *--------------------------------------------------------------*/
+ *  \return          error status.
+ */
+/*--------------------------------------------------------------*/
 
 bool HiddenVariableOrderMarkov::spreadsheet_write(StatError &error ,
                                                   const string path) const

@@ -492,7 +492,7 @@ Chain* Chain::parsing(StatError &error , ifstream &in_file , int &line , process
       if ((read_line == 0) || ((type == ORDINARY) && (read_line == 2))) {
         while (!((token = next()).isNull())) {
 
-          // test INITIAL_PROBABILITIES/TRANSITION_PROBABILITIES keywords
+          // test INITIAL_PROBABILITIES/TRANSITION_PROBABILITIES keyword
 
           if (i == 0) {
             if ((type == ORDINARY) && (read_line == 0)) {

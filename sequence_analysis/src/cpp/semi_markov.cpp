@@ -985,7 +985,7 @@ SemiMarkov* SemiMarkov::ascii_read(StatError &error , const string path , int le
 
       while (!((token = next()).isNull())) {
 
-        // test (EQUILIBRIUM) SEMI-MARKOV_CHAIN keyword
+        // test (EQUILIBRIUM_)SEMI-MARKOV_CHAIN keyword
 
         if (i == 0) {
           if (token == SEQ_word[SEQW_SEMI_MARKOV_CHAIN]) {
@@ -1491,7 +1491,7 @@ ostream& SemiMarkov::ascii_write(ostream &os , const SemiMarkovData *seq ,
     }
     os << SEQ_label[SEQL_CUMUL_LENGTH] << ": " << seq->cumul_length << endl;
 
-    // writing of the information quantity of sequences in the i.i.d. case
+    // writing of the information quantity of the observed sequences in the i.i.d. case
 
     for (i = 0;i < seq->nb_variable;i++) {
       if (seq->type[i] == REAL_VALUE) {
@@ -1510,7 +1510,7 @@ ostream& SemiMarkov::ascii_write(ostream &os , const SemiMarkovData *seq ,
          << information / seq->cumul_length << ")" << endl;
     }
 
-    // writing of the log-likelihoods for sequences
+    // writing of the (penalized) log-likelihoods of the model for sequences
 
     switch (hidden) {
 
@@ -1890,7 +1890,7 @@ ostream& SemiMarkov::spreadsheet_write(ostream &os , const SemiMarkovData *seq ,
 
     os << "\n" << SEQ_label[SEQL_CUMUL_LENGTH] << "\t" << seq->cumul_length << endl;
 
-    // writing of the information quantity of sequences in the i.i.d. case
+    // writing of the information quantity of the observed sequences in the i.i.d. case
 
     for (i = 0;i < seq->nb_variable;i++) {
       if (seq->type[i] == REAL_VALUE) {
@@ -1905,7 +1905,7 @@ ostream& SemiMarkov::spreadsheet_write(ostream &os , const SemiMarkovData *seq ,
          << information / seq->cumul_length << endl;
     }
 
-    // writing of the log-likelihoods for sequences
+    // writing of the (penalized) log-likelihoods of the model for sequences
 
     switch (hidden) {
 
@@ -3213,8 +3213,8 @@ SemiMarkovData* SemiMarkovData::remove_index_parameter(StatError &error) const
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Construction of auxiliary variables corresponding to
- *         the optimal state sequences.
+ *  \brief Construction of the auxiliary variables corresponding to
+ *         the restored state sequences.
  *
  *  \param[in] error reference on a StatError object.
  *
@@ -3268,7 +3268,7 @@ MarkovianSequences* SemiMarkovData::build_auxiliary_variable(StatError &error) c
  *
  *  \param[in] error reference on a StatError object.
  *
- *  \return          SemiMarkovData object.
+ *  \return          MarkovianSequences object.
  */
 /*--------------------------------------------------------------*/
 

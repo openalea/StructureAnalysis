@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -49,12 +49,12 @@ namespace sequence_analysis {
 
 
 
-/*--------------------------------------------------------------*
- *
- *  Calcul des probabilites de chaque etat en fonction de l'index
- *  pour une chaine de Markov d'ordre variable.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the state probabilities as a function of
+ *         the index parameter for a variable-order Markov chain.
+ */
+/*--------------------------------------------------------------*/
 
 void VariableOrderMarkovChain::index_state_distribution()
 
@@ -66,7 +66,7 @@ void VariableOrderMarkovChain::index_state_distribution()
 
   index_state = state_process->index_value;
 
-  // initialisation des probabilites des memoires et des etats
+  // initialization of the probabilities of the memories and the states
 
   memory = new double[nb_row];
   previous_memory = new double[nb_row];
@@ -104,17 +104,17 @@ void VariableOrderMarkovChain::index_state_distribution()
   }
   }
 
-  // calcul des probabilites de chaque etat en fonction de l'index
+  // computation of the state probabilities as a function of the index parameter
 
   for (i = 1;i < index_state->length;i++) {
 
-    // mise a jour des probabilites des memoires
+    // update of the probabilities of the memories
 
     for (j = 1;j < nb_row;j++) {
       previous_memory[j] = memory[j];
     }
 
-    // calcul des probabilites des memoires
+    // computation of the probabilities of the memories
 
     for (j = 1;j < nb_row;j++) {
       memory[j] = 0.;
@@ -123,7 +123,7 @@ void VariableOrderMarkovChain::index_state_distribution()
       }
     }
 
-    // calcul des probabilites des etats
+    // computation of the state probabilities
 
     for (j = 0;j < nb_state;j++) {
       index_state->point[j][i] = 0.;
@@ -138,12 +138,14 @@ void VariableOrderMarkovChain::index_state_distribution()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the probabilities of the memories for an ordinary variable-order Markov chain
+ *         taking account of the sequence length distribution.
  *
- *  Calcul des probabilites de chaque memoire pour une chaine de Markov d'ordre variable
- *  ordinaire en tenant compte de la distribution des longueurs des sequences.
- *
- *--------------------------------------------------------------*/
+ *  \return memory probabilities.
+ */
+/*--------------------------------------------------------------*/
 
 double* VariableOrderMarkovChain::memory_computation() const
 
@@ -157,7 +159,7 @@ double* VariableOrderMarkovChain::memory_computation() const
     average_memory[i] = 0.;
   }
 
-  // initialisation des probabilites des memoires
+  // initialization of the probabilities of the memories
 
   memory = new double[nb_row];
   previous_memory = new double[nb_row];
@@ -172,17 +174,17 @@ double* VariableOrderMarkovChain::memory_computation() const
     }
   }
 
-  // calcul des probabilites de chaque memoire en fonction de l'index
+  // computation of the probabilities of the memories as a function of the index parameter
 
   for (i = 1;i < state_process->length->nb_value - 2;i++) {
 
-    // mise a jour des probabilites des memoires
+    // update of the probabilities of the memories
 
     for (j = 1;j < nb_row;j++) {
       previous_memory[j] = memory[j];
     }
 
-    // calcul des probabilites des memoires
+    // computation of the probabilities of the memories
 
     for (j = 1;j < nb_row;j++) {
       memory[j] = 0.;
@@ -191,7 +193,7 @@ double* VariableOrderMarkovChain::memory_computation() const
       }
     }
 
-    // accumulation des probabilites des memoires
+    // accumulation of the probabilities of the memories
 
     for (j = 1;j < nb_row;j++) {
       average_memory[j] += memory[j] * (1. - state_process->length->cumul[i]);
@@ -205,14 +207,15 @@ double* VariableOrderMarkovChain::memory_computation() const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the probability of not visiting a state
+ *         for an ordinary variable-order Markov chain.
  *
- *  Calcul de la probabilite de ne pas observer un etat d'une chaine de Markov
- *  d'ordre variable ordinaire.
- *
- *  arguments : etat, seuil sur la somme des probabilites des memoires.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] istate    state,
+ *  \param[in] increment threshold on the sum of the probabilities of the memories.
+ */
+/*--------------------------------------------------------------*/
 
 void VariableOrderMarkovChain::state_no_occurrence_probability(int istate , double increment)
 
@@ -231,7 +234,7 @@ void VariableOrderMarkovChain::state_no_occurrence_probability(int istate , doub
            &no_occurrence = state_process->no_occurrence[istate];
 
 
-    // initialisation des probabilites des memoires
+    // initialization of the probabilities of the memories
 
     memory = new double[nb_row];
     previous_memory = new double[nb_row];
@@ -266,14 +269,14 @@ void VariableOrderMarkovChain::state_no_occurrence_probability(int istate , doub
 
     while ((memory_sum > increment) || (i < (nb_state - 1) * max_order)) {
 
-      // mise a jour des probabilites des memoires
+      // update of the probabilities of the memories
 
       for (j = 1;j < nb_row;j++) {
         previous_memory[j] = memory[j];
       }
 
-      // calcul des probabilites des memoires et mise a jour
-      // de la probabilite de ne pas observer l'etat
+      // computation of the probabilities of the memories and update of
+      // the probability of not visiting the selected state
 
       memory_sum = 0.;
 
@@ -316,15 +319,16 @@ void VariableOrderMarkovChain::state_no_occurrence_probability(int istate , doub
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the distribution of the time to the 1st occurrence of
+ *         a state for a variable-order Markov chain.
  *
- *  Calcul de la loi du temps avant la 1ere occurrence d'un etat
- *  pour une chaine de Markov d'ordre variable.
- *
- *  arguments : etat, nombre minimum de valeurs,
- *              seuil sur la fonction de repartition.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] istate          state,
+ *  \param[in] min_nb_value    minimum number of values,
+ *  \param[in] cumul_threshold threshold on the cumulative distribution function.
+ */
+/*--------------------------------------------------------------*/
 
 void VariableOrderMarkovChain::state_first_occurrence_distribution(int istate , int min_nb_value ,
                                                                    double cumul_threshold)
@@ -341,7 +345,7 @@ void VariableOrderMarkovChain::state_first_occurrence_distribution(int istate , 
   pmass = first_occurrence->mass;
   pcumul = first_occurrence->cumul;
 
-  // initialisation des probabilites des memoires
+  // initialization of the probabilities of the memories
 
   memory = new double[nb_row];
   previous_memory = new double[nb_row];
@@ -396,13 +400,13 @@ void VariableOrderMarkovChain::state_first_occurrence_distribution(int istate , 
   while (((*pcumul < cumul_threshold - first_occurrence->complement) || (i < min_nb_value)) &&
          (i < first_occurrence->alloc_nb_value)) {
 
-    // mise a jour des probabilites des memoires
+    // update of the probabilities of the memories
 
     for (j = 1;j < nb_row;j++) {
       previous_memory[j] = memory[j];
     }
 
-    // calcul des probabilites des memoires et de la valeur courante
+    // computation of the probabilities of the memories and the current probability mass
 
     *++pmass = 0.;
 
@@ -434,7 +438,7 @@ void VariableOrderMarkovChain::state_first_occurrence_distribution(int istate , 
       }
     }
 
-    // mise a jour de la fonction de repartition
+    // update of the cumulative distribution function
 
     pcumul++;
     *pcumul = *(pcumul - 1) + *pmass;
@@ -461,15 +465,16 @@ void VariableOrderMarkovChain::state_first_occurrence_distribution(int istate , 
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the probability of leaving definitively a state
+ *         for an ordinary variable-order Markov chain.
  *
- *  Calcul de la probabilite de quitter un etat sans possibilite
- *  d'y revenir pour une chaine de Markov d'ordre variable ordinaire.
- *
- *  arguments : loi des memoires, etat,
- *              seuil sur la somme des probabilites des memoires.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] imemory   memory distribution,
+ *  \param[in] istate    state,
+ *  \param[in] increment threshold on the sum of the probabilities of the memories.
+ */
+/*--------------------------------------------------------------*/
 
 void VariableOrderMarkovChain::state_leave_probability(const double *imemory , int istate ,
                                                        double increment)
@@ -484,7 +489,7 @@ void VariableOrderMarkovChain::state_leave_probability(const double *imemory , i
     memory = new double[nb_row];
     previous_memory = new double[nb_row];
 
-    // initialisation des probabilites des memoires
+    // initialization of the probabilities of the memories
 
     memory_sum = 0.;
 
@@ -513,14 +518,14 @@ void VariableOrderMarkovChain::state_leave_probability(const double *imemory , i
 
     do {
 
-      // mise a jour des probabilites des memoires
+      // update of the probabilities of the memories
 
       for (j = 1;j < nb_row;j++) {
         previous_memory[j] = memory[j];
       }
 
-      // calcul des probabilites des memoires et mise a jour
-      // de la probabilite de quitter l'etat
+      // computation of the probabilities of the memories and update of
+      // the probability of leaving definitively the selected state
 
       memory_sum = 0.;
 
@@ -560,15 +565,17 @@ void VariableOrderMarkovChain::state_leave_probability(const double *imemory , i
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the distribution of the recurrence time in a state
+ *         for a variable-order Markov chain.
  *
- *  Calcul de la loi du temps de retour dans un etat
- *  pour une chaine de Markov d'ordre variable.
- *
- *  arguments : loi des memoires, etat, nombre minimum de valeurs,
- *              seuil sur la fonction de repartition.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] imemory         memory distribution,
+ *  \param[in] istate          state,
+ *  \param[in] min_nb_value    minimum number of values,
+ *  \param[in] cumul_threshold threshold on the cumulative distribution function.
+ */
+/*--------------------------------------------------------------*/
 
 void VariableOrderMarkovChain::state_recurrence_time_distribution(const double *imemory , int istate ,
                                                                   int min_nb_value , double cumul_threshold)
@@ -590,7 +597,7 @@ void VariableOrderMarkovChain::state_recurrence_time_distribution(const double *
   memory = new double[nb_row];
   previous_memory = new double[nb_row];
 
-  // initialisation des probabilites des memoires
+  // initialization of the probabilities of the memories
 
   sum = 0.;
 
@@ -618,13 +625,13 @@ void VariableOrderMarkovChain::state_recurrence_time_distribution(const double *
 
   do {
 
-    // mise a jour des probabilites des memoires
+    // update of the probabilities of the memories
 
     for (j = 1;j < nb_row;j++) {
       previous_memory[j] = memory[j];
     }
 
-    // calcul des probabilites des memoires et de la valeur courante
+    // computation of the probabilities of the memories and the current probability mass
 
     *++pmass = 0.;
 
@@ -652,7 +659,7 @@ void VariableOrderMarkovChain::state_recurrence_time_distribution(const double *
       }
     }
 
-    // mise a jour de la fonction de repartition
+    // update of the cumulative distribution function
 
     pcumul++;
     *pcumul = *(pcumul - 1) + *pmass;
@@ -681,14 +688,17 @@ void VariableOrderMarkovChain::state_recurrence_time_distribution(const double *
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the distribution of the sojourn time in a state
+ *         for a variable-order Markov chain.
  *
- *  Calcul de la loi d'occupation d'un etat d'une chaine de Markov d'ordre variable.
- *
- *  arguments : loi des memoires, etat, nombre minimum de valeurs,
- *              seuil sur la fonction de repartition.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] imemory         memory distribution,
+ *  \param[in] istate          state,
+ *  \param[in] min_nb_value    minimum number of values,
+ *  \param[in] cumul_threshold threshold on the cumulative distribution function.
+ */
+/*--------------------------------------------------------------*/
 
 void VariableOrderMarkovChain::state_sojourn_time_distribution(const double *imemory , int istate ,
                                                                int min_nb_value , double cumul_threshold)
@@ -710,7 +720,7 @@ void VariableOrderMarkovChain::state_sojourn_time_distribution(const double *ime
   memory = new double[nb_row];
   previous_memory = new double[nb_row];
 
-  // initialisation des probabilites des memoires
+  // initialization of the probabilities of the memories
 
   sum = 0.;
 
@@ -736,17 +746,17 @@ void VariableOrderMarkovChain::state_sojourn_time_distribution(const double *ime
     }
   }
 
-  // temps < ordre maximum de la chaine de Markov
+  // sojourn time < maximum order of the Markov chain
 
   for (i = 1;i < max_order;i++) {
 
-    // mise a jour des probabilites des memoires
+    // update of the probabilities of the memories
 
     for (j = 1;j < nb_row;j++) {
       previous_memory[j] = memory[j];
     }
 
-    // calcul des probabilites des memoires et de la valeur courante
+    // computation of the probabilities of the memories and the current probability mass
 
     *++pmass = 0.;
 
@@ -767,13 +777,13 @@ void VariableOrderMarkovChain::state_sojourn_time_distribution(const double *ime
       }
     }
 
-    // mise a jour de la fonction de repartition
+    // update of the cumulative distribution function
 
     pcumul++;
     *pcumul = *(pcumul - 1) + *pmass;
   }
 
-  // calcul des probabilites des valeurs de la traine geometrique
+  // computation of the probability masses of the geometric tail
 
   for (j = 1;j < nb_row;j++) {
     if (!child[j]) {
@@ -814,14 +824,14 @@ void VariableOrderMarkovChain::state_sojourn_time_distribution(const double *ime
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the observation probabilities as a function of
+ *         the index parameter for a hidden variable-order Markov chain.
  *
- *  Calcul des probabilites de chaque observation en fonction de l'index
- *  pour une chaine de Markov d'ordre variable cachee.
- *
- *  argument : indice du processus d'observation.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] variable observation process index.
+ */
+/*--------------------------------------------------------------*/
 
 void VariableOrderMarkov::index_output_distribution(int variable)
 
@@ -832,8 +842,7 @@ void VariableOrderMarkov::index_output_distribution(int variable)
 
   index_value = categorical_process[variable]->index_value;
 
-  // calcul des probabilites des etats de la chaine de Markov d'ordre variable
-  // sous-jacente en fonction de l'index si necessaire
+  // computation of the state probabilities
 
   if (!(state_process->index_value)) {
     state_process->index_value = new Curves(nb_state , index_value->length);
@@ -841,7 +850,7 @@ void VariableOrderMarkov::index_output_distribution(int variable)
   }
   index_state = state_process->index_value;
 
-  // prise en compte des probabilites d'observation
+  // incorporation of the observation probabilities
 
   for (i = 0;i < index_value->length;i++) {
     for (j = 0;j < categorical_process[variable]->nb_value;j++) {
@@ -855,15 +864,16 @@ void VariableOrderMarkov::index_output_distribution(int variable)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the probability of not observing a value for
+ *         for a hidden ordinary variable-order Markov chain.
  *
- *  Calcul de la probabilite de ne pas observer une valeur
- *  pour une chaine de Markov d'ordre variable cachee ordinaire.
- *
- *  arguments : indice du processus d'observation, observation,
- *              seuil sur la somme des probabilites des memoires.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] variable  observation process index,
+ *  \param[in] output    observation,
+ *  \param[in] increment threshold on the sum of the probabilities of the memories.
+ */
+/*--------------------------------------------------------------*/
 
 void VariableOrderMarkov::output_no_occurrence_probability(int variable , int output ,
                                                            double increment)
@@ -880,7 +890,7 @@ void VariableOrderMarkov::output_no_occurrence_probability(int variable , int ou
     observation[i] = categorical_process[variable]->observation[i]->mass[output];
   }
 
-  // calcul de l'accessibilite d'une observation a partir d'un etat donne
+  // computation of the accessibility of the selected observation from a given state
 
   output_accessibility = new bool[nb_state];
 
@@ -910,7 +920,7 @@ void VariableOrderMarkov::output_no_occurrence_probability(int variable , int ou
 
   if (status) {
 
-    // initialisation des probabilites des memoires
+    // initialization of the probabilities of the memories
 
     memory = new double[nb_row];
     previous_memory = new double[nb_row];
@@ -939,14 +949,14 @@ void VariableOrderMarkov::output_no_occurrence_probability(int variable , int ou
 
     while ((memory_sum > increment) || (i < nb_state * max_order)) {
 
-      // mise a jour des probabilites des memoires
+      // update of the probabilities of the memories
 
       for (j = 1;j < nb_row;j++) {
         previous_memory[j] = memory[j];
       }
 
-      // calcul des probabilites des memoires et
-      // mise a jour de la probabilite de ne pas observer la valeur
+      // computation of the probabilities of the memories and update of
+      // the probability of not observing the selected observation
 
       memory_sum = 0.;
 
@@ -978,15 +988,17 @@ void VariableOrderMarkov::output_no_occurrence_probability(int variable , int ou
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the distribution of the time to the 1st occurrence of
+ *         a categorical observation for a hidden variable-order Markov chain.
  *
- *  Calcul de la loi du temps avant la 1ere occurrence d'une observation
- *  pour une chaine de Markov d'ordre variable cachee.
- *
- *  arguments : indice du processus d'observation, observation,
- *              nombre minimum de valeurs, seuil sur la fonction de repartition.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] variable        observation process index,
+ *  \param[in] output          observation,
+ *  \param[in] min_nb_value    minimum number of values,
+ *  \param[in] cumul_threshold threshold on the cumulative distribution function.
+ */
+/*--------------------------------------------------------------*/
 
 void VariableOrderMarkov::output_first_occurrence_distribution(int variable , int output ,
                                                                int min_nb_value ,
@@ -1009,7 +1021,7 @@ void VariableOrderMarkov::output_first_occurrence_distribution(int variable , in
     observation[i] = categorical_process[variable]->observation[i]->mass[output];
   }
 
-  // initialisation des probabilites des memoires
+  // initialization of the probabilities of the memories
 
   memory = new double[nb_row];
   previous_memory = new double[nb_row];
@@ -1052,13 +1064,13 @@ void VariableOrderMarkov::output_first_occurrence_distribution(int variable , in
   while (((*pcumul < cumul_threshold - first_occurrence->complement) || (i < min_nb_value)) &&
          (i < first_occurrence->alloc_nb_value)) {
 
-    // mise a jour des probabilites des memoires
+    // update of the probabilities of the memories
 
     for (j = 1;j < nb_row;j++) {
       previous_memory[j] = memory[j];
     }
 
-    // calcul des probabilites des memoires et de la valeur courante
+    // computation of the probabilities of the memories and the current probability mass
 
     *++pmass = 0.;
 
@@ -1072,7 +1084,7 @@ void VariableOrderMarkov::output_first_occurrence_distribution(int variable , in
       *pmass += observation[state[j][0]] * sum;
     }
 
-    // mise a jour de la fonction de repartition
+    // update of the cumulative distribution function
 
     pcumul++;
     *pcumul = *(pcumul - 1) + *pmass;
@@ -1092,15 +1104,17 @@ void VariableOrderMarkov::output_first_occurrence_distribution(int variable , in
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the probability of leaving definitively a categorical observation
+ *         for a hidden ordinary variable-order Markov chain.
  *
- *  Calcul de la probabilite de quitter une observation sans possibilite
- *  d'y revenir pour une chaine de Markov d'ordre variable cachee ordinaire.
- *
- *  arguments : loi des memoires, indice du processus d'observation,
- *              observation, seuil sur la somme des probabilites des memoires.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] imemory   memory distribution,
+ *  \param[in] variable  observation process index,
+ *  \param[in] output    observation,
+ *  \param[in] increment threshold on the sum of the probabilities of the memories.
+ */
+/*--------------------------------------------------------------*/
 
 void VariableOrderMarkov::output_leave_probability(const double *imemory , int variable ,
                                                    int output , double increment)
@@ -1117,7 +1131,7 @@ void VariableOrderMarkov::output_leave_probability(const double *imemory , int v
     observation[i] = categorical_process[variable]->observation[i]->mass[output];
   }
 
-  // calcul de l'accessibilite d'une observation a partir d'un etat donne
+  // computation of the accessibility of the selected observation from a given state
 
   output_accessibility = new bool[nb_state];
 
@@ -1149,7 +1163,7 @@ void VariableOrderMarkov::output_leave_probability(const double *imemory , int v
     memory = new double[nb_row];
     previous_memory = new double[nb_row];
 
-    // initialisation des probabilites des memoires
+    // initialization of the probabilities of the memories
 
     memory_sum = 0.;
 
@@ -1172,14 +1186,14 @@ void VariableOrderMarkov::output_leave_probability(const double *imemory , int v
 
     do {
 
-      // mise a jour des probabilites des memoires
+      // update of the probabilities of the memories
 
       for (j = 1;j < nb_row;j++) {
         previous_memory[j] = memory[j];
       }
 
-      // calcul des probabilites des memoires et mise a jour
-      // de la probabilite de quitter l'observation
+      // computation of the probabilities of the memories and update of
+      // the probability of leaving definitively the selected observation
 
       memory_sum = 0.;
 
@@ -1215,16 +1229,18 @@ void VariableOrderMarkov::output_leave_probability(const double *imemory , int v
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the distribution of the recurrence time in a categorical observation
+ *         for a hidden variable-order Markov chain.
  *
- *  Calcul de la loi du temps de retour dans une observation
- *  pour une chaine de Markov d'ordre variable cachee.
- *
- *  arguments : loi des memoires, indice du processus d'observation,
- *              observation, nombre minimum de valeurs,
- *              seuil sur la fonction de repartition.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] imemory         memory distribution,
+ *  \param[in] variable        observation process index,
+ *  \param[in] output          observation,
+ *  \param[in] min_nb_valu     minimum number of values,
+ *  \param[in] cumul_threshold threshold on the cumulative distribution function.
+ */
+/*--------------------------------------------------------------*/
 
 void VariableOrderMarkov::output_recurrence_time_distribution(const double *imemory , int variable ,
                                                               int output , int min_nb_value ,
@@ -1252,7 +1268,7 @@ void VariableOrderMarkov::output_recurrence_time_distribution(const double *imem
   memory = new double[nb_row];
   previous_memory = new double[nb_row];
 
-  // initialisation des probabilites des memoires
+  // initialization of the probabilities of the memories
 
   sum = 0.;
 
@@ -1274,13 +1290,13 @@ void VariableOrderMarkov::output_recurrence_time_distribution(const double *imem
 
   do {
 
-    // mise a jour des probabilites des memoires
+    // update of the probabilities of the memories
 
     for (j = 1;j < nb_row;j++) {
       previous_memory[j] = memory[j];
     }
 
-    // calcul des probabilites des memoires et de la valeur courante
+    // computation of the probabilities of the memories and the current probability mass
 
     *++pmass = 0.;
 
@@ -1294,7 +1310,7 @@ void VariableOrderMarkov::output_recurrence_time_distribution(const double *imem
       *pmass += observation[state[j][0]] * sum;
     }
 
-    // mise a jour de la fonction de repartition
+    // update of the cumulative distribution function
 
     pcumul++;
     *pcumul = *(pcumul - 1) + *pmass;
@@ -1324,16 +1340,18 @@ void VariableOrderMarkov::output_recurrence_time_distribution(const double *imem
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the distribution of the sojourn time in a categorical observation
+ *         for a hidden variable-order Markov chain.
  *
- *  Calcul de la loi du temps de sejour dans une observation
- *  pour une chaine de Markov d'ordre variable cachee.
- *
- *  arguments : loi des memoires, indice du processus d'observation,
- *              observation, nombre minimum de valeurs,
- *              seuil sur la fonction de repartition.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] imemory         memory distribution,
+ *  \param[in] variable        observation process index,
+ *  \param[in] output          observation,
+ *  \param[in] min_nb_value    minimum number of values,
+ *  \param[in] cumul_threshold threshold on the cumulative distribution function.
+ */
+/*--------------------------------------------------------------*/
 
 void VariableOrderMarkov::output_sojourn_time_distribution(const double *imemory , int variable ,
                                                            int output , int min_nb_value ,
@@ -1361,7 +1379,7 @@ void VariableOrderMarkov::output_sojourn_time_distribution(const double *imemory
   memory = new double[nb_row];
   previous_memory = new double[nb_row];
 
-  // initialisation des probabilites des memoires
+  // initialization of the probabilities of the memories
 
   sum = 0.;
 
@@ -1399,13 +1417,13 @@ void VariableOrderMarkov::output_sojourn_time_distribution(const double *imemory
 
   do {
 
-    // mise a jour des probabilites des memoires
+    // update of the probabilities of the memories
 
     for (j = 1;j < nb_row;j++) {
       previous_memory[j] = memory[j];
     }
 
-    // calcul des probabilites des memoires et de la valeur courante
+    // computation of the probabilities of the memories and the current probability mass
 
     absorption = 0.;
     *++pmass = 0.;
@@ -1424,7 +1442,7 @@ void VariableOrderMarkov::output_sojourn_time_distribution(const double *imemory
       *pmass += (1. - observation[state[j][0]]) * sum;
     }
 
-    // mise a jour de la fonction de repartition
+    // update of the cumulative distribution function
 
     pcumul++;
     *pcumul = *(pcumul - 1) + *pmass;
@@ -1462,15 +1480,19 @@ void VariableOrderMarkov::output_sojourn_time_distribution(const double *imemory
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the autocorrelation function for a state
+ *         of a variable-order Markov chain (binarized state process).
  *
- *  Calcul de la fonction d'autocorrelation correspondant a un etat
- *  pour une chaine de Markov d'ordre variable.
+ *  \param[in] error   reference on a StatError object,
+ *  \param[in] istate  state,
+ *  \param[in] max_lag maximum lag,
+ *  \param[in] seq     pointer on a VariableOrderMarkovData object.
  *
- *  arguments : reference sur un objet StatError, etat, decalage maximum,
- *              pointeur sur un objet VariableOrderMarkovData.
- *
- *--------------------------------------------------------------*/
+ *  \return            Correlation object.
+ */
+/*--------------------------------------------------------------*/
 
 Correlation* VariableOrderMarkovChain::state_autocorrelation_computation(StatError &error ,
                                                                          int istate , int max_lag ,
@@ -1554,7 +1576,7 @@ Correlation* VariableOrderMarkovChain::state_autocorrelation_computation(StatErr
     memory = new double[nb_row];
     previous_memory = new double[nb_row];
 
-    // initialisation des probabilites des memoires
+    // initialization of the probabilities of the memories
 
     sum = 0.;
     norm = 0.;
@@ -1588,13 +1610,13 @@ Correlation* VariableOrderMarkovChain::state_autocorrelation_computation(StatErr
 
     for (i = 1;i <= max_lag;i++) {
 
-      // mise a jour des probabilites des memoires
+      // update of the probabilities of the memories
 
       for (j = 1;j < nb_row;j++) {
         previous_memory[j] = memory[j];
       }
 
-      // calcul des probabilites des memoires et de la valeur courante
+      // computation of the probabilities of the memories and the current autocorrelation coefficient
 
       *++ppoint = 0.;
 
@@ -1637,14 +1659,18 @@ Correlation* VariableOrderMarkovChain::state_autocorrelation_computation(StatErr
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the autocorrelation function for a state
+ *         of a variable-order Markov chain (binarized state process).
  *
- *  Calcul de la fonction d'autocorrelation correspondant a un etat
- *  pour une chaine de Markov d'ordre variable.
+ *  \param[in] error   reference on a StatError object,
+ *  \param[in] istate  state,
+ *  \param[in] max_lag maximum lag.
  *
- *  arguments : reference sur un objet StatError, etat, decalage maximum.
- *
- *--------------------------------------------------------------*/
+ *  \return            Correlation object.
+ */
+/*--------------------------------------------------------------*/
 
 Correlation* VariableOrderMarkov::state_autocorrelation_computation(StatError &error ,
                                                                     int istate , int max_lag) const
@@ -1659,14 +1685,18 @@ Correlation* VariableOrderMarkov::state_autocorrelation_computation(StatError &e
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the autocorrelation function for a state
+ *         of a variable-order Markov chain (binarized state process).
  *
- *  Calcul de la fonction d'autocorrelation correspondant a un etat
- *  pour une chaine de Markov d'ordre variable.
+ *  \param[in] error   reference on a StatError object,
+ *  \param[in] istate  state,
+ *  \param[in] max_lag maximum lag.
  *
- *  arguments : reference sur un objet StatError, etat, decalage maximum.
- *
- *--------------------------------------------------------------*/
+ *  \return            Correlation object.
+ */
+/*--------------------------------------------------------------*/
 
 Correlation* VariableOrderMarkovData::state_autocorrelation_computation(StatError &error ,
                                                                         int istate , int max_lag) const
@@ -1681,15 +1711,20 @@ Correlation* VariableOrderMarkovData::state_autocorrelation_computation(StatErro
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the autocorrelation function for a categorical observation
+ *         of a hidden variable-order Markov chain (binarized observation process).
  *
- *  Calcul de la fonction d'autocorrelation correspondant a une observation
- *  pour une chaine de Markov d'ordre variable cachee.
+ *  \param[in] error    reference on a StatError object,
+ *  \param[in] variable observation process index
+ *  \param[in] output   observation,
+ *  \param[in] max_lag  maximum lag,
+ *  \param[in] seq      pointer on a VariableOrderMarkovData object.
  *
- *  arguments : reference sur un objet StatError, observation, decalage maximum,
- *              pointeur sur un objet VariableOrderMarkovData.
- *
- *--------------------------------------------------------------*/
+ *  \return             Correlation object.
+ */
+/*--------------------------------------------------------------*/
 
 Correlation* VariableOrderMarkov::output_autocorrelation_computation(StatError &error , int variable ,
                                                                      int output , int max_lag ,
@@ -1785,7 +1820,7 @@ Correlation* VariableOrderMarkov::output_autocorrelation_computation(StatError &
     memory = new double[nb_row];
     previous_memory = new double[nb_row];
 
-    // initialisation des probabilites des memoires
+    // initialization of the probabilities of the memories
 
     sum = 0.;
     norm = 0.;
@@ -1809,13 +1844,13 @@ Correlation* VariableOrderMarkov::output_autocorrelation_computation(StatError &
 
     for (i = 1;i <= max_lag;i++) {
 
-      // mise a jour des probabilites des memoires
+      // update of the probabilities of the memories
 
       for (j = 1;j < nb_row;j++) {
         previous_memory[j] = memory[j];
       }
 
-      // calcul des probabilites des memoires et de la valeur courante
+      // computation of the probabilities of the memories and the current autocorrelation coefficient
 
       *++ppoint = 0.;
 
@@ -1864,15 +1899,19 @@ Correlation* VariableOrderMarkov::output_autocorrelation_computation(StatError &
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the autocorrelation function for a categorical observation
+ *         of a hidden variable-order Markov chain (binarized observation process).
  *
- *  Calcul de la fonction d'autocorrelation correspondant a une observation
- *  pour une chaine de Markov d'ordre variable cachee.
+ *  \param[in] error    reference on a StatError object,
+ *  \param[in] variable observation process index,
+ *  \param[in] output   observation,
+ *  \param[in] max_lag  maximum lag.
  *
- *  arguments : reference sur un objet StatError, indice du processus d'observation,
- *              observation, decalage maximum.
- *
- *--------------------------------------------------------------*/
+ *  \return             Correlation object.
+ */
+/*--------------------------------------------------------------*/
 
 Correlation* VariableOrderMarkov::output_autocorrelation_computation(StatError &error ,
                                                                      int variable , int output ,
@@ -1888,15 +1927,19 @@ Correlation* VariableOrderMarkov::output_autocorrelation_computation(StatError &
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the autocorrelation function for a categorical observation
+ *         of a hidden variable-order Markov chain (binarized observation process).
  *
- *  Calcul de la fonction d'autocorrelation correspondant a une observation
- *  pour une chaine de Markov d'ordre variable cachee.
+ *  \param[in] error    reference on a StatError object,
+ *  \param[in] variable observation process index,
+ *  \param[in] output   observation,
+ *  \param[in] max_lag  maximum lag.
  *
- *  arguments : reference sur un objet StatError, indice du processus d'observation,
- *              observation, decalage maximum.
- *
- *--------------------------------------------------------------*/
+ *  \return             Correlation object.
+ */
+/*--------------------------------------------------------------*/
 
 Correlation* VariableOrderMarkovData::output_autocorrelation_computation(StatError &error ,
                                                                          int variable , int output ,

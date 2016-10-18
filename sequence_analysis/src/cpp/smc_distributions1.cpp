@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -48,12 +48,12 @@ namespace sequence_analysis {
 
 
 
-/*--------------------------------------------------------------*
- *
- *  Calcul des probabilites de chaque etat en fonction du temps
- *  pour une semi-chaine de Markov.
- *
- *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the state probabilities as a function of
+ *         the index parameter for a semi-Markov chain.
+ */
+/*--------------------------------------------------------------*/
 
 void SemiMarkovChain::index_state_distribution()
 
@@ -77,7 +77,7 @@ void SemiMarkovChain::index_state_distribution()
     for (j = 0;j < nb_state;j++) {
       switch (sojourn_type[j]) {
 
-      // cas etat semi-markovien
+      // case semi-Markovian state
 
       case SEMI_MARKOVIAN : {
         if (i == 0) {
@@ -116,7 +116,7 @@ void SemiMarkovChain::index_state_distribution()
         break;
       }
 
-      // cas etat markovien
+      // case Markovian state
 
       case MARKOVIAN : {
         if (i == 0) {
@@ -143,8 +143,8 @@ void SemiMarkovChain::index_state_distribution()
       }
     }
 
-    // renormalisation pour tenir compte des seuils appliques sur
-    // les fonctions de repartition des lois d'occupation des etats
+    // renormalization for taking account of the thresholds applied on
+    // the cumulative state occupancy distribution functions
 
     sum = 0.;
     for (j = 0;j < nb_state;j++) {
@@ -167,11 +167,14 @@ void SemiMarkovChain::index_state_distribution()
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the probabilities of the memories for a semi-Markov chain
+ *         taking account of the sequence length distribution.
  *
- *  Calcul des probabilites de chaque memoire pour une semi-chaine de Markov.
- *
- *--------------------------------------------------------------*/
+ *  \return memory probabilities.
+ */
+/*--------------------------------------------------------------*/
 
 double* SemiMarkovChain::memory_computation() const
 
@@ -200,7 +203,7 @@ double* SemiMarkovChain::memory_computation() const
       for (j = 0;j < nb_state;j++) {
         switch (sojourn_type[j]) {
 
-        // cas etat semi-markovien
+        // case semi-Markovian state
 
         case SEMI_MARKOVIAN : {
           occupancy = state_process->sojourn_time[j];
@@ -217,7 +220,7 @@ double* SemiMarkovChain::memory_computation() const
           break;
         }
 
-        // cas etat markovien
+        // case Markovian state
 
         case MARKOVIAN : {
           if (i == 0) {
@@ -230,7 +233,7 @@ double* SemiMarkovChain::memory_computation() const
         }
         }
 
-        // accumulation des probabilites des memoires
+        // summation of the probabilities of the memories
 
         memory[j] += state_out[j] * (1. - state_process->length->cumul[i + 1]);
       }
@@ -273,7 +276,7 @@ double* SemiMarkovChain::memory_computation() const
 
         switch (sojourn_type[j]) {
 
-        // cas etat semi-markovien
+        // case semi-Markovian state
 
         case SEMI_MARKOVIAN : {
           occupancy = state_process->sojourn_time[j];
@@ -290,7 +293,7 @@ double* SemiMarkovChain::memory_computation() const
           break;
         }
 
-        // cas etat markovien
+        // case Markovian state
 
         case MARKOVIAN : {
           if (i == 0) {
@@ -349,14 +352,15 @@ double* SemiMarkovChain::memory_computation() const
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the probability of not visiting a state
+ *         for an ordinary semi-Markov chain.
  *
- *  Calcul de la probabilite de ne pas observer un etat
- *  d'une semi-chaine de Markov ordinaire.
- *
- *  arguments : etat, seuil sur la somme des probabilites de quitter un etat.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] state     state,
+ *  \param[in] increment threshold on the sum of the probabilities of leaving a state.
+ */
+/*--------------------------------------------------------------*/
 
 void SemiMarkovChain::state_no_occurrence_probability(int state , double increment)
 
@@ -417,8 +421,8 @@ void SemiMarkovChain::state_no_occurrence_probability(int state , double increme
 
     do {
 
-      // calcul des probabilites de quitter (semi-Markov) / d'etre dans (Markov) un etat et
-      // mise a jour de la probabilite de ne pas observer l'etat selectionne
+      // computation of the probabilities of leaving (semi-Markov) / of being in (Markov) a state and
+      // update of the probability of not visiting the selected state
 
       sum = 0.;
 
@@ -426,7 +430,7 @@ void SemiMarkovChain::state_no_occurrence_probability(int state , double increme
         if ((j != state) && (accessibility[j][state])) {
           switch (sojourn_type[j]) {
 
-          // cas etat semi-markovien
+          // case semi-Markovian state
 
           case SEMI_MARKOVIAN : {
             occupancy = state_process->sojourn_time[j];
@@ -443,7 +447,7 @@ void SemiMarkovChain::state_no_occurrence_probability(int state , double increme
             break;
           }
 
-          // cas etat markovien
+          // case Markovian state
 
           case MARKOVIAN : {
             if (i == 1) {
@@ -496,15 +500,16 @@ void SemiMarkovChain::state_no_occurrence_probability(int state , double increme
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the distribution of the time to the 1st occurrence of a state
+ *         for a semi-Markov chain.
  *
- *  Calcul de la loi du temps avant la 1ere occurrence d'un etat
- *  pour une semi-chaine de Markov.
- *
- *  arguments : etat, nombre minimum de valeurs,
- *              seuil sur la fonction de repartition.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] state           state,
+ *  \param[in] min_nb_value    minimum number of values,
+ *  \param[in] cumul_threshold threshold on the cumulative distribution function.
+ */
+/*--------------------------------------------------------------*/
 
 void SemiMarkovChain::state_first_occurrence_distribution(int state , int min_nb_value ,
                                                           double cumul_threshold)
@@ -538,8 +543,8 @@ void SemiMarkovChain::state_first_occurrence_distribution(int state , int min_nb
   while (((*pcumul < cumul_threshold - first_occurrence->complement) || (i < min_nb_value)) &&
          (i < first_occurrence->alloc_nb_value)) {
 
-    // calcul des probabilites de quitter (semi-Markov) / d'etre dans (Markov) un etat et
-    // de la valeur courante
+    // computation of the probabilities of leaving (semi-Markov) / of being in (Markov) a state and of
+    // the current probability mass
 
     *++pmass = 0.;
 
@@ -547,7 +552,7 @@ void SemiMarkovChain::state_first_occurrence_distribution(int state , int min_nb
       if (j != state) {
         switch (sojourn_type[j]) {
 
-        // cas etat semi-markovien
+        // case semi-Markovian state
 
         case SEMI_MARKOVIAN : {
           occupancy = state_process->sojourn_time[j];
@@ -571,7 +576,7 @@ void SemiMarkovChain::state_first_occurrence_distribution(int state , int min_nb
           break;
         }
 
-        // cas etat markovien
+        // case Markovian state
 
         case MARKOVIAN : {
           if (i == 1) {
@@ -599,7 +604,7 @@ void SemiMarkovChain::state_first_occurrence_distribution(int state , int min_nb
       }
     }
 
-    // mise a jour de la fonction de repartition
+    // update of the cumulative distribution function
 
     pcumul++;
     *pcumul = *(pcumul - 1) + *pmass;
@@ -622,14 +627,15 @@ void SemiMarkovChain::state_first_occurrence_distribution(int state , int min_nb
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the probability of leaving definitively a state
+ *         for an ordinary semi-Markov chain.
  *
- *  Calcul de la probabilite de quitter un etat sans possibilite
- *  d'y revenir pour une semi-chaine de Markov ordinaire.
- *
- *  arguments : etat, seuil sur la somme des probabilites de quitter un etat.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] state     state,
+ *  \param[in] increment threshold on the sum of the probabilities of leaving a state.
+ */
+/*--------------------------------------------------------------*/
 
 void SemiMarkovChain::state_leave_probability(int state , double increment)
 
@@ -676,8 +682,8 @@ void SemiMarkovChain::state_leave_probability(int state , double increment)
 
     do {
 
-      // calcul des probabilites de quitter (semi-Markov) / d'etre dans (Markov) un etat et
-      // mise a jour de la probabilite de quitter l'etat selectionne
+      // computation of the probabilities of leaving (semi-Markov) / of being in (Markov) a state and
+      // update of the probability of leaving definitively the selected state
 
       sum = 0.;
 
@@ -685,7 +691,7 @@ void SemiMarkovChain::state_leave_probability(int state , double increment)
         if ((j != state) && (accessibility[j][state])) {
           switch (sojourn_type[j]) {
 
-          // cas etat semi-markovien
+          // case semi-Markovian state
 
           case SEMI_MARKOVIAN : {
             occupancy = state_process->sojourn_time[j];
@@ -702,7 +708,7 @@ void SemiMarkovChain::state_leave_probability(int state , double increment)
             break;
           }
 
-          // cas etat markovien
+          // case Markovian state
 
           case MARKOVIAN : {
             if (i == 2) {
@@ -765,15 +771,16 @@ void SemiMarkovChain::state_leave_probability(int state , double increment)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the distribution of the recurrence time in a state
+ *         for a semi-Markov chain.
  *
- *  Calcul de la loi du temps de retour dans un etat
- *  pour une semi-chaine de Markov.
- *
- *  arguments : etat, nombre minimum de valeurs,
- *              seuil sur la fonction de repartition.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] state           state,
+ *  \param[in] min_nb_value    minimum number of values,
+ *  \param[in] cumul_threshold threshold on the cumulative distribution function.
+ */
+/*--------------------------------------------------------------*/
 
 void SemiMarkovChain::state_recurrence_time_distribution(int state , int min_nb_value ,
                                                          double cumul_threshold)
@@ -802,7 +809,7 @@ void SemiMarkovChain::state_recurrence_time_distribution(int state , int min_nb_
     state_in[i] = new double[nb_state];
   }
 
-  // calcul de la probabilite de la valeur 1
+  // computation of the probability mass for 1
 
   switch (sojourn_type[state]) {
   case SEMI_MARKOVIAN :
@@ -821,8 +828,8 @@ void SemiMarkovChain::state_recurrence_time_distribution(int state , int min_nb_
   while (((*pcumul < cumul_threshold - recurrence_time->complement) || (i < min_nb_value)) &&
          (i < recurrence_time->alloc_nb_value)) {
 
-    // calcul des probabilites de quitter (semi-Markov) / d'etre dans (Markov) un etat et
-    // de la valeur courante
+    // computation of the probabilities of leaving (semi-Markov) / of being in (Markov) a state and of
+    // the current probability mass
 
     *++pmass = 0.;
 
@@ -830,7 +837,7 @@ void SemiMarkovChain::state_recurrence_time_distribution(int state , int min_nb_
       if (j != state) {
         switch (sojourn_type[j]) {
 
-        // cas etat semi-markovien
+        // case semi-Markovian state
 
         case SEMI_MARKOVIAN : {
           occupancy = state_process->sojourn_time[j];
@@ -847,7 +854,7 @@ void SemiMarkovChain::state_recurrence_time_distribution(int state , int min_nb_
           break;
         }
 
-        // cas etat markovien
+        // case Markovian state
 
         case MARKOVIAN : {
           if (i == 2) {
@@ -907,14 +914,14 @@ void SemiMarkovChain::state_recurrence_time_distribution(int state , int min_nb_
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the observation probabilities as a function of
+ *         the index parameter for a hidden semi-Markov chain.
  *
- *  Calcul des probabilites de chaque observation en fonction de l'index
- *  pour une semi-chaine de Markov cachee.
- *
- *  argument : indice du processus d'observation.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] variable observation process index.
+ */
+/*--------------------------------------------------------------*/
 
 void SemiMarkov::index_output_distribution(int variable)
 
@@ -925,8 +932,7 @@ void SemiMarkov::index_output_distribution(int variable)
 
   index_value = categorical_process[variable]->index_value;
 
-  // calcul des probabilites des etats de la semi-chaine de Markov
-  // sous-jacente en fonction de l'index si necessaire
+  // computation of the state probabilities
 
   if (!(state_process->index_value)) {
     state_process->index_value = new Curves(nb_state , index_value->length);
@@ -934,7 +940,7 @@ void SemiMarkov::index_output_distribution(int variable)
   }
   index_state = state_process->index_value;
 
-  // prise en compte des probabilites d'observation
+  // incorporation of the observation probabilities
 
   for (i = 0;i < index_value->length;i++) {
     for (j = 0;j < categorical_process[variable]->nb_value;j++) {
@@ -948,15 +954,16 @@ void SemiMarkov::index_output_distribution(int variable)
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the probability of not observing a value
+ *         for a hidden ordinary semi-Markov chain.
  *
- *  Calcul de la probabilite de ne pas observer une valeur
- *  pour une semi-chaine de Markov cachee ordinaire.
- *
- *  arguments : indice du processus d'observation, observation,
- *              seuils sur la somme des probabilites de quitter un etat.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] variable  observation process index,
+ *  \param[in] output    observation,
+ *  \param[in] increment threshold on the sum of the probabilities of leaving a state.
+ */
+/*--------------------------------------------------------------*/
 
 void SemiMarkov::output_no_occurrence_probability(int variable , int output ,
                                                   double increment)
@@ -975,7 +982,7 @@ void SemiMarkov::output_no_occurrence_probability(int variable , int output ,
     observation[i] = categorical_process[variable]->observation[i]->mass[output];
   }
 
-  // calcul de l'accessibilite d'une observation a partir d'un etat donne
+  // computation of the accessibility of the selected observation from a given state
 
   output_accessibility = new bool[nb_state];
 
@@ -1049,8 +1056,8 @@ void SemiMarkov::output_no_occurrence_probability(int variable , int output ,
 
     do {
 
-      // calcul des probabilites de quitter (semi-Markov) / d'etre dans (Markov) un etat et
-      // mise a jour de la probabilite de ne pas observer la valeur
+      // computation of the probabilities of leaving (semi-Markov) / of being in (Markov) a state and
+      // update of the probability of not observing the selected observation
 
       sum = 0.;
 
@@ -1058,13 +1065,13 @@ void SemiMarkov::output_no_occurrence_probability(int variable , int output ,
         if (output_accessibility[j]) {
           switch (sojourn_type[j]) {
 
-          // cas etat semi-markovien
+          // case semi-Markovian state
 
           case SEMI_MARKOVIAN : {
             occupancy = state_process->sojourn_time[j];
             state_out[j] = 0.;
 
-            // calcul des puissances des probabilites d'observation
+            // computation of the powers of the observation probabilities
 
             obs_power[j][i + 1] = obs_power[j][i] * (1. - observation[j]);
 
@@ -1079,7 +1086,7 @@ void SemiMarkov::output_no_occurrence_probability(int variable , int output ,
             break;
           }
 
-          // cas etat markovien
+          // case Markovian state
 
           case MARKOVIAN : {
             if (i == 0) {
@@ -1142,15 +1149,17 @@ void SemiMarkov::output_no_occurrence_probability(int variable , int output ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the distribution of the time to the 1st occurrence of
+ *         a categorical observation for a hidden semi-Markov chain.
  *
- *  Calcul de la loi du temps avant la 1ere occurrence d'une observation
- *  pour une semi-chaine de Markov cachee.
- *
- *  arguments : indice du processus d'observation, observation,
- *              nombre minimum de valeurs, seuil sur la fonction de repartition.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] variable        observation process index,
+ *  \param[in] output          observation,
+ *  \param[in] min_nb_value    minimum number of values,
+ *  \param[in] cumul_threshold threshold on the cumulative distribution function.
+ */
+/*--------------------------------------------------------------*/
 
 void SemiMarkov::output_first_occurrence_distribution(int variable , int output ,
                                                       int min_nb_value , double cumul_threshold)
@@ -1192,22 +1201,22 @@ void SemiMarkov::output_first_occurrence_distribution(int variable , int output 
 
   do {
 
-    // calcul des probabilites de quitter (semi-Markov) / d'etre dans (Markov) un etat et
-    // de la valeur courante
+    // computation of the probabilities of leaving (semi-Markov) / of being in (Markov) a state and of
+    // the current probability mass
 
     *++pmass = 0.;
 
     for (j = 0;j < nb_state;j++) {
       switch (sojourn_type[j]) {
 
-      // cas etat semi-markovien
+      // case semi-Markovian state
 
       case SEMI_MARKOVIAN : {
         occupancy = state_process->sojourn_time[j];
         state_out[j] = 0.;
         sum = 0.;
 
-        // calcul des puissances des probabilites d'observation
+        // computation of the powers of the observation probabilities
 
         obs_power[j][i + 1] = obs_power[j][i] * (1. - observation[j]);
 
@@ -1232,7 +1241,7 @@ void SemiMarkov::output_first_occurrence_distribution(int variable , int output 
         break;
       }
 
-      // cas etat markovien
+      // case Markovian state
 
       case MARKOVIAN : {
         if (i == 0) {
@@ -1257,7 +1266,7 @@ void SemiMarkov::output_first_occurrence_distribution(int variable , int output 
       }
     }
 
-    // mise a jour de la fonction de repartition
+    // update of the cumulative distribution function
 
     pcumul++;
     if (i == 0) {
@@ -1296,15 +1305,17 @@ void SemiMarkov::output_first_occurrence_distribution(int variable , int output 
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the probability of leaving definitively a categorical observation
+ *         for a hidden ordinary semi-Markov chain.
  *
- *  Calcul de la probabilite de quitter une observation sans possibilite
- *  d'y revenir pour une semi-chaine de Markov cachee ordinaire.
- *
- *  arguments : loi des memoires, indice du processus d'observation, observation,
- *              seuil sur la somme des probabilites de quitter un etat.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] memory    memory distribution,
+ *  \param[in] variable  observation process index,
+ *  \param[in] output    observation,
+ *  \param[in] increment threshold on the sum of the probabilities of leaving a state.
+ */
+/*--------------------------------------------------------------*/
 
 void SemiMarkov::output_leave_probability(const double *memory , int variable ,
                                           int output , double increment)
@@ -1323,7 +1334,7 @@ void SemiMarkov::output_leave_probability(const double *memory , int variable ,
     observation[i] = categorical_process[variable]->observation[i]->mass[output];
   }
 
-  // calcul de l'accessibilite d'une observation a partir d'un etat donne
+  // computation of the accessibility of the selected observation from a given state
 
   output_accessibility = new bool[nb_state];
 
@@ -1368,7 +1379,7 @@ void SemiMarkov::output_leave_probability(const double *memory , int variable ,
       state_in[i] = new double[nb_state];
     }
 
-    // calcul des probabilites d'entree et de sortie
+    // computation of the entering and exit probabilities
 
     input_proba = new double[nb_state];
     sum0 = 0.;
@@ -1382,7 +1393,7 @@ void SemiMarkov::output_leave_probability(const double *memory , int variable ,
       }
       input_proba[i] = observation[i] * (initial[i] + sum1);
 
-      // cas etat non-absorbant
+      // case non-absorbing state
 
       if (transition[i][i] < 1.) {
         switch (sojourn_type[i]) {
@@ -1395,7 +1406,7 @@ void SemiMarkov::output_leave_probability(const double *memory , int variable ,
         }
       }
 
-      // cas etat absorbant
+      // case absorbing state
 
       else {
         sum0 += input_proba[i];
@@ -1430,8 +1441,8 @@ void SemiMarkov::output_leave_probability(const double *memory , int variable ,
 
     do {
 
-      // calcul des probabilites de quitter un etat et mise a jour
-      // de la probabilite de quitter l'observation selectionnee
+      // computation of the probabilities of leaving a state and update of
+      // the probability of leaving definitively the selected observation
 
       sum0 = 0.;
 
@@ -1439,12 +1450,12 @@ void SemiMarkov::output_leave_probability(const double *memory , int variable ,
         if (output_accessibility[j]) {
           state_out[j] = 0.;
 
-          // cas etat non-absorbant
+          // case non-absorbing state
 
           if (transition[j][j] < 1.) {
             occupancy = state_process->sojourn_time[j];
 
-            // calcul des puissances des probabilites d'observation
+            // computation of the powers of the observation probabilities
 
             obs_power[j][i] = obs_power[j][i - 1] * (1. - observation[j]);
 
@@ -1526,16 +1537,18 @@ void SemiMarkov::output_leave_probability(const double *memory , int variable ,
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the distribution of the recurrence time in a categorical observation
+ *         for a hidden semi-Markov chain.
  *
- *  Calcul de la loi du temps de retour dans une observation
- *  pour une semi-chaine de Markov cachee.
- *
- *  arguments : loi des memoires, indice du processus d'observation,
- *              observation, nombre minimum de valeurs,
- *              seuil sur la fonction de repartition.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] memory          memory distribution,
+ *  \param[in] variable        observation process index,
+ *  \param[in] output          observation,
+ *  \param[in] min_nb_value    minimum number of values,
+ *  \param[in] cumul_threshold threshold on the cumulative distribution function.
+ */
+/*--------------------------------------------------------------*/
 
 void SemiMarkov::output_recurrence_time_distribution(const double *memory , int variable ,
                                                      int output , int min_nb_value ,
@@ -1578,7 +1591,7 @@ void SemiMarkov::output_recurrence_time_distribution(const double *memory , int 
     state_in[i] = new double[nb_state];
   }
 
-  // calcul des probabilites d'entree et de sortie
+  // computation of the entering and exit probabilities
 
   input_proba = new double[nb_state];
   output_proba = new double[nb_state];
@@ -1593,7 +1606,7 @@ void SemiMarkov::output_recurrence_time_distribution(const double *memory , int 
     }
     input_proba[i] = observation[i] * (initial[i] + sum1);
 
-    // cas etat non-absorbant
+    // case non-absorbing state
 
     if (transition[i][i] < 1.) {
       switch (sojourn_type[i]) {
@@ -1629,7 +1642,7 @@ void SemiMarkov::output_recurrence_time_distribution(const double *memory , int 
       output_proba[i] = sum1;
     }
 
-    // cas etat absorbant
+    // case absorbing state
 
     else {
       sum0 += input_proba[i];
@@ -1644,20 +1657,20 @@ void SemiMarkov::output_recurrence_time_distribution(const double *memory , int 
 
   do {
 
-    // calcul des probabilites de quitter un etat et de la valeur courante
+    // computation of the probabilities of leaving a state and of the current probability mass
 
     *++pmass = 0.;
 
     for (j = 0;j < nb_state;j++) {
 
-      // cas etat non-absorbant
+      // case non-absorbing state
 
       if (transition[j][j] < 1.) {
         occupancy = state_process->sojourn_time[j];
         state_out[j] = 0.;
         sum0 = 0.;
 
-        // calcul des puissances des probabilites d'observation
+        // computation of the powers of the observation probabilities
 
         obs_power[j][i] = obs_power[j][i - 1] * (1. - observation[j]);
 
@@ -1681,7 +1694,7 @@ void SemiMarkov::output_recurrence_time_distribution(const double *memory , int 
         *pmass += output_proba[j] * state_out[j] + observation[j] * sum0;
       }
 
-      // cas etat absorbant
+      // case absorbing state
 
       else {
         if (i == 1) {
@@ -1750,16 +1763,18 @@ void SemiMarkov::output_recurrence_time_distribution(const double *memory , int 
 }
 
 
-/*--------------------------------------------------------------*
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the distribution of the sojourn time in a categorical observation
+ *         for a hidden semi-Markov chain.
  *
- *  Calcul de la loi du temps de sejour dans une observation
- *  pour une semi-chaine de Markov cachee.
- *
- *  arguments : loi des memoires, indice du processus d'observation,
- *              observation, nombre minimum de valeurs,
- *              seuil sur la fonction de repartition.
- *
- *--------------------------------------------------------------*/
+ *  \param[in] memory          memory distribution,
+ *  \param[in] variable        observation process index,
+ *  \param[in] output          observation,
+ *  \param[in] min_nb_value    minimum number of values,
+ *  \param[in] cumul_threshold threshold on the cumulative distribution function.
+ */
+/*--------------------------------------------------------------*/
 
 void SemiMarkov::output_sojourn_time_distribution(const double *memory , int variable ,
                                                   int output , int min_nb_value ,
@@ -1801,7 +1816,7 @@ void SemiMarkov::output_sojourn_time_distribution(const double *memory , int var
     state_in[i] = new double[nb_state];
   }
 
-  // calcul des probabilites d'entree et de sortie
+  // computation of the entering and exit probabilities
 
   input_proba = new double*[nb_state];
   output_proba = new double[nb_state];
@@ -1819,7 +1834,7 @@ void SemiMarkov::output_sojourn_time_distribution(const double *memory , int var
     input_proba[i][0] = observation[i] * (initial[i] + sum1);
     sum0 += input_proba[i][0];
 
-    // cas etat non-absorbant
+    // case non-absorbing state
 
     if (transition[i][i] < 1.) {
       sum1 = 0.;
@@ -1875,7 +1890,7 @@ void SemiMarkov::output_sojourn_time_distribution(const double *memory , int var
 
   do {
 
-    // calcul des probabilites de quitter un etat et de la valeur courante
+    // computation of the probabilities of leaving a state
 
     absorption = 0.;
     *++pmass = 0.;
@@ -1885,13 +1900,13 @@ void SemiMarkov::output_sojourn_time_distribution(const double *memory , int var
 
       if (observation[j] > 0.) {
 
-        // cas etat non-absorbant
+        // case non-absorbing state
 
         if (transition[j][j] < 1.) {
           occupancy = state_process->sojourn_time[j];
           sum0 = 0.;
 
-          // calcul des puissances des probabilites d'observation
+          // computation of the powers of the observation probabilities
 
           obs_power[j][i] = obs_power[j][i - 1] * observation[j];
 
@@ -1917,7 +1932,7 @@ void SemiMarkov::output_sojourn_time_distribution(const double *memory , int var
           *pmass += output_proba[j] * state_out[j] + (1. - observation[j]) * sum0;
         }
 
-        // cas etat absorbant
+        // case absorbing state
 
         else {
           if (i == 1) {

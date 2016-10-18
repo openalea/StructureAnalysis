@@ -107,7 +107,7 @@ void MarkovianSequences::init()
 /**
  *  \brief Construction of a MarkovianSequences object from a Sequences object.
  *
- *  \param[in] seq reference sur un objet Sequences.
+ *  \param[in] seq reference on a Sequences object.
  */
 /*--------------------------------------------------------------*/
 
@@ -4756,7 +4756,7 @@ void MarkovianSequences::censored_sojourn_time_frequency_distribution_computatio
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Construction of the frequency distributions of the numbers of runs
+ *  \brief Construction of the frequency distributions of the number of runs
  *         per sequence of each value of an integer variable.
  *
  *  \param[in] variable variable index.
@@ -4842,7 +4842,7 @@ void MarkovianSequences::build_nb_run_frequency_distribution(int variable)
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Construction of the frequency distributions of the numbers of occurrences
+ *  \brief Construction of the frequency distributions of the number of occurrences
  *         per sequence of each value of an integer variable.
  *
  *  \param[in] variable variable index.
@@ -4988,7 +4988,7 @@ void MarkovianSequences::build_characteristic(int variable , bool sojourn_time_f
           break;
         }
 
-        if (max_length <= COUNT_MAX_LENGTH) {
+        if (max_length <= COUNTING_FREQUENCY_MAX_LENGTH) {
           build_nb_run_frequency_distribution(i);
           build_nb_occurrence_frequency_distribution(i);
         }
