@@ -61,8 +61,8 @@ namespace stat_tool {
 /**
  *  \brief Constructor of the FrequencyDistribution class.
  *
- *  \param[in] number of individuals,
- *  \param[in] individuals.
+ *  \param[in] inb_element number of individuals,
+ *  \param[in] pelement    individuals.
  */
 /*--------------------------------------------------------------*/
 
@@ -293,7 +293,7 @@ bool FrequencyDistribution::operator==(const FrequencyDistribution &histo) const
  *  \param[in] nb_sample number of FrequencyDistribution objects,
  *  \param[in] ihisto    pointer on the FrequencyDistribution objects.
  *
- *  \return              FrequencyDistribution object.
+ *  \return              DiscreteDistributionData object.
  */
 /*--------------------------------------------------------------*/
 
@@ -908,7 +908,7 @@ ostream& FrequencyDistribution::ascii_write(ostream &os , bool exhaustive ,
   if (exhaustive && file_flag) {
     os << "# ";
   }
-  os << STAT_label[STATL_MEAN_ABSOLUTE_DEVIATION] << ": " << mean_absolute_deviation_computation();
+  os << STAT_label[STATL_MEAN_ABSOLUTE_DEVIATION] << ": " << mean_absolute_deviation_computation(mean);
   if (mean > 0.) {
     os << "   " << STAT_label[STATL_CONCENTRATION_COEFF] << ": " << concentration_computation();
   }
@@ -984,8 +984,16 @@ ostream& FrequencyDistribution::spreadsheet_characteristic_print(ostream &os , b
 
   if ((mean != D_DEFAULT) && (variance != D_DEFAULT)) {
     os << STAT_label[STATL_MEAN] << "\t" << mean << "\t\t"
-       << STAT_label[STATL_VARIANCE] << "\t" << variance << "\t\t"
-       << STAT_label[STATL_STANDARD_DEVIATION] << "\t" << sqrt(variance) << endl;
+       << STAT_label[STATL_MEDIAN] << "\t" << quantile_computation() << "\t\t"
+       << STAT_label[STATL_MODE] << "\t" << mode_computation() << endl;
+
+    os << STAT_label[STATL_VARIANCE] << "\t" << variance << "\t\t"
+       << STAT_label[STATL_STANDARD_DEVIATION] << "\t" << sqrt(variance);
+    if (variance > 0.) {
+      os << "\t\t" << STAT_label[STATL_LOWER_QUARTILE] << "\t" << quantile_computation(0.25)
+         << "\t\t" << STAT_label[STATL_UPPER_QUARTILE] << "\t" << quantile_computation(0.75);
+    }
+    os << endl;
 
     if ((shape) && (variance > 0.)) {
       os << STAT_label[STATL_SKEWNESS_COEFF] << "\t" << skewness_computation() << "\t\t"
@@ -1666,7 +1674,7 @@ bool FrequencyDistribution::survival_plot_write(StatError &error , const char *p
  *  \brief Computation and writing of the survivor function computed from
  *         a frequency distribution.
  *
- *  \param[in] reference on a SinglePlot object.
+ *  \param[in] plot reference on a SinglePlot object.
  */
 /*--------------------------------------------------------------*/
 

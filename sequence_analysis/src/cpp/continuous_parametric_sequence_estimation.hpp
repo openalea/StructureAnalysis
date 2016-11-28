@@ -297,7 +297,7 @@ void MarkovianSequences::gamma_estimation(Type ***state_sequence_count , int var
  *  \param[in] state_sequence_count state counts,
  *  \param[in] variable             variable index,
  *  \param[in] process              pointer on a ContinuousParametricProcess object,
- *  \param[in  iter                 EM iteration.
+ *  \param[in] iter                 EM iteration.
  */
 /*--------------------------------------------------------------*/
 

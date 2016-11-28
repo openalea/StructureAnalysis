@@ -1882,7 +1882,7 @@ bool CategoricalProcess::test_hidden() const
 /**
  *  \brief Application of a threshold on the observation probabilities.
  *
- *  \param[in] minimum probability.
+ *  \param[in] min_probability minimum probability.
  */
 /*--------------------------------------------------------------*/
 

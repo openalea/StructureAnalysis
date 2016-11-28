@@ -1775,60 +1775,60 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , const FrequencyDistrib
         seq->restoration_likelihood = likelihood;
         break;
       }
-    }
 
-    // computation of the mixtures of observation distributions (theoretical weights and weights deduced from the restoration)
+      // computation of the mixtures of observation distributions (theoretical weights and weights deduced from the restoration)
 
-    if (hidden) {
-      weight = NULL;
-      restoration_weight = NULL;
+      if (hidden) {
+        weight = NULL;
+        restoration_weight = NULL;
 
-      for (i = 0;i < smarkov->nb_output_process;i++) {
-        if ((smarkov->categorical_process[i]) || (smarkov->discrete_parametric_process[i]) ||
-            ((smarkov->continuous_parametric_process[i]) &&
-             (smarkov->continuous_parametric_process[i]->ident != LINEAR_MODEL))) {
-          weight = smarkov->state_process->weight_computation();
-          restoration_weight = seq->weight_computation();
-          break;
+        for (i = 0;i < smarkov->nb_output_process;i++) {
+          if ((smarkov->categorical_process[i]) || (smarkov->discrete_parametric_process[i]) ||
+              ((smarkov->continuous_parametric_process[i]) &&
+               (smarkov->continuous_parametric_process[i]->ident != LINEAR_MODEL))) {
+            weight = smarkov->state_process->weight_computation();
+            restoration_weight = seq->weight_computation();
+            break;
+          }
         }
+
+        for (i = 0;i < smarkov->nb_output_process;i++) {
+          if (smarkov->categorical_process[i]) {
+            delete smarkov->categorical_process[i]->weight;
+            delete smarkov->categorical_process[i]->mixture;
+            smarkov->categorical_process[i]->weight = new Distribution(*weight);
+            smarkov->categorical_process[i]->mixture = smarkov->categorical_process[i]->mixture_computation(smarkov->categorical_process[i]->weight);
+            delete smarkov->categorical_process[i]->restoration_weight;
+            delete smarkov->categorical_process[i]->restoration_mixture;
+            smarkov->categorical_process[i]->restoration_weight = new Distribution(*restoration_weight);
+            smarkov->categorical_process[i]->restoration_mixture = smarkov->categorical_process[i]->mixture_computation(smarkov->categorical_process[i]->restoration_weight);
+          }
+
+          else if (smarkov->discrete_parametric_process[i]) {
+            delete smarkov->discrete_parametric_process[i]->weight;
+            delete smarkov->discrete_parametric_process[i]->mixture;
+            smarkov->discrete_parametric_process[i]->weight = new Distribution(*weight);
+            smarkov->discrete_parametric_process[i]->mixture = smarkov->discrete_parametric_process[i]->mixture_computation(smarkov->discrete_parametric_process[i]->weight);
+
+            delete smarkov->discrete_parametric_process[i]->restoration_weight;
+            delete smarkov->discrete_parametric_process[i]->restoration_mixture;
+            smarkov->discrete_parametric_process[i]->restoration_weight = new Distribution(*restoration_weight);
+            smarkov->discrete_parametric_process[i]->restoration_mixture = smarkov->discrete_parametric_process[i]->mixture_computation(smarkov->discrete_parametric_process[i]->restoration_weight);
+          }
+
+          else if ((smarkov->continuous_parametric_process[i]) &&
+                   (smarkov->continuous_parametric_process[i]->ident != LINEAR_MODEL)) {
+            delete smarkov->continuous_parametric_process[i]->weight;
+            smarkov->continuous_parametric_process[i]->weight = new Distribution(*weight);
+
+            delete smarkov->continuous_parametric_process[i]->restoration_weight;
+            smarkov->continuous_parametric_process[i]->restoration_weight = new Distribution(*restoration_weight);
+          }
+        }
+
+        delete weight;
+        delete restoration_weight;
       }
-
-      for (i = 0;i < smarkov->nb_output_process;i++) {
-        if (smarkov->categorical_process[i]) {
-          delete smarkov->categorical_process[i]->weight;
-          delete smarkov->categorical_process[i]->mixture;
-          smarkov->categorical_process[i]->weight = new Distribution(*weight);
-          smarkov->categorical_process[i]->mixture = smarkov->categorical_process[i]->mixture_computation(smarkov->categorical_process[i]->weight);
-          delete smarkov->categorical_process[i]->restoration_weight;
-          delete smarkov->categorical_process[i]->restoration_mixture;
-          smarkov->categorical_process[i]->restoration_weight = new Distribution(*restoration_weight);
-          smarkov->categorical_process[i]->restoration_mixture = smarkov->categorical_process[i]->mixture_computation(smarkov->categorical_process[i]->restoration_weight);
-        }
-
-        else if (smarkov->discrete_parametric_process[i]) {
-          delete smarkov->discrete_parametric_process[i]->weight;
-          delete smarkov->discrete_parametric_process[i]->mixture;
-          smarkov->discrete_parametric_process[i]->weight = new Distribution(*weight);
-          smarkov->discrete_parametric_process[i]->mixture = smarkov->discrete_parametric_process[i]->mixture_computation(smarkov->discrete_parametric_process[i]->weight);
-
-          delete smarkov->discrete_parametric_process[i]->restoration_weight;
-          delete smarkov->discrete_parametric_process[i]->restoration_mixture;
-          smarkov->discrete_parametric_process[i]->restoration_weight = new Distribution(*restoration_weight);
-          smarkov->discrete_parametric_process[i]->restoration_mixture = smarkov->discrete_parametric_process[i]->mixture_computation(smarkov->discrete_parametric_process[i]->restoration_weight);
-        }
-
-        else if ((smarkov->continuous_parametric_process[i]) &&
-                 (smarkov->continuous_parametric_process[i]->ident != LINEAR_MODEL)) {
-          delete smarkov->continuous_parametric_process[i]->weight;
-          smarkov->continuous_parametric_process[i]->weight = new Distribution(*weight);
-
-          delete smarkov->continuous_parametric_process[i]->restoration_weight;
-          smarkov->continuous_parametric_process[i]->restoration_weight = new Distribution(*restoration_weight);
-        }
-      }
-
-      delete weight;
-      delete restoration_weight;
     }
   }
 

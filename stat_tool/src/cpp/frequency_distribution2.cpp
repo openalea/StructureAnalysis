@@ -110,7 +110,7 @@ ostream& FrequencyDistribution::dissimilarity_ascii_write(ostream &os , int nb_h
     else {
       histo[i]->ascii_characteristic_print(os , true);
 
-      os << STAT_label[STATL_MEAN_ABSOLUTE_DEVIATION] << ": " << histo[i]->mean_absolute_deviation_computation();
+      os << STAT_label[STATL_MEAN_ABSOLUTE_DEVIATION] << ": " << histo[i]->mean_absolute_deviation_computation(histo[i]->mean);
       if (histo[i]->mean > 0.) {
         os << "   " << STAT_label[STATL_CONCENTRATION_COEFF] << ": " << histo[i]->concentration_computation();
       }
@@ -419,7 +419,7 @@ bool FrequencyDistribution::dissimilarity_spreadsheet_write(StatError &error , c
       else {
         histo[i]->spreadsheet_characteristic_print(out_file , true);
 
-        out_file << STAT_label[STATL_MEAN_ABSOLUTE_DEVIATION] << "\t" << histo[i]->mean_absolute_deviation_computation();
+        out_file << STAT_label[STATL_MEAN_ABSOLUTE_DEVIATION] << "\t" << histo[i]->mean_absolute_deviation_computation(histo[i]->mean);
         if (histo[i]->mean > 0.) {
           out_file << "\t\t" << STAT_label[STATL_CONCENTRATION_COEFF] << "\t" << histo[i]->concentration_computation();
         }
@@ -2350,7 +2350,7 @@ bool DiscreteDistributionData::spreadsheet_write(StatError &error , const string
       out_file << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
       spreadsheet_characteristic_print(out_file , true);
 
-      out_file << STAT_label[STATL_MEAN_ABSOLUTE_DEVIATION] << "\t" << mean_absolute_deviation_computation();
+      out_file << STAT_label[STATL_MEAN_ABSOLUTE_DEVIATION] << "\t" << mean_absolute_deviation_computation(mean);
       if (mean > 0.) {
         out_file << "\t\t" << STAT_label[STATL_CONCENTRATION_COEFF] << "\t" << concentration_computation();
       }

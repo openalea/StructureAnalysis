@@ -122,10 +122,12 @@ namespace stat_tool {
     void offset_computation();
     void nb_element_computation();
     void max_computation();
+    double mode_computation() const;
     void mean_computation();
+    double quantile_computation(double icumul = 0.5) const;
     void variance_computation(bool bias = false);
 
-    double mean_absolute_deviation_computation() const;
+    double mean_absolute_deviation_computation(double location) const;
     double log_geometric_mean_computation() const;
     double skewness_computation() const;
     double kurtosis_computation() const;

@@ -130,7 +130,7 @@ Histogram::Histogram(const FrequencyDistribution &histo)
 /**
  *  \brief Copy of an Histogram object.
  *
- *  \param[in] reference on an Histogram object.
+ *  \param[in] histo reference on an Histogram object.
  */
 /*--------------------------------------------------------------*/
 

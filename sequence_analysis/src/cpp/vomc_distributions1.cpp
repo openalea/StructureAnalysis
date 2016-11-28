@@ -1237,7 +1237,7 @@ void VariableOrderMarkov::output_leave_probability(const double *imemory , int v
  *  \param[in] imemory         memory distribution,
  *  \param[in] variable        observation process index,
  *  \param[in] output          observation,
- *  \param[in] min_nb_valu     minimum number of values,
+ *  \param[in] min_nb_value    minimum number of values,
  *  \param[in] cumul_threshold threshold on the cumulative distribution function.
  */
 /*--------------------------------------------------------------*/

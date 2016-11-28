@@ -49,6 +49,8 @@
 
 #include "stat_tool/stat_label.h"
 
+#include "stat_tool/quantile_computation.hpp"
+
 #include "sequences.h"
 #include "sequence_label.h"
 
@@ -781,8 +783,9 @@ ostream& Sequences::line_write(ostream &os) const
 ostream& Sequences::ascii_write(ostream &os , bool exhaustive , bool comment_flag) const
 
 {
-  register int i;
-  double mean , variance;
+  register int i , j , k;
+  int *int_value , *pint_value;
+  double mean , variance , median , lower_quartile , upper_quartile , *real_value , *preal_value;
 
 
   if (index_parameter) {
@@ -878,21 +881,74 @@ ostream& Sequences::ascii_write(ostream &os , bool exhaustive , bool comment_fla
       }
 
       else {
+        mean = mean_computation(i);
+        variance = variance_computation(i , mean);
+
+        if (variance > 0.) {
+          switch (type[i]) {
+
+          case INT_VALUE : {
+            int_value = new int[cumul_length];
+            pint_value = int_value;
+            for (j = 0;j < nb_sequence;j++) {
+              for (k = 0;k < length[j];k++) {
+                *pint_value++ = int_sequence[j][i][k];
+              }
+            }
+
+            lower_quartile = quantile_computation(cumul_length , int_value , 0.25);
+            median = quantile_computation(cumul_length , int_value , 0.5);
+            upper_quartile = quantile_computation(cumul_length , int_value , 0.75);
+
+            delete [] int_value;
+            break;
+          }
+
+          case REAL_VALUE : {
+            real_value = new double[cumul_length];
+            preal_value = real_value;
+            for (j = 0;j < nb_sequence;j++) {
+              for (k = 0;k < length[j];k++) {
+                *preal_value++ = real_sequence[j][i][k];
+              }
+            }
+
+            lower_quartile = quantile_computation(cumul_length , real_value , 0.25);
+            median = quantile_computation(cumul_length , real_value , 0.5);
+            upper_quartile = quantile_computation(cumul_length , real_value , 0.75);
+
+            delete [] real_value;
+            break;
+          }
+          }
+        }
+
+        else {
+          median = mean;
+        }
+
         os << "\n";
         if (comment_flag) {
           os << "# ";
         }
         os << STAT_label[STATL_SAMPLE_SIZE] << ": " << cumul_length << endl;
 
-        mean = mean_computation(i);
-        variance = variance_computation(i , mean);
-
         if (comment_flag) {
           os << "# ";
         }
         os << STAT_label[STATL_MEAN] << ": " << mean << "   "
-           << STAT_label[STATL_VARIANCE] << ": " << variance << "   "
-           << STAT_label[STATL_STANDARD_DEVIATION] << ": " << sqrt(variance) << endl;
+           << STAT_label[STATL_MEDIAN] << ": " << median << endl;
+
+        if (comment_flag) {
+          os << "# ";
+        }
+        os << STAT_label[STATL_VARIANCE] << ": " << variance << "   "
+           << STAT_label[STATL_STANDARD_DEVIATION] << ": " << sqrt(variance);
+        if (variance > 0.) {
+          os << "   " << STAT_label[STATL_LOWER_QUARTILE] << ": " << lower_quartile
+             << "   " << STAT_label[STATL_UPPER_QUARTILE] << ": " << upper_quartile;
+        }
+        os << endl;
 
         if ((variance > 0.) && (exhaustive)) {
           if (comment_flag) {
@@ -1626,8 +1682,9 @@ bool Sequences::spreadsheet_write(StatError &error , const string path) const
 
 {
   bool status;
-  register int i;
-  double mean , variance;
+  register int i , j , k;
+  int *int_value , *pint_value;
+  double mean , variance , median , lower_quartile , upper_quartile , *real_value , *preal_value;
   ofstream out_file(path.c_str());
 
 
@@ -1695,14 +1752,64 @@ bool Sequences::spreadsheet_write(StatError &error , const string path) const
         }
 
         else {
-          out_file << "\n" << STAT_label[STATL_SAMPLE_SIZE] << "\t" << cumul_length << endl;
-
           mean = mean_computation(i);
           variance = variance_computation(i , mean);
 
+          if (variance > 0.) {
+            switch (type[i]) {
+
+            case INT_VALUE : {
+              int_value = new int[cumul_length];
+              pint_value = int_value;
+              for (j = 0;j < nb_sequence;j++) {
+                for (k = 0;k < length[j];k++) {
+                  *pint_value++ = int_sequence[j][i][k];
+                }
+              }
+
+              lower_quartile = quantile_computation(cumul_length , int_value , 0.25);
+              median = quantile_computation(cumul_length , int_value , 0.5);
+              upper_quartile = quantile_computation(cumul_length , int_value , 0.75);
+
+              delete [] int_value;
+              break;
+            }
+
+            case REAL_VALUE : {
+              real_value = new double[cumul_length];
+              preal_value = real_value;
+              for (j = 0;j < nb_sequence;j++) {
+                for (k = 0;k < length[j];k++) {
+                  *preal_value++ = real_sequence[j][i][k];
+                }
+              }
+
+              lower_quartile = quantile_computation(cumul_length , real_value , 0.25);
+              median = quantile_computation(cumul_length , real_value , 0.5);
+              upper_quartile = quantile_computation(cumul_length , real_value , 0.75);
+
+              delete [] real_value;
+              break;
+            }
+            }
+          }
+
+          else {
+            median = mean;
+          }
+
+          out_file << "\n" << STAT_label[STATL_SAMPLE_SIZE] << "\t" << cumul_length << endl;
+
           out_file << STAT_label[STATL_MEAN] << "\t" << mean << "\t\t"
-                   << STAT_label[STATL_VARIANCE] << "\t" << variance << "\t\t"
-                   << STAT_label[STATL_STANDARD_DEVIATION] << "\t" << sqrt(variance) << endl;
+                   << STAT_label[STATL_MEDIAN] << "\t" << median << endl;
+
+          out_file << STAT_label[STATL_VARIANCE] << "\t" << variance << "\t\t"
+                   << STAT_label[STATL_STANDARD_DEVIATION] << "\t" << sqrt(variance);
+          if (variance > 0.) {
+            out_file << "\t\t" << STAT_label[STATL_LOWER_QUARTILE] << "\t" << lower_quartile
+                     << "\t\t" << STAT_label[STATL_UPPER_QUARTILE] << "\t" << upper_quartile;
+          }
+          out_file << endl;
 
           if (variance > 0.) {
             out_file << STAT_label[STATL_SKEWNESS_COEFF] << "\t" << skewness_computation(i , mean , variance) << "\t\t"
@@ -3335,21 +3442,21 @@ double Sequences::variance_computation(int variable , double mean) const
  *  \brief Computation of the mean absolute deviation for a variable.
  *
  *  \param[in] variable variable index,
- *  \param[in] mean     mean.
+ *  \param[in] location location measure (e.g. mean or median).
  *
  *  \return             mean absolute deviation.
  */
 /*--------------------------------------------------------------*/
 
-double Sequences::mean_absolute_deviation_computation(int variable , double mean) const
+double Sequences::mean_absolute_deviation_computation(int variable , double location) const
 
 {
   register int i , j;
-  double mean_absolute_deviation ;
+  double mean_absolute_deviation;
 
 
   if (marginal_distribution[variable]) {
-    mean_absolute_deviation = marginal_distribution[variable]->mean_absolute_deviation_computation();
+    mean_absolute_deviation = marginal_distribution[variable]->mean_absolute_deviation_computation(location);
   }
 
   else {
@@ -3358,7 +3465,7 @@ double Sequences::mean_absolute_deviation_computation(int variable , double mean
     if ((type[variable] != REAL_VALUE) && (type[variable] != AUXILIARY)) {
       for (i = 0;i < nb_sequence;i++) {
         for (j = 0;j < length[i];j++) {
-          mean_absolute_deviation += fabs(int_sequence[i][variable][j] - mean);
+          mean_absolute_deviation += fabs(int_sequence[i][variable][j] - location);
         }
       }
     }
@@ -3366,7 +3473,7 @@ double Sequences::mean_absolute_deviation_computation(int variable , double mean
     else {
       for (i = 0;i < nb_sequence;i++) {
         for (j = 0;j < length[i];j++) {
-          mean_absolute_deviation += fabs(real_sequence[i][variable][j] - mean);
+          mean_absolute_deviation += fabs(real_sequence[i][variable][j] - location);
         }
       }
     }

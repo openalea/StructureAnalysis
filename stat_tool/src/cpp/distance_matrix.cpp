@@ -1331,7 +1331,7 @@ ostream& DistanceMatrix::line_write(ostream &os) const
  *
  *  \param[in]     normalized_distance pointer on the normalized distance matrix,
  *  \param[in,out] os                  stream,
- *  \param[in]     output_format       output format (ASCII/SPREADSHEET).
+ *  \param[in]     format              output format (ASCII/SPREADSHEET).
  */
 /*--------------------------------------------------------------*/
 

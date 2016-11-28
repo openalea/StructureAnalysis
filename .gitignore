@@ -6,7 +6,7 @@ build-scons
 *.pyc
 *.dblite
 *.ps
-stat_tool/doc/html/
-stat_tool/doc/latex/
+*/doc/html/
+*/doc/latex/
 options.py
 /.project

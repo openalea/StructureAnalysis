@@ -493,8 +493,19 @@ ostream& Distribution::ascii_characteristic_print(ostream &os , bool shape , boo
       os << "# ";
     }
     os << STAT_label[STATL_MEAN] << ": " << mean << "   "
-       << STAT_label[STATL_VARIANCE] << ": " << variance << "   "
-       << STAT_label[STATL_STANDARD_DEVIATION] << ": " << sqrt(variance) << endl;
+       << STAT_label[STATL_MEDIAN] << ": " << quantile_computation() << "   "
+       << STAT_label[STATL_MODE] << ": " << mode_computation() << endl;
+
+    if (comment_flag) {
+      os << "# ";
+    }
+    os << STAT_label[STATL_VARIANCE] << ": " << variance << "   "
+       << STAT_label[STATL_STANDARD_DEVIATION] << ": " << sqrt(variance);
+    if (variance > 0.) {
+      os << "   " << STAT_label[STATL_LOWER_QUARTILE] << ": " << quantile_computation(0.25)
+         << "   " << STAT_label[STATL_UPPER_QUARTILE] << ": " << quantile_computation(0.75);
+    }
+    os << endl;
 
     if ((shape) && (variance > 0.)) {
       if (comment_flag) {
@@ -858,12 +869,20 @@ ostream& Distribution::spreadsheet_characteristic_print(ostream &os , bool shape
 
 {
   if ((mean != D_DEFAULT) && (variance != D_DEFAULT)) {
-    os << STAT_label[STATL_MEAN] << "\t" << mean << "\t"
-       << STAT_label[STATL_VARIANCE] << "\t" << variance << "\t"
-       << STAT_label[STATL_STANDARD_DEVIATION] << "\t" << sqrt(variance) << endl;
+    os << STAT_label[STATL_MEAN] << "\t" << mean << "\t\t"
+       << STAT_label[STATL_MEDIAN] << "\t" << quantile_computation() << "\t\t"
+       << STAT_label[STATL_MODE] << "\t" << mode_computation() << endl;
+
+    os << STAT_label[STATL_VARIANCE] << "\t" << variance << "\t\t"
+       << STAT_label[STATL_STANDARD_DEVIATION] << "\t" << sqrt(variance);
+    if (variance > 0.) {
+      os << "\t\t" << STAT_label[STATL_LOWER_QUARTILE] << "\t" << quantile_computation(0.25)
+         << "\t\t" << STAT_label[STATL_UPPER_QUARTILE] << "\t" << quantile_computation(0.75);
+    }
+    os << endl;
 
     if ((shape) && (variance > 0.)) {
-      os << STAT_label[STATL_SKEWNESS_COEFF] << "\t" << skewness_computation() << "\t"
+      os << STAT_label[STATL_SKEWNESS_COEFF] << "\t" << skewness_computation() << "\t\t"
          << STAT_label[STATL_KURTOSIS_COEFF] << "\t" << kurtosis_computation() << endl;
     }
   }
@@ -2586,7 +2605,7 @@ void Distribution::offset_computation()
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Extraction of the probability at the mode of the distribution.
+ *  \brief Extraction of the probability at the mode of a discrete distribution.
  */
 /*--------------------------------------------------------------*/
 
@@ -2602,6 +2621,41 @@ void Distribution::max_computation()
       max = mass[i];
     }
   }
+}
+
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Extraction of the mode of a discrete distribution.
+ *
+ *  \return mode.
+ */
+/*--------------------------------------------------------------*/
+
+double Distribution::mode_computation() const
+
+{
+  register int i;
+  double max_mass , mode;
+
+
+  max_mass = 0.;
+  for (i = offset;i < nb_value;i++) {
+    if (mass[i] > max_mass) {
+      max_mass = mass[i];
+      mode = i;
+    }
+  }
+
+  i = mode;
+  while (mass[i + 1] == mass[i]) {
+    i++;
+  }
+  if (i > mode) {
+    mode = (i + mode) / 2.;
+  }
+
+  return mode;
 }
 
 
@@ -2624,6 +2678,39 @@ void Distribution::mean_computation()
     }
     mean /= cumul[nb_value - 1];
   }
+}
+
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of a quantile of a discrete distribution.
+ *
+ *  \param[in] icumul value of the cumulative distribution function.
+ *
+ *  \return           quantile.
+ */
+/*--------------------------------------------------------------*/
+
+double Distribution::quantile_computation(double icumul) const
+
+{
+  register int i;
+  double quantile = D_DEFAULT;
+
+
+  if ((cumul[nb_value - 1] >= CUMUL_THRESHOLD) && (icumul <= cumul[nb_value - 1])) {
+    for (i = offset;i < nb_value;i++) {
+      if (cumul[i] >= icumul) {
+        quantile = i;
+        if (cumul[i] == icumul) {
+          quantile += 0.5;
+        }
+        break;
+      }
+    }
+  }
+
+  return quantile;
 }
 
 
@@ -2659,28 +2746,24 @@ void Distribution::variance_computation()
 /**
  *  \brief Computation of the mean absolute deviation of a discrete distribution.
  *
- *  \return mean absolute deviation.
+ *  \param[in] location location measure (e.g. mean or median).
+ *
+ *  \return              mean absolute deviation.
  */
 /*--------------------------------------------------------------*/
 
-double Distribution::mean_absolute_deviation_computation() const
+double Distribution::mean_absolute_deviation_computation(double location) const
 
 {
   register int i;
-  double mean_absolute_deviation = D_DEFAULT;
+  double mean_absolute_deviation;
 
 
-  if (mean != D_DEFAULT) {
-    mean_absolute_deviation = 0.;
-    for (i = offset;i < nb_value;i++) {
-      mean_absolute_deviation += mass[i] * fabs(i - mean);
-    }
-    mean_absolute_deviation /= cumul[nb_value - 1];
-
-    if (mean_absolute_deviation < 0.) {
-      mean_absolute_deviation = 0.;
-    }
+  mean_absolute_deviation = 0.;
+  for (i = offset;i < nb_value;i++) {
+    mean_absolute_deviation += mass[i] * fabs(i - location);
   }
+  mean_absolute_deviation /= cumul[nb_value - 1];
 
   return mean_absolute_deviation;
 }
@@ -2851,9 +2934,9 @@ double Distribution::second_difference_norm_computation() const
 /**
  *  \brief Computation of the cumulative distribution function of a discrete distribution.
  *
- *  \param[in] number of values,
- *  \param[in] pointer on the probability mass function
- *  \param[in] pointer on the cumulative distribution function.
+ *  \param[in] nb_value number of values,
+ *  \param[in] pmass    pointer on the probability mass function,
+ *  \param[in] pcumul   pointer on the cumulative distribution function.
  */
 /*--------------------------------------------------------------*/
 

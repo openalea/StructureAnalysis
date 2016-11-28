@@ -330,7 +330,7 @@ namespace stat_tool {
                           double imin_value = D_INF);
     int cumulative_distribution_function_computation(int variable , double **cdf) const;
 
-    double mean_absolute_deviation_computation(int variable) const;
+    double mean_absolute_deviation_computation(int variable , double location) const;
     double mean_absolute_difference_computation(int variable) const;
     double skewness_computation(int variable) const;
     double kurtosis_computation(int variable) const;

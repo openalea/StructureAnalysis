@@ -1124,10 +1124,10 @@ public:
 
   static Sequences*
   pointwise_average(const Sequences &seq, bool circular, bool robust , bool dispersion,
-      bool frequency_correction, sequence_type output, const char *path, output_format format)
+      sequence_type output, const char *path, output_format format)
   {
     SIMPLE_METHOD_TEMPLATE_1(seq, pointwise_average, Sequences,
-        circular, robust, dispersion, frequency_correction, output, path, format);
+        circular, robust, dispersion, output, path, format);
   }
 
   static Sequences*

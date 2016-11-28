@@ -3717,10 +3717,11 @@ ostream& Vectors::ascii_write(ostream &os , bool exhaustive , bool comment_flag)
 
 {
   register int i , j;
-  int buff , width[2];
+  int buff , width[2] , *int_value;
   long old_adjust;
-  double **correlation;
+  double median , lower_quartile , upper_quartile , *real_value , **correlation;
   Test *test;
+
 
   old_adjust = os.setf(ios::right , ios::adjustfield);
 
@@ -3762,6 +3763,43 @@ ostream& Vectors::ascii_write(ostream &os , bool exhaustive , bool comment_flag)
     }
 
     else {
+      if (covariance[i][i] > 0.) {
+        switch (type[i]) {
+
+        case INT_VALUE : {
+          int_value = new int[nb_vector];
+          for (j = 0;j < nb_vector;j++) {
+            int_value[j] = int_vector[j][i];
+          }
+
+          lower_quartile = quantile_computation(nb_vector , int_value , 0.25);
+          median = quantile_computation(nb_vector , int_value , 0.5);
+          upper_quartile = quantile_computation(nb_vector , int_value , 0.75);
+
+          delete [] int_value;
+          break;
+        }
+
+        case REAL_VALUE : {
+          real_value = new double[nb_vector];
+          for (j = 0;j < nb_vector;j++) {
+            real_value[j] = real_vector[j][i];
+          }
+
+          lower_quartile = quantile_computation(nb_vector , real_value , 0.25);
+          median = quantile_computation(nb_vector , real_value , 0.5);
+          upper_quartile = quantile_computation(nb_vector , real_value , 0.75);
+
+          delete [] real_value;
+          break;
+        }
+        }
+      }
+
+      else {
+        median = mean[i];
+      }
+
       os << "\n";
       if (comment_flag) {
         os << "# ";
@@ -3772,8 +3810,18 @@ ostream& Vectors::ascii_write(ostream &os , bool exhaustive , bool comment_flag)
         os << "# ";
       }
       os << STAT_label[STATL_MEAN] << ": " << mean[i] << "   "
-         << STAT_label[STATL_VARIANCE] << ": " << covariance[i][i] << "   "
-         << STAT_label[STATL_STANDARD_DEVIATION] << ": " << sqrt(covariance[i][i]) << endl;
+         << STAT_label[STATL_MEDIAN] << ": " << median << endl;
+
+      if (comment_flag) {
+        os << "# ";
+      }
+      os << STAT_label[STATL_VARIANCE] << ": " << covariance[i][i] << "   "
+         << STAT_label[STATL_STANDARD_DEVIATION] << ": " << sqrt(covariance[i][i]);
+      if (covariance[i][i] > 0.) {
+        os << "   " << STAT_label[STATL_LOWER_QUARTILE] << ": " << lower_quartile
+           << "   " << STAT_label[STATL_UPPER_QUARTILE] << ": " << upper_quartile;
+      }
+      os << endl;
 
       if ((exhaustive) && (covariance[i][i] > 0.)) {
         if (comment_flag) {
@@ -3798,50 +3846,6 @@ ostream& Vectors::ascii_write(ostream &os , bool exhaustive , bool comment_flag)
         marginal_histogram[i]->ascii_print(os , comment_flag);
       }
     }
-
-#   ifdef MESSAGE
-    if (comment_flag) {
-      os << "# ";
-    }
-
-    switch (type[i]) {
-
-    case INT_VALUE : {
-      int *int_value;
-
-      int_value = new int[nb_vector];
-      for (j = 0;j < nb_vector;j++) {
-        int_value[j] = int_vector[j][i];
-      }
-      os << STAT_label[STATL_LOWER_QUARTILE] << ": " << quantile_computation(nb_vector , int_value , 0.25 , false) << " | "
-         << STAT_label[STATL_MEDIAN] << ": " << quantile_computation(nb_vector , int_value , 0.5 , false) << " | "
-         << STAT_label[STATL_UPPER_QUARTILE] << ": " << quantile_computation(nb_vector , int_value , 0.75 , false) << endl;
-
-/*      os << STAT_label[STATL_LOWER_QUARTILE] << ": " << quantile_computation(nb_vector , int_value , 0.25 , true) << " | "
-         << STAT_label[STATL_MEDIAN] << quantile_computation(nb_vector , int_value , 0.5 , true) << " | "
-         << STAT_label[STATL_UPPER_QUARTILE] << ": " << quantile_computation(nb_vector , int_value , 0.75 , true) << endl; */
-
-      delete [] int_value;
-      break;
-    }
-
-    case REAL_VALUE : {
-      double *real_value;
-
-      real_value = new double[nb_vector];
-      for (j = 0;j < nb_vector;j++) {
-        real_value[j] = real_vector[j][i];
-      }
-      os << STAT_label[STATL_LOWER_QUARTILE] << ": " << quantile_computation(nb_vector , real_value , 0.25 , false) << " | "
-         << STAT_label[STATL_MEDIAN] << ": " << quantile_computation(nb_vector , real_value , 0.5 , false) << " | "
-         << STAT_label[STATL_UPPER_QUARTILE] << ": " << quantile_computation(nb_vector , real_value , 0.75 , false) << endl;
-
-      delete [] real_value;
-      break;
-    }
-    }
-#   endif
-
   }
 
   width[0] = column_width(nb_variable);
@@ -4186,7 +4190,8 @@ bool Vectors::spreadsheet_write(StatError &error , const string path) const
 {
   bool status;
   register int i , j;
-  double **correlation;
+  int *int_value;
+  double median , lower_quartile , upper_quartile , *real_value , **correlation;
   Test *test;
   ofstream out_file(path.c_str());
 
@@ -4221,11 +4226,55 @@ bool Vectors::spreadsheet_write(StatError &error , const string path) const
       }
 
       else {
+        if (covariance[i][i] > 0.) {
+          switch (type[i]) {
+
+          case INT_VALUE : {
+            int_value = new int[nb_vector];
+            for (j = 0;j < nb_vector;j++) {
+              int_value[j] = int_vector[j][i];
+            }
+
+            lower_quartile = quantile_computation(nb_vector , int_value , 0.25);
+            median = quantile_computation(nb_vector , int_value , 0.5);
+            upper_quartile = quantile_computation(nb_vector , int_value , 0.75);
+
+            delete [] int_value;
+            break;
+          }
+
+          case REAL_VALUE : {
+            real_value = new double[nb_vector];
+            for (j = 0;j < nb_vector;j++) {
+              real_value[j] = real_vector[j][i];
+            }
+
+            lower_quartile = quantile_computation(nb_vector , real_value , 0.25);
+            median = quantile_computation(nb_vector , real_value , 0.5);
+            upper_quartile = quantile_computation(nb_vector , real_value , 0.75);
+
+            delete [] real_value;
+            break;
+          }
+          }
+        }
+
+        else {
+          median = mean[i];
+        }
+
         out_file << "\n" << STAT_label[STATL_SAMPLE_SIZE] << "\t" << nb_vector << endl;
 
         out_file << STAT_label[STATL_MEAN] << "\t" << mean[i] << "\t\t"
-                 << STAT_label[STATL_VARIANCE] << "\t" << covariance[i][i] << "\t\t"
-                 << STAT_label[STATL_STANDARD_DEVIATION] << "\t" << sqrt(covariance[i][i]) << endl;
+                 << STAT_label[STATL_MEDIAN] << "\t" << median << endl;
+
+        out_file << STAT_label[STATL_VARIANCE] << "\t" << covariance[i][i] << "\t\t"
+                 << STAT_label[STATL_STANDARD_DEVIATION] << "\t" << sqrt(covariance[i][i]);
+        if (covariance[i][i] > 0.) {
+          out_file << "\t\t" << STAT_label[STATL_LOWER_QUARTILE] << "\t" << lower_quartile
+                   << "\t\t" << STAT_label[STATL_UPPER_QUARTILE] << "\t" << upper_quartile;
+        }
+        out_file << endl;
 
         if (covariance[i][i] > 0.) {
           out_file << STAT_label[STATL_SKEWNESS_COEFF] << "\t" << skewness_computation(i) << "\t\t"
@@ -5496,31 +5545,36 @@ void Vectors::covariance_computation(int variable)
 /**
  *  \brief Computation of the mean absolute deviation for a variable.
  *
- *  \param[in] variable variable index.
+ *  \param[in] variable variable index,
+ *  \param[in] location location measure (e.g. mean or median).
  *
  *  \return             mean absolute deviation.
  */
 /*--------------------------------------------------------------*/
 
-double Vectors::mean_absolute_deviation_computation(int variable) const
+double Vectors::mean_absolute_deviation_computation(int variable , double location) const
 
 {
   register int i;
-  double mean_absolute_deviation = D_DEFAULT;
+  double mean_absolute_deviation;
 
 
-  if (mean[variable] != D_INF) {
+  if (marginal_distribution[variable]) {
+    mean_absolute_deviation = marginal_distribution[variable]->mean_absolute_deviation_computation(location);
+  }
+
+  else {
     mean_absolute_deviation = 0.;
 
     if (type[variable] != REAL_VALUE) {
       for (i = 0;i < nb_vector;i++) {
-        mean_absolute_deviation += fabs(int_vector[i][variable] - mean[variable]);
+        mean_absolute_deviation += fabs(int_vector[i][variable] - location);
       }
     }
 
     else {
       for (i = 0;i < nb_vector;i++) {
-        mean_absolute_deviation += fabs(real_vector[i][variable] - mean[variable]);
+        mean_absolute_deviation += fabs(real_vector[i][variable] - location);
       }
     }
 

@@ -61,7 +61,7 @@ namespace stat_tool {
 /**
  *  \brief Construction of a Reestimation object.
  *
- *  \param[in] number of values from 0.
+ *  \param[in] inb_value number of values from 0.
  */
 /*--------------------------------------------------------------*/
 
@@ -128,7 +128,7 @@ void Reestimation<Type>::copy(const Reestimation<Type> &histo)
 /**
  *  \brief Constructor by copy of the Reestimation class.
  *
- *  \param[in] reference on a Reestimation object.
+ *  \param[in] histo reference on a Reestimation object.
  */
 /*--------------------------------------------------------------*/
 
@@ -246,8 +246,19 @@ ostream& Reestimation<Type>::ascii_characteristic_print(ostream &os , bool shape
       os << "# ";
     }
     os << STAT_label[STATL_MEAN] << ": " << mean << "   "
-       << STAT_label[STATL_VARIANCE] << ": " << variance << "   "
-       << STAT_label[STATL_STANDARD_DEVIATION] << ": " << sqrt(variance) << endl;
+       << STAT_label[STATL_MEDIAN] << ": " << quantile_computation() << "   "
+       << STAT_label[STATL_MODE] << ": " << mode_computation() << endl;
+
+    if (comment_flag) {
+      os << "# ";
+    }
+    os << STAT_label[STATL_VARIANCE] << ": " << variance << "   "
+       << STAT_label[STATL_STANDARD_DEVIATION] << ": " << sqrt(variance);
+    if (variance > 0.) {
+      os << "   " << STAT_label[STATL_LOWER_QUARTILE] << ": " << quantile_computation(0.25)
+         << "   " << STAT_label[STATL_UPPER_QUARTILE] << ": " << quantile_computation(0.75);
+    }
+    os << endl;
 
     if ((shape) && (variance > 0.)) {
       if (comment_flag) {
@@ -420,6 +431,43 @@ void Reestimation<Type>::max_computation()
 
 /*--------------------------------------------------------------*/
 /**
+ *  \brief Determination of the mode.
+ *
+ *  \return mode.
+ */
+/*--------------------------------------------------------------*/
+
+template <typename Type>
+double Reestimation<Type>::mode_computation() const
+
+{
+  register int i;
+  int max_frequency;
+  double mode;
+
+
+  max_frequency = 0;
+  for (i = offset;i < nb_value;i++) {
+    if (frequency[i] > max_frequency) {
+      max_frequency = frequency[i];
+      mode = i;
+    }
+  }
+
+  i = mode;
+  while (frequency[i + 1] == frequency[i]) {
+    i++;
+  }
+  if (i > mode) {
+    mode = (i + mode) / 2.;
+  }
+
+  return mode;
+}
+
+
+/*--------------------------------------------------------------*/
+/**
  *  \brief Mean computation.
  */
 /*--------------------------------------------------------------*/
@@ -438,6 +486,40 @@ void Reestimation<Type>::mean_computation()
     }
     mean /= nb_element;
   }
+}
+
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of a quantile.
+ *
+ *  \param[in] icumul value of the cumulative distribution function.
+ *
+ *  \return           quantile.
+ */
+/*--------------------------------------------------------------*/
+
+template <typename Type>
+double Reestimation<Type>::quantile_computation(double icumul) const
+
+{
+  register int i;
+  double cumul , quantile;
+
+
+  cumul = 0.;
+  for (i = offset;i < nb_value;i++) {
+    cumul += frequency[i] / (double)nb_element;
+    if (cumul >= icumul) {
+      quantile = i;
+      if (cumul == icumul) {
+        quantile += 0.5;
+      }
+      break;
+    }
+  }
+
+  return quantile;
 }
 
 
@@ -483,22 +565,24 @@ void Reestimation<Type>::variance_computation(bool bias)
 /**
  *  \brief Computation of the mean absolute deviation.
  *
- *  \return mean absolute deviation.
+ *  \param[in] location location measure (e.g. mean or median).
+ *
+ *  \return             mean absolute deviation.
  */
 /*--------------------------------------------------------------*/
 
 template <typename Type>
-double Reestimation<Type>::mean_absolute_deviation_computation() const
+double Reestimation<Type>::mean_absolute_deviation_computation(double location) const
 
 {
   register int i;
   double mean_absolute_deviation = D_DEFAULT;
 
 
-  if ((mean != D_DEFAULT) && (nb_element > 0)) {
+  if (nb_element > 0) {
     mean_absolute_deviation = 0.;
     for (i = offset;i < nb_value;i++) {
-      mean_absolute_deviation += frequency[i] * fabs(i - mean);
+      mean_absolute_deviation += frequency[i] * fabs(i - location);
     }
     mean_absolute_deviation /= nb_element;
   }

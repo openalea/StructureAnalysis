@@ -135,7 +135,7 @@ Mixture::Mixture(int inb_component , int inb_output_process , int *nb_value)
  *  \param[in] ident              component identifiers,
  *  \param[in] mean               mean of the 1st component,
  *  \param[in] standard_deviation shape parameter (gamma) / scale parameter (inverse Gaussian) /
- *  \param[in]                    standard deviation (Gaussian) of the 1st component,
+ *                                standard deviation (Gaussian) of the 1st component,
  *  \param[in] tied_mean          flag tied means,
  *  \param[in] variance_factor    type of link between the variances (CONVOLUTION_FACTOR/SCALING_FACTOR).
  */
@@ -2842,7 +2842,7 @@ void MixtureData::build_observation_histogram(int variable , int nb_component , 
 /**
  *  \brief Construction of the observation histograms.
  *
- *  \param[in] number of components.
+ *  \param[in] nb_component number of components.
  */
 /*--------------------------------------------------------------*/
 

@@ -592,9 +592,15 @@ ostream& ContinuousParametric::ascii_characteristic_print(ostream &os , bool fil
   case GAMMA : {
     if (shape != 0.) {
       double variance = shape * scale * scale;
+      boost::math::gamma_distribution<double> dist(shape , scale);
 
       os << STAT_label[STATL_MEAN] << ": " << shape * scale << "   "
-         << STAT_label[STATL_VARIANCE] << ": " << variance << "   "
+         << STAT_label[STATL_MEDIAN] << ": " << quantile(dist , 0.5) << "   "
+         << STAT_label[STATL_MODE] << ": " << mode(dist) << endl;
+      if (file_flag) {
+        os << "# ";
+      }
+      os << STAT_label[STATL_VARIANCE] << ": " << variance << "   "
          << STAT_label[STATL_STANDARD_DEVIATION] << ": " << sqrt(variance) << endl;
 
       if (file_flag) {
@@ -613,7 +619,13 @@ ostream& ContinuousParametric::ascii_characteristic_print(ostream &os , bool fil
 
   case INVERSE_GAUSSIAN : {
     double variance = location * location * location / scale;
+    inverse_gaussian dist(location , scale);
 
+    os << STAT_label[STATL_MEDIAN] << ": " << quantile(dist , 0.5) << "   "
+       << STAT_label[STATL_MODE] << ": " << mode(dist) << endl;
+    if (file_flag) {
+      os << "# ";
+    }
     os << STAT_label[STATL_VARIANCE] << ": " << variance << "   "
        << STAT_label[STATL_STANDARD_DEVIATION] << ": " << sqrt(variance) << endl;
 
@@ -655,6 +667,9 @@ ostream& ContinuousParametric::ascii_characteristic_print(ostream &os , bool fil
         standard_deviation *= (180 / M_PI);
       }
 
+      if (file_flag) {
+        os << "# ";
+      }
       os << STAT_label[STATL_STANDARD_DEVIATION] << ": " <<  standard_deviation << endl;
     }
 #   endif
@@ -1075,25 +1090,25 @@ ostream& ContinuousParametric::spreadsheet_parameter_print(ostream &os) const
   case GAMMA : {
     os << STAT_word[STATW_SHAPE] << "\t" << shape;
     if (shape != 0.) {
-      os << "\t" << STAT_word[STATW_SCALE] << "\t" << scale;
+      os << "\t\t" << STAT_word[STATW_SCALE] << "\t" << scale;
     }
     break;
   }
 
   case INVERSE_GAUSSIAN : {
-    os << STAT_word[STATW_MEAN] << "\t" << location << "\t"
+    os << STAT_word[STATW_MEAN] << "\t" << location << "\t\t"
        << STAT_word[STATW_SCALE] << "\t" << scale;
     break;
   }
 
   case GAUSSIAN : {
-    os << STAT_word[STATW_MEAN] << "\t" << location << "\t"
+    os << STAT_word[STATW_MEAN] << "\t" << location << "\t\t"
        << STAT_word[STATW_STANDARD_DEVIATION] << "\t" << dispersion;
     break;
   }
 
   case VON_MISES : {
-    os << STAT_word[STATW_MEAN_DIRECTION] << "\t" << location << "\t"
+    os << STAT_word[STATW_MEAN_DIRECTION] << "\t" << location << "\t\t"
        << STAT_word[STATW_CONCENTRATION] << "\t" << dispersion;
     break;
   }
@@ -1101,14 +1116,14 @@ ostream& ContinuousParametric::spreadsheet_parameter_print(ostream &os) const
   case ZERO_INFLATED_GAMMA : {
     os << STAT_word[STATW_ZERO_PROBABILITY] << "\t" << zero_probability;
     if (zero_probability < 1.) {
-      os << "\t" << STAT_word[STATW_SHAPE] << "\t" << shape
-         << "\t" << STAT_word[STATW_SCALE] << "\t" << scale;
+      os << "\t\t" << STAT_word[STATW_SHAPE] << "\t" << shape
+         << "\t\t" << STAT_word[STATW_SCALE] << "\t" << scale;
     }
     break;
   }
 
   case LINEAR_MODEL : {
-    os << STAT_word[STATW_INTERCEPT] << "\t" << intercept << "\t"
+    os << STAT_word[STATW_INTERCEPT] << "\t" << intercept << "\t\t"
        << STAT_word[STATW_SLOPE] << "\t" << slope;
 
     if (sample_size > 0.) {
@@ -1122,15 +1137,16 @@ ostream& ContinuousParametric::spreadsheet_parameter_print(ostream &os) const
            << slope + test.value * slope_standard_deviation;
       }
 
-      os << "\t" << STAT_word[STATW_STANDARD_DEVIATION] << "\t" << dispersion
-         << "\n" << STAT_label[STATL_CORRELATION_COEFF] << "\t" << correlation
-         << "\t" << STAT_label[STATL_LIMIT_CORRELATION_COEFF] << "\t" << "-/+"
+      os << "\t\t" << STAT_word[STATW_STANDARD_DEVIATION] << "\t" << dispersion << endl;
+
+      os << STAT_label[STATL_CORRELATION_COEFF] << "\t" << correlation
+         << "\t\t" << STAT_label[STATL_LIMIT_CORRELATION_COEFF] << "\t" << "-/+"
          << test.value / sqrt(test.value * test.value + sample_size)
          << "\t" << STAT_label[STATL_CRITICAL_PROBABILITY] << "\t" << test.critical_probability;
     }
 
     else {
-      os << "\t" << STAT_word[STATW_STANDARD_DEVIATION] << "\t" << dispersion;
+      os << "\t\t" << STAT_word[STATW_STANDARD_DEVIATION] << "\t" << dispersion;
     }
     break;
   }
@@ -1155,17 +1171,20 @@ ostream& ContinuousParametric::spreadsheet_characteristic_print(ostream &os) con
   case GAMMA : {
     if (shape != 0.) {
       double variance = shape * scale * scale;
+      boost::math::gamma_distribution<double> dist(shape , scale);
 
-      os << STAT_label[STATL_MEAN] << "\t" << shape * scale << "\t"
-         << STAT_label[STATL_VARIANCE] << "\t" << variance << "\t"
+      os << STAT_label[STATL_MEAN] << "\t" << shape * scale << "\t\t"
+         << STAT_label[STATL_MEDIAN] << "\t" << quantile(dist , 0.5) << "\t\t"
+         << STAT_label[STATL_MODE] << "\t" << mode(dist) << endl;
+      os << STAT_label[STATL_VARIANCE] << "\t" << variance << "\t\t"
          << STAT_label[STATL_STANDARD_DEVIATION] << "\t" << sqrt(variance) << endl;
 
-      os << STAT_label[STATL_SKEWNESS_COEFF] << "\t" << 2 / sqrt(shape) << "\t"
+      os << STAT_label[STATL_SKEWNESS_COEFF] << "\t" << 2 / sqrt(shape) << "\t\t"
          << STAT_label[STATL_KURTOSIS_COEFF] << "\t" << 6 / shape << endl;
     }
 
     else {
-      os << STAT_label[STATL_MEAN] << "\t" << 0 << "\t"
+      os << STAT_label[STATL_MEAN] << "\t" << 0 << "\t\t"
          << STAT_label[STATL_VARIANCE] << "\t" << 0 << endl;
     }
     break;
@@ -1173,10 +1192,14 @@ ostream& ContinuousParametric::spreadsheet_characteristic_print(ostream &os) con
 
   case INVERSE_GAUSSIAN : {
     double variance = location * location * location / scale;
+    inverse_gaussian dist(location , scale);
 
-    os << STAT_label[STATL_VARIANCE] << "\t" << variance << "\t"
-       << STAT_label[STATL_STANDARD_DEVIATION] << "\t" << sqrt(variance) << "\n"
-       << STAT_label[STATL_SKEWNESS_COEFF] << "\t" << 3 * sqrt(location / scale) << "   "
+    os << STAT_label[STATL_MEDIAN] << "\t" << quantile(dist , 0.5) << "\t\t"
+       << STAT_label[STATL_MODE] << "\t" << mode(dist) << endl;
+    os << STAT_label[STATL_VARIANCE] << "\t" << variance << "\t\t"
+       << STAT_label[STATL_STANDARD_DEVIATION] << "\t" << sqrt(variance) << endl;
+
+    os << STAT_label[STATL_SKEWNESS_COEFF] << "\t" << 3 * sqrt(location / scale) << "\t\t"
        << STAT_label[STATL_KURTOSIS_COEFF] << "\t" << 15 * location / scale << endl;
     break;
   }
@@ -1219,8 +1242,8 @@ ostream& ContinuousParametric::spreadsheet_characteristic_print(ostream &os) con
       variance = (1 - zero_probability) * shape * scale * scale * (1 + shape) - mean * mean;
     }
 
-    os << STAT_label[STATL_MEAN] << "\t" <<  mean << "\t"
-       << STAT_label[STATL_VARIANCE] << "\t" << variance << "\t"
+    os << STAT_label[STATL_MEAN] << "\t" <<  mean << "\t\t"
+       << STAT_label[STATL_VARIANCE] << "\t" << variance << "\t\t"
        << STAT_label[STATL_STANDARD_DEVIATION] << "\t" << sqrt(variance) << endl;
     break;
   }

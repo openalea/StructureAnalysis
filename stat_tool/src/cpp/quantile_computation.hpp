@@ -50,8 +50,7 @@ namespace stat_tool {
 
 
 template <typename Type>
-double quantile_computation(int nb_individual , Type *value , double cumul ,
-                            bool frequency_correction);
+double quantile_computation(int nb_individual , Type *value , double cumul);
 
 
 
@@ -59,22 +58,20 @@ double quantile_computation(int nb_individual , Type *value , double cumul ,
 /**
  *  \brief Computation of a quantile for a discrete or continuous sample.
  *
- *  \param[in] nb_individual        sample size,
- *  \param[in] value                pointer on the values,
- *  \param[in] cumul                value of the cumulative distribution function,
- *  \param[in] frequency_correction flag correction related to the frequencies for categorical variables.
+ *  \param[in] nb_individual sample size,
+ *  \param[in] value         pointer on the values,
+ *  \param[in] cumul         value of the cumulative distribution function.
  *
- *  \return                         quantile.
+ *  \return                  quantile.
  */
 /*--------------------------------------------------------------*/
 
 template <typename Type>
-double quantile_computation(int nb_individual , Type *value , double cumul ,
-                            bool frequency_correction)
+double quantile_computation(int nb_individual , Type *value , double cumul)
 
 {
   register int i , j;
-  int frequency , cumul_frequency , *index;
+  int *index;
   Type bvalue , min_value , max_value;
   double quantile;
 
@@ -131,34 +128,7 @@ double quantile_computation(int nb_individual , Type *value , double cumul ,
   else {
     i = nb_individual - 1;
   }
-
-  if ((nb_individual > 1) && (frequency_correction)) {
-
-    // frequency computation
-
-    j = i;
-    while ((j > 0) && (value[index[j]] == value[index[j - 1]])) {
-      j--;
-    }
-    cumul_frequency = j;
-
-    j = i;
-    while ((j < nb_individual - 1) && (value[index[j]] == value[index[j + 1]])) {
-      j++;
-    }
-    frequency = j + 1 - cumul_frequency;
-
-#   ifdef MESSAGE
-    cout << "TEST: " << cumul_frequency << " " << frequency << " " << nb_individual << endl;
-#   endif
-
-    quantile = value[index[i]] + (cumul - (double)cumul_frequency / (double)nb_individual) /
-               ((double)frequency / (double)nb_individual);
-  }
-
-  else {
-    quantile = value[index[i]];
-  }
+  quantile = value[index[i]];
 
   delete [] index;
 
