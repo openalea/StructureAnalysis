@@ -55,7 +55,7 @@ namespace sequence_analysis {
 /**
  *  \brief Default constructor of the SequenceCharacteristics class.
  *
- *  \param[in] number of categories.
+ *  \param[in] inb_value number of categories.
  */
 /*--------------------------------------------------------------*/
 

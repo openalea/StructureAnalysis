@@ -3027,7 +3027,7 @@ VariableOrderMarkov::VariableOrderMarkov(const VariableOrderMarkov &markov ,
 
 
 /*--------------------------------------------------------------*/
-/**
+/*
  *  \brief Constructor of the VariableOrderMarkov class with completion of
  *         the memory tree.
  *
@@ -3089,7 +3089,7 @@ VariableOrderMarkov::VariableOrderMarkov(const VariableOrderMarkov &markov ,
  *         the memory tree.
  *
  *  \param[in] pmarkov      pointer on a VariableOrderMarkovChain object,
- *  \param[in] pobservation pointer on a CategoricalSequenceProcess object,
+ *  \param[in] pobservation pointer on a CategoricalProcess object,
  *  \param[in] length       sequence length.
  */
 /*--------------------------------------------------------------*/

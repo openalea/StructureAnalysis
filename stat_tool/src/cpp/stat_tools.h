@@ -466,7 +466,7 @@ namespace stat_tool {
                               const FrequencyDistribution *histo = NULL ,
                               bool mass_first = false) const;
 
-    std::ostream& print(std::ostream&) const;
+    std::ostream& print(std::ostream &os) const;
 
     std::ostream& spreadsheet_characteristic_print(std::ostream &os , bool shape = false) const;
 
@@ -507,13 +507,15 @@ namespace stat_tool {
     MultiPlotSet* survival_get_plotable(StatError &error) const;
 
     void max_computation();
+    double mode_computation() const;
     void mean_computation();
+    double quantile_computation(double icumul = 0.5) const;
     void variance_computation();
     void nb_value_computation();
     void offset_computation();
     double concentration_computation() const;
 
-    double mean_absolute_deviation_computation() const;
+    double mean_absolute_deviation_computation(double location) const;
     double skewness_computation() const;
     double kurtosis_computation() const;
     double information_computation() const;
@@ -766,7 +768,7 @@ namespace stat_tool {
     double likelihood_computation(const ContinuousParametric &dist ,
                                   int min_interval = I_DEFAULT) const;
 
-    DiscreteDistributionData* merge(int nb_histo , std::vector<FrequencyDistribution> ihisto) const;
+    DiscreteDistributionData* merge(int nb_sample , std::vector<FrequencyDistribution> ihisto) const;
 
     void shift(const FrequencyDistribution &histo , int shift_param);
     void cluster(const FrequencyDistribution &histo , int step , rounding mode);

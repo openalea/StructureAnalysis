@@ -1530,7 +1530,7 @@ ostream& Vectors::variance_analysis_ascii_write(ostream &os , int type , const V
       value_mean[i] = value_vec[i]->mean[1];
       variance[i] = value_vec[i]->covariance[1][1];
       standard_deviation[i] = sqrt(value_vec[i]->covariance[1][1]);
-      mean_absolute_deviation[i] = value_vec[i]->mean_absolute_deviation_computation(1);
+      mean_absolute_deviation[i] = value_vec[i]->mean_absolute_deviation_computation(1 , value_vec[i]->mean[1]);
       if (value_vec[i]->nb_vector > 1) {
         concentration_coeff[i] = (value_vec[i]->mean_absolute_difference_computation(1) / (2 * value_vec[i]->mean[1])) *
                                  ((double)(value_vec[i]->nb_vector - 1) / (double)value_vec[i]->nb_vector);
@@ -1963,7 +1963,7 @@ bool Vectors::variance_analysis_spreadsheet_write(StatError &error , const strin
     out_file << STAT_label[STATL_MEAN_ABSOLUTE_DEVIATION];
     for (i = marginal_distribution[0]->offset;i < marginal_distribution[0]->nb_value;i++) {
       if (marginal_distribution[0]->frequency[i] > 0) {
-        out_file << "\t" << value_vec[i]->mean_absolute_deviation_computation(1);
+        out_file << "\t" << value_vec[i]->mean_absolute_deviation_computation(1 , value_vec[i]->mean[1]);
       }
     }
     out_file << endl;

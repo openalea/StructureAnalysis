@@ -313,7 +313,7 @@ Clusters& Clusters::operator=(const Clusters &clusters)
 /**
  *  \brief Writing on a line of a Clusters object.
  *
- *  \param[in,out] stream.
+ *  \param[in,out] os stream.
  */
 /*--------------------------------------------------------------*/
 

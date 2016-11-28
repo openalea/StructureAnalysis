@@ -2748,7 +2748,7 @@ TimeEvents* Sequences::extract_time_events(StatError &error , int variable ,
  *
  *  \param[in] error                 reference on a StatError object,
  *  \param[in] variable              variable index,
- *  \param[in] begin_index_parameter begin index parameter.
+ *  \param[in] begin_index_parameter begin index parameter,
  *  \param[in] end_index_parameter   end index parameter.
  *
  *  \return                          RenewalData object.

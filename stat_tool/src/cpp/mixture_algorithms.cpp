@@ -1864,7 +1864,7 @@ Mixture* Vectors::mixture_stochastic_estimation(StatError &error , ostream &os ,
  *  \param[in] ident              component identifiers,
  *  \param[in] mean               mean and of the 1st component,
  *  \param[in] standard_deviation shape parameter (gamma) / scale parameter (inverse Gaussian) /
- *  \param[in]                    standard deviation (Gaussian) of the 1st component,
+ *                                standard deviation (Gaussian) of the 1st component,
  *  \param[in] tied_mean          flag tied means,
  *  \param[in] variance_factor    type of relationship between variances (CONVOLUTION_FACTOR/SCALING_FACTOR)
  *  \param[in] min_nb_assignment  minimum number of assignments of generated individuals,

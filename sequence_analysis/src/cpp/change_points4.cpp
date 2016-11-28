@@ -1717,6 +1717,9 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
           if (piecewise_function[i]) {
             output_piecewise_function[i] = piecewise_function[i][index == I_DEFAULT ? 0 : index];
           }
+          else {
+            output_piecewise_function[i] = NULL;
+          }
         }
       }
 

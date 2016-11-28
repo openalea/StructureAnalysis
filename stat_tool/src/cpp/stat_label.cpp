@@ -213,9 +213,10 @@ const char *STAT_label[] = {
   "model" ,
 
   "mean" ,
+  "median" ,
+  "mode" ,
   "variance" ,
   "standard deviation" ,
-  "median" ,
   "lower quartile" ,
   "upper quartile" ,
   "mean absolute deviation" ,

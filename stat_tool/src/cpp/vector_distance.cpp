@@ -136,13 +136,13 @@ VectorDistance::VectorDistance(int inb_variable , variable_type *ivar_type ,
 /**
  *  \brief Constructor of the VectorDistance class.
  *
- *  \param[in] number of variables,
- *  \param[in] distance type (ABSOLUTE_VALUE/QUADRATIC),
- *  \param[in] variable types,
- *  \param[in] variable weights,
- *  \param[in] number of categories (for categorical variables),
- *  \param[in] between-category distance matrices (for categorical variables),
- *  \param[in] periods (for circular variables).
+ *  \param[in] inb_variable       number of variables,
+ *  \param[in] idistance_type     distance type (ABSOLUTE_VALUE/QUADRATIC),
+ *  \param[in] ivar_type          variable types,
+ *  \param[in] iweight            variable weights,
+ *  \param[in] inb_value          number of categories (for categorical variables),
+ *  \param[in] icategory_distance between-category distance matrices (for categorical variables),
+ *  \param[in] iperiod            periods (for circular variables).
  */
 /*--------------------------------------------------------------*/
 
@@ -1238,7 +1238,7 @@ void VectorDistance::dispersion_computation(int variable , const FrequencyDistri
     switch (distance_type) {
     case ABSOLUTE_VALUE :
       cout << "sqrt(2) * " << STAT_label[STATL_MEAN_ABSOLUTE_DEVIATION] << ": "
-           << sqrt(2.) * marginal_distribution->mean_absolute_deviation_computation();
+           << sqrt(2.) * marginal_distribution->mean_absolute_deviation_computation(marginal_distribution->mean);
       break;
     case QUADRATIC :
       cout << 2 * marginal_distribution->variance;

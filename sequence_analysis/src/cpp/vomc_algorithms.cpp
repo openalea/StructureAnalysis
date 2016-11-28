@@ -1967,8 +1967,8 @@ VariableOrderMarkov* MarkovianSequences::variable_order_markov_estimation(StatEr
 /**
  *  \brief Writing of transition counts.
  *
- *  \param[in,out] stream,
- *  \param[in]     flag for taking account of the beginning of sequences.
+ *  \param[in,out] os    stream,
+ *  \param[in]     begin flag for taking account of the beginning of sequences.
  */
 /*--------------------------------------------------------------*/
 
@@ -3363,50 +3363,50 @@ VariableOrderMarkovData* VariableOrderMarkov::simulation(StatError &error ,
         seq->restoration_likelihood = likelihood;
         break;
       }
-    }
 
-    // computation of the mixtures of observation distributions (theoretical weights and weights deduced from the restoration)
+      // computation of the mixtures of observation distributions (theoretical weights and weights deduced from the restoration)
 
-    if (hidden) {
-      weight = markov->state_process->weight_computation();
-      restoration_weight = seq->weight_computation();
+      if (hidden) {
+        weight = markov->state_process->weight_computation();
+        restoration_weight = seq->weight_computation();
 
-      for (i = 0;i < markov->nb_output_process;i++) {
-        if (markov->categorical_process[i]) {
-          delete markov->categorical_process[i]->weight;
-          delete markov->categorical_process[i]->mixture;
-          markov->categorical_process[i]->weight = new Distribution(*weight);
-          markov->categorical_process[i]->mixture = markov->categorical_process[i]->mixture_computation(markov->categorical_process[i]->weight);
+        for (i = 0;i < markov->nb_output_process;i++) {
+          if (markov->categorical_process[i]) {
+            delete markov->categorical_process[i]->weight;
+            delete markov->categorical_process[i]->mixture;
+            markov->categorical_process[i]->weight = new Distribution(*weight);
+            markov->categorical_process[i]->mixture = markov->categorical_process[i]->mixture_computation(markov->categorical_process[i]->weight);
 
-          delete markov->categorical_process[i]->restoration_weight;
-          delete markov->categorical_process[i]->restoration_mixture;
-          markov->categorical_process[i]->restoration_weight = new Distribution(*restoration_weight);
-          markov->categorical_process[i]->restoration_mixture = markov->categorical_process[i]->mixture_computation(markov->categorical_process[i]->restoration_weight);
+            delete markov->categorical_process[i]->restoration_weight;
+            delete markov->categorical_process[i]->restoration_mixture;
+            markov->categorical_process[i]->restoration_weight = new Distribution(*restoration_weight);
+            markov->categorical_process[i]->restoration_mixture = markov->categorical_process[i]->mixture_computation(markov->categorical_process[i]->restoration_weight);
+          }
+
+          else if (markov->discrete_parametric_process[i]) {
+            delete markov->discrete_parametric_process[i]->weight;
+            delete markov->discrete_parametric_process[i]->mixture;
+            markov->discrete_parametric_process[i]->weight = new Distribution(*weight);
+            markov->discrete_parametric_process[i]->mixture = markov->discrete_parametric_process[i]->mixture_computation(markov->discrete_parametric_process[i]->weight);
+
+            delete markov->discrete_parametric_process[i]->restoration_weight;
+            delete markov->discrete_parametric_process[i]->restoration_mixture;
+            markov->discrete_parametric_process[i]->restoration_weight = new Distribution(*restoration_weight);
+            markov->discrete_parametric_process[i]->restoration_mixture = markov->discrete_parametric_process[i]->mixture_computation(markov->discrete_parametric_process[i]->restoration_weight);
+          }
+
+          else if (markov->continuous_parametric_process[i]) {
+            delete markov->continuous_parametric_process[i]->weight;
+            markov->continuous_parametric_process[i]->weight = new Distribution(*weight);
+
+            delete markov->continuous_parametric_process[i]->restoration_weight;
+            markov->continuous_parametric_process[i]->restoration_weight = new Distribution(*restoration_weight);
+          }
         }
 
-        else if (markov->discrete_parametric_process[i]) {
-          delete markov->discrete_parametric_process[i]->weight;
-          delete markov->discrete_parametric_process[i]->mixture;
-          markov->discrete_parametric_process[i]->weight = new Distribution(*weight);
-          markov->discrete_parametric_process[i]->mixture = markov->discrete_parametric_process[i]->mixture_computation(markov->discrete_parametric_process[i]->weight);
-
-          delete markov->discrete_parametric_process[i]->restoration_weight;
-          delete markov->discrete_parametric_process[i]->restoration_mixture;
-          markov->discrete_parametric_process[i]->restoration_weight = new Distribution(*restoration_weight);
-          markov->discrete_parametric_process[i]->restoration_mixture = markov->discrete_parametric_process[i]->mixture_computation(markov->discrete_parametric_process[i]->restoration_weight);
-        }
-
-        else if (markov->continuous_parametric_process[i]) {
-          delete markov->continuous_parametric_process[i]->weight;
-          markov->continuous_parametric_process[i]->weight = new Distribution(*weight);
-
-          delete markov->continuous_parametric_process[i]->restoration_weight;
-          markov->continuous_parametric_process[i]->restoration_weight = new Distribution(*restoration_weight);
-        }
+        delete weight;
+        delete restoration_weight;
       }
-
-      delete weight;
-      delete restoration_weight;
     }
   }
 

@@ -5717,23 +5717,21 @@ bool Sequences::pointwise_average_spreadsheet_print(StatError &error , const str
  *  \brief Computation of the pointwise mean, median or mean direction of sequences and
  *         associated dispersion measures.
  *
- *  \param[in] error                reference on a StatError object,
- *  \param[in] circular             flag circular variables,
- *  \param[in] robust               flag computation of robust location and dispersion measures
- *  \param[in] dispersion           flag computation of dispersion measures,
- *  \param[in] frequency_correction flag correction related to the frequencies for categorical variables,
- *  \param[in] output               output (sequences, residuals or standardized residuals),
- *  \param[in] path                 file path,
- *  \param[in] format               format (ASCII/SPREADSHEET).
+ *  \param[in] error      reference on a StatError object,
+ *  \param[in] circular   flag circular variables,
+ *  \param[in] robust     flag computation of robust location and dispersion measures,
+ *  \param[in] dispersion flag computation of dispersion measures,
+ *  \param[in] output     output (sequences, residuals or standardized residuals),
+ *  \param[in] path       file path,
+ *  \param[in] format     format (ASCII/SPREADSHEET).
  *
- *  \return                         Sequences object.
+ *  \return               Sequences object.
  */
 /*--------------------------------------------------------------*/
 
 Sequences* Sequences::pointwise_average(StatError &error , bool circular , bool robust ,
-                                        bool dispersion , bool frequency_correction ,
-                                        sequence_type output , const string path ,
-                                        output_format format) const
+                                        bool dispersion , sequence_type output ,
+                                        const string path , output_format format) const
 
 {
   bool status = true;
@@ -6065,7 +6063,7 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular , bool 
                   }
                 }
 
-                seq->real_sequence[0][i][j] = quantile_computation(frequency[j] , int_sample , 0.5 , frequency_correction);
+                seq->real_sequence[0][i][j] = quantile_computation(frequency[j] , int_sample , 0.5);
               }
             }
 
@@ -6081,7 +6079,7 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular , bool 
                   }
                 }
 
-                seq->real_sequence[0][i][j] = quantile_computation(frequency[j] , real_sample , 0.5 , false);
+                seq->real_sequence[0][i][j] = quantile_computation(frequency[j] , real_sample , 0.5);
               }
             }
           }
@@ -6098,7 +6096,7 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular , bool 
                   }
                 }
 
-                seq->real_sequence[0][i][j] = quantile_computation(frequency[j] , int_sample , 0.5 , frequency_correction);
+                seq->real_sequence[0][i][j] = quantile_computation(frequency[j] , int_sample , 0.5);
               }
             }
 
@@ -6111,7 +6109,7 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular , bool 
                   }
                 }
 
-                seq->real_sequence[0][i][j] = quantile_computation(frequency[j] , real_sample , 0.5 , false);
+                seq->real_sequence[0][i][j] = quantile_computation(frequency[j] , real_sample , 0.5);
               }
             }
           }

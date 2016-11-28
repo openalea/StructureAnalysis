@@ -1044,7 +1044,7 @@ double dimension_jump(ostream &os , int max_nb_segment , double slope_step ,
   if (max_diff_nb_segment < MIN_DIMENSION_JUMP) {
     optimal_slope = D_DEFAULT;
   }
-  if (optimal_slope > 0.) {
+  else {
     optimal_slope *= 2;
   }
 
@@ -1346,7 +1346,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
       marginal_entropy = new long double[max_nb_segment + 1];
     }
 
-    if (max_nb_segment - min_nb_segment >= SLOPE_NB_SEGMENT_RANGE) {
+    if (max_nb_segment >= DIMENSION_JUMP_NB_SEGMENT) {
       penalty_shape = new double[max_nb_segment + 1];
 
       switch (penalty_shape_type) {
@@ -1398,16 +1398,18 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
                       segmentation_likelihood + 1 , nb_parameter + 1 ,
                       (bayesian ? NULL : segment_penalty + 1));
 
-    segmentation_dimension_jump_slope = dimension_jump(os , max_nb_segment , SLOPE_STEP , penalty_shape ,
-                                                       segmentation_likelihood);
-    if ((segmentation_dimension_jump_slope < 0.) && (criterion = SEGMENTATION_DIMENSION_JUMP)) {
-      criterion = mBIC;
-    }
-
     if (max_nb_segment - min_nb_segment >= SLOPE_NB_SEGMENT_RANGE) {
       log_likelihood_slope(min_nb_segment , max_nb_segment , penalty_shape_type , penalty_shape ,
                            segmentation_likelihood , segmentation_intercept , segmentation_slope ,
                            segmentation_slope_standard_deviation , segmentation_residual_standard_deviation);
+    }
+
+    if (max_nb_segment >= DIMENSION_JUMP_NB_SEGMENT) {
+      segmentation_dimension_jump_slope = dimension_jump(os , max_nb_segment , SLOPE_STEP , penalty_shape ,
+                                                         segmentation_likelihood);
+      if ((segmentation_dimension_jump_slope < 0.) && (criterion == SEGMENTATION_DIMENSION_JUMP)) {
+        criterion = mBIC;
+      }
     }
 
     if ((model_type[0] != MEAN_CHANGE) && (model_type[0] != INTERCEPT_SLOPE_CHANGE)) {
@@ -1420,11 +1422,6 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
       segmentation_divergence[1] = 0;
       for (i = 2;i <= max_nb_segment;i++) {
         segmentation_divergence[i] = uniform_entropy[i] - segmentation_entropy[i];
-      }
-
-      dimension_jump_slope = dimension_jump(os , max_nb_segment , SLOPE_STEP , penalty_shape , likelihood);
-      if ((dimension_jump_slope < 0.) && (criterion == DIMENSION_JUMP)) {
-        criterion = ICL;
       }
 
       if (max_nb_segment - min_nb_segment >= SLOPE_NB_SEGMENT_RANGE) {
@@ -1440,6 +1437,13 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
         }
 #       endif
 
+      }
+
+      if (max_nb_segment >= DIMENSION_JUMP_NB_SEGMENT) {
+        dimension_jump_slope = dimension_jump(os , max_nb_segment , SLOPE_STEP , penalty_shape , likelihood);
+        if ((dimension_jump_slope < 0.) && (criterion == DIMENSION_JUMP)) {
+          criterion = ICL;
+        }
       }
     }
 
@@ -1463,7 +1467,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
           max_likelihood[0] = penalized_likelihood[0][1];
         }
 
-        if (dimension_jump_slope > 0.) {
+        if ((max_nb_segment >= DIMENSION_JUMP_NB_SEGMENT) && (dimension_jump_slope > 0.)) {
           penalized_likelihood[1][1] = 2 * (likelihood[1] - 2 * penalty_shape[1] * dimension_jump_slope);
           max_likelihood[1] = penalized_likelihood[1][1];
         }
@@ -1482,7 +1486,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
           max_likelihood[3] = penalized_likelihood[3][1];
         }
 
-        if (segmentation_dimension_jump_slope > 0.) {
+        if ((max_nb_segment >= DIMENSION_JUMP_NB_SEGMENT) && (segmentation_dimension_jump_slope > 0.)) {
           penalized_likelihood[4][1] = 2 * (segmentation_likelihood[1] - 2 * penalty_shape[1] * segmentation_dimension_jump_slope);
           max_likelihood[4] = penalized_likelihood[4][1];
         }
@@ -1526,7 +1530,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
             }
           }
 
-          if (dimension_jump_slope > 0.) {
+          if ((max_nb_segment >= DIMENSION_JUMP_NB_SEGMENT) && (dimension_jump_slope > 0.)) {
             penalized_likelihood[1][i] = 2 * (likelihood[i] - 2 * penalty_shape[i] * dimension_jump_slope);
             if (penalized_likelihood[1][i] > max_likelihood[1]) {
               max_likelihood[1] = penalized_likelihood[1][i];
@@ -1560,7 +1564,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
             }
           }
 
-          if (segmentation_dimension_jump_slope > 0.) {
+          if ((max_nb_segment >= DIMENSION_JUMP_NB_SEGMENT) && (segmentation_dimension_jump_slope > 0.)) {
             penalized_likelihood[4][i] = 2 * (segmentation_likelihood[i] -
                                           2 * penalty_shape[i] * segmentation_dimension_jump_slope);
             if (penalized_likelihood[4][i] > max_likelihood[4]) {
@@ -1695,7 +1699,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
             delete test;
           }
 
-          if (dimension_jump_slope > 0.) {
+          if ((max_nb_segment >= DIMENSION_JUMP_NB_SEGMENT) && (dimension_jump_slope > 0.)) {
             norm = 0.;
             for (i = 1;i <= max_nb_segment;i++) {
               weight[1][i] = exp((penalized_likelihood[1][i] - max_likelihood[1]) / 2);
@@ -1730,7 +1734,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
           delete test;
         }
 
-        if (segmentation_dimension_jump_slope > 0.) {
+        if ((max_nb_segment >= DIMENSION_JUMP_NB_SEGMENT) && (segmentation_dimension_jump_slope > 0.)) {
           norm = 0.;
           for (i = 1;i <= max_nb_segment;i++) {
             weight[4][i] = exp((penalized_likelihood[4][i] - max_likelihood[4]) / 2);
@@ -1771,7 +1775,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
             width[11] = stat_tool::column_width(max_nb_segment , penalized_likelihood[0] + 1) + ASCII_SPACE;
             width[12] = stat_tool::column_width(max_nb_segment , weight[0] + 1) + ASCII_SPACE;
           }
-          if (dimension_jump_slope > 0.) {
+          if ((max_nb_segment >= DIMENSION_JUMP_NB_SEGMENT) && (dimension_jump_slope > 0.)) {
             width[13] = stat_tool::column_width(max_nb_segment , penalized_likelihood[1] + 1) + ASCII_SPACE;
             width[14] = stat_tool::column_width(max_nb_segment , weight[1] + 1) + ASCII_SPACE;
           }
@@ -1785,7 +1789,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
             width[17] = stat_tool::column_width(max_nb_segment , penalized_likelihood[3] + 1) + ASCII_SPACE;
             width[18] = stat_tool::column_width(max_nb_segment , weight[3] + 1) + ASCII_SPACE;
           }
-          if (segmentation_dimension_jump_slope > 0.) {
+          if ((max_nb_segment >= DIMENSION_JUMP_NB_SEGMENT) && (segmentation_dimension_jump_slope > 0.)) {
             width[19] = stat_tool::column_width(max_nb_segment , penalized_likelihood[4] + 1) + ASCII_SPACE;
             width[20] = stat_tool::column_width(max_nb_segment , weight[4] + 1) + ASCII_SPACE;
           }
@@ -1839,7 +1843,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
           if (max_nb_segment - min_nb_segment >= SLOPE_NB_SEGMENT_RANGE) {
             os << " | " << STAT_criterion_word[LIKELIHOOD_SLOPE] << " - "  << STAT_label[STATL_WEIGHT];
           }
-          if (dimension_jump_slope > 0.) {
+          if ((max_nb_segment >= DIMENSION_JUMP_NB_SEGMENT) && (dimension_jump_slope > 0.)) {
             os << " | " << STAT_criterion_word[DIMENSION_JUMP] << " - "  << STAT_label[STATL_WEIGHT];
           }
         }
@@ -1850,7 +1854,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
           if (max_nb_segment - min_nb_segment >= SLOPE_NB_SEGMENT_RANGE) {
             os << " | " << STAT_criterion_word[SEGMENTATION_LIKELIHOOD_SLOPE] << " - "  << STAT_label[STATL_WEIGHT];
           }
-          if (segmentation_dimension_jump_slope > 0.) {
+          if ((max_nb_segment >= DIMENSION_JUMP_NB_SEGMENT) && (segmentation_dimension_jump_slope > 0.)) {
             os << " | " << STAT_criterion_word[SEGMENTATION_DIMENSION_JUMP] << " - "  << STAT_label[STATL_WEIGHT];
           }
           os << " | " << STAT_criterion_word[mBIC] << " - "  << STAT_label[STATL_WEIGHT];
@@ -1870,7 +1874,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
               os << setw(width[11]) << penalized_likelihood[0][i]
                  << setw(width[12]) << weight[0][i];
             }
-            if (dimension_jump_slope > 0.) {
+            if ((max_nb_segment >= DIMENSION_JUMP_NB_SEGMENT) && (dimension_jump_slope > 0.)) {
               os << setw(width[13]) << penalized_likelihood[1][i]
                  << setw(width[14]) << weight[1][i];
             }
@@ -1884,7 +1888,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
               os << setw(width[17]) << penalized_likelihood[3][i]
                  << setw(width[18]) << weight[3][i];
             }
-            if (segmentation_dimension_jump_slope > 0.) {
+            if ((max_nb_segment >= DIMENSION_JUMP_NB_SEGMENT) && (segmentation_dimension_jump_slope > 0.)) {
               os << setw(width[19]) << penalized_likelihood[4][i]
                  << setw(width[20]) << weight[4][i];
             }
@@ -1904,7 +1908,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
           width[17] = stat_tool::column_width(max_nb_segment , penalized_likelihood[3] + 1) + ASCII_SPACE;
           width[18] = stat_tool::column_width(max_nb_segment , weight[3] + 1) + ASCII_SPACE;
         }
-        if (segmentation_dimension_jump_slope > 0.) {
+        if ((max_nb_segment >= DIMENSION_JUMP_NB_SEGMENT) && (segmentation_dimension_jump_slope > 0.)) {
           width[19] = stat_tool::column_width(max_nb_segment , penalized_likelihood[4] + 1) + ASCII_SPACE;
           width[20] = stat_tool::column_width(max_nb_segment , weight[4] + 1) + ASCII_SPACE;
         }
@@ -1916,7 +1920,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
         if (max_nb_segment - min_nb_segment >= SLOPE_NB_SEGMENT_RANGE) {
           os << " | " << STAT_criterion_word[SEGMENTATION_LIKELIHOOD_SLOPE] << " - "  << STAT_label[STATL_WEIGHT];
         }
-        if (segmentation_dimension_jump_slope > 0.) {
+        if ((max_nb_segment >= DIMENSION_JUMP_NB_SEGMENT) && (segmentation_dimension_jump_slope > 0.)) {
           os << " | " << STAT_criterion_word[SEGMENTATION_DIMENSION_JUMP] << " - "  << STAT_label[STATL_WEIGHT];
         }
         os << " | " << STAT_criterion_word[mBIC] << " - "  << STAT_label[STATL_WEIGHT] << endl;
@@ -1931,7 +1935,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
             os << setw(width[17]) << penalized_likelihood[3][i]
                << setw(width[18]) << weight[3][i];
           }
-          if (segmentation_dimension_jump_slope > 0.) {
+          if ((max_nb_segment >= DIMENSION_JUMP_NB_SEGMENT) && (segmentation_dimension_jump_slope > 0.)) {
             os << setw(width[19]) << penalized_likelihood[4][i]
                << setw(width[20]) << weight[4][i];
           }
@@ -2114,7 +2118,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
       error.update(SEQ_error[SEQR_SEGMENTATION_FAILURE]);
     }
 
-    if (max_nb_segment - min_nb_segment >= SLOPE_NB_SEGMENT_RANGE) {
+    if (max_nb_segment >= DIMENSION_JUMP_NB_SEGMENT) {
       delete [] penalty_shape;
     }
 

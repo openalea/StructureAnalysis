@@ -1379,7 +1379,7 @@ ConvolutionData::ConvolutionData(const FrequencyDistribution &histo , int nb_dis
 /**
  *  \brief Constructor of the ConvolutionData class.
  *
- *  \param[in] reference on a Convolution object.
+ *  \param[in] convol reference on a Convolution object.
  */
 /*--------------------------------------------------------------*/
 

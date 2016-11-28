@@ -77,7 +77,7 @@ DiscreteMixture::DiscreteMixture()
  *  \brief Constructor of the DiscreteMixture class.
  *
  *  \param[in] inb_component number of components,
- *  \param[in] pweight       weights,
+ *  \param[in] iweight       weights,
  *  \param[in] pcomponent    pointer on the components.
  */
 /*--------------------------------------------------------------*/
@@ -120,7 +120,7 @@ DiscreteMixture::DiscreteMixture(int inb_component , double *iweight ,
  *  \brief Constructor of the DiscreteMixture class.
  *
  *  \param[in] inb_component number of components,
- *  \param[in] pweight       weights,
+ *  \param[in] iweight       weights,
  *  \param[in] pcomponent    pointer on the components.
  */
 /*--------------------------------------------------------------*/

@@ -885,7 +885,7 @@ void Chain::log_computation()
 /**
  *  \brief Constructor by copy of the ChainData class.
  *
- *  \param[in] reference on a ChainData object.
+ *  \param[in] chain_data reference on a ChainData object.
  */
 /*--------------------------------------------------------------*/
 

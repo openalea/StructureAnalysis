@@ -705,8 +705,19 @@ ostream& DiscreteParametric::ascii_parametric_characteristic_print(ostream &os ,
       os << "# ";
     }
     os << STAT_label[STATL_MEAN] << ": " << parametric_mean_computation() << "   "
-       << STAT_label[STATL_VARIANCE] << ": " << variance << "   "
-       << STAT_label[STATL_STANDARD_DEVIATION] << ": " << sqrt(variance) << endl;
+       << STAT_label[STATL_MEDIAN] << ": " << quantile_computation() << "   "
+       << STAT_label[STATL_MODE] << ": " << mode_computation() << endl;
+
+    if (comment_flag) {
+      os << "# ";
+    }
+    os << STAT_label[STATL_VARIANCE] << ": " << variance << "   "
+       << STAT_label[STATL_STANDARD_DEVIATION] << ": " << sqrt(variance);
+    if (variance > 0.) {
+      os << "   " << STAT_label[STATL_LOWER_QUARTILE] << ": " << quantile_computation(0.25)
+         << "   " << STAT_label[STATL_UPPER_QUARTILE] << ": " << quantile_computation(0.75);
+    }
+    os << endl;
 
     if ((shape) && (variance > 0.)) {
       if (comment_flag) {
@@ -741,12 +752,20 @@ ostream& DiscreteParametric::spreadsheet_parametric_characteristic_print(ostream
     double variance = parametric_variance_computation();
 
 
-    os << STAT_label[STATL_MEAN] << "\t" << parametric_mean_computation() << "\t"
-       << STAT_label[STATL_VARIANCE] << "\t" << variance << "\t"
-       << STAT_label[STATL_STANDARD_DEVIATION] << "\t" << sqrt(variance) << endl;
+    os << STAT_label[STATL_MEAN] << "\t" << parametric_mean_computation() << "\t\t"
+       << STAT_label[STATL_MEDIAN] << "\t" << quantile_computation() << "\t\t"
+       << STAT_label[STATL_MODE] << "\t" << mode_computation() << endl;
+
+    os << STAT_label[STATL_VARIANCE] << "\t" << variance << "\t\t"
+       << STAT_label[STATL_STANDARD_DEVIATION] << "\t" << sqrt(variance);
+    if (variance > 0.) {
+      os << "\t\t" << STAT_label[STATL_LOWER_QUARTILE] << "\t" << quantile_computation(0.25)
+         << "\t\t" << STAT_label[STATL_UPPER_QUARTILE] << "\t" << quantile_computation(0.75);
+    }
+    os << endl;
 
     if ((shape) && (variance > 0.)) {
-      os << STAT_label[STATL_SKEWNESS_COEFF] << "\t" << parametric_skewness_computation() << "\t"
+      os << STAT_label[STATL_SKEWNESS_COEFF] << "\t" << parametric_skewness_computation() << "\t\t"
          << STAT_label[STATL_KURTOSIS_COEFF] << "\t" << parametric_kurtosis_computation() << endl;
     }
   }
@@ -1403,7 +1422,7 @@ ostream& DiscreteParametricModel::ascii_write(ostream &os , const DiscreteDistri
   if (file_flag) {
     os << "# ";
   }
-  os << STAT_label[STATL_MEAN_ABSOLUTE_DEVIATION] << ": " << mean_absolute_deviation_computation();
+  os << STAT_label[STATL_MEAN_ABSOLUTE_DEVIATION] << ": " << mean_absolute_deviation_computation(mean);
   if (mean > 0.) {
     os << "   " << STAT_label[STATL_CONCENTRATION_COEFF] << ": " << concentration_computation();
   }
@@ -1424,7 +1443,7 @@ ostream& DiscreteParametricModel::ascii_write(ostream &os , const DiscreteDistri
     if (file_flag) {
       os << "# ";
     }
-    os << STAT_label[STATL_MEAN_ABSOLUTE_DEVIATION] << ": " << histo->mean_absolute_deviation_computation();
+    os << STAT_label[STATL_MEAN_ABSOLUTE_DEVIATION] << ": " << histo->mean_absolute_deviation_computation(histo->mean);
     if (histo->mean > 0.) {
       os << "   " << STAT_label[STATL_CONCENTRATION_COEFF] << ": " << histo->concentration_computation();
     }
@@ -1563,7 +1582,7 @@ ostream& DiscreteParametricModel::spreadsheet_write(ostream &os ,
 
   spreadsheet_parametric_characteristic_print(os , true);
 
-  os << STAT_label[STATL_MEAN_ABSOLUTE_DEVIATION] << "\t" << mean_absolute_deviation_computation();
+  os << STAT_label[STATL_MEAN_ABSOLUTE_DEVIATION] << "\t" << mean_absolute_deviation_computation(mean);
   if (mean > 0.) {
     os << "\t\t" << STAT_label[STATL_CONCENTRATION_COEFF] << "\t" << concentration_computation();
   }
@@ -1577,7 +1596,7 @@ ostream& DiscreteParametricModel::spreadsheet_write(ostream &os ,
     os << "\n" << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
     histo->spreadsheet_characteristic_print(os , true);
 
-    os << STAT_label[STATL_MEAN_ABSOLUTE_DEVIATION] << "\t" << histo->mean_absolute_deviation_computation();
+    os << STAT_label[STATL_MEAN_ABSOLUTE_DEVIATION] << "\t" << histo->mean_absolute_deviation_computation(histo->mean);
     if (histo->mean > 0.) {
       os << "\t\t" << STAT_label[STATL_CONCENTRATION_COEFF] << "\t" << histo->concentration_computation();
     }

@@ -251,9 +251,10 @@ namespace sequence_analysis {
   const int PENALTY_SHAPE_SCALING_FACTOR = 100;  // scaling factor for the plot of log-likelihoods
   const int NB_SEGMENTATION = 10;        // number of computed segmentations
   const int SLOPE_NB_SEGMENT_RANGE = 5;  // minimum number of points for computing the log-likelihood slope
+  const int DIMENSION_JUMP_NB_SEGMENT = SLOPE_NB_SEGMENT_RANGE + 2;  // minimum number of segments for the dimension jump method
   const double SLOPE_STEP = 0.01;        // slope step for the dimension jump method
   const double MAX_SLOPE = 100.;         // maximum slope for the dimension jump method
-  const int MIN_DIMENSION_JUMP = 3;      // minimum dimension jump
+  const int MIN_DIMENSION_JUMP = 2;      // minimum dimension jump
   const double MIN_RANK_SQUARE_SUM = 1.e-2;  // default value in the case of a unique rank in a segment
 
   enum correlation_normalization {
@@ -354,13 +355,13 @@ namespace sequence_analysis {
                     stat_tool::FrequencyDistribution **empirical_observation = NULL ,
                     stat_tool::FrequencyDistribution *marginal_distribution = NULL ,
                     const SequenceCharacteristics *characteristics = NULL ,
-                    const stat_tool::FrequencyDistribution *hlength = NULL ,
+                    const stat_tool::FrequencyDistribution *length_distribution = NULL ,
                     stat_tool::Forward **forward = NULL) const;
     void plotable_write(stat_tool::MultiPlotSet &plot , int &index , int process ,
                         stat_tool::FrequencyDistribution **empirical_observation = NULL ,
                         stat_tool::FrequencyDistribution *marginal_distribution = NULL ,
                         const SequenceCharacteristics *characteristics = NULL ,
-                        const stat_tool::FrequencyDistribution *hlength = NULL ,
+                        const stat_tool::FrequencyDistribution *length_distribution = NULL ,
                         stat_tool::Forward **forward = NULL) const;
   };
 
@@ -702,7 +703,7 @@ namespace sequence_analysis {
                                     int begin_date , int end_date , int previous_date = stat_tool::I_DEFAULT ,
                                     int next_date = stat_tool::I_DEFAULT) const;
     RenewalData* extract_renewal_data(stat_tool::StatError &error , int variable ,
-                                      int begin_index , int end_index) const;
+                                      int begin_index_parameter , int end_index_parameter) const;
 
     Sequences* merge(stat_tool::StatError &error , int nb_sample , const Sequences **iseq) const;
     Sequences* merge(stat_tool::StatError &error , int nb_sample , const std::vector<Sequences> iseq) const;
@@ -759,8 +760,8 @@ namespace sequence_analysis {
                              int imax_length , bool keep = true) const;
     Sequences* remove_run(stat_tool::StatError &error , int variable , int ivalue ,
                           run_position position , int max_run_length = stat_tool::I_DEFAULT) const;
-    Sequences* index_parameter_extract(stat_tool::StatError &error , int min_parameter_index ,
-                                       int max_parameter_index = stat_tool::I_DEFAULT) const;
+    Sequences* index_parameter_extract(stat_tool::StatError &error , int min_index_parameter ,
+                                       int max_index_parameter = stat_tool::I_DEFAULT) const;
     Sequences* segmentation_extract(stat_tool::StatError &error , int variable , int nb_value ,
                                     int *ivalue , bool keep = true ,
                                     bool concatenation = false) const;
@@ -784,8 +785,8 @@ namespace sequence_analysis {
                               sequence_type output = TREND) const;
 
     Sequences* pointwise_average(stat_tool::StatError &error , bool robust = false , bool circular = false ,
-                                 bool dispersion = false , bool frequency_correction = false ,
-                                 sequence_type output = SEQUENCE , const std::string path = "" ,
+                                 bool dispersion = false , sequence_type output = SEQUENCE ,
+                                 const std::string path = "" ,
                                  stat_tool::output_format format = stat_tool::ASCII) const;
 
     Sequences* recurrence_time_sequences(stat_tool::StatError &error , int variable , int value) const;
@@ -823,7 +824,7 @@ namespace sequence_analysis {
 
     double mean_computation(int variable) const;
     double variance_computation(int variable , double mean) const;
-    double mean_absolute_deviation_computation(int variable , double mean) const;
+    double mean_absolute_deviation_computation(int variable , double location) const;
     double mean_absolute_difference_computation(int variable) const;
     double skewness_computation(int variable , double mean , double variance) const;
     double kurtosis_computation(int variable , double mean , double variance) const;

@@ -156,7 +156,7 @@ namespace sequence_analysis {
                                                           int identifier) const;
 
     VariableOrderMarkovData* state_sequence_computation(stat_tool::StatError &error ,
-                                                        const MarkovianSequences &seq ,
+                                                        const MarkovianSequences &iseq ,
                                                         bool characteristic_flag = true) const;
 
     VariableOrderMarkovData* simulation(stat_tool::StatError &error ,
