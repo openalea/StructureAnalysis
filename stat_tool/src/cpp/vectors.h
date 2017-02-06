@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -410,7 +410,6 @@ namespace stat_tool {
     double get_real_vector(int ivec , int variable) const
     { return real_vector[ivec][variable]; }
   };
-
 
 
   /// \brief Parameterization of a distance between vectors with heterogeneous variables

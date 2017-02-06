@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -153,7 +153,7 @@ const char *SEQ_label[] = {
   "absorption probability of " ,
   "biased" ,
   "occupancy" ,
-  "complete/censored state occupancy weights",
+  "complete/censored state occupancy weights" ,
   "initial run" ,
   "final run" ,
   "mixture of " ,
@@ -196,6 +196,7 @@ const char *SEQ_label[] = {
   "rank" ,
   "lag" ,
   "maximum lag" ,
+  "autoregressive model" ,
   "white noise" ,
   "randomness 95% confidence limit" ,
   "pair frequency" ,
@@ -234,6 +235,7 @@ const char *SEQ_label[] = {
   "global standard deviation" ,
   "global residual standard deviation" ,
   "piecewise linear function" ,
+  "confidence interval" ,
   "confidence intervals" ,
   "autoregressive coefficient" ,
   "95% confidence limits for a null autoregressive coefficient" ,
@@ -350,6 +352,7 @@ const char *SEQ_error[] = {
   "bad vertex identifier" ,
   "bad index parameter type" ,
   "bad index parameter" ,
+  "bad state" ,
   "bad variable indices" ,
   "bad variable lag" ,
   "bad date order" ,
@@ -370,6 +373,7 @@ const char *SEQ_error[] = {
   "bad frequency" ,
   "bad maximum lag" ,
   "incompatible with other correlation functions" ,
+  "bad autoregressive coefficient: should be between -1 and 1" ,
   "bad differencing order" ,
   "initial run histograms already built" ,
   "bad run length" ,

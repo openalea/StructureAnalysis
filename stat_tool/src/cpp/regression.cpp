@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -693,7 +693,7 @@ ostream& Regression::line_write(ostream &os) const
 
 {
   ascii_parameter_print(os);
-  os << STAT_label[ident == LINEAR_FUNCTION ? STATL_R_SQUARED : STATL_REGRESSION_VARIATION_TOTAL_VARIATION] << ": "
+  os << STAT_label[ident == LINEAR_FUNCTION ? STATL_R_SQUARED : STATL_DETERMINATION_COEFF] << ": "
      << 1. - residual_square_sum_computation() / (vectors->covariance[1][1] * (nb_vector - 1));
 
   return os;
@@ -838,7 +838,7 @@ ostream& Regression::ascii_write(ostream &os , bool exhaustive) const
     ascii_print(os);
   }
 
-  os << "\n" << STAT_label[ident == LINEAR_FUNCTION ? STATL_R_SQUARED : STATL_REGRESSION_VARIATION_TOTAL_VARIATION]
+  os << "\n" << STAT_label[ident == LINEAR_FUNCTION ? STATL_R_SQUARED : STATL_DETERMINATION_COEFF]
      << ": " << 1. - square_sum[1] / square_sum[2] << endl;
 
   switch (ident) {
@@ -1166,7 +1166,7 @@ bool Regression::spreadsheet_write(StatError &error , const string path) const
 
     spreadsheet_print(out_file);
 
-    out_file << "\n" << STAT_label[ident == LINEAR_FUNCTION ? STATL_R_SQUARED : STATL_REGRESSION_VARIATION_TOTAL_VARIATION]
+    out_file << "\n" << STAT_label[ident == LINEAR_FUNCTION ? STATL_R_SQUARED : STATL_DETERMINATION_COEFF]
              << "\t" << 1. - square_sum[1] / square_sum[2] << endl;
 
     switch (ident) {

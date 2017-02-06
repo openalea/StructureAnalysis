@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -65,8 +65,8 @@ extern bool cumul_matching_plot_print(const char *path , int nb_cumul , int *off
  *
  *  \param[in] iinf_bound   lower bound,
  *  \param[in] isup_bound   upper bound (binomial, uniform),
- *  \param[in] iparameter   parameter (Poisson, negative binomial),
- *  \param[in] iprobability probability (binomial, negative binomial).
+ *  \param[in] iparameter   parameter (Poisson, negative binomial, Poisson geometric),
+ *  \param[in] iprobability probability (binomial, negative binomial, Poisson geometric).
  */
 /*--------------------------------------------------------------*/
 
@@ -88,8 +88,8 @@ void DiscreteParametric::init(int iinf_bound , int isup_bound ,
  *  \param[in] iident       identifier,
  *  \param[in] iinf_bound   lower bound,
  *  \param[in] isup_bound   upper bound (binomial, uniform),
- *  \param[in] iparameter   parameter (Poisson, negative binomial),
- *  \param[in] iprobability probability (binomial, negative binomial).
+ *  \param[in] iparameter   parameter (Poisson, negative binomial, Poisson geometric),
+ *  \param[in] iprobability probability (binomial, negative binomial, Poisson geometric).
  */
 /*--------------------------------------------------------------*/
 
@@ -114,8 +114,8 @@ void DiscreteParametric::init(discrete_parametric iident , int iinf_bound , int 
  *  \param[in] iident       identifier,
  *  \param[in] iinf_bound   lower bound,
  *  \param[in] isup_bound   upper bound (binomial, uniform),
- *  \param[in] iparameter   parameter (Poisson, negative binomial),
- *  \param[in] iprobability probability (binomial, negative binomial).
+ *  \param[in] iparameter   parameter (Poisson, negative binomial, Poisson geometric),
+ *  \param[in] iprobability probability (binomial, negative binomial, Poisson geometric).
  */
 /*--------------------------------------------------------------*/
 
@@ -141,8 +141,8 @@ DiscreteParametric::DiscreteParametric(int inb_value , discrete_parametric iiden
  *  \param[in] iident          identifier,
  *  \param[in] iinf_bound      lower bound,
  *  \param[in] isup_bound      upper bound (binomial, uniform),
- *  \param[in] iparameter      parameter (Poisson, negative binomial),
- *  \param[in] iprobability    probability (binomial, negative binomial),
+ *  \param[in] iparameter      parameter (Poisson, negative binomial, Poisson geometric),
+ *  \param[in] iprobability    probability (binomial, negative binomial, Poisson geometric),
  *  \param[in] cumul_threshold threshold on the cumulative distribution function.
  */
 /*--------------------------------------------------------------*/
@@ -165,7 +165,7 @@ DiscreteParametric::DiscreteParametric(discrete_parametric iident , int iinf_bou
     nb_value = sup_bound + 1;
   }
   else {
-    if ((ident == POISSON) || (ident == NEGATIVE_BINOMIAL)) {
+    if ((ident == POISSON) || (ident == NEGATIVE_BINOMIAL) || (ident == POISSON_GEOMETRIC)) {
       nb_value = (int)round(inf_bound + (parametric_mean_computation() - inf_bound +
                                          sqrt(parametric_variance_computation())) * 20.);
       if (nb_value == inf_bound) {
@@ -456,7 +456,7 @@ DiscreteParametric* DiscreteParametric::parsing(StatError &error , ifstream &in_
             break;
           }
 
-          // 2nd parameter: upper bound (binomial, uniform) or parameter (Poisson, negative binomial)
+          // 2nd parameter: upper bound (binomial, uniform) or parameter (Poisson, negative binomial, Poisson geometric)
 
           case 1 : {
             if (((ident == BINOMIAL) || (ident == UNIFORM)) &&
@@ -465,7 +465,7 @@ DiscreteParametric* DiscreteParametric::parsing(StatError &error , ifstream &in_
               error.correction_update(STAT_parsing[STATP_PARAMETER_NAME] , STAT_word[STATW_SUP_BOUND] , line , i + 1);
             }
 
-            if (((ident == POISSON) || (ident == NEGATIVE_BINOMIAL)) &&
+            if (((ident == POISSON) || (ident == NEGATIVE_BINOMIAL) || (ident == POISSON_GEOMETRIC)) &&
                 (token != STAT_word[STATW_PARAMETER])) {
               status = false;
               error.correction_update(STAT_parsing[STATP_PARAMETER_NAME] , STAT_word[STATW_PARAMETER] , line , i + 1);
@@ -473,10 +473,10 @@ DiscreteParametric* DiscreteParametric::parsing(StatError &error , ifstream &in_
             break;
           }
 
-          // 3rd parameter: probability (binomial, negative binomial)
+          // 3rd parameter: probability (binomial, negative binomial, Poisson geometric)
 
           case 2 : {
-            if (((ident == BINOMIAL) || (ident == NEGATIVE_BINOMIAL)) &&
+            if (((ident == BINOMIAL) || (ident == NEGATIVE_BINOMIAL) || (ident == POISSON_GEOMETRIC)) &&
                 (token != STAT_word[STATW_PROBABILITY])) {
               status = false;
               error.correction_update(STAT_parsing[STATP_PARAMETER_NAME] , STAT_word[STATW_PROBABILITY] , line , i + 1);
@@ -513,13 +513,13 @@ DiscreteParametric* DiscreteParametric::parsing(StatError &error , ifstream &in_
             break;
           }
 
-          // 2nd parameter: upper bound (binomial, uniform) or parameter (Poisson, negative binomial)
+          // 2nd parameter: upper bound (binomial, uniform) or parameter (Poisson, negative binomial, Poisson geometric)
 
           case 1 : {
             if ((ident == BINOMIAL) || (ident == UNIFORM)) {
               lstatus = locale.stringToNum(token , &sup_bound);
 
-              if (lstatus) {
+              if ((lstatus) && (status)) {
                 switch (ident) {
 
                 case BINOMIAL : {
@@ -539,7 +539,7 @@ DiscreteParametric* DiscreteParametric::parsing(StatError &error , ifstream &in_
               }
             }
 
-            if ((ident == POISSON) || (ident == NEGATIVE_BINOMIAL)) {
+            if ((ident == POISSON) || (ident == NEGATIVE_BINOMIAL) || (ident == POISSON_GEOMETRIC)) {
               lstatus = locale.stringToNum(token , &parameter);
               if ((lstatus) && ((parameter <= 0.) ||
                    ((ident == POISSON) && (parameter > MAX_MEAN)))) {
@@ -549,10 +549,10 @@ DiscreteParametric* DiscreteParametric::parsing(StatError &error , ifstream &in_
             break;
           }
 
-          // 3rd parameter: probability (binomial, negative binomial)
+          // 3rd parameter: probability (binomial, negative binomial, Poisson geometric)
 
           case 2 : {
-            if ((ident == BINOMIAL) || (ident == NEGATIVE_BINOMIAL)) {
+            if ((ident == BINOMIAL) || (ident == NEGATIVE_BINOMIAL) || (ident == POISSON_GEOMETRIC)) {
               lstatus = locale.stringToNum(token , &probability);
 
               if (lstatus) {
@@ -569,7 +569,17 @@ DiscreteParametric* DiscreteParametric::parsing(StatError &error , ifstream &in_
                   if ((probability <= 0.) || (probability >= 1.)) {
                     lstatus = false;
                   }
-                  else if (parameter * (1. - probability) / probability > MAX_MEAN) {
+                  else if ((status) && (parameter * (1. - probability) / probability > MAX_MEAN)) {
+                    lstatus = false;
+                  }
+                  break;
+                }
+
+                case POISSON_GEOMETRIC : {
+                  if ((probability <= 0.) || (probability >= 1.)) {
+                    lstatus = false;
+                  }
+                  else if ((status) && ((inf_bound + parameter) / probability > MAX_MEAN)) {
                     lstatus = false;
                   }
                   break;
@@ -594,7 +604,7 @@ DiscreteParametric* DiscreteParametric::parsing(StatError &error , ifstream &in_
     }
 
     if (i > 0) {
-      if ((((ident == BINOMIAL) || (ident == NEGATIVE_BINOMIAL)) && (i != 10)) ||
+      if ((((ident == BINOMIAL) || (ident == NEGATIVE_BINOMIAL) || (ident == POISSON_GEOMETRIC)) && (i != 10)) ||
           (((ident == POISSON) || (ident == UNIFORM)) && (i != 7))) {
         status = false;
         error.update(STAT_parsing[STATP_FORMAT] , line);
@@ -853,6 +863,9 @@ int DiscreteParametric::nb_parameter_computation()
   case NEGATIVE_BINOMIAL :
     bnb_parameter = 3;
     break;
+  case POISSON_GEOMETRIC :
+    bnb_parameter = 3;
+    break;
   case UNIFORM :
     bnb_parameter = 2;
     break;
@@ -902,6 +915,9 @@ double DiscreteParametric::parametric_mean_computation() const
   case NEGATIVE_BINOMIAL :
     parametric_mean = inf_bound + parameter * (1. - probability) / probability;
     break;
+  case POISSON_GEOMETRIC :
+    parametric_mean = (inf_bound + parameter) / probability;
+    break;
   case UNIFORM :
     parametric_mean = (double)(inf_bound + sup_bound) / 2.;
     break;
@@ -937,6 +953,10 @@ double DiscreteParametric::parametric_variance_computation() const
     break;
   case NEGATIVE_BINOMIAL :
     parametric_variance = parameter * (1. - probability) / (probability * probability);
+    break;
+  case POISSON_GEOMETRIC :
+    parametric_variance = ((inf_bound + parameter) * (1. - probability) + parameter) /
+                          (probability * probability);
     break;
   case UNIFORM :
     parametric_variance = (double)((sup_bound - inf_bound + 2) *
@@ -988,13 +1008,20 @@ double DiscreteParametric::parametric_skewness_computation() const
     break;
   }
 
+  case POISSON_GEOMETRIC : {
+    parametric_skewness = (parameter * (1. + 3 * (1. - probability)) +
+                           (inf_bound + parameter) * (2. - probability) * (1. - probability)) /
+                          pow((inf_bound + parameter) * (1. - probability) + parameter , 1.5);
+    break;
+  }
+
   case UNIFORM : {
     parametric_skewness = 0.;
     break;
   }
 
   default : {
-    parametric_skewness = D_INF;
+    parametric_skewness = skewness_computation();
     break;
   }
   }
@@ -1048,7 +1075,7 @@ double DiscreteParametric::parametric_kurtosis_computation() const
   }
 
   default : {
-    parametric_kurtosis = -D_INF;
+    parametric_kurtosis = kurtosis_computation();
     break;
   }
   }

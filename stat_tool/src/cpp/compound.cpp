@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -84,11 +84,18 @@ Compound::Compound(const DiscreteParametric &sum_dist , const DiscreteParametric
   compound_data = NULL;
 
   sum_distribution = new DiscreteParametric(sum_dist , NORMALIZATION);
-  distribution = new DiscreteParametric(dist , NORMALIZATION);
+  distribution = new DiscreteParametric(dist.ident , dist.inf_bound , dist.sup_bound ,
+                                        dist.parameter , dist.probability , cumul_threshold);
 
   Distribution::init((sum_distribution->nb_value - 1) * (distribution->nb_value - 1) + 1);
 
   computation(1 , cumul_threshold , false , false);
+
+# ifdef DEBUG
+  dist.Distribution::ascii_print(cout , false , true , false);
+  distribution->Distribution::ascii_print(cout , false , true , false);
+# endif
+
 }
 
 

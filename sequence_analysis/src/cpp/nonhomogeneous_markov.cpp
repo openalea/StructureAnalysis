@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -496,7 +496,7 @@ ostream& Function::ascii_print(ostream &os , bool exhaustive , bool file_flag ,
     if (file_flag) {
       os << "# ";
     }
-    os << STAT_label[STATL_REGRESSION_VARIATION_TOTAL_VARIATION] << ": "
+    os << STAT_label[STATL_DETERMINATION_COEFF] << ": "
        << 1. - square_sum[1] / square_sum[2] << endl;
 
     if (file_flag) {
@@ -642,7 +642,7 @@ ostream& Function::spreadsheet_print(ostream &os , const Curves *curves) const
     square_sum[1] = residual_square_sum_computation();
     square_sum[2] = curves->total_square_sum_computation(0 , self_transition_mean);
 
-    os << "\n" << STAT_label[STATL_REGRESSION_VARIATION_TOTAL_VARIATION] << "\t"
+    os << "\n" << STAT_label[STATL_DETERMINATION_COEFF] << "\t"
        << 1. - square_sum[1] / square_sum[2] << endl;
 
     os << regression_df << "\t" << STAT_label[STATL_REGRESSION] << " " << STAT_label[STATL_FREEDOM_DEGREES] << "\t\t"

@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -2877,6 +2877,268 @@ Sequences* Sequences::merge_variable(StatError &error , int nb_sample ,
 
 /*--------------------------------------------------------------*/
 /**
+ *  \brief Differences between data and residuals in order to build auxiliary variables.
+ *
+ *  \param[in] error    reference on a StatError object,
+ *  \param[in] residual reference on a Sequences object.
+ *
+ *  \return             Sequences object.
+ */
+/*--------------------------------------------------------------*/
+
+Sequences* Sequences::difference_variable(StatError &error , const Sequences &residual) const
+
+{
+  bool status = true;
+  register int i , j , k , m;
+  int offset , inb_variable;
+  variable_nature *itype;
+  Sequences *seq;
+
+
+  seq = NULL;
+  error.init();
+
+  if (((residual.vertex_identifier) && (!vertex_identifier)) ||
+      ((!(residual.vertex_identifier)) && (vertex_identifier))) {
+    status = false;
+    error.update(SEQ_error[SEQR_SAMPLE_VERTEX_IDENTIFIER]);
+  }
+
+  if (residual.index_param_type != index_param_type) {
+    status = false;
+    ostringstream error_message;
+    error_message << SEQ_error[SEQR_INDEX_PARAMETER_TYPE];
+
+    if (index_param_type == IMPLICIT_TYPE) {
+      error.update((error_message.str()).c_str());
+    }
+    else {
+      error.correction_update((error_message.str()).c_str() , SEQ_index_parameter_word[index_param_type]);
+    }
+  }
+
+  if (residual.nb_sequence != nb_sequence) {
+    status = false;
+    error.update(SEQ_error[SEQR_NB_SEQUENCE]);
+  }
+
+  else {
+    for (i = 0;i < nb_sequence;i++) {
+      if (residual.identifier[i] != identifier[i]) {
+        status = false;
+        ostringstream error_message;
+        error_message << SEQ_label[SEQL_SEQUENCE] << " " << i + 1 << ": "
+                      << SEQ_error[SEQR_SEQUENCE_IDENTIFIER];
+        error.update((error_message.str()).c_str());
+      }
+
+      if (residual.length[i] != length[i]) {
+        status = false;
+        ostringstream error_message;
+        error_message << SEQ_label[SEQL_SEQUENCE] << " " << i + 1 << ": "
+                      << SEQ_error[SEQR_SEQUENCE_LENGTH];
+        error.update((error_message.str()).c_str());
+      }
+
+      else {
+        if ((residual.vertex_identifier) && (vertex_identifier)) {
+          for (j = 0;j < length[i];j++) {
+            if (residual.vertex_identifier[i][j] != vertex_identifier[i][j]) {
+              status = false;
+              ostringstream error_message;
+              error_message << SEQ_label[SEQL_SEQUENCE] << " " << i + 1 << ": "
+                            << SEQ_label[SEQL_VERTEX_IDENTIFIER] << " " << j << ": "
+                            << SEQ_error[SEQR_VERTEX_IDENTIFIER];
+              error.update((error_message.str()).c_str());
+            }
+          }
+        }
+
+        if ((residual.index_param_type != IMPLICIT_TYPE) &&
+            (residual.index_param_type == index_param_type)) {
+          for (j = 0;j < (index_param_type == POSITION ? length[i] + 1 : length[i]);j++) {
+            if (residual.index_parameter[i][j] != index_parameter[i][j]) {
+              status = false;
+              ostringstream error_message;
+              error_message << SEQ_label[SEQL_SEQUENCE] << " " << i + 1 << ": "
+                            << SEQ_label[SEQL_INDEX_PARAMETER] << " " << j << ": "
+                            << SEQ_error[SEQR_INDEX_PARAMETER];
+              error.update((error_message.str()).c_str());
+            }
+          }
+        }
+      }
+    }
+  }
+
+  if (residual.nb_variable != nb_variable) {
+    status = false;
+    error.correction_update(STAT_error[STATR_NB_VARIABLE] , nb_variable);
+  }
+
+  else {
+    if (type[0] == STATE) {
+      offset = 1;
+
+      if (nb_variable == 1) {
+        status = false;
+        error.update(STAT_error[STATR_NB_VARIABLE]);
+      }
+
+      if (residual.type[0] != STATE) {
+        status = false;
+        ostringstream error_message;
+        error_message << STAT_label[STATL_VARIABLE] << " 1: "
+                      << STAT_error[STATR_VARIABLE_TYPE];
+        error.correction_update((error_message.str()).c_str() , STAT_variable_word[STATE]);
+      }
+
+      else {
+        for (i = 0;i < nb_sequence;i++) {
+          for (j = 0;j < length[i];j++) {
+            if (residual.int_sequence[i][0][j] != int_sequence[i][0][j]) {
+              status = false;
+              ostringstream error_message , correction_message;
+              error_message << SEQ_label[SEQL_SEQUENCE] << " " << i + 1 << ": "
+                            << SEQ_label[SEQL_INDEX_PARAMETER] << " " << j << ": "
+                            << SEQ_error[SEQR_STATE];
+              correction_message << STAT_label[STATL_STATE] << " " << int_sequence[i][0][j];
+              error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
+            }
+          }
+        }
+      }
+    }
+
+    else {
+      offset = 0;
+    }
+
+    for (i = offset;i < nb_variable;i++) {
+      if (residual.type[i] != REAL_VALUE) {
+        status = false;
+        ostringstream error_message;
+        error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
+                      << STAT_error[STATR_VARIABLE_TYPE];
+        error.correction_update((error_message.str()).c_str() , STAT_variable_word[REAL_VALUE]);
+      }
+    }
+  }
+
+  if (status) {
+    inb_variable = offset + (nb_variable - offset) * 2;
+
+    itype = new variable_nature[inb_variable];
+
+    if (type[0] == STATE) {
+      itype[0] = type[0];
+    }
+    i = offset;
+    for (j = offset;j < nb_variable;j++) {
+      itype[i++] = type[j];
+      itype[i++] = AUXILIARY;
+    }
+
+    seq = new Sequences(nb_sequence , identifier , length , vertex_identifier ,
+                        index_param_type , inb_variable , itype);
+    delete [] itype;
+
+    // copy of index parameters
+
+    if (index_parameter_distribution) {
+      seq->index_parameter_distribution = new FrequencyDistribution(*index_parameter_distribution);
+    }
+    if (index_interval) {
+      seq->index_interval = new FrequencyDistribution(*index_interval);
+    }
+
+    if (index_parameter) {
+      for (i = 0;i < nb_sequence;i++) {
+        for (j = 0;j < (index_param_type == POSITION ? length[i] + 1 : length[i]);j++) {
+          seq->index_parameter[i][j] = index_parameter[i][j];
+        }
+      }
+    }
+
+    // copy of variables and building of auxiliary variables
+
+    for (i = 0;i < nb_sequence;i++) {
+      if (type[0] == STATE) {
+        for (j = 0;j < length[i];j++) {
+          seq->int_sequence[i][0][j] = int_sequence[i][0][j];
+        }
+      }
+
+      j = offset;
+      for (k = offset;k < nb_variable;k++) {
+        switch (type[k]) {
+
+        case INT_VALUE : {
+          for (m = 0;m < length[i];m++) {
+            seq->int_sequence[i][j][m] = int_sequence[i][k][m];
+          }
+          j++;
+          for (m = 0;m < length[i];m++) {
+            seq->real_sequence[i][j][m] = int_sequence[i][k][m] - residual.real_sequence[i][k][m];
+          }
+          j++;
+          break;
+        }
+
+        case REAL_VALUE : {
+          for (m = 0;m < length[i];m++) {
+            seq->real_sequence[i][j][m] = real_sequence[i][k][m];
+          }
+          j++;
+          for (m = 0;m < length[i];m++) {
+            seq->real_sequence[i][j][m] = real_sequence[i][k][m] - residual.real_sequence[i][k][m];
+          }
+          j++;
+          break;
+        }
+        }
+      }
+    }
+
+    if (type[0] == STATE) {
+      seq->min_value[0] = min_value[0];
+      seq->max_value[0] = max_value[0];
+      seq->marginal_distribution[0] = new FrequencyDistribution(*marginal_distribution[0]);
+    }
+
+    i = offset;
+    for (j = offset;j < nb_variable;j++) {
+      seq->min_value[i] = min_value[j];
+      seq->max_value[i] = max_value[j];
+
+      if (marginal_distribution[j]) {
+        seq->marginal_distribution[i] = new FrequencyDistribution(*marginal_distribution[j]);
+      }
+      else {
+        seq->marginal_distribution[i] = NULL;
+      }
+
+      if (marginal_histogram[j]) {
+        seq->marginal_histogram[i] = new Histogram(*marginal_histogram[j]);
+      }
+      else {
+        seq->marginal_histogram[i] = NULL;
+      }
+      i++;
+
+      seq->min_value_computation(i);
+      seq->max_value_computation(i);
+      i++;
+    }
+  }
+
+  return seq;
+}
+
+
+/*--------------------------------------------------------------*/
+/**
  *  \brief Variable shift.
  *
  *  \param[in] error    reference on a StatError object,
@@ -3670,7 +3932,7 @@ Sequences* Sequences::segmentation_extract(StatError &error , int variable ,
 {
   bool status = true;
   register int i , j , k , m , n;
-  int nb_present_value , nb_selected_value , nb_segment , inb_sequence , *pfrequency ,
+  int nb_present_value , nb_selected_value , nb_segment , inb_sequence ,
       *selected_value , *pvertex_id , *cvertex_id , *pindex_param , *cindex_param ,
       *pisequence , *cisequence , *segment_length , *sequence_length , **segment_begin;
   variable_nature *itype;
@@ -3715,13 +3977,11 @@ Sequences* Sequences::segmentation_extract(StatError &error , int variable ,
       }
 
       else {
-        pfrequency = marginal_distribution[variable]->frequency + marginal_distribution[variable]->offset;
         nb_present_value = 0;
         for (i = marginal_distribution[variable]->offset;i < marginal_distribution[variable]->nb_value;i++) {
-          if (*pfrequency > 0) {
+          if (marginal_distribution[variable]->frequency[i] > 0) {
             nb_present_value++;
           }
-          pfrequency++;
         }
 
         if ((nb_value < 1) || (nb_value > (keep ? nb_present_value : nb_present_value - 1))) {
@@ -3791,12 +4051,10 @@ Sequences* Sequences::segmentation_extract(StatError &error , int variable ,
     case false : {
       nb_selected_value = nb_present_value - nb_value;
       selected_value = new int[nb_selected_value];
-
-      pfrequency = marginal_distribution[variable]->frequency + marginal_distribution[variable]->offset;
       i = 0;
 
       for (j = marginal_distribution[variable]->offset;j < marginal_distribution[variable]->nb_value;j++) {
-        if (*pfrequency > 0) {
+        if (marginal_distribution[variable]->frequency[j] > 0) {
           for (k = 0;k < nb_value;k++) {
             if (ivalue[k] == j) {
               break;
@@ -3807,8 +4065,6 @@ Sequences* Sequences::segmentation_extract(StatError &error , int variable ,
             selected_value[i++] = j;
           }
         }
-
-        pfrequency++;
       }
       break;
     }
@@ -4899,7 +5155,7 @@ Sequences* Sequences::moving_average(StatError &error , int nb_point , double *f
 {
   bool status = true;
   register int i , j , k , m , n;
-  int inb_variable , *ilength , *pvertex_id , *cvertex_id , *pindex_param , *cindex_param ,
+  int offset , inb_variable , *ilength , *pvertex_id , *cvertex_id , *pindex_param , *cindex_param ,
       *pisequence , *cisequence;
   variable_nature *itype;
   double *prsequence , *crsequence , *ppoint;
@@ -4914,8 +5170,19 @@ Sequences* Sequences::moving_average(StatError &error , int nb_point , double *f
     error.update(SEQ_error[SEQR_UNEQUAL_INDEX_INTERVALS]);
   }
 
+  if (type[0] == STATE) {
+    offset = 1;
+    if (nb_variable == 1) {
+      status = false;
+      error.update(STAT_error[STATR_NB_VARIABLE]);
+    }
+  }
+  else {
+    offset = 0;
+  }
+
   if (variable != I_DEFAULT) {
-    if ((variable < 1) || (variable > nb_variable)) {
+    if ((variable < offset + 1) || (variable > nb_variable)) {
       status = false;
       error.update(STAT_error[STATR_VARIABLE_INDEX]);
     }
@@ -4924,15 +5191,14 @@ Sequences* Sequences::moving_average(StatError &error , int nb_point , double *f
     }
   }
 
-  for (i = 0;i < nb_variable;i++) {
+  for (i = offset;i < nb_variable;i++) {
     if (((variable == I_DEFAULT) || (variable == i)) &&
-        ((type[i] != INT_VALUE) && (type[i] != STATE) && (type[i] != REAL_VALUE))) {
+        (type[i] != INT_VALUE) && (type[i] != REAL_VALUE)) {
       status = false;
       ostringstream error_message , correction_message;
       error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
                     << STAT_error[STATR_VARIABLE_TYPE];
       correction_message << STAT_variable_word[INT_VALUE] << " or "
-                         << STAT_variable_word[STATE] << " or "
                          << STAT_variable_word[REAL_VALUE];
       error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
     }
@@ -4957,7 +5223,7 @@ Sequences* Sequences::moving_average(StatError &error , int nb_point , double *f
     }
 
     if (variable == I_DEFAULT) {
-      inb_variable = nb_variable;
+      inb_variable = nb_variable - offset;
     }
     else {
       inb_variable = 1;
@@ -4966,12 +5232,17 @@ Sequences* Sequences::moving_average(StatError &error , int nb_point , double *f
     if (output == SEQUENCE) {
       inb_variable *= 2;
     }
+    inb_variable += offset;
 
     itype = new variable_nature[inb_variable];
 
+    if (type[0] == STATE) {
+      itype[0] = type[0];
+    }
+
     if (output == SEQUENCE) {
-      i = 0;
-      for (j = 0;j < nb_variable;j++) {
+      i = offset;
+      for (j = offset;j < nb_variable;j++) {
         if ((variable == I_DEFAULT) || (variable == j)) {
           itype[i++] = type[j];
           itype[i++] = AUXILIARY;
@@ -4980,7 +5251,7 @@ Sequences* Sequences::moving_average(StatError &error , int nb_point , double *f
     }
 
     else {
-      for (i = 0;i < inb_variable;i++) {
+      for (i = offset;i < inb_variable;i++) {
         itype[i] = REAL_VALUE;
       }
     }
@@ -5045,15 +5316,47 @@ Sequences* Sequences::moving_average(StatError &error , int nb_point , double *f
       }
     }
 
+    // copy of the state variable
+
+    if (type[0] == STATE) {
+      for (i = 0;i < seq->nb_sequence;i++) {
+        pisequence = seq->int_sequence[i][0];
+        if (begin_end) {
+          cisequence = int_sequence[i][0];
+        }
+        else {
+          cisequence = int_sequence[i][0] + nb_point;
+        }
+
+        for (j = 0;j < seq->length[i];j++) {
+          *pisequence++ = *cisequence++;
+        }
+      }
+
+      if (begin_end) {
+        seq->min_value[0] = min_value[0];
+        seq->max_value[0] = max_value[0];
+        seq->marginal_distribution[0] = new FrequencyDistribution(*marginal_distribution[0]);
+      }
+
+      else {
+        seq->min_value_computation(0);
+        seq->max_value_computation(0);
+        seq->build_marginal_frequency_distribution(0);
+      }
+    }
+
     // filtering using a symmetric smoothing filter
 
     for (i = 0;i < nb_sequence;i++) {
-      j = 0;
-      for (k = 0;k < nb_variable;k++) {
+      j = offset;
+      for (k = offset;k < nb_variable;k++) {
         if ((variable == I_DEFAULT) || (variable == k)) {
           prsequence = seq->real_sequence[i][output == SEQUENCE ? j + 1 : j];
 
-          if (type[k] != REAL_VALUE) {
+          switch (type[k]) {
+
+          case INT_VALUE : {
             if (begin_end) {
               for (m = 0;m < MIN(nb_point , length[i]);m++) {
                 cisequence = int_sequence[i][k];
@@ -5132,9 +5435,10 @@ Sequences* Sequences::moving_average(StatError &error , int nb_point , double *f
               break;
             }
             }
+            break;
           }
 
-          else {
+          case REAL_VALUE : {
             if (begin_end) {
               for (m = 0;m < MIN(nb_point , length[i]);m++) {
                 crsequence = real_sequence[i][k];
@@ -5211,6 +5515,8 @@ Sequences* Sequences::moving_average(StatError &error , int nb_point , double *f
               break;
             }
             }
+            break;
+          }
           }
 
           if (output == SEQUENCE) {
@@ -5222,10 +5528,10 @@ Sequences* Sequences::moving_average(StatError &error , int nb_point , double *f
     }
 
     if (output == SEQUENCE) {
-      i = 0;
+      i = offset;
 
       if (begin_end) {
-        for (j = 0;j < nb_variable;j++) {
+        for (j = offset;j < nb_variable;j++) {
           if ((variable == I_DEFAULT) || (variable == j)) {
             seq->min_value[i] = min_value[j];
             seq->max_value[i] = max_value[j];
@@ -5246,7 +5552,7 @@ Sequences* Sequences::moving_average(StatError &error , int nb_point , double *f
       }
 
       else {
-        for (j = 0;j < nb_variable;j++) {
+        for (j = offset;j < nb_variable;j++) {
           if ((variable == I_DEFAULT) || (variable == j)) {
             seq->min_value_computation(i);
             seq->max_value_computation(i);
@@ -5263,7 +5569,7 @@ Sequences* Sequences::moving_average(StatError &error , int nb_point , double *f
     }
 
     else {
-      for (i = 0;i < seq->nb_variable;i++) {
+      for (i = offset;i < seq->nb_variable;i++) {
         seq->min_value_computation(i);
         seq->max_value_computation(i);
 

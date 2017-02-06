@@ -413,12 +413,12 @@ public:
 
   static HiddenSemiMarkov*
   hidden_semi_markov_estimation(const MarkovianSequences &input,
-      const HiddenSemiMarkov &ihsmarkov, bool common_dispersion, censoring_estimator estimator,
-      bool counting_flag, bool state_sequence, int nb_iter,
+      const HiddenSemiMarkov &ihsmarkov, bool poisson_geometric, bool common_dispersion,
+      censoring_estimator estimator, bool counting_flag, bool state_sequence, int nb_iter,
       duration_distribution_mean_estimator mean_estimator)
   {
     HEADER_OS(HiddenSemiMarkov);
-    ret = input.hidden_semi_markov_estimation(error, os, ihsmarkov, common_dispersion,
+    ret = input.hidden_semi_markov_estimation(error, os, ihsmarkov, poisson_geometric, common_dispersion,
         estimator, counting_flag, state_sequence, nb_iter, mean_estimator);
     FOOTER_OS;
   }
@@ -426,12 +426,12 @@ public:
   static HiddenSemiMarkov*
   hidden_semi_markov_estimation_model(const MarkovianSequences &input,
       process_type itype, int nb_state, bool left_right, double occupancy_mean,
-      bool common_dispersion, censoring_estimator estimator, bool counting_flag,
+      bool poisson_geometric, bool common_dispersion, censoring_estimator estimator, bool counting_flag,
       bool state_sequence, int nb_iter, duration_distribution_mean_estimator mean_estimator)
   {
     HEADER_OS(HiddenSemiMarkov);
-    ret = input.hidden_semi_markov_estimation(error, os, itype, nb_state,
-        left_right, occupancy_mean, common_dispersion, estimator, counting_flag,
+    ret = input.hidden_semi_markov_estimation(error, os, itype, nb_state, left_right,
+        occupancy_mean, poisson_geometric, common_dispersion, estimator, counting_flag,
         state_sequence, nb_iter, mean_estimator);
     FOOTER_OS;
   }
@@ -439,29 +439,29 @@ public:
 
   static HiddenSemiMarkov*
   hidden_semi_markov_stochastic_estimation(const MarkovianSequences &input,
-      const HiddenSemiMarkov &ihsmarkov, bool common_dispersion, int min_nb_state_sequence,
-      int max_nb_state_sequence, double parameter, censoring_estimator estimator,
-      bool counting_flag, bool state_sequence, int nb_iter)
+      const HiddenSemiMarkov &ihsmarkov, bool poisson_geometric, bool common_dispersion,
+      int min_nb_state_sequence, int max_nb_state_sequence, double parameter,
+      censoring_estimator estimator, bool counting_flag, bool state_sequence, int nb_iter)
   {
     HEADER_OS(HiddenSemiMarkov);
 
     ret = input.hidden_semi_markov_stochastic_estimation(error, os, ihsmarkov,
-        common_dispersion, min_nb_state_sequence, max_nb_state_sequence, parameter,
-        estimator, counting_flag, state_sequence, nb_iter);
+        poisson_geometric, common_dispersion, min_nb_state_sequence, max_nb_state_sequence,
+        parameter, estimator, counting_flag, state_sequence, nb_iter);
 
     FOOTER_OS;
   }
 
   static HiddenSemiMarkov*
   hidden_semi_markov_stochastic_estimation_model(
-      const MarkovianSequences &input, process_type itype, int nb_state,
-      bool left_right, double occupancy_mean, bool common_dispersion, int min_nb_state_sequence,
-      int max_nb_state_sequence, double parameter, censoring_estimator estimator, bool counting_flag,
-      bool state_sequence, int nb_iter)
+      const MarkovianSequences &input, process_type itype, int nb_state, bool left_right,
+      double occupancy_mean, bool poisson_geometric, bool common_dispersion, int min_nb_state_sequence,
+      int max_nb_state_sequence, double parameter, censoring_estimator estimator,
+      bool counting_flag, bool state_sequence, int nb_iter)
   {
     HEADER_OS(HiddenSemiMarkov);
-    ret = input.hidden_semi_markov_stochastic_estimation(error, os, itype,
-        nb_state, left_right, occupancy_mean, common_dispersion, min_nb_state_sequence,
+    ret = input.hidden_semi_markov_stochastic_estimation(error, os, itype, nb_state,
+        left_right, occupancy_mean, poisson_geometric, common_dispersion, min_nb_state_sequence,
         max_nb_state_sequence, parameter, estimator, counting_flag, state_sequence,
         nb_iter);
     FOOTER_OS;

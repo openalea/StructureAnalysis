@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -594,7 +594,7 @@ HiddenSemiMarkov* HiddenSemiMarkov::ascii_read(StatError &error , const string p
                   continuous_parametric_observation[index - 1] = ContinuousParametricProcess::parsing(error , in_file , line ,
                                                                                                       chain->nb_state ,
                                                                                                       HIDDEN_MARKOV ,
-                                                                                                      LINEAR_MODEL);
+                                                                                                      AUTOREGRESSIVE_MODEL);
                   if (!continuous_parametric_observation[index - 1]) {
                     status = false;
                   }

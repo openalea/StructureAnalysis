@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -213,7 +213,7 @@ double SemiMarkov::likelihood_computation(const MarkovianSequences &seq , int in
 {
   register int i , j , k , m;
   int nb_value , occupancy , *pstate , **pioutput;
-  double likelihood = 0. , proba , **proutput;
+  double likelihood = 0. , proba , residual , **proutput;
 
 
   // checking of the compatibility of the model with the data
@@ -293,12 +293,10 @@ double SemiMarkov::likelihood_computation(const MarkovianSequences &seq , int in
           }
 
           if (transition[*pstate][*pstate] < 1.) {
-            j++;
             occupancy = 1;
 
             if (sojourn_type[*pstate] == SEMI_MARKOVIAN) {
-              while ((j < seq.length[i]) && (*(pstate + 1) == *pstate)) {
-                j++;
+              while ((j + occupancy < seq.length[i]) && (*(pstate + 1) == *pstate)) {
                 occupancy++;
                 pstate++;
               }
@@ -306,7 +304,7 @@ double SemiMarkov::likelihood_computation(const MarkovianSequences &seq , int in
               proba = 0.;
               if ((type == EQUILIBRIUM) && (j == occupancy)) {
                 if (occupancy < forward[*pstate]->nb_value) {
-                  if (j < seq.length[i]) {
+                  if (j + occupancy < seq.length[i]) {
                     proba = forward[*pstate]->mass[occupancy];
                   }
                   else {
@@ -317,7 +315,7 @@ double SemiMarkov::likelihood_computation(const MarkovianSequences &seq , int in
 
               else {
                 if (occupancy < state_process->sojourn_time[*pstate]->nb_value) {
-                  if (j < seq.length[i]) {
+                  if (j + occupancy < seq.length[i]) {
                     proba = state_process->sojourn_time[*pstate]->mass[occupancy];
                   }
                   else {
@@ -338,31 +336,98 @@ double SemiMarkov::likelihood_computation(const MarkovianSequences &seq , int in
 
           else {
             occupancy = seq.length[i] - j;
-            j += occupancy;
           }
 
           if (nb_output_process > 0) {
-            for (k = 0;k < occupancy;k++) {
+            for (k = j;k < j + occupancy;k++) {
               for (m = 0;m < nb_output_process;m++) {
                 if (categorical_process[m]) {
-                  proba = categorical_process[m]->observation[*pstate]->mass[*pioutput[m]++];
+                  proba = categorical_process[m]->observation[*pstate]->mass[*pioutput[m]];
                 }
 
                 else if (discrete_parametric_process[m]) {
-                  proba = discrete_parametric_process[m]->observation[*pstate]->mass[*pioutput[m]++];
+                  proba = discrete_parametric_process[m]->observation[*pstate]->mass[*pioutput[m]];
                 }
 
                 else {
-                  switch (seq.type[m + 1]) {
-                  case INT_VALUE :
-                    proba = continuous_parametric_process[m]->observation[*pstate]->mass_computation(*pioutput[m] - seq.min_interval[m + 1] / 2 , *pioutput[m] + seq.min_interval[m + 1] / 2);
-                    pioutput[m]++;
-                    break;
-                  case REAL_VALUE :
-                    proba = continuous_parametric_process[m]->observation[*pstate]->mass_computation(*proutput[m] - seq.min_interval[m + 1] / 2 , *proutput[m] + seq.min_interval[m + 1] / 2);
-                    proutput[m]++;
-                    break;
+                  if (((continuous_parametric_process[m]->ident == GAMMA) ||
+                       (continuous_parametric_process[m]->ident == ZERO_INFLATED_GAMMA)) && (seq.min_value[m + 1] < seq.min_interval[m + 1] / 2)) {
+                    switch (seq.type[m + 1]) {
+                    case INT_VALUE :
+                      proba = continuous_parametric_process[m]->observation[*pstate]->mass_computation(*pioutput[m] , *pioutput[m] + seq.min_interval[m + 1]);
+                      break;
+                    case REAL_VALUE :
+                      proba = continuous_parametric_process[m]->observation[*pstate]->mass_computation(*proutput[m] , *proutput[m] + seq.min_interval[m + 1]);
+                      break;
+                    }
                   }
+
+                  else if (continuous_parametric_process[m]->ident == LINEAR_MODEL) {
+                    switch (seq.type[m + 1]) {
+                    case INT_VALUE :
+                      residual = *pioutput[m] - (continuous_parametric_process[m]->observation[*pstate]->intercept +
+                                  continuous_parametric_process[m]->observation[*pstate]->slope *
+                                  (seq.index_param_type == IMPLICIT_TYPE ? k : seq.index_parameter[i][k]));
+                      break;
+                    case REAL_VALUE :
+                      residual = *proutput[m] - (continuous_parametric_process[m]->observation[*pstate]->intercept +
+                                  continuous_parametric_process[m]->observation[*pstate]->slope *
+                                  (seq.index_param_type == IMPLICIT_TYPE ? k : seq.index_parameter[i][k]));
+                      break;
+                    }
+
+                    proba = continuous_parametric_process[m]->observation[*pstate]->mass_computation(residual - seq.min_interval[m + 1] / 2 , residual + seq.min_interval[m + 1] / 2);
+                  }
+
+                  else if (continuous_parametric_process[m]->ident == AUTOREGRESSIVE_MODEL) {
+                    if (k == 0) {
+                      switch (seq.type[m + 1]) {
+                      case INT_VALUE :
+                        residual = *pioutput[m] - continuous_parametric_process[m]->observation[*pstate]->location;
+                        break;
+                      case REAL_VALUE :
+                        residual = *proutput[m] - continuous_parametric_process[m]->observation[*pstate]->location;
+                        break;
+                      }
+                    }
+
+                    else {
+                      switch (seq.type[m + 1]) {
+                      case INT_VALUE :
+                        residual = *pioutput[m] - (continuous_parametric_process[m]->observation[*pstate]->location +
+                                    continuous_parametric_process[m]->observation[*pstate]->autoregressive_coeff *
+                                    (*(pioutput[m] - 1) - continuous_parametric_process[m]->observation[*pstate]->location));
+                        break;
+                      case REAL_VALUE :
+                        residual = *proutput[m] - (continuous_parametric_process[m]->observation[*pstate]->location +
+                                    continuous_parametric_process[m]->observation[*pstate]->autoregressive_coeff *
+                                    (*(proutput[m] - 1) - continuous_parametric_process[m]->observation[*pstate]->location));
+                        break;
+                      }
+                    }
+
+                    proba = continuous_parametric_process[m]->observation[*pstate]->mass_computation(residual - seq.min_interval[m + 1] / 2 , residual + seq.min_interval[m + 1] / 2);
+                  }
+
+                  else {
+                    switch (seq.type[m + 1]) {
+                    case INT_VALUE :
+                      proba = continuous_parametric_process[m]->observation[*pstate]->mass_computation(*pioutput[m] - seq.min_interval[m + 1] / 2 , *pioutput[m] + seq.min_interval[m + 1] / 2);
+                      break;
+                    case REAL_VALUE :
+                      proba = continuous_parametric_process[m]->observation[*pstate]->mass_computation(*proutput[m] - seq.min_interval[m + 1] / 2 , *proutput[m] + seq.min_interval[m + 1] / 2);
+                      break;
+                    }
+                  }
+                }
+
+                switch (seq.type[m + 1]) {
+                case INT_VALUE :
+                  pioutput[m]++;
+                  break;
+                case REAL_VALUE :
+                  proutput[m]++;
+                  break;
                 }
 
                 if (proba > 0.) {
@@ -383,6 +448,8 @@ double SemiMarkov::likelihood_computation(const MarkovianSequences &seq , int in
               break;
             }
           }
+
+          j += occupancy;
         }
         while (j < seq.length[i]);
 
@@ -443,7 +510,8 @@ double SemiMarkov::likelihood_computation(const SemiMarkovData &seq) const
         }
       }
 
-      else if (!(seq.marginal_distribution[i + 1])) {
+      else if ((continuous_parametric_process[i]->ident == LINEAR_MODEL) ||
+               (continuous_parametric_process[i]->ident == AUTOREGRESSIVE_MODEL) || (!(seq.marginal_distribution[i + 1]))) {
         likelihood = D_INF;
         break;
       }
@@ -1675,31 +1743,61 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , const FrequencyDistrib
         }
         }
 
-        j += occupancy;
-
         for (k = 1;k < occupancy;k++) {
           pstate++;
           *pstate = *(pstate - 1);
         }
 
-        for (k = 0;k < occupancy;k++) {
+        for (k = j;k < j + occupancy;k++) {
           for (m = 0;m < smarkov->nb_output_process;m++) {
             if (smarkov->categorical_process[m]) {
-              *pioutput[m]++ = smarkov->categorical_process[m]->observation[*pstate]->simulation();
+              *pioutput[m] = smarkov->categorical_process[m]->observation[*pstate]->simulation();
             }
+
             else if (smarkov->discrete_parametric_process[m]) {
-              *pioutput[m]++ = smarkov->discrete_parametric_process[m]->observation[*pstate]->simulation();
+              *pioutput[m] = smarkov->discrete_parametric_process[m]->observation[*pstate]->simulation();
             }
-            else if (smarkov->continuous_parametric_process[m]->ident != LINEAR_MODEL) {
-              *proutput[m]++ = round(smarkov->continuous_parametric_process[m]->observation[*pstate]->simulation() * decimal_scale[m]) / decimal_scale[m];
-            }
+
             else {
-              *proutput[m]++ = smarkov->continuous_parametric_process[m]->observation[*pstate]->intercept +
-                               smarkov->continuous_parametric_process[m]->observation[*pstate]->slope * (j + k) +
-                               round(smarkov->continuous_parametric_process[m]->observation[*pstate]->simulation() * decimal_scale[m]) / decimal_scale[m];
+              if (smarkov->continuous_parametric_process[m]->ident == LINEAR_MODEL) {
+                *proutput[m] = smarkov->continuous_parametric_process[m]->observation[*pstate]->intercept +
+                               smarkov->continuous_parametric_process[m]->observation[*pstate]->slope * k +
+//                               round(smarkov->continuous_parametric_process[m]->observation[*pstate]->simulation() * decimal_scale[m]) / decimal_scale[m];
+                               smarkov->continuous_parametric_process[m]->observation[*pstate]->simulation();
+              }
+
+              else if (smarkov->continuous_parametric_process[m]->ident == AUTOREGRESSIVE_MODEL) {
+                if (k == 0) {
+                  *proutput[m] = smarkov->continuous_parametric_process[m]->observation[*pstate]->location +
+//                                 round(smarkov->continuous_parametric_process[m]->observation[*pstate]->simulation() * decimal_scale[m]) / decimal_scale[m];
+                                 smarkov->continuous_parametric_process[m]->observation[*pstate]->simulation();
+                }
+                else {
+                  *proutput[m] = smarkov->continuous_parametric_process[m]->observation[*pstate]->location +
+                                 smarkov->continuous_parametric_process[m]->observation[*pstate]->autoregressive_coeff *
+                                 (*(proutput[m] - 1) - smarkov->continuous_parametric_process[m]->observation[*pstate]->location) +
+//                                 round(smarkov->continuous_parametric_process[m]->observation[*pstate]->simulation() * decimal_scale[m]) / decimal_scale[m];
+                                 smarkov->continuous_parametric_process[m]->observation[*pstate]->simulation();
+                }
+              }
+
+              else {
+                *proutput[m] = round(smarkov->continuous_parametric_process[m]->observation[*pstate]->simulation() * decimal_scale[m]) / decimal_scale[m];
+              }
+            }
+
+            switch (seq->type[m + 1]) {
+            case INT_VALUE :
+              pioutput[m]++;
+              break;
+            case REAL_VALUE :
+              proutput[m]++;
+              break;
             }
           }
         }
+
+        j += occupancy;
       }
       while (j < seq->length[i]);
     }

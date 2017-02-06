@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -98,7 +98,7 @@ namespace stat_tool {
   const double ref_critical_probability[NB_CRITICAL_PROBABILITY] = {0.05 , 0.01};
 
   const int NB_VALUE = 1000;             // number of values of a discrete variable
-  const int SAMPLE_NB_VALUE = NB_VALUE;  // number of values of a discrete sample 
+  const int SAMPLE_NB_VALUE = NB_VALUE;  // number of values of a discrete sample
 
   enum frequency_distribution_transformation {
     FREQUENCY_DISTRIBUTION_COPY ,
@@ -117,6 +117,7 @@ namespace stat_tool {
     BINOMIAL ,
     POISSON ,
     NEGATIVE_BINOMIAL ,
+    POISSON_GEOMETRIC ,
     UNIFORM ,
     MULTINOMIAL                          // addition by Florence Chaubert
   };
@@ -137,7 +138,8 @@ namespace stat_tool {
     GAUSSIAN ,
     VON_MISES ,
     ZERO_INFLATED_GAMMA ,
-    LINEAR_MODEL
+    LINEAR_MODEL ,
+    AUTOREGRESSIVE_MODEL
   };
 
   enum angle_unit {
@@ -354,7 +356,6 @@ namespace stat_tool {
   };
 
 
-
   /// \brief Class for error management
 
   class StatError {
@@ -391,7 +392,6 @@ namespace stat_tool {
   };
 
 
-
   /// \brief Abstract class defining a common interface
 
   class StatInterface {
@@ -412,7 +412,6 @@ namespace stat_tool {
 
 //    bool binary_write(StatError &error , const std::string path) const;
   };
-
 
 
   class FrequencyDistribution;
@@ -557,7 +556,6 @@ namespace stat_tool {
                   const FrequencyDistribution **histo);
 
 
-
   class Forward;
 
   /// \brief Discrete parametric distribution
@@ -571,8 +569,8 @@ namespace stat_tool {
     discrete_parametric ident;  ///< identifier
     int inf_bound;          ///< lower bound
     int sup_bound;          ///< upper bound (binomial, uniform)
-    double parameter;       ///< parameter (Poisson, negative binomial)
-    double probability;     ///< probability of success (binomial, negative binomial)
+    double parameter;       ///< parameter (Poisson, negative binomial, Poisson geometric)
+    double probability;     ///< probability of success (binomial, negative binomial, Poisson geometric)
 
     void init(int iinf_bound , int isup_bound , double iparameter , double iprobability);
     void init(discrete_parametric iident , int iinf_bound , int isup_bound ,
@@ -625,6 +623,7 @@ namespace stat_tool {
                              distribution_computation mode);
     void negative_binomial_computation(int inb_value , double cumul_threshold ,
                                        distribution_computation mode);
+    void poisson_geometric_computation(int inb_value , double cumul_threshold);
     void uniform_computation();
 
     void computation(int min_nb_value = 1 ,
@@ -642,8 +641,6 @@ namespace stat_tool {
                           const FrequencyDistribution *no_event ,
                           Reestimation<double> *inter_event_reestim ,
                           Reestimation<double> *length_bias_reestim , int iter) const;
-
-    void reestimation(const Reestimation<double> *reestim , int nb_estim = 1);
 
     double state_occupancy_likelihood_computation(const FrequencyDistribution &sojourn_time ,
                                                   const FrequencyDistribution &final_run) const;
@@ -666,7 +663,6 @@ namespace stat_tool {
   };
 
 
-
   /// \brief Forward recurrence or sojourn time distribution
 
   class Forward : public DiscreteParametric {
@@ -684,7 +680,6 @@ namespace stat_tool {
 
     void computation(const DiscreteParametric &dist);
   };
-
 
 
   class DiscreteDistributionData;
@@ -888,7 +883,6 @@ namespace stat_tool {
                   const FrequencyDistribution **histo);
 
 
-
   class Histogram;
 
   /// \brief Continuous parametric distribution
@@ -903,23 +897,27 @@ namespace stat_tool {
     continuous_parametric ident;  ///< identifier
     union {
       double shape;         ///< shape parameter (gamma, zero-inflated gamma)
-      double location;      ///< mean (Gaussian, inverse Gaussian), mean direction (von Mises),
+      double location;      ///< mean (Gaussian, inverse Gaussian, autoregressive model), mean direction (von Mises),
       double intercept;     ///< for linear model
     };
     union {
       double scale;         ///< scale parameter (gamma, inverse Gaussian, zero-inflated gamma)
-      double dispersion;    ///< standard deviation (Gaussian, linear model), concentration (von Mises),
+      double dispersion;    ///< standard deviation (Gaussian, linear model, autoregressive model), concentration (von Mises),
     };
     union {
       double zero_probability;  ///< zero probability (zero-inflated gamma)
-      double slope;           ///< for linear model
+      double slope;         ///< for linear models
+      double autoregressive_coeff;  ///< for autoregressive models
     };
     double min_value;       ///< minimum value
     double max_value;       ///< maximum value
     angle_unit unit;        ///< unit (degree/radian - von Mises)
-    double slope_standard_deviation;  ///< for linear model
-    double sample_size;     ///< for linear model
-    double correlation;     ///< for linear model
+    double slope_standard_deviation;  ///< for linear models
+    double sample_size;     ///< for linear and autoregressive models
+    union {
+      double correlation;     ///< for linear models
+      double determination_coeff;  ///< for autoregressive models
+    };
     double *cumul;          ///< cumulative distribution function (von Mises)
 
     void copy(const ContinuousParametric &dist);
@@ -973,7 +971,6 @@ namespace stat_tool {
   };
 
 
-
   /// \brief Histogram
 
   class Histogram {
@@ -1006,7 +1003,6 @@ namespace stat_tool {
     void max_computation();
     double* cumul_computation() const;
   };
-
 
 
   int column_width(int);

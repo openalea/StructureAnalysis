@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -1320,7 +1320,8 @@ ostream& SemiMarkov::ascii_write(ostream &os , const SemiMarkovData *seq ,
     }
     os << endl;
 
-    if ((continuous_parametric_process[i]) && (continuous_parametric_process[i]->ident == LINEAR_MODEL)) {
+    if ((continuous_parametric_process[i]) && ((continuous_parametric_process[i]->ident == LINEAR_MODEL) ||
+         (continuous_parametric_process[i]->ident == AUTOREGRESSIVE_MODEL))) {
       for (j = 0;j < nb_state;j++) {
         os << "\n" << STAT_word[STATW_STATE] << " " << j << " "
            << STAT_word[STATW_OBSERVATION_MODEL] << endl;
@@ -1328,17 +1329,24 @@ ostream& SemiMarkov::ascii_write(ostream &os , const SemiMarkovData *seq ,
       }
     }
 
-    else {
-      if (seq) {
-        switch (seq->type[0]) {
-        case STATE :
-          variable = i + 1;
-          break;
-        default :
-          variable = i;
-          break;
-        }
+    if (seq) {
+      switch (seq->type[0]) {
+      case STATE :
+        variable = i + 1;
+        break;
+      default :
+        variable = i;
+        break;
+      }
 
+      if ((continuous_parametric_process[i]) && (continuous_parametric_process[i]->ident == AUTOREGRESSIVE_MODEL)) {
+        if (seq->type[0] == STATE) {
+          seq->autoregressive_model_ascii_print(os , variable , continuous_parametric_process[i] , file_flag);
+        }
+      }
+
+      else if ((categorical_process[i]) || (discrete_parametric_process[i]) ||
+               ((continuous_parametric_process[i]) && (continuous_parametric_process[i]->ident != LINEAR_MODEL))) {
         if (seq->observation_distribution) {
           observation_dist = seq->observation_distribution[variable];
         }
@@ -1396,7 +1404,8 @@ ostream& SemiMarkov::ascii_write(ostream &os , const SemiMarkovData *seq ,
         }
       }
 
-      else {
+      else if ((continuous_parametric_process[i]->ident != LINEAR_MODEL) &&
+               (continuous_parametric_process[i]->ident != AUTOREGRESSIVE_MODEL)) {
         continuous_parametric_process[i]->ascii_print(os , observation_histo , observation_dist ,
                                                       marginal_histo , marginal_dist ,
                                                       exhaustive , file_flag);
@@ -1419,7 +1428,9 @@ ostream& SemiMarkov::ascii_write(ostream &os , const SemiMarkovData *seq ,
         }
       }
 
-      if (hidden) {
+      if ((hidden) && ((categorical_process[i]) || (discrete_parametric_process[i]) ||
+           ((continuous_parametric_process[i]) && (continuous_parametric_process[i]->ident != LINEAR_MODEL) &&
+            (continuous_parametric_process[i]->ident != AUTOREGRESSIVE_MODEL)))) {
         width = column_width(nb_state , distance[0]);
         for (j = 1;j < nb_state;j++) {
           buff = column_width(nb_state , distance[j]);
@@ -1769,7 +1780,8 @@ ostream& SemiMarkov::spreadsheet_write(ostream &os , const SemiMarkovData *seq ,
     }
     os << endl;
 
-    if ((continuous_parametric_process[i]) && (continuous_parametric_process[i]->ident == LINEAR_MODEL)) {
+    if ((continuous_parametric_process[i]) && ((continuous_parametric_process[i]->ident == LINEAR_MODEL) ||
+         (continuous_parametric_process[i]->ident == AUTOREGRESSIVE_MODEL))) {
       for (j = 0;j < nb_state;j++) {
         os << "\n" << STAT_word[STATW_STATE] << " " << j << "\t"
            << STAT_word[STATW_OBSERVATION_MODEL] << endl;
@@ -1790,6 +1802,11 @@ ostream& SemiMarkov::spreadsheet_write(ostream &os , const SemiMarkovData *seq ,
       if ((continuous_parametric_process[i]) && (continuous_parametric_process[i]->ident == LINEAR_MODEL)) {
         seq->linear_model_spreadsheet_print(os , variable , continuous_parametric_process[i]);
       }
+      else if ((continuous_parametric_process[i]) && (continuous_parametric_process[i]->ident == AUTOREGRESSIVE_MODEL)) {
+        if (seq->type[0] == STATE) {
+          seq->autoregressive_model_spreadsheet_print(os , variable , continuous_parametric_process[i]);
+        }
+      }
 
       else {
         if (seq->observation_distribution) {
@@ -1803,66 +1820,69 @@ ostream& SemiMarkov::spreadsheet_write(ostream &os , const SemiMarkovData *seq ,
         marginal_histo = seq->marginal_histogram[variable];
 
         characteristics = seq->characteristics[variable];
+      }
 
-        if (categorical_process[i]) {
-          categorical_process[i]->spreadsheet_print(os , i + 1 , observation_dist , marginal_dist ,
-                                                    characteristics);
-
-          if (hidden) {
-            for (j = 0;j < nb_state;j++) {
-              for (k = j + 1;k < nb_state;k++) {
-                if ((transition[j][k] > MIN_PROBABILITY) || (transition[k][j] > MIN_PROBABILITY)) {
-                  distance[j][k] = categorical_process[i]->observation[j]->overlap_distance_computation(*(categorical_process[i]->observation[k]));
-                  distance[k][j] = distance[j][k];
-                }
-              }
-            }
-          }
-        }
-
-        else if (discrete_parametric_process[i]) {
-          discrete_parametric_process[i]->spreadsheet_print(os , observation_dist , marginal_dist);
-
-          if (hidden) {
-            for (j = 0;j < nb_state;j++) {
-              for (k = j + 1;k < nb_state;k++) {
-                if ((transition[j][k] > MIN_PROBABILITY) || (transition[k][j] > MIN_PROBABILITY)) {
-                  distance[j][k] = discrete_parametric_process[i]->observation[j]->sup_norm_distance_computation(*(discrete_parametric_process[i]->observation[k]));
-                  distance[k][j] = distance[j][k];
-                }
-              }
-            }
-          }
-        }
-
-        else {
-          continuous_parametric_process[i]->spreadsheet_print(os , observation_histo , observation_dist ,
-                                                              marginal_histo , marginal_dist);
-
-          if (hidden) {
-            for (j = 0;j < nb_state;j++) {
-              for (k = j + 1;k < nb_state;k++) {
-                if ((transition[j][k] > MIN_PROBABILITY) || (transition[k][j] > MIN_PROBABILITY)) {
-                  distance[j][k] = continuous_parametric_process[i]->observation[j]->sup_norm_distance_computation(*(continuous_parametric_process[i]->observation[k]));
-                  distance[k][j] = distance[j][k];
-                }
-              }
-            }
-          }
-        }
+      if (categorical_process[i]) {
+        categorical_process[i]->spreadsheet_print(os , i + 1 , observation_dist , marginal_dist ,
+                                                  characteristics);
 
         if (hidden) {
-          os << "\n" << STAT_label[STATL_CONSECUTIVE_STATE_OBSERVATION_DISTRIBUTION_DISTANCE] << endl;
-
           for (j = 0;j < nb_state;j++) {
-            for (k = 0;k < nb_state;k++) {
-              if ((k != j) && (transition[j][k] > MIN_PROBABILITY)) {
-                os << distance[j][k];
+            for (k = j + 1;k < nb_state;k++) {
+              if ((transition[j][k] > MIN_PROBABILITY) || (transition[k][j] > MIN_PROBABILITY)) {
+                distance[j][k] = categorical_process[i]->observation[j]->overlap_distance_computation(*(categorical_process[i]->observation[k]));
+                distance[k][j] = distance[j][k];
               }
-              os << "\t";
             }
-            os << endl;
           }
+        }
+      }
+
+      else if (discrete_parametric_process[i]) {
+        discrete_parametric_process[i]->spreadsheet_print(os , observation_dist , marginal_dist);
+
+        if (hidden) {
+          for (j = 0;j < nb_state;j++) {
+            for (k = j + 1;k < nb_state;k++) {
+              if ((transition[j][k] > MIN_PROBABILITY) || (transition[k][j] > MIN_PROBABILITY)) {
+                distance[j][k] = discrete_parametric_process[i]->observation[j]->sup_norm_distance_computation(*(discrete_parametric_process[i]->observation[k]));
+                distance[k][j] = distance[j][k];
+              }
+            }
+          }
+        }
+      }
+
+      else if ((continuous_parametric_process[i]->ident != LINEAR_MODEL) &&
+               (continuous_parametric_process[i]->ident != AUTOREGRESSIVE_MODEL)) {
+        continuous_parametric_process[i]->spreadsheet_print(os , observation_histo , observation_dist ,
+                                                            marginal_histo , marginal_dist);
+
+        if (hidden) {
+          for (j = 0;j < nb_state;j++) {
+            for (k = j + 1;k < nb_state;k++) {
+              if ((transition[j][k] > MIN_PROBABILITY) || (transition[k][j] > MIN_PROBABILITY)) {
+                distance[j][k] = continuous_parametric_process[i]->observation[j]->sup_norm_distance_computation(*(continuous_parametric_process[i]->observation[k]));
+                distance[k][j] = distance[j][k];
+              }
+            }
+          }
+        }
+      }
+
+      if ((hidden) && ((categorical_process[i]) || (discrete_parametric_process[i]) ||
+           ((continuous_parametric_process[i]) && (continuous_parametric_process[i]->ident != LINEAR_MODEL) &&
+            (continuous_parametric_process[i]->ident != AUTOREGRESSIVE_MODEL)))) {
+        os << "\n" << STAT_label[STATL_CONSECUTIVE_STATE_OBSERVATION_DISTRIBUTION_DISTANCE] << endl;
+
+        for (j = 0;j < nb_state;j++) {
+          for (k = 0;k < nb_state;k++) {
+            if ((k != j) && (transition[j][k] > MIN_PROBABILITY)) {
+              os << distance[j][k];
+            }
+            os << "\t";
+          }
+          os << endl;
         }
       }
     }
@@ -2062,6 +2082,11 @@ bool SemiMarkov::plot_write(const char *prefix , const char *title ,
         if ((continuous_parametric_process[i]) && (continuous_parametric_process[i]->ident == LINEAR_MODEL)) {
           seq->linear_model_plot_print(prefix , title , variable , continuous_parametric_process[i]);
         }
+        else if ((continuous_parametric_process[i]) && (continuous_parametric_process[i]->ident == AUTOREGRESSIVE_MODEL)) {
+          if (seq->type[0] == STATE) {
+            seq->autoregressive_model_plot_print(prefix , title , variable , continuous_parametric_process[i]);
+          }
+        }
 
         else {
           if (seq->observation_distribution) {
@@ -2091,7 +2116,8 @@ bool SemiMarkov::plot_write(const char *prefix , const char *title ,
         discrete_parametric_process[i]->plot_print(prefix , title , i + 1 , observation_dist ,
                                                    marginal_dist);
       }
-      else if (continuous_parametric_process[i]->ident != LINEAR_MODEL) {
+      else if ((continuous_parametric_process[i]->ident != LINEAR_MODEL) &&
+               (continuous_parametric_process[i]->ident != AUTOREGRESSIVE_MODEL)) {
         continuous_parametric_process[i]->plot_print(prefix , title , i + 1 ,
                                                      observation_histo , observation_dist ,
                                                      marginal_histo , marginal_dist ,
@@ -2394,14 +2420,20 @@ MultiPlotSet* SemiMarkov::get_plotable(const SemiMarkovData *seq) const
       }
     }
 
-    if ((continuous_parametric_process[i]) && ((seq->marginal_histogram[variable]) ||
-         (seq->marginal_distribution[variable]))) {
+    if ((continuous_parametric_process[i]) && (continuous_parametric_process[i]->ident != LINEAR_MODEL) &&
+        (continuous_parametric_process[i]->ident != AUTOREGRESSIVE_MODEL) &&
+        ((seq->marginal_histogram[variable]) || (seq->marginal_distribution[variable]))) {
       if (continuous_parametric_process[i]->weight) {
         nb_plot_set += 2;
       }
       if (continuous_parametric_process[i]->restoration_weight) {
         nb_plot_set += 2;
       }
+    }
+
+    if ((continuous_parametric_process[i]) && ((continuous_parametric_process[i]->ident == LINEAR_MODEL) ||
+         ((continuous_parametric_process[i]->ident == AUTOREGRESSIVE_MODEL) && (seq->type[0] == STATE)))) {
+      nb_plot_set += nb_state;
     }
   }
 
@@ -2436,17 +2468,28 @@ MultiPlotSet* SemiMarkov::get_plotable(const SemiMarkovData *seq) const
         break;
       }
 
-      if (seq->observation_distribution) {
-        observation_dist = seq->observation_distribution[variable];
+      if ((continuous_parametric_process[i]) && (continuous_parametric_process[i]->ident == LINEAR_MODEL)) {
+        seq->linear_model_plotable_write(*plot_set , index , variable , continuous_parametric_process[i]);
       }
-      marginal_dist = seq->marginal_distribution[variable];
-
-      if (seq->observation_histogram) {
-        observation_histo = seq->observation_histogram[variable];
+      else if ((continuous_parametric_process[i]) && (continuous_parametric_process[i]->ident == AUTOREGRESSIVE_MODEL)) {
+        if (seq->type[0] == STATE) {
+          seq->autoregressive_model_plotable_write(*plot_set , index , variable , continuous_parametric_process[i]);
+        }
       }
-      marginal_histo = seq->marginal_histogram[variable];
 
-      characteristics = seq->characteristics[variable];
+      else {
+        if (seq->observation_distribution) {
+          observation_dist = seq->observation_distribution[variable];
+        }
+        marginal_dist = seq->marginal_distribution[variable];
+
+        if (seq->observation_histogram) {
+          observation_histo = seq->observation_histogram[variable];
+        }
+        marginal_histo = seq->marginal_histogram[variable];
+
+        characteristics = seq->characteristics[variable];
+      }
     }
 
     if (categorical_process[i]) {
@@ -2459,7 +2502,8 @@ MultiPlotSet* SemiMarkov::get_plotable(const SemiMarkovData *seq) const
       discrete_parametric_process[i]->plotable_write(*plot_set , index , i + 1 , observation_dist ,
                                                      marginal_dist);
     }
-    else {
+    else if ((continuous_parametric_process[i]->ident != LINEAR_MODEL) &&
+             (continuous_parametric_process[i]->ident != AUTOREGRESSIVE_MODEL)) {
       continuous_parametric_process[i]->plotable_write(*plot_set , index , i + 1 ,
                                                        observation_histo , observation_dist ,
                                                        marginal_histo , marginal_dist);

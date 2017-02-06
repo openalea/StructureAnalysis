@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -191,7 +191,6 @@ namespace stat_tool {
   };
 
 
-
   /// \brief Data structure corresponding to a Markov chain
 
   class ChainData : public ChainReestimation<int> {
@@ -205,7 +204,6 @@ namespace stat_tool {
 
     void estimation(Chain &chain) const;
   };
-
 
 
   /// \brief Categorical observation process
@@ -265,7 +263,6 @@ namespace stat_tool {
   };
 
 
-
   /// \brief Discrete parametric observation process
 
   class DiscreteParametricProcess {
@@ -319,7 +316,6 @@ namespace stat_tool {
     Distribution* mixture_computation(Distribution *pweight);
     void init();
   };
-
 
 
   /// \brief Continuous parametric observation process

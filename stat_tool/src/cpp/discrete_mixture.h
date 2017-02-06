@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -152,7 +152,6 @@ namespace stat_tool {
     DiscreteParametric* get_weight() const { return weight; }
     DiscreteParametric* get_component(int index) const { return component[index]; }
   };
-
 
 
   /// \brief Data structure corresponding to a mixture of discrete distributions

@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -60,6 +60,7 @@ const char *STAT_word[] = {
   "CONCENTRATION" ,
   "INTERCEPT" ,
   "SLOPE" ,
+  "AUTOREGRESSIVE_COEFF" ,
 
   "MIXTURE" ,
   "CONVOLUTION" ,
@@ -90,9 +91,13 @@ const char *STAT_word[] = {
 
   "OUTPUT_PROCESS" ,
   "OUTPUT_PROCESSES" ,
+
   "NONPARAMETRIC" ,   // for ascending compatibility
+
   "CATEGORICAL" ,
+
   "PARAMETRIC" ,   // for ascending compatibility
+
   "DISCRETE_PARAMETRIC" ,
   "CONTINUOUS_PARAMETRIC" ,
   "OBSERVATION_DISTRIBUTION" ,
@@ -109,6 +114,7 @@ const char *STAT_discrete_distribution_word[] = {
   "BINOMIAL" ,
   "POISSON" ,
   "NEGATIVE_BINOMIAL" ,
+  "POISSON_GEOMETRIC" ,
   "UNIFORM"
 };
 
@@ -118,6 +124,7 @@ const char *STAT_discrete_distribution_letter[] = {
   "B" ,
   "P" ,
   "NB" ,
+  "PG" ,
   "U"
 };
 
@@ -128,7 +135,8 @@ const char *STAT_continuous_distribution_word[] = {
   "GAUSSIAN" ,
   "VON_MISES" ,
   "ZERO_INFLATED_GAMMA" ,
-  "LINEAR_MODEL"
+  "LINEAR_MODEL" ,
+  "AUTOREGRESSIVE_MODEL"
 };
 
 
@@ -138,7 +146,8 @@ const char *STAT_continuous_distribution_letter[] = {
   "G" ,
   "VM" ,
   "ZIGa" ,
-  "LM"
+  "LM" ,
+  "AR"
 };
 
 
@@ -261,7 +270,7 @@ const char *STAT_label[] = {
   "deviance" ,
   "log-likelihood for the optimal classification" ,
   "maximum possible log-likelihood for the optimal classification" ,
-  "classification entropy",
+  "classification entropy" ,
   "free parameter" ,
   "free parameters" ,
   "penalyzed log-likelihood" ,
@@ -348,7 +357,8 @@ const char *STAT_label[] = {
   "response variable" ,
   "correlation coefficient" ,
   "R-squared" ,
-  "regression variation / total variation" ,
+//  "regression variation / total variation" ,
+  "coefficient of determination" ,
   "residual" ,
   "standardized residual" ,
   "linear" ,
@@ -385,7 +395,7 @@ const char *STAT_label[] = {
   "isolated" ,
   "non-isolated" ,
   "within" ,
-  "between",
+  "between" ,
   "ratio" ,
   "prototype" ,
   "step" ,
@@ -545,7 +555,7 @@ const char *STAT_error[] = {
   "greater than" ,
   "not allowed" ,
   "bad number of categories" ,
-  "non-consecutive categories",
+  "non-consecutive categories" ,
   "missing category" ,
   "bad cluster limit" ,
   "bad information ratio: should be between 0 and 1" ,

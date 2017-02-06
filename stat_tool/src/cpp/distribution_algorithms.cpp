@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -258,7 +258,6 @@ void DiscreteParametric::binomial_computation(int inb_value , distribution_compu
   if (mode == STANDARD) {
     binomial dist(sup_bound - inf_bound , probability);
 
-
     cout << "\nTEST binomial distribution" << endl;
     for (i = inf_bound;i <= sup_bound;i++) {
       cout << i << "  " << pdf(dist , i - inf_bound) << " | " << mass[i]
@@ -286,12 +285,9 @@ void DiscreteParametric::poisson_computation(int inb_value , double cumul_thresh
                                              distribution_computation mode)
 
 {
-  register int i;
-  double log_parameter , num , denom , *pmass , *pcumul;
+  register int i , j;
+  double log_parameter , num , denom;
 
-
-  pmass = mass;
-  pcumul = cumul;
 
   switch (mode) {
 
@@ -302,11 +298,11 @@ void DiscreteParametric::poisson_computation(int inb_value , double cumul_thresh
     // null probability values before the lower bound of the support
 
     for (i = 0;i < inf_bound;i++) {
-      *pmass++ = 0.;
-      *pcumul++ = 0.;
+      mass[i] = 0.;
+      cumul[i] = 0.;
     }
 
-    i = 1;
+    j = 1;
 
     // case direct computation
 
@@ -314,18 +310,17 @@ void DiscreteParametric::poisson_computation(int inb_value , double cumul_thresh
 
       // computation of the lower bound probability
 
-      *pmass = exp(-parameter);
-      *pcumul = *pmass;
+      mass[i] = exp(-parameter);
+      cumul[i] = mass[i];
 
       // computation of the probabilities for the successive values (forward recurrence)
 
-      while (((*pcumul < cumul_threshold) || (i + inf_bound < inb_value)) &&
-             (i + inf_bound < alloc_nb_value)) {
-        pmass++;
-        pcumul++;
-        *pmass = *(pmass - 1) * parameter / i;
-        *pcumul = *(pcumul - 1) + *pmass;
+      while (((cumul[i] < cumul_threshold) || (i < inb_value - 1)) &&
+             (i < alloc_nb_value - 1)) {
         i++;
+        mass[i] = mass[i - 1] * parameter / j;
+        j++;
+        cumul[i] = cumul[i - 1] + mass[i];
       }
     }
 
@@ -336,26 +331,24 @@ void DiscreteParametric::poisson_computation(int inb_value , double cumul_thresh
       // computation of the lower bound probability
 
       num = -parameter;
-      *pmass = exp(num);
-      *pcumul = *pmass;
+      mass[i] = exp(num);
+      cumul[i] = mass[i];
 
       // computation of the probabilities for the successive values (forward recurrence)
 
       log_parameter = log(parameter);
       denom = 0.;
 
-      while (((*pcumul < cumul_threshold) || (i + inf_bound < inb_value)) &&
-             (i + inf_bound < alloc_nb_value)) {
-        num += log_parameter;
-        denom += log((double)i);
-        *++pmass = exp(num - denom);
-        pcumul++;
-        *pcumul = *(pcumul - 1) + *pmass;
+      while (((cumul[i] < cumul_threshold) || (i < inb_value - 1)) &&
+             (i < alloc_nb_value - 1)) {
         i++;
+        num += log_parameter;
+        denom += log((double)j);
+        j++;
+        mass[i] = exp(num - denom);
+        cumul[i] = cumul[i - 1]  + mass[i];
       }
     }
-
-    i += inf_bound;
     break;
   }
 
@@ -366,12 +359,12 @@ void DiscreteParametric::poisson_computation(int inb_value , double cumul_thresh
     // null probability values before the lower bound of the support
 
     for (i = 0;i < MIN(inb_value , inf_bound);i++) {
-      *pmass++ = 0.;
-      *pcumul++ = 0.;
+      mass[i] = 0.;
+      cumul[i] = 0.;
     }
 
     if (inb_value > inf_bound) {
-      i = 1;
+      j = 1;
 
       // case direct computation
 
@@ -379,17 +372,16 @@ void DiscreteParametric::poisson_computation(int inb_value , double cumul_thresh
 
         // computation of the lower bound probability
 
-        *pmass = exp(-parameter);
-        *pcumul = *pmass;
+        mass[i] = exp(-parameter);
+        cumul[i] = mass[i];
 
         // computation of the probabilities for the successive values (forward recurrence)
 
-        while ((*pcumul < cumul_threshold) && (i + inf_bound < inb_value)) {
-          pmass++;
-          pcumul++;
-          *pmass = *(pmass - 1) * parameter / i;
-          *pcumul = *(pcumul - 1) + *pmass;
+        while ((cumul[i] < cumul_threshold) && (i < inb_value - 1)) {
           i++;
+          mass[i] = mass[i - 1] * parameter / j;
+          j++;
+          cumul[i] = cumul[i - 1] + mass[i];
         }
       }
 
@@ -400,37 +392,34 @@ void DiscreteParametric::poisson_computation(int inb_value , double cumul_thresh
         // computation of the lower bound probability
 
         num = -parameter;
-        *pmass = exp(num);
-        *pcumul = *pmass;
+        mass[i] = exp(num);
+        cumul[i] = mass[i];
 
         // computation of the probabilities for the successive values (forward recurrence)
 
         log_parameter = log(parameter);
         denom = 0.;
 
-        while ((*pcumul < cumul_threshold) && (i + inf_bound < inb_value)) {
-          num += log_parameter;
-          denom += log((double)i);
-          *++pmass = exp(num - denom);
-          pcumul++;
-          *pcumul = *(pcumul - 1) + *pmass;
+        while ((cumul[i] < cumul_threshold) && (i < inb_value - 1)) {
           i++;
+          num += log_parameter;
+          denom += log((double)j);
+          j++;
+          mass[i] = exp(num - denom);
+          cumul[i] = cumul[i - 1] + mass[i];
         }
       }
-
-      i += inf_bound;
     }
     break;
   }
   }
 
-  offset = MIN(inf_bound , i - 1);
-  nb_value = i;
+  offset = MIN(inf_bound , i);
+  nb_value = i + 1;
 
 # ifdef DEBUG2
   if (mode == STANDARD) {
     poisson dist(parameter);
-
 
     cout << "\nTEST Poisson distribution" << endl;
     for (i = inf_bound;i < nb_value;i++) {
@@ -461,11 +450,8 @@ void DiscreteParametric::negative_binomial_computation(int inb_value , double cu
 {
   register int i;
   double failure = 1. - probability , success = probability , log_failure ,
-         set , subset , scale , term , *pmass , *pcumul;
+         set , subset , scale , term;
 
-
-  pmass = mass;
-  pcumul = cumul;
 
   switch (mode) {
 
@@ -476,35 +462,33 @@ void DiscreteParametric::negative_binomial_computation(int inb_value , double cu
     // null probability values before the lower bound of the support
 
     for (i = 0;i < inf_bound;i++) {
-      *pmass++ = 0.;
-      *pcumul++ = 0.;
+      mass[i] = 0.;
+      cumul[i] = 0.;
     }
 
-    i++;
     subset = parameter - 1.;
     set = subset;
+
+    // computation of the lower bound probability
+
+    term = pow(success , parameter);
+    mass[i] = term;
+    cumul[i] = mass[i];
 
     // case direct computation
 
     if (sqrt(parameter) / success < NB_THRESHOLD) {
 
-      // computation of the lower bound probability
-
-      term = pow(success , parameter);
-      *pmass = term;
-      *pcumul = *pmass;
-
       // computation of the probabilities for the successive values (forward recurrence)
 
-      while (((*pcumul < cumul_threshold) || (i < inb_value)) &&
-             (i < alloc_nb_value)) {
+      while (((cumul[i] < cumul_threshold) || (i < inb_value - 1)) &&
+             (i < alloc_nb_value - 1)) {
+        i++;
         set++;
         scale = set / (set - subset);
         term *= scale * failure;
-        *++pmass = term;
-        pcumul++;
-        *pcumul = *(pcumul - 1) + *pmass;
-        i++;
+        mass[i] = term;
+        cumul[i] = cumul[i - 1] + mass[i];
       }
     }
 
@@ -512,25 +496,18 @@ void DiscreteParametric::negative_binomial_computation(int inb_value , double cu
 
     else {
 
-      // computation of the lower bound probability
-
-      term = parameter * log(success);
-      *pmass = exp(term);
-      *pcumul = *pmass;
-
       // computation of the probabilities for the successive values (forward recurrence)
 
       log_failure = log(failure);
 
-      while (((*pcumul < cumul_threshold) || (i < inb_value)) &&
-             (i < alloc_nb_value)) {
+      while (((cumul[i] < cumul_threshold) || (i < inb_value - 1)) &&
+             (i < alloc_nb_value - 1)) {
+        i++;
         set++;
         scale = set / (set - subset);
         term += log(scale) + log_failure;
-        *++pmass = exp(term);
-        pcumul++;
-        *pcumul = *(pcumul - 1) + *pmass;
-        i++;
+        mass[i] = exp(term);
+        cumul[i] = cumul[i - 1]  + mass[i];
       }
     }
     break;
@@ -543,35 +520,33 @@ void DiscreteParametric::negative_binomial_computation(int inb_value , double cu
     // null probability values before the lower bound of the support
 
     for (i = 0;i < MIN(inf_bound , inb_value);i++) {
-      *pmass++ = 0.;
-      *pcumul++ = 0.;
+      mass[i] = 0.;
+      cumul[i] = 0.;
     }
 
     if (inb_value > inf_bound) {
-      i++;
       subset = parameter - 1.;
       set = subset;
+
+      // computation of the lower bound probability
+
+      term = pow(success , parameter);
+      mass[i] = term;
+      cumul[i] = mass[i];
 
       // case direct computation
 
       if (sqrt(parameter) / success < NB_THRESHOLD) {
 
-        // computation of the lower bound probability
-
-        term = pow(success , parameter);
-        *pmass = term;
-        *pcumul = *pmass;
-
         // computation of the probabilities for the successive values (forward recurrence)
 
-        while ((*pcumul < cumul_threshold) && (i < inb_value)) {
+        while ((cumul[i] < cumul_threshold) && (i < inb_value - 1)) {
+          i++;
           set++;
           scale = set / (set - subset);
           term *= scale * failure;
-          *++pmass = term;
-          pcumul++;
-          *pcumul = *(pcumul - 1) + *pmass;
-          i++;
+          mass[i] = term;
+          cumul[i] = cumul[i - 1] + mass[i];
         }
       }
 
@@ -579,24 +554,17 @@ void DiscreteParametric::negative_binomial_computation(int inb_value , double cu
 
       else {
 
-        // computation of the lower bound probability
-
-        term = parameter * log(success);
-        *pmass = exp(term);
-        *pcumul = *pmass;
-
         // computation of the probabilities for the successive values (forward recurrence)
 
         log_failure = log(failure);
 
-        while ((*pcumul < cumul_threshold) && (i < inb_value)) {
+        while ((cumul[i] < cumul_threshold) && (i < inb_value - 1)) {
+          i++;
           set++;
           scale = set / (set - subset);
           term += log(scale) + log_failure;
-          *++pmass = exp(term);
-          pcumul++;
-          *pcumul = *(pcumul - 1) + *pmass;
-          i++;
+          mass[i] = exp(term);
+          cumul[i] = cumul[i - 1] + mass[i];
         }
       }
     }
@@ -604,13 +572,12 @@ void DiscreteParametric::negative_binomial_computation(int inb_value , double cu
   }
   }
 
-  offset = MIN(inf_bound , i - 1);
-  nb_value = i;
+  offset = MIN(inf_bound , i);
+  nb_value = i + 1;
 
 # ifdef DEBUG2
   if (mode == STANDARD) {
     negative_binomial dist(parameter , probability);
-
 
     cout << "TEST negative binomial distribution" << endl;
     for (i = inf_bound;i < nb_value;i++) {
@@ -620,6 +587,151 @@ void DiscreteParametric::negative_binomial_computation(int inb_value , double cu
   }
 # endif
 
+}
+
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the probability mass function of a Poisson geometric distribution.
+ *         The number of values is determined using a threshold on the cumulative
+ *         distribution function or using a predefined bound.
+ *
+ *  \param[in] inb_value       number of values,
+ *  \param[in] cumul_threshold threshold on the cumulative distribution function.
+ */
+/*--------------------------------------------------------------*/
+
+void DiscreteParametric::poisson_geometric_computation(int inb_value , double cumul_threshold)
+
+{
+  register int i , j , k;
+  double log_parameter , num , denom , failure = 1. - probability , success = probability , log_failure ,
+         scale , *sum_mass , *set , *subset , *term;
+
+
+  sum_mass = new double[alloc_nb_value];
+  set = new double[alloc_nb_value];
+  subset = new double[alloc_nb_value];
+  term = new double[alloc_nb_value];
+
+  log_failure = log(failure);
+
+  // null probability values before the lower bound of the support
+
+  for (i = 0;i < inf_bound;i++) {
+    mass[i] = 0.;
+    cumul[i] = 0.;
+  }
+
+  j = 1;
+
+  // case direct computation
+
+  if (parameter < P_THRESHOLD) {
+
+    // computation of the lower bound probability
+
+    sum_mass[i] = exp(-parameter);
+
+    subset[i] = i - 1;
+    set[i] = subset[i];
+    term[i] = pow(success , i);
+
+    mass[i] = sum_mass[i] * term[i];
+    cumul[i] = mass[i];
+
+    // computation of the probabilities for the successive values (forward recurrence)
+
+    while (((cumul[i] < cumul_threshold) || (i < inb_value - 1)) &&
+           (i < alloc_nb_value - 1)) {
+      i++;
+      sum_mass[i] = sum_mass[i - 1] * parameter / j;
+      j++;
+
+      subset[i] = i - 1;
+      set[i] = subset[i];
+      term[i] = pow(success , i);
+
+      mass[i] = sum_mass[i] * term[i];
+
+      for (k = inf_bound;k < i;k++) {
+        set[k]++;
+        scale = set[k] / (set[k] - subset[k]);
+
+        if (sqrt((double)k) / success < NB_THRESHOLD) {
+          term[k] *= scale * failure;
+          mass[i] += sum_mass[k] * term[k];
+        }
+        else {
+          term[k] += log(scale) + log_failure;
+          mass[i] += sum_mass[k] * exp(term[k]);
+        }
+      }
+
+      cumul[i] = cumul[i - 1] + mass[i];
+    }
+  }
+
+  // case computation in log
+
+  else {
+
+    // computation of the lower bound probability
+
+    num = -parameter;
+    sum_mass[i] = exp(num);
+
+    subset[i] = i - 1;
+    set[i] = subset[i];
+    term[i] = pow(success , i);
+
+    mass[i] = sum_mass[i] * term[i];
+    cumul[i] = mass[i];
+
+    // computation of the probabilities for the successive values (forward recurrence)
+
+    log_parameter = log(parameter);
+    denom = 0.;
+
+    while (((cumul[i] < cumul_threshold) || (i < inb_value - 1)) &&
+           (i < alloc_nb_value - 1)) {
+      i++;
+      num += log_parameter;
+      denom += log((double)j);
+      j++;
+
+      subset[i] = i - 1;
+      set[i] = subset[i];
+      term[i] = pow(success , i);
+
+      sum_mass[i] = exp(num - denom);
+      mass[i] = sum_mass[i] * term[i];
+
+      for (k = inf_bound;k < i;k++) {
+        set[k]++;
+        scale = set[k] / (set[k] - subset[k]);
+
+        if (sqrt((double)k) / success < NB_THRESHOLD) {
+          term[k] *= scale * failure;
+          mass[i] += sum_mass[k] * term[k];
+        }
+        else {
+          term[k] += log(scale) + log_failure;
+          mass[i] += sum_mass[k] * exp(term[k]);
+        }
+      }
+
+      cumul[i] = cumul[i - 1] + mass[i];
+    }
+  }
+
+  offset = inf_bound;
+  nb_value = i + 1;
+
+  delete [] sum_mass;
+  delete [] set;
+  delete [] subset;
+  delete [] term;
 }
 
 
@@ -680,7 +792,7 @@ int DiscreteParametric::nb_value_computation(discrete_parametric ident , int inf
   }
 
   else {
-    if ((ident == POISSON) || (ident == NEGATIVE_BINOMIAL)) {
+    if ((ident == POISSON) || (ident == NEGATIVE_BINOMIAL) || (ident == POISSON_GEOMETRIC)) {
       DiscreteParametric *dist;
 
       dist = new DiscreteParametric(ident , inf_bound , sup_bound , parameter ,
@@ -717,6 +829,9 @@ void DiscreteParametric::computation(int min_nb_value , double cumul_threshold)
       break;
     case NEGATIVE_BINOMIAL :
       negative_binomial_computation(min_nb_value , cumul_threshold , STANDARD);
+      break;
+    case POISSON_GEOMETRIC :
+      poisson_geometric_computation(min_nb_value , cumul_threshold);
       break;
     case UNIFORM :
       uniform_computation();
@@ -1340,69 +1455,6 @@ void Distribution::penalty_computation(double weight , penalty_type pen_type ,
     for (i = offset;i < nb_value;i++) {
       penalty[i] = weight * (log(mass[i]) + 1);
     }
-    break;
-  }
-  }
-}
-
-
-/*--------------------------------------------------------------*/
-/**
- *  \brief Reestimation of the parameters of a discrete distribution
- *         (binomial, Poisson or negative binomial).
- *
- *  \param[in] reestim  reference on the reestimation quantities,
- *  \param[in] nb_estim number of reestimated parameters (negative binomial).
- */
-/*--------------------------------------------------------------*/
-
-void DiscreteParametric::reestimation(const Reestimation<double> *reestim , int nb_estim)
-
-{
-  switch (ident) {
-
-  case BINOMIAL : {
-    probability = (reestim->mean - inf_bound) / (sup_bound - inf_bound);
-    break;
-  }
-
-  case POISSON : {
-    parameter = reestim->mean - inf_bound;
-    break;
-  }
-
-  case NEGATIVE_BINOMIAL : {
-    switch (nb_estim) {
-
-    case 1 : {
-      if (reestim->mean - inf_bound + parameter > 0.) {
-        probability = parameter / (reestim->mean - inf_bound + parameter);
-      }
-      break;
-    }
-
-    case 2 : {
-/*      register int i;
-      double previous_parameter = parameter , sum1 , sum2; */
-
-      parameter = (reestim->mean - inf_bound) * probability / (1. - probability);
-
-/*     sum1 = 0.;
-      sum2 = 0.;
-      for (i = inf_bound + 1;i < nb_value;i++) {
-        sum2 += 1. / (i - inf_bound + previous_parameter - 1);
-        sum1 += reestim->frequency[i] * sum2;
-      }
-
-      probability = exp(-sum1 / reestim->nb_element); */
-
-#     ifdef DEBUG
-//      cout << "<" << probability << "> ";
-#     endif
-      break;
-    }
-    }
-
     break;
   }
   }
