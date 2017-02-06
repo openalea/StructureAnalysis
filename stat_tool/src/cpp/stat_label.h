@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -65,6 +65,7 @@ namespace stat_tool {
     STATW_CONCENTRATION ,
     STATW_INTERCEPT ,
     STATW_SLOPE ,
+    STATW_AUTOREGRESSIVE_COEFF ,
 
     STATW_MIXTURE ,
     STATW_CONVOLUTION ,
@@ -95,9 +96,13 @@ namespace stat_tool {
 
     STATW_OUTPUT_PROCESS ,
     STATW_OUTPUT_PROCESSES ,
+
     STATW_NONPARAMETRIC ,   // for ascending compatibility
+
     STATW_CATEGORICAL ,
+
     STATW_PARAMETRIC ,   // for ascending compatibility
+
     STATW_DISCRETE_PARAMETRIC ,
     STATW_CONTINUOUS_PARAMETRIC ,
     STATW_OBSERVATION_DISTRIBUTION ,
@@ -274,7 +279,8 @@ namespace stat_tool {
     STATL_RESPONSE_VARIABLE ,
     STATL_CORRELATION_COEFF ,
     STATL_R_SQUARED ,
-    STATL_REGRESSION_VARIATION_TOTAL_VARIATION ,
+//    STATL_REGRESSION_VARIATION_TOTAL_VARIATION ,
+    STATL_DETERMINATION_COEFF ,
     STATL_RESIDUAL ,
     STATL_STANDARDIZED_RESIDUAL ,
     STATL_LINEAR ,

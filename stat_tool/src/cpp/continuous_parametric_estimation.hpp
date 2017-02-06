@@ -1143,7 +1143,8 @@ void Vectors::gaussian_estimation(Type **component_vector_count , int variable ,
       if (component_frequency[i] > 1) {
         variance[i] /= (component_frequency[i] - 1);
         process->observation[i]->dispersion = sqrt(variance[i]);
-        if (process->observation[i]->dispersion / process->observation[i]->location < GAUSSIAN_MIN_VARIATION_COEFF) {
+        if ((process->observation[i]->location != 0.) &&
+            (process->observation[i]->dispersion / process->observation[i]->location < GAUSSIAN_MIN_VARIATION_COEFF)) {
           process->observation[i]->dispersion = process->observation[i]->location * GAUSSIAN_MIN_VARIATION_COEFF;
         }
       }

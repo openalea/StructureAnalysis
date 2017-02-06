@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -108,7 +108,6 @@ namespace sequence_analysis {
                                             double cumul_threshold = OCCUPANCY_THRESHOLD);
     void state_nb_pattern_mixture(int state , stat_tool::count_pattern pattern);
   };
-
 
 
   class SemiMarkovData;
@@ -288,7 +287,6 @@ namespace sequence_analysis {
     int get_counter() const { return counter; }
     int get_nb_variable() const { return (semi_markov ? semi_markov->nb_output_process + 1 : 0); }
   };
-
 
 
   /// \brief Data structure corresponding to a semi-Markov chain

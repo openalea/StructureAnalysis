@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -736,7 +736,8 @@ void MarkovianSequences::gaussian_estimation(Type ***state_sequence_count , int 
       if (state_frequency[i] > 1) {
         variance[i] /= (state_frequency[i] - 1);
         process->observation[i]->dispersion = sqrt(variance[i]);
-        if (process->observation[i]->dispersion / process->observation[i]->location < GAUSSIAN_MIN_VARIATION_COEFF) {
+        if ((process->observation[i]->location != 0.) &&
+            (process->observation[i]->dispersion / process->observation[i]->location < GAUSSIAN_MIN_VARIATION_COEFF)) {
           process->observation[i]->dispersion = process->observation[i]->location * GAUSSIAN_MIN_VARIATION_COEFF;
         }
       }
@@ -1255,8 +1256,8 @@ void MarkovianSequences::linear_model_estimation(Type ***state_sequence_count , 
       process->observation[i]->sample_size = state_frequency[i] - 2;
     }
     else {
-      process->observation[i]->slope_standard_deviation = 0;
-      process->observation[i]->sample_size = 0;
+      process->observation[i]->slope_standard_deviation = 0.;
+      process->observation[i]->sample_size = 0.;
     }
   }
 
@@ -1302,6 +1303,159 @@ void MarkovianSequences::linear_model_estimation(Type ***state_sequence_count , 
   delete [] index_parameter_variance;
   delete [] covariance;
   delete [] residual_square_sum;
+}
+
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Estimation of a 1st-order autoregressive observation process.
+ *
+ *  \param[in] state_sequence_count state counts,
+ *  \param[in] variable             variable index,
+ *  \param[in] process              pointer on a ContinuousParametricProcess object.
+ */
+/*--------------------------------------------------------------*/
+
+template <typename Type>
+void MarkovianSequences::autoregressive_model_estimation(Type ***state_sequence_count , int variable ,
+                                                         ContinuousParametricProcess *process) const
+
+{
+  register int i , j , k;
+  double diff , shifted_diff , residual_square_sum , *mean , *square_sum ,
+         *shifted_square_sum , *autocovariance;
+  Type *state_frequency;
+
+
+  state_frequency = new Type[process->nb_state];
+  mean = new double[process->nb_state];
+
+  for (i = 0;i < process->nb_state;i++) {
+    mean[i] = 0.;
+    state_frequency[i] = 0;
+  }
+
+  switch (type[variable]) {
+
+  case INT_VALUE : {
+    for (i = 0;i < nb_sequence;i++) {
+      for (j = 0;j < length[i];j++) {
+        for (k = 0;k < process->nb_state;k++) {
+          mean[k] += state_sequence_count[i][j][k] * int_sequence[i][variable][j];
+          state_frequency[k] += state_sequence_count[i][j][k];
+        }
+      }
+    }
+    break;
+  }
+
+  case REAL_VALUE : {
+    for (i = 0;i < nb_sequence;i++) {
+      for (j = 0;j < length[i];j++) {
+        for (k = 0;k < process->nb_state;k++) {
+          mean[k] += state_sequence_count[i][j][k] * real_sequence[i][variable][j];
+          state_frequency[k] += state_sequence_count[i][j][k];
+        }
+      }
+    }
+    break;
+  }
+  }
+
+  for (i = 0;i < process->nb_state;i++) {
+    if (state_frequency[i] > 0) {
+      mean[i] /= state_frequency[i];
+      process->observation[i]->location = mean[i];
+    }
+    else {
+      process->observation[i]->location = D_INF;
+    }
+  }
+
+  square_sum = new double[process->nb_state];
+  shifted_square_sum = new double[process->nb_state];
+  autocovariance = new double[process->nb_state];
+  for (i = 0;i < process->nb_state;i++) {
+    square_sum[i] = 0.;
+    shifted_square_sum[i] = 0.;
+    autocovariance[i] = 0.;
+    state_frequency[i] = 0;
+  }
+
+  switch (type[variable]) {
+
+  case INT_VALUE : {
+    for (i = 0;i < nb_sequence;i++) {
+      for (j = 1;j < length[i];j++) {
+        for (k = 0;k < process->nb_state;k++) {
+          diff = int_sequence[i][variable][j] - mean[k];
+          shifted_diff = int_sequence[i][variable][j - 1] - mean[k];
+          square_sum[k] += state_sequence_count[i][j][k] * diff * diff;
+          shifted_square_sum[k] += state_sequence_count[i][j][k] * shifted_diff * shifted_diff;
+          autocovariance[k] += state_sequence_count[i][j][k] * diff * shifted_diff;
+          state_frequency[k] += state_sequence_count[i][j][k];
+        }
+      }
+    }
+    break;
+  }
+
+  case REAL_VALUE : {
+    for (i = 0;i < nb_sequence;i++) {
+      for (j = 1;j < length[i];j++) {
+        for (k = 0;k < process->nb_state;k++) {
+          diff = real_sequence[i][variable][j] - mean[k];
+          shifted_diff = real_sequence[i][variable][j - 1] - mean[k];
+          square_sum[k] += state_sequence_count[i][j][k] * diff * diff;
+          shifted_square_sum[k] += state_sequence_count[i][j][k] * shifted_diff * shifted_diff;
+          autocovariance[k] += state_sequence_count[i][j][k] * diff * shifted_diff;
+          state_frequency[k] += state_sequence_count[i][j][k];
+        }
+      }
+    }
+    break;
+  }
+  }
+
+  for (i = 0;i < process->nb_state;i++) {
+    if ((shifted_square_sum[i] > 0.) && (state_frequency[i] > 2)) {
+      process->observation[i]->autoregressive_coeff = autocovariance[i] / shifted_square_sum[i];
+      if (process->observation[i]->autoregressive_coeff < -1.) {
+        process->observation[i]->autoregressive_coeff = -1.;
+      }
+      else if (process->observation[i]->autoregressive_coeff > 1.) {
+        process->observation[i]->autoregressive_coeff = 1.;
+      }
+
+      residual_square_sum = (square_sum[i] - autocovariance[i] * autocovariance[i] /
+                             shifted_square_sum[i]) / (state_frequency[i] - 2);
+      process->observation[i]->dispersion = sqrt(residual_square_sum);
+
+      process->observation[i]->determination_coeff = 1.;
+      if (square_sum[i] > 0.) {
+        process->observation[i]->determination_coeff -= residual_square_sum / square_sum[i];
+      }
+
+      if ((process->observation[i]->location != 0.) &&
+          (process->observation[i]->dispersion / process->observation[i]->location < GAUSSIAN_MIN_VARIATION_COEFF)) {
+        process->observation[i]->dispersion = process->observation[i]->location * GAUSSIAN_MIN_VARIATION_COEFF;
+      }
+      process->observation[i]->sample_size = state_frequency[i] - 2;
+    }
+
+    else {
+      process->observation[i]->autoregressive_coeff = 0.;
+      process->observation[i]->dispersion = 0.;
+      process->observation[i]->determination_coeff = D_DEFAULT;
+      process->observation[i]->sample_size = 0.;
+    }
+  }
+
+  delete [] state_frequency;
+  delete [] mean;
+  delete [] square_sum;
+  delete [] shifted_square_sum;
+  delete [] autocovariance;
 }
 
 

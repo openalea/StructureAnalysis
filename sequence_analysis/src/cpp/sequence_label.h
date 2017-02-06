@@ -3,7 +3,7 @@
  *
  *       AMAPmod: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -196,6 +196,7 @@ namespace sequence_analysis {
     SEQL_RANK ,
     SEQL_LAG ,
     SEQL_MAX_LAG ,
+    SEQL_AUTOREGRESSIVE_MODEL ,
     SEQL_WHITE_NOISE ,
     SEQL_RANDOMNESS_95_CONFIDENCE_LIMIT ,
     SEQL_PAIR_FREQUENCY ,
@@ -234,6 +235,7 @@ namespace sequence_analysis {
     SEQL_GLOBAL_STANDARD_DEVIATION ,
     SEQL_GLOBAL_RESIDUAL_STANDARD_DEVIATION ,
     SEQL_PIECEWISE_LINEAR_FUNCTION ,
+    SEQL_CONFIDENCE_INTERVAL ,
     SEQL_CONFIDENCE_INTERVALS ,
     SEQL_AUTOREGRESSIVE_COEFF ,
     SEQL_NULL_AUTOREGRESSIVE_COEFF_95_CONFIDENCE_LIMIT ,
@@ -356,6 +358,7 @@ namespace sequence_analysis {
     SEQR_VERTEX_IDENTIFIER ,
     SEQR_INDEX_PARAMETER_TYPE ,
     SEQR_INDEX_PARAMETER ,
+    SEQR_STATE ,
     SEQR_VARIABLE_INDICES ,
     SEQR_VARIABLE_LAG ,
     SEQR_DATE_ORDER ,
@@ -376,6 +379,7 @@ namespace sequence_analysis {
     SEQR_FREQUENCY ,
     SEQR_MAX_LAG ,
     SEQR_INCOMPATIBLE_CORRELATION_FUNCTION ,
+    SEQR_AUTOREGRESSIVE_COEFF ,
     SEQR_DIFFERENCING_ORDER ,
     SEQR_INITIAL_RUN_ALREADY_BUILT ,
     SEQR_RUN_LENGTH ,

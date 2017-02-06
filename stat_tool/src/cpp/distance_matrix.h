@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -240,7 +240,6 @@ namespace stat_tool {
   };
 
 
-
   /// \brief Partitioning clustering results
 
   class Clusters : public DistanceMatrix {
@@ -321,7 +320,6 @@ namespace stat_tool {
     int get_pattern_length(int pattern , int cluster) const
     { return pattern_length[pattern][cluster]; }
   };
-
 
 
   /// \brief Hierarchical clustering results

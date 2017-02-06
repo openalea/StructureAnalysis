@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -325,7 +325,8 @@ double Mixture::likelihood_computation(const Vectors &vec , int index) const
             }
 
             else {
-              if ((continuous_parametric_process[k]->ident == GAMMA) && (vec.min_value[k] < vec.min_interval[k] / 2)) {
+              if (((continuous_parametric_process[k]->ident == GAMMA) ||
+                   (continuous_parametric_process[k]->ident == INVERSE_GAUSSIAN)) && (vec.min_value[k] < vec.min_interval[k] / 2)) {
                 switch (vec.type[k]) {
                 case INT_VALUE :
                   component_proba *= continuous_parametric_process[k]->observation[j]->mass_computation(vec.int_vector[i][k] , vec.int_vector[i][k] + vec.min_interval[k]);
@@ -1396,7 +1397,8 @@ Mixture* Vectors::mixture_stochastic_estimation(StatError &error , ostream &os ,
             }
 
             else {
-              if ((mixt->continuous_parametric_process[k]->ident == GAMMA) && (min_value[k] < min_interval[k] / 2)) {
+              if (((mixt->continuous_parametric_process[k]->ident == GAMMA) ||
+                   (mixt->continuous_parametric_process[k]->ident == INVERSE_GAUSSIAN)) && (min_value[k] < min_interval[k] / 2)) {
                 switch (type[k]) {
                 case INT_VALUE :
                   component_proba[j] *= mixt->continuous_parametric_process[k]->observation[j]->mass_computation(int_vector[i][k] , int_vector[i][k] + min_interval[k]);
@@ -1949,7 +1951,8 @@ void Mixture::individual_assignment(MixtureData &vec , bool assignment) const
         }
 
         else {
-          if ((continuous_parametric_process[k]->ident == GAMMA) && (vec.min_value[k + 1] < vec.min_interval[k + 1] / 2)) {
+          if (((continuous_parametric_process[k]->ident == GAMMA) ||
+               (continuous_parametric_process[k]->ident == INVERSE_GAUSSIAN)) && (vec.min_value[k + 1] < vec.min_interval[k + 1] / 2)) {
             switch (vec.type[k + 1]) {
             case INT_VALUE :
               component_proba[j] *= continuous_parametric_process[k]->observation[j]->mass_computation(vec.int_vector[i][k + 1] , vec.int_vector[i][k + 1] + vec.min_interval[k + 1]);

@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -114,7 +114,6 @@ namespace sequence_analysis {
   };
 
 
-
   /// \brief Backward recurrence time distribution
 
   class Backward : public stat_tool::DiscreteParametric {
@@ -130,7 +129,6 @@ namespace sequence_analysis {
 
     void computation(const stat_tool::DiscreteParametric &inter_event , const stat_tool::Distribution &time);
   };
-
 
 
   /// \brief Number of events distribution
@@ -155,7 +153,6 @@ namespace sequence_analysis {
     void ordinary_computation(stat_tool::DiscreteParametric &inter_event);
     void computation(stat_tool::DiscreteParametric &inter_event);
   };
-
 
 
   class RenewalIterator;
@@ -274,7 +271,6 @@ namespace sequence_analysis {
   };
 
 
-
   /// \brief Renewal process iterator for asynchronous simulation
 
   class RenewalIterator {
@@ -307,7 +303,6 @@ namespace sequence_analysis {
     int get_length() const { return length; }
     int get_sequence(int index) const { return sequence[index]; }
   };
-
 
 
   /// \brief Triplets {observation period, number of events, frequency}
@@ -410,7 +405,6 @@ namespace sequence_analysis {
     stat_tool::FrequencyDistribution* get_hnb_event(int itime) const { return hnb_event[itime]; }
     stat_tool::FrequencyDistribution* get_mixture() const { return mixture; }
   };
-
 
 
   /// \brief Data structure corresponding to a renewal process

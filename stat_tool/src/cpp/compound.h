@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -140,7 +140,6 @@ namespace stat_tool {
     DiscreteParametric* get_sum_distribution() const { return sum_distribution; }
     DiscreteParametric* get_distribution() const { return distribution; }
   };
-
 
 
   /// \brief Data structure corresponding to a compound distribution

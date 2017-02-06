@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -157,7 +157,6 @@ namespace sequence_analysis {
                                                    int istate , int max_lag ,
                                                    const MarkovianSequences *seq) const;
   };
-
 
 
   class VariableOrderMarkovChainData;
@@ -327,7 +326,6 @@ namespace sequence_analysis {
   };
 
 
-
   /// \brief Variable-order Markov chain iterator
 
   class VariableOrderMarkovIterator {
@@ -372,7 +370,6 @@ namespace sequence_analysis {
                     transition_estimator estimator = MAXIMUM_LIKELIHOOD ,
                     double laplace_coeff = LAPLACE_COEFF) const;
   };
-
 
 
   /// \brief Data structure corresponding to a variable-order Markov chain

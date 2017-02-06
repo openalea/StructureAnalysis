@@ -1330,10 +1330,11 @@ double Sequences::one_segment_likelihood(int index , segment_model *model_type ,
  *  \param[in] iintercept                segment intercepts,
  *  \param[in] islope                    segment slopes,
  *  \param[in] autoregressive_coeff      segment autoregressive coefficient,
- *  \param[in] correlation               segment correlation coefficients,
- *  \param[in] slope_standard_deviation  segment slope standard deviations,
- *  \param[in] iindex_parameter_mean     segment index parameter mean
- *  \param[in] iindex_parameter_variance segment index parameter variance.
+ *  \param[in] correlation               segment correlation coefficients (for linear models),
+ *  \param[in] slope_standard_deviation  segment slope standard deviations (for linear models),
+ *  \param[in] iindex_parameter_mean     segment index parameter mean (for linear models),
+ *  \param[in] iindex_parameter_variance segment index parameter variance (for linear models),
+ *  \param[in] determination_coeff       coefficient of determination (for autoregressive models).
  *
  *  \return                              log-likelihood of the piecewise linear function.
  */
@@ -1345,14 +1346,15 @@ double Sequences::piecewise_linear_function(int index , int variable , int nb_se
                                             double *global_variance , double **iintercept , double **islope ,
                                             double **autoregressive_coeff , double **correlation ,
                                             double **slope_standard_deviation , double **iindex_parameter_mean ,
-                                            long double **iindex_parameter_variance) const
+                                            long double **iindex_parameter_variance , double **determination_coeff) const
 
 {
   register int i , j , k;
   double likelihood , mean , diff , diff_sum , index_parameter_mean , response_mean , shifted_diff ,
          slope , intercept;
   long double square_sum , global_square_sum , index_parameter_variance , response_variance , covariance ,
-              shifted_square_sum , autocovariance , global_shifted_square_sum , global_autocovariance;
+              shifted_square_sum , autocovariance , residual_square_sum , global_shifted_square_sum ,
+              global_autocovariance;
 
 
   if ((model_type == POISSON_CHANGE) || (model_type == NEGATIVE_BINOMIAL_0_CHANGE) ||
@@ -1961,12 +1963,24 @@ double Sequences::piecewise_linear_function(int index , int variable , int nb_se
 
               if (shifted_square_sum > 0.) {
                 autoregressive_coeff[i][j] = autocovariance / shifted_square_sum;
-                square_sum -= autocovariance * autocovariance / shifted_square_sum;
-                variance[i][j] = square_sum / (change_point[j + 1] - change_point[j] - 2);
+                if (autoregressive_coeff[i][j] < -1.) {
+                  autoregressive_coeff[i][j] = -1.;
+                }
+                else if (autoregressive_coeff[i][j] > 1.) {
+                  autoregressive_coeff[i][j] = 1.;
+                }
+
+                residual_square_sum = square_sum - autocovariance * autocovariance / shifted_square_sum;
+                variance[i][j] = residual_square_sum / (change_point[j + 1] - change_point[j] - 2);
+
+                determination_coeff[i][j] = 1.;
+                if (square_sum > 0.) {
+                  determination_coeff[i][j] -= residual_square_sum / square_sum;
+                }
 
                 if (likelihood != D_INF) {
-                  if (square_sum > (change_point[j + 1] - change_point[j] - 1) * ROUNDOFF_ERROR) {
-                    likelihood -= ((double)(change_point[j + 1] - change_point[j] - 1) / 2.) *(log(square_sum /
+                  if (residual_square_sum > (change_point[j + 1] - change_point[j] - 1) * ROUNDOFF_ERROR) {
+                    likelihood -= ((double)(change_point[j + 1] - change_point[j] - 1) / 2.) *(log(residual_square_sum /
                                     (change_point[j + 1] - change_point[j] - 1)) + log(2 * M_PI) + 1);
                   }
                   else {
@@ -2051,8 +2065,8 @@ double Sequences::piecewise_linear_function(int index , int variable , int nb_se
           else {
             for (j = change_point[i] + 1;j < change_point[i + 1];j++) {
               for (k = 0;k < nb_sequence;k++) {
-                diff = real_sequence[k][variable][j] - mean;;
-                shifted_diff = real_sequence[k][variable][j - 1] - mean;;
+                diff = real_sequence[k][variable][j] - mean;
+                shifted_diff = real_sequence[k][variable][j - 1] - mean;
                 square_sum += diff * diff;
                 shifted_square_sum += shifted_diff * shifted_diff;
                 autocovariance += diff * shifted_diff;
@@ -2068,12 +2082,24 @@ double Sequences::piecewise_linear_function(int index , int variable , int nb_se
 
           if (shifted_square_sum > 0.) {
             autoregressive_coeff[0][i] = autocovariance / shifted_square_sum;
-            square_sum -= autocovariance * autocovariance / shifted_square_sum;
-            variance[0][i] = square_sum / (nb_sequence * (change_point[i + 1] - change_point[i] - 1) - 1);
+            if (autoregressive_coeff[0][i] < -1.) {
+              autoregressive_coeff[0][i] = -1.;
+            }
+            else if (autoregressive_coeff[0][i] > 1.) {
+              autoregressive_coeff[0][i] = 1.;
+            }
+
+            residual_square_sum = square_sum - autocovariance * autocovariance / shifted_square_sum;
+            variance[0][i] = residual_square_sum / (nb_sequence * (change_point[i + 1] - change_point[i] - 1) - 1);
+
+            determination_coeff[0][i] = 1.;
+            if (square_sum > 0.) {
+              determination_coeff[0][i] -= residual_square_sum / square_sum;
+            }
 
             if (likelihood != D_INF) {
-              if (square_sum > nb_sequence * (change_point[i + 1] - change_point[i] - 1) * ROUNDOFF_ERROR) {
-                likelihood -= ((double)(nb_sequence * (change_point[i + 1] - change_point[i] - 1)) / 2.) * (log(square_sum /
+              if (residual_square_sum > nb_sequence * (change_point[i + 1] - change_point[i] - 1) * ROUNDOFF_ERROR) {
+                likelihood -= ((double)(nb_sequence * (change_point[i + 1] - change_point[i] - 1)) / 2.) * (log(residual_square_sum /
                                 (nb_sequence * (change_point[i + 1] - change_point[i] - 1))) + log(2 * M_PI) + 1);
               }
               else {
@@ -2120,10 +2146,11 @@ double Sequences::piecewise_linear_function(int index , int variable , int nb_se
  *  \param[in]     intercept                segment intercepts,
  *  \param[in]     slope                    segment slopes,
  *  \param[in]     autoregressive_coeff     segment autoregressive coefficient,
- *  \param[in]     correlation              segment correlation coefficients,
- *  \param[in]     slope_standard_deviation segment slope standard deviations.
- *  \param[in]     index_parameter_mean     segment index parameter mean
- *  \param[in]     index_parameter_variance segment index parameter variance.
+ *  \param[in]     correlation              segment correlation coefficients (for linear models),
+ *  \param[in]     slope_standard_deviation segment slope standard deviations (for linear models).
+ *  \param[in]     index_parameter_mean     segment index parameter mean (for linear models),
+ *  \param[in]     index_parameter_variance segment index parameter variance (for linear models),
+ *  \param[in]     determination_coeff      coefficient of determination (for autoregressive models).
  */
 /*--------------------------------------------------------------*/
 
@@ -2132,7 +2159,8 @@ ostream& Sequences::piecewise_linear_function_ascii_print(ostream &os , int inde
                                                           int *seq_index_parameter , double **mean , double **variance ,
                                                           double **intercept , double **slope , double **autoregressive_coeff ,
                                                           double **correlation , double **slope_standard_deviation ,
-                                                          double **index_parameter_mean , long double **index_parameter_variance) const
+                                                          double **index_parameter_mean , long double **index_parameter_variance ,
+                                                          double **determination_coeff) const
 
 {
   register int i , j;
@@ -2233,8 +2261,8 @@ ostream& Sequences::piecewise_linear_function_ascii_print(ostream &os , int inde
     else {
       if ((correlation) && (slope_standard_deviation)) {
         os << SEQ_label[SEQL_SEGMENT] << " " << STAT_label[STATL_INTERCEPT] << ", "
-           << STAT_label[STATL_SLOPE] << ", " << STAT_label[STATL_CORRELATION_COEFF] << " ("
-           << STAT_label[STATL_LIMIT_CORRELATION_COEFF] << "), "
+           << STAT_label[STATL_SLOPE] << " (" << SEQ_label[SEQL_CONFIDENCE_INTERVAL] << "), "
+           << STAT_label[STATL_CORRELATION_COEFF] << " (" << STAT_label[STATL_LIMIT_CORRELATION_COEFF] << "), "
            << STAT_label[STATL_RESIDUAL] << " " << STAT_label[STATL_STANDARD_DEVIATION] << ", "
            << SEQ_label[SEQL_CHANGE_POINT_AMPLITUDE] << " (" << SEQ_label[SEQL_CONFIDENCE_INTERVALS] << ")" << endl;
 
@@ -2247,12 +2275,12 @@ ostream& Sequences::piecewise_linear_function_ascii_print(ostream &os , int inde
             os << intercept[index][i] << ", " << slope[index][i];
             if (slope_standard_deviation[index][i] > 0.) {
               os << " (" << slope[index][i] - test->value * slope_standard_deviation[index][i] << ", "
-                 << slope[index][i] + test->value * slope_standard_deviation[index][i] << "), ";
-//               << "slope_standard_deviation: " << slope_standard_deviation[index][i] << " "
+                 << slope[index][i] + test->value * slope_standard_deviation[index][i] << ")";
+//               << " (slope_standard_deviation: " << slope_standard_deviation[index][i] << ")";
             }
-            os << correlation[index][i] << " (-/+"
-               << test->value / sqrt(test->value * test->value + change_point[i + 1] - change_point[i] - 2) << "), ";
-            os << sqrt(variance[index][i]);
+            os << ", " << correlation[index][i] << " (-/+"
+               << test->value / sqrt(test->value * test->value + change_point[i + 1] - change_point[i] - 2)
+               << "), " << sqrt(variance[index][i]);
 
             if (i < nb_segment - 1) {
               os << ", " <<  intercept[index][i + 1] + slope[index][i + 1] * seq_index_parameter[change_point[i + 1]] -
@@ -2304,12 +2332,12 @@ ostream& Sequences::piecewise_linear_function_ascii_print(ostream &os , int inde
             os << intercept[0][i] << ", " << slope[0][i];
             if (slope_standard_deviation[0][i] > 0.) {
               os << " (" << slope[0][i] - test->value * slope_standard_deviation[0][i] << ", "
-                 << slope[0][i] + test->value * slope_standard_deviation[0][i] << "), ";
-//               << "slope_standard_deviation: " << slope_standard_deviation[0][i] << " "
+                 << slope[0][i] + test->value * slope_standard_deviation[0][i] << ")";
+//               << " (slope_standard_deviation: " << slope_standard_deviation[0][i] << ")";
             }
-            os << correlation[0][i] << " (-/+"
-               << test->value / sqrt(test->value * test->value + nb_sequence * (change_point[i + 1] - change_point[i]) - 2) << "), ";
-            os << sqrt(variance[0][i]);
+            os << ", " << correlation[0][i] << " (-/+"
+               << test->value / sqrt(test->value * test->value + nb_sequence * (change_point[i + 1] - change_point[i]) - 2)
+               << "), " << sqrt(variance[0][i]);
 
             if (i < nb_segment - 1) {
               os << ", " <<  intercept[0][i + 1] + slope[0][i + 1] * seq_index_parameter[change_point[i + 1]] -
@@ -2411,20 +2439,25 @@ ostream& Sequences::piecewise_linear_function_ascii_print(ostream &os , int inde
     os << SEQ_label[SEQL_SEGMENT] << " " << STAT_label[STATL_MEAN] << ", "
        << SEQ_label[SEQL_AUTOREGRESSIVE_COEFF] << " (" 
        << SEQ_label[SEQL_NULL_AUTOREGRESSIVE_COEFF_95_CONFIDENCE_LIMIT] << "), "
-       << STAT_label[STATL_STANDARD_DEVIATION] << ": ";
+       << STAT_label[STATL_STANDARD_DEVIATION] << ", "
+       << STAT_label[STATL_DETERMINATION_COEFF];
 
     if ((index != I_DEFAULT) || (!common_contrast)) {
       for (i = 0;i < nb_sequence;i++) {
         if ((index == I_DEFAULT) || (index == i)) {
+          if (index == I_DEFAULT) {
+            os << endl;
+          }
+          else {
+            os << ": ";
+          }
+
           for (j = 0;j < nb_segment;j++) {
             os << mean[i][j] << " " << autoregressive_coeff[i][j] << " (-/+"
                << standard_normal_value / sqrt((double)(change_point[j + 1] - change_point[j])) << ") "
-               << sqrt(variance[i][j]);
+               << sqrt(variance[i][j]) << " " << determination_coeff[i][j];
             if (j < nb_segment - 1) {
               os << " | ";
-            }
-            else if ((index == I_DEFAULT) && (i < nb_sequence - 1)) {
-              os << endl;
             }
           }
         }
@@ -2432,10 +2465,11 @@ ostream& Sequences::piecewise_linear_function_ascii_print(ostream &os , int inde
     }
 
     else {
+      os << ": ";
       for (i = 0;i < nb_segment;i++) {
         os << mean[0][i] << " " << autoregressive_coeff[0][i] << " (-/+"
            << standard_normal_value / sqrt((double)nb_sequence * (change_point[i + 1] - change_point[i])) << ") "
-           << sqrt(variance[0][i]);
+           << sqrt(variance[0][i]) << " " << determination_coeff[0][i];
         if (i < nb_segment - 1) {
           os << " | ";
         }
@@ -2452,31 +2486,39 @@ ostream& Sequences::piecewise_linear_function_ascii_print(ostream &os , int inde
 /**
  *  \brief Writing of piecewise linear functions at the spreadsheet format.
  *
- *  \param[in,out] os                   stream,
- *  \param[in]     index                sequence index,
- *  \param[in]     variable             variable index,
- *  \param[in]     nb_segment           number of segments,
- *  \param[in]     model_type           segment model type,
- *  \param[in]     common_contrast      flag contrast functions common to the individuals,
- *  \param[in]     change_point         change points,
- *  \param[in]     seq_index_parameter  index parameters,
- *  \param[in]     mean                 segment means,
- *  \param[in]     variance             segment variances or residual variances,
- *  \param[in]     intercept            segment intercepts,
- *  \param[in]     slope                segment slopes,
- *  \param[in]     autoregressive_coeff segment autoregressive coefficient.
+ *  \param[in,out] os                       stream,
+ *  \param[in]     index                    sequence index,
+ *  \param[in]     variable                 variable index,
+ *  \param[in]     nb_segment               number of segments,
+ *  \param[in]     model_type               segment model type,
+ *  \param[in]     common_contrast          flag contrast functions common to the individuals,
+ *  \param[in]     change_point             change points,
+ *  \param[in]     seq_index_parameter      index parameters,
+ *  \param[in]     mean                     segment means,
+ *  \param[in]     variance                 segment variances or residual variances,
+ *  \param[in]     intercept                segment intercepts,
+ *  \param[in]     slope                    segment slopes,
+ *  \param[in]     autoregressive_coeff     segment autoregressive coefficient,
+ *  \param[in]     correlation              segment correlation coefficients (for linear models),
+ *  \param[in]     slope_standard_deviation segment slope standard deviations (for linear models).
+ *  \param[in]     index_parameter_mean     segment index parameter mean (for linear models),
+ *  \param[in]     index_parameter_variance segment index parameter variance (for linear models),
+ *  \param[in]     determination_coeff      coefficient of determination (for autoregressive models).
  */
 /*--------------------------------------------------------------*/
 
 ostream& Sequences::piecewise_linear_function_spreadsheet_print(ostream &os , int index , int variable , int nb_segment ,
-                                                                segment_model model_type , bool common_contrast ,
-                                                                int *change_point , int *seq_index_parameter ,
-                                                                double **mean , double **variance ,
-                                                                double **intercept , double **slope ,
-                                                                double **autoregressive_coeff) const
+                                                                segment_model model_type , bool common_contrast , int *change_point ,
+                                                                int *seq_index_parameter , double **mean , double **variance ,
+                                                                double **intercept , double **slope , double **autoregressive_coeff ,
+                                                                double **correlation , double **slope_standard_deviation ,
+                                                                double **index_parameter_mean , long double **index_parameter_variance ,
+                                                                double **determination_coeff) const
 
 {
   register int i , j;
+  double diff , buff;
+  Test *test;
 
 
   if ((model_type == POISSON_CHANGE) || (model_type == BAYESIAN_POISSON_CHANGE)) {
@@ -2542,48 +2584,192 @@ ostream& Sequences::piecewise_linear_function_spreadsheet_print(ostream &os , in
     if (nb_variable > 2) {
       os << STAT_label[STATL_VARIABLE] << "\t" << variable << "\t";
     }
-    os << SEQ_label[SEQL_PIECEWISE_LINEAR_FUNCTION] << "\t"
-       << SEQ_label[SEQL_SEGMENT] << "\t" << STAT_label[STATL_INTERCEPT] << "\t"
-       << STAT_label[STATL_SLOPE] << "\t" << STAT_label[STATL_RESIDUAL] << " "
-       << STAT_label[STATL_STANDARD_DEVIATION];
 
-    if ((index != I_DEFAULT) || (!common_contrast)) {
+    if ((index == I_DEFAULT) && (!common_contrast)) {
+      os << SEQ_label[SEQL_PIECEWISE_LINEAR_FUNCTION] << "\t"
+         << SEQ_label[SEQL_SEGMENT] << " " << STAT_label[STATL_INTERCEPT] << "\t"
+         << SEQ_label[SEQL_SEGMENT] << " " << STAT_label[STATL_SLOPE] << "\t"
+         << SEQ_label[SEQL_SEGMENT] << " " << STAT_label[STATL_RESIDUAL] << " "
+         << STAT_label[STATL_STANDARD_DEVIATION] << endl;
       for (i = 0;i < nb_sequence;i++) {
-        if ((index == I_DEFAULT) || (index == i)) {
-          for (j = 0;j < nb_segment;j++) {
-            os << "\t" << intercept[i][j] + slope[i][j] * seq_index_parameter[change_point[j]] << "->";
-            if (i < nb_segment - 1) {
-              os << intercept[i][j] + slope[i][j] * seq_index_parameter[change_point[j + 1]];
-            }
-            else {
-              os << intercept[i][j] + slope[i][j] * seq_index_parameter[change_point[j + 1] - 1];
-            }
+        for (j = 0;j < nb_segment;j++) {
+          os << intercept[i][j] + slope[i][j] * seq_index_parameter[change_point[j]] << "->";
+          if (j < nb_segment - 1) {
+            os << intercept[i][j] + slope[i][j] * seq_index_parameter[change_point[j + 1]] << "\t";
           }
-          for (j = 0;j < nb_segment;j++) {
-            os << "\t\t" << intercept[i][j] << "\t" << slope[i][j] << "\t" << sqrt(variance[i][j]);
-          }
-          if ((index == I_DEFAULT) && (i < nb_sequence - 1)) {
-            os << "\t\t";
+          else {
+            os << intercept[i][j] + slope[i][j] * seq_index_parameter[change_point[j + 1] - 1];
           }
         }
+        for (j = 0;j < nb_segment;j++) {
+          os << "\t\t" << intercept[i][j] << "\t" << slope[i][j] << "\t" << sqrt(variance[i][j]);
+        }
+        os << endl;
       }
     }
 
     else {
-      for (i = 0;i < nb_segment;i++) {
-        os << "\t" << intercept[0][i] + slope[0][i] * seq_index_parameter[change_point[i]] << "->";
-        if (i < nb_segment - 1) {
-          os << intercept[0][i] + slope[0][i] * seq_index_parameter[change_point[i + 1]];
+      if ((correlation) && (slope_standard_deviation)) {
+        os << SEQ_label[SEQL_SEGMENT] << " " << STAT_label[STATL_INTERCEPT] << "\t"
+           << SEQ_label[SEQL_SEGMENT] << " " << STAT_label[STATL_SLOPE] << "\t"
+           << SEQ_label[SEQL_CONFIDENCE_INTERVAL] << "\t\t"
+           << SEQ_label[SEQL_SEGMENT] << " " << STAT_label[STATL_CORRELATION_COEFF] << "\t"
+           << STAT_label[STATL_LIMIT_CORRELATION_COEFF] << "\t" << SEQ_label[SEQL_SEGMENT] << " "
+           << STAT_label[STATL_RESIDUAL] << " " << STAT_label[STATL_STANDARD_DEVIATION] << "\t"
+           << SEQ_label[SEQL_CHANGE_POINT_AMPLITUDE] << "\t" << SEQ_label[SEQL_CONFIDENCE_INTERVALS] << endl;
+
+        if (index != I_DEFAULT) {
+          test = new Test(STUDENT , false , change_point[1] - change_point[0] - 2 , I_DEFAULT , D_DEFAULT);
+          test->critical_probability = ref_critical_probability[0];
+          test->t_value_computation();
+
+          for (i = 0;i < nb_segment;i++) {
+            os << intercept[index][i] << "\t" << slope[index][i];
+            if (slope_standard_deviation[index][i] > 0.) {
+              os << "\t" << slope[index][i] - test->value * slope_standard_deviation[index][i]
+                 << "\t" << slope[index][i] + test->value * slope_standard_deviation[index][i];
+            }
+            os << "\t" << correlation[index][i] << "\t-/+"
+               << test->value / sqrt(test->value * test->value + change_point[i + 1] - change_point[i] - 2)
+               << "\t" << sqrt(variance[index][i]);
+
+            if (i < nb_segment - 1) {
+              os << "\t" <<  intercept[index][i + 1] + slope[index][i + 1] * seq_index_parameter[change_point[i + 1]] -
+                            (intercept[index][i] + slope[index][i] * seq_index_parameter[change_point[i + 1]]);
+
+              diff = seq_index_parameter[change_point[i + 1]] - index_parameter_mean[index][i];
+              buff = test->value * sqrt(variance[index][i] * (1. / (double)(change_point[i + 1] - change_point[i]) +
+                     diff * diff / index_parameter_variance[index][i]));
+
+//              os << "\t" << test->value;
+              os << "\t" << MAX(intercept[index][i] + slope[index][i] * seq_index_parameter[change_point[i + 1]] - buff , 0)
+                 << "\t" << intercept[index][i] + slope[index][i] * seq_index_parameter[change_point[i + 1]] + buff;
+
+              delete test;
+
+              test = new Test(STUDENT , false , change_point[i + 2] - change_point[i + 1] - 2 , I_DEFAULT , D_DEFAULT);
+              test->critical_probability = ref_critical_probability[0];
+              test->t_value_computation();
+
+              diff = seq_index_parameter[change_point[i + 1]] - index_parameter_mean[index][i + 1];
+              buff = test->value * sqrt(variance[index][i + 1] * (1. / (double)(change_point[i + 2] - change_point[i + 1]) +
+                     diff * diff / index_parameter_variance[index][i + 1]));
+              os << "\t" << MAX(intercept[index][i + 1] + slope[index][i + 1] * seq_index_parameter[change_point[i + 1]] - buff , 0)
+                 << "\t" << intercept[index][i + 1] + slope[index][i + 1] * seq_index_parameter[change_point[i + 1]] + buff;
+            }
+            os << endl;
+          }
+
+          delete test;
+
+          os << SEQ_label[SEQL_PIECEWISE_LINEAR_FUNCTION] << "\t";
+          for (i = 0;i < nb_segment;i++) {
+            os << intercept[index][i] + slope[index][i] * seq_index_parameter[change_point[i]] << " -> ";
+            if (i < nb_segment - 1) {
+              os << intercept[index][i] + slope[index][i] * seq_index_parameter[change_point[i + 1]] << "\t";
+            }
+            else {
+              os << intercept[index][i] + slope[index][i] * seq_index_parameter[change_point[i + 1] - 1] << endl;
+            }
+          }
         }
-        else {
-          os << intercept[0][i] + slope[0][i] * seq_index_parameter[change_point[i + 1] - 1];
+
+        else if (common_contrast) {
+          test = new Test(STUDENT , false , nb_sequence * (change_point[1] - change_point[0]) - 2 , I_DEFAULT , D_DEFAULT);
+          test->critical_probability = ref_critical_probability[0];
+          test->t_value_computation();
+
+          for (i = 0;i < nb_segment;i++) {
+            os << intercept[0][i] << "\t" << slope[0][i];
+            if (slope_standard_deviation[0][i] > 0.) {
+              os << "\t" << slope[0][i] - test->value * slope_standard_deviation[0][i]
+                 << "\t" << slope[0][i] + test->value * slope_standard_deviation[0][i];
+            }
+            os << "\t" << correlation[0][i] << "\t-/+"
+               << test->value / sqrt(test->value * test->value + nb_sequence * (change_point[i + 1] - change_point[i]) - 2)
+               << "\t" << sqrt(variance[0][i]);
+
+            if (i < nb_segment - 1) {
+              os << "\t" <<  intercept[0][i + 1] + slope[0][i + 1] * seq_index_parameter[change_point[i + 1]] -
+                            (intercept[0][i] + slope[0][i] * seq_index_parameter[change_point[i + 1]]);
+
+              diff = seq_index_parameter[change_point[i + 1]] - index_parameter_mean[0][i];
+              buff = test->value * sqrt(variance[0][i] * (1. / (double)(nb_sequence * (change_point[i + 1] - change_point[i])) +
+                     diff * diff / index_parameter_variance[0][i]));
+
+//              os << "\t" << test->value;
+              os << "\t" << MAX(intercept[0][i] + slope[0][i] * seq_index_parameter[change_point[i + 1]] - buff , 0)
+                 << "\t" << intercept[0][i] + slope[0][i] * seq_index_parameter[change_point[i + 1]] + buff;
+
+              delete test;
+
+              test = new Test(STUDENT , false , nb_sequence * (change_point[i + 2] - change_point[i + 1]) - 2 , I_DEFAULT , D_DEFAULT);
+              test->critical_probability = ref_critical_probability[0];
+              test->t_value_computation();
+
+              diff = seq_index_parameter[change_point[i + 1]] - index_parameter_mean[0][i + 1];
+              buff = test->value * sqrt(variance[0][i + 1] * (1. / (double)(nb_sequence * (change_point[i + 2] - change_point[i + 1])) +
+                     diff * diff / index_parameter_variance[0][i + 1]));
+              os << "\t" << MAX(intercept[0][i + 1] + slope[0][i + 1] * seq_index_parameter[change_point[i + 1]] - buff , 0)
+                 << "\t" << intercept[0][i + 1] + slope[0][i + 1] * seq_index_parameter[change_point[i + 1]] + buff;
+            }
+            os << endl;
+          }
+
+          delete test;
+
+          os << SEQ_label[SEQL_PIECEWISE_LINEAR_FUNCTION] << "\t";
+          for (i = 0;i < nb_segment;i++) {
+            os << intercept[0][i] + slope[0][i] * seq_index_parameter[change_point[i]] << "->";
+            if (i < nb_segment - 1) {
+              os << intercept[0][i] + slope[0][i] * seq_index_parameter[change_point[i + 1]] << "\t";
+            }
+            else {
+              os << intercept[0][i] + slope[0][i] * seq_index_parameter[change_point[i + 1] - 1] << endl;
+            }
+          }
         }
       }
-      for (i = 0;i < nb_segment;i++) {
-        os << "\t\t" << intercept[0][i] << "\t" << slope[0][i] << "\t" << sqrt(variance[0][i]);
+
+      else {
+        os << SEQ_label[SEQL_PIECEWISE_LINEAR_FUNCTION] << "\t" 
+           << SEQ_label[SEQL_SEGMENT] << " " << STAT_label[STATL_INTERCEPT] << "\t"
+           << SEQ_label[SEQL_SEGMENT] << " " << STAT_label[STATL_SLOPE] << "\t"
+           << SEQ_label[SEQL_SEGMENT] << " " << STAT_label[STATL_RESIDUAL] << " "
+           << STAT_label[STATL_STANDARD_DEVIATION] << "\t";
+
+        if (index != I_DEFAULT) {
+          for (i = 0;i < nb_segment;i++) {
+            os << intercept[index][i] + slope[index][i] * seq_index_parameter[change_point[i]] << " -> ";
+            if (i < nb_segment - 1) {
+              os << intercept[index][i] + slope[index][i] * seq_index_parameter[change_point[i + 1]] << "\t";
+            }
+            else {
+              os << intercept[index][i] + slope[index][i] * seq_index_parameter[change_point[i + 1] - 1];
+            }
+          }
+          for (i = 0;i < nb_segment;i++) {
+            os << "\t\t" << intercept[index][i] << "\t" << slope[index][i] << "\t" << sqrt(variance[index][i]);
+          }
+        }
+
+        else if (common_contrast) {
+          for (i = 0;i < nb_segment;i++) {
+            os << intercept[0][i] + slope[0][i] * seq_index_parameter[change_point[i]] << " -> ";
+            if (i < nb_segment - 1) {
+              os << intercept[0][i] + slope[0][i] * seq_index_parameter[change_point[i + 1]] << "\t";
+            }
+            else {
+              os << intercept[0][i] + slope[0][i] * seq_index_parameter[change_point[i + 1] - 1];
+            }
+          }
+          for (i = 0;i < nb_segment;i++) {
+            os << "\t\t" << intercept[0][i] << "\t" << slope[0][i] << "\t" << sqrt(variance[0][i]);
+          }
+        }
+        os << endl;
       }
     }
-    os << endl;
   }
 
   else if ((model_type == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE)) {
@@ -2593,31 +2779,43 @@ ostream& Sequences::piecewise_linear_function_spreadsheet_print(ostream &os , in
     if (nb_variable > 2) {
       os << STAT_label[STATL_VARIABLE] << "\t" << variable << "\t";
     }
-    os << SEQ_label[SEQL_SEGMENT] << "\t" << STAT_label[STATL_MEAN] << "\t"
-       << SEQ_label[SEQL_AUTOREGRESSIVE_COEFF] << "\t"
+    os << SEQ_label[SEQL_SEGMENT] << " " << STAT_label[STATL_MEAN] << "\t"
+       << SEQ_label[SEQL_SEGMENT] << " " << SEQ_label[SEQL_AUTOREGRESSIVE_COEFF] << "\t"
        << SEQ_label[SEQL_NULL_AUTOREGRESSIVE_COEFF_95_CONFIDENCE_LIMIT] << "\t"
-       << STAT_label[STATL_STANDARD_DEVIATION];
+       << SEQ_label[SEQL_SEGMENT] << " " << STAT_label[STATL_STANDARD_DEVIATION] << "\t"
+       << SEQ_label[SEQL_SEGMENT] << " " << STAT_label[STATL_DETERMINATION_COEFF];
 
     if ((index != I_DEFAULT) || (!common_contrast)) {
       for (i = 0;i < nb_sequence;i++) {
         if ((index == I_DEFAULT) || (index == i)) {
-          for (j = 0;j < nb_segment;j++) {
-            os << "\t" << mean[i][j] << "\t"  << autoregressive_coeff[i][j] << "\t-/+"
-               << standard_normal_value / sqrt((double)(change_point[j + 1] - change_point[j])) << "\t"
-               << sqrt(variance[i][j]) << "\t";
+          if (index == I_DEFAULT) {
+            os << endl;
           }
-          if ((index == I_DEFAULT) && (i < nb_sequence - 1)) {
+          else {
             os << "\t";
+          }
+
+          for (j = 0;j < nb_segment;j++) {
+            os << mean[i][j] << "\t"  << autoregressive_coeff[i][j] << "\t-/+"
+               << standard_normal_value / sqrt((double)(change_point[j + 1] - change_point[j])) << "\t"
+               << sqrt(variance[i][j]) << "\t" << determination_coeff[i][j];
+            if (j < nb_segment - 1) {
+              os << "\t\t";
+            }
           }
         }
       }
     }
 
     else {
+      os << "\t";
       for (i = 0;i < nb_segment;i++) {
-        os << "\t" << mean[0][i] << "\t" << autoregressive_coeff[0][i] << "\t-/+"
+        os << mean[0][i] << "\t" << autoregressive_coeff[0][i] << "\t-/+"
            << standard_normal_value / sqrt((double)nb_sequence * (change_point[i + 1] - change_point[i])) << "\t"
-           << sqrt(variance[0][i]) << "\t";
+           << sqrt(variance[0][i]) << "\t" << determination_coeff[0][i] << "\t";
+        if (i < nb_segment - 1) {
+          os << "\t\t";
+        }
       }
     }
     os << endl;
@@ -2923,7 +3121,8 @@ Sequences* Sequences::segmentation_output(int nb_segment , segment_model *model_
   int *change_point , *psegment , *seq_index_parameter = NULL;
   double likelihood , corrected_likelihood , diff , buff , change_point_amplitude , *global_variance ,
          ***mean , ***variance , ***index_parameter_mean , ***intercept , ***slope , ***correlation ,
-         ***slope_standard_deviation , ***corrected_intercept , ***corrected_slope , ***autoregressive_coeff;
+         ***slope_standard_deviation , ***corrected_intercept , ***corrected_slope , ***autoregressive_coeff ,
+         ***determination_coeff;
   long double ***index_parameter_variance;
   Test *test;
   Sequences *seq;
@@ -2956,6 +3155,8 @@ Sequences* Sequences::segmentation_output(int nb_segment , segment_model *model_
   slope_standard_deviation = new double**[nb_variable];
   index_parameter_mean = new double**[nb_variable];
   index_parameter_variance = new long double**[nb_variable];
+  autoregressive_coeff = new double**[nb_variable];
+  determination_coeff = new double**[nb_variable];
 
   global_variance = NULL;
 
@@ -2963,8 +3164,6 @@ Sequences* Sequences::segmentation_output(int nb_segment , segment_model *model_
     corrected_intercept = new double**[nb_variable];
     corrected_slope = new double**[nb_variable];
   }
-
-  autoregressive_coeff = new double**[nb_variable];
 
   if (index_param_type == IMPLICIT_TYPE) {
     seq_index_parameter = new int[length[0]];
@@ -3073,11 +3272,13 @@ Sequences* Sequences::segmentation_output(int nb_segment , segment_model *model_
         mean[i] = new double*[nb_sequence];
         autoregressive_coeff[i] = new double*[nb_sequence];
         variance[i] = new double*[nb_sequence];
+        determination_coeff[i] = new double*[nb_sequence];
 
         for (j = 0;j < nb_sequence;j++) {
           mean[i][j] = new double[nb_segment];
           autoregressive_coeff[i][j] = new double[nb_segment];
           variance[i][j] = new double[nb_segment];
+          determination_coeff[i][j] = new double[nb_segment];
         }
         break;
       }
@@ -3089,6 +3290,8 @@ Sequences* Sequences::segmentation_output(int nb_segment , segment_model *model_
         autoregressive_coeff[i][0] = new double[nb_segment];
         variance[i] = new double*[1];
         variance[i][0] = new double[nb_segment];
+        determination_coeff[i] = new double*[1];
+        determination_coeff[i][0] = new double[nb_segment];
         break;
       }
       }
@@ -3136,7 +3339,7 @@ Sequences* Sequences::segmentation_output(int nb_segment , segment_model *model_
                                               global_variance , intercept[i] , slope[i] ,
                                               autoregressive_coeff[i] , correlation[i] ,
                                               slope_standard_deviation[i] , index_parameter_mean[i] ,
-                                              index_parameter_variance[i]);
+                                              index_parameter_variance[i] , determination_coeff[i]);
 #     ifdef MESSAGE
       if (((i == 1) && ((model_type[0] == MEAN_CHANGE) || (model_type[0] == INTERCEPT_SLOPE_CHANGE))) ||
           (model_type[i - 1] == GAUSSIAN_CHANGE) || (model_type[i - 1] == VARIANCE_CHANGE) ||
@@ -3188,7 +3391,7 @@ Sequences* Sequences::segmentation_output(int nb_segment , segment_model *model_
                                           common_contrast , change_point , seq_index_parameter ,
                                           mean[i] , variance[i] , intercept[i] , slope[i] ,
                                           autoregressive_coeff[i] , correlation[i] , slope_standard_deviation[i] ,
-                                          index_parameter_mean[i] , index_parameter_variance[i]);
+                                          index_parameter_mean[i] , index_parameter_variance[i] , determination_coeff[i]);
 
     if ((model_type[i - 1] == GAUSSIAN_CHANGE) || (model_type[0] == MEAN_CHANGE) ||
         (model_type[i - 1] == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type[i - 1] == BAYESIAN_GAUSSIAN_CHANGE)) {
@@ -3808,6 +4011,7 @@ Sequences* Sequences::segmentation_output(int nb_segment , segment_model *model_
           delete [] mean[i][j];
           delete [] autoregressive_coeff[i][j];
           delete [] variance[i][j];
+          delete [] determination_coeff[i][j];
         }
         break;
       }
@@ -3816,6 +4020,7 @@ Sequences* Sequences::segmentation_output(int nb_segment , segment_model *model_
         delete [] mean[i][0];
         delete [] autoregressive_coeff[i][0];
         delete [] variance[i][0];
+        delete [] determination_coeff[i][0];
         break;
       }
       }
@@ -3823,6 +4028,7 @@ Sequences* Sequences::segmentation_output(int nb_segment , segment_model *model_
       delete [] mean[i];
       delete [] autoregressive_coeff[i];
       delete [] variance[i];
+      delete [] determination_coeff[i];
     }
   }
 
@@ -3836,6 +4042,7 @@ Sequences* Sequences::segmentation_output(int nb_segment , segment_model *model_
   delete [] index_parameter_mean;
   delete [] index_parameter_variance;
   delete [] autoregressive_coeff;
+  delete [] determination_coeff;
 
   if (continuity) {
     delete [] corrected_intercept;
