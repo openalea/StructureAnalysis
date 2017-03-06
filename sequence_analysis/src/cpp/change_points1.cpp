@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -317,7 +317,7 @@ int Sequences::nb_parameter_computation(int index , int nb_segment , segment_mod
 {
   bool *used_output;
   register int i , j , k , m;
-  int nb_parameter , max_nb_value , *psegment;
+  int nb_parameter , max_nb_value;
 
 
 //  nb_parameter = 0;
@@ -361,16 +361,13 @@ int Sequences::nb_parameter_computation(int index , int nb_segment , segment_mod
         if ((index != I_DEFAULT) || (!common_contrast)) {
           for (j = 0;j < nb_sequence;j++) {
             if ((index == I_DEFAULT) || (index == j)) {
-              psegment = int_sequence[j][0];
-
               for (k = 0;k < length[j];k++) {
-                if ((k == 0) || ((k > 0) && (*psegment != *(psegment - 1)))) {
+                if ((k == 0) || ((k > 0) && (int_sequence[j][0][k] != int_sequence[j][0][k - 1]))) {
                   for (m = 0;m < marginal_distribution[i]->nb_value;m++) {
                     used_output[m] = false;
                   }
                   nb_parameter--;
                 }
-                psegment++;
 
                 if (!used_output[int_sequence[j][i][k]]) {
                   nb_parameter++;
@@ -382,16 +379,13 @@ int Sequences::nb_parameter_computation(int index , int nb_segment , segment_mod
         }
 
         else {
-          psegment = int_sequence[0][0];
-
           for (j = 0;j < length[0];j++) {
-            if ((j == 0) || ((j > 0) && (*psegment != *(psegment - 1)))) {
+            if ((j == 0) || ((j > 0) && (int_sequence[0][0][j] != int_sequence[0][0][j - 1]))) {
               for (k = 0;k < marginal_distribution[i]->nb_value;k++) {
                 used_output[k] = false;
               }
               nb_parameter--;
             }
-            psegment++;
 
             for (k = 0;k < nb_sequence;k++) {
               if (!used_output[int_sequence[k][i][j]]) {
@@ -1344,14 +1338,14 @@ double Sequences::piecewise_linear_function(int index , int variable , int nb_se
                                             bool common_contrast , int *change_point , int *seq_index_parameter ,
                                             double **piecewise_function , double **imean , double **variance ,
                                             double *global_variance , double **iintercept , double **islope ,
-                                            double **autoregressive_coeff , double **correlation ,
+                                            double **iautoregressive_coeff , double **correlation ,
                                             double **slope_standard_deviation , double **iindex_parameter_mean ,
                                             long double **iindex_parameter_variance , double **determination_coeff) const
 
 {
   register int i , j , k;
   double likelihood , mean , diff , diff_sum , index_parameter_mean , response_mean , shifted_diff ,
-         slope , intercept;
+         slope , intercept , autoregressive_coeff;
   long double square_sum , global_square_sum , index_parameter_variance , response_variance , covariance ,
               shifted_square_sum , autocovariance , residual_square_sum , global_shifted_square_sum ,
               global_autocovariance;
@@ -1874,7 +1868,7 @@ double Sequences::piecewise_linear_function(int index , int variable , int nb_se
   }
 
   else if ((model_type == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE)) {
-    if ((autoregressive_coeff) && ((variance) || (global_variance))) {
+    if (variance) {
       likelihood = 0.;
     }
     else {
@@ -1926,58 +1920,75 @@ double Sequences::piecewise_linear_function(int index , int variable , int nb_se
             if (imean) {
               imean[i][j] = mean;
             }
-            if (piecewise_function) {
-              for (k = change_point[j];k < change_point[j + 1];k++) {
-                piecewise_function[i][k] = mean;
+
+            square_sum = 0.;
+            shifted_square_sum = 0.;
+            autocovariance = 0.;
+            if (type[variable] != REAL_VALUE) {
+              for (k = change_point[j] + 1;k < change_point[j + 1];k++) {
+                diff = int_sequence[i][variable][k] - mean;
+                shifted_diff = int_sequence[i][variable][k - 1] - mean;
+                square_sum += diff * diff;
+                shifted_square_sum += shifted_diff * shifted_diff;
+                autocovariance += diff * shifted_diff;
+              }
+            }
+            else {
+              for (k = change_point[j] + 1;k < change_point[j + 1];k++) {
+                diff = real_sequence[i][variable][k] - mean;
+                shifted_diff = real_sequence[i][variable][k - 1] - mean;
+                square_sum += diff * diff;
+                shifted_square_sum += shifted_diff * shifted_diff;
+                autocovariance += diff * shifted_diff;
               }
             }
 
-            if ((autoregressive_coeff) && ((variance) || (global_variance))) {
-              square_sum = 0.;
-              shifted_square_sum = 0.;
-              autocovariance = 0.;
-              if (type[variable] != REAL_VALUE) {
-                for (k = change_point[j] + 1;k < change_point[j + 1];k++) {
-                  diff = int_sequence[i][variable][k] - mean;
-                  shifted_diff = int_sequence[i][variable][k - 1] - mean;
-                  square_sum += diff * diff;
-                  shifted_square_sum += shifted_diff * shifted_diff;
-                  autocovariance += diff * shifted_diff;
-                }
+            if (global_variance) {
+              global_square_sum += square_sum;
+              global_shifted_square_sum += shifted_square_sum;
+              global_autocovariance += autocovariance;
+            }
+
+            if (shifted_square_sum > 0.) {
+              autoregressive_coeff = autocovariance / shifted_square_sum;
+              if (autoregressive_coeff < -1.) {
+                autoregressive_coeff = -1.;
               }
-              else {
-                for (k = change_point[j] + 1;k < change_point[j + 1];k++) {
-                  diff = real_sequence[i][variable][k] - mean;
-                  shifted_diff = real_sequence[i][variable][k - 1] - mean;
-                  square_sum += diff * diff;
-                  shifted_square_sum += shifted_diff * shifted_diff;
-                  autocovariance += diff * shifted_diff;
+              else if (autoregressive_coeff > 1.) {
+                autoregressive_coeff = 1.;
+              }
+
+              if (iautoregressive_coeff) {
+                iautoregressive_coeff[i][j] = autoregressive_coeff;
+              }
+
+              if (piecewise_function) {
+                piecewise_function[i][change_point[j]] = mean;
+
+                if (type[variable] != REAL_VALUE) {
+                  for (k = change_point[j] + 1;k < change_point[j + 1];k++) {
+                    piecewise_function[i][k] = mean + autoregressive_coeff * (int_sequence[i][variable][k - 1] - mean);
+                  }
+                }
+                else {
+                  for (k = change_point[j] + 1;k < change_point[j + 1];k++) {
+                    piecewise_function[i][k] = mean + autoregressive_coeff * (real_sequence[i][variable][k - 1] - mean);
+                  }
                 }
               }
 
-              if (global_variance) {
-                global_square_sum += square_sum;
-                global_shifted_square_sum += shifted_square_sum;
-                global_autocovariance += autocovariance;
-              }
-
-              if (shifted_square_sum > 0.) {
-                autoregressive_coeff[i][j] = autocovariance / shifted_square_sum;
-                if (autoregressive_coeff[i][j] < -1.) {
-                  autoregressive_coeff[i][j] = -1.;
-                }
-                else if (autoregressive_coeff[i][j] > 1.) {
-                  autoregressive_coeff[i][j] = 1.;
-                }
-
+              if (variance) {
                 residual_square_sum = square_sum - autocovariance * autocovariance / shifted_square_sum;
+//                variance[i][j] = residual_square_sum / (change_point[j + 1] - change_point[j] - 3);
                 variance[i][j] = residual_square_sum / (change_point[j + 1] - change_point[j] - 2);
 
-                determination_coeff[i][j] = 1.;
-                if (square_sum > 0.) {
-                  determination_coeff[i][j] -= residual_square_sum / square_sum;
+                if (determination_coeff) {
+                  determination_coeff[i][j] = 1.;
+                  if (square_sum > 0.) {
+                    determination_coeff[i][j] -= residual_square_sum / square_sum;
+                  }
                 }
-
+ 
                 if (likelihood != D_INF) {
                   if (residual_square_sum > (change_point[j + 1] - change_point[j] - 1) * ROUNDOFF_ERROR) {
                     likelihood -= ((double)(change_point[j + 1] - change_point[j] - 1) / 2.) *(log(residual_square_sum /
@@ -1987,6 +1998,26 @@ double Sequences::piecewise_linear_function(int index , int variable , int nb_se
                     likelihood = D_INF;
                   }
                 }
+              }
+            }
+
+            else {
+              if (iautoregressive_coeff) {
+                iautoregressive_coeff[i][j] = 0.;
+              }
+
+              if (piecewise_function) {
+                for (k = change_point[j];k < change_point[j + 1];k++) {
+                  piecewise_function[i][k] = mean;
+                }
+              }
+
+              if (variance) {
+                variance[i][j] = D_DEFAULT;
+                if (determination_coeff) {
+                  determination_coeff[i][j] = 0.;
+                }
+                likelihood = D_INF;
               }
             }
           }
@@ -2039,62 +2070,79 @@ double Sequences::piecewise_linear_function(int index , int variable , int nb_se
         if (imean) {
           imean[0][i] = mean;
         }
-        if (piecewise_function) {
-          for (j = 0;j < nb_sequence;j++) {
-            for (k = change_point[i];k < change_point[i + 1];k++) {
-              piecewise_function[j][k] = mean;
+
+        square_sum = 0.;
+        shifted_square_sum = 0.;
+        autocovariance = 0.;
+        if (type[variable] != REAL_VALUE) {
+          for (j = change_point[i] + 1;j < change_point[i + 1];j++) {
+            for (k = 0;k < nb_sequence;k++) {
+              diff = int_sequence[k][variable][j] - mean;
+              shifted_diff = int_sequence[k][variable][j - 1] - mean;
+              square_sum += diff * diff;
+              shifted_square_sum += shifted_diff * shifted_diff;
+              autocovariance += diff * shifted_diff;
+            }
+          }
+        }
+        else {
+          for (j = change_point[i] + 1;j < change_point[i + 1];j++) {
+            for (k = 0;k < nb_sequence;k++) {
+              diff = real_sequence[k][variable][j] - mean;
+              shifted_diff = real_sequence[k][variable][j - 1] - mean;
+              square_sum += diff * diff;
+              shifted_square_sum += shifted_diff * shifted_diff;
+              autocovariance += diff * shifted_diff;
             }
           }
         }
 
-        if ((autoregressive_coeff) && ((variance) || (global_variance))) {
-          square_sum = 0.;
-          shifted_square_sum = 0.;
-          autocovariance = 0.;
-          if (type[variable] != REAL_VALUE) {
-            for (j = change_point[i] + 1;j < change_point[i + 1];j++) {
-              for (k = 0;k < nb_sequence;k++) {
-                diff = int_sequence[k][variable][j] - mean;
-                shifted_diff = int_sequence[k][variable][j - 1] - mean;
-                square_sum += diff * diff;
-                shifted_square_sum += shifted_diff * shifted_diff;
-                autocovariance += diff * shifted_diff;
+        if (global_variance) {
+          global_square_sum += square_sum;
+          global_shifted_square_sum += shifted_square_sum;
+          global_autocovariance += autocovariance;
+        }
+
+        if (shifted_square_sum > 0.) {
+          autoregressive_coeff = autocovariance / shifted_square_sum;
+          if (autoregressive_coeff < -1.) {
+            autoregressive_coeff = -1.;
+          }
+          else if (autoregressive_coeff > 1.) {
+            autoregressive_coeff = 1.;
+          }
+
+          if (iautoregressive_coeff) {
+            iautoregressive_coeff[0][i] = autoregressive_coeff;
+          }
+
+          if (piecewise_function) {
+            for (j = 0;j < nb_sequence;j++) {
+              piecewise_function[j][change_point[i]] = mean;
+
+              if (type[variable] != REAL_VALUE) {
+                for (k = change_point[i] + 1;k < change_point[i + 1];k++) {
+                  piecewise_function[j][k] = mean + autoregressive_coeff * (int_sequence[j][variable][k - 1] - mean);
+                }
+              }
+              else {
+                for (k = change_point[i] + 1;k < change_point[i + 1];k++) {
+                  piecewise_function[j][k] = mean + autoregressive_coeff * (real_sequence[j][variable][k - 1] - mean);
+                }
               }
             }
           }
-          else {
-            for (j = change_point[i] + 1;j < change_point[i + 1];j++) {
-              for (k = 0;k < nb_sequence;k++) {
-                diff = real_sequence[k][variable][j] - mean;
-                shifted_diff = real_sequence[k][variable][j - 1] - mean;
-                square_sum += diff * diff;
-                shifted_square_sum += shifted_diff * shifted_diff;
-                autocovariance += diff * shifted_diff;
-              }
-            }
-          }
 
-          if (global_variance) {
-            global_square_sum += square_sum;
-            global_shifted_square_sum += shifted_square_sum;
-            global_autocovariance += autocovariance;
-          }
-
-          if (shifted_square_sum > 0.) {
-            autoregressive_coeff[0][i] = autocovariance / shifted_square_sum;
-            if (autoregressive_coeff[0][i] < -1.) {
-              autoregressive_coeff[0][i] = -1.;
-            }
-            else if (autoregressive_coeff[0][i] > 1.) {
-              autoregressive_coeff[0][i] = 1.;
-            }
-
+          if (variance) {
             residual_square_sum = square_sum - autocovariance * autocovariance / shifted_square_sum;
+//            variance[0][i] = residual_square_sum / (nb_sequence * (change_point[i + 1] - change_point[i] - 1) - 2);
             variance[0][i] = residual_square_sum / (nb_sequence * (change_point[i + 1] - change_point[i] - 1) - 1);
 
-            determination_coeff[0][i] = 1.;
-            if (square_sum > 0.) {
-              determination_coeff[0][i] -= residual_square_sum / square_sum;
+            if (determination_coeff) {
+              determination_coeff[0][i] = 1.;
+              if (square_sum > 0.) {
+                determination_coeff[0][i] -= residual_square_sum / square_sum;
+              }
             }
 
             if (likelihood != D_INF) {
@@ -2108,6 +2156,28 @@ double Sequences::piecewise_linear_function(int index , int variable , int nb_se
             }
           }
         }
+
+        else {
+          if (iautoregressive_coeff) {
+            iautoregressive_coeff[0][i] = 0.;
+          }
+
+          if (piecewise_function) {
+            for (j = 0;j < nb_sequence;j++) {
+              for (k = change_point[i];k < change_point[i + 1];k++) {
+                piecewise_function[j][k] = mean;
+              }
+            }
+          }
+
+          if (variance) {
+            variance[0][i] = D_DEFAULT;
+            if (determination_coeff) {
+              determination_coeff[0][i] = 0.;
+            }
+            likelihood = D_INF;
+          }
+        }
       }
     }
 
@@ -2117,10 +2187,12 @@ double Sequences::piecewise_linear_function(int index , int variable , int nb_se
         global_variance[variable] -= global_autocovariance * global_autocovariance / global_shifted_square_sum;
       }
       if (index != I_DEFAULT) {
+//        global_variance[variable] /= (length[index] - 3 * nb_segment);
         global_variance[variable] /= (length[index] - 2 * nb_segment);
       }
       else {
-        global_variance[variable] /= (nb_sequence * length[0] - 2 * nb_segment);
+//        global_variance[variable] /= (nb_sequence * (length[0] - nb_segment) - 2 * nb_segment);
+        global_variance[variable] /= (nb_sequence * (length[0] - nb_segment) - nb_segment);
       }
     }
   }
@@ -2431,51 +2503,71 @@ ostream& Sequences::piecewise_linear_function_ascii_print(ostream &os , int inde
 
   else if ((model_type == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE)) {
     normal dist;
-    double standard_normal_value = quantile(complement(dist , 0.025));
+    double standard_normal_value = quantile(complement(dist , 0.025)) , standard_error;
 
     if (nb_variable > 2) {
       os << STAT_label[STATL_VARIABLE] << " " << variable << "   ";
     }
     os << SEQ_label[SEQL_SEGMENT] << " " << STAT_label[STATL_MEAN] << ", "
-       << SEQ_label[SEQL_AUTOREGRESSIVE_COEFF] << " (" 
-       << SEQ_label[SEQL_NULL_AUTOREGRESSIVE_COEFF_95_CONFIDENCE_LIMIT] << "), "
-       << STAT_label[STATL_STANDARD_DEVIATION] << ", "
-       << STAT_label[STATL_DETERMINATION_COEFF];
+       << SEQ_label[SEQL_AUTOREGRESSIVE_COEFF] << " ("  << SEQ_label[SEQL_CONFIDENCE_INTERVAL] << " | " 
+       << STAT_label[STATL_NULL_AUTOREGRESSIVE_COEFF_95_CONFIDENCE_LIMIT] << "), "
+       << STAT_label[STATL_RESIDUAL] << " " << STAT_label[STATL_STANDARD_DEVIATION];
+    if (determination_coeff) {
+      os << ", " << STAT_label[STATL_STANDARD_DEVIATION];
+      os << ", " << STAT_label[STATL_DETERMINATION_COEFF];
+    }
+    os << endl;
 
     if ((index != I_DEFAULT) || (!common_contrast)) {
       for (i = 0;i < nb_sequence;i++) {
         if ((index == I_DEFAULT) || (index == i)) {
-          if (index == I_DEFAULT) {
+/*          if (index == I_DEFAULT) {
             os << endl;
           }
           else {
             os << ": ";
-          }
+          } */
 
           for (j = 0;j < nb_segment;j++) {
-            os << mean[i][j] << " " << autoregressive_coeff[i][j] << " (-/+"
-               << standard_normal_value / sqrt((double)(change_point[j + 1] - change_point[j])) << ") "
-               << sqrt(variance[i][j]) << " " << determination_coeff[i][j];
-            if (j < nb_segment - 1) {
-              os << " | ";
+            standard_error = standard_normal_value * sqrt((1. - autoregressive_coeff[i][j] * autoregressive_coeff[i][j]) /
+                                                          (change_point[j + 1] - change_point[j]));
+            os << mean[i][j] << " " << autoregressive_coeff[i][j] << " ("
+               << MAX(autoregressive_coeff[i][j] - standard_error , -1.) << ", " << MIN(autoregressive_coeff[i][j] + standard_error , 1.)
+               << " | -/+" << standard_normal_value / sqrt((double)(change_point[j + 1] - change_point[j])) << ") "
+               << sqrt(variance[i][j]);
+            if (determination_coeff) {
+              os << " " << sqrt(variance[i][j] / (1. - determination_coeff[i][j]));
+              os << " " << determination_coeff[i][j];
             }
+            os << endl;
+/*            if (j < nb_segment - 1) {
+              os << " || ";
+            } */
           }
         }
       }
     }
 
     else {
-      os << ": ";
+//      os << ": ";
       for (i = 0;i < nb_segment;i++) {
-        os << mean[0][i] << " " << autoregressive_coeff[0][i] << " (-/+"
-           << standard_normal_value / sqrt((double)nb_sequence * (change_point[i + 1] - change_point[i])) << ") "
-           << sqrt(variance[0][i]) << " " << determination_coeff[0][i];
-        if (i < nb_segment - 1) {
-          os << " | ";
+        standard_error = standard_normal_value * sqrt((1. - autoregressive_coeff[0][i] * autoregressive_coeff[0][i]) /
+                                                      (nb_sequence * (change_point[i + 1] - change_point[i])));
+        os << mean[0][i] << " " << autoregressive_coeff[0][i] << " ("
+           << MAX(autoregressive_coeff[0][i] - standard_error , -1.) << ", " << MIN(autoregressive_coeff[0][i] + standard_error , 1.)
+           << " | -/+" << standard_normal_value / sqrt((double)nb_sequence * (change_point[i + 1] - change_point[i])) << ") "
+           << sqrt(variance[0][i]);
+        if (determination_coeff) {
+          os << " " << sqrt(variance[0][i] / (1. - determination_coeff[0][i]));
+          os << "  " << determination_coeff[0][i];
         }
+        os << endl;
+/*        if (i < nb_segment - 1) {
+          os << " || ";
+	} */
       }
     }
-    os << endl;
+//    os << endl;
   }
 
   return os;
@@ -2774,51 +2866,73 @@ ostream& Sequences::piecewise_linear_function_spreadsheet_print(ostream &os , in
 
   else if ((model_type == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE)) {
     normal dist;
-    double standard_normal_value = quantile(complement(dist , 0.025));
+    double standard_normal_value = quantile(complement(dist , 0.025)) , standard_error;
 
     if (nb_variable > 2) {
       os << STAT_label[STATL_VARIABLE] << "\t" << variable << "\t";
     }
     os << SEQ_label[SEQL_SEGMENT] << " " << STAT_label[STATL_MEAN] << "\t"
        << SEQ_label[SEQL_SEGMENT] << " " << SEQ_label[SEQL_AUTOREGRESSIVE_COEFF] << "\t"
-       << SEQ_label[SEQL_NULL_AUTOREGRESSIVE_COEFF_95_CONFIDENCE_LIMIT] << "\t"
-       << SEQ_label[SEQL_SEGMENT] << " " << STAT_label[STATL_STANDARD_DEVIATION] << "\t"
-       << SEQ_label[SEQL_SEGMENT] << " " << STAT_label[STATL_DETERMINATION_COEFF];
+       << SEQ_label[SEQL_CONFIDENCE_INTERVAL] << "\t"
+       << STAT_label[STATL_NULL_AUTOREGRESSIVE_COEFF_95_CONFIDENCE_LIMIT] << "\t"
+       << SEQ_label[SEQL_SEGMENT] << " " << STAT_label[STATL_RESIDUAL] << " "
+       << STAT_label[STATL_STANDARD_DEVIATION];
+    if (determination_coeff) {
+      os << "\t" << SEQ_label[SEQL_SEGMENT] << " " << STAT_label[STATL_STANDARD_DEVIATION];
+      os << "\t" << SEQ_label[SEQL_SEGMENT] << " " << STAT_label[STATL_DETERMINATION_COEFF];
+    }
+    os << endl;
 
     if ((index != I_DEFAULT) || (!common_contrast)) {
       for (i = 0;i < nb_sequence;i++) {
         if ((index == I_DEFAULT) || (index == i)) {
-          if (index == I_DEFAULT) {
+/*          if (index == I_DEFAULT) {
             os << endl;
           }
           else {
             os << "\t";
-          }
+          } */
 
           for (j = 0;j < nb_segment;j++) {
-            os << mean[i][j] << "\t"  << autoregressive_coeff[i][j] << "\t-/+"
-               << standard_normal_value / sqrt((double)(change_point[j + 1] - change_point[j])) << "\t"
-               << sqrt(variance[i][j]) << "\t" << determination_coeff[i][j];
-            if (j < nb_segment - 1) {
-              os << "\t\t";
+            standard_error = standard_normal_value * sqrt((1. - autoregressive_coeff[i][j] * autoregressive_coeff[i][j]) /
+                                                          (change_point[j + 1] - change_point[j]));
+            os << mean[i][j] << "\t"  << autoregressive_coeff[i][j] << "\t"
+               << MAX(autoregressive_coeff[i][j] - standard_error , -1.) << "\t" << MIN(autoregressive_coeff[i][j] + standard_error , 1.)
+               << "\t-/+" << standard_normal_value / sqrt((double)(change_point[j + 1] - change_point[j])) << "\t"
+               << sqrt(variance[i][j]);
+            if (determination_coeff) {
+              os << "\t" << sqrt(variance[i][j] / (1. - determination_coeff[i][j]));
+              os << "\t" << determination_coeff[i][j];
             }
+            os << endl;
+/*            if (j < nb_segment - 1) {
+              os << "\t\t";
+            } */
           }
         }
       }
     }
 
     else {
-      os << "\t";
+//      os << "\t";
       for (i = 0;i < nb_segment;i++) {
-        os << mean[0][i] << "\t" << autoregressive_coeff[0][i] << "\t-/+"
-           << standard_normal_value / sqrt((double)nb_sequence * (change_point[i + 1] - change_point[i])) << "\t"
-           << sqrt(variance[0][i]) << "\t" << determination_coeff[0][i] << "\t";
-        if (i < nb_segment - 1) {
-          os << "\t\t";
+        standard_error = standard_normal_value * sqrt((1. - autoregressive_coeff[0][i] * autoregressive_coeff[0][i]) /
+                                                      (nb_sequence * (change_point[i + 1] - change_point[i])));
+        os << mean[0][i] << "\t" << autoregressive_coeff[0][i] << "\t"
+           << MAX(autoregressive_coeff[0][i] - standard_error , -1.) << "\t" << MIN(autoregressive_coeff[0][i] + standard_error , 1.)
+           << "\t-/+" << standard_normal_value / sqrt((double)nb_sequence * (change_point[i + 1] - change_point[i])) << "\t"
+           << sqrt(variance[0][i]);
+        if (determination_coeff) {
+          os << "\t" << sqrt(variance[0][i] / (1. - determination_coeff[0][i]));
+          os << "\t" << determination_coeff[0][i];
         }
+        os << endl;
+/*        if (i < nb_segment - 1) {
+          os << "\t\t";
+        } */
       }
     }
-    os << endl;
+//    os << endl;
   }
 
   return os;
@@ -3118,11 +3232,12 @@ Sequences* Sequences::segmentation_output(int nb_segment , segment_model *model_
 {
   bool *piecewise_function_flag;
   register int i , j , k , m , n;
-  int *change_point , *psegment , *seq_index_parameter = NULL;
-  double likelihood , corrected_likelihood , diff , buff , change_point_amplitude , *global_variance ,
-         ***mean , ***variance , ***index_parameter_mean , ***intercept , ***slope , ***correlation ,
-         ***slope_standard_deviation , ***corrected_intercept , ***corrected_slope , ***autoregressive_coeff ,
-         ***determination_coeff;
+  int inb_variable , *change_point , *seq_index_parameter = NULL;
+  variable_nature *itype;
+  double likelihood , corrected_likelihood , diff , buff , change_point_amplitude , mean_absolute_deviation ,
+         *global_variance , ***mean , ***variance , ***index_parameter_mean , ***intercept , ***slope ,
+         ***correlation , ***slope_standard_deviation , ***corrected_intercept , ***corrected_slope ,
+         ***autoregressive_coeff , ***determination_coeff;
   long double ***index_parameter_variance;
   Test *test;
   Sequences *seq;
@@ -3134,15 +3249,13 @@ Sequences* Sequences::segmentation_output(int nb_segment , segment_model *model_
 
   else {
     change_point = new int[nb_segment + 1];
-    change_point[0] = 0;
 
-    psegment = int_sequence[0][0] + 1;
+    change_point[0] = 0;
     i = 1;
     for (j = 1;j < length[0];j++) {
-      if (*psegment != *(psegment - 1)) {
+      if (int_sequence[0][0][j] != int_sequence[0][0][j - 1]) {
         change_point[i++] = j;
       }
-      psegment++;
     }
     change_point[i] = length[0];
   }
@@ -3324,6 +3437,22 @@ Sequences* Sequences::segmentation_output(int nb_segment , segment_model *model_
     }
 
     seq = new Sequences(*this , piecewise_function_flag);
+  }
+
+  else if (output == ABSOLUTE_RESIDUAL) {
+    inb_variable = 1 + 2 * (nb_variable - 1);
+    itype = new variable_nature[inb_variable];
+
+    itype[0] = type[0];
+    i = 1;
+    for (j = 1;j < nb_variable;j++) {
+      itype[i++] = REAL_VALUE;
+      itype[i++] = AUXILIARY;
+    }
+
+    seq = new Sequences(nb_sequence , identifier , length , vertex_identifier ,
+                        index_param_type , inb_variable , itype);
+    delete [] itype;
   }
 
   for (i = 1;i < nb_variable;i++) {
@@ -3725,6 +3854,236 @@ Sequences* Sequences::segmentation_output(int nb_segment , segment_model *model_
     break;
   }
 
+  case ABSOLUTE_RESIDUAL : {
+    if (index_parameter) {
+      for (i = 0;i < nb_sequence;i++) {
+        for (j = 0;j < (index_param_type == POSITION ? length[i] + 1 : length[i]);j++) {
+          seq->index_parameter[i][j] = index_parameter[i][j];
+        }
+      }
+    }
+
+    if (index_parameter_distribution) {
+      seq->index_parameter_distribution = new FrequencyDistribution(*index_parameter_distribution);
+    }
+    if (index_interval) {
+      seq->index_interval = new FrequencyDistribution(*index_interval);
+    }
+
+    seq->min_value[0] = min_value[0];
+    seq->max_value[0] = max_value[0];
+    seq->marginal_distribution[0] = new FrequencyDistribution(*marginal_distribution[0]);
+
+    for (i = 0;i < nb_sequence;i++) {
+      for (j = 0;j < length[i];j++) {
+        seq->int_sequence[i][0][j] = int_sequence[i][0][j];
+      }
+    }
+
+    switch (common_contrast) {
+
+    case false : {
+      for (i = 0;i < nb_sequence;i++) {
+        j = 1;
+        for (k = 1;k < nb_variable;k++) {
+          if (type[k] != REAL_VALUE) {
+            if ((model_type[k - 1] == LINEAR_MODEL_CHANGE) || (model_type[k - 1] == INTERCEPT_SLOPE_CHANGE)) {
+              for (m = 0;m < nb_segment;m++) {
+                for (n = change_point[m];n < change_point[m + 1];n++) {
+                  seq->real_sequence[i][j][n] = fabs(int_sequence[i][k][n] - (intercept[k][i][m] + slope[k][i][m] * seq_index_parameter[n]));
+                }
+              }
+            }
+
+            else if ((model_type[k - 1] == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type[k - 1] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE)) {
+              for (m = 0;m < nb_segment;m++) {
+                seq->real_sequence[i][j][change_point[m]] = fabs(int_sequence[i][k][change_point[m]] - mean[k][i][m]);
+                for (n = change_point[m] + 1;n < change_point[m + 1];n++) {
+                  seq->real_sequence[i][j][n] = fabs(int_sequence[i][k][n] - (mean[k][i][m] + autoregressive_coeff[k][i][m] *
+                                                     (int_sequence[i][k][n - 1] - mean[k][i][m])));
+                }
+              }
+            }
+
+            else {
+              for (m = 0;m < nb_segment;m++) {
+                for (n = change_point[m];n < change_point[m + 1];n++) {
+                  seq->real_sequence[i][j][n] = fabs(int_sequence[i][k][n] - mean[k][i][m]);
+                }
+              }
+            }
+          }
+
+          else {
+            if ((model_type[k - 1] == LINEAR_MODEL_CHANGE) || (model_type[k - 1] == INTERCEPT_SLOPE_CHANGE)) {
+              for (m = 0;m < nb_segment;m++) {
+                for (n = change_point[m];n < change_point[m + 1];n++) {
+                  seq->real_sequence[i][j][n] = fabs(real_sequence[i][k][n] - (intercept[k][i][m] + slope[k][i][m] * seq_index_parameter[n]));
+                }
+              }
+            }
+
+            else if ((model_type[k - 1] == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type[k - 1] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE)) {
+              for (m = 0;m < nb_segment;m++) {
+                seq->real_sequence[i][j][change_point[m]] = fabs(real_sequence[i][k][change_point[m]] - mean[k][i][m]);
+                for (n = change_point[m] + 1;n < change_point[m + 1];n++) {
+                  seq->real_sequence[i][j][n] = fabs(real_sequence[i][k][n] - (mean[k][i][m] + autoregressive_coeff[k][i][m] *
+                                                     (real_sequence[i][k][n - 1] - mean[k][i][m])));
+                }
+              }
+            }
+
+            else {
+              for (m = 0;m < nb_segment;m++) {
+                for (n = change_point[m];n < change_point[m + 1];n++) {
+                  seq->real_sequence[i][j][n] = fabs(real_sequence[i][k][n] - mean[k][i][m]);
+                }
+              }
+            }
+          }
+
+          for (m = 0;m < nb_segment;m++) {
+            mean_absolute_deviation = 0.;
+
+            if ((model_type[k - 1] == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type[k - 1] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE)) {
+              for (n = change_point[m] + 1;n < change_point[m + 1];n++) {
+                mean_absolute_deviation += seq->real_sequence[i][j][n];
+              }
+//              mean_absolute_deviation /= (change_point[m + 1] - change_point[m] - 3);
+              mean_absolute_deviation /= (change_point[m + 1] - change_point[m] - 2);
+            }
+
+            else {
+              for (n = change_point[m];n < change_point[m + 1];n++) {
+                mean_absolute_deviation += seq->real_sequence[i][j][n];
+              }
+              if ((model_type[k - 1] == LINEAR_MODEL_CHANGE) || (model_type[k - 1] == INTERCEPT_SLOPE_CHANGE)) {
+                mean_absolute_deviation /= (change_point[m + 1] - change_point[m] - 2);
+              }
+              else {
+                mean_absolute_deviation /= (change_point[m + 1] - change_point[m] - 1);
+              }
+            }
+
+            for (n = change_point[m];n < change_point[m + 1];n++) {
+              seq->real_sequence[i][j + 1][n] = mean_absolute_deviation;
+            }
+          }
+
+          j += 2;
+        }
+      }
+      break;
+    }
+
+    case true : {
+      for (i = 0;i < nb_sequence;i++) {
+        j = 1;
+        for (k = 1;k < nb_variable;k++) {
+          if (type[k] != REAL_VALUE) {
+            if ((model_type[k - 1] == LINEAR_MODEL_CHANGE) || (model_type[k - 1] == INTERCEPT_SLOPE_CHANGE)) {
+              for (m = 0;m < nb_segment;m++) {
+                for (n = change_point[m];n < change_point[m + 1];n++) {
+                  seq->real_sequence[i][j][n] = fabs(int_sequence[i][k][n] - (intercept[k][0][m] + slope[k][0][m] * seq_index_parameter[n]));
+                }
+              }
+            }
+
+            else if ((model_type[k - 1] == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type[k - 1] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE)) {
+              for (m = 0;m < nb_segment;m++) {
+                seq->real_sequence[i][j][change_point[m]] = fabs(int_sequence[i][k][change_point[m]] - mean[k][0][m]);
+                for (n = change_point[m] + 1;n < change_point[m + 1];n++) {
+                  seq->real_sequence[i][j][n] = fabs(int_sequence[i][k][n] - (mean[k][0][m] + autoregressive_coeff[k][0][m] *
+                                                     (int_sequence[i][k][n - 1] - mean[k][0][m])));
+                }
+              }
+            }
+
+            else {
+              for (m = 0;m < nb_segment;m++) {
+                for (n = change_point[m];n < change_point[m + 1];n++) {
+                  seq->real_sequence[i][j][n] = fabs(int_sequence[i][k][n] - mean[k][0][m]);
+                }
+              }
+            }
+          }
+
+          else {
+            if ((model_type[k - 1] == LINEAR_MODEL_CHANGE) || (model_type[k - 1] == INTERCEPT_SLOPE_CHANGE)) {
+              for (m = 0;m < nb_segment;m++) {
+                for (n = change_point[m];n < change_point[m + 1];n++) {
+                  seq->real_sequence[i][j][n] = fabs(real_sequence[i][k][n] - (intercept[k][0][m] + slope[k][0][m] * seq_index_parameter[n]));
+                }
+              }
+            }
+
+            else if ((model_type[k - 1] == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type[k - 1] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE)) {
+              for (m = 0;m < nb_segment;m++) {
+                seq->real_sequence[i][j][change_point[m]] = fabs(real_sequence[i][k][change_point[m]] - mean[k][0][m]);
+                for (n = change_point[m] + 1;n < change_point[m + 1];n++) {
+                  seq->real_sequence[i][j][n] = fabs(real_sequence[i][k][n] - (mean[k][0][m] + autoregressive_coeff[k][0][m] *
+                                                     (real_sequence[i][k][n - 1] - mean[k][0][m])));
+                }
+              }
+            }
+
+            else {
+              for (m = 0;m < nb_segment;m++) {
+                for (n = change_point[m];n < change_point[m + 1];n++) {
+                  seq->real_sequence[i][j][n] = fabs(real_sequence[i][k][n] - mean[k][0][m]);
+                }
+              }
+            }
+          }
+
+          j += 2;
+        }
+      }
+
+      i = 1;
+      for (j = 1;j < nb_variable;j++) {
+        for (k = 0;k < nb_segment;k++) {
+          mean_absolute_deviation = 0.;
+
+          if ((model_type[j - 1] == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type[j - 1] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE)) {
+            for (m = change_point[k] + 1;m < change_point[k + 1];m++) {
+              for (n = 0;n < nb_sequence;n++) {
+                mean_absolute_deviation += seq->real_sequence[n][i][m];
+              }
+            }
+//            mean_absolute_deviation /= (nb_sequence * (change_point[k + 1] - change_point[k] - 1) - 2);
+            mean_absolute_deviation /= (nb_sequence * (change_point[k + 1] - change_point[k] - 1) - 1);
+          }
+
+          else {
+            for (m = change_point[k];m < change_point[k + 1];m++) {
+              for (n = 0;n < nb_sequence;n++) {
+                mean_absolute_deviation += seq->real_sequence[n][i][m];
+              }
+            }
+            if ((model_type[j - 1] == LINEAR_MODEL_CHANGE) || (model_type[j - 1] == INTERCEPT_SLOPE_CHANGE)) {
+              mean_absolute_deviation /= (nb_sequence * (change_point[k + 1] - change_point[k]) - 2);
+            }
+            else {
+              mean_absolute_deviation /= (nb_sequence * (change_point[k + 1] - change_point[k]) - 1);
+            }
+          }
+
+          for (m = change_point[k];m < change_point[k + 1];m++) {
+            for (n = 0;n < nb_sequence;n++) {
+              seq->real_sequence[n][i + 1][m] = mean_absolute_deviation;
+            }
+          }
+        }
+
+        i += 2;
+      }
+      break;
+    }
+    }
+    break;
+  }
+
   case DIVISION_RESIDUAL : {
     switch (common_contrast) {
 
@@ -4057,7 +4416,7 @@ Sequences* Sequences::segmentation_output(int nb_segment , segment_model *model_
     delete [] piecewise_function_flag;
   }
 
-  else {
+  if ((output == SUBTRACTION_RESIDUAL) || (output == DIVISION_RESIDUAL)) {
     for (i = 1;i < nb_variable;i++) {
       type[i] = REAL_VALUE;
     }
@@ -4070,6 +4429,17 @@ Sequences* Sequences::segmentation_output(int nb_segment , segment_model *model_
       if (seq->type[i] == AUXILIARY) {
         seq->min_value_computation(i);
         seq->max_value_computation(i);
+      }
+    }
+  }
+
+  else if (output == ABSOLUTE_RESIDUAL) {
+    for (i = 1;i < seq->nb_variable;i++) {
+      seq->min_value_computation(i);
+      seq->max_value_computation(i);
+
+      if (seq->type[i] != AUXILIARY) {
+        seq->build_marginal_histogram(i);
       }
     }
   }
@@ -4200,7 +4570,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
       }
 
       if (((model_type[i] == CATEGORICAL_CHANGE) || (model_type[i] == ORDINAL_GAUSSIAN_CHANGE)) &&
-          ((output == SUBTRACTION_RESIDUAL) || (output == DIVISION_RESIDUAL))) {
+          ((output == SUBTRACTION_RESIDUAL) || (output == ABSOLUTE_RESIDUAL) || (output == DIVISION_RESIDUAL))) {
         status = false;
         error.update(SEQ_error[SEQR_FORBIDDEN_OUTPUT]);
       }
@@ -4553,7 +4923,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
           }
         }
 
-        else  {
+        else {
           for (j = 0;j < nb_segment;j++) {
             sum = 0.;
             binomial_coeff_sum = 0.;
@@ -5474,30 +5844,30 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
       }
     }
 
-    if (index != I_DEFAULT) {
-      iseq = new Sequences(*this , 1 , &index);
-      seq = new Sequences(*iseq , ADD_STATE_VARIABLE);
-      delete iseq;
-    }
-    else {
-      seq = new Sequences(*this , ADD_STATE_VARIABLE);
-    }
+    if (segmentation_likelihood != D_INF) {
+      if (index != I_DEFAULT) {
+        iseq = new Sequences(*this , 1 , &index);
+        seq = new Sequences(*iseq , ADD_STATE_VARIABLE);
+        delete iseq;
+      }
+      else {
+        seq = new Sequences(*this , ADD_STATE_VARIABLE);
+      }
 
-    for (i = 0;i < seq->nb_sequence;i++) {
-      for (j = 0;j < nb_segment;j++) {
-        for (k = change_point[j];k < change_point[j + 1];k++) {
-          seq->int_sequence[i][0][k] = j;
+      for (i = 0;i < seq->nb_sequence;i++) {
+        for (j = 0;j < nb_segment;j++) {
+          for (k = change_point[j];k < change_point[j + 1];k++) {
+            seq->int_sequence[i][0][k] = j;
+          }
         }
       }
-    }
 
-    seq->min_value[0] = 0;
-    seq->max_value[0] = nb_segment - 1;
+      seq->min_value[0] = 0;
+      seq->max_value[0] = nb_segment - 1;
 
-    seq->build_marginal_frequency_distribution(0);
+      seq->build_marginal_frequency_distribution(0);
 
-#   ifdef MESSAGE
-    if (segmentation_likelihood != D_INF) {
+#     ifdef MESSAGE
       segment_penalty = 0.;
       for (i = 0;i < nb_segment;i++) {
         segment_penalty += log((double)(change_point[i + 1] - change_point[i]));
@@ -5514,19 +5884,19 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
          << nb_parameter << " " << STAT_label[nb_parameter == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS]
          << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " (Modified "  << STAT_criterion_word[BIC] << "): "
          << penalized_likelihood << endl;
+#     endif
+
+      oseq = seq->segmentation_output(nb_segment , model_type , common_contrast , os , output ,
+                                      change_point , continuity);
+
+      if ((output == SEQUENCE) || (output == ABSOLUTE_RESIDUAL)) {
+        delete seq;
+      }
     }
 
     else {
-      os << "\n" << nb_segment << " " << (nb_segment == 1 ? SEQ_label[SEQL_SEGMENT] : SEQ_label[SEQL_SEGMENTS])
-         << "   " << STAT_label[STATL_LIKELIHOOD] << ": " << segmentation_likelihood << endl;
-    }
-#   endif
-
-    oseq = seq->segmentation_output(nb_segment , model_type , common_contrast , os , output ,
-                                    change_point , continuity);
-
-    if (output == SEQUENCE) {
-      delete seq;
+      oseq = NULL;
+      error.update(SEQ_error[SEQR_SEGMENTATION_FAILURE]);
     }
 
     for (i = 0;i < nb_variable;i++) {

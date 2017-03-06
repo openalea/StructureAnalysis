@@ -584,16 +584,22 @@ ostream& ContinuousParametric::ascii_parameter_print(ostream &os , bool file_fla
 
     if (sample_size > 0.) {
       normal dist;
-      double standard_normal_value = quantile(complement(dist , 0.025));
+      double standard_normal_value = quantile(complement(dist , 0.025)) , standard_error;
+
+      standard_error = standard_normal_value * sqrt((1. - autoregressive_coeff * autoregressive_coeff) / sample_size);
 
       if (!file_flag) {
-        os << " (-/+" << standard_normal_value / sqrt(sample_size) << ")";
+        os << "   (" << MAX(autoregressive_coeff - standard_error , -1.) << ", " << MIN(autoregressive_coeff + standard_error , 1.)
+           << "),   " << STAT_label[STATL_NULL_AUTOREGRESSIVE_COEFF_95_CONFIDENCE_LIMIT]
+           << ": -/+" << standard_normal_value / sqrt(sample_size);
       }
 
       os << "   " << STAT_word[STATW_STANDARD_DEVIATION] << " : " << dispersion;
 
-      if (file_flag)  {
-        os << "   # -/+" << standard_normal_value / sqrt(sample_size);
+      if (file_flag) {
+        os << "   # " << MAX(autoregressive_coeff - standard_error , -1.) << ", " << MIN(autoregressive_coeff + standard_error , 1.)
+           << ",   " << STAT_label[STATL_NULL_AUTOREGRESSIVE_COEFF_95_CONFIDENCE_LIMIT]
+           << ": -/+" << standard_normal_value / sqrt(sample_size);
       }
 
       os << "\n";
@@ -1201,9 +1207,13 @@ ostream& ContinuousParametric::spreadsheet_parameter_print(ostream &os) const
 
     if (sample_size > 0.) {
       normal dist;
-      double standard_normal_value = quantile(complement(dist , 0.025));
+      double standard_normal_value = quantile(complement(dist , 0.025)) , standard_error;
 
-      os << "\t-/+" << standard_normal_value / sqrt(sample_size);
+      standard_error = standard_normal_value * sqrt((1. - autoregressive_coeff * autoregressive_coeff) / sample_size);
+
+      os << "\t" << MAX(autoregressive_coeff - standard_error , -1.) << "\t" << MIN(autoregressive_coeff + standard_error , 1.)
+         << "\t" << STAT_label[STATL_NULL_AUTOREGRESSIVE_COEFF_95_CONFIDENCE_LIMIT]
+         << "\t-/+" << standard_normal_value / sqrt(sample_size);
     }
 
     os << "\t\t" << STAT_word[STATW_STANDARD_DEVIATION] << "\t" << dispersion << endl;

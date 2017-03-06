@@ -2164,7 +2164,7 @@ MarkovianSequences* MarkovianSequences::merge_variable(StatError &error , int nb
               ostringstream error_message;
               error_message << STAT_label[STATL_SAMPLE] << " " << i + 2 << ": "
                             << SEQ_label[SEQL_SEQUENCE] << " " << j + 1 << ": "
-                            << SEQ_label[SEQL_INDEX_PARAMETER] << " " << k << ": "
+                            << SEQ_label[SEQL_INDEX] << " " << k << ": "
                             << SEQ_error[SEQR_INDEX_PARAMETER];
               error.update((error_message.str()).c_str());
             }

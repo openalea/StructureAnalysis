@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -5100,7 +5100,7 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , segment
       }
     }
 
-    else if (model_type[i - 1] == AUTOREGRESSIVE_MODEL_CHANGE) {
+    else if ((model_type[i - 1] == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type[i - 1] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE)) {
       if ((index != I_DEFAULT) || (!common_contrast)) {
         mean[i] = new double*[nb_sequence];
         autoregressive_coeff[i] = new double*[nb_sequence];
@@ -5463,7 +5463,7 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , segment
       delete [] variance[i];
     }
 
-    else if (model_type[i - 1] == AUTOREGRESSIVE_MODEL_CHANGE) {
+    else if ((model_type[i - 1] == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type[i - 1] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE)) {
       if ((index != I_DEFAULT) || (!common_contrast)) {
         for (j = 0;j < nb_sequence;j++) {
           if ((index == I_DEFAULT) || (index == j)) {
