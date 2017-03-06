@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -2806,7 +2806,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
 {
   bool status = true;
   register int i , j;
-  int index , nb_parameter , *psegment;
+  int index , nb_parameter;
   double segmentation_likelihood , segment_penalty , penalized_likelihood , **rank;
   FrequencyDistribution *marginal;
   Sequences *seq , *iseq , *oseq;
@@ -2882,7 +2882,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
       }
 
       if (((model_type[i] == CATEGORICAL_CHANGE) || (model_type[i] == ORDINAL_GAUSSIAN_CHANGE)) &&
-          ((output == SUBTRACTION_RESIDUAL) || (output == DIVISION_RESIDUAL))) {
+          ((output == SUBTRACTION_RESIDUAL) || (output == ABSOLUTE_RESIDUAL) || (output == DIVISION_RESIDUAL))) {
         status = false;
         error.update(SEQ_error[SEQR_FORBIDDEN_OUTPUT]);
       }
@@ -2961,15 +2961,13 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
     if (segmentation_likelihood != D_INF) {
 
 #     ifdef MESSAGE
-      psegment = seq->int_sequence[0][0] + 1;
       segment_penalty = 0.;
       i = 0;
       for (j = 1;j < seq->length[0];j++) {
-        if (*psegment != *(psegment - 1)) {
+        if (seq->int_sequence[0][0][j] != seq->int_sequence[0][0][j - 1]) {
           segment_penalty += log((double)(j - i));
           i = j;
         }
-        psegment++;
       }
       segment_penalty += log((double)(seq->length[0] - i));
 
@@ -2989,7 +2987,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
       oseq = seq->segmentation_output(nb_segment , model_type , common_contrast , os , output ,
                                       NULL , continuity);
 
-      if (output == SEQUENCE) {
+      if ((output == SEQUENCE) || (output == ABSOLUTE_RESIDUAL)) {
         delete seq;
       }
     }

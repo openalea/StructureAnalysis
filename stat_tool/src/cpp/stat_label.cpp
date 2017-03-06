@@ -359,6 +359,7 @@ const char *STAT_label[] = {
   "R-squared" ,
 //  "regression variation / total variation" ,
   "coefficient of determination" ,
+  "95% confidence limits for a null autoregressive coefficient" ,
   "residual" ,
   "standardized residual" ,
   "linear" ,

@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -355,7 +355,7 @@ double Sequences::N_segmentation(int index , int nb_segment , segment_model *mod
       }
     }
 
-    else if (model_type[i - 1] == AUTOREGRESSIVE_MODEL_CHANGE) {
+    else if ((model_type[i - 1] == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type[i - 1] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE)) {
       if ((index != I_DEFAULT) || (!common_contrast)) {
         mean[i] = new double*[nb_sequence];
         autoregressive_coeff[i] = new double*[nb_sequence];
@@ -1136,7 +1136,7 @@ double Sequences::N_segmentation(int index , int nb_segment , segment_model *mod
       delete [] variance[i];
     }
 
-    else if (model_type[i - 1] == AUTOREGRESSIVE_MODEL_CHANGE) {
+    else if ((model_type[i - 1] == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type[i - 1] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE)) {
       if ((index != I_DEFAULT) || (!common_contrast)) {
         for (j = 0;j < nb_sequence;j++) {
           if ((index == I_DEFAULT) || (index == j)) {
@@ -1402,12 +1402,12 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
 
   piecewise_function = new double**[nb_variable];
   for (i = 1;i < nb_variable;i++) {
-    if ((model_type[i - 1] == POISSON_CHANGE) ||
-        (model_type[i - 1] == NEGATIVE_BINOMIAL_0_CHANGE) || (model_type[i - 1] == NEGATIVE_BINOMIAL_1_CHANGE) ||
-        (model_type[i - 1] == GAUSSIAN_CHANGE) || (model_type[0] == MEAN_CHANGE) ||
+    if ((model_type[i - 1] == POISSON_CHANGE) || (model_type[i - 1] == NEGATIVE_BINOMIAL_0_CHANGE) ||
+        (model_type[i - 1] == NEGATIVE_BINOMIAL_1_CHANGE) || (model_type[i - 1] == GAUSSIAN_CHANGE) ||
+        (model_type[0] == MEAN_CHANGE) || (model_type[i - 1] == VARIANCE_CHANGE) ||
         (model_type[i - 1] == LINEAR_MODEL_CHANGE) || (model_type[0] == INTERCEPT_SLOPE_CHANGE) ||
-        (model_type[i - 1] == VARIANCE_CHANGE) || (model_type[i - 1] == BAYESIAN_POISSON_CHANGE) ||
-        (model_type[i - 1] == BAYESIAN_GAUSSIAN_CHANGE)) {
+        (model_type[i - 1] == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type[i - 1] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE) ||
+        (model_type[i - 1] == BAYESIAN_POISSON_CHANGE) || (model_type[i - 1] == BAYESIAN_GAUSSIAN_CHANGE)) {
       piecewise_function[i] = new double*[nb_sequence];
       for (j = 0;j < nb_sequence;j++) {
         if ((index == I_DEFAULT) || (index == j)) {
@@ -1925,12 +1925,12 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
   delete [] backward_output;
 
   for (i = 1;i < nb_variable;i++) {
-    if ((model_type[i - 1] == POISSON_CHANGE) ||
-        (model_type[i - 1] == NEGATIVE_BINOMIAL_0_CHANGE) || (model_type[i - 1] == NEGATIVE_BINOMIAL_1_CHANGE) ||
-        (model_type[i - 1] == GAUSSIAN_CHANGE) || (model_type[0] == MEAN_CHANGE) ||
+    if ((model_type[i - 1] == POISSON_CHANGE) || (model_type[i - 1] == NEGATIVE_BINOMIAL_0_CHANGE) ||
+        (model_type[i - 1] == NEGATIVE_BINOMIAL_1_CHANGE) || (model_type[i - 1] == GAUSSIAN_CHANGE) ||
+        (model_type[0] == MEAN_CHANGE) || (model_type[i - 1] == VARIANCE_CHANGE) ||
         (model_type[i - 1] == LINEAR_MODEL_CHANGE) || (model_type[0] == INTERCEPT_SLOPE_CHANGE) ||
-        (model_type[i - 1] == VARIANCE_CHANGE) || (model_type[i - 1] == BAYESIAN_POISSON_CHANGE) ||
-        (model_type[i - 1] == BAYESIAN_GAUSSIAN_CHANGE)) {
+        (model_type[i - 1] == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type[i - 1] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE) ||
+        (model_type[i - 1] == BAYESIAN_POISSON_CHANGE) || (model_type[i - 1] == BAYESIAN_GAUSSIAN_CHANGE)) {
       for (j = 0;j < nb_sequence;j++) {
         delete [] piecewise_function[i][j];
       }
@@ -2512,8 +2512,9 @@ bool Sequences::segment_profile_plot_write(StatError &error , const char *prefix
           for (k = 1;k < seq->nb_variable;k++) {
             if ((model_type[k - 1] == POISSON_CHANGE) || (model_type[k - 1] == NEGATIVE_BINOMIAL_0_CHANGE) ||
                 (model_type[k - 1] == NEGATIVE_BINOMIAL_1_CHANGE) || (model_type[k - 1] == GAUSSIAN_CHANGE) ||
-                (model_type[0] == MEAN_CHANGE) || (model_type[k - 1] == LINEAR_MODEL_CHANGE) ||
-                (model_type[0] == INTERCEPT_SLOPE_CHANGE) || (model_type[k - 1] == VARIANCE_CHANGE) ||
+                (model_type[0] == MEAN_CHANGE) || (model_type[k - 1] == VARIANCE_CHANGE) ||
+                (model_type[k - 1] == LINEAR_MODEL_CHANGE) || (model_type[0] == INTERCEPT_SLOPE_CHANGE) ||
+                (model_type[k - 1] == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type[k - 1] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE) ||
                 (model_type[k - 1] == BAYESIAN_POISSON_CHANGE) || (model_type[k - 1] == BAYESIAN_GAUSSIAN_CHANGE)) {
               out_file << "set title \"";
               if (title) {
@@ -2945,8 +2946,9 @@ MultiPlotSet* Sequences::segment_profile_plotable_write(StatError &error , int i
     for (i = 1;i < seq->nb_variable;i++) {
       if ((model_type[i - 1] == POISSON_CHANGE) || (model_type[i - 1] == NEGATIVE_BINOMIAL_0_CHANGE) ||
           (model_type[i - 1] == NEGATIVE_BINOMIAL_1_CHANGE) || (model_type[i - 1] == GAUSSIAN_CHANGE) ||
-          (model_type[0] == MEAN_CHANGE) || (model_type[i - 1] == LINEAR_MODEL_CHANGE) ||
-          (model_type[0] == INTERCEPT_SLOPE_CHANGE) || (model_type[i - 1] == VARIANCE_CHANGE) ||
+          (model_type[0] == MEAN_CHANGE) || (model_type[i - 1] == VARIANCE_CHANGE) ||
+          (model_type[i - 1] == LINEAR_MODEL_CHANGE) || (model_type[0] == INTERCEPT_SLOPE_CHANGE) ||
+          (model_type[i - 1] == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type[i - 1] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE) ||
           (model_type[i - 1] == BAYESIAN_POISSON_CHANGE) || (model_type[i - 1] == BAYESIAN_GAUSSIAN_CHANGE)) {
         nb_plot_set++;
       }
@@ -3006,8 +3008,9 @@ MultiPlotSet* Sequences::segment_profile_plotable_write(StatError &error , int i
       for (j = 1;j < seq->nb_variable;j++) {
         if ((model_type[j - 1] == POISSON_CHANGE) || (model_type[j - 1] == NEGATIVE_BINOMIAL_0_CHANGE) ||
             (model_type[j - 1] == NEGATIVE_BINOMIAL_1_CHANGE) || (model_type[j - 1] == GAUSSIAN_CHANGE) ||
-            (model_type[0] == MEAN_CHANGE) || (model_type[j - 1] == LINEAR_MODEL_CHANGE) ||
-            (model_type[0] == INTERCEPT_SLOPE_CHANGE) || (model_type[j - 1] == VARIANCE_CHANGE) ||
+            (model_type[0] == MEAN_CHANGE) || (model_type[j - 1] == VARIANCE_CHANGE) ||
+            (model_type[j - 1] == LINEAR_MODEL_CHANGE) || (model_type[0] == INTERCEPT_SLOPE_CHANGE) ||
+            (model_type[j - 1] == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type[j - 1] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE) ||
             (model_type[j - 1] == BAYESIAN_POISSON_CHANGE) || (model_type[j - 1] == BAYESIAN_GAUSSIAN_CHANGE)) {
           if (seq->nb_variable > 2) {
             title.str("");

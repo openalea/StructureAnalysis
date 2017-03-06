@@ -238,7 +238,6 @@ const char *SEQ_label[] = {
   "confidence interval" ,
   "confidence intervals" ,
   "autoregressive coefficient" ,
-  "95% confidence limits for a null autoregressive coefficient" ,
   "number of segments" ,
   "posterior probability" ,
   "dimension jump" ,

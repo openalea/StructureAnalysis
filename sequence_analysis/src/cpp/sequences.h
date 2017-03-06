@@ -201,6 +201,7 @@ namespace sequence_analysis {
     SEQUENCE ,
     TREND ,
     SUBTRACTION_RESIDUAL ,
+    ABSOLUTE_RESIDUAL ,
     DIVISION_RESIDUAL ,
     STANDARDIZED_RESIDUAL ,
     SEGMENTATION_ENTROPY ,
@@ -586,7 +587,7 @@ namespace sequence_analysis {
                                      bool common_contrast , int *change_point , int *seq_index_parameter ,
                                      double **piecewise_function , double **imean = NULL , double **variance = NULL ,
                                      double *global_variance = NULL , double **iintercept = NULL , double **islope = NULL ,
-                                     double **autoregressive_coeff = NULL , double **correlation = NULL ,
+                                     double **iautoregressive_coeff = NULL , double **correlation = NULL ,
                                      double **slope_standard_deviation = NULL , double **iindex_parameter_mean = NULL ,
                                      long double **iindex_parameter_variance = NULL , double **determination_coeff = NULL) const;
     std::ostream& piecewise_linear_function_ascii_print(std::ostream &os , int index , int variable , int nb_segment ,
@@ -787,13 +788,13 @@ namespace sequence_analysis {
     Sequences* sequence_normalization(stat_tool::StatError &error , int variable = stat_tool::I_DEFAULT) const;
     Sequences* moving_average(stat_tool::StatError &error , int nb_point , double *filter ,
                               int variable = stat_tool::I_DEFAULT , bool begin_end = false ,
-                              sequence_type output = TREND) const;
+                              bool segmentation = false , sequence_type output = TREND) const;
     Sequences* moving_average(stat_tool::StatError &error , int nb_point , std::vector<double> filter ,
                               int variable = stat_tool::I_DEFAULT , bool begin_end = false ,
-                              sequence_type output = TREND) const;
+                              bool segmentation = false , sequence_type output = TREND) const;
     Sequences* moving_average(stat_tool::StatError &error , const stat_tool::Distribution &dist ,
                               int variable = stat_tool::I_DEFAULT , bool begin_end = false ,
-                              sequence_type output = TREND) const;
+                              bool segmentation = false , sequence_type output = TREND) const;
 
     Sequences* pointwise_average(stat_tool::StatError &error , bool robust = false , bool circular = false ,
                                  bool dispersion = false , sequence_type output = SEQUENCE ,

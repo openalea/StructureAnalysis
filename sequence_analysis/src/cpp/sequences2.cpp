@@ -2658,7 +2658,7 @@ Sequences* Sequences::merge_variable(StatError &error , int nb_sample ,
                 ostringstream error_message;
                 error_message << STAT_label[STATL_SAMPLE] << " " << i + 2 << ": "
                               << SEQ_label[SEQL_SEQUENCE] << " " << j + 1 << ": "
-                              << SEQ_label[SEQL_INDEX_PARAMETER] << " " << k << ": "
+                              << SEQ_label[SEQL_INDEX] << " " << k << ": "
                               << SEQ_error[SEQR_INDEX_PARAMETER];
                 error.update((error_message.str()).c_str());
               }
@@ -2962,7 +2962,7 @@ Sequences* Sequences::difference_variable(StatError &error , const Sequences &re
               status = false;
               ostringstream error_message;
               error_message << SEQ_label[SEQL_SEQUENCE] << " " << i + 1 << ": "
-                            << SEQ_label[SEQL_INDEX_PARAMETER] << " " << j << ": "
+                            << SEQ_label[SEQL_INDEX] << " " << j << ": "
                             << SEQ_error[SEQR_INDEX_PARAMETER];
               error.update((error_message.str()).c_str());
             }
@@ -3276,7 +3276,7 @@ Sequences* Sequences::shift_variable(StatError &error , int variable , int lag) 
         else {
           prsequence = seq->real_sequence[i][j];
 
-          if ((j != variable) && (lag > 0))  {
+          if ((j != variable) && (lag > 0)) {
             crsequence = real_sequence[index[i]][j] + lag;
           }
           else if ((j == variable) && (lag < 0)) {
@@ -5143,6 +5143,7 @@ Sequences* Sequences::sequence_normalization(StatError &error , int variable) co
  *  \param[in] filter    filter,
  *  \param[in] variable  variable index,
  *  \param[in] begin_end begin and end kept or not,
+ *  \param[in] state     smoothing by segment or not using the state variable,
  *  \param[in] output    trend, substraction residuals or division residuals.
  *
  *  \return              Sequences object.
@@ -5150,15 +5151,16 @@ Sequences* Sequences::sequence_normalization(StatError &error , int variable) co
 /*--------------------------------------------------------------*/
 
 Sequences* Sequences::moving_average(StatError &error , int nb_point , double *filter ,
-                                     int variable , bool begin_end , sequence_type output) const
+                                     int variable , bool begin_end , bool segmentation ,
+                                     sequence_type output) const
 
 {
   bool status = true;
-  register int i , j , k , m , n;
-  int offset , inb_variable , *ilength , *pvertex_id , *cvertex_id , *pindex_param , *cindex_param ,
-      *pisequence , *cisequence;
+  register int i , j , k , m , n , p;
+  int offset , inb_variable , nb_segment , *ilength , *pvertex_id , *cvertex_id , *pindex_param , *cindex_param ,
+      *pisequence , *cisequence , *change_point;
   variable_nature *itype;
-  double *prsequence , *crsequence , *ppoint;
+  double *prsequence , *crsequence , *pfilter;
   Sequences *seq;
 
 
@@ -5348,181 +5350,364 @@ Sequences* Sequences::moving_average(StatError &error , int nb_point , double *f
 
     // filtering using a symmetric smoothing filter
 
-    for (i = 0;i < nb_sequence;i++) {
-      j = offset;
-      for (k = offset;k < nb_variable;k++) {
-        if ((variable == I_DEFAULT) || (variable == k)) {
-          prsequence = seq->real_sequence[i][output == SEQUENCE ? j + 1 : j];
+    if ((type[0] == STATE) && (begin_end) && (segmentation)) {
+      change_point = new int[max_length];
 
-          switch (type[k]) {
+      for (i = 0;i < nb_sequence;i++) {
+        change_point[0] = 0;
+        j = 1;
+        for (k = 1;k < length[i];k++) {
+          if (int_sequence[i][0][k] != int_sequence[i][0][k - 1]) {
+            change_point[j++] = k;
+          }
+        }
+        change_point[j] = length[i];
+        nb_segment = j;
 
-          case INT_VALUE : {
-            if (begin_end) {
-              for (m = 0;m < MIN(nb_point , length[i]);m++) {
-                cisequence = int_sequence[i][k];
-                ppoint = filter;
-                *prsequence = 0.;
-                for (n = 0;n < 2 * nb_point + 1;n++) {
-                  *prsequence += *cisequence * *ppoint++;
-                  if ((m - nb_point + n >= 0) && (m - nb_point + n < length[i] - 1)) {
-                    cisequence++;
+        j = 1;
+        for (k = 1;k < nb_variable;k++) {
+          if ((variable == I_DEFAULT) || (variable == k)) {
+            prsequence = seq->real_sequence[i][output == SEQUENCE ? j + 1 : j];
+
+            switch (type[k]) {
+
+            case INT_VALUE : {
+              for (m = 0;m < nb_segment;m++) {
+                for (n = change_point[m];n < MIN(change_point[m] + nb_point , change_point[m + 1]);n++) {
+                  cisequence = int_sequence[i][k] + change_point[m];
+                  pfilter = filter;
+                  *prsequence = 0.;
+                  for (p = 0;p < 2 * nb_point + 1;p++) {
+                    *prsequence += *cisequence * *pfilter++;
+                    if ((n - nb_point + p >= change_point[m]) && (n - nb_point + p < change_point[m + 1] - 1)) {
+                      cisequence++;
+                    }
                   }
+                  prsequence++;
                 }
-                prsequence++;
-              }
-            }
 
-            for (m = nb_point;m < length[i] - nb_point;m++) {
-              cisequence = int_sequence[i][k] + m - nb_point;
-              ppoint = filter;
-              *prsequence = 0.;
-              for (n = 0;n < 2 * nb_point + 1;n++) {
-                *prsequence += *cisequence++ * *ppoint++;
-              }
-              prsequence++;
-            }
-
-            if (begin_end) {
-              for (m = MAX(length[i] - nb_point , nb_point);m < length[i];m++) {
-                cisequence = int_sequence[i][k] + m - nb_point;
-                ppoint = filter;
-                *prsequence = 0.;
-                for (n = 0;n < 2 * nb_point + 1;n++) {
-                  *prsequence += *cisequence * *ppoint++;
-                  if ((m - nb_point + n >= 0) && (m - nb_point + n < length[i] - 1)) {
-                    cisequence++;
+                for (n = change_point[m] + nb_point;n < change_point[m + 1] - nb_point;n++) {
+                  cisequence = int_sequence[i][k] + n - nb_point;
+                  pfilter = filter;
+                  *prsequence = 0.;
+                  for (p = 0;p < 2 * nb_point + 1;p++) {
+                    *prsequence += *cisequence++ * *pfilter++;
                   }
+                  prsequence++;
                 }
-                prsequence++;
-              }
-            }
 
-            if (begin_end) {
+                for (n = MAX(change_point[m + 1] - nb_point , change_point[m] + nb_point);n < change_point[m + 1];n++) {
+                  cisequence = int_sequence[i][k] + n - nb_point;
+                  pfilter = filter;
+                  *prsequence = 0.;
+                  for (p = 0;p < 2 * nb_point + 1;p++) {
+                    *prsequence += *cisequence * *pfilter++;
+                    if (n - nb_point + p < change_point[m + 1] - 1) {
+                      cisequence++;
+                    }
+                  }
+                  prsequence++;
+                }
+              }
+
               cisequence = int_sequence[i][k];
-            }
-            else {
-              cisequence = int_sequence[i][k] + nb_point;
-            }
 
-            switch (output) {
+              switch (output) {
 
-            case SEQUENCE : {
-              pisequence = seq->int_sequence[i][j];
-              for (m = 0;m < seq->length[i];m++) {
-                *pisequence++ = *cisequence++;
-              }
-              break;
-            }
-
-            case SUBTRACTION_RESIDUAL : {
-              prsequence = seq->real_sequence[i][j];
-              for (m = 0;m < seq->length[i];m++) {
-                *prsequence = *cisequence++ - *prsequence;
-                prsequence++;
-              }
-              break;
-            }
-
-            case DIVISION_RESIDUAL : {
-              prsequence = seq->real_sequence[i][j];
-              for (m = 0;m < seq->length[i];m++) {
-                if (*prsequence != 0.) {
-                  *prsequence = *cisequence / *prsequence;
+              case SEQUENCE : {
+                pisequence = seq->int_sequence[i][j];
+                for (m = 0;m < seq->length[i];m++) {
+                  *pisequence++ = *cisequence++;
                 }
-                prsequence++;
-                cisequence++;
+                break;
               }
-              break;
-            }
-            }
-            break;
-          }
 
-          case REAL_VALUE : {
-            if (begin_end) {
-              for (m = 0;m < MIN(nb_point , length[i]);m++) {
-                crsequence = real_sequence[i][k];
-                ppoint = filter;
-                *prsequence = 0.;
-                for (n = 0;n < 2 * nb_point + 1;n++) {
-                  *prsequence += *crsequence * *ppoint++;
-                  if ((m - nb_point + n >= 0) && (m - nb_point + n < length[i] - 1)) {
-                    crsequence++;
+              case SUBTRACTION_RESIDUAL : {
+                prsequence = seq->real_sequence[i][j];
+                for (m = 0;m < seq->length[i];m++) {
+                  *prsequence = *cisequence++ - *prsequence;
+                  prsequence++;
+                }
+                break;
+              }
+
+              case DIVISION_RESIDUAL : {
+                prsequence = seq->real_sequence[i][j];
+                for (m = 0;m < seq->length[i];m++) {
+                  if (*prsequence != 0.) {
+                    *prsequence = *cisequence / *prsequence;
                   }
+                  prsequence++;
+                  cisequence++;
                 }
-                prsequence++;
+                break;
               }
+              }
+              break;
             }
 
-            for (m = nb_point;m < length[i] - nb_point;m++) {
-              crsequence = real_sequence[i][k] + m - nb_point;
-              ppoint = filter;
-              *prsequence = 0.;
-              for (n = 0;n < 2 * nb_point + 1;n++) {
-                *prsequence += *crsequence++ * *ppoint++;
-              }
-              prsequence++;
-            }
-
-            if (begin_end) {
-              for (m = MAX(length[i] - nb_point , nb_point);m < length[i];m++) {
-                crsequence = real_sequence[i][k] + m - nb_point;
-                ppoint = filter;
-                *prsequence = 0.;
-                for (n = 0;n < 2 * nb_point + 1;n++) {
-                  *prsequence += *crsequence * *ppoint++;
-                  if ((m - nb_point + n >= 0) && (m - nb_point + n < length[i] - 1)) {
-                    crsequence++;
+            case REAL_VALUE : {
+              for (m = 0;m < nb_segment;m++) {
+                for (n = change_point[m];n < MIN(change_point[m] + nb_point , change_point[m + 1]);n++) {
+                  crsequence = real_sequence[i][k] + change_point[m];
+                  pfilter = filter;
+                  *prsequence = 0.;
+                  for (p = 0;p < 2 * nb_point + 1;p++) {
+                    *prsequence += *crsequence * *pfilter++;
+                    if ((n - nb_point + p >= change_point[m]) && (n - nb_point + p < change_point[m + 1] - 1)) {
+                      crsequence++;
+                    }
                   }
+                  prsequence++;
                 }
-                prsequence++;
-              }
-            }
 
-            prsequence = seq->real_sequence[i][j];
-            if (begin_end) {
+                for (n = change_point[m] + nb_point;n < change_point[m + 1] - nb_point;n++) {
+                  crsequence = real_sequence[i][k] + n - nb_point;
+                  pfilter = filter;
+                  *prsequence = 0.;
+                  for (p = 0;p < 2 * nb_point + 1;p++) {
+                    *prsequence += *crsequence++ * *pfilter++;
+                  }
+                  prsequence++;
+                }
+
+                for (n = MAX(change_point[m + 1] - nb_point , change_point[m] + nb_point);n < change_point[m + 1];n++) {
+                  crsequence = real_sequence[i][k] + n - nb_point;
+                  pfilter = filter;
+                  *prsequence = 0.;
+                  for (p = 0;p < 2 * nb_point + 1;p++) {
+                    *prsequence += *crsequence * *pfilter++;
+                    if (n - nb_point + p < change_point[m + 1] - 1) {
+                      crsequence++;
+                    }
+                  }
+                  prsequence++;
+                }
+              }
+
+              prsequence = seq->real_sequence[i][j];
               crsequence = real_sequence[i][k];
-            }
-            else {
-              crsequence = real_sequence[i][k] + nb_point;
-            }
 
-            switch (output) {
+              switch (output) {
 
-            case SEQUENCE : {
-              for (m = 0;m < seq->length[i];m++) {
-                *prsequence++ = *crsequence++;
-              }
-              break;
-            }
-
-            case SUBTRACTION_RESIDUAL : {
-              for (m = 0;m < seq->length[i];m++) {
-                *prsequence = *crsequence++ - *prsequence;
-                prsequence++;
-              }
-              break;
-            }
-
-            case DIVISION_RESIDUAL : {
-              for (m = 0;m < seq->length[i];m++) {
-                if (*prsequence != 0.) {
-                  *prsequence = *crsequence / *prsequence;
+              case SEQUENCE : {
+                for (m = 0;m < seq->length[i];m++) {
+                  *prsequence++ = *crsequence++;
                 }
-                prsequence++;
-                crsequence++;
+                break;
+              }
+
+              case SUBTRACTION_RESIDUAL : {
+                for (m = 0;m < seq->length[i];m++) {
+                  *prsequence = *crsequence++ - *prsequence;
+                  prsequence++;
+                }
+                break;
+              }
+
+              case DIVISION_RESIDUAL : {
+                for (m = 0;m < seq->length[i];m++) {
+                  if (*prsequence != 0.) {
+                    *prsequence = *crsequence / *prsequence;
+                  }
+                  prsequence++;
+                  crsequence++;
+                }
+                break;
+              }
               }
               break;
             }
             }
-            break;
-          }
-          }
 
-          if (output == SEQUENCE) {
+            if (output == SEQUENCE) {
+              j++;
+            }
             j++;
           }
-          j++;
+        }
+      }
+
+      delete [] change_point;
+    }
+
+    else {
+      for (i = 0;i < nb_sequence;i++) {
+        j = offset;
+        for (k = offset;k < nb_variable;k++) {
+          if ((variable == I_DEFAULT) || (variable == k)) {
+            prsequence = seq->real_sequence[i][output == SEQUENCE ? j + 1 : j];
+
+            switch (type[k]) {
+
+            case INT_VALUE : {
+              if (begin_end) {
+                for (m = 0;m < MIN(nb_point , length[i]);m++) {
+                  cisequence = int_sequence[i][k];
+                  pfilter = filter;
+                  *prsequence = 0.;
+                  for (n = 0;n < 2 * nb_point + 1;n++) {
+                    *prsequence += *cisequence * *pfilter++;
+                    if ((m - nb_point + n >= 0) && (m - nb_point + n < length[i] - 1)) {
+                      cisequence++;
+                    }
+                  }
+                  prsequence++;
+                }
+              }
+
+              for (m = nb_point;m < length[i] - nb_point;m++) {
+                cisequence = int_sequence[i][k] + m - nb_point;
+                pfilter = filter;
+                *prsequence = 0.;
+                for (n = 0;n < 2 * nb_point + 1;n++) {
+                  *prsequence += *cisequence++ * *pfilter++;
+                }
+                prsequence++;
+              }
+
+              if (begin_end) {
+                for (m = MAX(length[i] - nb_point , nb_point);m < length[i];m++) {
+                  cisequence = int_sequence[i][k] + m - nb_point;
+                  pfilter = filter;
+                  *prsequence = 0.;
+                  for (n = 0;n < 2 * nb_point + 1;n++) {
+                    *prsequence += *cisequence * *pfilter++;
+                    if (m - nb_point + n < length[i] - 1) {
+                      cisequence++;
+                    }
+                  }
+                  prsequence++;
+                }
+              }
+
+              if (begin_end) {
+                cisequence = int_sequence[i][k];
+              }
+              else {
+                cisequence = int_sequence[i][k] + nb_point;
+              }
+
+              switch (output) {
+
+              case SEQUENCE : {
+                pisequence = seq->int_sequence[i][j];
+                for (m = 0;m < seq->length[i];m++) {
+                  *pisequence++ = *cisequence++;
+                }
+                break;
+              }
+
+              case SUBTRACTION_RESIDUAL : {
+                prsequence = seq->real_sequence[i][j];
+                for (m = 0;m < seq->length[i];m++) {
+                  *prsequence = *cisequence++ - *prsequence;
+                  prsequence++;
+                }
+                break;
+              }
+
+              case DIVISION_RESIDUAL : {
+                prsequence = seq->real_sequence[i][j];
+                for (m = 0;m < seq->length[i];m++) {
+                  if (*prsequence != 0.) {
+                    *prsequence = *cisequence / *prsequence;
+                  }
+                  prsequence++;
+                  cisequence++;
+                }
+                break;
+              }
+              }
+              break;
+            }
+
+            case REAL_VALUE : {
+              if (begin_end) {
+                for (m = 0;m < MIN(nb_point , length[i]);m++) {
+                  crsequence = real_sequence[i][k];
+                  pfilter = filter;
+                  *prsequence = 0.;
+                  for (n = 0;n < 2 * nb_point + 1;n++) {
+                  *prsequence += *crsequence * *pfilter++;
+                    if ((m - nb_point + n >= 0) && (m - nb_point + n < length[i] - 1)) {
+                      crsequence++;
+                    }
+                  }
+                  prsequence++;
+                }
+              }
+
+              for (m = nb_point;m < length[i] - nb_point;m++) {
+                crsequence = real_sequence[i][k] + m - nb_point;
+                pfilter = filter;
+                *prsequence = 0.;
+                for (n = 0;n < 2 * nb_point + 1;n++) {
+                  *prsequence += *crsequence++ * *pfilter++;
+                }
+                prsequence++;
+              }
+
+              if (begin_end) {
+                for (m = MAX(length[i] - nb_point , nb_point);m < length[i];m++) {
+                  crsequence = real_sequence[i][k] + m - nb_point;
+                  pfilter = filter;
+                  *prsequence = 0.;
+                  for (n = 0;n < 2 * nb_point + 1;n++) {
+                    *prsequence += *crsequence * *pfilter++;
+                    if (m - nb_point + n < length[i] - 1) {
+                      crsequence++;
+                    }
+                  }
+                  prsequence++;
+                }
+              }
+
+              prsequence = seq->real_sequence[i][j];
+              if (begin_end) {
+                crsequence = real_sequence[i][k];
+              }
+              else {
+                crsequence = real_sequence[i][k] + nb_point;
+              }
+
+              switch (output) {
+
+              case SEQUENCE : {
+                for (m = 0;m < seq->length[i];m++) {
+                  *prsequence++ = *crsequence++;
+                }
+                break;
+              }
+
+              case SUBTRACTION_RESIDUAL : {
+                for (m = 0;m < seq->length[i];m++) {
+                  *prsequence = *crsequence++ - *prsequence;
+                  prsequence++;
+                }
+                break;
+              }
+
+              case DIVISION_RESIDUAL : {
+                for (m = 0;m < seq->length[i];m++) {
+                  if (*prsequence != 0.) {
+                    *prsequence = *crsequence / *prsequence;
+                  }
+                  prsequence++;
+                  crsequence++;
+                }
+                break;
+              }
+              }
+              break;
+            }
+            }
+
+            if (output == SEQUENCE) {
+              j++;
+            }
+            j++;
+          }
         }
       }
     }
@@ -5591,6 +5776,7 @@ Sequences* Sequences::moving_average(StatError &error , int nb_point , double *f
  *  \param[in] filter    filter,
  *  \param[in] variable  variable index,
  *  \param[in] begin_end begin and end kept or not,
+ *  \param[in] state     smoothing by segment or not using the state variable,
  *  \param[in] output    trend, substraction residuals or division residuals.
  *
  *  \return              Sequences object.
@@ -5598,10 +5784,11 @@ Sequences* Sequences::moving_average(StatError &error , int nb_point , double *f
 /*--------------------------------------------------------------*/
 
 Sequences* Sequences::moving_average(StatError &error , int nb_point , vector<double> filter ,
-                                     int variable , bool begin_end , sequence_type output) const
+                                     int variable , bool begin_end , bool segmentation ,
+                                     sequence_type output) const
 
 {
-  return moving_average(error , nb_point , filter.data() , variable , begin_end , output);
+  return moving_average(error , nb_point , filter.data() , variable , begin_end , segmentation , output);
 }
 
 
@@ -5613,6 +5800,7 @@ Sequences* Sequences::moving_average(StatError &error , int nb_point , vector<do
  *  \param[in] dist      symmetric discrete distribution,
  *  \param[in] variable  variable index,
  *  \param[in] begin_end begin and end kept or not,
+ *  \param[in] state     smoothing by segment or not using the state variable,
  *  \param[in] output    trend, substraction residuals or division residuals.
  *
  *  \return              Sequences object.
@@ -5620,7 +5808,8 @@ Sequences* Sequences::moving_average(StatError &error , int nb_point , vector<do
 /*--------------------------------------------------------------*/
 
 Sequences* Sequences::moving_average(StatError &error , const Distribution &dist ,
-                                     int variable , bool begin_end , sequence_type output) const
+                                     int variable , bool begin_end , bool segmentation ,
+                                     sequence_type output) const
 
 {
   bool status = true;
@@ -5645,7 +5834,7 @@ Sequences* Sequences::moving_average(StatError &error , const Distribution &dist
 
   if (status) {
     seq = moving_average(error , dist.nb_value / 2 , dist.mass , variable ,
-                         begin_end , output);
+                         begin_end , segmentation , output);
   }
 
   return seq;
