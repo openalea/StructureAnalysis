@@ -40,10 +40,9 @@
 #include <sstream>
 #include <iomanip>
 
-#include "tool/rw_tokenizer.h"
-#include "tool/rw_cstring.h"
-#include "tool/rw_locale.h"
-#include "tool/config.h"
+#include <boost/tokenizer.hpp>
+#include <boost/algorithm/string/trim.hpp>
+#include <boost/algorithm/string/classification.hpp>
 
 #include "stat_tool/stat_label.h"
 
@@ -51,6 +50,7 @@
 #include "sequence_label.h"
 
 using namespace std;
+using namespace boost;
 using namespace stat_tool;
 
 
@@ -935,8 +935,10 @@ SemiMarkov* SemiMarkov::ascii_read(StatError &error , const string path , int le
                                    bool counting_flag , double cumul_threshold)
 
 {
-  RWCString buffer , token;
+  string buffer;
   size_t position;
+  typedef tokenizer<char_separator<char>> tokenizer;
+  char_separator<char> separator(" \t");
   process_type type = DEFAULT_TYPE;
   bool status;
   register int i;
@@ -968,30 +970,30 @@ SemiMarkov* SemiMarkov::ascii_read(StatError &error , const string path , int le
       error.update(SEQ_error[SEQR_LONG_SEQUENCE_LENGTH]);
     }
 
-    while (buffer.readLine(in_file , false)) {
+    while (getline(in_file , buffer)) {
       line++;
 
 #     ifdef DEBUG
       cout << line << "  " << buffer << endl;
 #     endif
 
-      position = buffer.first('#');
-      if (position != RW_NPOS) {
-        buffer.remove(position);
+      position = buffer.find('#');
+      if (position != string::npos) {
+        buffer.erase(position);
       }
       i = 0;
 
-      RWCTokenizer next(buffer);
+      tokenizer tok_buffer(buffer , separator);
 
-      while (!((token = next()).isNull())) {
+      for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
 
         // test (EQUILIBRIUM_)SEMI-MARKOV_CHAIN keyword
 
         if (i == 0) {
-          if (token == SEQ_word[SEQW_SEMI_MARKOV_CHAIN]) {
+          if (*token == SEQ_word[SEQW_SEMI_MARKOV_CHAIN]) {
             type = ORDINARY;
           }
-          else if (token == SEQ_word[SEQW_EQUILIBRIUM_SEMI_MARKOV_CHAIN]) {
+          else if (*token == SEQ_word[SEQW_EQUILIBRIUM_SEMI_MARKOV_CHAIN]) {
             type = EQUILIBRIUM;
           }
           else {
@@ -1036,27 +1038,27 @@ SemiMarkov* SemiMarkov::ascii_read(StatError &error , const string path , int le
 
         observation = NULL;
 
-        while (buffer.readLine(in_file , false)) {
+        while (getline(in_file , buffer)) {
           line++;
 
 #         ifdef DEBUG
           cout << line << "  " << buffer << endl;
 #         endif
 
-          position = buffer.first('#');
-          if (position != RW_NPOS) {
-            buffer.remove(position);
+          position = buffer.find('#');
+          if (position != string::npos) {
+            buffer.erase(position);
           }
           i = 0;
 
-          RWCTokenizer next(buffer);
+          tokenizer tok_buffer(buffer , separator);
 
-          while (!((token = next()).isNull())) {
+          for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
 
             // test OUTPUT_PROCESS keyword
 
             if (i == 0) {
-              if (token != STAT_word[STATW_OUTPUT_PROCESS]) {
+              if (*token != STAT_word[STATW_OUTPUT_PROCESS]) {
                 status = false;
                 error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_OUTPUT_PROCESS] , line);
               }
@@ -1081,18 +1083,18 @@ SemiMarkov* SemiMarkov::ascii_read(StatError &error , const string path , int le
           }
         }
 
-        while (buffer.readLine(in_file , false)) {
+        while (getline(in_file , buffer)) {
           line++;
 
 #         ifdef DEBUG
           cout << line << "  " << buffer << endl;
 #         endif
 
-          position = buffer.first('#');
-          if (position != RW_NPOS) {
-            buffer.remove(position);
+          position = buffer.find('#');
+          if (position != string::npos) {
+            buffer.erase(position);
           }
-          if (!(buffer.isNull())) {
+          if (!(trim_right_copy_if(buffer , is_any_of(" \t")).empty())) {
             status = false;
             error.update(STAT_parsing[STATP_FORMAT] , line);
           }
@@ -1152,10 +1154,10 @@ ostream& SemiMarkov::ascii_write(ostream &os , const SemiMarkovData *seq ,
   FrequencyDistribution *marginal_dist = NULL , **observation_dist = NULL;
   Histogram *marginal_histo = NULL , **observation_histo = NULL;
   SequenceCharacteristics *characteristics = NULL;
-  long old_adjust;
+  ios_base::fmtflags format_flags;
 
 
-  old_adjust = os.setf(ios::left , ios::adjustfield);
+  format_flags = os.setf(ios::left , ios::adjustfield);
 
   switch (hidden) {
 
@@ -1359,109 +1361,109 @@ ostream& SemiMarkov::ascii_write(ostream &os , const SemiMarkovData *seq ,
 
         characteristics = seq->characteristics[variable];
       }
+    }
 
-      if (categorical_process[i]) {
-        categorical_process[i]->ascii_print(os , i + 1 , observation_dist , marginal_dist ,
-                                            characteristics , exhaustive , file_flag);
+    if (categorical_process[i]) {
+      categorical_process[i]->ascii_print(os , i + 1 , observation_dist , marginal_dist ,
+                                          characteristics , exhaustive , file_flag);
 
-        if (hidden) {
-          for (j = 0;j < nb_state;j++) {
-            distance[j][j] = 0.;
+      if (hidden) {
+        for (j = 0;j < nb_state;j++) {
+          distance[j][j] = 0.;
 
-            for (k = j + 1;k < nb_state;k++) {
-              if ((transition[j][k] > MIN_PROBABILITY) || (transition[k][j] > MIN_PROBABILITY)) {
-                distance[j][k] = categorical_process[i]->observation[j]->overlap_distance_computation(*(categorical_process[i]->observation[k]));
-              }
-              else {
-                distance[j][k] = 1.;
-              }
-
-              distance[k][j] = distance[j][k];
+          for (k = j + 1;k < nb_state;k++) {
+            if ((transition[j][k] > MIN_PROBABILITY) || (transition[k][j] > MIN_PROBABILITY)) {
+              distance[j][k] = categorical_process[i]->observation[j]->overlap_distance_computation(*(categorical_process[i]->observation[k]));
             }
+            else {
+              distance[j][k] = 1.;
+            }
+
+            distance[k][j] = distance[j][k];
           }
         }
       }
+    }
 
-      else if (discrete_parametric_process[i]) {
-        discrete_parametric_process[i]->ascii_print(os , observation_dist , marginal_dist ,
+    else if (discrete_parametric_process[i]) {
+      discrete_parametric_process[i]->ascii_print(os , observation_dist , marginal_dist ,
+                                                  exhaustive , file_flag);
+
+      if (hidden) {
+        for (j = 0;j < nb_state;j++) {
+          distance[j][j] = 0.;
+
+          for (k = j + 1;k < nb_state;k++) {
+            if ((transition[j][k] > MIN_PROBABILITY) || (transition[k][j] > MIN_PROBABILITY)) {
+              distance[j][k] = discrete_parametric_process[i]->observation[j]->sup_norm_distance_computation(*(discrete_parametric_process[i]->observation[k]));
+            }
+            else {
+              distance[j][k] = 1.;
+            }
+
+            distance[k][j] = distance[j][k];
+          }
+        }
+      }
+    }
+
+    else if ((continuous_parametric_process[i]->ident != LINEAR_MODEL) &&
+             (continuous_parametric_process[i]->ident != AUTOREGRESSIVE_MODEL)) {
+      continuous_parametric_process[i]->ascii_print(os , observation_histo , observation_dist ,
+                                                    marginal_histo , marginal_dist ,
                                                     exhaustive , file_flag);
 
-        if (hidden) {
-          for (j = 0;j < nb_state;j++) {
-            distance[j][j] = 0.;
+      if (hidden) {
+        for (j = 0;j < nb_state;j++) {
+          distance[j][j] = 0.;
 
-            for (k = j + 1;k < nb_state;k++) {
-              if ((transition[j][k] > MIN_PROBABILITY) || (transition[k][j] > MIN_PROBABILITY)) {
-                distance[j][k] = discrete_parametric_process[i]->observation[j]->sup_norm_distance_computation(*(discrete_parametric_process[i]->observation[k]));
-              }
-              else {
-                distance[j][k] = 1.;
-              }
-
-              distance[k][j] = distance[j][k];
+          for (k = j + 1;k < nb_state;k++) {
+            if ((transition[j][k] > MIN_PROBABILITY) || (transition[k][j] > MIN_PROBABILITY)) {
+              distance[j][k] = continuous_parametric_process[i]->observation[j]->sup_norm_distance_computation(*(continuous_parametric_process[i]->observation[k]));
             }
+            else {
+              distance[j][k] = 1.;
+            }
+
+            distance[k][j] = distance[j][k];
           }
         }
       }
+    }
 
-      else if ((continuous_parametric_process[i]->ident != LINEAR_MODEL) &&
-               (continuous_parametric_process[i]->ident != AUTOREGRESSIVE_MODEL)) {
-        continuous_parametric_process[i]->ascii_print(os , observation_histo , observation_dist ,
-                                                      marginal_histo , marginal_dist ,
-                                                      exhaustive , file_flag);
-
-        if (hidden) {
-          for (j = 0;j < nb_state;j++) {
-            distance[j][j] = 0.;
-
-            for (k = j + 1;k < nb_state;k++) {
-              if ((transition[j][k] > MIN_PROBABILITY) || (transition[k][j] > MIN_PROBABILITY)) {
-                distance[j][k] = continuous_parametric_process[i]->observation[j]->sup_norm_distance_computation(*(continuous_parametric_process[i]->observation[k]));
-              }
-              else {
-                distance[j][k] = 1.;
-              }
-
-              distance[k][j] = distance[j][k];
-            }
-          }
+    if ((hidden) && ((categorical_process[i]) || (discrete_parametric_process[i]) ||
+         ((continuous_parametric_process[i]) && (continuous_parametric_process[i]->ident != LINEAR_MODEL) &&
+          (continuous_parametric_process[i]->ident != AUTOREGRESSIVE_MODEL)))) {
+      width = column_width(nb_state , distance[0]);
+      for (j = 1;j < nb_state;j++) {
+        buff = column_width(nb_state , distance[j]);
+        if (buff > width) {
+          width = buff;
         }
       }
+      width += ASCII_SPACE;
 
-      if ((hidden) && ((categorical_process[i]) || (discrete_parametric_process[i]) ||
-           ((continuous_parametric_process[i]) && (continuous_parametric_process[i]->ident != LINEAR_MODEL) &&
-            (continuous_parametric_process[i]->ident != AUTOREGRESSIVE_MODEL)))) {
-        width = column_width(nb_state , distance[0]);
-        for (j = 1;j < nb_state;j++) {
-          buff = column_width(nb_state , distance[j]);
-          if (buff > width) {
-            width = buff;
-          }
-        }
-        width += ASCII_SPACE;
+      os.setf(ios::left , ios::adjustfield);
 
-        os.setf(ios::left , ios::adjustfield);
+      os << "\n";
+      if (file_flag) {
+        os << "# ";
+      }
+      os << STAT_label[STATL_CONSECUTIVE_STATE_OBSERVATION_DISTRIBUTION_DISTANCE] << endl;
 
-        os << "\n";
+      for (j = 0;j < nb_state;j++) {
         if (file_flag) {
           os << "# ";
         }
-        os << STAT_label[STATL_CONSECUTIVE_STATE_OBSERVATION_DISTRIBUTION_DISTANCE] << endl;
-
-        for (j = 0;j < nb_state;j++) {
-          if (file_flag) {
-            os << "# ";
+        for (k = 0;k < nb_state;k++) {
+          if ((k != j) && (transition[j][k] > MIN_PROBABILITY)) {
+            os << setw(width) << distance[j][k];
           }
-          for (k = 0;k < nb_state;k++) {
-            if ((k != j) && (transition[j][k] > MIN_PROBABILITY)) {
-              os << setw(width) << distance[j][k];
-            }
-            else {
-              os << setw(width) << "_";
-            }
+          else {
+            os << setw(width) << "_";
           }
-          os << endl;
         }
+        os << endl;
       }
     }
   }
@@ -1625,7 +1627,7 @@ ostream& SemiMarkov::ascii_write(ostream &os , const SemiMarkovData *seq ,
     }
   }
 
-  os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
+  os.setf(format_flags , ios::adjustfield);
 
   return os;
 }
@@ -1821,69 +1823,69 @@ ostream& SemiMarkov::spreadsheet_write(ostream &os , const SemiMarkovData *seq ,
 
         characteristics = seq->characteristics[variable];
       }
+    }
 
-      if (categorical_process[i]) {
-        categorical_process[i]->spreadsheet_print(os , i + 1 , observation_dist , marginal_dist ,
-                                                  characteristics);
+    if (categorical_process[i]) {
+      categorical_process[i]->spreadsheet_print(os , i + 1 , observation_dist , marginal_dist ,
+                                                characteristics);
 
-        if (hidden) {
-          for (j = 0;j < nb_state;j++) {
-            for (k = j + 1;k < nb_state;k++) {
-              if ((transition[j][k] > MIN_PROBABILITY) || (transition[k][j] > MIN_PROBABILITY)) {
-                distance[j][k] = categorical_process[i]->observation[j]->overlap_distance_computation(*(categorical_process[i]->observation[k]));
-                distance[k][j] = distance[j][k];
-              }
-            }
-          }
-        }
-      }
-
-      else if (discrete_parametric_process[i]) {
-        discrete_parametric_process[i]->spreadsheet_print(os , observation_dist , marginal_dist);
-
-        if (hidden) {
-          for (j = 0;j < nb_state;j++) {
-            for (k = j + 1;k < nb_state;k++) {
-              if ((transition[j][k] > MIN_PROBABILITY) || (transition[k][j] > MIN_PROBABILITY)) {
-                distance[j][k] = discrete_parametric_process[i]->observation[j]->sup_norm_distance_computation(*(discrete_parametric_process[i]->observation[k]));
-                distance[k][j] = distance[j][k];
-              }
-            }
-          }
-        }
-      }
-
-      else if ((continuous_parametric_process[i]->ident != LINEAR_MODEL) &&
-               (continuous_parametric_process[i]->ident != AUTOREGRESSIVE_MODEL)) {
-        continuous_parametric_process[i]->spreadsheet_print(os , observation_histo , observation_dist ,
-                                                            marginal_histo , marginal_dist);
-
-        if (hidden) {
-          for (j = 0;j < nb_state;j++) {
-            for (k = j + 1;k < nb_state;k++) {
-              if ((transition[j][k] > MIN_PROBABILITY) || (transition[k][j] > MIN_PROBABILITY)) {
-                distance[j][k] = continuous_parametric_process[i]->observation[j]->sup_norm_distance_computation(*(continuous_parametric_process[i]->observation[k]));
-                distance[k][j] = distance[j][k];
-              }
-            }
-          }
-        }
-      }
-
-      if ((hidden) && ((categorical_process[i]) || (discrete_parametric_process[i]) ||
-           ((continuous_parametric_process[i]) && (continuous_parametric_process[i]->ident != LINEAR_MODEL) &&
-            (continuous_parametric_process[i]->ident != AUTOREGRESSIVE_MODEL)))) {
-        os << "\n" << STAT_label[STATL_CONSECUTIVE_STATE_OBSERVATION_DISTRIBUTION_DISTANCE] << endl;
-
+      if (hidden) {
         for (j = 0;j < nb_state;j++) {
-          for (k = 0;k < nb_state;k++) {
-            if ((k != j) && (transition[j][k] > MIN_PROBABILITY)) {
-              os << distance[j][k];
+          for (k = j + 1;k < nb_state;k++) {
+            if ((transition[j][k] > MIN_PROBABILITY) || (transition[k][j] > MIN_PROBABILITY)) {
+              distance[j][k] = categorical_process[i]->observation[j]->overlap_distance_computation(*(categorical_process[i]->observation[k]));
+              distance[k][j] = distance[j][k];
             }
-            os << "\t";
           }
-          os << endl;
         }
+      }
+    }
+
+    else if (discrete_parametric_process[i]) {
+      discrete_parametric_process[i]->spreadsheet_print(os , observation_dist , marginal_dist);
+
+      if (hidden) {
+        for (j = 0;j < nb_state;j++) {
+          for (k = j + 1;k < nb_state;k++) {
+            if ((transition[j][k] > MIN_PROBABILITY) || (transition[k][j] > MIN_PROBABILITY)) {
+              distance[j][k] = discrete_parametric_process[i]->observation[j]->sup_norm_distance_computation(*(discrete_parametric_process[i]->observation[k]));
+              distance[k][j] = distance[j][k];
+            }
+          }
+        }
+      }
+    }
+
+    else if ((continuous_parametric_process[i]->ident != LINEAR_MODEL) &&
+             (continuous_parametric_process[i]->ident != AUTOREGRESSIVE_MODEL)) {
+      continuous_parametric_process[i]->spreadsheet_print(os , observation_histo , observation_dist ,
+                                                          marginal_histo , marginal_dist);
+
+      if (hidden) {
+        for (j = 0;j < nb_state;j++) {
+          for (k = j + 1;k < nb_state;k++) {
+            if ((transition[j][k] > MIN_PROBABILITY) || (transition[k][j] > MIN_PROBABILITY)) {
+              distance[j][k] = continuous_parametric_process[i]->observation[j]->sup_norm_distance_computation(*(continuous_parametric_process[i]->observation[k]));
+              distance[k][j] = distance[j][k];
+            }
+          }
+        }
+      }
+    }
+
+    if ((hidden) && ((categorical_process[i]) || (discrete_parametric_process[i]) ||
+         ((continuous_parametric_process[i]) && (continuous_parametric_process[i]->ident != LINEAR_MODEL) &&
+          (continuous_parametric_process[i]->ident != AUTOREGRESSIVE_MODEL)))) {
+      os << "\n" << STAT_label[STATL_CONSECUTIVE_STATE_OBSERVATION_DISTRIBUTION_DISTANCE] << endl;
+
+      for (j = 0;j < nb_state;j++) {
+        for (k = 0;k < nb_state;k++) {
+          if ((k != j) && (transition[j][k] > MIN_PROBABILITY)) {
+            os << distance[j][k];
+          }
+          os << "\t";
+        }
+        os << endl;
       }
     }
   }

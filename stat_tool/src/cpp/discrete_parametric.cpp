@@ -41,14 +41,15 @@
 #include <string>
 #include <sstream>
 
-#include "tool/rw_tokenizer.h"
-#include "tool/rw_cstring.h"
-#include "tool/rw_locale.h"
+#include <boost/tokenizer.hpp>
+#include <boost/algorithm/string/trim.hpp>
+#include <boost/algorithm/string/classification.hpp>
 
 #include "distribution.h"
 #include "stat_label.h"
 
 using namespace std;
+using namespace boost;
 
 
 namespace stat_tool {
@@ -392,41 +393,43 @@ DiscreteParametric* DiscreteParametric::parsing(StatError &error , ifstream &in_
                                                 double cumul_threshold , int min_inf_bound)
 
 {
-  RWLocaleSnapshot locale("en");
-  RWCString buffer , token;
+  string buffer;
   size_t position;
+  typedef tokenizer<char_separator<char>> tokenizer;
+  char_separator<char> separator(" \t");
   bool status = true , lstatus;
   register int i , j;
   discrete_parametric ident = CATEGORICAL;
-  long inf_bound , sup_bound = I_DEFAULT;
+  int inf_bound , sup_bound = I_DEFAULT;
   double parameter = D_DEFAULT , probability = D_DEFAULT;
   DiscreteParametric *dist;
 
 
   dist = NULL;
 
-  while (buffer.readLine(in_file , false)) {
+  while (getline(in_file , buffer)) {
     line++;
 
 #   ifdef DEBUG
     cout << line << " " << buffer << endl;
 #   endif
 
-    position = buffer.first('#');
-    if (position != RW_NPOS) {
-      buffer.remove(position);
+    position = buffer.find('#');
+    if (position != string::npos) {
+      buffer.erase(position);
     }
     i = 0;
 
-    RWCTokenizer next(buffer);
+    tokenizer tok_buffer(buffer , separator);
 
-    while (!((token = next()).isNull())) {
+//    for (auto &token : tok_buffer)  {   in C++ 11, entails replacing pointer by reference for token
+    for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
 
       // test distribution name
 
       if (i == 0) {
         for (j = BINOMIAL;j <= last_ident;j++) {
-          if (token == STAT_discrete_distribution_word[j]) {
+          if (*token == STAT_discrete_distribution_word[j]) {
             ident = (discrete_parametric)j;
             break;
           }
@@ -449,7 +452,7 @@ DiscreteParametric* DiscreteParametric::parsing(StatError &error , ifstream &in_
           // 1st parameter: lower bound
 
           case 0 : {
-            if (token != STAT_word[STATW_INF_BOUND]) {
+            if (*token !=  STAT_word[STATW_INF_BOUND]) {
               status = false;
               error.correction_update(STAT_parsing[STATP_PARAMETER_NAME] , STAT_word[STATW_INF_BOUND] , line , i + 1);
             }
@@ -459,14 +462,13 @@ DiscreteParametric* DiscreteParametric::parsing(StatError &error , ifstream &in_
           // 2nd parameter: upper bound (binomial, uniform) or parameter (Poisson, negative binomial, Poisson geometric)
 
           case 1 : {
-            if (((ident == BINOMIAL) || (ident == UNIFORM)) &&
-                (token != STAT_word[STATW_SUP_BOUND])) {
+            if (((ident == BINOMIAL) || (ident == UNIFORM)) && (*token != STAT_word[STATW_SUP_BOUND])) {
               status = false;
               error.correction_update(STAT_parsing[STATP_PARAMETER_NAME] , STAT_word[STATW_SUP_BOUND] , line , i + 1);
             }
 
             if (((ident == POISSON) || (ident == NEGATIVE_BINOMIAL) || (ident == POISSON_GEOMETRIC)) &&
-                (token != STAT_word[STATW_PARAMETER])) {
+                (*token != STAT_word[STATW_PARAMETER])) {
               status = false;
               error.correction_update(STAT_parsing[STATP_PARAMETER_NAME] , STAT_word[STATW_PARAMETER] , line , i + 1);
             }
@@ -477,7 +479,7 @@ DiscreteParametric* DiscreteParametric::parsing(StatError &error , ifstream &in_
 
           case 2 : {
             if (((ident == BINOMIAL) || (ident == NEGATIVE_BINOMIAL) || (ident == POISSON_GEOMETRIC)) &&
-                (token != STAT_word[STATW_PROBABILITY])) {
+                (*token != STAT_word[STATW_PROBABILITY])) {
               status = false;
               error.correction_update(STAT_parsing[STATP_PARAMETER_NAME] , STAT_word[STATW_PROBABILITY] , line , i + 1);
             }
@@ -491,7 +493,7 @@ DiscreteParametric* DiscreteParametric::parsing(StatError &error , ifstream &in_
         // test separator
 
         case 1 : {
-          if (token != ":") {
+          if (*token != ":") {
             status = false;
             error.update(STAT_parsing[STATP_SEPARATOR] , line , i + 1);
           }
@@ -501,12 +503,21 @@ DiscreteParametric* DiscreteParametric::parsing(StatError &error , ifstream &in_
         // test parameter value
 
         case 2 : {
+          lstatus = true;
+
           switch ((i - 1) / 3) {
 
           // 1st parameter: lower bound
 
           case 0 : {
-            lstatus = locale.stringToNum(token , &inf_bound);
+/*            try {
+              inf_bound = stoi(*token);   in C++ 11
+            }
+            catch (invalid_argument &arg) {
+              lstatus = false;
+            } */
+            inf_bound = atoi(token->c_str());
+
             if ((lstatus) && ((inf_bound < min_inf_bound) || (inf_bound > MAX_INF_BOUND))) {
               lstatus = false;
             }
@@ -517,7 +528,13 @@ DiscreteParametric* DiscreteParametric::parsing(StatError &error , ifstream &in_
 
           case 1 : {
             if ((ident == BINOMIAL) || (ident == UNIFORM)) {
-              lstatus = locale.stringToNum(token , &sup_bound);
+/*              try {
+                sup_bound = stoi(*token);   in C++ 11
+              }
+              catch(invalid_argument &arg) {
+                lstatus = false;
+              } */
+              sup_bound = atoi(token->c_str());
 
               if ((lstatus) && (status)) {
                 switch (ident) {
@@ -540,9 +557,15 @@ DiscreteParametric* DiscreteParametric::parsing(StatError &error , ifstream &in_
             }
 
             if ((ident == POISSON) || (ident == NEGATIVE_BINOMIAL) || (ident == POISSON_GEOMETRIC)) {
-              lstatus = locale.stringToNum(token , &parameter);
-              if ((lstatus) && ((parameter <= 0.) ||
-                   ((ident == POISSON) && (parameter > MAX_MEAN)))) {
+/*              try {
+                parameter = stod(*token);   in C++ 11
+              }
+              catch(invalid_argument &arg) {
+                lstatus = false;
+              } */
+              parameter = atof(token->c_str());
+
+              if ((lstatus) && ((parameter <= 0.) || ((ident == POISSON) && (parameter > MAX_MEAN)))) {
                 lstatus = false;
               }
             }
@@ -553,7 +576,13 @@ DiscreteParametric* DiscreteParametric::parsing(StatError &error , ifstream &in_
 
           case 2 : {
             if ((ident == BINOMIAL) || (ident == NEGATIVE_BINOMIAL) || (ident == POISSON_GEOMETRIC)) {
-              lstatus = locale.stringToNum(token , &probability);
+/*              try {
+                probability = stod(*token);   in C++ 11
+              }
+              catch(invalid_argument &arg) {
+                lstatus = false;
+              } */
+              probability = atof(token->c_str());
 
               if (lstatus) {
                 switch (ident) {
@@ -827,13 +856,16 @@ ostream& DiscreteParametric::plot_title_print(ostream &os) const
 ostream& operator<<(ostream &os , const DiscreteParametric &dist)
 
 {
-  os.precision(5);
+  streamsize nb_digits;
+
+
+  nb_digits = os.precision(5);
 
   os << endl;
   dist.ascii_print(os);
   dist.Distribution::print(os);
 
-  os.precision(6);
+  os.precision(nb_digits);
 
   return os;
 }
@@ -1334,7 +1366,7 @@ DiscreteParametricModel* DiscreteParametricModel::ascii_read(StatError &error , 
                                                              double cumul_threshold)
 
 {
-  RWCString buffer;
+  string buffer;
   size_t position;
   bool status;
   int line;
@@ -1361,18 +1393,18 @@ DiscreteParametricModel* DiscreteParametricModel::ascii_read(StatError &error , 
       status = false;
     }
 
-    while (buffer.readLine(in_file , false)) {
+    while (getline(in_file , buffer)) {
       line++;
 
 #     ifdef DEBUG
       cout << line << " " << buffer << endl;
 #     endif
 
-      position = buffer.first('#');
-      if (position != RW_NPOS) {
-        buffer.remove(position);
+      position = buffer.find('#');
+      if (position != string::npos) {
+        buffer.erase(position);
       }
-      if (!(buffer.isNull())) {
+      if (!(trim_right_copy_if(buffer , is_any_of(" \t")).empty())) {
         status = false;
         error.update(STAT_parsing[STATP_FORMAT] , line);
       }

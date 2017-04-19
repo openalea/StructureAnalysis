@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -38,20 +38,18 @@
 
 #include <math.h>
 
+#include <boost/tokenizer.hpp>
+
 #include <boost/math/distributions/gamma.hpp>
 #include <boost/math/distributions/inverse_gaussian.hpp>
 #include <boost/math/distributions/normal.hpp>
 #include <boost/math/special_functions/bessel.hpp>
 
-#include "tool/rw_tokenizer.h"
-#include "tool/rw_cstring.h"
-#include "tool/rw_locale.h"
-#include "tool/config.h"
-
 #include "markovian.h"
 #include "stat_label.h"
 
 using namespace std;
+using namespace boost;
 using namespace boost::math;
 
 
@@ -255,12 +253,13 @@ ContinuousParametricProcess* ContinuousParametricProcess::parsing(StatError &err
                                                                   continuous_parametric last_ident)
 
 {
-  RWLocaleSnapshot locale("en");
-  RWCString buffer , token;
+  string buffer;
   size_t position;
+  typedef tokenizer<char_separator<char>> tokenizer;
+  char_separator<char> separator(" \t");
   bool status = true , lstatus;
   register int i , j;
-  long index;
+  int index;
   ContinuousParametric **dist;
   ContinuousParametricProcess *process;
 
@@ -273,22 +272,23 @@ ContinuousParametricProcess* ContinuousParametricProcess::parsing(StatError &err
   }
 
   for (i = 0;i < nb_state;i++) {
-    while (buffer.readLine(in_file , false)) {
+    while (getline(in_file , buffer)) {
       line++;
 
 #     ifdef DEBUG
       cout << line << "  " << buffer << endl;
 #     endif
 
-      position = buffer.first('#');
-      if (position != RW_NPOS) {
-        buffer.remove(position);
+      position = buffer.find('#');
+      if (position != string::npos) {
+        buffer.erase(position);
       }
+
       j = 0;
 
-      RWCTokenizer next(buffer);
+      tokenizer tok_buffer(buffer , separator);
 
-      while (!((token = next()).isNull())) {
+      for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
         switch (j) {
 
         // test COMPONENT/STATE keyword
@@ -297,7 +297,7 @@ ContinuousParametricProcess* ContinuousParametricProcess::parsing(StatError &err
           switch (model) {
 
           case MIXTURE : {
-            if (token != STAT_word[STATW_COMPONENT]) {
+            if (*token != STAT_word[STATW_COMPONENT]) {
               status = false;
               error.correction_update(STAT_parsing[STATP_KEYWORD] ,
                                       STAT_word[STATW_COMPONENT] , line , j + 1);
@@ -306,7 +306,7 @@ ContinuousParametricProcess* ContinuousParametricProcess::parsing(StatError &err
           }
 
           case HIDDEN_MARKOV : {
-            if (token != STAT_word[STATW_STATE]) {
+            if (*token != STAT_word[STATW_STATE]) {
               status = false;
               error.correction_update(STAT_parsing[STATP_KEYWORD] ,
                                       STAT_word[STATW_STATE] , line , j + 1);
@@ -320,7 +320,16 @@ ContinuousParametricProcess* ContinuousParametricProcess::parsing(StatError &err
         // test component/state index
 
         case 1 : {
-          lstatus = locale.stringToNum(token , &index);
+          lstatus = true;
+
+/*          try {
+            index = stoi(*token);   in C++ 11
+          }
+          catch(invalid_argument &arg) {
+            lstatus = false;
+          } */
+          index = atoi(token->c_str());
+
           if ((lstatus) && (index != i)) {
             lstatus = false;
           }
@@ -343,8 +352,8 @@ ContinuousParametricProcess* ContinuousParametricProcess::parsing(StatError &err
         // test OBSERVATION_DISTRIBUTION keyword
 
         case 2 : {
-          if ((token != STAT_word[STATW_OBSERVATION_DISTRIBUTION]) &&
-              (token != STAT_word[STATW_OBSERVATION_MODEL])) {
+          if ((*token != STAT_word[STATW_OBSERVATION_DISTRIBUTION]) &&
+              (*token != STAT_word[STATW_OBSERVATION_MODEL])) {
             status = false;
             error.correction_update(STAT_parsing[STATP_KEYWORD] ,
                                     STAT_word[STATW_OBSERVATION_DISTRIBUTION] , line , j + 1);
@@ -376,6 +385,11 @@ ContinuousParametricProcess* ContinuousParametricProcess::parsing(StatError &err
 
         break;
       }
+    }
+
+    if ((j == 0) && (!dist[i])) {
+      status = false;
+      error.update(STAT_parsing[STATP_FORMAT] , line);
     }
   }
 
@@ -437,13 +451,15 @@ ostream& ContinuousParametricProcess::ascii_print(ostream &os , Histogram **obse
 {
   register int i , j , k;
   int nb_step , nb_element , buff , width[5];
-  long old_adjust;
   double step , value , min_value , max_value , mass , *observation_cumul ,
          **frequency , **cumul;
   boost::math::gamma_distribution<double> **gamma_dist;
   inverse_gaussian **inverse_gaussian_dist;
   normal **gaussian_dist;
+  ios_base::fmtflags format_flags;
 
+
+  format_flags = os.setf(ios::right , ios::adjustfield);
 
   if ((marginal_histogram) || (marginal_distribution)) {
     if (marginal_histogram) {
@@ -731,10 +747,6 @@ ostream& ContinuousParametricProcess::ascii_print(ostream &os , Histogram **obse
       }
 
       if (exhaustive) {
-        if (i == 0) {
-          old_adjust = os.setf(ios::right , ios::adjustfield);
-        }
-
         if (observation_histogram) {
           nb_element = observation_histogram[i]->nb_element;
         }
@@ -1339,9 +1351,9 @@ ostream& ContinuousParametricProcess::ascii_print(ostream &os , Histogram **obse
       delete [] cumul[i];
     }
     delete [] cumul;
-
-    os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
   }
+
+  os.setf(format_flags , ios::adjustfield);
 
   return os;
 }
@@ -4798,7 +4810,7 @@ ostream& ContinuousParametricProcess::interval_computation(ostream &os)
 
     for (j = 1;j < nb_step;j++) {
       value += step;
-      if  (posterior[i][j] > max_posterior) {
+      if (posterior[i][j] > max_posterior) {
         max_posterior = posterior[i][j];
         posterior_mode = j;
         posterior_value = value;

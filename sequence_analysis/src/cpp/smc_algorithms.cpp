@@ -758,7 +758,7 @@ void SemiMarkovData::build_transition_count(const SemiMarkov *smarkov)
  *  \brief Estimation of a semi-Markov chain.
  *
  *  \param[in] error          reference on a StatError object,
- *  \param[in] os             stream,
+ *  \param[in] display        flag for displaying estimation intermediate results,
  *  \param[in] itype          process type (ORDINARY/EQUILIBRIUM),
  *  \param[in] estimator      estimator type for the reestimation of the state occupancy distribution
  *                            (complete or partial likelihood),
@@ -771,7 +771,7 @@ void SemiMarkovData::build_transition_count(const SemiMarkov *smarkov)
  */
 /*--------------------------------------------------------------*/
 
-SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostream &os , process_type itype ,
+SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , bool display , process_type itype ,
                                                        censoring_estimator estimator , bool counting_flag , int nb_iter ,
                                                        duration_distribution_mean_estimator mean_estimator) const
 
@@ -1029,27 +1029,23 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostrea
                                                                                *(initial_run[i]) , *(final_run[i]) ,
                                                                                *(single_run[i]));
 
-#               ifdef MESSAGE
-                if ((j < 10) || ((j < 100) && (j % 10 == 0)) || ((j < 1000) && (j % 100 == 0)) || (j % 1000 == 0)) {
-                  os << STAT_label[STATL_ITERATION] << " " << j << "   "
-                     << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
-                     << STAT_label[STATL_SMOOTHNESS] << ": " << occupancy->second_difference_norm_computation() << endl;
+                if ((display) && ((j < 10) || ((j < 100) && (j % 10 == 0)) || ((j < 1000) && (j % 100 == 0)) || (j % 1000 == 0))) {
+                  cout << STAT_label[STATL_ITERATION] << " " << j << "   "
+                       << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
+                       << STAT_label[STATL_SMOOTHNESS] << ": " << occupancy->second_difference_norm_computation() << endl;
                 }
-#               endif
-
               }
               while ((likelihood != D_INF) && (((nb_iter == I_DEFAULT) && (j < OCCUPANCY_NB_ITER) &&
                        ((likelihood - previous_likelihood) / -likelihood > OCCUPANCY_LIKELIHOOD_DIFF)) ||
                       ((nb_iter != I_DEFAULT) && (j < nb_iter))));
 
               if (likelihood != D_INF) {
-
-#               ifdef MESSAGE
-                os << "\n" << STAT_label[STATL_STATE] << " " << i << " - "
-                   << j << " " << STAT_label[STATL_ITERATIONS] << "   "
-                   << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
-                   << STAT_label[STATL_SMOOTHNESS] << ": " << occupancy->second_difference_norm_computation() << "\n" << endl;
-#               endif
+                if (display) {
+                  cout << "\n" << STAT_label[STATL_STATE] << " " << i << " - "
+                       << j << " " << STAT_label[STATL_ITERATIONS] << "   "
+                       << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
+                       << STAT_label[STATL_SMOOTHNESS] << ": " << occupancy->second_difference_norm_computation() << "\n" << endl;
+                }
 
                 hreestim = new FrequencyDistribution(MAX(occupancy->alloc_nb_value , max_length + 1));
 
@@ -1093,14 +1089,11 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostrea
                       nb_likelihood_decrease = 0;
                     }
 
-#                   ifdef MESSAGE
-                    if ((j < 10) || ((j < 100) && (j % 10 == 0)) || ((j < 1000) && (j % 100 == 0)) || (j % 1000 == 0)) {
-                      os << STAT_label[STATL_ITERATION] << " " << j << "   "
-                         << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
-                         << STAT_label[STATL_SMOOTHNESS] << ": " << occupancy->second_difference_norm_computation() << endl;
+                    if ((display) && ((j < 10) || ((j < 100) && (j % 10 == 0)) || ((j < 1000) && (j % 100 == 0)) || (j % 1000 == 0))) {
+                      cout << STAT_label[STATL_ITERATION] << " " << j << "   "
+                           << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
+                           << STAT_label[STATL_SMOOTHNESS] << ": " << occupancy->second_difference_norm_computation() << endl;
                     }
-#                   endif
-
                   }
                 }
                 while ((likelihood != D_INF) && (j < OCCUPANCY_NB_ITER) &&
@@ -1110,14 +1103,12 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostrea
                 delete hreestim;
 
                 if (likelihood != D_INF) {
-
-#                 ifdef MESSAGE
-                  os << "\n" << STAT_label[STATL_STATE] << " " << i << " - "
-                     << j << " " << STAT_label[STATL_ITERATIONS] << "   "
-                     << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
-                     << STAT_label[STATL_SMOOTHNESS] << ": " << occupancy->second_difference_norm_computation() << "\n" << endl;
-#                 endif
-
+                  if (display) {
+                    cout << "\n" << STAT_label[STATL_STATE] << " " << i << " - "
+                         << j << " " << STAT_label[STATL_ITERATIONS] << "   "
+                         << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
+                         << STAT_label[STATL_SMOOTHNESS] << ": " << occupancy->second_difference_norm_computation() << "\n" << endl;
+                  }
                 }
 
                 else {
@@ -1176,27 +1167,23 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostrea
               likelihood = occupancy->state_occupancy_likelihood_computation(*(seq->characteristics[0]->sojourn_time[i]) ,
                                                                              *pfinal_run);
 
-#             ifdef MESSAGE
-              if ((j < 10) || ((j < 100) && (j % 10 == 0)) || ((j < 1000) && (j % 100 == 0)) || (j % 1000 == 0)) {
-                os << STAT_label[STATL_ITERATION] << " " << j << "   "
-                   << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
-                   << STAT_label[STATL_SMOOTHNESS] << ": " << occupancy->second_difference_norm_computation() << endl;
+              if ((display) && ((j < 10) || ((j < 100) && (j % 10 == 0)) || ((j < 1000) && (j % 100 == 0)) || (j % 1000 == 0))) {
+                cout << STAT_label[STATL_ITERATION] << " " << j << "   "
+                     << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
+                     << STAT_label[STATL_SMOOTHNESS] << ": " << occupancy->second_difference_norm_computation() << endl;
               }
-#             endif
-
             }
             while ((likelihood != D_INF) && (((nb_iter == I_DEFAULT) && (j < OCCUPANCY_NB_ITER) &&
                      ((likelihood - previous_likelihood) / -likelihood > OCCUPANCY_LIKELIHOOD_DIFF)) ||
                     ((nb_iter != I_DEFAULT) && (j < nb_iter))));
 
             if (likelihood != D_INF) {
-
-#             ifdef MESSAGE
-              os << "\n" << STAT_label[STATL_STATE] << " " << i << " - "
-                 << j << " " << STAT_label[STATL_ITERATIONS] << "   "
-                 << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
-                 << STAT_label[STATL_SMOOTHNESS] << ": " << occupancy->second_difference_norm_computation() << "\n" << endl;
-#             endif
+              if (display) {
+                cout << "\n" << STAT_label[STATL_STATE] << " " << i << " - "
+                     << j << " " << STAT_label[STATL_ITERATIONS] << "   "
+                     << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
+                     << STAT_label[STATL_SMOOTHNESS] << ": " << occupancy->second_difference_norm_computation() << "\n" << endl;
+              }
 
               hreestim = new FrequencyDistribution(MAX(occupancy->alloc_nb_value , max_length + 1));
 
@@ -1235,14 +1222,11 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostrea
                     nb_likelihood_decrease = 0;
                   }
 
-#                 ifdef MESSAGE
-                  if ((j < 10) || ((j < 100) && (j % 10 == 0)) || ((j < 1000) && (j % 100 == 0)) || (j % 1000 == 0)) {
-                    os << STAT_label[STATL_ITERATION] << " " << j << "   "
-                       << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
-                       << STAT_label[STATL_SMOOTHNESS] << ": " << occupancy->second_difference_norm_computation() << endl;
+                  if ((display) && ((j < 10) || ((j < 100) && (j % 10 == 0)) || ((j < 1000) && (j % 100 == 0)) || (j % 1000 == 0))) {
+                    cout << STAT_label[STATL_ITERATION] << " " << j << "   "
+                         << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
+                         << STAT_label[STATL_SMOOTHNESS] << ": " << occupancy->second_difference_norm_computation() << endl;
                   }
-#                 endif
-
                 }
               }
               while ((likelihood != D_INF) && (j < OCCUPANCY_NB_ITER) &&
@@ -1252,14 +1236,12 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostrea
               delete hreestim;
 
               if (likelihood != D_INF) {
-
-#               ifdef MESSAGE
-                os << "\n" << STAT_label[STATL_STATE] << " " << i << " - "
-                   << j << " " << STAT_label[STATL_ITERATIONS] << "   "
-                   << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
-                   << STAT_label[STATL_SMOOTHNESS] << ": " << occupancy->second_difference_norm_computation() << "\n" << endl;
-#               endif
-
+                if (display) {
+                  cout << "\n" << STAT_label[STATL_STATE] << " " << i << " - "
+                       << j << " " << STAT_label[STATL_ITERATIONS] << "   "
+                       << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
+                       << STAT_label[STATL_SMOOTHNESS] << ": " << occupancy->second_difference_norm_computation() << "\n" << endl;
+                }
               }
 
               else {
@@ -1393,7 +1375,7 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostrea
  *  \brief Comparison of semi-Markov chains for a sample of sequences.
  *
  *  \param[in] error    reference on a StatError object,
- *  \param[in] os       stream,
+ *  \param[in] display  flag for displaying the results of model comparison,
  *  \param[in] nb_model number of semi-Markov chains,
  *  \param[in] ismarkov pointer on SemiMarkov objects,
  *  \param[in] path     file path.
@@ -1402,7 +1384,7 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostrea
  */
 /*--------------------------------------------------------------*/
 
-bool MarkovianSequences::comparison(StatError &error , ostream &os , int nb_model ,
+bool MarkovianSequences::comparison(StatError &error , bool display , int nb_model ,
                                     const SemiMarkov **ismarkov , const string path) const
 
 {
@@ -1514,10 +1496,9 @@ bool MarkovianSequences::comparison(StatError &error , ostream &os , int nb_mode
       }
     }
 
-#   ifdef MESSAGE
-    likelihood_write(os , nb_model , likelihood , SEQ_label[SEQL_SEMI_MARKOV_CHAIN] , true);
-#   endif
-
+    if (display) {
+      likelihood_write(cout , nb_model , likelihood , SEQ_label[SEQL_SEMI_MARKOV_CHAIN] , true);
+    }
     if (!path.empty()) {
       status = likelihood_write(error , path , nb_model , likelihood , SEQ_label[SEQL_SEMI_MARKOV_CHAIN]);
     }
@@ -2032,7 +2013,7 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , int nb_sequence ,
  *  \brief Computation of Kullback-Leibler divergences between semi-Markov chains.
  *
  *  \param[in] error               reference on a StatError object,
- *  \param[in] os                  stream,
+ *  \param[in] display             flag for displaying the matrix of pairwise distances between models,
  *  \param[in] nb_model            number of semi-Markov chains,
  *  \param[in] ismarkov            pointer on SemiMarkov objects,
  *  \param[in] length_distribution sequence length frequency distribution,
@@ -2042,7 +2023,7 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , int nb_sequence ,
  */
 /*--------------------------------------------------------------*/
 
-DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , ostream &os ,
+DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , bool display ,
                                                    int nb_model , const SemiMarkov **ismarkov ,
                                                    FrequencyDistribution **length_distribution ,
                                                    const string path) const
@@ -2166,11 +2147,9 @@ DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , ostream &o
 
       if (!out_file) {
         error.update(STAT_error[STATR_FILE_NAME]);
-
-#       ifdef MESSAGE
-        os << error;
-#       endif
-
+        if (display) {
+          cout << error;
+        }
       }
     }
 
@@ -2197,12 +2176,9 @@ DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , ostream &o
       for (j = 0;j < simul_seq->nb_sequence;j++) {
         likelihood[j][i] = smarkov[i]->likelihood_computation(*simul_seq , j);
 
-#       ifdef MESSAGE
-        if (likelihood[j][i] == D_INF) {
-          os << "\nERROR - " << SEQ_error[SEQR_REFERENCE_MODEL] << ": " << i + 1 << endl;
+        if ((display) && (likelihood[j][i] == D_INF)) {
+          cout << "\nERROR - " << SEQ_error[SEQR_REFERENCE_MODEL] << ": " << i + 1 << endl;
         }
-#       endif
-
       }
 
       if (smarkov[i]->nb_output_process == 1) {
@@ -2242,13 +2218,11 @@ DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , ostream &o
 //            }
           }
 
-#         ifdef MESSAGE
-          if (nb_failure > 0) {
-            os << "\nWARNING - " << SEQ_error[SEQR_REFERENCE_MODEL] << ": " << i + 1 << ", "
-               << SEQ_error[SEQR_TARGET_MODEL] << ": " << j + 1 << " - "
-               << SEQ_error[SEQR_DIVERGENCE_NB_FAILURE] << ": " << nb_failure << endl;
+          if ((display) && (nb_failure > 0)) {
+            cout << "\nWARNING - " << SEQ_error[SEQR_REFERENCE_MODEL] << ": " << i + 1 << ", "
+                 << SEQ_error[SEQR_TARGET_MODEL] << ": " << j + 1 << " - "
+                 << SEQ_error[SEQR_DIVERGENCE_NB_FAILURE] << ": " << nb_failure << endl;
           }
-#         endif
 
 //          if (divergence != -D_INF) {
             dist_matrix->update(i + 1 , j + 1 , divergence , cumul_length);
@@ -2260,12 +2234,11 @@ DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , ostream &o
         }
       }
 
-#     ifdef MESSAGE
-      os << SEQ_label[SEQL_SEMI_MARKOV_CHAIN] << " " << i + 1 << ": " << simul_seq->nb_sequence << " "
-         << SEQ_label[SEQL_SIMULATED] << " " << SEQ_label[simul_seq->nb_sequence == 1 ? SEQL_SEQUENCE : SEQL_SEQUENCES] << endl;
-      simul_seq->likelihood_write(os , nb_model , likelihood , SEQ_label[SEQL_SEMI_MARKOV_CHAIN]);
-#     endif
-
+      if (display) {
+        cout << SEQ_label[SEQL_SEMI_MARKOV_CHAIN] << " " << i + 1 << ": " << simul_seq->nb_sequence << " "
+             << SEQ_label[SEQL_SIMULATED] << " " << SEQ_label[simul_seq->nb_sequence == 1 ? SEQL_SEQUENCE : SEQL_SEQUENCES] << endl;
+        simul_seq->likelihood_write(cout , nb_model , likelihood , SEQ_label[SEQL_SEMI_MARKOV_CHAIN]);
+      }
       if (out_file) {
         *out_file << SEQ_label[SEQL_SEMI_MARKOV_CHAIN] << " " << i + 1 << ": " << simul_seq->nb_sequence << " "
                   << SEQ_label[SEQL_SIMULATED] << " " << SEQ_label[simul_seq->nb_sequence == 1 ? SEQL_SEQUENCE : SEQL_SEQUENCES] << endl;
@@ -2300,7 +2273,7 @@ DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , ostream &o
  *  \brief Computation of Kullback-Leibler divergences between semi-Markov chains.
  *
  *  \param[in] error       reference on a StatError object,
- *  \param[in] os          stream,
+ *  \param[in] display     flag for displaying the matrix of pairwise distances between models,
  *  \param[in] nb_model    number of semi-Markov chains,
  *  \param[in] smarkov     pointer on SemiMarkov objects,
  *  \param[in] nb_sequence number of generated sequences,
@@ -2311,7 +2284,7 @@ DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , ostream &o
  */
 /*--------------------------------------------------------------*/
 
-DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , ostream &os ,
+DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , bool display ,
                                                    int nb_model , const SemiMarkov **smarkov ,
                                                    int nb_sequence , int length , const string path) const
 
@@ -2354,7 +2327,7 @@ DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , ostream &o
       length_distribution[i] = new FrequencyDistribution(*length_distribution[0]);
     }
 
-    dist_matrix = divergence_computation(error , os , nb_model , smarkov , length_distribution , path);
+    dist_matrix = divergence_computation(error , display , nb_model , smarkov , length_distribution , path);
 
     for (i = 0;i < nb_model;i++) {
       delete length_distribution[i];
@@ -2371,7 +2344,7 @@ DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , ostream &o
  *  \brief Computation of Kullback-Leibler divergences between semi-Markov chains.
  *
  *  \param[in] error       reference on a StatError object,
- *  \param[in] os          stream,
+ *  \param[in] display     flag for displaying the matrix of pairwise distances between models,
  *  \param[in] nb_model    number of semi-Markov chains,
  *  \param[in] smarkov     pointer on SemiMarkov objects,
  *  \param[in] nb_sequence number of generated sequences,
@@ -2382,7 +2355,7 @@ DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , ostream &o
  */
 /*--------------------------------------------------------------*/
 
-DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , ostream &os ,
+DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , bool display ,
                                                    int nb_model , const SemiMarkov **smarkov ,
                                                    int nb_sequence , const MarkovianSequences **seq ,
                                                    const string path) const
@@ -2406,7 +2379,7 @@ DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , ostream &o
       length_distribution[i] = seq[i]->length_distribution->frequency_scale(nb_sequence);
     }
 
-    dist_matrix = divergence_computation(error , os , nb_model , smarkov , length_distribution , path);
+    dist_matrix = divergence_computation(error , display , nb_model , smarkov , length_distribution , path);
 
     for (i = 0;i < nb_model;i++) {
       delete length_distribution[i];

@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -1580,12 +1580,12 @@ ostream& DistanceMatrix::ascii_write(ostream &os , bool exhaustive) const
   int dim , max_identifier , buff , cumul_nb_deletion , cumul_nb_insertion , cumul_nb_match ,
       cumul_nb_substitution , cumul_nb_transposition , cumul_nb_operation , *cumul_length ,
       *index , width[2];
-  long old_adjust;
   double cumul_deletion_distance , cumul_insertion_distance , cumul_substitution_distance ,
          cumul_transposition_distance , *distance_vector , *cumul_distance , **normalized_distance;
+  ios_base::fmtflags format_flags;
 
 
-  old_adjust = os.setf(ios::right , ios::adjustfield);
+  format_flags = os.setf(ios::right , ios::adjustfield);
 
   normalized_distance = new double*[nb_row];
   for (i = 0;i < nb_row;i++) {
@@ -1860,7 +1860,7 @@ ostream& DistanceMatrix::ascii_write(ostream &os , bool exhaustive) const
     }
   }
 
-  os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
+  os.setf(format_flags , ios::adjustfield);
 
   return os;
 }

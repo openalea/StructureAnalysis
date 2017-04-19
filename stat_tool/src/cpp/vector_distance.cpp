@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -42,15 +42,13 @@
 #include <sstream>
 #include <iomanip>
 
-#include "tool/rw_tokenizer.h"
-#include "tool/rw_cstring.h"
-#include "tool/rw_locale.h"
-#include "tool/config.h"
+#include <boost/tokenizer.hpp>
 
 #include "vectors.h"
 #include "stat_label.h"
 
 using namespace std;
+using namespace boost;
 
 
 namespace stat_tool {
@@ -340,16 +338,16 @@ VectorDistance& VectorDistance::operator=(const VectorDistance &vector_dist)
 VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
 
 {
-  RWLocaleSnapshot locale("en");
-  RWCString buffer , token;
+  string buffer;
   size_t position;
+  typedef tokenizer<char_separator<char>> tokenizer;
+  char_separator<char> separator(" \t");
   bool status , lstatus , weight_flag;
   register int i , j , k , m;
-  int line , read_line , read_type , nb_variable , variable , category ,
-       nb_value[VECTOR_NB_VARIABLE] , period[VECTOR_NB_VARIABLE];
+  int line , read_line , read_type , nb_variable , value , variable , category ,
+      nb_value[VECTOR_NB_VARIABLE] , period[VECTOR_NB_VARIABLE];
   metric distance_type = ABSOLUTE_VALUE;
   variable_type var_type[VECTOR_NB_VARIABLE];
-  long value;
   double cumul , weight[VECTOR_NB_VARIABLE] , ***category_distance;
   VectorDistance *vector_dist;
   ifstream in_file(path.c_str());
@@ -369,28 +367,37 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
 
     // analysis of the line defining the number of variables
 
-    while (buffer.readLine(in_file , false)) {
+    while (getline(in_file , buffer)) {
       line++;
 
 #     ifdef DEBUG
       cout << line << "  " << buffer << endl;
 #     endif
 
-      position = buffer.first('#');
-      if (position != RW_NPOS) {
-        buffer.remove(position);
+      position = buffer.find('#');
+      if (position != string::npos) {
+        buffer.erase(position);
       }
       i = 0;
 
-      RWCTokenizer next(buffer);
+      tokenizer tok_buffer(buffer , separator);
 
-      while (!((token = next()).isNull())) {
+      for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
         switch (i) {
 
         // test number of variables
 
         case 0 : {
-          lstatus = locale.stringToNum(token , &value);
+          lstatus = true;
+
+/*          try {
+            value = stoi(*token);   in C++ 11
+          }
+          catch(invalid_argument &arg) {
+            lstatus = false;
+          } */
+          value = atoi(token->c_str());
+
           if (lstatus) {
             if ((value < 1) || (value > VECTOR_NB_VARIABLE)) {
               lstatus = false;
@@ -410,7 +417,7 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
         // test VARIABLE(S) keyword
 
         case 1 : {
-          if (token != STAT_word[nb_variable == 1 ? STATW_VARIABLE : STATW_VARIABLES]) {
+          if (*token != STAT_word[nb_variable == 1 ? STATW_VARIABLE : STATW_VARIABLES]) {
             status = false;
             error.correction_update(STAT_parsing[STATP_KEYWORD] ,
                                     STAT_word[nb_variable == 1 ? STATW_VARIABLE : STATW_VARIABLES] , line , i + 1);
@@ -442,28 +449,28 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
 
       // analysis of the line defining the distance type
 
-      while (buffer.readLine(in_file , false)) {
+      while (getline(in_file , buffer)) {
         line++;
 
 #       ifdef DEBUG
         cout << line << "  " << buffer << endl;
 #       endif
 
-        position = buffer.first('#');
-        if (position != RW_NPOS) {
-          buffer.remove(position);
+        position = buffer.find('#');
+        if (position != string::npos) {
+          buffer.erase(position);
         }
         i = 0;
 
-        RWCTokenizer next(buffer);
+        tokenizer tok_buffer(buffer , separator);
 
-        while (!((token = next()).isNull())) {
+        for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
           switch (i) {
 
           // test DISTANCE keyword
 
           case 0 : {
-            if (token != STAT_word[STATW_DISTANCE]) {
+            if (*token != STAT_word[STATW_DISTANCE]) {
               status = false;
               error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_DISTANCE] , line , i + 1);
             }
@@ -473,7 +480,7 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
           // test separator
 
           case 1 : {
-            if (token != ":") {
+            if (*token != ":") {
               status = false;
               error.update(STAT_parsing[STATP_SEPARATOR] , line , i + 1);
             }
@@ -484,7 +491,7 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
 
           case 2 : {
             for (j = ABSOLUTE_VALUE;j <= QUADRATIC;j++) {
-              if (token == STAT_distance_word[j]) {
+              if (*token == STAT_distance_word[j]) {
                 distance_type = (metric)j;
                 break;
               }
@@ -530,30 +537,38 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
       weight_flag = false;
       cumul = 0.;
 
-      while (buffer.readLine(in_file , false)) {
+      while (getline(in_file , buffer)) {
         line++;
 
 #       ifdef DEBUG
         cout << line << "  " << buffer << endl;
 #       endif
 
-        position = buffer.first('#');
-        if (position != RW_NPOS) {
-          buffer.remove(position);
+        position = buffer.find('#');
+        if (position != string::npos) {
+          buffer.erase(position);
         }
         i = 0;
 
-        RWCTokenizer next(buffer);
+        tokenizer tok_buffer(buffer , separator);
 
-        while (!((token = next()).isNull())) {
+        for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
           if ((i == 0) && (read_type == 0)) {
-            if (token == STAT_word[STATW_VARIABLE]) {
+            if (*token == STAT_word[STATW_VARIABLE]) {
               variable++;
             }
 
             else if ((variable >= 0) && (variable < nb_variable) &&
                      (var_type[variable] == NOMINAL)) {
-              lstatus = locale.stringToNum(token , &value);
+              lstatus = true;
+
+/*              try {
+                value = stoi(*token);   in C++ 11
+              }
+              catch(invalid_argument &arg) {
+                lstatus = false;
+              } */
+              value = atoi(token->c_str());
 
               if (lstatus) {
                 read_type = 1;
@@ -586,7 +601,16 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
             // test variable index
 
             case 1 : {
-              lstatus = locale.stringToNum(token , &value);
+              lstatus = true;
+
+/*              try {
+                value = stoi(*token);   in C++ 11
+              }
+              catch(invalid_argument &arg) {
+                lstatus = false;
+              } */
+              value = atoi(token->c_str());
+
               if ((lstatus) && (value != variable + 1)) {
                 lstatus = false;
               }
@@ -601,7 +625,7 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
             // test separator
 
             case 2 : {
-              if (token != ":") {
+              if (*token != ":") {
                 status = false;
                 error.update(STAT_parsing[STATP_SEPARATOR] , line , i + 1);
               }
@@ -613,7 +637,7 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
             case 3 : {
               if ((variable >= 0) && (variable < nb_variable)) {
                 for (j = NOMINAL;j <= CIRCULAR;j++) {
-                  if (token == STAT_variable_type_word[j]) {
+                  if (*token == STAT_variable_type_word[j]) {
                     var_type[variable] = (variable_type)j;
                     break;
                   }
@@ -630,7 +654,7 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
             // test WEIGHT keyword
 
             case 4 : {
-              if (token != STAT_word[STATW_WEIGHT]) {
+              if (*token != STAT_word[STATW_WEIGHT]) {
                 status = false;
                 error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_WEIGHT] , line , i + 1);
               }
@@ -640,7 +664,7 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
             // test separator
 
             case 5 : {
-              if (token != ":") {
+              if (*token != ":") {
                 status = false;
                 error.update(STAT_parsing[STATP_SEPARATOR] , line , i + 1);
               }
@@ -651,7 +675,16 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
 
             case 6 : {
               if ((variable >= 0) && (variable < nb_variable)) {
-                lstatus = locale.stringToNum(token , weight + variable);
+                lstatus = true;
+
+/*                try {
+                  weight[variable] = stod(*token);   in C++ 11
+                }
+                catch (invalid_argument &arg) {
+                  lstatus = false;
+                } */
+                weight[variable] = atof(token->c_str());
+
                 if (lstatus) {
                   if ((weight[variable] <= 0.) || (weight[variable] > 1. - cumul + DOUBLE_ERROR)) {
                     lstatus = false;
@@ -677,7 +710,7 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
 
             // test CATEGORIES keyword
 
-            if ((i == 1) && (token != STAT_word[STATW_CATEGORIES])) {
+            if ((i == 1) && (*token != STAT_word[STATW_CATEGORIES])) {
               status = false;
               error.update(STAT_parsing[STATP_KEYWORD] , line , i + 1);
             }
@@ -687,7 +720,16 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
 
           case 2 : {
             if (i <= MIN(category , nb_value[variable] - 1)) {
-              lstatus = locale.stringToNum(token , category_distance[variable][category] + i);
+              lstatus = true;
+
+/*              try {
+                category_distance[variable][category][i] = stod(*token);   in C++ 11
+              }
+              catch (invalid_argument &arg) {
+                lstatus = false;
+              } */
+              category_distance[variable][category][i] = atof(token->c_str());
+
               if (lstatus) {
                 if (((i < category) && (category_distance[variable][category][i] <= 0.)) ||
                     ((i == category) && (category_distance[variable][category][i] != 0.))) {
@@ -711,7 +753,7 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
             // test PERIOD keyword
 
             case 0 : {
-              if (token != STAT_word[STATW_PERIOD]) {
+              if (*token != STAT_word[STATW_PERIOD]) {
                 status = false;
                 error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_PERIOD] , line , i + 1);
               }
@@ -721,7 +763,7 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
             // test separator
 
             case 1 : {
-              if (token != ":") {
+              if (*token != ":") {
                 status = false;
                 error.update(STAT_parsing[STATP_SEPARATOR] , line , i + 1);
               }
@@ -732,7 +774,16 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
 
             case 2 : {
               if ((variable >= 0) && (variable < nb_variable)) {
-                lstatus = locale.stringToNum(token , &value);
+                lstatus = true;
+
+/*                try {
+                  value = stoi(*token);   in C++ 11
+                }
+                catch(invalid_argument &arg) {
+                  lstatus = false;
+                } */
+                value = atoi(token->c_str());
+ 
                 if (lstatus) {
                   if (value < 2) {
                     lstatus = false;
@@ -777,8 +828,7 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
               error.update(STAT_parsing[STATP_FORMAT] , line);
             }
 
-            if ((variable >= 0) && (variable < nb_variable) &&
-                (var_type[variable] == CIRCULAR)) {
+            if ((variable >= 0) && (variable < nb_variable) && (var_type[variable] == CIRCULAR)) {
               read_type = 3;
             }
             break;
@@ -913,10 +963,10 @@ ostream& VectorDistance::ascii_write(ostream &os , bool exhaustive) const
 {
   register int i , j , k;
   int buff , width[2];
-  long old_adjust;
+  ios_base::fmtflags format_flags;
 
 
-  old_adjust = os.setf(ios::right , ios::adjustfield);
+  format_flags = os.setf(ios::right , ios::adjustfield);
 
   os << nb_variable << " " << STAT_word[nb_variable == 1 ? STATW_VARIABLE : STATW_VARIABLES] << endl;
   if (nb_variable > 1) {
@@ -976,7 +1026,7 @@ ostream& VectorDistance::ascii_write(ostream &os , bool exhaustive) const
     }
   }
 
-  os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
+  os.setf(format_flags , ios::adjustfield);
 
   return os;
 }

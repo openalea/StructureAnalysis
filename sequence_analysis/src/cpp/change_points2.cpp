@@ -2785,7 +2785,7 @@ double Sequences::segmentation(int index , int nb_segment , segment_model *model
  *  \brief Optimal segmentation of a single sequence or a sample of sequences.
  *
  *  \param[in] error           reference on a StatError object,
- *  \param[in] os              stream,
+ *  \param[in] display         flag for displaying the segmentation,
  *  \param[in] iidentifier     sequence identifier,
  *  \param[in] nb_segment      number of segments,
  *  \param[in] model_type      segment model types,
@@ -2798,7 +2798,7 @@ double Sequences::segmentation(int index , int nb_segment , segment_model *model
  */
 /*--------------------------------------------------------------*/
 
-Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentifier ,
+Sequences* Sequences::segmentation(StatError &error , bool display , int iidentifier ,
                                    int nb_segment , segment_model *model_type ,
                                    bool common_contrast , double *shape_parameter ,
                                    sequence_type output , bool continuity) const
@@ -2959,32 +2959,31 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
     delete [] rank;
 
     if (segmentation_likelihood != D_INF) {
-
-#     ifdef MESSAGE
-      segment_penalty = 0.;
-      i = 0;
-      for (j = 1;j < seq->length[0];j++) {
-        if (seq->int_sequence[0][0][j] != seq->int_sequence[0][0][j - 1]) {
-          segment_penalty += log((double)(j - i));
-          i = j;
+      if (display) {
+        segment_penalty = 0.;
+        i = 0;
+        for (j = 1;j < seq->length[0];j++) {
+          if (seq->int_sequence[0][0][j] != seq->int_sequence[0][0][j - 1]) {
+            segment_penalty += log((double)(j - i));
+            i = j;
+          }
         }
+        segment_penalty += log((double)(seq->length[0] - i));
+
+        nb_parameter = seq->nb_parameter_computation((index == I_DEFAULT ? index : 0) , nb_segment , model_type ,
+                                                     common_contrast);
+
+        penalized_likelihood = 2 * segmentation_likelihood - nb_parameter *
+                               log((double)((seq->nb_variable - 1) * seq->length[0])) - segment_penalty;
+
+        cout << "\n" << nb_segment << " " << (nb_segment == 1 ? SEQ_label[SEQL_SEGMENT] : SEQ_label[SEQL_SEGMENTS])
+             << "   2 * " << STAT_label[STATL_LIKELIHOOD] << ": " << 2 * segmentation_likelihood << "   "
+             << nb_parameter << " " << STAT_label[nb_parameter == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS]
+             << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " (Modified "  << STAT_criterion_word[BIC] << "): "
+             << penalized_likelihood << endl;
       }
-      segment_penalty += log((double)(seq->length[0] - i));
 
-      nb_parameter = seq->nb_parameter_computation((index == I_DEFAULT ? index : 0) , nb_segment , model_type ,
-                                                   common_contrast);
-
-      penalized_likelihood = 2 * segmentation_likelihood - nb_parameter *
-                             log((double)((seq->nb_variable - 1) * seq->length[0])) - segment_penalty;
-
-      os << "\n" << nb_segment << " " << (nb_segment == 1 ? SEQ_label[SEQL_SEGMENT] : SEQ_label[SEQL_SEGMENTS])
-         << "   2 * " << STAT_label[STATL_LIKELIHOOD] << ": " << 2 * segmentation_likelihood << "   "
-         << nb_parameter << " " << STAT_label[nb_parameter == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS]
-         << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " (Modified "  << STAT_criterion_word[BIC] << "): "
-         << penalized_likelihood << endl;
-#     endif
-
-      oseq = seq->segmentation_output(nb_segment , model_type , common_contrast , os , output ,
+      oseq = seq->segmentation_output(nb_segment , model_type , common_contrast , display , output ,
                                       NULL , continuity);
 
       if ((output == SEQUENCE) || (output == ABSOLUTE_RESIDUAL)) {
@@ -3008,7 +3007,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
  *  \brief Optimal segmentation of a single sequence or a sample of sequences.
  *
  *  \param[in] error           reference on a StatError object,
- *  \param[in] os              stream,
+ *  \param[in] display         flag for displaying the segmentation,
  *  \param[in] iidentifier     sequence identifier,
  *  \param[in] nb_segment      number of segments,
  *  \param[in] model_type      segment model types,
@@ -3021,13 +3020,13 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
  */
 /*--------------------------------------------------------------*/
 
-Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentifier ,
+Sequences* Sequences::segmentation(StatError &error , bool display , int iidentifier ,
                                    int nb_segment , vector<segment_model> model_type ,
                                    bool common_contrast , vector<double> shape_parameter ,
                                    sequence_type output , bool continuity) const
 
 {
-  return segmentation(error , os , iidentifier , nb_segment , model_type.data() ,
+  return segmentation(error , display , iidentifier , nb_segment , model_type.data() ,
                       common_contrast , shape_parameter.data() , output , continuity);
 }
 

@@ -52,7 +52,7 @@ static OUTPUT_TYPE* METHOD_NAME(const INPUT_TYPE& input_class, VARTYPE1 var1, VA
 // Specific methods
 // ---------------------- file_ascii_write (ascii_write) method ----------------
 #define WRAP_METHOD_FILE_ASCII_WRITE(INPUT_CLASS) \
-  static void file_ascii_write(const INPUT_CLASS& m, const char* path, bool exhaustive)\
+  static void file_ascii_write(const INPUT_CLASS& m, const std::string path, bool exhaustive)\
   {\
      bool result = true;\
      StatError error;\

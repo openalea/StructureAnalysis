@@ -401,6 +401,7 @@ namespace stat_tool {
     virtual std::ostream& line_write(std::ostream &os) const = 0;
 
     virtual std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const = 0;
+    std::string ascii_write(bool exhaustive = false) const;
     virtual bool ascii_write(StatError &error , const std::string path ,
                              bool exhaustive = false) const = 0;
     virtual bool spreadsheet_write(StatError &error , const std::string path) const = 0;
@@ -770,7 +771,7 @@ namespace stat_tool {
 
     DiscreteDistributionData* shift(StatError &error , int shift_param) const;
     DiscreteDistributionData* cluster(StatError &error , int step , rounding mode = FLOOR) const;
-    DiscreteDistributionData* cluster(StatError &error , double ratio , std::ostream &os) const;
+    DiscreteDistributionData* cluster(StatError &error , double ratio , bool display) const;
     DiscreteDistributionData* cluster(StatError &error , int nb_class , int *ilimit) const;
     DiscreteDistributionData* cluster(StatError &error , int nb_class , std::vector<int> ilimit) const;
     DiscreteDistributionData* transcode(StatError &error , int *category) const;
@@ -794,16 +795,16 @@ namespace stat_tool {
                              const char *title = NULL) const;
     MultiPlotSet* survival_get_plotable(StatError &error) const;
 
-    bool comparison(StatError &error , std::ostream &os , int nb_histo ,
+    bool comparison(StatError &error , bool display , int nb_histo ,
                     const FrequencyDistribution **ihisto , variable_type type ,
                     const std::string path = NULL , output_format format = ASCII) const;
-    bool comparison(StatError &error , std::ostream &os , int nb_histo ,
+    bool comparison(StatError &error , bool display , int nb_histo ,
                     const std::vector<FrequencyDistribution> ihisto , variable_type type ,
                     const std::string path = NULL , output_format format = ASCII) const;
 
-    void F_comparison(std::ostream &os , const FrequencyDistribution &histo) const;
-    void t_comparison(std::ostream &os , const FrequencyDistribution &histo) const;
-    bool wilcoxon_mann_whitney_comparison(StatError &error , std::ostream &os ,
+    void F_comparison(bool display , const FrequencyDistribution &histo) const;
+    void t_comparison(bool display , const FrequencyDistribution &histo) const;
+    bool wilcoxon_mann_whitney_comparison(StatError &error , bool display ,
                                           const FrequencyDistribution &ihisto) const;
 
     DiscreteParametricModel* fit(StatError &error , const DiscreteParametric &idist) const;
@@ -827,38 +828,38 @@ namespace stat_tool {
     DiscreteMixture* discrete_mixture_estimation(StatError &error , int nb_component , std::vector<discrete_parametric> ident ,
                                                  int min_inf_bound = 0 , bool mixt_flag = true ,
                                                  bool component_flag = true , double weight_step = 0.1) const;
-    DiscreteMixture* discrete_mixture_estimation(StatError &error , std::ostream &os , int min_nb_component ,
+    DiscreteMixture* discrete_mixture_estimation(StatError &error , bool display , int min_nb_component ,
                                                  int max_nb_component , discrete_parametric *ident , int min_inf_bound = 0 ,
                                                  bool mixt_flag = true , bool component_flag = true ,
                                                  model_selection_criterion criterion = BICc ,
                                                  double weight_step = 0.1) const;
-    DiscreteMixture* discrete_mixture_estimation(StatError &error , std::ostream &os , int min_nb_component ,
+    DiscreteMixture* discrete_mixture_estimation(StatError &error , bool display , int min_nb_component ,
                                                  int max_nb_component , std::vector<discrete_parametric> ident , int min_inf_bound = 0 ,
                                                  bool mixt_flag = true , bool component_flag = true ,
                                                  model_selection_criterion criterion = BICc ,
                                                  double weight_step = 0.1) const;
 
-    Convolution* convolution_estimation(StatError &error , std::ostream &os , const DiscreteParametric &known_dist ,
+    Convolution* convolution_estimation(StatError &error , bool display , const DiscreteParametric &known_dist ,
                                         const DiscreteParametric &unknown_dist , estimation_criterion estimator = LIKELIHOOD ,
                                         int nb_iter = I_DEFAULT , double weight = D_DEFAULT ,
                                         penalty_type pen_type = SECOND_DIFFERENCE , side_effect outside = ZERO) const;
-    Convolution* convolution_estimation(StatError &error , std::ostream &os , const DiscreteParametric &known_dist ,
+    Convolution* convolution_estimation(StatError &error , bool display , const DiscreteParametric &known_dist ,
                                         int min_inf_bound , estimation_criterion estimator = LIKELIHOOD ,
                                         int nb_iter = I_DEFAULT , double weight = D_DEFAULT ,
                                         penalty_type pen_type = SECOND_DIFFERENCE , side_effect outside = ZERO) const;
 
-    Compound* compound_estimation(StatError &error , std::ostream &os , const DiscreteParametric &sum_dist ,
+    Compound* compound_estimation(StatError &error , bool display , const DiscreteParametric &sum_dist ,
                                   const DiscreteParametric &dist , compound_distribution type ,
                                   estimation_criterion estimator = LIKELIHOOD , int nb_iter = I_DEFAULT ,
                                   double weight = D_DEFAULT , penalty_type pen_type = SECOND_DIFFERENCE ,
                                   side_effect outside = ZERO) const;
-    Compound* compound_estimation(StatError &error , std::ostream &os , const DiscreteParametric &known_dist ,
+    Compound* compound_estimation(StatError &error , bool display , const DiscreteParametric &known_dist ,
                                   compound_distribution type , int min_inf_bound = 0 ,
                                   estimation_criterion estimator = LIKELIHOOD ,
                                   int nb_iter = I_DEFAULT , double weight = D_DEFAULT ,
                                   penalty_type pen_type = SECOND_DIFFERENCE , side_effect outside = ZERO) const;
 
-    DiscreteParametricModel* estimation(StatError &error , std::ostream &os ,
+    DiscreteParametricModel* estimation(StatError &error , bool display ,
                                         const FrequencyDistribution &backward ,
                                         const FrequencyDistribution &forward ,
                                         const FrequencyDistribution *no_event ,
@@ -867,7 +868,7 @@ namespace stat_tool {
                                         duration_distribution_mean_estimator mean_estimator = COMPUTED ,
                                         double weight = D_DEFAULT , penalty_type pen_type = SECOND_DIFFERENCE ,
                                         side_effect outside = ZERO , double iinter_event_mean = D_DEFAULT) const;
-    DiscreteParametricModel* estimation(StatError &error , std::ostream &os ,
+    DiscreteParametricModel* estimation(StatError &error , bool display ,
                                         const FrequencyDistribution &backward ,
                                         const FrequencyDistribution &forward ,
                                         const FrequencyDistribution *no_event ,

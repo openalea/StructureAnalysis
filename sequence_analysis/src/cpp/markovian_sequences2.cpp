@@ -2609,10 +2609,10 @@ ostream& MarkovianSequences::autoregressive_model_ascii_print(ostream &os , int 
   double standard_normal_value , *confidence_limit;
   Correlation *correl;
   normal dist;
-  long old_adjust;
+  ios_base::fmtflags format_flags;
 
 
-  old_adjust = os.setf(ios::right , ios::adjustfield);
+  format_flags = os.setf(ios::right , ios::adjustfield);
 
   max_lag = max_length * (1. - AUTOCORRELATION_FREQUENCY_RATIO);
   correl = new Correlation(2 , max_lag + 1 , true , PEARSON);
@@ -2669,7 +2669,7 @@ ostream& MarkovianSequences::autoregressive_model_ascii_print(ostream &os , int 
   delete correl;
   delete [] confidence_limit;
 
-  os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
+  os.setf(format_flags , ios::adjustfield);
 
   return os;
 }

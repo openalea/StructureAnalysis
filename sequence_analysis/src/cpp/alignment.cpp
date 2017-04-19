@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -76,10 +76,10 @@ ostream& Sequences::alignment_ascii_print(ostream &os , int width , int ref_inde
 {
   register int i , j , k , m , n;
   int ref_rank , test_rank , alignment_rank;
-  long old_adjust;
+  ios_base::fmtflags format_flags;
 
 
-  old_adjust = os.setf(ios::right , ios::adjustfield);
+  format_flags = os.setf(ios::right , ios::adjustfield);
 
   os << "\n" << SEQ_label[SEQL_SEQUENCE] << " " << identifier[test_index]
      << " (" << SEQ_label[SEQL_LENGTH] << " " << length[test_index] << ") " << SEQ_label[SEQL_ALIGNED_ON]
@@ -254,7 +254,8 @@ ostream& Sequences::alignment_ascii_print(ostream &os , int width , int ref_inde
     }
   }
 
-  os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
+  os.setf(format_flags , ios::adjustfield);
+
   return os;
 }
 
@@ -646,7 +647,7 @@ double Sequences::substitution_distance_computation(const VectorDistance &vector
  *  \brief Alignment of sequences.
  *
  *  \param[in] error                reference on a StatError object,
- *  \param[in] os                   stream,
+ *  \param[in] display              flag for displaying the alignments,
  *  \param[in] ivector_dist         reference on a VectorDistance object,
  *  \param[in] ref_identifier       reference sequence identifier,
  *  \param[in] test_identifier      test sequence identifier,
@@ -664,7 +665,7 @@ double Sequences::substitution_distance_computation(const VectorDistance &vector
  */
 /*--------------------------------------------------------------*/
 
-DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , const VectorDistance &ivector_dist ,
+DistanceMatrix* Sequences::alignment(StatError &error , bool display , const VectorDistance &ivector_dist ,
                                      int ref_identifier , int test_identifier , bool begin_free ,
                                      bool end_free , insertion_deletion_cost indel_cost , double indel_factor ,
                                      bool transposition_flag , double transposition_factor ,
@@ -915,13 +916,9 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , const Vect
 
       if (!out_file) {
         error.update(STAT_error[STATR_FILE_NAME]);
-
-#       ifdef MESSAGE
-        if (os) {
-          *os << error;
+        if (display) {
+          cout << error;
         }
-#       endif
-
       }
     }
 
@@ -1352,28 +1349,26 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , const Vect
 
             // writing of the alignment
 
-#           ifdef MESSAGE
-            if ((os) && (nb_alignment <= DISPLAY_NB_ALIGNMENT)) {
-              alignment_ascii_print(*os , width , i , j , *alignment , alignment_index);
+            if ((display) && (nb_alignment <= DISPLAY_NB_ALIGNMENT)) {
+              alignment_ascii_print(cout , width , i , j , *alignment , alignment_index);
 
               if (length[i] + length[j] - nb_begin_end > 0) {
-                *os << STAT_label[STATL_DISTANCE] << " (" << SEQ_label[SEQL_ALIGNMENT_LENGTH]
-                    << "): " << cumul_distance[length[i]][length[j]] / (length[i] + length[j] - nb_begin_end)
-                    << " (" << path_length[length[i]][length[j]] - nb_begin_end << ") = "
-                    << deletion_distance / (length[i] + length[j] - nb_begin_end) << " (" << nb_deletion << " d) + "
-                    << insertion_distance / (length[i] + length[j] - nb_begin_end) << " (" << nb_insertion << " i) + 0 ("
-                    << nb_match << " m) + " << substitution_distance / (length[i] + length[j] - nb_begin_end)
-                    << " (" << nb_substitution << " s)";
+                cout << STAT_label[STATL_DISTANCE] << " (" << SEQ_label[SEQL_ALIGNMENT_LENGTH]
+                     << "): " << cumul_distance[length[i]][length[j]] / (length[i] + length[j] - nb_begin_end)
+                     << " (" << path_length[length[i]][length[j]] - nb_begin_end << ") = "
+                     << deletion_distance / (length[i] + length[j] - nb_begin_end) << " (" << nb_deletion << " d) + "
+                     << insertion_distance / (length[i] + length[j] - nb_begin_end) << " (" << nb_insertion << " i) + 0 ("
+                     << nb_match << " m) + " << substitution_distance / (length[i] + length[j] - nb_begin_end)
+                     << " (" << nb_substitution << " s)";
                 if (transposition_flag) {
-                  *os << " + " << transposition_distance / (length[i] + length[j] - nb_begin_end)
-                      << " (" << nb_transposition << " t)";
+                  cout << " + " << transposition_distance / (length[i] + length[j] - nb_begin_end)
+                       << " (" << nb_transposition << " t)";
                 }
-                *os << endl;
+                cout << endl;
 
-                *os << SEQ_label[SEQL_MAX_GAP_LENGTH] << ": " << max_gap_length << endl;
+                cout << SEQ_label[SEQL_MAX_GAP_LENGTH] << ": " << max_gap_length << endl;
               }
             }
-#           endif
 
             if ((out_file) && (nb_alignment <= FILE_NB_ALIGNMENT)) {
               switch (result_format) {
@@ -1433,7 +1428,7 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , const Vect
     }
 
 #   ifdef DEBUG
-    cout << "\ndistance locale : "
+    cout << "\nlocal distance: "
          << mean_local_substitution_distance / nb_local_substitution_distance << endl;
 #   endif
 
@@ -1442,12 +1437,10 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , const Vect
       // writing of distances, alignment lengths, and numbers of deletions, insertions,
       // matchs, substitutions and transpositions
 
-#     ifdef MESSAGE
-      if ((os) && (nb_alignment <= DISPLAY_NB_ALIGNMENT)) {
-        *os << "\n";
-        dist_matrix->ascii_write(*os);
+      if ((display) && (nb_alignment <= DISPLAY_NB_ALIGNMENT)) {
+        cout << "\n";
+        dist_matrix->ascii_write(cout);
       }
-#     endif
 
       if (out_file) {
         *out_file << "\n";
@@ -1477,16 +1470,14 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , const Vect
         category[TRANSPOSITION] = 3;
       }
 
-#     ifdef MESSAGE
-      if (os) {
-        *os << "\n" << SEQ_label[SEQL_ALIGNMENT_CODING] << "\n" << STAT_label[STATL_INDEL] << ": " << 0
-            << "\n" << STAT_label[STATL_MATCH] << ": " << 1 << "\n" << STAT_label[STATL_SUBSTITUTION] << ": " << 2;
+      if (display) {
+        cout << "\n" << SEQ_label[SEQL_ALIGNMENT_CODING] << "\n" << STAT_label[STATL_INDEL] << ": " << 0
+             << "\n" << STAT_label[STATL_MATCH] << ": " << 1 << "\n" << STAT_label[STATL_SUBSTITUTION] << ": " << 2;
         if (transposition_flag) {
-          *os << "\n" << STAT_label[STATL_TRANSPOSITION] << ": " << 3;
+          cout << "\n" << STAT_label[STATL_TRANSPOSITION] << ": " << 3;
         }
-        *os << endl;
+        cout << endl;
       }
-#     endif
 
       for (i = 0;i < alignment->nb_sequence;i++) {
         calignment = alignment->int_sequence[i][0];
@@ -1518,13 +1509,9 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , const Vect
       // writing of alignment sequences
 
       status = alignment->ascii_data_write(error , alignment_path);
-
-#     ifdef MESSAGE
-      if ((!status) && (os)) {
-        *os << error;
+      if ((!status) && (display)) {
+        cout << error;
       }
-#     endif
-
     }
 
     if (out_file) {
@@ -1617,7 +1604,7 @@ double Sequences::substitution_distance_computation(int ref_index , int test_ind
  *  \brief Alignment of sequences.
  *
  *  \param[in] error           reference on a StatError object, 
- *  \param[in] os              stream,
+ *  \param[in] display         flag for displaying the alignments,
  *  \param[in] ref_identifier  reference sequence identifier,
  *  \param[in] test_identifier test sequence identifier,
  *  \param[in] begin_free      flag begin-free alignment,
@@ -1630,7 +1617,7 @@ double Sequences::substitution_distance_computation(int ref_index , int test_ind
  */
 /*--------------------------------------------------------------*/
 
-DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , int ref_identifier ,
+DistanceMatrix* Sequences::alignment(StatError &error , bool display , int ref_identifier ,
                                      int test_identifier , bool begin_free , bool end_free ,
                                      const string result_path , output_format result_format ,
                                      const string alignment_path) const
@@ -1750,13 +1737,9 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , int ref_id
 
       if (!out_file) {
         error.update(STAT_error[STATR_FILE_NAME]);
-
-#       ifdef MESSAGE
-        if (os) {
-          *os << error;
+        if (display) {
+          cout << error;
         }
-#       endif
-
       }
     }
 
@@ -2035,22 +2018,20 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , int ref_id
 
             // writing of the alignment
 
-#           ifdef MESSAGE
-            if ((os) && (nb_alignment <= DISPLAY_NB_ALIGNMENT)) {
-              alignment_ascii_print(*os , width , i , j , *alignment , alignment_index);
+            if ((display) && (nb_alignment <= DISPLAY_NB_ALIGNMENT)) {
+              alignment_ascii_print(cout , width , i , j , *alignment , alignment_index);
 
               if (length[i] + length[j] - nb_begin_end > 0) {
-                *os << STAT_label[STATL_DISTANCE] << " (" << SEQ_label[SEQL_ALIGNMENT_LENGTH]
-                    << "): " << cumul_distance[length[i]][length[j]] / (length[i] + length[j] - nb_begin_end)
-                    << " (" << path_length[length[i]][length[j]] - nb_begin_end << ") = "
-                    << deletion_distance / (length[i] + length[j] - nb_begin_end) << " (" << nb_deletion << " d) + "
-                    << insertion_distance / (length[i] + length[j] - nb_begin_end) << " (" << nb_insertion << " i) + 0 ("
-                    << nb_match << " m)" << endl;
+                cout << STAT_label[STATL_DISTANCE] << " (" << SEQ_label[SEQL_ALIGNMENT_LENGTH]
+                     << "): " << cumul_distance[length[i]][length[j]] / (length[i] + length[j] - nb_begin_end)
+                     << " (" << path_length[length[i]][length[j]] - nb_begin_end << ") = "
+                     << deletion_distance / (length[i] + length[j] - nb_begin_end) << " (" << nb_deletion << " d) + "
+                     << insertion_distance / (length[i] + length[j] - nb_begin_end) << " (" << nb_insertion << " i) + 0 ("
+                     << nb_match << " m)" << endl;
 
-                *os << SEQ_label[SEQL_MAX_GAP_LENGTH] << ": " << max_gap_length << endl;
+                cout << SEQ_label[SEQL_MAX_GAP_LENGTH] << ": " << max_gap_length << endl;
               }
             }
-#           endif
 
             if ((out_file) && (nb_alignment <= FILE_NB_ALIGNMENT)) {
               switch (result_format) {
@@ -2101,12 +2082,10 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , int ref_id
 
       // writing of distances, alignment lengths, and numbers of deletions, insertions and matchs
 
-#     ifdef MESSAGE
-      if ((os) && (nb_alignment <= DISPLAY_NB_ALIGNMENT)) {
-        *os << "\n";
-        dist_matrix->ascii_write(*os);
+      if ((display) && (nb_alignment <= DISPLAY_NB_ALIGNMENT)) {
+        cout << "\n";
+        dist_matrix->ascii_write(cout);
       }
-#     endif
 
       if (out_file) {
         *out_file << "\n";
@@ -2132,12 +2111,10 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , int ref_id
       category[INSERTION] = 0;
       category[MATCH] = 1;
 
-#     ifdef MESSAGE
-      if (os) {
-        *os << "\n" << SEQ_label[SEQL_ALIGNMENT_CODING] << "\n" << STAT_label[STATL_INDEL] << ": " << 0
-            << "\n" << STAT_label[STATL_MATCH] << ": " << 1 << endl;
+      if (display) {
+        cout << "\n" << SEQ_label[SEQL_ALIGNMENT_CODING] << "\n" << STAT_label[STATL_INDEL] << ": " << 0
+             << "\n" << STAT_label[STATL_MATCH] << ": " << 1 << endl;
       }
-#     endif
 
       for (i = 0;i < alignment->nb_sequence;i++) {
         calignment = alignment->int_sequence[i][0];
@@ -2169,13 +2146,9 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , int ref_id
       // writing of alignment sequences
 
       status = alignment->ascii_data_write(error , alignment_path);
-
-#     ifdef MESSAGE
-      if ((!status) && (os)) {
-        *os << error;
+      if ((!status) && (display)) {
+        cout << error;
       }
-#     endif
-
     }
 
     if (out_file) {
@@ -2221,10 +2194,10 @@ ostream& Sequences::multiple_alignment_ascii_print(ostream &os) const
 {
   register int i , j , k , m;
   int var , width , rank;
-  long old_adjust;
+  ios_base::fmtflags format_flags;
 
 
-  old_adjust = os.setf(ios::right , ios::adjustfield);
+  format_flags = os.setf(ios::right , ios::adjustfield);
 
   width = 0;
   for (i = 0;i < nb_variable - 1;i++) {
@@ -2344,7 +2317,8 @@ ostream& Sequences::multiple_alignment_ascii_print(ostream &os) const
     }
   }
 
-  os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
+  os.setf(format_flags , ios::adjustfield);
+
   return os;
 }
 
@@ -2831,7 +2805,7 @@ Sequences* Sequences::multiple_alignment(const Sequences &test_seq , const Vecto
  *  \brief Multiple alignment of sequences.
  *
  *  \param[in] error        reference on a StatError object,
- *  \param[in] os           stream,
+ *  \param[in] display      flag for displaying the alignment,
  *  \param[in] ivector_dist reference on a VectorDistance object,
  *  \param[in] begin_free   flag begin-free alignment,
  *  \param[in] end_free     flag end-free alignment,
@@ -2844,7 +2818,7 @@ Sequences* Sequences::multiple_alignment(const Sequences &test_seq , const Vecto
  */
 /*--------------------------------------------------------------*/
 
-Sequences* Sequences::multiple_alignment(StatError &error , ostream &os ,
+Sequences* Sequences::multiple_alignment(StatError &error , bool display ,
                                          const VectorDistance &ivector_dist ,
                                          bool begin_free , bool end_free ,
                                          insertion_deletion_cost indel_cost , double indel_factor ,
@@ -2900,9 +2874,9 @@ Sequences* Sequences::multiple_alignment(StatError &error , ostream &os ,
         dendrogram = dist_matrix->divisive_hierarchical_clustering();
       }
 
-#     ifdef MESSAGE
-      cout << *dendrogram << "\n";
-#     endif
+      if (display) {
+        cout << *dendrogram << "\n";
+      }
 
       vector_dist = new VectorDistance(ivector_dist);
 
@@ -2989,7 +2963,7 @@ Sequences* Sequences::multiple_alignment(StatError &error , ostream &os ,
 
 #       ifdef DEBUG
         if (i < 2 * nb_sequence - 2) {
-          clustered_seq[i]->multiple_alignment_ascii_print(os);
+          clustered_seq[i]->multiple_alignment_ascii_print(cout);
         }
 #       endif
 
@@ -2997,19 +2971,15 @@ Sequences* Sequences::multiple_alignment(StatError &error , ostream &os ,
 
       // writing of the multiple alignment
 
-#     ifdef MESSAGE
-      clustered_seq[2 * nb_sequence - 2]->multiple_alignment_ascii_print(os);
-#     endif
+      if (display) {
+        clustered_seq[2 * nb_sequence - 2]->multiple_alignment_ascii_print(cout);
+      }
 
       if (!path.empty()) {
         status = clustered_seq[2 * nb_sequence - 2]->multiple_alignment_ascii_print(error , path);
-
-#       ifdef MESSAGE
-        if (!status) {
-          os << error;
+        if ((!status) && (display)) {
+          cout << error;
         }
-#       endif
-
       }
 
       seq = new Sequences(nb_sequence , clustered_seq[2 * nb_sequence - 2]->identifier ,

@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -384,7 +384,7 @@ void Compound::expectation_step(const FrequencyDistribution &histo ,
  *  \brief Estimation of a compound distribution using the EM algorithm.
  *
  *  \param[in] error     reference on a StatError object,
- *  \param[in] os        stream,
+ *  \param[in] display   flag for displaying estimation intermediate results,
  *  \param[in] sum_dist  reference on the sum distribution,
  *  \param[in] dist      reference on the basis distribution,
  *  \param[in] type      unknown distribution type (SUM/ELEMENTARY),
@@ -400,7 +400,7 @@ void Compound::expectation_step(const FrequencyDistribution &histo ,
  */
 /*--------------------------------------------------------------*/
 
-Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream &os ,
+Compound* FrequencyDistribution::compound_estimation(StatError &error , bool display ,
                                                      const DiscreteParametric &sum_dist ,
                                                      const DiscreteParametric &dist ,
                                                      compound_distribution type ,
@@ -554,68 +554,66 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream 
       previous_likelihood = likelihood;
       likelihood = compound->likelihood_computation(*this);
 
-#     ifdef MESSAGE
-      if ((i < 10) || ((i < 100) && (i % 10 == 0)) || ((i < 1000) && (i % 100 == 0)) || (i % 1000 == 0)) {
-        os << STAT_label[STATL_ITERATION] << " " << i << "   "
-           << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
-           << STAT_label[STATL_SMOOTHNESS] << ": ";
+      // display of estimation results
+
+      if ((display) && ((i < 10) || ((i < 100) && (i % 10 == 0)) || ((i < 1000) && (i % 100 == 0)) || (i % 1000 == 0))) {
+        cout << STAT_label[STATL_ITERATION] << " " << i << "   "
+             << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
+             << STAT_label[STATL_SMOOTHNESS] << ": ";
 
         switch (type) {
 
         case SUM : {
-          os << compound->sum_distribution->second_difference_norm_computation();
+          cout << compound->sum_distribution->second_difference_norm_computation();
           if (estimator == PENALIZED_LIKELIHOOD) {
-            os << "   cumul: " << compound->sum_distribution->cumul[compound->sum_distribution->nb_value - 1];
+            cout << "   cumul: " << compound->sum_distribution->cumul[compound->sum_distribution->nb_value - 1];
           }
           break;
         }
 
         case ELEMENTARY : {
-          os << compound->distribution->second_difference_norm_computation();
+          cout << compound->distribution->second_difference_norm_computation();
           if (estimator == PENALIZED_LIKELIHOOD) {
-            os << "   cumul: " << compound->distribution->cumul[compound->distribution->nb_value - 1];
+            cout << "   cumul: " << compound->distribution->cumul[compound->distribution->nb_value - 1];
           }
           break;
         }
         }
 
-        os << endl;
+        cout << endl;
       }
-#     endif
-
     }
     while ((likelihood != D_INF) && (((nb_iter == I_DEFAULT) && (i < COMPOUND_NB_ITER) && 
              ((likelihood - previous_likelihood) / -likelihood > COMPOUND_LIKELIHOOD_DIFF)) ||
             ((nb_iter != I_DEFAULT) && (i < nb_iter))));
 
     if (likelihood != D_INF) {
+      if (display) {
+        cout << "\n" << i << " " << STAT_label[STATL_ITERATIONS] << "   "
+             << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
+             << STAT_label[STATL_SMOOTHNESS] << ": ";
 
-#     ifdef MESSAGE
-      os << "\n" << i << " " << STAT_label[STATL_ITERATIONS] << "   "
-           << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
-           << STAT_label[STATL_SMOOTHNESS] << ": ";
+        switch (type) {
 
-      switch (type) {
-
-      case SUM : {
-        os << compound->sum_distribution->second_difference_norm_computation();
-        if (estimator == PENALIZED_LIKELIHOOD) {
-          os << "   cumul: " << compound->sum_distribution->cumul[compound->sum_distribution->nb_value - 1];
+        case SUM : {
+          cout << compound->sum_distribution->second_difference_norm_computation();
+          if (estimator == PENALIZED_LIKELIHOOD) {
+            cout << "   cumul: " << compound->sum_distribution->cumul[compound->sum_distribution->nb_value - 1];
+          }
+          break;
         }
-        break;
-      }
 
-      case ELEMENTARY : {
-        os << compound->distribution->second_difference_norm_computation();
-        if (estimator == PENALIZED_LIKELIHOOD) {
-          os << "   cumul: " << compound->distribution->cumul[compound->distribution->nb_value - 1];
+        case ELEMENTARY : {
+          cout << compound->distribution->second_difference_norm_computation();
+          if (estimator == PENALIZED_LIKELIHOOD) {
+            cout << "   cumul: " << compound->distribution->cumul[compound->distribution->nb_value - 1];
+          }
+          break;
         }
-        break;
-      }
-      }
+        }
 
-      os << endl;
-#     endif
+        cout << endl;
+      }
 
       if (estimator == PARAMETRIC_REGULARIZATION) {
         likelihood = D_INF;
@@ -671,17 +669,17 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream 
             }
 
 #           ifdef DEBUG
-            if ((i < 10) || (i % 10 == 0)) {
-              os << STAT_label[STATL_ITERATION] << " " << i << "   "
-                 << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
-                 << STAT_label[STATL_SMOOTHNESS] << ": ";
+            if ((display) && ((i < 10) || (i % 10 == 0))) {
+              cout << STAT_label[STATL_ITERATION] << " " << i << "   "
+                   << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
+                   << STAT_label[STATL_SMOOTHNESS] << ": ";
 
               switch (type) {
               case SUM :
-                os << compound->sum_distribution->second_difference_norm_computation() << endl;
+                cout << compound->sum_distribution->second_difference_norm_computation() << endl;
                 break;
               case ELEMENTARY :
-                os << compound->distribution->second_difference_norm_computation() << endl;
+                cout << compound->distribution->second_difference_norm_computation() << endl;
                 break;
               }
             }
@@ -693,23 +691,20 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream 
                (((likelihood - previous_likelihood) / -likelihood > COMPOUND_LIKELIHOOD_DIFF) ||
                 (hlikelihood == D_INF) || (nb_likelihood_decrease == 1)));
 
-#       ifdef MESSAGE
-        if (likelihood != D_INF) {
-          os << "\n" << i << " " << STAT_label[STATL_ITERATIONS] << "   "
-             << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
-             << STAT_label[STATL_SMOOTHNESS] << ": ";
+        if ((display) && (likelihood != D_INF)) {
+          cout << "\n" << i << " " << STAT_label[STATL_ITERATIONS] << "   "
+               << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
+               << STAT_label[STATL_SMOOTHNESS] << ": ";
 
           switch (type) {
           case SUM :
-            os << compound->sum_distribution->second_difference_norm_computation() << endl;
+            cout << compound->sum_distribution->second_difference_norm_computation() << endl;
             break;
           case ELEMENTARY :
-            os << compound->distribution->second_difference_norm_computation() << endl;
+            cout << compound->distribution->second_difference_norm_computation() << endl;
             break;
           }
         }
-#       endif
-
       }
     }
 
@@ -761,7 +756,7 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream 
  *  \brief Estimation of a compound distribution using the EM algorithm.
  *
  *  \param[in] error         reference on a StatError object,
- *  \param[in] os            stream,
+ *  \param[in] display       flag for displaying estimation intermediate results,
  *  \param[in] known_dist    reference on the known distribution,
  *  \param[in] type          unknown distribution type (SUM/ELEMENTARY),
  *  \param[in] min_inf_bound minimum lower bound of the support of the unknown distribution,
@@ -777,7 +772,7 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream 
  */
 /*--------------------------------------------------------------*/
 
-Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream &os ,
+Compound* FrequencyDistribution::compound_estimation(StatError &error , bool display ,
                                                      const DiscreteParametric &known_dist ,
                                                      compound_distribution type , int min_inf_bound ,
                                                      estimation_criterion estimator , int nb_iter ,
@@ -823,11 +818,11 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream 
 
     switch (type) {
     case SUM :
-      compound = compound_estimation(error , os , *unknown_dist , known_dist , type ,
+      compound = compound_estimation(error , display , *unknown_dist , known_dist , type ,
                                      estimator , nb_iter , weight , pen_type , outside);
       break;
     case ELEMENTARY :
-      compound = compound_estimation(error , os , known_dist , *unknown_dist , type ,
+      compound = compound_estimation(error , display , known_dist , *unknown_dist , type ,
                                      estimator , nb_iter , weight , pen_type , outside);
       break;
     }

@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -36,16 +36,15 @@
 
 
 
-#include "tool/rw_tokenizer.h"
-#include "tool/rw_cstring.h"
-#include "tool/rw_locale.h"
-
 #include "stat_tool/stat_label.h"
+
+#include <boost/tokenizer.hpp>
 
 #include "sequences.h"
 #include "sequence_label.h"
 
 using namespace std;
+using namespace boost;
 using namespace stat_tool;
 
 
@@ -802,12 +801,13 @@ CategoricalSequenceProcess* CategoricalSequenceProcess::occupancy_parsing(StatEr
                                                                           double cumul_threshold)
 
 {
-  RWLocaleSnapshot locale("en");
-  RWCString buffer , token;
+  string buffer;
   size_t position;
+  typedef tokenizer<char_separator<char>> tokenizer;
+  char_separator<char> separator(" \t");
   bool status = true , lstatus;
   register int i , j;
-  long index;
+  int index;
   DiscreteParametric **dist;
   CategoricalSequenceProcess *process;
 
@@ -821,28 +821,28 @@ CategoricalSequenceProcess* CategoricalSequenceProcess::occupancy_parsing(StatEr
 
   for (i = 0;i < chain.nb_state;i++) {
     if (chain.transition[i][i] == 0.) {
-      while (buffer.readLine(in_file , false)) {
+      while (getline(in_file , buffer)) {
         line++;
 
 #       ifdef DEBUG
         cout << line << "  " << buffer << endl;
 #       endif
 
-        position = buffer.first('#');
-        if (position != RW_NPOS) {
-          buffer.remove(position);
+        position = buffer.find('#');
+        if (position != string::npos) {
+          buffer.erase(position);
         }
         j = 0;
 
-        RWCTokenizer next(buffer);
+        tokenizer tok_buffer(buffer , separator);
 
-        while (!((token = next()).isNull())) {
+        for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
           switch (j) {
 
           // test STATE keyword
 
           case 0 : {
-            if (token != STAT_word[STATW_STATE]) {
+            if (*token != STAT_word[STATW_STATE]) {
               status = false;
               error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_STATE] , line , j + 1);
             }
@@ -852,7 +852,16 @@ CategoricalSequenceProcess* CategoricalSequenceProcess::occupancy_parsing(StatEr
           // test state index
 
           case 1 : {
-            lstatus = locale.stringToNum(token , &index);
+            lstatus = true;
+
+/*            try {
+              index = stoi(*token);   in C++ 11
+            }
+            catch(invalid_argument &arg) {
+              lstatus = false;
+            } */
+            index = atoi(token->c_str());
+
             if ((lstatus) && (index != i)) {
               lstatus = false;
             }
@@ -867,7 +876,7 @@ CategoricalSequenceProcess* CategoricalSequenceProcess::occupancy_parsing(StatEr
           // test OCCUPANCY_DISTRIBUTION keyword
 
           case 2 : {
-            if (token != SEQ_word[SEQW_OCCUPANCY_DISTRIBUTION]) {
+            if (*token != SEQ_word[SEQW_OCCUPANCY_DISTRIBUTION]) {
               status = false;
               error.correction_update(STAT_parsing[STATP_KEYWORD] , SEQ_word[SEQW_OCCUPANCY_DISTRIBUTION] , line , j + 1);
             }
@@ -889,13 +898,18 @@ CategoricalSequenceProcess* CategoricalSequenceProcess::occupancy_parsing(StatEr
           if (!dist[i]) {
             status = false;
           }
-
           else if (dist[i]->mean == 1.) {
             delete dist[i];
             dist[i] = NULL;
           }
+
           break;
         }
+      }
+
+      if ((j == 0) && (!dist[i])) {
+        status = false;
+        error.update(STAT_parsing[STATP_FORMAT] , line);
       }
     }
   }

@@ -379,7 +379,7 @@ namespace sequence_analysis {
 
     double information_computation() const;
 
-    Renewal* estimation(stat_tool::StatError &error , std::ostream &os , stat_tool::process_type type ,
+    Renewal* estimation(stat_tool::StatError &error , bool display , stat_tool::process_type type ,
                         const stat_tool::DiscreteParametric &iinter_event ,
                         stat_tool::estimation_criterion estimator = stat_tool::LIKELIHOOD ,
                         int nb_iter = stat_tool::I_DEFAULT ,
@@ -388,7 +388,7 @@ namespace sequence_analysis {
                         double weight = stat_tool::D_DEFAULT ,
                         stat_tool::penalty_type pen_type = stat_tool::SECOND_DIFFERENCE ,
                         stat_tool::side_effect outside = stat_tool::ZERO) const;
-    Renewal* estimation(stat_tool::StatError &error , std::ostream &os , stat_tool::process_type type ,
+    Renewal* estimation(stat_tool::StatError &error , bool display , stat_tool::process_type type ,
                         stat_tool::estimation_criterion estimator = stat_tool::LIKELIHOOD ,
                         int nb_iter = stat_tool::I_DEFAULT ,
                         stat_tool::censoring_estimator equilibrium_estimator = stat_tool::COMPLETE_LIKELIHOOD ,
@@ -462,7 +462,7 @@ namespace sequence_analysis {
     bool plot_write(stat_tool::StatError &error , const char *prefix , const char *title = NULL) const;
     stat_tool::MultiPlotSet* get_plotable() const;
 
-    Renewal* estimation(stat_tool::StatError &error , std::ostream &os ,
+    Renewal* estimation(stat_tool::StatError &error , bool display ,
                         const stat_tool::DiscreteParametric &iinter_event ,
                         stat_tool::estimation_criterion estimator = stat_tool::LIKELIHOOD ,
                         int nb_iter = stat_tool::I_DEFAULT ,
@@ -470,7 +470,7 @@ namespace sequence_analysis {
                         double weight = stat_tool::D_DEFAULT ,
                         stat_tool::penalty_type pen_type = stat_tool::SECOND_DIFFERENCE ,
                         stat_tool::side_effect outside = stat_tool::ZERO) const;
-    Renewal* estimation(stat_tool::StatError &error , std::ostream &os ,
+    Renewal* estimation(stat_tool::StatError &error , bool display ,
                         stat_tool::estimation_criterion estimator = stat_tool::LIKELIHOOD ,
                         int nb_iter = stat_tool::I_DEFAULT ,
                         stat_tool::duration_distribution_mean_estimator mean_estimator = stat_tool::COMPUTED ,

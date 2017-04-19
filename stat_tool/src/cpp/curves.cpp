@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -458,10 +458,10 @@ ostream& Curves::ascii_print(ostream &os , bool file_flag , const Curves *curves
 {
   register int i , j , k;
   int nb_column = nb_curve + 1 , *width;
-  long old_adjust;
+  ios_base::fmtflags format_flags;
 
 
-  old_adjust = os.setf(ios::right , ios::adjustfield);
+  format_flags = os.setf(ios::right , ios::adjustfield);
 
   // computation of the column width
 
@@ -531,7 +531,7 @@ ostream& Curves::ascii_print(ostream &os , bool file_flag , const Curves *curves
 
   delete [] width;
 
-  os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
+  os.setf(format_flags , ios::adjustfield);
 
   return os;
 }
@@ -766,9 +766,10 @@ ostream& operator<<(ostream &os , const Curves &curves)
 
 {
   register int i , j;
+  streamsize nb_digits;
 
 
-  os.precision(4);
+  nb_digits = os.precision(4);
 
   os << endl;
   if (curves.nb_curve == 1) {
@@ -792,7 +793,7 @@ ostream& operator<<(ostream &os , const Curves &curves)
   }
   os << endl;
 
-  os.precision(6);
+  os.precision(nb_digits);
 
   return os;
 }

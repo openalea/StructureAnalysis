@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -38,9 +38,8 @@
 
 #include <string>
 
-#include "tool/rw_tokenizer.h"
-#include "tool/rw_cstring.h"
-#include "tool/rw_locale.h"
+#include <boost/algorithm/string/trim.hpp>
+#include <boost/algorithm/string/classification.hpp>
 
 #include "stat_tool/stat_label.h"
 
@@ -48,6 +47,7 @@
 #include "sequence_label.h"
 
 using namespace std;
+using namespace boost;
 using namespace stat_tool;
 
 
@@ -811,8 +811,7 @@ Renewal* Renewal::ascii_read(StatError &error , const string path ,
                              process_type type , int time , double cumul_threshold)
 
 {
-  RWLocaleSnapshot locale("en");
-  RWCString buffer , token;
+  string buffer;
   size_t position;
   bool status;
   int line;
@@ -850,18 +849,18 @@ Renewal* Renewal::ascii_read(StatError &error , const string path ,
       }
     }
 
-    while (buffer.readLine(in_file , false)) {
+    while (getline(in_file , buffer)) {
       line++;
 
 #     ifdef DEBUG
       cout << line << " " << buffer << endl;
 #     endif
 
-      position = buffer.first('#');
-      if (position != RW_NPOS) {
-        buffer.remove(position);
+      position = buffer.find('#');
+      if (position != string::npos) {
+        buffer.erase(position);
       }
-      if (!(buffer.isNull())) {
+      if (!(trim_right_copy_if(buffer , is_any_of(" \t")).empty())) {
         status = false;
         error.update(STAT_parsing[STATP_FORMAT] , line);
       }

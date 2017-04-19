@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -341,7 +341,7 @@ double HiddenVariableOrderMarkov::likelihood_computation(const MarkovianSequence
  *  \brief Estimation of a hidden variable-order Markov chain using the EM algorithm.
  *
  *  \param[in] error                     reference on a StatError object,
- *  \param[in] os                        stream,
+ *  \param[in] display                   flag for displaying estimation intermediate results,
  *  \param[in] ihmarkov                  initial hidden variable-order Markov chain,
  *  \param[in] global_initial_transition type of estimation of the initial transition probabilities (ordinary process case),
  *  \param[in] common_dispersion         flag common dispersion parameter (continuous observation processes),
@@ -353,7 +353,7 @@ double HiddenVariableOrderMarkov::likelihood_computation(const MarkovianSequence
  */
 /*--------------------------------------------------------------*/
 
-HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_estimation(StatError &error , ostream &os ,
+HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_estimation(StatError &error , bool display ,
                                                                                        const HiddenVariableOrderMarkov &ihmarkov ,
                                                                                        bool global_initial_transition ,
                                                                                        bool common_dispersion ,
@@ -1117,10 +1117,10 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_esti
         }
       }
 
-#     ifdef MESSAGE
-      os << STAT_label[STATL_ITERATION] << " " << iter << "   "
-         << SEQ_label[SEQL_OBSERVED_SEQUENCES_LIKELIHOOD] << ": " << likelihood << endl;
-#     endif
+      if (display) {
+        cout << STAT_label[STATL_ITERATION] << " " << iter << "   "
+             << SEQ_label[SEQL_OBSERVED_SEQUENCES_LIKELIHOOD] << ": " << likelihood << endl;
+      }
 
 #     ifdef DEBUG
       if (iter % 5 == 0) {
@@ -1134,10 +1134,9 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_esti
             ((nb_iter != I_DEFAULT) && (iter < nb_iter))));
 
     if (likelihood != D_INF) {
-
-#     ifdef MESSAGE
-      os << "\n" << iter << " " << STAT_label[STATL_ITERATIONS] << endl;
-#     endif
+      if (display) {
+        cout << "\n" << iter << " " << STAT_label[STATL_ITERATIONS] << endl;
+      }
 
       // reestimation of the initial probabilities
 
@@ -1304,20 +1303,19 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_esti
 
         delete weight;
 
-#       ifdef MESSAGE
-        os << "\n" << SEQ_label[SEQL_STATE_SEQUENCES_LIKELIHOOD] << ": " << seq->restoration_likelihood;
+        if (display) {
+          cout << "\n" << SEQ_label[SEQL_STATE_SEQUENCES_LIKELIHOOD] << ": " << seq->restoration_likelihood;
 
-        for (i = 0;i < nb_variable;i++) {
-          if (type[i] == REAL_VALUE) {
-            break;
+          for (i = 0;i < nb_variable;i++) {
+            if (type[i] == REAL_VALUE) {
+              break;
+            }
           }
+          if (i == nb_variable) {
+            cout << " | " << hmarkov->VariableOrderMarkov::likelihood_computation(*seq);
+          }
+          cout << endl;
         }
-        if (i == nb_variable) {
-          os << " | " << hmarkov->VariableOrderMarkov::likelihood_computation(*seq);
-        }
-        os << endl;
-#       endif
-
       }
 
       else {
@@ -1359,15 +1357,13 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_esti
            << SEQ_label[SEQL_OBSERVED_SEQUENCES_LIKELIHOOD] << ": " << seq->likelihood << endl;
 #     endif
 
-#     ifdef MESSAGE
-      if  ((state_sequence) && (seq->nb_sequence <= POSTERIOR_PROBABILITY_NB_SEQUENCE)) {
-        os << "\n" << SEQ_label[SEQL_POSTERIOR_STATE_SEQUENCE_PROBABILITY] << endl;
+      if ((display) && (state_sequence) && (seq->nb_sequence <= POSTERIOR_PROBABILITY_NB_SEQUENCE)) {
+        cout << "\n" << SEQ_label[SEQL_POSTERIOR_STATE_SEQUENCE_PROBABILITY] << endl;
         for (i = 0;i < seq->nb_sequence;i++) {
-          os << SEQ_label[SEQL_SEQUENCE] << " " << seq->identifier[i] << ": "
-             << seq->posterior_probability[i] << endl;
+          cout << SEQ_label[SEQL_SEQUENCE] << " " << seq->identifier[i] << ": "
+               << seq->posterior_probability[i] << endl;
         }
       }
-#     endif
 
       hmarkov->component_computation();
       hmarkov->characteristic_computation(*seq , counting_flag , I_DEFAULT , false);
@@ -1428,7 +1424,7 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_esti
  *  \brief Estimation of a hidden variable-order Markov chain using the MCEM algorithm.
  *
  *  \param[in] error                     reference on a StatError object,
- *  \param[in] os                        stream,
+ *  \param[in] display                   flag for displaying estimation intermediate results,
  *  \param[in] ihmarkov                  initial hidden variable-order Markov chain,
  *  \param[in] global_initial_transition type of estimation of the initial transition probabilities (ordinary process case),
  *  \param[in] common_dispersion         flag common dispersion parameter (continuous observation processes),
@@ -1443,7 +1439,7 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_esti
  */
 /*--------------------------------------------------------------*/
 
-HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_stochastic_estimation(StatError &error , ostream &os ,
+HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_stochastic_estimation(StatError &error , bool display ,
                                                                                                   const HiddenVariableOrderMarkov &ihmarkov ,
                                                                                                   bool global_initial_transition ,
                                                                                                   bool common_dispersion ,
@@ -2199,11 +2195,11 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_stoc
         }
       }
 
-#     ifdef MESSAGE
-      os << STAT_label[STATL_ITERATION] << " " << iter << "   "
-         << SEQ_label[SEQL_OBSERVED_SEQUENCES_LIKELIHOOD] << ": " << likelihood
-         << "   (" << nb_state_sequence << ")" << endl;
-#     endif
+      if (display) {
+        cout << STAT_label[STATL_ITERATION] << " " << iter << "   "
+             << SEQ_label[SEQL_OBSERVED_SEQUENCES_LIKELIHOOD] << ": " << likelihood
+             << "   (" << nb_state_sequence << ")" << endl;
+      }
 
 #     ifdef DEBUG
       if (iter % 5 == 0) {
@@ -2217,10 +2213,9 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_stoc
             ((nb_iter != I_DEFAULT) && (iter < nb_iter))));
 
     if (likelihood != D_INF) {
-
-#     ifdef MESSAGE
-      os << "\n" << iter << " " << STAT_label[STATL_ITERATIONS] << endl;
-#     endif
+      if (display) {
+        cout << "\n" << iter << " " << STAT_label[STATL_ITERATIONS] << endl;
+      }
 
       // reestimation of the initial probabilities
 
@@ -2331,7 +2326,7 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_stoc
     }
 
     else {
-      if  (state_sequence) {
+      if (state_sequence) {
         hmarkov->markov_data = new VariableOrderMarkovData(*this , ADD_STATE_VARIABLE ,
                                                            (hmarkov->type == EQUILIBRIUM ? true : false));
         seq = hmarkov->markov_data;
@@ -2386,20 +2381,19 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_stoc
 
         delete weight;
 
-#       ifdef MESSAGE
-        os << "\n" << SEQ_label[SEQL_STATE_SEQUENCES_LIKELIHOOD] << ": " << seq->restoration_likelihood;
+        if (display) {
+          cout << "\n" << SEQ_label[SEQL_STATE_SEQUENCES_LIKELIHOOD] << ": " << seq->restoration_likelihood;
 
-        for (i = 0;i < nb_variable;i++) {
-          if (type[i] == REAL_VALUE) {
-            break;
+          for (i = 0;i < nb_variable;i++) {
+            if (type[i] == REAL_VALUE) {
+              break;
+            }
           }
+          if (i == nb_variable) {
+            cout << " | " << hmarkov->VariableOrderMarkov::likelihood_computation(*seq);
+          }
+          cout << endl;
         }
-        if (i == nb_variable) {
-          os << " | " << hmarkov->VariableOrderMarkov::likelihood_computation(*seq);
-        }
-        os << endl;
-#       endif
-
       }
 
       else {
@@ -2441,15 +2435,13 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_stoc
            << SEQ_label[SEQL_OBSERVED_SEQUENCES_LIKELIHOOD] << ": " << seq->likelihood << endl;
 #     endif
 
-#     ifdef MESSAGE
-      if  ((state_sequence) && (seq->nb_sequence <= POSTERIOR_PROBABILITY_NB_SEQUENCE)) {
-        os << "\n" << SEQ_label[SEQL_POSTERIOR_STATE_SEQUENCE_PROBABILITY] << endl;
+      if ((display) && (state_sequence) && (seq->nb_sequence <= POSTERIOR_PROBABILITY_NB_SEQUENCE)) {
+        cout << "\n" << SEQ_label[SEQL_POSTERIOR_STATE_SEQUENCE_PROBABILITY] << endl;
         for (i = 0;i < seq->nb_sequence;i++) {
-          os << SEQ_label[SEQL_SEQUENCE] << " " << seq->identifier[i] << ": "
-             << seq->posterior_probability[i] << endl;
+          cout << SEQ_label[SEQL_SEQUENCE] << " " << seq->identifier[i] << ": "
+               << seq->posterior_probability[i] << endl;
         }
       }
-#     endif
 
       hmarkov->component_computation();
       hmarkov->characteristic_computation(*seq , counting_flag , I_DEFAULT , false);

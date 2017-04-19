@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -78,23 +78,21 @@ ostream& CategoricalSequenceProcess::ascii_print(ostream &os , int process ,
 {
   register int i , j;
   int buff , width[2];
-  long old_adjust;
-  double *pmass , scale[NB_STATE];
+  double scale[NB_STATE];
   const Distribution *pobservation[NB_STATE];
+  ios_base::fmtflags format_flags;
 
 
-  old_adjust = os.setf(ios::left , ios::adjustfield);
+  format_flags = os.setf(ios::left , ios::adjustfield);
 
   if (observation) {
     for (i = 0;i < nb_state;i++) {
       os << "\n" << STAT_word[STATW_STATE] << " " << i << " "
          << STAT_word[STATW_OBSERVATION_DISTRIBUTION] << endl;
-      pmass = observation[i]->mass + observation[i]->offset;
       for (j = observation[i]->offset;j < observation[i]->nb_value;j++) {
-        if (*pmass > 0.) {
-          os << STAT_word[STATW_OUTPUT] << " " << j << " : " << *pmass << endl;
+        if (observation[i]->mass[j] > 0.) {
+          os << STAT_word[STATW_OUTPUT] << " " << j << " : " << observation[i]->mass[j] << endl;
         }
-        pmass++;
       }
 
       if ((empirical_observation) && (empirical_observation[i]->nb_element > 0) && (exhaustive)) {
@@ -807,7 +805,7 @@ ostream& CategoricalSequenceProcess::ascii_print(ostream &os , int process ,
     }
   }
 
-  os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
+  os.setf(format_flags , ios::adjustfield);
 
   return os;
 }
@@ -834,7 +832,7 @@ ostream& CategoricalSequenceProcess::spreadsheet_print(ostream &os , int process
 
 {
   register int i , j;
-  double *pmass , scale[NB_STATE];
+  double scale[NB_STATE];
   const Distribution *pobservation[NB_STATE];
   Curves *smoothed_curves;
 
@@ -843,12 +841,10 @@ ostream& CategoricalSequenceProcess::spreadsheet_print(ostream &os , int process
     for (i = 0;i < nb_state;i++) {
       os << "\n" << STAT_word[STATW_STATE] << " " << i << "\t"
          << STAT_word[STATW_OBSERVATION_DISTRIBUTION] << endl;
-      pmass = observation[i]->mass + observation[i]->offset;
       for (j = observation[i]->offset;j < observation[i]->nb_value;j++) {
-        if (*pmass > 0.) {
-          os << STAT_word[STATW_OUTPUT] << "\t" << j << "\t" << *pmass << endl;
+        if (observation[i]->mass[j] > 0.) {
+          os << STAT_word[STATW_OUTPUT] << "\t" << j << "\t" << observation[i]->mass[j] << endl;
         }
-        pmass++;
       }
 
       if ((empirical_observation) && (empirical_observation[i]->nb_element > 0)) {

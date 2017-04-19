@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -42,14 +42,15 @@
 #include <string>
 #include <vector>
 
-#include "tool/rw_tokenizer.h"
-#include "tool/rw_cstring.h"
-#include "tool/rw_locale.h"
+#include <boost/tokenizer.hpp>
+#include <boost/algorithm/string/trim.hpp>
+#include <boost/algorithm/string/classification.hpp>
 
 #include "convolution.h"
 #include "stat_label.h"
 
 using namespace std;
+using namespace boost;
 
 
 namespace stat_tool {
@@ -403,13 +404,13 @@ Convolution* Convolution::building(StatError &error , int nb_dist , const vector
 Convolution* Convolution::ascii_read(StatError &error , const string path , double cumul_threshold)
 
 {
-  RWLocaleSnapshot locale("en");
-  RWCString buffer , token;
+  string buffer;
   size_t position;
+  typedef tokenizer<char_separator<char>> tokenizer;
+  char_separator<char> separator(" \t");
   bool status , lstatus;
   register int i , j;
-  int line;
-  long index , nb_dist;
+  int line , nb_dist , index;
   const DiscreteParametric **dist;
   Convolution *convol;
   ifstream in_file(path.c_str());
@@ -427,28 +428,28 @@ Convolution* Convolution::ascii_read(StatError &error , const string path , doub
     line = 0;
     nb_dist = 0;
 
-    while (buffer.readLine(in_file , false)) {
+    while (getline(in_file , buffer)) {
       line++;
 
 #     ifdef DEBUG
       cout << line << "  " << buffer << endl;
 #     endif
 
-      position = buffer.first('#');
-      if (position != RW_NPOS) {
-        buffer.remove(position);
+      position = buffer.find('#');
+      if (position != string::npos) {
+        buffer.erase(position);
       }
       i = 0;
 
-      RWCTokenizer next(buffer);
+      tokenizer tok_buffer(buffer , separator);
 
-      while (!((token = next()).isNull())) {
+      for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
         switch (i) {
 
         // test CONVOLUTION keyword
 
         case 0 : {
-          if (token != STAT_word[STATW_CONVOLUTION]) {
+          if (*token != STAT_word[STATW_CONVOLUTION]) {
             status = false;
             error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_CONVOLUTION] , line , i + 1);
           }
@@ -458,7 +459,16 @@ Convolution* Convolution::ascii_read(StatError &error , const string path , doub
         // test number of distributions
 
         case 1 : {
-          lstatus = locale.stringToNum(token , &nb_dist);
+          lstatus = true;
+
+/*          try {
+            nb_dist = stoi(*token);   in C++ 11
+          }
+          catch(invalid_argument &arg) {
+            lstatus = false;
+          } */
+          nb_dist = atoi(token->c_str());
+
           if ((lstatus) && ((nb_dist < 2) || (nb_dist > CONVOLUTION_NB_DISTRIBUTION))) {
             lstatus = false;
           }
@@ -473,7 +483,7 @@ Convolution* Convolution::ascii_read(StatError &error , const string path , doub
         // test DISTRIBUTIONS keyword
 
         case 2 : {
-          if (token != STAT_word[STATW_DISTRIBUTIONS]) {
+          if (*token != STAT_word[STATW_DISTRIBUTIONS]) {
             status = false;
             error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_DISTRIBUTIONS] , line , i + 1);
           }
@@ -506,28 +516,28 @@ Convolution* Convolution::ascii_read(StatError &error , const string path , doub
       }
 
       for (i = 0;i < nb_dist;i++) {
-        while (buffer.readLine(in_file , false)) {
+        while (getline(in_file , buffer)) {
           line++;
 
 #         ifdef DEBUG
           cout << line << "  " << buffer << endl;
 #         endif
 
-          position = buffer.first('#');
-          if (position != RW_NPOS) {
-            buffer.remove(position);
+          position = buffer.find('#');
+          if (position != string::npos) {
+            buffer.erase(position);
           }
           j = 0;
 
-          RWCTokenizer next(buffer);
+          tokenizer tok_buffer(buffer , separator);
 
-          while (!((token = next()).isNull())) {
+          for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
             switch (j) {
 
             // test DISTRIBUTION keyword
 
             case 0 : {
-              if (token != STAT_word[STATW_DISTRIBUTION]) {
+              if (*token != STAT_word[STATW_DISTRIBUTION]) {
                 status = false;
                 error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_DISTRIBUTION] , line , j + 1);
               }
@@ -537,7 +547,16 @@ Convolution* Convolution::ascii_read(StatError &error , const string path , doub
             // test distribution index
 
             case 1 : {
-              lstatus = locale.stringToNum(token , &index);
+              lstatus = true;
+
+/*              try {
+                index = stoi(*token);   in C++ 11
+              }
+              catch(invalid_argument &arg) {
+                lstatus = false;
+              } */
+              index = atoi(token->c_str());
+
               if ((lstatus) && (index != i + 1)) {
                 lstatus = false;
               }
@@ -571,18 +590,18 @@ Convolution* Convolution::ascii_read(StatError &error , const string path , doub
         }
       }
 
-      while (buffer.readLine(in_file , false)) {
+      while (getline(in_file , buffer)) {
         line++;
 
 #       ifdef DEBUG
         cout << line << "  " << buffer << endl;
 #       endif
 
-        position = buffer.first('#');
-        if (position != RW_NPOS) {
-          buffer.remove(position);
+        position = buffer.find('#');
+        if (position != string::npos) {
+          buffer.erase(position);
         }
-        if (!(buffer.isNull())) {
+        if (!(trim_right_copy_if(buffer , is_any_of(" \t")).empty())) {
           status = false;
           error.update(STAT_parsing[STATP_FORMAT] , line);
         }

@@ -571,18 +571,20 @@ double Sequences::N_segmentation(int index , int nb_segment , segment_model *mod
   }
 
 # ifdef MESSAGE
+  streamsize nb_digits;
+
   buff = 1.;
   for (i = 1;i < nb_segment;i++) {
     buff *= (double)(seq_length - i) / (double)i;
 //    buff = buff * (seq_length - i) / i;
   }
 
-  os.precision(10);
+  nb_digits = os.precision(10);
 
   os << "\n" << SEQ_label[SEQL_NB_SEGMENTATION] << ": "
      << nb_segmentation_forward[seq_length - 1][nb_segment - 1] << " (" << buff << ")" << endl;
 
-  os.precision(6);
+  os.precision(nb_digits);
 
   if (((model_type[0] == MEAN_CHANGE) || (model_type[0] == INTERCEPT_SLOPE_CHANGE)) &&
       (format == SPREADSHEET) && (nb_segment == 2) && (inb_segmentation >= seq_length - 1)) {
@@ -2151,17 +2153,15 @@ bool Sequences::segment_profile_write(StatError &error , ostream &os , int iiden
 /*--------------------------------------------------------------*/
 /**
  *  \brief Computation of the N most probable segmentations, of segment/change-point profiles and
- *         entropy profiles for a single sequence or a sample of sequences.
+ *         entropy profiles for a single sequence or a sample of sequences and displaying the results.
  *
  *  \param[in] error           reference on a StatError object,
- *  \param[in] os              stream,
  *  \param[in] iidentifier     sequence identifier,
  *  \param[in] nb_segment      number of segments,
  *  \param[in] model_type      segment model types,
  *  \param[in] common_contrast flag contrast functions common to the individuals,
  *  \param[in] shape_parameter negative binomial shape parameters,
  *  \param[in] output          output type,
- *  \param[in] format          output format (ASCII/SPREADSHEET),
  *  \param[in] segmentation    method for computing segmentations (FORWARD_DYNAMIC_PROGRAMMING/ FORWARD_BACKWARD_SAMPLING),
  *  \param[in] nb_segmentation number of segmentations.
  *
@@ -2169,16 +2169,16 @@ bool Sequences::segment_profile_write(StatError &error , ostream &os , int iiden
  */
 /*--------------------------------------------------------------*/
 
-bool Sequences::segment_profile_write(StatError &error , ostream &os , int iidentifier ,
-                                      int nb_segment , vector<segment_model> model_type ,
-                                      bool common_contrast , vector<double> shape_parameter ,
-                                      change_point_profile output , output_format format ,
-                                      latent_structure_algorithm segmentation , int nb_segmentation) const
+bool Sequences::segment_profile_ascii_write(StatError &error , int iidentifier ,
+                                            int nb_segment , vector<segment_model> model_type ,
+                                            bool common_contrast , vector<double> shape_parameter ,
+                                            change_point_profile output ,
+                                            latent_structure_algorithm segmentation , int nb_segmentation) const
 
 {
-  return segment_profile_write(error , os , iidentifier , nb_segment , model_type.data() ,
+  return segment_profile_write(error , cout , iidentifier , nb_segment , model_type.data() ,
                                common_contrast , shape_parameter.data() , output ,
-                               format , segmentation , nb_segmentation);
+                               ASCII , segmentation , nb_segmentation);
 }
 
 
@@ -2205,8 +2205,8 @@ bool Sequences::segment_profile_write(StatError &error , ostream &os , int iiden
 /*--------------------------------------------------------------*/
 
 bool Sequences::segment_profile_write(StatError &error , const string path , int iidentifier ,
-                                      int nb_segment , segment_model *model_type ,
-                                      bool common_contrast , double *shape_parameter ,
+                                      int nb_segment , vector<segment_model> model_type ,
+                                      bool common_contrast , vector<double> shape_parameter ,
                                       change_point_profile output , output_format format ,
                                       latent_structure_algorithm segmentation , int nb_segmentation) const
 
@@ -2223,47 +2223,12 @@ bool Sequences::segment_profile_write(StatError &error , const string path , int
   }
 
   else {
-    status = segment_profile_write(error , out_file , iidentifier , nb_segment , model_type ,
-                                   common_contrast , shape_parameter , output , format ,
+    status = segment_profile_write(error , out_file , iidentifier , nb_segment , model_type.data() ,
+                                   common_contrast , shape_parameter.data() , output , format ,
                                    segmentation , nb_segmentation);
   }
 
   return status;
-}
-
-
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the N most probable segmentations, of segment/change-point profiles and
- *         entropy profiles for a single sequence or a sample of sequences and
- *         writing of the results in a file.
- *
- *  \param[in] error           reference on a StatError object,
- *  \param[in] path            file path,
- *  \param[in] iidentifier     sequence identifier,
- *  \param[in] nb_segment      number of segments,
- *  \param[in] model_type      segment model types,
- *  \param[in] common_contrast flag contrast functions common to the individuals,
- *  \param[in] shape_parameter negative binomial shape parameters,
- *  \param[in] output          output type,
- *  \param[in] format          file format (ASCII/SPREADSHEET),
- *  \param[in] segmentation    method for computing segmentations (FORWARD_DYNAMIC_PROGRAMMING/FORWARD_BACKWARD_SAMPLING),
- *  \param[in] nb_segmentation number of segmentations.
- *
- *  \return                    error status.
- */
-/*--------------------------------------------------------------*/
-
-bool Sequences::segment_profile_write(StatError &error , const string path , int iidentifier ,
-                                      int nb_segment , vector<segment_model> model_type ,
-                                      bool common_contrast , vector<double> shape_parameter ,
-                                      change_point_profile output , output_format format ,
-                                      latent_structure_algorithm segmentation , int nb_segmentation) const
-
-{
-  return segment_profile_write(error , path , iidentifier , nb_segment , model_type.data() ,
-                               common_contrast , shape_parameter.data() , output ,
-                               format , segmentation , nb_segmentation);
 }
 
 

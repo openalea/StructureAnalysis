@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -42,10 +42,9 @@
 #include <sstream>
 #include <iomanip>
 
-#include "tool/rw_tokenizer.h"
-#include "tool/rw_cstring.h"
-#include "tool/rw_locale.h"
-#include "tool/config.h"
+#include <boost/tokenizer.hpp>
+#include <boost/algorithm/string/trim.hpp>
+#include <boost/algorithm/string/classification.hpp>
 
 #include "stat_tool/stat_label.h"
 
@@ -55,6 +54,7 @@
 #include "sequence_label.h"
 
 using namespace std;
+using namespace boost;
 using namespace stat_tool;
 
 
@@ -77,16 +77,16 @@ namespace sequence_analysis {
 Sequences* Sequences::ascii_read(StatError &error , const string path , bool old_format)
 
 {
-  RWLocaleSnapshot locale("en");
-  RWCString buffer , token;
+  string buffer , trimmed_buffer;
   size_t position;
+  typedef tokenizer<char_separator<char>> tokenizer;
+  char_separator<char> separator(" \t");
   bool status , lstatus;
   register int i , j , k , m;
   int line , read_line , offset , initial_nb_line , max_length , nb_variable = 0 ,
-      vector_size , nb_sequence , index , line_continue , *length;
+      vector_size , nb_sequence , index , int_value , line_continue , *length;
   variable_nature *type;
   index_parameter_type index_param_type = IMPLICIT_TYPE;
-  long int_value;
   double real_value;
   Sequences *seq;
   ifstream in_file(path.c_str());
@@ -110,32 +110,41 @@ Sequences* Sequences::ascii_read(StatError &error , const string path , bool old
 
     read_line = 0;
 
-    while (buffer.readLine(in_file , false)) {
+    while (getline(in_file , buffer)) {
       line++;
 
-      position = buffer.first('#');
-      if (position != RW_NPOS) {
-        buffer.remove(position);
+      position = buffer.find('#');
+      if (position != string::npos) {
+        buffer.erase(position);
       }
       i = 0;
 
-      RWCTokenizer next(buffer);
+      tokenizer tok_buffer(buffer , separator);
 
-      while (!((token = next()).isNull())) {
+      for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
         switch (i) {
 
         case 0 : {
 
           // test INDEX_PARAMETER keyword
 
-          if ((!old_format) && (read_line == 0) && (token == SEQ_word[SEQW_INDEX_PARAMETER])) {
+          if ((!old_format) && (read_line == 0) && (*token == SEQ_word[SEQW_INDEX_PARAMETER])) {
             index_param_type = TIME;
           }
 
           // test number of variables
 
           else {
-            lstatus = locale.stringToNum(token , &int_value);
+            lstatus = true;
+
+/*            try {
+              int_value = stoi(*token);   in C++ 11
+            }
+            catch(invalid_argument &arg) {
+              lstatus = false;
+            } */
+            int_value = atoi(token->c_str());
+
             if (lstatus) {
               if ((int_value < 1) || (int_value > SEQUENCE_NB_VARIABLE)) {
                 lstatus = false;
@@ -158,7 +167,7 @@ Sequences* Sequences::ascii_read(StatError &error , const string path , bool old
           // test separator
 
           if ((!old_format) && (read_line == 0) && (index_param_type != IMPLICIT_TYPE)) {
-            if (token != ":") {
+            if (*token != ":") {
               status = false;
               error.update(STAT_parsing[STATP_SEPARATOR] , line , i + 1);
             }
@@ -166,7 +175,7 @@ Sequences* Sequences::ascii_read(StatError &error , const string path , bool old
 
           // test VARIABLE(S) keyword
 
-          else if (token != STAT_word[nb_variable == 1 ? STATW_VARIABLE : STATW_VARIABLES]) {
+          else if (*token != STAT_word[nb_variable == 1 ? STATW_VARIABLE : STATW_VARIABLES]) {
             status = false;
             error.correction_update(STAT_parsing[STATP_KEYWORD] ,
                                     STAT_word[nb_variable == 1 ? STATW_VARIABLE : STATW_VARIABLES] , line , i + 1);
@@ -179,7 +188,7 @@ Sequences* Sequences::ascii_read(StatError &error , const string path , bool old
         case 2 : {
           if ((!old_format) && (read_line == 0) && (index_param_type != IMPLICIT_TYPE)) {
             for (j = TIME;j <= POSITION_INTERVAL;j++) {
-              if (token == SEQ_index_parameter_word[j]) {
+              if (*token == SEQ_index_parameter_word[j]) {
                 index_param_type = (index_parameter_type)j;
                 break;
               }
@@ -230,24 +239,24 @@ Sequences* Sequences::ascii_read(StatError &error , const string path , bool old
       read_line = 0;
       offset = (old_format ? 1 : 0);
 
-      while (buffer.readLine(in_file , false)) {
+      while (getline(in_file , buffer)) {
         line++;
 
-        position = buffer.first('#');
-        if (position != RW_NPOS) {
-          buffer.remove(position);
+        position = buffer.find('#');
+        if (position != string::npos) {
+          buffer.erase(position);
         }
         i = 0;
 
-        RWCTokenizer next(buffer);
+        tokenizer tok_buffer(buffer , separator);
 
-        while (!((token = next()).isNull())) {
+        for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
           switch (i) {
 
           // test VARIABLE keyword
 
           case 0 : {
-            if (token != STAT_word[STATW_VARIABLE]) {
+            if (*token != STAT_word[STATW_VARIABLE]) {
               status = false;
               error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_VARIABLE] , line , i + 1);
             }
@@ -257,7 +266,16 @@ Sequences* Sequences::ascii_read(StatError &error , const string path , bool old
           // test variable index
 
           case 1 : {
-            lstatus = locale.stringToNum(token , &int_value);
+            lstatus = true;
+
+/*            try {
+              int_value = stoi(*token);   in C++ 11
+            }
+            catch(invalid_argument &arg) {
+              lstatus = false;
+            } */
+            int_value = atoi(token->c_str());
+
             if ((lstatus) && (int_value != read_line + 1)) {
               lstatus = false;
             }
@@ -272,7 +290,7 @@ Sequences* Sequences::ascii_read(StatError &error , const string path , bool old
           // test separator
 
           case 2 : {
-            if (token != ":") {
+            if (*token != ":") {
               status = false;
               error.update(STAT_parsing[STATP_SEPARATOR] , line , i + 1);
             }
@@ -284,7 +302,7 @@ Sequences* Sequences::ascii_read(StatError &error , const string path , bool old
           case 3 : {
             if ((old_format) && (read_line == 0)) {
               for (j = TIME;j <= POSITION_INTERVAL;j++) {
-                if (token == SEQ_index_parameter_word[j]) {
+                if (*token == SEQ_index_parameter_word[j]) {
                   index_param_type = (index_parameter_type)j;
                   break;
                 }
@@ -293,7 +311,7 @@ Sequences* Sequences::ascii_read(StatError &error , const string path , bool old
               if (j == POSITION_INTERVAL + 1) {
 //                for (j = INT_VALUE;j <= STATE;j++) {
                 for (j = INT_VALUE;j <= OLD_INT_VALUE;j++) {
-                  if (token == STAT_variable_word[j]) {
+                  if (*token == STAT_variable_word[j]) {
 //                    if (j == STATE) {
                     if ((j == STATE) || (j == OLD_INT_VALUE)) {
                       j = INT_VALUE;
@@ -314,7 +332,7 @@ Sequences* Sequences::ascii_read(StatError &error , const string path , bool old
             else {
 //              for (j = INT_VALUE;j <= NB_INTERNODE;j++) {
               for (j = INT_VALUE;j <= OLD_INT_VALUE;j++) {
-                if (token == STAT_variable_word[j]) {
+                if (*token == STAT_variable_word[j]) {
 //                  if ((j == NB_INTERNODE) && ((read_line != offset) || ((read_line == offset) &&
                   if ((j == OLD_INT_VALUE) && ((read_line != offset) || ((read_line == offset) &&
                         (index_param_type != POSITION) && (index_param_type != POSITION_INTERVAL)))) {
@@ -400,14 +418,17 @@ Sequences* Sequences::ascii_read(StatError &error , const string path , bool old
       nb_sequence = 0;
       lstatus = true;
 
-      while (buffer.readLine(in_file , true)) {
-        position = buffer.first('#');
-        if (position != RW_NPOS) {
-          buffer.remove(position);
+//      while (buffer.readLine(in_file , true)) {
+      while (getline(in_file , buffer)) {
+        position = buffer.find('#');
+        if (position != string::npos) {
+          buffer.erase(position);
         }
 
-        if (!(buffer.isNull())) {
-          if (buffer.last('\\') == RW_NPOS) {
+        if (!(buffer.empty())) {
+          trimmed_buffer = trim_right_copy_if(buffer , is_any_of(" \t"));
+
+          if ((!(trimmed_buffer.empty())) && (trimmed_buffer.find('\\' , trimmed_buffer.length() - 1) == string::npos)) {
             nb_sequence++;
             lstatus = true;
           }
@@ -451,7 +472,7 @@ Sequences* Sequences::ascii_read(StatError &error , const string path , bool old
       line = 0;
 
       do {
-        buffer.readLine(in_file , false);
+        getline(in_file , buffer);
         line++;
 
 #       ifdef DEBUG
@@ -474,25 +495,25 @@ Sequences* Sequences::ascii_read(StatError &error , const string path , bool old
 
       i = 0;
 
-      while (buffer.readLine(in_file , false)) {
+      while (getline(in_file , buffer)) {
         line++;
 
 #       ifdef DEBUG
         cout << line << "  " << buffer << endl;
 #       endif
 
-        position = buffer.first('#');
-        if (position != RW_NPOS) {
-          buffer.remove(position);
+        position = buffer.find('#');
+        if (position != string::npos) {
+          buffer.erase(position);
         }
 
         j = 0;
         k = 0;
         line_continue = false;
 
-        RWCTokenizer next(buffer);
+        tokenizer tok_buffer(buffer , separator);
 
-        while (!((token = next()).isNull())) {
+        for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
           if (line_continue) {
             status = false;
             error.update(STAT_parsing[STATP_FORMAT] , line , j);
@@ -500,13 +521,13 @@ Sequences* Sequences::ascii_read(StatError &error , const string path , bool old
           }
 
           if ((vector_size > 1) && (j % (vector_size + 1) == vector_size)) {
-            if (token == "\\") {
+            if (*token == "\\") {
               line_continue = true;
               length[i]++;
             }
 
             else {
-              if (token != "|") {
+              if (*token != "|") {
                 status = false;
                 error.update(STAT_parsing[STATP_SEPARATOR] , line , j + 1);
               }
@@ -518,24 +539,38 @@ Sequences* Sequences::ascii_read(StatError &error , const string path , bool old
           }
 
           else {
-            if ((vector_size == 1) && (token == "\\")) {
+            if ((vector_size == 1) && (*token == "\\")) {
               line_continue = true;
             }
 
             else {
-              if (((index_param_type != IMPLICIT_TYPE) && (k == 0)) ||
-                  (type[k - offset] != REAL_VALUE)) {
-                lstatus = locale.stringToNum(token , &int_value);
+              lstatus = true;
+
+              if (((index_param_type != IMPLICIT_TYPE) && (k == 0)) || (type[k - offset] != REAL_VALUE)) {
+/*                try {
+                  int_value = stoi(*token);   in C++ 11
+                }
+                catch(invalid_argument &arg) {
+                  lstatus = false;
+                } */
+                int_value = atoi(token->c_str());
+
                 if ((lstatus) && (((k == 0) && (((index_param_type == TIME) || (index_param_type == POSITION) ||
                         (index_param_type == POSITION_INTERVAL)) && (int_value < 0)) ||
                       ((index_param_type == TIME_INTERVAL) && (int_value <= 0))))) {
 //                     ((k == 1) && (type[k - 1] == NB_INTERNODE) && (int_value < 0)))) {
                   lstatus = false;
                 }
+              }
 
-                else {
-                  lstatus = locale.stringToNum(token , &real_value);
+              else {
+/*                try {
+                  real_value = stod(*token);   in C++ 11
                 }
+                catch(invalid_argument &arg) {
+                  lstatus = false;
+                } */
+                real_value = atof(token->c_str());
               }
 
               if (!lstatus) {
@@ -653,7 +688,7 @@ Sequences* Sequences::ascii_read(StatError &error , const string path , bool old
       line = 0;
 
       do {
-        buffer.readLine(in_file , false);
+        getline(in_file , buffer);
         line++;
       }
       while (line < initial_nb_line);
@@ -661,21 +696,21 @@ Sequences* Sequences::ascii_read(StatError &error , const string path , bool old
       i = 0;
       j = 0;
 
-      while (buffer.readLine(in_file , false)) {
-        position = buffer.first('#');
-        if (position != RW_NPOS) {
-          buffer.remove(position);
+      while (getline(in_file , buffer)) {
+        position = buffer.find('#');
+        if (position != string::npos) {
+          buffer.erase(position);
         }
 
         k = 0;
         m = 0;
         line_continue = false;
 
-        RWCTokenizer next(buffer);
+        tokenizer tok_buffer(buffer , separator);
 
-        while (!((token = next()).isNull())) {
+        for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
           if ((vector_size > 1) && (m % (vector_size + 1) == vector_size)) {
-            if (token == "\\") {
+            if (*token == "\\") {
               line_continue = true;
             }
             k = 0;
@@ -683,25 +718,22 @@ Sequences* Sequences::ascii_read(StatError &error , const string path , bool old
           }
 
           else {
-            if ((vector_size == 1) && (token == "\\")) {
+            if ((vector_size == 1) && (*token == "\\")) {
               line_continue = true;
             }
 
             else {
-              if (((index_param_type != IMPLICIT_TYPE) && (k == 0)) ||
-                  (type[k - offset] != REAL_VALUE)) {
-                locale.stringToNum(token , &int_value);
-
-                if ((index_param_type != IMPLICIT_TYPE) && (k == 0)) {
-                  seq->index_parameter[i][j] = int_value;
-                }
-                else {
-                  seq->int_sequence[i][k - offset][j] = int_value;
-                }
+              if ((index_param_type != IMPLICIT_TYPE) && (k == 0)) {
+//                seq->index_parameter[i][j] = stoi(*token);   in C++ 11
+                seq->index_parameter[i][j] = atoi(token->c_str());
               }
-
+              else if (type[k - offset] != REAL_VALUE) {
+//                seq->int_sequence[i][k - offset][j] = stoi(*token);   in C++ 11
+                seq->int_sequence[i][k - offset][j] = atoi(token->c_str());
+              }
               else {
-                locale.stringToNum(token , seq->real_sequence[i][k - offset] + j);
+//                seq->real_sequence[i][k - offset][j] = stod(*token);   in C++ 11
+                seq->real_sequence[i][k - offset][j] = atof(token->c_str());
               }
 
               if (vector_size == 1) {
@@ -1244,10 +1276,10 @@ ostream& Sequences::ascii_print(ostream &os , output_sequence_format format , bo
 
   case LINE : {
     int buff , start , width;
-    long old_adjust;
+    ios_base::fmtflags format_flags;
 
 
-    old_adjust = os.setf(ios::right , ios::adjustfield);
+    format_flags = os.setf(ios::right , ios::adjustfield);
 
     if (index_parameter) {
       width = column_width(index_parameter_distribution->nb_value - 1);
@@ -1365,7 +1397,7 @@ ostream& Sequences::ascii_print(ostream &os , output_sequence_format format , bo
       }
     }
 
-    os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
+    os.setf(format_flags , ios::adjustfield);
     break;
   }
 
@@ -1489,8 +1521,8 @@ ostream& Sequences::ascii_print(ostream &os , output_sequence_format format , bo
     if ((posterior_probability) && (entropy) && (nb_state_sequence)) {
       bool *selected_sequence;
       int index , width[6];
-      long old_adjust;
       double max , *divergence;
+      ios_base::fmtflags format_flags;
 
 
       divergence = new double[nb_sequence];
@@ -1510,7 +1542,7 @@ ostream& Sequences::ascii_print(ostream &os , output_sequence_format format , bo
         selected_sequence[i] = false;
       }
 
-      old_adjust = os.setf(ios::left , ios::adjustfield);
+      format_flags = os.setf(ios::left , ios::adjustfield);
 
       os << "\n6 " << STAT_word[STATW_VARIABLES] << endl;
 
@@ -1596,7 +1628,7 @@ ostream& Sequences::ascii_print(ostream &os , output_sequence_format format , bo
       delete [] divergence;
       delete [] selected_sequence;
 
-      os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
+      os.setf(format_flags , ios::adjustfield);
     }
     break;
   }

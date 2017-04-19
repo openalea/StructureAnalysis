@@ -83,7 +83,7 @@ public:
   f_comparison(const FrequencyDistribution &h, const FrequencyDistribution &histo)
   {
     ostringstream output;
-    h.F_comparison(output, histo);
+    h.F_comparison(true , histo);
     return output.str();
 
   }
@@ -92,7 +92,7 @@ public:
   t_comparison(const FrequencyDistribution &h, const FrequencyDistribution &histo)
   {
     ostringstream output;
-    h.t_comparison(output, histo);
+    h.t_comparison(true , histo);
     return output.str();
   }
 
@@ -101,12 +101,11 @@ public:
   {
     ostringstream output;
     StatError error;
-    if (!h.wilcoxon_mann_whitney_comparison(error, output, histo))
+    if (!h.wilcoxon_mann_whitney_comparison(error, true , histo))
       {
         stat_tool::wrap_util::throw_error(error);
       }
     return output.str();
-
   }
 
   static std::string
@@ -129,8 +128,8 @@ public:
       ihisto[i] = boost::python::extract<FrequencyDistribution*>(histos[i]);
 
     // call comparaison
-    bool res = h.comparison(error, output, nb_histo, ihisto.get(), type,
-        filename, format);
+    bool res = h.comparison(error, true , nb_histo, ihisto.get(), type,
+                            filename, format);
 
     if (!res)
       stat_tool::wrap_util::throw_error(error);
@@ -196,7 +195,7 @@ public:
       double weight, penalty_type pen_type, side_effect outside)
   {
     Convolution* ret;
-    ostringstream output;
+    ostringstream *output;
     StatError error;
 
     ret = h.convolution_estimation(error, output, known_dist, unknown_dist,
@@ -214,7 +213,7 @@ public:
       penalty_type pen_type, side_effect outside)
   {
     Convolution* ret;
-    ostringstream output;
+    ostringstream *output;
     StatError error;
 
     ret = h.convolution_estimation(error, output, known_dist, min_inf_bound,

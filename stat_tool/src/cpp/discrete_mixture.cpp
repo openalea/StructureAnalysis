@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -41,15 +41,15 @@
 #include <vector>
 #include <iomanip>
 
-#include "tool/rw_tokenizer.h"
-#include "tool/rw_cstring.h"
-#include "tool/rw_locale.h"
-#include "tool/config.h"
+#include <boost/tokenizer.hpp>
+#include <boost/algorithm/string/trim.hpp>
+#include <boost/algorithm/string/classification.hpp>
 
 #include "discrete_mixture.h"
 #include "stat_label.h"
 
 using namespace std;
+using namespace boost;
 
 
 namespace stat_tool {
@@ -507,13 +507,13 @@ DiscreteMixture* DiscreteMixture::ascii_read(StatError &error , const string pat
                                              double cumul_threshold)
 
 {
-  RWLocaleSnapshot locale("en");
-  RWCString buffer , token;
+  string buffer;
   size_t position;
+  typedef tokenizer<char_separator<char>> tokenizer;
+  char_separator<char> separator(" \t");
   bool status , lstatus;
   register int i , j;
-  int line;
-  long index , nb_component;
+  int line , nb_component , index;
   double cumul , weight[DISCRETE_MIXTURE_NB_COMPONENT];
   const DiscreteParametric **component;
   DiscreteMixture *mixt;
@@ -532,28 +532,28 @@ DiscreteMixture* DiscreteMixture::ascii_read(StatError &error , const string pat
     line = 0;
     nb_component = 0;
 
-    while (buffer.readLine(in_file , false)) {
+    while (getline(in_file , buffer)) {
       line++;
 
 #     ifdef DEBUG
       cout << line << "  " << buffer << endl;
 #     endif
 
-      position = buffer.first('#');
-      if (position != RW_NPOS) {
-        buffer.remove(position);
+      position = buffer.find('#');
+      if (position != string::npos) {
+        buffer.erase(position);
       }
       i = 0;
 
-      RWCTokenizer next(buffer);
+      tokenizer tok_buffer(buffer , separator);
 
-      while (!((token = next()).isNull())) {
+      for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
         switch (i) {
 
         // test MIXTURE keyword
 
         case 0 : {
-          if (token != STAT_word[STATW_MIXTURE]) {
+          if (*token != STAT_word[STATW_MIXTURE]) {
             status = false;
             error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_MIXTURE] , line , i + 1);
           }
@@ -563,7 +563,16 @@ DiscreteMixture* DiscreteMixture::ascii_read(StatError &error , const string pat
         // test number of components
 
         case 1 : {
-          lstatus = locale.stringToNum(token , &nb_component);
+          lstatus = true;
+
+/*          try {
+            nb_component = stoi(*token);   in C++ 11
+          }
+          catch(invalid_argument &arg) {
+            lstatus = false;
+          } */
+          nb_component = atoi(token->c_str());
+
           if ((lstatus) && ((nb_component < 2) || (nb_component > DISCRETE_MIXTURE_NB_COMPONENT))) {
             lstatus = false;
           }
@@ -578,7 +587,7 @@ DiscreteMixture* DiscreteMixture::ascii_read(StatError &error , const string pat
         // test DISTRIBUTIONS keyword
 
         case 2 : {
-          if (token != STAT_word[STATW_DISTRIBUTIONS]) {
+          if (*token != STAT_word[STATW_DISTRIBUTIONS]) {
             status = false;
             error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_DISTRIBUTIONS] , line , i + 1);
           }
@@ -613,28 +622,28 @@ DiscreteMixture* DiscreteMixture::ascii_read(StatError &error , const string pat
       cumul = 0.;
 
       for (i = 0;i < nb_component;i++) {
-        while (buffer.readLine(in_file , false)) {
+        while (getline(in_file , buffer)) {
           line++;
 
 #         ifdef DEBUG
           cout << line << "  " << buffer << endl;
 #         endif
 
-          position = buffer.first('#');
-          if (position != RW_NPOS) {
-            buffer.remove(position);
+          position = buffer.find('#');
+          if (position != string::npos) {
+            buffer.erase(position);
           }
           j = 0;
 
-          RWCTokenizer next(buffer);
+          tokenizer tok_buffer(buffer , separator);
 
-          while (!((token = next()).isNull())) {
+          for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
             switch (j) {
 
             // test DISTRIBUTION keyword
 
             case 0 : {
-              if (token != STAT_word[STATW_DISTRIBUTION]) {
+              if (*token != STAT_word[STATW_DISTRIBUTION]) {
                 status = false;
                 error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_DISTRIBUTION] , line , j + 1);
               }
@@ -644,7 +653,16 @@ DiscreteMixture* DiscreteMixture::ascii_read(StatError &error , const string pat
             // test component index
 
             case 1 : {
-              lstatus = locale.stringToNum(token , &index);
+              lstatus = true;
+
+/*              try {
+                index = stoi(*token);   in C++ 11
+              }
+              catch(invalid_argument &arg) {
+                lstatus = false;
+              } */
+              index = atoi(token->c_str());
+
               if ((lstatus) && (index != i + 1)) {
                 lstatus = false;
               }
@@ -659,7 +677,7 @@ DiscreteMixture* DiscreteMixture::ascii_read(StatError &error , const string pat
             // test parameter name (WEIGHT)
 
             case 2 : {
-              if (token != STAT_word[STATW_WEIGHT]) {
+              if (*token != STAT_word[STATW_WEIGHT]) {
                 status = false;
                 error.correction_update(STAT_parsing[STATP_PARAMETER_NAME] , STAT_word[STATW_WEIGHT] , line , j + 1);
               }
@@ -669,7 +687,7 @@ DiscreteMixture* DiscreteMixture::ascii_read(StatError &error , const string pat
             // test separator
 
             case 3 : {
-              if (token != ":") {
+              if (*token != ":") {
                 status = false;
                 error.update(STAT_parsing[STATP_SEPARATOR] , line , j + 1);
               }
@@ -679,7 +697,16 @@ DiscreteMixture* DiscreteMixture::ascii_read(StatError &error , const string pat
             // test weight value
 
             case 4 : {
-              lstatus = locale.stringToNum(token , weight + i);
+              lstatus = true;
+
+/*              try {
+                weight[i] = stod(*token);   in C++ 11
+              }
+              catch (invalid_argument &arg) {
+                lstatus = false;
+              } */
+              weight[i] = atof(token->c_str());
+
               if (lstatus) {
                 if ((weight[i] <= 0.) || (weight[i] > 1. - cumul + DOUBLE_ERROR)) {
                   lstatus = false;
@@ -723,18 +750,18 @@ DiscreteMixture* DiscreteMixture::ascii_read(StatError &error , const string pat
         error.update(STAT_parsing[STATP_PROBABILITY_SUM]);
       }
 
-      while (buffer.readLine(in_file , false)) {
+      while (getline(in_file , buffer)) {
         line++;
 
 #       ifdef DEBUG
         cout << line << "  " << buffer << endl;
 #       endif
 
-        position = buffer.first('#');
-        if (position != RW_NPOS) {
-          buffer.remove(position);
+        position = buffer.find('#');
+        if (position != string::npos) {
+          buffer.erase(position);
         }
-        if (!(buffer.isNull())) {
+        if (!(trim_right_copy_if(buffer , is_any_of(" \t")).empty())) {
           status = false;
           error.update(STAT_parsing[STATP_FORMAT] , line);
         }
@@ -793,7 +820,7 @@ ostream& DiscreteMixture::ascii_write(ostream &os , const DiscreteMixtureData *m
   int bnb_parameter , buff , width;
   double **sup_norm_dist , scale[DISCRETE_MIXTURE_NB_COMPONENT];
   const Distribution *pcomponent[DISCRETE_MIXTURE_NB_COMPONENT];
-  long old_adjust;
+  ios_base::fmtflags format_flags;
 
 
   os << STAT_word[STATW_MIXTURE] << " " << nb_component << " " << STAT_word[STATW_DISTRIBUTIONS] << endl;
@@ -981,7 +1008,7 @@ ostream& DiscreteMixture::ascii_write(ostream &os , const DiscreteMixtureData *m
     }
   }
 
-  old_adjust = os.setf(ios::left , ios::adjustfield);
+  format_flags = os.setf(ios::left , ios::adjustfield);
 
   sup_norm_dist = new double*[nb_component];
   for (i = 0;i < nb_component;i++) {
@@ -1031,7 +1058,7 @@ ostream& DiscreteMixture::ascii_write(ostream &os , const DiscreteMixtureData *m
   }
   delete [] sup_norm_dist;
 
-  os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
+  os.setf(format_flags , ios::adjustfield);
 
   return os;
 }

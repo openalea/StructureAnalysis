@@ -1923,7 +1923,7 @@ Sequences* Sequences::round(StatError &error , int variable , rounding mode) con
  *  \brief Selection of sequences taking values in a given range for the index parameter.
  *
  *  \param[in] error               reference on a StatError object,
- *  \param[in] os                  stream,
+ *  \param[in] display             flag for displaying the selected individuals,
  *  \param[in] min_index_parameter lowest index parameter,
  *  \param[in] max_index_parameter highest index parameter,
  *  \param[in] keep                flag for keeping or rejecting the selected sequences.
@@ -1932,7 +1932,7 @@ Sequences* Sequences::round(StatError &error , int variable , rounding mode) con
  */
 /*--------------------------------------------------------------*/
 
-Sequences* Sequences::index_parameter_select(StatError &error , ostream &os ,
+Sequences* Sequences::index_parameter_select(StatError &error , bool display ,
                                              int min_index_parameter ,
                                              int max_index_parameter , bool keep) const
 
@@ -1998,12 +1998,12 @@ Sequences* Sequences::index_parameter_select(StatError &error , ostream &os ,
     // copy of sequences
 
     if (status) {
-      if (inb_sequence <= DISPLAY_NB_INDIVIDUAL) {
-        os << "\n" << SEQ_label[inb_sequence == 1 ? SEQL_SEQUENCE : SEQL_SEQUENCES] << ": ";
+      if ((display) && (inb_sequence <= DISPLAY_NB_INDIVIDUAL)) {
+        cout << "\n" << SEQ_label[inb_sequence == 1 ? SEQL_SEQUENCE : SEQL_SEQUENCES] << ": ";
         for (i = 0;i < inb_sequence;i++) {
-          os << iidentifier[i] << ", ";
+          cout << iidentifier[i] << ", ";
         }
-        os << endl;
+        cout << endl;
       }
 
       seq = new Sequences(*this , inb_sequence , index);
@@ -2022,7 +2022,7 @@ Sequences* Sequences::index_parameter_select(StatError &error , ostream &os ,
  *  \brief Selection of sequences taking values in a given range for a variable.
  *
  *  \param[in] error      reference on a StatError object,
- *  \param[in] os         stream,
+ *  \param[in] display    flag for displaying the selected individuals,
  *  \param[in] variable   variable index,
  *  \param[in] imin_value lowest integer value,
  *  \param[in] imax_value highest integer value,
@@ -2032,7 +2032,7 @@ Sequences* Sequences::index_parameter_select(StatError &error , ostream &os ,
  */
 /*--------------------------------------------------------------*/
 
-Sequences* Sequences::value_select(StatError &error , ostream &os , int variable ,
+Sequences* Sequences::value_select(StatError &error , bool display , int variable ,
                                    int imin_value , int imax_value , bool keep) const
 
 {
@@ -2131,12 +2131,12 @@ Sequences* Sequences::value_select(StatError &error , ostream &os , int variable
     // copy of sequences
 
     if (status) {
-      if (inb_sequence <= DISPLAY_NB_INDIVIDUAL) {
-        os << "\n" << SEQ_label[inb_sequence == 1 ? SEQL_SEQUENCE : SEQL_SEQUENCES] << ": ";
+      if ((display) && (inb_sequence <= DISPLAY_NB_INDIVIDUAL)) {
+        cout << "\n" << SEQ_label[inb_sequence == 1 ? SEQL_SEQUENCE : SEQL_SEQUENCES] << ": ";
         for (i = 0;i < inb_sequence;i++) {
-          os << iidentifier[i] << ", ";
+          cout << iidentifier[i] << ", ";
         }
-        os << endl;
+        cout << endl;
       }
 
       seq = new Sequences(*this , inb_sequence , index);
@@ -2155,7 +2155,7 @@ Sequences* Sequences::value_select(StatError &error , ostream &os , int variable
  *  \brief Selection of sequences taking values in a given range for a real-valued variable.
  *
  *  \param[in] error      reference on a StatError object,
- *  \param[in] os         stream,
+ *  \param[in] display    flag for displaying the selected individuals,
  *  \param[in] variable   variable index,
  *  \param[in] imin_value lowest real value,
  *  \param[in] imax_value highest real value,
@@ -2165,7 +2165,7 @@ Sequences* Sequences::value_select(StatError &error , ostream &os , int variable
  */
 /*--------------------------------------------------------------*/
 
-Sequences* Sequences::value_select(StatError &error , ostream &os , int variable ,
+Sequences* Sequences::value_select(StatError &error , bool display , int variable ,
                                    double imin_value , double imax_value , bool keep) const
 
 {
@@ -2237,12 +2237,12 @@ Sequences* Sequences::value_select(StatError &error , ostream &os , int variable
     // copy of sequences
 
     if (status) {
-      if (inb_sequence <= DISPLAY_NB_INDIVIDUAL) {
-        os << "\n" << SEQ_label[inb_sequence == 1 ? SEQL_SEQUENCE : SEQL_SEQUENCES] << ": ";
+      if ((display) && (inb_sequence <= DISPLAY_NB_INDIVIDUAL)) {
+        cout << "\n" << SEQ_label[inb_sequence == 1 ? SEQL_SEQUENCE : SEQL_SEQUENCES] << ": ";
         for (i = 0;i < inb_sequence;i++) {
-          os << iidentifier[i] << ", ";
+          cout << iidentifier[i] << ", ";
         }
-        os << endl;
+        cout << endl;
       }
 
       seq = new Sequences(*this , inb_sequence , index);
@@ -3347,7 +3347,7 @@ Sequences* Sequences::reverse(StatError &error) const
  *  \brief Selection of sequences on a sequence length criterion.
  *
  *  \param[in] error       reference on a StatError object,
- *  \param[in] os          stream,
+ *  \param[in] display     flag for displaying the selected individuals,
  *  \param[in] min_length  lowest sequence length,
  *  \param[in] imax_length highest sequence length,
  *  \param[in] keep        flag for keeping or rejecting the selected sequences.
@@ -3356,7 +3356,7 @@ Sequences* Sequences::reverse(StatError &error) const
  */
 /*--------------------------------------------------------------*/
 
-Sequences* Sequences::length_select(StatError &error , ostream &os , int min_length ,
+Sequences* Sequences::length_select(StatError &error , bool display , int min_length ,
                                     int imax_length , bool keep) const
 
 {
@@ -3408,12 +3408,12 @@ Sequences* Sequences::length_select(StatError &error , ostream &os , int min_len
     // copy of selected sequences
 
     if (status) {
-      if (inb_sequence <= DISPLAY_NB_INDIVIDUAL) {
-        os << "\n" << SEQ_label[inb_sequence == 1 ? SEQL_SEQUENCE : SEQL_SEQUENCES] << ": ";
+      if ((display) && (inb_sequence <= DISPLAY_NB_INDIVIDUAL)) {
+        cout << "\n" << SEQ_label[inb_sequence == 1 ? SEQL_SEQUENCE : SEQL_SEQUENCES] << ": ";
         for (i = 0;i < inb_sequence;i++) {
-          os << iidentifier[i] << ", ";
+          cout << iidentifier[i] << ", ";
         }
-        os << endl;
+        cout << endl;
       }
 
       seq = new Sequences(*this , inb_sequence , index);
@@ -5864,8 +5864,8 @@ bool Sequences::pointwise_average_ascii_print(StatError &error , const string pa
   bool status;
   register int i , j , k , m;
   int buff , inb_sequence , *width;
-  long old_adjust;
   double standard_normal_value , half_confidence_interval , *t_value;
+  ios_base::fmtflags format_flags;
   ofstream out_file(path.c_str());
 
 
@@ -5879,7 +5879,7 @@ bool Sequences::pointwise_average_ascii_print(StatError &error , const string pa
   else {
     status = true;
 
-    old_adjust = out_file.flags(ios::adjustfield);
+    format_flags = out_file.setf(ios::right , ios::adjustfield);
 
     if (dispersion) {
 
@@ -5949,8 +5949,6 @@ bool Sequences::pointwise_average_ascii_print(StatError &error , const string pa
         width[nb_variable + i + 2] += ASCII_SPACE;
       }
     }
-
-    out_file.setf(ios::right , ios::adjustfield);
 
     switch (output) {
     case SUBTRACTION_RESIDUAL :
@@ -6047,7 +6045,7 @@ bool Sequences::pointwise_average_ascii_print(StatError &error , const string pa
     delete [] width;
     delete [] t_value;
 
-    out_file.setf((FMTFLAGS)old_adjust , ios::adjustfield);
+    out_file.setf(format_flags , ios::adjustfield);
   }
 
   return status;

@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -399,17 +399,17 @@ DiscreteDistributionData* FrequencyDistribution::cluster(StatError &error , int 
  *  \brief clustering of values of a frequency distribution using
  *         an information quantity criterion.
  *
- *  \param[in] error reference on a StatError object,
- *  \param[in] ratio proportion of the information quantity of
- *                   the initial frequency distribution,
- *  \param[in] os    stream.
+ *  \param[in] error   reference on a StatError object,
+ *  \param[in] ratio   proportion of the information quantity of
+ *                     the initial frequency distribution,
+ *  \param[in] display flag for displaying the clustering step.
  *
- *  \return          DiscreteDistributionData object.
+ *  \return            DiscreteDistributionData object.
  */
 /*--------------------------------------------------------------*/
 
 DiscreteDistributionData* FrequencyDistribution::cluster(StatError &error , double ratio ,
-                                                         ostream &os) const
+                                                         bool display) const
 
 {
   bool status = true , stop = false;
@@ -493,11 +493,11 @@ DiscreteDistributionData* FrequencyDistribution::cluster(StatError &error , doub
 
     delete histo;
 
-#   ifdef MESSAGE
-    os << STAT_label[STATL_INFORMATION_RATIO] << ": "
-       << previous_information / reference_information << "   "
-       << STAT_label[STATL_CLUSTERING_STEP] << ": " << step << endl;
-#   endif
+    if (display) {
+      cout << STAT_label[STATL_INFORMATION_RATIO] << ": "
+           << previous_information / reference_information << "   "
+           << STAT_label[STATL_CLUSTERING_STEP] << ": " << step << endl;
+    }
 
     // computation of the frequency distribution characteristics
 
@@ -838,11 +838,11 @@ ostream& FrequencyDistribution::ascii_print(ostream &os , int comment_flag ,
 {
   register int i;
   int width[3];
-  long old_adjust;
   double *cumul;
+  ios_base::fmtflags format_flags;
 
 
-  old_adjust = os.setf(ios::right , ios::adjustfield);
+  format_flags = os.setf(ios::right , ios::adjustfield);
 
   // computation of the column widths
 
@@ -876,7 +876,7 @@ ostream& FrequencyDistribution::ascii_print(ostream &os , int comment_flag ,
     delete [] cumul;
   }
 
-  os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
+  os.setf(format_flags , ios::adjustfield);
 
   return os;
 }

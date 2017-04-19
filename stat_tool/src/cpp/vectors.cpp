@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -44,10 +44,7 @@
 #include <sstream>
 #include <iomanip>
 
-#include "tool/rw_tokenizer.h"
-#include "tool/rw_cstring.h"
-#include "tool/rw_locale.h"
-#include "tool/config.h"
+#include <boost/tokenizer.hpp>
 
 #include "quantile_computation.hpp"
 
@@ -57,6 +54,7 @@
 // #include "quantile_computation.h"   problem compiler C++ Windows
 
 using namespace std;
+using namespace boost;
 
 
 namespace stat_tool {
@@ -2497,7 +2495,7 @@ Vectors* Vectors::round(StatError &error , int variable , rounding mode) const
  *  \brief Selection of individuals taking values in a given range for a variable.
  *
  *  \param[in] error      reference on a StatError object,
- *  \param[in] os         stream,
+ *  \param[in] display    flag for displaying the selected individuals,
  *  \param[in] variable   variable index,
  *  \param[in] imin_value lowest integer value,
  *  \param[in] imax_value highest integer value,
@@ -2507,7 +2505,7 @@ Vectors* Vectors::round(StatError &error , int variable , rounding mode) const
  */
 /*--------------------------------------------------------------*/
 
-Vectors* Vectors::value_select(StatError &error , ostream &os , int variable ,
+Vectors* Vectors::value_select(StatError &error , bool display , int variable ,
                                int imin_value , int imax_value , bool keep) const
 
 {
@@ -2586,12 +2584,12 @@ Vectors* Vectors::value_select(StatError &error , ostream &os , int variable ,
     // copy of vectors
 
     if (status) {
-      if (inb_vector <= DISPLAY_NB_INDIVIDUAL) {
-        os << "\n" << STAT_label[inb_vector == 1 ? STATL_VECTOR : STATL_VECTORS] << ": ";
+      if ((display) && (inb_vector <= DISPLAY_NB_INDIVIDUAL)) {
+        cout << "\n" << STAT_label[inb_vector == 1 ? STATL_VECTOR : STATL_VECTORS] << ": ";
         for (i = 0;i < inb_vector;i++) {
-          os << iidentifier[i] << ", ";
+          cout << iidentifier[i] << ", ";
         }
-        os << endl;
+        cout << endl;
       }
 
       vec = new Vectors(*this , inb_vector , index);
@@ -2610,7 +2608,7 @@ Vectors* Vectors::value_select(StatError &error , ostream &os , int variable ,
  *  \brief Selection of individuals taking values in a given range for a real-valued variable.
  *
  *  \param[in] error      reference on a StatError object,
- *  \param[in] os         stream,
+ *  \param[in] display    flag for displaying the selected individuals,
  *  \param[in] variable   variable index,
  *  \param[in] imin_value lowest real value,
  *  \param[in] imax_value highest real value,
@@ -2620,7 +2618,7 @@ Vectors* Vectors::value_select(StatError &error , ostream &os , int variable ,
  */
 /*--------------------------------------------------------------*/
 
-Vectors* Vectors::value_select(StatError &error , ostream &os , int variable ,
+Vectors* Vectors::value_select(StatError &error , bool display , int variable ,
                                double imin_value , double imax_value , bool keep) const
 
 {
@@ -2686,12 +2684,12 @@ Vectors* Vectors::value_select(StatError &error , ostream &os , int variable ,
     // copy of vectors
 
     if (status) {
-      if (inb_vector <= DISPLAY_NB_INDIVIDUAL) {
-        os << "\n" << STAT_label[inb_vector == 1 ? STATL_VECTOR : STATL_VECTORS] << ": ";
+      if ((display) && (inb_vector <= DISPLAY_NB_INDIVIDUAL)) {
+        cout << "\n" << STAT_label[inb_vector == 1 ? STATL_VECTOR : STATL_VECTORS] << ": ";
         for (i = 0;i < inb_vector;i++) {
-          os << iidentifier[i] << ", ";
+          cout << iidentifier[i] << ", ";
         }
-        os << endl;
+        cout << endl;
       }
 
       vec = new Vectors(*this , inb_vector , index);
@@ -3366,14 +3364,14 @@ Vectors* Vectors::merge_variable(StatError &error , int nb_sample ,
 Vectors* Vectors::ascii_read(StatError &error , const string path)
 
 {
-  RWLocaleSnapshot locale("en");
-  RWCString buffer , token;
+  string buffer;
   size_t position;
+  typedef tokenizer<char_separator<char>> tokenizer;
+  char_separator<char> separator(" \t");
   bool status , lstatus;
   register int i , j;
-  int line , read_line , initial_nb_line , nb_variable = 0 , nb_vector , index;
+  int line , read_line , initial_nb_line , nb_variable = 0 , nb_vector , index , int_value;
   variable_nature *type;
-  long int_value;
   double real_value;
   Vectors *vec;
   ifstream in_file(path.c_str());
@@ -3394,24 +3392,33 @@ Vectors* Vectors::ascii_read(StatError &error , const string path)
     line = 0;
     read_line = 0;
 
-    while (buffer.readLine(in_file , false)) {
+    while (getline(in_file , buffer)) {
       line++;
 
-      position = buffer.first('#');
-      if (position != RW_NPOS) {
-        buffer.remove(position);
+      position = buffer.find('#');
+      if (position != string::npos) {
+        buffer.erase(position);
       }
       i = 0;
 
-      RWCTokenizer next(buffer);
+      tokenizer tok_buffer(buffer , separator);
 
-      while (!((token = next()).isNull())) {
+      for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
         switch (i) {
 
         // test number of variables
 
         case 0 : {
-          lstatus = locale.stringToNum(token , &int_value);
+          lstatus = true;
+
+/*          try {
+            int_value = stoi(*token);   in C++ 11
+          }
+          catch(invalid_argument &arg) {
+            lstatus = false;
+          } */
+          int_value = atoi(token->c_str());
+
           if (lstatus) {
             if ((int_value < 1) || (int_value > VECTOR_NB_VARIABLE)) {
               lstatus = false;
@@ -3431,7 +3438,7 @@ Vectors* Vectors::ascii_read(StatError &error , const string path)
         // test VARIABLE(S) keyword
 
         case 1 : {
-          if (token != STAT_word[nb_variable == 1 ? STATW_VARIABLE : STATW_VARIABLES]) {
+          if (*token != STAT_word[nb_variable == 1 ? STATW_VARIABLE : STATW_VARIABLES]) {
             status = false;
             error.correction_update(STAT_parsing[STATP_KEYWORD] ,
                                     STAT_word[nb_variable == 1 ? STATW_VARIABLE : STATW_VARIABLES] , line , i + 1);
@@ -3469,24 +3476,24 @@ Vectors* Vectors::ascii_read(StatError &error , const string path)
 
       read_line = 0;
 
-      while (buffer.readLine(in_file , false)) {
+      while (getline(in_file , buffer)) {
         line++;
 
-        position = buffer.first('#');
-        if (position != RW_NPOS) {
-          buffer.remove(position);
+        position = buffer.find('#');
+        if (position != string::npos) {
+          buffer.erase(position);
         }
         i = 0;
 
-        RWCTokenizer next(buffer);
+        tokenizer tok_buffer(buffer , separator);
 
-        while (!((token = next()).isNull())) {
+        for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
           switch (i) {
 
           // test VARIABLE keyword
 
           case 0 : {
-            if (token != STAT_word[STATW_VARIABLE]) {
+            if (*token != STAT_word[STATW_VARIABLE]) {
               status = false;
               error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_VARIABLE] , line , i + 1);
             }
@@ -3496,7 +3503,16 @@ Vectors* Vectors::ascii_read(StatError &error , const string path)
           // test variable index
 
           case 1 : {
-            lstatus = locale.stringToNum(token , &int_value);
+            lstatus = true;
+
+/*            try {
+              int_value = stoi(*token);   in C++ 11
+            }
+            catch(invalid_argument &arg) {
+              lstatus = false;
+            } */
+            int_value = atoi(token->c_str());
+
             if ((lstatus) && (int_value != read_line + 1)) {
               lstatus = false;
             }
@@ -3511,7 +3527,7 @@ Vectors* Vectors::ascii_read(StatError &error , const string path)
           // test separator
 
           case 2 : {
-            if (token != ":") {
+            if (*token != ":") {
               status = false;
               error.update(STAT_parsing[STATP_SEPARATOR] , line , i + 1);
             }
@@ -3522,7 +3538,7 @@ Vectors* Vectors::ascii_read(StatError &error , const string path)
 
           case 3 : {
             for (j = INT_VALUE;j <= STATE;j++) {
-              if (token == STAT_variable_word[j]) {
+              if (*token == STAT_variable_word[j]) {
                 type[read_line] = (variable_nature)j;
                 break;
               }
@@ -3567,28 +3583,43 @@ Vectors* Vectors::ascii_read(StatError &error , const string path)
       line = 0;
       nb_vector = 0;
 
-      while (buffer.readLine(in_file , false)) {
+      while (getline(in_file , buffer)) {
         line++;
 
 #       ifdef DEBUG
         cout << line << "  " << buffer << endl;
 #       endif
 
-        position = buffer.first('#');
-        if (position != RW_NPOS) {
-          buffer.remove(position);
+        position = buffer.find('#');
+        if (position != string::npos) {
+          buffer.erase(position);
         }
         i = 0;
 
-        RWCTokenizer next(buffer);
+        tokenizer tok_buffer(buffer , separator);
 
-        while (!((token = next()).isNull())) {
+        for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
           if (i <= nb_variable) {
+            lstatus = true;
+
             if (type[i] != REAL_VALUE) {
-              lstatus = locale.stringToNum(token , &int_value);
+/*              try {
+                int_value = stoi(*token);   in C++ 11
+              }
+              catch(invalid_argument &arg) {
+                lstatus = false;
+              } */
+              int_value = atoi(token->c_str());
             }
+
             else {
-              lstatus = locale.stringToNum(token , &real_value);
+/*              try {
+                real_value = stod(*token);   in C++ 11
+              }
+              catch(invalid_argument &arg) {
+                lstatus = false;
+              } */
+              real_value = atof(token->c_str());
             }
 
             if (!lstatus) {
@@ -3630,7 +3661,7 @@ Vectors* Vectors::ascii_read(StatError &error , const string path)
       line = 0;
 
       do {
-        buffer.readLine(in_file , false);
+        getline(in_file , buffer);
         line++;
 
 #       ifdef DEBUG
@@ -3644,23 +3675,24 @@ Vectors* Vectors::ascii_read(StatError &error , const string path)
 
       index = 0;
 
-      while (buffer.readLine(in_file , false)) {
-        position = buffer.first('#');
-        if (position != RW_NPOS) {
-          buffer.remove(position);
+      while (getline(in_file , buffer)) {
+        position = buffer.find('#');
+        if (position != string::npos) {
+          buffer.erase(position);
         }
         i = 0;
 
-        RWCTokenizer next(buffer);
+        tokenizer tok_buffer(buffer , separator);
 
-        while (!((token = next()).isNull())) {
+        for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
           if (type[i] != REAL_VALUE) {
-            locale.stringToNum(token , &int_value);
-            vec->int_vector[index][i++] = int_value;
+//            vec->int_vector[index][i++] = stoi(*token);   in C++ 11
+            vec->int_vector[index][i++] = atoi(token->c_str());
           }
+
           else {
-            locale.stringToNum(token , &real_value);
-            vec->real_vector[index][i++] = real_value;
+//            vec->real_vector[index][i++] = stod(*token);   in C++ 11
+            vec->real_vector[index][i++] = atof(token->c_str());
           }
         }
 
@@ -3718,12 +3750,12 @@ ostream& Vectors::ascii_write(ostream &os , bool exhaustive , bool comment_flag)
 {
   register int i , j;
   int buff , width[2] , *int_value;
-  long old_adjust;
   double median , lower_quartile , upper_quartile , *real_value , **correlation;
   Test *test;
+  ios_base::fmtflags format_flags;
 
 
-  old_adjust = os.setf(ios::right , ios::adjustfield);
+  format_flags = os.setf(ios::right , ios::adjustfield);
 
   if (comment_flag) {
     os << "# ";
@@ -3977,7 +4009,7 @@ ostream& Vectors::ascii_write(ostream &os , bool exhaustive , bool comment_flag)
   }
   delete [] correlation;
 
-  os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
+  os.setf(format_flags , ios::adjustfield);
 
   return os;
 }
@@ -4051,10 +4083,10 @@ ostream& Vectors::ascii_print(ostream &os , bool comment_flag ,
 {
   register int i , j;
   int buff , width[2];
-  long old_adjust;
+  ios_base::fmtflags format_flags;
 
 
-  old_adjust = os.setf(ios::right , ios::adjustfield);
+  format_flags = os.setf(ios::right , ios::adjustfield);
 
   width[0] = 0;
   for (i = 0;i < nb_variable;i++) {
@@ -4113,7 +4145,7 @@ ostream& Vectors::ascii_print(ostream &os , bool comment_flag ,
     os << endl;
   }
 
-  os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
+  os.setf(format_flags , ios::adjustfield);
 
   return os;
 }
