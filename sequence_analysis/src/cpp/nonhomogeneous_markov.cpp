@@ -42,10 +42,9 @@
 #include <sstream>
 #include <iomanip>
 
-#include "tool/rw_tokenizer.h"
-#include "tool/rw_cstring.h"
-#include "tool/rw_locale.h"
-#include "tool/config.h"
+#include <boost/tokenizer.hpp>
+#include <boost/algorithm/string/trim.hpp>
+#include <boost/algorithm/string/classification.hpp>
 
 #include "stat_tool/stat_label.h"
 
@@ -53,6 +52,7 @@
 #include "sequence_label.h"
 
 using namespace std;
+using namespace boost;
 using namespace stat_tool;
 
 
@@ -250,36 +250,36 @@ Function* Function::parsing(StatError &error , ifstream &in_file , int &line ,
                             int length , double min , double max)
 
 {
-  RWLocaleSnapshot locale("en");
-  RWCString buffer , token;
+  string buffer;
   size_t position;
+  typedef tokenizer<char_separator<char>> tokenizer;
+  char_separator<char> separator(" \t");
   bool status = true , lstatus;
   register int i , j;
-  int nb_parameter = 0;
+  int nb_parameter = 0 , index;
   parametric_function ident = NONPARAMETRIC_FUNCTION;
-  long index;
   double parameter[3];
   Function *function;
 
 
   function = NULL;
 
-  while (buffer.readLine(in_file , false)) {
+  while (getline(in_file , buffer)) {
     line++;
 
 #   ifdef DEBUG
     cout << line << "  " << buffer << endl;
 #   endif
 
-    position = buffer.first('#');
-    if (position != RW_NPOS) {
-      buffer.remove(position);
+    position = buffer.find('#');
+    if (position != string::npos) {
+      buffer.erase(position);
     }
     i = 0;
 
-    RWCTokenizer next(buffer);
+    tokenizer tok_buffer(buffer , separator);
 
-    while (!((token = next()).isNull())) {
+    for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
       if (i <= 1) {
         switch (i) {
 
@@ -287,7 +287,7 @@ Function* Function::parsing(StatError &error , ifstream &in_file , int &line ,
 
         case 0 : {
           for (j = LOGISTIC;j <= MONOMOLECULAR;j++) {
-            if (token == STAT_function_word[j]) {
+            if (*token == STAT_function_word[j]) {
               ident = (parametric_function)j;
               break;
             }
@@ -307,7 +307,7 @@ Function* Function::parsing(StatError &error , ifstream &in_file , int &line ,
         // test FUNCTION keyword
 
         case 1 : {
-          if (token != STAT_word[STATW_FUNCTION]) {
+          if (*token != STAT_word[STATW_FUNCTION]) {
             status = false;
             error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_FUNCTION] , line , i + 1);
           }
@@ -322,7 +322,7 @@ Function* Function::parsing(StatError &error , ifstream &in_file , int &line ,
         // test PARAMETER keyword
 
         case 0 : {
-          if (token != STAT_word[STATW_PARAMETER]) {
+          if (*token != STAT_word[STATW_PARAMETER]) {
             status = false;
             error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_PARAMETER] , line , i + 1);
           }
@@ -332,7 +332,16 @@ Function* Function::parsing(StatError &error , ifstream &in_file , int &line ,
         // test parameter index
 
         case 1 : {
-          lstatus = locale.stringToNum(token , &index);
+          lstatus = true;
+
+/*          try {
+            index = stoi(*token);   in C++ 11
+          }
+          catch(invalid_argument &arg) {
+            lstatus = false;
+          } */
+          index = atoi(token->c_str());
+
           if ((lstatus) && (index != (i - 2) / 4 + 1)) {
             lstatus = false;
           }
@@ -347,7 +356,7 @@ Function* Function::parsing(StatError &error , ifstream &in_file , int &line ,
         // test separator
 
         case 2 : {
-          if (token != ":") {
+          if (*token != ":") {
             status = false;
             error.update(STAT_parsing[STATP_SEPARATOR] , line , i + 1);
           }
@@ -358,7 +367,15 @@ Function* Function::parsing(StatError &error , ifstream &in_file , int &line ,
 
         case 3 : {
           if ((i - 2) / 4 < nb_parameter) {
-            lstatus = locale.stringToNum(token , parameter + (i - 2) / 4);
+            lstatus = true;
+
+/*            try {
+              parameter[(i - 2) / 4] = stod(*token);   in C++ 11
+            }
+            catch(invalid_argument &arg) {
+              lstatus = false;
+            } */
+            parameter[(i - 2) / 4] = atof(token->c_str());
 
             if (lstatus) {
               switch (ident) {
@@ -478,10 +495,10 @@ ostream& Function::ascii_print(ostream &os , bool exhaustive , bool file_flag ,
   int *pfrequency , width[6];
   double self_transition_mean , residual_mean , residual_standard_deviation ,
          *standard_residual , square_sum[3];
-  long old_adjust;
+  ios_base::fmtflags format_flags;
 
 
-  old_adjust = os.setf(ios::right , ios::adjustfield);
+  format_flags = os.setf(ios::right , ios::adjustfield);
 
   ascii_parameter_print(os);
   os << endl;
@@ -606,7 +623,7 @@ ostream& Function::ascii_print(ostream &os , bool exhaustive , bool file_flag ,
     }
   }
 
-  os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
+  os.setf(format_flags , ios::adjustfield);
 
   return os;
 }
@@ -1077,17 +1094,16 @@ DiscreteParametricModel* NonhomogeneousMarkov::extract(StatError &error , proces
  */
 /*--------------------------------------------------------------*/
 
-NonhomogeneousMarkov* NonhomogeneousMarkov::ascii_read(StatError &error , const string path ,
-                                                       int length)
+NonhomogeneousMarkov* NonhomogeneousMarkov::ascii_read(StatError &error , const string path , int length)
 
 {
-  RWLocaleSnapshot locale("en");
-  RWCString buffer , token;
+  string buffer;
   size_t position;
+  typedef tokenizer<char_separator<char>> tokenizer;
+  char_separator<char> separator(" \t");
   bool status , lstatus;
   register int i , j;
-  int line , homogeneity , nb_state;
-  double index;
+  int line , homogeneity , nb_state , index;
   const Chain *chain;
   const Function **self_transition;
   NonhomogeneousMarkov *markov;
@@ -1114,27 +1130,27 @@ NonhomogeneousMarkov* NonhomogeneousMarkov::ascii_read(StatError &error , const 
       error.update(SEQ_error[SEQR_LONG_SEQUENCE_LENGTH]);
     }
 
-    while (buffer.readLine(in_file , false)) {
+    while (getline(in_file , buffer)) {
       line++;
 
 #     ifdef DEBUG
       cout << line << "  " << buffer << endl;
 #     endif
 
-      position = buffer.first('#');
-      if (position != RW_NPOS) {
-        buffer.remove(position);
+      position = buffer.find('#');
+      if (position != string::npos) {
+        buffer.erase(position);
       }
       i = 0;
 
-      RWCTokenizer next(buffer);
+      tokenizer tok_buffer(buffer , separator);
 
-      while (!((token = next()).isNull())) {
+      for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
 
         // test NONHOMOGENEOUS_MARKOV_CHAIN keyword
 
         if (i == 0) {
-          if (token != SEQ_word[SEQW_NONHOMOGENEOUS_MARKOV_CHAIN]) {
+          if (*token != SEQ_word[SEQW_NONHOMOGENEOUS_MARKOV_CHAIN]) {
             status = false;
             error.update(STAT_parsing[STATP_KEYWORD] , line);
           }
@@ -1168,28 +1184,28 @@ NonhomogeneousMarkov* NonhomogeneousMarkov::ascii_read(StatError &error , const 
       for (i = 0;i < nb_state;i++) {
         homogeneity = I_DEFAULT;
 
-        while (buffer.readLine(in_file , false)) {
+        while (getline(in_file , buffer)) {
           line++;
 
 #         ifdef DEBUG
           cout << line << "  " << buffer << endl;
 #         endif
 
-          position = buffer.first('#');
-          if (position != RW_NPOS) {
-            buffer.remove(position);
+          position = buffer.find('#');
+          if (position != string::npos) {
+            buffer.erase(position);
           }
           j = 0;
 
-          RWCTokenizer next(buffer);
+          tokenizer tok_buffer(buffer , separator);
 
-          while (!((token = next()).isNull())) {
+          for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
             switch (j) {
 
             // test STATE keyword
 
             case 0 : {
-              if (token != STAT_word[STATW_STATE]) {
+              if (*token != STAT_word[STATW_STATE]) {
                 status = false;
                 error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_STATE] , line , j + 1);
               }
@@ -1199,7 +1215,16 @@ NonhomogeneousMarkov* NonhomogeneousMarkov::ascii_read(StatError &error , const 
             // test state index
 
             case 1 : {
-              lstatus = locale.stringToNum(token , &index);
+              lstatus = true;
+
+/*              try {
+                index = stoi(*token);   in C++ 11
+              }
+              catch(invalid_argument &arg) {
+                lstatus = false;
+              } */
+              index = atoi(token->c_str());
+
               if ((lstatus) && (index != i)) {
                 lstatus = false;
               }
@@ -1214,11 +1239,11 @@ NonhomogeneousMarkov* NonhomogeneousMarkov::ascii_read(StatError &error , const 
             // test HOMOGENEOUS/NONHOMOGENEOUS keyword
 
             case 2 : {
-              if (token == SEQ_word[SEQW_HOMOGENEOUS]) {
+              if (*token == SEQ_word[SEQW_HOMOGENEOUS]) {
                 homogeneity = true;
               }
               else {
-                if (token == SEQ_word[SEQW_NONHOMOGENEOUS]) {
+                if (*token == SEQ_word[SEQW_NONHOMOGENEOUS]) {
                   homogeneity = false;
                 }
                 else {
@@ -1256,18 +1281,18 @@ NonhomogeneousMarkov* NonhomogeneousMarkov::ascii_read(StatError &error , const 
         }
       }
 
-      while (buffer.readLine(in_file , false)) {
+      while (getline(in_file , buffer)) {
         line++;
 
 #       ifdef DEBUG
         cout << line << "  " << buffer << endl;
 #       endif
 
-        position = buffer.first('#');
-        if (position != RW_NPOS) {
-          buffer.remove(position);
+        position = buffer.find('#');
+        if (position != string::npos) {
+          buffer.erase(position);
         }
-        if (!(buffer.isNull())) {
+        if (!(trim_right_copy_if(buffer , is_any_of(" \t")).empty())) {
           status = false;
           error.update(STAT_parsing[STATP_FORMAT] , line);
         }

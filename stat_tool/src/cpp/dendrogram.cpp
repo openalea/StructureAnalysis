@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -405,10 +405,10 @@ ostream& Dendrogram::ascii_write(ostream &os , bool exhaustive) const
   int buff , max_identifier , max_nb_character , previous_nb_character ,
       *nb_character , width[3];
   double min_distance , min_diff_distance , *ordered_distance , *distance;
-  long old_adjust;
+  ios_base::fmtflags format_flags;
 
 
-  old_adjust = os.setf(ios::right , ios::adjustfield);
+  format_flags = os.setf(ios::right , ios::adjustfield);
 
   os << distance_matrix->nb_row << " " << distance_matrix->label << "s" << endl;
 
@@ -612,7 +612,7 @@ ostream& Dendrogram::ascii_write(ostream &os , bool exhaustive) const
   os << STAT_label[STATL_DIAMETER_COEFF] << ": "
      << coefficient_computation(DIAMETER) << endl;
 
-  os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
+  os.setf(format_flags , ios::adjustfield);
 
   return os;
 }
@@ -1478,7 +1478,7 @@ Dendrogram* DistanceMatrix::divisive_hierarchical_clustering() const
  *  \brief Hierarchical clustering algorithms.
  *
  *  \param[in] error     reference on a StatError object,
- *  \param[in] os        stream,
+ *  \param[in] display   flag for displaying the hierarchical clustering results,
  *  \param[in] strategy  algorithm type (AGGLOMERATIVE/DIVISIVE/ORDERING),
  *  \param[in] criterion cluster merging criterion (agglomerative algorithm),
  *  \param[in] path      file path,
@@ -1488,7 +1488,7 @@ Dendrogram* DistanceMatrix::divisive_hierarchical_clustering() const
  */
 /*--------------------------------------------------------------*/
 
-bool DistanceMatrix::hierarchical_clustering(StatError &error , ostream &os ,
+bool DistanceMatrix::hierarchical_clustering(StatError &error , bool display ,
                                              hierarchical_strategy strategy , linkage criterion ,
                                              const string path , output_format format) const
 
@@ -1514,9 +1514,9 @@ bool DistanceMatrix::hierarchical_clustering(StatError &error , ostream &os ,
 
     // writing of results
 
-#   ifdef MESSAGE
-    dendrogram->ascii_write(os);
-#   endif
+    if (display) {
+      dendrogram->ascii_write(cout);
+    }
 
     if (!path.empty()) {
       switch (format) {

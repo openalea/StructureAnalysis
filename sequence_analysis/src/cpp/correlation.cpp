@@ -447,10 +447,10 @@ ostream& Correlation::ascii_write(ostream &os , bool exhaustive) const
   register int i , j;
   int *width;
   double standard_normal_value , *confidence_limit;
-  long old_adjust;
+  ios_base::fmtflags format_flags;
 
 
-  old_adjust = os.setf(ios::right , ios::adjustfield);
+  format_flags = os.setf(ios::right , ios::adjustfield);
 
   // computation of the confidence limits
 
@@ -605,7 +605,7 @@ ostream& Correlation::ascii_write(ostream &os , bool exhaustive) const
   }
   delete [] width;
 
-  os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
+  os.setf(format_flags , ios::adjustfield);
 
   return os;
 }

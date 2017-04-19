@@ -714,13 +714,13 @@ ostream& Regression::ascii_write(ostream &os , bool exhaustive) const
 {
   register int i;
   int buff , width[5];
-  long old_adjust;
   double t_value , residual_mean , residual_standard_deviation , *estimated_response ,
          *standard_residual , square_sum[3] , df[3] , mean_square[3] , standard_deviation[2];
   Test *test;
+  ios_base::fmtflags format_flags;
 
 
-  old_adjust = os.setf(ios::right , ios::adjustfield);
+  format_flags = os.setf(ios::right , ios::adjustfield);
 
   // writing of the marginal distributions
 
@@ -980,7 +980,7 @@ ostream& Regression::ascii_write(ostream &os , bool exhaustive) const
     delete [] standard_residual;
   }
 
-  os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
+  os.setf(format_flags , ios::adjustfield);
 
   return os;
 }

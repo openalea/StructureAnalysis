@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -758,9 +758,9 @@ void VariableOrderMarkov::characteristic_computation(const VariableOrderMarkovDa
 
     // computation of the state intensity and interval distributions
 
-    if  (((variable == I_DEFAULT) || (variable == 0)) && ((!length_flag) ||
-          ((length_flag) && ((!(state_process->length)) ||
-            (dlength != *(state_process->length)))))) {
+    if (((variable == I_DEFAULT) || (variable == 0)) && ((!length_flag) ||
+         ((length_flag) && ((!(state_process->length)) ||
+           (dlength != *(state_process->length)))))) {
       computation[0] = true;
       state_process->create_characteristic(dlength , true , counting_flag);
 

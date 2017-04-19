@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -42,15 +42,15 @@
 #include <sstream>
 #include <iomanip>
 
-#include "tool/rw_tokenizer.h"
-#include "tool/rw_cstring.h"
-#include "tool/rw_locale.h"
-#include "tool/config.h"
+#include <boost/tokenizer.hpp>
+#include <boost/algorithm/string/trim.hpp>
+#include <boost/algorithm/string/classification.hpp>
 
 #include "mixture.h"
 #include "stat_label.h"
 
 using namespace std;
+using namespace boost;
 
 
 namespace stat_tool {
@@ -602,14 +602,14 @@ Mixture* Mixture::thresholding(double min_probability) const
 Mixture* Mixture::ascii_read(StatError &error , const string path , double cumul_threshold)
 
 {
-  RWLocaleSnapshot locale("en");
-  RWCString buffer , token;
+  string buffer;
   size_t position;
+  typedef tokenizer<char_separator<char>> tokenizer;
+  char_separator<char> separator(" \t");
   bool status , lstatus;
   register int i;
-  int line , read_line , nb_output_process , index;
+  int line , read_line , nb_component , value , nb_output_process , index;
   observation_process obs_type;
-  long nb_component , value;
   double proba , cumul;
   DiscreteParametric *weight;
   CategoricalProcess **categorical_observation;
@@ -631,28 +631,28 @@ Mixture* Mixture::ascii_read(StatError &error , const string path , double cumul
     line = 0;
     nb_component = 0;
 
-    while (buffer.readLine(in_file , false)) {
+    while (getline(in_file , buffer)) {
       line++;
 
 #     ifdef DEBUG
       cout << line << "  " << buffer << endl;
 #     endif
 
-      position = buffer.first('#');
-      if (position != RW_NPOS) {
-        buffer.remove(position);
+      position = buffer.find('#');
+      if (position != string::npos) {
+        buffer.erase(position);
       }
       i = 0;
 
-      RWCTokenizer next(buffer);
+      tokenizer tok_buffer(buffer , separator);
 
-      while (!((token = next()).isNull())) {
+      for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
         switch (i) {
 
         // test MIXTURE keyword
 
         case 0 : {
-          if (token != STAT_word[STATW_MIXTURE]) {
+          if (*token != STAT_word[STATW_MIXTURE]) {
             status = false;
             error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_MIXTURE] , line , i + 1);
           }
@@ -662,7 +662,16 @@ Mixture* Mixture::ascii_read(StatError &error , const string path , double cumul
         // test number of components
 
         case 1 : {
-          lstatus = locale.stringToNum(token , &nb_component);
+          lstatus = true;
+
+/*          try {
+            nb_component = stoi(*token);   in C++ 11
+          }
+          catch(invalid_argument &arg) {
+            lstatus = false;
+          } */
+          nb_component = atoi(token->c_str());
+
           if ((lstatus) && ((nb_component < 2) || (nb_component > MIXTURE_NB_COMPONENT))) {
             lstatus = false;
           }
@@ -677,7 +686,7 @@ Mixture* Mixture::ascii_read(StatError &error , const string path , double cumul
         // test COMPONENTS keyword
 
         case 2 : {
-          if (token != STAT_word[STATW_COMPONENTS]) {
+          if (*token != STAT_word[STATW_COMPONENTS]) {
             status = false;
             error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_COMPONENTS] , line , i + 1);
           }
@@ -709,28 +718,28 @@ Mixture* Mixture::ascii_read(StatError &error , const string path , double cumul
       // format analysis and reading of the weight distribution
 
       read_line = 0;
-      while (buffer.readLine(in_file , false)) {
+      while (getline(in_file , buffer)) {
         line++;
 
 #       ifdef DEBUG
         cout << line << "  " << buffer << endl;
 #       endif
 
-        position = buffer.first('#');
-        if (position != RW_NPOS) {
-          buffer.remove(position);
+        position = buffer.find('#');
+        if (position != string::npos) {
+          buffer.erase(position);
         }
         i = 0;
 
-        RWCTokenizer next(buffer);
+        tokenizer tok_buffer(buffer , separator);
 
         if (read_line == 0) {
-          while (!((token = next()).isNull())) {
+          for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
 
             // test WEIGHTS keyword
 
             if (i == 0) {
-              if (token != STAT_word[STATW_WEIGHTS]) {
+              if (*token != STAT_word[STATW_WEIGHTS]) {
                 status = false;
                 error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_WEIGHTS] , line);
               }
@@ -750,9 +759,18 @@ Mixture* Mixture::ascii_read(StatError &error , const string path , double cumul
         else {
           cumul = 0.;
 
-          while (!((token = next()).isNull())) {
+          for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
             if (i < nb_component) {
-              lstatus = locale.stringToNum(token , &proba);
+              lstatus = true;
+
+/*              try {
+                proba = stod(*token);   in C++ 11
+              }
+              catch (invalid_argument &arg) {
+                lstatus = false;
+              } */
+              proba = atof(token->c_str());
+
               if (lstatus) {
                 if ((proba <= 0.) || (proba > 1. - cumul + DOUBLE_ERROR)) {
                   lstatus = false;
@@ -803,28 +821,37 @@ Mixture* Mixture::ascii_read(StatError &error , const string path , double cumul
         discrete_parametric_observation = NULL;
         continuous_parametric_observation = NULL;
 
-        while (buffer.readLine(in_file , false)) {
+        while (getline(in_file , buffer)) {
           line++;
 
 #         ifdef DEBUG
           cout << line << "  " << buffer << endl;
 #         endif
 
-          position = buffer.first('#');
-          if (position != RW_NPOS) {
-            buffer.remove(position);
+          position = buffer.find('#');
+          if (position != string::npos) {
+            buffer.erase(position);
           }
           i = 0;
 
-          RWCTokenizer next(buffer);
+          tokenizer tok_buffer(buffer , separator);
 
-          while (!((token = next()).isNull())) {
+          for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
             switch (i) {
 
             // test number of observation processes
 
             case 0 : {
-              lstatus = locale.stringToNum(token , &value);
+              lstatus = true;
+
+/*              try {
+                value = stoi(*token);   in C++ 11
+              }
+              catch(invalid_argument &arg) {
+                lstatus = false;
+              } */
+              value = atoi(token->c_str());
+
               if (lstatus) {
                 if ((value < 1) || (value > NB_OUTPUT_PROCESS)) {
                   lstatus = false;
@@ -844,7 +871,7 @@ Mixture* Mixture::ascii_read(StatError &error , const string path , double cumul
             // test OUTPUT_PROCESS(ES) keyword
 
             case 1 : {
-              if (token != STAT_word[nb_output_process == 1 ? STATW_OUTPUT_PROCESS : STATW_OUTPUT_PROCESSES]) {
+              if (*token != STAT_word[nb_output_process == 1 ? STATW_OUTPUT_PROCESS : STATW_OUTPUT_PROCESSES]) {
                 status = false;
                 error.correction_update(STAT_parsing[STATP_KEYWORD] ,
                                         STAT_word[nb_output_process == 1 ? STATW_OUTPUT_PROCESS : STATW_OUTPUT_PROCESSES] , line , i + 1);
@@ -883,31 +910,28 @@ Mixture* Mixture::ascii_read(StatError &error , const string path , double cumul
 
           index = 0;
 
-          while (buffer.readLine(in_file , false)) {
+          while (getline(in_file , buffer)) {
             line++;
 
 #           ifdef DEBUG
             cout << line << "  " << buffer << endl;
 #           endif
 
-            position = buffer.first('#');
-            if (position != RW_NPOS) {
-              buffer.remove(position);
+            position = buffer.find('#');
+            if (position != string::npos) {
+              buffer.erase(position);
             }
             i = 0;
 
-            RWCTokenizer next(buffer);
+            tokenizer tok_buffer(buffer , separator);
 
-            while (!((token = next()).isNull())) {
+            for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
               switch (i) {
 
               // test OUTPUT_PROCESS keyword
 
               case 0 : {
-                if (token == STAT_word[STATW_OUTPUT_PROCESS]) {
-                  index++;
-                }
-                else {
+                if (*token != STAT_word[STATW_OUTPUT_PROCESS]) {
                   status = false;
                   error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_OUTPUT_PROCESS] , line , i + 1);
                 }
@@ -917,7 +941,17 @@ Mixture* Mixture::ascii_read(StatError &error , const string path , double cumul
               // test observation process index
 
               case 1 : {
-                lstatus = locale.stringToNum(token , &value);
+                index++;
+                lstatus = true;
+
+/*                try {
+                  value = stoi(*token);   in C++ 11
+                }
+                catch(invalid_argument &arg) {
+                  lstatus = false;
+                } */
+                value = atoi(token->c_str());
+
                 if ((lstatus) && ((value != index) || (value > nb_output_process))) {
                   lstatus = false;
                 }
@@ -932,7 +966,7 @@ Mixture* Mixture::ascii_read(StatError &error , const string path , double cumul
               // test separator
 
               case 2 : {
-                if (token != ":") {
+                if (*token != ":") {
                   status = false;
                   error.update(STAT_parsing[STATP_SEPARATOR] , line , i + 1);
                 }
@@ -942,15 +976,15 @@ Mixture* Mixture::ascii_read(StatError &error , const string path , double cumul
               // test CATEGORICAL/DISCRETE_PARAMETRIC/CONTINUOUS_PARAMETRIC keyword
 
               case 3 : {
-                if ((token == STAT_word[STATW_CATEGORICAL]) ||
-                    (token == STAT_word[STATW_NONPARAMETRIC])) {
+                if ((*token == STAT_word[STATW_CATEGORICAL]) ||
+                    (*token == STAT_word[STATW_NONPARAMETRIC])) {
                   obs_type = CATEGORICAL_PROCESS;
                 }
-                else if ((token == STAT_word[STATW_DISCRETE_PARAMETRIC]) ||
-                         (token == STAT_word[STATW_PARAMETRIC])) {
+                else if ((*token == STAT_word[STATW_DISCRETE_PARAMETRIC]) ||
+                         (*token == STAT_word[STATW_PARAMETRIC])) {
                   obs_type = DISCRETE_PARAMETRIC;
                 }
-                else if (token == STAT_word[STATW_CONTINUOUS_PARAMETRIC]) {
+                else if (*token == STAT_word[STATW_CONTINUOUS_PARAMETRIC]) {
                   obs_type = CONTINUOUS_PARAMETRIC;
                 }
                 else {
@@ -1007,11 +1041,34 @@ Mixture* Mixture::ascii_read(StatError &error , const string path , double cumul
               }
               }
             }
+
+            if (index == nb_output_process) {
+              break;
+            }
           }
 
-          if (index != nb_output_process) {
+          if (index < nb_output_process) {
             status = false;
             error.update(STAT_parsing[STATP_FORMAT] , line);
+          }
+
+          else {
+            while (getline(in_file , buffer)) {
+              line++;
+
+#             ifdef DEBUG
+              cout << line << " " << buffer << endl;
+#             endif
+
+              position = buffer.find('#');
+              if (position != string::npos) {
+                buffer.erase(position);
+              }
+              if (!(trim_right_copy_if(buffer , is_any_of(" \t")).empty())) {
+                status = false;
+                error.update(STAT_parsing[STATP_FORMAT] , line);
+              }
+            }
           }
 
           if (status) {
@@ -1082,10 +1139,10 @@ ostream& Mixture::ascii_write(ostream &os , const MixtureData *vec ,
   double mean , **distance;
   FrequencyDistribution *marginal_dist = NULL , **observation_dist = NULL;
   Histogram *marginal_histo = NULL , **observation_histo = NULL;
-  long old_adjust;
+  ios_base::fmtflags format_flags;
 
 
-  old_adjust = os.setf(ios::left , ios::adjustfield);
+  format_flags = os.setf(ios::left , ios::adjustfield);
 
   os << STAT_word[STATW_MIXTURE] << " " << nb_component << " " << STAT_word[STATW_COMPONENTS] << endl;
 
@@ -1348,7 +1405,7 @@ ostream& Mixture::ascii_write(ostream &os , const MixtureData *vec ,
     }
   }
 
-  os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
+  os.setf(format_flags , ios::adjustfield);
 
   return os;
 }

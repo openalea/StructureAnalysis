@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -492,16 +492,18 @@ ostream& Distribution::ascii_characteristic_print(ostream &os , bool shape , boo
     if (comment_flag) {
       os << "# ";
     }
-    os << STAT_label[STATL_MEAN] << ": " << mean << "   "
-       << STAT_label[STATL_MEDIAN] << ": " << quantile_computation() << "   "
-       << STAT_label[STATL_MODE] << ": " << mode_computation() << endl;
+    os << STAT_label[STATL_MEAN] << ": " << mean << "   ";
+    if (complement == 0.) {
+      os << STAT_label[STATL_MEDIAN] << ": " << quantile_computation() << "   ";
+    }
+    os << STAT_label[STATL_MODE] << ": " << mode_computation() << endl;
 
     if (comment_flag) {
       os << "# ";
     }
     os << STAT_label[STATL_VARIANCE] << ": " << variance << "   "
        << STAT_label[STATL_STANDARD_DEVIATION] << ": " << sqrt(variance);
-    if (variance > 0.) {
+    if ((complement == 0.) && (variance > 0.)) {
       os << "   " << STAT_label[STATL_LOWER_QUARTILE] << ": " << quantile_computation(0.25)
          << "   " << STAT_label[STATL_UPPER_QUARTILE] << ": " << quantile_computation(0.75);
     }
@@ -625,11 +627,11 @@ ostream& Distribution::ascii_print(ostream &os , bool comment_flag , bool cumul_
 {
   register int i;
   int ascii_nb_value = nb_value , width[5];
-  long old_adjust;
   double scale , *histo_cumul , *pcumul;
+  ios_base::fmtflags format_flags;
 
 
-  old_adjust = os.setf(ios::right , ios::adjustfield);
+  format_flags = os.setf(ios::right , ios::adjustfield);
 
   // computation of the scaling factor, the cumulative distribution function deduced from
   // the frequency distribution and the number of values
@@ -710,7 +712,7 @@ ostream& Distribution::ascii_print(ostream &os , bool comment_flag , bool cumul_
     delete [] histo_cumul;
   }
 
-  os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
+  os.setf(format_flags , ios::adjustfield);
 
   return os;
 }
@@ -738,11 +740,11 @@ ostream& Distribution::ascii_print(ostream &os , int nb_dist , const Distributio
 {
   register int i , j;
   int ascii_nb_value = nb_value , *width;
-  long old_adjust;
   double scale , *histo_cumul;
+  ios_base::fmtflags format_flags;
 
 
-  old_adjust = os.setf(ios::right , ios::adjustfield);
+  format_flags = os.setf(ios::right , ios::adjustfield);
 
   width = new int[nb_dist + 5];
 
@@ -850,7 +852,7 @@ ostream& Distribution::ascii_print(ostream &os , int nb_dist , const Distributio
     delete [] histo_cumul;
   }
 
-  os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
+  os.setf(format_flags , ios::adjustfield);
 
   return os;
 }
@@ -869,13 +871,15 @@ ostream& Distribution::spreadsheet_characteristic_print(ostream &os , bool shape
 
 {
   if ((mean != D_DEFAULT) && (variance != D_DEFAULT)) {
-    os << STAT_label[STATL_MEAN] << "\t" << mean << "\t\t"
-       << STAT_label[STATL_MEDIAN] << "\t" << quantile_computation() << "\t\t"
-       << STAT_label[STATL_MODE] << "\t" << mode_computation() << endl;
+    os << STAT_label[STATL_MEAN] << "\t" << mean << "\t\t";
+    if (complement == 0.) {
+      os << STAT_label[STATL_MEDIAN] << "\t" << quantile_computation() << "\t\t";
+    }
+    os << STAT_label[STATL_MODE] << "\t" << mode_computation() << endl;
 
     os << STAT_label[STATL_VARIANCE] << "\t" << variance << "\t\t"
        << STAT_label[STATL_STANDARD_DEVIATION] << "\t" << sqrt(variance);
-    if (variance > 0.) {
+    if ((complement == 0.) && (variance > 0.)) {
       os << "\t\t" << STAT_label[STATL_LOWER_QUARTILE] << "\t" << quantile_computation(0.25)
          << "\t\t" << STAT_label[STATL_UPPER_QUARTILE] << "\t" << quantile_computation(0.75);
     }
@@ -2550,12 +2554,15 @@ ostream& Distribution::print(ostream &os) const
 ostream& operator<<(ostream &os , const Distribution &dist)
 
 {
-  os.precision(5);
+  streamsize nb_digits;
+
+
+  nb_digits = os.precision(5);
 
   os << endl;
   dist.print(os);
 
-  os.precision(6);
+  os.precision(nb_digits);
 
   return os;
 }
@@ -2698,7 +2705,7 @@ double Distribution::quantile_computation(double icumul) const
   double quantile = D_DEFAULT;
 
 
-  if ((cumul[nb_value - 1] >= CUMUL_THRESHOLD) && (icumul <= cumul[nb_value - 1])) {
+  if ((complement == 0.) && (icumul <= cumul[nb_value - 1])) {
     for (i = offset;i < nb_value;i++) {
       if (cumul[i] >= icumul) {
         quantile = i;

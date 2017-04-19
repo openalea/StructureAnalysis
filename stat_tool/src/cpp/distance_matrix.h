@@ -182,16 +182,16 @@ namespace stat_tool {
                 double itransposition_distance = 0. , int inb_transposition = 0);
     void update(int irow_identifier , int icolumn_identifier , double idistance , int ilength);
 
-    Clusters* partitioning(StatError &error , std::ostream &os , int nb_cluster ,
+    Clusters* partitioning(StatError &error , bool display , int nb_cluster ,
                            int *prototype = NULL , int initialization = 1 , int algorithm = 1) const;
-    Clusters* partitioning(StatError &error , std::ostream &os , int nb_cluster ,
+    Clusters* partitioning(StatError &error , bool display , int nb_cluster ,
                            int *cluster_nb_pattern , int **cluster_pattern) const;
 
     Dendrogram* agglomerative_hierarchical_clustering(hierarchical_strategy strategy ,
                                                       linkage criterion = AVERAGE_NEIGHBOR) const;
     Dendrogram* divisive_hierarchical_clustering() const;
 
-    bool hierarchical_clustering(StatError &error , std::ostream &os ,
+    bool hierarchical_clustering(StatError &error , bool display ,
                                  hierarchical_strategy strategy = AGGLOMERATIVE ,
                                  linkage criterion = AVERAGE_NEIGHBOR ,
                                  const std::string path = "" , output_format format = ASCII) const;

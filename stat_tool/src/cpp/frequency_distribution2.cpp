@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -44,15 +44,13 @@
 #include <sstream>
 #include <iomanip>
 
-#include "tool/rw_tokenizer.h"
-#include "tool/rw_cstring.h"
-#include "tool/rw_locale.h"
-#include "tool/config.h"
+#include <boost/tokenizer.hpp>
 
 #include "distribution.h"
 #include "stat_label.h"
 
 using namespace std;
+using namespace boost;
 
 
 namespace stat_tool {
@@ -82,10 +80,10 @@ ostream& FrequencyDistribution::dissimilarity_ascii_write(ostream &os , int nb_h
 {
   register int i , j;
   int max_nb_value , buff , width[3];
-  long old_adjust;
   double information , **cumul;
   Test *test;
   const FrequencyDistribution **histo;
+  ios_base::fmtflags format_flags;
 
 
   nb_histo++;
@@ -96,7 +94,7 @@ ostream& FrequencyDistribution::dissimilarity_ascii_write(ostream &os , int nb_h
     histo[i] = ihisto[i - 1];
   }
 
-  old_adjust = os.setf(ios::right , ios::adjustfield);
+  format_flags = os.setf(ios::right , ios::adjustfield);
 
   // writing of the frequency distribution characteristics
 
@@ -311,7 +309,7 @@ ostream& FrequencyDistribution::dissimilarity_ascii_write(ostream &os , int nb_h
   }
   }
 
-  os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
+  os.setf(format_flags , ios::adjustfield);
 
   delete [] histo;
 
@@ -463,7 +461,7 @@ bool FrequencyDistribution::dissimilarity_spreadsheet_write(StatError &error , c
 
     if (type != NOMINAL) {
       for (i = 0;i < nb_histo;i++) {
-        if (histo[i]->mean > 0.) {
+        if (histo[i]->variance > 0.) {
           out_file << "\t" << STAT_label[STATL_CONCENTRATION] << " " << STAT_label[STATL_FUNCTION] << " "
                    << i + 1;
         }
@@ -488,7 +486,7 @@ bool FrequencyDistribution::dissimilarity_spreadsheet_write(StatError &error , c
 
       if (type != NOMINAL) {
         for (j = 0;j < nb_histo;j++) {
-          if (histo[j]->mean > 0.) {
+          if (histo[j]->variance > 0.) {
             out_file << "\t";
             if (i < histo[j]->nb_value) {
               out_file << concentration[j][i];
@@ -688,7 +686,7 @@ Test* FrequencyDistribution::kruskal_wallis_test(int nb_histo , const FrequencyD
  *  \brief Comparison of frequency distributions.
  *
  *  \param[in] error    reference on a StatError object,
- *  \param[in] os       stream,
+ *  \param[in] display  flag for displaying comparison outputs,
  *  \param[in] nb_histo number of frequency distributions,
  *  \param[in] ihisto   pointer on the frequency distributions,
  *  \param[in] type     variable type (NOMINAL/ORDINAL/NUMERIC),
@@ -699,7 +697,7 @@ Test* FrequencyDistribution::kruskal_wallis_test(int nb_histo , const FrequencyD
  */
 /*--------------------------------------------------------------*/
 
-bool FrequencyDistribution::comparison(StatError &error , ostream &os , int nb_histo ,
+bool FrequencyDistribution::comparison(StatError &error , bool display , int nb_histo ,
                                        const FrequencyDistribution **ihisto , variable_type type ,
                                        const string path , output_format format) const
 
@@ -785,24 +783,24 @@ bool FrequencyDistribution::comparison(StatError &error , ostream &os , int nb_h
 
     // writing of the pairwise dissimilarity matrix between frequency distributions
 
-    os << "\n" << STAT_label[STATL_DISSIMILARITIES] << " between "
-       << STAT_label[STATL_FREQUENCY_DISTRIBUTIONS] << endl;
+    cout << "\n" << STAT_label[STATL_DISSIMILARITIES] << " between "
+         << STAT_label[STATL_FREQUENCY_DISTRIBUTIONS] << endl;
 
-    os << "\n           ";
+    cout << "\n           ";
     for (i = 0;i < nb_histo;i++) {
-      os << " | " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << i + 1;
+      cout << " | " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << i + 1;
     }
-    os << endl;
+    cout << endl;
 
     for (i = 0;i < nb_histo;i++) {
-      os << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " ";
-      os << setw(width[0]) << i + 1 << " ";
+      cout << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " ";
+      cout << setw(width[0]) << i + 1 << " ";
       for (j = 0;j < nb_histo;j++) {
-        os << setw(width[1]) << dissimilarity[i][j];
+        cout << setw(width[1]) << dissimilarity[i][j];
       }
-      os << endl;
+      cout << endl;
     }
-    os << endl;
+    cout << endl;
 
     delete merged_histo;
     delete [] rank;
@@ -842,9 +840,9 @@ bool FrequencyDistribution::comparison(StatError &error , ostream &os , int nb_h
     }
   }
 
-# ifdef MESSAGE
-  dissimilarity_ascii_write(os , nb_histo - 1 , ihisto , type , dissimilarity);
-# endif
+  if (display) {
+    dissimilarity_ascii_write(cout , nb_histo - 1 , ihisto , type , dissimilarity);
+  }
 
   if (!path.empty()) {
     switch (format) {
@@ -877,7 +875,7 @@ bool FrequencyDistribution::comparison(StatError &error , ostream &os , int nb_h
  *  \brief Comparison of frequency distributions.
  *
  *  \param[in] error    reference on a StatError object,
- *  \param[in] os       stream,
+ *  \param[in] display  flag for displaying comparison outputs,
  *  \param[in] nb_histo number of frequency distributions,
  *  \param[in] ihisto   pointer on the frequency distributions,
  *  \param[in] type     variable type (NOMINAL/ORDINAL/NUMERIC),
@@ -888,7 +886,7 @@ bool FrequencyDistribution::comparison(StatError &error , ostream &os , int nb_h
  */
 /*--------------------------------------------------------------*/
 
-bool FrequencyDistribution::comparison(StatError &error , ostream &os , int nb_histo ,
+bool FrequencyDistribution::comparison(StatError &error , bool display , int nb_histo ,
                                        const vector<FrequencyDistribution> ihisto , variable_type type ,
                                        const string path , output_format format) const
 
@@ -903,7 +901,7 @@ bool FrequencyDistribution::comparison(StatError &error , ostream &os , int nb_h
     histo[i] = new FrequencyDistribution(ihisto[i]);
   }
 
-  status = comparison(error , os , nb_histo , histo , type , path , format);
+  status = comparison(error , display , nb_histo , histo , type , path , format);
 
   for (i = 0;i < nb_histo;i++) {
     delete histo[i];
@@ -918,12 +916,12 @@ bool FrequencyDistribution::comparison(StatError &error , ostream &os , int nb_h
 /**
  *  \brief F test of variance comparison.
  *
- *  \param[in] os    stream,
- *  \param[in] histo reference on a frequency distribution.
+ *  \param[in] display flag for displaying the test results,
+ *  \param[in] histo   reference on a frequency distribution.
  */
 /*--------------------------------------------------------------*/
 
-void FrequencyDistribution::F_comparison(ostream &os , const FrequencyDistribution &histo) const
+void FrequencyDistribution::F_comparison(bool display , const FrequencyDistribution &histo) const
 
 {
   if ((nb_element > 1) && (histo.nb_element > 1)) {
@@ -941,9 +939,9 @@ void FrequencyDistribution::F_comparison(ostream &os , const FrequencyDistributi
 
     test->F_critical_probability_computation();
 
-#   ifdef MESSAGE
-    os << *test;
-#   endif
+    if (display) {
+      cout << *test;
+    }
 
     delete test;
   }
@@ -954,12 +952,12 @@ void FrequencyDistribution::F_comparison(ostream &os , const FrequencyDistributi
 /**
  *  \brief Student's t test of mean comparison.
  *
- *  \param[in] os    stream,
- *  \param[in] histo reference on a frequency distribution.
+ *  \param[in] display flag for displaying the test results,
+ *  \param[in] histo   reference on a frequency distribution.
  */
 /*--------------------------------------------------------------*/
 
-void FrequencyDistribution::t_comparison(ostream &os , const FrequencyDistribution &histo) const
+void FrequencyDistribution::t_comparison(bool display , const FrequencyDistribution &histo) const
 
 {
   int df;
@@ -979,9 +977,9 @@ void FrequencyDistribution::t_comparison(ostream &os , const FrequencyDistributi
 
     test->t_critical_probability_computation();
 
-#   ifdef MESSAGE
-    os << *test;
-#   endif
+    if (display) {
+      cout << *test;
+    }
 
     delete test;
   }
@@ -997,7 +995,7 @@ void FrequencyDistribution::t_comparison(ostream &os , const FrequencyDistributi
 
     test->t_critical_probability_computation();
 
-    os << "\n" << *test;
+    cout << "\n" << *test;
 
     delete test;
   }
@@ -1010,15 +1008,15 @@ void FrequencyDistribution::t_comparison(ostream &os , const FrequencyDistributi
 /**
  *  \brief Wilcoxon-Mann-Whitney test of distribution comparison.
  *
- *  \param[in] error  reference on a StatError object,
- *  \param[in] os     stream,
- *  \param[in] ihisto reference on a frequency distribution.
+ *  \param[in] error   reference on a StatError object,
+ *  \param[in] display flag for displaying the test results,
+ *  \param[in] ihisto  reference on a frequency distribution.
  *
- *  \return           error status.
+ *  \return            error status.
  */
 /*--------------------------------------------------------------*/
 
-bool FrequencyDistribution::wilcoxon_mann_whitney_comparison(StatError &error , ostream &os ,
+bool FrequencyDistribution::wilcoxon_mann_whitney_comparison(StatError &error , bool display ,
                                                              const FrequencyDistribution &ihisto) const
 
 {
@@ -1102,18 +1100,18 @@ bool FrequencyDistribution::wilcoxon_mann_whitney_comparison(StatError &error , 
       }
     }
 
-#   ifdef MESSAGE
-    os << STAT_label[STATL_TWO_SIDED] << " " << STAT_label[STATL_WILCOXON_MANN_WHITNEY_TEST];
-    os << *test;
+    if (display) {
+      cout << STAT_label[STATL_TWO_SIDED] << " " << STAT_label[STATL_WILCOXON_MANN_WHITNEY_TEST];
+      cout << *test;
 
-    os << STAT_label[STATL_MANN_WHITNEY_INFERIOR_PROBABILITY] << " = "
-       << (histo[0]->nb_element * (double)histo[1]->nb_element - nb_equal / 2. - nb_sup) /
-          (histo[0]->nb_element * (double)histo[1]->nb_element) << "   "
-       << STAT_label[STATL_MANN_WHITNEY_EQUAL_PROBABILITY] << " = "
-       << nb_equal / (histo[0]->nb_element * (double)histo[1]->nb_element) << "   "
-       << STAT_label[STATL_MANN_WHITNEY_SUPERIOR_PROBABILITY] << " = "
-       << (nb_sup - nb_equal / 2.) / (histo[0]->nb_element * (double)histo[1]->nb_element) << endl;
-#   endif
+      cout << STAT_label[STATL_MANN_WHITNEY_INFERIOR_PROBABILITY] << " = "
+           << (histo[0]->nb_element * (double)histo[1]->nb_element - nb_equal / 2. - nb_sup) /
+              (histo[0]->nb_element * (double)histo[1]->nb_element) << "   "
+           << STAT_label[STATL_MANN_WHITNEY_EQUAL_PROBABILITY] << " = "
+           << nb_equal / (histo[0]->nb_element * (double)histo[1]->nb_element) << "   "
+           << STAT_label[STATL_MANN_WHITNEY_SUPERIOR_PROBABILITY] << " = "
+           << (nb_sup - nb_equal / 2.) / (histo[0]->nb_element * (double)histo[1]->nb_element) << endl;
+    }
 
     delete [] histo;
     delete merged_histo;
@@ -2057,13 +2055,13 @@ DiscreteParametricModel* DiscreteDistributionData::extract_model(StatError &erro
 DiscreteDistributionData* DiscreteDistributionData::ascii_read(StatError &error , const string path)
 
 {
-  RWLocaleSnapshot locale("en");
-  RWCString buffer , token;
+  string buffer;
   size_t position;
+  typedef tokenizer<char_separator<char>> tokenizer;
+  char_separator<char> separator(" \t");
   bool status , lstatus;
   register int i;
-  int line , nb_element;
-  long value , index , max_index;
+  int line , nb_element , value , index , max_index;
   DiscreteDistributionData *histo;
   ifstream in_file(path.c_str());
 
@@ -2084,24 +2082,33 @@ DiscreteDistributionData* DiscreteDistributionData::ascii_read(StatError &error 
     max_index = -1;
     nb_element = 0;
 
-    while (buffer.readLine(in_file , false)) {
+    while (getline(in_file , buffer)) {
       line++;
 
 #     ifdef DEBUG
       cout << line << "  " << buffer << endl;
 #     endif
 
-      position = buffer.first('#');
-      if (position != RW_NPOS) {
-        buffer.remove(position);
+      position = buffer.find('#');
+      if (position != string::npos) {
+        buffer.erase(position);
       }
       i = 0;
 
-      RWCTokenizer next(buffer);
+      tokenizer tok_buffer(buffer , separator);
 
-      while (!((token = next()).isNull())) {
-          if (i <= 1) {
-          lstatus = locale.stringToNum(token , &value);
+      for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
+        if (i <= 1) {
+          lstatus = true;
+
+/*          try {
+            value = stoi(*token);   in C++ 11
+          }
+          catch(invalid_argument &arg) {
+            lstatus = false;
+          } */
+          value = atoi(token->c_str());
+
           if ((lstatus) && (value < 0)) {
             lstatus = false;
           }
@@ -2170,23 +2177,24 @@ DiscreteDistributionData* DiscreteDistributionData::ascii_read(StatError &error 
 
       histo = new DiscreteDistributionData(max_index + 1);
 
-      while (buffer.readLine(in_file , false)) {
-        position = buffer.first('#');
-        if (position != RW_NPOS) {
-          buffer.remove(position);
+      while (getline(in_file , buffer)) {
+        position = buffer.find('#');
+        if (position != string::npos) {
+          buffer.erase(position);
         }
         i = 0;
 
-        RWCTokenizer next(buffer);
+        tokenizer tok_buffer(buffer , separator);
 
-        while (!((token = next()).isNull())) {
+        for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
           switch (i) {
           case 0 :
-            locale.stringToNum(token , &index);
+//            index = stoi(*token);   in C++ 11
+            index = atoi(token->c_str());
             break;
           case 1 :
-            locale.stringToNum(token , &value);
-            histo->frequency[index] = value;
+//            histo->frequency[index] = stoi(*token);   in C++ 11
+            histo->frequency[index] = atoi(token->c_str());
             break;
           }
 

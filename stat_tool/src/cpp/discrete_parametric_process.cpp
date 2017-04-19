@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -39,15 +39,13 @@
 #include <sstream>
 #include <iomanip>
 
-#include "tool/rw_tokenizer.h"
-#include "tool/rw_cstring.h"
-#include "tool/rw_locale.h"
-#include "tool/config.h"
+#include <boost/tokenizer.hpp>
 
 #include "markovian.h"
 #include "stat_label.h"
 
 using namespace std;
+using namespace boost;
 
 
 namespace stat_tool {
@@ -263,12 +261,13 @@ DiscreteParametricProcess* DiscreteParametricProcess::parsing(StatError &error ,
                                                               model_type model , double cumul_threshold)
 
 {
-  RWLocaleSnapshot locale("en");
-  RWCString buffer , token;
+  string buffer;
   size_t position;
+  typedef tokenizer<char_separator<char>> tokenizer;
+  char_separator<char> separator(" \t");
   bool status = true , lstatus;
   register int i , j;
-  long index;
+  int index;
   DiscreteParametric **dist;
   DiscreteParametricProcess *process;
 
@@ -281,22 +280,22 @@ DiscreteParametricProcess* DiscreteParametricProcess::parsing(StatError &error ,
   }
 
   for (i = 0;i < nb_state;i++) {
-    while (buffer.readLine(in_file , false)) {
+    while (getline(in_file , buffer)) {
       line++;
 
 #     ifdef DEBUG
       cout << line << "  " << buffer << endl;
 #     endif
 
-      position = buffer.first('#');
-      if (position != RW_NPOS) {
-        buffer.remove(position);
+      position = buffer.find('#');
+      if (position != string::npos) {
+        buffer.erase(position);
       }
       j = 0;
 
-      RWCTokenizer next(buffer);
+      tokenizer tok_buffer(buffer , separator);
 
-      while (!((token = next()).isNull())) {
+      for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
         switch (j) {
 
         // test COMPONENT/STATE keyword
@@ -305,7 +304,7 @@ DiscreteParametricProcess* DiscreteParametricProcess::parsing(StatError &error ,
           switch (model) {
 
           case MIXTURE : {
-            if (token != STAT_word[STATW_COMPONENT]) {
+            if (*token != STAT_word[STATW_COMPONENT]) {
               status = false;
               error.correction_update(STAT_parsing[STATP_KEYWORD] ,
                                       STAT_word[STATW_COMPONENT] , line , j + 1);
@@ -314,7 +313,7 @@ DiscreteParametricProcess* DiscreteParametricProcess::parsing(StatError &error ,
           }
 
           case HIDDEN_MARKOV : {
-            if (token != STAT_word[STATW_STATE]) {
+            if (*token != STAT_word[STATW_STATE]) {
               status = false;
               error.correction_update(STAT_parsing[STATP_KEYWORD] ,
                                       STAT_word[STATW_STATE] , line , j + 1);
@@ -328,7 +327,16 @@ DiscreteParametricProcess* DiscreteParametricProcess::parsing(StatError &error ,
         // test component/state index
 
         case 1 : {
-          lstatus = locale.stringToNum(token , &index);
+          lstatus = true;
+
+/*          try {
+            index = stoi(*token);   in C++ 11
+          }
+          catch(invalid_argument &arg) {
+            lstatus = false;
+          } */
+          index = atoi(token->c_str());
+
           if ((lstatus) && (index != i)) {
             lstatus = false;
           }
@@ -351,7 +359,7 @@ DiscreteParametricProcess* DiscreteParametricProcess::parsing(StatError &error ,
         // test OBSERVATION_DISTRIBUTION keyword
 
         case 2 : {
-          if (token != STAT_word[STATW_OBSERVATION_DISTRIBUTION]) {
+          if (*token != STAT_word[STATW_OBSERVATION_DISTRIBUTION]) {
             status = false;
             error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_OBSERVATION_DISTRIBUTION] , line , j + 1);
           }
@@ -377,7 +385,8 @@ DiscreteParametricProcess* DiscreteParametricProcess::parsing(StatError &error ,
         break;
       }
     }
-    if ((!dist[i]) && (j==0)) {
+
+    if ((j == 0) && (!dist[i])) {
       status = false;
       error.update(STAT_parsing[STATP_FORMAT] , line);
     }
@@ -494,12 +503,12 @@ ostream& DiscreteParametricProcess::ascii_print(ostream &os , FrequencyDistribut
 
   if ((!empirical_observation) && (exhaustive)) {
     int buff , width[3];
-    long old_adjust;
+    ios_base::fmtflags format_flags;
 
  
-    old_adjust = os.setf(ios::right , ios::adjustfield);
+    format_flags = os.setf(ios::right , ios::adjustfield);
 
-   // computation of the column widths
+    // computation of the column widths
 
     width[0] = column_width(nb_value - 1);
 
@@ -579,7 +588,7 @@ ostream& DiscreteParametricProcess::ascii_print(ostream &os , FrequencyDistribut
       os << endl;
     }
 
-    os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
+    os.setf(format_flags , ios::adjustfield);
   }
 
   if (marginal_distribution) {

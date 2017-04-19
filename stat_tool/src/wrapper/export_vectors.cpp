@@ -443,7 +443,7 @@ public:
   }
 
   static void
-  file_ascii_data_write(const Vectors& d, const char* path, bool exhaustive)
+  file_ascii_data_write(const Vectors& d, const std::string path, bool exhaustive)
   {
     bool result = true;
     StatError error;
@@ -1061,7 +1061,7 @@ public:
   }
 
   static void
-  file_ascii_write(const VectorDistance& d, const char* path, bool exhaustive)
+  file_ascii_write(const VectorDistance& d, const std::string path, bool exhaustive)
   {
     bool result = true;
     StatError error;

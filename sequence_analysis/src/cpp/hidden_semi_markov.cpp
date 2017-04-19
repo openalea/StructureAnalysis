@@ -41,9 +41,9 @@
 #include <string>
 #include <sstream>
 
-#include "tool/rw_tokenizer.h"
-#include "tool/rw_cstring.h"
-#include "tool/rw_locale.h"
+#include <boost/tokenizer.hpp>
+#include <boost/algorithm/string/trim.hpp>
+#include <boost/algorithm/string/classification.hpp>
 
 #include "stat_tool/stat_label.h"
 
@@ -51,6 +51,7 @@
 #include "sequence_label.h"
 
 using namespace std;
+using namespace boost;
 using namespace stat_tool;
 
 
@@ -280,15 +281,15 @@ HiddenSemiMarkov* HiddenSemiMarkov::ascii_read(StatError &error , const string p
                                                double cumul_threshold , bool old_format)
 
 {
-  RWLocaleSnapshot locale("en");
-  RWCString buffer , token;
+  string buffer;
   size_t position;
+  typedef tokenizer<char_separator<char>> tokenizer;
+  char_separator<char> separator(" \t");
   process_type type = DEFAULT_TYPE;
   bool status , lstatus;
   register int i;
-  int line , nb_output_process , index;
+  int line , nb_output_process , value , index;
   observation_process obs_type;
-  long value;
   const Chain *chain;
   const CategoricalSequenceProcess *occupancy;
   CategoricalProcess **categorical_observation;
@@ -318,30 +319,30 @@ HiddenSemiMarkov* HiddenSemiMarkov::ascii_read(StatError &error , const string p
       error.update(SEQ_error[SEQR_LONG_SEQUENCE_LENGTH]);
     }
 
-    while (buffer.readLine(in_file , false)) {
+    while (getline(in_file , buffer)) {
       line++;
 
 #     ifdef DEBUG
       cout << line << "  " << buffer << endl;
 #     endif
 
-      position = buffer.first('#');
-      if (position != RW_NPOS) {
-        buffer.remove(position);
+      position = buffer.find('#');
+      if (position != string::npos) {
+        buffer.erase(position);
       }
       i = 0;
 
-      RWCTokenizer next(buffer);
+      tokenizer tok_buffer(buffer , separator);
 
-      while (!((token = next()).isNull())) {
+      for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
 
         // test (EQUILIBRIUM_)HIDDEN_SEMI-MARKOV_CHAIN keyword
 
         if (i == 0) {
-          if (token == SEQ_word[SEQW_HIDDEN_SEMI_MARKOV_CHAIN]) {
+          if (*token == SEQ_word[SEQW_HIDDEN_SEMI_MARKOV_CHAIN]) {
             type = ORDINARY;
           }
-          else if (token == SEQ_word[SEQW_EQUILIBRIUM_HIDDEN_SEMI_MARKOV_CHAIN]) {
+          else if (*token == SEQ_word[SEQW_EQUILIBRIUM_HIDDEN_SEMI_MARKOV_CHAIN]) {
             type = EQUILIBRIUM;
           }
           else {
@@ -392,28 +393,37 @@ HiddenSemiMarkov* HiddenSemiMarkov::ascii_read(StatError &error , const string p
           discrete_parametric_observation = NULL;
           continuous_parametric_observation = NULL;
 
-          while (buffer.readLine(in_file , false)) {
+          while (getline(in_file , buffer)) {
             line++;
 
 #           ifdef DEBUG
             cout << line << "  " << buffer << endl;
 #           endif
 
-            position = buffer.first('#');
-            if (position != RW_NPOS) {
-              buffer.remove(position);
+            position = buffer.find('#');
+            if (position != string::npos) {
+              buffer.erase(position);
             }
             i = 0;
 
-            RWCTokenizer next(buffer);
+            tokenizer tok_buffer(buffer , separator);
 
-            while (!((token = next()).isNull())) {
+            for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
               switch (i) {
 
               // test number of observation processes
 
               case 0 : {
-                lstatus = locale.stringToNum(token , &value);
+                lstatus = true;
+
+/*                try {
+                  value = stoi(*token);   in C++ 11
+                }
+                catch(invalid_argument &arg) {
+                  lstatus = false;
+                } */
+                value = atoi(token->c_str());
+
                 if (lstatus) {
                   if ((value < 1) || (value > NB_OUTPUT_PROCESS)) {
                     lstatus = false;
@@ -433,7 +443,7 @@ HiddenSemiMarkov* HiddenSemiMarkov::ascii_read(StatError &error , const string p
               // test OUTPUT_PROCESS(ES) keyword
 
               case 1 : {
-                if (token != STAT_word[nb_output_process == 1 ? STATW_OUTPUT_PROCESS : STATW_OUTPUT_PROCESSES]) {
+                if (*token != STAT_word[nb_output_process == 1 ? STATW_OUTPUT_PROCESS : STATW_OUTPUT_PROCESSES]) {
                   status = false;
                   error.correction_update(STAT_parsing[STATP_KEYWORD] ,
                                           STAT_word[nb_output_process == 1 ? STATW_OUTPUT_PROCESS : STATW_OUTPUT_PROCESSES] , line , i + 1);
@@ -472,31 +482,28 @@ HiddenSemiMarkov* HiddenSemiMarkov::ascii_read(StatError &error , const string p
 
             index = 0;
 
-            while (buffer.readLine(in_file , false)) {
+            while (getline(in_file , buffer)) {
               line++;
 
 #             ifdef DEBUG
               cout << line << "  " << buffer << endl;
 #             endif
 
-              position = buffer.first('#');
-              if (position != RW_NPOS) {
-                buffer.remove(position);
+              position = buffer.find('#');
+              if (position != string::npos) {
+                buffer.erase(position);
               }
               i = 0;
 
-              RWCTokenizer next(buffer);
+              tokenizer tok_buffer(buffer , separator);
 
-              while (!((token = next()).isNull())) {
+              for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
                 switch (i) {
 
                 // test OUTPUT_PROCESS keyword
 
                 case 0 : {
-                  if (token == STAT_word[STATW_OUTPUT_PROCESS]) {
-                    index++;
-                  }
-                  else {
+                  if (*token != STAT_word[STATW_OUTPUT_PROCESS]) {
                     status = false;
                     error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_OUTPUT_PROCESS] , line , i + 1);
                   }
@@ -506,7 +513,17 @@ HiddenSemiMarkov* HiddenSemiMarkov::ascii_read(StatError &error , const string p
                 // test observation process index
 
                 case 1 : {
-                  lstatus = locale.stringToNum(token , &value);
+                  index++;
+                  lstatus = true;
+
+/*                  try {
+                    value = stoi(*token);   in C++ 11
+                  }
+                  catch(invalid_argument &arg) {
+                    lstatus = false;
+                  } */
+                  value = atoi(token->c_str());
+
                   if ((lstatus) && ((value != index) || (value > nb_output_process))) {
                     lstatus = false;
                   }
@@ -521,7 +538,7 @@ HiddenSemiMarkov* HiddenSemiMarkov::ascii_read(StatError &error , const string p
                 // test separator
 
                 case 2 : {
-                  if (token != ":") {
+                  if (*token != ":") {
                     status = false;
                     error.update(STAT_parsing[STATP_SEPARATOR] , line , i + 1);
                   }
@@ -531,15 +548,15 @@ HiddenSemiMarkov* HiddenSemiMarkov::ascii_read(StatError &error , const string p
                 // test CATEGORICAL/DISCRETE_PARAMETRIC/CONTINUOUS_PARAMETRIC keyword
 
                 case 3 : {
-                  if ((token == STAT_word[STATW_CATEGORICAL]) ||
-                      (token == STAT_word[STATW_NONPARAMETRIC])) {
+                  if ((*token == STAT_word[STATW_CATEGORICAL]) ||
+                      (*token == STAT_word[STATW_NONPARAMETRIC])) {
                     obs_type = CATEGORICAL_PROCESS;
                   }
-                  else if ((token == STAT_word[STATW_DISCRETE_PARAMETRIC]) ||
-                           (token == STAT_word[STATW_PARAMETRIC])) {
+                  else if ((*token == STAT_word[STATW_DISCRETE_PARAMETRIC]) ||
+                           (*token == STAT_word[STATW_PARAMETRIC])) {
                     obs_type = DISCRETE_PARAMETRIC;
                   }
-                  else if (token == STAT_word[STATW_CONTINUOUS_PARAMETRIC]) {
+                  else if (*token == STAT_word[STATW_CONTINUOUS_PARAMETRIC]) {
                     obs_type = CONTINUOUS_PARAMETRIC;
                   }
                   else {
@@ -602,11 +619,34 @@ HiddenSemiMarkov* HiddenSemiMarkov::ascii_read(StatError &error , const string p
                 }
                 }
               }
+
+              if (index == nb_output_process) {
+                break;
+              }
             }
 
-            if (index != nb_output_process) {
+            if (index < nb_output_process) {
               status = false;
               error.update(STAT_parsing[STATP_FORMAT] , line);
+            }
+
+            else {
+              while (getline(in_file , buffer)) {
+                line++;
+
+#               ifdef DEBUG
+                cout << line << " " << buffer << endl;
+#               endif
+
+                position = buffer.find('#');
+                if (position != string::npos) {
+                  buffer.erase(position);
+                }
+                if (!(trim_right_copy_if(buffer , is_any_of(" \t")).empty())) {
+                  status = false;
+                  error.update(STAT_parsing[STATP_FORMAT] , line);
+                }
+              }
             }
 
             if (status) {

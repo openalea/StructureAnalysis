@@ -1473,7 +1473,7 @@ MarkovianSequences* MarkovianSequences::transcode(StatError &error ,
  *  \brief Removing of the non-represented values of an integer-valued variable.
  *
  *  \param[in] error        reference on a StatError object,
- *  \param[in] os           stream,
+ *  \param[in] display      flag for displaying the non-represented values,
  *  \param[in] ivariable    variable index,
  *  \param[in] add_variable flag for adding a variable.
  *
@@ -1481,7 +1481,7 @@ MarkovianSequences* MarkovianSequences::transcode(StatError &error ,
  */
 /*--------------------------------------------------------------*/
 
-MarkovianSequences* MarkovianSequences::consecutive_values(StatError &error , ostream &os ,
+MarkovianSequences* MarkovianSequences::consecutive_values(StatError &error , bool display ,
                                                            int ivariable , bool add_variable) const
 
 {
@@ -1528,16 +1528,15 @@ MarkovianSequences* MarkovianSequences::consecutive_values(StatError &error , os
   }
 
   if (status) {
-
-#   ifdef MESSAGE
-    os << "\n" << SEQ_label[SEQL_MISSING_VALUE] << ":";
-    for (i = 0;i < marginal_distribution[ivariable]->nb_value;i++) {
-      if (marginal_distribution[ivariable]->frequency[i] == 0) {
-        os << " " << i;
+    if (display) {
+      cout << "\n" << SEQ_label[SEQL_MISSING_VALUE] << ":";
+      for (i = 0;i < marginal_distribution[ivariable]->nb_value;i++) {
+        if (marginal_distribution[ivariable]->frequency[i] == 0) {
+          cout << " " << i;
+        }
       }
+      cout << endl;
     }
-    os << endl;
-#   endif
 
     category = new int[marginal_distribution[ivariable]->nb_value - marginal_distribution[ivariable]->offset];
 
@@ -5089,7 +5088,7 @@ void MarkovianSequences::build_characteristic(int variable , bool sojourn_time_f
  *  \brief Count of words of fixed length.
  *
  *  \param[in] error         reference on a StatError object,
- *  \param[in] os            stream,
+ *  \param[in] display       flag for displaying word counts,
  *  \param[in] variable      variable index,
  *  \param[in] word_length   word length,
  *  \param[in] begin_state   begin state,
@@ -5100,7 +5099,7 @@ void MarkovianSequences::build_characteristic(int variable , bool sojourn_time_f
  */
 /*--------------------------------------------------------------*/
 
-bool MarkovianSequences::word_count(StatError &error , ostream &os , int variable ,
+bool MarkovianSequences::word_count(StatError &error , bool display , int variable ,
                                     int word_length , int begin_state , int end_state ,
                                     int min_frequency) const
 
@@ -5110,7 +5109,7 @@ bool MarkovianSequences::word_count(StatError &error , ostream &os , int variabl
   int nb_state , nb_word , max_nb_word , value , max_frequency , total_frequency , width ,
       *power , *frequency , *word_value , *pisequence , *index , **word;
   double nb_word_bound , *probability;
-  long old_adjust;
+  ios_base::fmtflags format_flags;
 
 
   error.init();
@@ -5269,25 +5268,27 @@ bool MarkovianSequences::word_count(StatError &error , ostream &os , int variabl
       }
     }
 
-    // output
+    // display of word counts
 
-    old_adjust = os.setf(ios::right , ios::adjustfield);
+    if (display) {
+      format_flags = cout.setf(ios::right , ios::adjustfield);
 
-    for (j = 0;j < i;j++) {
-      for (k = 0;k < word_length;k++) {
-        os << word[index[j]][k] << " ";
+      for (j = 0;j < i;j++) {
+        for (k = 0;k < word_length;k++) {
+          cout << word[index[j]][k] << " ";
+        }
+        cout << "   " << setw(width) << frequency[index[j]]
+             << "   " << probability[index[j]];
+
+        if (j == 0) {
+          cout << "   (" << nb_word << " " << SEQ_label[SEQL_WORDS] << ", "
+               << total_frequency << ")";
+        }
+        cout << endl;
       }
-      os << "   " << setw(width) << frequency[index[j]]
-         << "   " << probability[index[j]];
 
-      if (j == 0) {
-        os << "   (" << nb_word << " " << SEQ_label[SEQL_WORDS] << ", "
-           << total_frequency << ")";
-      }
-      os << endl;
+      cout.setf(format_flags , ios::adjustfield);
     }
-
-    os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
 
     delete [] power;
     delete [] frequency;

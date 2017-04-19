@@ -148,21 +148,24 @@ namespace sequence_analysis {
                                   int index = stat_tool::I_DEFAULT) const;
 
     bool state_profile_write(StatError &error , std::ostream &os , const MarkovianSequences &iseq ,
-                             int identifier = stat_tool::I_DEFAULT , state_profile output = SSTATE ,
+                             int identifier , state_profile output = SSTATE ,
                              stat_tool::output_format format = stat_tool::ASCII ,
                              latent_structure_algorithm state_sequence = GENERALIZED_VITERBI ,
                              int nb_state_sequence = NB_STATE_SEQUENCE) const;
+    bool state_profile_ascii_write(StatError &error , const MarkovianSequences &iseq ,
+                                   int identifier , state_profile output = SSTATE ,
+                                   latent_structure_algorithm state_sequence = GENERALIZED_VITERBI ,
+                                   int nb_state_sequence = NB_STATE_SEQUENCE) const;
     bool state_profile_write(StatError &error , const std::string path , const MarkovianSequences &iseq ,
-                             int identifier = stat_tool::I_DEFAULT , state_profile output = SSTATE ,
+                             int identifier , state_profile output = SSTATE ,
                              stat_tool::output_format format = stat_tool::ASCII ,
                              latent_structure_algorithm state_sequence = GENERALIZED_VITERBI ,
                              int nb_state_sequence = NB_STATE_SEQUENCE) const;
-    bool state_profile_ascii_write(StatError &error , std::ostream &os , int identifier ,
-                                   state_profile output = SSTATE ,
+    bool state_profile_ascii_write(StatError &error , int identifier , state_profile output = SSTATE ,
                                    latent_structure_algorithm state_sequence = GENERALIZED_VITERBI ,
                                    int nb_state_sequence = NB_STATE_SEQUENCE) const;
     bool state_profile_write(StatError &error , const std::string path ,
-                             int identifier = stat_tool::I_DEFAULT , state_profile output = SSTATE ,
+                             int identifier , state_profile output = SSTATE ,
                              stat_tool::output_format format = stat_tool::ASCII ,
                              latent_structure_algorithm state_sequence = GENERALIZED_VITERBI ,
                              int nb_state_sequence = NB_STATE_SEQUENCE) const;
@@ -179,7 +182,7 @@ namespace sequence_analysis {
     stat_tool::MultiPlotSet* state_profile_plotable_write(StatError &error ,
                                                           int identifier , state_profile output = SSTATE) const;
 
-    SemiMarkovData* state_sequence_computation(StatError &error , ostream &os ,
+    SemiMarkovData* state_sequence_computation(StatError &error , bool display ,
                                                const MarkovianSequences &seq ,
                                                bool characteristic_flag = true) const;
 
@@ -190,14 +193,14 @@ namespace sequence_analysis {
     SemiMarkovData* simulation(StatError &error , int nb_sequence ,
                                const MarkovianSequences &iseq , bool counting_flag = true) const;
 
-    stat_tool::DistanceMatrix* divergence_computation(StatError &error , std::ostream &os , int nb_model ,
+    stat_tool::DistanceMatrix* divergence_computation(StatError &error , bool display , int nb_model ,
                                                       const HiddenSemiMarkov **ihsmarkov ,
                                                       stat_tool::FrequencyDistribution **hlength ,
                                                       const std::string path = "") const;
-    stat_tool::DistanceMatrix* divergence_computation(StatError &error , std::ostream &os , int nb_model ,
+    stat_tool::DistanceMatrix* divergence_computation(StatError &error , bool display , int nb_model ,
                                                       const HiddenSemiMarkov **hsmarkov , int nb_sequence ,
                                                       int length , const std::string path = "") const;
-    stat_tool::DistanceMatrix* divergence_computation(StatError &error , std::ostream &os , int nb_model ,
+    stat_tool::DistanceMatrix* divergence_computation(StatError &error , bool display , int nb_model ,
                                                       const HiddenSemiMarkov **hsmarkov , int nb_sequence ,
                                                       const MarkovianSequences **seq , const std::string path = "") const;
   };

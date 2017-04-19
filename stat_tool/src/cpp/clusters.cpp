@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -401,12 +401,12 @@ ostream& Clusters::ascii_write(ostream &os , bool exhaustive) const
   register int i , j;
   int buff , max_identifier , neighbor_cluster , most_distant_pattern , neighbor_pattern ,
       isolation , *index , *order , width[3];
-  long old_adjust;
   double **normalized_pattern_distance , **normalized_pattern_cluster_distance ,
          **normalized_cluster_distance;
+  ios_base::fmtflags format_flags;
 
 
-  old_adjust = os.setf(ios::right , ios::adjustfield);
+  format_flags = os.setf(ios::right , ios::adjustfield);
 
   if (exhaustive) {
     order = new int[nb_pattern];
@@ -647,7 +647,7 @@ ostream& Clusters::ascii_write(ostream &os , bool exhaustive) const
   }
   delete [] normalized_cluster_distance;
 
-  os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
+  os.setf(format_flags , ios::adjustfield);
 
   return os;
 }
@@ -2451,7 +2451,7 @@ void Clusters::algorithmic_step_2()
  *  \brief Partitioning clustering algorithm.
  *
  *  \param[in] error          reference on a StatError object,
- *  \param[in] os             stream,
+ *  \param[in] display        flag for displaying the partitioning results,
  *  \param[in] nb_cluster     number of clusters,
  *  \param[in] initialization initial prototypes,
  *  \param[in] algorithm      algorithm type.
@@ -2460,7 +2460,7 @@ void Clusters::algorithmic_step_2()
  */
 /*--------------------------------------------------------------*/
 
-Clusters* DistanceMatrix::partitioning(StatError &error , ostream &os , int nb_cluster ,
+Clusters* DistanceMatrix::partitioning(StatError &error , bool display , int nb_cluster ,
                                        int *prototype , int initialization , int algorithm) const
 
 {
@@ -2593,9 +2593,9 @@ Clusters* DistanceMatrix::partitioning(StatError &error , ostream &os , int nb_c
 
     clusters->cluster_distance_computation_1();
 
-#   ifdef MESSAGE
-    clusters->global_distance_ascii_print(os);
-#   endif
+    if (display) {
+      clusters->global_distance_ascii_print(cout);
+    }
 
     delete dist_matrix;
   }
@@ -2609,7 +2609,7 @@ Clusters* DistanceMatrix::partitioning(StatError &error , ostream &os , int nb_c
  *  \brief Partitioning clustering algorithm.
  *
  *  \param[in] error              reference on a StatError object,
- *  \param[in] os                 stream,
+ *  \param[in] display            flag for displaying the partitioning results,
  *  \param[in] nb_cluster         number of clusters,
  *  \param[in] cluster_nb_pattern cluster sizes.
  *  \param[in] cluster_pattern    cluster compositions.
@@ -2618,7 +2618,7 @@ Clusters* DistanceMatrix::partitioning(StatError &error , ostream &os , int nb_c
  */
 /*--------------------------------------------------------------*/
 
-Clusters* DistanceMatrix::partitioning(StatError &error , ostream &os , int nb_cluster ,
+Clusters* DistanceMatrix::partitioning(StatError &error , bool display , int nb_cluster ,
                                        int *cluster_nb_pattern , int **cluster_pattern) const
 
 {
@@ -2719,9 +2719,9 @@ Clusters* DistanceMatrix::partitioning(StatError &error , ostream &os , int nb_c
     clusters->pattern_distance_computation();
     clusters->cluster_distance_computation_1();
 
-#   ifdef MESSAGE
-    clusters->global_distance_ascii_print(os);
-#   endif
+    if (display) {
+      clusters->global_distance_ascii_print(cout);
+    }
 
     delete dist_matrix;
   }

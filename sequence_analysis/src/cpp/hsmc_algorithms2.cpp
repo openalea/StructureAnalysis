@@ -5368,6 +5368,36 @@ bool HiddenSemiMarkov::state_profile_write(StatError &error , ostream &os ,
  *         of state profiles using the Viterbi forward-backward algorithm,
  *         computation of the N most probable state sequences using the generalized Viterbi algorithm or
  *         simulation of state sequences using the forward-backward algorithm for sampling and
+ *         displaying the results.
+ *
+ *  \param[in] error             reference on a StatError object,
+ *  \param[in] iseq              reference on a MarkovianSequences object,
+ *  \param[in] identifier        sequence identifier,
+ *  \param[in] output            output type,
+ *  \param[in] state_sequence    method for computing the state sequences (GENERALIZED_VITERBI/FORWARD_BACKWARD_SAMPLING),
+ *  \param[in] nb_state_sequence number of state sequences.
+ *
+ *  \return                      error status.
+ */
+/*--------------------------------------------------------------*/
+
+bool HiddenSemiMarkov::state_profile_ascii_write(StatError &error , const MarkovianSequences &iseq ,
+                                                 int identifier , state_profile output ,
+                                                 latent_structure_algorithm state_sequence ,
+                                                 int nb_state_sequence) const
+
+{
+  return state_profile_write(error , cout , iseq , identifier ,
+                             output , ASCII , state_sequence , nb_state_sequence);
+}
+
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of state and entropy profiles using the forward-backward algorithm,
+ *         of state profiles using the Viterbi forward-backward algorithm,
+ *         computation of the N most probable state sequences using the generalized Viterbi algorithm or
+ *         simulation of state sequences using the forward-backward algorithm for sampling and
  *         writing of the results in a file.
  *
  *  \param[in] error             reference on a StatError object,
@@ -5415,10 +5445,9 @@ bool HiddenSemiMarkov::state_profile_write(StatError &error , const string path 
  *         of state profiles using the Viterbi forward-backward algorithm,
  *         computation of the N most probable state sequences using the generalized Viterbi algorithm or
  *         simulation of state sequences using the forward-backward algorithm for sampling and
- *         writing of the results.
+ *         displaying of the results.
  *
  *  \param[in] error             reference on a StatError object,
- *  \param[in] os                stream,
  *  \param[in] identifier        sequence identifier,
  *  \param[in] output            output type,
  *  \param[in] state_sequence    method for computing the state sequences (GENERALIZED_VITERBI/FORWARD_BACKWARD_SAMPLING),
@@ -5428,8 +5457,7 @@ bool HiddenSemiMarkov::state_profile_write(StatError &error , const string path 
  */
 /*--------------------------------------------------------------*/
 
-bool HiddenSemiMarkov::state_profile_ascii_write(StatError &error , ostream &os ,
-                                                 int identifier , state_profile output ,
+bool HiddenSemiMarkov::state_profile_ascii_write(StatError &error , int identifier , state_profile output , 
                                                  latent_structure_algorithm state_sequence ,
                                                  int nb_state_sequence) const
 
@@ -5444,7 +5472,7 @@ bool HiddenSemiMarkov::state_profile_ascii_write(StatError &error , ostream &os 
     error.update(STAT_error[STATR_NO_DATA]);
   }
   else {
-    status = state_profile_write(error , os , *semi_markov_data , identifier ,
+    status = state_profile_write(error , cout , *semi_markov_data , identifier ,
                                  output , ASCII , state_sequence , nb_state_sequence);
   }
 
@@ -6258,7 +6286,7 @@ MultiPlotSet* HiddenSemiMarkov::state_profile_plotable_write(StatError &error , 
  *  \brief Computation of the most probable state sequences.
  *
  *  \param[in] error               reference on a StatError object,
- *  \param[in] os                  stream,
+ *  \param[in] display             flag for displaying the posterior state sequence probabilities,
  *  \param[in] iseq                reference on a MarkovianSequences object,
  *  \param[in] characteristic_flag flag on the computation of the characteristic distributions.
  *
@@ -6266,7 +6294,7 @@ MultiPlotSet* HiddenSemiMarkov::state_profile_plotable_write(StatError &error , 
  */
 /*--------------------------------------------------------------*/
 
-SemiMarkovData* HiddenSemiMarkov::state_sequence_computation(StatError &error , ostream &os ,
+SemiMarkovData* HiddenSemiMarkov::state_sequence_computation(StatError &error , bool display ,
                                                              const MarkovianSequences &iseq ,
                                                              bool characteristic_flag) const
 
@@ -6374,24 +6402,23 @@ SemiMarkovData* HiddenSemiMarkov::state_sequence_computation(StatError &error , 
     else {
       seq->likelihood = likelihood_computation(iseq , seq->posterior_probability);
 
-#     ifdef MESSAGE
-      if (seq->nb_sequence <= POSTERIOR_PROBABILITY_NB_SEQUENCE) {
+      if ((display) && (seq->nb_sequence <= POSTERIOR_PROBABILITY_NB_SEQUENCE)) {
         register int j;
         int *pstate;
 
-        os << "\n" << SEQ_label[SEQL_POSTERIOR_STATE_SEQUENCE_PROBABILITY] << endl;
+        cout << "\n" << SEQ_label[SEQL_POSTERIOR_STATE_SEQUENCE_PROBABILITY] << endl;
         for (i = 0;i < seq->nb_sequence;i++) {
-          os << SEQ_label[SEQL_SEQUENCE] << " " << seq->identifier[i] << ": "
-             << seq->posterior_probability[i];
+          cout << SEQ_label[SEQL_SEQUENCE] << " " << seq->identifier[i] << ": "
+               << seq->posterior_probability[i];
 
           if (hsmarkov->nb_component == hsmarkov->nb_state) {
-            os << " | " << SEQ_label[SEQL_STATE_BEGIN] << ": ";
+            cout << " | " << SEQ_label[SEQL_STATE_BEGIN] << ": ";
 
             pstate = seq->int_sequence[i][0] + 1;
             if (seq->index_parameter) {
               for (j = 1;j < seq->length[i];j++) {
                 if (*pstate != *(pstate - 1)) {
-                  os << seq->index_parameter[i][j] << ", ";
+                  cout << seq->index_parameter[i][j] << ", ";
                 }
                 pstate++;
               }
@@ -6400,17 +6427,16 @@ SemiMarkovData* HiddenSemiMarkov::state_sequence_computation(StatError &error , 
             else {
               for (j = 1;j < seq->length[i];j++) {
                 if (*pstate != *(pstate - 1)) {
-                  os << j << ", ";
+                  cout << j << ", ";
                 }
                 pstate++;
               }
             }
           }
 
-          os << endl;
+          cout << endl;
         }
       }
-#     endif
 
 /*      seq->min_value_computation(0);
       seq->max_value_computation(0); */
@@ -6445,7 +6471,7 @@ SemiMarkovData* HiddenSemiMarkov::state_sequence_computation(StatError &error , 
  *  \brief Comparison of hidden semi-Markov chains for a sample of sequences.
  *
  *  \param[in] error     reference on a StatError object,
- *  \param[in] os        stream,
+ *  \param[in] display   flag for displaying the results of model comparison,
  *  \param[in] nb_model  number of hidden semi-Markov chains,
  *  \param[in] ihsmarkov pointer on HiddenSemiMarkov objects,
  *  \param[in] algorithm type of algorithm (FORWARD/VITERBI),
@@ -6455,7 +6481,7 @@ SemiMarkovData* HiddenSemiMarkov::state_sequence_computation(StatError &error , 
  */
 /*--------------------------------------------------------------*/
 
-bool MarkovianSequences::comparison(StatError &error , ostream &os , int nb_model ,
+bool MarkovianSequences::comparison(StatError &error , bool display , int nb_model ,
                                     const HiddenSemiMarkov **ihsmarkov ,
                                     latent_structure_algorithm algorithm ,
                                     const string path) const
@@ -6579,11 +6605,10 @@ bool MarkovianSequences::comparison(StatError &error , ostream &os , int nb_mode
       }
     }
 
-#   ifdef MESSAGE
-    likelihood_write(os , nb_model , likelihood ,
-                     SEQ_label[SEQL_HIDDEN_SEMI_MARKOV_CHAIN] , true , algorithm);
-#   endif
-
+    if (display) {
+      likelihood_write(cout , nb_model , likelihood ,
+                       SEQ_label[SEQL_HIDDEN_SEMI_MARKOV_CHAIN] , true , algorithm);
+    }
     if (!path.empty()) {
       status = likelihood_write(error , path , nb_model , likelihood ,
                                 SEQ_label[SEQL_HIDDEN_SEMI_MARKOV_CHAIN] , algorithm);
@@ -6737,7 +6762,7 @@ SemiMarkovData* HiddenSemiMarkov::simulation(StatError &error , int nb_sequence 
  *  \brief Computation of Kullback-Leibler divergences between hidden semi-Markov chains.
  *
  *  \param[in] error               reference on a StatError object,
- *  \param[in] os                  stream,
+ *  \param[in] display             flag for displaying the matrix of pairwise distances between models,
  *  \param[in] nb_model            number of hidden semi-Markov chains,
  *  \param[in] ihsmarkov           pointer on HiddenSemiMarkov objects,
  *  \param[in] length_distribution sequence length frequency distribution,
@@ -6747,7 +6772,7 @@ SemiMarkovData* HiddenSemiMarkov::simulation(StatError &error , int nb_sequence 
  */
 /*--------------------------------------------------------------*/
 
-DistanceMatrix* HiddenSemiMarkov::divergence_computation(StatError &error , ostream &os ,
+DistanceMatrix* HiddenSemiMarkov::divergence_computation(StatError &error , bool display ,
                                                          int nb_model , const HiddenSemiMarkov **ihsmarkov ,
                                                          FrequencyDistribution **length_distribution ,
                                                          const string path) const
@@ -6863,11 +6888,9 @@ DistanceMatrix* HiddenSemiMarkov::divergence_computation(StatError &error , ostr
 
       if (!out_file) {
         error.update(STAT_error[STATR_FILE_NAME]);
-
-#       ifdef MESSAGE
-        os << error;
-#       endif
-
+        if (display) {
+          cout << error;
+        }
       }
     }
 
@@ -6895,12 +6918,9 @@ DistanceMatrix* HiddenSemiMarkov::divergence_computation(StatError &error , ostr
       for (j = 0;j < seq->nb_sequence;j++) {
         likelihood[j][i] = hsmarkov[i]->likelihood_computation(*seq , NULL , j);
 
-#       ifdef MESSAGE
-        if (likelihood[j][i] == D_INF) {
-          os << "\nERROR - " << SEQ_error[SEQR_REFERENCE_MODEL] << ": " << i + 1 << endl;
+        if ((display) && (likelihood[j][i] == D_INF)) {
+          cout << "\nERROR - " << SEQ_error[SEQR_REFERENCE_MODEL] << ": " << i + 1 << endl;
         }
-#       endif
-
       }
 
       // computation of the log-likelihood of each hidden semi-Markov chain for the sample of sequences
@@ -6926,13 +6946,11 @@ DistanceMatrix* HiddenSemiMarkov::divergence_computation(StatError &error , ostr
 //            }
           }
 
-#         ifdef MESSAGE
-          if (nb_failure > 0) {
-            os << "\nWARNING - " << SEQ_error[SEQR_REFERENCE_MODEL] << ": " << i + 1 << ", "
-               << SEQ_error[SEQR_TARGET_MODEL] << ": " << j + 1 << " - "
-               << SEQ_error[SEQR_DIVERGENCE_NB_FAILURE] << ": " << nb_failure << endl;
+          if ((display) && (nb_failure > 0)) {
+            cout << "\nWARNING - " << SEQ_error[SEQR_REFERENCE_MODEL] << ": " << i + 1 << ", "
+                 << SEQ_error[SEQR_TARGET_MODEL] << ": " << j + 1 << " - "
+                 << SEQ_error[SEQR_DIVERGENCE_NB_FAILURE] << ": " << nb_failure << endl;
           }
-#         endif
 
 //          if (divergence != -D_INF) {
             dist_matrix->update(i + 1 , j + 1 , divergence , cumul_length);
@@ -6940,12 +6958,11 @@ DistanceMatrix* HiddenSemiMarkov::divergence_computation(StatError &error , ostr
         }
       }
 
-#     ifdef MESSAGE
-      os << SEQ_label[SEQL_HIDDEN_SEMI_MARKOV_CHAIN] << " " << i + 1 << ": " << seq->nb_sequence << " "
-         << SEQ_label[SEQL_SIMULATED] << " " << SEQ_label[seq->nb_sequence == 1 ? SEQL_SEQUENCE : SEQL_SEQUENCES] << endl;
-      seq->likelihood_write(os , nb_model , likelihood , SEQ_label[SEQL_HIDDEN_SEMI_MARKOV_CHAIN]);
-#     endif
-
+      if (display) {
+        cout << SEQ_label[SEQL_HIDDEN_SEMI_MARKOV_CHAIN] << " " << i + 1 << ": " << seq->nb_sequence << " "
+             << SEQ_label[SEQL_SIMULATED] << " " << SEQ_label[seq->nb_sequence == 1 ? SEQL_SEQUENCE : SEQL_SEQUENCES] << endl;
+        seq->likelihood_write(cout , nb_model , likelihood , SEQ_label[SEQL_HIDDEN_SEMI_MARKOV_CHAIN]);
+      }
       if (out_file) {
         *out_file << SEQ_label[SEQL_HIDDEN_SEMI_MARKOV_CHAIN] << " " << i + 1 << ": " << seq->nb_sequence << " "
                   << SEQ_label[SEQL_SIMULATED] << " " << SEQ_label[seq->nb_sequence == 1 ? SEQL_SEQUENCE : SEQL_SEQUENCES] << endl;
@@ -6978,7 +6995,7 @@ DistanceMatrix* HiddenSemiMarkov::divergence_computation(StatError &error , ostr
  *  \brief Computation of Kullback-Leibler divergences between hidden semi-Markov chains.
  *
  *  \param[in] error       reference on a StatError object,
- *  \param[in] os          stream,
+ *  \param[in] display     flag for displaying the matrix of pairwise distances between models,
  *  \param[in] nb_model    number of hidden semi-Markov chains,
  *  \param[in] hsmarkov    pointer on HiddenSemiMarkov objects,
  *  \param[in] nb_sequence number of generated sequences,
@@ -6989,7 +7006,7 @@ DistanceMatrix* HiddenSemiMarkov::divergence_computation(StatError &error , ostr
  */
 /*--------------------------------------------------------------*/
 
-DistanceMatrix* HiddenSemiMarkov::divergence_computation(StatError &error , ostream &os ,
+DistanceMatrix* HiddenSemiMarkov::divergence_computation(StatError &error , bool display ,
                                                          int nb_model , const HiddenSemiMarkov **hsmarkov ,
                                                          int nb_sequence , int length , const string path) const
 
@@ -7032,7 +7049,7 @@ DistanceMatrix* HiddenSemiMarkov::divergence_computation(StatError &error , ostr
       length_distribution[i] = new FrequencyDistribution(*length_distribution[0]);
     }
 
-    dist_matrix = divergence_computation(error , os , nb_model , hsmarkov , length_distribution , path);
+    dist_matrix = divergence_computation(error , display , nb_model , hsmarkov , length_distribution , path);
 
     for (i = 0;i < nb_model;i++) {
       delete length_distribution[i];
@@ -7049,7 +7066,7 @@ DistanceMatrix* HiddenSemiMarkov::divergence_computation(StatError &error , ostr
  *  \brief Computation of Kullback-Leibler divergences between hidden semi-Markov chains.
  *
  *  \param[in] error       reference on a StatError object,
- *  \param[in] os          stream,
+ *  \param[in] display     flag for displaying the matrix of pairwise distances between models,
  *  \param[in] nb_model    number of hidden semi-Markov chains,
  *  \param[in] hsmarkov    pointer on HiddenSemiMarkov objects,
  *  \param[in] nb_sequence number of generated sequences,
@@ -7060,7 +7077,7 @@ DistanceMatrix* HiddenSemiMarkov::divergence_computation(StatError &error , ostr
  */
 /*--------------------------------------------------------------*/
 
-DistanceMatrix* HiddenSemiMarkov::divergence_computation(StatError &error , ostream &os ,
+DistanceMatrix* HiddenSemiMarkov::divergence_computation(StatError &error , bool display ,
                                                          int nb_model , const HiddenSemiMarkov **hsmarkov ,
                                                          int nb_sequence , const MarkovianSequences **seq ,
                                                          const string path) const
@@ -7084,7 +7101,7 @@ DistanceMatrix* HiddenSemiMarkov::divergence_computation(StatError &error , ostr
       length_distribution[i] = seq[i]->length_distribution->frequency_scale(nb_sequence);
     }
 
-    dist_matrix = divergence_computation(error , os , nb_model , hsmarkov , length_distribution , path);
+    dist_matrix = divergence_computation(error , display , nb_model , hsmarkov , length_distribution , path);
 
     for (i = 0;i < nb_model;i++) {
       delete length_distribution[i];

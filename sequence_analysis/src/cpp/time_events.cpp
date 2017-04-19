@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -43,10 +43,7 @@
 #include <iomanip>
 #include <iostream>
 
-#include "tool/rw_tokenizer.h"
-#include "tool/rw_cstring.h"
-#include "tool/rw_locale.h"
-#include "tool/config.h"
+#include <boost/tokenizer.hpp>
 
 #include "stat_tool/stat_label.h"
 
@@ -54,6 +51,7 @@
 #include "sequence_label.h"
 
 using namespace std;
+using namespace boost;
 using namespace stat_tool;
 
 
@@ -1005,13 +1003,13 @@ TimeEvents* TimeEvents::building(StatError &error , FrequencyDistribution &nb_ev
 TimeEvents* TimeEvents::ascii_read(StatError &error , const string path)
 
 {
-  RWLocaleSnapshot locale("en");
-  RWCString buffer , token;
+  string buffer;
   size_t position;
+  typedef tokenizer<char_separator<char>> tokenizer;
+  char_separator<char> separator(" \t");
   bool status , lstatus;
   register int i , j;
-  int line , nb_class , nb_element;
-  long value , time , nb_event;
+  int line , nb_class , nb_element , value , time , nb_event;
   TimeEvents *timev;
   ifstream in_file(path.c_str());
 
@@ -1035,24 +1033,32 @@ TimeEvents* TimeEvents::ascii_read(StatError &error , const string path)
     nb_class = 0;
     nb_element = 0;
 
-    while (buffer.readLine(in_file , false)) {
+    while (getline(in_file , buffer)) {
       line++;
 
 #     ifdef DEBUG
       cout << line << "  " << buffer << endl;
 #     endif
 
-      position = buffer.first('#');
-      if (position != RW_NPOS) {
-        buffer.remove(position);
+      position = buffer.find('#');
+      if (position != string::npos) {
+        buffer.erase(position);
       }
       i = 0;
 
-      RWCTokenizer next(buffer);
+      tokenizer tok_buffer(buffer , separator);
 
-      while (!((token = next()).isNull())) {
+      for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
         if (i <= 2) {
-          lstatus = locale.stringToNum(token , &value);
+          lstatus = true;
+
+/*          try {
+            value = stoi(*token);   in C++ 11
+          }
+          catch(invalid_argument &arg) {
+            lstatus = false;
+          } */
+          value = atoi(token->c_str());
 
           // test observation period > 0, number of events >= 0, frequency >= 0
 
@@ -1140,27 +1146,28 @@ TimeEvents* TimeEvents::ascii_read(StatError &error , const string path)
 
       i = 0;
 
-      while (buffer.readLine(in_file , false)) {
-        position = buffer.first('#');
-        if (position != RW_NPOS) {
-          buffer.remove(position);
+      while (getline(in_file , buffer)) {
+        position = buffer.find('#');
+        if (position != string::npos) {
+          buffer.erase(position);
         }
         j = 0;
 
-        RWCTokenizer next(buffer);
+        tokenizer tok_buffer(buffer , separator);
 
-        while (!((token = next()).isNull())) {
-          locale.stringToNum(token , &value);
-
+        for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
           switch (j) {
           case 0 :
-            timev->time[i] = value;
+//            timev->time[i] = stoi(*token);   in C++ 11
+            timev->time[i] = atoi(token->c_str());
             break;
           case 1 :
-            timev->nb_event[i] = value;
+//            timev->nb_event[i] = stoi(*token);   in C++ 11
+            timev->nb_event[i] = atoi(token->c_str());
             break;
           case 2 :
-            timev->frequency[i] = value;
+//            timev->frequency[i] = stoi(*token);   in C++ 11
+            timev->frequency[i] = atoi(token->c_str());
             break;
           }
 
@@ -1195,13 +1202,13 @@ TimeEvents* TimeEvents::ascii_read(StatError &error , const string path)
 TimeEvents* TimeEvents::old_ascii_read(StatError &error , const string path)
 
 {
-  RWLocaleSnapshot locale("en");
-  RWCString buffer , token;
+  string buffer;
   size_t position;
+  typedef tokenizer<char_separator<char>> tokenizer;
+  char_separator<char> separator(" \t");
   bool status , lstatus;
   register int i , j;
-  int line , nb_element , *ptime , *pnb_event;
-  long value;
+  int line , nb_element , value , *time , *nb_event;
   TimeEvents *timev;
   ifstream in_file(path.c_str());
 
@@ -1222,24 +1229,32 @@ TimeEvents* TimeEvents::old_ascii_read(StatError &error , const string path)
     line = 0;
     nb_element = 0;
 
-    while (buffer.readLine(in_file , false)) {
+    while (getline(in_file , buffer)) {
       line++;
 
 #     ifdef DEBUG
       cout << line << "  " << buffer << endl;
 #     endif
 
-      position = buffer.first('#');
-      if (position != RW_NPOS) {
-        buffer.remove(position);
+      position = buffer.find('#');
+      if (position != string::npos) {
+        buffer.erase(position);
       }
       i = 0;
 
-      RWCTokenizer next(buffer);
+      tokenizer tok_buffer(buffer , separator);
 
-      while (!((token = next()).isNull())) {
+      for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
         if (i <= 1) {
-          lstatus = locale.stringToNum(token , &value);
+          lstatus = true;
+
+/*          try {
+            value = stoi(*token);   in C++ 11
+          }
+          catch(invalid_argument &arg) {
+            lstatus = false;
+          } */
+          value = atoi(token->c_str());
 
           // test observation period > 0, number of events >= 0
 
@@ -1281,28 +1296,28 @@ TimeEvents* TimeEvents::old_ascii_read(StatError &error , const string path)
         in_file.clear();
         in_file.seekg(0,ios::beg);
 
-      ptime = new int[nb_element];
-      pnb_event = new int[nb_element];
+      time = new int[nb_element];
+      nb_event = new int[nb_element];
       i = 0;
 
-      while (buffer.readLine(in_file , false)) {
-        position = buffer.first('#');
-        if (position != RW_NPOS) {
-          buffer.remove(position);
+      while (getline(in_file , buffer)) {
+        position = buffer.find('#');
+        if (position != string::npos) {
+          buffer.erase(position);
         }
         j = 0;
 
-        RWCTokenizer next(buffer);
+        tokenizer tok_buffer(buffer , separator);
 
-        while (!((token = next()).isNull())) {
-          locale.stringToNum(token , &value);
-
+        for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
           switch (j) {
           case 0 :
-            ptime[i] = value;
+//            time[i] = stoi(*token);   in C++ 11
+            time[i] = atoi(token->c_str());
             break;
           case 1 :
-            pnb_event[i] = value;
+//            nb_event[i] = stoi(*token);   in C++ 11
+            nb_event[i] = atoi(token->c_str());
             break;
           }
 
@@ -1312,10 +1327,10 @@ TimeEvents* TimeEvents::old_ascii_read(StatError &error , const string path)
         i++;
       }
 
-      timev = new TimeEvents(nb_element , ptime , pnb_event);
+      timev = new TimeEvents(nb_element , time , nb_event);
 
-      delete [] ptime;
-      delete [] pnb_event;
+      delete [] time;
+      delete [] nb_event;
     }
   }
 
@@ -2833,10 +2848,10 @@ ostream& RenewalData::ascii_write(ostream &os , bool exhaustive , bool file_flag
 {
   register int i , j;
   int nb_value , max , width[2];
-  long old_adjust;
+  ios_base::fmtflags format_flags;
 
 
-  old_adjust = os.setf(ios::right , ios::adjustfield);
+  format_flags = os.setf(ios::right , ios::adjustfield);
 
   // writing of the inter-event frequency distribution,
   // the frequency distribution of time intervals between events within the observation period,
@@ -3032,7 +3047,7 @@ ostream& RenewalData::ascii_write(ostream &os , bool exhaustive , bool file_flag
     }
   }
 
-  os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
+  os.setf(format_flags , ios::adjustfield);
 
   return os;
 }

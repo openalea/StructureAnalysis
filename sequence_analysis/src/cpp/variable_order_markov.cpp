@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -42,12 +42,10 @@
 #include <sstream>
 #include <iomanip>
 
+#include <boost/tokenizer.hpp>
+#include <boost/algorithm/string/trim.hpp>
+#include <boost/algorithm/string/classification.hpp>
 #include <boost/math/distributions/normal.hpp>
-
-#include "tool/rw_tokenizer.h"
-#include "tool/rw_cstring.h"
-#include "tool/rw_locale.h"
-#include "tool/config.h"
 
 #include "stat_tool/stat_label.h"
 
@@ -55,6 +53,7 @@
 #include "sequence_label.h"
 
 using namespace std;
+using namespace boost;
 using namespace boost::math;
 using namespace stat_tool;
 
@@ -1687,15 +1686,15 @@ VariableOrderMarkovChain* VariableOrderMarkovChain::parsing(StatError &error , i
                                                             int &line , process_type type)
 
 {
-  RWLocaleSnapshot locale("en");
-  RWCString buffer , token;
+  string buffer;
   size_t position;
+  typedef tokenizer<char_separator<char>> tokenizer;
+  char_separator<char> separator(" \t");
   streampos transition_line;
   bool status = true , lstatus , increase , **logic_transition;
   register int i , j;
-  int read_line , tline , nb_state = 0 , order , previous_order , max_order = 0 , buff ,
+  int read_line , tline , value , nb_state = 0 , order , previous_order , max_order = 0 , buff ,
       nb_terminal , nb_non_terminal , memory , state[ORDER] , previous_state[ORDER];
-  long value;
   double proba , cumul , *initial;
   VariableOrderMarkovChain *markov;
 
@@ -1704,28 +1703,37 @@ VariableOrderMarkovChain* VariableOrderMarkovChain::parsing(StatError &error , i
 
   // analysis of the line defining the number of states
 
-  while (buffer.readLine(in_file , false)) {
+  while (getline(in_file , buffer)) {
     line++;
 
 #   ifdef DEBUG
     cout << line << "  " << buffer << endl;
 #   endif
 
-    position = buffer.first('#');
-    if (position != RW_NPOS) {
-      buffer.remove(position);
+    position = buffer.find('#');
+    if (position != string::npos) {
+      buffer.erase(position);
     }
     i = 0;
 
-    RWCTokenizer next(buffer);
+    tokenizer tok_buffer(buffer , separator);
 
-    while (!((token = next()).isNull())) {
+    for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
       switch (i) {
 
       // test number of states
 
       case 0 : {
-        lstatus = locale.stringToNum(token , &value);
+        lstatus = true;
+
+/*        try {
+          value = stoi(*token);   in C++ 11
+        }
+        catch(invalid_argument &arg) {
+          lstatus = false;
+        } */
+        value = atoi(token->c_str());
+
         if (lstatus) {
           if ((value < 2) || (value > NB_STATE)) {
             lstatus = false;
@@ -1745,7 +1753,7 @@ VariableOrderMarkovChain* VariableOrderMarkovChain::parsing(StatError &error , i
       // test STATES keyword
 
       case 1 : {
-        if (token != STAT_word[STATW_STATES]) {
+        if (*token != STAT_word[STATW_STATES]) {
           status = false;
           error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_STATES] , line , i + 1);
         }
@@ -1777,36 +1785,36 @@ VariableOrderMarkovChain* VariableOrderMarkovChain::parsing(StatError &error , i
     // analysis of the initial probabilities, transition probabilities and memories
 
     read_line = 0;
-    while (buffer.readLine(in_file , false)) {
+    while (getline(in_file , buffer)) {
       line++;
 
 #     ifdef DEBUG
       cout << line << "  " << buffer << endl;
 #     endif
 
-      position = buffer.first('#');
-      if (position != RW_NPOS) {
-        buffer.remove(position);
+      position = buffer.find('#');
+      if (position != string::npos) {
+        buffer.erase(position);
       }
       i = 0;
 
-      RWCTokenizer next(buffer);
+      tokenizer tok_buffer(buffer , separator);
 
       if ((read_line == 0) || ((type == ORDINARY) && (read_line == 2))) {
-        while (!((token = next()).isNull())) {
+        for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
 
           // test INITIAL_PROBABILITIES/TRANSITION_PROBABILITIES keyword
 
           if (i == 0) {
             if ((type == ORDINARY) && (read_line == 0)) {
-              if (token != STAT_word[STATW_INITIAL_PROBABILITIES]) {
+              if (*token != STAT_word[STATW_INITIAL_PROBABILITIES]) {
                 status = false;
                 error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_INITIAL_PROBABILITIES] , line);
               }
             }
 
             else {
-              if (token != STAT_word[STATW_TRANSITION_PROBABILITIES]) {
+              if (*token != STAT_word[STATW_TRANSITION_PROBABILITIES]) {
                 status = false;
                 error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_TRANSITION_PROBABILITIES] , line);
               }
@@ -1832,9 +1840,18 @@ VariableOrderMarkovChain* VariableOrderMarkovChain::parsing(StatError &error , i
       else {
         cumul = 0.;
 
-        while (!((token = next()).isNull())) {
+        for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
           if (i < nb_state) {
-            lstatus = locale.stringToNum(token , &proba);
+            lstatus = true;
+
+/*            try {
+              proba = stod(*token);   in C++ 11
+            }
+            catch (invalid_argument &arg) {
+              lstatus = false;
+            } */
+            proba = atof(token->c_str());
+
             if (lstatus) {
               if ((proba < 0.) || (proba > 1. - cumul + DOUBLE_ERROR)) {
                 lstatus = false;
@@ -1860,7 +1877,16 @@ VariableOrderMarkovChain* VariableOrderMarkovChain::parsing(StatError &error , i
           }
 
           else if ((type == EQUILIBRIUM) || (read_line >= 3)) {
-            lstatus = locale.stringToNum(token , &value);
+            lstatus = true;
+
+/*            try {
+              value = stoi(*token);   in C++ 11
+            }
+            catch(invalid_argument &arg) {
+              lstatus = false;
+            } */
+            value = atoi(token->c_str());
+
             if (lstatus) {
               if ((value < 0) || (value >= nb_state)) {
                 lstatus = false;
@@ -2033,30 +2059,30 @@ VariableOrderMarkovChain* VariableOrderMarkovChain::parsing(StatError &error , i
 
       memory = nb_non_terminal;
       line = tline;
-      while (buffer.readLine(in_file , false)) {
+      while (getline(in_file , buffer)) {
         line++;
 
 #       ifdef DEBUG
         cout << line << "  " << buffer << endl;
 #       endif
 
-        position = buffer.first('#');
-        if (position != RW_NPOS) {
-          buffer.remove(position);
+        position = buffer.find('#');
+        if (position != string::npos) {
+          buffer.erase(position);
         }
         i = 0;
 
-        RWCTokenizer next(buffer);
+        tokenizer tok_buffer(buffer , separator);
 
-        while (!((token = next()).isNull())) {
+        for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
           if (i < nb_state) {
-            locale.stringToNum(token , &proba);
-            markov->transition[memory][i] = proba;
+//            markov->transition[memory][i] = stod(*token);   in C++ 11
+            markov->transition[memory][i] = atof(token->c_str());
           }
 
           else {
-            locale.stringToNum(token , &value);
-            state[i - nb_state] = value;
+//            state[i - nb_state] = stoi(*token);   in C++ 11
+            state[i - nb_state] = atoi(token->c_str());
           }
 
           i++;
@@ -2138,10 +2164,10 @@ ostream& VariableOrderMarkovChain::ascii_memory_tree_print(ostream &os , bool fi
 {
   register int i , j , k;
   int bnb_memory , width = column_width(nb_state);
-  long old_adjust;
+  ios_base::fmtflags format_flags;
 
 
-  old_adjust = os.setf(ios::left , ios::adjustfield);
+  format_flags = os.setf(ios::left , ios::adjustfield);
 
   os << "\n";
   if (file_flag) {
@@ -2193,7 +2219,7 @@ ostream& VariableOrderMarkovChain::ascii_memory_tree_print(ostream &os , bool fi
     }
   }
 
-  os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
+  os.setf(format_flags , ios::adjustfield);
 
 # ifdef MESSAGE
   os << "\n";
@@ -2248,7 +2274,7 @@ ostream& VariableOrderMarkovChain::ascii_transition_tree_print(ostream &os , boo
   register int i , j , k;
   int min_order , nb_root , memory , width = column_width(nb_state) , *nb_next_memory ,
       *root , *nb_leaf_memory , *nb_drawn_next_memory , *nb_drawn_leaf_memory;
-  long old_adjust;
+  ios_base::fmtflags format_flags;
 
 
   // computation of the number of following memories of higher length 
@@ -2348,7 +2374,7 @@ ostream& VariableOrderMarkovChain::ascii_transition_tree_print(ostream &os , boo
     }
   }
 
-  old_adjust = os.setf(ios::left , ios::adjustfield);
+  format_flags = os.setf(ios::left , ios::adjustfield);
 
   os << "\n";
   if (file_flag) {
@@ -2434,7 +2460,7 @@ ostream& VariableOrderMarkovChain::ascii_transition_tree_print(ostream &os , boo
     }
   }
 
-  os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
+  os.setf(format_flags , ios::adjustfield);
 
   delete [] nb_next_memory;
   delete [] root;
@@ -2461,10 +2487,10 @@ ostream& VariableOrderMarkovChain::ascii_print(ostream &os , bool file_flag) con
   register int i , j , k;
   int buff , width;
   double *stationary_probability;
-  long old_adjust;
+  ios_base::fmtflags format_flags;
 
 
-  old_adjust = os.setf(ios::left , ios::adjustfield);
+  format_flags = os.setf(ios::left , ios::adjustfield);
 
   os << "\n" << nb_state << " " << STAT_word[STATW_STATES] << endl;
 
@@ -2702,7 +2728,7 @@ ostream& VariableOrderMarkovChain::ascii_print(ostream &os , bool file_flag) con
   }
 # endif
 
-  os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
+  os.setf(format_flags , ios::adjustfield);
 
   return os;
 }
@@ -3568,8 +3594,10 @@ VariableOrderMarkov* VariableOrderMarkov::ascii_read(StatError &error ,
                                                      const string path , int length)
 
 {
-  RWCString buffer , token;
+  string buffer;
   size_t position;
+  typedef tokenizer<char_separator<char>> tokenizer;
+  char_separator<char> separator(" \t");
   process_type type = DEFAULT_TYPE;
   bool status;
   register int i;
@@ -3600,30 +3628,30 @@ VariableOrderMarkov* VariableOrderMarkov::ascii_read(StatError &error ,
       error.update(SEQ_error[SEQR_LONG_SEQUENCE_LENGTH]);
     }
 
-    while (buffer.readLine(in_file , false)) {
+    while (getline(in_file , buffer)) {
       line++;
 
 #     ifdef DEBUG
       cout << line << "  " << buffer << endl;
 #     endif
 
-      position = buffer.first('#');
-      if (position != RW_NPOS) {
-        buffer.remove(position);
+      position = buffer.find('#');
+      if (position != string::npos) {
+        buffer.erase(position);
       }
       i = 0;
 
-      RWCTokenizer next(buffer);
+      tokenizer tok_buffer(buffer , separator);
 
-      while (!((token = next()).isNull())) {
+      for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
 
         // test (EQUILIBRIUM_)MARKOV_CHAIN keyword
 
         if (i == 0) {
-          if (token == SEQ_word[SEQW_MARKOV_CHAIN]) {
+          if (*token == SEQ_word[SEQW_MARKOV_CHAIN]) {
             type = ORDINARY;
           }
-          else if (token == SEQ_word[SEQW_EQUILIBRIUM_MARKOV_CHAIN]) {
+          else if (*token == SEQ_word[SEQW_EQUILIBRIUM_MARKOV_CHAIN]) {
             type = EQUILIBRIUM;
           }
           else {
@@ -3660,27 +3688,27 @@ VariableOrderMarkov* VariableOrderMarkov::ascii_read(StatError &error ,
 
         observation = NULL;
 
-        while (buffer.readLine(in_file , false)) {
+        while (getline(in_file , buffer)) {
           line++;
 
 #         ifdef DEBUG
           cout << line << "  " << buffer << endl;
 #         endif
 
-          position = buffer.first('#');
-          if (position != RW_NPOS) {
-            buffer.remove(position);
+          position = buffer.find('#');
+          if (position != string::npos) {
+            buffer.erase(position);
           }
           i = 0;
 
-          RWCTokenizer next(buffer);
+          tokenizer tok_buffer(buffer , separator);
 
-          while (!((token = next()).isNull())) {
+          for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
 
             // test OUTPUT_PROCESS keyword
 
             if (i == 0) {
-              if (token != STAT_word[STATW_OUTPUT_PROCESS]) {
+              if (*token != STAT_word[STATW_OUTPUT_PROCESS]) {
                 status = false;
                 error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_OUTPUT_PROCESS] , line);
               }
@@ -3706,18 +3734,18 @@ VariableOrderMarkov* VariableOrderMarkov::ascii_read(StatError &error ,
           }
         }
 
-        while (buffer.readLine(in_file , false)) {
+        while (getline(in_file , buffer)) {
           line++;
 
 #         ifdef DEBUG
           cout << line << "  " << buffer << endl;
 #         endif
 
-          position = buffer.first('#');
-          if (position != RW_NPOS) {
-            buffer.remove(position);
+          position = buffer.find('#');
+          if (position != string::npos) {
+            buffer.erase(position);
           }
-          if (!(buffer.isNull())) {
+          if (!(trim_right_copy_if(buffer , is_any_of(" \t")).empty())) {
             status = false;
             error.update(STAT_parsing[STATP_FORMAT] , line);
           }
@@ -3781,13 +3809,13 @@ ostream& VariableOrderMarkov::ascii_write(ostream &os , const VariableOrderMarko
   register int i , j , k;
   int buff , variable , max_memory_count , *memory_count , width[2];
   double standard_normal_value , half_confidence_interval , **distance;
-  long old_adjust;
   FrequencyDistribution *marginal_dist = NULL , **observation_dist = NULL;
   Histogram *marginal_histo = NULL , **observation_histo = NULL;
   SequenceCharacteristics *characteristics = NULL;
+  ios_base::fmtflags format_flags;
 
 
-  old_adjust = os.setf(ios::left , ios::adjustfield);
+  format_flags = os.setf(ios::left , ios::adjustfield);
 
   switch (hidden) {
 
@@ -4401,7 +4429,7 @@ ostream& VariableOrderMarkov::ascii_write(ostream &os , const VariableOrderMarko
     }
   }
 
-  os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
+  os.setf(format_flags , ios::adjustfield);
 
   return os;
 }

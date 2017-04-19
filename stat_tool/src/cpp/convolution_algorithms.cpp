@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -149,7 +149,7 @@ void Convolution::expectation_step(const FrequencyDistribution &histo ,
  *  \brief Deconvolution of an elementary distribution using the EM algorithm.
  *
  *  \param[in] error        reference on a StatError object,
- *  \param[in] os           stream,
+ *  \param[in] display      flag for displaying estimation intermediate results,
  *  \param[in] known_dist   reference on the known distribution,
  *  \param[in] unknown_dist reference on the unknown distribution,
  *  \param[in] estimator    estimator type (likelihood, penalized likelihood or 
@@ -164,7 +164,7 @@ void Convolution::expectation_step(const FrequencyDistribution &histo ,
  */
 /*--------------------------------------------------------------*/
 
-Convolution* FrequencyDistribution::convolution_estimation(StatError &error , ostream &os ,
+Convolution* FrequencyDistribution::convolution_estimation(StatError &error , bool display ,
                                                            const DiscreteParametric &known_dist ,
                                                            const DiscreteParametric &unknown_dist ,
                                                            estimation_criterion estimator , int nb_iter ,
@@ -240,7 +240,7 @@ Convolution* FrequencyDistribution::convolution_estimation(StatError &error , os
     convol->distribution[1]->init(CATEGORICAL , I_DEFAULT , I_DEFAULT , D_DEFAULT , D_DEFAULT);
 
 #   ifdef DEBUG
-    os << " (" << convol->mean << " " << convol->variance << ")" << endl;
+    cout << " (" << convol->mean << " " << convol->variance << ")" << endl;
 #   endif
 
     likelihood = D_INF;
@@ -267,18 +267,17 @@ Convolution* FrequencyDistribution::convolution_estimation(StatError &error , os
       previous_likelihood = likelihood;
       likelihood = convol->likelihood_computation(*this);
 
-#     ifdef MESSAGE
-      if ((i < 10) || ((i < 100) && (i % 10 == 0)) || ((i < 1000) && (i % 100 == 0)) || (i % 1000 == 0)) {
-        os << STAT_label[STATL_ITERATION] << " " << i << "   "
-           << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
-           << STAT_label[STATL_SMOOTHNESS] << ": " << convol->distribution[1]->second_difference_norm_computation();
-        if (estimator == PENALIZED_LIKELIHOOD) {
-          os << "   cumul: " << convol->distribution[1]->cumul[convol->distribution[1]->nb_value - 1];
-        }
-        os << endl;
-      }
-#     endif
+      // display of estimation results
 
+      if ((display) && ((i < 10) || ((i < 100) && (i % 10 == 0)) || ((i < 1000) && (i % 100 == 0)) || (i % 1000 == 0))) {
+        cout << STAT_label[STATL_ITERATION] << " " << i << "   "
+             << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
+             << STAT_label[STATL_SMOOTHNESS] << ": " << convol->distribution[1]->second_difference_norm_computation();
+        if (estimator == PENALIZED_LIKELIHOOD) {
+          cout << "   cumul: " << convol->distribution[1]->cumul[convol->distribution[1]->nb_value - 1];
+        }
+        cout << endl;
+      }
     }
     while ((likelihood != D_INF) && (((nb_iter == I_DEFAULT) && (i < CONVOLUTION_NB_ITER) && 
              ((likelihood - previous_likelihood) / -likelihood > CONVOLUTION_LIKELIHOOD_DIFF)) ||
@@ -286,15 +285,17 @@ Convolution* FrequencyDistribution::convolution_estimation(StatError &error , os
 
     if (likelihood != D_INF) {
 
-#     ifdef MESSAGE
-      os << "\n" << i << " " << STAT_label[STATL_ITERATIONS] << "   "
-         << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
-         << STAT_label[STATL_SMOOTHNESS] << ": " << convol->distribution[1]->second_difference_norm_computation();
-      if (estimator == PENALIZED_LIKELIHOOD) {
-        os << "   cumul: " << convol->distribution[1]->cumul[convol->distribution[1]->nb_value - 1];
+      // display of estimation results
+
+      if (display) {
+        cout << "\n" << i << " " << STAT_label[STATL_ITERATIONS] << "   "
+             << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
+             << STAT_label[STATL_SMOOTHNESS] << ": " << convol->distribution[1]->second_difference_norm_computation();
+        if (estimator == PENALIZED_LIKELIHOOD) {
+          cout << "   cumul: " << convol->distribution[1]->cumul[convol->distribution[1]->nb_value - 1];
+        }
+        cout << endl;
       }
-      os << endl;
-#     endif
 
       if (estimator == PARAMETRIC_REGULARIZATION) {
         dist_flag[0] = false;
@@ -336,10 +337,10 @@ Convolution* FrequencyDistribution::convolution_estimation(StatError &error , os
             }
 
 #           ifdef DEBUG
-            if ((i < 10) || (i % 10 == 0)) {
-              os << STAT_label[STATL_ITERATION] << " " << i << "   "
-                 << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
-                 << STAT_label[STATL_SMOOTHNESS] << ": " << convol->distribution[1]->second_difference_norm_computation() << endl;
+            if ((display) && ((i < 10) || (i % 10 == 0))) {
+              cout << STAT_label[STATL_ITERATION] << " " << i << "   "
+                   << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
+                   << STAT_label[STATL_SMOOTHNESS] << ": " << convol->distribution[1]->second_difference_norm_computation() << endl;
             }
 #           endif
 
@@ -349,14 +350,11 @@ Convolution* FrequencyDistribution::convolution_estimation(StatError &error , os
                (((likelihood - previous_likelihood) / -likelihood > CONVOLUTION_LIKELIHOOD_DIFF) ||
                 (hlikelihood == D_INF) || (nb_likelihood_decrease == 1)));
 
-#       ifdef MESSAGE
-        if (likelihood != D_INF) {
-          os << "\n" << i << " " << STAT_label[STATL_ITERATIONS] << "   "
-             << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
-             << STAT_label[STATL_SMOOTHNESS] << ": " << convol->distribution[1]->second_difference_norm_computation() << endl;
+        if ((display) && (likelihood != D_INF)) {
+          cout << "\n" << i << " " << STAT_label[STATL_ITERATIONS] << "   "
+               << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
+               << STAT_label[STATL_SMOOTHNESS] << ": " << convol->distribution[1]->second_difference_norm_computation() << endl;
         }
-#       endif
-
       }
     }
 
@@ -398,7 +396,7 @@ Convolution* FrequencyDistribution::convolution_estimation(StatError &error , os
  *  \brief Deconvolution of an elementary distribution using the EM algorithm.
  *
  *  \param[in] error         reference on a StatError object,
- *  \param[in] os            stream,
+ *  \param[in] display       flag for displaying estimation intermediate results,
  *  \param[in] known_dist    reference on the known distribution,
  *  \param[in] min_inf_bound minimum lower bound of the support,
  *  \param[in] estimator     estimator type (likelihood, penalized likelihood or 
@@ -413,7 +411,7 @@ Convolution* FrequencyDistribution::convolution_estimation(StatError &error , os
  */
 /*--------------------------------------------------------------*/
 
-Convolution* FrequencyDistribution::convolution_estimation(StatError &error , ostream &os ,
+Convolution* FrequencyDistribution::convolution_estimation(StatError &error , bool display ,
                                                            const DiscreteParametric &known_dist ,
                                                            int min_inf_bound , estimation_criterion estimator ,
                                                            int nb_iter , double weight ,
@@ -459,7 +457,7 @@ Convolution* FrequencyDistribution::convolution_estimation(StatError &error , os
     unknown_dist->ascii_print(os);
 #   endif
 
-    convol = convolution_estimation(error , os , known_dist , *unknown_dist , estimator ,
+    convol = convolution_estimation(error , display , known_dist , *unknown_dist , estimator ,
                                     nb_iter , weight , pen_type , outside);
 
     delete unknown_dist;

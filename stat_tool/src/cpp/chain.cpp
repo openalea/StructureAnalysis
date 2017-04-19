@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -38,15 +38,13 @@
 
 #include <iomanip>
 
-#include "tool/rw_tokenizer.h"
-#include "tool/rw_cstring.h"
-#include "tool/rw_locale.h"
-#include "tool/config.h"
+#include <boost/tokenizer.hpp>
 
 #include "markovian.h"
 #include "stat_label.h"
 
 using namespace std;
+using namespace boost;
 
 
 namespace stat_tool {
@@ -387,13 +385,13 @@ Chain& Chain::operator=(const Chain &chain)
 Chain* Chain::parsing(StatError &error , ifstream &in_file , int &line , process_type type)
 
 {
-  RWLocaleSnapshot locale("en");
-  RWCString buffer , token;
+  string buffer;
   size_t position;
+  typedef tokenizer<char_separator<char>> tokenizer;
+  char_separator<char> separator(" \t");
   bool status = true , lstatus , **logic_transition;
   register int i;
-  int read_line , nb_state = 0;
-  long value;
+  int read_line , nb_state = 0 , value;
   double proba , cumul;
   Chain *chain;
 
@@ -402,28 +400,37 @@ Chain* Chain::parsing(StatError &error , ifstream &in_file , int &line , process
 
   // analysis of the lines defining the number of states and the order (or memory length)
 
-  while (buffer.readLine(in_file , false)) {
+  while (getline(in_file , buffer)) {
     line++;
 
 #   ifdef DEBUG
     cout << line << "  " << buffer << endl;
 #   endif
 
-    position = buffer.first('#');
-    if (position != RW_NPOS) {
-      buffer.remove(position);
+    position = buffer.find('#');
+    if (position != string::npos) {
+      buffer.erase(position);
     }
     i = 0;
 
-    RWCTokenizer next(buffer);
+    tokenizer tok_buffer(buffer , separator);
 
-    while (!((token = next()).isNull())) {
+    for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
       switch (i) {
 
       // test number of states
 
       case 0 : {
-        lstatus = locale.stringToNum(token , &value);
+        lstatus = true;
+
+/*        try {
+          value = stoi(*token);   in C++ 11
+        }
+        catch(invalid_argument &arg) {
+          lstatus = false;
+        } */
+        value = atoi(token->c_str());
+
         if (lstatus) {
           if ((value < 2) || (value > NB_STATE)) {
             lstatus = false;
@@ -443,7 +450,7 @@ Chain* Chain::parsing(StatError &error , ifstream &in_file , int &line , process
       // test STATES keyword
 
       case 1 : {
-        if (token != STAT_word[STATW_STATES]) {
+        if (*token != STAT_word[STATW_STATES]) {
           status = false;
           error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_STATES] , line , i + 1);
         }
@@ -474,36 +481,36 @@ Chain* Chain::parsing(StatError &error , ifstream &in_file , int &line , process
     // analysis initial/transition probabilities
 
     read_line = 0;
-    while (buffer.readLine(in_file , false)) {
+    while (getline(in_file , buffer)) {
       line++;
 
 #     ifdef DEBUG
       cout << line << "  " << buffer << endl;
 #     endif
 
-      position = buffer.first('#');
-      if (position != RW_NPOS) {
-        buffer.remove(position);
+      position = buffer.find('#');
+      if (position != string::npos) {
+        buffer.erase(position);
       }
       i = 0;
 
-      RWCTokenizer next(buffer);
+      tokenizer tok_buffer(buffer , separator);
 
       if ((read_line == 0) || ((type == ORDINARY) && (read_line == 2))) {
-        while (!((token = next()).isNull())) {
+        for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
 
           // test INITIAL_PROBABILITIES/TRANSITION_PROBABILITIES keyword
 
           if (i == 0) {
             if ((type == ORDINARY) && (read_line == 0)) {
-              if (token != STAT_word[STATW_INITIAL_PROBABILITIES]) {
+              if (*token != STAT_word[STATW_INITIAL_PROBABILITIES]) {
                 status = false;
                 error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_INITIAL_PROBABILITIES] , line);
               }
             }
 
             else {
-              if (token != STAT_word[STATW_TRANSITION_PROBABILITIES]) {
+              if (*token != STAT_word[STATW_TRANSITION_PROBABILITIES]) {
                 status = false;
                 error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_TRANSITION_PROBABILITIES] , line);
               }
@@ -524,9 +531,18 @@ Chain* Chain::parsing(StatError &error , ifstream &in_file , int &line , process
       else {
         cumul = 0.;
 
-        while (!((token = next()).isNull())) {
+        for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
           if (i < nb_state) {
-            lstatus = locale.stringToNum(token , &proba);
+            lstatus = true;
+
+/*            try {
+              proba = stod(*token);   in C++ 11
+            }
+            catch (invalid_argument &arg) {
+              lstatus = false;
+            } */
+            proba = atof(token->c_str());
+
             if (lstatus) {
               if ((proba < 0.) || (proba > 1. - cumul + DOUBLE_ERROR)) {
                 lstatus = false;
@@ -630,10 +646,10 @@ ostream& Chain::ascii_print(ostream &os , bool file_flag) const
 {
   register int i , j;
   int buff , width;
-  long old_adjust;
+  ios_base::fmtflags format_flags;
 
 
-  old_adjust = os.setf(ios::left , ios::adjustfield);
+  format_flags = os.setf(ios::left , ios::adjustfield);
 
   os << "\n" << nb_state << " " << STAT_word[STATW_STATES] << endl;
 
@@ -711,7 +727,7 @@ ostream& Chain::ascii_print(ostream &os , bool file_flag) const
     os << endl;
   }
 
-  os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
+  os.setf(format_flags , ios::adjustfield);
 
   return os;
 }
