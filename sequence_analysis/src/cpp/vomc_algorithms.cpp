@@ -44,8 +44,6 @@
 
 #include <boost/math/distributions/normal.hpp>
 
-#include "tool/config.h"
-
 #include "stat_tool/stat_label.h"
 
 #include "variable_order_markov.h"

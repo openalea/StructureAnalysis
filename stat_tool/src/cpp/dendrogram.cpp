@@ -39,8 +39,6 @@
 #include <string>
 #include <iomanip>
 
-#include "tool/config.h"
-
 #include "distance_matrix.h"
 #include "stat_label.h"
 

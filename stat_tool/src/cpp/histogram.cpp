@@ -41,8 +41,6 @@
 #include <iomanip>
 #include <cstring>
 
-#include "tool/config.h"
-
 #include "stat_tools.h"
 
 using namespace std;

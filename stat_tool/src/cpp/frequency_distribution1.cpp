@@ -44,8 +44,6 @@
 #include <sstream>
 #include <iomanip>
 
-#include "tool/config.h"
-
 #include "distribution.h"
 #include "curves.h"
 #include "stat_label.h"

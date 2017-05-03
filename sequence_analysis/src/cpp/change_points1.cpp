@@ -44,8 +44,6 @@
 #include <boost/math/special_functions/binomial.hpp>
 #include <boost/math/distributions/normal.hpp>
 
-#include "tool/config.h"
-
 #include "sequences.h"
 #include "sequence_label.h"
 

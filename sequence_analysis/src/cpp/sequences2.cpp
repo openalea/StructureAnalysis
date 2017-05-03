@@ -47,8 +47,6 @@
 #include <boost/math/distributions/normal.hpp>
 #include <boost/math/distributions/students_t.hpp>
 
-#include "tool/config.h"
-
 #include "stat_tool/stat_label.h"
 
 #include "stat_tool/quantile_computation.hpp"
@@ -4771,6 +4769,133 @@ Sequences* Sequences::difference(StatError &error , int variable , bool first_el
 
 /*--------------------------------------------------------------*/
 /**
+ *  \brief Log-transform of values.
+ *
+ *  \param[in] error    reference on a StatError object,
+ *  \param[in] variable variable index.
+ *
+ *  \return             Sequences object.
+ */
+/*--------------------------------------------------------------*/
+
+Sequences* Sequences::log_transform(StatError &error , int variable) const
+
+{
+  bool status = true;
+  register int i , j , k , m;
+  int inb_variable;
+  variable_nature *itype;
+  Sequences *seq;
+
+
+  seq = NULL;
+  error.init();
+
+  if (variable != I_DEFAULT) {
+    if ((variable < 1) || (variable > nb_variable)) {
+      status = false;
+      error.update(STAT_error[STATR_VARIABLE_INDEX]);
+    }
+    else {
+      variable--;
+    }
+  }
+
+  for (i = 0;i < nb_variable;i++) {
+    if ((variable == I_DEFAULT) || (variable == i)) {
+      if ((type[i] != INT_VALUE) && (type[i] != STATE) && (type[i] != REAL_VALUE)) {
+        status = false;
+        ostringstream error_message , correction_message;
+        error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
+                      << STAT_error[STATR_VARIABLE_TYPE];
+        correction_message << STAT_variable_word[INT_VALUE] << " or "
+                           << STAT_variable_word[STATE] << " or "
+                           << STAT_variable_word[REAL_VALUE];
+        error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
+      }
+
+      else if (min_value[i] <= 0.) {
+        status = false;
+        ostringstream error_message;
+        error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
+                      << STAT_error[STATR_POSITIVE_MIN_VALUE];
+        error.update((error_message.str()).c_str());
+      }
+    }
+  }
+
+  if (status) {
+    if (variable == I_DEFAULT) {
+      inb_variable = nb_variable;
+    }
+    else {
+      inb_variable = 1;
+    }
+
+    itype = new variable_nature[inb_variable];
+    for (i = 0;i < inb_variable;i++) {
+      itype[i] = REAL_VALUE;
+    }
+
+    seq = new Sequences(nb_sequence , identifier , length , vertex_identifier ,
+                        index_param_type , inb_variable , itype);
+
+    delete [] itype;
+
+    // copy of index parameters
+
+    if (index_parameter_distribution) {
+      seq->index_parameter_distribution = new FrequencyDistribution(*index_parameter_distribution);
+    }
+    if (index_interval) {
+      seq->index_interval = new FrequencyDistribution(*index_interval);
+    }
+
+    if (index_parameter) {
+      for (i = 0;i < seq->nb_sequence;i++) {
+        for (j = 0;j < (seq->index_param_type == POSITION ? seq->length[i] + 1 : seq->length[i]);j++) {
+          seq->index_parameter[i][j] = index_parameter[i][j];
+        }
+      }
+    }
+
+   // log-transform of values
+
+    for (i = 0;i < nb_sequence;i++) {
+      j = 0;
+      for (k = 0;k < nb_variable;k++) {
+        if ((variable == I_DEFAULT) || (variable == k)) {
+          if (type[k] != REAL_VALUE) {
+            for (m = 0;m < length[i];m++) {
+              seq->real_sequence[i][j][m] = log(int_sequence[i][k][m]);
+            }
+          }
+
+          else {
+            for (m = 0;m < length[i];m++) {
+              seq->real_sequence[i][j][m] = log(real_sequence[i][k][m]);
+            }
+          }
+
+          j++;
+        }
+      }
+    }
+
+    for (i = 0;i < seq->nb_variable;i++) {
+      seq->min_value_computation(i);
+      seq->max_value_computation(i);
+
+      seq->build_marginal_histogram(i);
+    }
+  }
+
+  return seq;
+}
+
+
+/*--------------------------------------------------------------*/
+/**
  *  \brief Computation of relative growth rates on the basis of cumulative dimensions.
  *
  *  \param[in] error         reference on a StatError object,
@@ -4785,9 +4910,7 @@ Sequences* Sequences::relative_growth_rate(StatError &error , double growth_fact
 {
   bool status = true , begin;
   register int i , j , k;
-  int *pindex_param , *cindex_param , *pisequence , *cisequence;
   variable_nature *itype;
-  double *prsequence , *crsequence;
   Sequences *seq;
 
 
@@ -4860,55 +4983,42 @@ Sequences* Sequences::relative_growth_rate(StatError &error , double growth_fact
          (index_interval->variance > 0.))) {
       for (i = 0;i < nb_sequence;i++) {
         for (j = 0;j < nb_variable;j++) {
-          prsequence = seq->real_sequence[i][j];
-          cindex_param = index_parameter[i] + 1;
+          seq->real_sequence[i][j][0] = 0.;
           begin = true;
 
           if (type[j] != REAL_VALUE) {
-            cisequence = int_sequence[i][j] + 1;
-            *prsequence++ = 0.;
-
             for (k = 1;k < length[i];k++) {
-              if ((*cisequence > 0) && (*(cisequence - 1) > 0)) {
-                *prsequence = (log(*cisequence) - log(*(cisequence - 1))) /
-                              (*cindex_param - *(cindex_param - 1));
+              if ((int_sequence[i][j][k] > 0) && (int_sequence[i][j][k - 1] > 0)) {
+                seq->real_sequence[i][j][k] = (log(int_sequence[i][j][k]) - log(int_sequence[i][j][k - 1])) /
+                                              (index_parameter[i][k] - index_parameter[i][k - 1]);
 
                 if (begin) {
                   begin = false;
-                  *(prsequence - 1) = *prsequence * growth_factor;
+                  seq->real_sequence[i][j][k - 1] = seq->real_sequence[i][j][k] * growth_factor;
                 }
-                prsequence++;
               }
 
               else {
-                *prsequence++ = 0.;
+                seq->real_sequence[i][j][k] = 0.;
               }
-              cindex_param++;
-              cisequence++;
             }
           }
 
           else {
-            crsequence = real_sequence[i][j] + 1;
-            *prsequence++ = 0.;
-
             for (k = 1;k < length[i];k++) {
-              if ((*crsequence > 0.) && (*(crsequence - 1) > 0.)) {
-                *prsequence = (log(*crsequence) - log(*(crsequence - 1))) /
-                              (*cindex_param - *(cindex_param - 1));
+              if ((real_sequence[i][j][k] > 0.) && (real_sequence[i][j][k - 1] > 0.)) {
+                seq->real_sequence[i][j][k] = (log(real_sequence[i][j][k]) - log(real_sequence[i][j][k - 1])) /
+                                              (index_parameter[i][k] - index_parameter[i][k - 1]);
 
                 if (begin) {
                   begin = false;
-                  *(prsequence - 1) = *prsequence * growth_factor;
+                  seq->real_sequence[i][j][k - 1] = seq->real_sequence[i][j][k] * growth_factor;
                 }
-                prsequence++;
               }
 
               else {
-                *prsequence++ = 0.;
+                seq->real_sequence[i][j][k] = 0.;
               }
-              cindex_param++;
-              crsequence++;
             }
           }
         }
@@ -4918,50 +5028,40 @@ Sequences* Sequences::relative_growth_rate(StatError &error , double growth_fact
     else {
       for (i = 0;i < nb_sequence;i++) {
         for (j = 0;j < nb_variable;j++) {
-          prsequence = seq->real_sequence[i][j];
+          seq->real_sequence[i][j][0] = 0.;
           begin = true;
 
           if (type[j] != REAL_VALUE) {
-            cisequence = int_sequence[i][j] + 1;
-            *prsequence++ = 0.;
-
             for (k = 1;k < length[i];k++) {
-              if ((*cisequence > 0) && (*(cisequence - 1) > 0)) {
-                *prsequence = log(*cisequence) - log(*(cisequence - 1));
+              if ((int_sequence[i][j][k] > 0) && (int_sequence[i][j][k - 1] > 0)) {
+                seq->real_sequence[i][j][k] = log(int_sequence[i][j][k]) - log(int_sequence[i][j][k - 1]);
 
                 if (begin) {
                   begin = false;
-                  *(prsequence - 1) = *prsequence * growth_factor;
+                  seq->real_sequence[i][j][k - 1] = seq->real_sequence[i][j][k] * growth_factor;
                 }
-                prsequence++;
               }
 
               else {
-                *prsequence++ = 0.;
+                seq->real_sequence[i][j][k] = 0.;
               }
-              cisequence++;
             }
           }
 
           else {
-            crsequence = real_sequence[i][j] + 1;
-            *prsequence++ = 0.;
-
             for (k = 1;k < length[i];k++) {
-              if ((*crsequence > 0.) && (*(crsequence - 1) > 0.)) {
-                *prsequence = log(*crsequence) - log(*(crsequence - 1));
+              if ((real_sequence[i][j][k] > 0.) && (real_sequence[i][j][k - 1] > 0.)) {
+                seq->real_sequence[i][j][k] = log(real_sequence[i][j][k]) - log(real_sequence[i][j][k - 1]);
 
                 if (begin) {
                   begin = false;
-                  *(prsequence - 1) = *prsequence * growth_factor;
+                  seq->real_sequence[i][j][k - 1] = seq->real_sequence[i][j][k] * growth_factor;
                 }
-                prsequence++;
               }
 
               else {
-                *prsequence++ = 0.;
+                seq->real_sequence[i][j][k] = 0.;
               }
-              crsequence++;
             }
           }
         }
@@ -4972,7 +5072,7 @@ Sequences* Sequences::relative_growth_rate(StatError &error , double growth_fact
       seq->min_value_computation(i);
       seq->max_value_computation(i);
 
-      seq->build_marginal_frequency_distribution(i);
+      seq->build_marginal_histogram(i);
     }
   }
 

@@ -40,8 +40,6 @@
 #include <sstream>
 #include <iomanip>
 
-#include "tool/config.h"
-
 #include "sequences.h"
 #include "sequence_label.h"
 
@@ -2196,183 +2194,6 @@ Sequences* Sequences::segmentation(StatError &error , bool display , int iidenti
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Computation of the prior segment length distribution corresponding to
- *         the assumption of a uniform prior distribution for the possible segmentations.
- *
- *  \param[in] nb_segment number of segments,
- *  \param[in] length     sequence length.
- *
- *  \return               Distribution object.
- */
-/*--------------------------------------------------------------*/
-
-Distribution* prior_segment_length_distribution(int nb_segment , int length)
-
-{
-  register int i;
-  double buff , sum , variance , skewness , kurtosis;
-  Distribution *prior;
-
-
-  prior = new Distribution(length - nb_segment + 2);
-  prior->mass[0] = 0.;
-
-  buff = 1.;
-  for (i = 1;i < nb_segment - 1;i++) {
-    buff *= (double)(length - i - 1) / (double)i;
-  }
-  sum = buff * (double)(length - 1) / (double)(nb_segment - 1);
-
-  for (i = 1;i <= length - nb_segment + 1;i++) {
-    prior->mass[i] = buff / sum;
-    buff *= (double)(length - i - nb_segment + 1) /
-            (double)(length - i - 1);
-  }
-
-  prior->offset = 1.;
-  prior->cumul_computation();
-  prior->max = prior->mass[1];
-  prior->mean_computation();
-  prior->variance_computation();
-
-# ifdef MESSAGE
-  cout << "\n";
-  prior->ascii_characteristic_print(cout , true);
-
-  variance = ((double)length * (length - nb_segment) * (nb_segment - 1)) /
-             ((double)nb_segment * nb_segment * (nb_segment + 1));
-  skewness = (((double)(nb_segment - 2) * (2 * length - nb_segment)) / (double)(nb_segment + 2)) *
-             sqrt((double)(nb_segment + 1) / ((double)length * (length - nb_segment) * (nb_segment - 1)));
-  kurtosis = ((double)(nb_segment + 1) * (-nb_segment * nb_segment * nb_segment * (nb_segment - 1) *(nb_segment - 6) +
-               2 * nb_segment * nb_segment * length * (5 * nb_segment * nb_segment - 14 * nb_segment + 12) +
-               3 * length * length * (length - 2 * nb_segment) * (3 * nb_segment * nb_segment - 7 * nb_segment + 6))) /
-             ((double)length * (length - nb_segment) * (length - nb_segment) * (nb_segment - 1) *
-              (nb_segment + 2) * (nb_segment + 3)) - 3.;
-
-  cout << "\n" << STAT_label[STATL_MEAN] << ": " << (double)length / (double)nb_segment << "   "
-       << STAT_label[STATL_VARIANCE] << ": " << variance << "   "
-       << STAT_label[STATL_STANDARD_DEVIATION] << ": " << sqrt(variance) << endl;
-  cout << STAT_label[STATL_SKEWNESS_COEFF] << ": " << skewness << "   "
-       << STAT_label[STATL_KURTOSIS_COEFF] << ": " << kurtosis << endl;
-
-  cout << "\n";
-  prior->ascii_print(cout , false , true , false);
-# endif
-
-# ifdef MESSAGE
-  register int j , k;
-  double cumul , **segment_length , **nb_segmentation_forward , **nb_segmentation_backward;
-
-
-  nb_segmentation_forward = new double*[length];
-  for (i = 0;i < length;i++) {
-    nb_segmentation_forward[i] = new double[nb_segment];
-  }
-
-  nb_segmentation_backward = new double*[length];
-  for (i = 0;i < length;i++) {
-    nb_segmentation_backward[i] = new double[nb_segment];
-  }
-
-  segment_length = new double*[nb_segment];
-  for (i = 0;i < nb_segment;i++) {
-    segment_length[i] = new double[length - nb_segment + 2];
-    for (j = 0;j <= length - nb_segment + 1;j++) {
-      segment_length[i][j] = 0.;
-    }
-  }
-
-  // forward recurrence
-
-  for (i = 0;i < length;i++) {
-    for (j = 0;j < nb_segment;j++) {
-      nb_segmentation_forward[i][j] = 0;
-    }
-
-    for (j = MAX(0 , nb_segment + i - length);j < MIN((i < length - 1 ? nb_segment - 1 : nb_segment) , i + 1);j++) {
-      if (j == 0) {
-        nb_segmentation_forward[i][j]++;
-      }
-
-      else {
-        for (k = i;k >= j;k--) {
-          nb_segmentation_forward[i][j] += nb_segmentation_forward[k - 1][j - 1];
-        }
-      }
-    }
-  }
-
-  // backward recurrence
-
-  for (i = length - 1;i > 0;i--) {
-    for (j = 0;j < nb_segment;j++) {
-      nb_segmentation_backward[i][j] = 0;
-    }
-
-    for (j = MAX(1 , nb_segment + i - length);j < MIN(nb_segment , i + 1);j++) {
-      if (j < nb_segment - 1) {
-        for (k = i;k <= length + j - nb_segment;k++) {
-          nb_segmentation_backward[i][j] += nb_segmentation_backward[k + 1][j + 1];
-          segment_length[j][k - i + 1] += nb_segmentation_forward[i - 1][j - 1] *
-                                          nb_segmentation_backward[k + 1][j + 1];
-        }
-      }
-
-      else {
-        nb_segmentation_backward[i][j]++;
-        segment_length[j][length - i] += nb_segmentation_forward[i - 1][j - 1];
-      }
-    }
-  }
-
-  for (i = 0;i <= length - nb_segment;i++) {
-    segment_length[0][i + 1] += nb_segmentation_backward[i + 1][1];
-  }
-
-  for (i = 0;i < nb_segment;i++) {
-    sum = 0.;
-    for (j = 1;j <= length - nb_segment + 1;j++) {
-      sum += segment_length[i][j];
-    }
-
-    cumul = 0.;
-    for (j = 1;j <= length - nb_segment + 1;j++) {
-      cumul += segment_length[i][j] / sum;
-
-      if ((cumul < prior->cumul[j] - DOUBLE_ERROR) || (cumul > prior->cumul[j] + DOUBLE_ERROR)) {
-        cout << "\nERROR: " << i << ", " << j << " | " << cumul << " | " << prior->cumul[j] << endl;
-      }
-    }
-
-/*    cout << "\n" << SEQ_label[SEQL_SEGMENT] << " " << i << ":";
-    for (j = 1;j <= length - nb_segment + 1;j++) {
-      cout << " " << segment_length[i][j] / sum;
-    }
-    cout << endl; */
-  }
-
-  for (i = 0;i < length;i++) {
-    delete [] nb_segmentation_forward[i];
-  }
-  delete [] nb_segmentation_forward;
-
-  for (i = 0;i < length;i++) {
-    delete [] nb_segmentation_backward[i];
-  }
-  delete [] nb_segmentation_backward;
-
-  for (i = 0;i < nb_segment;i++) {
-    delete [] segment_length[i];
-  }
-  delete [] segment_length;
-# endif
-
-  return prior;
-}
-
-
-/*--------------------------------------------------------------*/
-/**
  *  \brief Writing of segment/state, change-point and entropy profiles for
  *         a single sequence or a sample of sequences (in the case of
  *         multiple change-point models).
@@ -3476,7 +3297,8 @@ double Sequences::forward_backward(int index , int nb_segment , segment_model *m
               **forward , **backward , **change_point , **forward_predicted_entropy ,
               **backward_predicted_entropy , **forward_partial_entropy , **backward_partial_entropy ,
               **change_point_entropy , ***state_entropy;
-  Distribution *prior_segment_length , **segment_length;
+  Distribution **segment_length;
+  DiscreteParametric *prior_segment_length;
 
 # ifdef DEBUG
   long double *entropy_norm;
@@ -4240,7 +4062,7 @@ double Sequences::forward_backward(int index , int nb_segment , segment_model *m
 
     }
 
-    prior_segment_length = prior_segment_length_distribution(nb_segment , seq_length);
+    prior_segment_length = new DiscreteParametric(PRIOR_SEGMENT_LENGTH , nb_segment , seq_length , D_DEFAULT , D_DEFAULT);
 
     segment_length_max = prior_segment_length->max;
     for (i = 0;i < nb_segment;i++) {

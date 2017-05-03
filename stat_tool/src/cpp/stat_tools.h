@@ -119,6 +119,7 @@ namespace stat_tool {
     NEGATIVE_BINOMIAL ,
     POISSON_GEOMETRIC ,
     UNIFORM ,
+    PRIOR_SEGMENT_LENGTH ,
     MULTINOMIAL                          // addition by Florence Chaubert
   };
 
@@ -563,13 +564,19 @@ namespace stat_tool {
 
   class DiscreteParametric : public Distribution {
 
-      friend std::ostream& operator<<(std::ostream& , const DiscreteParametric&);
+    friend std::ostream& operator<<(std::ostream& , const DiscreteParametric&);
 
   public :
 
     discrete_parametric ident;  ///< identifier
-    int inf_bound;          ///< lower bound
-    int sup_bound;          ///< upper bound (binomial, uniform)
+    union {
+      int inf_bound;        ///< lower bound
+      int no_segment;       ///< number of segments (prior segment length distribution)
+    };
+    union {
+      int sup_bound;        ///< upper bound (binomial, uniform)
+      int sequence_length;  ///< sequence length (prior segment length distribution)
+    };
     double parameter;       ///< parameter (Poisson, negative binomial, Poisson geometric)
     double probability;     ///< probability of success (binomial, negative binomial, Poisson geometric)
 
@@ -626,6 +633,7 @@ namespace stat_tool {
                                        distribution_computation mode);
     void poisson_geometric_computation(int inb_value , double cumul_threshold);
     void uniform_computation();
+    void prior_segment_length_computation();
 
     void computation(int min_nb_value = 1 ,
                      double cumul_threshold = CUMUL_THRESHOLD);

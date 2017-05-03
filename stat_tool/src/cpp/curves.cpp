@@ -38,8 +38,6 @@
 
 #include <iomanip>
 
-#include "tool/config.h"
-
 #include "curves.h"
 #include "stat_label.h"
 
