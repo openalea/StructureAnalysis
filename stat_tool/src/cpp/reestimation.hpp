@@ -45,8 +45,6 @@
 
 #include <boost/math/special_functions/digamma.hpp>
 
-//#include "tool/util_math.h"
-
 #include "stat_label.h"
 
 using namespace std;
