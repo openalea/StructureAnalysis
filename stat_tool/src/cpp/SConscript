@@ -7,7 +7,7 @@ Import( "env" )
 
 lib_env = env.Clone()
 
-lib_env.EnableQt4Modules(['QtCore','QtOpenGL', 'QtGui'])
+#lib_env.EnableQt4Modules(['QtCore','QtOpenGL', 'QtGui'])
 
 # Import/Export symbols for windows
 if lib_env['compiler'] == 'mingw':
@@ -26,7 +26,7 @@ sources = lib_env.ALEAGlob('*.cpp')
 excludes = Split( """
 """)
 
-for f in excludes: 
+for f in excludes:
     for cpp in sources:
 	if f in cpp:
             sources.remove(cpp)
@@ -34,7 +34,7 @@ for f in excludes:
 
 # Add defines to export symbols
 lib_env.AppendUnique(CPPDEFINES=['MESSAGE'])
-lib_env.AppendUnique(LIBS=['vptool'])
+#lib_env.AppendUnique(LIBS=['vptool'])
 
 if lib_env['DEBUG']:
     lib_env.Append(CPPDEFINES= ['DEBUG'])

@@ -1228,7 +1228,7 @@ double Reestimation<Type>::poisson_estimation(DiscreteParametric *dist , int min
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Estimation of the parameters of a shifted negative binomial distribution 
+ *  \brief Estimation of the parameters of a shifted negative binomial distribution
  *         on the basis of a frequency distribution.
  *
  *  \param[in] dist               pointer on a DiscreteParametric object,
@@ -1321,7 +1321,7 @@ double Reestimation<Type>::negative_binomial_estimation(DiscreteParametric *dist
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Estimation of the parameters of a shifted Poisson geometric distribution 
+ *  \brief Estimation of the parameters of a shifted Poisson geometric distribution
  *         on the basis of a frequency distribution.
  *
  *  \param[in] dist               pointer on a DiscreteParametric object,

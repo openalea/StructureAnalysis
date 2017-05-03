@@ -1,11 +1,11 @@
 # -*-python-*-
- 	
+
 
 import os
 pj = os.path.join
 Import("env")
 
-env.EnableQt4Modules(['QtCore','QtOpenGL', 'QtGui'])
+#env.EnableQt4Modules(['QtCore','QtOpenGL', 'QtGui'])
 # Export symbols under windows
 if env['compiler'] == 'mingw':
     LINKFLAGS=["-enable-stdcall-fixup",
@@ -17,12 +17,15 @@ if env['compiler'] == 'mingw':
 includes= env.ALEAGlob('*.h')
 sources = env.ALEAGlob('*.cpp')
 
-LIBS = ['vptool', 'vpstat_tool']
+#LIBS = ['vptool', 'vpstat_tool']
+LIBS = ['vpstat_tool']
 env.AppendUnique(LIBS=LIBS)
 
 # Add defines to export symbols on Windows
 env.AppendUnique(CPPDEFINES=['MESSAGE'])
-env.AppendUnique(LIBS=['vptool', 'vpstat_tool'])
+#env.AppendUnique(LIBS=['vptool', 'vpstat_tool'])
+env.AppendUnique(LIBS=['vpstat_tool'])
+
 # env.AppendUnique(LINKFLAGS='-Wl,--unresolved-symbols=report-all')
 
 #sources.remove(pj(".","cstat_tool.cpp"))
@@ -31,7 +34,7 @@ env.AppendUnique(LIBS=['vptool', 'vpstat_tool'])
 
 env.ALEAWrapper("../stat_tool", "_stat_tool", sources)
 # includes in wrappers should be restricted to boost_python_aliases.h and wrapper_util.h
-# inc = env.Install('$build_includedir/stat_tool', includes) 
+# inc = env.Install('$build_includedir/stat_tool', includes)
 inc = env.Install('$build_includedir/stat_tool', ["boost_python_aliases.h", "wrapper_util.h"])
 env.Alias('build', inc)
 
