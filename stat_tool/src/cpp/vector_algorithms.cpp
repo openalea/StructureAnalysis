@@ -42,8 +42,6 @@
 #include <sstream>
 #include <iomanip>
 
-#include "tool/config.h"
-
 #include "vectors.h"
 #include "stat_label.h"
 

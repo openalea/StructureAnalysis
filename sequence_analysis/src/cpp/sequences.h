@@ -784,6 +784,7 @@ namespace sequence_analysis {
     Sequences* cumulate(stat_tool::StatError &error , int variable = stat_tool::I_DEFAULT) const;
     Sequences* difference(stat_tool::StatError &error , int variable = stat_tool::I_DEFAULT ,
                           bool first_element = false) const;
+    Sequences* log_transform(stat_tool::StatError &error , int variable = stat_tool::I_DEFAULT) const;
     Sequences* relative_growth_rate(stat_tool::StatError &error , double growth_factor = GROWTH_FACTOR) const;
     Sequences* sequence_normalization(stat_tool::StatError &error , int variable = stat_tool::I_DEFAULT) const;
     Sequences* moving_average(stat_tool::StatError &error , int nb_point , double *filter ,

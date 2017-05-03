@@ -48,7 +48,6 @@
 
 #include "sequences.h"
 #include "sequence_label.h"
-#include "tool/config.h"
 
 using namespace std;
 using namespace boost::math;

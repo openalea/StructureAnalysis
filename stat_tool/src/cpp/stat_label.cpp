@@ -50,6 +50,8 @@ const char *STAT_word[] = {
   "SUP_BOUND" ,
   "PARAMETER" ,
   "PROBABILITY" ,
+  "NO_SEGMENT" ,
+  "SEQUENCE_LENGTH" ,
 
   "SHAPE" ,
   "SCALE" ,
@@ -115,7 +117,8 @@ const char *STAT_discrete_distribution_word[] = {
   "POISSON" ,
   "NEGATIVE_BINOMIAL" ,
   "POISSON_GEOMETRIC" ,
-  "UNIFORM"
+  "UNIFORM" ,
+  "PRIOR_SEGMENT_LENGTH"
 };
 
 
@@ -125,7 +128,8 @@ const char *STAT_discrete_distribution_letter[] = {
   "P" ,
   "NB" ,
   "PG" ,
-  "U"
+  "U" ,
+  "PSL"
 };
 
 

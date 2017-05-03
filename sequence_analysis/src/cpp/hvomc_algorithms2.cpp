@@ -42,8 +42,6 @@
 #include <sstream>
 #include <iomanip>
 
-#include "tool/config.h"
-
 #include "stat_tool/stat_label.h"
 
 #include "hidden_variable_order_markov.h"

@@ -55,6 +55,8 @@ namespace stat_tool {
     STATW_SUP_BOUND ,
     STATW_PARAMETER ,
     STATW_PROBABILITY ,
+    STATW_NO_SEGMENT ,
+    STATW_SEQUENCE_LENGTH ,
 
     STATW_SHAPE ,
     STATW_SCALE ,

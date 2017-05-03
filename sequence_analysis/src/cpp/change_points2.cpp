@@ -38,8 +38,6 @@
 
 #include <math.h>
 
-#include "tool/config.h"
-
 #include "sequences.h"
 #include "sequence_label.h"
 

@@ -44,8 +44,6 @@
 
 #include <boost/math/distributions/normal.hpp>
 
-#include "tool/config.h"
-
 #include "regression.h"
 #include "stat_label.h"
 

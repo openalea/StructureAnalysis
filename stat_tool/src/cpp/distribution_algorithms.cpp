@@ -43,8 +43,6 @@
 #include <boost/math/distributions/poisson.hpp>
 #include <boost/math/distributions/negative_binomial.hpp>
 
-#include "tool/config.h"
-
 #include "distribution.h"
 #include "stat_label.h"
 
@@ -764,10 +762,156 @@ void DiscreteParametric::uniform_computation()
 }
 
 
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the prior segment length distribution corresponding to
+ *         the assumption of a uniform prior distribution for the possible segmentations.
+ */
+/*--------------------------------------------------------------*/
+
+void DiscreteParametric::prior_segment_length_computation()
+
+{
+  register int i;
+  double buff , sum;
+
+
+  offset = 1;
+  nb_value = sequence_length - no_segment + 2;
+
+  mass[0] = 0.;
+
+  buff = 1.;
+  for (i = 1;i < no_segment - 1;i++) {
+    buff *= (double)(sequence_length - i - 1) / (double)i;
+  }
+  sum = buff * (double)(sequence_length - 1) / (double)(no_segment - 1);
+
+  for (i = 1;i <= sequence_length - no_segment + 1;i++) {
+    mass[i] = buff / sum;
+    buff *= (double)(sequence_length - i - no_segment + 1) /
+            (double)(sequence_length - i - 1);
+  }
+
+  cumul_computation();
+
+# ifdef MESSAGE
+  register int j , k;
+  double bcumul , **segment_length , **nb_segmentation_forward , **nb_segmentation_backward;
+
+
+  nb_segmentation_forward = new double*[sequence_length];
+  for (i = 0;i < sequence_length;i++) {
+    nb_segmentation_forward[i] = new double[no_segment];
+  }
+
+  nb_segmentation_backward = new double*[sequence_length];
+  for (i = 0;i < sequence_length;i++) {
+    nb_segmentation_backward[i] = new double[no_segment];
+  }
+
+  segment_length = new double*[no_segment];
+  for (i = 0;i < no_segment;i++) {
+    segment_length[i] = new double[sequence_length - no_segment + 2];
+    for (j = 0;j <= sequence_length - no_segment + 1;j++) {
+      segment_length[i][j] = 0.;
+    }
+  }
+
+  // forward recurrence
+
+  for (i = 0;i < sequence_length;i++) {
+    for (j = 0;j < no_segment;j++) {
+      nb_segmentation_forward[i][j] = 0;
+    }
+
+    for (j = MAX(0 , no_segment + i - sequence_length);j < MIN((i < sequence_length - 1 ? no_segment - 1 : no_segment) , i + 1);j++) {
+      if (j == 0) {
+        nb_segmentation_forward[i][j]++;
+      }
+
+      else {
+        for (k = i;k >= j;k--) {
+          nb_segmentation_forward[i][j] += nb_segmentation_forward[k - 1][j - 1];
+        }
+      }
+    }
+  }
+
+  // backward recurrence
+
+  for (i = sequence_length - 1;i > 0;i--) {
+    for (j = 0;j < no_segment;j++) {
+      nb_segmentation_backward[i][j] = 0;
+    }
+
+    for (j = MAX(1 , no_segment + i - sequence_length);j < MIN(no_segment , i + 1);j++) {
+      if (j < no_segment - 1) {
+        for (k = i;k <= sequence_length + j - no_segment;k++) {
+          nb_segmentation_backward[i][j] += nb_segmentation_backward[k + 1][j + 1];
+          segment_length[j][k - i + 1] += nb_segmentation_forward[i - 1][j - 1] *
+                                          nb_segmentation_backward[k + 1][j + 1];
+        }
+      }
+
+      else {
+        nb_segmentation_backward[i][j]++;
+        segment_length[j][sequence_length - i] += nb_segmentation_forward[i - 1][j - 1];
+      }
+    }
+  }
+
+  for (i = 0;i <= sequence_length - no_segment;i++) {
+    segment_length[0][i + 1] += nb_segmentation_backward[i + 1][1];
+  }
+
+  for (i = 0;i < no_segment;i++) {
+    sum = 0.;
+    for (j = 1;j <= sequence_length - no_segment + 1;j++) {
+      sum += segment_length[i][j];
+    }
+
+    bcumul = 0.;
+    for (j = 1;j <= sequence_length - no_segment + 1;j++) {
+      bcumul += segment_length[i][j] / sum;
+
+      if ((bcumul < cumul[j] - DOUBLE_ERROR) || (bcumul > cumul[j] + DOUBLE_ERROR)) {
+        cout << "\nERROR: " << i << ", " << j << " | " << bcumul << " | " << cumul[j] << endl;
+      }
+    }
+
+/*    cout << "\n" << SEQ_label[SEQL_SEGMENT] << " " << i << ":";
+    for (j = 1;j <= sequence_length - no_segment + 1;j++) {
+      cout << " " << segment_length[i][j] / sum;
+    }
+    cout << endl; */
+  }
+
+  for (i = 0;i < sequence_length;i++) {
+    delete [] nb_segmentation_forward[i];
+  }
+  delete [] nb_segmentation_forward;
+
+  for (i = 0;i < sequence_length;i++) {
+    delete [] nb_segmentation_backward[i];
+  }
+  delete [] nb_segmentation_backward;
+
+  for (i = 0;i < no_segment;i++) {
+    delete [] segment_length[i];
+  }
+  delete [] segment_length;
+# endif
+
+}
+
+
 /*--------------------------------------------------------------*/
 /**
  *  \brief Computation of the number of values of a parametric discrete distribution
- *         (binomial, Poisson, negative binomial, uniform).
+ *         (binomial, Poisson, negative binomial, uniform, compound Poisson geometric,
+            prior segment length distribution for a multiple change-point model).
  *
  *  \param[in] ident           distribution identifier,
  *  \param[in] inf_bound       lower bound of the support,
@@ -791,6 +935,10 @@ int DiscreteParametric::nb_value_computation(discrete_parametric ident , int inf
     nb_value = sup_bound + 1;
   }
 
+  else if (ident == PRIOR_SEGMENT_LENGTH) {
+    nb_value = sup_bound - inf_bound + 2;
+  }
+
   else {
     if ((ident == POISSON) || (ident == NEGATIVE_BINOMIAL) || (ident == POISSON_GEOMETRIC)) {
       DiscreteParametric *dist;
@@ -809,7 +957,8 @@ int DiscreteParametric::nb_value_computation(discrete_parametric ident , int inf
 /*--------------------------------------------------------------*/
 /**
  *  \brief Computation of the probability mass function of a parametric discrete distribution
- *         (binomial, Poisson, negative binomial, uniform).
+ *         (binomial, Poisson, negative binomial, uniform compound Poisson geometric,
+            prior segment length distribution for a multiple change-point model).
  *
  *  \param[in] min_nb_value    minimum number of values,
  *  \param[in] cumul_threshold threshold on the cumulative distribution function.
@@ -836,9 +985,18 @@ void DiscreteParametric::computation(int min_nb_value , double cumul_threshold)
     case UNIFORM :
       uniform_computation();
       break;
+    case PRIOR_SEGMENT_LENGTH :
+      prior_segment_length_computation();
+      break;
     }
 
-    max_computation();
+    if ((ident == UNIFORM) || (ident == PRIOR_SEGMENT_LENGTH)) {
+      max = mass[offset];
+    }
+    else {
+      max_computation();
+    }
+
     mean_computation();
     variance_computation();
   }

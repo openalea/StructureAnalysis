@@ -43,8 +43,6 @@
 #include <cstring>
 #include <string.h>
 
-#include "tool/config.h"
-
 #include "distance_matrix.h"
 #include "stat_label.h"
 

@@ -42,8 +42,6 @@
 #include <sstream>
 #include <iomanip>
 
-#include "tool/config.h"
-
 #include "sequences.h"
 #include "sequence_label.h"
 

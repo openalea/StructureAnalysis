@@ -42,8 +42,6 @@
 #include <iomanip>
 #include <cstring>
 
-#include "tool/config.h"
-
 #include "stat_tools.h"
 #include "curves.h"
 #include "stat_label.h"
