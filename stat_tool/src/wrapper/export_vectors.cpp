@@ -460,7 +460,8 @@ public:
   {
     StatError error;
     Vectors * ret = NULL;
-    std::stringstream s;
+    //std::stringstream s;
+    bool display = true;
 
     boost::python::extract<int> get_min(min);
     boost::python::extract<int> get_max(max);
@@ -470,19 +471,19 @@ public:
       {
         int mi = get_min();
         int ma = get_max();
-        ret = v.value_select(error, s, variable, mi, ma, keep);
+        ret = v.value_select(error, display, variable, mi, ma, keep);
       }
     else
       {
         double mi = extract<double> (min);
         double ma = extract<double> (max);
-        ret = v.value_select(error, s, variable, mi, ma, keep);
+        ret = v.value_select(error, display, variable, mi, ma, keep);
       }
 
     if (!ret)
       stat_tool::wrap_util::throw_error(error);
 
-    cout << s.str() << endl;
+    //cout << s.str() << endl;
 
     return ret;
   }
@@ -775,17 +776,18 @@ public:
       const string& filename, int iformat)
   {
     StatError error;
-    std::stringstream s;
+    //std::stringstream s;
+    bool display = true;
     bool ret;
-    output_format format = output_format(iformat);   
-    
-    ret = v.contingency_table(error, s, variable1, variable2, filename.c_str(),
+    output_format format = output_format(iformat);
+
+    ret = v.contingency_table(error, display, variable1, variable2, filename.c_str(),
         format);
 
     if (!ret)
       stat_tool::wrap_util::throw_error(error);
 
-    return s.str();
+    return string();
   }
 
   static string
@@ -794,30 +796,36 @@ public:
       int iformat)
   {
     StatError error;
-    std::stringstream s;
+    //std::stringstream s;
+    bool display = true;
+
     bool ret;
     output_format format = output_format(iformat);
 
-    ret = v.variance_analysis(error, s, class_variable, response_variable,
+    ret = v.variance_analysis(error, display, class_variable, response_variable,
         response_type, filename.c_str(), format);
 
     if (!ret)
       stat_tool::wrap_util::throw_error(error);
 
-    return s.str();
+    return string();
   }
 
   static string
   rank_correlation_computation(const Vectors& input, int icorrel_type, const string &filename)
   {
     StatError error;
-    std::stringstream os;
+    //std::stringstream os;
+    bool display = true;
+
     bool ret;
     correlation_type correl_type = correlation_type(icorrel_type);
-    
-    ret = input.rank_correlation_computation(error, os, correl_type, filename.c_str());
+
+    ret = input.rank_correlation_computation(error, display, correl_type, filename.c_str());
     //std::cout << os.str()<<endl;
-    return os.str();
+    if (!ret)
+      stat_tool::wrap_util::throw_error(error);
+    return string();
   }
 
   static MultiPlotSet*
@@ -974,9 +982,9 @@ class_vectors()
       "Save vector data into a file")
   .def("spreadsheet_write", WRAP::spreadsheet_write,
       "Save data into CSV file")
-  .def("select_bin_width", WRAP::select_bin_width, 
+  .def("select_bin_width", WRAP::select_bin_width,
     args("variable", "bin_width"), "select_bin_width(bin_width) redefine the bin_width of the histogram. bin_width must be >0")
-  DEF_RETURN_VALUE("get_marginal_histogram", WRAP::get_marginal_histogram, 
+  DEF_RETURN_VALUE("get_marginal_histogram", WRAP::get_marginal_histogram,
     args("variable"), "get_marginal_histogram(nb_variable) construct marginal histogram of the vector given for the variable provided. The variable must be >=0 and less than nb_variable.")
 
   ;
@@ -986,7 +994,7 @@ class_vectors()
     Vectors (int inb_vector , int *iidentifier , int inb_variable , int *itype ,  bool init_flag = false)
     Vectors(int inb_vector , int *iidentifier , int inb_variable , int *itype ,  int **iint_vector , double **ireal_vector);
     Vectors(const Vectors &vec , int inb_vector , int *index);
-    
+
 
 
 
