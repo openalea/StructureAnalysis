@@ -102,9 +102,9 @@ public:
   cluster_step(const MarkovianSequences &seq, int variable, int step, int imode)
   {
     StatError error;
-      
+
     MarkovianSequences *ret = NULL;
-    
+
     rounding rmode = rounding(imode);
     ret = seq.cluster(error, variable, step, rmode);
     if (!ret)
@@ -231,7 +231,8 @@ public:
 		  const char *path = 0)
   {
     StatError error;
-    std::stringstream os;
+    // std::stringstream os;
+    bool os = true; // display
     bool ret = true;
 
     ret = input.transition_count(error, os,
@@ -244,7 +245,8 @@ public:
 		  int begin_state, int end_state, int min_frequency)
   {
     StatError error;
-    std::stringstream os;
+    //std::stringstream os;
+    bool os = true; //display
     bool ret = true;
 
     ret = input.word_count(error, os ,variable, word_length,
@@ -253,7 +255,7 @@ public:
     if (!ret)
       sequence_analysis::wrap_util::throw_error(error);
     //todo if this what we want to return ?
-    return os.str();
+    return string();
   }
 
 
@@ -266,7 +268,7 @@ public:
     process_type itype = process_type(iitype);
     memory_tree_selection algorithm = memory_tree_selection(ialgorithm);
     transition_estimator estimator = transition_estimator(iestimator);
-    
+
     HEADER_OS(VariableOrderMarkov);
     ret = input.variable_order_markov_estimation(error, os, itype,
         min_order, max_order, algorithm, threshold, estimator,
@@ -354,7 +356,8 @@ public:
   {
     StatError error;
     bool ret = false;
-    std::stringstream os;
+    //std::stringstream os;
+    bool os = true; // display
 
     CREATE_ARRAY(input_markov, const VariableOrderMarkov*, data);
     ret = input.comparison(error, os, data_size, data.get(), filename);
@@ -366,7 +369,8 @@ public:
       boost::python::list &input_markov, char *filename)
   {
     StatError error;
-    std::stringstream os;
+    //std::stringstream os;
+    bool os = true; // display
     bool ret = false;
 
     CREATE_ARRAY(input_markov, const SemiMarkov*, data);
@@ -379,7 +383,8 @@ public:
       boost::python::list &input_markov, latent_structure_algorithm algorithm, const char *filename)
   {
     StatError error;
-    std::stringstream os;
+    //std::stringstream os;
+    bool os = true; // display
     bool ret = false;
 
     CREATE_ARRAY(input_markov, const HiddenVariableOrderMarkov*, data);
@@ -394,7 +399,8 @@ public:
       const char *filename)
   {
     StatError error;
-    std::stringstream os;
+    //std::stringstream os;
+    bool os = true; // display
     bool ret = false;
 
     CREATE_ARRAY(input_markov, const HiddenSemiMarkov*, markov);
@@ -508,8 +514,8 @@ public:
   {
     StatError error;
     bool ret;
-    std::stringstream os;
-
+    // std::stringstream os;
+    bool os = true; // display
     CREATE_ARRAY(input_values, int, data);
     ret = input.lumpability_test(error, os, data.get(), order);
     FOOTER_OS;
@@ -526,7 +532,7 @@ public:
   static SequenceCharacteristics *
   get_characteristics(const MarkovianSequences &input, const int variable)
   {
-    // todo : shall we return something ? 
+    // todo : shall we return something ?
     HEADER(SequenceCharacteristics);
     ret = input.get_characteristics(variable);
     FOOTER;
@@ -542,7 +548,7 @@ public:
     return ret;
   }
 
-  static MarkovianSequences* 
+  static MarkovianSequences*
   initial_run_computation(const MarkovianSequences &input)
   {
     HEADER(MarkovianSequences);
