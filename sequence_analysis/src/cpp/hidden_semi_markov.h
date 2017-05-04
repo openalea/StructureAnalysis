@@ -111,6 +111,12 @@ namespace sequence_analysis {
                                     state_profile output , stat_tool::output_format format ,
                                     double seq_likelihood = stat_tool::D_INF) const;
 
+    bool state_profile_write(StatError &error , std::ostream &os , const MarkovianSequences &iseq ,
+                             int identifier , state_profile output = SSTATE ,
+                             stat_tool::output_format format = stat_tool::ASCII ,
+                             latent_structure_algorithm state_sequence = GENERALIZED_VITERBI ,
+                             int nb_state_sequence = NB_STATE_SEQUENCE) const;
+
   public :
 
     HiddenSemiMarkov() {}
@@ -147,11 +153,6 @@ namespace sequence_analysis {
     double likelihood_computation(const MarkovianSequences &seq , double *posterior_probability = NULL ,
                                   int index = stat_tool::I_DEFAULT) const;
 
-    bool state_profile_write(StatError &error , std::ostream &os , const MarkovianSequences &iseq ,
-                             int identifier , state_profile output = SSTATE ,
-                             stat_tool::output_format format = stat_tool::ASCII ,
-                             latent_structure_algorithm state_sequence = GENERALIZED_VITERBI ,
-                             int nb_state_sequence = NB_STATE_SEQUENCE) const;
     bool state_profile_ascii_write(StatError &error , const MarkovianSequences &iseq ,
                                    int identifier , state_profile output = SSTATE ,
                                    latent_structure_algorithm state_sequence = GENERALIZED_VITERBI ,
