@@ -23,6 +23,8 @@ env.AppendUnique(CPPPATH=[sys.prefix + '/include'],
 prefix = env['build_prefix']
 SConscript(pj(prefix,"src/cpp/SConscript"),
            exports='env')
+SConscript(pj(prefix,"src/py/wrapper/SConscript"),
+           exports='env')
 SConscript(pj(prefix,"src/wrapper/SConscript"),
            exports='env')
 
