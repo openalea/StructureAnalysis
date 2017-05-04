@@ -669,6 +669,14 @@ namespace sequence_analysis {
     void entropy_profile_plotable_write(stat_tool::MultiPlot &plot , int index , double *begin_entropy ,
                                         double *end_entropy = NULL , double *marginal_entropy = NULL) const;
 
+    bool segment_profile_write(stat_tool::StatError &error , std::ostream &os , int iidentifier ,
+                               int nb_segment , segment_model *model_type ,
+                               bool common_contrast , double *shape_parameter ,
+                               change_point_profile output = SEGMENT ,
+                               stat_tool::output_format format = stat_tool::ASCII ,
+                               stat_tool::latent_structure_algorithm segmentation = stat_tool::FORWARD_DYNAMIC_PROGRAMMING ,
+                               int nb_segmentation = NB_SEGMENTATION) const;
+
   public :
 
     Sequences();
@@ -910,13 +918,6 @@ namespace sequence_analysis {
 //    Sequences* hierarchical_segmentation(stat_tool::StatError &error , std::ostream &os , int iidentifier ,
 //                                         int max_nb_segment , segment_model *model_type) const;
 
-    bool segment_profile_write(stat_tool::StatError &error , std::ostream &os , int iidentifier ,
-                               int nb_segment , segment_model *model_type ,
-                               bool common_contrast , double *shape_parameter ,
-                               change_point_profile output = SEGMENT ,
-                               stat_tool::output_format format = stat_tool::ASCII ,
-                               stat_tool::latent_structure_algorithm segmentation = stat_tool::FORWARD_DYNAMIC_PROGRAMMING ,
-                               int nb_segmentation = NB_SEGMENTATION) const;
     bool segment_profile_ascii_write(stat_tool::StatError &error , int iidentifier ,
                                      int nb_segment , std::vector<segment_model> model_type ,
                                      bool common_contrast , std::vector<double> shape_parameter ,

@@ -94,6 +94,12 @@ namespace sequence_analysis {
                                     stat_tool::MultiPlot *plot , stat_tool::output_format format ,
                                     double seq_likelihood = D_INF) const;
 
+    bool state_profile_write(stat_tool::StatError &error , std::ostream &os ,
+                             const MarkovianSequences &iseq , int identifier ,
+                             stat_tool::output_format format = stat_tool::ASCII ,
+                             latent_structure_algorithm state_sequence = GENERALIZED_VITERBI ,
+                             int nb_state_sequence = NB_STATE_SEQUENCE) const;
+
   public :
 
     HiddenVariableOrderMarkov() {}
@@ -122,11 +128,6 @@ namespace sequence_analysis {
     double likelihood_computation(const MarkovianSequences &seq , double *posterior_probability = NULL ,
                                   int index = stat_tool::I_DEFAULT) const;
 
-    bool state_profile_write(stat_tool::StatError &error , std::ostream &os ,
-                             const MarkovianSequences &iseq , int identifier ,
-                             stat_tool::output_format format = stat_tool::ASCII ,
-                             latent_structure_algorithm state_sequence = GENERALIZED_VITERBI ,
-                             int nb_state_sequence = NB_STATE_SEQUENCE) const;
     bool state_profile_ascii_write(StatError &error , const MarkovianSequences &iseq , int identifier ,
                                    latent_structure_algorithm state_sequence = GENERALIZED_VITERBI ,
                                    int nb_state_sequence = NB_STATE_SEQUENCE) const;

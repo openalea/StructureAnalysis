@@ -2,6 +2,7 @@
 
 from openalea.sconsx import config, environ
 import os
+import sys
 pj = os.path.join
 ALEASolution = config.ALEASolution
 
@@ -13,6 +14,10 @@ tools = ['boost_python'] #, 'vplants.tool','qt4', 'install', 'alea']
 
 env = ALEASolution(options, tools)
 env.AppendUnique(CXXFLAGS=['-x', 'c++', '-std=c++0x'])
+
+# Fix for Conda
+env.AppendUnique(CPPPATH=[sys.prefix + '/include'],
+                 LIBPATH=[sys.prefix + '/lib'])
 
 # Build stage
 prefix = env['build_prefix']

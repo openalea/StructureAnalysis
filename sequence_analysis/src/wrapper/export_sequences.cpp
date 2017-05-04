@@ -1411,21 +1411,22 @@ public:
   }
 
   static bool
-  segment_profile_write(const Sequences &input,int iidentifier,
+  segment_profile_write(const Sequences &input, int iidentifier,
                                int nb_segment , boost::python::list& model_type , change_point_profile output ,
-                               output_format format, latent_structure_algorithm segmentation ,
+                               latent_structure_algorithm segmentation ,
                                int nb_segmentation)
   {
-    std::stringstream os;
+//    std::stringstream os;
 
     StatError error;
     bool ret;
-    CREATE_ARRAY(model_type, segment_model, models);
-    ret = input.segment_profile_write(error, os, iidentifier,  nb_segment, models.get(),
-                                      true, NULL, output, format, segmentation, nb_segmentation);
+    std::vector<double> shape_parameters;
+    CREATE_VECTOR(model_type, segment_model, models);
+    ret = input.segment_profile_ascii_write(error, iidentifier, nb_segment, models,
+                                            true, shape_parameters, output, segmentation, nb_segmentation);
     if (!ret)
       sequence_analysis::wrap_util::throw_error(error);
-    cout << os.str() << endl;
+//    cout << os.str() << endl;
     return ret;
   }
 
@@ -1547,7 +1548,7 @@ class_sequences()
    .def("plot_data_write", SequencesWrap::plot_data_write, args("prefix", "title"), "Write GNUPLOT files")
    DEF_RETURN_VALUE("segment_profile_plotable_write", SequencesWrap::segment_profile_plotable_write, args("identifier", "nb_segment", "model_type", "output"), "Write segment_profile")
 
-    .def("segment_profile_write", SequencesWrap::segment_profile_write, args("sequences", "iidentifier","nb_segment", "model_type" , "output" ,"format","segmentation","nb_segmentation"), "segment profile write for Display")
+    .def("segment_profile_write", SequencesWrap::segment_profile_write, args("sequences", "iidentifier","nb_segment", "model_type" , "output", "segmentation", "nb_segmentation"), "segment profile write for Display")
     .def("select_bin_width", SequencesWrap::select_bin_width, args("variable", "bin_width"), "select_bin_width on sequences")
    DEF_RETURN_VALUE("get_marginal_histogram", SequencesWrap::get_marginal_histogram, args("variable"), "get_marginal_histogram wrapper")
 

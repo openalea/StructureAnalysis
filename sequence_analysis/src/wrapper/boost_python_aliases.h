@@ -12,6 +12,16 @@
   for (int i = 0; i < VARIABLE_NAME##_size; i++)\
       VARIABLE_NAME[i] = boost::python::extract<TYPE>(INPUT[i]);
 
+// synopsis: converts a boost python list into a CPP array
+// INPUT is the input variable name
+// TYPE is the type of the CPP array to be returned into the variable data
+// VARIABLE_NAME allows to use this macros several time inside the same function
+#define CREATE_VECTOR(INPUT, TYPE, VARIABLE_NAME)\
+  int VARIABLE_NAME##_size = len(INPUT);\
+  std::vector<TYPE> VARIABLE_NAME;\
+  for (int i = 0; i < VARIABLE_NAME##_size; i++)\
+    VARIABLE_NAME.push_back(boost::python::extract<TYPE>(INPUT[i]));
+
 
 // prototype not included since the name cannot be overloaded
 // INPUT the input argument
