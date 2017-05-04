@@ -25,7 +25,6 @@
 
 #include "sequence_analysis/sequences.h"
 #include "sequence_analysis/sequence_label.h"
-#include "tool/config.h"
 
 #include <boost/python.hpp>
 #include <boost/python/extract.hpp>

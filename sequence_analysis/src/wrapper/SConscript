@@ -4,7 +4,7 @@ import os
 
 Import("env")
 
-env.EnableQt4Modules(['QtCore','QtOpenGL', 'QtGui'])
+#env.EnableQt4Modules(['QtCore','QtOpenGL', 'QtGui'])
 
 # Export symbols under windows
 if env['compiler'] == 'mingw':
@@ -20,11 +20,13 @@ if env['compiler'] == 'mingw':
 sources = env.ALEAGlob('*.h')
 sources = env.ALEAGlob('*.cpp')
 
-LIBS = ['vptool', 'vpstat_tool', 'vpsequence']
+#LIBS = ['vptool', 'vpstat_tool', 'vpsequence']
+LIBS = ['vpstat_tool', 'vpsequence']
 env.AppendUnique(LIBS=LIBS)
 
 env.AppendUnique(CPPDEFINES=['MESSAGE'])
-env.AppendUnique(LIBS=['vptool', 'vpstat_tool', 'vpsequence'])
+#env.AppendUnique(LIBS=['vptool', 'vpstat_tool', 'vpsequence'])
+env.AppendUnique(LIBS=['vpstat_tool', 'vpsequence'])
 
 env.ALEAWrapper("../sequence_analysis", "_sequence_analysis", sources)
 

@@ -47,7 +47,7 @@
 #define FOOTER_OS \
     if (!ret) \
       sequence_analysis::wrap_util::throw_error(error);\
-    cout << os.str() << endl;\
+    //cout << os.str() << endl;\
     return ret;\
 
 #define FOOTER \
@@ -64,7 +64,8 @@
 #define HEADER_OS(TYPE) \
     StatError error; \
     TYPE* ret;\
-    std::stringstream os;\
+    bool os = true; \
+    //std::stringstream os;\
 
 
 
