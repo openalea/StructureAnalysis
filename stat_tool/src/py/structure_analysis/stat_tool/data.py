@@ -1,8 +1,7 @@
 from functools import wraps
 
-from openalea.stat_tool import _stat_tool
-from openalea.stat_tool import __stat_tool
-
+import _stat_tool
+import __stat_tool
 
 def wrapper(f):
     @wraps(f)

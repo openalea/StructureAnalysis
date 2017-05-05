@@ -23,8 +23,8 @@ __all__ = []
 
 from functools import wraps
 
-from openalea.stat_tool.__stat_tool.stat_tool import SinglePlot, MultiPlot, MultiPlotSet
-from openalea.stat_tool.std import Iterator
+from __stat_tool.stat_tool import SinglePlot, MultiPlot, MultiPlotSet
+from std import Iterator
 
 def __iter__(self):
     return Iterator(self.begin(), self.end())

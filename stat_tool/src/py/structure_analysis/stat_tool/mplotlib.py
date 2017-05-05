@@ -1,7 +1,7 @@
 def load_ipython_extension(ipython):
 
-    from openalea.stat_tool import stat_tool
-    from openalea.stat_tool import __stat_tool
+
+    from structure_analysis.stat_tool import __stat_tool
     from matplotlib import pyplot as plt
     from functools import wraps
     import numpy as np
