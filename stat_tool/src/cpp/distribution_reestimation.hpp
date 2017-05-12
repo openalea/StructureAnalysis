@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -67,7 +67,7 @@ void reestimation(int nb_value , Type *reestim , double *pmass ,
                   double min_probability , bool null_probability)
 
 {
-  register int i;
+  int i;
   int nb_correction;
   double sum , norm;
 

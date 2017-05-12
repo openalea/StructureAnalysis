@@ -93,7 +93,7 @@ VectorDistance::VectorDistance(int inb_variable , variable_type *ivar_type ,
                                double *iweight , metric idistance_type)
 
 {
-  register int i;
+  int i;
 
 
   nb_variable = inb_variable;
@@ -149,7 +149,7 @@ VectorDistance::VectorDistance(int inb_variable , metric idistance_type , variab
                                int *iperiod)
 
 {
-  register int i , j , k;
+  int i , j , k;
   double *pdistance , *cdistance;
 
 
@@ -207,7 +207,7 @@ VectorDistance::VectorDistance(int inb_variable , metric idistance_type , variab
 void VectorDistance::copy(const VectorDistance &vector_dist)
 
 {
-  register int i , j , k;
+  int i , j , k;
   double *pdistance , *cdistance;
 
 
@@ -264,7 +264,7 @@ void VectorDistance::copy(const VectorDistance &vector_dist)
 void VectorDistance::remove()
 
 {
-  register int i , j;
+  int i , j;
 
 
   delete [] var_type;
@@ -343,7 +343,7 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
   typedef tokenizer<char_separator<char>> tokenizer;
   char_separator<char> separator(" \t");
   bool status , lstatus , weight_flag;
-  register int i , j , k , m;
+  int i , j , k , m;
   int line , read_line , read_type , nb_variable , value , variable , category ,
       nb_value[VECTOR_NB_VARIABLE] , period[VECTOR_NB_VARIABLE];
   metric distance_type = ABSOLUTE_VALUE;
@@ -961,7 +961,7 @@ ostream& VectorDistance::line_write(ostream &os) const
 ostream& VectorDistance::ascii_write(ostream &os , bool exhaustive) const
 
 {
-  register int i , j , k;
+  int i , j , k;
   int buff , width[2];
   ios_base::fmtflags format_flags;
 
@@ -1089,7 +1089,7 @@ bool VectorDistance::plot_write(StatError &error , const char *prefix ,
 double* VectorDistance::max_category_distance_computation(int variable) const
 
 {
-  register int i , j;
+  int i , j;
   double *max_category_distance = NULL;
 
 
@@ -1140,7 +1140,7 @@ void VectorDistance::dispersion_computation(int variable , const FrequencyDistri
                                             double *rank) const
 
 {
-  register int i , j;
+  int i , j;
   int *pfrequency;
   double sum , distance = 1.;
 

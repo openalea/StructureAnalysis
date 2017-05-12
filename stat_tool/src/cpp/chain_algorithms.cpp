@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -61,7 +61,7 @@ namespace stat_tool {
 void Chain::init(bool left_right , double self_transition)
 
 {
-  register int i , j;
+  int i , j;
 
 
   accessibility = new bool*[nb_state];
@@ -71,46 +71,9 @@ void Chain::init(bool left_right , double self_transition)
 
   stype = new state_type[nb_state];
 
-  switch (left_right) {
-
-  // case ergodic Markov chain such that all the transitions are possible
-
-  case false : {
-    nb_component = 1;
-    component_nb_state = new int[nb_component];
-    component_nb_state[0] = nb_state;
-    component = new int*[nb_component];
-    component[0] = new int[component_nb_state[0]];
-
-    for (i = 0;i < nb_state;i++) {
-      for (j = 0;j < nb_state;j++) {
-        accessibility[i][j] = true;
-      }
-
-      component[0][i] = i;
-      stype[i] = RECURRENT;
-    }
-
-    for (i = 0;i < nb_state;i++) {
-      initial[i] = 1. / (double)nb_state;
-    }
-
-    for (i = 0;i < nb_state;i++) {
-      for (j = 0;j < i;j++) {
-        transition[i][j] = (1. - self_transition) / (nb_state - 1);
-      }
-      transition[i][i] = self_transition;
-      for (j = i + 1;j < nb_state;j++) {
-        transition[i][j] = (1. - self_transition) / (nb_state - 1);
-      }
-    }
-
-    break;
-  }
-
   // case left-right Markov chain
 
-  case true : {
+  if (left_right) {
     nb_component = nb_state;
     component_nb_state = new int[nb_component];
     component = new int*[nb_component];
@@ -156,9 +119,39 @@ void Chain::init(bool left_right , double self_transition)
         transition[i][i] = 1.;
       }
     }
-
-    break;
   }
+
+  // case ergodic Markov chain such that all the transitions are possible
+
+  else {
+    nb_component = 1;
+    component_nb_state = new int[nb_component];
+    component_nb_state[0] = nb_state;
+    component = new int*[nb_component];
+    component[0] = new int[component_nb_state[0]];
+
+    for (i = 0;i < nb_state;i++) {
+      for (j = 0;j < nb_state;j++) {
+        accessibility[i][j] = true;
+      }
+
+      component[0][i] = i;
+      stype[i] = RECURRENT;
+    }
+
+    for (i = 0;i < nb_state;i++) {
+      initial[i] = 1. / (double)nb_state;
+    }
+
+    for (i = 0;i < nb_state;i++) {
+      for (j = 0;j < i;j++) {
+        transition[i][j] = (1. - self_transition) / (nb_state - 1);
+      }
+      transition[i][i] = self_transition;
+      for (j = i + 1;j < nb_state;j++) {
+        transition[i][j] = (1. - self_transition) / (nb_state - 1);
+      }
+    }
   }
 }
 
@@ -176,7 +169,7 @@ bool** Chain::logic_transition_computation() const
 
 {
   bool **logic_transition;
-  register int i , j;
+  int i , j;
 
 
   logic_transition = new bool*[nb_state];
@@ -213,7 +206,7 @@ bool Chain::strongly_connected_component_research(StatError &error , bool **ilog
 
 {
   bool status = true , **logic_transition;
-  register int i , j;
+  int i , j;
   int state , test_state , nb_used_state , *state_transition , *used_transition ,
       *predecessor , *state_order;
 
@@ -341,7 +334,7 @@ void Chain::graph_accessibility_computation(bool **ilogic_transition)
 {
   if (!accessibility) {
     bool **logic_transition;
-    register int i , j , k;
+    int i , j , k;
     int state , test_state , nb_used_state , *state_transition , *used_transition ,
         *predecessor , *state_order;
 
@@ -469,7 +462,7 @@ void Chain::probability_accessibility_computation()
 {
   if (!accessibility) {
     bool stop;
-    register int i , j , k;
+    int i , j , k;
     int length;
     double sum , *state_seq , *pstate_seq , *states , *pstates ,
            **ptransition , **uniform_transition;
@@ -619,7 +612,7 @@ void Chain::component_computation(bool **ilogic_transition)
 {
   if (nb_component == 0) {
     bool *used_state;
-    register int i , j , k;
+    int i , j , k;
     int nb_used_state = 0 , state , *bcomponent_nb_state , **bcomponent;
 
 
@@ -734,7 +727,7 @@ void Chain::thresholding(double min_probability , bool semi_markov)
 
 {
   bool stop;
-  register int i , j;
+  int i , j;
   int nb_correction;
   double norm;
 
@@ -841,7 +834,7 @@ void Chain::thresholding(double min_probability , bool semi_markov)
 double Chain::likelihood_computation(const ChainData &chain_data , bool initial_flag) const
 
 {
-  register int i , j;
+  int i , j;
   double likelihood;
 
 
@@ -904,7 +897,7 @@ double Chain::likelihood_computation(const ChainData &chain_data , bool initial_
 int Chain::nb_parameter_computation(double min_probability) const
 
 {
-  register int i , j;
+  int i , j;
   int nb_parameter = 0;
 
 
@@ -934,7 +927,7 @@ int Chain::nb_parameter_computation(double min_probability) const
 double Chain::chi2_value_computation(const ChainData &chain_data) const
 
 {
-  register int i , j;
+  int i , j;
   int sum;
   double value , var1 , var2;
 
@@ -1008,7 +1001,7 @@ void Chain::chi2_fit(const ChainData &chain_data , Test &test) const
 void ChainData::estimation(Chain &chain) const
 
 {
-  register int i , j;
+  int i , j;
   int sum;
 
 
@@ -1063,7 +1056,7 @@ void ChainData::estimation(Chain &chain) const
 int ChainData::nb_parameter_computation() const
 
 {
-  register int i , j;
+  int i , j;
   int sum , nb_parameter = 0;
 
 

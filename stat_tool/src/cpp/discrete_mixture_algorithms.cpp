@@ -59,7 +59,7 @@ namespace stat_tool {
 double DiscreteMixtureData::information_computation() const
 
 {
-  register int i;
+  int i;
   double information , buff;
 
 
@@ -99,7 +99,7 @@ double DiscreteMixtureData::information_computation() const
 double DiscreteMixture::likelihood_computation(const DiscreteMixtureData &mixt_histo) const
 
 {
-  register int i;
+  int i;
   double likelihood , buff;
 
 
@@ -136,7 +136,7 @@ double DiscreteMixture::likelihood_computation(const DiscreteMixtureData &mixt_h
 void DiscreteMixture::computation(int min_nb_value , double cumul_threshold , bool component_flag)
 
 {
-  register int i , j;
+  int i , j;
 
 
   // computation of the weight distribution
@@ -205,7 +205,7 @@ void DiscreteMixture::init(const FrequencyDistribution &histo , bool *estimate ,
                            int min_inf_bound , bool component_flag)
 
 {
-  register int i , j = -1;
+  int i , j = -1;
   int nb_element = 0 , threshold , *pfrequency;
   double cumul_weight = 0. , shift_mean;
 
@@ -286,7 +286,7 @@ void DiscreteMixture::init(const FrequencyDistribution &histo , bool *estimate ,
 void DiscreteMixture::expectation_step(DiscreteMixtureData *mixt_histo , int nb_element) const
 
 {
-  register int i , j , k;
+  int i , j , k;
   int component_index , value_index;
   double scale , sum , max_frequency , **rfrequency;
 
@@ -396,7 +396,7 @@ void DiscreteMixture::variance_correction(DiscreteMixtureData *mixt_histo ,
                                           bool *estimate , int min_inf_bound) const
 
 {
-  register int i;
+  int i;
   double skewness;
   FrequencyDistribution *pcomponent , *ncomponent;
 
@@ -472,7 +472,7 @@ bool DiscreteMixture::component_order_test() const
 
 {
   bool order = true;
-  register int i;
+  int i;
 
 
   for (i = 1;i < nb_component;i++) {
@@ -516,7 +516,7 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
 
 {
   bool status = true;
-  register int i , j , k;
+  int i , j , k;
   int nb_component = imixt.nb_component , inf_bound[DISCRETE_MIXTURE_NB_COMPONENT] ,
       sup_bound[DISCRETE_MIXTURE_NB_COMPONENT];
   double step , likelihood , previous_likelihood , max_likelihood = D_INF ,
@@ -722,7 +722,7 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
 
 {
   bool estimate[DISCRETE_MIXTURE_NB_COMPONENT];
-  register int i;
+  int i;
   DiscreteMixture *mixt;
 
 
@@ -760,7 +760,7 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
 
 {
   bool estimate[DISCRETE_MIXTURE_NB_COMPONENT];
-  register int i;
+  int i;
   const DiscreteParametric *pcomponent[DISCRETE_MIXTURE_NB_COMPONENT];
   DiscreteMixture *imixt , *mixt;
 
@@ -850,7 +850,7 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
 
 {
   bool status = true , estimate[DISCRETE_MIXTURE_NB_COMPONENT];
-  register int i;
+  int i;
   int nb_parameter[DISCRETE_MIXTURE_NB_COMPONENT + 1];
   double penalty , max_likelihood , likelihood[DISCRETE_MIXTURE_NB_COMPONENT + 1] ,
          penalized_likelihood[DISCRETE_MIXTURE_NB_COMPONENT + 1];
@@ -1078,7 +1078,7 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
 DiscreteMixtureData* DiscreteMixture::simulation(StatError &error , int nb_element) const
 
 {
-  register int i , j;
+  int i , j;
   int value;
   DiscreteMixtureData *mixt_histo;
 

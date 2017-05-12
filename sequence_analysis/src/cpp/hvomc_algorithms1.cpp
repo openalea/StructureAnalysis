@@ -71,7 +71,7 @@ double HiddenVariableOrderMarkov::likelihood_computation(const MarkovianSequence
                                                          double *posterior_probability , int index) const
 
 {
-  register int i , j , k , m;
+  int i , j , k , m;
   int nb_value , **pioutput;
   double likelihood = 0. , seq_likelihood , *forward , *auxiliary , norm , **proutput;
 
@@ -362,7 +362,7 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_esti
 
 {
   bool status;
-  register int i , j , k , m;
+  int i , j , k , m;
   int nb_terminal , max_nb_value , iter , **pioutput;
   double likelihood = D_INF , previous_likelihood , observation_likelihood , **forward , norm ,
          **predicted , buff , *backward , *auxiliary , ***state_sequence_count , diff , variance ,
@@ -1018,20 +1018,7 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_esti
                   hmarkov->continuous_parametric_process[i]->observation[j]->location = observation_reestim[i][j]->mean;
                 }
 
-                switch (common_dispersion) {
-
-                case false : {
-                  for (j = 0;j < hmarkov->nb_state;j++) {
-                    hmarkov->continuous_parametric_process[i]->observation[j]->dispersion = sqrt(observation_reestim[i][j]->variance);
-                    if (hmarkov->continuous_parametric_process[i]->observation[j]->dispersion /
-                        hmarkov->continuous_parametric_process[i]->observation[j]->location < GAUSSIAN_MIN_VARIATION_COEFF) {
-                      hmarkov->continuous_parametric_process[i]->observation[j]->dispersion = hmarkov->continuous_parametric_process[i]->observation[j]->location * GAUSSIAN_MIN_VARIATION_COEFF;
-                    }
-                  }
-                  break;
-                }
-
-                case true : {
+                if (common_dispersion) {
                   variance = 0.;
                   buff = 0.;
 
@@ -1050,8 +1037,16 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_esti
                   for (j = 0;j < hmarkov->nb_state;j++) {
                     hmarkov->continuous_parametric_process[i]->observation[j]->dispersion = sqrt(variance);
                   }
-                  break;
                 }
+
+                else {
+                  for (j = 0;j < hmarkov->nb_state;j++) {
+                    hmarkov->continuous_parametric_process[i]->observation[j]->dispersion = sqrt(observation_reestim[i][j]->variance);
+                    if (hmarkov->continuous_parametric_process[i]->observation[j]->dispersion /
+                        hmarkov->continuous_parametric_process[i]->observation[j]->location < GAUSSIAN_MIN_VARIATION_COEFF) {
+                      hmarkov->continuous_parametric_process[i]->observation[j]->dispersion = hmarkov->continuous_parametric_process[i]->observation[j]->location * GAUSSIAN_MIN_VARIATION_COEFF;
+                    }
+                  }
                 }
 
                 break;
@@ -1063,16 +1058,7 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_esti
                   hmarkov->continuous_parametric_process[i]->observation[j]->location = mean_direction[j][3];
                 }
 
-                switch (common_dispersion) {
-
-                case false : {
-                  for (j = 0;j < hmarkov->nb_state;j++) {
-                    hmarkov->continuous_parametric_process[i]->observation[j]->dispersion = von_mises_concentration_computation(mean_direction[j][2]);
-                  }
-                  break;
-                }
-
-                case true : {
+                if (common_dispersion) {
                   global_mean_direction = 0.;
                   buff = 0.;
 
@@ -1085,8 +1071,12 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_esti
                   for (j = 0;j < hmarkov->nb_state;j++) {
                     hmarkov->continuous_parametric_process[i]->observation[j]->dispersion = concentration;
                   }
-                  break;
                 }
+
+                else {
+                  for (j = 0;j < hmarkov->nb_state;j++) {
+                    hmarkov->continuous_parametric_process[i]->observation[j]->dispersion = von_mises_concentration_computation(mean_direction[j][2]);
+                  }
                 }
                 break;
               }
@@ -1450,7 +1440,7 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_stoc
 
 {
   bool status;
-  register int i , j , k , m;
+  int i , j , k , m;
   int nb_terminal , iter , nb_state_sequence , memory , *state_seq , *pstate ,
       ***state_sequence_count , nb_element , **pioutput;
   double likelihood = D_INF , previous_likelihood , observation_likelihood , **forward ,
@@ -2097,20 +2087,7 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_stoc
                   hmarkov->continuous_parametric_process[i]->observation[j]->location = observation_reestim[i][j]->mean;
                 }
 
-                switch (common_dispersion) {
-
-                case false : {
-                  for (j = 0;j < hmarkov->nb_state;j++) {
-                    hmarkov->continuous_parametric_process[i]->observation[j]->dispersion = sqrt(observation_reestim[i][j]->variance);
-                    if (hmarkov->continuous_parametric_process[i]->observation[j]->dispersion /
-                        hmarkov->continuous_parametric_process[i]->observation[j]->location < GAUSSIAN_MIN_VARIATION_COEFF) {
-                      hmarkov->continuous_parametric_process[i]->observation[j]->dispersion = hmarkov->continuous_parametric_process[i]->observation[j]->location * GAUSSIAN_MIN_VARIATION_COEFF;
-                    }
-                  }
-                  break;
-                }
-
-                case true : {
+                if (common_dispersion) {
                   variance = 0.;
                   nb_element = 0;
 
@@ -2129,8 +2106,16 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_stoc
                   for (j = 0;j < hmarkov->nb_state;j++) {
                     hmarkov->continuous_parametric_process[i]->observation[j]->dispersion = sqrt(variance);
                   }
-                  break;
                 }
+
+                else {
+                  for (j = 0;j < hmarkov->nb_state;j++) {
+                    hmarkov->continuous_parametric_process[i]->observation[j]->dispersion = sqrt(observation_reestim[i][j]->variance);
+                    if (hmarkov->continuous_parametric_process[i]->observation[j]->dispersion /
+                        hmarkov->continuous_parametric_process[i]->observation[j]->location < GAUSSIAN_MIN_VARIATION_COEFF) {
+                      hmarkov->continuous_parametric_process[i]->observation[j]->dispersion = hmarkov->continuous_parametric_process[i]->observation[j]->location * GAUSSIAN_MIN_VARIATION_COEFF;
+                    }
+                  }
                 }
                 break;
               }
@@ -2141,16 +2126,7 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_stoc
                   hmarkov->continuous_parametric_process[i]->observation[j]->location = mean_direction[j][3];
                 }
 
-                switch (common_dispersion) {
-
-                case false : {
-                  for (j = 0;j < hmarkov->nb_state;j++) {
-                    hmarkov->continuous_parametric_process[i]->observation[j]->dispersion = von_mises_concentration_computation(mean_direction[j][2]);
-                  }
-                  break;
-                }
-
-                case true : {
+                if (common_dispersion) {
                   global_mean_direction = 0.;
                   nb_element = 0;
 
@@ -2163,8 +2139,12 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_stoc
                   for (j = 0;j < hmarkov->nb_state;j++) {
                     hmarkov->continuous_parametric_process[i]->observation[j]->dispersion = concentration;
                   }
-                  break;
                 }
+
+                else {
+                  for (j = 0;j < hmarkov->nb_state;j++) {
+                    hmarkov->continuous_parametric_process[i]->observation[j]->dispersion = von_mises_concentration_computation(mean_direction[j][2]);
+                  }
                 }
                 break;
               }

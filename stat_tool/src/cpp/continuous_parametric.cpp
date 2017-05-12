@@ -121,7 +121,7 @@ void ContinuousParametric::copy(const ContinuousParametric &dist)
   correlation = dist.correlation;
 
   if (dist.cumul) {
-    register int i;
+    int i;
 
     cumul = new double[VON_MISES_NB_STEP];
 
@@ -193,7 +193,7 @@ ContinuousParametric* ContinuousParametric::parsing(StatError &error , ifstream 
   typedef tokenizer<char_separator<char>> tokenizer;
   char_separator<char> separator(" \t");
   bool status = true , lstatus;
-  register int i , j;
+  int i , j;
   continuous_parametric ident = GAUSSIAN;
   union {
     double shape;
@@ -843,7 +843,7 @@ ostream& ContinuousParametric::ascii_print(ostream &os , bool file_flag ,
 
 {
   if ((histo1) || (histo2)) {
-    register int i , j;
+    int i , j;
     int nb_step , width[5];
     double step , histo_scale , mass , value , *frequency , *dist_cumul , *histo_cumul;
     ios_base::fmtflags format_flags;
@@ -1416,7 +1416,7 @@ ostream& ContinuousParametric::spreadsheet_print(ostream &os , bool cumul_flag ,
 
 {
   if ((histo1) || (histo2)) {
-    register int i , j;
+    int i , j;
     int nb_step;
     double step , histo_scale , value , mass , *frequency , *dist_cumul , *histo_cumul;
 
@@ -1789,7 +1789,7 @@ bool ContinuousParametric::plot_print(const char *path , const Histogram *histo1
 
 {
   bool status = false;
-  register int i;
+  int i;
   int nb_step;
   double histo_scale , step , buff , value , max , *frequency;
   ofstream out_file(path);
@@ -2095,7 +2095,7 @@ bool ContinuousParametric::q_q_plot_print(const char *path , int nb_value ,
 
 {
   bool status = false;
-  register int i;
+  int i;
   double **qqplot;
   ofstream out_file(path);
 
@@ -2132,7 +2132,7 @@ void ContinuousParametric::plotable_write(SinglePlot &plot , const Histogram *hi
                                           const FrequencyDistribution *histo2)
 
 {
-  register int i;
+  int i;
   int nb_step;
   double histo_scale , step , buff , value , max , *frequency;
 
@@ -2417,7 +2417,7 @@ void ContinuousParametric::q_q_plotable_write(SinglePlot &plot , int nb_value ,
                                               double **empirical_cdf) const
 
 {
-  register int i;
+  int i;
   double **qqplot;
 
 
@@ -2758,7 +2758,7 @@ double ContinuousParametric::mass_computation(double inf , double sup) const
 void ContinuousParametric::von_mises_cumul_computation()
 
 {
-  register int i , j;
+  int i , j;
   int start;
   double step , value;
 
@@ -2845,7 +2845,7 @@ double** ContinuousParametric::q_q_plot_computation(int nb_value ,
                                                     double **empirical_cdf) const
 
 {
-  register int i , j;
+  int i , j;
   double step , value , current_cumul , previous_cumul , **qqplot;
 
 
@@ -2984,7 +2984,7 @@ double ContinuousParametric::sup_norm_distance_computation(ContinuousParametric 
 
 {
   bool crossing;
-  register int i;
+  int i;
   double min , max , step , value , buff , distance , max_absolute_diff , cumul1[2] , cumul2[2];
 
 # ifdef MESSAGE
@@ -3464,7 +3464,7 @@ double ContinuousParametric::sup_norm_distance_computation(ContinuousParametric 
 double Vectors::likelihood_computation(int variable , const ContinuousParametric &dist) const
 
 {
-  register int i;
+  int i;
   double mass , likelihood;
 
 
@@ -3560,7 +3560,7 @@ double Vectors::likelihood_computation(int variable , const ContinuousParametric
 double Vectors::gamma_estimation(int variable , ContinuousParametric *dist) const
 
 {
-  register int i;
+  int i;
   int zero_count;
   double buff , log_geometric_mean , diff , likelihood = D_INF;
 //  double variance;
@@ -3707,7 +3707,7 @@ double Vectors::gamma_estimation(int variable , ContinuousParametric *dist) cons
 double Vectors::inverse_gaussian_estimation(int variable , ContinuousParametric *dist) const
 
 {
-  register int i;
+  int i;
   double inverse_scale , likelihood = D_INF;
 
 
@@ -3797,7 +3797,7 @@ double Vectors::gaussian_estimation(int variable , ContinuousParametric *dist) c
 double Vectors::von_mises_estimation(int variable , ContinuousParametric *dist) const
 
 {
-  register int i;
+  int i;
   double *mean_direction , likelihood = D_INF;
 
 
@@ -3934,7 +3934,7 @@ double Vectors::continuous_parametric_estimation(int variable , continuous_param
 double ContinuousParametric::simulation()
 
 {
-  register int i;
+  int i;
   int start;
   double limit , value , step , current_cumul , previous_cumul;
 

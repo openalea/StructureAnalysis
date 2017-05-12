@@ -89,7 +89,7 @@ double Sequences::N_segmentation(int index , int nb_segment , segment_model *mod
 
 {
   bool **active_cell;
-  register int i , j , k , m;
+  int i , j , k , m;
   int seq_length , brank , previous_rank , count , nb_cell , *inf_bound_parameter ,
       *seq_index_parameter , *rank , *change_point , *psegment , ***optimal_length , ***optimal_rank;
   double buff , segmentation_likelihood , *nb_segmentation , **hyperparam , **seq_mean ,
@@ -1219,7 +1219,7 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
                                                        double likelihood) const
 
 {
-  register int i , j , k , m;
+  int i , j , k , m;
   int seq_length , count , *inf_bound_parameter , *seq_index_parameter , *change_point , *psegment ,
        **optimal_length;
   double buff , segmentation_likelihood , backward_max , **seq_mean , **hyperparam , **forward ,
@@ -1972,7 +1972,7 @@ bool Sequences::segment_profile_write(StatError &error , ostream &os , int iiden
 
 {
   bool status = true;
-  register int i , j;
+  int i , j;
   int index;
   double segment_length_max , likelihood = D_INF , segmentation_likelihood , **rank;
   Sequences *seq;
@@ -2257,7 +2257,7 @@ bool Sequences::segment_profile_plot_write(StatError &error , const char *prefix
 
 {
   bool status = true;
-  register int i , j , k , m;
+  int i , j , k , m;
   int index , seq_length , *seq_index_parameter;
   double segment_length_max , likelihood = D_INF , segmentation_likelihood , **rank;
   Sequences *seq;
@@ -2783,7 +2783,7 @@ MultiPlotSet* Sequences::segment_profile_plotable_write(StatError &error , int i
 
 {
   bool status = true;
-  register int i , j , k;
+  int i , j , k;
   int index , nb_plot_set , segmentation_index , seq_length;
   double segment_length_max , likelihood = D_INF , segmentation_likelihood , **rank;
   Sequences *seq;

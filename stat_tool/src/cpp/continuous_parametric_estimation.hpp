@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -77,7 +77,7 @@ void Vectors::gamma_estimation(Type **component_vector_count , int variable ,
                                ContinuousParametricProcess *process , int iter) const
 
 {
-  register int i , j;
+  int i , j;
   double buff , diff , log_geometric_mean , *zero_mass , *mean , *variance;
   Type *component_frequency;
 
@@ -318,7 +318,7 @@ void Vectors::tied_gamma_estimation(Type **component_vector_count , int variable
                                     tying_rule variance_factor , int iter) const
 
 {
-  register int i , j;
+  int i , j;
   double buff , diff , variance , log_geometric_mean , *mean , *factor;
   Type *component_frequency;
 
@@ -663,7 +663,7 @@ void Vectors::inverse_gaussian_estimation(Type **component_vector_count , int va
                                           ContinuousParametricProcess *process) const
 
 {
-  register int i , j;
+  int i , j;
   double *mean , *inverse_scale;
   Type *component_frequency;
 
@@ -772,7 +772,7 @@ void Vectors::tied_inverse_gaussian_estimation(Type **component_vector_count , i
                                                tying_rule variance_factor) const
 
 {
-  register int i , j;
+  int i , j;
   double inverse_scale , *mean , *factor;
   Type *component_frequency;
 
@@ -1060,7 +1060,7 @@ void Vectors::gaussian_estimation(Type **component_vector_count , int variable ,
                                   ContinuousParametricProcess *process) const
 
 {
-  register int i , j;
+  int i , j;
   double diff , *mean , *variance;
   Type *component_frequency;
 
@@ -1218,7 +1218,7 @@ void Vectors::tied_gaussian_estimation(Type **component_vector_count , int varia
                                        tying_rule variance_factor) const
 
 {
-  register int i , j;
+  int i , j;
   double diff , variance , *mean , *factor;
   Type *component_frequency;
 
@@ -1406,7 +1406,7 @@ void Vectors::von_mises_estimation(Type **component_vector_count , int variable 
                                    ContinuousParametricProcess *process) const
 
 {
-  register int i , j;
+  int i , j;
   double buff , global_mean_direction , concentration , **mean_direction;
   Type *component_frequency;
 

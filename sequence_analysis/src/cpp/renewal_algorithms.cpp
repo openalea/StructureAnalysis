@@ -60,7 +60,7 @@ namespace sequence_analysis {
 double TimeEvents::information_computation() const
 
 {
-  register int i;
+  int i;
   double information , buff;
 
 
@@ -98,7 +98,7 @@ double TimeEvents::information_computation() const
 double Renewal::likelihood_computation(const TimeEvents &timev) const
 
 {
-  register int i;
+  int i;
   double likelihood , buff;
 
 
@@ -138,7 +138,7 @@ void Renewal::expectation_step(const TimeEvents &timev ,
                                Reestimation<double> *inter_event_reestim) const
 
 {
-  register int i , j;
+  int i , j;
   int min_time , max_time , *ptime , *pnb_event , *pfrequency;
   double num , denom , *ifrequency , *pmass;
 
@@ -270,7 +270,7 @@ void Renewal::expectation_step(const TimeEvents &timev ,
                                duration_distribution_mean_estimator mean_estimator) const
 
 {
-  register int i , j;
+  int i , j;
   int max_time , offset , nb_value , *ptime , *pnb_event , *pfrequency;
   double complete_num , censored_num , denom , inter_event_mean , *ifrequency ,
          *lfrequency , *pmass;
@@ -529,7 +529,7 @@ Renewal* TimeEvents::estimation(StatError &error , bool display , process_type t
 
 {
   bool status = true;
-  register int i;
+  int i;
   int nb_likelihood_decrease;
   double likelihood , previous_likelihood , information , hlikelihood , inter_event_mean , *penalty;
   DiscreteParametric *pinter_ev;
@@ -899,7 +899,7 @@ Renewal* RenewalData::estimation(StatError &error , bool display ,
                                  penalty_type pen_type , side_effect outside) const
 
 {
-  register int i , j;
+  int i , j;
   int *psequence;
   DiscreteParametricModel *inter_event;
   Renewal *renew;
@@ -1063,7 +1063,7 @@ RenewalData* Renewal::simulation(StatError &error , process_type itype ,
 
 {
   bool status = true , compute;
-  register int i , j , k , m;
+  int i , j , k , m;
   int offset , time_interval , cumul_time , *ptime , *pnb_event , *psequence;
   Distribution *dtime;
   Renewal *renew;
@@ -1391,7 +1391,7 @@ RenewalIterator::RenewalIterator(Renewal *irenewal , int ilength)
 void RenewalIterator::copy(const RenewalIterator &iter)
 
 {
-  register int i;
+  int i;
   int *psequence , *isequence;
 
 
@@ -1462,7 +1462,7 @@ RenewalIterator& RenewalIterator::operator=(const RenewalIterator &iter)
 void RenewalIterator::simulation(int ilength , process_type type)
 
 {
-  register int i;
+  int i;
   int offset , *psequence;
 
 

@@ -148,7 +148,7 @@ RegressionKernel::RegressionKernel(parametric_function iident , int imin_value ,
 void RegressionKernel::copy(const RegressionKernel &regression)
 
 {
-  register int i;
+  int i;
 
 
   ident = regression.ident;
@@ -248,7 +248,7 @@ ostream& RegressionKernel::ascii_parameter_print(ostream &os) const
   }
 
   else if ((ident == LOGISTIC) || (ident == MONOMOLECULAR)) {
-    register int i;
+    int i;
 
 
     os << STAT_function_word[ident] << " " << STAT_word[STATW_FUNCTION];
@@ -325,7 +325,7 @@ ostream& RegressionKernel::ascii_formal_print(ostream &os) const
 ostream& RegressionKernel::ascii_print(ostream &os) const
 
 {
-  register int i;
+  int i;
   int buff , width[2];
   double *ppoint;
 
@@ -355,7 +355,7 @@ ostream& RegressionKernel::ascii_print(ostream &os) const
 ostream& RegressionKernel::spreadsheet_print(ostream &os) const
 
 {
-  register int i;
+  int i;
   double *ppoint;
 
 
@@ -383,7 +383,7 @@ bool RegressionKernel::plot_print(const char *path) const
 
 {
   bool status = false;
-  register int i;
+  int i;
   double *ppoint;
   ofstream out_file(path);
 
@@ -425,7 +425,7 @@ void RegressionKernel::plotable_write(SinglePlot &plot) const
   }
 
   else {
-    register int i;
+    int i;
     double *ppoint;
 
     ppoint = point;
@@ -445,7 +445,7 @@ void RegressionKernel::plotable_write(SinglePlot &plot) const
 void RegressionKernel::computation()
 
 {
-  register int i;
+  int i;
   double *ppoint;
 
 
@@ -488,7 +488,7 @@ void RegressionKernel::computation()
 double RegressionKernel::min_computation() const
 
 {
-  register int i;
+  int i;
   double min , *ppoint;
 
 
@@ -517,7 +517,7 @@ double RegressionKernel::min_computation() const
 double RegressionKernel::max_computation() const
 
 {
-  register int i;
+  int i;
   double max , *ppoint;
 
 
@@ -567,7 +567,7 @@ Regression::Regression(parametric_function iident , int explanatory_variable ,
 :RegressionKernel(iident , (int)vec.min_value[explanatory_variable] , (int)vec.max_value[explanatory_variable])
 
 {
-  register int i;
+  int i;
 
 
   vectors = vec.select_variable(explanatory_variable , response_variable);
@@ -592,7 +592,7 @@ Regression::Regression(parametric_function iident , int explanatory_variable ,
 void Regression::copy(const Regression &regression)
 
 {
-  register int i;
+  int i;
 
 
   if (regression.vectors) {
@@ -710,7 +710,7 @@ ostream& Regression::line_write(ostream &os) const
 ostream& Regression::ascii_write(ostream &os , bool exhaustive) const
 
 {
-  register int i;
+  int i;
   int buff , width[5];
   double t_value , residual_mean , residual_standard_deviation , *estimated_response ,
          *standard_residual , square_sum[3] , df[3] , mean_square[3] , standard_deviation[2];
@@ -1035,7 +1035,7 @@ bool Regression::spreadsheet_write(StatError &error , const string path) const
 
 {
   bool status;
-  register int i;
+  int i;
   double t_value , residual_mean , residual_standard_deviation , square_sum[3] ,
          df[3] , mean_square[3] , standard_deviation[2];
   Test *test;
@@ -1264,7 +1264,7 @@ bool Regression::plot_write(StatError &error , const char *prefix ,
 
 {
   bool status;
-  register int i , j , k;
+  int i , j , k;
   int **frequency;
   double residual_mean , residual_standard_deviation , min_standard_residual ,
          max_standard_residual , min_response , max_response , threshold ,
@@ -1463,7 +1463,7 @@ bool Regression::plot_write(StatError &error , const char *prefix ,
 MultiPlotSet* Regression::get_plotable() const
 
 {
-  register int i;
+  int i;
   int xmin , nb_plot;
   double ymin , min_response , max_response , residual_mean , residual_standard_deviation ,
          min_standard_residual , max_standard_residual , threshold , *standard_residual;
@@ -1627,7 +1627,7 @@ MultiPlotSet* Regression::get_plotable() const
 double Regression::regression_square_sum_computation() const
 
 {
-  register int i;
+  int i;
   double regression_square_sum , diff;
 
 
@@ -1650,7 +1650,7 @@ double Regression::regression_square_sum_computation() const
 void Regression::residual_computation()
 
 {
-  register int i;
+  int i;
 
 
   if (vectors->type[1] == INT_VALUE) {
@@ -1677,7 +1677,7 @@ void Regression::residual_computation()
 double Regression::residual_mean_computation() const
 
 {
-  register int i;
+  int i;
   double residual_mean;
 
 
@@ -1704,7 +1704,7 @@ double Regression::residual_mean_computation() const
 double Regression::residual_variance_computation(double residual_mean) const
 
 {
-  register int i;
+  int i;
   double residual_variance = D_DEFAULT , diff;
 
 
@@ -1732,7 +1732,7 @@ double Regression::residual_variance_computation(double residual_mean) const
 double Regression::residual_square_sum_computation() const
 
 {
-  register int i;
+  int i;
   double residual_square_sum;
 
 
@@ -1848,7 +1848,7 @@ Regression* Vectors::moving_average(StatError &error , int explanatory_variable 
 
 {
   bool status = true;
-  register int i , j , k;
+  int i , j , k;
   int width , min , max , min_index , max_index , value_index , *index;
   double norm , diff , local_variance , local_covariance , local_mean[2] , *ppoint ,
          *weight , **smoother_matrix;
@@ -2208,7 +2208,7 @@ Regression* Vectors::nearest_neighbor_smoother(StatError &error , int explanator
 
 {
   bool status = true , greater;
-  register int i , j , k;
+  int i , j , k;
   int nb_neighbor , min_index , max_index , value_index , value , frequency ,
       max_deviation , *index;
   double norm , var , diff , local_variance , local_covariance , local_mean[2] , *ppoint ,

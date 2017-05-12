@@ -76,7 +76,7 @@ void MarkovianSequences::gamma_estimation(Type ***state_sequence_count , int var
                                           ContinuousParametricProcess *process , int iter) const
 
 {
-  register int i , j , k;
+  int i , j , k;
   double buff , diff , log_geometric_mean , *zero_mass , *mean , *variance;
   Type *state_frequency;
 
@@ -306,7 +306,7 @@ void MarkovianSequences::zero_inflated_gamma_estimation(Type ***state_sequence_c
                                                         ContinuousParametricProcess *process , int iter) const
 
 {
-  register int i , j , k;
+  int i , j , k;
   double buff , diff , log_geometric_mean , *zero_mass , *mean , *variance;
   Type *state_frequency;
 
@@ -531,7 +531,7 @@ void MarkovianSequences::inverse_gaussian_estimation(Type ***state_sequence_coun
                                                      ContinuousParametricProcess *process) const
 
 {
-  register int i , j , k;
+  int i , j , k;
   double *mean , *inverse_scale;
   Type *state_frequency;
 
@@ -645,7 +645,7 @@ void MarkovianSequences::gaussian_estimation(Type ***state_sequence_count , int 
                                              ContinuousParametricProcess *process) const
 
 {
-  register int i , j , k;
+  int i , j , k;
   double diff , *mean , *variance;
   Type *state_frequency;
 
@@ -812,7 +812,7 @@ void MarkovianSequences::von_mises_estimation(Type ***state_sequence_count , int
                                               ContinuousParametricProcess *process) const
 
 {
-  register int i , j , k;
+  int i , j , k;
   double buff , global_mean_direction , concentration , **mean_direction;
   Type *state_frequency;
 
@@ -958,7 +958,7 @@ void MarkovianSequences::linear_model_estimation(Type ***state_sequence_count , 
                                                  ContinuousParametricProcess *process) const
 
 {
-  register int i , j , k;
+  int i , j , k;
   double diff , threshold , *mean , *index_parameter_mean , *index_parameter_variance;
   long double *variance , *covariance , *residual_square_sum;
   Type *state_frequency;
@@ -1321,7 +1321,7 @@ void MarkovianSequences::autoregressive_model_estimation(Type ***state_sequence_
                                                          ContinuousParametricProcess *process) const
 
 {
-  register int i , j , k;
+  int i , j , k;
   double diff , shifted_diff , residual_square_sum , *mean , *square_sum ,
          *shifted_square_sum , *autocovariance;
   Type *state_frequency;

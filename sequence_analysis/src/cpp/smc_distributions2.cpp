@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -61,7 +61,7 @@ namespace sequence_analysis {
 void SemiMarkovChain::state_nb_pattern_mixture(int state , count_pattern pattern)
 
 {
-  register int i , j , k , m;
+  int i , j , k , m;
   int max_length , index_nb_pattern , previous_nb_pattern , increment;
   double sum , *pmass , *lmass , **state_out , *pstate_out , ***state_in;
   Distribution *pdist;
@@ -344,7 +344,7 @@ void SemiMarkovChain::state_nb_pattern_mixture(int state , count_pattern pattern
 void SemiMarkov::output_nb_run_mixture(int variable , int output)
 
 {
-  register int i , j , k , m , n;
+  int i , j , k , m , n;
   int max_length , index_nb_pattern , min , max;
   double sum0 , sum1 , *pmass , *lmass , **state_out , ***state_in , ***state_nb_run;
   Distribution *nb_run;
@@ -663,7 +663,7 @@ void SemiMarkov::output_nb_run_mixture(int variable , int output)
 void SemiMarkov::output_nb_occurrence_mixture(int variable , int output)
 
 {
-  register int i , j , k , m , n;
+  int i , j , k , m , n;
   int max_length , min , max;
   double sum , *pmass , *omass , *lmass , **state_out , ***state_in;
   Distribution *nb_occurrence;
@@ -907,7 +907,7 @@ void SemiMarkov::characteristic_computation(int length , bool counting_flag , in
 {
   if (nb_component > 0) {
     bool computation[NB_OUTPUT_PROCESS + 1];
-    register int i , j , k;
+    int i , j , k;
     double *memory;
     DiscreteParametric dlength(UNIFORM , length , length , D_DEFAULT , D_DEFAULT);
 
@@ -1094,7 +1094,7 @@ void SemiMarkov::characteristic_computation(const SemiMarkovData &seq , bool cou
 {
   if (nb_component > 0) {
     bool computation[NB_OUTPUT_PROCESS + 1];
-    register int i , j , k;
+    int i , j , k;
     int seq_variable;
     double *memory;
     Distribution dlength(*(seq.length_distribution));

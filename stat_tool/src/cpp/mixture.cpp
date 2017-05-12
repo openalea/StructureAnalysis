@@ -91,7 +91,7 @@ Mixture::Mixture()
 Mixture::Mixture(int inb_component , int inb_output_process , int *nb_value)
 
 {
-  register int i;
+  int i;
 
 
   mixture_data = NULL;
@@ -145,7 +145,7 @@ Mixture::Mixture(int inb_component , int ident , double mean , double standard_d
                  bool tied_mean , tying_rule variance_factor)
 
 {
-  register int i , j;
+  int i , j;
   ContinuousParametric **observation;
 
 
@@ -236,7 +236,7 @@ Mixture::Mixture(const DiscreteParametric *iweight , int inb_output_process ,
                  ContinuousParametricProcess **continuous_parametric_observation)
 
 {
-  register int i;
+  int i;
 
 
   mixture_data = NULL;
@@ -282,7 +282,7 @@ Mixture::Mixture(const DiscreteParametric *iweight , int inb_output_process ,
 void Mixture::copy(const Mixture &mixt , bool data_flag)
 
 {
-  register int i;
+  int i;
 
 
   if ((data_flag) && (mixt.mixture_data)) {
@@ -360,7 +360,7 @@ void Mixture::copy(const Mixture &mixt , bool data_flag)
 void Mixture::remove()
 
 {
-  register int i;
+  int i;
 
 
   delete mixture_data;
@@ -571,7 +571,7 @@ MixtureData* Mixture::extract_data(StatError &error) const
 Mixture* Mixture::thresholding(double min_probability) const
 
 {
-  register int i;
+  int i;
   Mixture *mixt;
 
 
@@ -607,7 +607,7 @@ Mixture* Mixture::ascii_read(StatError &error , const string path , double cumul
   typedef tokenizer<char_separator<char>> tokenizer;
   char_separator<char> separator(" \t");
   bool status , lstatus;
-  register int i;
+  int i;
   int line , read_line , nb_component , value , nb_output_process , index;
   observation_process obs_type;
   double proba , cumul;
@@ -1134,7 +1134,7 @@ ostream& Mixture::ascii_write(ostream &os , const MixtureData *vec ,
                                bool exhaustive , bool file_flag) const
 
 {
-  register int i , j , k;
+  int i , j , k;
   int buff , width , variable;
   double mean , **distance;
   FrequencyDistribution *marginal_dist = NULL , **observation_dist = NULL;
@@ -1476,7 +1476,7 @@ bool Mixture::ascii_write(StatError &error , const string path ,
 ostream& Mixture::spreadsheet_write(ostream &os , const MixtureData *vec) const
 
 {
-  register int i , j , k;
+  int i , j , k;
   int variable;
   double **distance;
   FrequencyDistribution *marginal_dist = NULL , **observation_dist = NULL;
@@ -1709,7 +1709,7 @@ bool Mixture::plot_write(const char *prefix , const char *title ,
 
 {
   bool status;
-  register int i;
+  int i;
   int variable , nb_value = I_DEFAULT;
   double *empirical_cdf[2];
   FrequencyDistribution *marginal_dist = NULL , **observation_dist = NULL;
@@ -1879,7 +1879,7 @@ bool Mixture::plot_write(StatError &error , const char *prefix ,
 MultiPlotSet* Mixture::get_plotable(const MixtureData *vec) const
 
 {
-  register int i , j;
+  int i , j;
   int nb_plot_set , index , variable;
   FrequencyDistribution *marginal_dist = NULL , **observation_dist = NULL;
   Histogram *marginal_histo = NULL , **observation_histo = NULL;
@@ -2054,7 +2054,7 @@ MultiPlotSet* Mixture::get_plotable() const
 int Mixture::nb_parameter_computation(double min_probability) const
 
 {
-  register int i;
+  int i;
   int nb_parameter = nb_component - 1;
 
 
@@ -2166,7 +2166,7 @@ MixtureData::MixtureData(const Vectors &vec , vector_transformation transform)
 void MixtureData::copy(const MixtureData &vec , bool model_flag)
 
 {
-  register int i , j;
+  int i , j;
 
 
   if ((model_flag) && (vec.mixture)) {
@@ -2255,7 +2255,7 @@ void MixtureData::copy(const MixtureData &vec , bool model_flag)
 void MixtureData::remove()
 
 {
-  register int i , j;
+  int i , j;
 
 
   delete mixture;
@@ -2338,7 +2338,7 @@ MixtureData& MixtureData::operator=(const MixtureData &vec)
 void MixtureData::state_variable_init(variable_nature itype)
 
 {
-  register int i , j;
+  int i , j;
 
 
   if (itype != type[0]) {
@@ -2680,7 +2680,7 @@ MultiPlotSet* MixtureData::get_plotable() const
 double MixtureData::information_computation() const
 
 {
-  register int i;
+  int i;
   double information = 0.;
 
 
@@ -2710,7 +2710,7 @@ double MixtureData::information_computation() const
 void MixtureData::observation_frequency_distribution_computation(int variable , int nb_component)
 
 {
-  register int i , j;
+  int i , j;
 
 
   // initialization of the observation frequency distributions
@@ -2752,7 +2752,7 @@ void MixtureData::build_observation_frequency_distribution(int nb_component)
 
 {
   if ((nb_variable > 1) && (!observation_distribution)) {
-    register int i , j;
+    int i , j;
 
 
     observation_distribution = new FrequencyDistribution**[nb_variable];
@@ -2790,7 +2790,7 @@ void MixtureData::build_observation_histogram(int variable , int nb_component , 
 
 {
   if ((!observation_histogram[variable]) || (bin_width != observation_histogram[variable][0]->bin_width)) {
-    register int i , j;
+    int i , j;
     double imin_value;
 
 
@@ -2907,7 +2907,7 @@ void MixtureData::build_observation_histogram(int nb_component)
 
 {
   if ((nb_variable > 1) && (!observation_histogram)) {
-    register int i;
+    int i;
 
 
     observation_histogram = new Histogram**[nb_variable];

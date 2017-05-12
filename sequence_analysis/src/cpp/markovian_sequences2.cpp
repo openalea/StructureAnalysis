@@ -71,7 +71,7 @@ namespace sequence_analysis {
 ostream& MarkovianSequences::ascii_write(ostream &os , bool exhaustive , bool comment_flag) const
 
 {
-  register int i , j , k;
+  int i , j , k;
   int *int_value , *pint_value;
   double mean , variance , median , lower_quartile , upper_quartile , *real_value , *preal_value;
 
@@ -475,7 +475,7 @@ bool MarkovianSequences::spreadsheet_write(StatError &error , const string path)
 
 {
   bool status;
-  register int i , j , k;
+  int i , j , k;
   int *int_value , *pint_value;
   double mean , variance , median , lower_quartile , upper_quartile , *real_value , *preal_value;
   Curves *smoothed_curves;
@@ -663,7 +663,7 @@ bool MarkovianSequences::plot_print(const char *prefix , const char *title , int
 
 {
   bool status;
-  register int i;
+  int i;
   int nb_histo;
   const FrequencyDistribution *phisto[1];
   ostringstream data_file_name[2];
@@ -867,7 +867,7 @@ bool MarkovianSequences::plot_write(StatError &error , const char *prefix ,
 
 {
   bool status , start;
-  register int i , j;
+  int i , j;
   int max_frequency[NB_OUTPUT];
   ostringstream data_file_name[NB_OUTPUT];
 
@@ -1159,7 +1159,7 @@ void MarkovianSequences::plotable_write(MultiPlotSet &plot , int &index , int va
 MultiPlotSet* MarkovianSequences::get_plotable() const
 
 {
-  register int i , j;
+  int i , j;
   int nb_plot_set , index_length , index , max_frequency;
   ostringstream title , legend;
   MultiPlotSet *plot_set;
@@ -1345,7 +1345,7 @@ ostream& MarkovianSequences::linear_model_spreadsheet_print(ostream &os , int va
 
 {
   bool *used_sequence;
-  register int i , j , k , m , n , r;
+  int i , j , k , m , n , r;
   int frequency , *index;
   double buff;
 
@@ -1683,7 +1683,7 @@ bool MarkovianSequences::linear_model_plot_print(const char *prefix , const char
 
 {
   bool status = false;
-  register int i , j;
+  int i , j;
   int process_index , *state_min_index_parameter , *state_max_index_parameter , *pstate;
   double buff , *state_min_value , *state_max_value;
   ostringstream data_file_name[NB_STATE * 2 + 1];
@@ -2174,7 +2174,7 @@ void MarkovianSequences::linear_model_plotable_write(MultiPlotSet &plot , int &i
 
 {
   bool status = false;
-  register int i , j;
+  int i , j;
   int process_index , plot_offset , *state_min_index_parameter , *state_max_index_parameter , *pstate;
   double buff , *state_min_value , *state_max_value;
   ostringstream title , legend;
@@ -2603,7 +2603,7 @@ ostream& MarkovianSequences::autoregressive_model_ascii_print(ostream &os , int 
                                                               bool file_flag) const
 
 {
-  register int i , j;
+  int i , j;
   int max_lag , width[5];
   double standard_normal_value , *confidence_limit;
   Correlation *correl;
@@ -2689,7 +2689,7 @@ ostream& MarkovianSequences::autoregressive_model_spreadsheet_print(ostream &os 
                                                                     ContinuousParametricProcess *process) const
 
 {
-  register int i , j;
+  int i , j;
   int max_lag;
   double standard_normal_value , confidence_limit;
   Correlation *correl;
@@ -2755,7 +2755,7 @@ bool MarkovianSequences::autoregressive_model_plot_print(const char *prefix , co
 
 {
   bool status = false , start;
-  register int i , j;
+  int i , j;
   int max_lag;
   double standard_normal_value , confidence_limit;
   Correlation **correl;
@@ -2897,7 +2897,7 @@ void MarkovianSequences::autoregressive_model_plotable_write(MultiPlotSet &plot 
 
 {
   bool status = false;
-  register int i , j;
+  int i , j;
   int max_lag;
   double standard_normal_value , confidence_limit;
   Correlation *correl;
@@ -2987,7 +2987,7 @@ bool MarkovianSequences::mtg_write(StatError &error , const string path , variab
 
 {
   bool status;
-  register int i , j , k , m;
+  int i , j , k , m;
   ofstream out_file(path.c_str());
 
 

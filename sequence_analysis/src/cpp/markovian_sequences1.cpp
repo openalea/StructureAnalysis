@@ -85,7 +85,7 @@ MarkovianSequences::MarkovianSequences()
 void MarkovianSequences::init()
 
 {
-  register int i;
+  int i;
 
 
   min_interval = new double[nb_variable];
@@ -116,7 +116,7 @@ MarkovianSequences::MarkovianSequences(const Sequences &seq)
 :Sequences(seq)
 
 {
-  register int i;
+  int i;
 
 
   init();
@@ -143,7 +143,7 @@ MarkovianSequences::MarkovianSequences(const MarkovianSequences &seq , bool *aux
 :Sequences(seq , auxiliary)
 
 {
-  register int i , j;
+  int i , j;
 
 
   min_interval = new double[nb_variable];
@@ -188,7 +188,7 @@ void MarkovianSequences::copy(const MarkovianSequences &seq , initial_run param)
 
 {
   bool initial_run_flag;
-  register int i , j;
+  int i , j;
 
 
   min_interval = new double[nb_variable];
@@ -301,7 +301,7 @@ void MarkovianSequences::copy(const MarkovianSequences &seq , initial_run param)
 void MarkovianSequences::reverse(const MarkovianSequences &seq)
 
 {
-  register int i , j;
+  int i , j;
 
 
   min_interval = new double[nb_variable];
@@ -389,7 +389,7 @@ void MarkovianSequences::add_state_variable(const MarkovianSequences &seq , init
 
 {
   bool initial_run_flag;
-  register int i;
+  int i;
 
 
   min_interval = new double[nb_variable];
@@ -489,7 +489,7 @@ MarkovianSequences::MarkovianSequences(const MarkovianSequences &seq , sequence_
 void MarkovianSequences::remove()
 
 {
-  register int i , j;
+  int i , j;
 
 
   delete [] min_interval;
@@ -583,7 +583,7 @@ MarkovianSequences& MarkovianSequences::operator=(const MarkovianSequences &seq)
 void MarkovianSequences::state_variable_init(variable_nature itype)
 
 {
-  register int i , j;
+  int i , j;
 
 
   if (itype != type[0]) {
@@ -769,7 +769,7 @@ MarkovianSequences* MarkovianSequences::merge(StatError &error , int nb_sample ,
 
 {
   bool status = true;
-  register int i , j , k , m , n , p , q;
+  int i , j , k , m , n , p , q;
   int inb_sequence , cumul_nb_sequence , nb_histo , *ilength , *iidentifier ,
       **ivertex_identifier;
   const FrequencyDistribution **phisto;
@@ -1166,7 +1166,7 @@ MarkovianSequences* MarkovianSequences::merge(StatError &error , int nb_sample ,
                                               const vector<MarkovianSequences> iseq) const
 
 {
-  register int i;
+  int i;
   MarkovianSequences *seq;
   const MarkovianSequences **pseq;
 
@@ -1205,7 +1205,7 @@ MarkovianSequences* MarkovianSequences::cluster(StatError &error , int variable 
 
 {
   bool status = true;
-  register int i;
+  int i;
   MarkovianSequences *seq;
 
 
@@ -1283,7 +1283,7 @@ MarkovianSequences* MarkovianSequences::transcode(StatError &error , int ivariab
 
 {
   bool status = true , *presence;
-  register int i;
+  int i;
   int variable , offset , min_category , max_category;
   variable_nature *itype;
   MarkovianSequences *seq;
@@ -1367,15 +1367,13 @@ MarkovianSequences* MarkovianSequences::transcode(StatError &error , int ivariab
     }
 
     if (status) {
-      switch (add_variable) {
-      case false :
-        variable = ivariable;
-        offset = 0;
-        break;
-      case true :
+      if (add_variable) {
         variable = 0;
         offset = 1;
-        break;
+      }
+      else {
+        variable = ivariable;
+        offset = 0;
       }
 
       itype = new variable_nature[nb_variable + offset];
@@ -1446,7 +1444,7 @@ MarkovianSequences* MarkovianSequences::transcode(StatError &error ,
                                                   const CategoricalSequenceProcess *process) const
 
 {
-  register int i , j;
+  int i , j;
   int *category;
   MarkovianSequences *seq;
 
@@ -1485,7 +1483,7 @@ MarkovianSequences* MarkovianSequences::consecutive_values(StatError &error , bo
 
 {
   bool status = true;
-  register int i , j;
+  int i , j;
   int variable , offset , max , *category;
   variable_nature *itype;
   MarkovianSequences *seq;
@@ -1559,15 +1557,13 @@ MarkovianSequences* MarkovianSequences::consecutive_values(StatError &error , bo
     cout << endl;
 #   endif
 
-    switch (add_variable) {
-    case false :
-      variable = ivariable;
-      offset = 0;
-      break;
-    case true :
+    if (add_variable) {
       variable = 0;
       offset = 1;
-      break;
+    }
+    else {
+      variable = ivariable;
+      offset = 0;
     }
 
     itype = new variable_nature[nb_variable + offset];
@@ -1619,7 +1615,7 @@ MarkovianSequences* MarkovianSequences::cluster(StatError &error , int ivariable
 
 {
   bool status = true;
-  register int i , j , k;
+  int i , j , k;
   int variable , offset , *category , *limit;
   variable_nature *itype;
   MarkovianSequences *seq;
@@ -1682,15 +1678,13 @@ MarkovianSequences* MarkovianSequences::cluster(StatError &error , int ivariable
         }
       }
 
-      switch (add_variable) {
-      case false :
-        variable = ivariable;
-        offset = 0;
-        break;
-      case true :
+      if (add_variable) {
         variable = 0;
         offset = 1;
-        break;
+      }
+      else {
+        variable = ivariable;
+        offset = 0;
       }
 
       itype = new variable_nature[nb_variable + offset];
@@ -1767,7 +1761,7 @@ MarkovianSequences* MarkovianSequences::cluster(StatError &error , int variable 
 
 {
   bool status = true;
-  register int i;
+  int i;
   double *limit;
   MarkovianSequences *seq;
 
@@ -1943,7 +1937,7 @@ MarkovianSequences* MarkovianSequences::select_variable(StatError &error , int i
 
 {
   bool status = true , *selected_variable;
-  register int i;
+  int i;
   int bnb_variable , *variable;
   variable_nature *itype;
   MarkovianSequences *seq;
@@ -2059,7 +2053,7 @@ MarkovianSequences* MarkovianSequences::select_variable(StatError &error , int i
 MarkovianSequences* MarkovianSequences::remove_variable_1() const
 
 {
-  register int i;
+  int i;
   int *variable;
   variable_nature *itype;
   MarkovianSequences *seq;
@@ -2109,7 +2103,7 @@ MarkovianSequences* MarkovianSequences::merge_variable(StatError &error , int nb
 
 {
   bool status = true;
-  register int i , j , k , m;
+  int i , j , k , m;
   int inb_variable , *iidentifier , **ivertex_identifier;
   variable_nature *itype;
   MarkovianSequences *seq;
@@ -2363,7 +2357,7 @@ MarkovianSequences* MarkovianSequences::merge_variable(StatError &error , int nb
                                                        const vector<MarkovianSequences> iseq , int ref_sample) const
 
 {
-  register int i;
+  int i;
   MarkovianSequences *seq;
   const MarkovianSequences **pseq;
 
@@ -2397,7 +2391,7 @@ MarkovianSequences* MarkovianSequences::merge_variable(StatError &error , int nb
  MarkovianSequences* MarkovianSequences::initial_run_computation(StatError &error) const
 
 {
-  register int i;
+  int i;
   MarkovianSequences *seq;
 
 
@@ -2440,7 +2434,7 @@ MarkovianSequences* MarkovianSequences::add_absorbing_run(StatError &error , int
 
 {
   bool status = true , initial_run_flag;
-  register int i , j , k;
+  int i , j , k;
   int inb_variable , end_value , *ilength;
   double mean , variance , limit , *standard_deviation;
   variable_nature *itype;
@@ -2468,13 +2462,11 @@ MarkovianSequences* MarkovianSequences::add_absorbing_run(StatError &error , int
   }
 
   if (status) {
-    switch (add_variable) {
-    case false :
-      inb_variable = nb_variable;
-      break;
-    case true :
+    if (add_variable) {
       inb_variable = nb_variable + 1;
-      break;
+    }
+    else {
+      inb_variable = nb_variable;
     }
 
     itype = new variable_nature[inb_variable];
@@ -2676,7 +2668,7 @@ MarkovianSequences* MarkovianSequences::build_auxiliary_variable(DiscreteParamet
 
 {
   bool *auxiliary;
-  register int i , j , k , m;
+  int i , j , k , m;
   int *pstate;
   double *mean;
   MarkovianSequences *seq;
@@ -2863,7 +2855,7 @@ MarkovianSequences* MarkovianSequences::residual_sequences(CategoricalSequencePr
                                                            ContinuousParametricProcess **continuous_process) const
 
 {
-  register int i , j , k;
+  int i , j , k;
   int *pstate;
   double *mean;
   variable_nature *itype;
@@ -3133,7 +3125,7 @@ MarkovianSequences* MarkovianSequences::residual_sequences(CategoricalSequencePr
 MarkovianSequences* MarkovianSequences::split(StatError &error , int step) const
 
 {
-  register int i , j , k , m;
+  int i , j , k , m;
   int inb_sequence , last_length , nb_segment , *ilength , *pindex_param , *cindex_param ,
       *pisequence , *cisequence;
   double *prsequence , *crsequence;
@@ -3250,7 +3242,7 @@ MarkovianSequences* MarkovianSequences::split(StatError &error , int step) const
 int MarkovianSequences::cumulative_distribution_function_computation(int variable , double **cdf) const
 
 {
-  register int i , j , k;
+  int i , j , k;
   int cumul , int_min , int_value , frequency;
   double real_min , real_value;
 
@@ -3384,7 +3376,7 @@ int MarkovianSequences::cumulative_distribution_function_computation(int variabl
                                                                      double **cdf) const
 
 {
-  register int i , j , k;
+  int i , j , k;
   int cumul , int_min , int_value , frequency;
   double real_min , real_value;
 
@@ -3517,7 +3509,7 @@ void MarkovianSequences::min_interval_computation(int variable)
 
   else if (type[variable] != AUXILIARY) {
     bool *selected_value;
-    register int i , j , k , m;
+    int i , j , k , m;
     int int_min , int_value , nb_value , max_frequency , *frequency , *index;
     double real_min , real_value;
 
@@ -3681,7 +3673,7 @@ void MarkovianSequences::min_interval_computation(int variable)
 double MarkovianSequences::iid_information_computation() const
 
 {
-  register int i;
+  int i;
   double information = 0.;
 
 
@@ -3711,7 +3703,7 @@ double MarkovianSequences::iid_information_computation() const
 void MarkovianSequences::self_transition_computation(int state)
 
 {
-  register int i , j;
+  int i , j;
   int num , denom;
 
 
@@ -3764,7 +3756,7 @@ void MarkovianSequences::self_transition_computation()
 
 {
   if (!self_transition) {
-    register int i;
+    int i;
 
 
     state_variable_init();
@@ -3791,21 +3783,19 @@ void MarkovianSequences::self_transition_computation(bool *homogeneity)
 
 {
   if (!self_transition) {
-    register int i;
+    int i;
 
 
     state_variable_init();
     self_transition = new SelfTransition*[marginal_distribution[0]->nb_value];
 
     for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
-      switch (homogeneity[i]) {
-      case false :
+      if (homogeneity[i]) {
+        self_transition[i] = NULL;
+      }
+      else {
         self_transition[i] = new SelfTransition(max_length - 1);
         self_transition_computation(i);
-        break;
-      case true :
-        self_transition[i] = NULL;
-        break;
       }
     }
   }
@@ -3824,7 +3814,7 @@ void MarkovianSequences::self_transition_computation(bool *homogeneity)
 Distribution* MarkovianSequences::weight_computation() const
 
 {
-  register int i;
+  int i;
   Distribution *weight;
 
 
@@ -3862,7 +3852,7 @@ void MarkovianSequences::observation_frequency_distribution_computation(int vari
                                                                         int nb_state)
 
 {
-  register int i , j;
+  int i , j;
   int *pstate , *poutput;
 
 
@@ -3914,7 +3904,7 @@ void MarkovianSequences::build_observation_frequency_distribution(int nb_state)
 
 {
   if ((nb_variable > 1) && (!observation_distribution)) {
-    register int i , j;
+    int i , j;
 
 
     observation_distribution = new FrequencyDistribution**[nb_variable];
@@ -3952,7 +3942,7 @@ void MarkovianSequences::build_observation_histogram(int variable , int nb_state
 
 {
   if ((!observation_histogram[variable]) || (bin_width != observation_histogram[variable][0]->bin_width)) {
-    register int i , j;
+    int i , j;
     int *pstate , *pioutput;
     double imin_value , *proutput;
 
@@ -4092,7 +4082,7 @@ void MarkovianSequences::build_observation_histogram(int nb_state)
 
 {
   if ((nb_variable > 1) && (!observation_histogram)) {
-    register int i;
+    int i;
 
 
     observation_histogram = new Histogram**[nb_variable];
@@ -4185,7 +4175,7 @@ bool MarkovianSequences::test_hidden(int variable) const
 
   if ((variable > 0) && (type[variable] == INT_VALUE)) {
     bool **occurrence;
-    register int i , j;
+    int i , j;
     int nb_occurrence , *pstate , *poutput;
 
 
@@ -4243,7 +4233,7 @@ bool MarkovianSequences::test_hidden(int variable) const
 void MarkovianSequences::build_index_value(int variable)
 
 {
-  register int i , j;
+  int i , j;
   int total , *frequency;
 
 
@@ -4292,7 +4282,7 @@ void MarkovianSequences::build_index_value(int variable)
 void MarkovianSequences::build_explicit_index_value(int variable)
 
 {
-  register int i , j , k , m;
+  int i , j , k , m;
   int total , *frequency , *index;
 
 
@@ -4367,7 +4357,7 @@ void MarkovianSequences::build_first_occurrence_frequency_distribution(int varia
 
 {
   bool *occurrence;
-  register int i , j;
+  int i , j;
   int nb_value , *pisequence;
   FrequencyDistribution **first_occurrence;
 
@@ -4454,7 +4444,7 @@ void MarkovianSequences::build_first_occurrence_frequency_distribution(int varia
 void MarkovianSequences::build_recurrence_time_frequency_distribution(int variable)
 
 {
-  register int i , j;
+  int i , j;
   int *index , *pisequence;
   FrequencyDistribution **recurrence_time;
 
@@ -4539,7 +4529,7 @@ void MarkovianSequences::build_sojourn_time_frequency_distribution(int variable 
 } */
 
 {
-  register int i , j;
+  int i , j;
   int run_length , *pisequence;
   FrequencyDistribution **sojourn_time , **initial_run , **final_run;
 
@@ -4657,7 +4647,7 @@ void MarkovianSequences::build_sojourn_time_frequency_distribution(int variable 
 void MarkovianSequences::sojourn_time_frequency_distribution_computation(int variable)
 
 {
-  register int i , j;
+  int i , j;
   int run_length , *pisequence;
 
 
@@ -4764,7 +4754,7 @@ void MarkovianSequences::censored_sojourn_time_frequency_distribution_computatio
                                                                                   FrequencyDistribution **single_run) const
 
 {
-  register int i , j;
+  int i , j;
   int *pisequence;
 
 
@@ -4850,7 +4840,7 @@ void MarkovianSequences::censored_sojourn_time_frequency_distribution_computatio
 void MarkovianSequences::build_nb_run_frequency_distribution(int variable)
 
 {
-  register int i , j;
+  int i , j;
   int *pisequence , *count;
   FrequencyDistribution **nb_run;
 
@@ -4936,7 +4926,7 @@ void MarkovianSequences::build_nb_run_frequency_distribution(int variable)
 void MarkovianSequences::build_nb_occurrence_frequency_distribution(int variable)
 
 {
-  register int i , j;
+  int i , j;
   int *pisequence , *count;
   FrequencyDistribution **nb_occurrence;
 
@@ -5024,7 +5014,7 @@ void MarkovianSequences::build_characteristic(int variable , bool sojourn_time_f
                                               bool initial_run_flag)
 
 {
-  register int i , j;
+  int i , j;
   bool build;
 
 
@@ -5063,13 +5053,11 @@ void MarkovianSequences::build_characteristic(int variable , bool sojourn_time_f
         }
         sojourn_time_frequency_distribution_computation(i); */
 
-        switch (sojourn_time_flag) {
-        case false :
-          sojourn_time_frequency_distribution_computation(i);
-          break;
-        case true :
+        if (sojourn_time_flag) {
           build_sojourn_time_frequency_distribution(i , initial_run_flag);
-          break;
+        }
+        else {
+          sojourn_time_frequency_distribution_computation(i);
         }
 
         if (max_length <= COUNTING_FREQUENCY_MAX_LENGTH) {
@@ -5104,7 +5092,7 @@ bool MarkovianSequences::word_count(StatError &error , bool display , int variab
 
 {
   bool status = true , *selected_word;
-  register int i , j , k;
+  int i , j , k;
   int nb_state , nb_word , max_nb_word , value , max_frequency , total_frequency , width ,
       *power , *frequency , *word_value , *pisequence , *index , **word;
   double nb_word_bound , *probability;
@@ -5321,7 +5309,7 @@ void MarkovianSequences::autocorrelation_computation(Correlation &correl , int s
 
 {
   if (marginal_distribution[0]->frequency[state] >= AUTOCORRELATION_MIN_FREQUENCY) {
-    register int i , j , k;
+    int i , j , k;
     int max_lag;
     double mean , variance , diff;
 

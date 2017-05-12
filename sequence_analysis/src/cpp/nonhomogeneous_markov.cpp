@@ -88,7 +88,7 @@ Function::Function(parametric_function iident , int length , double *iparameter)
 :RegressionKernel(iident , 0 , length - 1)
 
 {
-  register int i;
+  int i;
 
 
   for (i = 0;i < nb_parameter;i++) {
@@ -115,7 +115,7 @@ Function::Function(parametric_function iident , int length)
 :RegressionKernel(iident , 0 , length - 1)
 
 {
-  register int i;
+  int i;
 
 
   residual = new double[max_value + 1];
@@ -142,7 +142,7 @@ void Function::copy(const Function &function)
 
 {
   if ((function.residual) && (function.frequency)) {
-    register int i;
+    int i;
 
 
     residual = new double[max_value + 1];
@@ -255,7 +255,7 @@ Function* Function::parsing(StatError &error , ifstream &in_file , int &line ,
   typedef tokenizer<char_separator<char>> tokenizer;
   char_separator<char> separator(" \t");
   bool status = true , lstatus;
-  register int i , j;
+  int i , j;
   int nb_parameter = 0 , index;
   parametric_function ident = NONPARAMETRIC_FUNCTION;
   double parameter[3];
@@ -491,7 +491,7 @@ ostream& Function::ascii_print(ostream &os , bool exhaustive , bool file_flag ,
                                const Curves *curves) const
 
 {
-  register int i;
+  int i;
   int *pfrequency , width[6];
   double self_transition_mean , residual_mean , residual_standard_deviation ,
          *standard_residual , square_sum[3];
@@ -642,7 +642,7 @@ ostream& Function::ascii_print(ostream &os , bool exhaustive , bool file_flag ,
 ostream& Function::spreadsheet_print(ostream &os , const Curves *curves) const
 
 {
-  register int i;
+  int i;
   int *pfrequency;
   double self_transition_mean , residual_mean , residual_standard_deviation , square_sum[3];
 
@@ -743,7 +743,7 @@ bool Function::plot_print(const char *path , double residual_standard_deviation)
 
 {
   bool status = false;
-  register int i;
+  int i;
   ofstream out_file(path);
 
 
@@ -795,7 +795,7 @@ NonhomogeneousMarkov::NonhomogeneousMarkov(int inb_state , parametric_function *
 :Chain(ORDINARY , inb_state)
 
 {
-  register int i;
+  int i;
 
 
   markov_data = NULL;
@@ -832,7 +832,7 @@ NonhomogeneousMarkov::NonhomogeneousMarkov(const Chain *pchain , const Function 
 :Chain(*pchain)
 
 {
-  register int i;
+  int i;
 
 
   markov_data = NULL;
@@ -872,7 +872,7 @@ void NonhomogeneousMarkov::copy(const NonhomogeneousMarkov &markov , bool data_f
                                 bool characteristic_flag)
 
 {
-  register int i;
+  int i;
 
 
   if ((data_flag) && (markov.markov_data)) {
@@ -909,7 +909,7 @@ void NonhomogeneousMarkov::copy(const NonhomogeneousMarkov &markov , bool data_f
 void NonhomogeneousMarkov::remove()
 
 {
-  register int i;
+  int i;
 
 
   delete markov_data;
@@ -1102,7 +1102,7 @@ NonhomogeneousMarkov* NonhomogeneousMarkov::ascii_read(StatError &error , const 
   typedef tokenizer<char_separator<char>> tokenizer;
   char_separator<char> separator(" \t");
   bool status , lstatus;
-  register int i , j;
+  int i , j;
   int line , homogeneity , nb_state , index;
   const Chain *chain;
   const Function **self_transition;
@@ -1347,7 +1347,7 @@ ostream& NonhomogeneousMarkov::ascii_write(ostream &os , const NonhomogeneousMar
                                            bool exhaustive , bool file_flag) const
 
 {
-  register int i;
+  int i;
 
 
   os << SEQ_word[SEQW_NONHOMOGENEOUS_MARKOV_CHAIN] << endl;
@@ -1361,15 +1361,13 @@ ostream& NonhomogeneousMarkov::ascii_write(ostream &os , const NonhomogeneousMar
   for (i = 0;i < nb_state;i++) {
     os << "\n" << STAT_word[STATW_STATE] << " " << i << " ";
 
-    switch (homogeneity[i]) {
-    case true :
+    if (homogeneity[i]) {
       os << SEQ_word[SEQW_HOMOGENEOUS] << endl;
-      break;
-    case false :
+    }
+    else {
       os << SEQ_word[SEQW_NONHOMOGENEOUS] << endl;
       self_transition[i]->ascii_print(os , exhaustive , file_flag ,
                                       (seq ? seq->self_transition[i] : NULL));
-      break;
     }
   }
 
@@ -1533,7 +1531,7 @@ bool NonhomogeneousMarkov::ascii_write(StatError &error , const string path ,
 ostream& NonhomogeneousMarkov::spreadsheet_write(ostream &os , const NonhomogeneousMarkovData *seq) const
 
 {
-  register int i;
+  int i;
 
 
   os << SEQ_word[SEQW_NONHOMOGENEOUS_MARKOV_CHAIN] << endl;
@@ -1547,14 +1545,12 @@ ostream& NonhomogeneousMarkov::spreadsheet_write(ostream &os , const Nonhomogene
   for (i = 0;i < nb_state;i++) {
     os << "\n" << STAT_word[STATW_STATE] << "\t" << i << "\t";
 
-    switch (homogeneity[i]) {
-    case true :
+    if (homogeneity[i]) {
       os << SEQ_word[SEQW_HOMOGENEOUS] << endl;
-      break;
-    case false :
+    }
+    else {
       os << SEQ_word[SEQW_NONHOMOGENEOUS] << endl;
       self_transition[i]->spreadsheet_print(os , (seq ? seq->self_transition[i] : NULL));
-      break;
     }
   }
 
@@ -1663,7 +1659,7 @@ bool NonhomogeneousMarkov::plot_write(const char *prefix , const char *title ,
 
 {
   bool status;
-  register int i , j;
+  int i , j;
   int variable , start , *pfrequency , max_frequency[NB_STATE];
   double residual_mean , residual_standard_deviation , *standard_residual , *presidual ,
          min_standard_residual[NB_STATE] , max_standard_residual[NB_STATE];
@@ -1914,7 +1910,7 @@ bool NonhomogeneousMarkov::plot_write(StatError &error , const char *prefix ,
 MultiPlotSet* NonhomogeneousMarkov::get_plotable(const NonhomogeneousMarkovData *seq) const
 
 {
-  register int i , j , k;
+  int i , j , k;
   int nb_plot_set , index_length , index , nb_plot , max_frequency , *pfrequency;
   double residual_mean , residual_standard_deviation , min_standard_residual ,
          max_standard_residual , *standard_residual , *presidual;
@@ -2243,7 +2239,7 @@ MultiPlotSet* NonhomogeneousMarkov::get_plotable() const
 int NonhomogeneousMarkov::nb_parameter_computation() const
 
 {
-  register int i;
+  int i;
   int nb_parameter = Chain::nb_parameter_computation();
 
 

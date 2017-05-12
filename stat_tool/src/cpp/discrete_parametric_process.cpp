@@ -64,7 +64,7 @@ namespace stat_tool {
 DiscreteParametricProcess::DiscreteParametricProcess(int inb_state , int inb_value)
 
 {
-  register int i;
+  int i;
 
 
   nb_state = inb_state;
@@ -108,7 +108,7 @@ DiscreteParametricProcess::DiscreteParametricProcess(int inb_state , int inb_val
 DiscreteParametricProcess::DiscreteParametricProcess(int inb_state , DiscreteParametric **pobservation)
 
 {
-  register int i;
+  int i;
 
 
   nb_state = inb_state;
@@ -143,7 +143,7 @@ DiscreteParametricProcess::DiscreteParametricProcess(int inb_state , DiscretePar
 void DiscreteParametricProcess::copy(const DiscreteParametricProcess &process)
 
 {
-  register int i;
+  int i;
 
 
   nb_state = process.nb_state;
@@ -184,7 +184,7 @@ void DiscreteParametricProcess::remove()
 
 {
   if (observation) {
-    register int i;
+    int i;
 
     for (i = 0;i < nb_state;i++) {
       delete observation[i];
@@ -266,7 +266,7 @@ DiscreteParametricProcess* DiscreteParametricProcess::parsing(StatError &error ,
   typedef tokenizer<char_separator<char>> tokenizer;
   char_separator<char> separator(" \t");
   bool status = true , lstatus;
-  register int i , j;
+  int i , j;
   int index;
   DiscreteParametric **dist;
   DiscreteParametricProcess *process;
@@ -423,7 +423,7 @@ ostream& DiscreteParametricProcess::ascii_print(ostream &os , FrequencyDistribut
                                                 bool exhaustive , bool file_flag , model_type model) const
 
 {
-  register int i , j;
+  int i , j;
   double scale[NB_STATE];
   const Distribution *pobservation[NB_STATE];
 
@@ -777,7 +777,7 @@ ostream& DiscreteParametricProcess::spreadsheet_print(ostream &os , FrequencyDis
                                                       model_type model) const
 
 {
-  register int i , j;
+  int i , j;
   double scale[NB_STATE];
   const Distribution *pobservation[NB_STATE];
 
@@ -1033,7 +1033,7 @@ bool DiscreteParametricProcess::plot_print(const char *prefix , const char *titl
 
 {
   bool status;
-  register int i , j , k , m;
+  int i , j , k , m;
   int nb_dist , *dist_nb_value;
   double max , *scale;
   const Distribution **pdist;
@@ -1411,7 +1411,7 @@ void DiscreteParametricProcess::plotable_write(MultiPlotSet &plot , int &index ,
                                                model_type model) const
 
 {
-  register int i , j;
+  int i , j;
   double scale , max;
   ostringstream title , legend;
 
@@ -1735,7 +1735,7 @@ void DiscreteParametricProcess::plotable_write(MultiPlotSet &plot , int &index ,
 void DiscreteParametricProcess::nb_value_computation()
 
 {
-  register int i;
+  int i;
 
 
   nb_value = observation[0]->nb_value;
@@ -1759,7 +1759,7 @@ void DiscreteParametricProcess::nb_value_computation()
 void DiscreteParametricProcess::state_permutation(int *permut) const
 
 {
-  register int i;
+  int i;
   DiscreteParametric **pobservation;
 
 
@@ -1787,7 +1787,7 @@ void DiscreteParametricProcess::state_permutation(int *permut) const
 int DiscreteParametricProcess::nb_parameter_computation() const
 
 {
-  register int i;
+  int i;
   int nb_parameter = 0;
 
 
@@ -1816,7 +1816,7 @@ int DiscreteParametricProcess::nb_parameter_computation() const
 double DiscreteParametricProcess::mean_computation(Distribution *pweight) const
 
 {
-  register int i;
+  int i;
   double mean;
 
 
@@ -1844,7 +1844,7 @@ double DiscreteParametricProcess::mean_computation(Distribution *pweight) const
 double DiscreteParametricProcess::variance_computation(Distribution *pweight , double mean) const
 
 {
-  register int i;
+  int i;
   double variance , component_mean;
 
 
@@ -1876,7 +1876,7 @@ double DiscreteParametricProcess::variance_computation(Distribution *pweight , d
 Distribution* DiscreteParametricProcess::mixture_computation(Distribution *pweight)
 
 {
-  register int i , j;
+  int i , j;
   Distribution *mixture;
 
 
@@ -1923,7 +1923,7 @@ Distribution* DiscreteParametricProcess::mixture_computation(Distribution *pweig
 void DiscreteParametricProcess::init()
 
 {
-  register int i , j;
+  int i , j;
   double noise_proba , *pmass;
 
 

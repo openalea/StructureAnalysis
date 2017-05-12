@@ -78,7 +78,7 @@ SemiMarkov::SemiMarkov(const Chain *pchain , const CategoricalSequenceProcess *p
 :SemiMarkovChain(pchain , poccupancy)
 
 {
-  register int i;
+  int i;
 
 
   nb_iterator = 0;
@@ -153,7 +153,7 @@ SemiMarkov::SemiMarkov(const Chain *pchain , const CategoricalSequenceProcess *p
 :SemiMarkovChain(pchain , poccupancy)
 
 {
-  register int i;
+  int i;
 
 
   nb_iterator = 0;
@@ -244,7 +244,7 @@ HiddenSemiMarkov::~HiddenSemiMarkov() {}
 HiddenSemiMarkov* HiddenSemiMarkov::thresholding(double min_probability) const
 
 {
-  register int i;
+  int i;
   HiddenSemiMarkov *hsmarkov;
 
 
@@ -287,7 +287,7 @@ HiddenSemiMarkov* HiddenSemiMarkov::ascii_read(StatError &error , const string p
   char_separator<char> separator(" \t");
   process_type type = DEFAULT_TYPE;
   bool status , lstatus;
-  register int i;
+  int i;
   int line , nb_output_process , value , index;
   observation_process obs_type;
   const Chain *chain;
@@ -384,9 +384,24 @@ HiddenSemiMarkov* HiddenSemiMarkov::ascii_read(StatError &error , const string p
 
         // analysis of the format and reading of the observation distributions
 
-        switch (old_format) {
+        if (old_format) {
+          categorical_observation = CategoricalProcess::old_parsing(error , in_file , line ,
+                                                                    chain->nb_state , nb_output_process);
 
-        case false : {
+          if (categorical_observation) {
+            if (status) {
+              hsmarkov = new HiddenSemiMarkov(chain , occupancy , nb_output_process ,
+                                              categorical_observation , length , counting_flag);
+            }
+
+            for (i = 0;i < nb_output_process;i++) {
+              delete categorical_observation[i];
+            }
+            delete [] categorical_observation;
+          }
+        }
+
+        else {
           nb_output_process = I_DEFAULT;
 
           categorical_observation = NULL;
@@ -666,26 +681,6 @@ HiddenSemiMarkov* HiddenSemiMarkov::ascii_read(StatError &error , const string p
             delete [] discrete_parametric_observation;
             delete [] continuous_parametric_observation;
           }
-          break;
-        }
-
-        case true : {
-          categorical_observation = CategoricalProcess::old_parsing(error , in_file , line ,
-                                                                    chain->nb_state , nb_output_process);
-
-          if (categorical_observation) {
-            if (status) {
-              hsmarkov = new HiddenSemiMarkov(chain , occupancy , nb_output_process ,
-                                              categorical_observation , length , counting_flag);
-            }
-
-            for (i = 0;i < nb_output_process;i++) {
-              delete categorical_observation[i];
-            }
-            delete [] categorical_observation;
-          }
-          break;
-        }
         }
 
         delete chain;
@@ -801,7 +796,7 @@ bool HiddenSemiMarkov::spreadsheet_write(StatError &error , const string path) c
 int HiddenSemiMarkov::end_state() const
 
 {
-  register int i , j , k;
+  int i , j , k;
   int end_state = I_DEFAULT , output;
 
 

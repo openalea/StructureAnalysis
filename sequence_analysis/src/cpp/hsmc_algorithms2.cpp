@@ -65,7 +65,7 @@ namespace sequence_analysis {
 void HiddenSemiMarkov::forward_backward(SemiMarkovData &seq) const
 
 {
-  register int i , j , k , m , n;
+  int i , j , k , m , n;
   int **pioutput;
   double seq_likelihood , obs_product , residual , buff , sum , **observation ,
          *norm , *state_norm , **forward1 , **state_in , *transition_predicted ,
@@ -1128,7 +1128,7 @@ double HiddenSemiMarkov::forward_backward(MarkovianSequences &seq , int index , 
                                           double &entropy1) const
 
 {
-  register int i , j , k , m;
+  int i , j , k , m;
   int *pstate , **pioutput;
   double seq_likelihood , state_seq_likelihood , obs_product , residual , entropy2 , buff , sum ,
          backward_max , **observation , *norm , *state_norm , **forward1 , **state_in ,
@@ -2648,14 +2648,14 @@ double HiddenSemiMarkov::forward_backward_sampling(const MarkovianSequences &seq
                                                    int nb_state_sequence) const
 
 {
-  register int i , j , k;
+  int i , j , k;
   int state_occupancy , *pstate , **pioutput;
   double seq_likelihood , state_seq_likelihood , obs_product , residual , **observation , *norm ,
          *state_norm , **forward1 , **state_in , *backward , *cumul_backward , **proutput;
   DiscreteParametric *occupancy;
 
 # ifdef DEBUG
-  register int m;
+  int m;
   double sum;
 # endif
 
@@ -3160,7 +3160,7 @@ double HiddenSemiMarkov::forward_backward_sampling(const MarkovianSequences &seq
 void HiddenSemiMarkov::log_computation()
 
 {
-  register int i , j;
+  int i , j;
   double *pcumul;
   DiscreteParametric *occupancy;
 
@@ -3229,7 +3229,7 @@ double HiddenSemiMarkov::viterbi(const MarkovianSequences &seq ,
                                  double *posterior_probability , int index) const
 
 {
-  register int i , j , k , m;
+  int i , j , k , m;
   int length , *pstate , **pioutput , **input_state , **optimal_state ,
       **optimal_occupancy;
   double likelihood = 0. , obs_product , buff , residual , forward_max , **observation ,
@@ -3652,7 +3652,7 @@ double HiddenSemiMarkov::generalized_viterbi(const MarkovianSequences &seq , int
 
 {
   bool **active_cell;
-  register int i , j , k , m;
+  int i , j , k , m;
   int nb_state_sequence , max_occupancy , brank , previous_rank , nb_cell , *rank ,
       *pstate , **pioutput , ***input_state , ***optimal_state , ***optimal_occupancy ,
       ***input_rank , ***optimal_rank;
@@ -4369,7 +4369,7 @@ double HiddenSemiMarkov::viterbi_forward_backward(const MarkovianSequences &seq 
                                                   double seq_likelihood) const
 
 {
-  register int i , j , k , m;
+  int i , j , k , m;
   int *pstate , **pioutput;
   double obs_product , buff , residual , state_seq_likelihood , backward_max , **observation ,
          **forward1 , **state_in , **backward , **backward1 , *auxiliary , *occupancy_auxiliary ,
@@ -5201,7 +5201,7 @@ bool HiddenSemiMarkov::state_profile_write(StatError &error , ostream &os ,
 
 {
   bool status = true;
-  register int i;
+  int i;
   int offset = I_DEFAULT , nb_value , index = I_DEFAULT;
   double seq_likelihood , max_marginal_entropy , entropy;
   HiddenSemiMarkov *hsmarkov1 , *hsmarkov2;
@@ -5553,7 +5553,7 @@ bool HiddenSemiMarkov::state_profile_plot_write(StatError &error , const char *p
 
 {
   bool status = true;
-  register int i , j;
+  int i , j;
   int offset = I_DEFAULT , nb_value , index;
   double seq_likelihood , max_marginal_entropy , entropy , state_seq_likelihood;
   HiddenSemiMarkov *hsmarkov;
@@ -5989,7 +5989,7 @@ MultiPlotSet* HiddenSemiMarkov::state_profile_plotable_write(StatError &error ,
 
 {
   bool status = true;
-  register int i;
+  int i;
   int offset = I_DEFAULT , nb_value , index;
   double seq_likelihood , max_marginal_entropy , entropy , state_seq_likelihood;
   HiddenSemiMarkov *hsmarkov;
@@ -6300,7 +6300,7 @@ SemiMarkovData* HiddenSemiMarkov::state_sequence_computation(StatError &error , 
 
 {
   bool status = true;
-  register int i;
+  int i;
   int nb_value;
   HiddenSemiMarkov *hsmarkov;
   SemiMarkovData *seq;
@@ -6403,7 +6403,7 @@ SemiMarkovData* HiddenSemiMarkov::state_sequence_computation(StatError &error , 
       seq->likelihood = likelihood_computation(iseq , seq->posterior_probability);
 
       if ((display) && (seq->nb_sequence <= POSTERIOR_PROBABILITY_NB_SEQUENCE)) {
-        register int j;
+        int j;
         int *pstate;
 
         cout << "\n" << SEQ_label[SEQL_POSTERIOR_STATE_SEQUENCE_PROBABILITY] << endl;
@@ -6488,7 +6488,7 @@ bool MarkovianSequences::comparison(StatError &error , bool display , int nb_mod
 
 {
   bool status = true;
-  register int i , j;
+  int i , j;
   int nb_value;
   double **likelihood;
   HiddenSemiMarkov **hsmarkov;
@@ -6651,7 +6651,7 @@ SemiMarkovData* HiddenSemiMarkov::simulation(StatError &error ,
                                              bool counting_flag , bool divergence_flag) const
 
 {
-  register int i;
+  int i;
   MarkovianSequences *observed_seq;
   SemiMarkovData *seq;
 
@@ -6692,7 +6692,7 @@ SemiMarkovData* HiddenSemiMarkov::simulation(StatError &error , int nb_sequence 
                                              int length , bool counting_flag) const
 
 {
-  register int i;
+  int i;
   MarkovianSequences *observed_seq;
   SemiMarkovData *seq;
 
@@ -6733,7 +6733,7 @@ SemiMarkovData* HiddenSemiMarkov::simulation(StatError &error , int nb_sequence 
                                              const MarkovianSequences &iseq , bool counting_flag) const
 
 {
-  register int i;
+  int i;
   MarkovianSequences *observed_seq;
   SemiMarkovData *seq;
 
@@ -6779,7 +6779,7 @@ DistanceMatrix* HiddenSemiMarkov::divergence_computation(StatError &error , bool
 
 {
   bool status = true , lstatus;
-  register int i , j , k;
+  int i , j , k;
   int cumul_length , nb_failure;
   double **likelihood;
   long double divergence;
@@ -7012,7 +7012,7 @@ DistanceMatrix* HiddenSemiMarkov::divergence_computation(StatError &error , bool
 
 {
   bool status = true;
-  register int i;
+  int i;
   FrequencyDistribution **length_distribution;
   DistanceMatrix *dist_matrix;
 
@@ -7083,7 +7083,7 @@ DistanceMatrix* HiddenSemiMarkov::divergence_computation(StatError &error , bool
                                                          const string path) const
 
 {
-  register int i;
+  int i;
   FrequencyDistribution **length_distribution;
   DistanceMatrix *dist_matrix;
 

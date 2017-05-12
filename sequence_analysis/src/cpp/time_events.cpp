@@ -70,7 +70,7 @@ namespace sequence_analysis {
 void TimeEvents::build_frequency_distribution()
 
 {
-  register int i;
+  int i;
   int max_nb_event , *ptime , *pnb_event , *pfrequency;
 
 
@@ -154,7 +154,7 @@ void TimeEvents::build_frequency_distribution()
 void TimeEvents::build_sample()
 
 {
-  register int i , j;
+  int i , j;
   int *ptime , *pnb_event , *pfrequency , *hfrequency;
 
 
@@ -208,7 +208,7 @@ void TimeEvents::build_sample()
 void TimeEvents::build(int inb_element , int *itime , int *inb_event)
 
 {
-  register int i , j , k;
+  int i , j , k;
   int btime , min_time , max_time , bnb_event , min_nb_event , max_nb_event ,
       nb_selected , *ptime , *pnb_event , *selected_nb_event , *snb_event;
 
@@ -359,7 +359,7 @@ TimeEvents::TimeEvents(int inb_class)
   }
 
   else {
-    register int i;
+    int i;
     int *ptime , *pnb_event , *pfrequency;
 
     time = new int[nb_class];
@@ -395,7 +395,7 @@ TimeEvents::TimeEvents(int inb_class)
 TimeEvents::TimeEvents(FrequencyDistribution &inb_event, int itime)
 
 {
-  register int i;
+  int i;
   int *ptime , *pnb_event , *pfrequency;
 
 
@@ -459,7 +459,7 @@ TimeEvents::TimeEvents(FrequencyDistribution &inb_event, int itime)
 void TimeEvents::copy(const TimeEvents &timev)
 
 {
-  register int i;
+  int i;
   int *ptime , *pnb_event , *pfrequency , *ttime , *tnb_event , *tfrequency;
 
 
@@ -521,7 +521,7 @@ void TimeEvents::copy(const TimeEvents &timev)
 void TimeEvents::merge(int nb_sample , const TimeEvents **ptimev)
 
 {
-  register int i , j;
+  int i , j;
   int nb_histo;
   const FrequencyDistribution **phisto;
 
@@ -589,7 +589,7 @@ void TimeEvents::merge(int nb_sample , const TimeEvents **ptimev)
 TimeEvents* TimeEvents::merge(int nb_sample , const vector<TimeEvents> itimev) const
 
 {
-  register int i;
+  int i;
   TimeEvents *timev;
   const TimeEvents **ptimev;
 
@@ -622,7 +622,7 @@ TimeEvents* TimeEvents::merge(int nb_sample , const vector<TimeEvents> itimev) c
 void TimeEvents::remove()
 
 {
-  register int i;
+  int i;
 
 
   delete [] time;
@@ -733,7 +733,7 @@ TimeEvents* TimeEvents::time_scaling(StatError &error , int scaling_coeff) const
 
 {
   bool status = true;
-  register int i;
+  int i;
   int *ptime , *pnb_event , *pfrequency , *ttime , *tnb_event , *tfrequency;
   TimeEvents *timev;
 
@@ -793,7 +793,7 @@ TimeEvents* TimeEvents::time_select(StatError &error , int min_time ,
 
 {
   bool status = true;
-  register int i;
+  int i;
   int bnb_class , *ptime , *pnb_event , *pfrequency , *ttime , *tnb_event , *tfrequency;
   TimeEvents *timev;
 
@@ -879,7 +879,7 @@ TimeEvents* TimeEvents::nb_event_select(StatError &error , int min_nb_event ,
 
 {
   bool status = true;
-  register int i;
+  int i;
   int bnb_class , *ptime , *pnb_event , *pfrequency , *ttime , *tnb_event , *tfrequency;
   TimeEvents *timev;
 
@@ -1008,7 +1008,7 @@ TimeEvents* TimeEvents::ascii_read(StatError &error , const string path)
   typedef tokenizer<char_separator<char>> tokenizer;
   char_separator<char> separator(" \t");
   bool status , lstatus;
-  register int i , j;
+  int i , j;
   int line , nb_class , nb_element , value , time , nb_event;
   TimeEvents *timev;
   ifstream in_file(path.c_str());
@@ -1207,7 +1207,7 @@ TimeEvents* TimeEvents::old_ascii_read(StatError &error , const string path)
   typedef tokenizer<char_separator<char>> tokenizer;
   char_separator<char> separator(" \t");
   bool status , lstatus;
-  register int i , j;
+  int i , j;
   int line , nb_element , value , *time , *nb_event;
   TimeEvents *timev;
   ifstream in_file(path.c_str());
@@ -1370,7 +1370,7 @@ ostream& TimeEvents::line_write(ostream &os) const
 ostream& TimeEvents::ascii_write(ostream &os , bool exhaustive , process_type type) const
 
 {
-  register int i;
+  int i;
 
 
   if ((htime->variance > 0.) && (exhaustive)) {
@@ -1505,7 +1505,7 @@ ostream& TimeEvents::ascii_write(ostream &os , bool exhaustive) const
 ostream& TimeEvents::ascii_file_write(ostream &os , bool exhaustive , process_type type) const
 
 {
-  register int i;
+  int i;
   int max_frequency , *pfrequency , width[3];
 
 
@@ -1694,7 +1694,7 @@ bool TimeEvents::ascii_write(StatError &error , const string path ,
 ostream& TimeEvents::spreadsheet_write(ostream &os , process_type type) const
 
 {
-  register int i;
+  int i;
 
 
   if (htime->variance > 0.) {
@@ -1847,7 +1847,7 @@ bool TimeEvents::plot_write(StatError &error , const char *prefix ,
 
 {
   bool status;
-  register int i , j , k;
+  int i , j , k;
   int nb_histo;
   const FrequencyDistribution **phisto;
   ostringstream data_file_name;
@@ -2026,7 +2026,7 @@ bool TimeEvents::plot_write(StatError &error , const char *prefix ,
 MultiPlotSet* TimeEvents::get_plotable() const
 
 {
-  register int i , j , k , m;
+  int i , j , k , m;
   int nb_plot_set , nb_histo , max_nb_value , max_frequency;
   double shift;
   const FrequencyDistribution *phisto[2] , **merged_histo;
@@ -2215,7 +2215,7 @@ MultiPlotSet* TimeEvents::get_plotable() const
 double TimeEvents::min_inter_event_computation() const
 
 {
-  register int i;
+  int i;
   int *ptime , *pnb_event;
   double ratio , min_ratio;
 
@@ -2249,7 +2249,7 @@ double TimeEvents::min_inter_event_computation() const
 void TimeEvents::nb_element_computation()
 
 {
-  register int i;
+  int i;
   int *pfrequency;
 
 
@@ -2387,7 +2387,7 @@ RenewalData::RenewalData(process_type itype , const Renewal &renew)
 RenewalData::RenewalData(int nb_sample , const RenewalData **itimev)
 
 {
-  register int i , j , k;
+  int i , j , k;
   const TimeEvents **ptimev;
 
 
@@ -2438,7 +2438,7 @@ RenewalData::RenewalData(int nb_sample , const RenewalData **itimev)
 void RenewalData::copy(const RenewalData &timev , bool model_flag)
 
 {
-  register int i , j;
+  int i , j;
   int *psequence , *csequence;
 
 
@@ -2501,7 +2501,7 @@ void RenewalData::remove()
   delete [] length;
 
   if (sequence) {
-    register int i;
+    int i;
 
     for (i = 0;i < nb_element;i++) {
       delete [] sequence[i];
@@ -2574,7 +2574,7 @@ RenewalData* RenewalData::merge(StatError &error , int nb_sample ,
 
 {
   bool status = true;
-  register int i , j , k , m;
+  int i , j , k , m;
   int *psequence , *csequence;
   const FrequencyDistribution **phisto;
   RenewalData *timev;
@@ -2677,7 +2677,7 @@ RenewalData* RenewalData::merge(StatError &error , int nb_sample ,
                                 const vector<RenewalData> itimev) const
 
 {
-  register int i;
+  int i;
   RenewalData *timev;
   const RenewalData **ptimev;
 
@@ -2846,7 +2846,7 @@ DiscreteDistributionData* RenewalData::extract(StatError &error , renewal_distri
 ostream& RenewalData::ascii_write(ostream &os , bool exhaustive , bool file_flag) const
 
 {
-  register int i , j;
+  int i , j;
   int nb_value , max , width[2];
   ios_base::fmtflags format_flags;
 
@@ -2996,13 +2996,11 @@ ostream& RenewalData::ascii_write(ostream &os , bool exhaustive , bool file_flag
   }
 
   os << "\n";
-  switch (file_flag) {
-  case false :
-    TimeEvents::ascii_write(os , exhaustive , type);
-    break;
-  case true :
+  if (file_flag) {
     ascii_file_write(os , exhaustive , type);
-    break;
+  }
+  else {
+    TimeEvents::ascii_write(os , exhaustive , type);
   }
 
   // writing of no-event/event probabilities as a function of time
@@ -3130,7 +3128,7 @@ bool RenewalData::ascii_write(StatError &error , const string path ,
 ostream& RenewalData::spreadsheet_write(ostream &os) const
 
 {
-  register int i;
+  int i;
   int nb_value;
 
 
@@ -3299,7 +3297,7 @@ bool RenewalData::plot_write(StatError &error , const char *prefix ,
   }
 
   else {
-    register int i , j , k;
+    int i , j , k;
     int nb_histo;
     const FrequencyDistribution **phisto;
     ostringstream data_file_name[2];
@@ -3664,7 +3662,7 @@ MultiPlotSet* RenewalData::get_plotable() const
   }
 
   else {
-    register int i , j , k , m;
+    int i , j , k , m;
     int nb_plot_set , nb_histo , max_nb_value , max_frequency;
     double shift;
     const FrequencyDistribution *phisto[2] , **merged_histo;
@@ -4051,7 +4049,7 @@ MultiPlotSet* RenewalData::get_plotable() const
 void RenewalData::build_index_event(int offset)
 
 {
-  register int i , j;
+  int i , j;
   int frequency[2];
 
 

@@ -68,7 +68,7 @@ namespace sequence_analysis {
 void VariableOrderMarkovChain::non_terminal_transition_probability_computation()
 
 {
-  register int i , j , k;
+  int i , j , k;
   int nb_terminal;
   double sum , *memory , *previous_memory;
 
@@ -190,7 +190,7 @@ void VariableOrderMarkovChain::non_terminal_transition_probability_computation()
 void VariableOrderMarkovChain::initial_probability_computation()
 
 {
-  register int i , j , k;
+  int i , j , k;
   int nb_terminal;
   double sum , *memory , *previous_memory;
 
@@ -271,7 +271,7 @@ void VariableOrderMarkovChain::initial_probability_computation()
 double VariableOrderMarkov::likelihood_computation(const MarkovianSequences &seq , int index) const
 
 {
-  register int i , j , k;
+  int i , j , k;
   int nb_value , memory , start , length , *pstate , **pioutput;
   double likelihood = 0. , proba , **proutput;
 
@@ -497,7 +497,7 @@ double VariableOrderMarkov::likelihood_computation(const MarkovianSequences &seq
 double VariableOrderMarkov::likelihood_computation(const VariableOrderMarkovChainData &chain_data) const
 
 {
-  register int i , j;
+  int i , j;
   double likelihood;
 
 
@@ -562,7 +562,7 @@ void VariableOrderMarkovData::observation_frequency_distribution_correction(Freq
                                                                             int variable , int start) const
 
 {
-  register int i , j;
+  int i , j;
   int *pstate , *poutput;
 
 
@@ -603,7 +603,7 @@ void VariableOrderMarkovData::observation_frequency_distribution_correction(Freq
 double VariableOrderMarkov::likelihood_computation(const VariableOrderMarkovData &seq) const
 
 {
-  register int i , j;
+  int i , j;
   int nb_value , length;
   double buff , likelihood = 0.;
   FrequencyDistribution **observation;
@@ -756,7 +756,7 @@ void MarkovianSequences::transition_count_computation(const VariableOrderMarkovC
                                                       bool begin , bool non_terminal) const
 
 {
-  register int i , j , k;
+  int i , j , k;
   int memory , start , *pstate;
 
 
@@ -864,7 +864,7 @@ void VariableOrderMarkovChainData::estimation(VariableOrderMarkovChain &markov ,
                                               transition_estimator estimator , double laplace_coeff) const
 
 {
-  register int i , j;
+  int i , j;
   int sum , nb_parameter;
 
 
@@ -1027,7 +1027,7 @@ void VariableOrderMarkovChainData::estimation(VariableOrderMarkovChain &markov ,
 void VariableOrderMarkovData::order0_estimation(VariableOrderMarkov &markov) const
 
 {
-  register int i , j;
+  int i , j;
 //  int sum;
 
 
@@ -1086,7 +1086,7 @@ VariableOrderMarkov* MarkovianSequences::variable_order_markov_estimation(StatEr
 
 {
   bool status = true , order0 , *active_memory , *selected_memory;
-  register int i , j , k;
+  int i , j , k;
   int sample_size , length_nb_sequence , nb_row , state , nb_terminal , *memory_count ,
       *nb_parameter , *diff_nb_parameter;
   double num , denom , max_likelihood , *memory_likelihood , *diff_likelihood;
@@ -1401,9 +1401,14 @@ VariableOrderMarkov* MarkovianSequences::variable_order_markov_estimation(StatEr
       }
 
       for (i = markov->nb_row - 1;i >= 0;i--) {
-        switch (selected_memory[i]) {
+        if (selected_memory[i]) {
+          if ((markov->memo_type[i] == TERMINAL) && (markov->child[i])) {
+            delete [] markov->child[i];
+            markov->child[i] = NULL;
+          }
+        }
 
-        case false : {
+        else {
           markov->memo_type[i] = PRUNED;
           delete [] markov->state[i];
           markov->state[i] = NULL;
@@ -1411,16 +1416,6 @@ VariableOrderMarkov* MarkovianSequences::variable_order_markov_estimation(StatEr
             delete [] markov->child[i];
             markov->child[i] = NULL;
           }
-          break;
-        }
-
-        case true : {
-          if ((markov->memo_type[i] == TERMINAL) && (markov->child[i])) {
-            delete [] markov->child[i];
-            markov->child[i] = NULL;
-          }
-          break;
-        }
         }
       }
     }
@@ -1626,9 +1621,12 @@ VariableOrderMarkov* MarkovianSequences::variable_order_markov_estimation(StatEr
     seq = completed_markov->markov_data;
     seq->state_variable_init();
 
-    switch (order0) {
+    if (order0) {
+      seq->build_transition_count(*completed_markov , true , true);
+      seq->order0_estimation(*completed_markov);
+    }
 
-    case false : {
+    else {
       seq->build_transition_count(*completed_markov , true ,
                                   (((completed_markov->type == ORDINARY) && (global_initial_transition)) ? true : false));
       seq->chain_data->estimation(*completed_markov);
@@ -1644,14 +1642,6 @@ VariableOrderMarkov* MarkovianSequences::variable_order_markov_estimation(StatEr
           }
         }
       }
-      break;
-    }
-
-    case true : {
-      seq->build_transition_count(*completed_markov , true , true);
-      seq->order0_estimation(*completed_markov);
-      break;
-    }
     }
 
     if (completed_markov->type == EQUILIBRIUM) {
@@ -1745,7 +1735,7 @@ VariableOrderMarkov* MarkovianSequences::variable_order_markov_estimation(StatEr
 
 {
   bool status = true;
-  register int i , j , k;
+  int i , j , k;
   int nb_terminal;
   VariableOrderMarkov *markov;
   VariableOrderMarkovData *seq;
@@ -1967,7 +1957,7 @@ ostream& VariableOrderMarkov::transition_count_ascii_write(ostream &os , bool be
 
 {
   bool *bic_memory , *kt_memory;
-  register int i , j , k;
+  int i , j , k;
   int buff , max_memory_count , row , initial_count , *memory_count , *max_state ,
       *nb_parameter , *diff_nb_parameter , width[3];
   double standard_normal_value , half_confidence_interval , diff , max_abs_diff , child_likelihood ,
@@ -1981,15 +1971,7 @@ ostream& VariableOrderMarkov::transition_count_ascii_write(ostream &os , bool be
 
   memory_count = new int[nb_row];
 
-  switch (begin) {
-
-  case false : {
-    width[0] = 0;
-    row = 0;
-    break;
-  }
-
-  case true : {
+  if (begin) {
     initial_count = 0;
     for (i = 0;i < nb_state;i++) {
       initial_count += markov_data->chain_data->initial[i];
@@ -1997,8 +1979,11 @@ ostream& VariableOrderMarkov::transition_count_ascii_write(ostream &os , bool be
     width[0] = column_width(initial_count);
 
     max_memory_count = 0;
-    break;
   }
+
+  else {
+    width[0] = 0;
+    row = 0;
   }
 
   for (i = (begin ? 1 : 0);i < nb_row;i++) {
@@ -2590,7 +2575,7 @@ bool MarkovianSequences::transition_count(StatError &error , bool display , int 
 
 {
   bool status = true;
-  register int i;
+  int i;
   VariableOrderMarkov *markov;
   VariableOrderMarkovData *seq;
 
@@ -2688,7 +2673,7 @@ ostream& MarkovianSequences::likelihood_write(ostream &os , int nb_model , doubl
 
 {
   bool *status;
-  register int i , j , k , m;
+  int i , j , k , m;
   int buff , model , min , width[3] , *rank_cumul , **rank;
   double max_likelihood , likelihood_cumul;
   ios_base::fmtflags format_flags;
@@ -2962,7 +2947,7 @@ bool MarkovianSequences::comparison(StatError &error , bool display , int nb_mod
 
 {
   bool status = true;
-  register int i , j;
+  int i , j;
   double **likelihood;
 
 
@@ -3106,7 +3091,7 @@ VariableOrderMarkovData* VariableOrderMarkov::simulation(StatError &error ,
 
 {
   bool status = true , hidden;
-  register int i , j , k;
+  int i , j , k;
   int memory , cumul_length , *decimal_scale , *pstate , **pioutput;
   variable_nature *itype;
   double buff , min_location , likelihood , **proutput;
@@ -3345,13 +3330,11 @@ VariableOrderMarkovData* VariableOrderMarkov::simulation(StatError &error ,
       }
 #     endif
 
-      switch (hidden) {
-      case false :
-        seq->likelihood = likelihood;
-        break;
-      case true :
+      if (hidden) {
         seq->restoration_likelihood = likelihood;
-        break;
+      }
+      else {
+        seq->likelihood = likelihood;
       }
 
       // computation of the mixtures of observation distributions (theoretical weights and weights deduced from the restoration)
@@ -3521,7 +3504,7 @@ DistanceMatrix* VariableOrderMarkov::divergence_computation(StatError &error , b
 
 {
   bool status = true , lstatus;
-  register int i , j , k;
+  int i , j , k;
   int cumul_length , nb_failure;
   double **likelihood;
   long double divergence;
@@ -3781,7 +3764,7 @@ DistanceMatrix* VariableOrderMarkov::divergence_computation(StatError &error , b
 
 {
   bool status = true;
-  register int i;
+  int i;
   FrequencyDistribution **length_distribution;
   DistanceMatrix *dist_matrix;
 
@@ -3852,7 +3835,7 @@ DistanceMatrix* VariableOrderMarkov::divergence_computation(StatError &error , b
                                                             const string path) const
 
 {
-  register int i;
+  int i;
   FrequencyDistribution **length_distribution;
   DistanceMatrix *dist_matrix;
 
@@ -3981,7 +3964,7 @@ bool VariableOrderMarkovIterator::simulation(int **int_seq , int length , bool i
   }
 
   else {
-    register int i , j;
+    int i , j;
     int offset = 0 , *pstate , **pioutput;
 //    double **proutput;
 
@@ -4075,7 +4058,7 @@ bool VariableOrderMarkovIterator::simulation(int **int_seq , int length , bool i
 int** VariableOrderMarkovIterator::simulation(int length , bool initialization)
 
 {
-  register int i;
+  int i;
   int **int_seq;
 
 
@@ -4109,7 +4092,7 @@ int** VariableOrderMarkovIterator::simulation(int length , bool initialization)
 double VariableOrderMarkov::likelihood_correction(const VariableOrderMarkovData &seq) const
 
 {
-  register int i;
+  int i;
   double correction;
 
 
@@ -4152,7 +4135,7 @@ VariableOrderMarkov* MarkovianSequences::lumpability_estimation(StatError &error
 
 {
   bool status = true , *presence;
-  register int i;
+  int i;
   int max_category , nb_state[2] , nb_parameter[2];
   double penalty , max_likelihood , likelihood[2] , penalized_likelihood[2];
   VariableOrderMarkov *markov , *lumped_markov;
@@ -4267,7 +4250,7 @@ VariableOrderMarkov* MarkovianSequences::lumpability_estimation(StatError &error
 
       if (lumped_markov) {
         if (display) {
-          register int j , k;
+          int j , k;
           int nb_output , sum , lumped_nb_parameter , *pstate , *poutput , *pfrequency ,
               ***observation_data;
           double lumped_likelihood , lumped_penalized_likelihood;
@@ -4572,7 +4555,7 @@ bool MarkovianSequences::lumpability_test(StatError &error , bool display ,
 
 {
   bool status = true , *presence;
-  register int i , j , k;
+  int i , j , k;
   int max_category , df , sum , *ftransition;
   double value , var1 , var2;
   Test *test;
@@ -4733,7 +4716,7 @@ bool MarkovianSequences::lumpability_test(StatError &error , bool display ,
     delete test;
 
     if (display) {
-      register int k;
+      int k;
       int nb_output , sum , lumped_nb_parameter , *pstate , *poutput , *pfrequency ,
           ***observation_data;
       double lumped_likelihood , *pproba , ***observation_proba;

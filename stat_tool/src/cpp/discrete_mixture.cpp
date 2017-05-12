@@ -86,7 +86,7 @@ DiscreteMixture::DiscreteMixture(int inb_component , double *iweight ,
                                  const DiscreteParametric **pcomponent)
 
 {
-  register int i;
+  int i;
 
 
   mixture_data = NULL;
@@ -129,7 +129,7 @@ DiscreteMixture::DiscreteMixture(int inb_component , vector<double> iweight ,
                                  const vector<DiscreteParametric> icomponent)
 
 {
-  register int i;
+  int i;
 
 
   mixture_data = NULL;
@@ -171,7 +171,7 @@ DiscreteMixture::DiscreteMixture(int inb_component , vector<double> iweight ,
 DiscreteMixture::DiscreteMixture(const DiscreteMixture &mixt , bool *component_flag , int inb_value)
 
 {
-  register int i;
+  int i;
 
 
   mixture_data = NULL;
@@ -210,7 +210,7 @@ DiscreteMixture::DiscreteMixture(const DiscreteMixture &mixt , bool *component_f
 DiscreteMixture::DiscreteMixture(int inb_component , const DiscreteParametric **pcomponent)
 
 {
-  register int i;
+  int i;
 
 
   mixture_data = NULL;
@@ -237,7 +237,7 @@ DiscreteMixture::DiscreteMixture(int inb_component , const DiscreteParametric **
 void DiscreteMixture::copy(const DiscreteMixture &mixt , bool data_flag)
 
 {
-  register int i;
+  int i;
 
 
   if ((data_flag) && (mixt.mixture_data)) {
@@ -272,7 +272,7 @@ void DiscreteMixture::remove()
   delete weight;
 
   if (component) {
-    register int i;
+    int i;
 
     for (i = 0;i < nb_component;i++) {
       delete component[i];
@@ -403,7 +403,7 @@ DiscreteMixture* DiscreteMixture::building(StatError &error , int nb_component ,
 
 {
   bool status;
-  register int i;
+  int i;
   double cumul;
   DiscreteMixture *mixt;
 
@@ -456,7 +456,7 @@ DiscreteMixture* DiscreteMixture::building(StatError &error , int nb_component ,
 
 {
   bool status;
-  register int i;
+  int i;
   double cumul;
   DiscreteMixture *mixt;
 
@@ -512,7 +512,7 @@ DiscreteMixture* DiscreteMixture::ascii_read(StatError &error , const string pat
   typedef tokenizer<char_separator<char>> tokenizer;
   char_separator<char> separator(" \t");
   bool status , lstatus;
-  register int i , j;
+  int i , j;
   int line , nb_component , index;
   double cumul , weight[DISCRETE_MIXTURE_NB_COMPONENT];
   const DiscreteParametric **component;
@@ -816,7 +816,7 @@ ostream& DiscreteMixture::ascii_write(ostream &os , const DiscreteMixtureData *m
                                       bool exhaustive , bool file_flag) const
 
 {
-  register int i , j;
+  int i , j;
   int bnb_parameter , buff , width;
   double **sup_norm_dist , scale[DISCRETE_MIXTURE_NB_COMPONENT];
   const Distribution *pcomponent[DISCRETE_MIXTURE_NB_COMPONENT];
@@ -1129,7 +1129,7 @@ bool DiscreteMixture::ascii_write(StatError &error , const string path ,
 ostream& DiscreteMixture::spreadsheet_write(ostream &os , const DiscreteMixtureData *mixt_histo) const
 
 {
-  register int i , j;
+  int i , j;
   int bnb_parameter;
   double **sup_norm_dist , scale[DISCRETE_MIXTURE_NB_COMPONENT];
   const Distribution *pcomponent[DISCRETE_MIXTURE_NB_COMPONENT];
@@ -1342,7 +1342,7 @@ bool DiscreteMixture::plot_write(const char *prefix , const char *title ,
 
 {
   bool status;
-  register int i , j , k;
+  int i , j , k;
   int nb_histo = 0;
   double scale[DISCRETE_MIXTURE_NB_COMPONENT + 2];
   const Distribution *pdist[DISCRETE_MIXTURE_NB_COMPONENT + 2];
@@ -1568,7 +1568,7 @@ bool DiscreteMixture::plot_write(StatError &error , const char *prefix ,
 MultiPlotSet* DiscreteMixture::get_plotable(const DiscreteMixtureData *mixt_histo) const
 
 {
-  register int i , j;
+  int i , j;
   int nb_plot_set , xmax;
   double scale;
   ostringstream title , legend;
@@ -1793,7 +1793,7 @@ MultiPlotSet* DiscreteMixture::get_plotable() const
 int DiscreteMixture::nb_parameter_computation() const
 
 {
-  register int i;
+  int i;
   int bnb_parameter = nb_component - 1;
 
 
@@ -1816,7 +1816,7 @@ int DiscreteMixture::nb_parameter_computation() const
 double DiscreteMixture::penalty_computation() const
 
 {
-  register int i;
+  int i;
   double penalty = 0.;
 
 
@@ -1861,7 +1861,7 @@ DiscreteMixtureData::DiscreteMixtureData(const FrequencyDistribution &histo , in
 :FrequencyDistribution(histo)
 
 {
-  register int i;
+  int i;
 
 
   mixture = NULL;
@@ -1889,7 +1889,7 @@ DiscreteMixtureData::DiscreteMixtureData(const FrequencyDistribution &histo , co
 :FrequencyDistribution(histo)
 
 {
-  register int i;
+  int i;
 
 
   mixture = new DiscreteMixture(*pmixture , false); 
@@ -1918,7 +1918,7 @@ DiscreteMixtureData::DiscreteMixtureData(const DiscreteMixture &mixt)
 :FrequencyDistribution(mixt)
 
 {
-  register int i;
+  int i;
 
 
   mixture = NULL;
@@ -1945,7 +1945,7 @@ DiscreteMixtureData::DiscreteMixtureData(const DiscreteMixture &mixt)
 void DiscreteMixtureData::copy(const DiscreteMixtureData &mixt_histo , bool model_flag)
 
 {
-  register int i;
+  int i;
 
 
   if ((model_flag) && (mixt_histo.mixture)) {
@@ -1980,7 +1980,7 @@ void DiscreteMixtureData::remove()
   delete weight;
 
   if (component) {
-    register int i;
+    int i;
 
     for (i = 0;i < nb_component;i++) {
       delete component[i];

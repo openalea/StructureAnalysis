@@ -153,7 +153,7 @@ void Renewal::type_init(process_type itype)
 
 {
   if (itype != type) {
-    register int i;
+    int i;
 
 
     type = itype;
@@ -181,7 +181,7 @@ void Renewal::type_init(process_type itype)
 void Renewal::init(int inf_bound , int sup_bound , double parameter , double probability)
 
 {
-  register int i;
+  int i;
 
 
   inter_event->init(inf_bound , sup_bound , parameter , probability);
@@ -213,7 +213,7 @@ void Renewal::init(discrete_parametric ident , int inf_bound , int sup_bound ,
                    double parameter , double probability)
 
 {
-  register int i;
+  int i;
 
 
   inter_event->init(ident , inf_bound , sup_bound , parameter , probability);
@@ -274,7 +274,7 @@ Renewal::Renewal(process_type itype , const FrequencyDistribution &htime ,
                  const DiscreteParametric &iinter_event)
 
 {
-  register int i;
+  int i;
   int nb_value;
 
 
@@ -349,7 +349,7 @@ Renewal::Renewal(process_type itype , const Distribution &itime ,
                  const DiscreteParametric &iinter_event)
 
 {
-  register int i;
+  int i;
   int nb_value;
 
 
@@ -419,7 +419,7 @@ Renewal::Renewal(process_type itype , const Distribution &itime ,
 Renewal::Renewal(const RenewalData &irenewal_data , const DiscreteParametric &iinter_event)
 
 {
-  register int i;
+  int i;
   int nb_value;
 
 
@@ -490,7 +490,7 @@ Renewal::Renewal(const RenewalData &irenewal_data , const DiscreteParametric &ii
 void Renewal::copy(const Renewal &renew , bool data_flag)
 
 {
-  register int i;
+  int i;
 
 
   nb_iterator = 0;
@@ -554,7 +554,7 @@ void Renewal::copy(const Renewal &renew , bool data_flag)
 void Renewal::remove()
 
 {
-  register int i;
+  int i;
 
 
   delete renewal_data;
