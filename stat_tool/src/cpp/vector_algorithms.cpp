@@ -63,7 +63,7 @@ namespace stat_tool {
 double** Vectors::spearman_rank_correlation_computation() const
 
 {
-  register int i , j , k;
+  int i , j , k;
   int *pfrequency;
   double main_term , rank_mean , rank_diff , *correction , **correlation = NULL , **rank;
 
@@ -141,7 +141,7 @@ double** Vectors::spearman_rank_correlation_computation() const
 double** Vectors::kendall_rank_correlation_computation() const
 
 {
-  register int i , j , k , m , n , p;
+  int i , j , k , m , n , p;
   int diff , *current_frequency , *pfrequency , *cumul_frequency , *index , **frequency;
   double nb_pair , sum , rank_diff_sign , *correction , **correlation = NULL;
 
@@ -277,7 +277,7 @@ ostream& Vectors::rank_correlation_ascii_write(ostream &os , correlation_type co
                                                double **correlation) const
 
 {
-  register int i , j;
+  int i , j;
   int buff , width[2];
   Test *test;
   ios_base::fmtflags format_flags;
@@ -434,7 +434,7 @@ bool Vectors::rank_correlation_computation(StatError &error , bool display ,
 
 {
   bool status = true;
-  register int i;
+  int i;
   double **correlation;
 
 
@@ -504,7 +504,7 @@ bool Vectors::rank_correlation_computation(StatError &error , bool display ,
 double Vectors::spearman_rank_single_correlation_computation() const
 
 {
-  register int i , j;
+  int i , j;
   int *pfrequency;
   double correlation , main_term , rank_mean , correction[2] , *rank[2];
 
@@ -561,7 +561,7 @@ double Vectors::spearman_rank_single_correlation_computation() const
 double Vectors::kendall_rank_single_correlation_computation() const
 
 {
-  register int i , j , k , m;
+  int i , j , k , m;
   int diff , *current_frequency , *pfrequency , *cumul_frequency , *index ,
       **frequency;
   double sum , correlation , nb_pair , correction[2];
@@ -680,7 +680,7 @@ DistanceMatrix* Vectors::comparison(StatError &error , const VectorDistance &ive
                                     bool standardization) const
 {
   bool status = true;
-  register int i , j , k;
+  int i , j , k;
   double distance , ldistance , **rank;
   FrequencyDistribution *merged_marginal;
   VectorDistance *vector_dist;
@@ -760,9 +760,18 @@ DistanceMatrix* Vectors::comparison(StatError &error , const VectorDistance &ive
 
     rank = new double*[nb_variable];
 
-    switch (standardization) {
+    if (standardization) {
+      for (i = 0;i < nb_variable;i++) {
+        if (vector_dist->var_type[i] == ORDINAL) {
+          rank[i] = marginal_distribution[i]->rank_computation();
+        }
+        else {
+          rank[i] = NULL;
+        }
+      }
+    }
 
-    case false : {
+    else {
       if (vector_dist->var_type[0] == ORDINAL) {
         merged_marginal = new FrequencyDistribution(nb_variable , (const FrequencyDistribution**)marginal_distribution);
         rank[0] = merged_marginal->rank_computation();
@@ -797,20 +806,6 @@ DistanceMatrix* Vectors::comparison(StatError &error , const VectorDistance &ive
       }
 #     endif
 
-      break;
-    }
-
-    case true : {
-      for (i = 0;i < nb_variable;i++) {
-        if (vector_dist->var_type[i] == ORDINAL) {
-          rank[i] = marginal_distribution[i]->rank_computation();
-        }
-        else {
-          rank[i] = NULL;
-        }
-      }
-      break;
-    }
     }
 
     // computation of dispersion measures for standardization of variables
@@ -908,33 +903,7 @@ DistanceMatrix* Vectors::comparison(StatError &error , const VectorDistance &ive
           }
           }
 
-          switch (standardization) {
-
-          case false : {
-
-#           ifdef DEBUG
-            switch (vector_dist->distance_type) {
-            case ABSOLUTE_VALUE :
-              variable_distance[k] += fabs(ldistance);
-              break;
-            case QUADRATIC :
-              variable_distance[k] += ldistance * ldistance;
-              break;
-            }
-#           endif
-
-            switch (vector_dist->distance_type) {
-            case ABSOLUTE_VALUE :
-              distance += vector_dist->weight[k] * fabs(ldistance);
-              break;
-            case QUADRATIC :
-              distance += vector_dist->weight[k] * ldistance * ldistance;
-              break;
-            }
-            break;
-          }
-
-          case true : {
+          if (standardization) {
 
 #           ifdef DEBUG
             switch (vector_dist->distance_type) {
@@ -955,8 +924,29 @@ DistanceMatrix* Vectors::comparison(StatError &error , const VectorDistance &ive
               distance += vector_dist->weight[k] * ldistance * ldistance / vector_dist->dispersion[k];
               break;
             }
-            break;
           }
+
+          else {
+
+#           ifdef DEBUG
+            switch (vector_dist->distance_type) {
+            case ABSOLUTE_VALUE :
+              variable_distance[k] += fabs(ldistance);
+              break;
+            case QUADRATIC :
+              variable_distance[k] += ldistance * ldistance;
+              break;
+            }
+#           endif
+
+            switch (vector_dist->distance_type) {
+            case ABSOLUTE_VALUE :
+              distance += vector_dist->weight[k] * fabs(ldistance);
+              break;
+            case QUADRATIC :
+              distance += vector_dist->weight[k] * ldistance * ldistance;
+              break;
+            }
           }
         }
 
@@ -1005,7 +995,7 @@ DistanceMatrix* Vectors::comparison(StatError &error , const VectorDistance &ive
 int** Vectors::joint_frequency_computation(int variable1 , int variable2) const
 
 {
-  register int i , j;
+  int i , j;
   int **frequency = NULL;
 
 
@@ -1048,7 +1038,7 @@ ostream& Vectors::contingency_table_ascii_write(ostream &os , int variable1 , in
                                                 bool file_flag) const
 
 {
-  register int i , j;
+  int i , j;
   int buff , width[2];
   ios_base::fmtflags format_flags;
 
@@ -1219,7 +1209,7 @@ bool Vectors::contingency_table_spreadsheet_write(StatError &error , const strin
 
 {
   bool status;
-  register int i , j;
+  int i , j;
   ofstream out_file(path.c_str());
 
 
@@ -1316,7 +1306,7 @@ bool Vectors::contingency_table(StatError &error , bool display , int variable1 
 
 {
   bool status = true;
-  register int i , j;
+  int i , j;
   int df , **frequency;
   double value , var , **deviation , **chi2_contribution;
   Test *test;
@@ -1502,7 +1492,7 @@ ostream& Vectors::variance_analysis_ascii_write(ostream &os , int type , const V
                                                 bool exhaustive) const
 
 {
-  register int i , j;
+  int i , j;
   int buff , width[4] , df[3];
   double diff , square_sum[3] , mean_square[3] , *value_mean , *variance , *standard_deviation ,
          *mean_absolute_deviation , *concentration_coeff , *skewness_coeff , *kurtosis_coeff , **cumul;
@@ -1898,7 +1888,7 @@ bool Vectors::variance_analysis_spreadsheet_write(StatError &error , const strin
 
 {
   bool status;
-  register int i , j;
+  int i , j;
   int df[3];
   double diff , square_sum[3] , mean_square[3] , **cumul;
   Test *test;
@@ -2147,7 +2137,7 @@ bool Vectors::variance_analysis(StatError &error , bool display , int class_vari
 
 {
   bool status = true;
-  register int i;
+  int i;
   int *value_nb_vector , **index;
   Vectors *vec;
   const Vectors **value_vec;
@@ -2294,7 +2284,7 @@ bool Vectors::sup_norm_distance(StatError &error , bool display , const Vectors 
 
 {
   bool status = true , **selected_value;
-  register int i , j;
+  int i , j;
   int nb_crossing , previous_sign , sign , int_value , sample_size[2] , **rank;
   double min , max , sup_norm , diff_cumul , previous_diff_cumul , overlap , real_value ,
          sup_value , *cumul[2];

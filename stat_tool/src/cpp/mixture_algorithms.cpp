@@ -65,7 +65,7 @@ namespace stat_tool {
 double von_mises_concentration_computation(double mean_direction)
 
 {
-  register int i;
+  int i;
   double concentration , power[6];
 
 
@@ -111,7 +111,7 @@ double von_mises_concentration_computation(double mean_direction)
 double MixtureData::classification_information_computation() const
 
 {
-  register int i , j;
+  int i , j;
   double information , buff;
 
 
@@ -164,7 +164,7 @@ double MixtureData::classification_information_computation() const
 double Mixture::classification_likelihood_computation(const MixtureData &vec) const
 
 {
-  register int i , j;
+  int i , j;
   int nb_value;
   double buff , likelihood = 0.;
 
@@ -276,7 +276,7 @@ double Mixture::classification_likelihood_computation(const MixtureData &vec) co
 double Mixture::likelihood_computation(const Vectors &vec , int index) const
 
 {
-  register int i , j , k;
+  int i , j , k;
   int nb_value;
   double likelihood = 0. , norm , component_proba;
 
@@ -392,7 +392,7 @@ Mixture* Vectors::mixture_estimation(StatError &error , bool display , const Mix
 
 {
   bool status;
-  register int i , j , k;
+  int i , j , k;
   int max_nb_value , iter;
   double likelihood = D_INF , previous_likelihood , observation_likelihood , buff ,
          **component_vector_count , norm , *component_proba , diff , variance ,
@@ -754,20 +754,7 @@ Mixture* Vectors::mixture_estimation(StatError &error , bool display , const Mix
                     mixt->continuous_parametric_process[i]->observation[j]->location = observation_reestim[i][j]->mean;
                   }
 
-                  switch (common_dispersion) {
-
-                  case false : {
-                    for (j = 0;j < mixt->nb_component;j++) {
-                      mixt->continuous_parametric_process[i]->observation[j]->dispersion = sqrt(observation_reestim[i][j]->variance);
-                      if (mixt->continuous_parametric_process[i]->observation[j]->dispersion /
-                          mixt->continuous_parametric_process[i]->observation[j]->location < GAUSSIAN_MIN_VARIATION_COEFF) {
-                        mixt->continuous_parametric_process[i]->observation[j]->dispersion = mixt->continuous_parametric_process[i]->observation[j]->location * GAUSSIAN_MIN_VARIATION_COEFF;
-                      }
-                    }
-                    break;
-                  }
-
-                  case true : {
+                  if (common_dispersion) {
                     variance = 0.;
                     buff = 0.;
 
@@ -786,8 +773,16 @@ Mixture* Vectors::mixture_estimation(StatError &error , bool display , const Mix
                     for (j = 0;j < mixt->nb_component;j++) {
                       mixt->continuous_parametric_process[i]->observation[j]->dispersion = sqrt(variance);
                     }
-                    break;
                   }
+
+                  else {
+                    for (j = 0;j < mixt->nb_component;j++) {
+                      mixt->continuous_parametric_process[i]->observation[j]->dispersion = sqrt(observation_reestim[i][j]->variance);
+                      if (mixt->continuous_parametric_process[i]->observation[j]->dispersion /
+                          mixt->continuous_parametric_process[i]->observation[j]->location < GAUSSIAN_MIN_VARIATION_COEFF) {
+                        mixt->continuous_parametric_process[i]->observation[j]->dispersion = mixt->continuous_parametric_process[i]->observation[j]->location * GAUSSIAN_MIN_VARIATION_COEFF;
+                      }
+                    }
                   }
 
                   break;
@@ -799,16 +794,7 @@ Mixture* Vectors::mixture_estimation(StatError &error , bool display , const Mix
                     mixt->continuous_parametric_process[i]->observation[j]->location = mean_direction[j][3];
                   }
 
-                  switch (common_dispersion) {
-
-                  case false : {
-                    for (j = 0;j < mixt->nb_component;j++) {
-                      mixt->continuous_parametric_process[i]->observation[j]->dispersion = von_mises_concentration_computation(mean_direction[j][2]);
-                    }
-                    break;
-                  }
-
-                  case true : {
+                  if (common_dispersion) {
                     global_mean_direction = 0.;
                     buff = 0.;
 
@@ -821,8 +807,12 @@ Mixture* Vectors::mixture_estimation(StatError &error , bool display , const Mix
                     for (j = 0;j < mixt->nb_component;j++) {
                       mixt->continuous_parametric_process[i]->observation[j]->dispersion = concentration;
                     }
-                    break;
                   }
+
+                  else {
+                    for (j = 0;j < mixt->nb_component;j++) {
+                      mixt->continuous_parametric_process[i]->observation[j]->dispersion = von_mises_concentration_computation(mean_direction[j][2]);
+                    }
                   }
                   break;
                 }
@@ -1103,7 +1093,7 @@ Mixture* Vectors::mixture_estimation(StatError &error , bool display , int nb_co
                                      bool assignment , int nb_iter) const
 
 {
-  register int i , j;
+  int i , j;
   Mixture *imixt , *mixt;
 
 
@@ -1153,7 +1143,7 @@ Mixture* Vectors::mixture_stochastic_estimation(StatError &error , bool display 
 
 {
   bool status;
-  register int i , j , k , m;
+  int i , j , k , m;
   int max_nb_value , iter , nb_assignment , **component_vector_count;
   double likelihood = D_INF , previous_likelihood , observation_likelihood , buff ,
          norm , *component_proba , *component_cumul , diff , variance ,
@@ -1533,20 +1523,7 @@ Mixture* Vectors::mixture_stochastic_estimation(StatError &error , bool display 
                     mixt->continuous_parametric_process[i]->observation[j]->location = observation_reestim[i][j]->mean;
                   }
 
-                  switch (common_dispersion) {
-
-                  case false : {
-                    for (j = 0;j < mixt->nb_component;j++) {
-                      mixt->continuous_parametric_process[i]->observation[j]->dispersion = sqrt(observation_reestim[i][j]->variance);
-                      if (mixt->continuous_parametric_process[i]->observation[j]->dispersion /
-                          mixt->continuous_parametric_process[i]->observation[j]->location < GAUSSIAN_MIN_VARIATION_COEFF) {
-                        mixt->continuous_parametric_process[i]->observation[j]->dispersion = mixt->continuous_parametric_process[i]->observation[j]->location * GAUSSIAN_MIN_VARIATION_COEFF;
-                      }
-                    }
-                    break;
-                  }
-
-                  case true : {
+                  if (common_dispersion) {
                     variance = 0.;
                     buff = 0.;
 
@@ -1565,8 +1542,16 @@ Mixture* Vectors::mixture_stochastic_estimation(StatError &error , bool display 
                     for (j = 0;j < mixt->nb_component;j++) {
                       mixt->continuous_parametric_process[i]->observation[j]->dispersion = sqrt(variance);
                     }
-                    break;
                   }
+
+                  else {
+                    for (j = 0;j < mixt->nb_component;j++) {
+                      mixt->continuous_parametric_process[i]->observation[j]->dispersion = sqrt(observation_reestim[i][j]->variance);
+                      if (mixt->continuous_parametric_process[i]->observation[j]->dispersion /
+                          mixt->continuous_parametric_process[i]->observation[j]->location < GAUSSIAN_MIN_VARIATION_COEFF) {
+                        mixt->continuous_parametric_process[i]->observation[j]->dispersion = mixt->continuous_parametric_process[i]->observation[j]->location * GAUSSIAN_MIN_VARIATION_COEFF;
+                      }
+                    }
                   }
 
                   break;
@@ -1578,16 +1563,7 @@ Mixture* Vectors::mixture_stochastic_estimation(StatError &error , bool display 
                     mixt->continuous_parametric_process[i]->observation[j]->location = mean_direction[j][3];
                   }
 
-                  switch (common_dispersion) {
-
-                  case false : {
-                    for (j = 0;j < mixt->nb_component;j++) {
-                      mixt->continuous_parametric_process[i]->observation[j]->dispersion = von_mises_concentration_computation(mean_direction[j][2]);
-                    }
-                    break;
-                  }
-
-                  case true : {
+                  if (common_dispersion) {
                     global_mean_direction = 0.;
                     buff = 0.;
 
@@ -1600,8 +1576,12 @@ Mixture* Vectors::mixture_stochastic_estimation(StatError &error , bool display 
                     for (j = 0;j < mixt->nb_component;j++) {
                       mixt->continuous_parametric_process[i]->observation[j]->dispersion = concentration;
                     }
-                    break;
                   }
+
+                  else {
+                    for (j = 0;j < mixt->nb_component;j++) {
+                      mixt->continuous_parametric_process[i]->observation[j]->dispersion = von_mises_concentration_computation(mean_direction[j][2]);
+                    }
                   }
                   break;
                 }
@@ -1880,7 +1860,7 @@ Mixture* Vectors::mixture_stochastic_estimation(StatError &error , bool display 
                                                 double parameter , bool assignment , int nb_iter) const
 
 {
-  register int i , j;
+  int i , j;
   Mixture *imixt , *mixt;
 
 
@@ -1917,7 +1897,7 @@ Mixture* Vectors::mixture_stochastic_estimation(StatError &error , bool display 
 void Mixture::individual_assignment(MixtureData &vec , bool assignment) const
 
 {
-  register int i , j , k;
+  int i , j , k;
   double norm , *component_proba;
 
 
@@ -1974,14 +1954,7 @@ void Mixture::individual_assignment(MixtureData &vec , bool assignment) const
       norm += component_proba[j];
     }
  
-    switch (assignment) {
-
-    case false : {
-      vec.posterior_probability[i] = component_proba[vec.int_vector[i][0]];
-      break;
-    }
-
-    case true : {
+    if (assignment) {
       vec.posterior_probability[i] = 0.;
       for (j = 0;j < nb_component;j++) {
         if (component_proba[j] > vec.posterior_probability[i]) {
@@ -1989,8 +1962,10 @@ void Mixture::individual_assignment(MixtureData &vec , bool assignment) const
           vec.int_vector[i][0] = j;
         }
       }
-      break;
     }
+
+    else {
+      vec.posterior_probability[i] = component_proba[vec.int_vector[i][0]];
     }
 
     if (vec.posterior_probability[i] > 0.) {
@@ -2040,7 +2015,7 @@ void Mixture::individual_assignment(MixtureData &vec , bool assignment) const
 MixtureData* Mixture::simulation(StatError &error , int nb_vector) const
 
 {
-  register int i , j , k;
+  int i , j , k;
   int *decimal_scale;
   variable_nature *itype;
   double buff , min_location;

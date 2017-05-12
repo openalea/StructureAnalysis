@@ -66,7 +66,7 @@ namespace sequence_analysis {
 void HiddenVariableOrderMarkov::forward_backward(VariableOrderMarkovData &seq) const
 
 {
-  register int i , j , k , m;
+  int i , j , k , m;
   int **pioutput;
   double seq_likelihood , observation , **forward , norm , **predicted , buff ,
          *transition_predicted , **forward_state_entropy , **proutput;
@@ -782,7 +782,7 @@ ostream& Sequences::profile_ascii_print(ostream &os , int index , int nb_state ,
                                         double *end_conditional_entropy , double *end_partial_entropy) const
 
 {
-  register int i , j;
+  int i , j;
   int buff , *width;
   ios_base::fmtflags format_flags;
 
@@ -916,7 +916,7 @@ ostream& Sequences::profile_spreadsheet_print(ostream &os , int index , int nb_s
                                               double *end_conditional_entropy , double *end_partial_entropy) const
 
 {
-  register int i , j;
+  int i , j;
 
 
   os << SEQ_label[SEQL_OPTIMAL] << " " << STAT_label[STATL_STATE];
@@ -991,7 +991,7 @@ ostream& Sequences::profile_plot_print(ostream &os , int index , int nb_state ,
                                        double *end_conditional_entropy , double *end_partial_entropy) const
 
 {
-  register int i , j;
+  int i , j;
 
 
   for (i = 0;i < length[index];i++) {
@@ -1033,7 +1033,7 @@ void Sequences::profile_plotable_write(MultiPlot &plot , int index , int nb_stat
                                        double **profiles) const
 
 {
-  register int i , j;
+  int i , j;
 
 
   plot.resize(nb_state);
@@ -1073,7 +1073,7 @@ void Sequences::entropy_profile_plotable_write(MultiPlot &plot , int index ,
                                                double *marginal_entropy) const
 
 {
-  register int i , j;
+  int i , j;
   int nb_plot;
 
 
@@ -1150,7 +1150,7 @@ double HiddenVariableOrderMarkov::forward_backward(MarkovianSequences &seq , int
                                                    double &entropy1) const
 
 {
-  register int i , j , k;
+  int i , j , k;
   int *pstate , **pioutput;
   double seq_likelihood , state_seq_likelihood , **forward , norm , **predicted ,
          entropy2 , buff , **backward , *auxiliary , backward_max , **state_backward ,
@@ -2224,7 +2224,7 @@ double HiddenVariableOrderMarkov::forward_backward_sampling(const MarkovianSeque
                                                             int nb_state_sequence) const
 
 {
-  register int i , j , k;
+  int i , j , k;
   int memory , *pstate , **pioutput;
   double seq_likelihood , state_seq_likelihood , **forward , norm , **predicted ,
          *backward , *cumul_backward , **proutput;
@@ -2600,7 +2600,7 @@ double HiddenVariableOrderMarkov::forward_backward_sampling(const MarkovianSeque
 void HiddenVariableOrderMarkov::log_computation()
 
 {
-  register int i , j;
+  int i , j;
 
 
   Chain::log_computation();
@@ -2639,7 +2639,7 @@ double HiddenVariableOrderMarkov::viterbi(const MarkovianSequences &seq ,
                                           double *posterior_probability , int index) const
 
 {
-  register int i , j , k , m;
+  int i , j , k , m;
   int length , memory , *pstate , **pioutput , **optimal_memory;
   double likelihood = 0. , buff , forward_max , *forward , *previous_forward , **proutput;
 
@@ -3003,7 +3003,7 @@ double HiddenVariableOrderMarkov::generalized_viterbi(const MarkovianSequences &
 
 {
   bool **active_cell;
-  register int i , j , k , m;
+  int i , j , k , m;
   int nb_state_sequence , memory , brank , previous_rank , nb_cell , *rank , *pstate ,
       **pioutput , ***optimal_memory , ***optimal_rank;
   double buff , observation , forward_max , state_seq_likelihood , likelihood_cumul ,
@@ -3590,7 +3590,7 @@ double HiddenVariableOrderMarkov::viterbi_forward_backward(const MarkovianSequen
                                                            output_format format , double seq_likelihood) const
 
 {
-  register int i , j , k;
+  int i , j , k;
   int *pstate , **pioutput;
   double buff , state_seq_likelihood , backward_max , **forward , **backward , *auxiliary ,
          **state_backward , **proutput;
@@ -4137,7 +4137,7 @@ bool HiddenVariableOrderMarkov::state_profile_write(StatError &error , ostream &
 
 {
   bool status = true;
-  register int i;
+  int i;
   int offset = I_DEFAULT , nb_value , index = I_DEFAULT;
   double seq_likelihood , max_marginal_entropy , entropy;
   HiddenVariableOrderMarkov *hmarkov;
@@ -4480,7 +4480,7 @@ bool HiddenVariableOrderMarkov::state_profile_plot_write(StatError &error , cons
 
 {
   bool status = true;
-  register int i , j;
+  int i , j;
   int offset = I_DEFAULT , nb_value , index;
   double seq_likelihood , max_marginal_entropy , entropy , state_seq_likelihood;
   HiddenVariableOrderMarkov *hmarkov;
@@ -4897,7 +4897,7 @@ MultiPlotSet* HiddenVariableOrderMarkov::state_profile_plotable_write(StatError 
 
 {
   bool status = true;
-  register int i;
+  int i;
   int offset = I_DEFAULT , nb_value , index;
   double seq_likelihood , max_marginal_entropy , entropy , state_seq_likelihood;
   HiddenVariableOrderMarkov *hmarkov;
@@ -5193,7 +5193,7 @@ VariableOrderMarkovData* HiddenVariableOrderMarkov::state_sequence_computation(S
 
 {
   bool status = true;
-  register int i;
+  int i;
   int nb_value;
   HiddenVariableOrderMarkov *hmarkov;
   VariableOrderMarkovData *seq;
@@ -5344,7 +5344,7 @@ bool MarkovianSequences::comparison(StatError &error , bool display , int nb_mod
 
 {
   bool status = true;
-  register int i , j;
+  int i , j;
   int nb_value;
   double **likelihood;
   HiddenVariableOrderMarkov **hmarkov;
@@ -5505,7 +5505,7 @@ VariableOrderMarkovData* HiddenVariableOrderMarkov::simulation(StatError &error 
                                                                bool divergence_flag) const
 
 {
-  register int i;
+  int i;
   MarkovianSequences *observed_seq;
   VariableOrderMarkovData *seq;
 
@@ -5554,7 +5554,7 @@ VariableOrderMarkovData* HiddenVariableOrderMarkov::simulation(StatError &error 
                                                                bool counting_flag) const
 
 {
-  register int i;
+  int i;
   MarkovianSequences *observed_seq;
   VariableOrderMarkovData *seq;
 
@@ -5604,7 +5604,7 @@ VariableOrderMarkovData* HiddenVariableOrderMarkov::simulation(StatError &error 
                                                                bool counting_flag) const
 
 {
-  register int i;
+  int i;
   MarkovianSequences *observed_seq;
   VariableOrderMarkovData *seq;
 
@@ -5657,7 +5657,7 @@ DistanceMatrix* HiddenVariableOrderMarkov::divergence_computation(StatError &err
 
 {
   bool status = true , lstatus;
-  register int i , j , k;
+  int i , j , k;
   int cumul_length , nb_failure;
   double **likelihood;
   long double divergence;
@@ -5890,7 +5890,7 @@ DistanceMatrix* HiddenVariableOrderMarkov::divergence_computation(StatError &err
 
 {
   bool status = true;
-  register int i;
+  int i;
   FrequencyDistribution **length_distribution;
   DistanceMatrix *dist_matrix;
 
@@ -5961,7 +5961,7 @@ DistanceMatrix* HiddenVariableOrderMarkov::divergence_computation(StatError &err
                                                                   const string path) const
 
 {
-  register int i;
+  int i;
   FrequencyDistribution **length_distribution;
   DistanceMatrix *dist_matrix;
 

@@ -66,7 +66,7 @@ namespace sequence_analysis {
 void SemiMarkovChain::initial_probability_computation()
 
 {
-  register int i , j , k;
+  int i , j , k;
   double sum , *state , *state_out , **state_in;
   DiscreteParametric *occupancy;
 
@@ -211,7 +211,7 @@ void SemiMarkovChain::initial_probability_computation()
 double SemiMarkov::likelihood_computation(const MarkovianSequences &seq , int index) const
 
 {
-  register int i , j , k , m;
+  int i , j , k , m;
   int nb_value , occupancy , *pstate , **pioutput;
   double likelihood = 0. , proba , residual , **proutput;
 
@@ -482,7 +482,7 @@ double SemiMarkov::likelihood_computation(const MarkovianSequences &seq , int in
 double SemiMarkov::likelihood_computation(const SemiMarkovData &seq) const
 
 {
-  register int i , j;
+  int i , j;
   int nb_value;
   double buff , likelihood = 0.;
   FrequencyDistribution **initial_run , **final_run , **single_run;
@@ -700,7 +700,7 @@ void MarkovianSequences::transition_count_computation(const ChainData &chain_dat
                                                       const SemiMarkov *smarkov) const
 
 {
-  register int i , j;
+  int i , j;
   int *pstate;
 
 
@@ -777,7 +777,7 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , bool d
 
 {
   bool status = true;
-  register int i , j;
+  int i , j;
   int nb_likelihood_decrease , *occupancy_survivor , *censored_occupancy_survivor , nb_value[1];
   double likelihood , previous_likelihood , hlikelihood , occupancy_mean;
   DiscreteParametric *occupancy;
@@ -1389,7 +1389,7 @@ bool MarkovianSequences::comparison(StatError &error , bool display , int nb_mod
 
 {
   bool status = true;
-  register int i , j;
+  int i , j;
   double **likelihood;
 
 
@@ -1531,7 +1531,7 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , const FrequencyDistrib
 
 {
   bool status = true , hidden;
-  register int i , j , k , m;
+  int i , j , k , m;
   int cumul_length , occupancy , *decimal_scale , *pstate , **pioutput;
   variable_nature *itype;
   double buff , min_location , likelihood , **proutput;
@@ -1846,13 +1846,11 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , const FrequencyDistrib
       }
 #     endif
 
-      switch (hidden) {
-      case false :
-        seq->likelihood = likelihood;
-        break;
-      case true :
+      if (hidden) {
         seq->restoration_likelihood = likelihood;
-        break;
+      }
+      else {
+        seq->likelihood = likelihood;
       }
 
       // computation of the mixtures of observation distributions (theoretical weights and weights deduced from the restoration)
@@ -2030,7 +2028,7 @@ DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , bool displ
 
 {
   bool status = true , lstatus;
-  register int i , j , k;
+  int i , j , k;
   int cumul_length , nb_failure;
   double **likelihood;
   long double divergence;
@@ -2290,7 +2288,7 @@ DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , bool displ
 
 {
   bool status = true;
-  register int i;
+  int i;
   FrequencyDistribution **length_distribution;
   DistanceMatrix *dist_matrix;
 
@@ -2361,7 +2359,7 @@ DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , bool displ
                                                    const string path) const
 
 {
-  register int i;
+  int i;
   FrequencyDistribution **length_distribution;
   DistanceMatrix *dist_matrix;
 
@@ -2494,7 +2492,7 @@ bool SemiMarkovIterator::simulation(int **int_seq , int length , bool initializa
   }
 
   else {
-    register int i , j;
+    int i , j;
     int *pstate , **pioutput;
 //    double **proutput;
 
@@ -2602,7 +2600,7 @@ bool SemiMarkovIterator::simulation(int **int_seq , int length , bool initializa
 int** SemiMarkovIterator::simulation(int length , bool initialization)
 
 {
-  register int i;
+  int i;
   int **int_seq;
 
 

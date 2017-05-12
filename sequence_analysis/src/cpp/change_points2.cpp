@@ -80,7 +80,7 @@ void Sequences::forward_contrast(int time , int index , segment_model *model_typ
                                  double **rank , long double *contrast , int nb_segment) const
 
 {
-  register int i , j , k , m;
+  int i , j , k , m;
   int max_nb_value , count , *frequency , *inf_bound_parameter;
   double sum , factorial_sum , proba , binomial_coeff_sum , diff , index_parameter_sum ,
          index_parameter_diff , shifted_diff , range_diff , mean , buff;
@@ -1250,7 +1250,7 @@ void Sequences::backward_contrast(int time , int index , segment_model *model_ty
                                   double **rank , long double *contrast) const
 
 {
-  register int i , j , k , m;
+  int i , j , k , m;
   int max_nb_value , count , *frequency , *inf_bound_parameter;
   double sum , factorial_sum , proba , binomial_coeff_sum , diff , index_parameter_sum ,
          index_parameter_diff , shifted_diff , range_diff , mean , buff;
@@ -2283,7 +2283,7 @@ double Sequences::segmentation(int index , int nb_segment , segment_model *model
 
 {
   bool *used_output;
-  register int i , j , k , m , n , p;
+  int i , j , k , m , n , p;
   int max_nb_value , seq_length , count , *inf_bound_parameter , *seq_index_parameter ,
       *psegment , **optimal_length;
   double buff , segmentation_likelihood , **seq_mean , **hyperparam , **forward ,
@@ -2803,7 +2803,7 @@ Sequences* Sequences::segmentation(StatError &error , bool display , int iidenti
 
 {
   bool status = true;
-  register int i , j;
+  int i , j;
   int index , nb_parameter;
   double segmentation_likelihood , segment_penalty , penalized_likelihood , **rank;
   FrequencyDistribution *marginal;

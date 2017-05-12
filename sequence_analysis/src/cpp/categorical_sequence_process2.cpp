@@ -75,7 +75,7 @@ ostream& CategoricalSequenceProcess::ascii_print(ostream &os , int process ,
                                                  Forward **forward) const
 
 {
-  register int i , j;
+  int i , j;
   int buff , width[2];
   double scale[NB_STATE];
   const Distribution *pobservation[NB_STATE];
@@ -830,7 +830,7 @@ ostream& CategoricalSequenceProcess::spreadsheet_print(ostream &os , int process
                                                        Forward **forward) const
 
 {
-  register int i , j;
+  int i , j;
   double scale[NB_STATE];
   const Distribution *pobservation[NB_STATE];
   Curves *smoothed_curves;
@@ -1403,7 +1403,7 @@ bool CategoricalSequenceProcess::plot_print(const char *prefix , const char *tit
 
 {
   bool status = false , start;
-  register int i , j , k , m;
+  int i , j , k , m;
   int index_length , nb_histo , nb_dist , histo_index , dist_index , *dist_nb_value;
   double *scale;
   Curves *smoothed_curves;
@@ -2896,7 +2896,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
                                                 Forward **forward) const
 
 {
-  register int i , j;
+  int i , j;
   int index_length , dist_nb_value;
   double scale , max;
   Curves *smoothed_curves;

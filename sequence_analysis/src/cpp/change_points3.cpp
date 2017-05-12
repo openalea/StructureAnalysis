@@ -91,7 +91,7 @@ double Sequences::forward_backward(int index , int nb_segment , segment_model *m
                                    long double *marginal_entropy) const
 
 {
-  register int i , j , k , m;
+  int i , j , k , m;
   int seq_length , *inf_bound_parameter , *seq_index_parameter;
   double sum , buff , rlikelihood , **seq_mean , **hyperparam , **nb_segmentation_forward ,
          **nb_segmentation_backward , **smoothed , ***factorial , ***binomial_coeff;
@@ -889,7 +889,7 @@ void log_likelihood_slope(int min_nb_segment , int max_nb_segment , int penalty_
                           double &residual_standard_deviation)
 
 {
-  register int i;
+  int i;
   int nb_model;
   double diff , likelihood_mean , penalty_shape_mean , penalty_shape_variance , covariance ,
          residual_mean , residual_square_sum;
@@ -989,7 +989,7 @@ double dimension_jump(bool display , int max_nb_segment , double slope_step ,
                       double *penalty_shape , double *likelihood)
 
 {
-  register int i , j;
+  int i , j;
   int max_diff_nb_segment , nb_segment , previous_nb_segment , nb_step , *step_nb_segment;
   double slope , optimal_slope , max_likelihood , penalized_likelihood , *begin_slope , *end_slope;
 
@@ -1109,7 +1109,7 @@ Sequences* Sequences::segmentation(StatError &error , bool display , int iidenti
 
 {
   bool status = true , bayesian;
-  register int i , j;
+  int i , j;
   int index , nb_segment , inb_sequence , *nb_parameter , ilength[4];
   variable_nature itype[1];
   double buff , segmentation_intercept , segmentation_slope , segmentation_slope_standard_deviation ,
@@ -1445,9 +1445,38 @@ Sequences* Sequences::segmentation(StatError &error , bool display , int iidenti
       }
     }
 
-    switch (bayesian) {
+    if (bayesian) {
+      if (likelihood[1] != D_INF) {
+        penalized_likelihood[2][1] = 2 * likelihood[1];
+        max_likelihood[2] = penalized_likelihood[2][1];
+        nb_segment = 1;
+      }
 
-    case false : {
+      else {
+        max_nb_segment = 0;
+        nb_segment = 0;
+      }
+
+      for (i = 2;i <= max_nb_segment;i++) {
+        if (likelihood[i] != D_INF) {
+//          penalized_likelihood[2][i] = 2 * (likelihood[i] - segmentation_entropy[i]);
+          penalized_likelihood[2][i] = 2 * (likelihood[i] - segmentation_entropy[i] -
+                                            uniform_entropy[i]);
+
+          if (penalized_likelihood[2][i] > max_likelihood[2]) {
+            max_likelihood[2] = penalized_likelihood[2][i];
+            nb_segment = i;
+          }
+        }
+
+        else {
+          max_nb_segment = i - 1;
+          break;
+        }
+      }
+    }
+
+    else {
 
       // computation of penalized likelihoods corresponding to the slope heuristic (data-driven slope estimation and
       // dimension jump), the ICL criterion and the modified BIC (Zhang & Siegmund, 2007)
@@ -1589,40 +1618,6 @@ Sequences* Sequences::segmentation(StatError &error , bool display , int iidenti
           break;
         }
       }
-      break;
-    }
-
-    case true : {
-      if (likelihood[1] != D_INF) {
-        penalized_likelihood[2][1] = 2 * likelihood[1];
-        max_likelihood[2] = penalized_likelihood[2][1];
-        nb_segment = 1;
-      }
-
-      else {
-        max_nb_segment = 0;
-        nb_segment = 0;
-      }
-
-      for (i = 2;i <= max_nb_segment;i++) {
-        if (likelihood[i] != D_INF) {
-//          penalized_likelihood[2][i] = 2 * (likelihood[i] - segmentation_entropy[i]);
-          penalized_likelihood[2][i] = 2 * (likelihood[i] - segmentation_entropy[i] -
-                                            uniform_entropy[i]);
-
-          if (penalized_likelihood[2][i] > max_likelihood[2]) {
-            max_likelihood[2] = penalized_likelihood[2][i];
-            nb_segment = i;
-          }
-        }
-
-        else {
-          max_nb_segment = i - 1;
-          break;
-        }
-      }
-      break;
-    }
     }
 
     if (nb_segment > 0) {
@@ -1645,21 +1640,15 @@ Sequences* Sequences::segmentation(StatError &error , bool display , int iidenti
           }
         }
 
-        switch (bayesian) {
-
-        case false : {
+        if (bayesian) {
+          weight = new double*[3];
+          weight[2] = new double[max_nb_segment + 1];
+        }
+        else {
           weight = new double*[6];
           for (i = 0;i < 6;i++) {
             weight[i] = new double[max_nb_segment + 1];
           }
-          break;
-        }
-
-        case true : {
-          weight = new double*[3];
-          weight[2] = new double[max_nb_segment + 1];
-          break;
-        }
         }
 
         if ((model_type[0] != MEAN_CHANGE) && (model_type[0] != INTERCEPT_SLOPE_CHANGE)) {
@@ -1941,19 +1930,13 @@ Sequences* Sequences::segmentation(StatError &error , bool display , int iidenti
           delete [] posterior_probability;
         }
 
-        switch (bayesian) {
-
-        case false : {
+        if (bayesian) {
+          delete [] weight[2];
+        }
+        else {
           for (i = 0;i < 6;i++) {
             delete [] weight[i];
           }
-          break;
-        }
-
-        case true : {
-          delete [] weight[2];
-          break;
-        }
         }
 
         delete [] weight;
@@ -2125,21 +2108,16 @@ Sequences* Sequences::segmentation(StatError &error , bool display , int iidenti
     delete [] segmentation_likelihood;
     delete [] nb_parameter;
 
-    switch (bayesian) {
+    if (bayesian) {
+      delete [] penalized_likelihood[2];
+    }
 
-    case false : {
+    else {
       delete [] segment_penalty;
 
       for (i = 0;i < 6;i++) {
         delete [] penalized_likelihood[i];
       }
-      break;
-    }
-
-    case true : {
-      delete [] penalized_likelihood[2];
-      break;
-    }
     }
 
     delete [] penalized_likelihood;
@@ -2224,7 +2202,7 @@ ostream& Sequences::profile_ascii_print(ostream &os , int index , int nb_segment
                                         long double **change_point_entropy) const
 
 {
-  register int i , j , k;
+  int i , j , k;
   int seq_length , start , buff , max_nb_value , *seq_index_parameter , *width;
   ios_base::fmtflags format_flags;
 
@@ -2654,7 +2632,7 @@ ostream& Sequences::profile_spreadsheet_print(ostream &os , int index , int nb_s
                                               long double **change_point_entropy) const
 
 {
-  register int i , j , k;
+  int i , j , k;
   int seq_length , max_nb_value , *seq_index_parameter;
 
 
@@ -2736,29 +2714,7 @@ ostream& Sequences::profile_spreadsheet_print(ostream &os , int index , int nb_s
     for (j = 1;j < nb_variable;j++) {
 //      if ((index == I_DEFAULT) && (nb_sequence * (nb_variable - 1) <= SEQUENCE_MAX_NB_COLUMN)) {
       if (index == I_DEFAULT) {
-        switch (common_contrast) {
-
-        case false : {
-          if (type[j] != REAL_VALUE) {
-            for (k = 0;k < nb_sequence;k++) {
-              os << int_sequence[k][j][i] << "\t";
-              if ((piecewise_function) && (piecewise_function[j])) {
-                os << piecewise_function[j][k][i] << "\t";
-              }
-            }
-          }
-          else {
-            for (k = 0;k < nb_sequence;k++) {
-              os << real_sequence[k][j][i] << "\t";
-              if ((piecewise_function) && (piecewise_function[j])) {
-                os << piecewise_function[j][k][i] << "\t";
-              }
-            }
-          }
-          break;
-        }
-
-        case true : {
+        if (common_contrast) {
           if (type[j] != REAL_VALUE) {
             for (k = 0;k < nb_sequence;k++) {
               os << int_sequence[k][j][i] << "\t";
@@ -2772,8 +2728,25 @@ ostream& Sequences::profile_spreadsheet_print(ostream &os , int index , int nb_s
           if ((piecewise_function) && (piecewise_function[j])) {
             os << piecewise_function[j][0][i] << "\t";
           }
-          break;
         }
+
+        else {
+          if (type[j] != REAL_VALUE) {
+            for (k = 0;k < nb_sequence;k++) {
+              os << int_sequence[k][j][i] << "\t";
+              if ((piecewise_function) && (piecewise_function[j])) {
+                os << piecewise_function[j][k][i] << "\t";
+              }
+            }
+          }
+          else {
+            for (k = 0;k < nb_sequence;k++) {
+              os << real_sequence[k][j][i] << "\t";
+              if ((piecewise_function) && (piecewise_function[j])) {
+                os << piecewise_function[j][k][i] << "\t";
+              }
+            }
+          }
         }
       }
 
@@ -2978,7 +2951,7 @@ ostream& Sequences::profile_plot_print(ostream &os , int index , int nb_segment 
                                        long double **change_point_entropy) const
 
 {
-  register int i , j , k;
+  int i , j , k;
   int seq_length , *seq_index_parameter;
 
 
@@ -3120,7 +3093,7 @@ void Sequences::change_point_profile_plotable_write(MultiPlot &plot , int index 
                                                     long double **change_point) const
 
 {
-  register int i , j , k;
+  int i , j , k;
   int seq_length , *seq_index_parameter;
 
 
@@ -3172,7 +3145,7 @@ void Sequences::segment_length_distribution_plotable_write(MultiPlot &plot , int
                                                            Distribution *prior_segment_length) const
 
 {
-  register int i;
+  int i;
   int max_nb_value;
 
 
@@ -3229,7 +3202,7 @@ void Sequences::entropy_profile_plotable_write(MultiPlot &plot , int index ,
                                                long double *change_point_entropy) const
 
 {
-  register int i;
+  int i;
   int seq_length , *seq_index_parameter;
 
 
@@ -3287,7 +3260,7 @@ double Sequences::forward_backward(int index , int nb_segment , segment_model *m
                                    output_format format) const
 
 {
-  register int i , j , k , m;
+  int i , j , k , m;
   int seq_length , *inf_bound_parameter , *seq_index_parameter;
   double sum , buff , rlikelihood , backward_max , *likelihood , **seq_mean , **hyperparam ,
          **backward_output , ***factorial , ***binomial_coeff , ***smoothed;
@@ -4682,7 +4655,7 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , segment
                                             int nb_segmentation) const
 
 {
-  register int i , j , k , m;
+  int i , j , k , m;
   int seq_length , segment_length , *inf_bound_parameter , *seq_index_parameter , *change_point ,
       *psegment;
   double sum , likelihood , segmentation_likelihood , *backward , *cumul_backward , **seq_mean ,

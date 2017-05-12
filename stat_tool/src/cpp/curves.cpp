@@ -82,7 +82,7 @@ Curves::Curves(int inb_curve , int ilength , bool frequency_flag ,
                bool index_parameter_flag , bool init_flag)
 
 {
-  register int i , j;
+  int i , j;
 
 
   nb_curve = inb_curve;
@@ -134,7 +134,7 @@ Curves::Curves(int inb_curve , int ilength , bool frequency_flag ,
 Curves::Curves(const Distribution &dist)
 
 {
-  register int i;
+  int i;
   double norm , *pcumul;
 
 
@@ -184,7 +184,7 @@ Curves::Curves(const Distribution &dist)
 Curves::Curves(const FrequencyDistribution &histo)
 
 {
-  register int i;
+  int i;
   int norm;
 
 
@@ -221,7 +221,7 @@ Curves::Curves(const FrequencyDistribution &histo)
 void Curves::copy(const Curves &curves)
 
 {
-  register int i , j;
+  int i , j;
 
 
   nb_curve = curves.nb_curve;
@@ -275,7 +275,7 @@ void Curves::copy(const Curves &curves)
 void Curves::smooth(const Curves &curves , int max_frequency)
 
 {
-  register int i , j , k;
+  int i , j , k;
   int range , buff , min , max , total;
   double sum;
 
@@ -396,7 +396,7 @@ void Curves::remove()
   delete [] frequency;
 
   if (point) {
-    register int i;
+    int i;
 
     for (i = 0;i < nb_curve;i++) {
       delete [] point[i];
@@ -454,7 +454,7 @@ Curves& Curves::operator=(const Curves &curves)
 ostream& Curves::ascii_print(ostream &os , bool file_flag , const Curves *curves) const
 
 {
-  register int i , j , k;
+  int i , j , k;
   int nb_column = nb_curve + 1 , *width;
   ios_base::fmtflags format_flags;
 
@@ -547,7 +547,7 @@ ostream& Curves::ascii_print(ostream &os , bool file_flag , const Curves *curves
 ostream& Curves::spreadsheet_print(ostream &os , const Curves *curves) const
 
 {
-  register int i , j;
+  int i , j;
 
 
   for (i = offset;i < length;i++) {
@@ -623,7 +623,7 @@ bool Curves::plot_print(const char *path , int ilength ,
 
 {
   bool status = false;
-  register int i , j;
+  int i , j;
   ofstream out_file(path);
 
 
@@ -674,7 +674,7 @@ bool Curves::plot_print(const char *path , int ilength ,
 void Curves::plotable_write(int index , SinglePlot &plot) const
 
 {
-  register int i;
+  int i;
 
 
   if (index_parameter) {
@@ -702,7 +702,7 @@ void Curves::plotable_write(int index , SinglePlot &plot) const
 void Curves::plotable_write(MultiPlot &plot) const
 
 {
-  register int i , j;
+  int i , j;
 
 
   if (index_parameter) {
@@ -734,7 +734,7 @@ void Curves::plotable_write(MultiPlot &plot) const
 void Curves::plotable_frequency_write(SinglePlot &plot) const
 
 {
-  register int i;
+  int i;
 
 
   if (index_parameter) {
@@ -763,7 +763,7 @@ void Curves::plotable_frequency_write(SinglePlot &plot) const
 ostream& operator<<(ostream &os , const Curves &curves)
 
 {
-  register int i , j;
+  int i , j;
   streamsize nb_digits;
 
 
@@ -812,7 +812,7 @@ int Curves::max_frequency_computation() const
 
 
   if (frequency) {
-    register int i;
+    int i;
 
 
     max_frequency = 0;
@@ -842,7 +842,7 @@ int Curves::nb_element_computation() const
 
 
   if (frequency) {
-    register int i;
+    int i;
 
 
     nb_element = 0;
@@ -868,7 +868,7 @@ int Curves::nb_element_computation() const
 double Curves::mean_computation(int index) const
 
 {
-  register int i;
+  int i;
   int nb_element;
   double mean;
 
@@ -901,7 +901,7 @@ double Curves::mean_computation(int index) const
 double Curves::total_square_sum_computation(int index , double mean) const
 
 {
-  register int i;
+  int i;
   double total_square_sum , diff;
 
 
@@ -932,7 +932,7 @@ bool Curves::plot_print_standard_residual(const char *path , double *standard_re
 
 {
   bool status = false;
-  register int i;
+  int i;
   ofstream out_file(path);
 
 

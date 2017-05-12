@@ -65,7 +65,7 @@ void NonhomogeneousMarkov::transition_update(int state , int index , Chain &inde
 
 
 {
-  register int i;
+  int i;
   double scale , *pparam;
 
 
@@ -108,7 +108,7 @@ void NonhomogeneousMarkov::transition_update(int state , int index , Chain &inde
 void NonhomogeneousMarkov::index_state_distribution()
 
 {
-  register int i , j , k;
+  int i , j , k;
   Curves *index_state;
   Chain *index_chain;
 
@@ -162,7 +162,7 @@ void NonhomogeneousMarkov::index_state_distribution()
 void NonhomogeneousMarkov::state_no_occurrence_probability(int state , double increment)
 
 {
-  register int i;
+  int i;
 
   for (i = 0;i < nb_state;i++) {
     if ((i != state) && (!accessibility[i][state])) {
@@ -171,7 +171,7 @@ void NonhomogeneousMarkov::state_no_occurrence_probability(int state , double in
   }
 
   if (i < nb_state) {
-    register int j , k;
+    int j , k;
     double state_sum , *current_state , *previous_state ,
            &no_occurrence = process->no_occurrence[state];
     Chain *index_chain;
@@ -274,7 +274,7 @@ void NonhomogeneousMarkov::state_first_occurrence_distribution(int state , int m
                                                                double cumul_threshold)
 
 {
-  register int i , j , k;
+  int i , j , k;
   double *current_state , *previous_state , *pmass , *pcumul;
   Chain *index_chain;
   Distribution *first_occurrence;
@@ -390,7 +390,7 @@ void NonhomogeneousMarkov::state_first_occurrence_distribution(int state , int m
 void NonhomogeneousMarkov::state_nb_pattern_mixture(int state , count_pattern pattern)
 
 {
-  register int i , j , k , m;
+  int i , j , k , m;
   int max_length , nb_pattern , index_nb_pattern , increment;
   double sum , **current_state , **previous_state , *cstate , *pstate , *pmass , *lmass;
   Distribution *pdist;
@@ -552,7 +552,7 @@ void NonhomogeneousMarkov::characteristic_computation(int length , bool counting
 
 {
   if (nb_component > 0) {
-    register int i;
+    int i;
     DiscreteParametric dlength(UNIFORM , length , length , D_DEFAULT , D_DEFAULT);
 
 
@@ -605,7 +605,7 @@ void NonhomogeneousMarkov::characteristic_computation(const NonhomogeneousMarkov
 
 {
   if (nb_component > 0) {
-    register int i;
+    int i;
     Distribution dlength(*(seq.length_distribution));
 
 
@@ -658,7 +658,7 @@ void NonhomogeneousMarkov::characteristic_computation(const NonhomogeneousMarkov
 double Function::regression_square_sum_computation(double mean) const
 
 {
-  register int i;
+  int i;
   int *pfrequency;
   double regression_square_sum , diff , *ppoint;
 
@@ -691,7 +691,7 @@ double Function::regression_square_sum_computation(double mean) const
 void Function::residual_computation(const SelfTransition &self_transition)
 
 {
-  register int i;
+  int i;
   int *pfrequency , *sfrequency;
   double *presidual , *ppoint , *spoint;
 
@@ -727,7 +727,7 @@ void Function::residual_computation(const SelfTransition &self_transition)
 double Function::residual_mean_computation() const
 
 {
-  register int i;
+  int i;
   int nb_element , *pfrequency;
   double residual_mean , *presidual;
 
@@ -764,7 +764,7 @@ double Function::residual_mean_computation() const
 double Function::residual_variance_computation(double residual_mean) const
 
 {
-  register int i;
+  int i;
   int *pfrequency;
   double residual_variance = D_DEFAULT , diff , *presidual;
 
@@ -801,7 +801,7 @@ double Function::residual_variance_computation(double residual_mean) const
 double Function::residual_square_sum_computation() const
 
 {
-  register int i;
+  int i;
   int *pfrequency;
   double residual_square_sum , *presidual;
 
@@ -831,7 +831,7 @@ double Function::residual_square_sum_computation() const
 Function* SelfTransition::logistic_regression() const
 
 {
-  register int i;
+  int i;
   int iter , nb_element = nb_element_computation() , norm , init_nb_element , *pfrequency;
   double start_proba , denom , residual , residual_square_sum = -D_INF , previous_residual_square_sum ,
          correction[3] , *ppoint;
@@ -978,7 +978,7 @@ Function* SelfTransition::logistic_regression() const
 Function* SelfTransition::monomolecular_regression() const
 
 {
-  register int i;
+  int i;
   int iter , nb_element = nb_element_computation() , norm , init_nb_element , *pfrequency;
   double start_proba , residual , residual_square_sum = -D_INF , previous_residual_square_sum ,
          correction[3] , *ppoint;
@@ -1129,7 +1129,7 @@ Function* SelfTransition::monomolecular_regression() const
 double NonhomogeneousMarkov::likelihood_computation(const MarkovianSequences &seq , int index) const
 
 {
-  register int i , j , k;
+  int i , j , k;
   int *pstate;
   double likelihood = 0. , proba;
   Chain *index_chain;
@@ -1238,7 +1238,7 @@ NonhomogeneousMarkov* MarkovianSequences::nonhomogeneous_markov_estimation(StatE
 
 {
   bool status = true;
-  register int i;
+  int i;
   NonhomogeneousMarkov *markov;
   NonhomogeneousMarkovData *seq;
 
@@ -1345,7 +1345,7 @@ NonhomogeneousMarkovData* NonhomogeneousMarkov::simulation(StatError &error ,
 
 {
   bool status = true;
-  register int i , j , k;
+  int i , j , k;
   int cumul_length , *pstate;
   Chain *index_chain;
   NonhomogeneousMarkov *markov;

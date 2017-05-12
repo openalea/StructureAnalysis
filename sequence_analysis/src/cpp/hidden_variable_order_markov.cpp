@@ -77,7 +77,7 @@ VariableOrderMarkov::VariableOrderMarkov(const VariableOrderMarkovChain *pmarkov
                                          int length)
 
 {
-  register int i;
+  int i;
 
 
   build(*pmarkov);
@@ -136,7 +136,7 @@ HiddenVariableOrderMarkov::~HiddenVariableOrderMarkov() {}
 HiddenVariableOrderMarkov* HiddenVariableOrderMarkov::thresholding(double min_probability) const
 
 {
-  register int i;
+  int i;
   HiddenVariableOrderMarkov *hmarkov;
 
 
@@ -177,7 +177,7 @@ HiddenVariableOrderMarkov* HiddenVariableOrderMarkov::ascii_read(StatError &erro
   char_separator<char> separator(" \t");
   process_type type = DEFAULT_TYPE;
   bool status , lstatus;
-  register int i;
+  int i;
   int line , nb_output_process , value , index;
   observation_process obs_type;
   const VariableOrderMarkovChain *imarkov;

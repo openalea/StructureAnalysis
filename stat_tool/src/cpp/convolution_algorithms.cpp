@@ -61,7 +61,7 @@ namespace stat_tool {
 void Convolution::computation(int min_nb_value , double cumul_threshold , bool *dist_flag)
 
 {
-  register int i;
+  int i;
 
 
   // computation of the elementary distributions
@@ -104,7 +104,7 @@ void Convolution::expectation_step(const FrequencyDistribution &histo ,
                                    Reestimation<double> **reestim) const
 
 {
-  register int i , j , k;
+  int i , j , k;
   int min , max;
 
 
@@ -173,7 +173,7 @@ Convolution* FrequencyDistribution::convolution_estimation(StatError &error , bo
 
 {
   bool status = true , dist_flag[2];
-  register int i;
+  int i;
   int nb_likelihood_decrease;
   double likelihood , previous_likelihood , hlikelihood , *penalty;
   const Distribution *partial_convol[2];
@@ -481,7 +481,7 @@ Convolution* FrequencyDistribution::convolution_estimation(StatError &error , bo
 ConvolutionData* Convolution::simulation(StatError &error , int nb_element) const
 
 {
-  register int i , j;
+  int i , j;
   int value , sum;
   ConvolutionData *convol_histo;
 

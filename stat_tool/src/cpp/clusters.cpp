@@ -91,7 +91,7 @@ Clusters::Clusters(const DistanceMatrix &dist_matrix , int inb_cluster)
 :DistanceMatrix(dist_matrix , inb_cluster , STAT_label[STATL_CLUSTER])
 
 {
-  register int i , j;
+  int i , j;
 
 
   distance_matrix = new DistanceMatrix(dist_matrix);
@@ -143,7 +143,7 @@ Clusters::Clusters(const DistanceMatrix &dist_matrix , int inb_cluster ,
 :DistanceMatrix(dist_matrix , inb_cluster , STAT_label[STATL_CLUSTER])
 
 {
-  register int i , j , k;
+  int i , j , k;
 
 
   distance_matrix = new DistanceMatrix(dist_matrix);
@@ -200,7 +200,7 @@ Clusters::Clusters(const DistanceMatrix &dist_matrix , int inb_cluster ,
 void Clusters::copy(const Clusters &clusters)
 
 {
-  register int i , j;
+  int i , j;
 
 
   distance_matrix = new DistanceMatrix(*(clusters.distance_matrix));
@@ -245,7 +245,7 @@ void Clusters::copy(const Clusters &clusters)
 void Clusters::remove()
 
 {
-  register int i;
+  int i;
 
 
   delete distance_matrix;
@@ -340,7 +340,7 @@ int* Clusters::pattern_sort(int cluster) const
 
 {
   bool *selected_pattern;
-  register int i , j;
+  int i , j;
   int *index;
   double min_distance , *normalized_distance;
 
@@ -396,7 +396,7 @@ int* Clusters::pattern_sort(int cluster) const
 ostream& Clusters::ascii_write(ostream &os , bool exhaustive) const
 
 {
-  register int i , j;
+  int i , j;
   int buff , max_identifier , neighbor_cluster , most_distant_pattern , neighbor_pattern ,
       isolation , *index , *order , width[3];
   double **normalized_pattern_distance , **normalized_pattern_cluster_distance ,
@@ -702,7 +702,7 @@ bool Clusters::spreadsheet_write(StatError &error , const string path) const
 
 {
   bool status;
-  register int i , j;
+  int i , j;
   int isolation , neighbor_cluster , most_distant_pattern , neighbor_pattern , *index , *order;
   double **normalized_pattern_distance , **normalized_pattern_cluster_distance ,
          **normalized_cluster_distance;
@@ -917,7 +917,7 @@ bool Clusters::plot_write(StatError &error , const char *prefix ,
 
 {
   bool status = true;
-  register int i , j , k;
+  int i , j , k;
   int max_nb_pattern , plot_nb_cluster , *plot_nb_pattern , **index;
   double min_distance , max_distance , **normalized_distance;
   ostringstream *data_file_name;
@@ -1115,7 +1115,7 @@ bool Clusters::plot_write(StatError &error , const char *prefix ,
 MultiPlotSet* Clusters::get_plotable(StatError &error) const
 
 {
-  register int i , j , k;
+  int i , j , k;
   int max_nb_pattern , plot_nb_cluster , *plot_nb_pattern , **index;
   double min_distance , max_distance , **normalized_distance;
   ostringstream title , legend , identifier;
@@ -1268,7 +1268,7 @@ MultiPlotSet* Clusters::get_plotable() const
 void Clusters::cluster_nb_pattern_computation()
 
 {
-  register int i;
+  int i;
 
 
   for (i = 0;i < nb_cluster;i++) {
@@ -1291,7 +1291,7 @@ void Clusters::cluster_nb_pattern_computation()
 void Clusters::pattern_distance_computation()
 
 {
-  register int i , j;
+  int i , j;
 
 
   for (i = 0;i < nb_pattern;i++) {
@@ -1327,7 +1327,7 @@ void Clusters::pattern_distance_computation()
 void Clusters::cluster_distance_computation_1()
 
 {
-  register int i , j;
+  int i , j;
 
 
   for (i = 0;i < nb_cluster;i++) {
@@ -1474,7 +1474,7 @@ void Clusters::cluster_distance_computation_1()
 void Clusters::cluster_distance_computation_2()
 
 {
-  register int i , j;
+  int i , j;
 
 
   for (i = 0;i < nb_cluster;i++) {
@@ -1501,7 +1501,7 @@ void Clusters::cluster_distance_computation_2()
 
 # ifdef DEBUG
   {
-    register int k;
+    int k;
     double **normalized_distance;
 
 
@@ -1556,7 +1556,7 @@ void Clusters::cluster_distance_computation_2()
 int Clusters::most_distant_pattern_selection(double **normalized_distance , int ipattern) const
 
 {
-  register int i;
+  int i;
   int pattern = ipattern;
   double max_within_cluster_distance;
 
@@ -1590,7 +1590,7 @@ int Clusters::most_distant_pattern_selection(double **normalized_distance , int 
 int Clusters::neighbor_pattern_selection(double **normalized_distance , int ipattern) const
 
 {
-  register int i;
+  int i;
   int pattern;
   double min_between_cluster_distance;
 
@@ -1622,7 +1622,7 @@ int Clusters::neighbor_pattern_selection(double **normalized_distance , int ipat
 int Clusters::neighbor_pattern_cluster_selection(double **normalized_distance , int pattern) const
 
 {
-  register int i;
+  int i;
   int cluster;
   double min_between_cluster_distance;
 
@@ -1654,7 +1654,7 @@ int Clusters::neighbor_pattern_cluster_selection(double **normalized_distance , 
 double Clusters::max_within_cluster_distance_computation(double **normalized_distance , int cluster) const
 
 {
-  register int i , j;
+  int i , j;
   double max_within_cluster_distance;
 
 
@@ -1691,7 +1691,7 @@ double Clusters::max_within_cluster_distance_computation(double **normalized_dis
 double Clusters::min_between_cluster_distance_computation(double **normalized_distance , int cluster) const
 
 {
-  register int i , j;
+  int i , j;
   double min_between_cluster_distance;
 
 
@@ -1729,7 +1729,7 @@ bool Clusters::isolation_property(double **normalized_distance , int cluster ,
 
 {
   bool isolation = true;
-  register int i , j;
+  int i , j;
   double max_within_distance , min_between_distance;
 
 
@@ -1790,7 +1790,7 @@ bool Clusters::isolation_property(double **normalized_distance , int cluster ,
 double Clusters::between_cluster_distance_computation(int cluster) const
 
 {
-  register int i;
+  int i;
   int between_length;
   double between_distance;
 
@@ -1831,7 +1831,7 @@ double Clusters::between_cluster_distance_computation(int cluster) const
 ostream& Clusters::global_distance_ascii_print(ostream &os)
 
 {
-  register int i , j;
+  int i , j;
   int within_length , between_length;
   double within_distance , between_distance;
 
@@ -1897,7 +1897,7 @@ ostream& Clusters::global_distance_ascii_print(ostream &os)
 void Clusters::prototype_initialization_1()
 
 {
-  register int i;
+  int i;
   int *index;
   double *cumul_distance;
 
@@ -1931,7 +1931,7 @@ void Clusters::prototype_initialization_1()
 void Clusters::prototype_initialization_2()
 
 {
-  register int i , j , k , m;
+  int i , j , k , m;
   int *prototype , *index;
   double distance_diff , min_distance , max_distance , *cumul_distance , **normalized_distance;
 
@@ -2024,7 +2024,7 @@ void Clusters::pattern_distance_update(int pattern , int old_cluster , int new_c
 
 {
   bool *pattern_flag , *cluster_flag;
-  register int i , j;
+  int i , j;
 
 
   for (i = 0;i < nb_pattern;i++) {
@@ -2089,7 +2089,7 @@ void Clusters::algorithmic_step_1()
 
 {
   bool infinite_distance;
-  register int i , j;
+  int i , j;
   int iter , nb_change , *tmp_assignment;
   double min_distance , normalized_distance;
 
@@ -2253,7 +2253,7 @@ void Clusters::algorithmic_step_1()
 void Clusters::algorithmic_step_2()
 
 {
-  register int i , j , k , m;
+  int i , j , k , m;
   int iter , pattern , cluster , *prototype , *tmp_assignment , *index;
   double min_distance , min_swap_distance = D_INF , previous_min_swap_distance , *prototype_distance ,
          **normalized_distance , **swap_distance;
@@ -2463,7 +2463,7 @@ Clusters* DistanceMatrix::partitioning(StatError &error , bool display , int nb_
 
 {
   bool status = true , *selected_prototype;
-  register int i , j;
+  int i , j;
   int max_identifier;
   DistanceMatrix *dist_matrix;
   Clusters *clusters;
@@ -2621,7 +2621,7 @@ Clusters* DistanceMatrix::partitioning(StatError &error , bool display , int nb_
 
 {
   bool status = true , *selected_pattern;
-  register int i , j , k;
+  int i , j , k;
   int nb_pattern , max_identifier;
   DistanceMatrix *dist_matrix;
   Clusters *clusters;

@@ -82,7 +82,7 @@ Sequences* Sequences::ascii_read(StatError &error , const string path , bool old
   typedef tokenizer<char_separator<char>> tokenizer;
   char_separator<char> separator(" \t");
   bool status , lstatus;
-  register int i , j , k , m;
+  int i , j , k , m;
   int line , read_line , offset , initial_nb_line , max_length , nb_variable = 0 ,
       vector_size , nb_sequence , index , int_value , line_continue , *length;
   variable_nature *type;
@@ -815,7 +815,7 @@ ostream& Sequences::line_write(ostream &os) const
 ostream& Sequences::ascii_write(ostream &os , bool exhaustive , bool comment_flag) const
 
 {
-  register int i , j , k;
+  int i , j , k;
   int *int_value , *pint_value;
   double mean , variance , median , lower_quartile , upper_quartile , *real_value , *preal_value;
 
@@ -1123,7 +1123,7 @@ ostream& Sequences::ascii_print(ostream &os , output_sequence_format format , bo
                                 double *nb_state_sequence , int line_nb_character) const
 
 {
-  register int i , j , k , m;
+  int i , j , k , m;
 
 
   switch (format) {
@@ -1714,7 +1714,7 @@ bool Sequences::spreadsheet_write(StatError &error , const string path) const
 
 {
   bool status;
-  register int i , j , k;
+  int i , j , k;
   int *int_value , *pint_value;
   double mean , variance , median , lower_quartile , upper_quartile , *real_value , *preal_value;
   ofstream out_file(path.c_str());
@@ -1891,7 +1891,7 @@ bool Sequences::plot_write(StatError &error , const char *prefix ,
 
 {
   bool status;
-  register int i , j;
+  int i , j;
   int nb_histo;
   const FrequencyDistribution *phisto[2];
   ostringstream *data_file_name;
@@ -2117,7 +2117,7 @@ bool Sequences::plot_write(StatError &error , const char *prefix ,
 MultiPlotSet* Sequences::get_plotable() const
 
 {
-  register int i , j;
+  int i , j;
   int nb_plot_set;
   ostringstream legend;
   MultiPlotSet *plot_set;
@@ -2295,7 +2295,7 @@ bool Sequences::plot_print(const char *path , int ilength) const
 
 {
   bool status = false;
-  register int i , j , k;
+  int i , j , k;
   int length_nb_sequence , *index , *plength;
   ofstream out_file(path);
 
@@ -2354,7 +2354,7 @@ bool Sequences::plot_data_write(StatError &error , const char *prefix ,
 
 {
   bool status;
-  register int i , j , k;
+  int i , j , k;
   int min_index_parameter , max_index_parameter , *pfrequency , *length_nb_sequence;
   double min , max;
   ostringstream *data_file_name;
@@ -2590,7 +2590,7 @@ bool Sequences::plot_data_write(StatError &error , const char *prefix ,
 MultiPlotSet* Sequences::get_plotable_data(StatError &error) const
 
 {
-  register int i , j , k , m , n;
+  int i , j , k , m , n;
   int nb_plot_set , min_index_parameter , max_index_parameter;
   double min , max;
   ostringstream title , legend;
@@ -2771,7 +2771,7 @@ MultiPlotSet* Sequences::get_plotable_data(StatError &error) const
 void Sequences::max_length_computation()
 
 {
-  register int i;
+  int i;
 
 
   max_length = length[0];
@@ -2792,7 +2792,7 @@ void Sequences::max_length_computation()
 void Sequences::cumul_length_computation()
 
 {
-  register int i;
+  int i;
 
 
   cumul_length = 0;
@@ -2811,7 +2811,7 @@ void Sequences::cumul_length_computation()
 void Sequences::build_length_frequency_distribution()
 
 {
-  register int i;
+  int i;
 
 
   length_distribution = new FrequencyDistribution(max_length + 1);
@@ -2839,7 +2839,7 @@ void Sequences::index_parameter_computation()
 
 {
   if ((index_param_type == TIME_INTERVAL) || (index_param_type == POSITION_INTERVAL)) {
-    register int i , j;
+    int i , j;
 
 
     switch (index_param_type) {
@@ -2869,7 +2869,7 @@ void Sequences::index_parameter_computation()
 int Sequences::min_index_parameter_computation() const
 
 {
-  register int i;
+  int i;
   int min_index_parameter = I_DEFAULT;
 
 
@@ -2897,7 +2897,7 @@ int Sequences::min_index_parameter_computation() const
 int Sequences::max_index_parameter_computation(bool last_position) const
 
 {
-  register int i;
+  int i;
   int max_index_parameter = I_DEFAULT;
 
 
@@ -2935,7 +2935,7 @@ void Sequences::build_index_parameter_frequency_distribution()
 
 {
   if (index_parameter) {
-    register int i , j;
+    int i , j;
 
 
     index_parameter_distribution = new FrequencyDistribution(max_index_parameter_computation() + 1);
@@ -2970,7 +2970,7 @@ void Sequences::index_interval_computation()
 //  if ((index_param_type == TIME) || ((index_param_type == POSITION) &&
 //       (type[0] != NB_INTERNODE))) {
   if ((index_param_type == TIME) || (index_param_type == POSITION)) {
-    register int i , j;
+    int i , j;
 
 
     index_interval = new FrequencyDistribution(max_index_parameter_computation(true) + 1);
@@ -3011,7 +3011,7 @@ FrequencyDistribution* Sequences::value_index_interval_computation(StatError &er
 
 {
   bool status = true;
-  register int i , j;
+  int i , j;
   int previous_index_param , *pindex_param , *pisequence;
   FrequencyDistribution *value_index_interval;
 
@@ -3103,7 +3103,7 @@ FrequencyDistribution* Sequences::value_index_interval_computation(StatError &er
 void Sequences::min_value_computation(int variable)
 
 {
-  register int i , j;
+  int i , j;
 
 
   if ((type[variable] != REAL_VALUE) && (type[variable] != AUXILIARY)) {
@@ -3143,7 +3143,7 @@ void Sequences::min_value_computation(int variable)
 void Sequences::max_value_computation(int variable)
 
 {
-  register int i , j;
+  int i , j;
 
 
   if ((type[variable] != REAL_VALUE) && (type[variable] != AUXILIARY)) {
@@ -3184,7 +3184,7 @@ void Sequences::max_value_computation(int variable)
 void Sequences::marginal_frequency_distribution_computation(int variable)
 
 {
-  register int i , j;
+  int i , j;
 
 
   for (i = 0;i < marginal_distribution[variable]->nb_value;i++) {
@@ -3247,7 +3247,7 @@ void Sequences::build_marginal_histogram(int variable , double bin_width , doubl
 {
   if ((!marginal_histogram[variable]) || (bin_width != marginal_histogram[variable]->bin_width) ||
       (imin_value != D_INF)) {
-    register int i , j;
+    int i , j;
     int *pisequence;
     double *prsequence;
 
@@ -3383,7 +3383,7 @@ bool Sequences::select_bin_width(StatError &error , int variable ,
 double Sequences::mean_computation(int variable) const
 
 {
-  register int i , j;
+  int i , j;
   double mean;
 
 
@@ -3431,7 +3431,7 @@ double Sequences::mean_computation(int variable) const
 double Sequences::variance_computation(int variable , double mean) const
 
 {
-  register int i , j;
+  int i , j;
   double variance , diff;
 
 
@@ -3483,7 +3483,7 @@ double Sequences::variance_computation(int variable , double mean) const
 double Sequences::mean_absolute_deviation_computation(int variable , double location) const
 
 {
-  register int i , j;
+  int i , j;
   double mean_absolute_deviation;
 
 
@@ -3530,7 +3530,7 @@ double Sequences::mean_absolute_deviation_computation(int variable , double loca
 double Sequences::mean_absolute_difference_computation(int variable) const
 
 {
-  register int i , j , k , m;
+  int i , j , k , m;
   double mean_absolute_difference;
 
 
@@ -3600,7 +3600,7 @@ double Sequences::mean_absolute_difference_computation(int variable) const
 double Sequences::skewness_computation(int variable , double mean , double variance) const
 
 {
-  register int i , j;
+  int i , j;
   double skewness , diff;
 
 
@@ -3655,7 +3655,7 @@ double Sequences::skewness_computation(int variable , double mean , double varia
 double Sequences::kurtosis_computation(int variable , double mean , double variance) const
 
 {
-  register int i , j;
+  int i , j;
   double kurtosis , diff;
 
 
@@ -3711,7 +3711,7 @@ double Sequences::kurtosis_computation(int variable , double mean , double varia
 double* Sequences::mean_direction_computation(int variable , angle_unit unit) const
 
 {
-  register int i , j;
+  int i , j;
   double *mean_direction;
 
 

@@ -69,7 +69,7 @@ CategoricalProcess::CategoricalProcess(int inb_state , int inb_value ,
   nb_value = inb_value;
 
   if (observation_flag) {
-    register int i;
+    int i;
 
 
     observation = new Distribution*[nb_state];
@@ -103,7 +103,7 @@ CategoricalProcess::CategoricalProcess(int inb_state , int inb_value ,
                                        double **observation_probability)
 
 {
-  register int i , j;
+  int i , j;
 
 
   nb_state = inb_state;
@@ -142,7 +142,7 @@ CategoricalProcess::CategoricalProcess(int inb_state , int inb_value ,
 CategoricalProcess::CategoricalProcess(int inb_state , Distribution **pobservation)
 
 {
-  register int i;
+  int i;
 
   nb_value = 0;
   nb_state = inb_state;
@@ -175,7 +175,7 @@ CategoricalProcess::CategoricalProcess(int inb_state , Distribution **pobservati
 void CategoricalProcess::copy(const CategoricalProcess &process)
 
 {
-  register int i;
+  int i;
 
 
   nb_state = process.nb_state;
@@ -222,7 +222,7 @@ void CategoricalProcess::remove()
 
 {
   if (observation) {
-    register int i;
+    int i;
 
 
     for (i = 0;i < nb_state;i++) {
@@ -305,7 +305,7 @@ CategoricalProcess* CategoricalProcess::parsing(StatError &error , ifstream &in_
   char_separator<char> separator(" \t");
   enum{PSTATE , POUTPUT};
   bool status = true , lstatus , defined_output[NB_OUTPUT];
-  register int i , j;
+  int i , j;
   int type , state , output , value , nb_value;
   double proba , cumul , **observation_probability;
   CategoricalProcess *process;
@@ -616,7 +616,7 @@ CategoricalProcess** CategoricalProcess::old_parsing(StatError &error , ifstream
   typedef tokenizer<char_separator<char>> tokenizer;
   char_separator<char> separator(" \t");
   bool status = true , lstatus;
-  register int i;
+  int i;
   int value , index;
   CategoricalProcess **process;
 
@@ -857,7 +857,7 @@ ostream& CategoricalProcess::ascii_print(ostream &os , FrequencyDistribution **e
 
 {
   if (observation) {
-    register int i , j;
+    int i , j;
     int buff , width[2];
     double *pmass , scale[NB_STATE];
     const Distribution *pobservation[NB_STATE];
@@ -1132,7 +1132,7 @@ ostream& CategoricalProcess::spreadsheet_print(ostream &os ,FrequencyDistributio
 
 {
   if (observation) {
-    register int i , j;
+    int i , j;
     double *pmass , scale[NB_STATE];
     const Distribution *pobservation[NB_STATE];
 
@@ -1313,7 +1313,7 @@ bool CategoricalProcess::plot_print(const char *prefix , const char *title , int
   bool status = false;
 
   if (observation) {
-    register int i , j , k , m;
+    int i , j , k , m;
     int nb_dist , nb_histo , *dist_nb_value;
     double *scale;
     const Distribution **pdist;
@@ -1612,7 +1612,7 @@ void CategoricalProcess::plotable_write(MultiPlotSet &plot , int &index , int pr
 
 {
   if (observation) {
-    register int i , j;
+    int i , j;
     double scale , max;
     ostringstream title , legend;
 
@@ -1887,7 +1887,7 @@ bool CategoricalProcess::test_hidden() const
 
 {
   bool hidden = false;
-  register int i , j;
+  int i , j;
   int nb_occurrence;
 
 
@@ -1921,7 +1921,7 @@ void CategoricalProcess::thresholding(double min_probability)
 
 {
   bool stop;
-  register int i , j;
+  int i , j;
   int nb_correction;
   double norm , *pmass;
 
@@ -1982,7 +1982,7 @@ void CategoricalProcess::thresholding(double min_probability)
 void CategoricalProcess::state_permutation(int *permut) const
 
 {
-  register int i;
+  int i;
   Distribution **pobservation = new Distribution*[nb_state];
 
 
@@ -2010,7 +2010,7 @@ void CategoricalProcess::state_permutation(int *permut) const
 int CategoricalProcess::nb_parameter_computation(double min_probability) const
 
 {
-  register int i , j;
+  int i , j;
   int nb_parameter = 0;
 
 
@@ -2041,7 +2041,7 @@ int CategoricalProcess::nb_parameter_computation(double min_probability) const
 Distribution* CategoricalProcess::mixture_computation(Distribution *pweight)
 
 {
-  register int i , j;
+  int i , j;
   Distribution *mixture;
 
 
@@ -2076,7 +2076,7 @@ void CategoricalProcess::init()
 
 {
   bool *active_output;
-  register int i , j , k;
+  int i , j , k;
   int nb_noise , *state_nb_value;
   double cumul , noise_proba = NOISE_PROBABILITY , *pmass;
 

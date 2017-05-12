@@ -72,7 +72,7 @@ double HiddenSemiMarkov::likelihood_computation(const MarkovianSequences &seq ,
                                                 double *posterior_probability , int index) const
 
 {
-  register int i , j , k , m;
+  int i , j , k , m;
   int nb_value , length , **pioutput;
   double likelihood = 0. , seq_likelihood , obs_product , residual , **observation ,
          *norm , *state_norm , *forward1 , **state_in , **proutput;
@@ -430,7 +430,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
 
 {
   bool status;
-  register int i , j , k , m , n;
+  int i , j , k , m , n;
   int max_nb_value , iter , nb_likelihood_decrease , offset , nb_value , *occupancy_nb_value ,
       *censored_occupancy_nb_value , **pioutput;
   double likelihood = D_INF , previous_likelihood , occupancy_likelihood , observation_likelihood ,
@@ -1614,20 +1614,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
                   hsmarkov->continuous_parametric_process[i]->observation[j]->location = observation_reestim[i][j]->mean;
                 }
 
-                switch (common_dispersion) {
-
-                case false : {
-                  for (j = 0;j < hsmarkov->nb_state;j++) {
-                    hsmarkov->continuous_parametric_process[i]->observation[j]->dispersion = sqrt(observation_reestim[i][j]->variance);
-                    if (hsmarkov->continuous_parametric_process[i]->observation[j]->dispersion /
-                        hsmarkov->continuous_parametric_process[i]->observation[j]->location < GAUSSIAN_MIN_VARIATION_COEFF) {
-                      hsmarkov->continuous_parametric_process[i]->observation[j]->dispersion = hsmarkov->continuous_parametric_process[i]->observation[j]->location * GAUSSIAN_MIN_VARIATION_COEFF;
-                    }
-                  }
-                  break;
-                }
-
-                case true : {
+                if (common_dispersion) {
                   variance = 0.;
                   buff = 0.;
 
@@ -1646,8 +1633,16 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
                   for (j = 0;j < hsmarkov->nb_state;j++) {
                     hsmarkov->continuous_parametric_process[i]->observation[j]->dispersion = sqrt(variance);
                   }
-                  break;
                 }
+
+                else {
+                  for (j = 0;j < hsmarkov->nb_state;j++) {
+                    hsmarkov->continuous_parametric_process[i]->observation[j]->dispersion = sqrt(observation_reestim[i][j]->variance);
+                    if (hsmarkov->continuous_parametric_process[i]->observation[j]->dispersion /
+                        hsmarkov->continuous_parametric_process[i]->observation[j]->location < GAUSSIAN_MIN_VARIATION_COEFF) {
+                      hsmarkov->continuous_parametric_process[i]->observation[j]->dispersion = hsmarkov->continuous_parametric_process[i]->observation[j]->location * GAUSSIAN_MIN_VARIATION_COEFF;
+                    }
+                  }
                 }
 
                 break;
@@ -1659,16 +1654,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
                   hsmarkov->continuous_parametric_process[i]->observation[j]->location = mean_direction[j][3];
                 }
 
-                switch (common_dispersion) {
-
-                case false : {
-                  for (j = 0;j < hsmarkov->nb_state;j++) {
-                    hsmarkov->continuous_parametric_process[i]->observation[j]->dispersion = von_mises_concentration_computation(mean_direction[j][2]);
-                  }
-                  break;
-                }
-
-                case true : {
+                if (common_dispersion) {
                   global_mean_direction = 0.;
                   buff = 0.;
 
@@ -1681,8 +1667,12 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
                   for (j = 0;j < hsmarkov->nb_state;j++) {
                     hsmarkov->continuous_parametric_process[i]->observation[j]->dispersion = concentration;
                   }
-                  break;
                 }
+
+                else {
+                  for (j = 0;j < hsmarkov->nb_state;j++) {
+                    hsmarkov->continuous_parametric_process[i]->observation[j]->dispersion = von_mises_concentration_computation(mean_direction[j][2]);
+                  }
                 }
                 break;
               }
@@ -2167,7 +2157,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
 
 {
   bool status = true;
-  register int i;
+  int i;
   int nb_value[SEQUENCE_NB_VARIABLE];
   double proba , mean , variance;
   HiddenSemiMarkov *ihsmarkov , *hsmarkov;
@@ -2313,7 +2303,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
 
 {
   bool status;
-  register int i , j , k , m , n;
+  int i , j , k , m , n;
   int max_nb_value , iter , nb_state_sequence , state_occupancy , nb_likelihood_decrease ,
       *occupancy_nb_value , *state_seq , *pstate , ***state_sequence_count , nb_element , **pioutput;
   double likelihood = D_INF , previous_likelihood , occupancy_likelihood , observation_likelihood ,
@@ -3350,20 +3340,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
                   hsmarkov->continuous_parametric_process[i]->observation[j]->location = observation_reestim[i][j]->mean;
                 }
 
-                switch (common_dispersion) {
-
-                case false : {
-                  for (j = 0;j < hsmarkov->nb_state;j++) {
-                    hsmarkov->continuous_parametric_process[i]->observation[j]->dispersion = sqrt(observation_reestim[i][j]->variance);
-                    if (hsmarkov->continuous_parametric_process[i]->observation[j]->dispersion /
-                        hsmarkov->continuous_parametric_process[i]->observation[j]->location < GAUSSIAN_MIN_VARIATION_COEFF) {
-                      hsmarkov->continuous_parametric_process[i]->observation[j]->dispersion = hsmarkov->continuous_parametric_process[i]->observation[j]->location * GAUSSIAN_MIN_VARIATION_COEFF;
-                    }
-                  }
-                  break;
-                }
-
-                case true : {
+                if (common_dispersion) {
                   variance = 0.;
                   nb_element = 0;
 
@@ -3382,8 +3359,16 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
                   for (j = 0;j < hsmarkov->nb_state;j++) {
                     hsmarkov->continuous_parametric_process[i]->observation[j]->dispersion = sqrt(variance);
                   }
-                  break;
                 }
+
+                else {
+                  for (j = 0;j < hsmarkov->nb_state;j++) {
+                    hsmarkov->continuous_parametric_process[i]->observation[j]->dispersion = sqrt(observation_reestim[i][j]->variance);
+                    if (hsmarkov->continuous_parametric_process[i]->observation[j]->dispersion /
+                        hsmarkov->continuous_parametric_process[i]->observation[j]->location < GAUSSIAN_MIN_VARIATION_COEFF) {
+                      hsmarkov->continuous_parametric_process[i]->observation[j]->dispersion = hsmarkov->continuous_parametric_process[i]->observation[j]->location * GAUSSIAN_MIN_VARIATION_COEFF;
+                    }
+                  }
                 }
                 break;
               }
@@ -3394,16 +3379,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
                   hsmarkov->continuous_parametric_process[i]->observation[j]->location = mean_direction[j][3];
                 }
 
-                switch (common_dispersion) {
-
-                case false : {
-                  for (j = 0;j < hsmarkov->nb_state;j++) {
-                    hsmarkov->continuous_parametric_process[i]->observation[j]->dispersion = von_mises_concentration_computation(mean_direction[j][2]);
-                  }
-                  break;
-                }
-
-                case true : {
+                if (common_dispersion) {
                   global_mean_direction = 0.;
                   nb_element = 0;
 
@@ -3416,8 +3392,12 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
                   for (j = 0;j < hsmarkov->nb_state;j++) {
                     hsmarkov->continuous_parametric_process[i]->observation[j]->dispersion = concentration;
                   }
-                  break;
                 }
+
+                else {
+                  for (j = 0;j < hsmarkov->nb_state;j++) {
+                    hsmarkov->continuous_parametric_process[i]->observation[j]->dispersion = von_mises_concentration_computation(mean_direction[j][2]);
+                  }
                 }
                 break;
               }
@@ -3899,7 +3879,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
 
 {
   bool status = true;
-  register int i;
+  int i;
   int nb_value[SEQUENCE_NB_VARIABLE];
   double proba , mean , variance;
   HiddenSemiMarkov *ihsmarkov , *hsmarkov;

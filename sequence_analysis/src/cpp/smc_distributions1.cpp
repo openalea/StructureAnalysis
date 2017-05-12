@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -58,7 +58,7 @@ namespace sequence_analysis {
 void SemiMarkovChain::index_state_distribution()
 
 {
-  register int i , j , k;
+  int i , j , k;
   double sum , *state_out , **state_in;
   Curves *index_state;
   DiscreteParametric *occupancy;
@@ -179,7 +179,7 @@ void SemiMarkovChain::index_state_distribution()
 double* SemiMarkovChain::memory_computation() const
 
 {
-  register int i , j , k;
+  int i , j , k;
   double sum , *memory , *state_out , **state_in;
   DiscreteParametric *occupancy;
 
@@ -365,7 +365,7 @@ double* SemiMarkovChain::memory_computation() const
 void SemiMarkovChain::state_no_occurrence_probability(int state , double increment)
 
 {
-  register int i;
+  int i;
 
   for (i = 0;i < nb_state;i++) {
     if ((i != state) && (!accessibility[i][state])) {
@@ -374,7 +374,7 @@ void SemiMarkovChain::state_no_occurrence_probability(int state , double increme
   }
 
   if (i < nb_state) {
-    register int j , k;
+    int j , k;
     int min_time;
     double sum , *state_out , **state_in ,
            &no_occurrence = state_process->no_occurrence[state];
@@ -515,7 +515,7 @@ void SemiMarkovChain::state_first_occurrence_distribution(int state , int min_nb
                                                           double cumul_threshold)
 
 {
-  register int i , j , k;
+  int i , j , k;
   double *state_out , **state_in , *pmass , *pcumul;
   DiscreteParametric *occupancy;
   Distribution *first_occurrence;
@@ -641,7 +641,7 @@ void SemiMarkovChain::state_leave_probability(int state , double increment)
 
 {
   if (stype[state] == TRANSIENT) {
-    register int i , j , k;
+    int i , j , k;
     int min_time;
     double sum , *state_out , **state_in , &leave = state_process->leave[state];
     DiscreteParametric *occupancy;
@@ -786,7 +786,7 @@ void SemiMarkovChain::state_recurrence_time_distribution(int state , int min_nb_
                                                          double cumul_threshold)
 
 {
-  register int i , j , k;
+  int i , j , k;
   double occupancy_mean , *state_out , **state_in , *pmass , *pcumul;
   Distribution *recurrence_time;
   DiscreteParametric *occupancy;
@@ -926,7 +926,7 @@ void SemiMarkovChain::state_recurrence_time_distribution(int state , int min_nb_
 void SemiMarkov::index_output_distribution(int variable)
 
 {
-  register int i , j , k;
+  int i , j , k;
   Curves *index_state , *index_value;
 
 
@@ -970,7 +970,7 @@ void SemiMarkov::output_no_occurrence_probability(int variable , int output ,
 
 {
   bool status = false , *output_accessibility;
-  register int i , j , k;
+  int i , j , k;
   int min_time;
   double sum , *state_out , **state_in , *observation , **obs_power ,
          &no_occurrence = categorical_process[variable]->no_occurrence[output];
@@ -1165,7 +1165,7 @@ void SemiMarkov::output_first_occurrence_distribution(int variable , int output 
                                                       int min_nb_value , double cumul_threshold)
 
 {
-  register int i , j , k;
+  int i , j , k;
   double sum , *state_out , **state_in , *observation , **obs_power , *pmass , *pcumul;
   DiscreteParametric *occupancy;
   Distribution *first_occurrence;
@@ -1322,7 +1322,7 @@ void SemiMarkov::output_leave_probability(const double *memory , int variable ,
 
 {
   bool status = false , *output_accessibility;
-  register int i , j , k;
+  int i , j , k;
   int min_time;
   double sum0 , sum1 , *observation , **obs_power , *input_proba , *state_out ,
          **state_in , &leave = categorical_process[variable]->leave[output];
@@ -1555,7 +1555,7 @@ void SemiMarkov::output_recurrence_time_distribution(const double *memory , int 
                                                      double cumul_threshold)
 
 {
-  register int i , j , k , m;
+  int i , j , k , m;
   double sum0 , sum1 , *observation , **obs_power , *input_proba , *output_proba ,
          *state_out , **state_in , *pmass , *pcumul;
   Distribution *recurrence_time;
@@ -1781,7 +1781,7 @@ void SemiMarkov::output_sojourn_time_distribution(const double *memory , int var
                                                   double cumul_threshold)
 
 {
-  register int i , j , k , m;
+  int i , j , k , m;
   double sum0 , sum1 , *observation , **obs_power , **input_proba ,
          *output_proba , *state_out , **state_in , *pmass , *pcumul ,
          &absorption = categorical_process[variable]->absorption[output];

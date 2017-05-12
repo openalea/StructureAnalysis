@@ -72,7 +72,7 @@ const static double posterior_threshold[7] = {0.25, 0.1, 0.05, 0.025, 0.01, 0.00
 ContinuousParametricProcess::ContinuousParametricProcess(int inb_state)
 
 {
-  register int i;
+  int i;
 
 
   nb_state = inb_state;
@@ -109,7 +109,7 @@ ContinuousParametricProcess::ContinuousParametricProcess(int inb_state)
 ContinuousParametricProcess::ContinuousParametricProcess(int inb_state , ContinuousParametric **pobservation)
 
 {
-  register int i;
+  int i;
 
 
   nb_state = inb_state;
@@ -139,7 +139,7 @@ ContinuousParametricProcess::ContinuousParametricProcess(int inb_state , Continu
 void ContinuousParametricProcess::copy(const ContinuousParametricProcess &process)
 
 {
-  register int i;
+  int i;
 
 
   nb_state = process.nb_state;
@@ -179,7 +179,7 @@ void ContinuousParametricProcess::remove()
 
 {
   if (observation) {
-    register int i;
+    int i;
 
 
     for (i = 0;i < nb_state;i++) {
@@ -258,7 +258,7 @@ ContinuousParametricProcess* ContinuousParametricProcess::parsing(StatError &err
   typedef tokenizer<char_separator<char>> tokenizer;
   char_separator<char> separator(" \t");
   bool status = true , lstatus;
-  register int i , j;
+  int i , j;
   int index;
   ContinuousParametric **dist;
   ContinuousParametricProcess *process;
@@ -449,7 +449,7 @@ ostream& ContinuousParametricProcess::ascii_print(ostream &os , Histogram **obse
                                                   bool exhaustive , bool file_flag , model_type model) const
 
 {
-  register int i , j , k;
+  int i , j , k;
   int nb_step , nb_element , buff , width[5];
   double step , value , min_value , max_value , mass , *observation_cumul ,
          **frequency , **cumul;
@@ -1379,7 +1379,7 @@ ostream& ContinuousParametricProcess::spreadsheet_print(ostream &os , Histogram 
                                                         model_type model) const
 
 {
-  register int i , j , k;
+  int i , j , k;
   int nb_step , nb_element;
   double step , value , min_value , max_value , mass , *observation_cumul ,
          **frequency , **cumul;
@@ -2338,7 +2338,7 @@ double** q_q_plot_computation(double min_value , double step ,
                               int nb_value , double **empirical_cdf)
 
 {
-  register int i , j;
+  int i , j;
   double value , **qqplot;
 
 
@@ -2388,7 +2388,7 @@ bool q_q_plot_print(const char *path , int nb_value , double **qqplot)
 
 {
   bool status = false;
-  register int i;
+  int i;
   ofstream out_file(path);
 
 
@@ -2437,7 +2437,7 @@ bool ContinuousParametricProcess::plot_print(const char *prefix , const char *ti
 
 {
   bool status = false;
-  register int i , j , k;
+  int i , j , k;
   int min_interval , nb_step , dist_index;
   double value , min_value , max_value , step , buff , max , *scale , *dist_max ,
          **cumul , **frequency , **qqplot;
@@ -3389,7 +3389,7 @@ bool ContinuousParametricProcess::plot_print(const char *prefix , const char *ti
 void q_q_plotable_write(SinglePlot &plot , int nb_value , double **qqplot)
 
 {
-  register int i;
+  int i;
 
 
   for (i = 0;i < nb_value;i++) {
@@ -3428,7 +3428,7 @@ void ContinuousParametricProcess::plotable_write(MultiPlotSet &plot , int &index
                                                  model_type model) const
 
 {
-  register int i , j , k;
+  int i , j , k;
   int min_interval , nb_step;
   double value , min_value , max_value , step , buff , scale , max , *dist_max ,
          **cumul , **frequency , **qqplot;
@@ -4314,7 +4314,7 @@ void ContinuousParametricProcess::plotable_write(MultiPlotSet &plot , int &index
 int ContinuousParametricProcess::nb_parameter_computation() const
 
 {
-  register int i;
+  int i;
   int nb_parameter = 0;
 
 
@@ -4359,7 +4359,7 @@ int ContinuousParametricProcess::nb_parameter_computation() const
 double ContinuousParametricProcess::mean_computation(Distribution *pweight) const
 
 {
-  register int i;
+  int i;
   double mean;
 
 
@@ -4423,7 +4423,7 @@ double ContinuousParametricProcess::mean_computation(Distribution *pweight) cons
 double ContinuousParametricProcess::variance_computation(Distribution *pweight , double mean) const
 
 {
-  register int i;
+  int i;
   double variance;
 
 
@@ -4492,7 +4492,7 @@ void ContinuousParametricProcess::select_unit(angle_unit iunit)
 
 {
   if (ident == VON_MISES) {
-    register int i;
+    int i;
 
 
     unit = iunit;
@@ -4519,7 +4519,7 @@ void ContinuousParametricProcess::init(continuous_parametric iident , double min
                                        double mean , double variance)
 
 {
-  register int i;
+  int i;
 
 
   ident = iident;
@@ -4589,7 +4589,7 @@ void ContinuousParametricProcess::init(continuous_parametric iident , double min
 ostream& ContinuousParametricProcess::interval_computation(ostream &os)
 
 {
-  register int i , j , k;
+  int i , j , k;
   int nb_step , posterior_mode;
   double step , value , min_value , max_value , cumul , norm , max_posterior ,
          posterior_value , **quantile_limit , **posterior , **posterior_limit;
