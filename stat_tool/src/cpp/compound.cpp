@@ -266,7 +266,7 @@ Compound* Compound::ascii_read(StatError &error , const string path , double cum
   typedef tokenizer<char_separator<char>> tokenizer;
   char_separator<char> separator(" \t");
   bool status;
-  register int i;
+  int i;
   int line , read_line;
   DiscreteParametric *sum_dist , *dist;
   Compound *compound;
@@ -783,7 +783,7 @@ bool Compound::plot_write(const char *prefix , const char *title ,
 
 {
   bool status;
-  register int i;
+  int i;
   int nb_histo = 0;
   double scale[3];
   const Distribution *pdist[3];
@@ -1006,7 +1006,7 @@ bool Compound::plot_write(StatError &error , const char *prefix ,
 MultiPlotSet* Compound::get_plotable(const CompoundData *compound_histo) const
 
 {
-  register int i , j;
+  int i , j;
   int xmax;
   double scale = 1.;
   ostringstream title , legend;

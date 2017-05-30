@@ -94,7 +94,7 @@ Dendrogram::Dendrogram()
 Dendrogram::Dendrogram(const DistanceMatrix &dist_matrix , cluster_scale iscale)
 
 {
-  register int i;
+  int i;
 
 
   distance_matrix = new DistanceMatrix(dist_matrix);
@@ -158,7 +158,7 @@ Dendrogram::Dendrogram(const DistanceMatrix &dist_matrix , cluster_scale iscale)
 void Dendrogram::copy(const Dendrogram &dendrogram)
 
 {
-  register int i , j;
+  int i , j;
 
 
   distance_matrix = new DistanceMatrix(*(dendrogram.distance_matrix));
@@ -232,7 +232,7 @@ void Dendrogram::copy(const Dendrogram &dendrogram)
 void Dendrogram::remove()
 
 {
-  register int i;
+  int i;
 
 
   delete [] cluster_nb_pattern;
@@ -342,7 +342,7 @@ ostream& Dendrogram::line_write(ostream &os) const
 double* Dendrogram::distance_ordering() const
 
 {
-  register int i , j;
+  int i , j;
   int offset;
   double *ordered_distance , *distance;
 
@@ -399,7 +399,7 @@ double* Dendrogram::distance_ordering() const
 ostream& Dendrogram::ascii_write(ostream &os , bool exhaustive) const
 
 {
-  register int i , j , k;
+  int i , j , k;
   int buff , max_identifier , max_nb_character , previous_nb_character ,
       *nb_character , width[3];
   double min_distance , min_diff_distance , *ordered_distance , *distance;
@@ -667,7 +667,7 @@ bool Dendrogram::spreadsheet_write(StatError &error , const string path) const
 
 {
   bool status;
-  register int i , j;
+  int i , j;
   double *ordered_distance;
   ofstream out_file(path.c_str());
 
@@ -756,7 +756,7 @@ bool Dendrogram::spreadsheet_write(StatError &error , const string path) const
 void Dendrogram::tree_computation()
 
 {
-  register int i , j , k;
+  int i , j , k;
 
 
   for (i = 0;i < nb_cluster - 1;i++) {
@@ -796,7 +796,7 @@ void Dendrogram::tree_computation()
 double Dendrogram::coefficient_computation(cluster_scale iscale) const
 
 {
-  register int i;
+  int i;
   double coeff , *distance;
 
 
@@ -854,7 +854,7 @@ Dendrogram* DistanceMatrix::agglomerative_hierarchical_clustering(hierarchical_s
                                                                   linkage criterion) const
 
 {
-  register int i , j , k;
+  int i , j , k;
   int index , index1 , index2 , icluster , *pattern_index , **cluster_pattern;
   double min_distance , *cumul_distance , **normalized_cluster_distance ,
          **normalized_pattern_distance , **max_between_cluster_distance;
@@ -1236,7 +1236,7 @@ Dendrogram* DistanceMatrix::agglomerative_hierarchical_clustering(hierarchical_s
 Dendrogram* DistanceMatrix::divisive_hierarchical_clustering() const
 
 {
-  register int i , j , k;
+  int i , j , k;
   int bnb_pattern , icluster , new_cluster , outlying_pattern , *passignment1 , *passignment2 ,
       *cluster_identifier , *cluster_index;
   double distance , max_cumul_distance , *cumul_distance , **normalized_distance;

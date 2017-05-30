@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -101,7 +101,7 @@ Sequences::Sequences()
 Sequences::Sequences(int inb_sequence , int inb_variable)
 
 {
-  register int i , j;
+  int i , j;
 
 
   nb_sequence = inb_sequence;
@@ -178,7 +178,7 @@ void Sequences::init(int inb_sequence , int *iidentifier , int *ilength ,
                      bool init_flag)
 
 {
-  register int i , j , k;
+  int i , j , k;
   int blength;
 
 
@@ -310,7 +310,7 @@ void Sequences::init(int inb_sequence , int *iidentifier , int *ilength ,
                      int inb_variable , bool init_flag)
 
 {
-  register int i , j , k;
+  int i , j , k;
 
 
   nb_sequence = inb_sequence;
@@ -397,7 +397,7 @@ Sequences::Sequences(int inb_sequence , int *iidentifier , int *ilength ,
                      variable_nature itype , int ***iint_sequence)
 
 {
-  register int i , j , k;
+  int i , j , k;
   int *pisequence , *cisequence;
   variable_nature *btype;
 
@@ -469,7 +469,7 @@ Sequences::Sequences(int inb_sequence , int *iidentifier , int *ilength ,
                      int inb_variable , double ***ireal_sequence)
 
 {
-  register int i , j , k;
+  int i , j , k;
   variable_nature *itype;
 
 
@@ -522,7 +522,7 @@ Sequences::Sequences(int inb_sequence , int *iidentifier , int *ilength ,
                      int ***iint_sequence , double ***ireal_sequence)
 
 {
-  register int i , j , k , m , n;
+  int i , j , k , m , n;
 
 
   init(inb_sequence , iidentifier , ilength , ivertex_identifier ,
@@ -601,7 +601,7 @@ Sequences::Sequences(const FrequencyDistribution &ilength_distribution ,
                      int inb_variable , variable_nature *itype , bool init_flag)
 
 {
-  register int i , j , k;
+  int i , j , k;
   int *plength;
 
 
@@ -702,7 +702,7 @@ Sequences::Sequences(const FrequencyDistribution &ilength_distribution ,
 Sequences::Sequences(const RenewalData &timev)
 
 {
-  register int i , j;
+  int i , j;
 
 
   nb_sequence = timev.nb_element;
@@ -772,7 +772,7 @@ Sequences::Sequences(const RenewalData &timev)
 Sequences::Sequences(const Sequences &seq , int variable , variable_nature itype)
 
 {
-  register int i , j , k;
+  int i , j , k;
   int blength;
 
 
@@ -921,7 +921,7 @@ Sequences::Sequences(const Sequences &seq , int variable , variable_nature itype
 Sequences::Sequences(const Sequences &seq , int inb_sequence , int *index)
 
 {
-  register int i , j , k;
+  int i , j , k;
   int blength;
 
 
@@ -1049,7 +1049,7 @@ Sequences::Sequences(const Sequences &seq , int inb_sequence , int *index)
 Sequences::Sequences(const Sequences &seq , bool *auxiliary)
 
 {
-  register int i , j , k , m;
+  int i , j , k , m;
   int blength;
 
 
@@ -1208,7 +1208,7 @@ Sequences::Sequences(const Sequences &seq , bool *auxiliary)
 void Sequences::copy(const Sequences &seq)
 
 {
-  register int i , j , k;
+  int i , j , k;
   int blength;
 
 
@@ -1341,7 +1341,7 @@ void Sequences::copy(const Sequences &seq)
 void Sequences::reverse(const Sequences &seq)
 
 {
-  register int i , j , k;
+  int i , j , k;
   int blength , end_position , *pidentifier , *cidentifier , *pindex_param ,
       *cindex_param , *pisequence , *cisequence;
   double *prsequence , *crsequence;
@@ -1504,7 +1504,7 @@ void Sequences::reverse(const Sequences &seq)
 void Sequences::add_state_variable(const Sequences &seq)
 
 {
-  register int i , j , k;
+  int i , j , k;
   int blength;
 
 
@@ -1652,7 +1652,7 @@ void Sequences::add_state_variable(const Sequences &seq)
 void Sequences::explicit_index_parameter(const Sequences &seq)
 
 {
-  register int i , j;
+  int i , j;
 
 
   Sequences::copy(seq);
@@ -1683,7 +1683,7 @@ void Sequences::explicit_index_parameter(const Sequences &seq)
 void Sequences::remove_index_parameter(const Sequences &seq)
 
 {
-  register int i , j , k;
+  int i , j , k;
 
 
   nb_sequence = seq.nb_sequence;
@@ -1819,7 +1819,7 @@ Sequences::Sequences(const Sequences &seq , sequence_transformation transform)
 void Sequences::remove()
 
 {
-  register int i , j;
+  int i , j;
 
 
   delete [] identifier;
@@ -1982,7 +1982,7 @@ DiscreteDistributionData* Sequences::extract(StatError &error , int variable) co
 Vectors* Sequences::build_vectors(bool index_variable) const
 
 {
-  register int i , j , k , m;
+  int i , j , k , m;
   int offset , **int_vector;
   variable_nature *itype;
   double **real_vector;
@@ -1992,15 +1992,7 @@ Vectors* Sequences::build_vectors(bool index_variable) const
   if (index_parameter) {
     index_variable = true;
   }
-
-  switch (index_variable) {
-  case false :
-    offset = 0;
-    break;
-  case true :
-    offset = 1;
-    break;
-  }
+  offset = (index_variable ? 1 : 0);
 
   itype = new variable_nature[nb_variable + offset];
 
@@ -2093,7 +2085,7 @@ Vectors* Sequences::extract_vectors(StatError &error , sequence_pattern pattern 
 
 {
   bool status = true;
-  register int i , j;
+  int i , j;
   int begin_run , count , **int_vector;
   variable_nature itype[1];
   double **real_vector;
@@ -2384,7 +2376,7 @@ MarkovianSequences* Sequences::markovian_sequences(StatError &error) const
 
 {
   bool status = true;
-  register int i;
+  int i;
   MarkovianSequences *seq;
 
 
@@ -2462,7 +2454,7 @@ bool Sequences::increasing_index_parameter_checking(StatError &error , bool stri
 
 {
   bool status = true;
-  register int i , j;
+  int i , j;
 
 
   for (i = 0;i < nb_sequence;i++) {
@@ -2502,7 +2494,7 @@ bool Sequences::increasing_sequence_checking(StatError &error , int variable , b
 
 {
   bool status = true;
-  register int i , j;
+  int i , j;
 
 
   switch (type[variable]) {
@@ -2625,7 +2617,7 @@ TimeEvents* Sequences::extract_time_events(StatError &error , int variable ,
 
 {
   bool status = true , lstatus;
-  register int i , j;
+  int i , j;
   int nb_element , previous , begin , end , next , *time , *nb_event , *pdate;
   TimeEvents *timev;
 
@@ -2760,7 +2752,7 @@ RenewalData* Sequences::extract_renewal_data(StatError &error , int variable ,
 
 {
   bool status = true , lstatus;
-  register int i , j;
+  int i , j;
   int nb_element , index , *ptime , *pnb_event , *pisequence , *cisequence;
   RenewalData *timev;
 

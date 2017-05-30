@@ -61,7 +61,7 @@ namespace stat_tool {
 StatError::StatError(int imax_nb_error)
 
 {
-  register int i;
+  int i;
 
 
   nb_error = 0;
@@ -86,7 +86,7 @@ StatError::StatError(int imax_nb_error)
 StatError::~StatError()
 
 {
-  register int i;
+  int i;
 
 
   delete [] line;
@@ -113,7 +113,7 @@ StatError::~StatError()
 ostream& StatError::ascii_write(ostream &os , error_type type) const
 
 {
-  register int i;
+  int i;
 
 
   if (nb_error > 0) {

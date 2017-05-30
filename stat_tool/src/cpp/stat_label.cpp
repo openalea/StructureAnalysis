@@ -230,6 +230,7 @@ const char *STAT_label[] = {
   "mode" ,
   "variance" ,
   "standard deviation" ,
+  "quantile" ,
   "lower quartile" ,
   "upper quartile" ,
   "mean absolute deviation" ,

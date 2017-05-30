@@ -69,7 +69,7 @@ void CategoricalSequenceProcess::create_characteristic(const Distribution &ileng
 
 {
   bool homogeneous = true;
-  register int i;
+  int i;
   int max_length = ilength.nb_value - 1;
 
 
@@ -200,7 +200,7 @@ void CategoricalSequenceProcess::create_characteristic(const Distribution &ileng
                                                        bool sojourn_time_flag , bool counting_flag)
 
 {
-  register int i;
+  int i;
   int max_length = ilength.nb_value - 1;
 
 
@@ -351,7 +351,7 @@ CategoricalSequenceProcess::CategoricalSequenceProcess(int inb_state ,
                                                        DiscreteParametric **occupancy)
 
 {
-  register int i;
+  int i;
 
 
   nb_state = inb_state;
@@ -422,7 +422,7 @@ void CategoricalSequenceProcess::copy(const CategoricalSequenceProcess &process 
 
 {
   if (characteristic_flag) {
-    register int i;
+    int i;
 
 
     if (process.length) {
@@ -558,7 +558,7 @@ void CategoricalSequenceProcess::init_occupancy(const CategoricalSequenceProcess
                                                 int occupancy_nb_value)
 
 {
-  register int i;
+  int i;
 
 
   nb_state = process.nb_state;
@@ -628,7 +628,7 @@ CategoricalSequenceProcess::CategoricalSequenceProcess(const CategoricalSequence
 void CategoricalSequenceProcess::remove()
 
 {
-  register int i;
+  int i;
 
 
   if (length) {
@@ -761,7 +761,7 @@ bool CategoricalSequenceProcess::test_hidden(int nb_output_process , Categorical
 
 {
   bool hidden = false;
-  register int i;
+  int i;
 
 
   for (i = 0;i < nb_output_process;i++) {
@@ -806,7 +806,7 @@ CategoricalSequenceProcess* CategoricalSequenceProcess::occupancy_parsing(StatEr
   typedef tokenizer<char_separator<char>> tokenizer;
   char_separator<char> separator(" \t");
   bool status = true , lstatus;
-  register int i , j;
+  int i , j;
   int index;
   DiscreteParametric **dist;
   CategoricalSequenceProcess *process;
@@ -938,7 +938,7 @@ CategoricalSequenceProcess* CategoricalSequenceProcess::occupancy_parsing(StatEr
 Distribution* CategoricalSequenceProcess::weight_computation() const
 
 {
-  register int i , j;
+  int i , j;
   double sum;
   Distribution *weight;
 

@@ -401,7 +401,7 @@ DiscreteParametric* DiscreteParametric::parsing(StatError &error , ifstream &in_
   typedef tokenizer<char_separator<char>> tokenizer;
   char_separator<char> separator(" \t");
   bool status = true , lstatus;
-  register int i , j;
+  int i , j;
   discrete_parametric ident = CATEGORICAL;
   union {
     int inf_bound;
@@ -835,11 +835,11 @@ ostream& DiscreteParametric::ascii_parametric_characteristic_print(ostream &os ,
     }
   }
 
-  # ifdef MESSAGE
+# ifdef MESSAGE
   if (ident == PRIOR_SEGMENT_LENGTH) {
     ascii_characteristic_print(os , shape , comment_flag);
   }
-  # endif
+# endif
 
   return os;
 }
@@ -1239,7 +1239,7 @@ double DiscreteParametric::sup_norm_distance_computation(const DiscreteParametri
 
 {
   bool crossing;
-  register int i;
+  int i;
   int inf , sup;
   double buff , distance , max_absolute_diff;
 
@@ -1870,7 +1870,7 @@ bool DiscreteParametricModel::plot_write(StatError &error , const char *prefix ,
 
 
   if (histo) {
-    register int i;
+    int i;
     int plot_nb_value , *poffset , *pnb_value;
     double scale , **pcumul , **pconcentration;
     ostringstream *data_file_name;
@@ -2134,7 +2134,7 @@ MultiPlotSet* DiscreteParametricModel::get_plotable(const DiscreteDistributionDa
 
 
   if (histo) {
-    register int i , j;
+    int i , j;
     int nb_plot_set , plot_nb_value;
     double scale , *pcumul;
     ostringstream legend , title;

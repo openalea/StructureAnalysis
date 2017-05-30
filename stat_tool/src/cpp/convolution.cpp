@@ -84,7 +84,7 @@ Convolution::Convolution()
 Convolution::Convolution(int nb_dist , const DiscreteParametric **pdist)
 
 {
-  register int i;
+  int i;
   int cnb_value = 1;
 
 
@@ -114,7 +114,7 @@ Convolution::Convolution(int nb_dist , const DiscreteParametric **pdist)
 Convolution::Convolution(int nb_dist , const vector<DiscreteParametric> idist)
 
 {
-  register int i;
+  int i;
   int cnb_value = 1;
 
 
@@ -177,7 +177,7 @@ Convolution::Convolution(const DiscreteParametric &known_dist ,
 void Convolution::copy(const Convolution &convol , bool data_flag)
 
 {
-  register int i;
+  int i;
 
 
   if ((data_flag) && (convol.convolution_data)) {
@@ -208,7 +208,7 @@ void Convolution::remove()
   delete convolution_data;
 
   if (distribution) {
-    register int i;
+    int i;
 
     for (i = 0;i < nb_distribution;i++) {
       delete distribution[i];
@@ -409,7 +409,7 @@ Convolution* Convolution::ascii_read(StatError &error , const string path , doub
   typedef tokenizer<char_separator<char>> tokenizer;
   char_separator<char> separator(" \t");
   bool status , lstatus;
-  register int i , j;
+  int i , j;
   int line , nb_dist , index;
   const DiscreteParametric **dist;
   Convolution *convol;
@@ -657,7 +657,7 @@ ostream& Convolution::ascii_write(ostream &os , const ConvolutionData *convol_hi
                                   bool exhaustive , bool file_flag) const
 
 {
-  register int i;
+  int i;
   double scale[CONVOLUTION_NB_DISTRIBUTION];
   const Distribution *pdist[CONVOLUTION_NB_DISTRIBUTION];
 
@@ -850,7 +850,7 @@ bool Convolution::ascii_write(StatError &error , const string path ,
 ostream& Convolution::spreadsheet_write(ostream &os , const ConvolutionData *convol_histo) const
 
 {
-  register int i;
+  int i;
   double scale[CONVOLUTION_NB_DISTRIBUTION];
   const Distribution *pdist[CONVOLUTION_NB_DISTRIBUTION];
 
@@ -987,7 +987,7 @@ bool Convolution::plot_write(const char *prefix , const char *title ,
 
 {
   bool status;
-  register int i , j;
+  int i , j;
   double plot_max , scale[CONVOLUTION_NB_DISTRIBUTION + 2];
   const Distribution *pdist[CONVOLUTION_NB_DISTRIBUTION + 2];
   const FrequencyDistribution *phisto[CONVOLUTION_NB_DISTRIBUTION + 1];
@@ -1181,7 +1181,7 @@ bool Convolution::plot_write(StatError &error , const char *prefix ,
 MultiPlotSet* Convolution::get_plotable(const ConvolutionData *convol_histo) const
 
 {
-  register int i;
+  int i;
   int xmax;
   double ymax;
   ostringstream title , legend;
@@ -1381,7 +1381,7 @@ ConvolutionData::ConvolutionData(const FrequencyDistribution &histo , int nb_dis
 :FrequencyDistribution(histo)
 
 {
-  register int i;
+  int i;
 
 
   convolution = NULL;
@@ -1406,7 +1406,7 @@ ConvolutionData::ConvolutionData(const Convolution &convol)
 :FrequencyDistribution(convol)
 
 {
-  register int i;
+  int i;
 
 
   convolution = NULL;
@@ -1431,7 +1431,7 @@ ConvolutionData::ConvolutionData(const Convolution &convol)
 void ConvolutionData::copy(const ConvolutionData &convol_histo , bool model_flag)
 
 {
-  register int i;
+  int i;
 
 
   if ((model_flag) && (convol_histo.convolution)) {
@@ -1462,7 +1462,7 @@ void ConvolutionData::remove()
   delete convolution;
 
   if (frequency_distribution) {
-    register int i;
+    int i;
 
     for (i = 0;i < nb_distribution;i++) {
       delete frequency_distribution[i];

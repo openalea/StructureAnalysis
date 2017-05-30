@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -59,7 +59,7 @@ namespace sequence_analysis {
 void VariableOrderMarkovChain::index_state_distribution()
 
 {
-  register int i , j , k;
+  int i , j , k;
   double *memory , *previous_memory;
   Curves *index_state;
 
@@ -150,7 +150,7 @@ void VariableOrderMarkovChain::index_state_distribution()
 double* VariableOrderMarkovChain::memory_computation() const
 
 {
-  register int i , j , k;
+  int i , j , k;
   double *average_memory , *memory , *previous_memory;
 
 
@@ -220,7 +220,7 @@ double* VariableOrderMarkovChain::memory_computation() const
 void VariableOrderMarkovChain::state_no_occurrence_probability(int istate , double increment)
 
 {
-  register int i;
+  int i;
 
   for (i = 0;i < nb_state;i++) {
     if ((i != istate) && (!accessibility[i][istate])) {
@@ -229,7 +229,7 @@ void VariableOrderMarkovChain::state_no_occurrence_probability(int istate , doub
   }
 
   if (i < nb_state) {
-    register int j , k;
+    int j , k;
     double memory_sum , *memory , *previous_memory ,
            &no_occurrence = state_process->no_occurrence[istate];
 
@@ -334,7 +334,7 @@ void VariableOrderMarkovChain::state_first_occurrence_distribution(int istate , 
                                                                    double cumul_threshold)
 
 {
-  register int i , j , k;
+  int i , j , k;
   double *memory , *previous_memory , *pmass , *pcumul;
   Distribution *first_occurrence;
 
@@ -481,7 +481,7 @@ void VariableOrderMarkovChain::state_leave_probability(const double *imemory , i
 
 {
   if (stype[istate] == TRANSIENT) {
-    register int i , j , k;
+    int i , j , k;
     double memory_sum , *memory , *previous_memory ,
            &leave = state_process->leave[istate];
 
@@ -581,7 +581,7 @@ void VariableOrderMarkovChain::state_recurrence_time_distribution(const double *
                                                                   int min_nb_value , double cumul_threshold)
 
 {
-  register int i , j , k;
+  int i , j , k;
   double sum , *memory , *previous_memory , *pmass , *pcumul;
   Distribution *recurrence_time;
 
@@ -704,7 +704,7 @@ void VariableOrderMarkovChain::state_sojourn_time_distribution(const double *ime
                                                                int min_nb_value , double cumul_threshold)
 
 {
-  register int i , j , k;
+  int i , j , k;
   int self_index;
   double sum , *memory , *previous_memory , *pmass , *pcumul;
   DiscreteParametric *sojourn_time;
@@ -836,7 +836,7 @@ void VariableOrderMarkovChain::state_sojourn_time_distribution(const double *ime
 void VariableOrderMarkov::index_output_distribution(int variable)
 
 {
-  register int i , j , k;
+  int i , j , k;
   Curves *index_state , *index_value;
 
 
@@ -880,7 +880,7 @@ void VariableOrderMarkov::output_no_occurrence_probability(int variable , int ou
 
 {
   bool status = false , *output_accessibility;
-  register int i , j , k;
+  int i , j , k;
   double memory_sum , sum , *observation , *memory , *previous_memory ,
          &no_occurrence = categorical_process[variable]->no_occurrence[output];
 
@@ -1005,7 +1005,7 @@ void VariableOrderMarkov::output_first_occurrence_distribution(int variable , in
                                                                double cumul_threshold)
 
 {
-  register int i , j , k;
+  int i , j , k;
   double sum , *observation , *memory , *previous_memory , *pmass , *pcumul;
   Distribution *first_occurrence;
 
@@ -1121,7 +1121,7 @@ void VariableOrderMarkov::output_leave_probability(const double *imemory , int v
 
 {
   bool status = false , *output_accessibility;
-  register int i , j , k;
+  int i , j , k;
   double memory_sum , sum , *observation , *memory , *previous_memory ,
          &leave = categorical_process[variable]->leave[output];
 
@@ -1247,7 +1247,7 @@ void VariableOrderMarkov::output_recurrence_time_distribution(const double *imem
                                                               double cumul_threshold)
 
 {
-  register int i , j , k;
+  int i , j , k;
   double sum , *observation , *memory , *previous_memory , *pmass , *pcumul;
   Distribution *recurrence_time;
 
@@ -1358,7 +1358,7 @@ void VariableOrderMarkov::output_sojourn_time_distribution(const double *imemory
                                                            double cumul_threshold)
 
 {
-  register int i , j , k;
+  int i , j , k;
   double sum , *observation , *memory , *previous_memory , *pmass , *pcumul ,
          &absorption = categorical_process[variable]->absorption[output];
   DiscreteParametric *sojourn_time;
@@ -1500,7 +1500,7 @@ Correlation* VariableOrderMarkovChain::state_autocorrelation_computation(StatErr
 
 {
   bool status = true;
-  register int i , j , k;
+  int i , j , k;
   int *category;
   double sum , norm , mean , *average_memory , *memory , *previous_memory , *ppoint;
   Correlation *correl;
@@ -1732,7 +1732,7 @@ Correlation* VariableOrderMarkov::output_autocorrelation_computation(StatError &
 
 {
   bool status = true;
-  register int i , j , k;
+  int i , j , k;
   int seq_variable , *category;
   double sum , norm , mean , *average_memory , *observation , *memory ,
          *previous_memory , *ppoint;

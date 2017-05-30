@@ -82,7 +82,7 @@ Chain::Chain(process_type itype , int inb_state , bool init_flag)
   }
 
   else {
-    register int i , j;
+    int i , j;
 
 
     nb_row = nb_state;
@@ -126,7 +126,7 @@ Chain::Chain(process_type itype , int inb_state , bool init_flag)
 Chain::Chain(process_type itype , int inb_state , int inb_row , bool init_flag)
 
 {
-  register int i , j;
+  int i , j;
 
 
   type = itype;
@@ -175,7 +175,7 @@ Chain::Chain(process_type itype , int inb_state , int inb_row , bool init_flag)
 void Chain::parameter_copy(const Chain &chain)
 
 {
-  register int i , j;
+  int i , j;
 
 
   for (i = 0;i < (type == ORDINARY ? nb_state : nb_row);i++) {
@@ -215,7 +215,7 @@ void Chain::parameter_copy(const Chain &chain)
 void Chain::copy(const Chain &chain)
 
 {
-  register int i , j;
+  int i , j;
 
 
   type = chain.type;
@@ -294,7 +294,7 @@ void Chain::copy(const Chain &chain)
 void Chain::remove()
 
 {
-  register int i;
+  int i;
 
 
   if (accessibility) {
@@ -390,7 +390,7 @@ Chain* Chain::parsing(StatError &error , ifstream &in_file , int &line , process
   typedef tokenizer<char_separator<char>> tokenizer;
   char_separator<char> separator(" \t");
   bool status = true , lstatus , **logic_transition;
-  register int i;
+  int i;
   int read_line , nb_state = 0 , value;
   double proba , cumul;
   Chain *chain;
@@ -644,7 +644,7 @@ Chain* Chain::parsing(StatError &error , ifstream &in_file , int &line , process
 ostream& Chain::ascii_print(ostream &os , bool file_flag) const
 
 {
-  register int i , j;
+  int i , j;
   int buff , width;
   ios_base::fmtflags format_flags;
 
@@ -744,7 +744,7 @@ ostream& Chain::ascii_print(ostream &os , bool file_flag) const
 ostream& Chain::spreadsheet_print(ostream &os) const
 
 {
-  register int i , j;
+  int i , j;
 
 
   os << "\n" << nb_state << "\t" << STAT_word[STATW_STATES] << endl;
@@ -808,7 +808,7 @@ ostream& Chain::spreadsheet_print(ostream &os) const
 void Chain::create_cumul()
 
 {
-  register int i;
+  int i;
 
 
   if (!cumul_initial) {
@@ -833,7 +833,7 @@ void Chain::create_cumul()
 void Chain::remove_cumul()
 
 {
-  register int i;
+  int i;
 
 
   if (cumul_initial) {
@@ -863,7 +863,7 @@ void Chain::cumul_computation()
 
 {
   if ((cumul_initial) && (cumul_transition)) {
-    register int i;
+    int i;
 
 
     stat_tool::cumul_computation((type == ORDINARY ? nb_state : nb_row) , initial , cumul_initial);
@@ -885,7 +885,7 @@ void Chain::log_computation()
 
 {
   if ((cumul_initial) && (cumul_transition)) {
-    register int i;
+    int i;
 
 
     stat_tool::log_computation((type == ORDINARY ? nb_state : nb_row) , initial , cumul_initial);

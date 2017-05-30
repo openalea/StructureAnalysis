@@ -80,7 +80,7 @@ void Reestimation<Type>::init(int inb_value)
   }
 
   else {
-    register int i;
+    int i;
 
     frequency = new Type[nb_value];
 
@@ -103,7 +103,7 @@ template <typename Type>
 void Reestimation<Type>::copy(const Reestimation<Type> &histo)
 
 {
-  register int i;
+  int i;
 
 
   nb_value = histo.nb_value;
@@ -151,7 +151,7 @@ template <typename Type>
 Reestimation<Type>::Reestimation(int nb_histo , const Reestimation<Type> **histo)
 
 {
-  register int i , j;
+  int i , j;
 
 
   nb_value = 0;
@@ -255,6 +255,11 @@ ostream& Reestimation<Type>::ascii_characteristic_print(ostream &os , bool shape
     if (variance > 0.) {
       os << "   " << STAT_label[STATL_LOWER_QUARTILE] << ": " << quantile_computation(0.25)
          << "   " << STAT_label[STATL_UPPER_QUARTILE] << ": " << quantile_computation(0.75);
+
+#     ifdef DEBUG
+      os << "   0.9 " << STAT_label[STATL_QUANTILE] << ": " << quantile_computation(0.9);
+#     endif
+
     }
     os << endl;
 
@@ -319,7 +324,7 @@ template <typename Type>
 ostream& Reestimation<Type>::print(ostream &os) const
 
 {
-  register int i;
+  int i;
 
 
   os << endl;
@@ -395,7 +400,7 @@ template <typename Type>
 void Reestimation<Type>::nb_element_computation()
 
 {
-  register int i;
+  int i;
 
 
   nb_element = 0;
@@ -415,7 +420,7 @@ template <typename Type>
 void Reestimation<Type>::max_computation()
 
 {
-  register int i;
+  int i;
 
 
   max = 0;
@@ -439,7 +444,7 @@ template <typename Type>
 double Reestimation<Type>::mode_computation() const
 
 {
-  register int i;
+  int i;
   int max_frequency;
   double mode;
 
@@ -475,7 +480,7 @@ void Reestimation<Type>::mean_computation()
 
 {
   if (nb_element > 0) {
-    register int i;
+    int i;
 
 
     mean = 0.;
@@ -501,7 +506,7 @@ template <typename Type>
 double Reestimation<Type>::quantile_computation(double icumul) const
 
 {
-  register int i;
+  int i;
   double cumul , quantile;
 
 
@@ -537,7 +542,7 @@ void Reestimation<Type>::variance_computation(bool bias)
     variance = 0.;
 
     if (nb_element > 1) {
-      register int i;
+      int i;
       double diff;
 
 
@@ -573,7 +578,7 @@ template <typename Type>
 double Reestimation<Type>::mean_absolute_deviation_computation(double location) const
 
 {
-  register int i;
+  int i;
   double mean_absolute_deviation = D_DEFAULT;
 
 
@@ -601,7 +606,7 @@ template <typename Type>
 double Reestimation<Type>::log_geometric_mean_computation() const
 
 {
-  register int i;
+  int i;
   double log_geometric_mean = D_DEFAULT;
 
 
@@ -629,7 +634,7 @@ template <typename Type>
 double Reestimation<Type>::skewness_computation() const
 
 {
-  register int i;
+  int i;
   double skewness = D_INF , diff;
 
 
@@ -664,7 +669,7 @@ template <typename Type>
 double Reestimation<Type>::kurtosis_computation() const
 
 {
-  register int i;
+  int i;
   double kurtosis = D_INF , diff;
 
 
@@ -699,7 +704,7 @@ template <typename Type>
 void Reestimation<Type>::mean_direction_computation(double *mean_direction) const
 
 {
-  register int i , j;
+  int i , j;
 
 
   mean_direction[0] = 0.;
@@ -747,7 +752,7 @@ template <typename Type>
 double Reestimation<Type>::information_computation() const
 
 {
-  register int i;
+  int i;
   double information = D_INF;
 
 
@@ -778,7 +783,7 @@ template <typename Type>
 double Reestimation<Type>::likelihood_computation(const Distribution &dist) const
 
 {
-  register int i;
+  int i;
   double likelihood = 0.;
 
 
@@ -823,7 +828,7 @@ void Reestimation<Type>::distribution_estimation(Distribution *dist) const
 
 {
   if (nb_element > 0) {
-    register int i;
+    int i;
 
 
     dist->offset = offset;
@@ -866,7 +871,7 @@ void Reestimation<Type>::penalized_likelihood_estimation(Distribution *dist , do
 
 {
   if (nb_element > 0) {
-    register int i;
+    int i;
     int iter;
     double ratio , inf_ratio , sup_ratio , norm , inf_norm , sup_norm;
 
@@ -1022,7 +1027,7 @@ double Reestimation<Type>::binomial_estimation(DiscreteParametric *dist , int mi
                                                bool min_inf_bound_flag) const
 
 {
-  register int i , j;
+  int i , j;
   int max_inf_bound , inf_bound , sup_bound , sup_sup_bound , est_sup_bound ,
       min_sup_bound , max_sup_bound;
   double shift_mean , probability , likelihood , inf_bound_likelihood , max_likelihood = D_INF;
@@ -1063,7 +1068,7 @@ double Reestimation<Type>::binomial_estimation(DiscreteParametric *dist , int mi
 //      cout << "\nbound range: " << min_inf_bound
 //           << " | " << max_inf_bound << " (" << sup_sup_bound << ")" << endl;
 
-      register int k = 0;
+      int k = 0;
 #     endif
 
       for (i = min_inf_bound;i <= max_inf_bound;i++) {
@@ -1160,7 +1165,7 @@ double Reestimation<Type>::poisson_estimation(DiscreteParametric *dist , int min
                                               bool min_inf_bound_flag , double cumul_threshold) const
 
 {
-  register int i;
+  int i;
   int max_inf_bound , inf_bound;
   double diff , parameter , likelihood , max_likelihood = D_INF;
 
@@ -1245,7 +1250,7 @@ double Reestimation<Type>::negative_binomial_estimation(DiscreteParametric *dist
                                                         bool min_inf_bound_flag , double cumul_threshold) const
 
 {
-  register int i;
+  int i;
   int max_inf_bound , inf_bound;
   double diff , shift_mean , parameter , probability , likelihood , max_likelihood = D_INF;
 
@@ -1338,7 +1343,7 @@ double Reestimation<Type>::poisson_geometric_estimation(DiscreteParametric *dist
                                                         bool min_inf_bound_flag , double cumul_threshold) const
 
 {
-  register int i;
+  int i;
   int max_inf_bound , inf_bound;
   double diff , buff , parameter , probability , likelihood , max_likelihood = D_INF;
 
@@ -1580,7 +1585,7 @@ void Reestimation<Type>::equilibrium_process_combination(const Reestimation<Type
 
 {
   if (nb_element + length_bias_reestim->nb_element > 0) {
-    register int i;
+    int i;
 
 
     for (i = offset;i < nb_value;i++) {
@@ -1614,7 +1619,7 @@ void Reestimation<Type>::equilibrium_process_estimation(const Reestimation<Type>
 
 {
   if (nb_element + length_bias_reestim->nb_element > 0) {
-    register int i;
+    int i;
 
 
     for (i = 0;i < offset;i++) {
@@ -1671,7 +1676,7 @@ void Reestimation<Type>::penalized_likelihood_equilibrium_process_estimation(con
 
 {
   if (nb_element + length_bias_reestim->nb_element > 0) {
-    register int i;
+    int i;
     int iter;
     double ratio , inf_ratio , sup_ratio , norm , inf_norm , sup_norm;
 
@@ -1802,7 +1807,7 @@ void Reestimation<Type>::state_occupancy_estimation(const Reestimation<Type> *fi
                                                     bool characteristic_computation)
 
 {
-  register int i;
+  int i;
   int max_nb_value;
   double hazard_rate , hazard_product;
 
@@ -1878,7 +1883,7 @@ template <typename Type>
 void Reestimation<Type>::gamma_estimation(ContinuousParametric *dist , int iter) const
 
 {
-//  register int i;
+//  int i;
   double buff , log_geometric_mean , diff;
 //  double bvariance;
 
@@ -1976,7 +1981,7 @@ void Reestimation<Type>::zero_inflated_gamma_estimation(ContinuousParametric *di
   }
 
   else {
-    register int i;
+    int i;
     double bmean , bvariance , buff , diff , log_geometric_mean;
 
 
@@ -2072,7 +2077,7 @@ template <typename Type>
 void Reestimation<Type>::inverse_gaussian_estimation(ContinuousParametric *dist) const
 
 {
-  register int i;
+  int i;
 
 
   if (mean > 0.) {

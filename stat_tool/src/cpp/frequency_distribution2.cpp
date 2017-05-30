@@ -78,7 +78,7 @@ ostream& FrequencyDistribution::dissimilarity_ascii_write(ostream &os , int nb_h
                                                           variable_type type , double **dissimilarity) const
 
 {
-  register int i , j;
+  int i , j;
   int max_nb_value , buff , width[3];
   double information , **cumul;
   Test *test;
@@ -379,7 +379,7 @@ bool FrequencyDistribution::dissimilarity_spreadsheet_write(StatError &error , c
 
 {
   bool status;
-  register int i , j;
+  int i , j;
   int max_nb_value;
   double information , **cumul , **concentration;
   Test *test;
@@ -621,7 +621,7 @@ bool FrequencyDistribution::dissimilarity_spreadsheet_write(StatError &error , c
 Test* FrequencyDistribution::kruskal_wallis_test(int nb_histo , const FrequencyDistribution **ihisto) const
 
 {
-  register int i , j;
+  int i , j;
   int *pfrequency;
   double correction , value , sum , *rank;
   const FrequencyDistribution **histo;
@@ -703,7 +703,7 @@ bool FrequencyDistribution::comparison(StatError &error , bool display , int nb_
 
 {
   bool status = true;
-  register int i , j , k , m;
+  int i , j , k , m;
   int max_nb_value , distance = 1;
   double **dissimilarity;
   Distribution **dist;
@@ -892,7 +892,7 @@ bool FrequencyDistribution::comparison(StatError &error , bool display , int nb_
 
 {
   bool status;
-  register int i;
+  int i;
   const FrequencyDistribution **histo;
 
 
@@ -1021,7 +1021,7 @@ bool FrequencyDistribution::wilcoxon_mann_whitney_comparison(StatError &error , 
 
 {
   bool status;
-  register int i;
+  int i;
   int nb_equal , min , max , *pfrequency;
   double correction , value , nb_sup , mean , variance , *rank;
   const FrequencyDistribution **histo;
@@ -1158,7 +1158,7 @@ bool FrequencyDistribution::plot_write(StatError &error , const char *prefix , i
 
   else {
     bool cumul_concentration_flag;
-    register int i , j , k;
+    int i , j , k;
     int max_nb_value , max_frequency , max_range , reference_matching ,
         reference_concentration , *poffset , *pnb_value;
     double max_mass , shift , **cumul , **concentration;
@@ -1570,7 +1570,7 @@ MultiPlotSet* FrequencyDistribution::get_plotable_frequency_distributions(StatEr
   }
 
   else {
-    register int i , j , k;
+    int i , j , k;
     int max_nb_value , max_frequency , cumul_concentration_nb_histo , max_range ,
         reference_matching , nb_plot_set;
     double max_mass , shift , **cumul;
@@ -2060,7 +2060,7 @@ DiscreteDistributionData* DiscreteDistributionData::ascii_read(StatError &error 
   typedef tokenizer<char_separator<char>> tokenizer;
   char_separator<char> separator(" \t");
   bool status , lstatus;
-  register int i;
+  int i;
   int line , nb_element , value , index , max_index;
   DiscreteDistributionData *histo;
   ifstream in_file(path.c_str());

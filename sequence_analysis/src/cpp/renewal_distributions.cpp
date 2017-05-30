@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -57,7 +57,7 @@ namespace sequence_analysis {
 void LengthBias::computation(const DiscreteParametric &inter_event)
 
 {
-  register int i;
+  int i;
   double norm , *pmass , *imass;
 
 
@@ -106,7 +106,7 @@ void LengthBias::computation(const DiscreteParametric &inter_event)
 void Backward::computation(const DiscreteParametric &inter_event , const Distribution &time)
 
 {
-  register int i , j;
+  int i , j;
   double norm , sum , *pmass , *icumul , *scumul , *tmass , *tcumul;
 
 
@@ -169,7 +169,7 @@ void Backward::computation(const DiscreteParametric &inter_event , const Distrib
 void NbEvent::computation(DiscreteParametric &inter_event)
 
 {
-  register int i , j;
+  int i , j;
   int time_nb_value;
   double bcumul = 1. , previous_cumul = 1. , *pmass , *pcumul;
   DiscreteParametric *nevent_time;
@@ -321,7 +321,7 @@ void NbEvent::computation(DiscreteParametric &inter_event)
 void NbEvent::binomial_computation()
 
 {
-  register int i , j;
+  int i , j;
   int main_set , main_subset , inf_bound_set , inf_bound_subset ,
       rapid_index , nb_term;
   double failure = 1. - probability , success = probability , k_success , main_term ,
@@ -461,7 +461,7 @@ void NbEvent::binomial_computation()
 void NbEvent::negative_binomial_computation()
 
 {
-  register int i , j;
+  int i , j;
   int main_set , main_subset , inf_bound_set , inf_bound_subset;
   double failure = 1. - probability , success = probability , main_term , inf_bound_term ,
          scale , *pmass;
@@ -625,7 +625,7 @@ void NbEvent::ordinary_computation(DiscreteParametric &inter_event)
 void Renewal::index_event_computation()
 
 {
-  register int i , j;
+  int i , j;
   double no_event , event , *pindex_event;
 
 
@@ -697,7 +697,7 @@ void Renewal::index_event_computation()
 void Renewal::computation(bool inter_event_flag , process_type itype , const Distribution *dtime)
 
 {
-  register int i , j;
+  int i , j;
   int nb_value , time_nb_value;
   double sum , *tmass , *pmass , *cumul , *previous_cumul , *pcumul1 , *pcumul2;
   DiscreteParametric *pnevent_time , *power , *forward_power;

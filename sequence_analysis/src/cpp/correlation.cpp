@@ -147,7 +147,7 @@ Correlation::Correlation(int inb_curve , int ilength , bool frequency_flag , cor
 void Correlation::copy(const Correlation &correl)
 
 {
-  register int i;
+  int i;
 
 
   type = correl.type;
@@ -251,7 +251,7 @@ Correlation* Correlation::merge(StatError &error , int nb_correl ,
 
 {
   bool status = true;
-  register int i , j , k , m;
+  int i , j , k , m;
   int inb_curve , *pfrequency;
   Correlation *correl;
   const Correlation **pcorrel;
@@ -379,7 +379,7 @@ Correlation* Correlation::merge(StatError &error , int nb_correl ,
 ostream& Correlation::line_write(ostream &os) const
 
 {
-  register int i;
+  int i;
   int autocorrelation , cross_correlation;
 
 
@@ -443,7 +443,7 @@ ostream& Correlation::ascii_write(ostream &os , bool exhaustive) const
 
 {
   bool autocorrelation , cross_correlation;
-  register int i , j;
+  int i , j;
   int *width;
   double standard_normal_value , *confidence_limit;
   ios_base::fmtflags format_flags;
@@ -660,7 +660,7 @@ bool Correlation::spreadsheet_write(StatError &error , const string path) const
 
 {
   bool status , autocorrelation , cross_correlation;
-  register int i , j;
+  int i , j;
   double standard_normal_value , confidence_limit;
   ofstream out_file(path.c_str());
 
@@ -821,7 +821,7 @@ bool Correlation::plot_print(const char *path , double *confidence_limit) const
 
 {
   bool status = false;
-  register int i , j;
+  int i , j;
   ofstream out_file(path);
 
 
@@ -864,7 +864,7 @@ bool Correlation::plot_write(StatError &error , const char *prefix ,
 
 {
   bool status , autocorrelation , cross_correlation;
-  register int i , j;
+  int i , j;
   double standard_normal_value , *confidence_limit = NULL;
   ostringstream data_file_name;
 
@@ -1104,7 +1104,7 @@ MultiPlotSet* Correlation::get_plotable() const
 
 {
   bool autocorrelation , cross_correlation;
-  register int i , j;
+  int i , j;
   int nb_plot;
   double standard_normal_value , *confidence_limit = NULL;
   ostringstream title , legend;
@@ -1320,7 +1320,7 @@ void Sequences::correlation_computation(Correlation &correl , int variable1 , in
 
 {
   if (correl.type == PEARSON) {
-    register int i , j , k;
+    int i , j , k;
     int max_lag = correl.length - 1;
     double variance1 , variance2 , diff , norm , *mean1 , *mean2;
 
@@ -1511,7 +1511,7 @@ void Sequences::correlation_computation(Correlation &correl , int variable1 , in
   }
 
   else if (correl.type == SPEARMAN) {
-    register int i , j , k;
+    int i , j , k;
     int max_lag = correl.length - 1 , *pfrequency;
     double main_term , correction , norm , rank_mean , *rank[2];
 
@@ -1612,7 +1612,7 @@ void Sequences::correlation_computation(Correlation &correl , int variable1 , in
   }
 
   else {
-    register int i , j , k;
+    int i , j , k;
     int max_lag = correl.length - 1 , nb_vector , **int_vector;
     Vectors *vec;
 
@@ -1804,7 +1804,7 @@ bool Correlation::autoregressive_model_autocorrelation(StatError &error , double
 
 {
   bool status = true;
-  register int i;
+  int i;
 
 
   error.init();
@@ -1868,7 +1868,7 @@ bool Correlation::white_noise_correlation(StatError &error , int nb_point , doub
 
 {
   bool status = true;
-  register int i , j;
+  int i , j;
   double variance;
 
 
@@ -1986,7 +1986,7 @@ bool Correlation::white_noise_correlation(StatError &error , int order)
 
 {
   bool status = true;
-  register int i;
+  int i;
   double *filter;
 
 
@@ -2040,7 +2040,7 @@ Correlation* Sequences::partial_autocorrelation_computation(StatError &error , i
 
 {
   bool status = true;
-  register int i , j;
+  int i , j;
   double sum , denom , *ppoint , *cpoint1 , *cpoint2 , *aux_correl , *paux_correl ,
          *aux , *paux1 , *paux2;
   Correlation *correl , *partial_correl;

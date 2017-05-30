@@ -67,7 +67,7 @@ namespace stat_tool {
 void Distribution::convolution(Distribution &dist1 , Distribution &dist2 , int inb_value)
 
 {
-  register int i , j;
+  int i , j;
   int coffset , cnb_value , min , max;
   double sum , *pmass1 , *pmass2 , *pmass;
 
@@ -118,7 +118,7 @@ void Distribution::convolution(Distribution &dist1 , Distribution &dist2 , int i
 void DiscreteParametric::binomial_computation(int inb_value , distribution_computation mode)
 
 {
-  register int i;
+  int i;
   int set , subset;
   double failure = 1. - probability , success = probability , ratio , scale , term;
 
@@ -283,7 +283,7 @@ void DiscreteParametric::poisson_computation(int inb_value , double cumul_thresh
                                              distribution_computation mode)
 
 {
-  register int i , j;
+  int i , j;
   double log_parameter , num , denom;
 
 
@@ -446,7 +446,7 @@ void DiscreteParametric::negative_binomial_computation(int inb_value , double cu
                                                        distribution_computation mode)
 
 {
-  register int i;
+  int i;
   double failure = 1. - probability , success = probability , log_failure ,
          set , subset , scale , term;
 
@@ -602,7 +602,7 @@ void DiscreteParametric::negative_binomial_computation(int inb_value , double cu
 void DiscreteParametric::poisson_geometric_computation(int inb_value , double cumul_threshold)
 
 {
-  register int i , j , k;
+  int i , j , k;
   double log_parameter , num , denom , failure = 1. - probability , success = probability , log_failure ,
          scale , *sum_mass , *set , *subset , *term;
 
@@ -742,7 +742,7 @@ void DiscreteParametric::poisson_geometric_computation(int inb_value , double cu
 void DiscreteParametric::uniform_computation()
 
 {
-  register int i;
+  int i;
   double proba;
 
 
@@ -773,7 +773,7 @@ void DiscreteParametric::uniform_computation()
 void DiscreteParametric::prior_segment_length_computation()
 
 {
-  register int i;
+  int i;
   double buff , sum;
 
 
@@ -797,7 +797,7 @@ void DiscreteParametric::prior_segment_length_computation()
   cumul_computation();
 
 # ifdef MESSAGE
-  register int j , k;
+  int j , k;
   double bcumul , **segment_length , **nb_segmentation_forward , **nb_segmentation_backward;
 
 
@@ -1015,7 +1015,7 @@ void DiscreteParametric::computation(int min_nb_value , double cumul_threshold)
 void Forward::computation(const DiscreteParametric &dist)
 
 {
-  register int i;
+  int i;
   double norm;
 
 
@@ -1059,7 +1059,7 @@ void Forward::computation(const DiscreteParametric &dist)
 double Distribution::survivor_likelihood_computation(const FrequencyDistribution &histo) const
 
 {
-  register int i;
+  int i;
   double likelihood = 0.;
 
 
@@ -1100,7 +1100,7 @@ double Distribution::survivor_likelihood_computation(const FrequencyDistribution
 double Distribution::chi2_value_computation(const FrequencyDistribution &histo) const
 
 {
-  register int i;
+  int i;
   double value , var1 , var2;
 
 
@@ -1159,7 +1159,7 @@ double Distribution::chi2_value_computation(const FrequencyDistribution &histo) 
 void Distribution::chi2_degree_of_freedom(const FrequencyDistribution &histo , Test &test) const
 
 {
-  register int i , j;
+  int i , j;
   int *filter_frequency;
   double *filter_mass;
   Distribution *filter_dist;
@@ -1269,7 +1269,7 @@ void Distribution::chi2_fit(const FrequencyDistribution &histo , Test &test) con
 DiscreteParametricModel* Distribution::truncate(StatError &error , int imax_value) const
 
 {
-  register int i;
+  int i;
   DiscreteParametricModel *dist;
 
 
@@ -1529,7 +1529,7 @@ void Distribution::penalty_computation(double weight , penalty_type pen_type ,
                                        double *penalty , side_effect outside) const
 
 {
-  register int i;
+  int i;
 
 
   switch (pen_type) {
@@ -1636,7 +1636,7 @@ void Distribution::penalty_computation(double weight , penalty_type pen_type ,
 int cumul_method(int nb_value , const double *cumul , double scale)
 
 {
-  register int i;
+  int i;
   double limit;
 
 
@@ -1734,7 +1734,7 @@ DiscreteDistributionData* DiscreteParametricModel::simulation(StatError &error ,
                                                               int nb_element) const
 
 {
-  register int i;
+  int i;
   DiscreteDistributionData *histo;
 
 
@@ -1862,7 +1862,7 @@ void DiscreteParametric::expectation_step(const FrequencyDistribution &within ,
                                           Reestimation<double> *length_bias_reestim , int iter) const
 
 {
-  register int i , j;
+  int i , j;
   int reestim_offset , reestim_nb_value , *pfrequency;
   double sum , *ifrequency , *lfrequency , *pmass , *pcumul , *norm;
 
@@ -2001,7 +2001,7 @@ double interval_bisection(Reestimation<double> *distribution_reestim ,
                           Reestimation<double> *length_bias_reestim)
 
 {
-  register int i;
+  int i;
   double ratio , inf_ratio , sup_ratio , mean , inf_mean , sup_mean , *dfrequency , *lfrequency;
 
 # ifdef DEBUG
@@ -2097,7 +2097,7 @@ DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , bo
 
 {
   bool status = true;
-  register int i;
+  int i;
   int inb_value , max_nb_value;
   double likelihood , previous_likelihood , inter_event_mean , *penalty;
   DiscreteParametricModel *inter_event;
@@ -2357,7 +2357,7 @@ DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , bo
         }
 
 /*        if (backward_forward->nb_value > nb_value) {
-          register int j;
+          int j;
           double term = forward.nb_element * (backward_forward->nb_value - 1) /
                         inter_event->mean + nb_element + backward.nb_element;
           if (no_event) {
@@ -2458,7 +2458,7 @@ DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , bo
                                                            double weight , penalty_type pen_type , side_effect outside) const
 
 {
-  register int i;
+  int i;
   int nb_histo , *pfrequency;
   double *pmass;
   DiscreteParametric *iinter_event;
@@ -2636,7 +2636,7 @@ void DiscreteParametric::expectation_step(const FrequencyDistribution &sojourn_t
                                           Reestimation<double> *occupancy_reestim , int iter) const
 
 {
-  register int i;
+  int i;
   int *pfrequency;
   double sum , *ofrequency , *pmass , *pcumul;
 
@@ -2716,7 +2716,7 @@ void DiscreteParametric::expectation_step(const FrequencyDistribution &sojourn_t
                                           duration_distribution_mean_estimator mean_estimator) const
 
 {
-  register int i , j;
+  int i , j;
   int reestim_offset , reestim_nb_value , *pfrequency;
   double sum , occupancy_mean , *ofrequency , *lfrequency , *pmass , *pcumul , *norm;
 

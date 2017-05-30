@@ -99,7 +99,7 @@ DistanceMatrix::DistanceMatrix()
 DistanceMatrix::DistanceMatrix(int nb_pattern , const char *ilabel , int *pattern_identifier)
 
 {
-  register int i , j;
+  int i , j;
 
 
   nb_row = nb_pattern;
@@ -182,7 +182,7 @@ DistanceMatrix::DistanceMatrix(int nb_pattern , int irow_identifier , int icolum
                                bool substitution_flag , bool transposition_flag)
 
 {
-  register int i , j;
+  int i , j;
 
 
   nb_row = (irow_identifier == I_DEFAULT ? nb_pattern : 1);
@@ -332,7 +332,7 @@ DistanceMatrix::DistanceMatrix(const DistanceMatrix &dist_matrix , int inb_patte
                                int *iidentifier , bool keep)
 
 {
-  register int i , j , k;
+  int i , j , k;
   int nb_pattern , dnb_pattern , *didentifier , *index , *rindex , *cindex;
 
 
@@ -346,20 +346,22 @@ DistanceMatrix::DistanceMatrix(const DistanceMatrix &dist_matrix , int inb_patte
     didentifier = dist_matrix.column_identifier;
   }
 
-  switch (keep) {
-  case false :
-    nb_pattern = dnb_pattern - inb_pattern;
-    break;
-  case true :
-    nb_pattern = inb_pattern;
-    break;
-  }
+  nb_pattern = (keep ? inb_pattern : dnb_pattern - inb_pattern);
 
   index = new int[nb_pattern];
 
-  switch (keep) {
+  if (keep) {
+    for (i = 0;i < inb_pattern;i++) {
+      for (j = 0;j < dnb_pattern;j++) {
+        if (iidentifier[i] == didentifier[j]) {
+          index[i] = j;
+          break;
+        }
+      }
+    }
+  }
 
-  case false : {
+  else {
     i = 0;
     for (j = 0;j < dnb_pattern;j++) {
       for (k = 0;k < inb_pattern;k++) {
@@ -372,20 +374,6 @@ DistanceMatrix::DistanceMatrix(const DistanceMatrix &dist_matrix , int inb_patte
         index[i++] = j;
       }
     }
-    break;
-  }
-
-  case true : {
-    for (i = 0;i < inb_pattern;i++) {
-      for (j = 0;j < dnb_pattern;j++) {
-        if (iidentifier[i] == didentifier[j]) {
-          index[i] = j;
-          break;
-        }
-      }
-    }
-    break;
-  }
   }
 
   if (dist_matrix.nb_row == 1) {
@@ -539,7 +527,7 @@ DistanceMatrix::DistanceMatrix(const DistanceMatrix &dist_matrix , int nb_cluste
                                const char *ilabel)
 
 {
-  register int i , j;
+  int i , j;
 
 
   nb_row = nb_cluster;
@@ -670,7 +658,7 @@ DistanceMatrix::DistanceMatrix(const DistanceMatrix &dist_matrix , int nb_cluste
 void DistanceMatrix::copy(const DistanceMatrix &dist_matrix , matrix_transform transform)
 
 {
-  register int i , j;
+  int i , j;
 
 
   nb_row = dist_matrix.nb_row;
@@ -984,7 +972,7 @@ void DistanceMatrix::copy(const DistanceMatrix &dist_matrix , matrix_transform t
 void DistanceMatrix::remove()
 
 {
-  register int i;
+  int i;
 
 
   delete [] row_identifier;
@@ -1124,7 +1112,7 @@ DistanceMatrix* DistanceMatrix::select_individual(StatError &error , int inb_pat
 
 {
   bool status = true , *selected_pattern;
-  register int i , j;
+  int i , j;
   int nb_pattern , max_identifier , *identifier;
   DistanceMatrix *dist_matrix;
 
@@ -1269,7 +1257,7 @@ DistanceMatrix* DistanceMatrix::unnormalize(StatError &error) const
 
 {
   bool status = false;
-  register int i , j;
+  int i , j;
   DistanceMatrix *dist_matrix;
 
 
@@ -1338,7 +1326,7 @@ ostream& DistanceMatrix::property_print(double **normalized_distance ,
 
 {
   bool status = true;
-  register int i , j , k;
+  int i , j , k;
   int nb_combination , nb_symmetry , nb_triangle_inequality;
 
 
@@ -1466,7 +1454,7 @@ ostream& DistanceMatrix::property_print(double **normalized_distance ,
 int cumul_computation(int nb_row , int nb_column , int **value)
 
 {
-  register int i , j;
+  int i , j;
   int cumul = 0;
 
 
@@ -1494,7 +1482,7 @@ int cumul_computation(int nb_row , int nb_column , int **value)
 double cumul_distance_computation(int dim , double *distance)
 
 {
-  register int i;
+  int i;
   double cumul_distance = 0.;
 
 
@@ -1528,7 +1516,7 @@ int* pattern_sort(int nb_pattern , double *distance , int nb_sorted_pattern)
 
 {
   bool *selected_pattern;
-  register int i , j;
+  int i , j;
   int *index;
   double min_distance;
 
@@ -1574,7 +1562,7 @@ int* pattern_sort(int nb_pattern , double *distance , int nb_sorted_pattern)
 ostream& DistanceMatrix::ascii_write(ostream &os , bool exhaustive) const
 
 {
-  register int i , j;
+  int i , j;
   int dim , max_identifier , buff , cumul_nb_deletion , cumul_nb_insertion , cumul_nb_match ,
       cumul_nb_substitution , cumul_nb_transposition , cumul_nb_operation , *cumul_length ,
       *index , width[2];
@@ -1911,7 +1899,7 @@ bool DistanceMatrix::ascii_write(StatError &error , const string path ,
 ostream& DistanceMatrix::spreadsheet_write(ostream &os) const
 
 {
-  register int i , j;
+  int i , j;
   int dim , cumul_nb_deletion , cumul_nb_insertion , cumul_nb_match ,
       cumul_nb_substitution , cumul_nb_transposition , cumul_nb_operation ,
       *cumul_length , *index;
@@ -2187,7 +2175,7 @@ bool DistanceMatrix::plot_write(StatError &error , const char *prefix ,
   }
 
   else {
-    register int i , j;
+    int i , j;
     int plot_nb_pattern , *index;
     double *plot_distance;
     ostringstream data_file_name;
@@ -2362,7 +2350,7 @@ MultiPlotSet* DistanceMatrix::get_plotable(StatError &error) const
   }
 
   else {
-    register int i;
+    int i;
     int plot_nb_pattern , *index;
     double *plot_distance;
     ostringstream title , legend , identifier;
@@ -2506,7 +2494,7 @@ bool DistanceMatrix::test_symmetry() const
 
 
   if ((nb_row > 1) && (nb_row == nb_column)) {
-    register int i , j;
+    int i , j;
     double normalized_distance[2];
 
 
@@ -2566,7 +2554,7 @@ void DistanceMatrix::update(int irow_identifier , int icolumn_identifier , doubl
 
 {
   if (idistance != -D_INF) {
-    register int i , j;
+    int i , j;
 
 
     for (i = 0;i < nb_row;i++) {
@@ -2618,7 +2606,7 @@ void DistanceMatrix::update(int irow_identifier , int icolumn_identifier ,
 
 {
   if (idistance != -D_INF) {
-    register int i , j;
+    int i , j;
 
 
     for (i = 0;i < nb_row;i++) {
@@ -2652,7 +2640,7 @@ void DistanceMatrix::update(int irow_identifier , int icolumn_identifier ,
 int DistanceMatrix::cumul_length_computation(bool *row_flag , bool *column_flag) const
 
 {
-  register int i , j;
+  int i , j;
   int cumul_length = 0;
 
 
@@ -2684,7 +2672,7 @@ int DistanceMatrix::cumul_length_computation(bool *row_flag , bool *column_flag)
 double DistanceMatrix::cumul_distance_computation(bool *row_flag , bool *column_flag) const
 
 {
-  register int i , j;
+  int i , j;
   double cumul_distance = 0.;
 
 

@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -98,7 +98,7 @@ ostream& Renewal::ascii_write(ostream &os , const RenewalData *timev ,
                               bool exhaustive , bool file_flag) const
 
 {
-  register int i , j;
+  int i , j;
   int nb_dist , inf , sup;
   double likelihood , information , *scale;
   const Distribution **pdist;
@@ -919,7 +919,7 @@ ostream& Renewal::spreadsheet_write(ostream &os , const RenewalData *timev) cons
 } */
 
 {
-  register int i;
+  int i;
   int nb_dist , inf , sup;
   double likelihood , information , *scale;
   const Distribution **pdist;
@@ -1440,7 +1440,7 @@ bool Renewal::plot_write(const char *prefix , const char *title ,
 
 {
   bool status;
-  register int i , j , k , m , n;
+  int i , j , k , m , n;
   int nb_file , nb_dist , nb_histo , nb_time , inf , sup;
   double max , *scale;
   const FrequencyDistribution **phisto;
@@ -2041,7 +2041,7 @@ bool Renewal::plot_write(StatError &error , const char *prefix ,
 MultiPlotSet* Renewal::get_plotable(const RenewalData *timev) const
 
 {
-  register int i , j , k;
+  int i , j , k;
   int nb_plot_set , nb_time , inf , sup , scale;
   double max;
   ostringstream legend , title;

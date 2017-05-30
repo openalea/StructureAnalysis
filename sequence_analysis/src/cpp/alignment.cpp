@@ -73,7 +73,7 @@ ostream& Sequences::alignment_ascii_print(ostream &os , int width , int ref_inde
                                           const Sequences &alignment , int alignment_index) const
 
 {
-  register int i , j , k , m , n;
+  int i , j , k , m , n;
   int ref_rank , test_rank , alignment_rank;
   ios_base::fmtflags format_flags;
 
@@ -275,7 +275,7 @@ ostream& Sequences::alignment_spreadsheet_print(ostream &os , int ref_index , in
                                                 const Sequences &alignment , int alignment_index) const
 
 {
-  register int i , j , k;
+  int i , j , k;
 
 
   os << "\n" << SEQ_label[SEQL_SEQUENCE] << " " << identifier[test_index]
@@ -410,7 +410,7 @@ double Sequences::indel_distance_computation(const VectorDistance &vector_dist ,
                                              double **rank , double **max_category_distance) const
 
 {
-  register int i , j;
+  int i , j;
   double ldistance , distance = 0.;
 
 
@@ -486,7 +486,7 @@ double Sequences::indel_distance_computation(const VectorDistance &vector_dist ,
                                              double **max_category_distance) const
 
 {
-  register int i;
+  int i;
   double ldistance , distance = 0.;
 
 
@@ -571,7 +571,7 @@ double Sequences::substitution_distance_computation(const VectorDistance &vector
                                                     double **rank , const Sequences *test_seq) const
 
 {
-  register int i;
+  int i;
   double ldistance , distance = 0.;
 
 
@@ -673,7 +673,7 @@ DistanceMatrix* Sequences::alignment(StatError &error , bool display , const Vec
 
 {
   bool status = true , half_matrix;
-  register int i , j , k , m;
+  int i , j , k , m;
   int nb_alignment , ilength , alignment_index , var , width , ref_position , pref_position ,
       test_position , ptest_position , gap_length , max_gap_length , nb_deletion , nb_insertion ,
       nb_match , nb_substitution , nb_transposition , nb_begin_end , offset , *palignment ,
@@ -1026,13 +1026,11 @@ DistanceMatrix* Sequences::alignment(StatError &error , bool display , const Vec
 
               // deletion
 
-              switch (begin_free) {
-              case false :
-                cumul_distance[k][0] = cumul_distance[k - 1][0] + local_indel_distance[i][k];
-                break;
-              case true :
+              if (begin_free) {
                 cumul_distance[k][0] = cumul_distance[k - 1][0];
-                break;
+              }
+              else {
+                cumul_distance[k][0] = cumul_distance[k - 1][0] + local_indel_distance[i][k];
               }
 
               path_length[k][0] = k;
@@ -1044,13 +1042,11 @@ DistanceMatrix* Sequences::alignment(StatError &error , bool display , const Vec
 
               // insertion
 
-              switch (begin_free) {
-              case false :
-                cumul_distance[0][k] = cumul_distance[0][k - 1] + local_indel_distance[j][k];
-                break;
-              case true :
+              if (begin_free) {
                 cumul_distance[0][k] = cumul_distance[0][k - 1];
-                break;
+              }
+              else {
+                cumul_distance[0][k] = cumul_distance[0][k - 1] + local_indel_distance[j][k];
               }
 
               path_length[0][k] = k;
@@ -1583,7 +1579,7 @@ double Sequences::substitution_distance_computation(int ref_index , int test_ind
                                                     int test_position , double substitution_distance) const
 
 {
-  register int i;
+  int i;
   double distance = 0.;
 
 
@@ -1623,7 +1619,7 @@ DistanceMatrix* Sequences::alignment(StatError &error , bool display , int ref_i
 
 {
   bool status = true , half_matrix;
-  register int i , j , k , m;
+  int i , j , k , m;
   int nb_alignment , ilength , alignment_index , var , width , ref_position ,
       pref_position , test_position , ptest_position , gap_length , max_gap_length ,
       nb_deletion , nb_insertion , nb_match , nb_begin_end , offset , *palignment ,
@@ -1793,13 +1789,11 @@ DistanceMatrix* Sequences::alignment(StatError &error , bool display , int ref_i
 
               // deletion
 
-              switch (begin_free) {
-              case false :
-                cumul_distance[k][0] = cumul_distance[k - 1][0] + INDEL_DISTANCE;
-                break;
-              case true :
+              if (begin_free) {
                 cumul_distance[k][0] = cumul_distance[k - 1][0];
-                break;
+              }
+              else {
+                cumul_distance[k][0] = cumul_distance[k - 1][0] + INDEL_DISTANCE;
               }
 
               path_length[k][0] = k;
@@ -1811,13 +1805,11 @@ DistanceMatrix* Sequences::alignment(StatError &error , bool display , int ref_i
 
               // insertion
 
-              switch (begin_free) {
-              case false :
-                cumul_distance[0][k] = cumul_distance[0][k - 1] + INDEL_DISTANCE;
-                break;
-              case true :
+              if (begin_free) {
                 cumul_distance[0][k] = cumul_distance[0][k - 1];
-                break;
+              }
+              else {
+                cumul_distance[0][k] = cumul_distance[0][k - 1] + INDEL_DISTANCE;
               }
 
               path_length[0][k] = k;
@@ -2191,7 +2183,7 @@ DistanceMatrix* Sequences::alignment(StatError &error , bool display , int ref_i
 ostream& Sequences::multiple_alignment_ascii_print(ostream &os) const
 
 {
-  register int i , j , k , m;
+  int i , j , k , m;
   int var , width , rank;
   ios_base::fmtflags format_flags;
 
@@ -2378,7 +2370,7 @@ Sequences* Sequences::multiple_alignment(const Sequences &test_seq , const Vecto
                                          bool end_free , insertion_deletion_cost indel_cost , double indel_factor) const
 
 {
-  register int i , j , k , m;
+  int i , j , k , m;
   int ref_position , pref_position , test_position , ptest_position , *alignment , *palignment ,
       *ilength , **path_length , ***back_pointers;
   double buff , sum , **ref_local_indel_distance , **test_local_indel_distance , **cumul_distance;
@@ -2486,9 +2478,11 @@ Sequences* Sequences::multiple_alignment(const Sequences &test_seq , const Vecto
 
     // deletion
 
-    switch (begin_free) {
+    if (begin_free) {
+      cumul_distance[i][0] = cumul_distance[i - 1][0];
+    }
 
-    case false : {
+    else {
       sum = 0.;
       for (j = 0;j < nb_sequence;j++) {
         if (int_sequence[j][nb_variable - 1][i - 1] == DATA) {
@@ -2496,13 +2490,6 @@ Sequences* Sequences::multiple_alignment(const Sequences &test_seq , const Vecto
         }
       }
       cumul_distance[i][0] = cumul_distance[i - 1][0] + sum / nb_sequence;
-      break;
-    }
-
-    case true : {
-      cumul_distance[i][0] = cumul_distance[i - 1][0];
-      break;
-    }
     }
 
     path_length[i][0] = i;
@@ -2514,9 +2501,11 @@ Sequences* Sequences::multiple_alignment(const Sequences &test_seq , const Vecto
 
     // insertion
 
-    switch (begin_free) {
+    if (begin_free) {
+      cumul_distance[0][i] = cumul_distance[0][i - 1];
+    }
 
-    case false : {
+    else {
       sum = 0.;
       for (j = 0;j < test_seq.nb_sequence;j++) {
         if (test_seq.int_sequence[j][nb_variable - 1][i - 1] == DATA) {
@@ -2524,13 +2513,6 @@ Sequences* Sequences::multiple_alignment(const Sequences &test_seq , const Vecto
         }
       }
       cumul_distance[0][i] = cumul_distance[0][i - 1] + sum / test_seq.nb_sequence;
-      break;
-    }
-
-    case true : {
-      cumul_distance[0][i] = cumul_distance[0][i - 1];
-      break;
-    }
     }
 
     path_length[0][i] = i;
@@ -2826,7 +2808,7 @@ Sequences* Sequences::multiple_alignment(StatError &error , bool display ,
 
 {
   bool status = true;
-  register int i , j , k;
+  int i , j , k;
   int *itype , *psequence , *csequence , *variable;
   double **rank , **max_category_distance;
   VectorDistance *vector_dist;

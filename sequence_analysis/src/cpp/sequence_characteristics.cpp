@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -92,7 +92,7 @@ SequenceCharacteristics::SequenceCharacteristics(const SequenceCharacteristics &
                                                  bool initial_run_flag)
 
 {
-  register int i;
+  int i;
 
 
   nb_value = characteristics.nb_value;
@@ -176,7 +176,7 @@ SequenceCharacteristics::SequenceCharacteristics(const SequenceCharacteristics &
 void SequenceCharacteristics::copy(const SequenceCharacteristics &characteristics)
 
 {
-  register int i;
+  int i;
 
 
   nb_value = characteristics.nb_value;
@@ -253,7 +253,7 @@ void SequenceCharacteristics::copy(const SequenceCharacteristics &characteristic
 void SequenceCharacteristics::reverse(const SequenceCharacteristics &characteristics)
 
 {
-  register int i;
+  int i;
 
 
   nb_value = characteristics.nb_value;
@@ -340,7 +340,7 @@ SequenceCharacteristics::SequenceCharacteristics(const SequenceCharacteristics &
 void SequenceCharacteristics::remove()
 
 {
-  register int i;
+  int i;
 
 
   delete index_value;
@@ -445,7 +445,7 @@ SequenceCharacteristics& SequenceCharacteristics::operator=(const SequenceCharac
 void SequenceCharacteristics::create_sojourn_time_frequency_distribution(int max_length , int initial_run_flag)
 
 {
-  register int i;
+  int i;
 
 
   sojourn_time = new FrequencyDistribution*[nb_value];
@@ -484,7 +484,7 @@ ostream& SequenceCharacteristics::ascii_print(ostream &os , int type ,
                                               bool exhaustive , bool comment_flag) const
 
 {
-  register int i;
+  int i;
 
 
   if (exhaustive) {
@@ -681,7 +681,7 @@ ostream& SequenceCharacteristics::spreadsheet_print(ostream &os , int type ,
                                                     const FrequencyDistribution &length_distribution) const
 
 {
-  register int i;
+  int i;
   Curves *smoothed_curves;
 
 
@@ -843,7 +843,7 @@ bool SequenceCharacteristics::plot_print(const char *prefix , const char *title 
 
 {
   bool status , start;
-  register int i , j , k;
+  int i , j , k;
   int index_length , nb_histo , histo_index;
   Curves *smoothed_curves;
   const FrequencyDistribution **phisto;
@@ -1564,7 +1564,7 @@ void SequenceCharacteristics::plotable_write(MultiPlotSet &plot , int &index ,
                                              const FrequencyDistribution &length_distribution) const
 
 {
-  register int i , j , k;
+  int i , j , k;
   int index_length , nb_histo , max_nb_value , max_frequency;
   double shift;
   Curves *smoothed_curves;

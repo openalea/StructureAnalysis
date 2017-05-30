@@ -63,7 +63,7 @@ void Compound::computation(int min_nb_value , double cumul_threshold ,
                            bool sum_flag , bool dist_flag)
 
 {
-  register int i , j;
+  int i , j;
   DiscreteParametric *power_dist;
 
 
@@ -151,7 +151,7 @@ void Compound::computation(DiscreteParametric **power_dist , int min_nb_value ,
                            double cumul_threshold , bool sum_flag , bool dist_flag)
 
 {
-  register int i , j;
+  int i , j;
   int sum_nb_value , min;
 
 
@@ -259,7 +259,7 @@ void Compound::expectation_step(const FrequencyDistribution &histo ,
                                 Reestimation<double> *reestim) const
 
 {
-  register int i , j , k;
+  int i , j , k;
   double num , denom , *term;
 
 
@@ -410,7 +410,7 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , bool dis
 
 {
   bool status = true , sum_compute , dist_compute;
-  register int i;
+  int i;
   int sum_nb_value , nb_likelihood_decrease;
   double likelihood , previous_likelihood , hlikelihood , *penalty;
   DiscreteParametric **power_dist;
@@ -848,7 +848,7 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , bool dis
 CompoundData* Compound::simulation(StatError &error , int nb_element) const
 
 {
-  register int i , j;
+  int i , j;
   int nb_dist , sum , value;
   CompoundData *compound_histo;
 
