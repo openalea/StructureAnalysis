@@ -1,7 +1,7 @@
 from functools import wraps
 
-import _stat_tool
 import __stat_tool
+import _stat_tool
 
 def wrapper(f):
     @wraps(f)
@@ -45,8 +45,8 @@ def wrapper(f):
     return discrete_mixture_estimation
 
 
-__stat_tool.stat_tool.DiscreteDistributionData.ascii_read = staticmethod(__stat_tool.stat_tool.ascii_read_d00b270bd3835f568531951506bb4410)
-del __stat_tool.stat_tool.ascii_read_d00b270bd3835f568531951506bb4410
+#__stat_tool.stat_tool.DiscreteDistributionData.ascii_read = staticmethod(__stat_tool.stat_tool.ascii_read_d00b270bd3835f568531951506bb4410)
+#del __stat_tool.stat_tool.ascii_read_d00b270bd3835f568531951506bb4410
 
 def wrapper(f):
     @wraps(f)

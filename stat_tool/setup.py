@@ -18,7 +18,7 @@ for key,value in metadata.iteritems():
 build_prefix = "build-scons"
 
 # Scons build directory
-scons_parameters = ["build_prefix=" + build_prefix]
+scons_parameters = [] #["build_prefix=" + build_prefix]
 
 
 # platform dependencies

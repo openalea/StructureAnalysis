@@ -43,12 +43,12 @@ void wrapper_277a0516fe4451448165550d8b9d6b2b()
     class_277a0516fe4451448165550d8b9d6b2b.def("eof", method_pointer_8e0245c906515b8bac9b3a032c10c3ec, "");
 //    class_277a0516fe4451448165550d8b9d6b2b.def("not_eof", method_pointer_5efa6ea3d7425d318a1f00b954dd4b73, "");
     class_277a0516fe4451448165550d8b9d6b2b.staticmethod("eof");
-    class_277a0516fe4451448165550d8b9d6b2b.staticmethod("to_int_type");
-    class_277a0516fe4451448165550d8b9d6b2b.staticmethod("not_eof");
-    class_277a0516fe4451448165550d8b9d6b2b.staticmethod("eq_int_type");
-    class_277a0516fe4451448165550d8b9d6b2b.staticmethod("to_char_type");
-    class_277a0516fe4451448165550d8b9d6b2b.staticmethod("lt");
-    class_277a0516fe4451448165550d8b9d6b2b.staticmethod("eq");
+//    class_277a0516fe4451448165550d8b9d6b2b.staticmethod("to_int_type");
+//    class_277a0516fe4451448165550d8b9d6b2b.staticmethod("not_eof");
+//    class_277a0516fe4451448165550d8b9d6b2b.staticmethod("eq_int_type");
+//    class_277a0516fe4451448165550d8b9d6b2b.staticmethod("to_char_type");
+//    class_277a0516fe4451448165550d8b9d6b2b.staticmethod("lt");
+//    class_277a0516fe4451448165550d8b9d6b2b.staticmethod("eq");
     class_277a0516fe4451448165550d8b9d6b2b.staticmethod("assign");
 
 }
