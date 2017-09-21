@@ -2057,6 +2057,12 @@ bool Sequences::segment_profile_write(StatError &error , ostream &os , int iiden
                          << STAT_variable_word[REAL_VALUE];
       error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
     }
+
+    else if (((model_type[i] == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type[i] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE)) &&
+             (index_param_type != IMPLICIT_TYPE) && (index_interval->variance > 0.)) {
+      status = false;
+      error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
+    }
   }
 
   if (iidentifier != I_DEFAULT) {
@@ -2123,7 +2129,7 @@ bool Sequences::segment_profile_write(StatError &error , ostream &os , int iiden
       error.update(SEQ_error[SEQR_SEGMENTATION_FAILURE]);
     }
 
-    else if ((format == ASCII) || (length[index == I_DEFAULT ? 0 : index] <= 256)) {
+    else if ((format == ASCII) || (length[index == I_DEFAULT ? 0 : index] <= 400)) {
       switch (segmentation) {
       case FORWARD_DYNAMIC_PROGRAMMING :
         seq->N_segmentation(index , nb_segment , model_type , common_contrast , shape_parameter ,
@@ -2343,6 +2349,12 @@ bool Sequences::segment_profile_plot_write(StatError &error , const char *prefix
                          << STAT_variable_word[STATE] << " or "
                          << STAT_variable_word[REAL_VALUE];
       error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
+    }
+
+    else if (((model_type[i] == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type[i] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE)) &&
+             (index_param_type != IMPLICIT_TYPE) && (index_interval->variance > 0.)) {
+      status = false;
+      error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
     }
   }
 
@@ -2870,6 +2882,12 @@ MultiPlotSet* Sequences::segment_profile_plotable_write(StatError &error , int i
                          << STAT_variable_word[STATE] << " or "
                          << STAT_variable_word[REAL_VALUE];
       error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
+    }
+
+    else if (((model_type[i] == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type[i] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE)) &&
+             (index_param_type != IMPLICIT_TYPE) && (index_interval->variance > 0.)) {
+      status = false;
+      error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
     }
   }
 

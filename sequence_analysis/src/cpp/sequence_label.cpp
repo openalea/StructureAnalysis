@@ -234,6 +234,8 @@ const char *SEQ_label[] = {
   "segment sample size" ,
   "global standard deviation" ,
   "global residual standard deviation" ,
+  "root mean square error" ,
+  "mean absolute error" ,
   "piecewise linear function" ,
   "confidence interval" ,
   "confidence intervals" ,

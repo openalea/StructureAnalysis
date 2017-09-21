@@ -576,7 +576,7 @@ double Sequences::one_segment_likelihood(int index , segment_model *model_type ,
       }
     }
 
-    else if (model_type[j - 1] == POISSON_CHANGE) {
+    else if (model_type[i - 1] == POISSON_CHANGE) {
       if ((index != I_DEFAULT) || (!common_contrast)) {
         for (j = 0;j < nb_sequence;j++) {
           if ((index == I_DEFAULT) || (index == j)) {
@@ -1345,8 +1345,11 @@ double Sequences::piecewise_linear_function(int index , int variable , int nb_se
   double likelihood , mean , diff , diff_sum , index_parameter_mean , response_mean , shifted_diff ,
          slope , intercept , autoregressive_coeff;
   long double square_sum , global_square_sum , index_parameter_variance , response_variance , covariance ,
-              shifted_square_sum , autocovariance , residual_square_sum , global_shifted_square_sum ,
-              global_autocovariance;
+              shifted_square_sum , autocovariance , residual_square_sum , mean_squared_error_1;
+
+# ifdef MESSAGE
+  long double mean_squared_error;
+# endif
 
 
   if ((model_type == POISSON_CHANGE) || (model_type == NEGATIVE_BINOMIAL_0_CHANGE) ||
@@ -1539,14 +1542,14 @@ double Sequences::piecewise_linear_function(int index , int variable , int nb_se
     }
 
     if (global_variance) {
-      if (index != I_DEFAULT) {
-        global_variance[variable] = global_square_sum / (length[index] - nb_segment);
-      }
-      else {
-        global_variance[variable] = global_square_sum / (nb_sequence * length[0] - nb_segment);
-      }
-
       if (model_type == MEAN_CHANGE) {
+        if (index != I_DEFAULT) {
+          global_variance[variable] = global_square_sum / (length[index] - nb_segment);
+        }
+        else {
+          global_variance[variable] = global_square_sum / (nb_sequence * length[0] - nb_segment);
+        }
+
         if (index != I_DEFAULT) {
           if (global_square_sum > length[index] * ROUNDOFF_ERROR) {
             likelihood = -((double)length[index] / 2.) * (log(global_square_sum /
@@ -1565,6 +1568,17 @@ double Sequences::piecewise_linear_function(int index , int variable , int nb_se
           else {
             likelihood = D_INF;
           }
+        }
+      }
+
+      // computation of mean squared error
+
+      else {
+        if (index != I_DEFAULT) {
+          global_variance[variable] = global_square_sum / length[index];
+        }
+        else {
+          global_variance[variable] = global_square_sum / (nb_sequence * length[0]);
         }
       }
     }
@@ -1834,14 +1848,14 @@ double Sequences::piecewise_linear_function(int index , int variable , int nb_se
     }
 
     if (global_variance) {
-      if (index != I_DEFAULT) {
-        global_variance[variable] = global_square_sum / (length[index] - 2 * nb_segment);
-      }
-      else {
-        global_variance[variable] = global_square_sum / (nb_sequence * length[0] - 2 * nb_segment);
-      }
-
       if (model_type == INTERCEPT_SLOPE_CHANGE) {
+        if (index != I_DEFAULT) {
+          global_variance[variable] = global_square_sum / (length[index] - 2 * nb_segment);
+        }
+        else {
+          global_variance[variable] = global_square_sum / (nb_sequence * length[0] - 2 * nb_segment);
+        }
+
         if (index != I_DEFAULT) {
           if (global_square_sum > length[index] * ROUNDOFF_ERROR) {
             likelihood = -((double)length[index] / 2.) * (log(global_square_sum /
@@ -1862,6 +1876,17 @@ double Sequences::piecewise_linear_function(int index , int variable , int nb_se
           }
         }
       }
+
+      // computation of mean squared error
+
+      else {
+        if (index != I_DEFAULT) {
+          global_variance[variable] = global_square_sum / length[index];
+        }
+        else {
+          global_variance[variable] = global_square_sum / (nb_sequence * length[0]);
+        }
+      }
     }
   }
 
@@ -1874,9 +1899,13 @@ double Sequences::piecewise_linear_function(int index , int variable , int nb_se
     }
 
     if (global_variance) {
+      mean_squared_error_1 = 0.;
       global_square_sum = 0.;
-      global_shifted_square_sum = 0.;
-      global_autocovariance = 0.;
+
+#     ifdef MESSAGE
+      mean_squared_error = 0.;
+#     endif
+
     }
 
     if ((index != I_DEFAULT) || (!common_contrast)) {
@@ -1941,12 +1970,6 @@ double Sequences::piecewise_linear_function(int index , int variable , int nb_se
               }
             }
 
-            if (global_variance) {
-              global_square_sum += square_sum;
-              global_shifted_square_sum += shifted_square_sum;
-              global_autocovariance += autocovariance;
-            }
-
             if (shifted_square_sum > 0.) {
               autoregressive_coeff = autocovariance / shifted_square_sum;
               if (autoregressive_coeff < -1.) {
@@ -1975,8 +1998,41 @@ double Sequences::piecewise_linear_function(int index , int variable , int nb_se
                 }
               }
 
-              if (variance) {
+              if (global_variance) {
+                if (type[variable] != REAL_VALUE) {
+                  diff = int_sequence[i][variable][change_point[j]] - mean;
+                  mean_squared_error_1 += diff * diff;
+
+#                 ifdef MESSAGE
+                  mean_squared_error += diff * diff;
+                  for (k = change_point[j] + 1;k < change_point[j + 1];k++) {
+                    diff = int_sequence[i][variable][k] - (mean + autoregressive_coeff * (int_sequence[i][variable][k - 1] - mean));
+                    mean_squared_error += diff * diff;
+                  }
+#                 endif
+
+                }
+
+                else {
+                  diff = real_sequence[i][variable][change_point[j]] - mean;
+                  mean_squared_error_1 += diff * diff;
+
+#                 ifdef MESSAGE
+                  mean_squared_error += diff * diff;
+                  for (k = change_point[j] + 1;k < change_point[j + 1];k++) {
+                    diff = real_sequence[i][variable][k] - (mean + autoregressive_coeff * (real_sequence[i][variable][k - 1] - mean));
+                    mean_squared_error += diff * diff;
+                  }
+#                 endif
+
+                }
+              }
+
+              if ((variance) || (global_variance)) {
                 residual_square_sum = square_sum - autocovariance * autocovariance / shifted_square_sum;
+                if (global_variance) {
+                  global_square_sum += residual_square_sum;
+                }
 //                variance[i][j] = residual_square_sum / (change_point[j + 1] - change_point[j] - 3);
                 variance[i][j] = residual_square_sum / (change_point[j + 1] - change_point[j] - 2);
 
@@ -2095,12 +2151,6 @@ double Sequences::piecewise_linear_function(int index , int variable , int nb_se
           }
         }
 
-        if (global_variance) {
-          global_square_sum += square_sum;
-          global_shifted_square_sum += shifted_square_sum;
-          global_autocovariance += autocovariance;
-        }
-
         if (shifted_square_sum > 0.) {
           autoregressive_coeff = autocovariance / shifted_square_sum;
           if (autoregressive_coeff < -1.) {
@@ -2131,8 +2181,43 @@ double Sequences::piecewise_linear_function(int index , int variable , int nb_se
             }
           }
 
-          if (variance) {
+          if (global_variance) {
+            for (j = 0;j < nb_sequence;j++) {
+              if (type[variable] != REAL_VALUE) {
+                diff = int_sequence[j][variable][change_point[i]] - mean;
+                mean_squared_error_1 += diff * diff;
+
+#               ifdef MESSAGE
+                mean_squared_error += diff * diff;
+                for (k = change_point[i] + 1;k < change_point[i + 1];k++) {
+                  diff = int_sequence[j][variable][k] - (mean + autoregressive_coeff * (int_sequence[j][variable][k - 1] - mean));
+                  mean_squared_error += diff * diff;
+                }
+#               endif
+
+              }
+              else {
+                diff = real_sequence[j][variable][change_point[i]] - mean;
+                mean_squared_error_1 += diff * diff;
+
+#               ifdef MESSAGE
+                mean_squared_error += diff * diff;
+                for (k = change_point[i] + 1;k < change_point[i + 1];k++) {
+                  diff= real_sequence[j][variable][k] - (mean + autoregressive_coeff * (real_sequence[j][variable][k - 1] - mean));
+                  mean_squared_error += diff * diff;
+                }
+#               endif
+
+              }
+            }
+          }
+
+          if ((variance) || (global_variance)) {
             residual_square_sum = square_sum - autocovariance * autocovariance / shifted_square_sum;
+            if (global_variance) {
+              global_square_sum += residual_square_sum;
+            }
+
 //            variance[0][i] = residual_square_sum / (nb_sequence * (change_point[i + 1] - change_point[i] - 1) - 2);
             variance[0][i] = residual_square_sum / (nb_sequence * (change_point[i + 1] - change_point[i] - 1) - 1);
 
@@ -2179,19 +2264,39 @@ double Sequences::piecewise_linear_function(int index , int variable , int nb_se
       }
     }
 
+    // computation of mean squared error
+
     if (global_variance) {
-      global_variance[variable] = global_square_sum;
-      if (global_shifted_square_sum > 0.) {
-        global_variance[variable] -= global_autocovariance * global_autocovariance / global_shifted_square_sum;
-      }
       if (index != I_DEFAULT) {
-//        global_variance[variable] /= (length[index] - 3 * nb_segment);
-        global_variance[variable] /= (length[index] - 2 * nb_segment);
+//        global_variance[variable] = global_square_sum / (length[index] - 3 * nb_segment);
+//        global_variance[variable] = global_square_sum / (length[index] - 2 * nb_segment);
+        global_variance[variable] = (mean_squared_error_1 + global_square_sum) / length[index];
+       
       }
+
       else {
-//        global_variance[variable] /= (nb_sequence * (length[0] - nb_segment) - 2 * nb_segment);
-        global_variance[variable] /= (nb_sequence * (length[0] - nb_segment) - nb_segment);
+//        global_variance[variable] = global_square_sum / (nb_sequence * (length[0] - nb_segment) - 2 * nb_segment);
+//        global_variance[variable] = global_square_sum / (nb_sequence * (length[0] - nb_segment) - nb_segment);
+        global_variance[variable] = (mean_squared_error_1 + global_square_sum) / (nb_sequence * length[0]);
       }
+
+#     ifdef MESSAGE
+      if ((model_type == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE)) {
+        if (index != I_DEFAULT) {
+          mean_squared_error /= length[index];
+        }
+        else {
+          mean_squared_error /= (nb_sequence * length[0]);
+        }
+
+        if ((global_variance[variable] < mean_squared_error - DOUBLE_ERROR) ||
+            (global_variance[variable] > mean_squared_error + DOUBLE_ERROR)) {
+          cout << "\nERROR " << SEQ_label[SEQL_ROOT_MEAN_SQUARE_ERROR] << ": " << sqrt(global_variance[variable]) << " | "
+               << sqrtl(mean_squared_error) << endl;
+        }
+      }
+#     endif
+
     }
   }
 
@@ -3450,6 +3555,7 @@ Sequences* Sequences::segmentation_output(int nb_segment , segment_model *model_
                                               autoregressive_coeff[i] , correlation[i] ,
                                               slope_standard_deviation[i] , index_parameter_mean[i] ,
                                               index_parameter_variance[i] , determination_coeff[i]);
+
       if ((display) && (((i == 1) && ((model_type[0] == MEAN_CHANGE) || (model_type[0] == INTERCEPT_SLOPE_CHANGE))) ||
            (model_type[i - 1] == GAUSSIAN_CHANGE) || (model_type[i - 1] == VARIANCE_CHANGE) ||
            (model_type[i - 1] == LINEAR_MODEL_CHANGE) || (model_type[i - 1] == AUTOREGRESSIVE_MODEL_CHANGE) ||
@@ -3525,7 +3631,7 @@ Sequences* Sequences::segmentation_output(int nb_segment , segment_model *model_
                << change_point_amplitude << "   ";
         }
 
-        cout << SEQ_label[SEQL_GLOBAL_STANDARD_DEVIATION] << ": " << sqrt(global_variance[i]);
+        cout << SEQ_label[SEQL_ROOT_MEAN_SQUARE_ERROR] << ": " << sqrt(global_variance[i]);
         if (nb_segment > 1) {
           cout << "   " << STAT_label[STATL_RATIO] << ": "
                << change_point_amplitude / sqrt(global_variance[i]);
@@ -3533,7 +3639,11 @@ Sequences* Sequences::segmentation_output(int nb_segment , segment_model *model_
         cout << endl;
       }
 
-      if (model_type[0] == MEAN_CHANGE) {
+      else if ((model_type[i - 1] == LINEAR_MODEL_CHANGE) || (model_type[i - 1] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE)) {
+        cout << SEQ_label[SEQL_ROOT_MEAN_SQUARE_ERROR] << ": " << sqrt(global_variance[i]) << endl;
+      }
+
+      else if (model_type[0] == MEAN_CHANGE) {
         cout << SEQ_label[SEQL_GLOBAL_STANDARD_DEVIATION] << ": "  << sqrt(global_variance[i]) << endl;
       }
       else if (model_type[0] == INTERCEPT_SLOPE_CHANGE) {
@@ -4515,6 +4625,12 @@ Sequences* Sequences::segmentation(StatError &error , bool display , int iidenti
                          << STAT_variable_word[STATE] << " or "
                          << STAT_variable_word[REAL_VALUE];
       error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
+    }
+
+    else if (((model_type[i] == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type[i] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE)) &&
+             (index_param_type != IMPLICIT_TYPE) && (index_interval->variance > 0.)) {
+      status = false;
+      error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
     }
   }
 

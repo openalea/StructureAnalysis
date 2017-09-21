@@ -810,6 +810,9 @@ namespace sequence_analysis {
                                  const std::string path = "" ,
                                  stat_tool::output_format format = stat_tool::ASCII) const;
 
+    bool mean_error_computation(stat_tool::StatError &error , bool display , int variable ,
+                                int iidentifier = stat_tool::I_DEFAULT , bool robust = false) const;
+
     Sequences* recurrence_time_sequences(stat_tool::StatError &error , int variable , int value) const;
     Sequences* sojourn_time_sequences(stat_tool::StatError &error , int variable) const;
 

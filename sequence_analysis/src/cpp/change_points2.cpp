@@ -2896,6 +2896,12 @@ Sequences* Sequences::segmentation(StatError &error , bool display , int iidenti
                          << STAT_variable_word[REAL_VALUE];
       error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
     }
+
+    else if (((model_type[i] == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type[i] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE)) &&
+             (index_param_type != IMPLICIT_TYPE) && (index_interval->variance > 0.)) {
+      status = false;
+      error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
+    }
   }
 
   if (iidentifier != I_DEFAULT) {

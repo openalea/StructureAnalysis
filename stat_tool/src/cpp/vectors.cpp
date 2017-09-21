@@ -5477,28 +5477,33 @@ void Vectors::variance_computation(int variable)
 
 {
   if (mean[variable] != D_INF) {
-    covariance[variable][variable] = 0.;
-
     if (nb_vector > 1) {
       int i;
       double diff;
+      long double square_sum;
 
+
+      square_sum = 0.;
 
       if (type[variable] != REAL_VALUE) {
         for (i = 0;i < nb_vector;i++) {
           diff = int_vector[i][variable] - mean[variable];
-          covariance[variable][variable] += diff * diff;
+          square_sum += diff * diff;
         }
       }
 
       else{
         for (i = 0;i < nb_vector;i++) {
           diff = real_vector[i][variable] - mean[variable];
-          covariance[variable][variable] += diff * diff;
+          square_sum += diff * diff;
         }
       }
 
-      covariance[variable][variable] /= (nb_vector - 1);
+      covariance[variable][variable] = square_sum / (nb_vector - 1);
+    }
+
+    else {
+      covariance[variable][variable] = 0.;
     }
   }
 }
@@ -5517,37 +5522,42 @@ void Vectors::covariance_computation(int variable)
 {
   if (mean[0] != D_INF) {
     int i , j , k;
+    long double square_sum;
 
 
     for (i = 0;i < nb_variable;i++) {
       if ((variable == I_DEFAULT) || (i == variable)) {
         for (j = (variable == I_DEFAULT ? i + 1 : 0);j < nb_variable;j++) {
-          covariance[i][j] = 0.;
-
           if (nb_vector > 1) {
+            square_sum = 0.;
+
             if ((type[i] != REAL_VALUE) && (type[j] != REAL_VALUE)) {
               for (k = 0;k < nb_vector;k++) {
-                covariance[i][j] += (int_vector[k][i] - mean[i]) * (int_vector[k][j] - mean[j]);
+                square_sum += (int_vector[k][i] - mean[i]) * (int_vector[k][j] - mean[j]);
               }
             }
             else if ((type[i] != REAL_VALUE) && (type[j] == REAL_VALUE)) {
               for (k = 0;k < nb_vector;k++) {
-                covariance[i][j] += (int_vector[k][i] - mean[i]) * (real_vector[k][j] - mean[j]);
+                square_sum += (int_vector[k][i] - mean[i]) * (real_vector[k][j] - mean[j]);
               }
             }
             else if ((type[i] == REAL_VALUE) && (type[j] != REAL_VALUE)) {
               for (k = 0;k < nb_vector;k++) {
-                covariance[i][j] += (real_vector[k][i] - mean[i]) * (int_vector[k][j] - mean[j]);
+                square_sum += (real_vector[k][i] - mean[i]) * (int_vector[k][j] - mean[j]);
               }
             }
 //            else if ((type[i] == REAL_VALUE) && (type[j] == REAL_VALUE)) {
             else {
               for (k = 0;k < nb_vector;k++) {
-                covariance[i][j] += (real_vector[k][i] - mean[i]) * (real_vector[k][j] - mean[j]);
+                square_sum += (real_vector[k][i] - mean[i]) * (real_vector[k][j] - mean[j]);
               }
             }
 
-            covariance[i][j] /= (nb_vector - 1);
+            covariance[i][j] = square_sum / (nb_vector - 1);
+          }
+
+          else {
+            covariance[i][j] = 0.;
           }
 
           covariance[j][i] = covariance[i][j];
@@ -5660,28 +5670,33 @@ double Vectors::skewness_computation(int variable) const
 {
   int i;
   double skewness = D_INF , diff;
+  long double cube_sum;
 
 
   if ((mean[variable] != D_INF) && (covariance[variable][variable] != D_DEFAULT)) {
-    skewness = 0.;
-
     if ((nb_vector > 2) && (covariance[variable][variable] > 0.)) {
+      cube_sum = 0.;
+
       if (type[variable] != REAL_VALUE) {
         for (i = 0;i < nb_vector;i++) {
           diff = int_vector[i][variable] - mean[variable];
-          skewness += diff * diff * diff;
+          cube_sum += diff * diff * diff;
         }
       }
 
       else {
         for (i = 0;i < nb_vector;i++) {
           diff = real_vector[i][variable] - mean[variable];
-          skewness += diff * diff * diff;
+          cube_sum += diff * diff * diff;
         }
       }
 
-      skewness = skewness * nb_vector / ((nb_vector - 1) * (nb_vector - 2) *
+      skewness = cube_sum * nb_vector / ((nb_vector - 1) * (nb_vector - 2) *
                   pow(covariance[variable][variable] , 1.5));
+    }
+
+    else {
+      skewness = 0.;
     }
   }
 
@@ -5705,32 +5720,33 @@ double Vectors::kurtosis_computation(int variable) const
 {
   int i;
   double kurtosis = D_INF , diff;
+  long double power_sum;
 
 
   if ((mean[variable] != D_INF) && (covariance[variable][variable] != D_DEFAULT)) {
-    if (covariance[variable][variable] == 0.) {
-      kurtosis = -2.;
-    }
-
-    else {
-      kurtosis = 0.;
+    if (covariance[variable][variable] > 0.) {
+      power_sum = 0.;
 
       if (type[variable] != REAL_VALUE) {
         for (i = 0;i < nb_vector;i++) {
           diff = int_vector[i][variable] - mean[variable];
-          kurtosis += diff * diff * diff * diff;
+          power_sum += diff * diff * diff * diff;
         }
       }
 
       else {
         for (i = 0;i < nb_vector;i++) {
           diff = real_vector[i][variable] - mean[variable];
-          kurtosis += diff * diff * diff * diff;
+          power_sum += diff * diff * diff * diff;
         }
       }
 
-      kurtosis = kurtosis / ((nb_vector - 1) * covariance[variable][variable] *
+      kurtosis = power_sum / ((nb_vector - 1) * covariance[variable][variable] *
                   covariance[variable][variable]) - 3.;
+    }
+
+    else {
+      kurtosis = -2.;
     }
   }
 

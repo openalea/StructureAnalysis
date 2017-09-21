@@ -4746,7 +4746,8 @@ bool HiddenVariableOrderMarkov::state_profile_plot_write(StatError &error , cons
                      << exp(state_seq_likelihood - seq_likelihood) << "] ";
             for (j = 0;j < nb_state;j++) {
               out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using "
-                       << j + 1 << " title \"" << STAT_label[STATL_STATE] << " "
+//                       << j + 1 << " title \"" << STAT_label[STATL_STATE] << " "
+                       << 1 << " : " << j + 2 << " title \"" << STAT_label[STATL_STATE] << " "
                        << j << "\" with linespoints";
               if (j < nb_state - 1) {
                 out_file << ",\\";
