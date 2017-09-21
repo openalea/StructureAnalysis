@@ -3433,6 +3433,7 @@ double Sequences::variance_computation(int variable , double mean) const
 {
   int i , j;
   double variance , diff;
+  long double square_sum;
 
 
   if (marginal_distribution[variable]) {
@@ -3440,14 +3441,14 @@ double Sequences::variance_computation(int variable , double mean) const
   }
 
   else {
-    variance = 0.;
-
     if (cumul_length > 1) {
+      square_sum = 0.;
+
       if ((type[variable] != REAL_VALUE) && (type[variable] != AUXILIARY)) {
         for (i = 0;i < nb_sequence;i++) {
           for (j = 0;j < length[i];j++) {
             diff = int_sequence[i][variable][j] - mean;
-            variance += diff * diff;
+            square_sum += diff * diff;
           }
         }
       }
@@ -3456,12 +3457,16 @@ double Sequences::variance_computation(int variable , double mean) const
         for (i = 0;i < nb_sequence;i++) {
           for (j = 0;j < length[i];j++) {
             diff = real_sequence[i][variable][j] - mean;
-            variance += diff * diff;
+            square_sum += diff * diff;
           }
         }
       }
 
-      variance /= (cumul_length - 1);
+      variance = square_sum / (cumul_length - 1);
+    }
+
+    else {
+      variance = 0.;
     }
   }
 
@@ -3602,6 +3607,7 @@ double Sequences::skewness_computation(int variable , double mean , double varia
 {
   int i , j;
   double skewness , diff;
+  long double cube_sum;
 
 
   if (marginal_distribution[variable]) {
@@ -3609,14 +3615,14 @@ double Sequences::skewness_computation(int variable , double mean , double varia
   }
 
   else {
-    skewness = 0.;
-
     if ((cumul_length > 2) && (variance > 0.)) {
+      cube_sum = 0.;
+
       if ((type[variable] != REAL_VALUE) && (type[variable] != AUXILIARY)) {
         for (i = 0;i < nb_sequence;i++) {
           for (j = 0;j < length[i];j++) {
             diff = int_sequence[i][variable][j] - mean;
-            skewness += diff * diff * diff;
+            cube_sum += diff * diff * diff;
           }
         }
       }
@@ -3625,13 +3631,17 @@ double Sequences::skewness_computation(int variable , double mean , double varia
         for (i = 0;i < nb_sequence;i++) {
           for (j = 0;j < length[i];j++) {
             diff = real_sequence[i][variable][j] - mean;
-            skewness += diff * diff * diff;
+            cube_sum += diff * diff * diff;
           }
         }
       }
 
-      skewness = skewness * cumul_length / ((cumul_length - 1) *
+      skewness = cube_sum * cumul_length / ((cumul_length - 1) *
                   (double)(cumul_length - 2) * pow(variance , 1.5));
+    }
+
+    else {
+      skewness = 0.;
     }
   }
 
@@ -3657,6 +3667,7 @@ double Sequences::kurtosis_computation(int variable , double mean , double varia
 {
   int i , j;
   double kurtosis , diff;
+  long double power_sum;
 
 
   if (marginal_distribution[variable]) {
@@ -3664,18 +3675,14 @@ double Sequences::kurtosis_computation(int variable , double mean , double varia
   }
 
   else {
-    if (variance == 0.) {
-      kurtosis = -2.;
-    }
-
-    else {
-      kurtosis = 0.;
+    if (variance > 0.) {
+      power_sum = 0.;
 
       if ((type[variable] != REAL_VALUE) && (type[variable] != AUXILIARY)) {
         for (i = 0;i < nb_sequence;i++) {
           for (j = 0;j < length[i];j++) {
             diff = int_sequence[i][variable][j] - mean;
-            kurtosis += diff * diff * diff * diff;
+            power_sum += diff * diff * diff * diff;
           }
         }
       }
@@ -3684,12 +3691,16 @@ double Sequences::kurtosis_computation(int variable , double mean , double varia
         for (i = 0;i < nb_sequence;i++) {
           for (j = 0;j < length[i];j++) {
             diff = real_sequence[i][variable][j] - mean;
-            kurtosis += diff * diff * diff * diff;
+            power_sum += diff * diff * diff * diff;
           }
         }
       }
 
-      kurtosis = kurtosis / ((cumul_length - 1) * variance * variance) - 3.;
+      kurtosis = power_sum / ((cumul_length - 1) * variance * variance) - 3.;
+    }
+
+    else {
+      kurtosis = -2.;
     }
   }
 
@@ -3782,6 +3793,169 @@ double* Sequences::mean_direction_computation(int variable , angle_unit unit) co
   }
 
   return mean_direction;
+}
+
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the root mean square error or the mean absolute error for a variable.
+ *
+ *  \param[in] error       reference on a StatError object,
+ *  \param[in] display     flag for displaying the result,
+ *  \param[in] variable    variable index,
+ *  \param[in] iidentifier sequence identifier,
+ *  \param[in] robust      flag computation of mean absolute error.
+ *
+ *  \return                root mean square error or mean absolute error.
+ */
+/*--------------------------------------------------------------*/
+
+bool Sequences::mean_error_computation(StatError &error , bool display , int variable ,
+                                       int iidentifier , bool robust) const
+
+{
+  bool status = true;
+  int i , j;
+  int index;
+  double mean_error , diff;
+  long double mean_squared_error;
+
+
+  error.init();
+
+  if ((variable < 1) || (variable >= nb_variable)) {
+    status = false;
+    error.update(STAT_error[STATR_VARIABLE_INDEX]);
+  }
+
+  else {
+    variable--;
+
+    if ((type[variable] != INT_VALUE) && (type[variable] != REAL_VALUE)) {
+      status = false;
+      ostringstream correction_message;
+      correction_message << STAT_variable_word[INT_VALUE] << " or " << STAT_variable_word[REAL_VALUE];
+      error.correction_update(STAT_error[STATR_VARIABLE_TYPE] , (correction_message.str()).c_str());
+    }
+
+    if (type[variable + 1] != AUXILIARY) {
+      status = false;
+      ostringstream error_message;
+      error_message << STAT_label[STATL_VARIABLE] << " " << variable + 1 << ": "
+                    << STAT_error[STATR_VARIABLE_TYPE];
+      error.correction_update((error_message.str()).c_str() , STAT_variable_word[AUXILIARY]);
+    }
+  }
+
+  if (iidentifier != I_DEFAULT) {
+    for (i = 0;i < nb_sequence;i++) {
+      if (iidentifier == identifier[i]) {
+        index = i;
+        break;
+      }
+    }
+
+    if (i == nb_sequence) {
+      status = false;
+      error.update(SEQ_error[SEQR_SEQUENCE_IDENTIFIER]);
+    }
+  }
+
+  else {
+    index = I_DEFAULT;
+  }
+
+  if (status) {
+    if (robust) {
+      mean_error = 0.;
+
+      switch (type[variable]) {
+
+      case INT_VALUE : {
+        for (i = 0;i < nb_sequence;i++) {
+          if ((index == I_DEFAULT) || (index == i)) {
+            for (j = 0;j < length[i];j++) {
+              mean_error += fabs(int_sequence[i][variable][j] - real_sequence[i][variable + 1][j]);
+            }
+          }
+        }
+        break;
+      }
+
+      case REAL_VALUE : {
+        for (i = 0;i < nb_sequence;i++) {
+          if ((index == I_DEFAULT) || (index == i)) {
+            for (j = 0;j < length[i];j++) {
+              mean_error += fabs(real_sequence[i][variable][j] - real_sequence[i][variable + 1][j]);
+            }
+          }
+        }
+        break;
+      }
+      }
+
+      if (index == I_DEFAULT) {
+        mean_error /= cumul_length;
+      }
+      else {
+        mean_error /= length[index];
+      }
+    }
+
+    else {
+      mean_squared_error = 0.;
+
+      switch (type[variable]) {
+
+      case INT_VALUE : {
+        for (i = 0;i < nb_sequence;i++) {
+          if ((index == I_DEFAULT) || (index == i)) {
+            for (j = 0;j < length[i];j++) {
+              diff = int_sequence[i][variable][j] - real_sequence[i][variable + 1][j];
+              mean_squared_error += diff * diff;
+            }
+          }
+        }
+        break;
+      }
+
+      case REAL_VALUE : {
+        for (i = 0;i < nb_sequence;i++) {
+          if ((index == I_DEFAULT) || (index == i)) {
+            for (j = 0;j < length[i];j++) {
+              diff = real_sequence[i][variable][j] - real_sequence[i][variable + 1][j];
+              mean_squared_error += diff * diff;
+            }
+          }
+        }
+        break;
+      }
+      }
+
+      if (index == I_DEFAULT) {
+        mean_error = sqrtl(mean_squared_error / cumul_length);
+      }
+      else {
+        mean_error = sqrtl(mean_squared_error / length[index]);
+      }
+    }
+
+    if (display) {
+      cout << "\n";
+      if (((type[0] != STATE) && (nb_variable > 2)) || ((type[0] == STATE) && (nb_variable > 3))) {
+        cout << STAT_label[STATL_VARIABLE] << " " << variable + 1 << "   ";
+      }
+
+      if (robust) {
+        cout << SEQ_label[SEQL_MEAN_ABSOLUTE_ERROR] << ": " << mean_error << endl;
+      }
+      else {
+        cout << SEQ_label[SEQL_ROOT_MEAN_SQUARE_ERROR] << ": " << mean_error << endl;
+      }
+    }
+  }
+
+  return status;
 }
 
 

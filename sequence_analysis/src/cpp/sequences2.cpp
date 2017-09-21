@@ -4613,16 +4613,11 @@ Sequences* Sequences::difference(StatError &error , int variable , bool first_el
     seq = new Sequences(nb_sequence , identifier , ilength , vertex_identifier ,
                         index_param_type , inb_variable , itype , false);
 
-    if (((index_param_type != IMPLICIT_TYPE) && ((index_interval->mean != 1.) ||
-          (index_interval->variance > 0.))) || (variable != I_DEFAULT)) {
-      delete [] itype;
-    }
-
     if (!first_element) {
       delete [] ilength;
     }
-    if ((index_param_type != IMPLICIT_TYPE) && ((index_interval->mean != 1.) ||
-         (index_interval->variance > 0.))) {
+    if (((index_param_type != IMPLICIT_TYPE) && ((index_interval->mean != 1.) ||
+          (index_interval->variance > 0.))) || (variable != I_DEFAULT)) {
       delete [] itype;
     }
 

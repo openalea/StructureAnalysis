@@ -539,26 +539,30 @@ void Reestimation<Type>::variance_computation(bool bias)
 
 {
   if (mean != D_DEFAULT) {
-    variance = 0.;
-
     if (nb_element > 1) {
       int i;
       double diff;
+      long double square_sum;
 
 
+      square_sum = 0.;
       for (i = offset;i < nb_value;i++) {
         diff = i - mean;
-        variance += frequency[i] * diff * diff;
+        square_sum += frequency[i] * diff * diff;
       }
 
       switch (bias) {
       case false :
-        variance /= (nb_element - 1);
+        variance = square_sum / (nb_element - 1);
         break;
       case true :
-        variance /= nb_element;
+        variance = square_sum / nb_element;
         break;
       }
+    }
+
+    else {
+      variance = 0.;
     }
   }
 }
@@ -636,19 +640,22 @@ double Reestimation<Type>::skewness_computation() const
 {
   int i;
   double skewness = D_INF , diff;
+  long double cube_sum;
 
 
   if ((mean != D_DEFAULT) && (variance != D_DEFAULT)) {
-    skewness = 0.;
-
     if ((nb_element > 2) && (variance > 0.)) {
+      cube_sum = 0.;
       for (i = offset;i < nb_value;i++) {
         diff = i - mean;
-        skewness += frequency[i] * diff * diff * diff;
+        cube_sum += frequency[i] * diff * diff * diff;
       }
-
-      skewness = skewness * nb_element /
+      skewness = cube_sum * nb_element /
                  ((nb_element - 1) * (double)(nb_element - 2) * pow(variance , 1.5));
+    }
+
+    else {
+      skewness = 0.;
     }
   }
 
@@ -671,20 +678,21 @@ double Reestimation<Type>::kurtosis_computation() const
 {
   int i;
   double kurtosis = D_INF , diff;
+  long double power_sum;
 
 
   if ((mean != D_DEFAULT) && (variance != D_DEFAULT)) {
-    if (variance == 0.) {
-      kurtosis = -2.;
+    if (variance > 0.) {
+      power_sum = 0.;
+      for (i = offset;i < nb_value;i++) {
+        diff = i - mean;
+        power_sum += frequency[i] * diff * diff * diff * diff;
+      }
+      kurtosis = power_sum / ((nb_element - 1) * variance * variance) - 3.;
     }
 
     else {
-      kurtosis = 0.;
-      for (i = offset;i < nb_value;i++) {
-        diff = i - mean;
-        kurtosis += frequency[i] * diff * diff * diff * diff;
-      }
-      kurtosis = kurtosis / ((nb_element - 1) * variance * variance) - 3.;
+      kurtosis = -2.;
     }
   }
 

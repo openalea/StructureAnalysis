@@ -2731,14 +2731,15 @@ void Distribution::variance_computation()
   if (mean != D_DEFAULT) {
     int i;
     double diff;
+    long double square_sum;
 
 
-    variance = 0.;
+    square_sum = 0.;
     for (i = offset;i < nb_value;i++) {
       diff = i - mean;
-      variance += mass[i] * diff * diff;
+      square_sum += mass[i] * diff * diff;
     }
-    variance /= cumul[nb_value - 1];
+    variance = square_sum / cumul[nb_value - 1];
 
     if (variance < 0.) {
       variance = 0.;
@@ -2787,17 +2788,21 @@ double Distribution::skewness_computation() const
 {
   int i;
   double skewness = D_INF , diff;
+  long double cube_sum;
 
 
   if ((mean != D_DEFAULT) && (variance != D_DEFAULT)) {
-    skewness = 0.;
-
     if (variance > 0.) {
+      cube_sum = 0.;
       for (i = offset;i < nb_value;i++) {
         diff = i - mean;
-        skewness += mass[i] * diff * diff * diff;
+        cube_sum += mass[i] * diff * diff * diff;
       }
-      skewness /= (cumul[nb_value - 1] * pow(variance , 1.5));
+      skewness = cube_sum / (cumul[nb_value - 1] * pow(variance , 1.5));
+    }
+
+    else {
+      skewness = 0.;
     }
   }
 
@@ -2819,20 +2824,21 @@ double Distribution::kurtosis_computation() const
 {
   int i;
   double kurtosis = D_INF , diff;
+  long double power_sum;
 
 
   if ((mean != D_DEFAULT) && (variance != D_DEFAULT)) {
-    if (variance == 0.) {
-      kurtosis = -2.;
+    if (variance > 0.) {
+      power_sum = 0.;
+      for (i = offset;i < nb_value;i++) {
+        diff = i - mean;
+        power_sum += mass[i] * diff * diff * diff * diff;
+      }
+      kurtosis = power_sum / (cumul[nb_value - 1] * variance * variance) - 3.;
     }
 
     else {
-      kurtosis = 0.;
-      for (i = offset;i < nb_value;i++) {
-        diff = i - mean;
-        kurtosis += mass[i] * diff * diff * diff * diff;
-      }
-      kurtosis = kurtosis / (cumul[nb_value - 1] * variance * variance) - 3.;
+      kurtosis = -2.;
     }
   }
 

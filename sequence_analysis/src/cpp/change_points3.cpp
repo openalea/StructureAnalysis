@@ -1229,6 +1229,12 @@ Sequences* Sequences::segmentation(StatError &error , bool display , int iidenti
                          << STAT_variable_word[REAL_VALUE];
       error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
     }
+
+    else if (((model_type[i] == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type[i] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE)) &&
+             (index_param_type != IMPLICIT_TYPE) && (index_interval->variance > 0.)) {
+      status = false;
+      error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
+    }
   }
 
   if (iidentifier != I_DEFAULT) {
@@ -3262,8 +3268,8 @@ double Sequences::forward_backward(int index , int nb_segment , segment_model *m
 {
   int i , j , k , m;
   int seq_length , *inf_bound_parameter , *seq_index_parameter;
-  double sum , buff , rlikelihood , backward_max , *likelihood , **seq_mean , **hyperparam ,
-         **backward_output , ***factorial , ***binomial_coeff , ***smoothed;
+  double sum , buff , rlikelihood , *likelihood , **seq_mean , **hyperparam , **backward_output ,
+         ***factorial , ***binomial_coeff , ***smoothed;
   long double segment_norm , sequence_norm , lbuff , lsum , segmentation_entropy , first_order_entropy ,
               change_point_entropy_sum , marginal_entropy , *contrast , *normalized_contrast ,
               *norm , *forward_norm , *backward_norm , *entropy_smoothed , *segment_predicted ,
@@ -4419,31 +4425,28 @@ double Sequences::forward_backward(int index , int nb_segment , segment_model *m
             *os << SEQ_label[SEQL_CHANGE_POINT] << " " << i << " (";
 
             sum = 0.;
-            backward_max = 0.;
             j = 0;
             while (sum < CHANGE_POINT_UNCERTAINTY_PROBABILITY / 2) {
               j++;
               sum += backward_output[j][i];
-              if (backward_output[j][i] > backward_max) {
-                backward_max = backward_output[j][i];
-              }
             }
             *os << seq_index_parameter[j] << ", ";
 
+#           ifdef MESSAGE
             while (sum <= 1. - CHANGE_POINT_UNCERTAINTY_PROBABILITY / 2) {
               j++;
               sum += backward_output[j][i];
-              if (backward_output[j][i] > backward_max) {
-                backward_max = backward_output[j][i];
-              }
             }
+            *os << seq_index_parameter[j] << " | ";
+#           endif
 
-            if (backward_output[j][i] == backward_max) {
-              *os << seq_index_parameter[j] << ")" << endl;
+            sum = 0.;
+            j = seq_length;
+            while (sum < CHANGE_POINT_UNCERTAINTY_PROBABILITY / 2) {
+              j--;
+              sum += backward_output[j][i];
             }
-            else {
-              *os << seq_index_parameter[j - 1] << ")" << endl;
-            }
+            *os << seq_index_parameter[j] << ")" << endl;
           }
         }
 
