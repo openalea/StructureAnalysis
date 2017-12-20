@@ -170,6 +170,7 @@ const char *SEQ_label[] = {
   "posterior state sequence probability" ,
   "posterior state sequence probability log ratio" ,
   "state begin" ,
+  "posterior most probable initial state probability" ,
   "posterior state probabilities" ,
   "posterior in state probabilities" ,
   "posterior out state probabilities" ,
@@ -386,6 +387,7 @@ const char *SEQ_error[] = {
   "consecutive values from 0" ,
   "non-existing characteristic distribution" ,
   "non-existing forward sojourn time distribution" ,
+  "bad ordering of the posterior probabilities of the most probable state sequence and the most probable initial state" ,
   "incompatible with model" ,
   "sequence incompatible with model" ,
 

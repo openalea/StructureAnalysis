@@ -551,13 +551,11 @@ void Reestimation<Type>::variance_computation(bool bias)
         square_sum += frequency[i] * diff * diff;
       }
 
-      switch (bias) {
-      case false :
-        variance = square_sum / (nb_element - 1);
-        break;
-      case true :
+      if (bias) {
         variance = square_sum / nb_element;
-        break;
+      }
+      else {
+        variance = square_sum / (nb_element - 1);
       }
     }
 
@@ -1916,7 +1914,7 @@ void Reestimation<Type>::gamma_estimation(ContinuousParametric *dist , int iter)
       // Hawang & Huang (2012), Ann. Inst. Statist. Math. 54(4), 840-847
 
       buff = mean * mean / variance;
-      if (buff >  GAMMA_INVERSE_SAMPLE_SIZE_FACTOR / (double)nb_element) {
+      if (buff > GAMMA_INVERSE_SAMPLE_SIZE_FACTOR / (double)nb_element) {
         dist->shape = buff - 1. / (double)nb_element;
       }
       else {
@@ -2021,7 +2019,7 @@ void Reestimation<Type>::zero_inflated_gamma_estimation(ContinuousParametric *di
       // Hawang & Huang (2012), Ann. Inst. Statist. Math. 54(4), 840-847
 
       buff = bmean * bmean / bvariance;
-      if (buff >  GAMMA_INVERSE_SAMPLE_SIZE_FACTOR / (double)(nb_element - frequency[0])) {
+      if (buff > GAMMA_INVERSE_SAMPLE_SIZE_FACTOR / (double)(nb_element - frequency[0])) {
         dist->shape = buff - 1. / (double)(nb_element - frequency[0]);
       }
       else {

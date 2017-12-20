@@ -116,6 +116,8 @@ namespace stat_tool {
 
     Mixture();
     Mixture(int inb_component , int inb_output_process , int *nb_value);
+    Mixture(int inb_component , double offset , double mean , double standard_deviation ,
+            bool common_dispersion);
     Mixture(int inb_component , int ident , double mean , double standard_deviation ,
             bool tied_mean , tying_rule variance_factor);
     Mixture(const Mixture &mixt , bool data_flag = true)

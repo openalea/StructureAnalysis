@@ -821,7 +821,12 @@ Mixture* Vectors::mixture_estimation(StatError &error , bool display , const Mix
             }
 
             else {
-              if (variance_factor != INDEPENDENT) {
+              if (mixt->continuous_parametric_process[i]->offset > 0.) {
+                tied_gaussian_estimation(component_vector_count , i ,
+                                         mixt->continuous_parametric_process[i]);
+              }
+
+              else if (variance_factor != INDEPENDENT) {
                 switch (mixt->continuous_parametric_process[i]->ident) {
                 case GAMMA :
                   tied_gamma_estimation(component_vector_count , i ,
@@ -1068,6 +1073,52 @@ Mixture* Vectors::mixture_estimation(StatError &error , bool display , const Mix
 
 /*--------------------------------------------------------------*/
 /**
+ *  \brief Estimation of a mixture of univariate Gaussian distributions with
+ *         evenly spaced means using the EM algorithm.
+ *
+ *  \param[in] error              reference on a StatError object,
+ *  \param[in] display            flag for displaying estimation intermediate results,
+ *  \param[in] nb_component       number of components,
+ *  \param[in] offset             mixture offset,
+ *  \param[in] mean               mean - offset of the 1st component,
+ *  \param[in] standard_deviation standard deviation,
+ *  \param[in] common_dispersion  common dispersion parameter,
+ *  \param[in] assignment         flag on the computation of the optimal assignments,
+ *  \param[in] nb_iter            number of iterations.
+ *
+ *  \return                       Mixture object.
+ */
+/*--------------------------------------------------------------*/
+
+Mixture* Vectors::mixture_estimation(StatError &error , bool display , int nb_component ,
+                                     double offset , double mean , double standard_deviation ,
+                                     bool common_dispersion , bool assignment , int nb_iter) const
+
+{
+  int i , j;
+  Mixture *imixt , *mixt;
+
+
+  error.init();
+
+  if ((nb_component < 2) || (nb_component > MIXTURE_NB_COMPONENT)) {
+    mixt = NULL;
+    error.update(STAT_error[STATR_NB_DISTRIBUTION]);
+  }
+
+  else {
+    imixt = new Mixture(nb_component , offset , mean , standard_deviation , common_dispersion);
+
+    mixt = mixture_estimation(error , display , *imixt , false , common_dispersion ,
+                              INDEPENDENT , assignment , nb_iter);
+  }
+
+  return mixt;
+}
+
+
+/*--------------------------------------------------------------*/
+/**
  *  \brief Estimation of a mixture of univariate gamma, inverse Gaussian or
  *         Gaussian distributions with tied parameters using the EM algorithm.
  *
@@ -1106,6 +1157,10 @@ Mixture* Vectors::mixture_estimation(StatError &error , bool display , int nb_co
 
   else {
     imixt = new Mixture(nb_component , ident , mean , standard_deviation , tied_mean , variance_factor);
+
+#   ifdef MESSAGE
+    cout << *mixt;
+#   endif
 
     mixt = mixture_estimation(error , display , *imixt , false , false ,
                               variance_factor , assignment , nb_iter);
@@ -1590,7 +1645,12 @@ Mixture* Vectors::mixture_stochastic_estimation(StatError &error , bool display 
             }
 
             else {
-              if (variance_factor != INDEPENDENT) {
+              if (mixt->continuous_parametric_process[i]->offset > 0.) {
+                tied_gaussian_estimation(component_vector_count , i ,
+                                         mixt->continuous_parametric_process[i]);
+              }
+
+              else if (variance_factor != INDEPENDENT) {
                 switch (mixt->continuous_parametric_process[i]->ident) {
                 case GAMMA :
                   tied_gamma_estimation(component_vector_count , i ,
@@ -1823,6 +1883,57 @@ Mixture* Vectors::mixture_stochastic_estimation(StatError &error , bool display 
         }
       }
     }
+  }
+
+  return mixt;
+}
+
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Estimation of a mixture of univariate Gaussian distributions with
+ *         evenly spaced means using the MCEM algorithm.
+ *
+ *  \param[in] error              reference on a StatError object,
+ *  \param[in] display            flag for displaying estimation intermediate results,
+ *  \param[in] nb_component       number of components,
+ *  \param[in] offset             mixture offset,
+ *  \param[in] mean               mean - offset of the 1st component,
+ *  \param[in] standard_deviation standard deviation,
+ *  \param[in] common_dispersion  common dispersion parameter,
+ *  \param[in] min_nb_assignment  minimum number of assignments of generated individuals,
+ *  \param[in] max_nb_assignment  maximum number of assignments of generated individuals,
+ *  \param[in] parameter          parameter for the assignments of the generated individuals,
+ *  \param[in] assignment         flag on the computation of the optimal assignments,
+ *  \param[in] nb_iter            number of iterations.
+ *
+ *  \return                       Mixture object.
+ */
+/*--------------------------------------------------------------*/
+
+Mixture* Vectors::mixture_stochastic_estimation(StatError &error , bool display , int nb_component ,
+                                                double offset , double mean , double standard_deviation ,
+                                                bool common_dispersion , int min_nb_assignment , int max_nb_assignment ,
+                                                double parameter , bool assignment , int nb_iter) const
+
+{
+  int i , j;
+  Mixture *imixt , *mixt;
+
+
+  error.init();
+
+  if ((nb_component < 2) || (nb_component > MIXTURE_NB_COMPONENT)) {
+    mixt = NULL;
+    error.update(STAT_error[STATR_NB_DISTRIBUTION]);
+  }
+
+  else {
+    imixt = new Mixture(nb_component , offset , mean , standard_deviation , common_dispersion);
+
+    mixt = mixture_stochastic_estimation(error , display , *imixt , false , common_dispersion , INDEPENDENT ,
+                                         min_nb_assignment , max_nb_assignment , parameter ,
+                                         assignment , nb_iter);
   }
 
   return mixt;

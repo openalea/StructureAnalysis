@@ -2902,6 +2902,13 @@ Sequences* Sequences::segmentation(StatError &error , bool display , int iidenti
       status = false;
       error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
     }
+
+    if (((model_type[i] == CATEGORICAL_CHANGE) || (model_type[i] == ORDINAL_GAUSSIAN_CHANGE) ||
+         (model_type[i] == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type[i] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE)) &&
+        (output == SEQUENCE_SAMPLE)) {
+      status = false;
+      error.update(SEQ_error[SEQR_FORBIDDEN_OUTPUT]);
+    }
   }
 
   if (iidentifier != I_DEFAULT) {
@@ -2924,6 +2931,11 @@ Sequences* Sequences::segmentation(StatError &error , bool display , int iidenti
       status = false;
       error.update(SEQ_error[SEQR_VARIABLE_SEQUENCE_LENGTH]);
     }
+  }
+
+  if (((index != I_DEFAULT) || (!common_contrast)) && (output == SEQUENCE_SAMPLE)) {
+    status = false;
+    error.update(SEQ_error[SEQR_FORBIDDEN_OUTPUT]);
   }
 
   if ((status) && ((nb_segment < 1) || (nb_segment > length[index == I_DEFAULT ? 0 : index] / 2))) {

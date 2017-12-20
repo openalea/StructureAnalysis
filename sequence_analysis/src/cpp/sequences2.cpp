@@ -1076,7 +1076,7 @@ void Sequences::transcode(const Sequences &seq , int ivariable , int min_categor
 
         else {
           for (k = 0;k < length[i];k++) {
-            int_sequence[i][j][k] =  seq.int_sequence[i][j - offset][k];
+            int_sequence[i][j][k] = seq.int_sequence[i][j - offset][k];
           }
         }
       }
@@ -2557,6 +2557,261 @@ Sequences* Sequences::select_variable(StatError &error , int inb_variable ,
 
 {
   return select_variable(error , inb_variable , ivariable.data() , keep);
+}
+
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Summation of variables.
+ *
+ *  \param[in] error              reference on a StatError object,
+ *  \param[in] nb_summed_variable number of variables to be summed,
+ *  \param[in] variable           variable indices.
+ *
+ *  \return                       Sequences object.
+ */
+/*--------------------------------------------------------------*/
+
+Sequences* Sequences::sum_variable(StatError &error , int nb_summed_variable , int *ivariable) const
+
+{
+  bool status = true , *selected_variable;
+  int i , j , k , m , n;
+  int inb_variable , *copied_variable , *summed_variable;
+  variable_nature *itype;
+  Sequences *seq;
+
+
+  seq = NULL;
+  error.init();
+
+  if (nb_variable == 1) {
+    status = false;
+    error.update(STAT_error[STATR_NB_VARIABLE]);
+  }
+
+  if ((nb_summed_variable < 2) || (nb_summed_variable > nb_variable)) {
+    status = false;
+    error.update(STAT_error[STATR_NB_SUMMED_VARIABLE]);
+  }
+
+  else {
+    selected_variable = new bool[nb_variable + 1];
+    for (i = 1;i <= nb_variable;i++) {
+      selected_variable[i] = false;
+    }
+
+    for (i = 0;i < nb_summed_variable;i++) {
+      if ((ivariable[i] < 1) || (ivariable[i] > nb_variable)) {
+        status = false;
+        ostringstream error_message;
+        error_message << ivariable[i] << ": " << STAT_error[STATR_VARIABLE_INDEX];
+        error.update((error_message.str()).c_str());
+      }
+
+      else {
+        if (selected_variable[ivariable[i]]) {
+          status = false;
+          ostringstream error_message;
+          error_message << STAT_label[STATL_VARIABLE] << " " << ivariable[i] << " "
+                        << STAT_error[STATR_ALREADY_SELECTED];
+          error.update((error_message.str()).c_str());
+        }
+
+        else {
+          selected_variable[ivariable[i]] = true;
+
+          if ((type[ivariable[i] - 1] != INT_VALUE) && (type[ivariable[i] - 1] != REAL_VALUE)) {
+            status = false;
+            ostringstream error_message , correction_message;
+            error_message << STAT_label[STATL_VARIABLE] << " " << ivariable[i] << ": "
+                          << STAT_error[STATR_VARIABLE_TYPE];
+            correction_message << STAT_variable_word[INT_VALUE] << " or "
+                               << STAT_variable_word[REAL_VALUE];
+            error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
+          }
+
+          else if ((ivariable[i] < nb_variable) && (type[ivariable[i]] == AUXILIARY)) {
+            status = false;
+            ostringstream error_message;
+            error_message << STAT_label[STATL_VARIABLE] << " " << ivariable[i] + 1 << ": "
+                          << STAT_error[STATR_VARIABLE_TYPE];
+            error.update((error_message.str()).c_str());
+          }
+        }
+      }
+    }
+
+    delete [] selected_variable;
+  }
+
+  if (status) {
+    inb_variable = nb_variable - nb_summed_variable + 1;
+    for (i = 0;i < nb_summed_variable;i++) {
+      ivariable[i]--;
+    }
+
+    summed_variable = new int[nb_summed_variable];
+    copied_variable = new int[nb_variable - nb_summed_variable];
+    i = 0;
+    j = 0;
+    for (k = 0;k < nb_variable;k++) {
+      for (m = 0;m < nb_summed_variable;m++) {
+        if (ivariable[m] == k) {
+          summed_variable[i++] = k;
+          break;
+        }
+      }
+      if (m == nb_summed_variable) {
+        copied_variable[j++] = k;
+      }
+    }
+
+    itype = new variable_nature[inb_variable];
+    i = 0;
+    for (j = 0;j < inb_variable;j++) {
+      if (j == summed_variable[0]) {
+        itype[j] = type[j];
+        for (k = 1;k < nb_summed_variable;k++) {
+          if (type[summed_variable[k]] == REAL_VALUE) {
+           itype[j] = REAL_VALUE;
+          }
+        }
+      }
+      else {
+        itype[j] = type[copied_variable[i++]];
+      }
+    }
+
+    seq = new Sequences(nb_sequence , identifier , length , vertex_identifier ,
+                        index_param_type , inb_variable , itype);
+    delete [] itype;
+
+    // copy of index parameters
+
+    if (index_parameter_distribution) {
+      seq->index_parameter_distribution = new FrequencyDistribution(*(index_parameter_distribution));
+    }
+    if (index_interval) {
+      seq->index_interval = new FrequencyDistribution(*(index_interval));
+    }
+
+    if (index_parameter) {
+      for (i = 0;i < nb_sequence;i++) {
+        for (j = 0;j < (index_param_type == POSITION ? length[i] + 1 : length[i]);j++) {
+          seq->index_parameter[i][j] = index_parameter[i][j];
+        }
+      }
+    }
+
+    for (i = 0;i < nb_sequence;i++) {
+      for (j = 0;j < length[i];j++) {
+        k = 0;
+        for (m = 0;m < inb_variable;m++) {
+
+          // summation of values
+
+          if (m == summed_variable[0]) {
+            switch (seq->type[m]) {
+
+            case INT_VALUE : {
+              seq->int_sequence[i][m][j] = 0.;
+
+              for (n = 0;n < nb_summed_variable;n++) {
+                switch (type[summed_variable[n]]) {
+                case INT_VALUE :
+                  seq->int_sequence[i][m][j] += int_sequence[i][summed_variable[n]][j];
+                  break;
+                case REAL_VALUE :
+                  seq->int_sequence[i][m][j] += real_sequence[i][summed_variable[n]][j];
+                  break;
+                }
+              }
+              break;
+            }
+
+            case REAL_VALUE : {
+              seq->real_sequence[i][m][j] = 0.;
+
+              for (n = 0;n < nb_summed_variable;n++) {
+                switch (type[summed_variable[n]]) {
+                case INT_VALUE :
+                  seq->real_sequence[i][m][j] += int_sequence[i][summed_variable[n]][j];
+                  break;
+                case REAL_VALUE :
+                  seq->real_sequence[i][m][j] += real_sequence[i][summed_variable[n]][j];
+                  break;
+                }
+              }
+              break;
+            }
+            }
+          }
+
+          // copy of values
+
+          else {
+            switch (seq->type[m]) {
+            case INT_VALUE :
+              seq->int_sequence[i][m][j] = int_sequence[i][copied_variable[k++]][j];
+              break;
+            case REAL_VALUE :
+              seq->real_sequence[i][m][j] = real_sequence[i][copied_variable[k++]][j];
+              break;
+            }
+          }
+        }
+      }
+    }
+
+    i = 0;
+    for (j = 0;j < inb_variable;j++) {
+      if (j == summed_variable[0]) {
+        seq->min_value_computation(j);
+        seq->max_value_computation(j);
+
+        seq->build_marginal_frequency_distribution(j);
+      }
+
+      else {
+        seq->min_value[j] = min_value[copied_variable[i]];
+        seq->max_value[j] = max_value[copied_variable[i]];
+
+        if (marginal_distribution[copied_variable[i]]) {
+          seq->marginal_distribution[j] = new FrequencyDistribution(*(marginal_distribution[copied_variable[i]]));
+        }
+        if (marginal_histogram[copied_variable[i]]) {
+          seq->marginal_histogram[j] = new Histogram(*(marginal_histogram[copied_variable[i]]));
+        }
+        i++;
+      }
+    }
+
+    delete [] summed_variable;
+    delete [] copied_variable;
+  }
+
+  return seq;
+}
+
+
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Summation of variables.
+ *
+ *  \param[in] error              reference on a StatError object,
+ *  \param[in] nb_summed_variable number of variables to be summed,
+ *  \param[in] variable           variable indices.
+ *
+ *  \return                       Vectors object.
+ */
+/*--------------------------------------------------------------*/
+
+Sequences* Sequences::sum_variable(StatError &error , int nb_summed_variable , vector<int> ivariable) const
+
+{
+  return sum_variable(error , nb_summed_variable , ivariable.data());
 }
 
 
@@ -4310,7 +4565,7 @@ Sequences* Sequences::segmentation_extract(StatError &error , int variable ,
           global_variance /= (seq->cumul_length - 1);
 
           cout << "\n" << STAT_label[STATL_VARIABLE] << " " << i + 1 << " - "
-               << "average difference: " <<  average_diff << " | "
+               << "average difference: " << average_diff << " | "
                << "within-individual variance: " << individual_variance << " | "
                << "global variance: " << global_variance << " | "
                << individual_variance / global_variance;
@@ -4815,13 +5070,14 @@ Sequences* Sequences::difference(StatError &error , int variable , bool first_el
  *  \brief Log-transform of values.
  *
  *  \param[in] error    reference on a StatError object,
- *  \param[in] variable variable index.
+ *  \param[in] variable variable index,
+ *  \param[in] base     base of the logarithm.
  *
  *  \return             Sequences object.
  */
 /*--------------------------------------------------------------*/
 
-Sequences* Sequences::log_transform(StatError &error , int variable) const
+Sequences* Sequences::log_transform(StatError &error , int variable , log_base base) const
 
 {
   bool status = true;
@@ -4895,7 +5151,6 @@ Sequences* Sequences::log_transform(StatError &error , int variable) const
 
     seq = new Sequences(nb_sequence , identifier , length , vertex_identifier ,
                         index_param_type , inb_variable , itype);
-
     delete [] itype;
 
     // copy of index parameters
@@ -4932,25 +5187,79 @@ Sequences* Sequences::log_transform(StatError &error , int variable) const
 
     // log-transform of values
 
-    for (i = 0;i < nb_sequence;i++) {
-      j = offset;
-      for (k = offset;k < nb_variable;k++) {
-        if ((variable == I_DEFAULT) || (variable == k)) {
-          if (type[k] != REAL_VALUE) {
-            for (m = 0;m < length[i];m++) {
-              seq->real_sequence[i][j][m] = log(int_sequence[i][k][m]);
-            }
-          }
+    switch (base) {
 
-          else {
-            for (m = 0;m < length[i];m++) {
-              seq->real_sequence[i][j][m] = log(real_sequence[i][k][m]);
+    case NATURAL : {
+      for (i = 0;i < nb_sequence;i++) {
+        j = offset;
+        for (k = offset;k < nb_variable;k++) {
+          if ((variable == I_DEFAULT) || (variable == k)) {
+            if (type[k] != REAL_VALUE) {
+              for (m = 0;m < length[i];m++) {
+                seq->real_sequence[i][j][m] = log(int_sequence[i][k][m]);
+              }
             }
-          }
 
-          j++;
+            else {
+              for (m = 0;m < length[i];m++) {
+                seq->real_sequence[i][j][m] = log(real_sequence[i][k][m]);
+              }
+            }
+
+            j++;
+          }
         }
       }
+      break;
+    }
+
+    case TWO : {
+      for (i = 0;i < nb_sequence;i++) {
+        j = offset;
+        for (k = offset;k < nb_variable;k++) {
+          if ((variable == I_DEFAULT) || (variable == k)) {
+            if (type[k] != REAL_VALUE) {
+              for (m = 0;m < length[i];m++) {
+                seq->real_sequence[i][j][m] = log2(int_sequence[i][k][m]);
+              }
+            }
+
+            else {
+              for (m = 0;m < length[i];m++) {
+                seq->real_sequence[i][j][m] = log2(real_sequence[i][k][m]);
+              }
+            }
+
+            j++;
+          }
+        }
+      }
+      break;
+    }
+
+    case TEN : {
+      for (i = 0;i < nb_sequence;i++) {
+        j = offset;
+        for (k = offset;k < nb_variable;k++) {
+          if ((variable == I_DEFAULT) || (variable == k)) {
+            if (type[k] != REAL_VALUE) {
+              for (m = 0;m < length[i];m++) {
+                seq->real_sequence[i][j][m] = log10(int_sequence[i][k][m]);
+              }
+            }
+
+            else {
+              for (m = 0;m < length[i];m++) {
+                seq->real_sequence[i][j][m] = log10(real_sequence[i][k][m]);
+              }
+            }
+
+            j++;
+          }
+        }
+      }
+      break;
+    }
     }
 
     for (i = offset;i < seq->nb_variable;i++) {
@@ -5217,7 +5526,7 @@ Sequences* Sequences::sequence_normalization(StatError &error , int variable) co
   }
 
   if (variable != I_DEFAULT) {
-    if ((variable <  offset + 1) || (variable > nb_variable)) {
+    if ((variable < offset + 1) || (variable > nb_variable)) {
       status = false;
       error.update(STAT_error[STATR_VARIABLE_INDEX]);
     }
@@ -5311,7 +5620,7 @@ Sequences* Sequences::sequence_normalization(StatError &error , int variable) co
           if (type[j] != REAL_VALUE) {
             int_max = int_sequence[i][j][0];
             for (k = 1;k < length[i];k++) {
-              if (int_sequence[i][j][k] >  int_max) {
+              if (int_sequence[i][j][k] > int_max) {
                 int_max = int_sequence[i][j][k];
               }
             }
@@ -5324,7 +5633,7 @@ Sequences* Sequences::sequence_normalization(StatError &error , int variable) co
           else {
             real_max = real_sequence[i][j][0];
             for (k = 1;k < length[i];k++) {
-              if (real_sequence[i][j][k] >  real_max) {
+              if (real_sequence[i][j][k] > real_max) {
                 real_max = real_sequence[i][j][k];
               }
             }

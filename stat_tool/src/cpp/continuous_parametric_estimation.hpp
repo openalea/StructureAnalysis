@@ -78,18 +78,19 @@ void Vectors::gamma_estimation(Type **component_vector_count , int variable ,
 
 {
   int i , j;
-  double buff , diff , log_geometric_mean , *zero_mass , *mean , *variance;
+  double buff , diff , log_geometric_mean , *zero_mass , *bmean;
+  long double *variance;
   Type *component_frequency;
 
 
   component_frequency = new Type[process->nb_state];
   zero_mass = new double[process->nb_state];
-  mean = new double[process->nb_state];
-  variance = new double[process->nb_state];
+  bmean = new double[process->nb_state];
+  variance = new long double[process->nb_state];
 
   for (i = 0;i < process->nb_state;i++) {
     zero_mass[i] = 0.;
-    mean[i] = 0.;
+    bmean[i] = 0.;
     component_frequency[i] = 0;
   }
 
@@ -102,7 +103,7 @@ void Vectors::gamma_estimation(Type **component_vector_count , int variable ,
           zero_mass[j] += component_vector_count[i][j];
         }
         else {
-          mean[j] += component_vector_count[i][j] * int_vector[i][variable];
+          bmean[j] += component_vector_count[i][j] * int_vector[i][variable];
         }
         component_frequency[j] += component_vector_count[i][j];
       }
@@ -117,7 +118,7 @@ void Vectors::gamma_estimation(Type **component_vector_count , int variable ,
           zero_mass[j] += component_vector_count[i][j];
         }
         else {
-          mean[j] += component_vector_count[i][j] * real_vector[i][variable];
+          bmean[j] += component_vector_count[i][j] * real_vector[i][variable];
         }
         component_frequency[j] += component_vector_count[i][j];
       }
@@ -128,7 +129,7 @@ void Vectors::gamma_estimation(Type **component_vector_count , int variable ,
 
   for (i = 0;i < process->nb_state;i++) {
     if (component_frequency[i] > 0) {
-      mean[i] /= component_frequency[i];
+      bmean[i] /= component_frequency[i];
     }
     variance[i] = 0.;
   }
@@ -138,7 +139,7 @@ void Vectors::gamma_estimation(Type **component_vector_count , int variable ,
   case INT_VALUE : {
     for (i = 0;i < nb_vector;i++) {
       for (j = 0;j < process->nb_state;j++) {
-        diff = int_vector[i][variable] - mean[j];
+        diff = int_vector[i][variable] - bmean[j];
         variance[j] += component_vector_count[i][j] * diff * diff;
       }
     }
@@ -148,7 +149,7 @@ void Vectors::gamma_estimation(Type **component_vector_count , int variable ,
   case REAL_VALUE : {
     for (i = 0;i < nb_vector;i++) {
       for (j = 0;j < process->nb_state;j++) {
-        diff = real_vector[i][variable] - mean[j];
+        diff = real_vector[i][variable] - bmean[j];
         variance[j] += component_vector_count[i][j] * diff * diff;
       }
     }
@@ -183,16 +184,16 @@ void Vectors::gamma_estimation(Type **component_vector_count , int variable ,
 
       else {
         if (variance[i] > 0.) {
-/*          if (sqrt(variance[i]) < mean[i] * GAMMA_VARIATION_COEFF_THRESHOLD) {
-            variance[i] = mean[i] * mean[i] * GAMMA_VARIATION_COEFF_THRESHOLD * GAMMA_VARIATION_COEFF_THRESHOLD;
+/*          if (sqrtl(variance[i]) < bmean[i] * GAMMA_VARIATION_COEFF_THRESHOLD) {
+            variance[i] = bmean[i] * bmean[i] * GAMMA_VARIATION_COEFF_THRESHOLD * GAMMA_VARIATION_COEFF_THRESHOLD;
           }
-          process->observation[i]->shape = mean[i] * mean[i] / variance[i];
-          process->observation[i]->scale = variance[i] / mean[i]; */
+          process->observation[i]->shape = bmean[i] * bmean[i] / variance[i];
+          process->observation[i]->scale = variance[i] / bmean[i]; */
 
           // Hawang & Huang (2012), Ann. Inst. Statist. Math. 54(4), 840-847
 
-          buff = mean[i] * mean[i] / variance[i];
-          if (buff >  GAMMA_INVERSE_SAMPLE_SIZE_FACTOR / (double)component_frequency[i]) {
+          buff = bmean[i] * bmean[i] / variance[i];
+          if (buff > GAMMA_INVERSE_SAMPLE_SIZE_FACTOR / (double)component_frequency[i]) {
             process->observation[i]->shape = buff - 1. / (double)component_frequency[i];
           }
           else {
@@ -201,10 +202,10 @@ void Vectors::gamma_estimation(Type **component_vector_count , int variable ,
 /*          if (process->observation[i]->shape < GAMMA_MIN_SHAPE_PARAMETER) {
             process->observation[i]->shape = GAMMA_MIN_SHAPE_PARAMETER;
           } */
-          process->observation[i]->scale = mean[i] / process->observation[i]->shape;
+          process->observation[i]->scale = bmean[i] / process->observation[i]->shape;
 
 #         ifdef MESSAGE
-          if (buff <=  GAMMA_INVERSE_SAMPLE_SIZE_FACTOR / (double)component_frequency[i]) {
+          if (buff <= GAMMA_INVERSE_SAMPLE_SIZE_FACTOR / (double)component_frequency[i]) {
             cout << "\n" << STAT_word[STATW_COMPONENT] << " " << i << "   "
                  << STAT_word[STATW_SHAPE] << " : " << process->observation[i]->shape << "   "
                  << STAT_word[STATW_SCALE] << " : " << process->observation[i]->scale << " |  ";
@@ -253,7 +254,7 @@ void Vectors::gamma_estimation(Type **component_vector_count , int variable ,
 
             do {
               process->observation[i]->scale = exp(log_geometric_mean - digamma(process->observation[i]->shape));
-              process->observation[i]->shape = mean[i] / process->observation[i]->scale;
+              process->observation[i]->shape = bmean[i] / process->observation[i]->scale;
               j++;
 
 #             ifdef DEBUG
@@ -266,10 +267,10 @@ void Vectors::gamma_estimation(Type **component_vector_count , int variable ,
 
             // approximations Johnson, Kotz & Balakrishnan, Continuous Univariate Distributions, vol. 1, 2nd ed., pp. 361-362
 
-//            process->observation[i]->shape = mean[i] / (2 * (mean[i] - exp(log_geometric_mean))) - 1./12.;
-            diff = log(mean[i]) - log_geometric_mean;
+//            process->observation[i]->shape = bmean[i] / (2 * (bmean[i] - exp(log_geometric_mean))) - 1./12.;
+            diff = log(bmean[i]) - log_geometric_mean;
             process->observation[i]->shape = (1 + sqrt(1 + 4 * diff / 3)) / (4 * diff);
-            process->observation[i]->scale = mean[i] / process->observation[i]->shape;
+            process->observation[i]->scale = bmean[i] / process->observation[i]->shape;
 
 #           ifdef DEBUG
             cout << " | " << STAT_word[STATW_SHAPE] << " : " << process->observation[i]->shape << "   "
@@ -294,7 +295,7 @@ void Vectors::gamma_estimation(Type **component_vector_count , int variable ,
 
   delete [] component_frequency;
   delete [] zero_mass;
-  delete [] mean;
+  delete [] bmean;
   delete [] variance;
 }
 
@@ -319,88 +320,17 @@ void Vectors::tied_gamma_estimation(Type **component_vector_count , int variable
 
 {
   int i , j;
-  double buff , diff , variance , log_geometric_mean , *mean , *factor;
+  double buff , diff , log_geometric_mean , *bmean , *factor;
+  long double variance;
   Type *component_frequency;
 
 
   component_frequency = new Type[process->nb_state];
-  mean = new double[process->nb_state];
+  bmean = new double[process->nb_state];
   factor = new double[process->nb_state];
 
-  switch (process->tied_location) {
-
-  case false : {
-    for (i = 0;i < process->nb_state;i++) {
-      mean[i] = 0.;
-      component_frequency[i] = 0;
-    }
-
-    switch (type[variable]) {
-
-    case INT_VALUE : {
-      for (i = 0;i < nb_vector;i++) {
-        for (j = 0;j < process->nb_state;j++) {
-          mean[j] += component_vector_count[i][j] * int_vector[i][variable];
-          component_frequency[j] += component_vector_count[i][j];
-        }
-      }
-      break;
-    }
-
-    case REAL_VALUE : {
-      for (i = 0;i < nb_vector;i++) {
-        for (j = 0;j < process->nb_state;j++) {
-          mean[j] += component_vector_count[i][j] * real_vector[i][variable];
-          component_frequency[j] += component_vector_count[i][j];
-        }
-      }
-      break;
-    }
-    }
-
-    for (i = 0;i < process->nb_state;i++) {
-      if (component_frequency[i] > 0) {
-        mean[i] /= component_frequency[i];
-      }
-    }
-
-    switch (variance_factor) {
-
-    case CONVOLUTION_FACTOR : {
-      factor[0] = 1.;
-      for (i = 1;i < process->nb_state;i++) {
-        if (component_frequency[i] > 0) {
-          factor[i] = mean[i] / mean[0];
-        }
-        else {
-          factor[i] = 1.;
-        }
-      }
-      break;
-    }
-
-    case SCALING_FACTOR : {
-      factor[0] = 1.;
-      for (i = 1;i < process->nb_state;i++) {
-        if (component_frequency[i] > 0) {
-          factor[i] = (mean[i] * mean[i]) / (mean[0] * mean[0]);
-        }
-        else {
-          factor[i] = 1.;
-        }
-      }
-      break;
-    }
-    }
-
-    for (i = 1;i < process->nb_state;i++) {
-      component_frequency[0] += component_frequency[i];
-    }
-    break;
-  }
-
-  case true : {
-    mean[0] = 0.;
+  if (process->tied_location) {
+    bmean[0] = 0.;
     component_frequency[0] = 0.;
 
     factor[0] = 1.;
@@ -413,7 +343,7 @@ void Vectors::tied_gamma_estimation(Type **component_vector_count , int variable
     case INT_VALUE : {
       for (i = 0;i < nb_vector;i++) {
         for (j = 0;j < process->nb_state;j++) {
-          mean[0] += component_vector_count[i][j] * int_vector[i][variable] / factor[j];
+          bmean[0] += component_vector_count[i][j] * int_vector[i][variable] / factor[j];
           component_frequency[0] += component_vector_count[i][j];
         }
       }
@@ -423,7 +353,7 @@ void Vectors::tied_gamma_estimation(Type **component_vector_count , int variable
     case REAL_VALUE : {
       for (i = 0;i < nb_vector;i++) {
         for (j = 0;j < process->nb_state;j++) {
-          mean[0] += component_vector_count[i][j] * real_vector[i][variable] / factor[j];
+          bmean[0] += component_vector_count[i][j] * real_vector[i][variable] / factor[j];
           component_frequency[0] += component_vector_count[i][j];
         }
       }
@@ -431,9 +361,9 @@ void Vectors::tied_gamma_estimation(Type **component_vector_count , int variable
     }
     }
 
-    mean[0] /= component_frequency[0];
+    bmean[0] /= component_frequency[0];
     for (i = 1;i < process->nb_state;i++) {
-      mean[i] = mean[0] * factor[i];
+      bmean[i] = bmean[0] * factor[i];
     }
 
     if (variance_factor == SCALING_FACTOR) {
@@ -442,8 +372,75 @@ void Vectors::tied_gamma_estimation(Type **component_vector_count , int variable
 //        factor[i] = factor[i - 1] * 4;
       }
     }
-    break;
   }
+
+  else {
+    for (i = 0;i < process->nb_state;i++) {
+      bmean[i] = 0.;
+      component_frequency[i] = 0;
+    }
+
+    switch (type[variable]) {
+
+    case INT_VALUE : {
+      for (i = 0;i < nb_vector;i++) {
+        for (j = 0;j < process->nb_state;j++) {
+          bmean[j] += component_vector_count[i][j] * int_vector[i][variable];
+          component_frequency[j] += component_vector_count[i][j];
+        }
+      }
+      break;
+    }
+
+    case REAL_VALUE : {
+      for (i = 0;i < nb_vector;i++) {
+        for (j = 0;j < process->nb_state;j++) {
+          bmean[j] += component_vector_count[i][j] * real_vector[i][variable];
+          component_frequency[j] += component_vector_count[i][j];
+        }
+      }
+      break;
+    }
+    }
+
+    for (i = 0;i < process->nb_state;i++) {
+      if (component_frequency[i] > 0) {
+        bmean[i] /= component_frequency[i];
+      }
+    }
+
+    switch (variance_factor) {
+
+    case CONVOLUTION_FACTOR : {
+      factor[0] = 1.;
+      for (i = 1;i < process->nb_state;i++) {
+        if (component_frequency[i] > 0) {
+          factor[i] = bmean[i] / bmean[0];
+        }
+        else {
+          factor[i] = 1.;
+        }
+      }
+      break;
+    }
+
+    case SCALING_FACTOR : {
+      factor[0] = 1.;
+      for (i = 1;i < process->nb_state;i++) {
+        if (component_frequency[i] > 0) {
+          factor[i] = (bmean[i] * bmean[i]) / (bmean[0] * bmean[0]);
+        }
+        else {
+          factor[i] = 1.;
+        }
+      }
+      break;
+    }
+    }
+
+    for (i = 1;i < process->nb_state;i++) {
+      component_frequency[0] += component_frequency[i];
+    }
   }
 
   variance = 0.;
@@ -453,7 +450,7 @@ void Vectors::tied_gamma_estimation(Type **component_vector_count , int variable
   case INT_VALUE : {
     for (i = 0;i < nb_vector;i++) {
       for (j = 0;j < process->nb_state;j++) {
-        diff = int_vector[i][variable] - mean[j];
+        diff = int_vector[i][variable] - bmean[j];
         variance += component_vector_count[i][j] * diff * diff / factor[j];
       }
     }
@@ -463,7 +460,7 @@ void Vectors::tied_gamma_estimation(Type **component_vector_count , int variable
   case REAL_VALUE : {
     for (i = 0;i < nb_vector;i++) {
       for (j = 0;j < process->nb_state;j++) {
-        diff = real_vector[i][variable] - mean[j];
+        diff = real_vector[i][variable] - bmean[j];
         variance += component_vector_count[i][j] * diff * diff / factor[j];
       }
     }
@@ -477,8 +474,8 @@ void Vectors::tied_gamma_estimation(Type **component_vector_count , int variable
   switch (variance_factor) {
 
   case CONVOLUTION_FACTOR : {
-    process->observation[0]->shape = mean[0] * mean[0] / variance;
-    process->observation[0]->scale = variance / mean[0];
+    process->observation[0]->shape = bmean[0] * bmean[0] / variance;
+    process->observation[0]->scale = variance / bmean[0];
 
     for (i = 1;i < process->nb_state;i++) {
       process->observation[i]->shape = process->observation[0]->shape * factor[i];
@@ -488,15 +485,25 @@ void Vectors::tied_gamma_estimation(Type **component_vector_count , int variable
   }
 
   case SCALING_FACTOR : {
-    switch (process->tied_location) {
+    if (process->tied_location) {
+      process->observation[0]->shape = bmean[0] * bmean[0] / variance;
+      process->observation[0]->scale = variance / bmean[0];
 
-    case false : {
-//      process->observation[0]->shape = mean[0] * mean[0] / variance;
-//      process->observation[0]->scale = variance / mean[0];
+      for (i = 1;i < process->nb_state;i++) {
+        process->observation[i]->shape = process->observation[0]->shape;
+//        factor[i] = sqrt(factor[i]);
+        factor[i] = factor[i - 1] * 2;
+        process->observation[i]->scale = process->observation[0]->scale * factor[i];
+      }
+    }
+
+    else {
+//      process->observation[0]->shape = bmean[0] * bmean[0] / variance;
+//      process->observation[0]->scale = variance / bmean[0];
 
       // Hawang & Huang (2012), Ann. Inst. Statist. Math. 54(4), 840-847
 
-      buff = mean[0] * mean[0] / variance;
+      buff = bmean[0] * bmean[0] / variance;
       if (buff > GAMMA_INVERSE_SAMPLE_SIZE_FACTOR / (double)component_frequency[0]) {
         process->observation[0]->shape = buff - 1. / (double)component_frequency[0];
       }
@@ -506,29 +513,14 @@ void Vectors::tied_gamma_estimation(Type **component_vector_count , int variable
 /*      if (process->observation[0]->shape < GAMMA_MIN_SHAPE_PARAMETER) {
         process->observation[0]->shape = GAMMA_MIN_SHAPE_PARAMETER;
       } */
-      process->observation[0]->scale = mean[0] / process->observation[0]->shape;
+      process->observation[0]->scale = bmean[0] / process->observation[0]->shape;
 
       for (i = 1;i < process->nb_state;i++) {
         process->observation[i]->shape = process->observation[0]->shape;
 //        factor[i] = sqrt(factor[i]);
-        factor[i] = mean[i] / mean[0];
+        factor[i] = bmean[i] / bmean[0];
         process->observation[i]->scale = process->observation[0]->scale * factor[i];
       }
-      break;
-    }
-
-    case true : {
-      process->observation[0]->shape = mean[0] * mean[0] / variance;
-      process->observation[0]->scale = variance / mean[0];
-
-      for (i = 1;i < process->nb_state;i++) {
-        process->observation[i]->shape = process->observation[0]->shape;
-//        factor[i] = sqrt(factor[i]);
-        factor[i] = factor[i - 1] * 2;
-        process->observation[i]->scale = process->observation[0]->scale * factor[i];
-      }
-      break;
-    }
     }
     break;
   }
@@ -586,8 +578,8 @@ void Vectors::tied_gamma_estimation(Type **component_vector_count , int variable
 
     // approximations Johnson, Kotz & Balakrishnan, Continuous Univariate Distributions, vol. 1, 2nd ed., pp. 361-362
 
-//    process->observation[0]->shape = mean[0] / (2 * (mean[0] - exp(log_geometric_mean))) - 1./12.;
-    diff = log(mean[0]) - log_geometric_mean;
+//    process->observation[0]->shape = bmean[0] / (2 * (bmean[0] - exp(log_geometric_mean))) - 1./12.;
+    diff = log(bmean[0]) - log_geometric_mean;
     process->observation[0]->shape = (1 + sqrt(1 + 4 * diff / 3)) / (4 * diff);
 
 #   ifdef DEBUG
@@ -598,7 +590,7 @@ void Vectors::tied_gamma_estimation(Type **component_vector_count , int variable
 
 /*    do {
       process->observation[0]->scale = exp(log_geometric_mean - digamma(process->observation[0]->shape));
-      process->observation[0]->shape = mean[0] / process->observation[0]->scale;
+      process->observation[0]->shape = bmean[0] / process->observation[0]->scale;
       i++;
     }
     while (i < MIN(GAMMA_ITERATION_FACTOR * iter , GAMMA_MAX_NB_ITERATION)); */
@@ -615,7 +607,7 @@ void Vectors::tied_gamma_estimation(Type **component_vector_count , int variable
     }
     while (i < MIN(GAMMA_ITERATION_FACTOR * iter , GAMMA_MAX_NB_ITERATION));
 
-    process->observation[0]->scale = mean[0] / process->observation[0]->shape;
+    process->observation[0]->scale = bmean[0] / process->observation[0]->shape;
 
 #   ifdef DEBUG
     cout << "\n" << STAT_word[STATW_SHAPE] << " : " << process->observation[0]->shape << "   "
@@ -643,7 +635,7 @@ void Vectors::tied_gamma_estimation(Type **component_vector_count , int variable
   }
 
   delete [] component_frequency;
-  delete [] mean;
+  delete [] bmean;
   delete [] factor;
 }
 
@@ -664,15 +656,15 @@ void Vectors::inverse_gaussian_estimation(Type **component_vector_count , int va
 
 {
   int i , j;
-  double *mean , *inverse_scale;
+  double *bmean , *inverse_scale;
   Type *component_frequency;
 
 
   component_frequency = new Type[process->nb_state];
-  mean = new double[process->nb_state];
+  bmean = new double[process->nb_state];
 
   for (i = 0;i < process->nb_state;i++) {
-    mean[i] = 0.;
+    bmean[i] = 0.;
     component_frequency[i] = 0;
   }
 
@@ -681,7 +673,7 @@ void Vectors::inverse_gaussian_estimation(Type **component_vector_count , int va
   case INT_VALUE : {
     for (i = 0;i < nb_vector;i++) {
       for (j = 0;j < process->nb_state;j++) {
-        mean[j] += component_vector_count[i][j] * int_vector[i][variable];
+        bmean[j] += component_vector_count[i][j] * int_vector[i][variable];
         component_frequency[j] += component_vector_count[i][j];
       }
     }
@@ -691,7 +683,7 @@ void Vectors::inverse_gaussian_estimation(Type **component_vector_count , int va
   case REAL_VALUE : {
     for (i = 0;i < nb_vector;i++) {
       for (j = 0;j < process->nb_state;j++) {
-        mean[j] += component_vector_count[i][j] * real_vector[i][variable];
+        bmean[j] += component_vector_count[i][j] * real_vector[i][variable];
         component_frequency[j] += component_vector_count[i][j];
       }
     }
@@ -701,8 +693,8 @@ void Vectors::inverse_gaussian_estimation(Type **component_vector_count , int va
 
   for (i = 0;i < process->nb_state;i++) {
     if (component_frequency[i] > 0) {
-      mean[i] /= component_frequency[i];
-      process->observation[i]->location = mean[i];
+      bmean[i] /= component_frequency[i];
+      process->observation[i]->location = bmean[i];
     }
     else {
       process->observation[i]->location = D_DEFAULT;
@@ -719,8 +711,8 @@ void Vectors::inverse_gaussian_estimation(Type **component_vector_count , int va
   case INT_VALUE : {
     for (i = 0;i < nb_vector;i++) {
       for (j = 0;j < process->nb_state;j++) {
-        if ((mean[j] > 0.) && (int_vector[i][variable] > 0)) {
-          inverse_scale[j] += component_vector_count[i][j] * (1. / (double)int_vector[i][variable] - 1. / mean[j]);
+        if ((bmean[j] > 0.) && (int_vector[i][variable] > 0)) {
+          inverse_scale[j] += component_vector_count[i][j] * (1. / (double)int_vector[i][variable] - 1. / bmean[j]);
         }
       }
     }
@@ -730,8 +722,8 @@ void Vectors::inverse_gaussian_estimation(Type **component_vector_count , int va
   case REAL_VALUE : {
     for (i = 0;i < nb_vector;i++) {
       for (j = 0;j < process->nb_state;j++) {
-        if ((mean[j] > 0.) && (real_vector[i][variable] > 0.)) {
-          inverse_scale[j] += component_vector_count[i][j] * (1. / real_vector[i][variable] - 1. / mean[j]);
+        if ((bmean[j] > 0.) && (real_vector[i][variable] > 0.)) {
+          inverse_scale[j] += component_vector_count[i][j] * (1. / real_vector[i][variable] - 1. / bmean[j]);
         }
       }
     }
@@ -749,7 +741,7 @@ void Vectors::inverse_gaussian_estimation(Type **component_vector_count , int va
   }
 
   delete [] component_frequency;
-  delete [] mean;
+  delete [] bmean;
   delete [] inverse_scale;
 }
 
@@ -773,21 +765,142 @@ void Vectors::tied_inverse_gaussian_estimation(Type **component_vector_count , i
 
 {
   int i , j;
-  double inverse_scale , *mean , *factor;
+  double inverse_scale , *bmean , *factor;
   Type *component_frequency;
 
   double inverse_scale2;
 
 
   component_frequency = new Type[process->nb_state];
-  mean = new double[process->nb_state];
+  bmean = new double[process->nb_state];
   factor = new double[process->nb_state];
 
-  switch (process->tied_location) {
+  if (process->tied_location) {
+    bmean[0] = 0.;
+    component_frequency[0] = 0.;
 
-  case false : {
+    factor[0] = 1.;
+    for (i = 1;i < process->nb_state;i++) {
+      factor[i] = factor[i - 1] * 2;
+    }
+
+    switch (type[variable]) {
+
+    case INT_VALUE : {
+      for (i = 0;i < nb_vector;i++) {
+        for (j = 0;j < process->nb_state;j++) {
+          bmean[0] += component_vector_count[i][j] * int_vector[i][variable] / factor[j];
+          component_frequency[0] += component_vector_count[i][j];
+        }
+      }
+      break;
+    }
+
+    case REAL_VALUE : {
+      for (i = 0;i < nb_vector;i++) {
+        for (j = 0;j < process->nb_state;j++) {
+          bmean[0] += component_vector_count[i][j] * real_vector[i][variable] / factor[j];
+          component_frequency[0] += component_vector_count[i][j];
+        }
+      }
+      break;
+    }
+    }
+
+    bmean[0] /= component_frequency[0];
+    process->observation[0]->location = bmean[0];
+    for (i = 1;i < process->nb_state;i++) {
+      bmean[i] = bmean[0] * factor[i];
+      process->observation[i]->location = bmean[i];
+    }
+
+    if (variance_factor == CONVOLUTION_FACTOR) {
+      for (i = 1;i < process->nb_state;i++) {
+//        factor[i] = factor[i - 1] * 4;
+        factor[i] *= factor[i];
+      }
+    }
+
+    inverse_scale = 0.;
+
+    switch (variance_factor) {
+
+    case CONVOLUTION_FACTOR : {
+      switch (type[variable]) {
+
+      case INT_VALUE : {
+        for (i = 0;i < nb_vector;i++) {
+          for (j = 0;j < process->nb_state;j++) {
+            if ((bmean[j] > 0.) && (int_vector[i][variable] > 0)) {
+              inverse_scale += component_vector_count[i][j] * factor[j] * (1. / (double)int_vector[i][variable] - 2. / bmean[j] +
+                                                                           int_vector[i][variable] / (bmean[j] * bmean[j]));
+            }
+          }
+        }
+        break;
+      }
+
+      case REAL_VALUE : {
+        for (i = 0;i < nb_vector;i++) {
+          for (j = 0;j < process->nb_state;j++) {
+            if ((bmean[j] > 0.) && (real_vector[i][variable] > 0.)) {
+              inverse_scale += component_vector_count[i][j] * factor[j] * (1. / real_vector[i][variable] - 2. / bmean[j] +
+                                                                           real_vector[i][variable] / (bmean[j] * bmean[j]));
+            }
+          }
+        }
+        break;
+      }
+      }
+      break;
+    }
+
+    case SCALING_FACTOR : {
+      inverse_scale2 = 0.;
+
+      switch (type[variable]) {
+
+      case INT_VALUE : {
+        for (i = 0;i < nb_vector;i++) {
+          for (j = 0;j < process->nb_state;j++) {
+            if ((bmean[j] > 0.) && (int_vector[i][variable] > 0)) {
+              inverse_scale += component_vector_count[i][j] * factor[j] * (1. / (double)int_vector[i][variable] - 1. / bmean[j]);
+              inverse_scale2 += component_vector_count[i][j] * factor[j] * (1. / (double)int_vector[i][variable] - 2. / bmean[j] +
+                                                                            int_vector[i][variable] / (bmean[j] * bmean[j]));
+            }
+          }
+        }
+        break;
+      }
+
+      case REAL_VALUE : {
+        for (i = 0;i < nb_vector;i++) {
+          for (j = 0;j < process->nb_state;j++) {
+            if ((bmean[j] > 0.) && (real_vector[i][variable] > 0.)) {
+              inverse_scale += component_vector_count[i][j] * factor[j] * (1. / real_vector[i][variable] - 1. / bmean[j]);
+              inverse_scale2 += component_vector_count[i][j] * factor[j] * (1. / real_vector[i][variable] - 2. / bmean[j] +
+                                                                           real_vector[i][variable] / (bmean[j] * bmean[j]));
+            }
+          }
+        }
+        break;
+      }
+      }
+
+#     ifdef MESSAGE
+      if ((inverse_scale2 < inverse_scale - DOUBLE_ERROR) || (inverse_scale2 > inverse_scale + DOUBLE_ERROR)) {
+        cout << "\nERROR: " << inverse_scale << " | " << inverse_scale2 << endl;
+      }
+#     endif
+
+      break;
+    }
+    }
+  }
+
+  else {
     for (i = 0;i < process->nb_state;i++) {
-      mean[i] = 0.;
+      bmean[i] = 0.;
       component_frequency[i] = 0;
     }
 
@@ -796,7 +909,7 @@ void Vectors::tied_inverse_gaussian_estimation(Type **component_vector_count , i
     case INT_VALUE : {
       for (i = 0;i < nb_vector;i++) {
         for (j = 0;j < process->nb_state;j++) {
-          mean[j] += component_vector_count[i][j] * int_vector[i][variable];
+          bmean[j] += component_vector_count[i][j] * int_vector[i][variable];
           component_frequency[j] += component_vector_count[i][j];
         }
       }
@@ -806,7 +919,7 @@ void Vectors::tied_inverse_gaussian_estimation(Type **component_vector_count , i
     case REAL_VALUE : {
       for (i = 0;i < nb_vector;i++) {
         for (j = 0;j < process->nb_state;j++) {
-          mean[j] += component_vector_count[i][j] * real_vector[i][variable];
+          bmean[j] += component_vector_count[i][j] * real_vector[i][variable];
           component_frequency[j] += component_vector_count[i][j];
         }
       }
@@ -816,8 +929,8 @@ void Vectors::tied_inverse_gaussian_estimation(Type **component_vector_count , i
 
     for (i = 0;i < process->nb_state;i++) {
       if (component_frequency[i] > 0) {
-        mean[i] /= component_frequency[i];
-        process->observation[i]->location = mean[i];
+        bmean[i] /= component_frequency[i];
+        process->observation[i]->location = bmean[i];
       }
       else {
         process->observation[i]->location = D_DEFAULT;
@@ -830,7 +943,7 @@ void Vectors::tied_inverse_gaussian_estimation(Type **component_vector_count , i
       factor[0] = 1.;
       for (i = 1;i < process->nb_state;i++) {
         if (component_frequency[i] > 0) {
-          factor[i] = (mean[i] * mean[i]) / (mean[0] * mean[0]);
+          factor[i] = (bmean[i] * bmean[i]) / (bmean[0] * bmean[0]);
         }
         else {
           factor[i] = 1.;
@@ -843,7 +956,7 @@ void Vectors::tied_inverse_gaussian_estimation(Type **component_vector_count , i
       factor[0] = 1.;
       for (i = 1;i < process->nb_state;i++) {
         if (component_frequency[i] > 0) {
-          factor[i] = mean[i] / mean[0];
+          factor[i] = bmean[i] / bmean[0];
         }
         else {
           factor[i] = 1.;
@@ -861,10 +974,10 @@ void Vectors::tied_inverse_gaussian_estimation(Type **component_vector_count , i
     case INT_VALUE : {
       for (i = 0;i < nb_vector;i++) {
         for (j = 0;j < process->nb_state;j++) {
-          if ((mean[j] > 0.) && (int_vector[i][variable] > 0)) {
-            inverse_scale += component_vector_count[i][j] * factor[j] * (1. / (double)int_vector[i][variable] - 1. / mean[j]);
-            inverse_scale2 += component_vector_count[i][j] * factor[j] * (1. / (double)int_vector[i][variable] - 2. / mean[j] +
-                                                                          int_vector[i][variable] / (mean[j] * mean[j]));
+          if ((bmean[j] > 0.) && (int_vector[i][variable] > 0)) {
+            inverse_scale += component_vector_count[i][j] * factor[j] * (1. / (double)int_vector[i][variable] - 1. / bmean[j]);
+            inverse_scale2 += component_vector_count[i][j] * factor[j] * (1. / (double)int_vector[i][variable] - 2. / bmean[j] +
+                                                                          int_vector[i][variable] / (bmean[j] * bmean[j]));
           }
         }
       }
@@ -874,10 +987,10 @@ void Vectors::tied_inverse_gaussian_estimation(Type **component_vector_count , i
     case REAL_VALUE : {
       for (i = 0;i < nb_vector;i++) {
         for (j = 0;j < process->nb_state;j++) {
-          if ((mean[j] > 0.) && (real_vector[i][variable] > 0.)) {
-            inverse_scale += component_vector_count[i][j] * factor[j] * (1. / real_vector[i][variable] - 1 / mean[j]);
-            inverse_scale2 += component_vector_count[i][j] * factor[j] * (1. / real_vector[i][variable] - 2. / mean[j] +
-                                                                          real_vector[i][variable] / (mean[j] * mean[j]));
+          if ((bmean[j] > 0.) && (real_vector[i][variable] > 0.)) {
+            inverse_scale += component_vector_count[i][j] * factor[j] * (1. / real_vector[i][variable] - 1 / bmean[j]);
+            inverse_scale2 += component_vector_count[i][j] * factor[j] * (1. / real_vector[i][variable] - 2. / bmean[j] +
+                                                                          real_vector[i][variable] / (bmean[j] * bmean[j]));
           }
         }
       }
@@ -906,132 +1019,6 @@ void Vectors::tied_inverse_gaussian_estimation(Type **component_vector_count , i
     for (i = 1;i < process->nb_state;i++) {
       component_frequency[0] += component_frequency[i];
     }
-    break;
-  }
-
-  case true : {
-    mean[0] = 0.;
-    component_frequency[0] = 0.;
-
-    factor[0] = 1.;
-    for (i = 1;i < process->nb_state;i++) {
-      factor[i] = factor[i - 1] * 2;
-    }
-
-    switch (type[variable]) {
-
-    case INT_VALUE : {
-      for (i = 0;i < nb_vector;i++) {
-        for (j = 0;j < process->nb_state;j++) {
-          mean[0] += component_vector_count[i][j] * int_vector[i][variable] / factor[j];
-          component_frequency[0] += component_vector_count[i][j];
-        }
-      }
-      break;
-    }
-
-    case REAL_VALUE : {
-      for (i = 0;i < nb_vector;i++) {
-        for (j = 0;j < process->nb_state;j++) {
-          mean[0] += component_vector_count[i][j] * real_vector[i][variable] / factor[j];
-          component_frequency[0] += component_vector_count[i][j];
-        }
-      }
-      break;
-    }
-    }
-
-    mean[0] /= component_frequency[0];
-    process->observation[0]->location = mean[0];
-    for (i = 1;i < process->nb_state;i++) {
-      mean[i] = mean[0] * factor[i];
-      process->observation[i]->location = mean[i];
-    }
-
-    if (variance_factor == CONVOLUTION_FACTOR) {
-      for (i = 1;i < process->nb_state;i++) {
-//        factor[i] = factor[i - 1] * 4;
-        factor[i] *= factor[i];
-      }
-    }
-
-    inverse_scale = 0.;
-
-    switch (variance_factor) {
-
-    case CONVOLUTION_FACTOR : {
-      switch (type[variable]) {
-
-      case INT_VALUE : {
-        for (i = 0;i < nb_vector;i++) {
-          for (j = 0;j < process->nb_state;j++) {
-            if ((mean[j] > 0.) && (int_vector[i][variable] > 0)) {
-              inverse_scale += component_vector_count[i][j] * factor[j] * (1. / (double)int_vector[i][variable] - 2. / mean[j] +
-                                                                           int_vector[i][variable] / (mean[j] * mean[j]));
-            }
-          }
-        }
-        break;
-      }
-
-      case REAL_VALUE : {
-        for (i = 0;i < nb_vector;i++) {
-          for (j = 0;j < process->nb_state;j++) {
-            if ((mean[j] > 0.) && (real_vector[i][variable] > 0.)) {
-              inverse_scale += component_vector_count[i][j] * factor[j] * (1. / real_vector[i][variable] - 2. / mean[j] +
-                                                                           real_vector[i][variable] / (mean[j] * mean[j]));
-            }
-          }
-        }
-        break;
-      }
-      }
-      break;
-    }
-
-    case SCALING_FACTOR : {
-      inverse_scale2 = 0.;
-
-      switch (type[variable]) {
-
-      case INT_VALUE : {
-        for (i = 0;i < nb_vector;i++) {
-          for (j = 0;j < process->nb_state;j++) {
-            if ((mean[j] > 0.) && (int_vector[i][variable] > 0)) {
-              inverse_scale += component_vector_count[i][j] * factor[j] * (1. / (double)int_vector[i][variable] - 1. / mean[j]);
-              inverse_scale2 += component_vector_count[i][j] * factor[j] * (1. / (double)int_vector[i][variable] - 2. / mean[j] +
-                                                                            int_vector[i][variable] / (mean[j] * mean[j]));
-            }
-          }
-        }
-        break;
-      }
-
-      case REAL_VALUE : {
-        for (i = 0;i < nb_vector;i++) {
-          for (j = 0;j < process->nb_state;j++) {
-            if ((mean[j] > 0.) && (real_vector[i][variable] > 0.)) {
-              inverse_scale += component_vector_count[i][j] * factor[j] * (1. / real_vector[i][variable] - 1. / mean[j]);
-              inverse_scale2 += component_vector_count[i][j] * factor[j] * (1. / real_vector[i][variable] - 2. / mean[j] +
-                                                                           real_vector[i][variable] / (mean[j] * mean[j]));
-            }
-          }
-        }
-        break;
-      }
-      }
-
-#     ifdef MESSAGE
-      if ((inverse_scale2 < inverse_scale - DOUBLE_ERROR) || (inverse_scale2 > inverse_scale + DOUBLE_ERROR)) {
-        cout << "\nERROR: " << inverse_scale << " | " << inverse_scale2 << endl;
-      }
-#     endif
-
-      break;
-    }
-    }
-    break;
-  }
   }
 
   process->observation[0]->scale = component_frequency[0] / inverse_scale;
@@ -1040,7 +1027,7 @@ void Vectors::tied_inverse_gaussian_estimation(Type **component_vector_count , i
   }
 
   delete [] component_frequency;
-  delete [] mean;
+  delete [] bmean;
   delete [] factor;
 }
 
@@ -1061,15 +1048,16 @@ void Vectors::gaussian_estimation(Type **component_vector_count , int variable ,
 
 {
   int i , j;
-  double diff , *mean , *variance;
+  double diff , *bmean;
+  long double *variance;
   Type *component_frequency;
 
 
   component_frequency = new Type[process->nb_state];
-  mean = new double[process->nb_state];
+  bmean = new double[process->nb_state];
 
   for (i = 0;i < process->nb_state;i++) {
-    mean[i] = 0.;
+    bmean[i] = 0.;
     component_frequency[i] = 0;
   }
 
@@ -1078,7 +1066,7 @@ void Vectors::gaussian_estimation(Type **component_vector_count , int variable ,
   case INT_VALUE : {
     for (i = 0;i < nb_vector;i++) {
       for (j = 0;j < process->nb_state;j++) {
-        mean[j] += component_vector_count[i][j] * int_vector[i][variable];
+        bmean[j] += component_vector_count[i][j] * int_vector[i][variable];
         component_frequency[j] += component_vector_count[i][j];
       }
     }
@@ -1088,7 +1076,7 @@ void Vectors::gaussian_estimation(Type **component_vector_count , int variable ,
   case REAL_VALUE : {
     for (i = 0;i < nb_vector;i++) {
       for (j = 0;j < process->nb_state;j++) {
-        mean[j] += component_vector_count[i][j] * real_vector[i][variable];
+        bmean[j] += component_vector_count[i][j] * real_vector[i][variable];
         component_frequency[j] += component_vector_count[i][j];
       }
     }
@@ -1098,18 +1086,56 @@ void Vectors::gaussian_estimation(Type **component_vector_count , int variable ,
 
   for (i = 0;i < process->nb_state;i++) {
     if (component_frequency[i] > 0) {
-      mean[i] /= component_frequency[i];
-      process->observation[i]->location = mean[i];
+      bmean[i] /= component_frequency[i];
+      process->observation[i]->location = bmean[i];
     }
     else {
       process->observation[i]->location = D_INF;
     }
   }
 
-  switch (process->tied_dispersion) {
+  if (process->tied_dispersion) {
+    for (i = 1;i < process->nb_state;i++) {
+      component_frequency[0] += component_frequency[i];
+    }
 
-  case false : {
-    variance = new double[process->nb_state];
+    variance = new long double[1];
+    variance[0] = 0.;
+
+    switch (type[variable]) {
+
+    case INT_VALUE : {
+      for (i = 0;i < nb_vector;i++) {
+        for (j = 0;j < process->nb_state;j++) {
+          diff = int_vector[i][variable] - bmean[j];
+          variance[0] += component_vector_count[i][j] * diff * diff;
+        }
+      }
+      break;
+    }
+
+    case REAL_VALUE : {
+      for (i = 0;i < nb_vector;i++) {
+        for (j = 0;j < process->nb_state;j++) {
+          diff = real_vector[i][variable] - bmean[j];
+          variance[0] += component_vector_count[i][j] * diff * diff;
+        }
+      }
+      break;
+    }
+    }
+
+//    variance[0] /= component_frequency[0];
+    variance[0] /= (component_frequency[0] - process->nb_state);
+
+    process->observation[0]->dispersion = sqrtl(variance[0]);
+    for (i = 1;i < process->nb_state;i++) {
+      process->observation[i]->dispersion = process->observation[0]->dispersion;
+    }
+  }
+
+  else {
+    variance = new long double[process->nb_state];
     for (i = 0;i < process->nb_state;i++) {
       variance[i] = 0.;
     }
@@ -1119,7 +1145,7 @@ void Vectors::gaussian_estimation(Type **component_vector_count , int variable ,
     case INT_VALUE : {
       for (i = 0;i < nb_vector;i++) {
         for (j = 0;j < process->nb_state;j++) {
-          diff = int_vector[i][variable] - mean[j];
+          diff = int_vector[i][variable] - bmean[j];
           variance[j] += component_vector_count[i][j] * diff * diff;
         }
       }
@@ -1129,7 +1155,7 @@ void Vectors::gaussian_estimation(Type **component_vector_count , int variable ,
     case REAL_VALUE : {
       for (i = 0;i < nb_vector;i++) {
         for (j = 0;j < process->nb_state;j++) {
-          diff = real_vector[i][variable] - mean[j];
+          diff = real_vector[i][variable] - bmean[j];
           variance[j] += component_vector_count[i][j] * diff * diff;
         }
       }
@@ -1142,31 +1168,160 @@ void Vectors::gaussian_estimation(Type **component_vector_count , int variable ,
 //        variance[i] /= component_frequency[i];
       if (component_frequency[i] > 1) {
         variance[i] /= (component_frequency[i] - 1);
-        process->observation[i]->dispersion = sqrt(variance[i]);
+        process->observation[i]->dispersion = sqrtl(variance[i]);
         if ((process->observation[i]->location != 0.) &&
             (process->observation[i]->dispersion / process->observation[i]->location < GAUSSIAN_MIN_VARIATION_COEFF)) {
           process->observation[i]->dispersion = process->observation[i]->location * GAUSSIAN_MIN_VARIATION_COEFF;
         }
       }
     }
+  }
+
+  delete [] component_frequency;
+  delete [] bmean;
+  delete [] variance;
+}
+
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Estimation of Gaussian observation distributions with evenly spaced means. 
+ *
+ *  \param[in] component_vector_count component counts,
+ *  \param[in] variable               variable index,
+ *  \param[in] process                pointer on a ContinuousParametricProcess object.
+ */
+/*--------------------------------------------------------------*/
+
+template <typename Type>
+void Vectors::tied_gaussian_estimation(Type **component_vector_count , int variable ,
+                                       ContinuousParametricProcess *process) const
+
+{
+  int i , j;
+  double old_offset , diff , *bmean;
+  long double *variance;
+  Type *component_frequency;
+
+
+  bmean = new double[2];
+  component_frequency = new Type[process->nb_state];
+
+  old_offset = process->offset;
+  process->offset = 0.;
+  bmean[0] = 0.;
+  component_frequency[0] = 0;
+  bmean[1] = 0.;
+  component_frequency[1] = 0;
+
+  switch (type[variable]) {
+
+  case INT_VALUE : {
+    for (i = 0;i < nb_vector;i++) {
+      for (j = 0;j < process->nb_state - 1;j++) {
+        process->offset += component_vector_count[i][j] * (int_vector[i][variable] - (process->observation[j]->location - old_offset));
+        bmean[0] += component_vector_count[i][j] * (int_vector[i][variable] - old_offset) / (j + 1);
+        component_frequency[0] += component_vector_count[i][j];
+      }
+
+      bmean[1] += component_vector_count[i][process->nb_state - 1] * int_vector[i][variable];
+      component_frequency[1] += component_vector_count[i][process->nb_state - 1];
+    }
     break;
   }
 
-  case true : {
-    for (i = 1;i < process->nb_state;i++) {
-      component_frequency[0] += component_frequency[i];
+  case REAL_VALUE : {
+    for (i = 0;i < nb_vector;i++) {
+      for (j = 0;j < process->nb_state - 1;j++) {
+        process->offset += component_vector_count[i][j] * (real_vector[i][variable] - (process->observation[j]->location - old_offset));
+        bmean[0] += component_vector_count[i][j] * (real_vector[i][variable] - old_offset) / (j + 1);
+        component_frequency[0] += component_vector_count[i][j];
+      }
+
+      bmean[1] += component_vector_count[i][process->nb_state - 1] * real_vector[i][variable];
+      component_frequency[1] += component_vector_count[i][process->nb_state - 1];
+    }
+    break;
+  }
+  }
+
+  process->offset /= component_frequency[0];
+
+  bmean[0] /= component_frequency[0];
+  for (i = 0;i < process->nb_state - 1;i++) {
+    process->observation[i]->location = process->offset + (i + 1) * bmean[0];
+  }
+  process->observation[process->nb_state - 1]->location = bmean[1] / component_frequency[1];
+
+  if (process->tied_dispersion) {
+    variance = new long double[2];
+    variance[0] = 0.;
+    variance[1] = 0.;
+
+    switch (type[variable]) {
+
+    case INT_VALUE : {
+      for (i = 0;i < nb_vector;i++) {
+        for (j = 0;j < process->nb_state - 1;j++) {
+          diff = int_vector[i][variable] - process->observation[j]->location;
+          variance[0] += component_vector_count[i][j] * diff * diff;
+        }
+
+        diff = int_vector[i][variable] - process->observation[process->nb_state - 1]->location;
+        variance[1] += component_vector_count[i][process->nb_state - 1] * diff * diff;
+      }
+      break;
     }
 
-    variance = new double[1];
-    variance[0] = 0.;
+    case REAL_VALUE : {
+      for (i = 0;i < nb_vector;i++) {
+        for (j = 0;j < process->nb_state - 1;j++) {
+          diff = real_vector[i][variable] - process->observation[j]->location;
+          variance[0] += component_vector_count[i][j] * diff * diff;
+        }
+
+        diff = real_vector[i][variable] - process->observation[process->nb_state - 1]->location;
+        variance[1] += component_vector_count[i][process->nb_state - 1] * diff * diff;
+      }
+      break;
+    }
+    }
+
+//    variance[0] /= component_frequency[0];
+    variance[0] /= (component_frequency[0] - (process->nb_state - 1));
+
+    process->observation[0]->dispersion = sqrtl(variance[0]);
+    for (i = 1;i < process->nb_state - 1;i++) {
+      process->observation[i]->dispersion = process->observation[0]->dispersion;
+    }
+
+//    variance[1] /= component_frequency[1];
+    variance[1] /= (component_frequency[1] - 1);
+    if (sqrtl(variance[1]) > 2 * process->observation[0]->dispersion) {
+      process->observation[process->nb_state - 1]->dispersion = sqrtl(variance[1]);
+    }    
+
+#   ifdef MESSAGE
+    cout << "TEST: " << process->offset << " " << bmean[0] << " " << process->observation[0]->dispersion << endl;
+#   endif
+
+  }
+
+  else {
+    variance = new long double[process->nb_state];
+    for (i = 0;i < process->nb_state;i++) {
+      variance[i] = 0.;
+      component_frequency[i] = 0;
+    }
 
     switch (type[variable]) {
 
     case INT_VALUE : {
       for (i = 0;i < nb_vector;i++) {
         for (j = 0;j < process->nb_state;j++) {
-          diff = int_vector[i][variable] - mean[j];
-          variance[0] += component_vector_count[i][j] * diff * diff;
+          diff = int_vector[i][variable] - process->observation[j]->location;
+          variance[j] += component_vector_count[i][j] * diff * diff;
+          component_frequency[j] += component_vector_count[i][j];
         }
       }
       break;
@@ -1175,27 +1330,31 @@ void Vectors::gaussian_estimation(Type **component_vector_count , int variable ,
     case REAL_VALUE : {
       for (i = 0;i < nb_vector;i++) {
         for (j = 0;j < process->nb_state;j++) {
-          diff = real_vector[i][variable] - mean[j];
-          variance[0] += component_vector_count[i][j] * diff * diff;
+          diff = real_vector[i][variable] - process->observation[j]->location;
+          variance[j] += component_vector_count[i][j] * diff * diff;
+          component_frequency[j] += component_vector_count[i][j];
         }
       }
       break;
     }
     }
 
-//    variance[0] /= component_frequency[0];
-    variance[0] /= (component_frequency[0] - process->nb_state);
-
-    process->observation[0]->dispersion = sqrt(variance[0]);
-    for (i = 1;i < process->nb_state;i++) {
-      process->observation[i]->dispersion = process->observation[0]->dispersion;
+    for (i = 0;i < process->nb_state;i++) {
+//      if (component_frequency[i] > 0) {
+//        variance[i] /= component_frequency[i];
+      if (component_frequency[i] > 1) {
+        variance[i] /= (component_frequency[i] - 1);
+        process->observation[i]->dispersion = sqrtl(variance[i]);
+        if ((process->observation[i]->location != 0.) &&
+            (process->observation[i]->dispersion / process->observation[i]->location < GAUSSIAN_MIN_VARIATION_COEFF)) {
+          process->observation[i]->dispersion = process->observation[i]->location * GAUSSIAN_MIN_VARIATION_COEFF;
+        }
+      }
     }
-    break;
-  }
   }
 
   delete [] component_frequency;
-  delete [] mean;
+  delete [] bmean;
   delete [] variance;
 }
 
@@ -1219,92 +1378,17 @@ void Vectors::tied_gaussian_estimation(Type **component_vector_count , int varia
 
 {
   int i , j;
-  double diff , variance , *mean , *factor;
+  double diff , *bmean , *factor;
+  long double variance;
   Type *component_frequency;
 
 
   component_frequency = new Type[process->nb_state];
-  mean = new double[process->nb_state];
+  bmean = new double[process->nb_state];
   factor = new double[process->nb_state];
 
-  switch (process->tied_location) {
-
-  case false : {
-    for (i = 0;i < process->nb_state;i++) {
-      mean[i] = 0.;
-      component_frequency[i] = 0;
-    }
-
-    switch (type[variable]) {
-
-    case INT_VALUE : {
-      for (i = 0;i < nb_vector;i++) {
-        for (j = 0;j < process->nb_state;j++) {
-          mean[j] += component_vector_count[i][j] * int_vector[i][variable];
-          component_frequency[j] += component_vector_count[i][j];
-        }
-      }
-      break;
-    }
-
-    case REAL_VALUE : {
-      for (i = 0;i < nb_vector;i++) {
-        for (j = 0;j < process->nb_state;j++) {
-          mean[j] += component_vector_count[i][j] * real_vector[i][variable];
-          component_frequency[j] += component_vector_count[i][j];
-        }
-      }
-      break;
-    }
-    }
-
-    for (i = 0;i < process->nb_state;i++) {
-      if (component_frequency[i] > 0) {
-        mean[i] /= component_frequency[i];
-        process->observation[i]->location = mean[i];
-      }
-      else {
-        process->observation[i]->location = D_INF;
-      }
-    }
-
-    switch (variance_factor) {
-
-    case CONVOLUTION_FACTOR : {
-      factor[0] = 1.;
-      for (i = 1;i < process->nb_state;i++) {
-        if (component_frequency[i] > 0) {
-          factor[i] = mean[i] / mean[0];
-        }
-        else {
-          factor[i] = 1.;
-        }
-      }
-      break;
-    }
-
-    case SCALING_FACTOR : {
-      factor[0] = 1.;
-      for (i = 1;i < process->nb_state;i++) {
-        if (component_frequency[i] > 0) {
-          factor[i] = (mean[i] * mean[i]) / (mean[0] * mean[0]);
-        }
-        else {
-          factor[i] = 1.;
-        }
-      }
-      break;
-    }
-    }
-
-    for (i = 1;i < process->nb_state;i++) {
-      component_frequency[0] += component_frequency[i];
-    }
-    break;
-  }
-
-  case true : {
-    mean[0] = 0.;
+  if (process->tied_location) {
+    bmean[0] = 0.;
     component_frequency[0] = 0.;
 
     factor[0] = 1.;
@@ -1317,7 +1401,7 @@ void Vectors::tied_gaussian_estimation(Type **component_vector_count , int varia
     case INT_VALUE : {
       for (i = 0;i < nb_vector;i++) {
         for (j = 0;j < process->nb_state;j++) {
-          mean[0] += component_vector_count[i][j] * int_vector[i][variable] / factor[j];
+          bmean[0] += component_vector_count[i][j] * int_vector[i][variable] / factor[j];
           component_frequency[0] += component_vector_count[i][j];
         }
       }
@@ -1327,7 +1411,7 @@ void Vectors::tied_gaussian_estimation(Type **component_vector_count , int varia
     case REAL_VALUE : {
       for (i = 0;i < nb_vector;i++) {
         for (j = 0;j < process->nb_state;j++) {
-          mean[0] += component_vector_count[i][j] * real_vector[i][variable] / factor[j];
+          bmean[0] += component_vector_count[i][j] * real_vector[i][variable] / factor[j];
           component_frequency[0] += component_vector_count[i][j];
         }
       }
@@ -1335,11 +1419,11 @@ void Vectors::tied_gaussian_estimation(Type **component_vector_count , int varia
     }
     }
 
-    mean[0] /= component_frequency[0];
-    process->observation[0]->location = mean[0];
+    bmean[0] /= component_frequency[0];
+    process->observation[0]->location = bmean[0];
     for (i = 1;i < process->nb_state;i++) {
-      mean[i] = mean[0] * factor[i];
-      process->observation[i]->location = mean[i];
+      bmean[i] = bmean[0] * factor[i];
+      process->observation[i]->location = bmean[i];
     }
 
     if (variance_factor == SCALING_FACTOR) {
@@ -1348,8 +1432,79 @@ void Vectors::tied_gaussian_estimation(Type **component_vector_count , int varia
         factor[i] *= factor[i];
       }
     }
-    break;
   }
+
+  else {
+    for (i = 0;i < process->nb_state;i++) {
+      bmean[i] = 0.;
+      component_frequency[i] = 0;
+    }
+
+    switch (type[variable]) {
+
+    case INT_VALUE : {
+      for (i = 0;i < nb_vector;i++) {
+        for (j = 0;j < process->nb_state;j++) {
+          bmean[j] += component_vector_count[i][j] * int_vector[i][variable];
+          component_frequency[j] += component_vector_count[i][j];
+        }
+      }
+      break;
+    }
+
+    case REAL_VALUE : {
+      for (i = 0;i < nb_vector;i++) {
+        for (j = 0;j < process->nb_state;j++) {
+          bmean[j] += component_vector_count[i][j] * real_vector[i][variable];
+          component_frequency[j] += component_vector_count[i][j];
+        }
+      }
+      break;
+    }
+    }
+
+    for (i = 0;i < process->nb_state;i++) {
+      if (component_frequency[i] > 0) {
+        bmean[i] /= component_frequency[i];
+        process->observation[i]->location = bmean[i];
+      }
+      else {
+        process->observation[i]->location = D_INF;
+      }
+    }
+
+    switch (variance_factor) {
+
+    case CONVOLUTION_FACTOR : {
+      factor[0] = 1.;
+      for (i = 1;i < process->nb_state;i++) {
+        if (component_frequency[i] > 0) {
+          factor[i] = bmean[i] / bmean[0];
+        }
+        else {
+          factor[i] = 1.;
+        }
+      }
+      break;
+    }
+
+    case SCALING_FACTOR : {
+      factor[0] = 1.;
+      for (i = 1;i < process->nb_state;i++) {
+        if (component_frequency[i] > 0) {
+          factor[i] = (bmean[i] * bmean[i]) / (bmean[0] * bmean[0]);
+        }
+        else {
+          factor[i] = 1.;
+        }
+      }
+      break;
+    }
+    }
+
+    for (i = 1;i < process->nb_state;i++) {
+      component_frequency[0] += component_frequency[i];
+    }
   }
 
   variance = 0.;
@@ -1359,7 +1514,7 @@ void Vectors::tied_gaussian_estimation(Type **component_vector_count , int varia
   case INT_VALUE : {
     for (i = 0;i < nb_vector;i++) {
       for (j = 0;j < process->nb_state;j++) {
-        diff = int_vector[i][variable] - mean[j];
+        diff = int_vector[i][variable] - bmean[j];
         variance += component_vector_count[i][j] * diff * diff / factor[j];
       }
     }
@@ -1369,7 +1524,7 @@ void Vectors::tied_gaussian_estimation(Type **component_vector_count , int varia
   case REAL_VALUE : {
     for (i = 0;i < nb_vector;i++) {
       for (j = 0;j < process->nb_state;j++) {
-        diff = real_vector[i][variable] - mean[j];
+        diff = real_vector[i][variable] - bmean[j];
         variance += component_vector_count[i][j] * diff * diff / factor[j];
       }
     }
@@ -1380,13 +1535,13 @@ void Vectors::tied_gaussian_estimation(Type **component_vector_count , int varia
 //  variance /= component_frequency[0];
   variance /= (component_frequency[0] - process->nb_state);
 
-  process->observation[0]->dispersion = sqrt(variance);
+  process->observation[0]->dispersion = sqrtl(variance);
   for (i = 1;i < process->nb_state;i++) {
-    process->observation[i]->dispersion = sqrt(variance * factor[i]);
+    process->observation[i]->dispersion = sqrtl(variance * factor[i]);
   }
 
   delete [] component_frequency;
-  delete [] mean;
+  delete [] bmean;
   delete [] factor;
 }
 
@@ -1493,21 +1648,7 @@ void Vectors::von_mises_estimation(Type **component_vector_count , int variable 
     }
   }
 
-  switch (process->tied_dispersion) {
-
-  case false : {
-    for (i = 0;i < process->nb_state;i++) {
-      if (component_frequency[i] > 0) {
-        process->observation[i]->dispersion = von_mises_concentration_computation(mean_direction[i][2]);
-      }
-      else {
-        process->observation[i]->dispersion = D_DEFAULT;
-      }
-    }
-    break;
-  }
-
-  case true : {
+  if (process->tied_dispersion) {
     global_mean_direction = 0.;
     buff = 0.;
 
@@ -1520,8 +1661,17 @@ void Vectors::von_mises_estimation(Type **component_vector_count , int variable 
     for (i = 0;i < process->nb_state;i++) {
       process->observation[i]->dispersion = concentration;
     }
-    break;
   }
+
+  else {
+    for (i = 0;i < process->nb_state;i++) {
+      if (component_frequency[i] > 0) {
+        process->observation[i]->dispersion = von_mises_concentration_computation(mean_direction[i][2]);
+      }
+      else {
+        process->observation[i]->dispersion = D_DEFAULT;
+      }
+    }
   }
 
   for (i = 0;i < process->nb_state;i++) {
