@@ -971,7 +971,7 @@ TimeEvents* TimeEvents::building(StatError &error , FrequencyDistribution &nb_ev
   timev = NULL;
   error.init();
 
-  if (itime / (nb_event.nb_value - 1) < MIN_INTER_EVENT) {
+  if ((nb_event.nb_value == 1) || (itime / (nb_event.nb_value - 1) < MIN_INTER_EVENT)) {
     status = false;
     error.update(SEQ_error[SEQR_SHORT_OBSERVATION_TIME]);
   }

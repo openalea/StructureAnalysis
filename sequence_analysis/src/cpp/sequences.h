@@ -199,6 +199,7 @@ namespace sequence_analysis {
 
   enum sequence_type {
     SEQUENCE ,
+    SEQUENCE_SAMPLE ,
     TREND ,
     SUBTRACTION_RESIDUAL ,
     ABSOLUTE_RESIDUAL ,
@@ -499,7 +500,8 @@ namespace sequence_analysis {
     std::ostream& ascii_write(std::ostream &os , bool exhaustive , bool comment_flag) const;
     std::ostream& ascii_print(std::ostream &os , output_sequence_format format , bool comment_flag ,
                               double *posterior_probability = NULL , double *entropy = NULL ,
-                              double *nb_state_sequence = NULL , int line_nb_character = stat_tool::LINE_NB_CHARACTER) const;
+                              double *nb_state_sequence = NULL , double *posterior_state_probability = NULL ,
+                              int line_nb_character = stat_tool::LINE_NB_CHARACTER) const;
     bool plot_print(const char *path , int ilength) const;
 
     void max_length_computation();
@@ -768,6 +770,8 @@ namespace sequence_analysis {
                                bool keep = true) const;
     Sequences* select_variable(stat_tool::StatError &error , int inb_variable , std::vector<int> ivariable ,
                                bool keep = true) const;
+    Sequences* sum_variable(stat_tool::StatError &error , int nb_summed_variable , int *ivariable) const;
+    Sequences* sum_variable(stat_tool::StatError &error , int nb_summed_variable , std::vector<int> ivariable) const;
     Sequences* merge_variable(stat_tool::StatError &error , int nb_sample , const Sequences **iseq ,
                               int ref_sample = stat_tool::I_DEFAULT) const;
     Sequences* merge_variable(stat_tool::StatError &error , int nb_sample , const std::vector<Sequences> iseq ,
@@ -792,7 +796,8 @@ namespace sequence_analysis {
     Sequences* cumulate(stat_tool::StatError &error , int variable = stat_tool::I_DEFAULT) const;
     Sequences* difference(stat_tool::StatError &error , int variable = stat_tool::I_DEFAULT ,
                           bool first_element = false) const;
-    Sequences* log_transform(stat_tool::StatError &error , int variable = stat_tool::I_DEFAULT) const;
+    Sequences* log_transform(stat_tool::StatError &error , int variable = stat_tool::I_DEFAULT ,
+                             stat_tool::log_base base = stat_tool::NATURAL) const;
     Sequences* relative_growth_rate(stat_tool::StatError &error , double growth_factor = GROWTH_FACTOR) const;
     Sequences* sequence_normalization(stat_tool::StatError &error , int variable = stat_tool::I_DEFAULT) const;
     Sequences* moving_average(stat_tool::StatError &error , int nb_point , double *filter ,

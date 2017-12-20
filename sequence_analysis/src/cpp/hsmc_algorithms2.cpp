@@ -58,13 +58,14 @@ namespace sequence_analysis {
 /**
  *  \brief Computation of the state sequence entropies using the forward-backward algorithm.
  *
- *  \param[in] seq reference on a SemiMarkovData object.
+ *  \param[in] seq reference on a SemiMarkovData object,
  */
 /*--------------------------------------------------------------*/
 
 void HiddenSemiMarkov::forward_backward(SemiMarkovData &seq) const
 
 {
+  bool posterior_state_probability_flag;
   int i , j , k , m , n;
   int **pioutput;
   double seq_likelihood , obs_product , residual , buff , sum , **observation ,
@@ -82,6 +83,11 @@ void HiddenSemiMarkov::forward_backward(SemiMarkovData &seq) const
 
   seq.entropy = new double[seq.nb_sequence];
   seq.nb_state_sequence = new double[seq.nb_sequence];
+
+  posterior_state_probability_flag = parallel_initial_state();
+  if (posterior_state_probability_flag) {
+    seq.posterior_state_probability = new double[seq.nb_sequence];
+  }
 
   observation = new double*[seq.max_length];
   for (i = 0;i < seq.max_length;i++) {
@@ -778,6 +784,15 @@ void HiddenSemiMarkov::forward_backward(SemiMarkovData &seq) const
                 }
               }
             }
+          }
+        }
+      }
+
+      if (posterior_state_probability_flag) {
+        seq.posterior_state_probability[i] = 0.;
+        for (j = 0;j < nb_state;j++) {
+          if (backward[0][j] > seq.posterior_state_probability[i]) {
+            seq.posterior_state_probability[i] = backward[0][j];
           }
         }
       }

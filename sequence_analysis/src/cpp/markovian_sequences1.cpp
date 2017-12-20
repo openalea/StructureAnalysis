@@ -3640,7 +3640,7 @@ void MarkovianSequences::min_interval_computation(int variable)
       while (i < nb_value);
 
 #     ifdef DEBUG
-      cout << "\n" << STAT_label[STATL_VARIABLE] << " " <<  variable + 1 << ": "
+      cout << "\n" << STAT_label[STATL_VARIABLE] << " " << variable + 1 << ": "
            << min_interval[variable] << " " << frequency[index[nb_value / 2]];
 #     endif
 

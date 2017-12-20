@@ -2738,6 +2738,7 @@ SemiMarkovData::SemiMarkovData()
   sample_entropy = D_DEFAULT;
 
   posterior_probability = NULL;
+  posterior_state_probability = NULL;
   entropy = NULL;
   nb_state_sequence = NULL;
 }
@@ -2767,6 +2768,7 @@ SemiMarkovData::SemiMarkovData(const FrequencyDistribution &ilength_distribution
   sample_entropy = D_DEFAULT;
 
   posterior_probability = NULL;
+  posterior_state_probability = NULL;
   entropy = NULL;
   nb_state_sequence = NULL;
 }
@@ -2793,6 +2795,7 @@ SemiMarkovData::SemiMarkovData(const MarkovianSequences &seq)
   sample_entropy = D_DEFAULT;
 
   posterior_probability = NULL;
+  posterior_state_probability = NULL;
   entropy = NULL;
   nb_state_sequence = NULL;
 }
@@ -2821,6 +2824,7 @@ SemiMarkovData::SemiMarkovData(const MarkovianSequences &seq , sequence_transfor
   sample_entropy = D_DEFAULT;
 
   posterior_probability = NULL;
+  posterior_state_probability = NULL;
   entropy = NULL;
   nb_state_sequence = NULL;
 }
@@ -2869,6 +2873,16 @@ void SemiMarkovData::copy(const SemiMarkovData &seq , bool model_flag)
     posterior_probability = NULL;
   }
 
+  if (seq.posterior_state_probability) {
+    posterior_state_probability = new double[nb_sequence];
+    for (i = 0;i < nb_sequence;i++) {
+      posterior_state_probability[i] = seq.posterior_state_probability[i];
+    }
+  }
+  else {
+    posterior_state_probability = NULL;
+  }
+
   if (seq.entropy) {
     entropy = new double[nb_sequence];
     for (i = 0;i < nb_sequence;i++) {
@@ -2904,6 +2918,7 @@ SemiMarkovData::~SemiMarkovData()
   delete chain_data;
 
   delete [] posterior_probability;
+  delete [] posterior_state_probability;
   delete [] entropy;
   delete [] nb_state_sequence;
 }
@@ -2927,6 +2942,7 @@ SemiMarkovData& SemiMarkovData::operator=(const SemiMarkovData &seq)
     delete chain_data;
 
     delete [] posterior_probability;
+    delete [] posterior_state_probability;
     delete [] entropy;
     delete [] nb_state_sequence;
 
@@ -3390,7 +3406,7 @@ ostream& SemiMarkovData::ascii_data_write(ostream &os , output_sequence_format f
 
 {
   MarkovianSequences::ascii_write(os , exhaustive , false);
-  ascii_print(os , format , false , posterior_probability , entropy , nb_state_sequence);
+  ascii_print(os , format , false , posterior_probability , entropy , nb_state_sequence , posterior_state_probability);
 
   return os;
 }
@@ -3429,7 +3445,7 @@ bool SemiMarkovData::ascii_data_write(StatError &error , const string path ,
     if (format != 'a') {
       MarkovianSequences::ascii_write(out_file , exhaustive , true);
     }
-    ascii_print(out_file , format , true , posterior_probability , entropy , nb_state_sequence);
+    ascii_print(out_file , format , true , posterior_probability , entropy , nb_state_sequence , posterior_state_probability);
   }
 
   return status;

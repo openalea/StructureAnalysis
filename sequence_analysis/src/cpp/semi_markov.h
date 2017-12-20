@@ -308,6 +308,7 @@ namespace sequence_analysis {
     double restoration_likelihood;  ///< log-likelihood for the restored state sequences
     double sample_entropy;  ///< entropy of the state sequences for the sample
     double *posterior_probability;  ///< posterior probabilities of the most probable state sequences
+    double *posterior_state_probability;  ///< posterior probabilities of the most probable initial state
     double *entropy;        ///< entropies of the state sequences
     double *nb_state_sequence;  ///< numbers of state sequences
 
@@ -355,6 +356,7 @@ namespace sequence_analysis {
     double get_restoration_likelihood() const { return restoration_likelihood; }
     double get_sample_entropy() const { return sample_entropy; }
     double get_posterior_probability(int index) const { return posterior_probability[index]; }
+    double get_state_posterior_probability(int index) const { return posterior_state_probability[index]; }
     double get_entropy(int index) const { return entropy[index]; }
     double get_nb_state_sequence(int index) const { return nb_state_sequence[index]; }
   };

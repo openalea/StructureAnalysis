@@ -79,6 +79,7 @@ ContinuousParametricProcess::ContinuousParametricProcess(int inb_state)
   ident = GAUSSIAN;
   tied_location = false;
   tied_dispersion = false;
+  offset = 0.;
   unit = DEGREE;
 
   if (nb_state > 0) {
@@ -116,6 +117,7 @@ ContinuousParametricProcess::ContinuousParametricProcess(int inb_state , Continu
   ident = pobservation[0]->ident;
   tied_location = false;
   tied_dispersion = false;
+  offset = 0.;
   unit = pobservation[0]->unit;
 
   observation = new ContinuousParametric*[nb_state];
@@ -146,6 +148,7 @@ void ContinuousParametricProcess::copy(const ContinuousParametricProcess &proces
   ident = process.ident;
   tied_location = process.tied_location;
   tied_dispersion = process.tied_dispersion;
+  offset = process.offset;
   unit = process.unit;
 
   observation = new ContinuousParametric*[nb_state];
@@ -1328,14 +1331,14 @@ ostream& ContinuousParametricProcess::ascii_print(ostream &os , Histogram **obse
       delete [] gamma_dist;
     }
 
-    else if (ident ==  INVERSE_GAUSSIAN) {
+    else if (ident == INVERSE_GAUSSIAN) {
       for (i = 0;i < nb_state;i++) {
         delete inverse_gaussian_dist[i];
       }
       delete [] inverse_gaussian_dist;
     }
 
-    else if (ident ==  GAUSSIAN) {
+    else if (ident == GAUSSIAN) {
       for (i = 0;i < nb_state;i++) {
         delete gaussian_dist[i];
       }
@@ -1562,7 +1565,7 @@ ostream& ContinuousParametricProcess::spreadsheet_print(ostream &os , Histogram 
 
         if (observation[i]->zero_probability == 1.) {
           for (j = 1;j < nb_step;j++) {
-            cumul[i][j] =  cumul[i][0];
+            cumul[i][j] = cumul[i][0];
             frequency[i][j] = 0.;
           }
         }
@@ -2289,7 +2292,7 @@ ostream& ContinuousParametricProcess::spreadsheet_print(ostream &os , Histogram 
       delete [] gamma_dist;
     }
 
-    else if (ident ==  INVERSE_GAUSSIAN) {
+    else if (ident == INVERSE_GAUSSIAN) {
       for (i = 0;i < nb_state;i++) {
         delete inverse_gaussian_dist[i];
       }
@@ -3091,7 +3094,7 @@ bool ContinuousParametricProcess::plot_print(const char *prefix , const char *ti
                             dist_max[j] * scale[j]) * YSCALE) + 1;
           }
           else {
-            max = MIN(dist_max[j] * YSCALE , 1.);
+            max = dist_max[j] * YSCALE;
           }
 
           out_file << "plot [" << min_value << ":" << max_value << "] [0:"
@@ -3150,7 +3153,7 @@ bool ContinuousParametricProcess::plot_print(const char *prefix , const char *ti
         }
 
         out_file << "plot [" << min_value  << ":" << max_value << "] [0:"
-                 << MIN(max * YSCALE , 1.) << "] ";
+                 << max * YSCALE << "] ";
         for (j = 0;j < nb_state;j++) {
           out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\" using 1:" << j + 2
                    << " title \"";
@@ -3344,7 +3347,7 @@ bool ContinuousParametricProcess::plot_print(const char *prefix , const char *ti
       delete [] gamma_dist;
     }
 
-    else if (ident ==  INVERSE_GAUSSIAN) {
+    else if (ident == INVERSE_GAUSSIAN) {
       for (i = 0;i < nb_state;i++) {
         delete inverse_gaussian_dist[i];
       }
@@ -3882,7 +3885,7 @@ void ContinuousParametricProcess::plotable_write(MultiPlotSet &plot , int &index
       }
       else {
         scale = 1.;
-        max = MIN(dist_max[i] * YSCALE , 1.);
+        max = dist_max[i] * YSCALE;
       }
 
       plot[index].yrange = Range(0 , max);
@@ -3967,7 +3970,7 @@ void ContinuousParametricProcess::plotable_write(MultiPlotSet &plot , int &index
         max = dist_max[i];
       }
     }
-    plot[index].yrange = Range(0 , MIN(max * YSCALE , 1.));
+    plot[index].yrange = Range(0 , max * YSCALE);
 
     for (i = 0;i < nb_state;i++) {
       legend.str("");
@@ -4274,7 +4277,7 @@ void ContinuousParametricProcess::plotable_write(MultiPlotSet &plot , int &index
     delete [] gamma_dist;
   }
 
-  else if (ident ==  INVERSE_GAUSSIAN) {
+  else if (ident == INVERSE_GAUSSIAN) {
     for (i = 0;i < nb_state;i++) {
       delete inverse_gaussian_dist[i];
     }
@@ -4339,6 +4342,9 @@ int ContinuousParametricProcess::nb_parameter_computation() const
   }
   if (tied_dispersion) {
     nb_parameter -= (nb_state - 1);
+  }
+  if (offset > 0.) {
+    nb_parameter++;
   }
 
   return nb_parameter;

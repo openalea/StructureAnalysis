@@ -1388,7 +1388,7 @@ Sequences* Sequences::segmentation(StatError &error , bool display , int iidenti
       buff = 1.;
       buff1 = 1.;
       for (i = 1;i <= max_nb_segment;i++) {
-        cout << i - 1 << "  " << i - 1 + log(buff) << "  " << log(buff1) << " | " <<  i - 1 + log(buff) - log(buff1) << endl;
+        cout << i - 1 << "  " << i - 1 + log(buff) << "  " << log(buff1) << " | " << i - 1 + log(buff) - log(buff1) << endl;
         buff *= (double)(seq->length[0] - i) / (double)i;
         buff1 *= (double)seq->length[0] / (double)i;
       }
@@ -4379,7 +4379,7 @@ double Sequences::forward_backward(int index , int nb_segment , segment_model *m
       for (j = 0;j < seq_length;j++) {
         if (forward_partial_entropy[i][j] > change_point_entropy[i][j]) {
           cout << "\n" << SEQ_label[SEQL_BEGIN_CONDITIONAL_ENTROPY] << " ERROR: "
-               << forward_partial_entropy[i][j] << " " <<  change_point_entropy[i][j]
+               << forward_partial_entropy[i][j] << " " << change_point_entropy[i][j]
                << " | " << i << ", " << j + 1 << endl;
         }
 

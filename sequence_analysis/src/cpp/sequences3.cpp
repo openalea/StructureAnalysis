@@ -1108,19 +1108,21 @@ bool Sequences::ascii_write(StatError &error , const string path ,
 /**
  *  \brief Writing of sequences.
  *
- *  \param[in,out] os                    stream,
- *  \param[in]     format                format (LINE/COLUMN/VECTOR/POSTERIOR_PROBABILITY),
- *  \param[in]     comment_flag          flag comment,
- *  \param[in]     posterior_probability posterior probabilities of the most probable state sequences,
- *  \param[in]     entropy               entropies of state sequences,
- *  \param[in]     nb_state_sequence     numbers of state sequences (hidden Markovian models),
- *  \param[in]     line_nb_character     number of characters per line.
+ *  \param[in,out] os                          stream,
+ *  \param[in]     format                      format (LINE/COLUMN/VECTOR/POSTERIOR_PROBABILITY),
+ *  \param[in]     comment_flag                flag comment,
+ *  \param[in]     posterior_probability       posterior probabilities of the most probable state sequences,
+ *  \param[in]     entropy                     entropies of state sequences,
+ *  \param[in]     nb_state_sequence           numbers of state sequences (hidden Markovian models),
+ *  \param[in]     posterior_state_probability posterior probabilities of the most probable initial state,
+ *  \param[in]     line_nb_character           number of characters per line.
  */
 /*--------------------------------------------------------------*/
 
 ostream& Sequences::ascii_print(ostream &os , output_sequence_format format , bool comment_flag ,
                                 double *posterior_probability , double *entropy ,
-                                double *nb_state_sequence , int line_nb_character) const
+                                double *nb_state_sequence , double *posterior_state_probability ,
+                                int line_nb_character) const
 
 {
   int i , j , k , m;
@@ -1520,7 +1522,7 @@ ostream& Sequences::ascii_print(ostream &os , output_sequence_format format , bo
   case POSTERIOR_PROBABILITY : {
     if ((posterior_probability) && (entropy) && (nb_state_sequence)) {
       bool *selected_sequence;
-      int index , width[6];
+      int index , width[7];
       double max , *divergence;
       ios_base::fmtflags format_flags;
 
@@ -1536,6 +1538,9 @@ ostream& Sequences::ascii_print(ostream &os , output_sequence_format format , bo
       width[3] = column_width(nb_sequence , divergence) + ASCII_SPACE;
       width[4] = column_width(nb_sequence , nb_state_sequence) + ASCII_SPACE;
       width[5] = column_width(max_length) + ASCII_SPACE;
+      if (posterior_state_probability) {
+        width[6] = column_width(nb_sequence , posterior_state_probability) + ASCII_SPACE;
+      }
 
       selected_sequence = new bool[nb_sequence];
       for (i = 0;i < nb_sequence;i++) {
@@ -1544,35 +1549,44 @@ ostream& Sequences::ascii_print(ostream &os , output_sequence_format format , bo
 
       format_flags = os.setf(ios::left , ios::adjustfield);
 
-      os << "\n6 " << STAT_word[STATW_VARIABLES] << endl;
+      os << "\n" << (posterior_state_probability ? 7 : 6) << " " << STAT_word[STATW_VARIABLES] << endl;
 
-      os << "\n" << STAT_word[STATW_VARIABLE] << " 1 : " << STAT_variable_word[INT_VALUE] << endl;
+      i = 1;
+      os << "\n" << STAT_word[STATW_VARIABLE] << " " << i++ << " : " << STAT_variable_word[INT_VALUE] << endl;
 
-      os << STAT_word[STATW_VARIABLE] << " 2 : " << STAT_variable_word[REAL_VALUE] << "   ";
+      if (posterior_state_probability) {
+        os << STAT_word[STATW_VARIABLE] << " " << i++ << " : " << STAT_variable_word[REAL_VALUE] << "   ";
+        if (comment_flag) {
+          os << "# ";
+        }
+        os << SEQ_label[SEQL_POSTERIOR_INITIAL_STATE_PROBABILITY] << endl;
+      }
+
+      os << STAT_word[STATW_VARIABLE] << " " << i++ << " : " << STAT_variable_word[REAL_VALUE] << "   ";
       if (comment_flag) {
         os << "# ";
       }
       os << SEQ_label[SEQL_POSTERIOR_STATE_SEQUENCE_PROBABILITY] << endl;
 
-      os << STAT_word[STATW_VARIABLE] << " 3 : " << STAT_variable_word[REAL_VALUE] << "   ";
+      os << STAT_word[STATW_VARIABLE] << " " << i++ << " : " << STAT_variable_word[REAL_VALUE] << "   ";
       if (comment_flag) {
         os << "# ";
       }
       os << SEQ_label[SEQL_STATE_SEQUENCE_ENTROPY] << endl;
 
-      os << STAT_word[STATW_VARIABLE] << " 4 : " << STAT_variable_word[REAL_VALUE] << "   ";
+      os << STAT_word[STATW_VARIABLE] << " " << i++ << " : " << STAT_variable_word[REAL_VALUE] << "   ";
       if (comment_flag) {
         os << "# ";
       }
       os << SEQ_label[SEQL_STATE_SEQUENCE_DIVERGENCE] << endl;
 
-      os << STAT_word[STATW_VARIABLE] << " 5 : " << STAT_variable_word[REAL_VALUE] << "   ";
+      os << STAT_word[STATW_VARIABLE] << " " << i++ << " : " << STAT_variable_word[REAL_VALUE] << "   ";
       if (comment_flag) {
         os << "# ";
       }
       os << SEQ_label[SEQL_NB_STATE_SEQUENCE] << endl;
 
-      os << STAT_word[STATW_VARIABLE] << " 6 : " << STAT_variable_word[INT_VALUE] << "    ";
+      os << STAT_word[STATW_VARIABLE] << " " << i << " : " << STAT_variable_word[INT_VALUE] << "    ";
       if (comment_flag) {
         os << "# ";
       }
@@ -1602,19 +1616,43 @@ ostream& Sequences::ascii_print(ostream &os , output_sequence_format format , bo
 #       endif
 
         max = 0.;
-        for (j = 0;j < nb_sequence;j++) {
-/*          if ((!selected_sequence[j]) && (entropy[j] > max)) {
-            max = entropy[j]; */
-          if ((!selected_sequence[j]) && (posterior_probability[j] > max)) {
-            max = posterior_probability[j];
-            index = j;
+
+        if (posterior_state_probability) {
+          for (j = 0;j < nb_sequence;j++) {
+            if ((!selected_sequence[j]) && (posterior_state_probability[j] > max)) {
+              max = posterior_state_probability[j];
+              index = j;
+            }
+          }
+        }
+
+        else {
+          for (j = 0;j < nb_sequence;j++) {
+/*            if ((!selected_sequence[j]) && (entropy[j] > max)) {
+              max = entropy[j]; */
+            if ((!selected_sequence[j]) && (posterior_probability[j] > max)) {
+              max = posterior_probability[j];
+              index = j;
+            }
           }
         }
 
         selected_sequence[index] = true;
 
-        os << setw(width[0]) << i + 1
-           << setw(width[1]) << posterior_probability[index]
+        os << setw(width[0]) << i + 1;
+
+        if (posterior_state_probability) {
+
+#         ifdef MESSAGE
+          if (posterior_probability[index] > posterior_state_probability[index] + DOUBLE_ERROR) {
+            cout << "\n" << SEQ_label[SEQL_SEQUENCE] << " " << identifier[index] << ", "<< SEQ_error[SEQR_POSTERIOR_PROBABILITY_ORDER] << endl;
+          }
+#         endif
+
+          os << setw(width[6]) << posterior_state_probability[index];
+        }
+
+        os << setw(width[1]) << posterior_probability[index]
            << setw(width[2]) << entropy[index]
            << setw(width[3]) << divergence[index]
            << setw(width[4]) << nb_state_sequence[index]

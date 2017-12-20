@@ -1343,7 +1343,7 @@ double Sequences::piecewise_linear_function(int index , int variable , int nb_se
 {
   int i , j , k;
   double likelihood , mean , diff , diff_sum , index_parameter_mean , response_mean , shifted_diff ,
-         slope , intercept , autoregressive_coeff;
+    slope , intercept , autoregressive_coeff , *individual_mean , *rank;
   long double square_sum , global_square_sum , index_parameter_variance , response_variance , covariance ,
               shifted_square_sum , autocovariance , residual_square_sum , mean_squared_error_1;
 
@@ -1451,21 +1451,76 @@ double Sequences::piecewise_linear_function(int index , int variable , int nb_se
     }
 
     else {
+      individual_mean = new double[nb_sequence];
+
+      // rank variance decomposition
+
+      if (((model_type == POISSON_CHANGE) || (model_type == NEGATIVE_BINOMIAL_0_CHANGE) ||
+           (model_type == NEGATIVE_BINOMIAL_1_CHANGE) || (model_type == BAYESIAN_POISSON_CHANGE)) && (variance)) {
+        rank = marginal_distribution[variable]->rank_computation();
+
+        for (i = 0;i < nb_segment;i++) {
+          mean = 0.;
+          for (j = 0;j < nb_sequence;j++) {
+            individual_mean[j] = 0.;
+            for (k = change_point[i];k < change_point[i + 1];k++) {
+              individual_mean[j] += rank[int_sequence[j][variable][k]];
+            }
+            mean += individual_mean[j];
+            individual_mean[j] /= (change_point[i + 1] - change_point[i]);
+          }
+          mean /= (nb_sequence * (change_point[i + 1] - change_point[i]));
+
+          square_sum = 0.;
+          for (j = 0;j < nb_sequence;j++) {
+            for (k = change_point[i];k < change_point[i + 1];k++) {
+              diff = rank[int_sequence[j][variable][k]] - mean;
+              square_sum += diff * diff;
+            }
+          }
+          variance[1][i] = square_sum / (nb_sequence * (change_point[i + 1] - change_point[i]));
+
+          square_sum = 0.;
+          for (j = 0;j < nb_sequence;j++) {
+            diff = individual_mean[j] - mean;
+            square_sum += diff * diff;
+          }
+          variance[2][i] = square_sum / nb_sequence;
+
+          square_sum = 0.;
+          for (j = 0;j < nb_sequence;j++) {
+            for (k = change_point[i];k < change_point[i + 1];k++) {
+              diff = rank[int_sequence[j][variable][k]] - individual_mean[j];
+              square_sum += diff * diff;
+            }
+          }
+          variance[3][i] = square_sum / (nb_sequence * (change_point[i + 1] - change_point[i]));
+        }
+
+        delete [] rank;
+      }
+
       if (model_type == VARIANCE_CHANGE) {
         mean = 0.;
 
         if (type[variable] != REAL_VALUE) {
-          for (i = 0;i < length[0];i++) {
-            for (j = 0;j < nb_sequence;j++) {
-              mean += int_sequence[j][variable][i];
+          for (i = 0;i < nb_sequence;i++) {
+            individual_mean[i] = 0.;
+            for (j = 0;j < length[0];j++) {
+              individual_mean[i] += int_sequence[i][variable][j];
             }
+            mean += individual_mean[i];
+            individual_mean[i] /= length[0];
           }
         }
         else {
-          for (i = 0;i < length[0];i++) {
-            for (j = 0;j < nb_sequence;j++) {
-              mean += real_sequence[j][variable][i];
+          for (i = 0;i < nb_sequence;i++) {
+            individual_mean[i] = 0.;
+            for (j = 0;j < length[0];j++) {
+              individual_mean[i] += real_sequence[i][variable][j];
             }
+            mean += individual_mean[i];
+            individual_mean[i] /= length[0];
           }
         }
         mean /= (nb_sequence * length[0]);
@@ -1476,17 +1531,23 @@ double Sequences::piecewise_linear_function(int index , int variable , int nb_se
           mean = 0.;
 
           if (type[variable] != REAL_VALUE) {
-            for (j = change_point[i];j < change_point[i + 1];j++) {
-              for (k = 0;k < nb_sequence;k++) {
-                mean += int_sequence[k][variable][j];
+            for (j = 0;j < nb_sequence;j++) {
+              individual_mean[j] = 0.;
+              for (k = change_point[i];k < change_point[i + 1];k++) {
+                individual_mean[j] += int_sequence[j][variable][k];
               }
+              mean += individual_mean[j];
+              individual_mean[j] /= (change_point[i + 1] - change_point[i]);
             }
           }
           else {
-            for (j = change_point[i];j < change_point[i + 1];j++) {
-              for (k = 0;k < nb_sequence;k++) {
-                mean += real_sequence[k][variable][j];
+            for (j = 0;j < nb_sequence;j++) {
+              individual_mean[j] = 0.;
+              for (k = change_point[i];k < change_point[i + 1];k++) {
+                individual_mean[j] += real_sequence[j][variable][k];
               }
+              mean += individual_mean[j];
+              individual_mean[j] /= (change_point[i + 1] - change_point[i]);
             }
           }
           mean /= (nb_sequence * (change_point[i + 1] - change_point[i]));
@@ -1507,17 +1568,17 @@ double Sequences::piecewise_linear_function(int index , int variable , int nb_se
           square_sum = 0.;
 
           if (type[variable] != REAL_VALUE) {
-            for (j = change_point[i];j < change_point[i + 1];j++) {
-              for (k = 0;k < nb_sequence;k++) {
-                diff = int_sequence[k][variable][j] - mean;
+            for (j = 0;j < nb_sequence;j++) {
+              for (k = change_point[i];k < change_point[i + 1];k++) {
+                diff = int_sequence[j][variable][k] - mean;
                 square_sum += diff * diff;
               }
             }
           }
           else {
-            for (j = change_point[i];j < change_point[i + 1];j++) {
-              for (k = 0;k < nb_sequence;k++) {
-                diff = real_sequence[k][variable][j] - mean;
+            for (j = 0;j < nb_sequence;j++) {
+              for (k = change_point[i];k < change_point[i + 1];k++) {
+                diff = real_sequence[j][variable][k] - mean;
                 square_sum += diff * diff;
               }
             }
@@ -1537,8 +1598,45 @@ double Sequences::piecewise_linear_function(int index , int variable , int nb_se
               likelihood = D_INF;
             }
           }
+
+          // variance decomposition
+
+          if ((model_type == GAUSSIAN_CHANGE) || (model_type == MEAN_CHANGE) ||
+              (model_type == BAYESIAN_GAUSSIAN_CHANGE)) {
+            variance[1][i] = square_sum / (nb_sequence * (change_point[i + 1] - change_point[i]));
+
+            square_sum = 0.;
+            for (j = 0;j < nb_sequence;j++) {
+              diff = individual_mean[j] - mean;
+              square_sum += diff * diff;
+            }
+            variance[2][i] = square_sum / nb_sequence;
+
+            square_sum = 0.;
+
+            if (type[variable] != REAL_VALUE) {
+              for (j = 0;j < nb_sequence;j++) {
+                for (k = change_point[i];k < change_point[i + 1];k++) {
+                  diff = int_sequence[j][variable][k] - individual_mean[j];
+                  square_sum += diff * diff;
+                }
+              }
+            }
+            else {
+              for (j = 0;j < nb_sequence;j++) {
+                for (k = change_point[i];k < change_point[i + 1];k++) {
+                  diff = real_sequence[j][variable][k] - individual_mean[j];
+                  square_sum += diff * diff;
+                }
+              }
+            }
+
+            variance[3][i] = square_sum / (nb_sequence * (change_point[i + 1] - change_point[i]));
+          }
         }
       }
+
+      delete [] individual_mean;
     }
 
     if (global_variance) {
@@ -2084,16 +2182,16 @@ double Sequences::piecewise_linear_function(int index , int variable , int nb_se
         mean = 0.;
 
         if (type[variable] != REAL_VALUE) {
-          for (i = 0;i < length[0];i++) {
-            for (j = 0;j < nb_sequence;j++) {
-              mean += int_sequence[j][variable][i];
+          for (i = 0;i < nb_sequence;i++) {
+            for (j = 0;j < length[0];j++) {
+              mean += int_sequence[i][variable][j];
             }
           }
         }
         else {
-          for (i = 0;i < length[0];i++) {
-            for (j = 0;j < nb_sequence;j++) {
-              mean += real_sequence[j][variable][i];
+          for (i = 0;i < nb_sequence;i++) {
+            for (j = 0;j < length[0];j++) {
+              mean += real_sequence[i][variable][j];
             }
           }
         }
@@ -2105,16 +2203,16 @@ double Sequences::piecewise_linear_function(int index , int variable , int nb_se
           mean = 0.;
 
           if (type[variable] != REAL_VALUE) {
-            for (j = change_point[i];j < change_point[i + 1];j++) {
-              for (k = 0;k < nb_sequence;k++) {
-                mean += int_sequence[k][variable][j];
+            for (j = 0;j < nb_sequence;j++) {
+              for (k = change_point[i];k < change_point[i + 1];k++) {
+                mean += int_sequence[j][variable][k];
               }
             }
           }
           else {
-            for (j = change_point[i];j < change_point[i + 1];j++) {
-              for (k = 0;k < nb_sequence;k++) {
-                mean += real_sequence[k][variable][j];
+            for (j = 0;j < nb_sequence;j++) {
+              for (k = change_point[i];k < change_point[i + 1];k++) {
+                mean += real_sequence[j][variable][k];
               }
             }
           }
@@ -2129,10 +2227,10 @@ double Sequences::piecewise_linear_function(int index , int variable , int nb_se
         shifted_square_sum = 0.;
         autocovariance = 0.;
         if (type[variable] != REAL_VALUE) {
-          for (j = change_point[i] + 1;j < change_point[i + 1];j++) {
-            for (k = 0;k < nb_sequence;k++) {
-              diff = int_sequence[k][variable][j] - mean;
-              shifted_diff = int_sequence[k][variable][j - 1] - mean;
+          for (j = 0;j < nb_sequence;j++) {
+            for (k = change_point[i] + 1;k < change_point[i + 1];k++) {
+              diff = int_sequence[j][variable][k] - mean;
+              shifted_diff = int_sequence[j][variable][k - 1] - mean;
               square_sum += diff * diff;
               shifted_square_sum += shifted_diff * shifted_diff;
               autocovariance += diff * shifted_diff;
@@ -2140,10 +2238,10 @@ double Sequences::piecewise_linear_function(int index , int variable , int nb_se
           }
         }
         else {
-          for (j = change_point[i] + 1;j < change_point[i + 1];j++) {
-            for (k = 0;k < nb_sequence;k++) {
-              diff = real_sequence[k][variable][j] - mean;
-              shifted_diff = real_sequence[k][variable][j - 1] - mean;
+          for (j = 0;j < nb_sequence;j++) {
+            for (k = change_point[i] + 1;k < change_point[i + 1];k++) {
+              diff = real_sequence[j][variable][k] - mean;
+              shifted_diff = real_sequence[j][variable][k - 1] - mean;
               square_sum += diff * diff;
               shifted_square_sum += shifted_diff * shifted_diff;
               autocovariance += diff * shifted_diff;
@@ -2369,6 +2467,9 @@ ostream& Sequences::piecewise_linear_function_ascii_print(ostream &os , int inde
     else {
       for (i = 0;i < nb_segment;i++) {
         os << mean[0][i] << " " << variance[0][i];
+        if (variance[1][i] > 0.) {
+          os << " (" << 100 * variance[2][i] / variance[1][i] << "%, " << 100 * variance[3][i] / variance[1][i] << "%)";
+        }
         if (i < nb_segment - 1) {
           os << " | ";
         }
@@ -2383,10 +2484,11 @@ ostream& Sequences::piecewise_linear_function_ascii_print(ostream &os , int inde
     if (nb_variable > 2) {
       os << STAT_label[STATL_VARIABLE] << " " << variable << "   ";
     }
-    os << SEQ_label[SEQL_SEGMENT] << " " << STAT_label[STATL_MEAN] << ", "
-       << STAT_label[STATL_STANDARD_DEVIATION] << ": ";
 
     if ((index != I_DEFAULT) || (!common_contrast)) {
+      os << SEQ_label[SEQL_SEGMENT] << " " << STAT_label[STATL_MEAN] << ", "
+         << STAT_label[STATL_STANDARD_DEVIATION] << ": ";
+
       for (i = 0;i < nb_sequence;i++) {
         if ((index == I_DEFAULT) || (index == i)) {
           for (j = 0;j < nb_segment;j++) {
@@ -2403,8 +2505,19 @@ ostream& Sequences::piecewise_linear_function_ascii_print(ostream &os , int inde
     }
 
     else {
+      os << SEQ_label[SEQL_SEGMENT] << " " << STAT_label[STATL_MEAN] << ", "
+         << STAT_label[STATL_STANDARD_DEVIATION];
+      if (model_type != VARIANCE_CHANGE) {
+        os << ", " << STAT_label[STATL_VARIANCE];
+      }
+      os << ": ";
+
       for (i = 0;i < nb_segment;i++) {
         os << mean[0][i] << " " << sqrt(variance[0][i]);
+        if ((model_type != VARIANCE_CHANGE) && (variance[1][i] > 0.)) {
+          os << " " << variance[0][i] << " (" << 100 * variance[2][i] / variance[1][i] << "%, "
+             << 100 * variance[3][i] / variance[1][i] << "%)";
+        }
         if (i < nb_segment - 1) {
           os << " | ";
         }
@@ -2458,8 +2571,8 @@ ostream& Sequences::piecewise_linear_function_ascii_print(ostream &os , int inde
                << "), " << sqrt(variance[index][i]);
 
             if (i < nb_segment - 1) {
-              os << ", " <<  intercept[index][i + 1] + slope[index][i + 1] * seq_index_parameter[change_point[i + 1]] -
-                            (intercept[index][i] + slope[index][i] * seq_index_parameter[change_point[i + 1]]) << " (";
+              os << ", " << intercept[index][i + 1] + slope[index][i + 1] * seq_index_parameter[change_point[i + 1]] -
+                           (intercept[index][i] + slope[index][i] * seq_index_parameter[change_point[i + 1]]) << " (";
 
               diff = seq_index_parameter[change_point[i + 1]] - index_parameter_mean[index][i];
               buff = test->value * sqrt(variance[index][i] * (1. / (double)(change_point[i + 1] - change_point[i]) +
@@ -2515,8 +2628,8 @@ ostream& Sequences::piecewise_linear_function_ascii_print(ostream &os , int inde
                << "), " << sqrt(variance[0][i]);
 
             if (i < nb_segment - 1) {
-              os << ", " <<  intercept[0][i + 1] + slope[0][i + 1] * seq_index_parameter[change_point[i + 1]] -
-                            (intercept[0][i] + slope[0][i] * seq_index_parameter[change_point[i + 1]]) << " (";
+              os << ", " << intercept[0][i + 1] + slope[0][i + 1] * seq_index_parameter[change_point[i + 1]] -
+                           (intercept[0][i] + slope[0][i] * seq_index_parameter[change_point[i + 1]]) << " (";
 
               diff = seq_index_parameter[change_point[i + 1]] - index_parameter_mean[0][i];
               buff = test->value * sqrt(variance[0][i] * (1. / (double)(nb_sequence * (change_point[i + 1] - change_point[i])) +
@@ -2738,7 +2851,13 @@ ostream& Sequences::piecewise_linear_function_spreadsheet_print(ostream &os , in
 
     else {
       for (i = 0;i < nb_segment;i++) {
-        os << "\t" << mean[0][i] << "\t" << variance[0][i] << "\t";
+        os << "\t" << mean[0][i] << "\t" << variance[0][i];
+        if (variance[1][i] > 0.) {
+          os << "\t" << 100 * variance[2][i] / variance[1][i] << "%\t" << 100 * variance[3][i] / variance[1][i] << "%";
+        }
+        if (i < nb_segment - 1) {
+          os << "\t\t";
+        }
       }
     }
     os << endl;
@@ -2746,15 +2865,15 @@ ostream& Sequences::piecewise_linear_function_spreadsheet_print(ostream &os , in
 
   else if ((model_type == NEGATIVE_BINOMIAL_0_CHANGE) || (model_type == NEGATIVE_BINOMIAL_1_CHANGE) ||
            (model_type == GAUSSIAN_CHANGE) || (model_type == MEAN_CHANGE) ||
-           (model_type == VARIANCE_CHANGE) || (model_type == AUTOREGRESSIVE_MODEL_CHANGE) ||
-           (model_type == BAYESIAN_GAUSSIAN_CHANGE)) {
+           (model_type == VARIANCE_CHANGE) || (model_type == BAYESIAN_GAUSSIAN_CHANGE)) {
     if (nb_variable > 2) {
       os << STAT_label[STATL_VARIABLE] << "\t" << variable << "\t";
     }
-    os << SEQ_label[SEQL_SEGMENT] << "\t" << STAT_label[STATL_MEAN] << "\t"
-       << STAT_label[STATL_STANDARD_DEVIATION];
 
     if ((index != I_DEFAULT) || (!common_contrast)) {
+      os << SEQ_label[SEQL_SEGMENT] << "\t" << STAT_label[STATL_MEAN] << "\t"
+         << STAT_label[STATL_STANDARD_DEVIATION];
+
       for (i = 0;i < nb_sequence;i++) {
         if ((index == I_DEFAULT) || (index == i)) {
           for (j = 0;j < nb_segment;j++) {
@@ -2768,8 +2887,21 @@ ostream& Sequences::piecewise_linear_function_spreadsheet_print(ostream &os , in
     }
 
     else {
+      os << SEQ_label[SEQL_SEGMENT] << "\t" << STAT_label[STATL_MEAN] << "\t"
+         << STAT_label[STATL_STANDARD_DEVIATION];
+      if (model_type != VARIANCE_CHANGE) {
+        os << "\t" << STAT_label[STATL_VARIANCE];
+      }
+
       for (i = 0;i < nb_segment;i++) {
-        os << "\t" << mean[0][i] << "\t" << sqrt(variance[0][i]) << "\t";
+        os << "\t" << mean[0][i] << "\t" << sqrt(variance[0][i]);
+        if ((model_type != VARIANCE_CHANGE) && (variance[1][i] > 0.)) {
+          os << "\t" << variance[0][i] << "\t" << 100 * variance[2][i] / variance[1][i] << "%\t"
+             << 100 * variance[3][i] / variance[1][i] << "%";
+        }
+        if (i < nb_segment - 1) {
+          os << "\t\t";
+        }
       }
     }
     os << endl;
@@ -2829,8 +2961,8 @@ ostream& Sequences::piecewise_linear_function_spreadsheet_print(ostream &os , in
                << "\t" << sqrt(variance[index][i]);
 
             if (i < nb_segment - 1) {
-              os << "\t" <<  intercept[index][i + 1] + slope[index][i + 1] * seq_index_parameter[change_point[i + 1]] -
-                            (intercept[index][i] + slope[index][i] * seq_index_parameter[change_point[i + 1]]);
+              os << "\t" << intercept[index][i + 1] + slope[index][i + 1] * seq_index_parameter[change_point[i + 1]] -
+                           (intercept[index][i] + slope[index][i] * seq_index_parameter[change_point[i + 1]]);
 
               diff = seq_index_parameter[change_point[i + 1]] - index_parameter_mean[index][i];
               buff = test->value * sqrt(variance[index][i] * (1. / (double)(change_point[i + 1] - change_point[i]) +
@@ -2885,8 +3017,8 @@ ostream& Sequences::piecewise_linear_function_spreadsheet_print(ostream &os , in
                << "\t" << sqrt(variance[0][i]);
 
             if (i < nb_segment - 1) {
-              os << "\t" <<  intercept[0][i + 1] + slope[0][i + 1] * seq_index_parameter[change_point[i + 1]] -
-                            (intercept[0][i] + slope[0][i] * seq_index_parameter[change_point[i + 1]]);
+              os << "\t" << intercept[0][i + 1] + slope[0][i + 1] * seq_index_parameter[change_point[i + 1]] -
+                           (intercept[0][i] + slope[0][i] * seq_index_parameter[change_point[i + 1]]);
 
               diff = seq_index_parameter[change_point[i + 1]] - index_parameter_mean[0][i];
               buff = test->value * sqrt(variance[0][i] * (1. / (double)(nb_sequence * (change_point[i + 1] - change_point[i])) +
@@ -3333,7 +3465,8 @@ Sequences* Sequences::segmentation_output(int nb_segment , segment_model *model_
 {
   bool *piecewise_function_flag;
   int i , j , k , m , n;
-  int inb_variable , *change_point , *seq_index_parameter = NULL;
+  int inb_variable , min_identifier , max_identifier , *iidentifier , *ilength , *change_point ,
+       *seq_index_parameter = NULL;
   variable_nature *itype;
   double likelihood , corrected_likelihood , diff , buff , change_point_amplitude , mean_absolute_deviation ,
          *global_variance , ***mean , ***variance , ***index_parameter_mean , ***intercept , ***slope ,
@@ -3408,8 +3541,10 @@ Sequences* Sequences::segmentation_output(int nb_segment , segment_model *model_
       if (common_contrast) {
         mean[i] = new double*[1];
         mean[i][0] = new double[nb_segment];
-        variance[i] = new double*[1];
-        variance[i][0] = new double[nb_segment];
+        variance[i] = new double*[4];
+        for (j = 0;j < 4;j++) {
+          variance[i][j] = new double[nb_segment];
+        }
       }
 
       else {
@@ -3523,6 +3658,46 @@ Sequences* Sequences::segmentation_output(int nb_segment , segment_model *model_
     }
 
     seq = new Sequences(*this , piecewise_function_flag);
+  }
+
+  else if (output == SEQUENCE_SAMPLE) {
+    iidentifier = new int[nb_sequence + 2];
+
+    min_identifier = identifier[0];
+    for (i = 0;i < nb_sequence;i++) {
+      if (identifier[i] < min_identifier) {
+        min_identifier = identifier[i];
+      }
+
+      iidentifier[i + 1] = identifier[i];
+    }
+
+    iidentifier[0] = min_identifier - 1;
+
+    max_identifier = identifier[nb_sequence - 1];
+    for (i = 0;i < nb_sequence - 1;i++) {
+      if (identifier[i] > max_identifier) {
+        max_identifier = identifier[i];
+      }
+    }
+
+    iidentifier[nb_sequence + 1] = max_identifier + 1;
+
+    ilength = new int[nb_sequence + 2];
+    for (i = 0;i < nb_sequence + 2;i++) {
+      ilength[i] = length[0];
+    }
+
+    itype = new variable_nature[nb_variable - 1];
+    for (i = 0;i < nb_variable - 1;i++) {
+      itype[i] = REAL_VALUE;
+    }
+
+    seq = new Sequences(nb_sequence + 2 , iidentifier , ilength , NULL ,
+                        index_param_type , nb_variable - 1 , itype);
+    delete [] iidentifier;
+    delete [] ilength;
+    delete [] itype;
   }
 
   else if (output == ABSOLUTE_RESIDUAL) {
@@ -3778,6 +3953,92 @@ Sequences* Sequences::segmentation_output(int nb_segment , segment_model *model_
           }
         }
       }
+    }
+    break;
+  }
+
+  case SEQUENCE_SAMPLE : {
+
+    // copy of index parameters
+
+    if (index_parameter) {
+      for (i = 0;i < seq->nb_sequence;i++) {
+        for (j = 0;j < (index_param_type == POSITION ? length[0] + 1 : length[0]);j++) {
+          seq->index_parameter[i][j] = index_parameter[0][j];
+        }
+      }
+
+      seq->build_index_parameter_frequency_distribution();
+      seq->index_interval_computation();
+    }
+
+    // copy of sequences
+
+    for (i = 0;i < nb_sequence;i++) {
+      for (j = 1;j < nb_variable;j++) {
+        if (type[j] != REAL_VALUE) {
+          for (k = 0;k < length[i];k++) {
+            seq->real_sequence[i + 1][j - 1][k] = int_sequence[i][j][k];
+          }
+        }
+
+        else {
+          for (k = 0;k < length[i];k++) {
+            seq->real_sequence[i + 1][j - 1][k] = real_sequence[i][j][k];
+          }
+        }
+      }
+    }
+
+    for (i = 1;i < nb_variable;i++) {
+      if ((model_type[i - 1] == LINEAR_MODEL_CHANGE) || (model_type[i - 1] == INTERCEPT_SLOPE_CHANGE)) {
+        if (continuity) {
+          for (j = 0;j < nb_segment;j++) {
+            for (k = change_point[j];k < change_point[j + 1];k++) {
+              seq->real_sequence[0][i - 1][k] = corrected_intercept[i][0][j] + corrected_slope[i][0][j] * seq_index_parameter[k];
+            }
+          }
+        }
+
+        else{
+          for (j = 0;j < nb_segment;j++) {
+            for (k = change_point[j];k < change_point[j + 1];k++) {
+              seq->real_sequence[0][i - 1][k] = intercept[i][0][j] + slope[i][0][j] * seq_index_parameter[k];
+            }
+          }
+        }
+      }
+
+      else {
+        for (j = 0;j < nb_segment;j++) {
+          for (k = change_point[j];k < change_point[j + 1];k++) {
+            seq->real_sequence[0][i - 1][k] = mean[i][0][j];
+          }
+        }
+      }
+
+      if ((model_type[i - 1] == MEAN_CHANGE) || (model_type[i - 1] == INTERCEPT_SLOPE_CHANGE)) {
+        buff = sqrt(global_variance[0]);
+        for (j = 0;j < length[i];j++) {
+          seq->real_sequence[nb_sequence + 1][i - 1][j] = buff;
+        }
+      }
+
+      else {
+        for (j = 0;j < nb_segment;j++) {
+          buff = sqrt(variance[i][0][j]);
+          for (k = change_point[j];k < change_point[j + 1];k++) {
+            seq->real_sequence[nb_sequence + 1][i - 1][k] = buff;
+          }
+        }
+      }
+    }
+
+    for (i = 0;i < seq->nb_variable;i++) {
+      seq->min_value_computation(i);
+      seq->max_value_computation(i);
+
+      seq->build_marginal_histogram(i);
     }
     break;
   }
@@ -4355,7 +4616,9 @@ Sequences* Sequences::segmentation_output(int nb_segment , segment_model *model_
         (model_type[i - 1] == BAYESIAN_POISSON_CHANGE) || (model_type[i - 1] == BAYESIAN_GAUSSIAN_CHANGE)) {
       if (common_contrast) {
         delete [] mean[i][0];
-        delete [] variance[i][0];
+        for (j = 0;j < 4;j++) {
+          delete [] variance[i][j];
+        }
       }
       else{
         for (j = 0;j < nb_sequence;j++) {
@@ -4632,6 +4895,13 @@ Sequences* Sequences::segmentation(StatError &error , bool display , int iidenti
       status = false;
       error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
     }
+
+    if (((model_type[i] == CATEGORICAL_CHANGE) || (model_type[i] == ORDINAL_GAUSSIAN_CHANGE) ||
+         (model_type[i] == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type[i] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE)) &&
+        (output == SEQUENCE_SAMPLE)) {
+      status = false;
+      error.update(SEQ_error[SEQR_FORBIDDEN_OUTPUT]);
+    }
   }
 
   if (iidentifier != I_DEFAULT) {
@@ -4654,6 +4924,11 @@ Sequences* Sequences::segmentation(StatError &error , bool display , int iidenti
       status = false;
       error.update(SEQ_error[SEQR_VARIABLE_SEQUENCE_LENGTH]);
     }
+  }
+
+  if (((index != I_DEFAULT) || (!common_contrast)) && (output == SEQUENCE_SAMPLE)) {
+    status = false;
+    error.update(SEQ_error[SEQR_FORBIDDEN_OUTPUT]);
   }
 
   if (status) {

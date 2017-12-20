@@ -161,6 +161,12 @@ namespace stat_tool {
     CIRCULAR
   };
 
+  enum log_base {
+    NATURAL ,
+    TWO ,
+    TEN
+  };
+
   enum process_type {
     ORDINARY ,
     EQUILIBRIUM ,

@@ -77,14 +77,15 @@ void MarkovianSequences::gamma_estimation(Type ***state_sequence_count , int var
 
 {
   int i , j , k;
-  double buff , diff , log_geometric_mean , *zero_mass , *mean , *variance;
+  double buff , diff , log_geometric_mean , *zero_mass , *mean;
+  long double *variance;
   Type *state_frequency;
 
 
   state_frequency = new Type[process->nb_state];
   zero_mass = new double[process->nb_state];
   mean = new double[process->nb_state];
-  variance = new double[process->nb_state];
+  variance = new long double[process->nb_state];
 
   for (i = 0;i < process->nb_state;i++) {
     zero_mass[i] = 0.;
@@ -190,7 +191,7 @@ void MarkovianSequences::gamma_estimation(Type ***state_sequence_count , int var
 
       else {
         if (variance[i] > 0.) {
-/*          if (sqrt(variance[i]) < mean[i] * GAMMA_VARIATION_COEFF_THRESHOLD) {
+/*          if (sqrtl(variance[i]) < mean[i] * GAMMA_VARIATION_COEFF_THRESHOLD) {
             variance[i] = mean[i] * mean[i] * GAMMA_VARIATION_COEFF_THRESHOLD * GAMMA_VARIATION_COEFF_THRESHOLD;
           }
           process->observation[i]->shape = mean[i] * mean[i] / variance[i];
@@ -307,14 +308,15 @@ void MarkovianSequences::zero_inflated_gamma_estimation(Type ***state_sequence_c
 
 {
   int i , j , k;
-  double buff , diff , log_geometric_mean , *zero_mass , *mean , *variance;
+  double buff , diff , log_geometric_mean , *zero_mass , *mean;
+  long double *variance;
   Type *state_frequency;
 
 
   state_frequency = new Type[process->nb_state];
   zero_mass = new double[process->nb_state];
   mean = new double[process->nb_state];
-  variance = new double[process->nb_state];
+  variance = new long double[process->nb_state];
 
   for (i = 0;i < process->nb_state;i++) {
     zero_mass[i] = 0.;
@@ -417,7 +419,7 @@ void MarkovianSequences::zero_inflated_gamma_estimation(Type ***state_sequence_c
         process->observation[i]->zero_probability = zero_mass[i] / (zero_mass[i] + state_frequency[i]);
 
         if ((variance[i] > 0.) && (state_frequency[i] > 1)) {
-/*          if (sqrt(variance[i]) < mean[i] * GAMMA_VARIATION_COEFF_THRESHOLD) {
+/*          if (sqrtl(variance[i]) < mean[i] * GAMMA_VARIATION_COEFF_THRESHOLD) {
             variance[i] = mean[i] * mean[i] * GAMMA_VARIATION_COEFF_THRESHOLD * GAMMA_VARIATION_COEFF_THRESHOLD;
           }
           process->observation[i]->shape = mean[i] * mean[i] / variance[i];
@@ -646,7 +648,8 @@ void MarkovianSequences::gaussian_estimation(Type ***state_sequence_count , int 
 
 {
   int i , j , k;
-  double diff , *mean , *variance;
+  double diff , *mean;
+  long double *variance;
   Type *state_frequency;
 
 
@@ -695,10 +698,52 @@ void MarkovianSequences::gaussian_estimation(Type ***state_sequence_count , int 
     }
   }
 
-  switch (process->tied_dispersion) {
+  if (process->tied_dispersion) {
+    for (i = 1;i < process->nb_state;i++) {
+      state_frequency[0] += state_frequency[i];
+    }
 
-  case false : {
-    variance = new double[process->nb_state];
+    variance = new long double[1];
+    variance[0] = 0.;
+
+    switch (type[variable]) {
+
+    case INT_VALUE : {
+      for (i = 0;i < nb_sequence;i++) {
+        for (j = 0;j < length[i];j++) {
+          for (k = 0;k < process->nb_state;k++) {
+            diff = int_sequence[i][variable][j] - mean[k];
+            variance[0] += state_sequence_count[i][j][k] * diff * diff;
+          }
+        }
+      }
+      break;
+    }
+
+    case REAL_VALUE : {
+      for (i = 0;i < nb_sequence;i++) {
+        for (j = 0;j < length[i];j++) {
+          for (k = 0;k < process->nb_state;k++) {
+            diff = real_sequence[i][variable][j] - mean[k];
+            variance[0] += state_sequence_count[i][j][k] * diff * diff;
+          }
+        }
+      }
+      break;
+    }
+    }
+
+//    variance[0] /= state_frequency[0];
+    variance[0] /= (state_frequency[0] - process->nb_state);
+
+    process->observation[0]->dispersion = sqrtl(variance[0]);
+    for (i = 1;i < process->nb_state;i++) {
+      process->observation[i]->dispersion = process->observation[0]->dispersion;
+    }
+  }
+
+  else {
+    variance = new long double[process->nb_state];
     for (i = 0;i < process->nb_state;i++) {
       variance[i] = 0.;
     }
@@ -735,60 +780,13 @@ void MarkovianSequences::gaussian_estimation(Type ***state_sequence_count , int 
 //        variance[i] /= state_frequency[i];
       if (state_frequency[i] > 1) {
         variance[i] /= (state_frequency[i] - 1);
-        process->observation[i]->dispersion = sqrt(variance[i]);
+        process->observation[i]->dispersion = sqrtl(variance[i]);
         if ((process->observation[i]->location != 0.) &&
             (process->observation[i]->dispersion / process->observation[i]->location < GAUSSIAN_MIN_VARIATION_COEFF)) {
           process->observation[i]->dispersion = process->observation[i]->location * GAUSSIAN_MIN_VARIATION_COEFF;
         }
       }
     }
-    break;
-  }
-
-  case true : {
-    for (i = 1;i < process->nb_state;i++) {
-      state_frequency[0] += state_frequency[i];
-    }
-
-    variance = new double[1];
-    variance[0] = 0.;
-
-    switch (type[variable]) {
-
-    case INT_VALUE : {
-      for (i = 0;i < nb_sequence;i++) {
-        for (j = 0;j < length[i];j++) {
-          for (k = 0;k < process->nb_state;k++) {
-            diff = int_sequence[i][variable][j] - mean[k];
-            variance[0] += state_sequence_count[i][j][k] * diff * diff;
-          }
-        }
-      }
-      break;
-    }
-
-    case REAL_VALUE : {
-      for (i = 0;i < nb_sequence;i++) {
-        for (j = 0;j < length[i];j++) {
-          for (k = 0;k < process->nb_state;k++) {
-            diff = real_sequence[i][variable][j] - mean[k];
-            variance[0] += state_sequence_count[i][j][k] * diff * diff;
-          }
-        }
-      }
-      break;
-    }
-    }
-
-//    variance[0] /= state_frequency[0];
-    variance[0] /= (state_frequency[0] - process->nb_state);
-
-    process->observation[0]->dispersion = sqrt(variance[0]);
-    for (i = 1;i < process->nb_state;i++) {
-      process->observation[i]->dispersion = process->observation[0]->dispersion;
-    }
-    break;
-  }
   }
 
   delete [] state_frequency;
@@ -903,21 +901,7 @@ void MarkovianSequences::von_mises_estimation(Type ***state_sequence_count , int
     }
   }
 
-  switch (process->tied_dispersion) {
-
-  case false : {
-    for (i = 0;i < process->nb_state;i++) {
-      if (state_frequency[i] > 0) {
-        process->observation[i]->dispersion = von_mises_concentration_computation(mean_direction[i][2]);
-      }
-      else {
-        process->observation[i]->dispersion = D_DEFAULT;
-      }
-    }
-    break;
-  }
-
-  case true : {
+  if (process->tied_dispersion) {
     global_mean_direction = 0.;
     buff = 0.;
 
@@ -930,8 +914,17 @@ void MarkovianSequences::von_mises_estimation(Type ***state_sequence_count , int
     for (i = 0;i < process->nb_state;i++) {
       process->observation[i]->dispersion = concentration;
     }
-    break;
   }
+
+  else {
+    for (i = 0;i < process->nb_state;i++) {
+      if (state_frequency[i] > 0) {
+        process->observation[i]->dispersion = von_mises_concentration_computation(mean_direction[i][2]);
+      }
+      else {
+        process->observation[i]->dispersion = D_DEFAULT;
+      }
+    }
   }
 
   for (i = 0;i < process->nb_state;i++) {
@@ -1164,7 +1157,7 @@ void MarkovianSequences::linear_model_estimation(Type ***state_sequence_count , 
       process->observation[i]->slope = covariance[i] / index_parameter_variance[i];
       process->observation[i]->intercept = mean[i] - process->observation[i]->slope * index_parameter_mean[i];
       if (variance[i] > 0.) {
-        process->observation[i]->correlation = covariance[i] / sqrt(variance[i] * index_parameter_variance[i]);
+        process->observation[i]->correlation = covariance[i] / sqrtl(variance[i] * index_parameter_variance[i]);
       }
       else {
         process->observation[i]->correlation = 0.;
@@ -1252,7 +1245,7 @@ void MarkovianSequences::linear_model_estimation(Type ***state_sequence_count , 
   for (i = 0;i < process->nb_state;i++) {
     if (state_frequency[i] > 2) {
       residual_square_sum[i] /= (state_frequency[i] - 2);
-      process->observation[i]->slope_standard_deviation = sqrt(residual_square_sum[i] / index_parameter_variance[i]);
+      process->observation[i]->slope_standard_deviation = sqrtl(residual_square_sum[i] / index_parameter_variance[i]);
       process->observation[i]->sample_size = state_frequency[i] - 2;
     }
     else {
@@ -1263,7 +1256,7 @@ void MarkovianSequences::linear_model_estimation(Type ***state_sequence_count , 
 
   for (i = 0;i < process->nb_state;i++) {
     if (state_frequency[i] > 2) {
-      process->observation[i]->dispersion = sqrt(residual_square_sum[i]);
+      process->observation[i]->dispersion = sqrtl(residual_square_sum[i]);
 
       if (mean[i] != 0.) {
         if (process->observation[i]->dispersion / mean[i] < GAUSSIAN_MIN_VARIATION_COEFF) {
@@ -1322,8 +1315,8 @@ void MarkovianSequences::autoregressive_model_estimation(Type ***state_sequence_
 
 {
   int i , j , k;
-  double diff , shifted_diff , residual_square_sum , *mean , *square_sum ,
-         *shifted_square_sum , *autocovariance;
+  double diff , shifted_diff , residual_square_sum , *mean;
+  long double *square_sum , *shifted_square_sum , *autocovariance;
   Type *state_frequency;
 
 
@@ -1372,9 +1365,9 @@ void MarkovianSequences::autoregressive_model_estimation(Type ***state_sequence_
     }
   }
 
-  square_sum = new double[process->nb_state];
-  shifted_square_sum = new double[process->nb_state];
-  autocovariance = new double[process->nb_state];
+  square_sum = new long double[process->nb_state];
+  shifted_square_sum = new long double[process->nb_state];
+  autocovariance = new long double[process->nb_state];
   for (i = 0;i < process->nb_state;i++) {
     square_sum[i] = 0.;
     shifted_square_sum[i] = 0.;
