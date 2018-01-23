@@ -39,11 +39,9 @@
 #ifndef REESTIMATION_H
 #define REESTIMATION_H
 
-
-
 #include <iostream>
 
-
+#include "config.h"
 
 namespace stat_tool {
 
@@ -176,7 +174,7 @@ namespace stat_tool {
   };
 
 
-  double interval_bisection(Reestimation<double> *distribution_reestim ,
+  STAT_TOOL_API double interval_bisection(Reestimation<double> *distribution_reestim ,
                             Reestimation<double> *length_bias_reestim);
 
 

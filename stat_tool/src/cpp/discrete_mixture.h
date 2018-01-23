@@ -75,7 +75,7 @@ namespace stat_tool {
 
   /// \brief Mixture of discrete distributions
 
-  class DiscreteMixture : public StatInterface , public Distribution {
+  class STAT_TOOL_API DiscreteMixture : public StatInterface , public Distribution {
 
     friend class FrequencyDistribution;
     friend class DiscreteMixtureData;
@@ -156,7 +156,7 @@ namespace stat_tool {
 
   /// \brief Data structure corresponding to a mixture of discrete distributions
 
-  class DiscreteMixtureData : public StatInterface , public FrequencyDistribution {
+  class STAT_TOOL_API DiscreteMixtureData : public StatInterface , public FrequencyDistribution {
 
     friend class FrequencyDistribution;
     friend class DiscreteMixture;

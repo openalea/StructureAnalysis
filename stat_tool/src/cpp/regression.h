@@ -74,7 +74,7 @@ namespace stat_tool {
 
   /// \brief Regression kernel class
 
-  class RegressionKernel {
+  class STAT_TOOL_API RegressionKernel {
 
   public :
 
@@ -113,7 +113,7 @@ namespace stat_tool {
 
   /// \brief Regression function
 
-  class Regression : public StatInterface , public RegressionKernel {
+  class STAT_TOOL_API Regression : public StatInterface , public RegressionKernel {
 
     friend class Vectors;
 

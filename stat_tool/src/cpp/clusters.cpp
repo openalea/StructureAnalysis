@@ -40,6 +40,7 @@
 #include <sstream>
 #include <iomanip>
 #include <cstring>
+#include <fstream>
 
 #include "distance_matrix.h"
 #include "stat_label.h"

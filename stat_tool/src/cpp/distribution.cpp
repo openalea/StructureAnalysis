@@ -41,6 +41,7 @@
 #include <sstream>
 #include <iomanip>
 #include <cstring>
+#include <fstream>
 
 #include "stat_tools.h"
 #include "curves.h"

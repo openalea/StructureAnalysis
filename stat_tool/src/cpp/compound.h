@@ -76,7 +76,7 @@ namespace stat_tool {
 
   /// \brief Compound distribution
 
-  class Compound : public StatInterface , public Distribution {
+  class STAT_TOOL_API Compound : public StatInterface , public Distribution {
 
     friend class FrequencyDistribution;
     friend class CompoundData;
@@ -144,7 +144,7 @@ namespace stat_tool {
 
   /// \brief Data structure corresponding to a compound distribution
 
-  class CompoundData : public StatInterface , public FrequencyDistribution {
+  class STAT_TOOL_API CompoundData : public StatInterface , public FrequencyDistribution {
     friend class FrequencyDistribution;
     friend class Compound;
 

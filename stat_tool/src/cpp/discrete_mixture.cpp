@@ -40,6 +40,7 @@
 #include <string>
 #include <vector>
 #include <iomanip>
+#include <fstream>
 
 #include <boost/tokenizer.hpp>
 #include <boost/algorithm/string/trim.hpp>

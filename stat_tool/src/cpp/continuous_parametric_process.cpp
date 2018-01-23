@@ -37,6 +37,10 @@
 
 
 #include <math.h>
+#include <sstream>
+#include <fstream>
+#include <iostream>
+#include <iomanip>
 
 #include <boost/tokenizer.hpp>
 

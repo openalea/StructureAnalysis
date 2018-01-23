@@ -48,8 +48,6 @@
 
 using std::string;
 
-
-
 namespace stat_tool {
 
   enum process_distribution {
@@ -76,9 +74,9 @@ namespace stat_tool {
 
   // Class SinglePlot: list of (X, Y) pair with properties
 
-  class SinglePlot
+  class STAT_TOOL_API SinglePlot
   {
-    typedef std::list<PlotPoint> Points;
+    typedef std::vector<PlotPoint> Points;
     typedef std::vector<Label> Labels;
 
   public:
@@ -121,19 +119,19 @@ namespace stat_tool {
     int get_size() { return data_and_text.size(); }
  
     int size()
-    { return data.size(); };   
+    { return data_and_text.size(); };   
 
-    Points::const_iterator begin()
-    { return data.begin(); };
+    // Points::const_iterator begin()
+    // { return data_and_text.begin(); };
 
-    Points::const_iterator end()
-    { return data.end(); };
+    // Points::const_iterator end()
+    // { return data_and_text.end(); };
   };
 
 
   // Class MultiPlot: set of SinglePlot
 
-  class MultiPlot
+  class STAT_TOOL_API MultiPlot
   {
     std::vector<SinglePlot> plots;
     

@@ -37,6 +37,7 @@
 
 
 #include <iomanip>
+#include <fstream>
 
 #include "curves.h"
 #include "stat_label.h"

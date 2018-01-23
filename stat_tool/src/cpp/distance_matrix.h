@@ -102,7 +102,7 @@ namespace stat_tool {
 
   /// \brief Distance matrix
 
-  class DistanceMatrix : public StatInterface {
+  class STAT_TOOL_API DistanceMatrix : public StatInterface {
 
     friend class Clusters;
     friend class Dendrogram;
@@ -242,7 +242,7 @@ namespace stat_tool {
 
   /// \brief Partitioning clustering results
 
-  class Clusters : public DistanceMatrix {
+  class STAT_TOOL_API Clusters : public DistanceMatrix {
 
     friend class DistanceMatrix;
 
@@ -324,7 +324,7 @@ namespace stat_tool {
 
   /// \brief Hierarchical clustering results
 
-  class Dendrogram : public StatInterface {
+  class STAT_TOOL_API Dendrogram : public StatInterface {
 
     friend class DistanceMatrix;
 

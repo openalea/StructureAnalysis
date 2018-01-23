@@ -73,7 +73,7 @@ namespace stat_tool {
 
   /// \brief Family of curves with frequencies
 
-  class Curves {
+  class STAT_TOOL_API Curves {
 
     friend std::ostream& operator<<(std::ostream& , const Curves&);
 

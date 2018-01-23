@@ -38,6 +38,7 @@
 
 #include <string>
 #include <iomanip>
+#include <fstream>
 
 #include "distance_matrix.h"
 #include "stat_label.h"

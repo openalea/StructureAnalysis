@@ -41,6 +41,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <fstream>
 
 #include <boost/tokenizer.hpp>
 #include <boost/algorithm/string/trim.hpp>

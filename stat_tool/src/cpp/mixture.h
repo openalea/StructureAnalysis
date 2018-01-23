@@ -74,7 +74,7 @@ namespace stat_tool {
 
   /// \brief Multivariate mixture of distributions
 
-  class Mixture : public StatInterface {
+  class STAT_TOOL_API Mixture : public StatInterface {
 
     friend class Vectors;
     friend class MixtureData;
@@ -169,7 +169,7 @@ namespace stat_tool {
 
   /// \brief Data structure corresponding to a multivariate mixture of distributions
 
-  class MixtureData : public Vectors {
+  class STAT_TOOL_API MixtureData : public Vectors {
 
     friend class Vectors;
     friend class Mixture;

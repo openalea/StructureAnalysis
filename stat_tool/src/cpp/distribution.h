@@ -50,7 +50,7 @@ namespace stat_tool {
 
   /// \brief Discrete parametric distribution
 
-  class DiscreteParametricModel : public StatInterface , public DiscreteParametric {
+  class STAT_TOOL_API DiscreteParametricModel : public StatInterface , public DiscreteParametric {
 
     friend class Distribution;  // Hack for Windows
     friend class FrequencyDistribution;
@@ -114,7 +114,7 @@ namespace stat_tool {
 
   // \brief Frequency distribution
 
-  class DiscreteDistributionData : public StatInterface , public FrequencyDistribution {
+  class STAT_TOOL_API DiscreteDistributionData : public StatInterface , public FrequencyDistribution {
 
     friend class DiscreteParametricModel;
 

@@ -77,7 +77,7 @@ namespace stat_tool {
 
   /// \brief Convolution of discrete distributions
 
-  class Convolution : public StatInterface , public Distribution {
+  class STAT_TOOL_API Convolution : public StatInterface , public Distribution {
 
     friend class FrequencyDistribution;
     friend class ConvolutionData;
@@ -147,7 +147,7 @@ namespace stat_tool {
 
   /// \brief Data structure corresponding to a convolution of discrete distributions
 
-  class ConvolutionData : public StatInterface , public FrequencyDistribution {
+  class STAT_TOOL_API ConvolutionData : public StatInterface , public FrequencyDistribution {
 
     friend class FrequencyDistribution;
     friend class Convolution;

@@ -100,6 +100,14 @@ StatError::~StatError()
   }
 }
 
+std::string StatError::ascii_write(error_type type) const
+{
+  ostringstream oss;
+      
+  ascii_write(oss , type);
+
+  return oss.str();
+}
 
 /*--------------------------------------------------------------*/
 /**

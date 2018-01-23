@@ -43,6 +43,7 @@
 #include <vector>
 #include <sstream>
 #include <iomanip>
+#include <fstream>
 
 #include "distribution.h"
 #include "curves.h"

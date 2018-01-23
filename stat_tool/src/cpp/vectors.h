@@ -123,7 +123,7 @@ namespace stat_tool {
 
   /// \brief Vectors with integer- and real-valued variables
 
-  class Vectors : public StatInterface {
+  class STAT_TOOL_API Vectors : public StatInterface {
 
     friend class Regression;
     friend class Mixture;
@@ -432,7 +432,7 @@ namespace stat_tool {
 
   /// \brief Parameterization of a distance between vectors with heterogeneous variables
 
-  class VectorDistance : public StatInterface {
+  class STAT_TOOL_API VectorDistance : public StatInterface {
 
     friend class Vectors;
 

@@ -34,7 +34,8 @@
  *  ----------------------------------------------------------------------------
  */
 
-
+#define STAT_LABEL_CPP
+#include "stat_label.h"
 
 namespace stat_tool {
 

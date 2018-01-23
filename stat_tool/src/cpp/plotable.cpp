@@ -38,6 +38,7 @@
 #include <iostream>
 #include <stdlib.h>
 
+#include "stat_tools.h"
 #include "plotable.h"
 
 using namespace std;
@@ -50,7 +51,8 @@ namespace stat_tool {
 
 void SinglePlot::add_point(float x, float y)
 {
-  data.push_back(std::pair<float, float>(x,y));
+  // data.push_back(std::pair<float, float>(x,y));
+    add_text(x, y, "");
 }
 
 void SinglePlot::add_point(const PlotPoint& p)
