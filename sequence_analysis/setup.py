@@ -51,14 +51,15 @@ if __name__ == '__main__':
           create_namespaces=True,
 
           # Packages
-          packages=['openalea', 
+          packages=['openalea',
                     'openalea.sequence_analysis',
-                    'sequence_analysis_wralea.demo.change_point', 
-                    'sequence_analysis_wralea.demo.stat_tool_tutorial', 
+                    'sequence_analysis_wralea.demo.change_point',
+                    'sequence_analysis_wralea.demo.stat_tool_tutorial',
                     'sequence_analysis_wralea',
                     ],
 
-          package_dir={ "openalea.sequence_analysis" : pj("src","sequence_analysis"),  '':'src'},
+          package_dir={ "openalea.sequence_analysis" : pj("src","openalea","sequence_analysis"),
+                        "":"src"},
           share_dirs = { 'share' : 'share' },
 
 
