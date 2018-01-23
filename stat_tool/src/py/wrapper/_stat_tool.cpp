@@ -69,7 +69,6 @@ void wrapper_a18fbbaaa69b5c948c8a228f2d6f4a61();
 void wrapper_a2ee7427a2e3532a81d098956e35f92e();
 void wrapper_a4ec1929ca0853fbb1225d63f381e9e9();
 void wrapper_a87ca98a1bfb5734926ff985d38c7479();
-void wrapper_a91a18eff57b57bf937c00c6700ed896();
 void wrapper_ad547ba62d555da5925f982f13f6787b();
 void wrapper_b2b598c024f65acba246d207ae371e07();
 void wrapper_b6671fe8acff574aaf15e1ac26abb1bf();
@@ -91,7 +90,6 @@ void wrapper_ee282d2f51c8552ab1fe6c3d4c138e4b();
 void wrapper_ee3ef581666a5a45ab4576cfe45beb11();
 void wrapper_ee6a7db98b4a5be8b6b0ce867301d18c();
 void wrapper_f2037461cb4052b7bd89cc9ba087647c();
-void wrapper_f38d1184226e5eab899f2ead9c835dc3();
 void wrapper_f8e6e1fb23ed565882e129ff519e2e8e();
 void wrapper_f926cb231a7f5da09f313cd361ff94c7();
 void wrapper_fd2600c41cee533c8c9f0e437b2ea032();
@@ -121,7 +119,6 @@ void wrapper_d3fbcd4a393754ca8d7be71823564225();
 void wrapper_db7f50b235e15b1aa024911715fa604a();
 void wrapper_e00cc711eccf595f84c6952a456d7688();
 void wrapper_e01b7ade8cab5e31a34a5e2f80a619a6();
-void wrapper_e02265b3556258f58f3c778c3fc40f56();
 void wrapper_e95f705e6c0c58008e5a01fae73debe6();
 void wrapper_f0840635c9e2594cb061b2ce1bc3514a();
 void wrapper_f2215828ca3a504b8e3d080988e9947f();
@@ -137,9 +134,7 @@ void wrapper_acd6178a21305dc0a048b18ff459a4b3();
 void wrapper_cf43b79f5a78554dace960313eb9c09b();
 void wrapper_e1391944268253558f04b6f996bb5a8b();
 void wrapper_e4b407b97f515e8bbcdf5a6f0e8aa41c();
-void wrapper_fca17f710d195093b3688c031fef3ac8();
 void wrapper_b6a067f70ca259909a6411bfb14cfdca();
-void wrapper_e102b867f3765e87889ff8f3373ea10b();
 
 boost::python::docstring_options docstring_options(1, 0, 0);
 
@@ -214,7 +209,6 @@ BOOST_PYTHON_MODULE(__stat_tool)
     wrapper_a2ee7427a2e3532a81d098956e35f92e();
     wrapper_a4ec1929ca0853fbb1225d63f381e9e9();
     wrapper_a87ca98a1bfb5734926ff985d38c7479();
-    wrapper_a91a18eff57b57bf937c00c6700ed896();
     wrapper_ad547ba62d555da5925f982f13f6787b();
     wrapper_b2b598c024f65acba246d207ae371e07();
     wrapper_b6671fe8acff574aaf15e1ac26abb1bf();
@@ -236,7 +230,6 @@ BOOST_PYTHON_MODULE(__stat_tool)
     wrapper_ee3ef581666a5a45ab4576cfe45beb11();
     wrapper_ee6a7db98b4a5be8b6b0ce867301d18c();
     wrapper_f2037461cb4052b7bd89cc9ba087647c();
-    wrapper_f38d1184226e5eab899f2ead9c835dc3();
     wrapper_f8e6e1fb23ed565882e129ff519e2e8e();
     wrapper_f926cb231a7f5da09f313cd361ff94c7();
     wrapper_fd2600c41cee533c8c9f0e437b2ea032();
@@ -266,7 +259,6 @@ BOOST_PYTHON_MODULE(__stat_tool)
     wrapper_db7f50b235e15b1aa024911715fa604a();
     wrapper_e00cc711eccf595f84c6952a456d7688();
     wrapper_e01b7ade8cab5e31a34a5e2f80a619a6();
-    wrapper_e02265b3556258f58f3c778c3fc40f56();
     wrapper_e95f705e6c0c58008e5a01fae73debe6();
     wrapper_f0840635c9e2594cb061b2ce1bc3514a();
     wrapper_f2215828ca3a504b8e3d080988e9947f();
@@ -282,7 +274,5 @@ BOOST_PYTHON_MODULE(__stat_tool)
     wrapper_cf43b79f5a78554dace960313eb9c09b();
     wrapper_e1391944268253558f04b6f996bb5a8b();
     wrapper_e4b407b97f515e8bbcdf5a6f0e8aa41c();
-    wrapper_fca17f710d195093b3688c031fef3ac8();
     wrapper_b6a067f70ca259909a6411bfb14cfdca();
-    wrapper_e102b867f3765e87889ff8f3373ea10b();
 }
