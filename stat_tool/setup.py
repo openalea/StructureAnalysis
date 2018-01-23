@@ -1,9 +1,5 @@
 # -*- coding: utf-8 -*-
-__revision__ = "$Id$"
-
 """setup file for stat_tool package"""
-
-__revision__ = "$Id$"
 
 import os, sys
 from setuptools import setup, find_packages
@@ -24,7 +20,6 @@ scons_parameters = ["build_prefix=" + build_prefix]
 
 
 # platform dependencies
-install_requires = [binary_deps('vplants.tool')]
 if sys.platform.startswith('win'):
     install_requires += [binary_deps("boost")]
 install_requires = []
@@ -52,13 +47,16 @@ if __name__ == '__main__':
           create_namespaces=True,
 
           # Packages
-          packages=['openalea', 
+          packages=['openalea',
                     'openalea.stat_tool',
                     'structure_analysis',
-                    'structure_analysis.stat_tool' 
+                    'structure_analysis.stat_tool'
                     ],
 
-          package_dir={ "openalea.stat_tool" : pj("src","stat_tool"), "structure_analysis" : pj("src", "py", "structure_analysis"), "structure_analysis.stat_tool" : pj("src", "py", "structure_analysis", "stat_tool"), '':'src'},
+          package_dir={ "openalea.stat_tool" : pj("src","openalea", "stat_tool"),
+                        "structure_analysis" : pj("src", "py", "structure_analysis"),
+                        "structure_analysis.stat_tool" : pj("src", "py", "structure_analysis", "stat_tool"),
+                        '':'src'},
           share_dirs = { 'share' : 'share' },
 
 

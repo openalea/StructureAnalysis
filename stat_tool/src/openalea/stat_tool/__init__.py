@@ -1,21 +1,24 @@
-import os.path
+from distribution import *
+from histogram import *
+from mixture import *
+from compound import *
+from convolution import *
+from vectors import *
+from estimate import *
+from simulate import *
+from comparison import *
+from regression import *
+from output import  *
+from data_transform import *
+from cluster import *
+from enums import *
+from plot import *
+from error import *
+
+from openalea.deploy.shared_data import get_shared_data_path
 from os.path import join as pj
 
-cdir = os.path.dirname(__file__)
-pdir = pj(cdir, "..", "..", "stat_tool")
-pdir = os.path.abspath(pdir)
-import openalea.stat_tool
-from openalea.stat_tool import __path__
-__path__ = [pdir] + __path__[:]
-
-from openalea.stat_tool.__init__ import *
-
-
-"""
-# Redirect path
-import os
-import vplants.stat_tool
-__path__ = vplants.stat_tool.__path__ + __path__[:]
-
-from vplants.stat_tool.__init__ import *
-"""
+def get_shared_data(file):
+    import openalea.stat_tool
+    shared_data_path = get_shared_data_path(openalea.stat_tool.__path__)
+    return pj(shared_data_path, file)
