@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       V-Plants: Exploring and Modeling Plant Architecture
+ *       StructureAnalysis: Exploring and Analyzing Plant Architecture
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2018 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for V-Plants developers:
+ *       Forum for StructureAnalysis developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -217,7 +217,7 @@ void HiddenSemiMarkov::forward_backward(SemiMarkovData &seq) const
                 break;
               }
 
-              observation[j][k] *= continuous_parametric_process[m]->observation[k]->mass_computation(residual - seq.min_interval[m + 1] / 2 , residual + seq.min_interval[m + 1] / 2);
+              observation[j][k] *= continuous_parametric_process[m]->observation[k]->mass_computation(residual , residual);
             }
 
             else if (continuous_parametric_process[m]->ident == AUTOREGRESSIVE_MODEL) {
@@ -247,7 +247,7 @@ void HiddenSemiMarkov::forward_backward(SemiMarkovData &seq) const
                 }
               }
 
-              observation[j][k] *= continuous_parametric_process[m]->observation[k]->mass_computation(residual - seq.min_interval[m + 1] / 2 , residual + seq.min_interval[m + 1] / 2);
+              observation[j][k] *= continuous_parametric_process[m]->observation[k]->mass_computation(residual , residual);
             }
 
             else {
@@ -541,7 +541,7 @@ void HiddenSemiMarkov::forward_backward(SemiMarkovData &seq) const
                   break;
                 }
 
-                entropy -= backward[j][k] * log(continuous_parametric_process[m]->observation[k]->mass_computation(residual - seq.min_interval[m + 1] / 2 , residual + seq.min_interval[m + 1] / 2));
+                entropy -= backward[j][k] * log(continuous_parametric_process[m]->observation[k]->mass_computation(residual , residual));
               }
 
               else if (continuous_parametric_process[m]->ident == AUTOREGRESSIVE_MODEL) {
@@ -571,7 +571,7 @@ void HiddenSemiMarkov::forward_backward(SemiMarkovData &seq) const
                   }
                 }
 
-                entropy -= backward[j][k] * log(continuous_parametric_process[m]->observation[k]->mass_computation(residual - seq.min_interval[m + 1] / 2 , residual + seq.min_interval[m + 1] / 2));
+                entropy -= backward[j][k] * log(continuous_parametric_process[m]->observation[k]->mass_computation(residual , residual));
               }
 
               else {
@@ -739,7 +739,7 @@ void HiddenSemiMarkov::forward_backward(SemiMarkovData &seq) const
                     break;
                   }
 
-                  entropy -= backward[j][k] * log(continuous_parametric_process[m]->observation[k]->mass_computation(residual - seq.min_interval[m + 1] / 2 , residual + seq.min_interval[m + 1] / 2));
+                  entropy -= backward[j][k] * log(continuous_parametric_process[m]->observation[k]->mass_computation(residual , residual));
                 }
 
                 else if (continuous_parametric_process[m]->ident == AUTOREGRESSIVE_MODEL) {
@@ -769,7 +769,7 @@ void HiddenSemiMarkov::forward_backward(SemiMarkovData &seq) const
                     }
                   }
 
-                  entropy -= backward[j][k] * log(continuous_parametric_process[m]->observation[k]->mass_computation(residual - seq.min_interval[m + 1] / 2 , residual + seq.min_interval[m + 1] / 2));
+                  entropy -= backward[j][k] * log(continuous_parametric_process[m]->observation[k]->mass_computation(residual , residual));
                 }
 
                 else {
@@ -1299,7 +1299,7 @@ double HiddenSemiMarkov::forward_backward(MarkovianSequences &seq , int index , 
               break;
             }
 
-            observation[i][j] *= continuous_parametric_process[k]->observation[j]->mass_computation(residual - seq.min_interval[k + 1] / 2 , residual + seq.min_interval[k + 1] / 2);
+            observation[i][j] *= continuous_parametric_process[k]->observation[j]->mass_computation(residual , residual);
           }
 
           else if (continuous_parametric_process[k]->ident == AUTOREGRESSIVE_MODEL) {
@@ -1329,7 +1329,7 @@ double HiddenSemiMarkov::forward_backward(MarkovianSequences &seq , int index , 
               }
             }
 
-            observation[i][j] *= continuous_parametric_process[k]->observation[j]->mass_computation(residual - seq.min_interval[k + 1] / 2 , residual + seq.min_interval[k + 1] / 2);
+            observation[i][j] *= continuous_parametric_process[k]->observation[j]->mass_computation(residual , residual);
           }
 
           else {
@@ -1625,7 +1625,7 @@ double HiddenSemiMarkov::forward_backward(MarkovianSequences &seq , int index , 
                 break;
               }
 
-              entropy2 -= backward[i][j] * log(continuous_parametric_process[k]->observation[j]->mass_computation(residual - seq.min_interval[k + 1] / 2 , residual + seq.min_interval[k + 1] / 2));
+              entropy2 -= backward[i][j] * log(continuous_parametric_process[k]->observation[j]->mass_computation(residual , residual));
             }
 
             else if (continuous_parametric_process[k]->ident == AUTOREGRESSIVE_MODEL) {
@@ -1655,7 +1655,7 @@ double HiddenSemiMarkov::forward_backward(MarkovianSequences &seq , int index , 
                 }
               }
 
-              entropy2 -= backward[i][j] * log(continuous_parametric_process[k]->observation[j]->mass_computation(residual - seq.min_interval[k + 1] / 2 , residual + seq.min_interval[k + 1] / 2));
+              entropy2 -= backward[i][j] * log(continuous_parametric_process[k]->observation[j]->mass_computation(residual , residual));
             }
 
             else {
@@ -1836,7 +1836,7 @@ double HiddenSemiMarkov::forward_backward(MarkovianSequences &seq , int index , 
                   break;
                 }
 
-                entropy2 -= backward[i][j] * log(continuous_parametric_process[k]->observation[j]->mass_computation(residual - seq.min_interval[k + 1] / 2 , residual + seq.min_interval[k + 1] / 2));
+                entropy2 -= backward[i][j] * log(continuous_parametric_process[k]->observation[j]->mass_computation(residual , residual));
               }
 
               else if (continuous_parametric_process[k]->ident == AUTOREGRESSIVE_MODEL) {
@@ -1866,7 +1866,7 @@ double HiddenSemiMarkov::forward_backward(MarkovianSequences &seq , int index , 
                   }
                 }
 
-                entropy2 -= backward[i][j] * log(continuous_parametric_process[k]->observation[j]->mass_computation(residual - seq.min_interval[k + 1] / 2 , residual + seq.min_interval[k + 1] / 2));
+                entropy2 -= backward[i][j] * log(continuous_parametric_process[k]->observation[j]->mass_computation(residual , residual));
               }
 
               else {
@@ -2772,7 +2772,7 @@ double HiddenSemiMarkov::forward_backward_sampling(const MarkovianSequences &seq
               break;
             }
 
-            observation[i][j] *= continuous_parametric_process[k]->observation[j]->mass_computation(residual - seq.min_interval[k + 1] / 2 , residual + seq.min_interval[k + 1] / 2);
+            observation[i][j] *= continuous_parametric_process[k]->observation[j]->mass_computation(residual , residual);
           }
 
           else if (continuous_parametric_process[k]->ident == AUTOREGRESSIVE_MODEL) {
@@ -2802,7 +2802,7 @@ double HiddenSemiMarkov::forward_backward_sampling(const MarkovianSequences &seq
               }
             }
 
-            observation[i][j] *= continuous_parametric_process[k]->observation[j]->mass_computation(residual - seq.min_interval[k + 1] / 2 , residual + seq.min_interval[k + 1] / 2);
+            observation[i][j] *= continuous_parametric_process[k]->observation[j]->mass_computation(residual , residual);
           }
 
           else {
@@ -3343,7 +3343,7 @@ double HiddenSemiMarkov::viterbi(const MarkovianSequences &seq ,
                   break;
                 }
 
-                buff = continuous_parametric_process[m]->observation[k]->mass_computation(residual - seq.min_interval[m + 1] / 2 , residual + seq.min_interval[m + 1] / 2);
+                buff = continuous_parametric_process[m]->observation[k]->mass_computation(residual , residual);
               }
 
               else if (continuous_parametric_process[m]->ident == AUTOREGRESSIVE_MODEL) {
@@ -3373,7 +3373,7 @@ double HiddenSemiMarkov::viterbi(const MarkovianSequences &seq ,
                   }
                 }
 
-                buff = continuous_parametric_process[m]->observation[k]->mass_computation(residual - seq.min_interval[m + 1] / 2 , residual + seq.min_interval[m + 1] / 2);
+                buff = continuous_parametric_process[m]->observation[k]->mass_computation(residual , residual);
               }
 
               else {
@@ -3821,7 +3821,7 @@ double HiddenSemiMarkov::generalized_viterbi(const MarkovianSequences &seq , int
               break;
             }
 
-            buff = continuous_parametric_process[k]->observation[j]->mass_computation(residual - seq.min_interval[k + 1] / 2 , residual + seq.min_interval[k + 1] / 2);
+            buff = continuous_parametric_process[k]->observation[j]->mass_computation(residual , residual);
           }
 
           else if (continuous_parametric_process[k]->ident == AUTOREGRESSIVE_MODEL) {
@@ -3851,7 +3851,7 @@ double HiddenSemiMarkov::generalized_viterbi(const MarkovianSequences &seq , int
               }
             }
 
-            buff = continuous_parametric_process[k]->observation[j]->mass_computation(residual - seq.min_interval[k + 1] / 2 , residual + seq.min_interval[k + 1] / 2);
+            buff = continuous_parametric_process[k]->observation[j]->mass_computation(residual , residual);
           }
 
           else {
@@ -4511,7 +4511,7 @@ double HiddenSemiMarkov::viterbi_forward_backward(const MarkovianSequences &seq 
               break;
             }
 
-            buff = continuous_parametric_process[k]->observation[j]->mass_computation(residual - seq.min_interval[k + 1] / 2 , residual + seq.min_interval[k + 1] / 2);
+            buff = continuous_parametric_process[k]->observation[j]->mass_computation(residual , residual);
           }
 
           else if (continuous_parametric_process[k]->ident == AUTOREGRESSIVE_MODEL) {
@@ -4541,7 +4541,7 @@ double HiddenSemiMarkov::viterbi_forward_backward(const MarkovianSequences &seq 
               }
             }
 
-            buff = continuous_parametric_process[k]->observation[j]->mass_computation(residual - seq.min_interval[k + 1] / 2 , residual + seq.min_interval[k + 1] / 2);
+            buff = continuous_parametric_process[k]->observation[j]->mass_computation(residual , residual);
           }
 
           else {

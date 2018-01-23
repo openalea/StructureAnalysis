@@ -1,9 +1,9 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       V-Plants: Exploring and Modeling Plant Architecture
+ *       StructureAnalysis: Exploring and Analyzing Plant Architecture
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2018 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -184,7 +184,7 @@ double HiddenSemiMarkov::likelihood_computation(const MarkovianSequences &seq ,
                     break;
                   }
 
-                  observation[j][k] *= continuous_parametric_process[m]->observation[k]->mass_computation(residual - seq.min_interval[m] / 2 , residual + seq.min_interval[m] / 2);
+                  observation[j][k] *= continuous_parametric_process[m]->observation[k]->mass_computation(residual , residual);
                 }
 
                 else if (continuous_parametric_process[m]->ident == AUTOREGRESSIVE_MODEL) {
@@ -214,7 +214,7 @@ double HiddenSemiMarkov::likelihood_computation(const MarkovianSequences &seq ,
                     }
                   }
 
-                  observation[j][k] *= continuous_parametric_process[m]->observation[k]->mass_computation(residual - seq.min_interval[m] / 2 , residual + seq.min_interval[m] / 2);
+                  observation[j][k] *= continuous_parametric_process[m]->observation[k]->mass_computation(residual , residual);
                 }
 
                 else {
@@ -879,12 +879,12 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
                     break;
                   }
 
-                  observation[j][k] *= hsmarkov->continuous_parametric_process[m]->observation[k]->mass_computation(residual - min_interval[m] / 2 , residual + min_interval[m] / 2);
+                  observation[j][k] *= hsmarkov->continuous_parametric_process[m]->observation[k]->mass_computation(residual , residual);
 
 #                 ifdef DEBUG
                   cout << STAT_label[STATL_STATE] << " " << k << "  " << SEQ_label[SEQL_SEQUENCE] << " " << i << "  "
                        << SEQ_label[SEQL_INDEX] << " " << j << ": " << residual << " "
-                       << hsmarkov->continuous_parametric_process[m]->observation[k]->mass_computation(residual - min_interval[m] / 2 , residual + min_interval[m] / 2) << endl;
+                       << hsmarkov->continuous_parametric_process[m]->observation[k]->mass_computation(residual , residual) << endl;
 #                 endif
 
                 }
@@ -916,7 +916,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
                     }
                   }
 
-                  observation[j][k] *= hsmarkov->continuous_parametric_process[m]->observation[k]->mass_computation(residual - min_interval[m] / 2 , residual + min_interval[m] / 2);
+                  observation[j][k] *= hsmarkov->continuous_parametric_process[m]->observation[k]->mass_computation(residual , residual);
                 }
 
                 else {
@@ -2724,7 +2724,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
                     break;
                   }
 
-                  observation[j][k] *= hsmarkov->continuous_parametric_process[m]->observation[k]->mass_computation(residual - min_interval[m] / 2 , residual + min_interval[m] / 2);
+                  observation[j][k] *= hsmarkov->continuous_parametric_process[m]->observation[k]->mass_computation(residual , residual);
                 }
 
                 else if (hsmarkov->continuous_parametric_process[m]->ident == AUTOREGRESSIVE_MODEL) {
@@ -2754,7 +2754,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
                     }
                   }
 
-                  observation[j][k] *= hsmarkov->continuous_parametric_process[m]->observation[k]->mass_computation(residual - min_interval[m] / 2 , residual + min_interval[m] / 2);
+                  observation[j][k] *= hsmarkov->continuous_parametric_process[m]->observation[k]->mass_computation(residual , residual);
                 }
 
                 else {
