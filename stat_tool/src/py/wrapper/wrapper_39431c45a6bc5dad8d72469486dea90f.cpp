@@ -9,9 +9,7 @@ void wrapper_39431c45a6bc5dad8d72469486dea90f()
     boost::python::scope().attr("stat_tool") = module_0cdd446515295e8e8373e99f328c3748;
     boost::python::scope scope_0cdd446515295e8e8373e99f328c3748 = module_0cdd446515295e8e8373e99f328c3748;
     boost::python::enum_< enum ::stat_tool::cluster_scale > enum_39431c45a6bc5dad8d72469486dea90f("cluster_scale");
-
     enum_39431c45a6bc5dad8d72469486dea90f.value("CHILD_CLUSTER_DISTANCE", ::stat_tool::CHILD_CLUSTER_DISTANCE);
-
     enum_39431c45a6bc5dad8d72469486dea90f.value("DIAMETER", ::stat_tool::DIAMETER);
 
 }

@@ -26,6 +26,13 @@ void wrapper_16995d5158735f999b84ef5efdd8439b()
     boost::python::scope().attr("stat_tool") = module_0cdd446515295e8e8373e99f328c3748;
     boost::python::scope scope_0cdd446515295e8e8373e99f328c3748 = module_0cdd446515295e8e8373e99f328c3748;
     void  (::stat_tool::ContinuousParametric::*method_pointer_51d3f6aaff1c56f9958e931bf18034cc)(class ::stat_tool::ContinuousParametric const &) = &::stat_tool::ContinuousParametric::copy;
+    class ::std::basic_ostream< char, struct ::std::char_traits< char > > & (::stat_tool::ContinuousParametric::*method_pointer_f33e653ce3c45484aaa449282e51e100)(class ::std::basic_ostream< char, struct ::std::char_traits< char > > &, bool ) const = &::stat_tool::ContinuousParametric::ascii_parameter_print;
+    class ::std::basic_ostream< char, struct ::std::char_traits< char > > & (::stat_tool::ContinuousParametric::*method_pointer_094becabde1558ffa4de95bf41b96b5a)(class ::std::basic_ostream< char, struct ::std::char_traits< char > > &, bool ) const = &::stat_tool::ContinuousParametric::ascii_characteristic_print;
+    class ::std::basic_ostream< char, struct ::std::char_traits< char > > & (::stat_tool::ContinuousParametric::*method_pointer_5d741de66ca05becb1d7e36a0888e789)(class ::std::basic_ostream< char, struct ::std::char_traits< char > > &, bool , bool , class ::stat_tool::Histogram const *, class ::stat_tool::FrequencyDistribution const *) = &::stat_tool::ContinuousParametric::ascii_print;
+    class ::std::basic_ostream< char, struct ::std::char_traits< char > > & (::stat_tool::ContinuousParametric::*method_pointer_13b5f743aa025178a29482819de99c1b)(class ::std::basic_ostream< char, struct ::std::char_traits< char > > &) const = &::stat_tool::ContinuousParametric::spreadsheet_parameter_print;
+    class ::std::basic_ostream< char, struct ::std::char_traits< char > > & (::stat_tool::ContinuousParametric::*method_pointer_6479e0bbce00577caf356e5efe797bcb)(class ::std::basic_ostream< char, struct ::std::char_traits< char > > &, bool , class ::stat_tool::Histogram const *, class ::stat_tool::FrequencyDistribution const *) = &::stat_tool::ContinuousParametric::spreadsheet_print;
+    class ::std::basic_ostream< char, struct ::std::char_traits< char > > & (::stat_tool::ContinuousParametric::*method_pointer_38e87bcc468751c9b329303b0fd5b1ce)(class ::std::basic_ostream< char, struct ::std::char_traits< char > > &) const = &::stat_tool::ContinuousParametric::spreadsheet_characteristic_print;
+    class ::std::basic_ostream< char, struct ::std::char_traits< char > > & (::stat_tool::ContinuousParametric::*method_pointer_838f5b7384dd529d9a3cac3e2e017e66)(class ::std::basic_ostream< char, struct ::std::char_traits< char > > &) const = &::stat_tool::ContinuousParametric::plot_title_print;
     void  (::stat_tool::ContinuousParametric::*method_pointer_e07a6588990458909e46971a75350dae)(class ::stat_tool::SinglePlot &, class ::stat_tool::Histogram const *, class ::stat_tool::FrequencyDistribution const *) = &::stat_tool::ContinuousParametric::plotable_write;
     int  (::stat_tool::ContinuousParametric::*method_pointer_eb05dd7eac87515c9bc1748a0004daa7)() const = &::stat_tool::ContinuousParametric::nb_parameter_computation;
     double  (::stat_tool::ContinuousParametric::*method_pointer_2912c7228ded5fe0ad4edc7b170b41fd)(double , double ) const = &::stat_tool::ContinuousParametric::von_mises_mass_computation;
@@ -38,6 +45,13 @@ void wrapper_16995d5158735f999b84ef5efdd8439b()
     class_16995d5158735f999b84ef5efdd8439b.def(boost::python::init< enum ::stat_tool::continuous_parametric , double , double , double , enum ::stat_tool::angle_unit  >(""));
     class_16995d5158735f999b84ef5efdd8439b.def(boost::python::init< class ::stat_tool::ContinuousParametric const & >(""));
     class_16995d5158735f999b84ef5efdd8439b.def("copy", method_pointer_51d3f6aaff1c56f9958e931bf18034cc, "");
+    class_16995d5158735f999b84ef5efdd8439b.def("ascii_parameter_print", method_pointer_f33e653ce3c45484aaa449282e51e100, boost::python::return_internal_reference<>(), "");
+    class_16995d5158735f999b84ef5efdd8439b.def("ascii_characteristic_print", method_pointer_094becabde1558ffa4de95bf41b96b5a, boost::python::return_internal_reference<>(), "");
+    class_16995d5158735f999b84ef5efdd8439b.def("ascii_print", method_pointer_5d741de66ca05becb1d7e36a0888e789, boost::python::return_internal_reference<>(), "");
+    class_16995d5158735f999b84ef5efdd8439b.def("spreadsheet_parameter_print", method_pointer_13b5f743aa025178a29482819de99c1b, boost::python::return_internal_reference<>(), "");
+    class_16995d5158735f999b84ef5efdd8439b.def("spreadsheet_print", method_pointer_6479e0bbce00577caf356e5efe797bcb, boost::python::return_internal_reference<>(), "");
+    class_16995d5158735f999b84ef5efdd8439b.def("spreadsheet_characteristic_print", method_pointer_38e87bcc468751c9b329303b0fd5b1ce, boost::python::return_internal_reference<>(), "");
+    class_16995d5158735f999b84ef5efdd8439b.def("plot_title_print", method_pointer_838f5b7384dd529d9a3cac3e2e017e66, boost::python::return_internal_reference<>(), "");
     class_16995d5158735f999b84ef5efdd8439b.def("plotable_write", method_pointer_e07a6588990458909e46971a75350dae, "");
     class_16995d5158735f999b84ef5efdd8439b.def("nb_parameter_computation", method_pointer_eb05dd7eac87515c9bc1748a0004daa7, "");
     class_16995d5158735f999b84ef5efdd8439b.def("von_mises_mass_computation", method_pointer_2912c7228ded5fe0ad4edc7b170b41fd, "");

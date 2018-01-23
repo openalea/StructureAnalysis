@@ -66,7 +66,6 @@ void wrapper_0bd75707ac98530d926ac17eb4fe47d3()
     if(autowig::Held< class ::stat_tool::MixtureData >::is_class)
     {
         boost::python::implicitly_convertible< autowig::Held< class ::stat_tool::MixtureData >::Type, autowig::Held< class ::stat_tool::Vectors >::Type >();
-        //boost::python::objects::class_value_wrapper< autowig::Held< class ::stat_tool::MixtureData >::Type, boost::python::objects::make_ptr_instance< class ::stat_tool::MixtureData, boost::python::objects::pointer_holder< autowig::Held< class ::stat_tool::MixtureData >::Type, class ::stat_tool::MixtureData > > >();
     }
 
 }

@@ -31,3 +31,7 @@ requirements:
   run:
    - python
    - boost
+
+test:
+  imports:
+    - stat_tool

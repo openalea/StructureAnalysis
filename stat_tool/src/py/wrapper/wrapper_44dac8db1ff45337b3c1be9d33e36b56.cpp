@@ -28,6 +28,7 @@ void wrapper_44dac8db1ff45337b3c1be9d33e36b56()
     class ::stat_tool::DistanceMatrix * (::stat_tool::DistanceMatrix::*method_pointer_5694ddb7f4a654b792dcac1d2c7e646f)(class ::stat_tool::StatError &, int , class ::std::vector< int, class ::std::allocator< int > > , bool ) const = &::stat_tool::DistanceMatrix::select_individual;
     class ::stat_tool::DistanceMatrix * (::stat_tool::DistanceMatrix::*method_pointer_1d604885d9985299bd1f9b51dd023a91)(class ::stat_tool::StatError &) const = &::stat_tool::DistanceMatrix::symmetrize;
     class ::stat_tool::DistanceMatrix * (::stat_tool::DistanceMatrix::*method_pointer_e35d0838984b58eaa9ae519e30b67285)(class ::stat_tool::StatError &) const = &::stat_tool::DistanceMatrix::unnormalize;
+    class ::std::basic_ostream< char, struct ::std::char_traits< char > > & (::stat_tool::DistanceMatrix::*method_pointer_e23319161b02558eb4a68ba86cf918de)(class ::std::basic_ostream< char, struct ::std::char_traits< char > > &) const = &::stat_tool::DistanceMatrix::spreadsheet_write;
     bool  (::stat_tool::DistanceMatrix::*method_pointer_7b0a0590fbf553b7a09c3fbad02a8977)() const = &::stat_tool::DistanceMatrix::test_symmetry;
     void  (::stat_tool::DistanceMatrix::*method_pointer_3ffddd5defe953c8a5e3739abd7fd36a)(int , int , double , int , double , int , double , int , int , double , int , double , int ) = &::stat_tool::DistanceMatrix::update;
     void  (::stat_tool::DistanceMatrix::*method_pointer_09477275018c56d9ba6e229798e23b4e)(int , int , double , int ) = &::stat_tool::DistanceMatrix::update;
@@ -61,6 +62,7 @@ void wrapper_44dac8db1ff45337b3c1be9d33e36b56()
     class_44dac8db1ff45337b3c1be9d33e36b56.def("select_individual", method_pointer_5694ddb7f4a654b792dcac1d2c7e646f, boost::python::return_value_policy< boost::python::reference_existing_object >(), "");
     class_44dac8db1ff45337b3c1be9d33e36b56.def("symmetrize", method_pointer_1d604885d9985299bd1f9b51dd023a91, boost::python::return_value_policy< boost::python::reference_existing_object >(), "");
     class_44dac8db1ff45337b3c1be9d33e36b56.def("unnormalize", method_pointer_e35d0838984b58eaa9ae519e30b67285, boost::python::return_value_policy< boost::python::reference_existing_object >(), "");
+    class_44dac8db1ff45337b3c1be9d33e36b56.def("spreadsheet_write", method_pointer_e23319161b02558eb4a68ba86cf918de, boost::python::return_internal_reference<>(), "");
     class_44dac8db1ff45337b3c1be9d33e36b56.def("test_symmetry", method_pointer_7b0a0590fbf553b7a09c3fbad02a8977, "");
     class_44dac8db1ff45337b3c1be9d33e36b56.def("update", method_pointer_3ffddd5defe953c8a5e3739abd7fd36a, "");
     class_44dac8db1ff45337b3c1be9d33e36b56.def("update", method_pointer_09477275018c56d9ba6e229798e23b4e, "");
@@ -92,7 +94,6 @@ void wrapper_44dac8db1ff45337b3c1be9d33e36b56()
     if(autowig::Held< class ::stat_tool::DistanceMatrix >::is_class)
     {
         boost::python::implicitly_convertible< autowig::Held< class ::stat_tool::DistanceMatrix >::Type, autowig::Held< class ::stat_tool::StatInterface >::Type >();
-        //boost::python::objects::class_value_wrapper< autowig::Held< class ::stat_tool::DistanceMatrix >::Type, boost::python::objects::make_ptr_instance< class ::stat_tool::DistanceMatrix, boost::python::objects::pointer_holder< autowig::Held< class ::stat_tool::DistanceMatrix >::Type, class ::stat_tool::DistanceMatrix > > >();
     }
 
 }

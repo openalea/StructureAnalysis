@@ -28,6 +28,10 @@ void wrapper_82d14e3aa0215f91b29ab0b4c2b24290()
     void  (::stat_tool::DiscreteParametric::*method_pointer_abfba932b25d52f7bfd2f2ea5b43da88)(int , int , double , double ) = &::stat_tool::DiscreteParametric::init;
     void  (::stat_tool::DiscreteParametric::*method_pointer_d60dea7c925a54c0bd2a855bbe1a5f58)(enum ::stat_tool::discrete_parametric , int , int , double , double ) = &::stat_tool::DiscreteParametric::init;
     void  (::stat_tool::DiscreteParametric::*method_pointer_ae8dca5e086c5c93a61df11a32ad57c0)(class ::stat_tool::DiscreteParametric const &) = &::stat_tool::DiscreteParametric::copy;
+    class ::std::basic_ostream< char, struct ::std::char_traits< char > > & (::stat_tool::DiscreteParametric::*method_pointer_42a9ef98ce235c25ba78c8418e2cff9c)(class ::std::basic_ostream< char, struct ::std::char_traits< char > > &) const = &::stat_tool::DiscreteParametric::ascii_print;
+    class ::std::basic_ostream< char, struct ::std::char_traits< char > > & (::stat_tool::DiscreteParametric::*method_pointer_1e2470ecea845c5ebc32d2bcfbc98ee4)(class ::std::basic_ostream< char, struct ::std::char_traits< char > > &, bool , bool ) const = &::stat_tool::DiscreteParametric::ascii_parametric_characteristic_print;
+    class ::std::basic_ostream< char, struct ::std::char_traits< char > > & (::stat_tool::DiscreteParametric::*method_pointer_bea7fd4010685dd38f61049f78e7197f)(class ::std::basic_ostream< char, struct ::std::char_traits< char > > &) const = &::stat_tool::DiscreteParametric::spreadsheet_print;
+    class ::std::basic_ostream< char, struct ::std::char_traits< char > > & (::stat_tool::DiscreteParametric::*method_pointer_26ddfbf705055ef4800204a666cf0e0b)(class ::std::basic_ostream< char, struct ::std::char_traits< char > > &, bool ) const = &::stat_tool::DiscreteParametric::spreadsheet_parametric_characteristic_print;
     int  (*method_pointer_60c76b854c1d563496f805ccd43c71d0)(enum ::stat_tool::discrete_parametric , int , int , double , double , double ) = ::stat_tool::DiscreteParametric::nb_value_computation;
     int  (::stat_tool::DiscreteParametric::*method_pointer_a24cc9da2b445b8fa9fbd5e1fa58f5f1)() = &::stat_tool::DiscreteParametric::nb_parameter_computation;
     void  (::stat_tool::DiscreteParametric::*method_pointer_4e8d96996526545bb344532cc0ebec2d)() = &::stat_tool::DiscreteParametric::nb_parameter_update;
@@ -61,6 +65,10 @@ void wrapper_82d14e3aa0215f91b29ab0b4c2b24290()
     class_82d14e3aa0215f91b29ab0b4c2b24290.def("init", method_pointer_abfba932b25d52f7bfd2f2ea5b43da88, "");
     class_82d14e3aa0215f91b29ab0b4c2b24290.def("init", method_pointer_d60dea7c925a54c0bd2a855bbe1a5f58, "");
     class_82d14e3aa0215f91b29ab0b4c2b24290.def("copy", method_pointer_ae8dca5e086c5c93a61df11a32ad57c0, "");
+    class_82d14e3aa0215f91b29ab0b4c2b24290.def("ascii_print", method_pointer_42a9ef98ce235c25ba78c8418e2cff9c, boost::python::return_internal_reference<>(), "");
+    class_82d14e3aa0215f91b29ab0b4c2b24290.def("ascii_parametric_characteristic_print", method_pointer_1e2470ecea845c5ebc32d2bcfbc98ee4, boost::python::return_internal_reference<>(), "");
+    class_82d14e3aa0215f91b29ab0b4c2b24290.def("spreadsheet_print", method_pointer_bea7fd4010685dd38f61049f78e7197f, boost::python::return_internal_reference<>(), "");
+    class_82d14e3aa0215f91b29ab0b4c2b24290.def("spreadsheet_parametric_characteristic_print", method_pointer_26ddfbf705055ef4800204a666cf0e0b, boost::python::return_internal_reference<>(), "");
     class_82d14e3aa0215f91b29ab0b4c2b24290.def("nb_value_computation", method_pointer_60c76b854c1d563496f805ccd43c71d0, "");
     class_82d14e3aa0215f91b29ab0b4c2b24290.def("nb_parameter_computation", method_pointer_a24cc9da2b445b8fa9fbd5e1fa58f5f1, "");
     class_82d14e3aa0215f91b29ab0b4c2b24290.def("nb_parameter_update", method_pointer_4e8d96996526545bb344532cc0ebec2d, "");
@@ -91,7 +99,6 @@ void wrapper_82d14e3aa0215f91b29ab0b4c2b24290()
     if(autowig::Held< class ::stat_tool::DiscreteParametric >::is_class)
     {
         boost::python::implicitly_convertible< autowig::Held< class ::stat_tool::DiscreteParametric >::Type, autowig::Held< class ::stat_tool::Distribution >::Type >();
-        //boost::python::objects::class_value_wrapper< autowig::Held< class ::stat_tool::DiscreteParametric >::Type, boost::python::objects::make_ptr_instance< class ::stat_tool::DiscreteParametric, boost::python::objects::pointer_holder< autowig::Held< class ::stat_tool::DiscreteParametric >::Type, class ::stat_tool::DiscreteParametric > > >();
     }
 
 }

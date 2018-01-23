@@ -53,7 +53,6 @@ void wrapper_01172f25879c56bd9d3f985ccab12de5()
     if(autowig::Held< class ::stat_tool::VectorDistance >::is_class)
     {
         boost::python::implicitly_convertible< autowig::Held< class ::stat_tool::VectorDistance >::Type, autowig::Held< class ::stat_tool::StatInterface >::Type >();
-        //boost::python::objects::class_value_wrapper< autowig::Held< class ::stat_tool::VectorDistance >::Type, boost::python::objects::make_ptr_instance< class ::stat_tool::VectorDistance, boost::python::objects::pointer_holder< autowig::Held< class ::stat_tool::VectorDistance >::Type, class ::stat_tool::VectorDistance > > >();
     }
 
 }

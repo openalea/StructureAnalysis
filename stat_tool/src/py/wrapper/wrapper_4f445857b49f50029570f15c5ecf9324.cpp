@@ -5,7 +5,7 @@
 namespace autowig
 {
 
-    void method_decorator_7365756e35f3565592c28fbb79abbc51(class ::stat_tool::TemplateMultiPlotSet< enum ::stat_tool::process_distribution > & instance, int  param_in_0, class ::stat_tool::MultiPlot & param_out)     { instance.operator[](param_in_0) = param_out; }
+    void method_decorator_7365756e35f3565592c28fbb79abbc51(class ::stat_tool::TemplateMultiPlotSet< enum ::stat_tool::process_distribution > & instance, int  param_in_0, const class ::stat_tool::MultiPlot & param_out) { instance.operator[](param_in_0) = param_out; }
 }
 
 #if defined(_MSC_VER)

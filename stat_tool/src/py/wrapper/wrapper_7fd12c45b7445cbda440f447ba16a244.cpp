@@ -41,6 +41,7 @@ void wrapper_7fd12c45b7445cbda440f447ba16a244()
     class ::stat_tool::ContinuousParametricProcess * (::stat_tool::Mixture::*method_pointer_4b463eddb9cc5b5fb92002c7d34bffc5)(int ) const = &::stat_tool::Mixture::get_continuous_parametric_process;
     boost::python::class_< class ::stat_tool::Mixture, autowig::Held< class ::stat_tool::Mixture >::Type, boost::python::bases< class ::stat_tool::StatInterface > > class_7fd12c45b7445cbda440f447ba16a244("Mixture", "Multivariate mixture of distributions\n\n", boost::python::no_init);
     class_7fd12c45b7445cbda440f447ba16a244.def(boost::python::init<  >(""));
+    class_7fd12c45b7445cbda440f447ba16a244.def(boost::python::init< int , double , double , double , bool  >(""));
     class_7fd12c45b7445cbda440f447ba16a244.def(boost::python::init< int , int , double , double , bool , enum ::stat_tool::tying_rule  >(""));
     class_7fd12c45b7445cbda440f447ba16a244.def(boost::python::init< class ::stat_tool::Mixture const &, bool  >(""));
     class_7fd12c45b7445cbda440f447ba16a244.def("extract", method_pointer_c8e5ae61c41751f6b367998e3a1c9f5b, boost::python::return_value_policy< boost::python::reference_existing_object >(), "");
@@ -62,7 +63,6 @@ void wrapper_7fd12c45b7445cbda440f447ba16a244()
     if(autowig::Held< class ::stat_tool::Mixture >::is_class)
     {
         boost::python::implicitly_convertible< autowig::Held< class ::stat_tool::Mixture >::Type, autowig::Held< class ::stat_tool::StatInterface >::Type >();
-        //boost::python::objects::class_value_wrapper< autowig::Held< class ::stat_tool::Mixture >::Type, boost::python::objects::make_ptr_instance< class ::stat_tool::Mixture, boost::python::objects::pointer_holder< autowig::Held< class ::stat_tool::Mixture >::Type, class ::stat_tool::Mixture > > >();
     }
 
 }

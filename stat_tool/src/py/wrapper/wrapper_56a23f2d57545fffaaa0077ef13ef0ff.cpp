@@ -48,7 +48,6 @@ void wrapper_56a23f2d57545fffaaa0077ef13ef0ff()
     {
         boost::python::implicitly_convertible< autowig::Held< class ::stat_tool::DiscreteMixtureData >::Type, autowig::Held< class ::stat_tool::StatInterface >::Type >();
         boost::python::implicitly_convertible< autowig::Held< class ::stat_tool::DiscreteMixtureData >::Type, autowig::Held< class ::stat_tool::FrequencyDistribution >::Type >();
-        //boost::python::objects::class_value_wrapper< autowig::Held< class ::stat_tool::DiscreteMixtureData >::Type, boost::python::objects::make_ptr_instance< class ::stat_tool::DiscreteMixtureData, boost::python::objects::pointer_holder< autowig::Held< class ::stat_tool::DiscreteMixtureData >::Type, class ::stat_tool::DiscreteMixtureData > > >();
     }
 
 }

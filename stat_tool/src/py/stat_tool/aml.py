@@ -2,8 +2,8 @@ def load_ipython_extension(ipython):
 
     from multipledispatch import dispatch
 
-    from openalea.stat_tool import stat_tool
-    from openalea.stat_tool import __stat_tool
+    import stat_tool
+    from stat_tool import __stat_tool
 
     def Histogram(filename):
         """
@@ -14,10 +14,9 @@ def load_ipython_extension(ipython):
     del Histogram
 
     def Merge(*args):
-        cls = args[0].__class__
-        if not all(isinstance(arg, cls) for arg in args):
-            raise TypeError('Cannot merge objects of different types')
-        return cls(args)
+        if not all(hasattr(arg, 'merge') for arg in args):
+            raise AttributeError('no `merge` method found')
+        return args[0].merge(*args[1:])
 
     stat_tool.Merge = Merge
     del Merge
@@ -35,13 +34,20 @@ def load_ipython_extension(ipython):
             test = lhs.w_comparison(rhs)
         else:
             raise ValueError('\'test\' parameter')
-        print test
+        print(test)
 
     stat_tool.ComparisonTest = ComparisonTest
 
+    def MixtureEstimation(data, *args, **kwargs):
+        if isinstance(data, __stat_tool.stat_tool.DiscreteDistributionData):
+            return data.discrete_mixture_estimation(*args, **kwargs)
+        else:
+            raise NotImplementedError('For a `' + data.__class__.__name__ + '` instance')
+
+    stat_tool.MixtureEstimation = MixtureEstimation
 
 def unload_ipython_extension(ipython):
 
-    from openalea.stat_tool import stat_tool
+    import stat_tool
 
     del stat_tool.Histogram

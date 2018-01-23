@@ -50,7 +50,6 @@ void wrapper_e95f705e6c0c58008e5a01fae73debe6()
     {
         boost::python::implicitly_convertible< autowig::Held< class ::stat_tool::Compound >::Type, autowig::Held< class ::stat_tool::StatInterface >::Type >();
         boost::python::implicitly_convertible< autowig::Held< class ::stat_tool::Compound >::Type, autowig::Held< class ::stat_tool::Distribution >::Type >();
-        //boost::python::objects::class_value_wrapper< autowig::Held< class ::stat_tool::Compound >::Type, boost::python::objects::make_ptr_instance< class ::stat_tool::Compound, boost::python::objects::pointer_holder< autowig::Held< class ::stat_tool::Compound >::Type, class ::stat_tool::Compound > > >();
     }
 
 }

@@ -45,7 +45,6 @@ void wrapper_699cdb7e19d058c5bb8d30066fdc55ac()
     {
         boost::python::implicitly_convertible< autowig::Held< class ::stat_tool::DiscreteDistributionData >::Type, autowig::Held< class ::stat_tool::StatInterface >::Type >();
         boost::python::implicitly_convertible< autowig::Held< class ::stat_tool::DiscreteDistributionData >::Type, autowig::Held< class ::stat_tool::FrequencyDistribution >::Type >();
-        //boost::python::objects::class_value_wrapper< autowig::Held< class ::stat_tool::DiscreteDistributionData >::Type, boost::python::objects::make_ptr_instance< class ::stat_tool::DiscreteDistributionData, boost::python::objects::pointer_holder< autowig::Held< class ::stat_tool::DiscreteDistributionData >::Type, class ::stat_tool::DiscreteDistributionData > > >();
     }
 
 }

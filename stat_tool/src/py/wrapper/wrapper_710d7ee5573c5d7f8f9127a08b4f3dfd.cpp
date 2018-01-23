@@ -27,6 +27,9 @@ void wrapper_710d7ee5573c5d7f8f9127a08b4f3dfd()
     boost::python::scope scope_0cdd446515295e8e8373e99f328c3748 = module_0cdd446515295e8e8373e99f328c3748;
     void  (::stat_tool::Reestimation< int >::*method_pointer_09f5f68263f3506d9d082e14dcc2a6e9)(int ) = &::stat_tool::Reestimation< int >::init;
     void  (::stat_tool::Reestimation< int >::*method_pointer_0e9d7d4cc2ae53f5bab80c00665ca2d4)(class ::stat_tool::Reestimation< int > const &) = &::stat_tool::Reestimation< int >::copy;
+    class ::std::basic_ostream< char, struct ::std::char_traits< char > > & (::stat_tool::Reestimation< int >::*method_pointer_a4aad21b6790571c93675176c29392af)(class ::std::basic_ostream< char, struct ::std::char_traits< char > > &, bool , bool ) const = &::stat_tool::Reestimation< int >::ascii_characteristic_print;
+    class ::std::basic_ostream< char, struct ::std::char_traits< char > > & (::stat_tool::Reestimation< int >::*method_pointer_39af36c4a73953f3a40f16210221bc8d)(class ::std::basic_ostream< char, struct ::std::char_traits< char > > &, bool ) const = &::stat_tool::Reestimation< int >::ascii_circular_characteristic_print;
+    class ::std::basic_ostream< char, struct ::std::char_traits< char > > & (::stat_tool::Reestimation< int >::*method_pointer_9eac2967c2a65b95a6ec2efce075edd3)(class ::std::basic_ostream< char, struct ::std::char_traits< char > > &) const = &::stat_tool::Reestimation< int >::print;
     void  (::stat_tool::Reestimation< int >::*method_pointer_08c79701de3f58609887e2fbf225b2b5)() = &::stat_tool::Reestimation< int >::nb_value_computation;
     void  (::stat_tool::Reestimation< int >::*method_pointer_fae34c98fafd5884bb3fff56394048be)() = &::stat_tool::Reestimation< int >::offset_computation;
     void  (::stat_tool::Reestimation< int >::*method_pointer_4f0ea42a7b0353c2815b56f8a6cb2145)() = &::stat_tool::Reestimation< int >::nb_element_computation;
@@ -59,6 +62,9 @@ void wrapper_710d7ee5573c5d7f8f9127a08b4f3dfd()
     class_710d7ee5573c5d7f8f9127a08b4f3dfd.def(boost::python::init< class ::stat_tool::Reestimation< int > const & >(""));
     class_710d7ee5573c5d7f8f9127a08b4f3dfd.def("init", method_pointer_09f5f68263f3506d9d082e14dcc2a6e9, "");
     class_710d7ee5573c5d7f8f9127a08b4f3dfd.def("copy", method_pointer_0e9d7d4cc2ae53f5bab80c00665ca2d4, "");
+    class_710d7ee5573c5d7f8f9127a08b4f3dfd.def("ascii_characteristic_print", method_pointer_a4aad21b6790571c93675176c29392af, boost::python::return_internal_reference<>(), "");
+    class_710d7ee5573c5d7f8f9127a08b4f3dfd.def("ascii_circular_characteristic_print", method_pointer_39af36c4a73953f3a40f16210221bc8d, boost::python::return_internal_reference<>(), "");
+    class_710d7ee5573c5d7f8f9127a08b4f3dfd.def("print", method_pointer_9eac2967c2a65b95a6ec2efce075edd3, boost::python::return_internal_reference<>(), "");
     class_710d7ee5573c5d7f8f9127a08b4f3dfd.def("nb_value_computation", method_pointer_08c79701de3f58609887e2fbf225b2b5, "");
     class_710d7ee5573c5d7f8f9127a08b4f3dfd.def("offset_computation", method_pointer_fae34c98fafd5884bb3fff56394048be, "");
     class_710d7ee5573c5d7f8f9127a08b4f3dfd.def("nb_element_computation", method_pointer_4f0ea42a7b0353c2815b56f8a6cb2145, "");

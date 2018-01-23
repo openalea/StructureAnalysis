@@ -48,7 +48,6 @@ void wrapper_96585eb2e8955e26852987df1de3cbd1()
     {
         boost::python::implicitly_convertible< autowig::Held< class ::stat_tool::DiscreteParametricModel >::Type, autowig::Held< class ::stat_tool::StatInterface >::Type >();
         boost::python::implicitly_convertible< autowig::Held< class ::stat_tool::DiscreteParametricModel >::Type, autowig::Held< class ::stat_tool::DiscreteParametric >::Type >();
-        //boost::python::objects::class_value_wrapper< autowig::Held< class ::stat_tool::DiscreteParametricModel >::Type, boost::python::objects::make_ptr_instance< class ::stat_tool::DiscreteParametricModel, boost::python::objects::pointer_holder< autowig::Held< class ::stat_tool::DiscreteParametricModel >::Type, class ::stat_tool::DiscreteParametricModel > > >();
     }
 
 }

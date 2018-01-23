@@ -28,6 +28,7 @@ void wrapper_e00cc711eccf595f84c6952a456d7688()
     void  (::stat_tool::Vectors::*method_pointer_7325afaa1c79508aa61a5ea7a3eb1802)(int ) = &::stat_tool::Vectors::min_interval_computation;
     class ::stat_tool::DiscreteDistributionData * (::stat_tool::Vectors::*method_pointer_0a64824f80f95d7c95e677c5900996a9)(class ::stat_tool::StatError &, int ) const = &::stat_tool::Vectors::extract;
     bool  (::stat_tool::Vectors::*method_pointer_d4a0c706785b560180824a6675b5a254)(class ::stat_tool::StatError &) = &::stat_tool::Vectors::check;
+    class ::stat_tool::Vectors * (::stat_tool::Vectors::*method_pointer_e61329f09a4c5de69cb610711ed19f78)(class ::stat_tool::StatError &, int , class ::std::vector< class ::stat_tool::Vectors, class ::std::allocator< class ::stat_tool::Vectors > > const) const = &::stat_tool::Vectors::merge;
     class ::stat_tool::Vectors * (::stat_tool::Vectors::*method_pointer_7e36c2e63fa851f3873c2c91109940a5)(class ::stat_tool::StatError &, int , int ) const = &::stat_tool::Vectors::shift;
     class ::stat_tool::Vectors * (::stat_tool::Vectors::*method_pointer_b01568ce752456ab8cd8af6fece78b51)(class ::stat_tool::StatError &, int , double ) const = &::stat_tool::Vectors::shift;
     class ::stat_tool::Vectors * (::stat_tool::Vectors::*method_pointer_95853d148357577baa33cff6d5a50044)(class ::stat_tool::StatError &, int , int , enum ::stat_tool::threshold_direction ) const = &::stat_tool::Vectors::thresholding;
@@ -39,11 +40,15 @@ void wrapper_e00cc711eccf595f84c6952a456d7688()
     class ::stat_tool::Vectors * (::stat_tool::Vectors::*method_pointer_687cdb26391b5a42b246993209abc6f6)(class ::stat_tool::StatError &, int , int ) const = &::stat_tool::Vectors::scaling;
     class ::stat_tool::Vectors * (::stat_tool::Vectors::*method_pointer_38fd0e7a6bfb5cdcb6ecc3570ac1fba6)(class ::stat_tool::StatError &, int , double ) const = &::stat_tool::Vectors::scaling;
     class ::stat_tool::Vectors * (::stat_tool::Vectors::*method_pointer_a1c95f46a3ce50d9a07a6f3c086fe120)(class ::stat_tool::StatError &, int , enum ::stat_tool::rounding ) const = &::stat_tool::Vectors::round;
+    class ::stat_tool::Vectors * (::stat_tool::Vectors::*method_pointer_e7920dc35a4c59f7a5dad1ef1ec8712d)(class ::stat_tool::StatError &, int , enum ::stat_tool::log_base ) const = &::stat_tool::Vectors::log_transform;
     class ::stat_tool::Vectors * (::stat_tool::Vectors::*method_pointer_7d1da63ddd5c57f8a5d531d6de79078d)(class ::stat_tool::StatError &, bool , int , int , int , bool ) const = &::stat_tool::Vectors::value_select;
     class ::stat_tool::Vectors * (::stat_tool::Vectors::*method_pointer_d797bc5036e2503cad783720b1088de5)(class ::stat_tool::StatError &, bool , int , double , double , bool ) const = &::stat_tool::Vectors::value_select;
     class ::stat_tool::Vectors * (::stat_tool::Vectors::*method_pointer_de250270454c51d790e48877c46f86d9)(class ::stat_tool::StatError &, int , class ::std::vector< int, class ::std::allocator< int > > , bool ) const = &::stat_tool::Vectors::select_individual;
     class ::stat_tool::Vectors * (::stat_tool::Vectors::*method_pointer_d761498f88915e81986ca3c4386af241)(class ::stat_tool::StatError &, int , class ::std::vector< int, class ::std::allocator< int > > , bool ) const = &::stat_tool::Vectors::select_variable;
+    class ::stat_tool::Vectors * (::stat_tool::Vectors::*method_pointer_c0467846d0fa50d3be4527e931122d61)(class ::stat_tool::StatError &, int , class ::std::vector< int, class ::std::allocator< int > > ) const = &::stat_tool::Vectors::sum_variable;
+    class ::stat_tool::Vectors * (::stat_tool::Vectors::*method_pointer_c610b4f2dd6e512398f3d7d2bade0e54)(class ::stat_tool::StatError &, int , class ::std::vector< class ::stat_tool::Vectors, class ::std::allocator< class ::stat_tool::Vectors > > const, int ) const = &::stat_tool::Vectors::merge_variable;
     class ::stat_tool::Vectors * (*method_pointer_ff2504e6b0f153a39cb10ab6a6311f23)(class ::stat_tool::StatError &, class ::std::basic_string< char, struct ::std::char_traits< char >, class ::std::allocator< char > > const) = ::stat_tool::Vectors::ascii_read;
+    class ::std::basic_ostream< char, struct ::std::char_traits< char > > & (::stat_tool::Vectors::*method_pointer_06a099886ed25ac89709f3f1f8f878eb)(class ::std::basic_ostream< char, struct ::std::char_traits< char > > &, bool ) const = &::stat_tool::Vectors::ascii_data_write;
     bool  (::stat_tool::Vectors::*method_pointer_e65a013b8a23512da704fb416d54dc32)(class ::stat_tool::StatError &, class ::std::basic_string< char, struct ::std::char_traits< char >, class ::std::allocator< char > > const, bool ) const = &::stat_tool::Vectors::ascii_data_write;
     bool  (::stat_tool::Vectors::*method_pointer_ecc04a018f6a5b208ee872074d8f8b75)(class ::stat_tool::StatError &, int , double , double ) = &::stat_tool::Vectors::select_bin_width;
     double  (::stat_tool::Vectors::*method_pointer_26c98b2e5f5c5bb086bea4965a5b78a2)(int , double ) const = &::stat_tool::Vectors::mean_absolute_deviation_computation;
@@ -61,8 +66,10 @@ void wrapper_e00cc711eccf595f84c6952a456d7688()
     class ::stat_tool::Regression * (::stat_tool::Vectors::*method_pointer_86d0ca671ac2548595161412d53ed757)(class ::stat_tool::StatError &, int , int , class ::stat_tool::Distribution const &, enum ::stat_tool::moving_average_method ) const = &::stat_tool::Vectors::moving_average;
     class ::stat_tool::Regression * (::stat_tool::Vectors::*method_pointer_46b74a48e9645b688643826906daf90c)(class ::stat_tool::StatError &, int , int , double , bool ) const = &::stat_tool::Vectors::nearest_neighbor_smoother;
     class ::stat_tool::Mixture * (::stat_tool::Vectors::*method_pointer_fed11c312f67586fb2c5044a9d8a1c22)(class ::stat_tool::StatError &, bool , class ::stat_tool::Mixture const &, bool , bool , enum ::stat_tool::tying_rule , bool , int ) const = &::stat_tool::Vectors::mixture_estimation;
+    class ::stat_tool::Mixture * (::stat_tool::Vectors::*method_pointer_a9d70f4cd9c85801b6c620d56ba59a4a)(class ::stat_tool::StatError &, bool , int , double , double , double , bool , bool , int ) const = &::stat_tool::Vectors::mixture_estimation;
     class ::stat_tool::Mixture * (::stat_tool::Vectors::*method_pointer_d0677aba3f785bcbbe86a1ad850b225e)(class ::stat_tool::StatError &, bool , int , int , double , double , bool , enum ::stat_tool::tying_rule , bool , int ) const = &::stat_tool::Vectors::mixture_estimation;
     class ::stat_tool::Mixture * (::stat_tool::Vectors::*method_pointer_3e8aef16c1c052eaa8c877b0562b3459)(class ::stat_tool::StatError &, bool , class ::stat_tool::Mixture const &, bool , bool , enum ::stat_tool::tying_rule , int , int , double , bool , int ) const = &::stat_tool::Vectors::mixture_stochastic_estimation;
+    class ::stat_tool::Mixture * (::stat_tool::Vectors::*method_pointer_4f19af298c9456c4bb4e42702c9ff4de)(class ::stat_tool::StatError &, bool , int , double , double , double , bool , int , int , double , bool , int ) const = &::stat_tool::Vectors::mixture_stochastic_estimation;
     class ::stat_tool::Mixture * (::stat_tool::Vectors::*method_pointer_f6218f54c6745899ab677bfe4385f6fb)(class ::stat_tool::StatError &, bool , int , int , double , double , bool , enum ::stat_tool::tying_rule , int , int , double , bool , int ) const = &::stat_tool::Vectors::mixture_stochastic_estimation;
     int  (::stat_tool::Vectors::*method_pointer_99bc1d3ca6a7569cb81ab8af2e6327da)() const = &::stat_tool::Vectors::get_nb_vector;
     int  (::stat_tool::Vectors::*method_pointer_4bf15c5573385ba787ef95b022e982a0)(int ) const = &::stat_tool::Vectors::get_identifier;
@@ -83,6 +90,7 @@ void wrapper_e00cc711eccf595f84c6952a456d7688()
     class_e00cc711eccf595f84c6952a456d7688.def("min_interval_computation", method_pointer_7325afaa1c79508aa61a5ea7a3eb1802, "");
     class_e00cc711eccf595f84c6952a456d7688.def("extract", method_pointer_0a64824f80f95d7c95e677c5900996a9, boost::python::return_value_policy< boost::python::reference_existing_object >(), "");
     class_e00cc711eccf595f84c6952a456d7688.def("check", method_pointer_d4a0c706785b560180824a6675b5a254, "");
+    class_e00cc711eccf595f84c6952a456d7688.def("merge", method_pointer_e61329f09a4c5de69cb610711ed19f78, boost::python::return_value_policy< boost::python::reference_existing_object >(), "");
     class_e00cc711eccf595f84c6952a456d7688.def("shift", method_pointer_7e36c2e63fa851f3873c2c91109940a5, boost::python::return_value_policy< boost::python::reference_existing_object >(), "");
     class_e00cc711eccf595f84c6952a456d7688.def("shift", method_pointer_b01568ce752456ab8cd8af6fece78b51, boost::python::return_value_policy< boost::python::reference_existing_object >(), "");
     class_e00cc711eccf595f84c6952a456d7688.def("thresholding", method_pointer_95853d148357577baa33cff6d5a50044, boost::python::return_value_policy< boost::python::reference_existing_object >(), "");
@@ -94,11 +102,15 @@ void wrapper_e00cc711eccf595f84c6952a456d7688()
     class_e00cc711eccf595f84c6952a456d7688.def("scaling", method_pointer_687cdb26391b5a42b246993209abc6f6, boost::python::return_value_policy< boost::python::reference_existing_object >(), "");
     class_e00cc711eccf595f84c6952a456d7688.def("scaling", method_pointer_38fd0e7a6bfb5cdcb6ecc3570ac1fba6, boost::python::return_value_policy< boost::python::reference_existing_object >(), "");
     class_e00cc711eccf595f84c6952a456d7688.def("round", method_pointer_a1c95f46a3ce50d9a07a6f3c086fe120, boost::python::return_value_policy< boost::python::reference_existing_object >(), "");
+    class_e00cc711eccf595f84c6952a456d7688.def("log_transform", method_pointer_e7920dc35a4c59f7a5dad1ef1ec8712d, boost::python::return_value_policy< boost::python::reference_existing_object >(), "");
     class_e00cc711eccf595f84c6952a456d7688.def("value_select", method_pointer_7d1da63ddd5c57f8a5d531d6de79078d, boost::python::return_value_policy< boost::python::reference_existing_object >(), "");
     class_e00cc711eccf595f84c6952a456d7688.def("value_select", method_pointer_d797bc5036e2503cad783720b1088de5, boost::python::return_value_policy< boost::python::reference_existing_object >(), "");
     class_e00cc711eccf595f84c6952a456d7688.def("select_individual", method_pointer_de250270454c51d790e48877c46f86d9, boost::python::return_value_policy< boost::python::reference_existing_object >(), "");
     class_e00cc711eccf595f84c6952a456d7688.def("select_variable", method_pointer_d761498f88915e81986ca3c4386af241, boost::python::return_value_policy< boost::python::reference_existing_object >(), "");
+    class_e00cc711eccf595f84c6952a456d7688.def("sum_variable", method_pointer_c0467846d0fa50d3be4527e931122d61, boost::python::return_value_policy< boost::python::reference_existing_object >(), "");
+    class_e00cc711eccf595f84c6952a456d7688.def("merge_variable", method_pointer_c610b4f2dd6e512398f3d7d2bade0e54, boost::python::return_value_policy< boost::python::reference_existing_object >(), "");
     class_e00cc711eccf595f84c6952a456d7688.def("ascii_read", method_pointer_ff2504e6b0f153a39cb10ab6a6311f23, boost::python::return_value_policy< boost::python::reference_existing_object >(), "");
+    class_e00cc711eccf595f84c6952a456d7688.def("ascii_data_write", method_pointer_06a099886ed25ac89709f3f1f8f878eb, boost::python::return_internal_reference<>(), "");
     class_e00cc711eccf595f84c6952a456d7688.def("ascii_data_write", method_pointer_e65a013b8a23512da704fb416d54dc32, "");
     class_e00cc711eccf595f84c6952a456d7688.def("select_bin_width", method_pointer_ecc04a018f6a5b208ee872074d8f8b75, "");
     class_e00cc711eccf595f84c6952a456d7688.def("mean_absolute_deviation_computation", method_pointer_26c98b2e5f5c5bb086bea4965a5b78a2, "");
@@ -116,8 +128,10 @@ void wrapper_e00cc711eccf595f84c6952a456d7688()
     class_e00cc711eccf595f84c6952a456d7688.def("moving_average", method_pointer_86d0ca671ac2548595161412d53ed757, boost::python::return_value_policy< boost::python::reference_existing_object >(), "");
     class_e00cc711eccf595f84c6952a456d7688.def("nearest_neighbor_smoother", method_pointer_46b74a48e9645b688643826906daf90c, boost::python::return_value_policy< boost::python::reference_existing_object >(), "");
     class_e00cc711eccf595f84c6952a456d7688.def("mixture_estimation", method_pointer_fed11c312f67586fb2c5044a9d8a1c22, boost::python::return_value_policy< boost::python::reference_existing_object >(), "");
+    class_e00cc711eccf595f84c6952a456d7688.def("mixture_estimation", method_pointer_a9d70f4cd9c85801b6c620d56ba59a4a, boost::python::return_value_policy< boost::python::reference_existing_object >(), "");
     class_e00cc711eccf595f84c6952a456d7688.def("mixture_estimation", method_pointer_d0677aba3f785bcbbe86a1ad850b225e, boost::python::return_value_policy< boost::python::reference_existing_object >(), "");
     class_e00cc711eccf595f84c6952a456d7688.def("mixture_stochastic_estimation", method_pointer_3e8aef16c1c052eaa8c877b0562b3459, boost::python::return_value_policy< boost::python::reference_existing_object >(), "");
+    class_e00cc711eccf595f84c6952a456d7688.def("mixture_stochastic_estimation", method_pointer_4f19af298c9456c4bb4e42702c9ff4de, boost::python::return_value_policy< boost::python::reference_existing_object >(), "");
     class_e00cc711eccf595f84c6952a456d7688.def("mixture_stochastic_estimation", method_pointer_f6218f54c6745899ab677bfe4385f6fb, boost::python::return_value_policy< boost::python::reference_existing_object >(), "");
     class_e00cc711eccf595f84c6952a456d7688.def("get_nb_vector", method_pointer_99bc1d3ca6a7569cb81ab8af2e6327da, "");
     class_e00cc711eccf595f84c6952a456d7688.def("get_identifier", method_pointer_4bf15c5573385ba787ef95b022e982a0, "");
@@ -136,7 +150,6 @@ void wrapper_e00cc711eccf595f84c6952a456d7688()
     if(autowig::Held< class ::stat_tool::Vectors >::is_class)
     {
         boost::python::implicitly_convertible< autowig::Held< class ::stat_tool::Vectors >::Type, autowig::Held< class ::stat_tool::StatInterface >::Type >();
-        //boost::python::objects::class_value_wrapper< autowig::Held< class ::stat_tool::Vectors >::Type, boost::python::objects::make_ptr_instance< class ::stat_tool::Vectors, boost::python::objects::pointer_holder< autowig::Held< class ::stat_tool::Vectors >::Type, class ::stat_tool::Vectors > > >();
     }
 
 }
