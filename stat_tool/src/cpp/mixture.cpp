@@ -129,6 +129,58 @@ Mixture::Mixture(int inb_component , int inb_output_process , int *nb_value)
 
 /*--------------------------------------------------------------*/
 /**
+ *  \brief Constructor of the Mixture class (univariate Gaussian with evenly spaced means).
+ *
+ *  \param[in] inb_component      number of components,
+ *  \param[in] offset             mixture offset,
+ *  \param[in] mean               mean - offset of the 1st component,
+ *  \param[in] standard_deviation standard deviation,
+ *  \param[in] common_dispersion  common dispersion parameter,
+ */
+/*--------------------------------------------------------------*/
+
+Mixture::Mixture(int inb_component , double offset , double mean , double standard_deviation ,
+                 bool common_dispersion)
+
+{
+  int i , j;
+  ContinuousParametric **observation;
+
+
+  mixture_data = NULL;
+
+  nb_component = inb_component;
+  weight = new DiscreteParametric(nb_component);
+
+  nb_output_process = 1;
+
+  categorical_process = new CategoricalProcess*[1];
+  discrete_parametric_process = new DiscreteParametricProcess*[1];
+  continuous_parametric_process = new ContinuousParametricProcess*[1];
+
+  categorical_process[0] = NULL;
+  discrete_parametric_process[0] = NULL;
+
+  observation = new ContinuousParametric*[nb_component];
+
+  for (i = 0;i < nb_component - 1;i++) {
+    weight->mass[i] = 1 / (double)nb_component;
+    observation[i] = new ContinuousParametric(GAUSSIAN , offset + (i + 1) * mean , standard_deviation);
+  }
+  weight->mass[nb_component - 1] = 1 / (double)nb_component;
+  observation[nb_component - 1] = new ContinuousParametric(GAUSSIAN , offset + nb_component * mean / 2 , 10 * standard_deviation);
+
+  continuous_parametric_process[0] = new ContinuousParametricProcess(nb_component , observation);
+  continuous_parametric_process[0]->tied_location = true;
+  continuous_parametric_process[0]->tied_dispersion = common_dispersion;
+  continuous_parametric_process[0]->offset = offset;
+
+  delete [] observation;
+}
+
+
+/*--------------------------------------------------------------*/
+/**
  *  \brief Constructor of the Mixture class (univariate gamma, inverse Gaussian or Gaussian with tied parameters).
  *
  *  \param[in] inb_component      number of components,

@@ -795,7 +795,7 @@ ostream& ContinuousParametric::ascii_characteristic_print(ostream &os , bool fil
       if (file_flag) {
         os << "# ";
       }
-      os << STAT_label[STATL_STANDARD_DEVIATION] << ": " <<  standard_deviation << endl;
+      os << STAT_label[STATL_STANDARD_DEVIATION] << ": " << standard_deviation << endl;
     }
 #   endif
 
@@ -814,7 +814,7 @@ ostream& ContinuousParametric::ascii_characteristic_print(ostream &os , bool fil
       variance = (1 - zero_probability) * shape * scale * scale * (1 + shape) - mean * mean;
     }
 
-    os << STAT_label[STATL_MEAN] << ": " <<  mean << "   "
+    os << STAT_label[STATL_MEAN] << ": " << mean << "   "
        << STAT_label[STATL_VARIANCE] << ": " << variance << "   "
        << STAT_label[STATL_STANDARD_DEVIATION] << ": " << sqrt(variance) << endl;
     break;
@@ -1388,7 +1388,7 @@ ostream& ContinuousParametric::spreadsheet_characteristic_print(ostream &os) con
       variance = (1 - zero_probability) * shape * scale * scale * (1 + shape) - mean * mean;
     }
 
-    os << STAT_label[STATL_MEAN] << "\t" <<  mean << "\t\t"
+    os << STAT_label[STATL_MEAN] << "\t" << mean << "\t\t"
        << STAT_label[STATL_VARIANCE] << "\t" << variance << "\t\t"
        << STAT_label[STATL_STANDARD_DEVIATION] << "\t" << sqrt(variance) << endl;
     break;
@@ -1983,7 +1983,7 @@ bool ContinuousParametric::plot_print(const char *path , const Histogram *histo1
 
       case DEGREE : {
         max_value = 360;
-        step =  max_value / VON_MISES_NB_STEP;
+        step = max_value / VON_MISES_NB_STEP;
 
         value = 0.;
         for (i = 0;i < VON_MISES_NB_STEP;i++) {
@@ -1996,7 +1996,7 @@ bool ContinuousParametric::plot_print(const char *path , const Histogram *histo1
 
       case RADIAN : {
         max_value = 2 * M_PI;
-        step =  max_value / VON_MISES_NB_STEP;
+        step = max_value / VON_MISES_NB_STEP;
 
         value = 0.;
         for (i = 0;i < VON_MISES_NB_STEP;i++) {

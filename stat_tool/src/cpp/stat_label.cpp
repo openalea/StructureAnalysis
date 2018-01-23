@@ -579,6 +579,7 @@ const char *STAT_error[] = {
   "bad number of vectors" ,
   "bad number of variables" ,
   "bad number of selected variables" ,
+  "bad number of summed variables" ,
   "bad variable type" ,
   "bad variable index" ,
   "bad variable indices: should be different" ,

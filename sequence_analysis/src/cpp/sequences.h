@@ -1,9 +1,9 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       V-Plants: Exploring and Modeling Plant Architecture
+ *       StructureAnalysis: Exploring and Analyzing Plant Architecture
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2018 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -199,6 +199,7 @@ namespace sequence_analysis {
 
   enum sequence_type {
     SEQUENCE ,
+    SEQUENCE_SAMPLE ,
     TREND ,
     SUBTRACTION_RESIDUAL ,
     ABSOLUTE_RESIDUAL ,
@@ -499,7 +500,8 @@ namespace sequence_analysis {
     std::ostream& ascii_write(std::ostream &os , bool exhaustive , bool comment_flag) const;
     std::ostream& ascii_print(std::ostream &os , output_sequence_format format , bool comment_flag ,
                               double *posterior_probability = NULL , double *entropy = NULL ,
-                              double *nb_state_sequence = NULL , int line_nb_character = stat_tool::LINE_NB_CHARACTER) const;
+                              double *nb_state_sequence = NULL , double *posterior_state_probability = NULL ,
+                              int line_nb_character = stat_tool::LINE_NB_CHARACTER) const;
     bool plot_print(const char *path , int ilength) const;
 
     void max_length_computation();
@@ -768,6 +770,8 @@ namespace sequence_analysis {
                                bool keep = true) const;
     Sequences* select_variable(stat_tool::StatError &error , int inb_variable , std::vector<int> ivariable ,
                                bool keep = true) const;
+    Sequences* sum_variable(stat_tool::StatError &error , int nb_summed_variable , int *ivariable) const;
+    Sequences* sum_variable(stat_tool::StatError &error , int nb_summed_variable , std::vector<int> ivariable) const;
     Sequences* merge_variable(stat_tool::StatError &error , int nb_sample , const Sequences **iseq ,
                               int ref_sample = stat_tool::I_DEFAULT) const;
     Sequences* merge_variable(stat_tool::StatError &error , int nb_sample , const std::vector<Sequences> iseq ,
@@ -780,6 +784,7 @@ namespace sequence_analysis {
                              int imax_length , bool keep = true) const;
     Sequences* remove_run(stat_tool::StatError &error , int variable , int ivalue ,
                           run_position position , int max_run_length = stat_tool::I_DEFAULT) const;
+    Sequences* truncate(stat_tool::StatError &error , int max_index_parameter) const;
     Sequences* index_parameter_extract(stat_tool::StatError &error , int min_index_parameter ,
                                        int max_index_parameter = stat_tool::I_DEFAULT) const;
     Sequences* segmentation_extract(stat_tool::StatError &error , int variable , int nb_value ,
@@ -792,7 +797,8 @@ namespace sequence_analysis {
     Sequences* cumulate(stat_tool::StatError &error , int variable = stat_tool::I_DEFAULT) const;
     Sequences* difference(stat_tool::StatError &error , int variable = stat_tool::I_DEFAULT ,
                           bool first_element = false) const;
-    Sequences* log_transform(stat_tool::StatError &error , int variable = stat_tool::I_DEFAULT) const;
+    Sequences* log_transform(stat_tool::StatError &error , int variable = stat_tool::I_DEFAULT ,
+                             stat_tool::log_base base = stat_tool::NATURAL) const;
     Sequences* relative_growth_rate(stat_tool::StatError &error , double growth_factor = GROWTH_FACTOR) const;
     Sequences* sequence_normalization(stat_tool::StatError &error , int variable = stat_tool::I_DEFAULT) const;
     Sequences* moving_average(stat_tool::StatError &error , int nb_point , double *filter ,
@@ -809,6 +815,9 @@ namespace sequence_analysis {
                                  bool dispersion = false , sequence_type output = SEQUENCE ,
                                  const std::string path = "" ,
                                  stat_tool::output_format format = stat_tool::ASCII) const;
+
+    bool mean_error_computation(stat_tool::StatError &error , bool display , int variable ,
+                                int iidentifier = stat_tool::I_DEFAULT , bool robust = false) const;
 
     Sequences* recurrence_time_sequences(stat_tool::StatError &error , int variable , int value) const;
     Sequences* sojourn_time_sequences(stat_tool::StatError &error , int variable) const;

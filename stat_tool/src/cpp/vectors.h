@@ -239,6 +239,9 @@ namespace stat_tool {
                              ContinuousParametricProcess *process) const;
     template <typename Type>
     void tied_gaussian_estimation(Type **component_vector_count , int variable ,
+                                  ContinuousParametricProcess *process) const;
+    template <typename Type>
+    void tied_gaussian_estimation(Type **component_vector_count , int variable ,
                                   ContinuousParametricProcess *process ,
                                   tying_rule variance_factor) const;
     template <typename Type>
@@ -294,6 +297,8 @@ namespace stat_tool {
     Vectors* scaling(StatError &error , int variable , double scaling_coeff) const;
     Vectors* round(StatError &error , int variable = I_DEFAULT ,
                    rounding mode = ROUND) const;
+    Vectors* log_transform(StatError &error , int variable = I_DEFAULT ,
+                           log_base base = NATURAL) const;
 
     Vectors* value_select(StatError &error , bool display , int variable ,
                           int imin_value , int imax_value , bool keep = true) const;
@@ -308,6 +313,8 @@ namespace stat_tool {
                              bool keep = true) const;
     Vectors* select_variable(StatError &error , int inb_variable , std::vector<int> ivariable ,
                              bool keep = true) const;
+    Vectors* sum_variable(StatError &error , int nb_summed_variable , int *ivariable) const;
+    Vectors* sum_variable(StatError &error , int nb_summed_variable , std::vector<int> ivariable) const;
     Vectors* merge_variable(StatError &error , int nb_sample , const Vectors **ivec ,
                             int ref_sample = I_DEFAULT) const;
     Vectors* merge_variable(StatError &error , int nb_sample , const std::vector<Vectors> ivec ,
@@ -372,12 +379,23 @@ namespace stat_tool {
                                 tying_rule variance_factor = INDEPENDENT , bool assignment = true ,
                                 int nb_iter = I_DEFAULT) const;
     Mixture* mixture_estimation(StatError &error , bool display , int nb_component ,
+                                double offset , double mean , double standard_deviation ,
+                                bool common_dispersion = true , bool assignment = true ,
+                                int nb_iter = I_DEFAULT) const;
+    Mixture* mixture_estimation(StatError &error , bool display , int nb_component ,
                                 int ident , double mean , double standard_deviation ,
                                 bool tied_location = true , tying_rule variance_factor = SCALING_FACTOR ,
                                 bool assignment = true , int nb_iter = I_DEFAULT) const;
     Mixture* mixture_stochastic_estimation(StatError &error , bool display , const Mixture &imixt ,
                                            bool known_component = false , bool common_dispersion = false ,
                                            tying_rule variance_factor = INDEPENDENT ,
+                                           int min_nb_assignment = MIN_NB_ASSIGNMENT ,
+                                           int max_nb_assignment = MAX_NB_ASSIGNMENT ,
+                                           double parameter = NB_ASSIGNMENT_PARAMETER ,
+                                           bool assignment = true , int nb_iter = I_DEFAULT) const;
+    Mixture* mixture_stochastic_estimation(StatError &error , bool display , int nb_component ,
+                                           double offset , double mean , double standard_deviation ,
+                                           bool common_dispersion = true ,
                                            int min_nb_assignment = MIN_NB_ASSIGNMENT ,
                                            int max_nb_assignment = MAX_NB_ASSIGNMENT ,
                                            double parameter = NB_ASSIGNMENT_PARAMETER ,

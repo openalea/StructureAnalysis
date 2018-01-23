@@ -178,6 +178,7 @@ namespace stat_tool {
     void graph_accessibility_computation(bool **ilogic_transition);
     void probability_accessibility_computation();
     void component_computation(bool **ilogic_transition = NULL);
+    bool parallel_initial_state() const;
 
     void thresholding(double min_probability , bool semi_markov = false);
 
@@ -328,6 +329,7 @@ namespace stat_tool {
     continuous_parametric ident;  ///< identifiers of observation distributions
     bool tied_location;     ///< flag tied means  (gamma, Gaussian)
     bool tied_dispersion;   ///< flag tied dispersion parameters (gamma, Gaussian, von Mises)
+    double offset;          ///< offset for Gaussian mixture with evenly spaced means
     angle_unit unit;        ///< unit (degree/radian) for von Mises distributions
     ContinuousParametric **observation;  ///< continuous observation distributions
     Distribution *weight;   ///< theoretical weights of observation distributions

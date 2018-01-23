@@ -2722,7 +2722,7 @@ ostream& MarkovianSequences::autoregressive_model_spreadsheet_print(ostream &os 
         confidence_limit = standard_normal_value / sqrt((double)(correl->frequency[j]));
 
         os << j << "\t" << correl->point[0][j] << "\t" << correl->point[1][j] << "\t"
-           << confidence_limit << "\t" << -confidence_limit << "\t" <<  correl->frequency[j] << endl;
+           << confidence_limit << "\t" << -confidence_limit << "\t" << correl->frequency[j] << endl;
       }
       os << endl;
     }
@@ -2792,7 +2792,7 @@ bool MarkovianSequences::autoregressive_model_plot_print(const char *prefix , co
           confidence_limit = standard_normal_value / sqrt((double)(correl[i]->frequency[j]));
 
           *out_data_file[i] << j << " " << correl[i]->point[0][j] << " " << correl[i]->point[1][j] << " "
-                            << confidence_limit << " " << -confidence_limit << " " <<  correl[i]->frequency[j] << endl;
+                            << confidence_limit << " " << -confidence_limit << " " << correl[i]->frequency[j] << endl;
         }
       }
     }

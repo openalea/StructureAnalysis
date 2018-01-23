@@ -716,6 +716,43 @@ void Chain::component_computation(bool **ilogic_transition)
 
 /*--------------------------------------------------------------*/
 /**
+ *  \brief Computation of the number of initial states in parallel (clustering structure).
+ */
+/*--------------------------------------------------------------*/
+
+bool Chain::parallel_initial_state() const
+
+{
+  int i , j;
+  int nb_initial_state;
+
+
+  nb_initial_state = 0;
+
+  for (i = 0;i < nb_state;i++) {
+    if (initial[i] > 0.) {
+      for (j = 0;j < nb_state;j++) {
+        if ((j != i) && (accessibility[j][i])) {
+          break;
+        }
+      }
+
+      if (j == nb_state) {
+        nb_initial_state++;
+      }
+    }
+  }
+
+# ifdef MESSAGE
+  cout << "\nN.o. initial states in parallel: " << nb_initial_state << endl;
+# endif
+
+  return (nb_initial_state > 1 ? true : false);
+}
+
+
+/*--------------------------------------------------------------*/
+/**
  *  \brief Application of a threshold on the Markov chain parameters.
  *
  *  \param[in] min_probability minimum probability,

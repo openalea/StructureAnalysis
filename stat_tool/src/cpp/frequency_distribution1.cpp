@@ -1229,7 +1229,7 @@ void FrequencyDistribution::plotable_mass_write(SinglePlot &plot) const
   int i;
 
 
-  for (i =  MAX(offset - 1 , 0);i < nb_value;i++) {
+  for (i = MAX(offset - 1 , 0);i < nb_value;i++) {
     plot.add_point(i , (double)frequency[i] / (double)nb_element);
   }
   if ((double)frequency[nb_value - 1] / (double)nb_element > PLOT_MASS_THRESHOLD) {

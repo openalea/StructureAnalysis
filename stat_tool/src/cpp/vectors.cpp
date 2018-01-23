@@ -2487,6 +2487,189 @@ Vectors* Vectors::round(StatError &error , int variable , rounding mode) const
 
 /*--------------------------------------------------------------*/
 /**
+ *  \brief Log-transform of values.
+ *
+ *  \param[in] error    reference on a StatError object,
+ *  \param[in] variable variable index,
+ *  \param[in] base     base of the logarithm.
+ *
+ *  \return             Vectors object.
+ */
+/*--------------------------------------------------------------*/
+
+Vectors* Vectors::log_transform(StatError &error , int variable , log_base base) const
+
+{
+  bool status = true;
+  int i , j , k;
+  int offset , inb_variable;
+  variable_nature *itype;
+  Vectors *vec;
+
+
+  vec = NULL;
+  error.init();
+
+  if (type[0] == STATE) {
+    offset = 1;
+    if (nb_variable == 1) {
+      status = false;
+      error.update(STAT_error[STATR_NB_VARIABLE]);
+    }
+  }
+  else {
+    offset = 0;
+  }
+
+  if (variable != I_DEFAULT) {
+    if ((variable < offset + 1) || (variable > nb_variable)) {
+      status = false;
+      error.update(STAT_error[STATR_VARIABLE_INDEX]);
+    }
+    else {
+      variable--;
+    }
+  }
+
+  for (i = offset;i < nb_variable;i++) {
+    if ((variable == I_DEFAULT) || (variable == i)) {
+      if ((type[i] != INT_VALUE) && (type[i] != REAL_VALUE)) {
+        status = false;
+        ostringstream error_message , correction_message;
+        error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
+                      << STAT_error[STATR_VARIABLE_TYPE];
+        correction_message << STAT_variable_word[INT_VALUE] << " or "
+                           << STAT_variable_word[REAL_VALUE];
+        error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
+      }
+
+      else if (min_value[i] <= 0.) {
+        status = false;
+        ostringstream error_message;
+        error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
+                      << STAT_error[STATR_POSITIVE_MIN_VALUE];
+        error.update((error_message.str()).c_str());
+      }
+    }
+  }
+
+  if (status) {
+    if (variable == I_DEFAULT) {
+      inb_variable = nb_variable;
+    }
+    else {
+      inb_variable = offset + 1;
+    }
+
+    itype = new variable_nature[inb_variable];
+    if (type[0] == STATE) {
+      itype[0] = type[0];
+    }
+    for (i = offset;i < inb_variable;i++) {
+      itype[i] = REAL_VALUE;
+    }
+
+    vec = new Vectors(nb_vector , identifier , inb_variable , itype);
+    delete [] itype;
+
+    // copy of the state variable
+
+    if (type[0] == STATE) {
+      for (i = 0;i < vec->nb_vector;i++) {
+        vec->int_vector[i][0] = int_vector[i][0];
+      }
+
+      vec->min_value[0] = min_value[0];
+      vec->max_value[0] = max_value[0];
+
+      vec->marginal_distribution[0] = new FrequencyDistribution(*marginal_distribution[0]);
+    }
+
+    // log-transform of values
+
+    switch (base) {
+
+    case NATURAL : {
+      for (i = 0;i < nb_vector;i++) {
+        j = offset;
+        for (k = offset;k < nb_variable;k++) {
+          if ((variable == I_DEFAULT) || (variable == k)) {
+            if (type[k] != REAL_VALUE) {
+              vec->real_vector[i][j] = log(int_vector[i][k]);
+            }
+
+            else {
+              vec->real_vector[i][j] = log(real_vector[i][k]);
+            }
+
+            j++;
+          }
+        }
+      }
+      break;
+    }
+
+    case TWO : {
+      for (i = 0;i < nb_vector;i++) {
+        j = offset;
+        for (k = offset;k < nb_variable;k++) {
+          if ((variable == I_DEFAULT) || (variable == k)) {
+            if (type[k] != REAL_VALUE) {
+              vec->real_vector[i][j] = log2(int_vector[i][k]);
+            }
+
+            else {
+              vec->real_vector[i][j] = log2(real_vector[i][k]);
+            }
+
+            j++;
+          }
+        }
+      }
+      break;
+    }
+
+    case TEN : {
+       for (i = 0;i < nb_vector;i++) {
+        j = offset;
+        for (k = offset;k < nb_variable;k++) {
+          if ((variable == I_DEFAULT) || (variable == k)) {
+            if (type[k] != REAL_VALUE) {
+              vec->real_vector[i][j] = log10(int_vector[i][k]);
+            }
+
+            else {
+              vec->real_vector[i][j] = log10(real_vector[i][k]);
+            }
+
+            j++;
+          }
+        }
+      }
+     break;
+    }
+    }
+
+    for (i = offset;i < vec->nb_variable;i++) {
+      vec->min_value_computation(i);
+      vec->max_value_computation(i);
+
+      vec->build_marginal_histogram(i);
+      vec->min_interval_computation(i);
+
+      vec->mean_computation(i);
+      vec->variance_computation(i);
+    }
+
+    vec->covariance_computation();
+ }
+
+  return vec;
+}
+
+
+/*--------------------------------------------------------------*/
+/**
  *  \brief Selection of individuals taking values in a given range for a variable.
  *
  *  \param[in] error      reference on a StatError object,
@@ -3155,6 +3338,248 @@ Vectors* Vectors::remove_variable_1() const
   delete [] itype;
 
   return vec;
+}
+
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Summation of variables.
+ *
+ *  \param[in] error              reference on a StatError object,
+ *  \param[in] nb_summed_variable number of variables to be summed,
+ *  \param[in] variable           variable indices.
+ *
+ *  \return                       Vectors object.
+ */
+/*--------------------------------------------------------------*/
+
+Vectors* Vectors::sum_variable(StatError &error , int nb_summed_variable , int *ivariable) const
+
+{
+  bool status = true , *selected_variable;
+  int i , j , k , m;
+  int inb_variable , *copied_variable , *summed_variable;
+  variable_nature *itype;
+  Vectors *vec;
+
+
+  vec = NULL;
+  error.init();
+
+  if (nb_variable == 1) {
+    status = false;
+    error.update(STAT_error[STATR_NB_VARIABLE]);
+  }
+
+  if ((nb_summed_variable < 2) || (nb_summed_variable > nb_variable)) {
+    status = false;
+    error.update(STAT_error[STATR_NB_SUMMED_VARIABLE]);
+  }
+
+  else {
+    selected_variable = new bool[nb_variable + 1];
+    for (i = 1;i <= nb_variable;i++) {
+      selected_variable[i] = false;
+    }
+
+    for (i = 0;i < nb_summed_variable;i++) {
+      if ((ivariable[i] < 1) || (ivariable[i] > nb_variable)) {
+        status = false;
+        ostringstream error_message;
+        error_message << ivariable[i] << ": " << STAT_error[STATR_VARIABLE_INDEX];
+        error.update((error_message.str()).c_str());
+      }
+
+      else {
+        if (selected_variable[ivariable[i]]) {
+          status = false;
+          ostringstream error_message;
+          error_message << STAT_label[STATL_VARIABLE] << " " << ivariable[i] << " "
+                        << STAT_error[STATR_ALREADY_SELECTED];
+          error.update((error_message.str()).c_str());
+        }
+
+        else {
+          selected_variable[ivariable[i]] = true;
+
+          if ((type[ivariable[i] - 1] != INT_VALUE) && (type[ivariable[i] - 1] != REAL_VALUE)) {
+            status = false;
+            ostringstream error_message , correction_message;
+            error_message << STAT_label[STATL_VARIABLE] << " " << ivariable[i] << ": "
+                          << STAT_error[STATR_VARIABLE_TYPE];
+            correction_message << STAT_variable_word[INT_VALUE] << " or "
+                               << STAT_variable_word[REAL_VALUE];
+            error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
+          }
+        }
+      }
+    }
+
+    delete [] selected_variable;
+  }
+
+  if (status) {
+    inb_variable = nb_variable - nb_summed_variable + 1;
+    for (i = 0;i < nb_summed_variable;i++) {
+      ivariable[i]--;
+    }
+
+    summed_variable = new int[nb_summed_variable];
+    copied_variable = new int[nb_variable - nb_summed_variable];
+    i = 0;
+    j = 0;
+    for (k = 0;k < nb_variable;k++) {
+      for (m = 0;m < nb_summed_variable;m++) {
+        if (ivariable[m] == k) {
+          summed_variable[i++] = k;
+          break;
+        }
+      }
+      if (m == nb_summed_variable) {
+        copied_variable[j++] = k;
+      }
+    }
+
+    itype = new variable_nature[inb_variable];
+    i = 0;
+    for (j = 0;j < inb_variable;j++) {
+      if (j == summed_variable[0]) {
+        itype[j] = type[j];
+        for (k = 1;k < nb_summed_variable;k++) {
+          if (type[summed_variable[k]] == REAL_VALUE) {
+           itype[j] = REAL_VALUE;
+          }
+        }
+      }
+      else {
+        itype[j] = type[copied_variable[i++]];
+      }
+    }
+
+    vec = new Vectors(nb_vector , identifier , inb_variable , itype);
+    delete [] itype;
+
+    for (i = 0;i < nb_vector;i++) {
+      j = 0;
+      for (k = 0;k < inb_variable;k++) {
+
+        // summation of values
+
+        if (k == summed_variable[0]) {
+          switch (vec->type[k]) {
+
+          case INT_VALUE : {
+            vec->int_vector[i][k] = 0.;
+
+            for (m = 0;m < nb_summed_variable;m++) {
+              switch (type[summed_variable[m]]) {
+              case INT_VALUE :
+                vec->int_vector[i][k] += int_vector[i][summed_variable[m]];
+                break;
+              case REAL_VALUE :
+                vec->int_vector[i][k] += real_vector[i][summed_variable[m]];
+                break;
+              }
+            }
+            break;
+          }
+
+          case REAL_VALUE : {
+            vec->real_vector[i][k] = 0.;
+
+            for (m = 0;m < nb_summed_variable;m++) {
+              switch (type[summed_variable[m]]) {
+              case INT_VALUE :
+                vec->real_vector[i][k] += int_vector[i][summed_variable[m]];
+                break;
+              case REAL_VALUE :
+                vec->real_vector[i][k] += real_vector[i][summed_variable[m]];
+                break;
+              }
+            }
+            break;
+          }
+          }
+        }
+
+        // copy of values
+
+        else {
+          switch (vec->type[k]) {
+          case INT_VALUE :
+            vec->int_vector[i][k] = int_vector[i][copied_variable[j++]];
+            break;
+          case REAL_VALUE :
+            vec->real_vector[i][k] = real_vector[i][copied_variable[j++]];
+            break;
+          }
+        }
+      }
+    }
+
+    i = 0;
+    for (j = 0;j < inb_variable;j++) {
+      if (j == summed_variable[0]) {
+        vec->min_value_computation(j);
+        vec->max_value_computation(j);
+
+        vec->build_marginal_frequency_distribution(j);
+      }
+
+      else {
+        vec->min_value[j] = min_value[copied_variable[i]];
+        vec->max_value[j] = max_value[copied_variable[i]];
+        vec->min_interval[j] = min_interval[copied_variable[i]];
+
+        if (marginal_distribution[copied_variable[i]]) {
+          vec->marginal_distribution[j] = new FrequencyDistribution(*(marginal_distribution[copied_variable[i]]));
+        }
+        if (marginal_histogram[copied_variable[i]]) {
+          vec->marginal_histogram[j] = new Histogram(*(marginal_histogram[copied_variable[i]]));
+        }
+
+        vec->mean[j] = mean[copied_variable[i]];
+
+        k = 0;
+        for (m = 0;m < inb_variable;m++) {
+          if (m != summed_variable[0]) {
+            vec->covariance[j][m] = covariance[copied_variable[i]][copied_variable[k++]];
+            if (m != j) {
+              vec->covariance[m][j] = vec->covariance[j][m];
+            }
+          }
+        }
+
+        i++;
+      }
+
+      vec->covariance_computation(summed_variable[0]);
+    }
+
+    delete [] summed_variable;
+    delete [] copied_variable;
+  }
+
+  return vec;
+}
+
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Summation of variables.
+ *
+ *  \param[in] error              reference on a StatError object,
+ *  \param[in] nb_summed_variable number of variables to be summed,
+ *  \param[in] variable           variable indices.
+ *
+ *  \return                       Vectors object.
+ */
+/*--------------------------------------------------------------*/
+
+Vectors* Vectors::sum_variable(StatError &error , int nb_summed_variable , vector<int>ivariable) const
+
+{
+  return sum_variable(error , nb_summed_variable , ivariable.data());
 }
 
 
@@ -5477,28 +5902,33 @@ void Vectors::variance_computation(int variable)
 
 {
   if (mean[variable] != D_INF) {
-    covariance[variable][variable] = 0.;
-
     if (nb_vector > 1) {
       int i;
       double diff;
+      long double square_sum;
 
+
+      square_sum = 0.;
 
       if (type[variable] != REAL_VALUE) {
         for (i = 0;i < nb_vector;i++) {
           diff = int_vector[i][variable] - mean[variable];
-          covariance[variable][variable] += diff * diff;
+          square_sum += diff * diff;
         }
       }
 
       else{
         for (i = 0;i < nb_vector;i++) {
           diff = real_vector[i][variable] - mean[variable];
-          covariance[variable][variable] += diff * diff;
+          square_sum += diff * diff;
         }
       }
 
-      covariance[variable][variable] /= (nb_vector - 1);
+      covariance[variable][variable] = square_sum / (nb_vector - 1);
+    }
+
+    else {
+      covariance[variable][variable] = 0.;
     }
   }
 }
@@ -5517,40 +5947,47 @@ void Vectors::covariance_computation(int variable)
 {
   if (mean[0] != D_INF) {
     int i , j , k;
+    long double square_sum;
 
 
     for (i = 0;i < nb_variable;i++) {
       if ((variable == I_DEFAULT) || (i == variable)) {
         for (j = (variable == I_DEFAULT ? i + 1 : 0);j < nb_variable;j++) {
-          covariance[i][j] = 0.;
-
           if (nb_vector > 1) {
+            square_sum = 0.;
+
             if ((type[i] != REAL_VALUE) && (type[j] != REAL_VALUE)) {
               for (k = 0;k < nb_vector;k++) {
-                covariance[i][j] += (int_vector[k][i] - mean[i]) * (int_vector[k][j] - mean[j]);
+                square_sum += (int_vector[k][i] - mean[i]) * (int_vector[k][j] - mean[j]);
               }
             }
             else if ((type[i] != REAL_VALUE) && (type[j] == REAL_VALUE)) {
               for (k = 0;k < nb_vector;k++) {
-                covariance[i][j] += (int_vector[k][i] - mean[i]) * (real_vector[k][j] - mean[j]);
+                square_sum += (int_vector[k][i] - mean[i]) * (real_vector[k][j] - mean[j]);
               }
             }
             else if ((type[i] == REAL_VALUE) && (type[j] != REAL_VALUE)) {
               for (k = 0;k < nb_vector;k++) {
-                covariance[i][j] += (real_vector[k][i] - mean[i]) * (int_vector[k][j] - mean[j]);
+                square_sum += (real_vector[k][i] - mean[i]) * (int_vector[k][j] - mean[j]);
               }
             }
 //            else if ((type[i] == REAL_VALUE) && (type[j] == REAL_VALUE)) {
             else {
               for (k = 0;k < nb_vector;k++) {
-                covariance[i][j] += (real_vector[k][i] - mean[i]) * (real_vector[k][j] - mean[j]);
+                square_sum += (real_vector[k][i] - mean[i]) * (real_vector[k][j] - mean[j]);
               }
             }
 
-            covariance[i][j] /= (nb_vector - 1);
+            covariance[i][j] = square_sum / (nb_vector - 1);
           }
 
-          covariance[j][i] = covariance[i][j];
+          else {
+            covariance[i][j] = 0.;
+          }
+
+          if (j != i) {
+            covariance[j][i] = covariance[i][j];
+          }
         }
       }
     }
@@ -5660,28 +6097,33 @@ double Vectors::skewness_computation(int variable) const
 {
   int i;
   double skewness = D_INF , diff;
+  long double cube_sum;
 
 
   if ((mean[variable] != D_INF) && (covariance[variable][variable] != D_DEFAULT)) {
-    skewness = 0.;
-
     if ((nb_vector > 2) && (covariance[variable][variable] > 0.)) {
+      cube_sum = 0.;
+
       if (type[variable] != REAL_VALUE) {
         for (i = 0;i < nb_vector;i++) {
           diff = int_vector[i][variable] - mean[variable];
-          skewness += diff * diff * diff;
+          cube_sum += diff * diff * diff;
         }
       }
 
       else {
         for (i = 0;i < nb_vector;i++) {
           diff = real_vector[i][variable] - mean[variable];
-          skewness += diff * diff * diff;
+          cube_sum += diff * diff * diff;
         }
       }
 
-      skewness = skewness * nb_vector / ((nb_vector - 1) * (nb_vector - 2) *
+      skewness = cube_sum * nb_vector / ((nb_vector - 1) * (nb_vector - 2) *
                   pow(covariance[variable][variable] , 1.5));
+    }
+
+    else {
+      skewness = 0.;
     }
   }
 
@@ -5705,32 +6147,33 @@ double Vectors::kurtosis_computation(int variable) const
 {
   int i;
   double kurtosis = D_INF , diff;
+  long double power_sum;
 
 
   if ((mean[variable] != D_INF) && (covariance[variable][variable] != D_DEFAULT)) {
-    if (covariance[variable][variable] == 0.) {
-      kurtosis = -2.;
-    }
-
-    else {
-      kurtosis = 0.;
+    if (covariance[variable][variable] > 0.) {
+      power_sum = 0.;
 
       if (type[variable] != REAL_VALUE) {
         for (i = 0;i < nb_vector;i++) {
           diff = int_vector[i][variable] - mean[variable];
-          kurtosis += diff * diff * diff * diff;
+          power_sum += diff * diff * diff * diff;
         }
       }
 
       else {
         for (i = 0;i < nb_vector;i++) {
           diff = real_vector[i][variable] - mean[variable];
-          kurtosis += diff * diff * diff * diff;
+          power_sum += diff * diff * diff * diff;
         }
       }
 
-      kurtosis = kurtosis / ((nb_vector - 1) * covariance[variable][variable] *
+      kurtosis = power_sum / ((nb_vector - 1) * covariance[variable][variable] *
                   covariance[variable][variable]) - 3.;
+    }
+
+    else {
+      kurtosis = -2.;
     }
   }
 
