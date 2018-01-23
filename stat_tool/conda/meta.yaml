@@ -27,9 +27,7 @@ requirements:
    - openalea.deploy
    - scons
    - openalea.sconsx
-   - readline
    - boost
   run:
    - python
-   - readline
    - boost
