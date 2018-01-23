@@ -26,7 +26,7 @@ env.AppendUnique(CPPDEFINES=['MESSAGE'])
 
 
 
-env.ALEAWrapper("../structure_analysis/stat_tool", "__stat_tool", sources)
+env.ALEAWrapper("../stat_tool", "__stat_tool", sources)
 # includes in wrappers should be restricted to boost_python_aliases.h and wrapper_util.h
 # inc = env.Install('$build_includedir/stat_tool', includes)
 # inc = env.Install('$build_includedir/stat_tool', ["boost_python_aliases.h", "wrapper_util.h"])
