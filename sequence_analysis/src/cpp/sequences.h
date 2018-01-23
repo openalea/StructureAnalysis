@@ -1,9 +1,9 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       V-Plants: Exploring and Modeling Plant Architecture
+ *       StructureAnalysis: Exploring and Analyzing Plant Architecture
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2018 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -784,6 +784,7 @@ namespace sequence_analysis {
                              int imax_length , bool keep = true) const;
     Sequences* remove_run(stat_tool::StatError &error , int variable , int ivalue ,
                           run_position position , int max_run_length = stat_tool::I_DEFAULT) const;
+    Sequences* truncate(stat_tool::StatError &error , int max_index_parameter) const;
     Sequences* index_parameter_extract(stat_tool::StatError &error , int min_index_parameter ,
                                        int max_index_parameter = stat_tool::I_DEFAULT) const;
     Sequences* segmentation_extract(stat_tool::StatError &error , int variable , int nb_value ,

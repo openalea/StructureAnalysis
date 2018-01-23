@@ -1,9 +1,9 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       V-Plants: Exploring and Modeling Plant Architecture
+ *       StructureAnalysis: Exploring and Analyzing Plant Architecture
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2018 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -3936,6 +3936,119 @@ Sequences* Sequences::remove_run(StatError &error , int variable , int ivalue ,
 
 /*--------------------------------------------------------------*/
 /**
+ *  \brief Truncation of sequences.
+ *
+ *  \param[in] error               reference on a StatError object,
+ *  \param[in] max_index_parameter highest index parameter.
+ *
+ *  \return                        Sequences object.
+ */
+/*--------------------------------------------------------------*/
+
+Sequences* Sequences::truncate(StatError &error , int max_index_parameter) const
+
+{
+  int i , j , k;
+  int *ilength;
+  Sequences *seq;
+
+
+  error.init();
+
+  if ((max_index_parameter < (index_parameter ? index_parameter_distribution->offset : 1)) ||
+      ((!index_parameter) && (max_index_parameter >= max_length))) {
+    seq = NULL;
+    error.update(SEQ_error[SEQR_MAX_INDEX_PARAMETER]);
+  }
+
+  else {
+    ilength = new int[nb_sequence];
+
+    // explicit index parameters
+
+    if (index_parameter) {
+      for (i = 0;i < nb_sequence;i++) {
+        for (j = length[i] - 1;j >= 0;j--) {
+          if (index_parameter[i][j] <= max_index_parameter) {
+            break;
+          }
+        }
+        ilength[i] = MAX(j + 1 , 1);
+
+#       ifdef MESSAGE
+        if (ilength[i] == 0) {
+          cout << "\n" << identifier[i] << " " << j << " " << length[i] << endl;
+        }
+#       endif
+
+      }
+    }
+
+    // implicit index parameters
+
+    else {
+      for (i = 0;i < nb_sequence;i++) {
+        ilength[i] = MIN(max_index_parameter + 1 , length[i]);
+      }
+    }
+
+    // extraction of truncated sequences
+
+    seq = new Sequences(nb_sequence , identifier , ilength , vertex_identifier ,
+                        index_param_type , nb_variable , type);
+    delete [] ilength;
+
+    // copy of index parameters
+
+    if (index_parameter) {
+      for (i = 0;i < seq->nb_sequence;i++) {
+        for (j = 0;j < seq->length[i];j++) {
+          seq->index_parameter[i][j] = index_parameter[i][j];
+        }
+
+        if (seq->index_param_type == POSITION) {
+          seq->index_parameter[i][seq->length[i]] = (index_interval->variance == 0. ? index_parameter[i][seq->length[i]] : index_parameter[i][seq->length[i] - 1]);
+        }
+      }
+
+      seq->build_index_parameter_frequency_distribution();
+      seq->index_interval_computation();
+    }
+
+    // copy of values
+
+    for (i = 0;i < seq->nb_sequence;i++) {
+      for (j = 0;j < seq->nb_variable;j++) {
+        if ((seq->type[j] != REAL_VALUE) && (seq->type[j] != AUXILIARY)) {
+          for (k = 0;k < seq->length[i];k++) {
+            seq->int_sequence[i][j][k] = int_sequence[i][j][k];
+          }
+        }
+
+        else {
+          for (k = 0;k < seq->length[i];k++) {
+            seq->real_sequence[i][j][k] = real_sequence[i][j][k];
+          }
+        }
+      }
+    }
+
+    for (i = 0;i < seq->nb_variable;i++) {
+      seq->min_value_computation(i);
+      seq->max_value_computation(i);
+
+      if (seq->type[i] != AUXILIARY) {
+        seq->build_marginal_frequency_distribution(i);
+      }
+    }
+  }
+ 
+  return seq;
+}
+
+
+/*--------------------------------------------------------------*/
+/**
  *  \brief Extraction of sub-sequences.
  *
  *  \param[in] error               reference on a StatError object,
@@ -3961,13 +4074,14 @@ Sequences* Sequences::index_parameter_extract(StatError &error , int min_index_p
   seq = NULL;
   error.init();
 
-  if ((min_index_parameter < 0) || ((!index_parameter) && (min_index_parameter >= max_length)) ||
+  if ((min_index_parameter < (index_parameter ? index_parameter_distribution->offset : 1)) ||
+      ((!index_parameter) && (min_index_parameter >= max_length)) ||
       ((max_index_parameter != I_DEFAULT) && (min_index_parameter > max_index_parameter))) {
     status = false;
     error.update(SEQ_error[SEQR_MIN_INDEX_PARAMETER]);
   }
-  if ((max_index_parameter != I_DEFAULT) && ((max_index_parameter < 0) || ((!index_parameter) &&
-        (max_index_parameter >= max_length)) || (max_index_parameter < min_index_parameter))) {
+  if ((max_index_parameter != I_DEFAULT) && ((max_index_parameter < (index_parameter ? index_parameter_distribution->offset : 1)) ||
+       ((!index_parameter) && (max_index_parameter >= max_length)) || (max_index_parameter < min_index_parameter))) {
     status = false;
     error.update(SEQ_error[SEQR_MAX_INDEX_PARAMETER]);
   }
@@ -4072,7 +4186,7 @@ Sequences* Sequences::index_parameter_extract(StatError &error , int min_index_p
         for (i = 0;i < seq->nb_sequence;i++) {
           pvertex_id = seq->vertex_identifier[i];
           cvertex_id = vertex_identifier[index[i]] + first_index[i];
-          for (k = 0;k < seq->length[i];k++) {
+          for (j = 0;j < seq->length[i];j++) {
             *pvertex_id++ = *cvertex_id++;
           }
         }
@@ -4084,7 +4198,7 @@ Sequences* Sequences::index_parameter_extract(StatError &error , int min_index_p
         for (i = 0;i < seq->nb_sequence;i++) {
           pindex_param = seq->index_parameter[i];
           cindex_param = index_parameter[index[i]] + first_index[i];
-          for (k = 0;k < seq->length[i];k++) {
+          for (j = 0;j < seq->length[i];j++) {
             *pindex_param++ = *cindex_param++;
           }
 
