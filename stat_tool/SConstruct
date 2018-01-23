@@ -1,8 +1,10 @@
 # -*-python-*-
 
-from openalea.sconsx import config, environ
 import os
 import sys
+
+from openalea.sconsx import config, environ
+
 pj = os.path.join
 ALEASolution = config.ALEASolution
 
@@ -10,14 +12,14 @@ options = Variables(['../options.py', 'options.py'], ARGUMENTS)
 options.Add(BoolVariable('with_efence', 'build tests with efence library', 0))
 options.Add(BoolVariable('DEBUG', 'my debug', 0))
 
-tools = ['boost_python'] #, 'vplants.tool','qt4', 'install', 'alea']
+tools = ['boost_python']
 
 env = ALEASolution(options, tools)
 env.AppendUnique(CXXFLAGS=['-x', 'c++', '-std=c++0x'])
 
 # Fix for Conda
-env.AppendUnique(CPPPATH=[sys.prefix + '/include'],
-                 LIBPATH=[sys.prefix + '/lib'])
+#env.AppendUnique(CPPPATH=[sys.prefix + '/include'],
+#                 LIBPATH=[sys.prefix + '/lib'])
 
 # Build stage
 prefix = env['build_prefix']
