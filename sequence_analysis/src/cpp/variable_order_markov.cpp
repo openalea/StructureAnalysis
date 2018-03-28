@@ -1,9 +1,9 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       V-Plants: Exploring and Modeling Plant Architecture
+ *       V-Plants: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2018 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -36,11 +36,12 @@
 
 
 
-#include <math.h>
+#include <cmath>
 
-#include <string>
 #include <sstream>
 #include <iomanip>
+#include <fstream>
+#include <string>
 
 #include <boost/tokenizer.hpp>
 #include <boost/algorithm/string/trim.hpp>

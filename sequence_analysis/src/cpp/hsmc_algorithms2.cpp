@@ -1,7 +1,7 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       StructureAnalysis: Exploring and Analyzing Plant Architecture
+ *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
  *       Copyright 1995-2018 CIRAD AGAP
  *
@@ -36,10 +36,11 @@
 
 
 
-#include <math.h>
+#include <cmath>
 
-#include <string>
 #include <sstream>
+#include <fstream>
+#include <string>
 
 #include "stat_tool/stat_label.h"
 

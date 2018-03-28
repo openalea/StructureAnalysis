@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       V-Plants: Exploring and Modeling Plant Architecture
+ *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2018 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id: change_points4.cpp 11914 2012-03-26 06:29:13Z guedon $
  *
- *       Forum for V-Plants developers:
+ *       Forum for StructureAnalysis developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -36,11 +36,12 @@
 
 
 
-#include <math.h>
+#include <cmath>
 
-#include <string>
 #include <sstream>
 #include <iomanip>
+#include <fstream>
+#include <string>
 
 #include "sequences.h"
 #include "sequence_label.h"

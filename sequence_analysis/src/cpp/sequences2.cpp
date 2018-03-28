@@ -1,7 +1,7 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       StructureAnalysis: Exploring and Analyzing Plant Architecture
+ *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
  *       Copyright 1995-2018 CIRAD AGAP
  *
@@ -10,7 +10,7 @@
  *       $Source$
  *       $Id$
  *
- *       Forum for V-Plants developers:
+ *       Forum for StructureAnalysis developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -36,13 +36,14 @@
 
 
 
-#include <limits.h>
-#include <math.h>
+#include <climits>
+#include <cmath>
 
-#include <string>
-#include <vector>
 #include <sstream>
 #include <iomanip>
+#include <fstream>
+#include <string>
+#include <vector>
 
 #include <boost/math/distributions/normal.hpp>
 #include <boost/math/distributions/students_t.hpp>

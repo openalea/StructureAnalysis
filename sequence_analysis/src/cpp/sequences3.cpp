@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       V-Plants: Exploring and Modeling Plant Architecture
+ *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2018 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id: sequences3.cpp 11060 2011-09-02 16:28:11Z guedon $
  *
- *       Forum for V-Plants developers:
+ *       Forum for StructureAnalysis developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -36,11 +36,12 @@
 
 
 
-#include <math.h>
+#include <cmath>
 
-#include <string>
 #include <sstream>
 #include <iomanip>
+#include <fstream>
+#include <string>
 
 #include <boost/tokenizer.hpp>
 #include <boost/algorithm/string/trim.hpp>

@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       V-Plants: Exploring and Modeling Plant Architecture
+ *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2018 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for V-Plants developers:
+ *       Forum for StructureAnalysis developers:
  *
  *  ----------------------------------------------------------------------------
  * 
@@ -36,13 +36,12 @@
 
 
 
-#include <string>
-#include <vector>
 #include <sstream>
 #include <iomanip>
-#include <cstring>
-#include <string.h>
 #include <fstream>
+#include <cstring>
+#include <string>
+#include <vector>
 
 #include "distance_matrix.h"
 #include "stat_label.h"

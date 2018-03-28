@@ -46,6 +46,8 @@ def stat_tool_controller(asg):
                 fld.boost_python_export = False
     for specialization in asg['class ::std::reverse_iterator'].specializations():
         specialization.boost_python_export = False
+    for ctr in asg['class ::std::basic_string< char, struct ::std::char_traits< char >, class ::std::allocator< char > >'].constructors():
+        ctr.boost_python_export = False
     asg['::std::ios_base::openmode'].qualified_type.boost_python_export = True
     return asg
 

@@ -1,7 +1,7 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       StructureAnalysis: Exploring and Analyzing Plant Architecture
+ *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
  *       Copyright 1995-2018 CIRAD AGAP
  *
@@ -10,7 +10,7 @@
  *       $Source$
  *       $Id$
  *
- *       Forum for V-Plants developers:
+ *       Forum for StructureAnalysis developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -36,7 +36,7 @@
 
 
 
-#include <math.h>
+#include <cmath>
 #include <sstream>
 
 #include "stat_tool/stat_label.h"

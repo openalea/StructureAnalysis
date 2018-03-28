@@ -9,13 +9,13 @@ void wrapper_0cdd446515295e8e8373e99f328c3748()
     boost::python::scope().attr("stat_tool") = module_0cdd446515295e8e8373e99f328c3748;
     boost::python::scope scope_0cdd446515295e8e8373e99f328c3748 = module_0cdd446515295e8e8373e99f328c3748;
     boost::python::scope().attr("inverse_gaussian_tail") = ::stat_tool::INVERSE_GAUSSIAN_TAIL;
-    boost::python::scope().attr("convolution_nb_iter") = ::stat_tool::CONVOLUTION_NB_ITER;
+    boost::python::scope().attr("compound_threshold") = ::stat_tool::COMPOUND_THRESHOLD;
     boost::python::scope().attr("renewal_entropy_weight") = ::stat_tool::RENEWAL_ENTROPY_WEIGHT;
     boost::python::scope().attr("sample_nb_value_coeff") = ::stat_tool::SAMPLE_NB_VALUE_COEFF;
     boost::python::scope().attr("max_surface") = ::stat_tool::MAX_SURFACE;
     boost::python::scope().attr("min_nb_assignment") = ::stat_tool::MIN_NB_ASSIGNMENT;
     boost::python::scope().attr("bisection_ratio_threshold") = ::stat_tool::BISECTION_RATIO_THRESHOLD;
-    boost::python::scope().attr("compound_threshold") = ::stat_tool::COMPOUND_THRESHOLD;
+    boost::python::scope().attr("convolution_coeff") = ::stat_tool::CONVOLUTION_COEFF;
     boost::python::scope().attr("gamma_nb_sub_step") = ::stat_tool::GAMMA_NB_SUB_STEP;
     boost::python::scope().attr("gamma_max_nb_iteration") = ::stat_tool::GAMMA_MAX_NB_ITERATION;
     boost::python::scope().attr("distance_nb_vector") = ::stat_tool::DISTANCE_NB_VECTOR;
@@ -43,7 +43,6 @@ void wrapper_0cdd446515295e8e8373e99f328c3748()
     boost::python::scope().attr("plot_roundness") = ::stat_tool::PLOT_ROUNDNESS;
     boost::python::scope().attr("gamma_nb_step") = ::stat_tool::GAMMA_NB_STEP;
     boost::python::scope().attr("p_threshold") = ::stat_tool::P_THRESHOLD;
-    boost::python::scope().attr("convolution_coeff") = ::stat_tool::CONVOLUTION_COEFF;
     boost::python::scope().attr("plot_nb_value") = ::stat_tool::PLOT_NB_VALUE;
     boost::python::scope().attr("discrete_mixture_nb_component") = ::stat_tool::DISCRETE_MIXTURE_NB_COMPONENT;
     boost::python::scope().attr("vector_nb_variable") = ::stat_tool::VECTOR_NB_VARIABLE;
@@ -59,7 +58,7 @@ void wrapper_0cdd446515295e8e8373e99f328c3748()
     boost::python::scope().attr("mixture_nb_component") = ::stat_tool::MIXTURE_NB_COMPONENT;
     boost::python::scope().attr("nb_value_coeff") = ::stat_tool::NB_VALUE_COEFF;
     boost::python::scope().attr("gaussian_max_nb_decimal") = ::stat_tool::GAUSSIAN_MAX_NB_DECIMAL;
-    boost::python::scope().attr("gamma_tail") = ::stat_tool::GAMMA_TAIL;
+    boost::python::scope().attr("compound_likelihood_diff") = ::stat_tool::COMPOUND_LIKELIHOOD_DIFF;
     boost::python::scope().attr("min_nb_element") = ::stat_tool::MIN_NB_ELEMENT;
     boost::python::scope().attr("convolution_difference_weight") = ::stat_tool::CONVOLUTION_DIFFERENCE_WEIGHT;
     boost::python::scope().attr("gamma_shape_parameter_threshold") = ::stat_tool::GAMMA_SHAPE_PARAMETER_THRESHOLD;
@@ -68,6 +67,7 @@ void wrapper_0cdd446515295e8e8373e99f328c3748()
     boost::python::scope().attr("gamma_default_scale_parameter") = ::stat_tool::GAMMA_DEFAULT_SCALE_PARAMETER;
     boost::python::scope().attr("nb_output") = ::stat_tool::NB_OUTPUT;
     boost::python::scope().attr("plot_range_ratio") = ::stat_tool::PLOT_RANGE_RATIO;
+    boost::python::scope().attr("convolution_nb_iter") = ::stat_tool::CONVOLUTION_NB_ITER;
     boost::python::scope().attr("gamma_iteration_factor") = ::stat_tool::GAMMA_ITERATION_FACTOR;
     boost::python::scope().attr("discrete_mixture_coeff") = ::stat_tool::DISCRETE_MIXTURE_COEFF;
     boost::python::scope().attr("convolution_entropy_weight") = ::stat_tool::CONVOLUTION_ENTROPY_WEIGHT;
@@ -137,7 +137,7 @@ void wrapper_0cdd446515295e8e8373e99f328c3748()
     boost::python::scope().attr("plot_mass_threshold") = ::stat_tool::PLOT_MASS_THRESHOLD;
     boost::python::scope().attr("mean_shift_coeff") = ::stat_tool::MEAN_SHIFT_COEFF;
     boost::python::scope().attr("order") = ::stat_tool::ORDER;
-    boost::python::scope().attr("compound_likelihood_diff") = ::stat_tool::COMPOUND_LIKELIHOOD_DIFF;
+    boost::python::scope().attr("gamma_tail") = ::stat_tool::GAMMA_TAIL;
     boost::python::scope().attr("min_probability") = ::stat_tool::MIN_PROBABILITY;
     boost::python::scope().attr("max_range") = ::stat_tool::MAX_RANGE;
     boost::python::scope().attr("inverse_gaussian_nb_step") = ::stat_tool::INVERSE_GAUSSIAN_NB_STEP;

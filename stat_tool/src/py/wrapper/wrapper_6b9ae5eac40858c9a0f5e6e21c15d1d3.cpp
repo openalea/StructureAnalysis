@@ -30,6 +30,7 @@ void wrapper_6b9ae5eac40858c9a0f5e6e21c15d1d3()
     boost::python::scope().attr("std") = module_a5e4e9231d6351ccb0e06756b389f0af;
     boost::python::scope scope_a5e4e9231d6351ccb0e06756b389f0af = module_a5e4e9231d6351ccb0e06756b389f0af;
     void  (::std::vector< int, ::std::allocator< int > >::*method_pointer_3ee60599950b5555a32f72572e8ff771)(::std::vector< int, class ::std::allocator< int > >::size_type , ::std::vector< int, class ::std::allocator< int > >::value_type const &) = &::std::vector< int, class ::std::allocator< int > >::assign;
+    void  (::std::vector< int, ::std::allocator< int > >::*method_pointer_71cdcbe2848d593a8e8cb2f82950acdf)(class ::std::initializer_list< int > ) = &::std::vector< int, class ::std::allocator< int > >::assign;
     ::std::vector< int, class ::std::allocator< int > >::size_type  (::std::vector< int, ::std::allocator< int > >::*method_pointer_2f0bd94041965427ab114d1ec9369eb1)() const = &::std::vector< int, class ::std::allocator< int > >::size;
     ::std::vector< int, class ::std::allocator< int > >::size_type  (::std::vector< int, ::std::allocator< int > >::*method_pointer_03cb2a43c5ae5df48ecc631a008fa511)() const = &::std::vector< int, class ::std::allocator< int > >::max_size;
     void  (::std::vector< int, ::std::allocator< int > >::*method_pointer_b661720aed4355f39b433f04f40c652d)(::std::vector< int, class ::std::allocator< int > >::size_type ) = &::std::vector< int, class ::std::allocator< int > >::resize;
@@ -57,7 +58,9 @@ void wrapper_6b9ae5eac40858c9a0f5e6e21c15d1d3()
     class_6b9ae5eac40858c9a0f5e6e21c15d1d3.def(boost::python::init< ::std::vector< int, class ::std::allocator< int > >::size_type , ::std::vector< int, class ::std::allocator< int > >::value_type const &, ::std::vector< int, class ::std::allocator< int > >::allocator_type const & >(""));
     class_6b9ae5eac40858c9a0f5e6e21c15d1d3.def(boost::python::init< class ::std::vector< int, class ::std::allocator< int > > const & >(""));
     class_6b9ae5eac40858c9a0f5e6e21c15d1d3.def(boost::python::init< class ::std::vector< int, class ::std::allocator< int > > const &, ::std::vector< int, class ::std::allocator< int > >::allocator_type const & >(""));
+    class_6b9ae5eac40858c9a0f5e6e21c15d1d3.def(boost::python::init< class ::std::initializer_list< int > , ::std::vector< int, class ::std::allocator< int > >::allocator_type const & >(""));
     class_6b9ae5eac40858c9a0f5e6e21c15d1d3.def("assign", method_pointer_3ee60599950b5555a32f72572e8ff771, "");
+    class_6b9ae5eac40858c9a0f5e6e21c15d1d3.def("assign", method_pointer_71cdcbe2848d593a8e8cb2f82950acdf, "");
     class_6b9ae5eac40858c9a0f5e6e21c15d1d3.def("__len__", method_pointer_2f0bd94041965427ab114d1ec9369eb1, "");
     class_6b9ae5eac40858c9a0f5e6e21c15d1d3.def("max_size", method_pointer_03cb2a43c5ae5df48ecc631a008fa511, "");
     class_6b9ae5eac40858c9a0f5e6e21c15d1d3.def("resize", method_pointer_b661720aed4355f39b433f04f40c652d, "");

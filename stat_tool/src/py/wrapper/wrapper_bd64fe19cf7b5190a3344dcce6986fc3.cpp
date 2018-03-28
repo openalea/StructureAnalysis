@@ -35,7 +35,6 @@ void wrapper_bd64fe19cf7b5190a3344dcce6986fc3()
     int  (::stat_tool::SinglePlot::*method_pointer_9bfcc702128d5ec79deb061830e16ef4)() = &::stat_tool::SinglePlot::size;
     boost::python::class_< class ::stat_tool::SinglePlot, autowig::Held< class ::stat_tool::SinglePlot >::Type > class_bd64fe19cf7b5190a3344dcce6986fc3("SinglePlot", "", boost::python::no_init);
     class_bd64fe19cf7b5190a3344dcce6986fc3.def(boost::python::init<  >(""));
-    class_bd64fe19cf7b5190a3344dcce6986fc3.def(boost::python::init< class ::stat_tool::SinglePlot const & >(""));
     class_bd64fe19cf7b5190a3344dcce6986fc3.def("add_point", method_pointer_6a7e6a436fdf5223936bab1c87e3a925, "");
     class_bd64fe19cf7b5190a3344dcce6986fc3.def("add_point", method_pointer_844b03359db15d14a628d52100fd1a25, "");
     class_bd64fe19cf7b5190a3344dcce6986fc3.def("add_text", method_pointer_8c534756c2dd5b20a382cc680f7fa35f, "");

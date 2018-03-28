@@ -30,6 +30,7 @@ void wrapper_db7f50b235e15b1aa024911715fa604a()
     boost::python::scope().attr("std") = module_a5e4e9231d6351ccb0e06756b389f0af;
     boost::python::scope scope_a5e4e9231d6351ccb0e06756b389f0af = module_a5e4e9231d6351ccb0e06756b389f0af;
     void  (::std::vector< ::stat_tool::Vectors, ::std::allocator< ::stat_tool::Vectors > >::*method_pointer_98cad235f33b5012ada8f95493b92544)(::std::vector< class ::stat_tool::Vectors, class ::std::allocator< class ::stat_tool::Vectors > >::size_type , ::std::vector< class ::stat_tool::Vectors, class ::std::allocator< class ::stat_tool::Vectors > >::value_type const &) = &::std::vector< class ::stat_tool::Vectors, class ::std::allocator< class ::stat_tool::Vectors > >::assign;
+    void  (::std::vector< ::stat_tool::Vectors, ::std::allocator< ::stat_tool::Vectors > >::*method_pointer_c632a5e3dd8c5dda9749ea255f35edc2)(class ::std::initializer_list< class ::stat_tool::Vectors > ) = &::std::vector< class ::stat_tool::Vectors, class ::std::allocator< class ::stat_tool::Vectors > >::assign;
     ::std::vector< class ::stat_tool::Vectors, class ::std::allocator< class ::stat_tool::Vectors > >::size_type  (::std::vector< ::stat_tool::Vectors, ::std::allocator< ::stat_tool::Vectors > >::*method_pointer_f67ce359a30f58d28fc366cdb4586cb5)() const = &::std::vector< class ::stat_tool::Vectors, class ::std::allocator< class ::stat_tool::Vectors > >::size;
     ::std::vector< class ::stat_tool::Vectors, class ::std::allocator< class ::stat_tool::Vectors > >::size_type  (::std::vector< ::stat_tool::Vectors, ::std::allocator< ::stat_tool::Vectors > >::*method_pointer_f5e1d945560e5c6f88beb5ff37891076)() const = &::std::vector< class ::stat_tool::Vectors, class ::std::allocator< class ::stat_tool::Vectors > >::max_size;
     void  (::std::vector< ::stat_tool::Vectors, ::std::allocator< ::stat_tool::Vectors > >::*method_pointer_663ee50fa32752d6a0e5fd0d42c3ef27)(::std::vector< class ::stat_tool::Vectors, class ::std::allocator< class ::stat_tool::Vectors > >::size_type ) = &::std::vector< class ::stat_tool::Vectors, class ::std::allocator< class ::stat_tool::Vectors > >::resize;
@@ -52,7 +53,6 @@ void wrapper_db7f50b235e15b1aa024911715fa604a()
     void  (::std::vector< ::stat_tool::Vectors, ::std::allocator< ::stat_tool::Vectors > >::*method_pointer_c00e309f8e635de2a9e0758330f081c5)() = &::std::vector< class ::stat_tool::Vectors, class ::std::allocator< class ::stat_tool::Vectors > >::pop_back;
     void  (::std::vector< ::stat_tool::Vectors, ::std::allocator< ::stat_tool::Vectors > >::*method_pointer_63a6c8fedcf15f55afbd0706c0d0cdcb)(class ::std::vector< class ::stat_tool::Vectors, class ::std::allocator< class ::stat_tool::Vectors > > &) = &::std::vector< class ::stat_tool::Vectors, class ::std::allocator< class ::stat_tool::Vectors > >::swap;
     void  (::std::vector< ::stat_tool::Vectors, ::std::allocator< ::stat_tool::Vectors > >::*method_pointer_956846ac8e1557aba3fab6a2431160ef)() = &::std::vector< class ::stat_tool::Vectors, class ::std::allocator< class ::stat_tool::Vectors > >::clear;
-    void  (::std::vector< ::stat_tool::Vectors, ::std::allocator< ::stat_tool::Vectors > >::*method_pointer_62f66319367f56c49ff63b245b9a0486)(class ::stat_tool::Vectors const *, class ::stat_tool::Vectors const *) = &::std::vector< class ::stat_tool::Vectors, class ::std::allocator< class ::stat_tool::Vectors > >::assign;
     boost::python::class_< class ::std::vector< class ::stat_tool::Vectors, class ::std::allocator< class ::stat_tool::Vectors > >, autowig::Held< class ::std::vector< class ::stat_tool::Vectors, class ::std::allocator< class ::stat_tool::Vectors > > >::Type > class_db7f50b235e15b1aa024911715fa604a("_Vector_db7f50b235e15b1aa024911715fa604a", "", boost::python::no_init);
     class_db7f50b235e15b1aa024911715fa604a.def(boost::python::init<  >(""));
     class_db7f50b235e15b1aa024911715fa604a.def(boost::python::init< ::std::vector< class ::stat_tool::Vectors, class ::std::allocator< class ::stat_tool::Vectors > >::allocator_type const & >(""));
@@ -60,7 +60,9 @@ void wrapper_db7f50b235e15b1aa024911715fa604a()
     class_db7f50b235e15b1aa024911715fa604a.def(boost::python::init< ::std::vector< class ::stat_tool::Vectors, class ::std::allocator< class ::stat_tool::Vectors > >::size_type , ::std::vector< class ::stat_tool::Vectors, class ::std::allocator< class ::stat_tool::Vectors > >::value_type const &, ::std::vector< class ::stat_tool::Vectors, class ::std::allocator< class ::stat_tool::Vectors > >::allocator_type const & >(""));
     class_db7f50b235e15b1aa024911715fa604a.def(boost::python::init< class ::std::vector< class ::stat_tool::Vectors, class ::std::allocator< class ::stat_tool::Vectors > > const & >(""));
     class_db7f50b235e15b1aa024911715fa604a.def(boost::python::init< class ::std::vector< class ::stat_tool::Vectors, class ::std::allocator< class ::stat_tool::Vectors > > const &, ::std::vector< class ::stat_tool::Vectors, class ::std::allocator< class ::stat_tool::Vectors > >::allocator_type const & >(""));
+    class_db7f50b235e15b1aa024911715fa604a.def(boost::python::init< class ::std::initializer_list< class ::stat_tool::Vectors > , ::std::vector< class ::stat_tool::Vectors, class ::std::allocator< class ::stat_tool::Vectors > >::allocator_type const & >(""));
     class_db7f50b235e15b1aa024911715fa604a.def("assign", method_pointer_98cad235f33b5012ada8f95493b92544, "");
+    class_db7f50b235e15b1aa024911715fa604a.def("assign", method_pointer_c632a5e3dd8c5dda9749ea255f35edc2, "");
     class_db7f50b235e15b1aa024911715fa604a.def("__len__", method_pointer_f67ce359a30f58d28fc366cdb4586cb5, "");
     class_db7f50b235e15b1aa024911715fa604a.def("max_size", method_pointer_f5e1d945560e5c6f88beb5ff37891076, "");
     class_db7f50b235e15b1aa024911715fa604a.def("resize", method_pointer_663ee50fa32752d6a0e5fd0d42c3ef27, "");
@@ -87,7 +89,6 @@ void wrapper_db7f50b235e15b1aa024911715fa604a()
     class_db7f50b235e15b1aa024911715fa604a.def("pop_back", method_pointer_c00e309f8e635de2a9e0758330f081c5, "");
     class_db7f50b235e15b1aa024911715fa604a.def("swap", method_pointer_63a6c8fedcf15f55afbd0706c0d0cdcb, "");
     class_db7f50b235e15b1aa024911715fa604a.def("clear", method_pointer_956846ac8e1557aba3fab6a2431160ef, "");
-    class_db7f50b235e15b1aa024911715fa604a.def("assign", method_pointer_62f66319367f56c49ff63b245b9a0486, "");
 
     struct vector_db7f50b235e15b1aa024911715fa604a_from_python
     {
