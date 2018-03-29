@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2018 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id: sequence_label.h 18668 2015-11-09 12:03:42Z guedon $
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for StructureAnalysis developers: amldevlp@cirad.fr
  *
  *  ----------------------------------------------------------------------------
  *

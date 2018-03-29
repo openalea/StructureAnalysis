@@ -1,7 +1,7 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       V-Plants: Identifying patterns in plant architecture and development
+ *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
  *       Copyright 1995-2018 CIRAD AGAP
  *
@@ -10,7 +10,7 @@
  *       $Source$
  *       $Id$
  *
- *       Forum for V-Plants developers:
+ *       Forum for StructureAnalysis developers:
  *
  *  ----------------------------------------------------------------------------
  *

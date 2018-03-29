@@ -1,7 +1,7 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       StructureAnalysis: Exploring and Analyzing Plant Architecture
+ *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
  *       Copyright 1995-2018 CIRAD AGAP
  *
@@ -10,7 +10,7 @@
  *       $Source$
  *       $Id: sequences.h 18659 2015-11-03 07:28:02Z guedon $
  *
- *       Forum for V-Plants developers:
+ *       Forum for StructureAnalysis developers:
  *
  *  ----------------------------------------------------------------------------
  *
