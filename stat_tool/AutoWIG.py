@@ -2,18 +2,18 @@ import autowig
 import os
 import shutil
 import sys
-try:
-    from path import Path
-except:
-    from path import path as Path
+
+from path import Path
 
 
 prefix = Path(sys.prefix).abspath()
 root = Path('.')
 
-os.makedirs(root/'include'/'stat_tool')
-for file in (root/'src'/'cpp').walkfiles('*.h*'):
-    file.copy(root/'include'/'stat_tool'/file.name)
+inc_dir = root/'include'/'stat_tool'
+if not inc_dir.exists():
+    os.makedirs(root/'include'/'stat_tool')
+    for file in (root/'src'/'cpp').walkfiles('*.h*'):
+        file.copy(root/'include'/'stat_tool'/file.name)
 
 headers = list((root/'include'/'stat_tool').walkfiles('*.h'))
 
@@ -21,7 +21,7 @@ flags = ['-x', 'c++', '-std=c++11']
 flags.append('-I' + str((prefix/'include').abspath()))
 flags.append('-I' + str((root/'include').abspath()))
 
-asg = autowig.AbstractSemanticGraph()    
+asg = autowig.AbstractSemanticGraph()
 autowig.parser.plugin = 'clanglite'
 asg = autowig.parser(asg, headers,
                           flags = flags,
@@ -39,7 +39,8 @@ def stat_tool_controller(asg):
                         'class ::std::basic_ostringstream< char, struct ::std::char_traits< char >, class ::std::allocator< char > >',
                         'class ::std::basic_ios< char, struct ::std::char_traits< char > >',
                         'class ::std::basic_stringbuf< char, struct ::std::char_traits< char >, class ::std::allocator< char > >']:
-        asg[noncopyable].is_copyable = False
+        if noncopyable in asg:
+            asg[noncopyable].is_copyable = False
     for cls in asg.classes():
         for fld in cls.fields(access='public'):
             if fld.qualified_type.unqualified_type.globalname == 'class ::std::locale::id':
@@ -63,7 +64,8 @@ wrappers = autowig.generator(asg,
 
 wrappers.write()
 
-shutil.rmtree('include')
+# strange line
+#shutil.rmtree('include')
 
 import pickle
 with open('ASG.pkl', 'w') as filehandler:
