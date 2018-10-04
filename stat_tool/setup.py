@@ -39,18 +39,18 @@ if __name__ == '__main__':
           platforms = platforms,
 
           # Define where to execute scons
-          scons_scripts=['SConstruct'],
+          #scons_scripts=['SConstruct'],
           # Scons parameters  v
-          scons_parameters=scons_parameters,
+          #scons_parameters=scons_parameters,
 
           #namespace_packages=['openalea', "structure_analysis"],
           namespace_packages=["structure_analysis"],
-          create_namespaces=True,
+          create_namespaces=False,
 
           # Packages
           packages=['structure_analysis',
                     'structure_analysis.stat_tool',
-                    'stat_tool'
+                    #'stat_tool'
                     ],
 
           package_dir={ #"openalea.stat_tool" : pj("src","openalea", "stat_tool"),
@@ -58,7 +58,7 @@ if __name__ == '__main__':
                         "structure_analysis" : pj("src", "py", "structure_analysis"),
                         "structure_analysis.stat_tool" : pj("src", "py", "structure_analysis", "stat_tool"),
 
-                        '':'src'},
+                        '':'src/py'},
           share_dirs = { 'share' : 'share' },
 
 
@@ -69,8 +69,8 @@ if __name__ == '__main__':
           zip_safe = False,
 
           # Specific options of openalea.deploy
-          lib_dirs = {'lib' : pj(build_prefix, 'lib'),},
-          inc_dirs = { 'include' : pj(build_prefix, 'include') },
+          #lib_dirs = {'lib' : pj(build_prefix, 'lib'),},
+          #inc_dirs = { 'include' : pj(build_prefix, 'include') },
 
 
           # Dependencies
