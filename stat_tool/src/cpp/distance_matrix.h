@@ -215,7 +215,7 @@ namespace stat_tool {
     int get_nb_insertion(int row , int column) const
     { return nb_insertion[row][column]; }
     int get_nb_match(int row , int column) const
-    { if (nb_match) return nb_match[row][column];}
+    { if (nb_match) return nb_match[row][column]; else return 0; }
     double get_substitution_distance(int row , int column) const
     { return substitution_distance[row][column]; }
     int get_nb_substitution(int row , int column) const

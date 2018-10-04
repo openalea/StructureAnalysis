@@ -4075,13 +4075,13 @@ Sequences* Sequences::index_parameter_extract(StatError &error , int min_index_p
   seq = NULL;
   error.init();
 
-  if ((min_index_parameter < (index_parameter ? index_parameter_distribution->offset : 1)) ||
+  if ((min_index_parameter < (index_parameter ? index_parameter_distribution->offset : 0)) ||
       ((!index_parameter) && (min_index_parameter >= max_length)) ||
       ((max_index_parameter != I_DEFAULT) && (min_index_parameter > max_index_parameter))) {
     status = false;
     error.update(SEQ_error[SEQR_MIN_INDEX_PARAMETER]);
   }
-  if ((max_index_parameter != I_DEFAULT) && ((max_index_parameter < (index_parameter ? index_parameter_distribution->offset : 1)) ||
+  if ((max_index_parameter != I_DEFAULT) && ((max_index_parameter < (index_parameter ? index_parameter_distribution->offset : 0)) ||
        ((!index_parameter) && (max_index_parameter >= max_length)) || (max_index_parameter < min_index_parameter))) {
     status = false;
     error.update(SEQ_error[SEQR_MAX_INDEX_PARAMETER]);
