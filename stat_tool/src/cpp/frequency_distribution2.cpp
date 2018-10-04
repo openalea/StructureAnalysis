@@ -234,8 +234,10 @@ ostream& FrequencyDistribution::dissimilarity_ascii_write(ostream &os , int nb_h
   case ORDINAL : {
     test = histo[0]->kruskal_wallis_test(nb_histo - 1 , histo + 1);
 
-    os << "\n" << STAT_label[STATL_KRUSKAL_WALLIS_TEST] << endl;
-    test->ascii_print(os);
+    if (test) {
+      os << "\n" << STAT_label[STATL_KRUSKAL_WALLIS_TEST] << endl;
+      test->ascii_print(os);
+    }
     break;
   }
 
@@ -247,65 +249,67 @@ ostream& FrequencyDistribution::dissimilarity_ascii_write(ostream &os , int nb_h
 
     merged_histo = new FrequencyDistribution(nb_histo , histo);
 
-    square_sum[0] = 0.;
-    square_sum[1] = 0.;
+    if (merged_histo->variance > 0.) {
+      square_sum[0] = 0.;
+      square_sum[1] = 0.;
 
-    for (i = 0;i < nb_histo;i++) {
-      diff = histo[i]->mean - merged_histo->mean;
-      square_sum[0] += diff * diff * histo[i]->nb_element;
-      square_sum[1] += histo[i]->variance * (histo[i]->nb_element - 1);
-    }
+      for (i = 0;i < nb_histo;i++) {
+        diff = histo[i]->mean - merged_histo->mean;
+        square_sum[0] += diff * diff * histo[i]->nb_element;
+        square_sum[1] += histo[i]->variance * (histo[i]->nb_element - 1);
+      }
 
-    square_sum[2] = merged_histo->variance * (merged_histo->nb_element - 1);
+      square_sum[2] = merged_histo->variance * (merged_histo->nb_element - 1);
 
-    df[0] = nb_histo - 1;
-    df[1] = merged_histo->nb_element - nb_histo;
-    df[2] = merged_histo->nb_element - 1;
+      df[0] = nb_histo - 1;
+      df[1] = merged_histo->nb_element - nb_histo;
+      df[2] = merged_histo->nb_element - 1;
 
-    for (i = 0;i < 3;i++) {
-      mean_square[i] = square_sum[i] / df[i];
+      for (i = 0;i < 3;i++) {
+        mean_square[i] = square_sum[i] / df[i];
+      }
+
+#     ifdef DEBUG
+      os << "\ntest: " << square_sum[0] + square_sum[1] << " | " << square_sum[2] << endl;
+#     endif
+
+      width[0] = column_width(merged_histo->nb_element - 1) + ASCII_SPACE;
+      width[1] = column_width(3 , square_sum) + ASCII_SPACE;
+      width[2] = column_width(3 , mean_square) + ASCII_SPACE;
+
+      os << "\n" << STAT_label[STATL_VARIANCE_ANALYSIS] << endl;
+      os << "\n" << STAT_label[STATL_VARIATION_SOURCE] << " | " << STAT_label[STATL_FREEDOM_DEGREES]
+         << " | " << STAT_label[STATL_SQUARE_SUM] << " | " << STAT_label[STATL_MEAN_SQUARE] << endl;
+      for (i = 0;i < 3;i++) {
+        switch (i) {
+        case 0 :
+          os << STAT_label[STATL_BETWEEN_SAMPLES];
+          break;
+        case 1 :
+          os << STAT_label[STATL_WITHIN_SAMPLES] << " ";
+          break;
+        case 2 :
+          os << STAT_label[STATL_TOTAL] << "          ";
+          break;
+        }
+
+        os << setw(width[0]) << df[i];
+        os << setw(width[1]) << square_sum[i];
+        os << setw(width[2]) << mean_square[i] << endl;
+      }
+      os << endl;
+
+      if ((df[0] > 0) && (df[1] > 0)) {
+        test = new Test(FISHER , true , df[0] , df[1] , mean_square[0] / mean_square[1]);
+        test->F_critical_probability_computation();
+
+        test->ascii_print(os , false , (df[0] == 1 ? false : true));
+
+        delete test;
+      }
     }
 
     delete merged_histo;
-
-#   ifdef DEBUG
-    os << "\ntest: " << square_sum[0] + square_sum[1] << " | " << square_sum[2] << endl;
-#   endif
-
-    width[0] = column_width(merged_histo->nb_element - 1) + ASCII_SPACE;
-    width[1] = column_width(3 , square_sum) + ASCII_SPACE;
-    width[2] = column_width(3 , mean_square) + ASCII_SPACE;
-
-    os << "\n" << STAT_label[STATL_VARIANCE_ANALYSIS] << endl;
-    os << "\n" << STAT_label[STATL_VARIATION_SOURCE] << " | " << STAT_label[STATL_FREEDOM_DEGREES]
-       << " | " << STAT_label[STATL_SQUARE_SUM] << " | " << STAT_label[STATL_MEAN_SQUARE] << endl;
-    for (i = 0;i < 3;i++) {
-      switch (i) {
-      case 0 :
-        os << STAT_label[STATL_BETWEEN_SAMPLES];
-        break;
-      case 1 :
-        os << STAT_label[STATL_WITHIN_SAMPLES] << " ";
-        break;
-      case 2 :
-        os << STAT_label[STATL_TOTAL] << "          ";
-        break;
-      }
-
-      os << setw(width[0]) << df[i];
-      os << setw(width[1]) << square_sum[i];
-      os << setw(width[2]) << mean_square[i] << endl;
-    }
-    os << endl;
-
-    if ((df[0] > 0) && (df[1] > 0)) {
-      test = new Test(FISHER , true , df[0] , df[1] , mean_square[0] / mean_square[1]);
-      test->F_critical_probability_computation();
-
-      test->ascii_print(os , false , (df[0] == 1 ? false : true));
-
-      delete test;
-    }
     break;
   }
   }
@@ -630,6 +634,8 @@ Test* FrequencyDistribution::kruskal_wallis_test(int nb_histo , const FrequencyD
   Test *test;
 
 
+  test = NULL;
+
   nb_histo++;
   histo = new const FrequencyDistribution*[nb_histo];
 
@@ -640,43 +646,47 @@ Test* FrequencyDistribution::kruskal_wallis_test(int nb_histo , const FrequencyD
 
   merged_histo = new FrequencyDistribution(nb_histo , histo);
 
-  // computation of the correction term for ties
+  if (merged_histo->variance > 0.) {
 
-  pfrequency = merged_histo->frequency + merged_histo->offset;
-  correction = 0.;
-  for (i = merged_histo->offset;i < merged_histo->nb_value;i++) {
-    if (*pfrequency > 1) {
-      correction += *pfrequency * ((double)*pfrequency * (double)*pfrequency - 1);
+    // computation of the correction term for ties
+
+    pfrequency = merged_histo->frequency + merged_histo->offset;
+    correction = 0.;
+    for (i = merged_histo->offset;i < merged_histo->nb_value;i++) {
+      if (*pfrequency > 1) {
+        correction += *pfrequency * ((double)*pfrequency * (double)*pfrequency - 1);
+      }
+      pfrequency++;
     }
-    pfrequency++;
-  }
 
-  // rank computation
+    // rank computation
 
-  rank = merged_histo->rank_computation();
+    rank = merged_histo->rank_computation();
 
-  // computation of the Kruskal-Wallis statistic
+    // computation of the Kruskal-Wallis statistic
 
-  value = 0.;
-  for (i = 0;i < nb_histo;i++) {
-    sum = 0.;
-    for (j = histo[i]->offset;j < histo[i]->nb_value;j++) {
-      sum += histo[i]->frequency[j] * rank[j];
+    value = 0.;
+    for (i = 0;i < nb_histo;i++) {
+      sum = 0.;
+      for (j = histo[i]->offset;j < histo[i]->nb_value;j++) {
+        sum += histo[i]->frequency[j] * rank[j];
+      }
+      value += sum * sum / histo[i]->nb_element;
     }
-    value += sum * sum / histo[i]->nb_element;
+
+    value = (12 * value / (merged_histo->nb_element * ((double)merged_histo->nb_element + 1)) -
+             3 * (merged_histo->nb_element + 1)) / (1. - correction / (merged_histo->nb_element *
+             ((double)merged_histo->nb_element * (double)merged_histo->nb_element - 1)));
+
+    test = new Test(CHI2 , true , nb_histo - 1 , I_DEFAULT , value);
+
+    test->chi2_critical_probability_computation();
+
+    delete [] rank;
   }
-
-  value = (12 * value / (merged_histo->nb_element * ((double)merged_histo->nb_element + 1)) -
-           3 * (merged_histo->nb_element + 1)) / (1. - correction / (merged_histo->nb_element *
-           ((double)merged_histo->nb_element * (double)merged_histo->nb_element - 1)));
-
-  test = new Test(CHI2 , true , nb_histo - 1 , I_DEFAULT , value);
-
-  test->chi2_critical_probability_computation();
 
   delete [] histo;
   delete merged_histo;
-  delete [] rank;
 
   return test;
 }
