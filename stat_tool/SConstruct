@@ -2,6 +2,7 @@
 
 import os
 import sys
+import platform
 
 from openalea.sconsx import config, environ
 
@@ -15,7 +16,26 @@ options.Add(BoolVariable('DEBUG', 'my debug', 0))
 tools = ['boost_python']
 
 env = ALEASolution(options, tools)
-env.AppendUnique(CXXFLAGS=['-x', 'c++', '-std=c++0x'])
+env.AppendUnique(CXXFLAGS=['-x', 'c++', '-std=c++11'])
+
+if (platform.system() != 'Windows' and
+    os.environ.get('CC') and
+    os.environ.get('CXX')):
+
+    env.AppendUnique(CFLAGS=["-std=c11"])
+    if (platform.system() == 'Darwin'):
+        env.AppendUnique(CXXFLAGS=['-stdlib=libc++'])
+    conda_prefix = os.environ['CONDA_PREFIX']
+    conda_bin = pj(os.environ['CONDA_PREFIX'], 'bin')
+# To work with conda toolchain
+    env['AR'] = os.environ['AR']
+    env['AS'] = os.environ['AS']
+    env['CC'] = os.environ['CLANG'] #pj(conda_bin, os.environ['CC'])
+    env['CXX'] = os.environ['CLANG__'] #pj(conda_bin, os.environ['CXX'])
+    env.PrependUnique(
+        CPPPATH=['%s/include'%(conda_prefix)],
+        CCFLAGS=['-fvisibility=hidden'],
+        LIBPATH=['%s/lib'%(conda_prefix)])
 
 # Fix for Conda
 #env.AppendUnique(CPPPATH=[sys.prefix + '/include'],
@@ -23,8 +43,8 @@ env.AppendUnique(CXXFLAGS=['-x', 'c++', '-std=c++0x'])
 
 # Build stage
 prefix = env['build_prefix']
-SConscript(pj(prefix,"src/cpp/SConscript"),
-           exports='env')
+#SConscript(pj(prefix,"src/cpp/SConscript"),
+#           exports='env')
 SConscript(pj(prefix,"src/py/wrapper/SConscript"),
            exports='env')
 #SConscript(pj(prefix,"src/wrapper/SConscript"),
