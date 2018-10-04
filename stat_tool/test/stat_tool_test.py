@@ -16,7 +16,7 @@ import structure_analysis.stat_tool as st
 from structure_analysis.stat_tool.distribution import Distribution
 
 dist0 = Distribution("NEGATIVE_BINOMIAL", 0, 1, 0.3)
-dist0 = Distribution("data/distribution1.dist")
+dist1 = Distribution("data/distribution1.dist")
 
-dist1 = Distribution("B", 0, 10, 0.3)
-dist1 = Distribution("NB", 0, 3.5, 0.3)
+dist2 = Distribution("B", 0, 10, 0.3)
+dist3 = Distribution("NB", 0, 3.5, 0.3)

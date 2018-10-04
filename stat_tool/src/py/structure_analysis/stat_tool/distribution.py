@@ -13,7 +13,7 @@
 """
 
 #import interface
-import .error
+from . import error
 
 from stat_tool.__stat_tool.stat_tool import *
 import stat_tool.__stat_tool.stat_tool as cst
@@ -102,7 +102,7 @@ def Distribution(utype, *args):
     # Constructor from Filename or Histogram or parametricmodel
     if len(args) == 0:
         error.CheckType([utype],
-                        [[str, _DiscreteDistributionData, _DiscreteParametricModel]],
+                        [[str, _DiscreteDistributionData]],
                         arg_id=[1])
 
         if type(utype) == str:
@@ -129,7 +129,7 @@ def Distribution(utype, *args):
     return result
 
 
-def Binomial(inf_bound, sup_bound=I_DEFAULT, \
+def Binomial(inf_bound, sup_bound=I_DEFAULT,
              proba=D_DEFAULT):
     """
     Construction of a binomial distribution
