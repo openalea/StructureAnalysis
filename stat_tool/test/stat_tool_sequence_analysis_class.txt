@@ -65,7 +65,6 @@ mixture.h :
 Mixture
 MixtureData
 
-multivariate_mixture.h -> repris en plus général dans mixture.h, à vocation à disparaître à terme
 
 regression.h :
 RegressionKernel -> classe de base
