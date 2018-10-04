@@ -10,29 +10,37 @@
     :Documentation status: to be completed
     :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
 
-    :Revision: $Id$
 """
-__version__ = "$Id$"
 
-import interface
+#import interface
 import error
 
-from openalea.stat_tool._stat_tool import *
+from stat_tool.__stat_tool.stat_tool import *
+import stat_tool.__stat_tool.stat_tool as cst
 
-from openalea.stat_tool._stat_tool import _DiscreteParametricModel
-from openalea.stat_tool._stat_tool import _DiscreteDistributionData
-from openalea.stat_tool._stat_tool import _Distribution
-from openalea.stat_tool._stat_tool import I_DEFAULT
-from openalea.stat_tool._stat_tool import D_DEFAULT
-from openalea.stat_tool._stat_tool import D_INF
-from openalea.stat_tool._stat_tool import MAX_DIFF_BOUND
-from openalea.stat_tool._stat_tool import MAX_MEAN
-from openalea.stat_tool._stat_tool import VariableType
-from openalea.stat_tool._stat_tool import VariableTypeBis
-from openalea.stat_tool._stat_tool import RestorationAlgorithm
+_DiscreteParametricModel = cst.DiscreteParametricModel
+_DiscreteDistributionData = cst.DiscreteDistributionData
+_Distribution = cst.Distribution
+
+I_DEFAULT = cst.i_default
+D_DEFAULT = cst.d_default
+D_INF = cst.d_inf
+MAX_DIFF_BOUND = cst.max_diff_bound
+MAX_MEAN = cst.max_mean
+VariableType = cst.variable_type
+CUMUL_THRESHOLD = cst.cumul_threshold
+
+# from stat_tool.__stat_tool.stat_tool import I_DEFAULT
+# from stat_tool.__stat_tool.stat_tool import D_DEFAULT
+# from stat_tool.__stat_tool.stat_tool import D_INF
+# from stat_tool.__stat_tool.stat_tool import MAX_DIFF_BOUND
+# from stat_tool.__stat_tool.stat_tool import MAX_MEAN
+# from stat_tool.__stat_tool.stat_tool import VariableType
+# from stat_tool.__stat_tool.stat_tool import VariableTypeBis
+# from stat_tool.__stat_tool.stat_tool import RestorationAlgorithm
 
 
-from enums import distribution_identifier_type
+#from enums import distribution_identifier_type
 
 __all__ = ["_Distribution",
            "_DiscreteParametricModel",
@@ -93,9 +101,9 @@ def Distribution(utype, *args):
         >>> Distribution(file_name)
 
     .. seealso::
-        :func:`~openalea.stat_tool.output.Save`,
-        :func:`~openalea.stat_tool.estimate.Estimate`
-        :func:`~openalea.stat_tool.simulate.Simulate`.
+        :func:`~stat_tool.output.Save`,
+        :func:`~stat_tool.estimate.Estimate`
+        :func:`~stat_tool.simulate.Simulate`.
     """
     # Constructor from Filename or Histogram or parametricmodel
     if(len(args) == 0):
@@ -136,7 +144,7 @@ def Binomial(inf_bound, sup_bound=I_DEFAULT, \
         :width: 50%
         :include-source:
 
-        from openalea.stat_tool.distribution import Binomial
+        from stat_tool.distribution import Binomial
         b = Binomial(0,10,0.5)
         b.plot(legend_size=8)
 
@@ -155,7 +163,8 @@ def Binomial(inf_bound, sup_bound=I_DEFAULT, \
 
     param = D_DEFAULT
 
-    return(_DiscreteParametricModel(BINOMIAL.real,
+    BINOMIAL = cst.discrete_parametric.BINOMIAL
+    return(_DiscreteParametricModel(BINOMIAL,
         inf_bound, sup_bound, param, proba))
 
 def Poisson(inf_bound, param=D_DEFAULT):
@@ -171,7 +180,7 @@ def Poisson(inf_bound, param=D_DEFAULT):
         :width: 50%
         :include-source:
 
-        from openalea.stat_tool.distribution import Poisson
+        from stat_tool.distribution import Poisson
         b = Poisson(1,1.5)
         b.plot(legend_size=8)
     """
@@ -183,11 +192,13 @@ def Poisson(inf_bound, param=D_DEFAULT):
     sup_bound = I_DEFAULT
     proba = D_DEFAULT
 
-    return _DiscreteParametricModel(POISSON, \
+    POISSON = cst.discrete_parametric.POISSON
+
+    return _DiscreteParametricModel(POISSON,
         inf_bound, sup_bound, param, proba)
 
 
-def NegativeBinomial(inf_bound, param=D_DEFAULT, \
+def NegativeBinomial(inf_bound, param=D_DEFAULT,
                      proba=D_DEFAULT):
     """
     Construction of a negative binomial distribution
@@ -202,7 +213,7 @@ def NegativeBinomial(inf_bound, param=D_DEFAULT, \
         :width: 50%
         :include-source:
 
-        from openalea.stat_tool.distribution import NegativeBinomial
+        from stat_tool.distribution import NegativeBinomial
         b = NegativeBinomial(1,2 ,.5)
         b.plot(legend_size=12)
 
@@ -215,9 +226,10 @@ def NegativeBinomial(inf_bound, param=D_DEFAULT, \
     assert (param * (1. - proba) / proba) <= MAX_MEAN
 
     sup_bound = I_DEFAULT
+    NEGATIVE_BINOMIAL = cst.discrete_parametric.NEGATIVE_BINOMIAL
 
-    return _DiscreteParametricModel(NEGATIVE_BINOMIAL, \
-        inf_bound, sup_bound, param, proba)
+    return _DiscreteParametricModel(NEGATIVE_BINOMIAL,
+        inf_bound, sup_bound, param, proba, CUMUL_THRESHOLD)
 
 
 def Uniform(inf_bound, sup_bound=I_DEFAULT):
@@ -233,7 +245,7 @@ def Uniform(inf_bound, sup_bound=I_DEFAULT):
         :width: 50%
         :include-source:
 
-        from openalea.stat_tool.distribution import Uniform
+        from stat_tool.distribution import Uniform
         b = Uniform(1,10)
         b.plot(legend_size=8)
 
@@ -250,7 +262,9 @@ def Uniform(inf_bound, sup_bound=I_DEFAULT):
     param = D_DEFAULT
     proba = D_DEFAULT
     cumul_threshold = CUMUL_THRESHOLD
-    return _DiscreteParametricModel(UNIFORM, \
+
+    UNIFORM = cst.discrete_parametric.UNIFORM
+    return _DiscreteParametricModel(UNIFORM,
         inf_bound, sup_bound, param, proba, cumul_threshold)
 
 
@@ -259,7 +273,7 @@ def Multinomial():
     raise NotImplementedError("Multinomial not yet implemented")
 
 # Extend _DiscreteParametricModel
-interface.extend_class( _DiscreteParametricModel, interface.StatInterface)
+#interface.extend_class( _DiscreteParametricModel, interface.StatInterface)
 
 # Cast Functions
 
@@ -284,7 +298,7 @@ def ToDistribution(histo):
         >>> ToDistribution(histo)
 
     .. seealso::
-        :func:`~openalea.stat_tool.distribution.ToHistogram`
+        :func:`~stat_tool.distribution.ToHistogram`
     """
     return histo.extract_model()
 
@@ -309,7 +323,7 @@ def ToHistogram(dist):
         >>> ToHistogram(dist)
 
     .. seealso::
-        :func:`~openalea.stat_tool.distribution.ToDistribution`
+        :func:`~stat_tool.distribution.ToDistribution`
     """
     return dist.extract_data()
 
