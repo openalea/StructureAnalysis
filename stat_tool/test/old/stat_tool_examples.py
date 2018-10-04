@@ -22,7 +22,7 @@ from openalea.stat_tool import Simulate, ExtractHistogram, Vectors
 from openalea.stat_tool import Estimate, Plot, Fit, Merge
 from openalea.stat_tool import Histogram, SelectVariable, ValueSelect
 from openalea.stat_tool import Transcode, Compare, Regression, Shift
-from openalea.stat_tool import ExtractData, Mixture, ToHistogram 
+from openalea.stat_tool import ExtractData, Mixture, ToHistogram
 from openalea.stat_tool import Compound, Convolution, VarianceAnalysis
 from openalea.stat_tool import ContingencyTable
 
@@ -32,7 +32,7 @@ from openalea.stat_tool import get_shared_data
 
 
 dist0 = Distribution("NEGATIVE_BINOMIAL", 0, 1, 0.3)
-dist0 = Distribution("data//distribution1.dist")
+dist0 = Distribution("data/distribution1.dist")
 
 dist1 = Distribution("B", 0, 10, 0.3)
 dist1 = Distribution("NB", 0, 3.5, 0.3)
@@ -106,7 +106,7 @@ mixt1 = Mixture(0.6, Distribution("B", 2, 18, 0.5), 0.4,
 
 mixt_histo1 = Simulate(mixt1, 200)
 
-# extraction of histograms/frequency distributions corresponding to 
+# extraction of histograms/frequency distributions corresponding to
 # a given mixture component
 # (i.e. elementary distributions which are combined by mixture)
 
@@ -130,10 +130,10 @@ histo15 = ToHistogram(ExtractDistribution(mixt2, "Component", 1))
 mixt3 = Estimate(meri1, "MIXTURE", Distribution("B", 6, 7, 0.5), "B")
 
 # Penalty="AIC"/ "AICc" / "BIC" / "BICc" (default),  NbComponent="Estimated"
- 
+
 meri = Merge(meri1, meri2, meri3, meri4, meri5)
 
-mixt2 = Estimate(meri, "MIXTURE", "B", "B", "B", "B", 
+mixt2 = Estimate(meri, "MIXTURE", "B", "B", "B", "B",
                  NbComponent="Estimated", Penalty="BIC")
 #Display(mixt2, Detail=2)
 dist_mixt = ExtractDistribution(mixt2, "Mixture")
@@ -196,13 +196,13 @@ chisto1 = Simulate(cdist1, 200)
 
 histo30 = ExtractHistogram(chisto1, "Sum")
 
-cdist2 = Estimate(chisto1, "COMPOUND", 
+cdist2 = Estimate(chisto1, "COMPOUND",
                   ExtractDistribution(cdist1, "Elementary"), "Sum",
                   MinInfBound=0)
 
 histo31 = ExtractHistogram(ExtractData(cdist2), "Sum")
 histo32 = ToHistogram(ExtractDistribution(cdist2, "Sum"))
-    
+
 peup1 = Histogram(get_shared_data( "peup1.his"))
 mixt4 = Estimate(peup1, "MIXTURE", "B", "NB")
 histo33 = ToHistogram(ExtractDistribution(mixt4, "Component", 2))
@@ -312,7 +312,7 @@ vec15 = SelectVariable(vec10, [1, 3, 6], Mode="Reject")
 
 #########################################################################
 #
-#  Distance matrix and clustering (partitioning or hierarchical methods) 
+#  Distance matrix and clustering (partitioning or hierarchical methods)
 #
 #########################################################################
 
@@ -324,7 +324,7 @@ matrix10 = Compare(vec15, VectorDistance("N", "N", "N"))
 
 # Display(Clustering(matrix10, "Partition", 2))
 
-vec151 = SelectIndividual(vec10,  
+vec151 = SelectIndividual(vec10,
                           [69, 48, 41, 44, 32, 47, 81, 95, 11, 36, 75, 108, 56,
                            83, 38, 98, 113, 134, 110, 101, 77, 35, 74, 80, 50,
                            24, 89, 128, 5, 45, 8, 116, 119, 132, 61, 78, 53,
@@ -337,7 +337,7 @@ vec152 = SelectIndividual(vec10, [100, 13, 133, 105, 72, 9, 93, 109, 30, 115,
                                   87, 58, 43, 60, 76, 52, 6, 39, 31, 12, 99,
                                   121, 123, 22, 79, 94, 88, 21, 97, 25, 40,
                                   57, 136, 67, 49, 10, 4, 120, 92, 27, 91,
-                                  64, 124, 16, 130, 84, 107, 126, 103, 122, 
+                                  64, 124, 16, 130, 84, 107, 126, 103, 122,
                                   112, 59, 1, 82, 34, 135, 118, 85])
 Plot(ExtractHistogram(vec151, 4), ExtractHistogram(vec152, 4))
 

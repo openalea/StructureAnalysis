@@ -13,7 +13,7 @@
 """
 
 #import interface
-import error
+import .error
 
 from stat_tool.__stat_tool.stat_tool import *
 import stat_tool.__stat_tool.stat_tool as cst
@@ -22,13 +22,7 @@ _DiscreteParametricModel = cst.DiscreteParametricModel
 _DiscreteDistributionData = cst.DiscreteDistributionData
 _Distribution = cst.Distribution
 
-I_DEFAULT = cst.i_default
-D_DEFAULT = cst.d_default
-D_INF = cst.d_inf
-MAX_DIFF_BOUND = cst.max_diff_bound
-MAX_MEAN = cst.max_mean
-VariableType = cst.variable_type
-CUMUL_THRESHOLD = cst.cumul_threshold
+from .enum import *
 
 # from stat_tool.__stat_tool.stat_tool import I_DEFAULT
 # from stat_tool.__stat_tool.stat_tool import D_DEFAULT
@@ -106,11 +100,15 @@ def Distribution(utype, *args):
         :func:`~stat_tool.simulate.Simulate`.
     """
     # Constructor from Filename or Histogram or parametricmodel
-    if(len(args) == 0):
+    if len(args) == 0:
         error.CheckType([utype],
                         [[str, _DiscreteDistributionData, _DiscreteParametricModel]],
                         arg_id=[1])
-        result =  _DiscreteParametricModel(utype)
+
+        if type(utype) == str:
+            result =  _DiscreteParametricModel.ascii_read(utype, CUMUL_THRESHOLD)
+        else:
+            result =  _DiscreteParametricModel(utype)
     # from parameters
     if len(args)>0:
         error.CheckArgumentsLength(args, 1)
@@ -164,8 +162,8 @@ def Binomial(inf_bound, sup_bound=I_DEFAULT, \
     param = D_DEFAULT
 
     BINOMIAL = cst.discrete_parametric.BINOMIAL
-    return(_DiscreteParametricModel(BINOMIAL,
-        inf_bound, sup_bound, param, proba))
+    return _DiscreteParametricModel(BINOMIAL,
+            inf_bound, sup_bound, param, proba, CUMUL_THRESHOLD)
 
 def Poisson(inf_bound, param=D_DEFAULT):
     """
@@ -195,7 +193,7 @@ def Poisson(inf_bound, param=D_DEFAULT):
     POISSON = cst.discrete_parametric.POISSON
 
     return _DiscreteParametricModel(POISSON,
-        inf_bound, sup_bound, param, proba)
+        inf_bound, sup_bound, param, proba, CUMUL_THRESHOLD)
 
 
 def NegativeBinomial(inf_bound, param=D_DEFAULT,
@@ -261,11 +259,10 @@ def Uniform(inf_bound, sup_bound=I_DEFAULT):
 
     param = D_DEFAULT
     proba = D_DEFAULT
-    cumul_threshold = CUMUL_THRESHOLD
 
     UNIFORM = cst.discrete_parametric.UNIFORM
     return _DiscreteParametricModel(UNIFORM,
-        inf_bound, sup_bound, param, proba, cumul_threshold)
+        inf_bound, sup_bound, param, proba, CUMUL_THRESHOLD)
 
 
 def Multinomial():
