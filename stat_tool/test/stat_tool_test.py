@@ -20,3 +20,6 @@ dist1 = Distribution("data/distribution1.dist")
 
 dist2 = Distribution("B", 0, 10, 0.3)
 dist3 = Distribution("NB", 0, 3.5, 0.3)
+
+#dist3.plot()
+

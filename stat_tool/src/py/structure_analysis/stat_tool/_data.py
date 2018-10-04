@@ -20,8 +20,37 @@ def wrapper(f):
     return ascii_read
 
 
-ascii_read_classes = [cst.DiscreteParametricModel]
+_classes = [cst.DiscreteParametricModel]
 
-for klass in ascii_read_classes:
+for klass in _classes:
     klass.ascii_read = staticmethod(wrapper(klass.ascii_read))
 
+del wrapper
+
+def wrapper(f):
+    @wraps(f)
+    def simulation(self, size, *args, **kwds):
+        error = __stat_tool.stat_tool.StatError(__stat_tool.stat_tool.nb_error)
+        data = f(self, error, size, *args, **kwds)
+        if not data:
+            raise Exception(str(error))
+        return data
+    return simulation
+
+_classes = [cst.DiscreteParametricModel]
+for klass in _classes:
+    klass.simulation = wrapper(klass.simulation)
+
+
+def wrapper(f):
+    @wraps(f)
+    def __str__(self):
+        data = self.ascii_write(False)
+        return data
+    return __str__
+
+def __ascii_w(module):
+    for obj in module.__dict__.itervalues():
+        if hasattr(obj, 'ascii_write'):
+            obj.__str__ = wrapper(getattr(obj, 'ascii_write'))
+_classes =__ascii_w(cst)
