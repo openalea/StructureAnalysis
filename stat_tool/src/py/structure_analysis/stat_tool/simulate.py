@@ -10,13 +10,13 @@
     :Documentation status: to be completed
     :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
 
+    :Revision: $Id$
 """
+__version__ = "$Id$"
 
 __all__ = ["Simulate"]
 
-
-from . import error
-from .enum import *
+import error
 
 
 def Simulate(obj, *args):
@@ -32,16 +32,16 @@ def Simulate(obj, *args):
 
     :Returns:
 
-        If the first argument is of type distribution and if 0 < size < 1000000,
+        If the first argument is of type distribution and if 0 < size < 1000000, 
         an object of type HISTOGRAM is returned, otherwise no object is returned.
         If the first argument is of type mixture and if 0 < size < 1000000, an
         object of type mixture_data is returned, otherwise no object is returned.
-        If the first argument is of type convolution and if 0 < size < 1000000, an
+        If the first argument is of type convolution and if 0 < size < 1000000, an 
         object of type convolution_data is returned, otherwise no object is returned.
-        If the first argument is of type compound and if 0 < size < 1000000, an
+        If the first argument is of type compound and if 0 < size < 1000000, an 
         object of type compound_data is returned, otherwise no object is returned.
-        The returned object of type HISTOGRAM, mixture_data, convolution_data or
-        compound_data contains both the simulated sample and the model used for
+        The returned object of type HISTOGRAM, mixture_data, convolution_data or 
+        compound_data contains both the simulated sample and the model used for 
         simulation.
 
     :Example:
@@ -63,4 +63,8 @@ def Simulate(obj, *args):
         ExtractHistogram.
     """
     error.CheckArgumentsLength(args, 1, 1)
-    return obj.simulate(args[0])
+    try:
+        return obj.simulate(args[0])
+    except ImportError:
+        from openalea.sequence_analysis.simulate import Simulate as newSimulate
+        return newSimulate(args[0])
