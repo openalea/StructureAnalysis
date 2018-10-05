@@ -20,7 +20,7 @@ def wrapper(f):
     return ascii_read
 
 
-_classes = [cst.DiscreteParametricModel]
+_classes = [cst.DiscreteParametricModel, cst.DiscreteMixture]
 
 for klass in _classes:
     klass.ascii_read = staticmethod(wrapper(klass.ascii_read))
@@ -37,7 +37,7 @@ def wrapper(f):
         return data
     return simulation
 
-_classes = [cst.DiscreteParametricModel]
+_classes = [cst.DiscreteParametricModel, cst.DiscreteMixture]
 for klass in _classes:
     klass.simulation = wrapper(klass.simulation)
 

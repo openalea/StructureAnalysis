@@ -12,8 +12,8 @@
 
 """
 
-#import interface
 from . import error
+from .enum import *
 
 from stat_tool.__stat_tool.stat_tool import *
 import stat_tool.__stat_tool.stat_tool as cst
@@ -22,7 +22,6 @@ _DiscreteParametricModel = cst.DiscreteParametricModel
 _DiscreteDistributionData = cst.DiscreteDistributionData
 _Distribution = cst.Distribution
 
-from .enum import *
 
 # from stat_tool.__stat_tool.stat_tool import I_DEFAULT
 # from stat_tool.__stat_tool.stat_tool import D_DEFAULT
