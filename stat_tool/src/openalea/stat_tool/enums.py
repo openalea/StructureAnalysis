@@ -9,10 +9,10 @@ __version__ = "$Id$"
 
 from openalea.stat_tool._stat_tool import *
 
-from openalea.stat_tool._stat_tool import _FrequencyDistribution, _DiscreteMixtureData, \
-    _CompoundData,_ConvolutionData, _DiscreteDistributionData, _DiscreteMixture, \
-    _Compound, _Convolution, _DiscreteParametricModel, _Distribution, \
-    _Vectors, _Cluster, _DistanceMatrix, _VectorDistance, _Regression
+from openalea.stat_tool._stat_tool import (_FrequencyDistribution, _DiscreteMixtureData,
+    _CompoundData,_ConvolutionData, _DiscreteDistributionData, _DiscreteMixture,
+    _Compound, _Convolution, _DiscreteParametricModel, _Distribution,
+    _Vectors, _Cluster, _DistanceMatrix, _VectorDistance, _Regression)
 
 # map to enumerate in boost python
 criterion_type = {
@@ -91,7 +91,7 @@ estimator_type = {
     "Likelihood":           EstimatorType.LIKELIHOOD,
     "PenalizedLikelihood":  EstimatorType.PENALIZED_LIKELIHOOD,
     "Parametric": EstimatorType.PARAMETRIC_REGULARIZATION,
-    "ParametricRegularization": 
+    "ParametricRegularization":
         EstimatorType.PARAMETRIC_REGULARIZATION
     }
 
@@ -134,13 +134,13 @@ algorithm_type = {
 
 
 # used by Clustering
-format_type = { \
+format_type = {
     "ASCII" :'a',
     "SpreadSheet": 's',
     "" : 'n'
     }
 
-cluster_type = \
+cluster_type =
     {
      "Step":        "cluster_step",
      "Limit":       "cluster_limit",
@@ -180,17 +180,17 @@ algo_map = {"Averaging": 'a',
             }
 
 
-histogram_types = [ _FrequencyDistribution, 
-                    _DiscreteMixtureData, 
-                    _CompoundData, 
+histogram_types = [ _FrequencyDistribution,
+                    _DiscreteMixtureData,
+                    _CompoundData,
                     _ConvolutionData,
                     _DiscreteDistributionData]
 
 
 model_distribution_types = [ _DiscreteMixture,
-                            _Compound, 
-                            _Convolution, 
-                            _DiscreteParametricModel, 
+                            _Compound,
+                            _Convolution,
+                            _DiscreteParametricModel,
                             _Distribution]
 
 all_stat_tool_types  = [_FrequencyDistribution,

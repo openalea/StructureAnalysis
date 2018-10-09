@@ -10,20 +10,15 @@
     :Documentation status: to be completed
     :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
 
-    :Revision: $Id$
 """
-__version__ = "$Id$"
 
-#import sys
-#import os
-#sys.path.append(os.path.abspath("."))
+from . import error
+from .enum import *
 
-import interface
+from stat_tool.__stat_tool.stat_tool import *
+import stat_tool.__stat_tool.stat_tool as cst
 
-from openalea.stat_tool._stat_tool import _DiscreteDistributionData
-
-# Extend _DistributionData class dynamically
-interface.extend_class(_DiscreteDistributionData, interface.StatInterface)
+_DiscreteDistributionData = cst.DiscreteDistributionData
 
 __all__ = ["_DiscreteDistributionData",
            "Histogram",
@@ -65,7 +60,7 @@ def Histogram(*args):
         h = Histogram(randint(10, size=10000).tolist())
         h.plot()
 
-    .. note:: works for integer values only. 
+    .. note:: works for integer values only.
 
     .. seealso::
         :func:`~openalea.stat_tool.output.Save`,
@@ -83,14 +78,19 @@ def Histogram(*args):
     # Histogram(filename)
     if len(args)==1 and isinstance(args[0], str):
         try:
-            ret = _DiscreteDistributionData(args[0])
+            #ret = _DiscreteDistributionData(args[0])
+            ret =  _DiscreteDistributionData.ascii_read(args[0])
+
         except:
             raise IOError("wrong filename ? %s" % args[0])
     # Histogram([1,2,3])
     elif len(args)==1 and isinstance(args[0], list):
-        ret = _DiscreteDistributionData(args[0])
+        n = len(args[0])
+        ret = _DiscreteDistributionData(n, args[0])
     # Histogram(1,2,3)
     else:
-        ret = _DiscreteDistributionData(list(args))
+        l = list(args)
+        n = len(l)
+        ret = _DiscreteDistributionData(n, l)
 
     return ret

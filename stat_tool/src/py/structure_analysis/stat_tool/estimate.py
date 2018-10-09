@@ -10,41 +10,32 @@
     :Documentation status: to be completed
     :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
 
-
+    :Revision: $Id$
+    
 .. warning:: sequence analysis package also contains an estimate module and
     function
 """
 
-from . import error
-from .enum import *
+__version__ = "$Id$"
 
-from stat_tool.__stat_tool.stat_tool import *
-import stat_tool.__stat_tool.stat_tool as cst
+import error
+import interface
 
-_DiscreteParametricModel = cst.DiscreteParametricModel
-_DiscreteParametric = cst.DiscreteParametric
-_Compound = cst.Compound
-_Convolution = cst.Convolution
-_Distribution = cst.Distribution
-_DiscreteMixture = cst.DiscreteMixture
-_FrequencyDistribution = cst.FrequencyDistribution
+from enums import likelihood_penalty_type
+from enums import smoothing_penalty_type
+from enums import outside_type
+from enums import compound_type
+from enums import estimator_type
+from enums import distribution_identifier_type as dist_type
 
-# from enums import likelihood_penalty_type
-# from enums import smoothing_penalty_type
-# from enums import outside_type
-# from enums import compound_type
-# from enums import estimator_type
-# from enums import distribution_identifier_type as dist_type
-
-# from openalea.stat_tool._stat_tool import _DiscreteParametricModel
-# from openalea.stat_tool._stat_tool import _DiscreteParametric
-# from openalea.stat_tool._stat_tool import _Compound
-# from openalea.stat_tool._stat_tool import _Convolution
-# from openalea.stat_tool._stat_tool import _Distribution
-# from openalea.stat_tool._stat_tool import _DiscreteMixture
-# from openalea.stat_tool._stat_tool import _FrequencyDistribution
-# from openalea.stat_tool._stat_tool import LikelihoodPenaltyType
-
+from openalea.stat_tool._stat_tool import _DiscreteParametricModel
+from openalea.stat_tool._stat_tool import _DiscreteParametric
+from openalea.stat_tool._stat_tool import _Compound
+from openalea.stat_tool._stat_tool import _Convolution
+from openalea.stat_tool._stat_tool import _Distribution
+from openalea.stat_tool._stat_tool import _DiscreteMixture
+from openalea.stat_tool._stat_tool import _FrequencyDistribution
+from openalea.stat_tool._stat_tool import LikelihoodPenaltyType
 
 __all__ = ["Estimate", "EstimateFunctions"]
 
@@ -340,7 +331,7 @@ class EstimateFunctions(object):
                            known_distribution, unknown_distribution, Type,
                            Estimator, NbIteration, Weight, Penalty, Outside)
             else:
-                raise KeyError("should not enter here.")
+                raise KeyError("should not enter here.")	
         else:
             return histo.compound_estimation2(
                             known_distribution, Type, MinInfBound,  Estimator,

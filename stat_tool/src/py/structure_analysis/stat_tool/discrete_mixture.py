@@ -10,23 +10,23 @@
     :Documentation status: to be completed
     :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
 
-    :Revision: $Id$
-    
 .. testsetup:: *
 
     from openalea.stat_tool.vectors import *
 """
-__version__ = "$Id$"
 
+from . import error
+from .enum import *
 
-import interface
-import error
+from stat_tool.__stat_tool.stat_tool import *
+import stat_tool.__stat_tool.stat_tool as cst
 
-from openalea.stat_tool._stat_tool import _DiscreteMixture
-from openalea.stat_tool._stat_tool import _DiscreteMixtureData
-from openalea.stat_tool._stat_tool import _DiscreteParametricModel
-from openalea.stat_tool._stat_tool import _Compound
-from openalea.stat_tool._stat_tool import _Convolution
+_DiscreteMixture = cst.DiscreteMixture
+_DiscreteMixtureData = cst.DiscreteMixtureData
+_DiscreteParametricModel = cst.DiscreteParametricModel
+_Compound = cst.Compound
+_Convolution = cst.Convolution
+
 
 __all__ = ['_DiscreteMixture',
            '_DiscreteMixtureData',
@@ -70,10 +70,10 @@ def Mixture(*args):
 
     types = [_DiscreteParametricModel, _DiscreteMixture, _Compound, _Convolution]
 
-    # filename 
+    # filename
     if (len(args) == 1):
         error.CheckType([args[0]], [str], arg_id=[1])
-        result = _DiscreteMixture(args[0])
+        result = _DiscreteMixture.ascii_read(args[0], CUMUL_THRESHOLD)
 
     # build list of weights and distributions
     else:
@@ -91,14 +91,14 @@ def Mixture(*args):
             #dists.append(_Distribution(args[i * 2 + 1]))
             dists.append((args[i * 2 + 1]))
 
-        result = _DiscreteMixture(weights, dists)
+        result = _DiscreteMixture(nb_param/2, weights, dists)
 
     return result
 
 # Extend _DiscreteMixture
-interface.extend_class(_DiscreteMixture, interface.StatInterface)
+#interface.extend_class(_DiscreteMixture, interface.StatInterface)
 
 # Extend _DiscreteMixtureData
-interface.extend_class(_DiscreteMixtureData, interface.StatInterface)
+#interface.extend_class(_DiscreteMixtureData, interface.StatInterface)
 
 _DiscreteMixture.__doc__ = Mixture.__doc__
