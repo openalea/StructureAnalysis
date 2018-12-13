@@ -14,26 +14,35 @@
 
 import structure_analysis.stat_tool as st
 from structure_analysis.stat_tool.distribution import Distribution
-from structure_analysis.stat_tool.frequency_distribution import Histogram
+from structure_analysis.stat_tool.frequency_distribution import FrequencyDistribution
 from structure_analysis.stat_tool.discrete_mixture import Mixture
+from structure_analysis.stat_tool.estimate import Estimate
 
 dist0 = Distribution("NEGATIVE_BINOMIAL", 0, 1, 0.3)
+# print(dist0)
+# print(dist0.ascii_write(True)) # Display(dist0, Detail->2)
+
 dist1 = Distribution("data/distribution1.dist")
 
 dist2 = Distribution("B", 0, 10, 0.3)
 dist3 = Distribution("NB", 0, 3.5, 0.3)
+# print (dist3.survival_ascii_write(False)) # Display(dist1, ViewPoint->"Survival")
 
 #dist3.plot()
 
 histo1 = dist1.simulation(200)
+#histo1.plot()
 
-fagus = Histogram("data/fagus1.his")
+dist2 = Estimate(histo1, "NEGATIVE_BINOMIAL", MinInfBound=0, InfBoundStatus="Fixed")
 
-meri1 = Histogram("data/meri1.his")
-meri2 = Histogram("data/meri2.his")
-meri3 = Histogram("data/meri3.his")
-meri4 = Histogram("data/meri4.his")
-meri5 = Histogram("data/meri5.his")
+
+fagus = FrequencyDistribution("data/fagus1.his")
+
+meri1 = FrequencyDistribution("data/meri1.his")
+meri2 = FrequencyDistribution("data/meri2.his")
+meri3 = FrequencyDistribution("data/meri3.his")
+meri4 = FrequencyDistribution("data/meri4.his")
+meri5 = FrequencyDistribution("data/meri5.his")
 
 
 

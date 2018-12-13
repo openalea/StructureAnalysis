@@ -21,11 +21,12 @@ import stat_tool.__stat_tool.stat_tool as cst
 _DiscreteDistributionData = cst.DiscreteDistributionData
 
 __all__ = ["_DiscreteDistributionData",
+           "FrequencyDistribution",
            "Histogram",
            ]
 
 
-def Histogram(*args):
+def FrequencyDistribution(*args):
     """Construction of a frequency distribution from an object of type
     list(int) or from an ASCII file.
 
@@ -46,8 +47,8 @@ def Histogram(*args):
     .. doctest::
         :options: +SKIP
 
-        >>> Histogram(list)
-        >>> Histogram(filename)
+        >>> FrequencyDistribution(list)
+        >>> FrequencyDistribution(filename)
 
     :Examples:
 
@@ -57,7 +58,7 @@ def Histogram(*args):
 
         from openalea.stat_tool import *
         from numpy.random import randint
-        h = Histogram(randint(10, size=10000).tolist())
+        h = FrequencyDistribution(randint(10, size=10000).tolist())
         h.plot()
 
     .. note:: works for integer values only.
@@ -94,3 +95,6 @@ def Histogram(*args):
         ret = _DiscreteDistributionData(n, l)
 
     return ret
+
+
+Histogram = FrequencyDistribution
