@@ -10,3 +10,4 @@ build-scons
 */doc/latex/
 options.py
 /.project
+.DS_Store
