@@ -335,7 +335,7 @@ ConvolutionData* Convolution::extract_data(StatError &error) const
  */
 /*--------------------------------------------------------------*/
 
-Convolution* Convolution::building(StatError &error , int nb_dist , const DiscreteParametric **dist)
+Convolution* Convolution::build(StatError &error , int nb_dist , const DiscreteParametric **dist)
 
 {
   Convolution *convol;
@@ -362,21 +362,22 @@ Convolution* Convolution::building(StatError &error , int nb_dist , const Discre
  *         elementary distributions.
  *
  *  \param[in] error   reference on a StatError object,
- *  \param[in] nb_dist number of distributions,
  *  \param[in] dist    pointer on the distributions.
  *
  *  \return            Convolution object.
  */
 /*--------------------------------------------------------------*/
 
-Convolution* Convolution::building(StatError &error , int nb_dist , const vector<DiscreteParametric> dist)
+Convolution* Convolution::build(StatError &error , const vector<DiscreteParametric> dist)
 
 {
+  int nb_dist;
   Convolution *convol;
 
 
   error.init();
 
+  nb_dist = dist.size();
   if ((nb_dist < 2) || (nb_dist > CONVOLUTION_NB_DISTRIBUTION)) {
     convol = NULL;
     error.update(STAT_parsing[STATP_NB_DISTRIBUTION]);

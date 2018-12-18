@@ -351,6 +351,164 @@ Vectors::Vectors(int inb_vector , int *iidentifier , int inb_variable , variable
 /**
  *  \brief Constructor of the Vectors class.
  *
+ *  \param[in] inb_vector       number of individuals,
+ *  \param[in] iidentifier      individual identifiers,
+ *  \param[in] nb_int_variable  number of integer variables,
+ *  \param[in] nb_real_variable number of real variables,
+ *  \param[in] iint_vector      integer variables,
+ *  \param[in] ireal_vector     real variables.
+ */
+/*--------------------------------------------------------------*/
+
+Vectors::Vectors(int inb_vector , const vector<int> iidentifier , int nb_int_variable , int nb_real_variable ,
+                 const vector<vector<int>> iint_vector , const vector<vector<double>> ireal_vector)
+
+{
+  int i , j , k;
+  variable_nature *itype;
+
+
+  itype = new variable_nature[nb_int_variable + nb_real_variable];
+
+  i= 0;
+  for (j = 0;j < nb_int_variable;j++) {
+    itype[i++] = INT_VALUE;
+  }
+  for (j = 0;j < nb_real_variable;j++) {
+    itype[i++] = REAL_VALUE;
+  }
+
+  init(inb_vector , NULL , nb_int_variable + nb_real_variable , itype , false);
+  delete [] itype;
+
+  if (!iidentifier.empty()) {
+    for (i = 0;i < nb_vector;i++) {
+      identifier[i] = iidentifier[i];
+    }
+  }
+
+  for (i = 0;i < nb_vector;i++) {
+    j = 0;
+    for (k = 0;k < nb_int_variable;k++) {
+      int_vector[i][j++] = iint_vector[i][k];
+    }
+    for (k = 0;k < nb_real_variable;k++) {
+      real_vector[i][j++] = ireal_vector[i][k];
+    }
+  }
+
+  for (i = 0;i < nb_variable;i++) {
+    min_value_computation(i);
+    max_value_computation(i);
+
+    switch (type[i]) {
+
+    case INT_VALUE : {
+      build_marginal_frequency_distribution(i);
+      break;
+    }
+
+    case REAL_VALUE : {
+      build_marginal_histogram(i);
+
+      mean_computation(i);
+      variance_computation(i);
+      break;
+    }
+    }
+
+    min_interval_computation(i);
+  }
+
+  covariance_computation();
+}
+
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Construction of a Vectors objects from arrays of discrete values, real values and identifiers.
+ *
+ *  \param[in] error        reference on a StatError object,
+ *  \param[in] iint_vector  integer variables,
+ *  \param[in] ireal_vector real variables,
+ *  \param[in] iidentifier  individual identifiers.
+ */
+/*--------------------------------------------------------------*/
+
+Vectors* Vectors::build(StatError &error , const vector<vector<int>> iint_vector ,
+                        const vector<vector<double>> ireal_vector , const vector<int> iidentifier)
+
+{
+  bool status = true;
+  int i;
+  int inb_vector , nb_int_variable , nb_real_variable;
+  Vectors *vec;
+
+
+  vec = NULL;
+  inb_vector = I_DEFAULT;
+  error.init();
+
+  if (!iint_vector.empty()) { 
+    inb_vector = iint_vector.size();
+  }
+  else if (!ireal_vector.empty()) {
+    inb_vector = ireal_vector.size();
+  }
+  else {
+    status = false;
+    error.update(STAT_error[STATR_EMPTY_SAMPLE]);
+  }
+
+  if ((!iint_vector.empty()) && (!ireal_vector.empty()) && (iint_vector.size() != ireal_vector.size())) {
+    status = false;
+    error.update(STAT_error[STATR_NB_VECTOR]);
+  }
+  if ((!iidentifier.empty()) && (iidentifier.size() != inb_vector)) {
+    status = false;
+    error.update(STAT_error[STATR_NB_VECTOR]);
+  }
+
+  if (status) {
+    if (!iint_vector.empty()) {
+      nb_int_variable = iint_vector[0].size();
+      for (i = 1;i < inb_vector;i++) {
+        if (iint_vector[i].size() != nb_int_variable) {
+          status = false;
+          error.update(STAT_error[STATR_NB_VARIABLE] , i);
+        }
+      }
+    }
+    else {
+      nb_int_variable = 0;
+    }
+
+    if (!ireal_vector.empty()) {
+      nb_real_variable = ireal_vector[0].size();
+      for (i = 1;i < inb_vector;i++) {
+        if (ireal_vector[i].size() != nb_real_variable) {
+          status = false;
+          error.update(STAT_error[STATR_NB_VARIABLE] , i);
+        }
+      }
+    }
+    else {
+      nb_real_variable = 0;
+    }
+
+    if (status) {
+      vec = new Vectors(inb_vector , iidentifier , nb_int_variable , nb_real_variable , iint_vector , ireal_vector);
+    }
+  }
+  
+  return vec;
+}
+
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the Vectors class.
+ *
  *  \param[in] vec      reference on a Vectors object,
  *  \param[in] variable variable index,
  *  \param[in] itype    variable type.
@@ -4438,7 +4596,7 @@ ostream& Vectors::ascii_write(ostream &os , bool exhaustive , bool comment_flag)
 ostream& Vectors::ascii_write(ostream &os , bool exhaustive) const
 
 {
-  return ascii_write(os, exhaustive, false);
+  return ascii_write(os , exhaustive , false);
 }
 
 
@@ -4578,6 +4736,28 @@ ostream& Vectors::ascii_data_write(ostream &os , bool exhaustive) const
   ascii_print(os , false);
 
   return os;
+}
+
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a Vectors object.
+ *
+ *  \param[in] exhaustive flag detail level,
+ *
+ *  \return    string.
+ */
+/*--------------------------------------------------------------*/
+
+string Vectors::ascii_data_write(bool exhaustive) const
+
+{
+  ostringstream oss;
+
+
+  ascii_data_write(oss , exhaustive);
+
+  return oss.str();
 }
 
 

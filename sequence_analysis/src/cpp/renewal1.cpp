@@ -761,8 +761,8 @@ DiscreteParametricModel* Renewal::extract(StatError &error , renewal_distributio
  */
 /*--------------------------------------------------------------*/
 
-Renewal* Renewal::building(StatError &error , const DiscreteParametric &inter_event ,
-                           process_type type , int time)
+Renewal* Renewal::build(StatError &error , const DiscreteParametric &inter_event ,
+                        process_type type , int time)
 
 {
   bool status = true;

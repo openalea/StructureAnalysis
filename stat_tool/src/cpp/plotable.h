@@ -69,7 +69,7 @@ namespace stat_tool {
 
   typedef std::pair<float, float> PlotPoint;
   typedef std::pair<float, float> Range;
-  typedef std::pair<PlotPoint, string> Label;
+  typedef std::pair<PlotPoint, std::string> Label;
 
 
   // Class SinglePlot: list of (X, Y) pair with properties
@@ -83,15 +83,15 @@ namespace stat_tool {
 
     Points data;
     Labels data_and_text;
-    string legend;
-    string style;
+    std::string legend;
+    std::string style;
 
     // Combination with
     // impulse, linepoints or line
     // linestyle : -- : -. -
     // marker : + , o . s v x > < ^
 
-    string color;
+    std::string color;
     // b  : blue,
     // g  : green,
     // r  : red,
@@ -112,7 +112,7 @@ namespace stat_tool {
     void add_point(const PlotPoint& p);
   
     // related to the label mode
-    void add_text(float x, float y, const string& p);   
+    void add_text(float x, float y, const std::string& p);   
     float get_x(int);
     float get_y(int);
     std::string get_label(int);
@@ -137,7 +137,7 @@ namespace stat_tool {
     
   public:
 
-    string title;
+    std::string title;
 
     float xtics; 
     float ytics;
@@ -145,8 +145,8 @@ namespace stat_tool {
     Range xrange;
     Range yrange;
 
-    string xlabel;
-    string ylabel;
+    std::string xlabel;
+    std::string ylabel;
 
     bool grid;
 
@@ -183,8 +183,8 @@ namespace stat_tool {
 
   public:
 
-    string title;
-    string border;
+    std::string title;
+    std::string border;
     int nb_variable;
     std::vector<int> variable_nb_viewpoint;
     std::vector<int> variable;

@@ -423,6 +423,29 @@ ostream& MarkovianSequences::ascii_data_write(ostream &os , output_sequence_form
 
 /*--------------------------------------------------------------*/
 /**
+ *  \brief Writing of a MarkovianSequences object.
+ *
+ *  \param[in] format     format (LINE/COLUMN/VECTOR/POSTERIOR_PROBABILITY),
+ *  \param[in] exhaustive flag detail level,
+ *
+ *  \return    string.
+ */
+/*--------------------------------------------------------------*/
+
+string MarkovianSequences::ascii_data_write(output_sequence_format format , bool exhaustive) const
+
+{
+  ostringstream oss;
+
+
+  ascii_data_write(oss , format , exhaustive);
+
+  return oss.str();
+}
+
+
+/*--------------------------------------------------------------*/
+/**
  *  \brief Writing of a MarkovianSequences object in a file.
  *
  *  \param[in] error      reference on a StatError object,

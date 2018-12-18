@@ -245,7 +245,7 @@ string StatInterface::ascii_write(bool exhaustive) const
 
 {
   ostringstream oss;
-      
+
 
   ascii_write(oss , exhaustive);
 

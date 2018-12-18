@@ -399,8 +399,8 @@ DiscreteMixtureData* DiscreteMixture::extract_data(StatError &error) const
  */
 /*--------------------------------------------------------------*/
 
-DiscreteMixture* DiscreteMixture::building(StatError &error , int nb_component , double *weight ,
-                                           const DiscreteParametric **component)
+DiscreteMixture* DiscreteMixture::build(StatError &error , int nb_component , double *weight ,
+                                        const DiscreteParametric **component)
 
 {
   bool status;
@@ -444,7 +444,6 @@ DiscreteMixture* DiscreteMixture::building(StatError &error , int nb_component ,
  *  \brief Construction of a DiscreteMixture object on the basis of weights and components.
  *
  *  \param[in] error        reference on a StatError object,
- *  \param[in] nb_component number of components,
  *  \param[in] weight       component weights,
  *  \param[in] component    pointer on the components.
  *
@@ -452,12 +451,13 @@ DiscreteMixture* DiscreteMixture::building(StatError &error , int nb_component ,
  */
 /*--------------------------------------------------------------*/
 
-DiscreteMixture* DiscreteMixture::building(StatError &error , int nb_component , vector<double> weight ,
-                                           const vector<DiscreteParametric> component)
+DiscreteMixture* DiscreteMixture::build(StatError &error , const vector<double> weight ,
+                                        const vector<DiscreteParametric> component)
 
 {
   bool status;
   int i;
+  int nb_component;
   double cumul;
   DiscreteMixture *mixt;
 
@@ -465,7 +465,8 @@ DiscreteMixture* DiscreteMixture::building(StatError &error , int nb_component ,
   mixt = NULL;
   error.init();
 
-  if ((nb_component < 2) || (nb_component > DISCRETE_MIXTURE_NB_COMPONENT)) {
+  nb_component = weight.size();
+  if ((nb_component != component.size()) || (nb_component < 2) || (nb_component > DISCRETE_MIXTURE_NB_COMPONENT)) {
     error.update(STAT_parsing[STATP_NB_DISTRIBUTION]);
   }
 

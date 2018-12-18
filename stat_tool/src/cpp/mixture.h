@@ -209,6 +209,7 @@ namespace stat_tool {
     DiscreteDistributionData* extract(StatError &error , int variable , int index) const;
 
     std::ostream& ascii_data_write(std::ostream &os , bool exhaustive = false) const;
+    std::string ascii_data_write(bool exhaustive = false) const;
     bool ascii_data_write(StatError &error , const std::string path , bool exhaustive = false) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;

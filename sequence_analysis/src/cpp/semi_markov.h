@@ -337,6 +337,7 @@ namespace sequence_analysis {
 
     std::ostream& ascii_data_write(std::ostream &os , output_sequence_format format = COLUMN ,
                                    bool exhaustive = false) const;
+    std::string ascii_data_write(output_sequence_format format = COLUMN , bool exhaustive = false) const;
     bool ascii_data_write(stat_tool::StatError &error , const std::string path ,
                           output_sequence_format format = COLUMN , bool exhaustive = false) const;
 

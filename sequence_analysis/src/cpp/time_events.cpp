@@ -43,6 +43,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <vector>
 
 #include <boost/tokenizer.hpp>
 
@@ -361,20 +362,15 @@ TimeEvents::TimeEvents(int inb_class)
 
   else {
     int i;
-    int *ptime , *pnb_event , *pfrequency;
 
     time = new int[nb_class];
     nb_event = new int[nb_class];
     frequency = new int[nb_class];
 
-    ptime = time;
-    pnb_event = nb_event;
-    pfrequency = frequency;
-
     for (i = 0;i < nb_class;i++) {
-      *ptime++ = 0;
-      *pnb_event++ = 0;
-      *pfrequency++ = 0;
+      time[i] = 0;
+      nb_event[i] = 0;
+      frequency[i] = 0;
     }
   }
 
@@ -461,7 +457,6 @@ void TimeEvents::copy(const TimeEvents &timev)
 
 {
   int i;
-  int *ptime , *pnb_event , *pfrequency , *ttime , *tnb_event , *tfrequency;
 
 
   // copy of the triplets {observation period, number of events, frequency}
@@ -473,17 +468,10 @@ void TimeEvents::copy(const TimeEvents &timev)
   nb_event = new int[nb_class];
   frequency = new int[nb_class];
 
-  ptime = time;
-  ttime = timev.time;
-  pnb_event = nb_event;
-  tnb_event = timev.nb_event;
-  pfrequency = frequency;
-  tfrequency = timev.frequency;
-
   for (i = 0;i < nb_class;i++) {
-    *ptime++ = *ttime++;
-    *pnb_event++ = *tnb_event++;
-    *pfrequency++ = *tfrequency++;
+    time[i] = timev.time[i];
+    nb_event[i] = timev.nb_event[i];
+    frequency[i] = timev.frequency[i];
   }
 
   // copy of the observation period frequency distribution and
@@ -735,7 +723,6 @@ TimeEvents* TimeEvents::time_scaling(StatError &error , int scaling_coeff) const
 {
   bool status = true;
   int i;
-  int *ptime , *pnb_event , *pfrequency , *ttime , *tnb_event , *tfrequency;
   TimeEvents *timev;
 
 
@@ -756,17 +743,10 @@ TimeEvents* TimeEvents::time_scaling(StatError &error , int scaling_coeff) const
 
     timev->nb_element = nb_element;
 
-    ptime = timev->time;
-    ttime = time;
-    pnb_event = timev->nb_event;
-    tnb_event = nb_event;
-    pfrequency = timev->frequency;
-    tfrequency = frequency;
-
     for (i = 0;i < nb_class;i++) {
-      *ptime++ = *ttime++ * scaling_coeff;
-      *pnb_event++ = *tnb_event++;
-      *pfrequency++ = *tfrequency++;
+      timev->time[i] = time[i] * scaling_coeff;
+      timev->nb_event[i] = nb_event[i];
+      timev->frequency[i] = frequency[i];
     }
 
     timev->build_frequency_distribution();
@@ -789,13 +769,12 @@ TimeEvents* TimeEvents::time_scaling(StatError &error , int scaling_coeff) const
  */
 /*--------------------------------------------------------------*/
 
-TimeEvents* TimeEvents::time_select(StatError &error , int min_time ,
-                                    int max_time) const
+TimeEvents* TimeEvents::time_select(StatError &error , int min_time , int max_time) const
 
 {
   bool status = true;
-  int i;
-  int bnb_class , *ptime , *pnb_event , *pfrequency , *ttime , *tnb_event , *tfrequency;
+  int i , j;
+  int bnb_class;
   TimeEvents *timev;
 
 
@@ -815,36 +794,25 @@ TimeEvents* TimeEvents::time_select(StatError &error , int min_time ,
 
     // computation of the number of classes
 
-    ttime = time;
     bnb_class = 0;
-
     for (i = 0;i < nb_class;i++) {
-      if ((*ttime >= min_time) && (*ttime <= max_time)) {
+      if ((time[i] >= min_time) && (time[i] <= max_time)) {
          bnb_class++;
       }
-      ttime++;
     }
 
     // copy of the selected triplets
 
     timev = new TimeEvents(bnb_class);
 
-    ptime = timev->time;
-    ttime = time;
-    pnb_event = timev->nb_event;
-    tnb_event = nb_event;
-    pfrequency = timev->frequency;
-    tfrequency = frequency;
-
-    for (i = 0;i < nb_class;i++) {
-      if ((*ttime >= min_time) && (*ttime <= max_time)) {
-        *ptime++ = *ttime;
-        *pnb_event++ = *tnb_event;
-        *pfrequency++ = *tfrequency;
+    i = 0;
+    for (j = 0;j < nb_class;j++) {
+      if ((time[j] >= min_time) && (time[j] <= max_time)) {
+        timev->time[i] = time[j];
+        timev->nb_event[i] = nb_event[j];
+        timev->frequency[i] = frequency[j];
+        i++;
       }
-      ttime++;
-      tnb_event++;
-      tfrequency++;
     }
 
     timev->nb_element_computation();
@@ -875,13 +843,12 @@ TimeEvents* TimeEvents::time_select(StatError &error , int min_time ,
  */
 /*--------------------------------------------------------------*/
 
-TimeEvents* TimeEvents::nb_event_select(StatError &error , int min_nb_event ,
-                                        int max_nb_event) const
+TimeEvents* TimeEvents::nb_event_select(StatError &error , int min_nb_event , int max_nb_event) const
 
 {
   bool status = true;
-  int i;
-  int bnb_class , *ptime , *pnb_event , *pfrequency , *ttime , *tnb_event , *tfrequency;
+  int i , j;
+  int bnb_class;
   TimeEvents *timev;
 
 
@@ -901,36 +868,25 @@ TimeEvents* TimeEvents::nb_event_select(StatError &error , int min_nb_event ,
 
     // computation of the number of classes
 
-    tnb_event = nb_event;
     bnb_class = 0;
-
     for (i = 0;i < nb_class;i++) {
-      if ((*tnb_event >= min_nb_event) && (*tnb_event <= max_nb_event)) {
+      if ((nb_event[i] >= min_nb_event) && (nb_event[i] <= max_nb_event)) {
          bnb_class++;
       }
-      tnb_event++;
     }
 
     // copy of the selected triplets
 
     timev = new TimeEvents(bnb_class);
 
-    ptime = timev->time;
-    ttime = time;
-    pnb_event = timev->nb_event;
-    tnb_event = nb_event;
-    pfrequency = timev->frequency;
-    tfrequency = frequency;
-
-    for (i = 0;i < nb_class;i++) {
-      if ((*tnb_event >= min_nb_event) && (*tnb_event <= max_nb_event)) {
-        *ptime++ = *ttime;
-        *pnb_event++ = *tnb_event;
-        *pfrequency++ = *tfrequency;
+    i = 0;
+    for (j = 0;j < nb_class;j++) {
+      if ((nb_event[j] >= min_nb_event) && (nb_event[j] <= max_nb_event)) {
+        timev->time[i] = time[j];
+        timev->nb_event[i] = nb_event[j];
+        timev->frequency[i] = frequency[j];
+        i++;
       }
-      ttime++;
-      tnb_event++;
-      tfrequency++;
     }
 
     timev->nb_element_computation();
@@ -962,7 +918,7 @@ TimeEvents* TimeEvents::nb_event_select(StatError &error , int min_nb_event ,
  */
 /*--------------------------------------------------------------*/
 
-TimeEvents* TimeEvents::building(StatError &error , FrequencyDistribution &nb_event , int itime)
+TimeEvents* TimeEvents::build(StatError &error , FrequencyDistribution &nb_event , int itime)
 
 {
   bool status = true;
@@ -983,6 +939,64 @@ TimeEvents* TimeEvents::building(StatError &error , FrequencyDistribution &nb_ev
 
   if (status) {
     timev = new TimeEvents(nb_event , itime);
+  }
+
+  return timev;
+}
+
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Construction of a TimeEvents object from pairs {observation period, number of events}.
+ *
+ *  \param[in] error    reference on a StatError object,
+ *  \param[in] itime    pairs {observation period, number of events}.
+ *
+ *  \return             TimeEvents object.
+ */
+/*--------------------------------------------------------------*/
+
+TimeEvents* TimeEvents::build(StatError &error , const vector<vector<int>> time_nb_event)
+
+{
+  bool status = true;
+  int i;
+  int inb_element , *itime , *inb_event;
+  TimeEvents *timev;
+
+
+  timev = NULL;
+  error.init();
+
+  if (!time_nb_event.empty()) {
+    inb_element = time_nb_event.size();
+
+    for (i = 0;i < inb_element;i++) {
+      if (time_nb_event[i].size() != 2) {
+        status = false;
+        error.update(SEQ_error[SEQR_TIME_NB_EVENT_PAIR] , i);
+      }
+    }
+  }
+  else {
+    status = false;
+    error.update(STAT_error[STATR_EMPTY_SAMPLE]);
+  }
+  
+  if (status) {
+    itime = new int[inb_element];
+    inb_event = new int[inb_element];
+
+    for (i = 0;i < inb_element;i++) {
+      itime[i] = time_nb_event[i][0];
+      inb_event[i] = time_nb_event[i][1];
+    }
+
+    timev = new TimeEvents();
+    timev->build(inb_element , itime , inb_event);
+
+    delete [] itime;
+    delete [] inb_event;
   }
 
   return timev;
@@ -1507,7 +1521,7 @@ ostream& TimeEvents::ascii_file_write(ostream &os , bool exhaustive , process_ty
 
 {
   int i;
-  int max_frequency , *pfrequency , width[3];
+  int max_frequency , width[3];
 
 
   if ((htime->variance > 0.) && (exhaustive)) {
@@ -1524,14 +1538,11 @@ ostream& TimeEvents::ascii_file_write(ostream &os , bool exhaustive , process_ty
     width[0] = column_width(time[nb_class - 1]);
     width[1] = column_width(nb_event[nb_class - 1]) + ASCII_SPACE;
 
-    pfrequency = frequency;
     max_frequency = 0;
-
     for (i = 0;i < nb_class;i++) {
-      if (*pfrequency > max_frequency) {
-        max_frequency = *pfrequency;
+      if (frequency[i] > max_frequency) {
+        max_frequency = frequency[i];
       }
-      pfrequency++;
     }
 
     width[2] = column_width(max_frequency) + ASCII_SPACE;
@@ -2217,24 +2228,17 @@ double TimeEvents::min_inter_event_computation() const
 
 {
   int i;
-  int *ptime , *pnb_event;
   double ratio , min_ratio;
 
 
-  ptime = time;
-  pnb_event = nb_event;
   min_ratio = time[nb_class - 1];
-
   for (i = 0;i < nb_class;i++) {
-    if (*pnb_event > 0) {
-      ratio = (double)*ptime / (double)*pnb_event;
+    if (nb_event[i] > 0) {
+      ratio = (double)time[i] / (double)nb_event[i];
       if (ratio < min_ratio) {
         min_ratio = ratio;
       }
     }
-
-    ptime++;
-    pnb_event++;
   }
 
   return min_ratio;
@@ -2251,13 +2255,11 @@ void TimeEvents::nb_element_computation()
 
 {
   int i;
-  int *pfrequency;
 
 
-  pfrequency = frequency;
   nb_element = 0;
   for (i = 0;i < nb_class;i++) {
-    nb_element += *pfrequency++;
+    nb_element += frequency[i];
   }
 }
 
@@ -2440,7 +2442,6 @@ void RenewalData::copy(const RenewalData &timev , bool model_flag)
 
 {
   int i , j;
-  int *psequence , *csequence;
 
 
   if ((model_flag) && (timev.renewal)) {
@@ -2460,11 +2461,8 @@ void RenewalData::copy(const RenewalData &timev , bool model_flag)
   sequence = new int*[nb_element];
   for (i = 0;i < nb_element;i++) {
     sequence[i] = new int[length[i]];
-
-    psequence = sequence[i];
-    csequence = timev.sequence[i];
     for (j = 0;j < length[i];j++) {
-      *psequence++ = *csequence++;
+      sequence[i][j] = timev.sequence[i][j];
     }
   }
 
@@ -2576,7 +2574,6 @@ RenewalData* RenewalData::merge(StatError &error , int nb_sample ,
 {
   bool status = true;
   int i , j , k , m;
-  int *psequence , *csequence;
   const FrequencyDistribution **phisto;
   RenewalData *timev;
   const RenewalData **ptimev;
@@ -2612,10 +2609,8 @@ RenewalData* RenewalData::merge(StatError &error , int nb_sample ,
     i = 0;
     for (j = 0;j < nb_sample;j++) {
       for (k = 0;k < ptimev[j]->nb_element;k++) {
-        psequence = timev->sequence[i];
-        csequence = ptimev[j]->sequence[k];
         for (m = 0;m < ptimev[j]->length[k];m++) {
-          *psequence++ = *csequence++;
+          timev->sequence[i][m] = ptimev[j]->sequence[k][m];
         }
         i++;
       }

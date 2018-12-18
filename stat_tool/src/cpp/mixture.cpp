@@ -2592,6 +2592,28 @@ ostream& MixtureData::ascii_data_write(ostream &os , bool exhaustive) const
 
 /*--------------------------------------------------------------*/
 /**
+ *  \brief Writing of a MixtureData object.
+ *
+ *  \param[in] exhaustive flag detail level,
+ *
+ *  \return    string.
+ */
+/*--------------------------------------------------------------*/
+
+string MixtureData::ascii_data_write(bool exhaustive) const
+
+{
+  ostringstream oss;
+
+
+  ascii_data_write(oss , exhaustive);
+
+  return oss.str();
+}
+
+
+/*--------------------------------------------------------------*/
+/**
  *  \brief Writing of a MixtureData object in a file.
  *
  *  \param[in] error      reference on a StatError object,

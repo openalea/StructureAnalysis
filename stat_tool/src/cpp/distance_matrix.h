@@ -207,36 +207,36 @@ namespace stat_tool {
     int get_length(int row , int column) const
     { return length[row][column]; }
     double get_deletion_distance(int row , int column) const
-    { return deletion_distance[row][column]; }
+    { if (deletion_distance) return deletion_distance[row][column]; else return -D_INF; }
     int get_nb_deletion(int row , int column) const
-    { return nb_deletion[row][column]; }
+    { if (nb_deletion) return nb_deletion[row][column]; else return I_DEFAULT; }
     double get_insertion_distance(int row , int column) const
-    { return insertion_distance[row][column]; }
+    { if (insertion_distance) return insertion_distance[row][column]; else return -D_INF; }
     int get_nb_insertion(int row , int column) const
-    { return nb_insertion[row][column]; }
+    { if (nb_insertion) return nb_insertion[row][column]; else return I_DEFAULT; }
     int get_nb_match(int row , int column) const
-    { if (nb_match) return nb_match[row][column]; else return 0; }
+    { if (nb_match) return nb_match[row][column]; else return I_DEFAULT; }
     double get_substitution_distance(int row , int column) const
-    { return substitution_distance[row][column]; }
+    { if (substitution_distance) return substitution_distance[row][column]; else return -D_INF; }
     int get_nb_substitution(int row , int column) const
-    { return nb_substitution[row][column]; }
+    { if (nb_substitution) return nb_substitution[row][column]; else return I_DEFAULT; }
     double get_transposition_distance(int row , int column) const
-    { return transposition_distance[row][column]; }
+    { if (transposition_distance) return transposition_distance[row][column]; else return -D_INF; }
     int get_nb_transposition(int row , int column) const
-    { return nb_transposition[row][column]; }
+    { if (nb_transposition) return nb_transposition[row][column]; else return I_DEFAULT; }
     int get_label_size() const { return label_size; }
     char* get_label() const { return label; }
 
     bool is_deletion()
-    { if (nb_deletion != NULL) return true; else return false; }
+    { if (nb_deletion) return true; else return false; }
     bool is_insertion()
-    { if (nb_insertion != NULL) return true; else return false; }
+    { if (nb_insertion) return true; else return false; }
     bool is_match()
     { if (nb_match != NULL) return true; else return false; }
     bool is_substitution()
-    { if (nb_substitution != NULL) return true; else return false; }
+    { if (nb_substitution) return true; else return false; }
     bool is_transposition()
-    { if (nb_transposition != NULL) return true; else return false; }
+    { if (nb_transposition) return true; else return false; }
   };
 
 

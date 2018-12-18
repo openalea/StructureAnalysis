@@ -506,6 +506,7 @@ namespace stat_tool {
                                              const Distribution **idist) const;
 
     std::ostream& survival_ascii_write(std::ostream &os) const;
+    std::string survival_ascii_write() const;
     bool survival_ascii_write(StatError &error , const std::string path) const;
     bool survival_spreadsheet_write(StatError &error , const std::string path) const;
     bool survival_plot_write(StatError &error , const char *prefix ,
@@ -712,7 +713,8 @@ namespace stat_tool {
     :Reestimation<int>(inb_value) {}
     FrequencyDistribution(const Distribution &dist)
     :Reestimation<int>(dist.nb_value) {}
-    FrequencyDistribution(int inb_element , int *pelement);
+    FrequencyDistribution(int inb_element , int *ielement);
+    FrequencyDistribution(const std::vector<int> ielement);
     FrequencyDistribution(int nb_histo , const FrequencyDistribution **histo)
     :Reestimation<int>(nb_histo , (const Reestimation<int>**)histo) {}
     FrequencyDistribution(const FrequencyDistribution &histo ,
@@ -802,6 +804,7 @@ namespace stat_tool {
                                                        const FrequencyDistribution **ihisto) const;
 
     std::ostream& survival_ascii_write(std::ostream &os) const;
+    std::string survival_ascii_write() const;
     bool survival_ascii_write(StatError &error , const std::string path) const;
     bool survival_spreadsheet_write(StatError &error , const std::string path) const;
     bool survival_plot_write(StatError &error , const char *prefix ,

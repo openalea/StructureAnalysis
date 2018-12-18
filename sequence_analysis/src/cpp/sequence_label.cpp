@@ -310,6 +310,7 @@ const char *SEQ_error[] = {
   "average number of events too small: choose a longer observation period" ,
   "time unit too large" ,
 
+  "format error: should be a pair {observation period, number of events}" ,
   "bad time between two observation dates" ,
   "bad minimum time" ,
   "bad maximum time" ,

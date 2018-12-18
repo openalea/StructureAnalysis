@@ -258,6 +258,8 @@ namespace stat_tool {
     Vectors(int inb_vector , int *iidentifier , int inb_variable , double **ireal_vector);  // AML interface
     Vectors(int inb_vector , int *iidentifier , int inb_variable , variable_nature *itype ,
             int **iint_vector , double **ireal_vector , bool variable_index = true);
+    Vectors(int inb_vector , const  std::vector<int> iidentifier , int nb_int_variable , int nb_real_variable ,
+            const std::vector<std::vector<int>> iint_vector , const  std::vector<std::vector<double>> ireal_vector);
     Vectors(const Vectors &vec , int variable , variable_nature itype);
     Vectors(const Vectors &vec , int inb_vector , int *index);
 //    Vectors(const Vectors &vec , vector_transformation transform = VECTOR_COPY , variable_nature itype = I_DEFAULT);
@@ -320,11 +322,14 @@ namespace stat_tool {
     Vectors* merge_variable(StatError &error , int nb_sample , const std::vector<Vectors> ivec ,
                             int ref_sample = I_DEFAULT) const;
 
+    static Vectors* build(StatError &error , const std::vector<std::vector<int>> iint_vector ,
+                          const std::vector<std::vector<double>> ireal_vector , const std::vector<int> iidentifier);
     static Vectors* ascii_read(StatError &error , const std::string path);
 
     std::ostream& line_write(std::ostream &os) const;
 
     virtual std::ostream& ascii_data_write(std::ostream &os , bool exhaustive = false) const;
+    std::string ascii_data_write(bool exhaustive = false) const;
     virtual bool ascii_data_write(StatError &error , const std::string path , bool exhaustive = false) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;

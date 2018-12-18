@@ -227,8 +227,8 @@ namespace sequence_analysis {
                                                 renewal_distribution dist_type ,
                                                 int itime = stat_tool::I_DEFAULT) const;
 
-    static Renewal* building(stat_tool::StatError &error , const stat_tool::DiscreteParametric &inter_event ,
-                             stat_tool::process_type type = stat_tool::EQUILIBRIUM , int time = DEFAULT_TIME);
+    static Renewal* build(stat_tool::StatError &error , const stat_tool::DiscreteParametric &inter_event ,
+                          stat_tool::process_type type = stat_tool::EQUILIBRIUM , int time = DEFAULT_TIME);
 
     static Renewal* ascii_read(stat_tool::StatError& error , const std::string path ,
                                stat_tool::process_type type = stat_tool::EQUILIBRIUM , int time = DEFAULT_TIME ,
@@ -364,7 +364,8 @@ namespace sequence_analysis {
     TimeEvents* nb_event_select(stat_tool::StatError &error , int min_nb_event ,
                                 int max_nb_event) const;
 
-    static TimeEvents* building(stat_tool::StatError &error , stat_tool::FrequencyDistribution &nb_event , int itime);
+    static TimeEvents* build(stat_tool::StatError &error , stat_tool::FrequencyDistribution &nb_event , int itime);
+    static TimeEvents* build(stat_tool::StatError &error , const std::vector<std::vector<int>> time_nb_event);
 
     static TimeEvents* ascii_read(stat_tool::StatError &error , const std::string path);
     static TimeEvents* old_ascii_read(stat_tool::StatError &error , const std::string path);

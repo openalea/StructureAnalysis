@@ -61,11 +61,11 @@ namespace stat_tool {
  *  \brief Constructor of the FrequencyDistribution class.
  *
  *  \param[in] inb_element number of individuals,
- *  \param[in] pelement    individuals.
+ *  \param[in] ielement    individuals.
  */
 /*--------------------------------------------------------------*/
 
-FrequencyDistribution::FrequencyDistribution(int inb_element , int *pelement)
+FrequencyDistribution::FrequencyDistribution(int inb_element , int *ielement)
 
 {
   int i;
@@ -75,12 +75,10 @@ FrequencyDistribution::FrequencyDistribution(int inb_element , int *pelement)
 
   nb_value = 0;
   for (i = 0;i < nb_element;i++) {
-    if (*pelement > nb_value) {
-      nb_value = *pelement;
+    if (ielement[i] > nb_value) {
+      nb_value = ielement[i];
     }
-    pelement++;
   }
-  pelement -= nb_element;
 
   nb_value++;
   alloc_nb_value = nb_value;
@@ -90,7 +88,50 @@ FrequencyDistribution::FrequencyDistribution(int inb_element , int *pelement)
     frequency[i] = 0;
   }
   for (i = 0;i < nb_element;i++) {
-    frequency[*pelement++]++;
+    frequency[ielement[i]]++;
+  }
+
+  // computation of the frequency distribution characteristics
+
+  offset_computation();
+  max_computation();
+  mean_computation();
+  variance_computation();
+}
+
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the FrequencyDistribution class.
+ *
+ *  \param[in] ielement individuals.
+ */
+/*--------------------------------------------------------------*/
+
+FrequencyDistribution::FrequencyDistribution(const vector<int> ielement)
+
+{
+  int i;
+
+
+  nb_element = ielement.size();
+
+  nb_value = 0;
+  for (i = 0;i < nb_element;i++) {
+    if (ielement[i] > nb_value) {
+      nb_value = ielement[i];
+    }
+  }
+
+  nb_value++;
+  alloc_nb_value = nb_value;
+  frequency = new int[nb_value];
+
+  for (i = 0;i < nb_value;i++) {
+    frequency[i] = 0;
+  }
+  for (i = 0;i < nb_element;i++) {
+    frequency[ielement[i]]++;
   }
 
   // computation of the frequency distribution characteristics
@@ -1390,6 +1431,27 @@ ostream& FrequencyDistribution::survival_ascii_write(ostream &os) const
   delete survival_rate;
 
   return os;
+}
+
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the survival rates from a frequency distribution and
+ *         writing of the result.
+ *
+ *  \return string.
+ */
+/*--------------------------------------------------------------*/
+
+string FrequencyDistribution::survival_ascii_write() const
+
+{
+  ostringstream oss;
+
+
+  survival_ascii_write(oss);
+
+  return oss.str();
 }
 
 

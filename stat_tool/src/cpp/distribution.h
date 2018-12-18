@@ -135,8 +135,10 @@ namespace stat_tool {
     :FrequencyDistribution(dist) { distribution = NULL; }
     DiscreteDistributionData(const FrequencyDistribution &histo)
     :FrequencyDistribution(histo) { distribution = NULL; }
-    DiscreteDistributionData(int inb_element , int *pelement)
-    :FrequencyDistribution(inb_element , pelement) { distribution = NULL; }
+    DiscreteDistributionData(int inb_element , int *ielement)
+    :FrequencyDistribution(inb_element , ielement) { distribution = NULL; }
+    DiscreteDistributionData(const std::vector<int> ielement)
+    :FrequencyDistribution(ielement) { distribution = NULL; }
     DiscreteDistributionData(const FrequencyDistribution &histo ,
                              frequency_distribution_transformation transform ,
                              int param , rounding mode = FLOOR)

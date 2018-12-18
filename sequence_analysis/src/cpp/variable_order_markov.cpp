@@ -6114,6 +6114,29 @@ ostream& VariableOrderMarkovData::ascii_data_write(ostream &os , output_sequence
 
 /*--------------------------------------------------------------*/
 /**
+ *  \brief Writing of a VariableOrderMarkovData object.
+ *
+ *  \param[in] format     format (line/column),
+ *  \param[in] exhaustive flag detail level,
+ *
+ *  \return    string.
+ */
+/*--------------------------------------------------------------*/
+
+string VariableOrderMarkovData::ascii_data_write(output_sequence_format format , bool exhaustive) const
+
+{
+  ostringstream oss;
+
+
+  ascii_data_write(oss , format , exhaustive);
+
+  return oss.str();
+}
+
+
+/*--------------------------------------------------------------*/
+/**
  *  \brief Writing of a VariableOrderMarkovData object in a file.
  *
  *  \param[in] error      reference on a StatError object,

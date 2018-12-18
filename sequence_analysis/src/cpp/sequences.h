@@ -696,6 +696,11 @@ namespace sequence_analysis {
     Sequences(int inb_sequence , int *iidentifier , int *ilength , int **ivertex_identifier ,
               index_parameter_type iindex_param_type , int **iindex_parameter , int inb_variable ,
               stat_tool::variable_nature *itype , int ***iint_sequence , double ***ireal_sequence);
+    Sequences(int inb_sequence , const std::vector<int> iidentifier , int *ilength ,
+              const std::vector<std::vector<int>> ivertex_identifier , index_parameter_type iindex_param_type ,
+              const std::vector<std::vector<int>> iindex_parameter , int nb_int_variable , int nb_real_variable ,
+              const std::vector<std::vector<std::vector<int>>> iint_sequence ,
+              const std::vector<std::vector<std::vector<double>>> ireal_sequence);
     Sequences(int inb_sequence , int *iidentifier , int *ilength , int inb_variable ,
               bool init_flag = false)
     { init(inb_sequence , iidentifier , ilength , inb_variable , init_flag); }
@@ -826,6 +831,11 @@ namespace sequence_analysis {
 
     Sequences* cross(stat_tool::StatError &error) const;
 
+    static Sequences* build(stat_tool::StatError &error , index_parameter_type iindex_param_type ,
+                            const std::vector<std::vector<int>> iindex_parameter ,
+                            const std::vector<std::vector<std::vector<int>>> iint_sequence ,
+                            const std::vector<std::vector<std::vector<double>>> ireal_sequence ,
+                            const std::vector<int> iidentifier , const std::vector<std::vector<int>> ivertex_identifier);
     static Sequences* ascii_read(stat_tool::StatError &error , const std::string path ,
                                  bool old_format = false);
 
@@ -833,6 +843,7 @@ namespace sequence_analysis {
 
     virtual std::ostream& ascii_data_write(std::ostream &os , output_sequence_format format = COLUMN ,
                                            bool exhaustive = false) const;
+    std::string ascii_data_write(output_sequence_format format = COLUMN , bool exhaustive = false) const;
     virtual bool ascii_data_write(stat_tool::StatError &error , const std::string path ,
                                   output_sequence_format format = COLUMN , bool exhaustive = false) const;
     bool plot_data_write(stat_tool::StatError &error , const char *prefix ,
@@ -1232,6 +1243,7 @@ namespace sequence_analysis {
 
     std::ostream& ascii_data_write(std::ostream &os , output_sequence_format format = COLUMN ,
                                    bool exhaustive = false) const;
+    std::string ascii_data_write(output_sequence_format format = COLUMN , bool exhaustive = false) const;
     bool ascii_data_write(stat_tool::StatError &error , const std::string path ,
                           output_sequence_format format = COLUMN , bool exhaustive = false) const;
 

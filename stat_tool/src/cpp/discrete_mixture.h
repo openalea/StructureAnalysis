@@ -125,10 +125,10 @@ namespace stat_tool {
     DiscreteParametricModel* extract(StatError &error , int index) const;
     DiscreteMixtureData* extract_data(StatError &error) const;
 
-    static DiscreteMixture* building(StatError &error , int nb_component , double *weight ,
-                                     const DiscreteParametric **component);
-    static DiscreteMixture* building(StatError &error , int nb_component , std::vector<double> weight ,
-                                     const std::vector<DiscreteParametric> component);
+    static DiscreteMixture* build(StatError &error , int nb_component , double *weight ,
+                                  const DiscreteParametric **component);
+    static DiscreteMixture* build(StatError &error , const std::vector<double> weight ,
+                                  const std::vector<DiscreteParametric> component);
     static DiscreteMixture* ascii_read(StatError &error , const std::string path ,
                                        double cumul_threshold = CUMUL_THRESHOLD);
 

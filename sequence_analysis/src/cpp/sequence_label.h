@@ -316,6 +316,7 @@ namespace sequence_analysis {
     SEQR_NB_EVENT_TOO_SMALL ,
     SEQR_TIME_UNIT ,
 
+    SEQR_TIME_NB_EVENT_PAIR ,
     SEQR_OBSERVATION_TIME ,
     SEQR_MIN_TIME ,
     SEQR_MAX_TIME ,

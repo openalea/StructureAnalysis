@@ -2130,6 +2130,27 @@ ostream& Distribution::survival_ascii_write(ostream &os) const
 
 /*--------------------------------------------------------------*/
 /**
+ *  \brief Computation of the survival rates from a discrete distribution and
+ *         writing of the result.
+ *
+ *  \return string.
+ */
+/*--------------------------------------------------------------*/
+
+string Distribution::survival_ascii_write() const
+
+{
+  ostringstream oss;
+
+
+  survival_ascii_write(oss);
+
+  return oss.str();
+}
+
+
+/*--------------------------------------------------------------*/
+/**
  *  \brief Computation ofs survival rates from a discrete distribution and
  *         writing of the result in a file.
  *

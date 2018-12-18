@@ -118,10 +118,8 @@ namespace stat_tool {
     DiscreteParametricModel* extract(StatError &error , int index) const;
     ConvolutionData* extract_data(StatError &error) const;
 
-    static Convolution* building(StatError &error , int nb_dist ,
-                                 const DiscreteParametric **dist);
-    static Convolution* building(StatError &error , int nb_dist ,
-                                 const std::vector<DiscreteParametric> dist);
+    static Convolution* build(StatError &error , int nb_dist , const DiscreteParametric **dist);
+    static Convolution* build(StatError &error , const std::vector<DiscreteParametric> dist);
     static Convolution* ascii_read(StatError &error , const std::string path ,
                                    double cumul_threshold = CONVOLUTION_THRESHOLD);
 
