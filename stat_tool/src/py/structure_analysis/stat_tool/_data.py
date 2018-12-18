@@ -41,6 +41,23 @@ _classes = [cst.DiscreteParametricModel, cst.DiscreteMixture]
 for klass in _classes:
     klass.simulation = wrapper(klass.simulation)
 
+##############################################################################
+
+def wrapper(f):
+    @wraps(f)
+    def parametric_estimation(self, *args, **kwds):
+        error = __stat_tool.stat_tool.StatError(__stat_tool.stat_tool.nb_error)
+        data = f(self, error,*args, **kwds)
+        if not data:
+            raise Exception(str(error))
+        return data
+    return parametric_estimation
+
+_classes = [cst.FrequencyDistribution]
+for klass in _classes:
+    klass.parametric_estimation = wrapper(klass.parametric_estimation)
+
+
 
 def wrapper(f):
     @wraps(f)

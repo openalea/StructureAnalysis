@@ -52,7 +52,9 @@ del wrapper
 
 def wrapper(f):
     @wraps(f)
-    def discrete_mixture_estimation(self, max_nb_component, ident, min_inf_bound=0, mixt_flag=True, component_flag=True, model_selection_criterion="BIC", weight_step=.1, **kwargs):
+    def discrete_mixture_estimation(self, max_nb_component, ident, min_inf_bound=0,
+                                    mixt_flag=True, component_flag=True,
+                                    model_selection_criterion="BIC", weight_step=.1, **kwargs):
         if isinstance(ident, basestring):
             ident = [ident] * max_nb_component
         if isinstance(ident, (list, tuple)):

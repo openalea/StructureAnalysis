@@ -1,0 +1,31 @@
+package:
+  name: python-stat_tool
+  version: "1.0.1"
+
+source:
+  path: ../../..
+
+build:
+  number: 0
+
+about:
+  home:  http://openalea.gforge.inria.fr/doc/vplants/stat_tool/doc/html/contents.html
+  license: CeCILL-C
+
+requirements:
+  build:
+    - libtoolchain
+    - python-toolchain
+    - libboost_python-dev
+    - libstat_tool
+    - python {{PY_VER}}*
+    - path.py <11.5
+  run:
+    - libstat_tool
+    - python {{PY_VER}}*
+    - multipledispatch
+    - libboost_python-dev
+
+test:
+  imports:
+    - stat_tool

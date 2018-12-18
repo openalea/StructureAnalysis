@@ -1,0 +1,17 @@
+# -*-python-*-
+
+import os
+
+env = Environment(tools = ['toolchain'])
+
+env.AppendUnique(LIBS = [])
+env.AppendUnique(CPPDEFINES=['MESSAGE'])
+
+if env['SYSTEM'] == 'linux':
+    env.AppendUnique(CCFLAGS=['-Wno-deprecated-declarations'])
+VariantDir(os.path.join('build', 'src'), 'src')
+
+SConscript(os.path.join('build', 'src', 'cpp', 'SConscriptWIG'), exports="env")
+SConscript(os.path.join('build', 'src', 'py', 'wrapper', 'SConscriptWIG'), exports="env")
+
+Default("install")

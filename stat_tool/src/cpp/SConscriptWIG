@@ -1,0 +1,36 @@
+# -*-python-*-
+
+from SCons.Errors import EnvironmentError
+
+try:
+    Import("env")
+
+    cppenv = env.Clone(tools = ['cpp'])
+
+    cppenv.AppendUnique(CPPDEFINES = ['STAT_TOOL_MAKEDLL'])
+
+    exclude = """
+    """.split()
+
+    sources = [source for source in cppenv.Glob('*.h*') if not source.name in exclude]
+    targets = cppenv.CppDev("stat_tool", sources)
+    Alias("cpp-dev", targets)
+    Alias("cpp", targets)
+    Alias("install", targets)
+
+    exclude = """
+    """.split()
+
+    sources = [source for source in cppenv.Glob('*.cpp') if not source.name in exclude]
+    targets = cppenv.CppLib("stat_tool", sources)
+    Alias("cpp-lib", targets)
+    Alias("cpp", targets)
+    Alias("install", targets)
+except EnvironmentError:
+    Alias("cpp-dev", [])
+    Alias("cpp-lib", [])
+    Alias("cpp", [])
+    Alias("install", [])
+    pass
+except Exception:
+    raise
