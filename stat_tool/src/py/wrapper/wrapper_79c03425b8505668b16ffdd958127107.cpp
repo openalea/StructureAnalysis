@@ -29,7 +29,7 @@ void wrapper_79c03425b8505668b16ffdd958127107()
     boost::python::object module_e1391944268253558f04b6f996bb5a8b(boost::python::handle<  >(boost::python::borrowed(PyImport_AddModule(name_e1391944268253558f04b6f996bb5a8b.c_str()))));
     boost::python::scope().attr("__basic_ostream_e1391944268253558f04b6f996bb5a8b") = module_e1391944268253558f04b6f996bb5a8b;
     boost::python::scope scope_e1391944268253558f04b6f996bb5a8b = module_e1391944268253558f04b6f996bb5a8b;
-    boost::python::class_< class ::std::basic_ostream< char, struct ::std::char_traits< char > >::sentry, autowig::Held< class ::std::basic_ostream< char, struct ::std::char_traits< char > >::sentry >::Type > class_79c03425b8505668b16ffdd958127107("Sentry", "", boost::python::no_init);
+    boost::python::class_< class ::std::basic_ostream< char, struct ::std::char_traits< char > >::sentry, autowig::Held< class ::std::basic_ostream< char, struct ::std::char_traits< char > >::sentry >::Type, boost::noncopyable > class_79c03425b8505668b16ffdd958127107("Sentry", "", boost::python::no_init);
     class_79c03425b8505668b16ffdd958127107.def(boost::python::init< class ::std::basic_ostream< char, struct ::std::char_traits< char > > & >(""));
 
 }

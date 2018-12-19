@@ -9,6 +9,9 @@ env.AppendUnique(CPPDEFINES=['MESSAGE'])
 
 if env['SYSTEM'] == 'linux':
     env.AppendUnique(CCFLAGS=['-Wno-deprecated-declarations'])
+elif env['SYSTEM'] == 'osx':
+    env.AppendUnique(CXXFLAGS=['-fPIC'])
+
 VariantDir(os.path.join('build', 'src'), 'src')
 
 SConscript(os.path.join('build', 'src', 'cpp', 'SConscriptWIG'), exports="env")

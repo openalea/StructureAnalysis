@@ -29,8 +29,8 @@ void wrapper_b2b598c024f65acba246d207ae371e07()
     boost::python::object module_2f3439617e035c41b1282a03e900ef19(boost::python::handle<  >(boost::python::borrowed(PyImport_AddModule(name_2f3439617e035c41b1282a03e900ef19.c_str()))));
     boost::python::scope().attr("_locale") = module_2f3439617e035c41b1282a03e900ef19;
     boost::python::scope scope_2f3439617e035c41b1282a03e900ef19 = module_2f3439617e035c41b1282a03e900ef19;
-    ::std::size_t  (::std::locale::id::*method_pointer_e68fc79fdb385b8494652d968f50fb2b)() const = &::std::locale::id::_M_id;
+    long int  (::std::locale::id::*method_pointer_019c70c57dee56f1b98736e078a1db97)() = &::std::locale::id::__get;
     boost::python::class_< class ::std::locale::id, autowig::Held< class ::std::locale::id >::Type, boost::noncopyable > class_b2b598c024f65acba246d207ae371e07("Id", "", boost::python::no_init);
-    class_b2b598c024f65acba246d207ae371e07.def("m__id", method_pointer_e68fc79fdb385b8494652d968f50fb2b, "");
+    class_b2b598c024f65acba246d207ae371e07.def("get", method_pointer_019c70c57dee56f1b98736e078a1db97, "");
 
 }

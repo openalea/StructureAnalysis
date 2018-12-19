@@ -28,8 +28,8 @@ void wrapper_d8c688ecc06b59f3b584e1e6735b6825()
     void  (::stat_tool::Chain::*method_pointer_a255fb643996510ca503e0599fd445c5)(class ::stat_tool::Chain const &) = &::stat_tool::Chain::parameter_copy;
     void  (::stat_tool::Chain::*method_pointer_3e1e9bbe45495cac8fe305ca8064a73d)(class ::stat_tool::Chain const &) = &::stat_tool::Chain::copy;
     void  (::stat_tool::Chain::*method_pointer_06eebefd01815b2cbf83a87c5b7f4349)() = &::stat_tool::Chain::remove;
-    class ::std::basic_ostream< char, struct ::std::char_traits< char > > & (::stat_tool::Chain::*method_pointer_f7574889cdbb5fd381197d07f04e7af0)(class ::std::basic_ostream< char, struct ::std::char_traits< char > > &, bool ) const = &::stat_tool::Chain::ascii_print;
-    class ::std::basic_ostream< char, struct ::std::char_traits< char > > & (::stat_tool::Chain::*method_pointer_cac61d75eba05a709779f52328e898f9)(class ::std::basic_ostream< char, struct ::std::char_traits< char > > &) const = &::stat_tool::Chain::spreadsheet_print;
+    class ::std::basic_ostream< char, struct ::std::char_traits< char > > & (::stat_tool::Chain::*method_pointer_6a05059fdf2d56138b0f7b3927533f71)(class ::std::basic_ostream< char, struct ::std::char_traits< char > > &, bool ) const = &::stat_tool::Chain::ascii_print;
+    class ::std::basic_ostream< char, struct ::std::char_traits< char > > & (::stat_tool::Chain::*method_pointer_86303b0d2e9554b7896d67841d4850c9)(class ::std::basic_ostream< char, struct ::std::char_traits< char > > &) const = &::stat_tool::Chain::spreadsheet_print;
     void  (::stat_tool::Chain::*method_pointer_a7a1ab89213756b282b6ca868005bb8b)() = &::stat_tool::Chain::create_cumul;
     void  (::stat_tool::Chain::*method_pointer_4d2ce28bf1025608a64163e69ce7beb3)() = &::stat_tool::Chain::cumul_computation;
     void  (::stat_tool::Chain::*method_pointer_e4b964206af254b7aa6dc1c1df876b0e)() = &::stat_tool::Chain::remove_cumul;
@@ -49,8 +49,8 @@ void wrapper_d8c688ecc06b59f3b584e1e6735b6825()
     class_d8c688ecc06b59f3b584e1e6735b6825.def("parameter_copy", method_pointer_a255fb643996510ca503e0599fd445c5, "");
     class_d8c688ecc06b59f3b584e1e6735b6825.def("copy", method_pointer_3e1e9bbe45495cac8fe305ca8064a73d, "");
     class_d8c688ecc06b59f3b584e1e6735b6825.def("remove", method_pointer_06eebefd01815b2cbf83a87c5b7f4349, "");
-    class_d8c688ecc06b59f3b584e1e6735b6825.def("ascii_print", method_pointer_f7574889cdbb5fd381197d07f04e7af0, boost::python::return_internal_reference<>(), "");
-    class_d8c688ecc06b59f3b584e1e6735b6825.def("spreadsheet_print", method_pointer_cac61d75eba05a709779f52328e898f9, boost::python::return_internal_reference<>(), "");
+    class_d8c688ecc06b59f3b584e1e6735b6825.def("ascii_print", method_pointer_6a05059fdf2d56138b0f7b3927533f71, boost::python::return_internal_reference<>(), "");
+    class_d8c688ecc06b59f3b584e1e6735b6825.def("spreadsheet_print", method_pointer_86303b0d2e9554b7896d67841d4850c9, boost::python::return_internal_reference<>(), "");
     class_d8c688ecc06b59f3b584e1e6735b6825.def("create_cumul", method_pointer_a7a1ab89213756b282b6ca868005bb8b, "");
     class_d8c688ecc06b59f3b584e1e6735b6825.def("cumul_computation", method_pointer_4d2ce28bf1025608a64163e69ce7beb3, "");
     class_d8c688ecc06b59f3b584e1e6735b6825.def("remove_cumul", method_pointer_e4b964206af254b7aa6dc1c1df876b0e, "");

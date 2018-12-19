@@ -12,10 +12,14 @@ root = Path('.')
 inc_dir = root/'include'/'stat_tool'
 if not inc_dir.exists():
     os.makedirs(root/'include'/'stat_tool')
-    for file in (root/'src'/'cpp').walkfiles('*.h*'):
-        file.copy(root/'include'/'stat_tool'/file.name)
+else:
+    for file in inc_dir.files('*.h*'):
+        file.remove()
 
-headers = list((root/'include'/'stat_tool').walkfiles('*.h'))
+for file in (root/'src'/'cpp').walkfiles('*.h*'):
+    file.copy(root/'include'/'stat_tool'/file.name)
+
+headers = list(inc_dir.walkfiles('*.h'))
 
 flags = ['-x', 'c++', '-std=c++11']
 flags.append('-I' + str((prefix/'include').abspath()))

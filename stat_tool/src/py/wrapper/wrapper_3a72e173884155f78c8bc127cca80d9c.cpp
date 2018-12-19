@@ -31,6 +31,5 @@ void wrapper_3a72e173884155f78c8bc127cca80d9c()
     boost::python::scope scope_5647113ef4105dfab0588ffcaf6c479b = module_5647113ef4105dfab0588ffcaf6c479b;
     boost::python::class_< class ::std::ios_base::Init, autowig::Held< class ::std::ios_base::Init >::Type > class_3a72e173884155f78c8bc127cca80d9c("Init", "", boost::python::no_init);
     class_3a72e173884155f78c8bc127cca80d9c.def(boost::python::init<  >(""));
-    class_3a72e173884155f78c8bc127cca80d9c.def(boost::python::init< class ::std::ios_base::Init const & >(""));
 
 }
