@@ -714,7 +714,7 @@ namespace stat_tool {
     FrequencyDistribution(const Distribution &dist)
     :Reestimation<int>(dist.nb_value) {}
     FrequencyDistribution(int inb_element , int *ielement);
-    FrequencyDistribution(const std::vector<int> ielement);
+    FrequencyDistribution(const std::vector<int>& ielement);
     FrequencyDistribution(int nb_histo , const FrequencyDistribution **histo)
     :Reestimation<int>(nb_histo , (const Reestimation<int>**)histo) {}
     FrequencyDistribution(const FrequencyDistribution &histo ,
@@ -779,7 +779,7 @@ namespace stat_tool {
     double likelihood_computation(const ContinuousParametric &dist ,
                                   int min_interval = I_DEFAULT) const;
 
-    DiscreteDistributionData* merge(int nb_sample , std::vector<FrequencyDistribution> ihisto) const;
+    DiscreteDistributionData* merge(int nb_sample , const std::vector<FrequencyDistribution>& ihisto) const;
 
     void shift(const FrequencyDistribution &histo , int shift_param);
     void cluster(const FrequencyDistribution &histo , int step , rounding mode);
@@ -788,9 +788,9 @@ namespace stat_tool {
     DiscreteDistributionData* cluster(StatError &error , int step , rounding mode = FLOOR) const;
     DiscreteDistributionData* cluster(StatError &error , double ratio , bool display) const;
     DiscreteDistributionData* cluster(StatError &error , int nb_class , int *ilimit) const;
-    DiscreteDistributionData* cluster(StatError &error , int nb_class , std::vector<int> ilimit) const;
+    DiscreteDistributionData* cluster(StatError &error , int nb_class , std::vector<int>& ilimit) const;
     DiscreteDistributionData* transcode(StatError &error , int *category) const;
-    DiscreteDistributionData* transcode(StatError &error , std::vector<int> category) const;
+    DiscreteDistributionData* transcode(StatError &error , std::vector<int>& category) const;
     DiscreteDistributionData* value_select(StatError &error , int min_value ,
                                            int max_value , bool keep = true) const;
 
@@ -815,7 +815,7 @@ namespace stat_tool {
                     const FrequencyDistribution **ihisto , variable_type type ,
                     const std::string path = NULL , output_format format = ASCII) const;
     bool comparison(StatError &error , bool display , int nb_histo ,
-                    const std::vector<FrequencyDistribution> ihisto , variable_type type ,
+                    const std::vector<FrequencyDistribution>& ihisto , variable_type type ,
                     const std::string path = NULL , output_format format = ASCII) const;
 
     void F_comparison(bool display , const FrequencyDistribution &histo) const;
@@ -841,7 +841,7 @@ namespace stat_tool {
     DiscreteMixture* discrete_mixture_estimation(StatError &error , int nb_component , discrete_parametric *ident ,
                                                  int min_inf_bound = 0 , bool mixt_flag = true ,
                                                  bool component_flag = true , double weight_step = 0.1) const;
-    DiscreteMixture* discrete_mixture_estimation(StatError &error , int nb_component , std::vector<discrete_parametric> ident ,
+    DiscreteMixture* discrete_mixture_estimation(StatError &error , int nb_component , std::vector<discrete_parametric>& ident ,
                                                  int min_inf_bound = 0 , bool mixt_flag = true ,
                                                  bool component_flag = true , double weight_step = 0.1) const;
     DiscreteMixture* discrete_mixture_estimation(StatError &error , bool display , int min_nb_component ,
@@ -850,7 +850,7 @@ namespace stat_tool {
                                                  model_selection_criterion criterion = BICc ,
                                                  double weight_step = 0.1) const;
     DiscreteMixture* discrete_mixture_estimation(StatError &error , bool display , int min_nb_component ,
-                                                 int max_nb_component , std::vector<discrete_parametric> ident , int min_inf_bound = 0 ,
+                                                 int max_nb_component , std::vector<discrete_parametric>& ident , int min_inf_bound = 0 ,
                                                  bool mixt_flag = true , bool component_flag = true ,
                                                  model_selection_criterion criterion = BICc ,
                                                  double weight_step = 0.1) const;

@@ -108,7 +108,7 @@ namespace stat_tool {
 
     Convolution();
     Convolution(int nb_dist , const DiscreteParametric **pdist);
-    Convolution(int nb_dist , const std::vector<DiscreteParametric> idist);
+    Convolution(int nb_dist , const std::vector<DiscreteParametric>& idist);
     Convolution(const DiscreteParametric &known_dist , const DiscreteParametric &unknown_dist);
     Convolution(const Convolution &convol , bool data_flag = true)
     :Distribution(convol) { copy(convol , data_flag); }
@@ -119,7 +119,7 @@ namespace stat_tool {
     ConvolutionData* extract_data(StatError &error) const;
 
     static Convolution* build(StatError &error , int nb_dist , const DiscreteParametric **dist);
-    static Convolution* build(StatError &error , const std::vector<DiscreteParametric> dist);
+    static Convolution* build(StatError &error , const std::vector<DiscreteParametric>& dist);
     static Convolution* ascii_read(StatError &error , const std::string path ,
                                    double cumul_threshold = CONVOLUTION_THRESHOLD);
 

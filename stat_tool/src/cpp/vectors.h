@@ -258,8 +258,8 @@ namespace stat_tool {
     Vectors(int inb_vector , int *iidentifier , int inb_variable , double **ireal_vector);  // AML interface
     Vectors(int inb_vector , int *iidentifier , int inb_variable , variable_nature *itype ,
             int **iint_vector , double **ireal_vector , bool variable_index = true);
-    Vectors(int inb_vector , const  std::vector<int> iidentifier , int nb_int_variable , int nb_real_variable ,
-            const std::vector<std::vector<int>> iint_vector , const  std::vector<std::vector<double>> ireal_vector);
+    Vectors(int inb_vector , const  std::vector<int>& iidentifier , int nb_int_variable , int nb_real_variable ,
+            const std::vector<std::vector<int> >& iint_vector , const  std::vector<std::vector<double> >& ireal_vector);
     Vectors(const Vectors &vec , int variable , variable_nature itype);
     Vectors(const Vectors &vec , int inb_vector , int *index);
 //    Vectors(const Vectors &vec , vector_transformation transform = VECTOR_COPY , variable_nature itype = I_DEFAULT);
@@ -274,7 +274,7 @@ namespace stat_tool {
     bool check(StatError &error);
 
     Vectors* merge(StatError &error, int nb_sample , const Vectors **ivec) const;
-    Vectors* merge(StatError &error, int nb_sample , const std::vector<Vectors> ivec) const;
+    Vectors* merge(StatError &error, int nb_sample , const std::vector<Vectors>& ivec) const;
 
     Vectors* shift(StatError &error , int variable , int shift_param) const;
     Vectors* shift(StatError &error , int variable , double shift_param) const;
@@ -283,18 +283,18 @@ namespace stat_tool {
     Vectors* thresholding(StatError &error , int variable , double threshold ,
                           threshold_direction mode) const;
     Vectors* transcode(StatError &error , int variable , int *category) const;
-    Vectors* transcode(StatError &error , int variable , std::vector<int> category) const;
+    Vectors* transcode(StatError &error , int variable , std::vector<int>& category) const;
 
     Vectors* cluster(StatError &error , int variable , int step ,
                      rounding mode = FLOOR) const;
     Vectors* cluster(StatError &error , int variable , int inb_value ,
                      int *ilimit) const;
     Vectors* cluster(StatError &error , int variable , int inb_value ,
-                     std::vector<int> ilimit) const;
+                     std::vector<int>& ilimit) const;
     Vectors* cluster(StatError &error , int variable , int nb_class ,
                      double *ilimit) const;
     Vectors* cluster(StatError &error , int variable , int nb_class ,
-                     std::vector<double> ilimit) const;
+                     std::vector<double>& ilimit) const;
     Vectors* scaling(StatError &error , int variable , int scaling_coeff) const;
     Vectors* scaling(StatError &error , int variable , double scaling_coeff) const;
     Vectors* round(StatError &error , int variable = I_DEFAULT ,
@@ -309,21 +309,21 @@ namespace stat_tool {
 
     Vectors* select_individual(StatError &error , int inb_vector , int *iidentifier ,
                                bool keep = true) const;
-    Vectors* select_individual(StatError &error , int inb_vector , std::vector<int> iidentifier ,
+    Vectors* select_individual(StatError &error , int inb_vector , std::vector<int>& iidentifier ,
                                bool keep = true) const;
     Vectors* select_variable(StatError &error , int inb_variable , int *ivariable ,
                              bool keep = true) const;
-    Vectors* select_variable(StatError &error , int inb_variable , std::vector<int> ivariable ,
+    Vectors* select_variable(StatError &error , int inb_variable , std::vector<int>& ivariable ,
                              bool keep = true) const;
     Vectors* sum_variable(StatError &error , int nb_summed_variable , int *ivariable) const;
-    Vectors* sum_variable(StatError &error , int nb_summed_variable , std::vector<int> ivariable) const;
+    Vectors* sum_variable(StatError &error , int nb_summed_variable , std::vector<int>& ivariable) const;
     Vectors* merge_variable(StatError &error , int nb_sample , const Vectors **ivec ,
                             int ref_sample = I_DEFAULT) const;
-    Vectors* merge_variable(StatError &error , int nb_sample , const std::vector<Vectors> ivec ,
+    Vectors* merge_variable(StatError &error , int nb_sample , const std::vector<Vectors>& ivec ,
                             int ref_sample = I_DEFAULT) const;
 
-    static Vectors* build(StatError &error , const std::vector<std::vector<int>> iint_vector ,
-                          const std::vector<std::vector<double>> ireal_vector , const std::vector<int> iidentifier);
+    static Vectors* build(StatError &error , const std::vector<std::vector<int> >& iint_vector ,
+                          const std::vector<std::vector<double> >& ireal_vector , const std::vector<int>& iidentifier);
     static Vectors* ascii_read(StatError &error , const std::string path);
 
     std::ostream& line_write(std::ostream &os) const;

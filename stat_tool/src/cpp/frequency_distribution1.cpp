@@ -108,7 +108,7 @@ FrequencyDistribution::FrequencyDistribution(int inb_element , int *ielement)
  */
 /*--------------------------------------------------------------*/
 
-FrequencyDistribution::FrequencyDistribution(const vector<int> ielement)
+FrequencyDistribution::FrequencyDistribution(const vector<int>& ielement)
 
 {
   int i;
@@ -338,7 +338,7 @@ bool FrequencyDistribution::operator==(const FrequencyDistribution &histo) const
 /*--------------------------------------------------------------*/
 
 DiscreteDistributionData* FrequencyDistribution::merge(int nb_sample ,
-                                                       const vector<FrequencyDistribution> ihisto) const
+                                                       const vector<FrequencyDistribution>& ihisto) const
 
 {
   int i;
@@ -639,7 +639,7 @@ DiscreteDistributionData* FrequencyDistribution::cluster(StatError &error , int 
 /*--------------------------------------------------------------*/
 
 DiscreteDistributionData* FrequencyDistribution::cluster(StatError &error , int nb_class ,
-                                                         vector<int> ilimit) const
+                                                         vector<int>& ilimit) const
 
 {
   return cluster(error , nb_class , ilimit.data());
@@ -762,7 +762,7 @@ DiscreteDistributionData* FrequencyDistribution::transcode(StatError &error ,
 /*--------------------------------------------------------------*/
 
 DiscreteDistributionData* FrequencyDistribution::transcode(StatError &error ,
-                                                           vector<int> category) const
+                                                           vector<int>& category) const
 
 {
   return transcode(error , category.data());

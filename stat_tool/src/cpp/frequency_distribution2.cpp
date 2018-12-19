@@ -898,7 +898,7 @@ bool FrequencyDistribution::comparison(StatError &error , bool display , int nb_
 /*--------------------------------------------------------------*/
 
 bool FrequencyDistribution::comparison(StatError &error , bool display , int nb_histo ,
-                                       const vector<FrequencyDistribution> ihisto , variable_type type ,
+                                       const vector<FrequencyDistribution>& ihisto , variable_type type ,
                                        const string path , output_format format) const
 
 {

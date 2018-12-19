@@ -360,8 +360,8 @@ Vectors::Vectors(int inb_vector , int *iidentifier , int inb_variable , variable
  */
 /*--------------------------------------------------------------*/
 
-Vectors::Vectors(int inb_vector , const vector<int> iidentifier , int nb_int_variable , int nb_real_variable ,
-                 const vector<vector<int>> iint_vector , const vector<vector<double>> ireal_vector)
+Vectors::Vectors(int inb_vector , const vector<int>& iidentifier , int nb_int_variable , int nb_real_variable ,
+                 const vector<vector<int> >& iint_vector , const vector<vector<double> >& ireal_vector)
 
 {
   int i , j , k;
@@ -435,8 +435,8 @@ Vectors::Vectors(int inb_vector , const vector<int> iidentifier , int nb_int_var
  */
 /*--------------------------------------------------------------*/
 
-Vectors* Vectors::build(StatError &error , const vector<vector<int>> iint_vector ,
-                        const vector<vector<double>> ireal_vector , const vector<int> iidentifier)
+Vectors* Vectors::build(StatError &error , const vector<vector<int> >& iint_vector ,
+                        const vector<vector<double> >& ireal_vector , const vector<int>& iidentifier)
 
 {
   bool status = true;
@@ -449,7 +449,7 @@ Vectors* Vectors::build(StatError &error , const vector<vector<int>> iint_vector
   inb_vector = I_DEFAULT;
   error.init();
 
-  if (!iint_vector.empty()) { 
+  if (!iint_vector.empty()) {
     inb_vector = iint_vector.size();
   }
   else if (!ireal_vector.empty()) {
@@ -500,7 +500,7 @@ Vectors* Vectors::build(StatError &error , const vector<vector<int>> iint_vector
       vec = new Vectors(inb_vector , iidentifier , nb_int_variable , nb_real_variable , iint_vector , ireal_vector);
     }
   }
-  
+
   return vec;
 }
 
@@ -796,7 +796,7 @@ void Vectors::add_state_variable(const Vectors &vec)
   type[0] = STATE;
   min_value[0] = 0.;
   max_value[0] = 0.;
-  min_interval[0] = 0.; 
+  min_interval[0] = 0.;
   marginal_distribution[0] = NULL;
   marginal_histogram[0] = NULL;
 
@@ -1302,7 +1302,7 @@ Vectors* Vectors::merge(StatError &error , int nb_sample , const Vectors **ivec)
  */
 /*--------------------------------------------------------------*/
 
-Vectors* Vectors::merge(StatError &error , int nb_sample , const vector<Vectors> ivec) const
+Vectors* Vectors::merge(StatError &error , int nb_sample , const vector<Vectors>& ivec) const
 
 {
   int i;
@@ -2046,7 +2046,7 @@ Vectors* Vectors::transcode(StatError &error , int variable , int *category) con
  */
 /*--------------------------------------------------------------*/
 
-Vectors* Vectors::transcode(StatError &error , int variable , vector<int> category) const
+Vectors* Vectors::transcode(StatError &error , int variable , vector<int>& category) const
 
 {
   return transcode(error , variable , category.data());
@@ -2171,7 +2171,7 @@ Vectors* Vectors::cluster(StatError &error , int variable ,
 /*--------------------------------------------------------------*/
 
 Vectors* Vectors::cluster(StatError &error , int variable ,
-                          int nb_class , vector<int> ilimit) const
+                          int nb_class , vector<int>& ilimit) const
 
 {
   return cluster(error , variable , nb_class , ilimit.data());
@@ -2300,7 +2300,7 @@ Vectors* Vectors::cluster(StatError &error , int variable ,
 /*--------------------------------------------------------------*/
 
 Vectors* Vectors::cluster(StatError &error , int variable ,
-                          int nb_class , vector<double> ilimit) const
+                          int nb_class , vector<double>& ilimit) const
 
 {
   return cluster(error , variable , nb_class , ilimit.data());
@@ -2980,7 +2980,7 @@ Vectors* Vectors::value_select(StatError &error , bool display , int variable ,
       status = false;
       error.correction_update(STAT_error[STATR_VARIABLE_TYPE] , STAT_variable_word[REAL_VALUE]);
     }
-    
+
     if ((imin_value > max_value[variable]) || (imin_value > imax_value)) {
       status = false;
       error.update(STAT_error[STATR_MIN_VALUE]);
@@ -3227,7 +3227,7 @@ Vectors* Vectors::select_individual(StatError &error , int inb_vector ,
 /*--------------------------------------------------------------*/
 
 Vectors* Vectors::select_individual(StatError &error , int inb_vector ,
-                                    vector<int> iidentifier , bool keep) const
+                                    vector<int>& iidentifier , bool keep) const
 
 {
   return select_individual(error , inb_vector , iidentifier.data() , keep);
@@ -3459,7 +3459,7 @@ Vectors* Vectors::select_variable(StatError &error , int inb_variable ,
 /*--------------------------------------------------------------*/
 
 Vectors* Vectors::select_variable(StatError &error , int inb_variable ,
-                                  vector<int>ivariable , bool keep) const
+                                  vector<int>& ivariable , bool keep) const
 
 {
   return select_variable(error , inb_variable , ivariable.data() , keep);
@@ -3735,7 +3735,7 @@ Vectors* Vectors::sum_variable(StatError &error , int nb_summed_variable , int *
  */
 /*--------------------------------------------------------------*/
 
-Vectors* Vectors::sum_variable(StatError &error , int nb_summed_variable , vector<int>ivariable) const
+Vectors* Vectors::sum_variable(StatError &error , int nb_summed_variable , vector<int>& ivariable) const
 
 {
   return sum_variable(error , nb_summed_variable , ivariable.data());
@@ -3894,7 +3894,7 @@ Vectors* Vectors::merge_variable(StatError &error , int nb_sample ,
 /*--------------------------------------------------------------*/
 
 Vectors* Vectors::merge_variable(StatError &error , int nb_sample ,
-                                 const vector<Vectors> ivec , int ref_sample) const
+                                 const vector<Vectors>& ivec , int ref_sample) const
 
 {
   int i;
@@ -5662,7 +5662,7 @@ void Vectors::build_marginal_histogram(int variable , double bin_width , double 
 
 #   ifdef DEBUG
     cout << "\nTEST: " << marginal_histogram[variable]->min_value << " " << marginal_histogram[variable]->max_value
-         << " | " << marginal_histogram[variable]->nb_bin 
+         << " | " << marginal_histogram[variable]->nb_bin
         << " " << (marginal_histogram[variable]->max_value - marginal_histogram[variable]->min_value) / marginal_histogram[variable]->bin_width << endl;
 #    endif
 

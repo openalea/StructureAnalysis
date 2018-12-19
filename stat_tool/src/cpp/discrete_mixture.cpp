@@ -126,8 +126,8 @@ DiscreteMixture::DiscreteMixture(int inb_component , double *iweight ,
  */
 /*--------------------------------------------------------------*/
 
-DiscreteMixture::DiscreteMixture(int inb_component , vector<double> iweight ,
-                                 const vector<DiscreteParametric> icomponent)
+DiscreteMixture::DiscreteMixture(int inb_component , const vector<double>& iweight ,
+                                 const vector<DiscreteParametric>& icomponent)
 
 {
   int i;
@@ -451,8 +451,8 @@ DiscreteMixture* DiscreteMixture::build(StatError &error , int nb_component , do
  */
 /*--------------------------------------------------------------*/
 
-DiscreteMixture* DiscreteMixture::build(StatError &error , const vector<double> weight ,
-                                        const vector<DiscreteParametric> component)
+DiscreteMixture* DiscreteMixture::build(StatError &error , const vector<double>& weight ,
+                                        const vector<DiscreteParametric>& component)
 
 {
   bool status;
@@ -1759,7 +1759,7 @@ MultiPlotSet* DiscreteMixture::get_plotable(const DiscreteMixtureData *mixt_hist
         plot[i][1].style = "linespoints";
 
         component[j]->plotable_mass_write(plot[i][1] , mixt_histo->component[j]->nb_element);
-  
+
         i++;
       }
     }
@@ -1894,7 +1894,7 @@ DiscreteMixtureData::DiscreteMixtureData(const FrequencyDistribution &histo , co
   int i;
 
 
-  mixture = new DiscreteMixture(*pmixture , false); 
+  mixture = new DiscreteMixture(*pmixture , false);
   nb_component = pmixture->nb_component;
 
   weight = new FrequencyDistribution(nb_component);

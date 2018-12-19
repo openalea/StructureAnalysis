@@ -160,7 +160,7 @@ namespace stat_tool {
     DistanceMatrix* select_individual(StatError &error , int inb_pattern ,
                                       int *iidentifier , bool keep = true) const;
     DistanceMatrix* select_individual(StatError &error , int inb_pattern ,
-                                      std::vector<int> iidentifier , bool keep = true) const;
+                                      std::vector<int>& iidentifier , bool keep = true) const;
     DistanceMatrix* symmetrize(StatError &error) const;
     DistanceMatrix* unnormalize(StatError &error) const;
 

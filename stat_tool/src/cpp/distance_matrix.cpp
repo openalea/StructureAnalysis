@@ -1206,7 +1206,7 @@ DistanceMatrix* DistanceMatrix::select_individual(StatError &error , int inb_pat
 /*--------------------------------------------------------------*/
 
 DistanceMatrix* DistanceMatrix::select_individual(StatError &error , int inb_pattern ,
-                                                  vector<int> iidentifier , bool keep) const
+                                                  vector<int>& iidentifier , bool keep) const
 
 {
   return select_individual(error , inb_pattern , iidentifier.data() , keep);
