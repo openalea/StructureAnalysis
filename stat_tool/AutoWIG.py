@@ -51,8 +51,27 @@ def stat_tool_controller(asg):
                 fld.boost_python_export = False
     for specialization in asg['class ::std::reverse_iterator'].specializations():
         specialization.boost_python_export = False
-    for ctr in asg['class ::std::basic_string< char, struct ::std::char_traits< char >, class ::std::allocator< char > >'].constructors():
-        ctr.boost_python_export = False
+
+    for m in ['class ::std::basic_string< char, struct ::std::char_traits< char >, class ::std::allocator< char > >',
+              'class ::std::basic_string< wchar_t, struct ::std::char_traits< wchar_t >, class ::std::allocator< wchar_t > >' ]:
+        #asg[m].boost_python_export = False # Try
+        for ctr in asg[m].constructors():
+            ctr.boost_python_export = False
+        for method in asg[m].methods():
+            method.boost_python_export = False
+            # if method.localname.startswith('__'):
+            #     if isinstance(method.boost_python_export, bool):
+            #         method.boost_python_export = False
+            # for exclude_method in ['append', 'assign', 'at', 'back', 'capacity', 'clear', 'compare',
+            #                        'copy', 'c_str', 'data', 'empty', 'erase',
+            #                        'find', 'front',
+            #                        'get_allocator' , 'insert', 'operator[]', 'operator+=',
+            #                        'pop', 'push', 'replace', 'reserve', 'resize', 'rfind',
+            #                        'shrink_to_fit', 'substr', 'swap']:
+            #     if method.localname.startswith(exclude_method):
+            #         if isinstance(method.boost_python_export, bool):
+            #             method.boost_python_export = False
+
     asg['::std::ios_base::openmode'].qualified_type.boost_python_export = True
 
 
