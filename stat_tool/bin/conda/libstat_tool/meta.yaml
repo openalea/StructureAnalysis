@@ -14,7 +14,7 @@ about:
 
 requirements:
     build:
-        - python {{PY_VER}}*,<2.8
+        - python {{PY_VER}}*
         - path.py <11.5
         - libtoolchain
         - libboost_core-dev
