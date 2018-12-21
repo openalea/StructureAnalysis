@@ -3,7 +3,7 @@
  *
  *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2018 CIRAD AGAP
+ *       Copyright 1995-2019 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -160,7 +160,7 @@ namespace stat_tool {
     DistanceMatrix* select_individual(StatError &error , int inb_pattern ,
                                       int *iidentifier , bool keep = true) const;
     DistanceMatrix* select_individual(StatError &error , int inb_pattern ,
-                                      std::vector<int>& iidentifier , bool keep = true) const;
+                                      std::vector<int> &iidentifier , bool keep = true) const;
     DistanceMatrix* symmetrize(StatError &error) const;
     DistanceMatrix* unnormalize(StatError &error) const;
 
@@ -182,16 +182,16 @@ namespace stat_tool {
                 double itransposition_distance = 0. , int inb_transposition = 0);
     void update(int irow_identifier , int icolumn_identifier , double idistance , int ilength);
 
-    Clusters* partitioning(StatError &error , bool display , int nb_cluster ,
+    Clusters* partitioning(StatError &error , std::ostream *os , int nb_cluster ,
                            int *prototype = NULL , int initialization = 1 , int algorithm = 1) const;
-    Clusters* partitioning(StatError &error , bool display , int nb_cluster ,
+    Clusters* partitioning(StatError &error , std::ostream *os , int nb_cluster ,
                            int *cluster_nb_pattern , int **cluster_pattern) const;
 
     Dendrogram* agglomerative_hierarchical_clustering(hierarchical_strategy strategy ,
                                                       linkage criterion = AVERAGE_NEIGHBOR) const;
     Dendrogram* divisive_hierarchical_clustering() const;
 
-    bool hierarchical_clustering(StatError &error , bool display ,
+    bool hierarchical_clustering(StatError &error , std::ostream *os ,
                                  hierarchical_strategy strategy = AGGLOMERATIVE ,
                                  linkage criterion = AVERAGE_NEIGHBOR ,
                                  const std::string path = "" , output_format format = ASCII) const;
@@ -232,7 +232,7 @@ namespace stat_tool {
     bool is_insertion()
     { if (nb_insertion) return true; else return false; }
     bool is_match()
-    { if (nb_match != NULL) return true; else return false; }
+    { if (nb_match) return true; else return false; }
     bool is_substitution()
     { if (nb_substitution) return true; else return false; }
     bool is_transposition()

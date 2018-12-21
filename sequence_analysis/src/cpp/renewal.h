@@ -3,7 +3,7 @@
  *
  *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2018 CIRAD AGAP
+ *       Copyright 1995-2019 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -353,7 +353,7 @@ namespace sequence_analysis {
     ~TimeEvents();
     TimeEvents& operator=(const TimeEvents &timev);
 
-    TimeEvents* merge(int nb_sample , const std::vector<TimeEvents> itimev) const;
+    TimeEvents* merge(int nb_sample , const std::vector<TimeEvents> &itimev) const;
     stat_tool::DiscreteDistributionData* extract(stat_tool::StatError &error ,
                                                  renewal_distribution histo_type ,
                                                  int itime = stat_tool::I_DEFAULT) const;
@@ -365,7 +365,7 @@ namespace sequence_analysis {
                                 int max_nb_event) const;
 
     static TimeEvents* build(stat_tool::StatError &error , stat_tool::FrequencyDistribution &nb_event , int itime);
-    static TimeEvents* build(stat_tool::StatError &error , const std::vector<std::vector<int>> time_nb_event);
+    static TimeEvents* build(stat_tool::StatError &error , const std::vector<std::vector<int> > &time_nb_event);
 
     static TimeEvents* ascii_read(stat_tool::StatError &error , const std::string path);
     static TimeEvents* old_ascii_read(stat_tool::StatError &error , const std::string path);
@@ -380,7 +380,7 @@ namespace sequence_analysis {
 
     double information_computation() const;
 
-    Renewal* estimation(stat_tool::StatError &error , bool display , stat_tool::process_type type ,
+    Renewal* estimation(stat_tool::StatError &error , std::ostream *os , stat_tool::process_type type ,
                         const stat_tool::DiscreteParametric &iinter_event ,
                         stat_tool::estimation_criterion estimator = stat_tool::LIKELIHOOD ,
                         int nb_iter = stat_tool::I_DEFAULT ,
@@ -389,7 +389,7 @@ namespace sequence_analysis {
                         double weight = stat_tool::D_DEFAULT ,
                         stat_tool::penalty_type pen_type = stat_tool::SECOND_DIFFERENCE ,
                         stat_tool::side_effect outside = stat_tool::ZERO) const;
-    Renewal* estimation(stat_tool::StatError &error , bool display , stat_tool::process_type type ,
+    Renewal* estimation(stat_tool::StatError &error , std::ostream *os , stat_tool::process_type type ,
                         stat_tool::estimation_criterion estimator = stat_tool::LIKELIHOOD ,
                         int nb_iter = stat_tool::I_DEFAULT ,
                         stat_tool::censoring_estimator equilibrium_estimator = stat_tool::COMPLETE_LIKELIHOOD ,
@@ -452,7 +452,7 @@ namespace sequence_analysis {
     RenewalData& operator=(const RenewalData&);
 
     RenewalData* merge(stat_tool::StatError &error , int nb_sample , const RenewalData **itimev) const;
-    RenewalData* merge(stat_tool::StatError &error , int nb_sample , const std::vector<RenewalData> itimev) const;
+    RenewalData* merge(stat_tool::StatError &error , int nb_sample , const std::vector<RenewalData> &itimev) const;
     stat_tool::DiscreteDistributionData* extract(stat_tool::StatError &error ,
                                                  renewal_distribution histo_type ,
                                                  int itime = stat_tool::I_DEFAULT) const;
@@ -463,7 +463,7 @@ namespace sequence_analysis {
     bool plot_write(stat_tool::StatError &error , const char *prefix , const char *title = NULL) const;
     stat_tool::MultiPlotSet* get_plotable() const;
 
-    Renewal* estimation(stat_tool::StatError &error , bool display ,
+    Renewal* estimation(stat_tool::StatError &error , std::ostream *os ,
                         const stat_tool::DiscreteParametric &iinter_event ,
                         stat_tool::estimation_criterion estimator = stat_tool::LIKELIHOOD ,
                         int nb_iter = stat_tool::I_DEFAULT ,
@@ -471,7 +471,7 @@ namespace sequence_analysis {
                         double weight = stat_tool::D_DEFAULT ,
                         stat_tool::penalty_type pen_type = stat_tool::SECOND_DIFFERENCE ,
                         stat_tool::side_effect outside = stat_tool::ZERO) const;
-    Renewal* estimation(stat_tool::StatError &error , bool display ,
+    Renewal* estimation(stat_tool::StatError &error , std::ostream *os ,
                         stat_tool::estimation_criterion estimator = stat_tool::LIKELIHOOD ,
                         int nb_iter = stat_tool::I_DEFAULT ,
                         stat_tool::duration_distribution_mean_estimator mean_estimator = stat_tool::COMPUTED ,

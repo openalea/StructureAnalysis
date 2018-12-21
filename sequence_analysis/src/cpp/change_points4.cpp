@@ -3,7 +3,7 @@
  *
  *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2018 CIRAD AGAP
+ *       Copyright 1995-2019 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -2175,8 +2175,8 @@ bool Sequences::segment_profile_write(StatError &error , ostream &os , int iiden
 /*--------------------------------------------------------------*/
 
 bool Sequences::segment_profile_ascii_write(StatError &error , int iidentifier ,
-                                            int nb_segment , vector<segment_model> model_type ,
-                                            bool common_contrast , vector<double> shape_parameter ,
+                                            int nb_segment , vector<segment_model> &model_type ,
+                                            bool common_contrast , vector<double> &shape_parameter ,
                                             change_point_profile output ,
                                             latent_structure_algorithm segmentation , int nb_segmentation) const
 
@@ -2210,8 +2210,8 @@ bool Sequences::segment_profile_ascii_write(StatError &error , int iidentifier ,
 /*--------------------------------------------------------------*/
 
 bool Sequences::segment_profile_write(StatError &error , const string path , int iidentifier ,
-                                      int nb_segment , vector<segment_model> model_type ,
-                                      bool common_contrast , vector<double> shape_parameter ,
+                                      int nb_segment , vector<segment_model> &model_type ,
+                                      bool common_contrast , vector<double> &shape_parameter ,
                                       change_point_profile output , output_format format ,
                                       latent_structure_algorithm segmentation , int nb_segmentation) const
 
@@ -3294,8 +3294,8 @@ MultiPlotSet* Sequences::segment_profile_plotable_write(StatError &error , int i
 /*--------------------------------------------------------------*/
 
 MultiPlotSet* Sequences::segment_profile_plotable_write(StatError &error , int iidentifier ,
-                                                        int nb_segment , vector<segment_model> model_type ,
-                                                        bool common_contrast , vector<double> shape_parameter ,
+                                                        int nb_segment , vector<segment_model> &model_type ,
+                                                        bool common_contrast , vector<double> &shape_parameter ,
                                                         change_point_profile output) const
 
 {

@@ -3,7 +3,7 @@
  *
  *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2018 CIRAD AGAP
+ *       Copyright 1995-2019 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -360,7 +360,7 @@ Sequences* Sequences::merge(StatError &error , int nb_sample , const Sequences *
  */
 /*--------------------------------------------------------------*/
 
-Sequences* Sequences::merge(StatError &error , int nb_sample , const vector<Sequences> iseq) const
+Sequences* Sequences::merge(StatError &error , int nb_sample , const vector<Sequences> &iseq) const
 
 {
   int i;
@@ -1235,7 +1235,7 @@ Sequences* Sequences::transcode(StatError &error , int variable , int *category)
  */
 /*--------------------------------------------------------------*/
 
-Sequences* Sequences::transcode(StatError &error , int variable , vector<int> category) const
+Sequences* Sequences::transcode(StatError &error , int variable , vector<int> &category) const
 
 {
   return transcode(error , variable , category.data());
@@ -1380,7 +1380,7 @@ Sequences* Sequences::cluster(StatError &error , int variable ,
 /*--------------------------------------------------------------*/
 
 Sequences* Sequences::cluster(StatError &error , int variable ,
-                              int nb_class , vector<int> ilimit) const
+                              int nb_class , vector<int> &ilimit) const
 
 {
   return cluster(error , variable , nb_class , ilimit.data());
@@ -1518,7 +1518,7 @@ Sequences* Sequences::cluster(StatError &error , int variable ,
 /*--------------------------------------------------------------*/
 
 Sequences* Sequences::cluster(StatError &error , int variable ,
-                              int nb_class , vector<double> ilimit) const
+                              int nb_class , vector<double> &ilimit) const
 
 {
   return cluster(error , variable , nb_class , ilimit.data());
@@ -1920,7 +1920,7 @@ Sequences* Sequences::round(StatError &error , int variable , rounding mode) con
  *  \brief Selection of sequences taking values in a given range for the index parameter.
  *
  *  \param[in] error               reference on a StatError object,
- *  \param[in] display             flag for displaying the selected individuals,
+ *  \param[in] os                  stream for displaying the selected individuals,
  *  \param[in] min_index_parameter lowest index parameter,
  *  \param[in] max_index_parameter highest index parameter,
  *  \param[in] keep                flag for keeping or rejecting the selected sequences.
@@ -1929,7 +1929,7 @@ Sequences* Sequences::round(StatError &error , int variable , rounding mode) con
  */
 /*--------------------------------------------------------------*/
 
-Sequences* Sequences::index_parameter_select(StatError &error , bool display ,
+Sequences* Sequences::index_parameter_select(StatError &error , ostream *os ,
                                              int min_index_parameter ,
                                              int max_index_parameter , bool keep) const
 
@@ -1995,12 +1995,12 @@ Sequences* Sequences::index_parameter_select(StatError &error , bool display ,
     // copy of sequences
 
     if (status) {
-      if ((display) && (inb_sequence <= DISPLAY_NB_INDIVIDUAL)) {
-        cout << "\n" << SEQ_label[inb_sequence == 1 ? SEQL_SEQUENCE : SEQL_SEQUENCES] << ": ";
+      if ((os) && (inb_sequence <= DISPLAY_NB_INDIVIDUAL)) {
+        *os << "\n" << SEQ_label[inb_sequence == 1 ? SEQL_SEQUENCE : SEQL_SEQUENCES] << ": ";
         for (i = 0;i < inb_sequence;i++) {
-          cout << iidentifier[i] << ", ";
+          *os << iidentifier[i] << ", ";
         }
-        cout << endl;
+        *os << endl;
       }
 
       seq = new Sequences(*this , inb_sequence , index);
@@ -2019,7 +2019,7 @@ Sequences* Sequences::index_parameter_select(StatError &error , bool display ,
  *  \brief Selection of sequences taking values in a given range for a variable.
  *
  *  \param[in] error      reference on a StatError object,
- *  \param[in] display    flag for displaying the selected individuals,
+ *  \param[in] os         stream for displaying the selected individuals,
  *  \param[in] variable   variable index,
  *  \param[in] imin_value lowest integer value,
  *  \param[in] imax_value highest integer value,
@@ -2029,7 +2029,7 @@ Sequences* Sequences::index_parameter_select(StatError &error , bool display ,
  */
 /*--------------------------------------------------------------*/
 
-Sequences* Sequences::value_select(StatError &error , bool display , int variable ,
+Sequences* Sequences::value_select(StatError &error , ostream *os , int variable ,
                                    int imin_value , int imax_value , bool keep) const
 
 {
@@ -2128,12 +2128,12 @@ Sequences* Sequences::value_select(StatError &error , bool display , int variabl
     // copy of sequences
 
     if (status) {
-      if ((display) && (inb_sequence <= DISPLAY_NB_INDIVIDUAL)) {
-        cout << "\n" << SEQ_label[inb_sequence == 1 ? SEQL_SEQUENCE : SEQL_SEQUENCES] << ": ";
+      if ((os) && (inb_sequence <= DISPLAY_NB_INDIVIDUAL)) {
+        *os << "\n" << SEQ_label[inb_sequence == 1 ? SEQL_SEQUENCE : SEQL_SEQUENCES] << ": ";
         for (i = 0;i < inb_sequence;i++) {
-          cout << iidentifier[i] << ", ";
+          *os << iidentifier[i] << ", ";
         }
-        cout << endl;
+        *os << endl;
       }
 
       seq = new Sequences(*this , inb_sequence , index);
@@ -2152,7 +2152,7 @@ Sequences* Sequences::value_select(StatError &error , bool display , int variabl
  *  \brief Selection of sequences taking values in a given range for a real-valued variable.
  *
  *  \param[in] error      reference on a StatError object,
- *  \param[in] display    flag for displaying the selected individuals,
+ *  \param[in] os         stream for displaying the selected individuals,
  *  \param[in] variable   variable index,
  *  \param[in] imin_value lowest real value,
  *  \param[in] imax_value highest real value,
@@ -2162,7 +2162,7 @@ Sequences* Sequences::value_select(StatError &error , bool display , int variabl
  */
 /*--------------------------------------------------------------*/
 
-Sequences* Sequences::value_select(StatError &error , bool display , int variable ,
+Sequences* Sequences::value_select(StatError &error , ostream *os , int variable ,
                                    double imin_value , double imax_value , bool keep) const
 
 {
@@ -2234,12 +2234,12 @@ Sequences* Sequences::value_select(StatError &error , bool display , int variabl
     // copy of sequences
 
     if (status) {
-      if ((display) && (inb_sequence <= DISPLAY_NB_INDIVIDUAL)) {
-        cout << "\n" << SEQ_label[inb_sequence == 1 ? SEQL_SEQUENCE : SEQL_SEQUENCES] << ": ";
+      if ((os) && (inb_sequence <= DISPLAY_NB_INDIVIDUAL)) {
+        *os << "\n" << SEQ_label[inb_sequence == 1 ? SEQL_SEQUENCE : SEQL_SEQUENCES] << ": ";
         for (i = 0;i < inb_sequence;i++) {
-          cout << iidentifier[i] << ", ";
+          *os << iidentifier[i] << ", ";
         }
-        cout << endl;
+        *os << endl;
       }
 
       seq = new Sequences(*this , inb_sequence , index);
@@ -2314,7 +2314,7 @@ Sequences* Sequences::select_individual(StatError &error , int inb_sequence ,
 /*--------------------------------------------------------------*/
 
 Sequences* Sequences::select_individual(StatError &error , int inb_sequence ,
-                                        vector<int> iidentifier , bool keep) const
+                                        vector<int> &iidentifier , bool keep) const
 
 {
   return select_individual(error , inb_sequence , iidentifier.data() , keep);
@@ -2554,7 +2554,7 @@ Sequences* Sequences::select_variable(StatError &error , int inb_variable ,
 /*--------------------------------------------------------------*/
 
 Sequences* Sequences::select_variable(StatError &error , int inb_variable ,
-                                      vector<int> ivariable , bool keep) const
+                                      vector<int> &ivariable , bool keep) const
 
 {
   return select_variable(error , inb_variable , ivariable.data() , keep);
@@ -2809,7 +2809,7 @@ Sequences* Sequences::sum_variable(StatError &error , int nb_summed_variable , i
  */
 /*--------------------------------------------------------------*/
 
-Sequences* Sequences::sum_variable(StatError &error , int nb_summed_variable , vector<int> ivariable) const
+Sequences* Sequences::sum_variable(StatError &error , int nb_summed_variable , vector<int> &ivariable) const
 
 {
   return sum_variable(error , nb_summed_variable , ivariable.data());
@@ -3103,7 +3103,7 @@ Sequences* Sequences::merge_variable(StatError &error , int nb_sample ,
 /*--------------------------------------------------------------*/
 
 Sequences* Sequences::merge_variable(StatError &error , int nb_sample ,
-                                     const vector<Sequences> iseq , int ref_sample) const
+                                     const vector<Sequences> &iseq , int ref_sample) const
 
 {
   int i;
@@ -3599,7 +3599,7 @@ Sequences* Sequences::reverse(StatError &error) const
  *  \brief Selection of sequences on a sequence length criterion.
  *
  *  \param[in] error       reference on a StatError object,
- *  \param[in] display     flag for displaying the selected individuals,
+ *  \param[in] os          stream for displaying the selected individuals,
  *  \param[in] min_length  lowest sequence length,
  *  \param[in] imax_length highest sequence length,
  *  \param[in] keep        flag for keeping or rejecting the selected sequences.
@@ -3608,7 +3608,7 @@ Sequences* Sequences::reverse(StatError &error) const
  */
 /*--------------------------------------------------------------*/
 
-Sequences* Sequences::length_select(StatError &error , bool display , int min_length ,
+Sequences* Sequences::length_select(StatError &error , ostream *os , int min_length ,
                                     int imax_length , bool keep) const
 
 {
@@ -3660,12 +3660,12 @@ Sequences* Sequences::length_select(StatError &error , bool display , int min_le
     // copy of selected sequences
 
     if (status) {
-      if ((display) && (inb_sequence <= DISPLAY_NB_INDIVIDUAL)) {
-        cout << "\n" << SEQ_label[inb_sequence == 1 ? SEQL_SEQUENCE : SEQL_SEQUENCES] << ": ";
+      if ((os) && (inb_sequence <= DISPLAY_NB_INDIVIDUAL)) {
+        *os << "\n" << SEQ_label[inb_sequence == 1 ? SEQL_SEQUENCE : SEQL_SEQUENCES] << ": ";
         for (i = 0;i < inb_sequence;i++) {
-          cout << iidentifier[i] << ", ";
+          *os << iidentifier[i] << ", ";
         }
-        cout << endl;
+        *os << endl;
       }
 
       seq = new Sequences(*this , inb_sequence , index);
@@ -4712,7 +4712,7 @@ Sequences* Sequences::segmentation_extract(StatError &error , int variable ,
 /*--------------------------------------------------------------*/
 
 Sequences* Sequences::segmentation_extract(StatError &error , int variable ,
-                                           int nb_value , vector<int> ivalue , bool keep ,
+                                           int nb_value , vector<int> &ivalue , bool keep ,
                                            bool concatenation) const
 
 {
@@ -6435,7 +6435,7 @@ Sequences* Sequences::moving_average(StatError &error , int nb_point , double *f
  */
 /*--------------------------------------------------------------*/
 
-Sequences* Sequences::moving_average(StatError &error , int nb_point , vector<double> filter ,
+Sequences* Sequences::moving_average(StatError &error , int nb_point , vector<double> &filter ,
                                      int variable , bool begin_end , bool segmentation ,
                                      sequence_type output) const
 

@@ -3,7 +3,7 @@
  *
  *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2018 CIRAD AGAP
+ *       Copyright 1995-2019 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -2067,7 +2067,7 @@ double interval_bisection(Reestimation<double> *distribution_reestim ,
  *         using the EM algorithm.
  *
  *  \param[in] error             reference on a StatError object,
- *  \param[in] display           flag for displaying estimation intermediate results,
+ *  \param[in] os                stream for displaying estimation intermediate results,
  *  \param[in] backward          backward recurrence time frequency distribution,
  *  \param[in] forward           forward recurrence time frequency distribution,
  *  \param[in] no_event          observation period frequency distribution for the case of no event,
@@ -2085,7 +2085,7 @@ double interval_bisection(Reestimation<double> *distribution_reestim ,
  */
 /*--------------------------------------------------------------*/
 
-DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , bool display ,
+DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , ostream *os ,
                                                            const FrequencyDistribution &backward ,
                                                            const FrequencyDistribution &forward ,
                                                            const FrequencyDistribution *no_event ,
@@ -2169,7 +2169,7 @@ DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , bo
     backward_forward = new FrequencyDistribution(2 , phisto);
     delete phisto[0];
 
-    if (display) {
+    if (os) {
       int max_nb_element , width[2];
       ios_base::fmtflags format_flags;
 
@@ -2187,69 +2187,69 @@ DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , bo
       }
       width[1] = column_width(max_nb_element) + ASCII_SPACE;
 
-      cout << "\n   | " << STAT_label[STATL_OBSERVATION_INTER_EVENT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
-           << " | " << STAT_label[STATL_BACKWARD] << "/" << STAT_label[STATL_FORWARD]
-           << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
+      *os << "\n   | " << STAT_label[STATL_OBSERVATION_INTER_EVENT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
+          << " | " << STAT_label[STATL_BACKWARD] << "/" << STAT_label[STATL_FORWARD]
+          << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
       if (no_event) {
-        cout << " | no-event " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
+        *os << " | no-event " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
       }
-      cout << endl;
+      *os << endl;
 
       for (i = 0;i < max_nb_value;i++) {
-        cout << setw(width[0]) << i;
+        *os << setw(width[0]) << i;
 
         if (i < nb_value) {
-          cout << setw(width[1]) << frequency[i];
+          *os << setw(width[1]) << frequency[i];
         }
         else {
-          cout << setw(width[1]) << " ";
+          *os << setw(width[1]) << " ";
         }
 
         if (i < backward_forward->nb_value) {
-          cout << setw(width[1]) << backward_forward->frequency[i];
+          *os << setw(width[1]) << backward_forward->frequency[i];
         }
         else {
-          cout << setw(width[1]) << " ";
+          *os << setw(width[1]) << " ";
         }
 
         if (no_event) {
           if (i < no_event->nb_value) {
-            cout << setw(width[1]) << no_event->frequency[i];
+            *os << setw(width[1]) << no_event->frequency[i];
           }
           else {
-            cout << setw(width[1]) << " ";
+            *os << setw(width[1]) << " ";
           }
         }
 
-        cout << "    |  ";
+        *os << "    |  ";
         if (i < backward.nb_value) {
-          cout << setw(width[1]) << backward.frequency[i];
+          *os << setw(width[1]) << backward.frequency[i];
         }
         else {
-          cout << setw(width[1]) << " ";
+          *os << setw(width[1]) << " ";
         }
 
         if (i < forward.nb_value) {
-          cout << setw(width[1]) << forward.frequency[i];
+          *os << setw(width[1]) << forward.frequency[i];
         }
         else {
-          cout << setw(width[1]) << " ";
+          *os << setw(width[1]) << " ";
         }
 
-        cout << endl;
+        *os << endl;
       }
-      cout << endl;
+      *os << endl;
 
-      cout << setw(width[0]) << " "
-           << setw(width[1]) << nb_element
-           << setw(width[1]) << backward_forward->nb_element;
+      *os << setw(width[0]) << " "
+          << setw(width[1]) << nb_element
+          << setw(width[1]) << backward_forward->nb_element;
       if (no_event) {
-        cout << setw(width[1]) << no_event->nb_element;
+        *os << setw(width[1]) << no_event->nb_element;
       }
-      cout << "    |  " << setw(width[1]) << backward.nb_element
-           << setw(width[1]) << forward.nb_element << "\n" << endl;
+      *os << "    |  " << setw(width[1]) << backward.nb_element
+          << setw(width[1]) << forward.nb_element << "\n" << endl;
 
-      cout.setf(format_flags , ios::adjustfield);
+      os->setf(format_flags , ios::adjustfield);
     }
 
     // construction of the inter-event distribution
@@ -2334,12 +2334,12 @@ DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , bo
                                                                forward , no_event);
       // display of estimation results
 
-      if ((display) && ((i < 10) || ((i < 100) && (i % 10 == 0)) || ((i < 1000) && (i % 100 == 0)) || (i % 1000 == 0))) {
-        cout << STAT_label[STATL_ITERATION] << " " << i << "   "
-             << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
-             << STAT_label[STATL_SMOOTHNESS] << ": " << inter_event->second_difference_norm_computation();
+      if ((os) && ((i < 10) || ((i < 100) && (i % 10 == 0)) || ((i < 1000) && (i % 100 == 0)) || (i % 1000 == 0))) {
+        *os << STAT_label[STATL_ITERATION] << " " << i << "   "
+            << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
+            << STAT_label[STATL_SMOOTHNESS] << ": " << inter_event->second_difference_norm_computation();
         if (estimator == PENALIZED_LIKELIHOOD) {
-          cout << "   cumul: " << inter_event->cumul[inter_event->nb_value - 1];
+          *os << "   cumul: " << inter_event->cumul[inter_event->nb_value - 1];
         }
 
         if ((no_event) && (no_event->offset + 1 == no_event->nb_value) && (backward_forward->nb_value > nb_value) &&
@@ -2351,7 +2351,7 @@ DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , bo
             inter_event_mean = inter_event->mean;
           }
 
-          cout << "   smaller upper bound: "
+          *os << "   smaller upper bound: "
                << inb_value - 1 + (no_event->nb_element * inter_event_mean) /
                                   ((forward.nb_element + no_event->nb_element) * (1. - inter_event->cumul[inb_value - 2]));
         }
@@ -2367,10 +2367,10 @@ DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , bo
             term -= backward_forward->frequency[j] / (1. - inter_event->cumul[j - 1]);
           }
 
-          cout << " |   " << term;
+          *os << " |   " << term;
         } */
 
-        cout << endl;
+        *os << endl;
       }
     }
     while ((likelihood != D_INF) && (((nb_iter == I_DEFAULT) && (i < RENEWAL_NB_ITER) &&
@@ -2381,12 +2381,12 @@ DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , bo
 
       // display of estimation results
 
-      if (display) {
-        cout << "\n" << i << " " << STAT_label[STATL_ITERATIONS] << "   "
-             << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
-             << STAT_label[STATL_SMOOTHNESS] << ": " << inter_event->second_difference_norm_computation();
+      if (os) {
+        *os << "\n" << i << " " << STAT_label[STATL_ITERATIONS] << "   "
+            << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
+            << STAT_label[STATL_SMOOTHNESS] << ": " << inter_event->second_difference_norm_computation();
         if (estimator == PENALIZED_LIKELIHOOD) {
-          cout << "   cumul: " << inter_event->cumul[inter_event->nb_value - 1];
+          *os << "   cumul: " << inter_event->cumul[inter_event->nb_value - 1];
         }
 
         if ((no_event) && (no_event->offset + 1 == no_event->nb_value) && (backward_forward->nb_value > nb_value) &&
@@ -2398,11 +2398,11 @@ DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , bo
             inter_event_mean = inter_event->mean;
           }
 
-          cout << "   smaller upper bound: "
-               << inb_value - 1 + (no_event->nb_element * inter_event_mean) /
-                                  ((forward.nb_element + no_event->nb_element) * (1. - inter_event->cumul[inb_value - 2]));
+          *os << "   smaller upper bound: "
+              << inb_value - 1 + (no_event->nb_element * inter_event_mean) /
+                                 ((forward.nb_element + no_event->nb_element) * (1. - inter_event->cumul[inb_value - 2]));
         }
-        cout << endl;
+        *os << endl;
       }
     }
 
@@ -2433,7 +2433,7 @@ DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , bo
  *         using the EM algorithm.
  *
  *  \param[in] error          reference on a StatError object,
- *  \param[in] display        flag for displaying estimation intermediate results,
+ *  \param[in] os             stream for displaying estimation intermediate results,
  *  \param[in] backward       backward recurrence time frequency distribution,
  *  \param[in] forward        forward recurrence time frequency distribution,
  *  \param[in] no_event       observation period frequency distribution for the case of no event,
@@ -2449,7 +2449,7 @@ DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , bo
  */
 /*--------------------------------------------------------------*/
 
-DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , bool display ,
+DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , ostream *os ,
                                                            const FrequencyDistribution &backward ,
                                                            const FrequencyDistribution &forward ,
                                                            const FrequencyDistribution *no_event ,
@@ -2513,7 +2513,7 @@ DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , bo
   iinter_event->ascii_print(cout);
 # endif
 
-  inter_event = estimation(error , display , backward , forward , no_event ,
+  inter_event = estimation(error , os , backward , forward , no_event ,
                            *iinter_event , estimator , nb_iter , mean_estimator ,
                            weight , pen_type , outside);
   delete iinter_event;

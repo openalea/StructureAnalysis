@@ -3,7 +3,7 @@
  *
  *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2018 CIRAD AGAP
+ *       Copyright 1995-2019 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -126,8 +126,8 @@ DiscreteMixture::DiscreteMixture(int inb_component , double *iweight ,
  */
 /*--------------------------------------------------------------*/
 
-DiscreteMixture::DiscreteMixture(int inb_component , const vector<double>& iweight ,
-                                 const vector<DiscreteParametric>& icomponent)
+DiscreteMixture::DiscreteMixture(int inb_component , const vector<double> &iweight ,
+                                 const vector<DiscreteParametric> &icomponent)
 
 {
   int i;
@@ -451,8 +451,8 @@ DiscreteMixture* DiscreteMixture::build(StatError &error , int nb_component , do
  */
 /*--------------------------------------------------------------*/
 
-DiscreteMixture* DiscreteMixture::build(StatError &error , const vector<double>& weight ,
-                                        const vector<DiscreteParametric>& component)
+DiscreteMixture* DiscreteMixture::build(StatError &error , const vector<double> &weight ,
+                                        const vector<DiscreteParametric> &component)
 
 {
   bool status;

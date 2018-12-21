@@ -3,7 +3,7 @@
  *
  *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2018 CIRAD AGAP
+ *       Copyright 1995-2019 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -293,14 +293,14 @@ namespace sequence_analysis {
                                         const MarkovianSequences &iseq ,
                                         bool counting_flag = true) const;
 
-    stat_tool::DistanceMatrix* divergence_computation(stat_tool::StatError &error , bool display , int nb_model ,
+    stat_tool::DistanceMatrix* divergence_computation(stat_tool::StatError &error , std::ostream *os , int nb_model ,
                                                       const VariableOrderMarkov **imarkov ,
                                                       stat_tool::FrequencyDistribution **hlength ,
                                                       const std::string path = "") const;
-    stat_tool::DistanceMatrix* divergence_computation(stat_tool::StatError &error , bool display , int nb_model ,
+    stat_tool::DistanceMatrix* divergence_computation(stat_tool::StatError &error , std::ostream *os , int nb_model ,
                                                       const VariableOrderMarkov **markov , int nb_sequence ,
                                                       int length , const std::string path = "") const;
-    stat_tool::DistanceMatrix* divergence_computation(stat_tool::StatError &error , bool display , int nb_model ,
+    stat_tool::DistanceMatrix* divergence_computation(stat_tool::StatError &error , std::ostream *os , int nb_model ,
                                                       const VariableOrderMarkov **markov , int nb_sequence ,
                                                       const MarkovianSequences **seq , const std::string path = "") const;
 

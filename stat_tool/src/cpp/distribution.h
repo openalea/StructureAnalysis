@@ -3,7 +3,7 @@
  *
  *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2018 CIRAD AGAP
+ *       Copyright 1995-2019 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -137,7 +137,7 @@ namespace stat_tool {
     :FrequencyDistribution(histo) { distribution = NULL; }
     DiscreteDistributionData(int inb_element , int *ielement)
     :FrequencyDistribution(inb_element , ielement) { distribution = NULL; }
-    DiscreteDistributionData(const std::vector<int> ielement)
+    DiscreteDistributionData(const std::vector<int> &ielement)
     :FrequencyDistribution(ielement) { distribution = NULL; }
     DiscreteDistributionData(const FrequencyDistribution &histo ,
                              frequency_distribution_transformation transform ,

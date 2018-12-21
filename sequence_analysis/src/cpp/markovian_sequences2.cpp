@@ -3,7 +3,7 @@
  *
  *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2018 CIRAD AGAP
+ *       Copyright 1995-2019 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -40,7 +40,6 @@
 #include <iomanip>
 #include <fstream>
 #include <string>
-// #include <vector>
 
 #include <boost/math/distributions/normal.hpp>
 

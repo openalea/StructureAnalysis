@@ -3,7 +3,7 @@
  *
  *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2018 CIRAD AGAP
+ *       Copyright 1995-2019 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -405,7 +405,7 @@ double HiddenSemiMarkov::likelihood_computation(const MarkovianSequences &seq ,
  *  \brief Estimation of a hidden semi-Markov chain using the EM algorithm.
  *
  *  \param[in] error             reference on a StatError object,
- *  \param[in] display           flag for displaying estimation intermediate results,
+ *  \param[in] os                stream for displaying estimation intermediate results,
  *  \param[in] ihsmarkov         initial hidden semi-Markov chain,
  *  \param[in] poisson_geometric flag on the estimation of Poisson geometric state occupancy distributions,
  *  \param[in] common_dispersion flag common dispersion parameter (continuous observation processes),
@@ -421,7 +421,7 @@ double HiddenSemiMarkov::likelihood_computation(const MarkovianSequences &seq ,
  */
 /*--------------------------------------------------------------*/
 
-HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &error , bool display ,
+HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &error , ostream *os ,
                                                                     const HiddenSemiMarkov &ihsmarkov ,
                                                                     bool poisson_geometric , bool common_dispersion ,
                                                                     censoring_estimator estimator , bool counting_flag ,
@@ -679,7 +679,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
 
     hoccupancy = new FrequencyDistribution(max_nb_value);
 
-    if ((display) && (hsmarkov->type == ORDINARY)) {
+    if ((os) && (hsmarkov->type == ORDINARY)) {
       complete_occupancy_weight = new double[hsmarkov->nb_state];
       censored_occupancy_weight = new double[hsmarkov->nb_state];
     }
@@ -786,7 +786,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
             }
           }
 
-          if ((display) && (hsmarkov->type == ORDINARY)) {
+          if ((os) && (hsmarkov->type == ORDINARY)) {
             complete_occupancy_weight[i] = 0.;
             censored_occupancy_weight[i] = 0.;
           }
@@ -1345,7 +1345,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
         }
 #       endif
 
-        if ((display) && (hsmarkov->type == ORDINARY)) {
+        if ((os) && (hsmarkov->type == ORDINARY)) {
           for (j = 0;j < hsmarkov->nb_state;j++) {
             if (hsmarkov->sojourn_type[j] == SEMI_MARKOVIAN) {
               for (k = 0;k < length[i] - 1;k++) {
@@ -1711,9 +1711,9 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
         }
       }
 
-      if (display) {
-        cout << STAT_label[STATL_ITERATION] << " " << iter << "   "
-             << SEQ_label[SEQL_OBSERVED_SEQUENCES_LIKELIHOOD] << ": " << likelihood << endl;
+      if (os) {
+        *os << STAT_label[STATL_ITERATION] << " " << iter << "   "
+            << SEQ_label[SEQL_OBSERVED_SEQUENCES_LIKELIHOOD] << ": " << likelihood << endl;
       }
 
 #     ifdef DEBUG
@@ -1729,20 +1729,20 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
             ((nb_iter != I_DEFAULT) && (iter < nb_iter))));
 
     if (likelihood != D_INF) {
-      if (display) {
-        cout << "\n" << iter << " " << STAT_label[STATL_ITERATIONS] << endl;
+      if (os) {
+        *os << "\n" << iter << " " << STAT_label[STATL_ITERATIONS] << endl;
 
         if (hsmarkov->type == ORDINARY) {
-          cout << "\n" << SEQ_label[SEQL_OCCUPANCY_WEIGHTS] << endl;
+          *os << "\n" << SEQ_label[SEQL_OCCUPANCY_WEIGHTS] << endl;
           for (i = 0;i < hsmarkov->nb_state;i++) {
             if (hsmarkov->sojourn_type[i] == SEMI_MARKOVIAN) {
-              cout << STAT_label[STATL_STATE] << " " << i << ": " << complete_occupancy_weight[i] << ", "
-                   << censored_occupancy_weight[i];
+              *os << STAT_label[STATL_STATE] << " " << i << ": " << complete_occupancy_weight[i] << ", "
+                  << censored_occupancy_weight[i];
               if ((complete_occupancy_weight[i] > 0.) && (censored_occupancy_weight[i] > 0.)) {
-                cout <<"  (" << complete_occupancy_weight[i] / (complete_occupancy_weight[i] + censored_occupancy_weight[i]) << ", "
-                     << censored_occupancy_weight[i] / (complete_occupancy_weight[i] + censored_occupancy_weight[i]) << ")";
+                *os << "  (" << complete_occupancy_weight[i] / (complete_occupancy_weight[i] + censored_occupancy_weight[i]) << ", "
+                    << censored_occupancy_weight[i] / (complete_occupancy_weight[i] + censored_occupancy_weight[i]) << ")";
               }
-              cout << endl;
+              *os << endl;
             }
           }
         }
@@ -1853,7 +1853,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
 
     delete hoccupancy;
 
-    if ((display) && (hsmarkov->type == ORDINARY)) {
+    if ((os) && (hsmarkov->type == ORDINARY)) {
       delete [] complete_occupancy_weight;
       delete [] censored_occupancy_weight;
     }
@@ -1981,8 +1981,8 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
 
         delete weight;
 
-        if ((display) && (seq->characteristics[0])) {
-          cout << "\n" << SEQ_label[SEQL_STATE_SEQUENCES_LIKELIHOOD] << ": " << seq->restoration_likelihood;
+        if ((os) && (seq->characteristics[0])) {
+          *os << "\n" << SEQ_label[SEQL_STATE_SEQUENCES_LIKELIHOOD] << ": " << seq->restoration_likelihood;
 
           for (i = 0;i < nb_variable;i++) {
             if (type[i] == REAL_VALUE) {
@@ -1990,9 +1990,9 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
             }
           }
           if (i == nb_variable) {
-            cout << " | " << hsmarkov->SemiMarkov::likelihood_computation(*seq);
+            *os << " | " << hsmarkov->SemiMarkov::likelihood_computation(*seq);
           }
-          cout << endl;
+          *os << endl;
         }
       }
 
@@ -2082,22 +2082,22 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
 
       delete weight;
 
-      if ((display) && (state_sequence) && (seq->nb_sequence <= POSTERIOR_PROBABILITY_NB_SEQUENCE)) {
+      if ((os) && (state_sequence) && (seq->nb_sequence <= POSTERIOR_PROBABILITY_NB_SEQUENCE)) {
         int *pstate;
 
-        cout << "\n" << SEQ_label[SEQL_POSTERIOR_STATE_SEQUENCE_PROBABILITY] << endl;
+        *os << "\n" << SEQ_label[SEQL_POSTERIOR_STATE_SEQUENCE_PROBABILITY] << endl;
         for (i = 0;i < seq->nb_sequence;i++) {
-          cout << SEQ_label[SEQL_SEQUENCE] << " " << seq->identifier[i] << ": "
-               << seq->posterior_probability[i];
+          *os << SEQ_label[SEQL_SEQUENCE] << " " << seq->identifier[i] << ": "
+              << seq->posterior_probability[i];
 
           if (hsmarkov->nb_component == hsmarkov->nb_state) {
-            cout << " | " << SEQ_label[SEQL_STATE_BEGIN] << ": ";
+            *os << " | " << SEQ_label[SEQL_STATE_BEGIN] << ": ";
 
             pstate = seq->int_sequence[i][0] + 1;
             if (seq->index_parameter) {
               for (j = 1;j < seq->length[i];j++) {
                 if (*pstate != *(pstate - 1)) {
-                  cout << seq->index_parameter[i][j] << ", ";
+                  *os << seq->index_parameter[i][j] << ", ";
                 }
                 pstate++;
               }
@@ -2106,14 +2106,14 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
             else {
               for (j = 1;j < seq->length[i];j++) {
                 if (*pstate != *(pstate - 1)) {
-                  cout << j << ", ";
+                  *os << j << ", ";
                 }
                 pstate++;
               }
             }
           }
 
-          cout << endl;
+          *os << endl;
         }
       }
     }
@@ -2128,7 +2128,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
  *  \brief Estimation of a hidden semi-Markov chain using the EM algorithm.
  *
  *  \param[in] error             reference on a StatError object,
- *  \param[in] display           flag for displaying estimation intermediate results,
+ *  \param[in] os                stream for displaying estimation intermediate results,
  *  \param[in] itype             process type (ORDINARY/EQUILIBRIUM),
  *  \param[in] nb_state          number of states,
  *  \param[in] left_right        flag on the Markov chain structure,
@@ -2147,7 +2147,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
  */
 /*--------------------------------------------------------------*/
 
-HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &error , bool display ,
+HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &error , ostream *os ,
                                                                     process_type itype , int nb_state ,
                                                                     bool left_right , double occupancy_mean ,
                                                                     bool poisson_geometric , bool common_dispersion ,
@@ -2260,7 +2260,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
       }
     }
 
-    hsmarkov = hidden_semi_markov_estimation(error , display , *ihsmarkov , poisson_geometric ,
+    hsmarkov = hidden_semi_markov_estimation(error , os , *ihsmarkov , poisson_geometric ,
                                              common_dispersion , estimator , counting_flag ,
                                              state_sequence , nb_iter , mean_estimator);
     delete ihsmarkov;
@@ -2275,7 +2275,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
  *  \brief Estimation of a hidden semi-Markov chain using the MCEM algorithm.
  *
  *  \param[in] error                  reference on a StatError object,
- *  \param[in] display                flag for displaying estimation intermediate results,
+ *  \param[in] os                     stream for displaying estimation intermediate results,
  *  \param[in] ihsmarkov              initial hidden semi-Markov chain,
  *  \param[in] poisson_geometric      flag on the estimation of Poisson geometric state occupancy distributions,
  *  \param[in] common_dispersion      flag common dispersion parameter (continuous observation processes),
@@ -2292,7 +2292,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
  */
 /*--------------------------------------------------------------*/
 
-HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(StatError &error , bool display ,
+HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(StatError &error , ostream *os ,
                                                                                const HiddenSemiMarkov &ihsmarkov ,
                                                                                bool poisson_geometric , bool common_dispersion ,
                                                                                int min_nb_state_sequence ,
@@ -3436,10 +3436,10 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
         }
       }
 
-      if (display) {
-        cout << STAT_label[STATL_ITERATION] << " " << iter << "   "
-             << SEQ_label[SEQL_OBSERVED_SEQUENCES_LIKELIHOOD] << ": " << likelihood
-             << "   (" << nb_state_sequence << ")" << endl;
+      if (os) {
+        *os << STAT_label[STATL_ITERATION] << " " << iter << "   "
+            << SEQ_label[SEQL_OBSERVED_SEQUENCES_LIKELIHOOD] << ": " << likelihood
+            << "   (" << nb_state_sequence << ")" << endl;
       }
 
 #     ifdef DEBUG
@@ -3456,14 +3456,14 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
             ((nb_iter != I_DEFAULT) && (iter < nb_iter))));
 
     if (likelihood != D_INF) {
-      if (display) {
-        cout << "\n" << iter << " " << STAT_label[STATL_ITERATIONS] << endl;
+      if (os) {
+        *os << "\n" << iter << " " << STAT_label[STATL_ITERATIONS] << endl;
 
         if (hsmarkov->type == EQUILIBRIUM) {
           for (i = 0;i < hsmarkov->nb_state;i++) {
             if (single_run[i]->nb_element > 0) {
-              cout << "\n" << SEQ_label[SEQL_BIASED] << " " << STAT_label[STATL_STATE] << " " << i
-                   << " " << SEQ_label[SEQL_OCCUPANCY] << " "  << STAT_label[STATL_DISTRIBUTION] << endl;
+              *os << "\n" << SEQ_label[SEQL_BIASED] << " " << STAT_label[STATL_STATE] << " " << i
+                  << " " << SEQ_label[SEQL_OCCUPANCY] << " "  << STAT_label[STATL_DISTRIBUTION] << endl;
             }
           }
         }
@@ -3690,8 +3690,8 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
 
         delete weight;
 
-        if ((display) && (seq->characteristics[0])) {
-          cout << "\n" << SEQ_label[SEQL_STATE_SEQUENCES_LIKELIHOOD] << ": " << seq->restoration_likelihood;
+        if ((os) && (seq->characteristics[0])) {
+          *os << "\n" << SEQ_label[SEQL_STATE_SEQUENCES_LIKELIHOOD] << ": " << seq->restoration_likelihood;
 
           for (i = 0;i < nb_variable;i++) {
             if (type[i] == REAL_VALUE) {
@@ -3699,9 +3699,9 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
             }
           }
           if (i == nb_variable) {
-            cout << " | " << hsmarkov->SemiMarkov::likelihood_computation(*seq);
+            *os << " | " << hsmarkov->SemiMarkov::likelihood_computation(*seq);
           }
-          cout << endl;
+          *os << endl;
         }
       }
 
@@ -3803,20 +3803,20 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
         }
       }
 
-      if ((display) && (state_sequence) && (seq->nb_sequence <= POSTERIOR_PROBABILITY_NB_SEQUENCE)) {
-        cout << "\n" << SEQ_label[SEQL_POSTERIOR_STATE_SEQUENCE_PROBABILITY] << endl;
+      if ((os) && (state_sequence) && (seq->nb_sequence <= POSTERIOR_PROBABILITY_NB_SEQUENCE)) {
+        *os << "\n" << SEQ_label[SEQL_POSTERIOR_STATE_SEQUENCE_PROBABILITY] << endl;
         for (i = 0;i < seq->nb_sequence;i++) {
-          cout << SEQ_label[SEQL_SEQUENCE] << " " << seq->identifier[i] << ": "
-               << seq->posterior_probability[i];
+          *os << SEQ_label[SEQL_SEQUENCE] << " " << seq->identifier[i] << ": "
+              << seq->posterior_probability[i];
 
           if (hsmarkov->nb_component == hsmarkov->nb_state) {
-            cout << " | " << SEQ_label[SEQL_STATE_BEGIN] << ": ";
+            *os << " | " << SEQ_label[SEQL_STATE_BEGIN] << ": ";
 
             pstate = seq->int_sequence[i][0] + 1;
             if (seq->index_parameter) {
               for (j = 1;j < seq->length[i];j++) {
                 if (*pstate != *(pstate - 1)) {
-                  cout << seq->index_parameter[i][j] << ", ";
+                  *os << seq->index_parameter[i][j] << ", ";
                 }
                 pstate++;
               }
@@ -3825,14 +3825,14 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
             else {
               for (j = 1;j < seq->length[i];j++) {
                 if (*pstate != *(pstate - 1)) {
-                  cout << j << ", ";
+                  *os << j << ", ";
                 }
                 pstate++;
               }
             }
           }
 
-          cout << endl;
+          *os << endl;
         }
       }
     }
@@ -3847,7 +3847,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
  *  \brief Estimation of a hidden semi-Markov chain using the MCEM algorithm.
  *
  *  \param[in] error                 reference on a StatError object,
- *  \param[in] display               flag for displaying estimation intermediate results,
+ *  \param[in] os                    stream for displaying estimation intermediate results,
  *  \param[in] itype                 process type (ORDINARY/EQUILIBRIUM),
  *  \param[in] nb_state              number of states,
  *  \param[in] left_right            flag on the Markov chain structure,
@@ -3867,7 +3867,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
  */
 /*--------------------------------------------------------------*/
 
-HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(StatError &error , bool display ,
+HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(StatError &error , ostream *os ,
                                                                                process_type itype , int nb_state ,
                                                                                bool left_right , double occupancy_mean ,
                                                                                bool poisson_geometric , bool common_dispersion ,
@@ -3982,7 +3982,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
       }
     }
 
-    hsmarkov = hidden_semi_markov_stochastic_estimation(error , display , *ihsmarkov , poisson_geometric ,
+    hsmarkov = hidden_semi_markov_stochastic_estimation(error , os , *ihsmarkov , poisson_geometric ,
                                                         common_dispersion , min_nb_state_sequence ,
                                                         max_nb_state_sequence , parameter , estimator ,
                                                         counting_flag , state_sequence , nb_iter);

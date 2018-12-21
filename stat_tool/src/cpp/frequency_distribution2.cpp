@@ -3,7 +3,7 @@
  *
  *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2018 CIRAD AGAP
+ *       Copyright 1995-2019 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -697,7 +697,7 @@ Test* FrequencyDistribution::kruskal_wallis_test(int nb_histo , const FrequencyD
  *  \brief Comparison of frequency distributions.
  *
  *  \param[in] error    reference on a StatError object,
- *  \param[in] display  flag for displaying comparison outputs,
+ *  \param[in] os       stream for displaying comparison outputs,
  *  \param[in] nb_histo number of frequency distributions,
  *  \param[in] ihisto   pointer on the frequency distributions,
  *  \param[in] type     variable type (NOMINAL/ORDINAL/NUMERIC),
@@ -708,7 +708,7 @@ Test* FrequencyDistribution::kruskal_wallis_test(int nb_histo , const FrequencyD
  */
 /*--------------------------------------------------------------*/
 
-bool FrequencyDistribution::comparison(StatError &error , bool display , int nb_histo ,
+bool FrequencyDistribution::comparison(StatError &error , ostream *os , int nb_histo ,
                                        const FrequencyDistribution **ihisto , variable_type type ,
                                        const string path , output_format format) const
 
@@ -851,8 +851,8 @@ bool FrequencyDistribution::comparison(StatError &error , bool display , int nb_
     }
   }
 
-  if (display) {
-    dissimilarity_ascii_write(cout , nb_histo - 1 , ihisto , type , dissimilarity);
+  if (os) {
+    dissimilarity_ascii_write(*os , nb_histo - 1 , ihisto , type , dissimilarity);
   }
 
   if (!path.empty()) {
@@ -886,7 +886,7 @@ bool FrequencyDistribution::comparison(StatError &error , bool display , int nb_
  *  \brief Comparison of frequency distributions.
  *
  *  \param[in] error    reference on a StatError object,
- *  \param[in] display  flag for displaying comparison outputs,
+ *  \param[in] os       stream for displaying comparison outputs,
  *  \param[in] nb_histo number of frequency distributions,
  *  \param[in] ihisto   pointer on the frequency distributions,
  *  \param[in] type     variable type (NOMINAL/ORDINAL/NUMERIC),
@@ -897,8 +897,8 @@ bool FrequencyDistribution::comparison(StatError &error , bool display , int nb_
  */
 /*--------------------------------------------------------------*/
 
-bool FrequencyDistribution::comparison(StatError &error , bool display , int nb_histo ,
-                                       const vector<FrequencyDistribution>& ihisto , variable_type type ,
+bool FrequencyDistribution::comparison(StatError &error , ostream *os , int nb_histo ,
+                                       const vector<FrequencyDistribution> &ihisto , variable_type type ,
                                        const string path , output_format format) const
 
 {
@@ -912,7 +912,7 @@ bool FrequencyDistribution::comparison(StatError &error , bool display , int nb_
     histo[i] = new FrequencyDistribution(ihisto[i]);
   }
 
-  status = comparison(error , display , nb_histo , histo , type , path , format);
+  status = comparison(error , os , nb_histo , histo , type , path , format);
 
   for (i = 0;i < nb_histo;i++) {
     delete histo[i];
@@ -927,12 +927,12 @@ bool FrequencyDistribution::comparison(StatError &error , bool display , int nb_
 /**
  *  \brief F test of variance comparison.
  *
- *  \param[in] display flag for displaying the test results,
+ *  \param[in] os      stream for displaying the test results,
  *  \param[in] histo   reference on a frequency distribution.
  */
 /*--------------------------------------------------------------*/
 
-void FrequencyDistribution::F_comparison(bool display , const FrequencyDistribution &histo) const
+void FrequencyDistribution::F_comparison(ostream &os , const FrequencyDistribution &histo) const
 
 {
   if ((nb_element > 1) && (histo.nb_element > 1)) {
@@ -949,10 +949,7 @@ void FrequencyDistribution::F_comparison(bool display , const FrequencyDistribut
     }
 
     test->F_critical_probability_computation();
-
-    if (display) {
-      cout << *test;
-    }
+    os << *test;
 
     delete test;
   }
@@ -963,12 +960,12 @@ void FrequencyDistribution::F_comparison(bool display , const FrequencyDistribut
 /**
  *  \brief Student's t test of mean comparison.
  *
- *  \param[in] display flag for displaying the test results,
+ *  \param[in] os      stream for displaying the test results,
  *  \param[in] histo   reference on a frequency distribution.
  */
 /*--------------------------------------------------------------*/
 
-void FrequencyDistribution::t_comparison(bool display , const FrequencyDistribution &histo) const
+void FrequencyDistribution::t_comparison(ostream &os , const FrequencyDistribution &histo) const
 
 {
   int df;
@@ -987,10 +984,7 @@ void FrequencyDistribution::t_comparison(bool display , const FrequencyDistribut
     test = new Test(STUDENT , false , df , I_DEFAULT , value);
 
     test->t_critical_probability_computation();
-
-    if (display) {
-      cout << *test;
-    }
+    os << *test;
 
     delete test;
   }
@@ -1020,14 +1014,14 @@ void FrequencyDistribution::t_comparison(bool display , const FrequencyDistribut
  *  \brief Wilcoxon-Mann-Whitney test of distribution comparison.
  *
  *  \param[in] error   reference on a StatError object,
- *  \param[in] display flag for displaying the test results,
+ *  \param[in] os      stream for displaying the test results,
  *  \param[in] ihisto  reference on a frequency distribution.
  *
  *  \return            error status.
  */
 /*--------------------------------------------------------------*/
 
-bool FrequencyDistribution::wilcoxon_mann_whitney_comparison(StatError &error , bool display ,
+bool FrequencyDistribution::wilcoxon_mann_whitney_comparison(StatError &error , ostream &os ,
                                                              const FrequencyDistribution &ihisto) const
 
 {
@@ -1111,18 +1105,16 @@ bool FrequencyDistribution::wilcoxon_mann_whitney_comparison(StatError &error , 
       }
     }
 
-    if (display) {
-      cout << STAT_label[STATL_TWO_SIDED] << " " << STAT_label[STATL_WILCOXON_MANN_WHITNEY_TEST];
-      cout << *test;
+    os << STAT_label[STATL_TWO_SIDED] << " " << STAT_label[STATL_WILCOXON_MANN_WHITNEY_TEST];
+    os << *test;
 
-      cout << STAT_label[STATL_MANN_WHITNEY_INFERIOR_PROBABILITY] << " = "
-           << (histo[0]->nb_element * (double)histo[1]->nb_element - nb_equal / 2. - nb_sup) /
-              (histo[0]->nb_element * (double)histo[1]->nb_element) << "   "
-           << STAT_label[STATL_MANN_WHITNEY_EQUAL_PROBABILITY] << " = "
-           << nb_equal / (histo[0]->nb_element * (double)histo[1]->nb_element) << "   "
-           << STAT_label[STATL_MANN_WHITNEY_SUPERIOR_PROBABILITY] << " = "
-           << (nb_sup - nb_equal / 2.) / (histo[0]->nb_element * (double)histo[1]->nb_element) << endl;
-    }
+    os << STAT_label[STATL_MANN_WHITNEY_INFERIOR_PROBABILITY] << " = "
+       << (histo[0]->nb_element * (double)histo[1]->nb_element - nb_equal / 2. - nb_sup) /
+          (histo[0]->nb_element * (double)histo[1]->nb_element) << "   "
+       << STAT_label[STATL_MANN_WHITNEY_EQUAL_PROBABILITY] << " = "
+       << nb_equal / (histo[0]->nb_element * (double)histo[1]->nb_element) << "   "
+       << STAT_label[STATL_MANN_WHITNEY_SUPERIOR_PROBABILITY] << " = "
+       << (nb_sup - nb_equal / 2.) / (histo[0]->nb_element * (double)histo[1]->nb_element) << endl;
 
     delete [] histo;
     delete merged_histo;

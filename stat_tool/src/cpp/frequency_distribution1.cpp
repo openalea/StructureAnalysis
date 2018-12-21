@@ -3,7 +3,7 @@
  *
  *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2018 CIRAD AGAP
+ *       Copyright 1995-2019 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -108,7 +108,7 @@ FrequencyDistribution::FrequencyDistribution(int inb_element , int *ielement)
  */
 /*--------------------------------------------------------------*/
 
-FrequencyDistribution::FrequencyDistribution(const vector<int>& ielement)
+FrequencyDistribution::FrequencyDistribution(const vector<int> &ielement)
 
 {
   int i;
@@ -338,7 +338,7 @@ bool FrequencyDistribution::operator==(const FrequencyDistribution &histo) const
 /*--------------------------------------------------------------*/
 
 DiscreteDistributionData* FrequencyDistribution::merge(int nb_sample ,
-                                                       const vector<FrequencyDistribution>& ihisto) const
+                                                       const vector<FrequencyDistribution> &ihisto) const
 
 {
   int i;
@@ -442,14 +442,14 @@ DiscreteDistributionData* FrequencyDistribution::cluster(StatError &error , int 
  *  \param[in] error   reference on a StatError object,
  *  \param[in] ratio   proportion of the information quantity of
  *                     the initial frequency distribution,
- *  \param[in] display flag for displaying the clustering step.
+ *  \param[in] os      stream for displaying the clustering step.
  *
  *  \return            DiscreteDistributionData object.
  */
 /*--------------------------------------------------------------*/
 
 DiscreteDistributionData* FrequencyDistribution::cluster(StatError &error , double ratio ,
-                                                         bool display) const
+                                                         ostream *os) const
 
 {
   bool status = true , stop = false;
@@ -533,10 +533,10 @@ DiscreteDistributionData* FrequencyDistribution::cluster(StatError &error , doub
 
     delete histo;
 
-    if (display) {
-      cout << STAT_label[STATL_INFORMATION_RATIO] << ": "
-           << previous_information / reference_information << "   "
-           << STAT_label[STATL_CLUSTERING_STEP] << ": " << step << endl;
+    if (os) {
+      *os << STAT_label[STATL_INFORMATION_RATIO] << ": "
+          << previous_information / reference_information << "   "
+          << STAT_label[STATL_CLUSTERING_STEP] << ": " << step << endl;
     }
 
     // computation of the frequency distribution characteristics
@@ -639,7 +639,7 @@ DiscreteDistributionData* FrequencyDistribution::cluster(StatError &error , int 
 /*--------------------------------------------------------------*/
 
 DiscreteDistributionData* FrequencyDistribution::cluster(StatError &error , int nb_class ,
-                                                         vector<int>& ilimit) const
+                                                         vector<int> &ilimit) const
 
 {
   return cluster(error , nb_class , ilimit.data());
@@ -762,7 +762,7 @@ DiscreteDistributionData* FrequencyDistribution::transcode(StatError &error ,
 /*--------------------------------------------------------------*/
 
 DiscreteDistributionData* FrequencyDistribution::transcode(StatError &error ,
-                                                           vector<int>& category) const
+                                                           vector<int> &category) const
 
 {
   return transcode(error , category.data());

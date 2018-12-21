@@ -613,7 +613,7 @@ public:
   static std::string
   ascii_data_write(const Sequences &d, output_sequence_format format, bool exhaustive)
   {
-    std::stringstream os;
+    ostringstream os;
     std::string res;
     d.ascii_data_write(os, format, exhaustive);
     res = os.str();
@@ -727,8 +727,7 @@ public:
       const object& max, bool keep)
   {
     HEADER(Sequences);
-    //std::stringstream s;
-    bool display = true;
+    ostringstream os;
 
     boost::python::extract<int> get_min(min);
     boost::python::extract<int> get_max(max);
@@ -737,13 +736,13 @@ public:
       {
         int mi = get_min();
         int ma = get_max();
-        ret = seq.value_select(error, display, variable, mi, ma, keep);
+        ret = seq.value_select(error, &os, variable, mi, ma, keep);
       }
     else
       {
         double mi = extract<double> (min);
         double ma = extract<double> (max);
-        ret = seq.value_select(error, display, variable, mi, ma, keep);
+        ret = seq.value_select(error, &os, variable, mi, ma, keep);
       }
 
     // cout << s.str() << endl;
@@ -918,10 +917,9 @@ public:
   {
      StatError error;
     Sequences* ret;
-    //std::ostringstream os;
-    bool display = true;
+    ostringstream os;
 
-    ret = input.length_select(error, display,
+    ret = input.length_select(error, &os,
         min_length, max_length, keep);
     if (!ret)
       sequence_analysis::wrap_util::throw_error(error);
@@ -1046,10 +1044,9 @@ public:
   {
     StatError error;
     Sequences* ret;
-    //std::ostringstream os;
-    bool display = true;
+    ostringstream os;
 
-    ret = input.index_parameter_select(error,  display,
+    ret = input.index_parameter_select(error,  &os,
         min_index_parameter, max_index_parameter, keep);
     if (!ret)
       sequence_analysis::wrap_util::throw_error(error);
@@ -1211,7 +1208,7 @@ public:
       hierarchical_strategy strategy, const char *path)
   {
     HEADER_OS(Sequences);
-    ret = input.multiple_alignment(error, os, ivector_dist, begin_free,\
+    ret = input.multiple_alignment(error, &os, ivector_dist, begin_free,\
         end_free, indel_cost, indel_factor, strategy, path);
     FOOTER_OS;
 
@@ -1295,7 +1292,7 @@ public:
     for (int i = 0; i < nb; i++)
       model_type[i] = extract<segment_model> (input_model_type[i]);
 
-    ret = input.segmentation(error, os, iidentifier, nb_segment,
+    ret = input.segmentation(error, &os, iidentifier, nb_segment,
                              change_point, model_type, true, NULL, output);
 
     FOOTER_OS;
@@ -1315,7 +1312,7 @@ public:
         model_type[i] = extract<segment_model> (input_model_type[i]);
 
 
-    ret = input.segmentation(error, os, iidentifier, nb_segment, model_type,
+    ret = input.segmentation(error, &os, iidentifier, nb_segment, model_type,
                              true, NULL, output);
     FOOTER_OS;
   }
@@ -1332,7 +1329,7 @@ public:
     for (int i = 0; i < nb; i++)
         model_type[i] = extract<segment_model> (input_model_type[i]);
 
-    ret = input.segmentation(error, os, iidentifier, max_nb_segment, model_type,
+    ret = input.segmentation(error, &os, iidentifier, max_nb_segment, model_type,
                              true, NULL);
     FOOTER_OS;
   }
@@ -1345,7 +1342,7 @@ public:
   {
     HEADER_OS(Sequences);
     ret = input.segmentation(error,iidentifier,  nb_segment,
-      ivector_dist, os, output);
+      ivector_dist, &os, output);
     FOOTER_OS;
   } */
 
@@ -1416,7 +1413,7 @@ public:
                                latent_structure_algorithm segmentation ,
                                int nb_segmentation)
   {
-//    std::stringstream os;
+//    ostringstream os;
 
     StatError error;
     bool ret;
