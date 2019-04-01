@@ -473,7 +473,7 @@ double Sequences::N_segmentation(int index , int nb_segment , segment_model *mod
 
     if (i < inb_segmentation) {
       cout << i << ": ";
-      for (j = 0;j < MIN((i < seq_length - 1 ? nb_segment - 1 : nb_segment) , i + 1);j++) {
+      for (j = 1;j < MIN((i < seq_length - 1 ? nb_segment - 1 : nb_segment) , i + 1);j++) {
         cout << nb_segmentation_forward[i][j] << " " << nb_segmentation[j] << " | ";
       }
       cout << endl;
@@ -572,16 +572,11 @@ double Sequences::N_segmentation(int index , int nb_segment , segment_model *mod
 # ifdef MESSAGE
   streamsize nb_digits;
 
-  buff = 1.;
-  for (i = 1;i < nb_segment;i++) {
-    buff *= (double)(seq_length - i) / (double)i;
-//    buff = buff * (seq_length - i) / i;
-  }
-
   nb_digits = os.precision(10);
 
   os << "\n" << SEQ_label[SEQL_NB_SEGMENTATION] << ": "
-     << nb_segmentation_forward[seq_length - 1][nb_segment - 1] << " (" << buff << ")" << endl;
+     << nb_segmentation_forward[seq_length - 1][nb_segment - 1]
+     << " (" << nb_segmentation_computation(index , nb_segment , model_type , common_contrast) << ")" << endl;
 
   os.precision(nb_digits);
 

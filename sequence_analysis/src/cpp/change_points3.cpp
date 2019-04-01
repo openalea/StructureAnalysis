@@ -64,6 +64,228 @@ extern int column_width(int nb_value , const long double *value);
 
 /*--------------------------------------------------------------*/
 /**
+ *  \brief Computation of the inf_bound parameter of the prior segment length distribution.
+ *
+ *  \param[in] index           sequence index,
+ *  \param[in] nb_segment      number of segments,
+ *  \param[in] model_type      segment model types,
+ *  \param[in] common_contrast flag contrast functions common to the individuals.
+ *
+ *  \return                    inf_bound parameter.
+ */
+/*--------------------------------------------------------------*/
+
+double Sequences::prior_segment_length_inf_bound_computation(int index , int nb_segment , segment_model *model_type ,
+                                                             bool common_contrast) const
+
+{
+  int i;
+  int seq_length , inf_bound;
+
+
+  inf_bound = 1;
+  seq_length = length[index == I_DEFAULT ? 0 : index];
+
+  if ((index != I_DEFAULT) || (!common_contrast)) {
+    for (i = 1;i < nb_variable;i++) {
+      if (((i == 1) && (model_type[0] == MEAN_CHANGE)) || ((model_type[i - 1] == GAUSSIAN_CHANGE) ||
+           (model_type[i - 1] == ORDINAL_GAUSSIAN_CHANGE) || (model_type[i - 1] == BAYESIAN_GAUSSIAN_CHANGE) ||
+           (model_type[i - 1] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE))) {
+        inf_bound = 2;
+      }
+      if (((i == 1) && (model_type[0] == INTERCEPT_SLOPE_CHANGE)) || ((model_type[i - 1] == LINEAR_MODEL_CHANGE) ||
+           (model_type[i - 1] == AUTOREGRESSIVE_MODEL_CHANGE))) {
+        inf_bound = 3;
+      }
+    }
+  }
+
+  else {
+    for (i = 1;i < nb_variable;i++) {
+      if (((i == 1) && (model_type[0] == INTERCEPT_SLOPE_CHANGE)) || ((model_type[i - 1] == LINEAR_MODEL_CHANGE) ||
+           (model_type[i - 1] == AUTOREGRESSIVE_MODEL_CHANGE) ||
+           (model_type[i - 1] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE))) {
+        inf_bound = 2;
+      }
+    }
+  }
+
+  return inf_bound;
+}
+
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the number of possible segmentations.
+ *
+ *  \param[in] index           sequence index,
+ *  \param[in] nb_segment      number of segments,
+ *  \param[in] model_type      segment model types,
+ *  \param[in] common_contrast flag contrast functions common to the individuals.
+ *
+ *  \return                    number of possible segmentations.
+ */
+/*--------------------------------------------------------------*/
+
+double Sequences::nb_segmentation_computation(int index , int nb_segment , segment_model *model_type ,
+                                              bool common_contrast) const
+
+{
+  int i;
+  int inf_bound , seq_length;
+  double nb_segmentation;
+
+
+  inf_bound = prior_segment_length_inf_bound_computation(index , nb_segment , model_type , common_contrast);
+  seq_length = length[index == I_DEFAULT ? 0 : index];
+
+  nb_segmentation = 1.;
+  for (i = 1;i < nb_segment;i++) {
+    nb_segmentation *= (double)(seq_length - i - (inf_bound - 1) * nb_segment) / (double)i;
+  }
+
+  return nb_segmentation;
+}
+
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the penalty shape.
+ *
+ *  \param[in] index              sequence index,
+ *  \param[in] max_nb_segment     maximum number of segments,
+ *  \param[in] model_type         segment model types,
+ *  \param[in] common_contrast    flag contrast functions common to the individuals,
+ *  \param[in] penalty_shape_type penalty shape type.
+ *
+ *  \return                       penalty shape.
+ */
+/*--------------------------------------------------------------*/
+
+double* Sequences::penalty_shape_computation(int index , int max_nb_segment , segment_model *model_type ,
+                                             bool common_contrast , int penalty_shape_type) const
+
+{
+  int i , j;
+  int seq_length , inf_bound;
+  double buff , *penalty_shape;
+
+
+  inf_bound = 1;
+  seq_length = length[index == I_DEFAULT ? 0 : index];
+
+  if ((index != I_DEFAULT) || (!common_contrast)) {
+    for (i = 0;i < nb_variable;i++) {
+      if ((model_type[i] == GAUSSIAN_CHANGE) || (model_type[i] == ORDINAL_GAUSSIAN_CHANGE) ||
+          (model_type[i] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE)) {
+        inf_bound = 2;
+      }
+      if ((model_type[i] == LINEAR_MODEL_CHANGE) || (model_type[i] == AUTOREGRESSIVE_MODEL_CHANGE))  {
+        inf_bound = 3;
+      }
+    }
+  }
+
+  else {
+    for (i = 0;i < nb_variable;i++) {
+      if ((model_type[i] == LINEAR_MODEL_CHANGE) || (model_type[i] == AUTOREGRESSIVE_MODEL_CHANGE) ||
+          (model_type[i] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE)) {
+        inf_bound = 2;
+      }
+    }
+  }
+
+  penalty_shape = new double[max_nb_segment + 1];
+
+  switch (penalty_shape_type) {
+
+  case 0 : {
+    for (i = 1;i <= max_nb_segment;i++) {
+      penalty_shape[i] = i - 1;
+    }
+    break;
+  }
+
+  case 1 : {
+    buff = 1.;
+    for (i = 1;i <= max_nb_segment;i++) {
+//      penalty_shape[i] = i - 1 + log(buff);
+      penalty_shape[i] = log(buff);
+      buff *= (double)(seq_length - i) / (double)i;
+    }
+    break;
+  }
+
+  case 2 : {
+    buff = 1.;
+    for (i = 1;i <= max_nb_segment;i++) {
+      penalty_shape[i] = log(buff);
+      buff *= (double)seq_length / (double)i;
+    }
+    break;
+  }
+
+  case 3 : {
+    buff = 1.;
+    for (i = 1;i <= max_nb_segment;i++) {
+      penalty_shape[i] = log(buff);
+      buff *= (double)(seq_length - 1) / (double)i;
+    }
+    break;
+  }
+
+  case 4 : {
+    for (i = 1;i <= max_nb_segment;i++) {
+      buff = 1.;
+      for (j = 1;j < i;j++) {
+        buff *= (double)(seq_length - j - (inf_bound - 1) * i) / (double)j;
+      }
+      penalty_shape[i] = log(buff);
+    }
+    break;
+  }
+
+  case 5 : {
+    for (i = 1;i <= max_nb_segment;i++) {
+      buff = 1.;
+      for (j = 1;j < i;j++) {
+        buff *= (double)(seq_length - (inf_bound - 1) * i) / (double)j;
+      }
+      penalty_shape[i] = log(buff);
+    }
+    break;
+  }
+  }
+
+# ifdef MESSAGE
+  double buff1 , buff2 , buff3 , buff4;
+
+  cout << "\nPenalty shapes (" << inf_bound << ")" << endl;
+  buff = 1.;
+  buff1 = 1.;
+  buff2 = 1.;
+  for (i = 1;i <= max_nb_segment;i++) {
+    buff3 = 1.;
+    buff4 = 1.;
+    for (j = 1;j < i;j++) {
+      buff3 *= (double)(seq_length - (inf_bound - 1) * i) / (double)j;
+      buff4 *= (double)(seq_length - j - (inf_bound - 1) * i) / (double)j;
+    }
+    cout << i << "  " << log(buff) << "  " << log(buff1) << "  " << log(buff2) << " | " << log(buff) - log(buff1) << " | " << log(buff) - log(buff2)
+	 << " || " << log(buff3) << "  " << log(buff4) << " | " << log(buff3) - log(buff4) << endl;
+    buff *= (double)seq_length / (double)i;
+    buff1 *= (double)(seq_length - 1) / (double)i;
+    buff2 *= (double)(seq_length - i) / (double)i;
+  }
+  cout << endl;
+# endif
+
+  return penalty_shape;
+}
+
+
+/*--------------------------------------------------------------*/
+/**
  *  \brief Computation of segmentation and change-point entropies.
  *
  *  \param[in] index                sequence index,
@@ -419,13 +641,14 @@ double Sequences::forward_backward(int index , int nb_segment , segment_model *m
     }
   }
 
-# ifdef DEBUG
+# ifdef MESSAGE
   cout << "\n";
-  buff = 1.;
+//  buff = 1.;
   for (i = 1;i < nb_segment;i++) {
-    buff *= (double)(seq_length - i) / (double)i;
+//    buff *= (double)(seq_length - i) / (double)i;
     cout << i + 1 << " " << SEQ_label[SEQL_SEGMENTS] << ": "
-         << nb_segmentation_forward[seq_length - 1][i] << " (" << buff << ") | "
+         << nb_segmentation_forward[seq_length - 1][i]
+         << " (" << nb_segmentation_computation(index , nb_segment , model_type , common_contrast) << ") | "
          << log(nb_segmentation_forward[seq_length - 1][i]) << endl;
   }
 # endif
@@ -1352,50 +1575,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream *os , int iidentif
     }
 
     if (max_nb_segment >= DIMENSION_JUMP_NB_SEGMENT) {
-      penalty_shape = new double[max_nb_segment + 1];
-
-      switch (penalty_shape_type) {
-
-      case 0 : {
-        for (i = 1;i <= max_nb_segment;i++) {
-          penalty_shape[i] = i - 1;
-        }
-        break;
-      }
-
-      case 1 : {
-        buff = 1.;
-        for (i = 1;i <= max_nb_segment;i++) {
-          penalty_shape[i] = i - 1 + log(buff);
-          buff *= (double)(seq->length[0] - i) / (double)i;
-        }
-        break;
-      }
-
-      case 2 : {
-        buff = 1.;
-        for (i = 1;i <= max_nb_segment;i++) {
-          penalty_shape[i] = log(buff);
-          buff *= (double)seq->length[0] / (double)i;
-        }
-        break;
-      }
-      }
-
-#     ifdef MESSAGE
-      double buff1;
-
-      cout << "\nPenalty shapes" << endl;
-      buff = 1.;
-      buff1 = 1.;
-      for (i = 1;i <= max_nb_segment;i++) {
-        cout << i - 1 << "  " << i - 1 + log(buff) << "  " << log(buff1) << " | " << i - 1 + log(buff) - log(buff1) << endl;
-        buff *= (double)(seq->length[0] - i) / (double)i;
-        buff1 *= (double)seq->length[0] / (double)i;
-      }
-      cout << endl;
-#     endif
-
+      penalty_shape = penalty_shape_computation(index , max_nb_segment , model_type , common_contrast , penalty_shape_type);
     }
 
     seq->segmentation((index == I_DEFAULT ? index : 0) , max_nb_segment , model_type ,
@@ -2060,6 +2240,9 @@ Sequences* Sequences::segmentation(StatError &error , ostream *os , int iidentif
           scaling_factor = PENALTY_SHAPE_SCALING_FACTOR;
           break;
         case 2 :
+          scaling_factor = PENALTY_SHAPE_SCALING_FACTOR;
+          break;
+        default :
           scaling_factor = PENALTY_SHAPE_SCALING_FACTOR;
           break;
         }
@@ -3269,7 +3452,7 @@ double Sequences::forward_backward(int index , int nb_segment , segment_model *m
 
 {
   int i , j , k , m;
-  int seq_length , *inf_bound_parameter , *seq_index_parameter;
+  int seq_length , inf_bound , *inf_bound_parameter , *seq_index_parameter;
   double sum , buff , rlikelihood , *likelihood , **seq_mean , **hyperparam , **backward_output ,
          ***factorial , ***binomial_coeff , ***smoothed;
   long double segment_norm , sequence_norm , lbuff , lsum , segmentation_entropy , first_order_entropy ,
@@ -4043,7 +4226,8 @@ double Sequences::forward_backward(int index , int nb_segment , segment_model *m
 
     }
 
-    prior_segment_length = new DiscreteParametric(PRIOR_SEGMENT_LENGTH , nb_segment , seq_length , D_DEFAULT , D_DEFAULT);
+    inf_bound = prior_segment_length_inf_bound_computation(index , nb_segment , model_type , common_contrast);
+    prior_segment_length = new DiscreteParametric(inf_bound , nb_segment , seq_length);
 
     segment_length_max = prior_segment_length->max;
     for (i = 0;i < nb_segment;i++) {
@@ -4252,7 +4436,7 @@ double Sequences::forward_backward(int index , int nb_segment , segment_model *m
         for (j = 1;j < nb_segment;j++) {
           sequence_norm = expl(forward_norm[i] + backward_norm[i + 1] - likelihood[j]);
 
-          for (k = MAX(nb_segment - 1 - j , nb_segment + i - seq_length);k <= MIN(nb_segment - 1 , i + nb_segment - 1 - j);k++) {
+          for (k = MAX(nb_segment - 1 - j , nb_segment + i - seq_length);k <= MIN(nb_segment - 2 , i + nb_segment - 1 - j);k++) {
             if (k == nb_segment - 1 - j) {
               lsum = normalized_contrast[0] * backward[i + 1][k + 1] * sequence_norm;
               for (m = 0;m <= i;m++) {
@@ -4316,7 +4500,7 @@ double Sequences::forward_backward(int index , int nb_segment , segment_model *m
       }
     }
 
-#   ifdef DEBUG
+#   ifdef MESSAGE
     cout << "\n" << SEQ_label[SEQL_SEGMENTATION_ENTROPY] << endl;
     for (i = 1;i < nb_segment - 1;i++) {
       cout << i + 1 << " " << SEQ_label[SEQL_SEGMENTS] << ": "
@@ -4419,23 +4603,23 @@ double Sequences::forward_backward(int index , int nb_segment , segment_model *m
 //            << " (" << change_point_entropy_sum / nb_segment << ")";
             << "\n" << SEQ_label[SEQL_MARGINAL_ENTROPY] << ": " << marginal_entropy << endl;
 
-        // extraction of change-point uncertainty intervals
+        // extraction of change-point credibility intervals
 
         if (output == CHANGE_POINT) {
-          *os << "\n" << SEQ_label[SEQL_CHANGE_POINT_UNCERTAINTY_INTERVALS] << endl;
+          *os << "\n" << SEQ_label[SEQL_CHANGE_POINT_CREDIBILITY_INTERVALS] << endl;
           for (i = 1;i < nb_segment;i++) {
             *os << SEQ_label[SEQL_CHANGE_POINT] << " " << i << " (";
 
             sum = 0.;
             j = 0;
-            while (sum < CHANGE_POINT_UNCERTAINTY_PROBABILITY / 2) {
+            while (sum < CHANGE_POINT_CREDIBILITY_PROBABILITY / 2) {
               j++;
               sum += backward_output[j][i];
             }
             *os << seq_index_parameter[j] << ", ";
 
 #           ifdef MESSAGE
-            while (sum <= 1. - CHANGE_POINT_UNCERTAINTY_PROBABILITY / 2) {
+            while (sum <= 1. - CHANGE_POINT_CREDIBILITY_PROBABILITY / 2) {
               j++;
               sum += backward_output[j][i];
             }
@@ -4444,7 +4628,7 @@ double Sequences::forward_backward(int index , int nb_segment , segment_model *m
 
             sum = 0.;
             j = seq_length;
-            while (sum < CHANGE_POINT_UNCERTAINTY_PROBABILITY / 2) {
+            while (sum < CHANGE_POINT_CREDIBILITY_PROBABILITY / 2) {
               j--;
               sum += backward_output[j][i];
             }

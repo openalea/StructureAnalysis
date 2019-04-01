@@ -253,7 +253,7 @@ namespace sequence_analysis {
     SEGMENT
   };
 
-  const double CHANGE_POINT_UNCERTAINTY_PROBABILITY = 0.05;  // probability for defining change-point uncertainty intervals
+  const double CHANGE_POINT_CREDIBILITY_PROBABILITY = 0.05;  // probability for defining change-point credibility intervals
   const int SEQUENCE_MAX_NB_COLUMN = 20; // threshold for the writing of sequences in text files
   const double ROUNDOFF_ERROR = 1.e-10;  // error on a sum of doubles
   const int PENALTY_SHAPE_SCALING_FACTOR = 100;  // scaling factor for the plot of log-likelihoods
@@ -626,6 +626,12 @@ namespace sequence_analysis {
                         bool common_contrast , double *shape_parameter , double **rank ,
                         double *isegmentation_likelihood = NULL , int *nb_parameter = NULL ,
                         double *segment_penalty = NULL);
+    double prior_segment_length_inf_bound_computation(int index , int nb_segment , segment_model *model_type ,
+                                                      bool common_contrast) const;
+    double nb_segmentation_computation(int index , int nb_segment , segment_model *model_type ,
+                                       bool common_contrast) const;
+    double* penalty_shape_computation(int index , int max_nb_segment , segment_model *model_type ,
+                                      bool common_contrast , int penalty_shape_type) const;
     double forward_backward(int index , int nb_segment , segment_model *model_type ,
                             bool common_contrast , double *shape_parameter , double **rank ,
                             double *likelihood , long double *segmentation_entropy ,

@@ -222,7 +222,6 @@ namespace stat_tool {
   const int MAX_INF_BOUND = 10000;       // maximum lower bound
   const int MAX_DIFF_BOUND = 10000;      // maximum difference between lower and upper bounds
   const double MAX_MEAN = 10000.;        // maximum mean
-  const int MAX_SEQUENCE_LENGTH = 10000; // maximum sequence length for computing prior segment length distributions
 
   const double B_PROBABILITY = 0.8;      // threshold for using the backward computation of the binomial probability mass function
   const double B_THRESHOLD = 1000.;      // threshold for using the computation in log of the binomial probability mass function

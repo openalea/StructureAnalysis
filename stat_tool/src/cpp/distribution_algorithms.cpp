@@ -777,28 +777,47 @@ void DiscreteParametric::prior_segment_length_computation()
   double buff , sum;
 
 
-  offset = 1;
-  nb_value = sequence_length - no_segment + 2;
+  offset = inf_bound;
+//  nb_value = sequence_length - no_segment + 2;
+  nb_value = sequence_length - inf_bound * (no_segment - 1) + 1;
 
-  mass[0] = 0.;
-
-  buff = 1.;
-  for (i = 1;i < no_segment - 1;i++) {
-    buff *= (double)(sequence_length - i - 1) / (double)i;
+  for (i = 0;i < inf_bound;i++) {
+    mass[i] = 0.;
   }
-  sum = buff * (double)(sequence_length - 1) / (double)(no_segment - 1);
 
-  for (i = 1;i <= sequence_length - no_segment + 1;i++) {
-    mass[i] = buff / sum;
-    buff *= (double)(sequence_length - i - no_segment + 1) /
-            (double)(sequence_length - i - 1);
+/*  if (inf_bound == 1) {
+    buff = 1.;
+    for (i = 1;i < no_segment - 1;i++) {
+      buff *= (double)(sequence_length - i - 1) / (double)i;
+    }
+    sum = buff * (double)(sequence_length - 1) / (double)(no_segment - 1);
+
+    for (i = 1;i <= sequence_length - no_segment + 1;i++) {
+      mass[i] = buff / sum;
+      buff *= (double)(sequence_length - i - no_segment + 1) /
+              (double)(sequence_length - i - 1);
+    }
   }
+
+  else { */
+    buff = 1.;
+    for (i = 1;i < no_segment - 1;i++) {
+      buff *= (double)(sequence_length - i - (inf_bound - 1) * no_segment - 1) / (double)i;
+    }
+    sum = buff * (double)(sequence_length - (inf_bound - 1) * no_segment - 1) / (double)(no_segment - 1);
+
+    for (i = inf_bound;i <= sequence_length - inf_bound * (no_segment - 1);i++) {
+      mass[i] = buff / sum;
+      buff *= (double)(sequence_length - i - inf_bound * (no_segment - 1)) /
+              (double)(sequence_length - i - (inf_bound - 1) * (no_segment - 1) - 1);
+    }
+//  }
 
   cumul_computation();
 
 # ifdef MESSAGE
   int j , k;
-  double bcumul , **segment_length , **nb_segmentation_forward , **nb_segmentation_backward;
+  double bcumul , **nb_segmentation_forward , **nb_segmentation_backward , **segment_length;
 
 
   nb_segmentation_forward = new double*[sequence_length];
@@ -813,8 +832,10 @@ void DiscreteParametric::prior_segment_length_computation()
 
   segment_length = new double*[no_segment];
   for (i = 0;i < no_segment;i++) {
-    segment_length[i] = new double[sequence_length - no_segment + 2];
-    for (j = 0;j <= sequence_length - no_segment + 1;j++) {
+//    segment_length[i] = new double[sequence_length - no_segment + 2];
+    segment_length[i] = new double[sequence_length - inf_bound * (no_segment - 1) + 1];
+//    for (j = 0;j <= sequence_length - no_segment + 1;j++) {
+    for (j = 0;j <= sequence_length - inf_bound * (no_segment - 1);j++) {
       segment_length[i][j] = 0.;
     }
   }
@@ -827,12 +848,15 @@ void DiscreteParametric::prior_segment_length_computation()
     }
 
     for (j = MAX(0 , no_segment + i - sequence_length);j < MIN((i < sequence_length - 1 ? no_segment - 1 : no_segment) , i + 1);j++) {
-      if (j == 0) {
-        nb_segmentation_forward[i][j]++;
+      if (j == 0)  {
+        if (i >= inf_bound - 1) {
+          nb_segmentation_forward[i][j]++;
+        }
       }
 
       else {
-        for (k = i;k >= j;k--) {
+//        for (k = i;k >= j;k--) {
+        for (k = i - inf_bound + 1;k >= inf_bound * j;k--) {
           nb_segmentation_forward[i][j] += nb_segmentation_forward[k - 1][j - 1];
         }
       }
@@ -848,32 +872,36 @@ void DiscreteParametric::prior_segment_length_computation()
 
     for (j = MAX(1 , no_segment + i - sequence_length);j < MIN(no_segment , i + 1);j++) {
       if (j < no_segment - 1) {
-        for (k = i;k <= sequence_length + j - no_segment;k++) {
+//        for (k = i;k <= sequence_length + j - no_segment;k++) {
+        for (k = i + inf_bound - 1;k <= sequence_length - inf_bound * (no_segment - j - 1) - 1;k++) {
           nb_segmentation_backward[i][j] += nb_segmentation_backward[k + 1][j + 1];
           segment_length[j][k - i + 1] += nb_segmentation_forward[i - 1][j - 1] *
                                           nb_segmentation_backward[k + 1][j + 1];
         }
       }
 
-      else {
+      else if (i <= sequence_length - inf_bound) {
         nb_segmentation_backward[i][j]++;
         segment_length[j][sequence_length - i] += nb_segmentation_forward[i - 1][j - 1];
       }
     }
   }
 
-  for (i = 0;i <= sequence_length - no_segment;i++) {
-    segment_length[0][i + 1] += nb_segmentation_backward[i + 1][1];
+//  for (i = 1;i <= sequence_length - no_segment + 1;i++) {
+  for (i = inf_bound;i <= sequence_length - inf_bound * (no_segment - 1);i++) {
+    segment_length[0][i] += nb_segmentation_backward[i][1];
   }
 
   for (i = 0;i < no_segment;i++) {
     sum = 0.;
-    for (j = 1;j <= sequence_length - no_segment + 1;j++) {
+//    for (j = 1;j <= sequence_length - no_segment + 1;j++) {
+    for (j = inf_bound;j <= sequence_length - inf_bound * (no_segment - 1);j++) {
       sum += segment_length[i][j];
     }
 
     bcumul = 0.;
-    for (j = 1;j <= sequence_length - no_segment + 1;j++) {
+//    for (j = 1;j <= sequence_length - no_segment + 1;j++) {
+    for (j = inf_bound;j <= sequence_length - inf_bound * (no_segment - 1);j++) {
       bcumul += segment_length[i][j] / sum;
 
       if ((bcumul < cumul[j] - DOUBLE_ERROR) || (bcumul > cumul[j] + DOUBLE_ERROR)) {
@@ -881,8 +909,8 @@ void DiscreteParametric::prior_segment_length_computation()
       }
     }
 
-/*    cout << "\n" << SEQ_label[SEQL_SEGMENT] << " " << i << ":";
-    for (j = 1;j <= sequence_length - no_segment + 1;j++) {
+/*    cout << "\nSegment " << i << ":";
+    for (j = inf_bound;j <= sequence_length - inf_bound * (no_segment - 1);j++) {
       cout << " " << segment_length[i][j] / sum;
     }
     cout << endl; */
