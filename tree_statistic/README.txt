@@ -1,4 +1,4 @@
-vplants.tree_statictic
+vplants.tree_statistic
 ----------------------
 
 Description
