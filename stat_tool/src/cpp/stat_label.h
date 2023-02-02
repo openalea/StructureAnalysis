@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -55,6 +55,8 @@ namespace stat_tool {
     STATW_SUP_BOUND ,
     STATW_PARAMETER ,
     STATW_PROBABILITY ,
+    STATW_NO_SEGMENT ,
+    STATW_SEQUENCE_LENGTH ,
 
     STATW_SHAPE ,
     STATW_SCALE ,
@@ -65,6 +67,7 @@ namespace stat_tool {
     STATW_CONCENTRATION ,
     STATW_INTERCEPT ,
     STATW_SLOPE ,
+    STATW_AUTOREGRESSIVE_COEFF ,
 
     STATW_MIXTURE ,
     STATW_CONVOLUTION ,
@@ -95,9 +98,13 @@ namespace stat_tool {
 
     STATW_OUTPUT_PROCESS ,
     STATW_OUTPUT_PROCESSES ,
+
     STATW_NONPARAMETRIC ,   // for ascending compatibility
+
     STATW_CATEGORICAL ,
+
     STATW_PARAMETRIC ,   // for ascending compatibility
+
     STATW_DISCRETE_PARAMETRIC ,
     STATW_CONTINUOUS_PARAMETRIC ,
     STATW_OBSERVATION_DISTRIBUTION ,
@@ -143,6 +150,7 @@ namespace stat_tool {
     STATL_MODE ,
     STATL_VARIANCE ,
     STATL_STANDARD_DEVIATION ,
+    STATL_QUANTILE ,
     STATL_LOWER_QUARTILE ,
     STATL_UPPER_QUARTILE ,
     STATL_MEAN_ABSOLUTE_DEVIATION ,
@@ -274,7 +282,9 @@ namespace stat_tool {
     STATL_RESPONSE_VARIABLE ,
     STATL_CORRELATION_COEFF ,
     STATL_R_SQUARED ,
-    STATL_REGRESSION_VARIATION_TOTAL_VARIATION ,
+//    STATL_REGRESSION_VARIATION_TOTAL_VARIATION ,
+    STATL_DETERMINATION_COEFF ,
+    STATL_NULL_AUTOREGRESSIVE_COEFF_95_CONFIDENCE_LIMIT ,
     STATL_RESIDUAL ,
     STATL_STANDARDIZED_RESIDUAL ,
     STATL_LINEAR ,
@@ -494,6 +504,7 @@ namespace stat_tool {
     STATR_NB_VECTOR ,
     STATR_NB_VARIABLE ,
     STATR_NB_SELECTED_VARIABLE ,
+    STATR_NB_SUMMED_VARIABLE ,
     STATR_VARIABLE_TYPE ,
     STATR_VARIABLE_INDEX ,
     STATR_VARIABLE_INDICES ,

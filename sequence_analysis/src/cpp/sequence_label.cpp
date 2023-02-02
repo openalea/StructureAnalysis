@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -153,7 +153,7 @@ const char *SEQ_label[] = {
   "absorption probability of " ,
   "biased" ,
   "occupancy" ,
-  "complete/censored state occupancy weights",
+  "complete/censored state occupancy weights" ,
   "initial run" ,
   "final run" ,
   "mixture of " ,
@@ -170,6 +170,7 @@ const char *SEQ_label[] = {
   "posterior state sequence probability" ,
   "posterior state sequence probability log ratio" ,
   "state begin" ,
+  "posterior most probable initial state probability" ,
   "posterior state probabilities" ,
   "posterior in state probabilities" ,
   "posterior out state probabilities" ,
@@ -196,6 +197,7 @@ const char *SEQ_label[] = {
   "rank" ,
   "lag" ,
   "maximum lag" ,
+  "autoregressive model" ,
   "white noise" ,
   "randomness 95% confidence limit" ,
   "pair frequency" ,
@@ -233,10 +235,12 @@ const char *SEQ_label[] = {
   "segment sample size" ,
   "global standard deviation" ,
   "global residual standard deviation" ,
+  "root mean square error" ,
+  "mean absolute error" ,
   "piecewise linear function" ,
+  "confidence interval" ,
   "confidence intervals" ,
   "autoregressive coefficient" ,
-  "95% confidence limits for a null autoregressive coefficient" ,
   "number of segments" ,
   "posterior probability" ,
   "dimension jump" ,
@@ -350,6 +354,7 @@ const char *SEQ_error[] = {
   "bad vertex identifier" ,
   "bad index parameter type" ,
   "bad index parameter" ,
+  "bad state" ,
   "bad variable indices" ,
   "bad variable lag" ,
   "bad date order" ,
@@ -370,6 +375,7 @@ const char *SEQ_error[] = {
   "bad frequency" ,
   "bad maximum lag" ,
   "incompatible with other correlation functions" ,
+  "bad autoregressive coefficient: should be between -1 and 1" ,
   "bad differencing order" ,
   "initial run histograms already built" ,
   "bad run length" ,
@@ -381,6 +387,7 @@ const char *SEQ_error[] = {
   "consecutive values from 0" ,
   "non-existing characteristic distribution" ,
   "non-existing forward sojourn time distribution" ,
+  "bad ordering of the posterior probabilities of the most probable state sequence and the most probable initial state" ,
   "incompatible with model" ,
   "sequence incompatible with model" ,
 

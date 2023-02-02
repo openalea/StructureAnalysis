@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -70,7 +70,7 @@ template <typename Type>
 double quantile_computation(int nb_individual , Type *value , double cumul)
 
 {
-  register int i , j;
+  int i , j;
   int *index;
   Type bvalue , min_value , max_value;
   double quantile;

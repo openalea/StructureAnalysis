@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -104,7 +104,6 @@ namespace sequence_analysis {
   };
 
 
-
   class NonhomogeneousMarkovData;
 
   /// \brief Nonhomogeneous Markov chain
@@ -192,7 +191,6 @@ namespace sequence_analysis {
     Function* get_self_transition(int state) const { return self_transition[state]; }
     CategoricalSequenceProcess* get_process() const { return process; }
   };
-
 
 
   /// \brief Data structure corresponding to a nonhomogeneous Markov chain

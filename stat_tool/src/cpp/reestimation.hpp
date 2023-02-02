@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -45,8 +45,6 @@
 
 #include <boost/math/special_functions/digamma.hpp>
 
-#include "tool/util_math.h"
-
 #include "stat_label.h"
 
 using namespace std;
@@ -82,7 +80,7 @@ void Reestimation<Type>::init(int inb_value)
   }
 
   else {
-    register int i;
+    int i;
 
     frequency = new Type[nb_value];
 
@@ -105,7 +103,7 @@ template <typename Type>
 void Reestimation<Type>::copy(const Reestimation<Type> &histo)
 
 {
-  register int i;
+  int i;
 
 
   nb_value = histo.nb_value;
@@ -153,7 +151,7 @@ template <typename Type>
 Reestimation<Type>::Reestimation(int nb_histo , const Reestimation<Type> **histo)
 
 {
-  register int i , j;
+  int i , j;
 
 
   nb_value = 0;
@@ -257,6 +255,11 @@ ostream& Reestimation<Type>::ascii_characteristic_print(ostream &os , bool shape
     if (variance > 0.) {
       os << "   " << STAT_label[STATL_LOWER_QUARTILE] << ": " << quantile_computation(0.25)
          << "   " << STAT_label[STATL_UPPER_QUARTILE] << ": " << quantile_computation(0.75);
+
+#     ifdef DEBUG
+      os << "   0.9 " << STAT_label[STATL_QUANTILE] << ": " << quantile_computation(0.9);
+#     endif
+
     }
     os << endl;
 
@@ -321,7 +324,7 @@ template <typename Type>
 ostream& Reestimation<Type>::print(ostream &os) const
 
 {
-  register int i;
+  int i;
 
 
   os << endl;
@@ -397,7 +400,7 @@ template <typename Type>
 void Reestimation<Type>::nb_element_computation()
 
 {
-  register int i;
+  int i;
 
 
   nb_element = 0;
@@ -417,7 +420,7 @@ template <typename Type>
 void Reestimation<Type>::max_computation()
 
 {
-  register int i;
+  int i;
 
 
   max = 0;
@@ -441,7 +444,7 @@ template <typename Type>
 double Reestimation<Type>::mode_computation() const
 
 {
-  register int i;
+  int i;
   int max_frequency;
   double mode;
 
@@ -477,7 +480,7 @@ void Reestimation<Type>::mean_computation()
 
 {
   if (nb_element > 0) {
-    register int i;
+    int i;
 
 
     mean = 0.;
@@ -503,7 +506,7 @@ template <typename Type>
 double Reestimation<Type>::quantile_computation(double icumul) const
 
 {
-  register int i;
+  int i;
   double cumul , quantile;
 
 
@@ -536,26 +539,28 @@ void Reestimation<Type>::variance_computation(bool bias)
 
 {
   if (mean != D_DEFAULT) {
-    variance = 0.;
-
     if (nb_element > 1) {
-      register int i;
+      int i;
       double diff;
+      long double square_sum;
 
 
+      square_sum = 0.;
       for (i = offset;i < nb_value;i++) {
         diff = i - mean;
-        variance += frequency[i] * diff * diff;
+        square_sum += frequency[i] * diff * diff;
       }
 
-      switch (bias) {
-      case false :
-        variance /= (nb_element - 1);
-        break;
-      case true :
-        variance /= nb_element;
-        break;
+      if (bias) {
+        variance = square_sum / nb_element;
       }
+      else {
+        variance = square_sum / (nb_element - 1);
+      }
+    }
+
+    else {
+      variance = 0.;
     }
   }
 }
@@ -575,7 +580,7 @@ template <typename Type>
 double Reestimation<Type>::mean_absolute_deviation_computation(double location) const
 
 {
-  register int i;
+  int i;
   double mean_absolute_deviation = D_DEFAULT;
 
 
@@ -603,7 +608,7 @@ template <typename Type>
 double Reestimation<Type>::log_geometric_mean_computation() const
 
 {
-  register int i;
+  int i;
   double log_geometric_mean = D_DEFAULT;
 
 
@@ -631,21 +636,24 @@ template <typename Type>
 double Reestimation<Type>::skewness_computation() const
 
 {
-  register int i;
+  int i;
   double skewness = D_INF , diff;
+  long double cube_sum;
 
 
   if ((mean != D_DEFAULT) && (variance != D_DEFAULT)) {
-    skewness = 0.;
-
     if ((nb_element > 2) && (variance > 0.)) {
+      cube_sum = 0.;
       for (i = offset;i < nb_value;i++) {
         diff = i - mean;
-        skewness += frequency[i] * diff * diff * diff;
+        cube_sum += frequency[i] * diff * diff * diff;
       }
-
-      skewness = skewness * nb_element /
+      skewness = cube_sum * nb_element /
                  ((nb_element - 1) * (double)(nb_element - 2) * pow(variance , 1.5));
+    }
+
+    else {
+      skewness = 0.;
     }
   }
 
@@ -666,22 +674,23 @@ template <typename Type>
 double Reestimation<Type>::kurtosis_computation() const
 
 {
-  register int i;
+  int i;
   double kurtosis = D_INF , diff;
+  long double power_sum;
 
 
   if ((mean != D_DEFAULT) && (variance != D_DEFAULT)) {
-    if (variance == 0.) {
-      kurtosis = -2.;
+    if (variance > 0.) {
+      power_sum = 0.;
+      for (i = offset;i < nb_value;i++) {
+        diff = i - mean;
+        power_sum += frequency[i] * diff * diff * diff * diff;
+      }
+      kurtosis = power_sum / ((nb_element - 1) * variance * variance) - 3.;
     }
 
     else {
-      kurtosis = 0.;
-      for (i = offset;i < nb_value;i++) {
-        diff = i - mean;
-        kurtosis += frequency[i] * diff * diff * diff * diff;
-      }
-      kurtosis = kurtosis / ((nb_element - 1) * variance * variance) - 3.;
+      kurtosis = -2.;
     }
   }
 
@@ -701,7 +710,7 @@ template <typename Type>
 void Reestimation<Type>::mean_direction_computation(double *mean_direction) const
 
 {
-  register int i , j;
+  int i , j;
 
 
   mean_direction[0] = 0.;
@@ -749,7 +758,7 @@ template <typename Type>
 double Reestimation<Type>::information_computation() const
 
 {
-  register int i;
+  int i;
   double information = D_INF;
 
 
@@ -780,7 +789,7 @@ template <typename Type>
 double Reestimation<Type>::likelihood_computation(const Distribution &dist) const
 
 {
-  register int i;
+  int i;
   double likelihood = 0.;
 
 
@@ -825,7 +834,7 @@ void Reestimation<Type>::distribution_estimation(Distribution *dist) const
 
 {
   if (nb_element > 0) {
-    register int i;
+    int i;
 
 
     dist->offset = offset;
@@ -868,7 +877,7 @@ void Reestimation<Type>::penalized_likelihood_estimation(Distribution *dist , do
 
 {
   if (nb_element > 0) {
-    register int i;
+    int i;
     int iter;
     double ratio , inf_ratio , sup_ratio , norm , inf_norm , sup_norm;
 
@@ -1024,7 +1033,7 @@ double Reestimation<Type>::binomial_estimation(DiscreteParametric *dist , int mi
                                                bool min_inf_bound_flag) const
 
 {
-  register int i , j;
+  int i , j;
   int max_inf_bound , inf_bound , sup_bound , sup_sup_bound , est_sup_bound ,
       min_sup_bound , max_sup_bound;
   double shift_mean , probability , likelihood , inf_bound_likelihood , max_likelihood = D_INF;
@@ -1062,10 +1071,10 @@ double Reestimation<Type>::binomial_estimation(DiscreteParametric *dist , int mi
       // on the basis of the sample mean
 
 #     ifdef DEBUG
-//      cout << "\nbound range : " << min_inf_bound
+//      cout << "\nbound range: " << min_inf_bound
 //           << " | " << max_inf_bound << " (" << sup_sup_bound << ")" << endl;
 
-      register int k = 0;
+      int k = 0;
 #     endif
 
       for (i = min_inf_bound;i <= max_inf_bound;i++) {
@@ -1132,9 +1141,9 @@ double Reestimation<Type>::binomial_estimation(DiscreteParametric *dist , int mi
       }
 
 #     ifdef DEBUG
-//      cout << "\nnumber of cases : "
+//      cout << "\nnumber of cases: "
 //           << (max_inf_bound - min_inf_bound + 1) * (2 * SUP_BOUND_MARGIN + 1)
-//           << " | number of computations : " << k << endl;
+//           << " | number of computations: " << k << endl;
 #     endif
     }
   }
@@ -1162,7 +1171,7 @@ double Reestimation<Type>::poisson_estimation(DiscreteParametric *dist , int min
                                               bool min_inf_bound_flag , double cumul_threshold) const
 
 {
-  register int i;
+  int i;
   int max_inf_bound , inf_bound;
   double diff , parameter , likelihood , max_likelihood = D_INF;
 
@@ -1189,8 +1198,7 @@ double Reestimation<Type>::poisson_estimation(DiscreteParametric *dist , int min
     // estimation for each possible lower bound of the parameter on the basis of the sample mean
 
 #   ifdef DEBUG
-//    cout << "\nplage de recherche : " << min_inf_bound
-//         << " | " << max_inf_bound << endl;
+//    cout << "\ninf bound range: " << min_inf_bound << " | " << max_inf_bound << endl;
 #   endif
 
     for (i = max_inf_bound;i >= min_inf_bound;i--) {
@@ -1220,8 +1228,8 @@ double Reestimation<Type>::poisson_estimation(DiscreteParametric *dist , int min
     }
 
 #   ifdef DEBUG
-//    cout << "\nnumber of cases : " << (max_inf_bound - min_inf_bound + 1)
-//         << " | number of computations : " << (max_inf_bound - i + 1) << endl;
+//    cout << "\nnumber of cases: " << (max_inf_bound - min_inf_bound + 1)
+//         << " | number of computations: " << (max_inf_bound - i + 1) << endl;
 #   endif
   }
 
@@ -1231,7 +1239,7 @@ double Reestimation<Type>::poisson_estimation(DiscreteParametric *dist , int min
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Estimation of the parameters of a shifted negative binomial distribution 
+ *  \brief Estimation of the parameters of a shifted negative binomial distribution
  *         on the basis of a frequency distribution.
  *
  *  \param[in] dist               pointer on a DiscreteParametric object,
@@ -1248,7 +1256,7 @@ double Reestimation<Type>::negative_binomial_estimation(DiscreteParametric *dist
                                                         bool min_inf_bound_flag , double cumul_threshold) const
 
 {
-  register int i;
+  int i;
   int max_inf_bound , inf_bound;
   double diff , shift_mean , parameter , probability , likelihood , max_likelihood = D_INF;
 
@@ -1275,8 +1283,7 @@ double Reestimation<Type>::negative_binomial_estimation(DiscreteParametric *dist
     // the probability on the basis of the sample mean and variance
 
 #   ifdef DEBUG
-//    cout << "\nplage de recherche : " << min_inf_bound
-//         << " | " << max_inf_bound << endl;
+    cout << "\ninf bound range: " << min_inf_bound << " | " << max_inf_bound << endl;
 #   endif
 
     for (i = max_inf_bound;i >= min_inf_bound;i--) {
@@ -1325,8 +1332,8 @@ double Reestimation<Type>::negative_binomial_estimation(DiscreteParametric *dist
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Estimation of the parameters of a discrete parametric distribution
- *         (binomial, Poisson, negative binomial) on the basis of a frequency distribution.
+ *  \brief Estimation of the parameters of a shifted Poisson geometric distribution
+ *         on the basis of a frequency distribution.
  *
  *  \param[in] dist               pointer on a DiscreteParametric object,
  *  \param[in] min_inf_bound      minimum lower bound of the support,
@@ -1338,8 +1345,96 @@ double Reestimation<Type>::negative_binomial_estimation(DiscreteParametric *dist
 /*--------------------------------------------------------------*/
 
 template <typename Type>
+double Reestimation<Type>::poisson_geometric_estimation(DiscreteParametric *dist , int min_inf_bound ,
+                                                        bool min_inf_bound_flag , double cumul_threshold) const
+
+{
+  int i;
+  int max_inf_bound , inf_bound;
+  double diff , buff , parameter , probability , likelihood , max_likelihood = D_INF;
+
+
+  // computation of the interval tested on the lower bound of the support
+
+  if (!min_inf_bound_flag) {
+    max_inf_bound = min_inf_bound;
+  }
+  else {
+    max_inf_bound = MIN(offset , (int)(mean * mean / (variance + mean)));
+  }
+
+  if (mean - max_inf_bound < variance) {
+
+    // estimation for each possible lower bound of the shape parameter and
+    // the probability on the basis of the sample mean and variance
+
+#   ifdef DEBUG
+    cout << "\ninf bound range: " << min_inf_bound << " | " << max_inf_bound << endl;
+#   endif
+
+    for (i = max_inf_bound;i >= min_inf_bound;i--) {
+      dist->inf_bound = i;
+      buff = mean * mean - (variance + mean) * i;
+      dist->parameter = (buff + mean * sqrt(buff)) / (variance + mean);
+      dist->probability = (i + dist->parameter) / mean;
+
+#     ifdef DEBUG
+//      cout << i << " : " dist->parameter << " | " << dist->probability << endl;
+#     endif
+
+      dist->poisson_geometric_computation(nb_value , cumul_threshold);
+      likelihood = dist->likelihood_computation(*this);
+
+      if (likelihood > max_likelihood) {
+        max_likelihood = likelihood;
+        inf_bound = dist->inf_bound;
+        parameter = dist->parameter;
+        probability = dist->probability;
+      }
+
+      else {
+        if (likelihood < max_likelihood) {
+          break;
+        }
+      }
+    }
+
+    // update of the estimated parameters
+
+    if (max_likelihood != D_INF) {
+      dist->init(inf_bound , I_DEFAULT , parameter , probability);
+    }
+
+#   ifdef DEBUG
+//    cout << "\nnumber of cases: " << max_inf_bound - min_inf_bound + 1
+//         << " | number of computations: " << (max_inf_bound - i + 1) << endl;
+#   endif
+  }
+
+  return max_likelihood;
+}
+
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Estimation of the parameters of a discrete parametric distribution
+ *         (binomial, Poisson, negative binomial, Poisson geometric) on the basis of
+ *         a frequency distribution.
+ *
+ *  \param[in] dist               pointer on a DiscreteParametric object,
+ *  \param[in] min_inf_bound      minimum lower bound of the support,
+ *  \param[in] min_inf_bound_flag flag on the distribution shift,
+ *  \param[in] cumul_threshold    threshold on the cumulative distribution function,
+ *  \param[in] poisson_geometric  flag on the estimation of a Poisson geometric distribution.
+ *
+ *  \return                       maximized log-likelihood.
+ */
+/*--------------------------------------------------------------*/
+
+template <typename Type>
 double Reestimation<Type>::parametric_estimation(DiscreteParametric *dist , int min_inf_bound ,
-                                                 bool min_inf_bound_flag , double cumul_threshold) const
+                                                 bool min_inf_bound_flag , double cumul_threshold ,
+                                                 bool poisson_geometric) const
 
 {
   double likelihood;
@@ -1355,6 +1450,9 @@ double Reestimation<Type>::parametric_estimation(DiscreteParametric *dist , int 
   case NEGATIVE_BINOMIAL :
     likelihood = negative_binomial_estimation(dist , min_inf_bound , min_inf_bound_flag , cumul_threshold);
     break;
+  case POISSON_GEOMETRIC :
+    likelihood = poisson_geometric_estimation(dist , min_inf_bound , min_inf_bound_flag , cumul_threshold);
+    break;
   }
 
   return likelihood;
@@ -1364,12 +1462,14 @@ double Reestimation<Type>::parametric_estimation(DiscreteParametric *dist , int 
 /*--------------------------------------------------------------*/
 /**
  *  \brief Estimation of the type and parameters of a discrete parametric distribution
- *         (binomial, Poisson, negative binomial) on the basis of a frequency distribution.
+ *         (binomial, Poisson, negative binomial, Poisson geometric) on the basis of
+ *         a frequency distribution.
  *
  *  \param[in] dist               pointer on a DiscreteParametric object,
  *  \param[in] min_inf_bound      minimum lower bound of the support,
  *  \param[in] min_inf_bound_flag flag on the distribution shift,
- *  \param[in] cumul_threshold    threshold on the cumulative distribution function.
+ *  \param[in] cumul_threshold    threshold on the cumulative distribution function,
+ *  \param[in] poisson_geometric  flag on the estimation of a Poisson geometric distribution.
  *
  *  \return                       maximized log-likelihood.
  */
@@ -1377,7 +1477,8 @@ double Reestimation<Type>::parametric_estimation(DiscreteParametric *dist , int 
 
 template <typename Type>
 double Reestimation<Type>::type_parametric_estimation(DiscreteParametric *dist , int min_inf_bound ,
-                                                      bool min_inf_bound_flag , double cumul_threshold) const
+                                                      bool min_inf_bound_flag , double cumul_threshold ,
+                                                      bool poisson_geometric) const
 
 {
   double likelihood , max_likelihood;
@@ -1404,12 +1505,24 @@ double Reestimation<Type>::type_parametric_estimation(DiscreteParametric *dist ,
     dist->copy(*bdist);
   }
 
+  if ((min_inf_bound == 0) || (!poisson_geometric)) {  // for comparing negative binomial and poisson geometric distributions
   likelihood = negative_binomial_estimation(bdist , min_inf_bound , min_inf_bound_flag , cumul_threshold);
   if (likelihood > max_likelihood) {
     bdist->ident = NEGATIVE_BINOMIAL;
     max_likelihood = likelihood;
     dist->equal_size_copy(*bdist);
     dist->copy(*bdist);
+  }
+  }
+
+  if ((min_inf_bound > 0) && (poisson_geometric)) {
+    likelihood = poisson_geometric_estimation(bdist , min_inf_bound , min_inf_bound_flag , cumul_threshold);
+    if (likelihood > max_likelihood) {
+      bdist->ident = POISSON_GEOMETRIC;
+      max_likelihood = likelihood;
+      dist->equal_size_copy(*bdist);
+      dist->copy(*bdist);
+    }
   }
 
   delete bdist;
@@ -1478,7 +1591,7 @@ void Reestimation<Type>::equilibrium_process_combination(const Reestimation<Type
 
 {
   if (nb_element + length_bias_reestim->nb_element > 0) {
-    register int i;
+    int i;
 
 
     for (i = offset;i < nb_value;i++) {
@@ -1512,7 +1625,7 @@ void Reestimation<Type>::equilibrium_process_estimation(const Reestimation<Type>
 
 {
   if (nb_element + length_bias_reestim->nb_element > 0) {
-    register int i;
+    int i;
 
 
     for (i = 0;i < offset;i++) {
@@ -1569,7 +1682,7 @@ void Reestimation<Type>::penalized_likelihood_equilibrium_process_estimation(con
 
 {
   if (nb_element + length_bias_reestim->nb_element > 0) {
-    register int i;
+    int i;
     int iter;
     double ratio , inf_ratio , sup_ratio , norm , inf_norm , sup_norm;
 
@@ -1700,7 +1813,7 @@ void Reestimation<Type>::state_occupancy_estimation(const Reestimation<Type> *fi
                                                     bool characteristic_computation)
 
 {
-  register int i;
+  int i;
   int max_nb_value;
   double hazard_rate , hazard_product;
 
@@ -1776,7 +1889,7 @@ template <typename Type>
 void Reestimation<Type>::gamma_estimation(ContinuousParametric *dist , int iter) const
 
 {
-//  register int i;
+//  int i;
   double buff , log_geometric_mean , diff;
 //  double bvariance;
 
@@ -1801,7 +1914,7 @@ void Reestimation<Type>::gamma_estimation(ContinuousParametric *dist , int iter)
       // Hawang & Huang (2012), Ann. Inst. Statist. Math. 54(4), 840-847
 
       buff = mean * mean / variance;
-      if (buff >  GAMMA_INVERSE_SAMPLE_SIZE_FACTOR / (double)nb_element) {
+      if (buff > GAMMA_INVERSE_SAMPLE_SIZE_FACTOR / (double)nb_element) {
         dist->shape = buff - 1. / (double)nb_element;
       }
       else {
@@ -1874,7 +1987,7 @@ void Reestimation<Type>::zero_inflated_gamma_estimation(ContinuousParametric *di
   }
 
   else {
-    register int i;
+    int i;
     double bmean , bvariance , buff , diff , log_geometric_mean;
 
 
@@ -1906,7 +2019,7 @@ void Reestimation<Type>::zero_inflated_gamma_estimation(ContinuousParametric *di
       // Hawang & Huang (2012), Ann. Inst. Statist. Math. 54(4), 840-847
 
       buff = bmean * bmean / bvariance;
-      if (buff >  GAMMA_INVERSE_SAMPLE_SIZE_FACTOR / (double)(nb_element - frequency[0])) {
+      if (buff > GAMMA_INVERSE_SAMPLE_SIZE_FACTOR / (double)(nb_element - frequency[0])) {
         dist->shape = buff - 1. / (double)(nb_element - frequency[0]);
       }
       else {
@@ -1970,7 +2083,7 @@ template <typename Type>
 void Reestimation<Type>::inverse_gaussian_estimation(ContinuousParametric *dist) const
 
 {
-  register int i;
+  int i;
 
 
   if (mean > 0.) {

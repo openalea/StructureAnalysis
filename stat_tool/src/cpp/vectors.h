@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -239,6 +239,9 @@ namespace stat_tool {
                              ContinuousParametricProcess *process) const;
     template <typename Type>
     void tied_gaussian_estimation(Type **component_vector_count , int variable ,
+                                  ContinuousParametricProcess *process) const;
+    template <typename Type>
+    void tied_gaussian_estimation(Type **component_vector_count , int variable ,
                                   ContinuousParametricProcess *process ,
                                   tying_rule variance_factor) const;
     template <typename Type>
@@ -294,10 +297,12 @@ namespace stat_tool {
     Vectors* scaling(StatError &error , int variable , double scaling_coeff) const;
     Vectors* round(StatError &error , int variable = I_DEFAULT ,
                    rounding mode = ROUND) const;
+    Vectors* log_transform(StatError &error , int variable = I_DEFAULT ,
+                           log_base base = NATURAL) const;
 
-    Vectors* value_select(StatError &error , std::ostream &os , int variable ,
+    Vectors* value_select(StatError &error , bool display , int variable ,
                           int imin_value , int imax_value , bool keep = true) const;
-    Vectors* value_select(StatError &error , std::ostream &os , int variable ,
+    Vectors* value_select(StatError &error , bool display , int variable ,
                           double imin_value , double imax_value , bool keep = true) const;
 
     Vectors* select_individual(StatError &error , int inb_vector , int *iidentifier ,
@@ -308,6 +313,8 @@ namespace stat_tool {
                              bool keep = true) const;
     Vectors* select_variable(StatError &error , int inb_variable , std::vector<int> ivariable ,
                              bool keep = true) const;
+    Vectors* sum_variable(StatError &error , int nb_summed_variable , int *ivariable) const;
+    Vectors* sum_variable(StatError &error , int nb_summed_variable , std::vector<int> ivariable) const;
     Vectors* merge_variable(StatError &error , int nb_sample , const Vectors **ivec ,
                             int ref_sample = I_DEFAULT) const;
     Vectors* merge_variable(StatError &error , int nb_sample , const std::vector<Vectors> ivec ,
@@ -340,20 +347,20 @@ namespace stat_tool {
     double spearman_rank_single_correlation_computation() const;
     double kendall_rank_single_correlation_computation() const;
 
-    bool rank_correlation_computation(StatError &error , std::ostream &os ,
+    bool rank_correlation_computation(StatError &error , bool display ,
                                       correlation_type correl_type , const std::string path = "") const;
 
     DistanceMatrix* comparison(StatError &error , const VectorDistance &ivector_dist ,
                                bool standardization = true) const;
 
-    bool contingency_table(StatError &error , std::ostream &os , int variable1 ,
+    bool contingency_table(StatError &error , bool display , int variable1 ,
                            int variable2 , const std::string path = "" , output_format format = ASCII) const;
 
-    bool variance_analysis(StatError &error , std::ostream &os , int class_variable ,
+    bool variance_analysis(StatError &error , bool display , int class_variable ,
                            int response_variable , int response_type ,
                            const std::string path = "" , output_format format = ASCII) const;
 
-    bool sup_norm_distance(StatError &error , std::ostream &os , const Vectors &ivec) const;
+    bool sup_norm_distance(StatError &error , bool display , const Vectors &ivec) const;
 
     Regression* linear_regression(StatError &error , int explanatory_variable ,
                                   int response_variable) const;
@@ -367,22 +374,33 @@ namespace stat_tool {
                                           int response_variable , double span ,
                                           bool weighting = true) const;
 
-    Mixture* mixture_estimation(StatError &error , std::ostream &os , const Mixture &imixt ,
+    Mixture* mixture_estimation(StatError &error , bool display , const Mixture &imixt ,
                                 bool known_component = false , bool common_dispersion = false ,
                                 tying_rule variance_factor = INDEPENDENT , bool assignment = true ,
                                 int nb_iter = I_DEFAULT) const;
-    Mixture* mixture_estimation(StatError &error , ostream &os , int nb_component ,
+    Mixture* mixture_estimation(StatError &error , bool display , int nb_component ,
+                                double offset , double mean , double standard_deviation ,
+                                bool common_dispersion = true , bool assignment = true ,
+                                int nb_iter = I_DEFAULT) const;
+    Mixture* mixture_estimation(StatError &error , bool display , int nb_component ,
                                 int ident , double mean , double standard_deviation ,
                                 bool tied_location = true , tying_rule variance_factor = SCALING_FACTOR ,
                                 bool assignment = true , int nb_iter = I_DEFAULT) const;
-    Mixture* mixture_stochastic_estimation(StatError &error , std::ostream &os , const Mixture &imixt ,
+    Mixture* mixture_stochastic_estimation(StatError &error , bool display , const Mixture &imixt ,
                                            bool known_component = false , bool common_dispersion = false ,
                                            tying_rule variance_factor = INDEPENDENT ,
                                            int min_nb_assignment = MIN_NB_ASSIGNMENT ,
                                            int max_nb_assignment = MAX_NB_ASSIGNMENT ,
                                            double parameter = NB_ASSIGNMENT_PARAMETER ,
                                            bool assignment = true , int nb_iter = I_DEFAULT) const;
-    Mixture* mixture_stochastic_estimation(StatError &error , ostream &os , int nb_component ,
+    Mixture* mixture_stochastic_estimation(StatError &error , bool display , int nb_component ,
+                                           double offset , double mean , double standard_deviation ,
+                                           bool common_dispersion = true ,
+                                           int min_nb_assignment = MIN_NB_ASSIGNMENT ,
+                                           int max_nb_assignment = MAX_NB_ASSIGNMENT ,
+                                           double parameter = NB_ASSIGNMENT_PARAMETER ,
+                                           bool assignment = true , int nb_iter = I_DEFAULT) const;
+    Mixture* mixture_stochastic_estimation(StatError &error , bool display , int nb_component ,
                                            int ident , double mean , double standard_deviation ,
                                            bool tied_location = true , tying_rule variance_factor = SCALING_FACTOR ,
                                            int min_nb_assignment = MIN_NB_ASSIGNMENT ,
@@ -410,7 +428,6 @@ namespace stat_tool {
     double get_real_vector(int ivec , int variable) const
     { return real_vector[ivec][variable]; }
   };
-
 
 
   /// \brief Parameterization of a distance between vectors with heterogeneous variables

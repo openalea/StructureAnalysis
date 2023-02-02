@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -178,6 +178,7 @@ namespace stat_tool {
     void graph_accessibility_computation(bool **ilogic_transition);
     void probability_accessibility_computation();
     void component_computation(bool **ilogic_transition = NULL);
+    bool parallel_initial_state() const;
 
     void thresholding(double min_probability , bool semi_markov = false);
 
@@ -189,7 +190,6 @@ namespace stat_tool {
     double likelihood_computation(const ChainData &chain_data , bool initial_flag = true) const;
     void chi2_fit(const ChainData &chain_data , Test &test) const;
   };
-
 
 
   /// \brief Data structure corresponding to a Markov chain
@@ -205,7 +205,6 @@ namespace stat_tool {
 
     void estimation(Chain &chain) const;
   };
-
 
 
   /// \brief Categorical observation process
@@ -265,7 +264,6 @@ namespace stat_tool {
   };
 
 
-
   /// \brief Discrete parametric observation process
 
   class DiscreteParametricProcess {
@@ -321,7 +319,6 @@ namespace stat_tool {
   };
 
 
-
   /// \brief Continuous parametric observation process
 
   class ContinuousParametricProcess {
@@ -332,6 +329,7 @@ namespace stat_tool {
     continuous_parametric ident;  ///< identifiers of observation distributions
     bool tied_location;     ///< flag tied means  (gamma, Gaussian)
     bool tied_dispersion;   ///< flag tied dispersion parameters (gamma, Gaussian, von Mises)
+    double offset;          ///< offset for Gaussian mixture with evenly spaced means
     angle_unit unit;        ///< unit (degree/radian) for von Mises distributions
     ContinuousParametric **observation;  ///< continuous observation distributions
     Distribution *weight;   ///< theoretical weights of observation distributions

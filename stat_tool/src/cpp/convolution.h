@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -143,7 +143,6 @@ namespace stat_tool {
     int get_nb_distribution() const { return nb_distribution; }
     DiscreteParametric* get_distribution(int index) const { return distribution[index]; }
   };
-
 
 
   /// \brief Data structure corresponding to a convolution of discrete distributions

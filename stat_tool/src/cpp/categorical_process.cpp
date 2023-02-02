@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -38,15 +38,13 @@
 
 #include <iomanip>
 
-#include "tool/rw_tokenizer.h"
-#include "tool/rw_cstring.h"
-#include "tool/rw_locale.h"
-#include "tool/config.h"
+#include <boost/tokenizer.hpp>
 
 #include "markovian.h"
 #include "stat_label.h"
 
 using namespace std;
+using namespace boost;
 
 
 namespace stat_tool {
@@ -71,7 +69,7 @@ CategoricalProcess::CategoricalProcess(int inb_state , int inb_value ,
   nb_value = inb_value;
 
   if (observation_flag) {
-    register int i;
+    int i;
 
 
     observation = new Distribution*[nb_state];
@@ -105,7 +103,7 @@ CategoricalProcess::CategoricalProcess(int inb_state , int inb_value ,
                                        double **observation_probability)
 
 {
-  register int i , j;
+  int i , j;
 
 
   nb_state = inb_state;
@@ -144,7 +142,7 @@ CategoricalProcess::CategoricalProcess(int inb_state , int inb_value ,
 CategoricalProcess::CategoricalProcess(int inb_state , Distribution **pobservation)
 
 {
-  register int i;
+  int i;
 
   nb_value = 0;
   nb_state = inb_state;
@@ -157,7 +155,7 @@ CategoricalProcess::CategoricalProcess(int inb_state , Distribution **pobservati
 
     observation[i]->max_computation();
     nb_value = max(nb_value, observation[i]->nb_value);
-  }  
+  }
 
   weight = NULL;
   mixture = NULL;
@@ -177,7 +175,7 @@ CategoricalProcess::CategoricalProcess(int inb_state , Distribution **pobservati
 void CategoricalProcess::copy(const CategoricalProcess &process)
 
 {
-  register int i;
+  int i;
 
 
   nb_state = process.nb_state;
@@ -224,7 +222,7 @@ void CategoricalProcess::remove()
 
 {
   if (observation) {
-    register int i;
+    int i;
 
 
     for (i = 0;i < nb_state;i++) {
@@ -297,19 +295,18 @@ CategoricalProcess& CategoricalProcess::operator=(const CategoricalProcess &proc
  */
 /*--------------------------------------------------------------*/
 
-CategoricalProcess* CategoricalProcess::parsing(StatError &error , ifstream &in_file ,
-                                                int &line , int nb_state , model_type model ,
-                                                bool hidden)
+CategoricalProcess* CategoricalProcess::parsing(StatError &error , ifstream &in_file , int &line ,
+                                                int nb_state , model_type model , bool hidden)
 
 {
-  RWLocaleSnapshot locale("en");
-  RWCString buffer , token;
+  string buffer;
   size_t position;
+  typedef tokenizer<char_separator<char>> tokenizer;
+  char_separator<char> separator(" \t");
   enum{PSTATE , POUTPUT};
   bool status = true , lstatus , defined_output[NB_OUTPUT];
-  register int i , j;
-  int type , state , output , nb_value;
-  long value;
+  int i , j;
+  int type , state , output , value , nb_value;
   double proba , cumul , **observation_probability;
   CategoricalProcess *process;
 
@@ -332,35 +329,35 @@ CategoricalProcess* CategoricalProcess::parsing(StatError &error , ifstream &in_
   output = NB_OUTPUT;
   cumul = 0.;
 
-  while (buffer.readLine(in_file , false)) {
+  while (getline(in_file , buffer)) {
     line++;
 
 #   ifdef DEBUG
     cout << line << "  " << buffer << endl;
 #   endif
 
-    position = buffer.first('#');
-    if (position != RW_NPOS) {
-      buffer.remove(position);
+    position = buffer.find('#');
+    if (position != string::npos) {
+      buffer.erase(position);
     }
     i = 0;
 
-    RWCTokenizer next(buffer);
+    tokenizer tok_buffer(buffer , separator);
 
-    while (!((token = next()).isNull())) {
+    for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
       switch (i) {
 
       case 0 : {
 
         // test COMPONENT/STATE keyword
 
-        if ((token == STAT_word[STATW_STATE]) || (token == STAT_word[STATW_COMPONENT])) {
+        if ((*token == STAT_word[STATW_STATE]) || (*token == STAT_word[STATW_COMPONENT])) {
           type = PSTATE;
 
           switch (model) {
 
           case MIXTURE : {
-            if (token != STAT_word[STATW_COMPONENT]) {
+            if (*token != STAT_word[STATW_COMPONENT]) {
               status = false;
               error.correction_update(STAT_parsing[STATP_KEYWORD] ,
                                       STAT_word[STATW_COMPONENT] , line , i + 1);
@@ -369,7 +366,7 @@ CategoricalProcess* CategoricalProcess::parsing(StatError &error , ifstream &in_
           }
 
           case HIDDEN_MARKOV : {
-            if (token != STAT_word[STATW_STATE]) {
+            if (*token != STAT_word[STATW_STATE]) {
               status = false;
               error.correction_update(STAT_parsing[STATP_KEYWORD] ,
                                       STAT_word[STATW_STATE] , line , i + 1);
@@ -392,7 +389,7 @@ CategoricalProcess* CategoricalProcess::parsing(StatError &error , ifstream &in_
 
         // test OUTPUT keyword
 
-        else if (token == STAT_word[STATW_OUTPUT]) {
+        else if (*token == STAT_word[STATW_OUTPUT]) {
           type = POUTPUT;
         }
 
@@ -407,10 +404,19 @@ CategoricalProcess* CategoricalProcess::parsing(StatError &error , ifstream &in_
       // test component/state index or observation category
 
       case 1 : {
+        lstatus = true;
+
+/*        try {
+          value = stoi(*token);   in C++ 11
+        }
+        catch(invalid_argument &arg) {
+          lstatus = false;
+        } */
+        value = atoi(token->c_str());
+
         switch (type) {
 
         case PSTATE : {
-          lstatus = locale.stringToNum(token , &value);
           if ((lstatus) && ((value != state) || (value >= nb_state))) {
             lstatus = false;
           }
@@ -431,7 +437,6 @@ CategoricalProcess* CategoricalProcess::parsing(StatError &error , ifstream &in_
         }
 
         case POUTPUT : {
-          lstatus = locale.stringToNum(token , &value);
           if (lstatus) {
             if ((value <= output) || (value >= NB_OUTPUT)) {
               lstatus = false;
@@ -459,7 +464,7 @@ CategoricalProcess* CategoricalProcess::parsing(StatError &error , ifstream &in_
         // test OBSERVATION_DISTRIBUTION keyword
 
         case PSTATE : {
-          if (token != STAT_word[STATW_OBSERVATION_DISTRIBUTION]) {
+          if (*token != STAT_word[STATW_OBSERVATION_DISTRIBUTION]) {
             status = false;
             error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_OBSERVATION_DISTRIBUTION] , line , i + 1);
           }
@@ -469,7 +474,7 @@ CategoricalProcess* CategoricalProcess::parsing(StatError &error , ifstream &in_
         // test separator
 
         case POUTPUT : {
-          if (token != ":") {
+          if (*token != ":") {
             status = false;
             error.update(STAT_parsing[STATP_SEPARATOR] , line , i + 1);
           }
@@ -484,7 +489,16 @@ CategoricalProcess* CategoricalProcess::parsing(StatError &error , ifstream &in_
 
       case 3 : {
         if (type == POUTPUT) {
-          lstatus = locale.stringToNum(token , &proba);
+          lstatus = true;
+
+/*          try {
+            proba = stod(*token);   in C++ 11
+          }
+          catch (invalid_argument &arg) {
+            lstatus = false;
+          } */
+          proba = atof(token->c_str());
+
           if (lstatus) {
             if ((proba < 0.) || (proba > 1. - cumul + DOUBLE_ERROR)) {
               lstatus = false;
@@ -593,45 +607,44 @@ CategoricalProcess* CategoricalProcess::parsing(StatError &error , ifstream &in_
  */
 /*--------------------------------------------------------------*/
 
-CategoricalProcess** CategoricalProcess::old_parsing(StatError &error , ifstream &in_file ,
-                                                     int &line , int nb_state ,
-                                                     int &nb_output_process)
+CategoricalProcess** CategoricalProcess::old_parsing(StatError &error , ifstream &in_file , int &line ,
+                                                     int nb_state , int &nb_output_process)
 
 {
-  RWLocaleSnapshot locale("en");
-  RWCString buffer , token;
+  string buffer;
   size_t position;
+  typedef tokenizer<char_separator<char>> tokenizer;
+  char_separator<char> separator(" \t");
   bool status = true , lstatus;
-  register int i;
-  int index;
-  long value;
+  int i;
+  int value , index;
   CategoricalProcess **process;
 
 
   nb_output_process = I_DEFAULT;
   process = NULL;
 
-  while (buffer.readLine(in_file , false)) {
+  while (getline(in_file , buffer)) {
     line++;
 
 #   ifdef DEBUG
     cout << line << "  " << buffer << endl;
 #   endif
 
-    position = buffer.first('#');
-    if (position != RW_NPOS) {
-      buffer.remove(position);
+    position = buffer.find('#');
+    if (position != string::npos) {
+      buffer.erase(position);
     }
     i = 0;
 
-    RWCTokenizer next(buffer);
+    tokenizer tok_buffer(buffer , separator);
 
-    while (!((token = next()).isNull())) {
+    for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
 
       // test OBSERVATION_PROBABILITIES keyword
 
       if (i == 0) {
-        if (token != STAT_word[STATW_OBSERVATION_PROBABILITIES]) {
+        if (*token != STAT_word[STATW_OBSERVATION_PROBABILITIES]) {
           status = false;
           error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_OBSERVATION_PROBABILITIES] , line);
         }
@@ -649,28 +662,37 @@ CategoricalProcess** CategoricalProcess::old_parsing(StatError &error , ifstream
     }
   }
 
-  while (buffer.readLine(in_file , false)) {
+  while (getline(in_file , buffer)) {
     line++;
 
 #   ifdef DEBUG
     cout << line << "  " << buffer << endl;
 #   endif
 
-    position = buffer.first('#');
-    if (position != RW_NPOS) {
-      buffer.remove(position);
+    position = buffer.find('#');
+    if (position != string::npos) {
+      buffer.erase(position);
     }
     i = 0;
 
-    RWCTokenizer next(buffer);
+    tokenizer tok_buffer(buffer , separator);
 
-    while (!((token = next()).isNull())) {
+    for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
       switch (i) {
 
       // test number of observation processes
 
       case 0 : {
-        lstatus = locale.stringToNum(token , &value);
+        lstatus = true;
+
+/*        try {
+          value = stoi(*token);   in C++ 11
+        }
+        catch(invalid_argument &arg) {
+          lstatus = false;
+        } */
+        value = atoi(token->c_str());
+
         if (lstatus) {
           if ((value < 1) || (value > NB_OUTPUT_PROCESS)) {
             lstatus = false;
@@ -690,7 +712,7 @@ CategoricalProcess** CategoricalProcess::old_parsing(StatError &error , ifstream
       // test VARIABLE(S) keyword
 
       case 1 : {
-        if (token != STAT_word[nb_output_process == 1 ? STATW_VARIABLE : STATW_VARIABLES]) {
+        if (*token != STAT_word[nb_output_process == 1 ? STATW_VARIABLE : STATW_VARIABLES]) {
           status = false;
           error.correction_update(STAT_parsing[STATP_KEYWORD] ,
                                   STAT_word[nb_output_process == 1 ? STATW_VARIABLE : STATW_VARIABLES] , line , i + 1);
@@ -724,28 +746,28 @@ CategoricalProcess** CategoricalProcess::old_parsing(StatError &error , ifstream
 
     index = 0;
 
-    while (buffer.readLine(in_file , false)) {
+    while (getline(in_file , buffer)) {
       line++;
 
 #     ifdef DEBUG
       cout << line << "  " << buffer << endl;
 #     endif
 
-      position = buffer.first('#');
-      if (position != RW_NPOS) {
-        buffer.remove(position);
+      position = buffer.find('#');
+      if (position != string::npos) {
+        buffer.erase(position);
       }
       i = 0;
 
-      RWCTokenizer next(buffer);
+      tokenizer tok_buffer(buffer , separator);
 
-      while (!((token = next()).isNull())) {
+      for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
         switch (i) {
 
         // test VARIABLE keyword
 
         case 0 : {
-          if (token == STAT_word[STATW_VARIABLE]) {
+          if (*token == STAT_word[STATW_VARIABLE]) {
             index++;
           }
           else {
@@ -758,7 +780,16 @@ CategoricalProcess** CategoricalProcess::old_parsing(StatError &error , ifstream
         // test observation process index
 
         case 1 : {
-          lstatus = locale.stringToNum(token , &value);
+          lstatus = true;
+
+/*          try {
+            value = stoi(*token);   in C++ 11
+          }
+          catch(invalid_argument &arg) {
+            lstatus = false;
+          } */
+          value = atoi(token->c_str());
+
           if ((lstatus) && ((value != index) || (value > nb_output_process))) {
             lstatus = false;
           }
@@ -826,14 +857,14 @@ ostream& CategoricalProcess::ascii_print(ostream &os , FrequencyDistribution **e
 
 {
   if (observation) {
-    register int i , j;
+    int i , j;
     int buff , width[2];
-    long old_adjust;
     double *pmass , scale[NB_STATE];
     const Distribution *pobservation[NB_STATE];
+    ios_base::fmtflags format_flags;
 
 
-    old_adjust = os.setf(ios::left , ios::adjustfield);
+    format_flags = os.setf(ios::left , ios::adjustfield);
 
     for (i = 0;i < nb_state;i++) {
 
@@ -1077,7 +1108,7 @@ ostream& CategoricalProcess::ascii_print(ostream &os , FrequencyDistribution **e
       }
     }
 
-    os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
+    os.setf(format_flags , ios::adjustfield);
   }
 
   return os;
@@ -1101,7 +1132,7 @@ ostream& CategoricalProcess::spreadsheet_print(ostream &os ,FrequencyDistributio
 
 {
   if (observation) {
-    register int i , j;
+    int i , j;
     double *pmass , scale[NB_STATE];
     const Distribution *pobservation[NB_STATE];
 
@@ -1282,7 +1313,7 @@ bool CategoricalProcess::plot_print(const char *prefix , const char *title , int
   bool status = false;
 
   if (observation) {
-    register int i , j , k , m;
+    int i , j , k , m;
     int nb_dist , nb_histo , *dist_nb_value;
     double *scale;
     const Distribution **pdist;
@@ -1581,7 +1612,7 @@ void CategoricalProcess::plotable_write(MultiPlotSet &plot , int &index , int pr
 
 {
   if (observation) {
-    register int i , j;
+    int i , j;
     double scale , max;
     ostringstream title , legend;
 
@@ -1856,7 +1887,7 @@ bool CategoricalProcess::test_hidden() const
 
 {
   bool hidden = false;
-  register int i , j;
+  int i , j;
   int nb_occurrence;
 
 
@@ -1890,7 +1921,7 @@ void CategoricalProcess::thresholding(double min_probability)
 
 {
   bool stop;
-  register int i , j;
+  int i , j;
   int nb_correction;
   double norm , *pmass;
 
@@ -1951,7 +1982,7 @@ void CategoricalProcess::thresholding(double min_probability)
 void CategoricalProcess::state_permutation(int *permut) const
 
 {
-  register int i;
+  int i;
   Distribution **pobservation = new Distribution*[nb_state];
 
 
@@ -1979,7 +2010,7 @@ void CategoricalProcess::state_permutation(int *permut) const
 int CategoricalProcess::nb_parameter_computation(double min_probability) const
 
 {
-  register int i , j;
+  int i , j;
   int nb_parameter = 0;
 
 
@@ -2010,7 +2041,7 @@ int CategoricalProcess::nb_parameter_computation(double min_probability) const
 Distribution* CategoricalProcess::mixture_computation(Distribution *pweight)
 
 {
-  register int i , j;
+  int i , j;
   Distribution *mixture;
 
 
@@ -2045,7 +2076,7 @@ void CategoricalProcess::init()
 
 {
   bool *active_output;
-  register int i , j , k;
+  int i , j , k;
   int nb_noise , *state_nb_value;
   double cumul , noise_proba = NOISE_PROBABILITY , *pmass;
 

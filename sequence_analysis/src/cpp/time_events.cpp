@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -43,10 +43,7 @@
 #include <iomanip>
 #include <iostream>
 
-#include "tool/rw_tokenizer.h"
-#include "tool/rw_cstring.h"
-#include "tool/rw_locale.h"
-#include "tool/config.h"
+#include <boost/tokenizer.hpp>
 
 #include "stat_tool/stat_label.h"
 
@@ -54,6 +51,7 @@
 #include "sequence_label.h"
 
 using namespace std;
+using namespace boost;
 using namespace stat_tool;
 
 
@@ -72,7 +70,7 @@ namespace sequence_analysis {
 void TimeEvents::build_frequency_distribution()
 
 {
-  register int i;
+  int i;
   int max_nb_event , *ptime , *pnb_event , *pfrequency;
 
 
@@ -156,7 +154,7 @@ void TimeEvents::build_frequency_distribution()
 void TimeEvents::build_sample()
 
 {
-  register int i , j;
+  int i , j;
   int *ptime , *pnb_event , *pfrequency , *hfrequency;
 
 
@@ -210,7 +208,7 @@ void TimeEvents::build_sample()
 void TimeEvents::build(int inb_element , int *itime , int *inb_event)
 
 {
-  register int i , j , k;
+  int i , j , k;
   int btime , min_time , max_time , bnb_event , min_nb_event , max_nb_event ,
       nb_selected , *ptime , *pnb_event , *selected_nb_event , *snb_event;
 
@@ -361,7 +359,7 @@ TimeEvents::TimeEvents(int inb_class)
   }
 
   else {
-    register int i;
+    int i;
     int *ptime , *pnb_event , *pfrequency;
 
     time = new int[nb_class];
@@ -397,7 +395,7 @@ TimeEvents::TimeEvents(int inb_class)
 TimeEvents::TimeEvents(FrequencyDistribution &inb_event, int itime)
 
 {
-  register int i;
+  int i;
   int *ptime , *pnb_event , *pfrequency;
 
 
@@ -461,7 +459,7 @@ TimeEvents::TimeEvents(FrequencyDistribution &inb_event, int itime)
 void TimeEvents::copy(const TimeEvents &timev)
 
 {
-  register int i;
+  int i;
   int *ptime , *pnb_event , *pfrequency , *ttime , *tnb_event , *tfrequency;
 
 
@@ -523,7 +521,7 @@ void TimeEvents::copy(const TimeEvents &timev)
 void TimeEvents::merge(int nb_sample , const TimeEvents **ptimev)
 
 {
-  register int i , j;
+  int i , j;
   int nb_histo;
   const FrequencyDistribution **phisto;
 
@@ -591,7 +589,7 @@ void TimeEvents::merge(int nb_sample , const TimeEvents **ptimev)
 TimeEvents* TimeEvents::merge(int nb_sample , const vector<TimeEvents> itimev) const
 
 {
-  register int i;
+  int i;
   TimeEvents *timev;
   const TimeEvents **ptimev;
 
@@ -624,7 +622,7 @@ TimeEvents* TimeEvents::merge(int nb_sample , const vector<TimeEvents> itimev) c
 void TimeEvents::remove()
 
 {
-  register int i;
+  int i;
 
 
   delete [] time;
@@ -735,7 +733,7 @@ TimeEvents* TimeEvents::time_scaling(StatError &error , int scaling_coeff) const
 
 {
   bool status = true;
-  register int i;
+  int i;
   int *ptime , *pnb_event , *pfrequency , *ttime , *tnb_event , *tfrequency;
   TimeEvents *timev;
 
@@ -795,7 +793,7 @@ TimeEvents* TimeEvents::time_select(StatError &error , int min_time ,
 
 {
   bool status = true;
-  register int i;
+  int i;
   int bnb_class , *ptime , *pnb_event , *pfrequency , *ttime , *tnb_event , *tfrequency;
   TimeEvents *timev;
 
@@ -881,7 +879,7 @@ TimeEvents* TimeEvents::nb_event_select(StatError &error , int min_nb_event ,
 
 {
   bool status = true;
-  register int i;
+  int i;
   int bnb_class , *ptime , *pnb_event , *pfrequency , *ttime , *tnb_event , *tfrequency;
   TimeEvents *timev;
 
@@ -973,7 +971,7 @@ TimeEvents* TimeEvents::building(StatError &error , FrequencyDistribution &nb_ev
   timev = NULL;
   error.init();
 
-  if (itime / (nb_event.nb_value - 1) < MIN_INTER_EVENT) {
+  if ((nb_event.nb_value == 1) || (itime / (nb_event.nb_value - 1) < MIN_INTER_EVENT)) {
     status = false;
     error.update(SEQ_error[SEQR_SHORT_OBSERVATION_TIME]);
   }
@@ -1005,13 +1003,13 @@ TimeEvents* TimeEvents::building(StatError &error , FrequencyDistribution &nb_ev
 TimeEvents* TimeEvents::ascii_read(StatError &error , const string path)
 
 {
-  RWLocaleSnapshot locale("en");
-  RWCString buffer , token;
+  string buffer;
   size_t position;
+  typedef tokenizer<char_separator<char>> tokenizer;
+  char_separator<char> separator(" \t");
   bool status , lstatus;
-  register int i , j;
-  int line , nb_class , nb_element;
-  long value , time , nb_event;
+  int i , j;
+  int line , nb_class , nb_element , value , time , nb_event;
   TimeEvents *timev;
   ifstream in_file(path.c_str());
 
@@ -1035,24 +1033,32 @@ TimeEvents* TimeEvents::ascii_read(StatError &error , const string path)
     nb_class = 0;
     nb_element = 0;
 
-    while (buffer.readLine(in_file , false)) {
+    while (getline(in_file , buffer)) {
       line++;
 
 #     ifdef DEBUG
       cout << line << "  " << buffer << endl;
 #     endif
 
-      position = buffer.first('#');
-      if (position != RW_NPOS) {
-        buffer.remove(position);
+      position = buffer.find('#');
+      if (position != string::npos) {
+        buffer.erase(position);
       }
       i = 0;
 
-      RWCTokenizer next(buffer);
+      tokenizer tok_buffer(buffer , separator);
 
-      while (!((token = next()).isNull())) {
+      for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
         if (i <= 2) {
-          lstatus = locale.stringToNum(token , &value);
+          lstatus = true;
+
+/*          try {
+            value = stoi(*token);   in C++ 11
+          }
+          catch(invalid_argument &arg) {
+            lstatus = false;
+          } */
+          value = atoi(token->c_str());
 
           // test observation period > 0, number of events >= 0, frequency >= 0
 
@@ -1140,27 +1146,28 @@ TimeEvents* TimeEvents::ascii_read(StatError &error , const string path)
 
       i = 0;
 
-      while (buffer.readLine(in_file , false)) {
-        position = buffer.first('#');
-        if (position != RW_NPOS) {
-          buffer.remove(position);
+      while (getline(in_file , buffer)) {
+        position = buffer.find('#');
+        if (position != string::npos) {
+          buffer.erase(position);
         }
         j = 0;
 
-        RWCTokenizer next(buffer);
+        tokenizer tok_buffer(buffer , separator);
 
-        while (!((token = next()).isNull())) {
-          locale.stringToNum(token , &value);
-
+        for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
           switch (j) {
           case 0 :
-            timev->time[i] = value;
+//            timev->time[i] = stoi(*token);   in C++ 11
+            timev->time[i] = atoi(token->c_str());
             break;
           case 1 :
-            timev->nb_event[i] = value;
+//            timev->nb_event[i] = stoi(*token);   in C++ 11
+            timev->nb_event[i] = atoi(token->c_str());
             break;
           case 2 :
-            timev->frequency[i] = value;
+//            timev->frequency[i] = stoi(*token);   in C++ 11
+            timev->frequency[i] = atoi(token->c_str());
             break;
           }
 
@@ -1195,13 +1202,13 @@ TimeEvents* TimeEvents::ascii_read(StatError &error , const string path)
 TimeEvents* TimeEvents::old_ascii_read(StatError &error , const string path)
 
 {
-  RWLocaleSnapshot locale("en");
-  RWCString buffer , token;
+  string buffer;
   size_t position;
+  typedef tokenizer<char_separator<char>> tokenizer;
+  char_separator<char> separator(" \t");
   bool status , lstatus;
-  register int i , j;
-  int line , nb_element , *ptime , *pnb_event;
-  long value;
+  int i , j;
+  int line , nb_element , value , *time , *nb_event;
   TimeEvents *timev;
   ifstream in_file(path.c_str());
 
@@ -1222,24 +1229,32 @@ TimeEvents* TimeEvents::old_ascii_read(StatError &error , const string path)
     line = 0;
     nb_element = 0;
 
-    while (buffer.readLine(in_file , false)) {
+    while (getline(in_file , buffer)) {
       line++;
 
 #     ifdef DEBUG
       cout << line << "  " << buffer << endl;
 #     endif
 
-      position = buffer.first('#');
-      if (position != RW_NPOS) {
-        buffer.remove(position);
+      position = buffer.find('#');
+      if (position != string::npos) {
+        buffer.erase(position);
       }
       i = 0;
 
-      RWCTokenizer next(buffer);
+      tokenizer tok_buffer(buffer , separator);
 
-      while (!((token = next()).isNull())) {
+      for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
         if (i <= 1) {
-          lstatus = locale.stringToNum(token , &value);
+          lstatus = true;
+
+/*          try {
+            value = stoi(*token);   in C++ 11
+          }
+          catch(invalid_argument &arg) {
+            lstatus = false;
+          } */
+          value = atoi(token->c_str());
 
           // test observation period > 0, number of events >= 0
 
@@ -1281,28 +1296,28 @@ TimeEvents* TimeEvents::old_ascii_read(StatError &error , const string path)
         in_file.clear();
         in_file.seekg(0,ios::beg);
 
-      ptime = new int[nb_element];
-      pnb_event = new int[nb_element];
+      time = new int[nb_element];
+      nb_event = new int[nb_element];
       i = 0;
 
-      while (buffer.readLine(in_file , false)) {
-        position = buffer.first('#');
-        if (position != RW_NPOS) {
-          buffer.remove(position);
+      while (getline(in_file , buffer)) {
+        position = buffer.find('#');
+        if (position != string::npos) {
+          buffer.erase(position);
         }
         j = 0;
 
-        RWCTokenizer next(buffer);
+        tokenizer tok_buffer(buffer , separator);
 
-        while (!((token = next()).isNull())) {
-          locale.stringToNum(token , &value);
-
+        for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
           switch (j) {
           case 0 :
-            ptime[i] = value;
+//            time[i] = stoi(*token);   in C++ 11
+            time[i] = atoi(token->c_str());
             break;
           case 1 :
-            pnb_event[i] = value;
+//            nb_event[i] = stoi(*token);   in C++ 11
+            nb_event[i] = atoi(token->c_str());
             break;
           }
 
@@ -1312,10 +1327,10 @@ TimeEvents* TimeEvents::old_ascii_read(StatError &error , const string path)
         i++;
       }
 
-      timev = new TimeEvents(nb_element , ptime , pnb_event);
+      timev = new TimeEvents(nb_element , time , nb_event);
 
-      delete [] ptime;
-      delete [] pnb_event;
+      delete [] time;
+      delete [] nb_event;
     }
   }
 
@@ -1355,7 +1370,7 @@ ostream& TimeEvents::line_write(ostream &os) const
 ostream& TimeEvents::ascii_write(ostream &os , bool exhaustive , process_type type) const
 
 {
-  register int i;
+  int i;
 
 
   if ((htime->variance > 0.) && (exhaustive)) {
@@ -1490,7 +1505,7 @@ ostream& TimeEvents::ascii_write(ostream &os , bool exhaustive) const
 ostream& TimeEvents::ascii_file_write(ostream &os , bool exhaustive , process_type type) const
 
 {
-  register int i;
+  int i;
   int max_frequency , *pfrequency , width[3];
 
 
@@ -1679,7 +1694,7 @@ bool TimeEvents::ascii_write(StatError &error , const string path ,
 ostream& TimeEvents::spreadsheet_write(ostream &os , process_type type) const
 
 {
-  register int i;
+  int i;
 
 
   if (htime->variance > 0.) {
@@ -1832,7 +1847,7 @@ bool TimeEvents::plot_write(StatError &error , const char *prefix ,
 
 {
   bool status;
-  register int i , j , k;
+  int i , j , k;
   int nb_histo;
   const FrequencyDistribution **phisto;
   ostringstream data_file_name;
@@ -2011,7 +2026,7 @@ bool TimeEvents::plot_write(StatError &error , const char *prefix ,
 MultiPlotSet* TimeEvents::get_plotable() const
 
 {
-  register int i , j , k , m;
+  int i , j , k , m;
   int nb_plot_set , nb_histo , max_nb_value , max_frequency;
   double shift;
   const FrequencyDistribution *phisto[2] , **merged_histo;
@@ -2200,7 +2215,7 @@ MultiPlotSet* TimeEvents::get_plotable() const
 double TimeEvents::min_inter_event_computation() const
 
 {
-  register int i;
+  int i;
   int *ptime , *pnb_event;
   double ratio , min_ratio;
 
@@ -2234,7 +2249,7 @@ double TimeEvents::min_inter_event_computation() const
 void TimeEvents::nb_element_computation()
 
 {
-  register int i;
+  int i;
   int *pfrequency;
 
 
@@ -2372,7 +2387,7 @@ RenewalData::RenewalData(process_type itype , const Renewal &renew)
 RenewalData::RenewalData(int nb_sample , const RenewalData **itimev)
 
 {
-  register int i , j , k;
+  int i , j , k;
   const TimeEvents **ptimev;
 
 
@@ -2423,7 +2438,7 @@ RenewalData::RenewalData(int nb_sample , const RenewalData **itimev)
 void RenewalData::copy(const RenewalData &timev , bool model_flag)
 
 {
-  register int i , j;
+  int i , j;
   int *psequence , *csequence;
 
 
@@ -2486,7 +2501,7 @@ void RenewalData::remove()
   delete [] length;
 
   if (sequence) {
-    register int i;
+    int i;
 
     for (i = 0;i < nb_element;i++) {
       delete [] sequence[i];
@@ -2559,7 +2574,7 @@ RenewalData* RenewalData::merge(StatError &error , int nb_sample ,
 
 {
   bool status = true;
-  register int i , j , k , m;
+  int i , j , k , m;
   int *psequence , *csequence;
   const FrequencyDistribution **phisto;
   RenewalData *timev;
@@ -2662,7 +2677,7 @@ RenewalData* RenewalData::merge(StatError &error , int nb_sample ,
                                 const vector<RenewalData> itimev) const
 
 {
-  register int i;
+  int i;
   RenewalData *timev;
   const RenewalData **ptimev;
 
@@ -2831,12 +2846,12 @@ DiscreteDistributionData* RenewalData::extract(StatError &error , renewal_distri
 ostream& RenewalData::ascii_write(ostream &os , bool exhaustive , bool file_flag) const
 
 {
-  register int i , j;
+  int i , j;
   int nb_value , max , width[2];
-  long old_adjust;
+  ios_base::fmtflags format_flags;
 
 
-  old_adjust = os.setf(ios::right , ios::adjustfield);
+  format_flags = os.setf(ios::right , ios::adjustfield);
 
   // writing of the inter-event frequency distribution,
   // the frequency distribution of time intervals between events within the observation period,
@@ -2981,13 +2996,11 @@ ostream& RenewalData::ascii_write(ostream &os , bool exhaustive , bool file_flag
   }
 
   os << "\n";
-  switch (file_flag) {
-  case false :
-    TimeEvents::ascii_write(os , exhaustive , type);
-    break;
-  case true :
+  if (file_flag) {
     ascii_file_write(os , exhaustive , type);
-    break;
+  }
+  else {
+    TimeEvents::ascii_write(os , exhaustive , type);
   }
 
   // writing of no-event/event probabilities as a function of time
@@ -3032,7 +3045,7 @@ ostream& RenewalData::ascii_write(ostream &os , bool exhaustive , bool file_flag
     }
   }
 
-  os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
+  os.setf(format_flags , ios::adjustfield);
 
   return os;
 }
@@ -3115,7 +3128,7 @@ bool RenewalData::ascii_write(StatError &error , const string path ,
 ostream& RenewalData::spreadsheet_write(ostream &os) const
 
 {
-  register int i;
+  int i;
   int nb_value;
 
 
@@ -3284,7 +3297,7 @@ bool RenewalData::plot_write(StatError &error , const char *prefix ,
   }
 
   else {
-    register int i , j , k;
+    int i , j , k;
     int nb_histo;
     const FrequencyDistribution **phisto;
     ostringstream data_file_name[2];
@@ -3649,7 +3662,7 @@ MultiPlotSet* RenewalData::get_plotable() const
   }
 
   else {
-    register int i , j , k , m;
+    int i , j , k , m;
     int nb_plot_set , nb_histo , max_nb_value , max_frequency;
     double shift;
     const FrequencyDistribution *phisto[2] , **merged_histo;
@@ -4036,7 +4049,7 @@ MultiPlotSet* RenewalData::get_plotable() const
 void RenewalData::build_index_event(int offset)
 
 {
-  register int i , j;
+  int i , j;
   int frequency[2];
 
 

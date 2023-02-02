@@ -25,7 +25,6 @@
 
 #include "sequence_analysis/sequences.h"
 #include "sequence_analysis/sequence_label.h"
-#include "tool/config.h"
 
 #include <boost/python.hpp>
 #include <boost/python/extract.hpp>
@@ -133,7 +132,7 @@ void class_correlation() {
     .def("get_variable_type", &Correlation::get_variable_type, args("index"))
     .def("get_variable1", &Correlation::get_variable1, args("index"))
     .def("get_variable2", &Correlation::get_variable2, args("index"))
-    .def("get_white_noise", &Correlation::get_white_noise, args("lag"))
+    .def("get_theoretical_function", &Correlation::get_theoretical_function, args("lag"))
 
     .def("white_noise_correlation_dist", WRAP::white_noise_correlation_dist, args("dist"), "todo")
     .def("white_noise_correlation_order", WRAP::white_noise_correlation_order, args("order"), "todo")

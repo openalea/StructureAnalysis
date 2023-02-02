@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -42,8 +42,6 @@
 #include <sstream>
 #include <iomanip>
 
-#include "tool/config.h"
-
 #include "vectors.h"
 #include "stat_label.h"
 
@@ -65,7 +63,7 @@ namespace stat_tool {
 double** Vectors::spearman_rank_correlation_computation() const
 
 {
-  register int i , j , k;
+  int i , j , k;
   int *pfrequency;
   double main_term , rank_mean , rank_diff , *correction , **correlation = NULL , **rank;
 
@@ -143,7 +141,7 @@ double** Vectors::spearman_rank_correlation_computation() const
 double** Vectors::kendall_rank_correlation_computation() const
 
 {
-  register int i , j , k , m , n , p;
+  int i , j , k , m , n , p;
   int diff , *current_frequency , *pfrequency , *cumul_frequency , *index , **frequency;
   double nb_pair , sum , rank_diff_sign , *correction , **correlation = NULL;
 
@@ -279,13 +277,13 @@ ostream& Vectors::rank_correlation_ascii_write(ostream &os , correlation_type co
                                                double **correlation) const
 
 {
-  register int i , j;
+  int i , j;
   int buff , width[2];
   Test *test;
-  long old_adjust;
+  ios_base::fmtflags format_flags;
 
 
-  old_adjust = os.setf(ios::right , ios::adjustfield);
+  format_flags = os.setf(ios::right , ios::adjustfield);
 
   width[0] = column_width(nb_variable);
 
@@ -374,7 +372,7 @@ ostream& Vectors::rank_correlation_ascii_write(ostream &os , correlation_type co
     delete test;
   }
 
-  os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
+  os.setf(format_flags , ios::adjustfield);
 
   return os;
 }
@@ -423,7 +421,7 @@ bool Vectors::rank_correlation_ascii_write(StatError &error , const string path 
  *         (either in the Spearman or in the Kendall sense).
  *
  *  \param[in] error       reference on a StatError object,
- *  \param[in] os          stream,
+ *  \param[in] display     flag for displaying the rank correlation coefficient matrix,
  *  \param[in] correl_type rank correlation coefficient type (SPEARMAN/KENDALL),
  *  \param[in] path        file path.
  *
@@ -431,12 +429,12 @@ bool Vectors::rank_correlation_ascii_write(StatError &error , const string path 
  */
 /*--------------------------------------------------------------*/
 
-bool Vectors::rank_correlation_computation(StatError &error , ostream &os ,
+bool Vectors::rank_correlation_computation(StatError &error , bool display ,
                                            correlation_type correl_type , const string path) const
 
 {
   bool status = true;
-  register int i;
+  int i;
   double **correlation;
 
 
@@ -478,10 +476,9 @@ bool Vectors::rank_correlation_computation(StatError &error , ostream &os ,
       break;
     }
 
-#   ifdef MESSAGE
-    rank_correlation_ascii_write(os , correl_type , correlation);
-#   endif
-
+    if (display) {
+      rank_correlation_ascii_write(cout , correl_type , correlation);
+    }
     if (!path.empty()) {
       status = rank_correlation_ascii_write(error , path , correl_type , correlation);
     }
@@ -507,7 +504,7 @@ bool Vectors::rank_correlation_computation(StatError &error , ostream &os ,
 double Vectors::spearman_rank_single_correlation_computation() const
 
 {
-  register int i , j;
+  int i , j;
   int *pfrequency;
   double correlation , main_term , rank_mean , correction[2] , *rank[2];
 
@@ -564,7 +561,7 @@ double Vectors::spearman_rank_single_correlation_computation() const
 double Vectors::kendall_rank_single_correlation_computation() const
 
 {
-  register int i , j , k , m;
+  int i , j , k , m;
   int diff , *current_frequency , *pfrequency , *cumul_frequency , *index ,
       **frequency;
   double sum , correlation , nb_pair , correction[2];
@@ -683,7 +680,7 @@ DistanceMatrix* Vectors::comparison(StatError &error , const VectorDistance &ive
                                     bool standardization) const
 {
   bool status = true;
-  register int i , j , k;
+  int i , j , k;
   double distance , ldistance , **rank;
   FrequencyDistribution *merged_marginal;
   VectorDistance *vector_dist;
@@ -763,9 +760,18 @@ DistanceMatrix* Vectors::comparison(StatError &error , const VectorDistance &ive
 
     rank = new double*[nb_variable];
 
-    switch (standardization) {
+    if (standardization) {
+      for (i = 0;i < nb_variable;i++) {
+        if (vector_dist->var_type[i] == ORDINAL) {
+          rank[i] = marginal_distribution[i]->rank_computation();
+        }
+        else {
+          rank[i] = NULL;
+        }
+      }
+    }
 
-    case false : {
+    else {
       if (vector_dist->var_type[0] == ORDINAL) {
         merged_marginal = new FrequencyDistribution(nb_variable , (const FrequencyDistribution**)marginal_distribution);
         rank[0] = merged_marginal->rank_computation();
@@ -800,20 +806,6 @@ DistanceMatrix* Vectors::comparison(StatError &error , const VectorDistance &ive
       }
 #     endif
 
-      break;
-    }
-
-    case true : {
-      for (i = 0;i < nb_variable;i++) {
-        if (vector_dist->var_type[i] == ORDINAL) {
-          rank[i] = marginal_distribution[i]->rank_computation();
-        }
-        else {
-          rank[i] = NULL;
-        }
-      }
-      break;
-    }
     }
 
     // computation of dispersion measures for standardization of variables
@@ -911,33 +903,7 @@ DistanceMatrix* Vectors::comparison(StatError &error , const VectorDistance &ive
           }
           }
 
-          switch (standardization) {
-
-          case false : {
-
-#           ifdef DEBUG
-            switch (vector_dist->distance_type) {
-            case ABSOLUTE_VALUE :
-              variable_distance[k] += fabs(ldistance);
-              break;
-            case QUADRATIC :
-              variable_distance[k] += ldistance * ldistance;
-              break;
-            }
-#           endif
-
-            switch (vector_dist->distance_type) {
-            case ABSOLUTE_VALUE :
-              distance += vector_dist->weight[k] * fabs(ldistance);
-              break;
-            case QUADRATIC :
-              distance += vector_dist->weight[k] * ldistance * ldistance;
-              break;
-            }
-            break;
-          }
-
-          case true : {
+          if (standardization) {
 
 #           ifdef DEBUG
             switch (vector_dist->distance_type) {
@@ -958,8 +924,29 @@ DistanceMatrix* Vectors::comparison(StatError &error , const VectorDistance &ive
               distance += vector_dist->weight[k] * ldistance * ldistance / vector_dist->dispersion[k];
               break;
             }
-            break;
           }
+
+          else {
+
+#           ifdef DEBUG
+            switch (vector_dist->distance_type) {
+            case ABSOLUTE_VALUE :
+              variable_distance[k] += fabs(ldistance);
+              break;
+            case QUADRATIC :
+              variable_distance[k] += ldistance * ldistance;
+              break;
+            }
+#           endif
+
+            switch (vector_dist->distance_type) {
+            case ABSOLUTE_VALUE :
+              distance += vector_dist->weight[k] * fabs(ldistance);
+              break;
+            case QUADRATIC :
+              distance += vector_dist->weight[k] * ldistance * ldistance;
+              break;
+            }
           }
         }
 
@@ -1008,7 +995,7 @@ DistanceMatrix* Vectors::comparison(StatError &error , const VectorDistance &ive
 int** Vectors::joint_frequency_computation(int variable1 , int variable2) const
 
 {
-  register int i , j;
+  int i , j;
   int **frequency = NULL;
 
 
@@ -1051,14 +1038,14 @@ ostream& Vectors::contingency_table_ascii_write(ostream &os , int variable1 , in
                                                 bool file_flag) const
 
 {
-  register int i , j;
+  int i , j;
   int buff , width[2];
-  long old_adjust;
+  ios_base::fmtflags format_flags;
 
 
   if ((file_flag) || ((marginal_distribution[variable1]->nb_value - marginal_distribution[variable1]->offset <= DISPLAY_CONTINGENCY_NB_VALUE) &&
        (marginal_distribution[variable2]->nb_value - marginal_distribution[variable2]->offset <= DISPLAY_CONTINGENCY_NB_VALUE))) {
-    old_adjust = os.setf(ios::right , ios::adjustfield);
+    format_flags = os.setf(ios::right , ios::adjustfield);
 
     // computation of the column widths
 
@@ -1144,7 +1131,7 @@ ostream& Vectors::contingency_table_ascii_write(ostream &os , int variable1 , in
       os << endl;
     }
 
-    os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
+    os.setf(format_flags , ios::adjustfield);
   }
 
   os << "\n";
@@ -1222,7 +1209,7 @@ bool Vectors::contingency_table_spreadsheet_write(StatError &error , const strin
 
 {
   bool status;
-  register int i , j;
+  int i , j;
   ofstream out_file(path.c_str());
 
 
@@ -1304,7 +1291,7 @@ bool Vectors::contingency_table_spreadsheet_write(StatError &error , const strin
  *  \brief Computation of a contingency table for 2 categorical variables.
  *
  *  \param[in] error     reference on a StatError object,
- *  \param[in] os        stream,
+ *  \param[in] display   flag for displaying the contingency table,
  *  \param[in] variable1 variable 1 index,
  *  \param[in] variable2 variable 2 index,
  *  \param[in] path      file path,
@@ -1314,12 +1301,12 @@ bool Vectors::contingency_table_spreadsheet_write(StatError &error , const strin
  */
 /*--------------------------------------------------------------*/
 
-bool Vectors::contingency_table(StatError &error , ostream &os , int variable1 ,
+bool Vectors::contingency_table(StatError &error , bool display , int variable1 ,
                                 int variable2 , const string path , output_format format) const
 
 {
   bool status = true;
-  register int i , j;
+  int i , j;
   int df , **frequency;
   double value , var , **deviation , **chi2_contribution;
   Test *test;
@@ -1456,10 +1443,10 @@ bool Vectors::contingency_table(StatError &error , ostream &os , int variable1 ,
     test = new Test(CHI2 , true , df , I_DEFAULT , value);
     test->chi2_critical_probability_computation();
 
-#   ifdef MESSAGE
-    contingency_table_ascii_write(os , variable1 , variable2 , frequency ,
-                                  deviation , chi2_contribution , *test);
-#   endif
+    if (display) {
+      contingency_table_ascii_write(cout , variable1 , variable2 , frequency ,
+                                    deviation , chi2_contribution , *test);
+    }
 
     if (!path.empty()) {
       switch (format) {
@@ -1505,15 +1492,15 @@ ostream& Vectors::variance_analysis_ascii_write(ostream &os , int type , const V
                                                 bool exhaustive) const
 
 {
-  register int i , j;
+  int i , j;
   int buff , width[4] , df[3];
   double diff , square_sum[3] , mean_square[3] , *value_mean , *variance , *standard_deviation ,
          *mean_absolute_deviation , *concentration_coeff , *skewness_coeff , *kurtosis_coeff , **cumul;
   Test *test;
-  long old_adjust;
+  ios_base::fmtflags format_flags;
 
 
-  old_adjust = os.setf(ios::right , ios::adjustfield);
+  format_flags = os.setf(ios::right , ios::adjustfield);
 
   // conditional distributions
 
@@ -1838,7 +1825,7 @@ ostream& Vectors::variance_analysis_ascii_write(ostream &os , int type , const V
 
   delete test;
 
-  os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
+  os.setf(format_flags , ios::adjustfield);
 
   return os;
 }
@@ -1901,7 +1888,7 @@ bool Vectors::variance_analysis_spreadsheet_write(StatError &error , const strin
 
 {
   bool status;
-  register int i , j;
+  int i , j;
   int df[3];
   double diff , square_sum[3] , mean_square[3] , **cumul;
   Test *test;
@@ -2133,7 +2120,7 @@ bool Vectors::variance_analysis_spreadsheet_write(StatError &error , const strin
  *  \brief One-way analysis of variance.
  *
  *  \param[in] error             reference on a StatError object,
- *  \param[in] os                stream,
+ *  \param[in] display           flag for displaying the ANOVA results,
  *  \param[in] class_variable    explanatory variable index,
  *  \param[in] response_variable response variable index,
  *  \param[in] response_type     response variable type (ORDINAL/NUMERIC),
@@ -2144,13 +2131,13 @@ bool Vectors::variance_analysis_spreadsheet_write(StatError &error , const strin
  */
 /*--------------------------------------------------------------*/
 
-bool Vectors::variance_analysis(StatError &error , ostream &os , int class_variable ,
+bool Vectors::variance_analysis(StatError &error , bool display , int class_variable ,
                                 int response_variable , int response_type ,
                                 const string path , output_format format) const
 
 {
   bool status = true;
-  register int i;
+  int i;
   int *value_nb_vector , **index;
   Vectors *vec;
   const Vectors **value_vec;
@@ -2248,9 +2235,9 @@ bool Vectors::variance_analysis(StatError &error , ostream &os , int class_varia
     }
     delete [] value_nb_vector;
 
-#   ifdef MESSAGE
-    vec->variance_analysis_ascii_write(os , response_type , value_vec, false);
-#   endif
+    if (display) {
+      vec->variance_analysis_ascii_write(cout , response_type , value_vec , false);
+    }
 
     if (!path.empty()) {
       switch (format) {
@@ -2285,19 +2272,19 @@ bool Vectors::variance_analysis(StatError &error , ostream &os , int class_varia
 /**
  *  \brief Computation of sup norm distance between two empirical continuous distributions.
  *
- *  \param[in] error  reference on a StatError object,
- *  \param[in] os     stream,
- *  \param[in] ivec   reference on a Vector object.
+ *  \param[in] error   reference on a StatError object,
+ *  \param[in] display flag for displaying the sup norm distance,
+ *  \param[in] ivec    reference on a Vector object.
  *
  *  \return           error status.
  */
 /*--------------------------------------------------------------*/
 
-bool Vectors::sup_norm_distance(StatError &error , ostream &os , const Vectors &ivec) const
+bool Vectors::sup_norm_distance(StatError &error , bool display , const Vectors &ivec) const
 
 {
   bool status = true , **selected_value;
-  register int i , j;
+  int i , j;
   int nb_crossing , previous_sign , sign , int_value , sample_size[2] , **rank;
   double min , max , sup_norm , diff_cumul , previous_diff_cumul , overlap , real_value ,
          sup_value , *cumul[2];
@@ -2369,7 +2356,7 @@ bool Vectors::sup_norm_distance(StatError &error , ostream &os , const Vectors &
         overlap = 0.;
 
 #       ifdef DEBUG
-        os << "\n";
+        cout << "\n";
 #       endif
 
         for (i = MAX(marginal_distribution[0]->offset , ivec.marginal_distribution[0]->offset);i < MIN(marginal_distribution[0]->nb_value , ivec.marginal_distribution[0]->nb_value);i++) {
@@ -2393,11 +2380,10 @@ bool Vectors::sup_norm_distance(StatError &error , ostream &os , const Vectors &
           }
 
           if ((previous_sign != 0) && (sign != 0) && (sign != previous_sign)) {
-
-#           ifdef MESSAGE
-            os << "\n" << STAT_label[STATL_SUP_NORM_DISTANCE] << ": " << max
-               << "   sup norm value: " << sup_value << "   crossing value: " << i;
-#           endif
+            if (display) {
+              cout << "\n" << STAT_label[STATL_SUP_NORM_DISTANCE] << ": " << max
+                   << "   sup norm value: " << sup_value << "   crossing value: " << i;
+            }
 
             nb_crossing++;
             sup_norm += max;
@@ -2408,34 +2394,33 @@ bool Vectors::sup_norm_distance(StatError &error , ostream &os , const Vectors &
                          (double)ivec.marginal_distribution[0]->frequency[i] / (double)ivec.nb_vector);
 
 #         ifdef DEBUG
-          os << i << "  ";
+          cout << i << "  ";
           if ((double)marginal_distribution[0]->frequency[i] / (double)nb_vector < (double)ivec.marginal_distribution[0]->frequency[i] / (double)ivec.nb_vector)) {
-            os << marginal_distribution[0]->frequency[i];
+            cout << marginal_distribution[0]->frequency[i];
           }
           else {
-            os << ivec.marginal_distribution[0]->frequency[i];
+            cout << ivec.marginal_distribution[0]->frequency[i];
           }
-          os << "   " << MIN((double)marginal_distribution[0]->frequency[i] / (double)nb_vector ,
-                             (double)ivec.marginal_distribution[0]->frequency[i] / (double)ivec.nb_vector) << "  " << overlap << endl;
+          cout << "   " << MIN((double)marginal_distribution[0]->frequency[i] / (double)nb_vector ,
+                               (double)ivec.marginal_distribution[0]->frequency[i] / (double)ivec.nb_vector) << "  " << overlap << endl;
 #         endif
 
         }
         sup_norm += max;
 
 #       ifdef DEBUG
-        os << endl;
+        cout << endl;
 #       endif
 
         delete [] cumul[0];
         delete [] cumul[1];
 
-#       ifdef MESSAGE
-        os << "\n" << STAT_label[STATL_SUP_NORM_DISTANCE] << ": " << sup_norm << "   "
-           << STAT_label[STATL_OVERLAP] << ": " << overlap
-           << "   number of crossings of cdfs: " << nb_crossing << "   sup norm value: " << sup_value
-           << "   (" << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << ")";
-#       endif
-
+        if (display) {
+          cout << "\n" << STAT_label[STATL_SUP_NORM_DISTANCE] << ": " << sup_norm << "   "
+               << STAT_label[STATL_OVERLAP] << ": " << overlap
+               << "   number of crossings of cdfs: " << nb_crossing << "   sup norm value: " << sup_value
+               << "   (" << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << ")";
+        }
       }
 
       // computation of ranks on the basis of the two samples
@@ -2493,7 +2478,7 @@ bool Vectors::sup_norm_distance(StatError &error , ostream &os , const Vectors &
       nb_crossing = 0;
 
 #     ifdef DEBUG
-      os << "\n";
+      cout << "\n";
 #     endif
 
       i = 0;
@@ -2532,14 +2517,14 @@ bool Vectors::sup_norm_distance(StatError &error , ostream &os , const Vectors &
         }
 
 #       ifdef DEBUG
-        os << i << "  " << int_value << "   "
-           << (double)sample_size[0] / (double)nb_vector << "  " << (double)sample_size[1] / (double)ivec.nb_vector << endl;
+        cout << i << "  " << int_value << "   "
+             << (double)sample_size[0] / (double)nb_vector << "  " << (double)sample_size[1] / (double)ivec.nb_vector << endl;
 #       endif
 
         // test of non-crossing of empirical cumulative distribution functions
 
 #       ifdef DEBUG
-        os << i << "  " << diff_cumul << "   " << diff_cumul - previous_diff_cumul << endl;
+        cout << i << "  " << diff_cumul << "   " << diff_cumul - previous_diff_cumul << endl;
 #       endif
 
         previous_sign = sign;
@@ -2551,14 +2536,13 @@ bool Vectors::sup_norm_distance(StatError &error , ostream &os , const Vectors &
         }
         else {
           sign = 1;
-	}
+        }
 
         if ((previous_sign != 0) && (sign != 0) && (sign != previous_sign)) {
-
-#         ifdef MESSAGE
-          os << "\n" << STAT_label[STATL_SUP_NORM_DISTANCE] << ": " << max
-             << "   sup norm value: " << sup_value << "   crossing value: " << int_value;
-#         endif
+          if (display) {
+            cout << "\n" << STAT_label[STATL_SUP_NORM_DISTANCE] << ": " << max
+                 << "   sup norm value: " << sup_value << "   crossing value: " << int_value;
+          }
 
           nb_crossing++;
           sup_norm += max;
@@ -2570,7 +2554,7 @@ bool Vectors::sup_norm_distance(StatError &error , ostream &os , const Vectors &
       sup_norm += max;
 
 #     ifdef DEBUG
-      os << endl;
+      cout << endl;
 #     endif
 
       break;
@@ -2632,7 +2616,7 @@ bool Vectors::sup_norm_distance(StatError &error , ostream &os , const Vectors &
       nb_crossing = 0;
 
 #     ifdef DEBUG
-      os << "\n";
+      cout << "\n";
 #     endif
 
       i = 0;
@@ -2667,8 +2651,8 @@ bool Vectors::sup_norm_distance(StatError &error , ostream &os , const Vectors &
         }
 
 #       ifdef DEBUG
-        os << i << "  " << real_value << "   "
-           << (double)sample_size[0] / (double)nb_vector << "  " << (double)sample_size[1] / (double)ivec.nb_vector << endl;
+        cout << i << "  " << real_value << "   "
+             << (double)sample_size[0] / (double)nb_vector << "  " << (double)sample_size[1] / (double)ivec.nb_vector << endl;
 #       endif
 
         // test of non-crossing of empirical cumulative distribution functions
@@ -2685,11 +2669,10 @@ bool Vectors::sup_norm_distance(StatError &error , ostream &os , const Vectors &
         }
 
         if ((previous_sign != 0) && (sign != 0) && (sign != previous_sign)) {
-
-#         ifdef MESSAGE
-          os << "\n" << STAT_label[STATL_SUP_NORM_DISTANCE] << ": " << max
-             << "   sup norm value: " << sup_value << "   crossing value: " << real_value;
-#         endif
+          if (display) {
+            cout << "\n" << STAT_label[STATL_SUP_NORM_DISTANCE] << ": " << max
+                 << "   sup norm value: " << sup_value << "   crossing value: " << real_value;
+          }
 
           nb_crossing++;
           sup_norm += max;
@@ -2701,18 +2684,18 @@ bool Vectors::sup_norm_distance(StatError &error , ostream &os , const Vectors &
       sup_norm += max;
 
 #     ifdef DEBUG
-      os << endl;
+      cout << endl;
 #     endif
 
       break;
     }
     }
 
-#   ifdef MESSAGE
-    os << "\n" << STAT_label[STATL_SUP_NORM_DISTANCE] << ": " << sup_norm << "   "
-       << STAT_label[STATL_OVERLAP] << ": " << 1. - sup_norm
-       << "   number of crossings of cdfs: " << nb_crossing << "   sup norm value: " << sup_value << endl;
-#   endif
+    if (display) {
+      cout << "\n" << STAT_label[STATL_SUP_NORM_DISTANCE] << ": " << sup_norm << "   "
+           << STAT_label[STATL_OVERLAP] << ": " << 1. - sup_norm
+           << "   number of crossings of cdfs: " << nb_crossing << "   sup norm value: " << sup_value << endl;
+    }
 
     delete [] selected_value[0];
     delete [] selected_value[1];

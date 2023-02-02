@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -44,8 +44,6 @@
 #include <sstream>
 #include <iomanip>
 
-#include "tool/config.h"
-
 #include "distribution.h"
 #include "curves.h"
 #include "stat_label.h"
@@ -69,7 +67,7 @@ namespace stat_tool {
 FrequencyDistribution::FrequencyDistribution(int inb_element , int *pelement)
 
 {
-  register int i;
+  int i;
 
 
   nb_element = inb_element;
@@ -115,7 +113,7 @@ FrequencyDistribution::FrequencyDistribution(int inb_element , int *pelement)
 void FrequencyDistribution::shift(const FrequencyDistribution &histo , int shift_param)
 
 {
-  register int i;
+  int i;
   int *cfrequency;
 
 
@@ -157,7 +155,7 @@ void FrequencyDistribution::cluster(const FrequencyDistribution &histo ,
                                     int step , rounding mode)
 
 {
-  register int i;
+  int i;
 
 
   nb_element = histo.nb_element;
@@ -265,7 +263,7 @@ bool FrequencyDistribution::operator==(const FrequencyDistribution &histo) const
 
 {
   bool status = true;
-  register int i;
+  int i;
 
 
   if ((offset != histo.offset) || (nb_value != histo.nb_value) ||
@@ -301,7 +299,7 @@ DiscreteDistributionData* FrequencyDistribution::merge(int nb_sample ,
                                                        const vector<FrequencyDistribution> ihisto) const
 
 {
-  register int i;
+  int i;
   DiscreteDistributionData *histo;
   const FrequencyDistribution **phisto;
 
@@ -399,21 +397,21 @@ DiscreteDistributionData* FrequencyDistribution::cluster(StatError &error , int 
  *  \brief clustering of values of a frequency distribution using
  *         an information quantity criterion.
  *
- *  \param[in] error reference on a StatError object,
- *  \param[in] ratio proportion of the information quantity of
- *                   the initial frequency distribution,
- *  \param[in] os    stream.
+ *  \param[in] error   reference on a StatError object,
+ *  \param[in] ratio   proportion of the information quantity of
+ *                     the initial frequency distribution,
+ *  \param[in] display flag for displaying the clustering step.
  *
- *  \return          DiscreteDistributionData object.
+ *  \return            DiscreteDistributionData object.
  */
 /*--------------------------------------------------------------*/
 
 DiscreteDistributionData* FrequencyDistribution::cluster(StatError &error , double ratio ,
-                                                         ostream &os) const
+                                                         bool display) const
 
 {
   bool status = true , stop = false;
-  register int i;
+  int i;
   int step = 1 , *pfrequency , *cfrequency;
   double information , reference_information , previous_information;
   DiscreteDistributionData *histo , *previous_histo;
@@ -493,11 +491,11 @@ DiscreteDistributionData* FrequencyDistribution::cluster(StatError &error , doub
 
     delete histo;
 
-#   ifdef MESSAGE
-    os << STAT_label[STATL_INFORMATION_RATIO] << ": "
-       << previous_information / reference_information << "   "
-       << STAT_label[STATL_CLUSTERING_STEP] << ": " << step << endl;
-#   endif
+    if (display) {
+      cout << STAT_label[STATL_INFORMATION_RATIO] << ": "
+           << previous_information / reference_information << "   "
+           << STAT_label[STATL_CLUSTERING_STEP] << ": " << step << endl;
+    }
 
     // computation of the frequency distribution characteristics
 
@@ -527,7 +525,7 @@ DiscreteDistributionData* FrequencyDistribution::cluster(StatError &error , int 
 
 {
   bool status = true;
-  register int i , j;
+  int i , j;
   int *pfrequency , *cfrequency , *limit;
   DiscreteDistributionData *histo;
 
@@ -622,7 +620,7 @@ DiscreteDistributionData* FrequencyDistribution::transcode(StatError &error ,
 
 {
   bool status = true , *presence;
-  register int i;
+  int i;
   int min_category , max_category , *cfrequency;
   DiscreteDistributionData *histo;
 
@@ -747,7 +745,7 @@ DiscreteDistributionData* FrequencyDistribution::value_select(StatError &error ,
 
 {
   bool status = true;
-  register int i;
+  int i;
   DiscreteDistributionData *histo;
 
 
@@ -764,10 +762,23 @@ DiscreteDistributionData* FrequencyDistribution::value_select(StatError &error ,
   }
 
   if (status) {
-    switch (keep) {
+    if (keep) {
+      histo = new DiscreteDistributionData(MIN(max_value + 1 , nb_value));
 
-    case false : {
+      // copy of frequencies
+
+       for (i = 0;i < min_value;i++) {
+        histo->frequency[i] = 0;
+      }
+      for (i = min_value;i < histo->nb_value;i++) {
+        histo->frequency[i] = frequency[i];
+      }
+    }
+
+    else {
       histo = new DiscreteDistributionData(nb_value);
+
+      // copy of frequencies
 
       for (i = 0;i < min_value;i++) {
         histo->frequency[i] = frequency[i];
@@ -780,23 +791,6 @@ DiscreteDistributionData* FrequencyDistribution::value_select(StatError &error ,
           histo->frequency[i] = frequency[i];
         }
       }
-
-      break;
-    }
-
-    case true : {
-      histo = new DiscreteDistributionData(MIN(max_value + 1 , nb_value));
-
-      // copy of frequencies
-
-       for (i = 0;i < min_value;i++) {
-        histo->frequency[i] = 0;
-      }
-      for (i = min_value;i < histo->nb_value;i++) {
-        histo->frequency[i] = frequency[i];
-      }
-      break;
-    }
     }
 
     // computation of the frequency distribution characteristics
@@ -836,13 +830,13 @@ ostream& FrequencyDistribution::ascii_print(ostream &os , int comment_flag ,
                                             bool cumul_flag) const
 
 {
-  register int i;
+  int i;
   int width[3];
-  long old_adjust;
   double *cumul;
+  ios_base::fmtflags format_flags;
 
 
-  old_adjust = os.setf(ios::right , ios::adjustfield);
+  format_flags = os.setf(ios::right , ios::adjustfield);
 
   // computation of the column widths
 
@@ -876,7 +870,7 @@ ostream& FrequencyDistribution::ascii_print(ostream &os , int comment_flag ,
     delete [] cumul;
   }
 
-  os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
+  os.setf(format_flags , ios::adjustfield);
 
   return os;
 }
@@ -1050,7 +1044,7 @@ ostream& FrequencyDistribution::spreadsheet_print(ostream &os , bool cumul_flag 
                                                   bool concentration_flag) const
 
 {
-  register int i;
+  int i;
   double *cumul, *concentration;
 
 
@@ -1105,7 +1099,7 @@ bool FrequencyDistribution::plot_print(const char *path , double *cumul ,
 
 {
   bool status = false;
-  register int i;
+  int i;
   ofstream out_file(path);
 
 
@@ -1157,7 +1151,7 @@ bool FrequencyDistribution::plot_print(const char *path , int nb_histo ,
 
 {
   bool status = false;
-  register int i , j;
+  int i , j;
   int plot_nb_value = nb_value;
   ofstream out_file(path);
 
@@ -1210,7 +1204,7 @@ bool FrequencyDistribution::plot_print(const char *path , int nb_histo ,
 void FrequencyDistribution::plotable_frequency_write(SinglePlot &plot) const
 
 {
-  register int i;
+  int i;
 
 
   for (i = offset;i < nb_value;i++) {
@@ -1232,10 +1226,10 @@ void FrequencyDistribution::plotable_frequency_write(SinglePlot &plot) const
 void FrequencyDistribution::plotable_mass_write(SinglePlot &plot) const
 
 {
-  register int i;
+  int i;
 
 
-  for (i =  MAX(offset - 1 , 0);i < nb_value;i++) {
+  for (i = MAX(offset - 1 , 0);i < nb_value;i++) {
     plot.add_point(i , (double)frequency[i] / (double)nb_element);
   }
   if ((double)frequency[nb_value - 1] / (double)nb_element > PLOT_MASS_THRESHOLD) {
@@ -1258,7 +1252,7 @@ void FrequencyDistribution::plotable_cumul_write(SinglePlot &plot , double *icum
                                                  double scale) const
 
 {
-  register int i;
+  int i;
   double *cumul;
 
 
@@ -1297,7 +1291,7 @@ void FrequencyDistribution::plotable_cumul_matching_write(SinglePlot &plot , int
                                                           double *icumul) const
 
 {
-  register int i;
+  int i;
   double *cumul;
 
 
@@ -1339,7 +1333,7 @@ void FrequencyDistribution::plotable_concentration_write(SinglePlot &plot , doub
                                                          double scale) const
 
 {
-  register int i;
+  int i;
   double *cumul , *concentration;
 
 
@@ -1499,7 +1493,7 @@ bool FrequencyDistribution::survival_plot_print(const char *path , double *survi
 
 {
   bool status = false;
-  register int i;
+  int i;
   ofstream out_file(path);
 
 
@@ -1534,7 +1528,7 @@ bool FrequencyDistribution::survival_plot_write(StatError &error , const char *p
 
 {
   bool status;
-  register int i;
+  int i;
   double *survivor;
   Curves *survival_rate;
   ostringstream data_file_name[2];
@@ -1681,7 +1675,7 @@ bool FrequencyDistribution::survival_plot_write(StatError &error , const char *p
 void FrequencyDistribution::plotable_survivor_write(SinglePlot &plot) const
 
 {
-  register int i;
+  int i;
   double *survivor;
 
 
@@ -1720,7 +1714,7 @@ MultiPlotSet* FrequencyDistribution::survival_get_plotable(StatError &error) con
   }
 
   else {
-    register int i , j;
+    int i , j;
     int xmax;
     Curves *survival_rate;
     ostringstream legend;
@@ -1821,7 +1815,7 @@ MultiPlotSet* FrequencyDistribution::survival_get_plotable(StatError &error) con
 double* FrequencyDistribution::cumul_computation(double scale) const
 
 {
-  register int i;
+  int i;
   double *cumul;
 
 
@@ -1856,7 +1850,7 @@ double* FrequencyDistribution::cumul_computation(double scale) const
 double* FrequencyDistribution::survivor_function_computation(double scale) const
 
 {
-  register int i;
+  int i;
   double *survivor_function;
 
 
@@ -1891,7 +1885,7 @@ double* FrequencyDistribution::survivor_function_computation(double scale) const
 double* FrequencyDistribution::concentration_function_computation(double scale) const
 
 {
-  register int i;
+  int i;
   double norm , *concentration_function;
 
 
@@ -1932,7 +1926,7 @@ double* FrequencyDistribution::concentration_function_computation(double scale) 
 double FrequencyDistribution::concentration_computation() const
 
 {
-  register int i;
+  int i;
   double concentration = D_DEFAULT , *concentration_function;
 
 
@@ -1987,7 +1981,7 @@ double FrequencyDistribution::concentration_computation() const
 void FrequencyDistribution::update(const Reestimation<double> *reestim , int inb_element)
 
 {
-  register int i , j;
+  int i , j;
   int index;
   double scale , sum , max_frequency , *real_frequency;
 
@@ -2062,7 +2056,7 @@ void FrequencyDistribution::update(const Reestimation<double> *reestim , int inb
 FrequencyDistribution* FrequencyDistribution::frequency_scale(int inb_element) const
 
 {
-  register int i , j;
+  int i , j;
   int index;
   double sum , real_max , *real_frequency;
   FrequencyDistribution *histo;
@@ -2134,7 +2128,7 @@ FrequencyDistribution* FrequencyDistribution::frequency_scale(int inb_element) c
 double* FrequencyDistribution::rank_computation() const
 
 {
-  register int i;
+  int i;
   double *rank;
 
 
@@ -2162,7 +2156,7 @@ double* FrequencyDistribution::rank_computation() const
 int FrequencyDistribution::cumulative_distribution_function_computation(double **cdf) const
 
 {
-  register int i , j;
+  int i , j;
   int buff , cumul;
 
 
@@ -2196,7 +2190,7 @@ int FrequencyDistribution::cumulative_distribution_function_computation(double *
 int FrequencyDistribution::min_interval_computation() const
 
 {
-  register int i;
+  int i;
   int min_interval , previous_value;
 
 
@@ -2231,7 +2225,7 @@ double FrequencyDistribution::likelihood_computation(const ContinuousParametric 
                                                      int min_interval) const
 
 {
-  register int i;
+  int i;
   double mass , likelihood = 0.;
 
 

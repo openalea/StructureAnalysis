@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -42,8 +42,6 @@
 #include <iomanip>
 #include <cstring>
 
-#include "tool/config.h"
-
 #include "stat_tools.h"
 #include "curves.h"
 #include "stat_label.h"
@@ -67,7 +65,7 @@ namespace stat_tool {
 void Distribution::mass_copy(const Distribution &dist , int inb_value)
 
 {
-  register int i;
+  int i;
 
 
   if ((inb_value != I_DEFAULT) && (inb_value < dist.nb_value)) {
@@ -96,7 +94,7 @@ void Distribution::mass_copy(const Distribution &dist , int inb_value)
 void Distribution::equal_size_copy(const Distribution &dist)
 
 {
-  register int i;
+  int i;
 
 
   nb_value = dist.nb_value;
@@ -142,7 +140,7 @@ void Distribution::init(int inb_value)
   }
 
   else {
-    register int i;
+    int i;
 
 
     mass = new double[nb_value];
@@ -183,7 +181,7 @@ Distribution::Distribution(int inb_value)
 Distribution::Distribution(int inb_value , double *imass)
 
 {
-  register int i;
+  int i;
 
 
   nb_value = inb_value;
@@ -221,7 +219,7 @@ Distribution::Distribution(int inb_value , double *imass)
 Distribution::Distribution(const Distribution &dist , double scaling_coeff)
 
 {
-  register int i , j;
+  int i , j;
   int min , max;
 
 
@@ -301,7 +299,7 @@ Distribution::Distribution(const FrequencyDistribution &histo)
 void Distribution::copy(const Distribution &dist , int ialloc_nb_value)
 
 {
-  register int i;
+  int i;
 
 
   nb_value = dist.nb_value;
@@ -349,7 +347,7 @@ void Distribution::normalization_copy(const Distribution &dist)
   }
 
   else {
-    register int i;
+    int i;
 
 
     nb_value = dist.nb_value;
@@ -455,7 +453,7 @@ bool Distribution::operator==(const Distribution &dist) const
 
 {
   bool status = true;
-  register int i;
+  int i;
 
 
   if ((offset != dist.offset) || (nb_value != dist.nb_value)) {
@@ -492,16 +490,18 @@ ostream& Distribution::ascii_characteristic_print(ostream &os , bool shape , boo
     if (comment_flag) {
       os << "# ";
     }
-    os << STAT_label[STATL_MEAN] << ": " << mean << "   "
-       << STAT_label[STATL_MEDIAN] << ": " << quantile_computation() << "   "
-       << STAT_label[STATL_MODE] << ": " << mode_computation() << endl;
+    os << STAT_label[STATL_MEAN] << ": " << mean << "   ";
+    if (complement == 0.) {
+      os << STAT_label[STATL_MEDIAN] << ": " << quantile_computation() << "   ";
+    }
+    os << STAT_label[STATL_MODE] << ": " << mode_computation() << endl;
 
     if (comment_flag) {
       os << "# ";
     }
     os << STAT_label[STATL_VARIANCE] << ": " << variance << "   "
        << STAT_label[STATL_STANDARD_DEVIATION] << ": " << sqrt(variance);
-    if (variance > 0.) {
+    if ((complement == 0.) && (variance > 0.)) {
       os << "   " << STAT_label[STATL_LOWER_QUARTILE] << ": " << quantile_computation(0.25)
          << "   " << STAT_label[STATL_UPPER_QUARTILE] << ": " << quantile_computation(0.75);
     }
@@ -590,7 +590,7 @@ int column_width(int min_value , int max_value)
 int column_width(int nb_value , const double *value , double scale)
 
 {
-  register int i;
+  int i;
   int width , max_width = 0;
 
 
@@ -623,13 +623,13 @@ ostream& Distribution::ascii_print(ostream &os , bool comment_flag , bool cumul_
                                    bool nb_value_flag , const FrequencyDistribution *histo) const
 
 {
-  register int i;
+  int i;
   int ascii_nb_value = nb_value , width[5];
-  long old_adjust;
   double scale , *histo_cumul , *pcumul;
+  ios_base::fmtflags format_flags;
 
 
-  old_adjust = os.setf(ios::right , ios::adjustfield);
+  format_flags = os.setf(ios::right , ios::adjustfield);
 
   // computation of the scaling factor, the cumulative distribution function deduced from
   // the frequency distribution and the number of values
@@ -710,7 +710,7 @@ ostream& Distribution::ascii_print(ostream &os , bool comment_flag , bool cumul_
     delete [] histo_cumul;
   }
 
-  os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
+  os.setf(format_flags , ios::adjustfield);
 
   return os;
 }
@@ -736,13 +736,13 @@ ostream& Distribution::ascii_print(ostream &os , int nb_dist , const Distributio
                                    const FrequencyDistribution *histo , bool mass_first) const
 
 {
-  register int i , j;
+  int i , j;
   int ascii_nb_value = nb_value , *width;
-  long old_adjust;
   double scale , *histo_cumul;
+  ios_base::fmtflags format_flags;
 
 
-  old_adjust = os.setf(ios::right , ios::adjustfield);
+  format_flags = os.setf(ios::right , ios::adjustfield);
 
   width = new int[nb_dist + 5];
 
@@ -850,7 +850,7 @@ ostream& Distribution::ascii_print(ostream &os , int nb_dist , const Distributio
     delete [] histo_cumul;
   }
 
-  os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
+  os.setf(format_flags , ios::adjustfield);
 
   return os;
 }
@@ -869,13 +869,15 @@ ostream& Distribution::spreadsheet_characteristic_print(ostream &os , bool shape
 
 {
   if ((mean != D_DEFAULT) && (variance != D_DEFAULT)) {
-    os << STAT_label[STATL_MEAN] << "\t" << mean << "\t\t"
-       << STAT_label[STATL_MEDIAN] << "\t" << quantile_computation() << "\t\t"
-       << STAT_label[STATL_MODE] << "\t" << mode_computation() << endl;
+    os << STAT_label[STATL_MEAN] << "\t" << mean << "\t\t";
+    if (complement == 0.) {
+      os << STAT_label[STATL_MEDIAN] << "\t" << quantile_computation() << "\t\t";
+    }
+    os << STAT_label[STATL_MODE] << "\t" << mode_computation() << endl;
 
     os << STAT_label[STATL_VARIANCE] << "\t" << variance << "\t\t"
        << STAT_label[STATL_STANDARD_DEVIATION] << "\t" << sqrt(variance);
-    if (variance > 0.) {
+    if ((complement == 0.) && (variance > 0.)) {
       os << "\t\t" << STAT_label[STATL_LOWER_QUARTILE] << "\t" << quantile_computation(0.25)
          << "\t\t" << STAT_label[STATL_UPPER_QUARTILE] << "\t" << quantile_computation(0.75);
     }
@@ -908,7 +910,7 @@ ostream& Distribution::spreadsheet_print(ostream &os , bool cumul_flag ,
                                          const FrequencyDistribution *histo) const
 
 {
-  register int i;
+  int i;
   int spreadsheet_nb_value = nb_value;
   double scale , *pcumul , *histo_cumul , *concentration , *histo_concentration;
 
@@ -1025,7 +1027,7 @@ ostream& Distribution::spreadsheet_print(ostream &os , int nb_dist , const Distr
                                          const FrequencyDistribution *histo , bool mass_first) const
 
 {
-  register int i , j;
+  int i , j;
   int spreadsheet_nb_value = nb_value;
   double scale , *histo_cumul;
 
@@ -1156,7 +1158,7 @@ bool Distribution::plot_print(const char *path , double *concentration ,
 
 {
   bool status = false;
-  register int i;
+  int i;
   ofstream out_file(path);
 
 
@@ -1200,7 +1202,7 @@ bool Distribution::plot_print(const char *path , const FrequencyDistribution *hi
 
 {
   bool status = false;
-  register int i;
+  int i;
   double scale;
   ofstream out_file(path);
 
@@ -1260,7 +1262,7 @@ bool plot_print(const char *path , int nb_dist , const Distribution **dist ,
 
 {
   bool status = false;
-  register int i , j;
+  int i , j;
   int plot_nb_value = 0;
   ofstream out_file(path);
 
@@ -1358,7 +1360,7 @@ bool cumul_matching_plot_print(const char *path , int nb_cumul , int *offset ,
 
 {
   bool status = false;
-  register int i , j;
+  int i , j;
   int plot_offset , plot_nb_value;
   ofstream out_file(path);
 
@@ -1466,7 +1468,7 @@ bool Distribution::plot_write(StatError &error , const char *prefix , int nb_dis
 
   else {
     bool cumul_concentration_flag;
-    register int i , j , k;
+    int i , j , k;
     int plot_nb_value , max_nb_value , max_range , reference_matching ,
         reference_concentration , *poffset , *pnb_value;
     double max , min_complement , **pcumul , **concentration;
@@ -1751,7 +1753,7 @@ bool Distribution::plot_write(StatError &error , const char *prefix , int nb_dis
 void Distribution::plotable_mass_write(SinglePlot &plot , double scale) const
 
 {
-  register int i;
+  int i;
 
 
   for (i = MAX(offset - 1 , 0);i < nb_value;i++) {
@@ -1775,7 +1777,7 @@ void Distribution::plotable_mass_write(SinglePlot &plot , double scale) const
 void Distribution::plotable_cumul_write(SinglePlot &plot) const
 
 {
-  register int i;
+  int i;
 
 
   for (i = MAX(offset - 1 , 0);i < nb_value;i++) {
@@ -1798,7 +1800,7 @@ void Distribution::plotable_cumul_matching_write(SinglePlot &plot ,
                                                  const Distribution &reference_dist) const
 
 {
-  register int i;
+  int i;
 
 
   plot.add_point(0. , 0.);
@@ -1825,7 +1827,7 @@ void Distribution::plotable_cumul_matching_write(SinglePlot &plot ,
 void Distribution::plotable_concentration_write(SinglePlot &plot) const
 
 {
-  register int i;
+  int i;
   double *concentration;
 
 
@@ -1870,7 +1872,7 @@ MultiPlotSet* Distribution::get_plotable_distributions(StatError &error , int nb
   }
 
   else {
-    register int i , j , k;
+    int i , j , k;
     int plot_nb_value , xmax , max_range , cumul_concentration_nb_dist ,
         nb_plot_set , reference_matching;
     double ymax , min_complement;
@@ -2225,7 +2227,7 @@ bool Distribution::survival_plot_print(const char *path , double *survivor) cons
 
 {
   bool status = false;
-  register int i;
+  int i;
   ofstream out_file(path);
 
 
@@ -2269,7 +2271,7 @@ bool Distribution::survival_plot_write(StatError &error , const char *prefix ,
   }
 
   else {
-    register int i;
+    int i;
     double *survivor;
     Curves *survival_rate;
     ostringstream data_file_name[2];
@@ -2387,7 +2389,7 @@ bool Distribution::survival_plot_write(StatError &error , const char *prefix ,
 void Distribution::plotable_survivor_write(SinglePlot &plot) const
 
 {
-  register int i;
+  int i;
   double *survivor;
 
 
@@ -2426,7 +2428,7 @@ MultiPlotSet* Distribution::survival_get_plotable(StatError &error) const
   }
 
   else {
-    register int i , j;
+    int i , j;
     int xmax;
     Curves *survival_rate;
     ostringstream legend;
@@ -2511,7 +2513,7 @@ MultiPlotSet* Distribution::survival_get_plotable(StatError &error) const
 ostream& Distribution::print(ostream &os) const
 
 {
-  register int i;
+  int i;
 
 
   ascii_characteristic_print(os);
@@ -2550,12 +2552,15 @@ ostream& Distribution::print(ostream &os) const
 ostream& operator<<(ostream &os , const Distribution &dist)
 
 {
-  os.precision(5);
+  streamsize nb_digits;
+
+
+  nb_digits = os.precision(5);
 
   os << endl;
   dist.print(os);
 
-  os.precision(6);
+  os.precision(nb_digits);
 
   return os;
 }
@@ -2612,7 +2617,7 @@ void Distribution::offset_computation()
 void Distribution::max_computation()
 
 {
-  register int i;
+  int i;
 
 
   max = 0.;
@@ -2635,7 +2640,7 @@ void Distribution::max_computation()
 double Distribution::mode_computation() const
 
 {
-  register int i;
+  int i;
   double max_mass , mode;
 
 
@@ -2669,7 +2674,7 @@ void Distribution::mean_computation()
 
 {
   if (cumul[nb_value - 1] > 0.) {
-    register int i;
+    int i;
 
 
     mean = 0.;
@@ -2694,11 +2699,11 @@ void Distribution::mean_computation()
 double Distribution::quantile_computation(double icumul) const
 
 {
-  register int i;
+  int i;
   double quantile = D_DEFAULT;
 
 
-  if ((cumul[nb_value - 1] >= CUMUL_THRESHOLD) && (icumul <= cumul[nb_value - 1])) {
+  if ((complement == 0.) && (icumul <= cumul[nb_value - 1])) {
     for (i = offset;i < nb_value;i++) {
       if (cumul[i] >= icumul) {
         quantile = i;
@@ -2724,16 +2729,17 @@ void Distribution::variance_computation()
 
 {
   if (mean != D_DEFAULT) {
-    register int i;
+    int i;
     double diff;
+    long double square_sum;
 
 
-    variance = 0.;
+    square_sum = 0.;
     for (i = offset;i < nb_value;i++) {
       diff = i - mean;
-      variance += mass[i] * diff * diff;
+      square_sum += mass[i] * diff * diff;
     }
-    variance /= cumul[nb_value - 1];
+    variance = square_sum / cumul[nb_value - 1];
 
     if (variance < 0.) {
       variance = 0.;
@@ -2755,7 +2761,7 @@ void Distribution::variance_computation()
 double Distribution::mean_absolute_deviation_computation(double location) const
 
 {
-  register int i;
+  int i;
   double mean_absolute_deviation;
 
 
@@ -2780,19 +2786,23 @@ double Distribution::mean_absolute_deviation_computation(double location) const
 double Distribution::skewness_computation() const
 
 {
-  register int i;
+  int i;
   double skewness = D_INF , diff;
+  long double cube_sum;
 
 
   if ((mean != D_DEFAULT) && (variance != D_DEFAULT)) {
-    skewness = 0.;
-
     if (variance > 0.) {
+      cube_sum = 0.;
       for (i = offset;i < nb_value;i++) {
         diff = i - mean;
-        skewness += mass[i] * diff * diff * diff;
+        cube_sum += mass[i] * diff * diff * diff;
       }
-      skewness /= (cumul[nb_value - 1] * pow(variance , 1.5));
+      skewness = cube_sum / (cumul[nb_value - 1] * pow(variance , 1.5));
+    }
+
+    else {
+      skewness = 0.;
     }
   }
 
@@ -2812,22 +2822,23 @@ double Distribution::skewness_computation() const
 double Distribution::kurtosis_computation() const
 
 {
-  register int i;
+  int i;
   double kurtosis = D_INF , diff;
+  long double power_sum;
 
 
   if ((mean != D_DEFAULT) && (variance != D_DEFAULT)) {
-    if (variance == 0.) {
-      kurtosis = -2.;
+    if (variance > 0.) {
+      power_sum = 0.;
+      for (i = offset;i < nb_value;i++) {
+        diff = i - mean;
+        power_sum += mass[i] * diff * diff * diff * diff;
+      }
+      kurtosis = power_sum / (cumul[nb_value - 1] * variance * variance) - 3.;
     }
 
     else {
-      kurtosis = 0.;
-      for (i = offset;i < nb_value;i++) {
-        diff = i - mean;
-        kurtosis += mass[i] * diff * diff * diff * diff;
-      }
-      kurtosis = kurtosis / (cumul[nb_value - 1] * variance * variance) - 3.;
+      kurtosis = -2.;
     }
   }
 
@@ -2846,7 +2857,7 @@ double Distribution::kurtosis_computation() const
 double Distribution::information_computation() const
 
 {
-  register int i;
+  int i;
   double information = D_INF;
 
 
@@ -2880,7 +2891,7 @@ double Distribution::information_computation() const
 double Distribution::first_difference_norm_computation() const
 
 {
-  register int i;
+  int i;
   double first_difference_norm , buff;
 
 
@@ -2907,7 +2918,7 @@ double Distribution::first_difference_norm_computation() const
 double Distribution::second_difference_norm_computation() const
 
 {
-  register int i;
+  int i;
   double second_difference_norm , buff;
 
 
@@ -2943,7 +2954,7 @@ double Distribution::second_difference_norm_computation() const
 void cumul_computation(int nb_value , const double *pmass , double *pcumul)
 
 {
-  register int i;
+  int i;
 
 
   *pcumul = *pmass;
@@ -2963,7 +2974,7 @@ void cumul_computation(int nb_value , const double *pmass , double *pcumul)
 void Distribution::cumul_computation()
 
 {
-  register int i;
+  int i;
 
 
   for (i = 0;i < offset;i++) {
@@ -2984,7 +2995,7 @@ void Distribution::cumul_computation()
 double* Distribution::survivor_function_computation() const
 
 {
-  register int i;
+  int i;
   double *survivor_function;
 
 
@@ -3012,7 +3023,7 @@ double* Distribution::survivor_function_computation() const
 double* Distribution::concentration_function_computation() const
 
 {
-  register int i;
+  int i;
   double *concentration_function;
 
 
@@ -3047,7 +3058,7 @@ double* Distribution::concentration_function_computation() const
 double Distribution::concentration_computation() const
 
 {
-  register int i;
+  int i;
   double concentration = D_DEFAULT , *concentration_function;
 
 
@@ -3098,7 +3109,7 @@ double Distribution::concentration_computation() const
 double Distribution::overlap_distance_computation(const Distribution &dist) const
 
 {
-  register int i;
+  int i;
   double overlap;
 
 
@@ -3124,7 +3135,7 @@ double Distribution::overlap_distance_computation(const Distribution &dist) cons
 void log_computation(int nb_value , const double *pmass , double *plog)
 
 {
-  register int i;
+  int i;
 
 
   for (i = 0;i < nb_value;i++) {

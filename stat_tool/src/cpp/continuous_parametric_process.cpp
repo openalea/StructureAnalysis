@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -38,20 +38,18 @@
 
 #include <math.h>
 
+#include <boost/tokenizer.hpp>
+
 #include <boost/math/distributions/gamma.hpp>
 #include <boost/math/distributions/inverse_gaussian.hpp>
 #include <boost/math/distributions/normal.hpp>
 #include <boost/math/special_functions/bessel.hpp>
 
-#include "tool/rw_tokenizer.h"
-#include "tool/rw_cstring.h"
-#include "tool/rw_locale.h"
-#include "tool/config.h"
-
 #include "markovian.h"
 #include "stat_label.h"
 
 using namespace std;
+using namespace boost;
 using namespace boost::math;
 
 
@@ -74,13 +72,14 @@ const static double posterior_threshold[7] = {0.25, 0.1, 0.05, 0.025, 0.01, 0.00
 ContinuousParametricProcess::ContinuousParametricProcess(int inb_state)
 
 {
-  register int i;
+  int i;
 
 
   nb_state = inb_state;
   ident = GAUSSIAN;
   tied_location = false;
   tied_dispersion = false;
+  offset = 0.;
   unit = DEGREE;
 
   if (nb_state > 0) {
@@ -111,13 +110,14 @@ ContinuousParametricProcess::ContinuousParametricProcess(int inb_state)
 ContinuousParametricProcess::ContinuousParametricProcess(int inb_state , ContinuousParametric **pobservation)
 
 {
-  register int i;
+  int i;
 
 
   nb_state = inb_state;
   ident = pobservation[0]->ident;
   tied_location = false;
   tied_dispersion = false;
+  offset = 0.;
   unit = pobservation[0]->unit;
 
   observation = new ContinuousParametric*[nb_state];
@@ -141,13 +141,14 @@ ContinuousParametricProcess::ContinuousParametricProcess(int inb_state , Continu
 void ContinuousParametricProcess::copy(const ContinuousParametricProcess &process)
 
 {
-  register int i;
+  int i;
 
 
   nb_state = process.nb_state;
   ident = process.ident;
   tied_location = process.tied_location;
   tied_dispersion = process.tied_dispersion;
+  offset = process.offset;
   unit = process.unit;
 
   observation = new ContinuousParametric*[nb_state];
@@ -181,7 +182,7 @@ void ContinuousParametricProcess::remove()
 
 {
   if (observation) {
-    register int i;
+    int i;
 
 
     for (i = 0;i < nb_state;i++) {
@@ -255,12 +256,13 @@ ContinuousParametricProcess* ContinuousParametricProcess::parsing(StatError &err
                                                                   continuous_parametric last_ident)
 
 {
-  RWLocaleSnapshot locale("en");
-  RWCString buffer , token;
+  string buffer;
   size_t position;
+  typedef tokenizer<char_separator<char>> tokenizer;
+  char_separator<char> separator(" \t");
   bool status = true , lstatus;
-  register int i , j;
-  long index;
+  int i , j;
+  int index;
   ContinuousParametric **dist;
   ContinuousParametricProcess *process;
 
@@ -273,22 +275,23 @@ ContinuousParametricProcess* ContinuousParametricProcess::parsing(StatError &err
   }
 
   for (i = 0;i < nb_state;i++) {
-    while (buffer.readLine(in_file , false)) {
+    while (getline(in_file , buffer)) {
       line++;
 
 #     ifdef DEBUG
       cout << line << "  " << buffer << endl;
 #     endif
 
-      position = buffer.first('#');
-      if (position != RW_NPOS) {
-        buffer.remove(position);
+      position = buffer.find('#');
+      if (position != string::npos) {
+        buffer.erase(position);
       }
+
       j = 0;
 
-      RWCTokenizer next(buffer);
+      tokenizer tok_buffer(buffer , separator);
 
-      while (!((token = next()).isNull())) {
+      for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
         switch (j) {
 
         // test COMPONENT/STATE keyword
@@ -297,7 +300,7 @@ ContinuousParametricProcess* ContinuousParametricProcess::parsing(StatError &err
           switch (model) {
 
           case MIXTURE : {
-            if (token != STAT_word[STATW_COMPONENT]) {
+            if (*token != STAT_word[STATW_COMPONENT]) {
               status = false;
               error.correction_update(STAT_parsing[STATP_KEYWORD] ,
                                       STAT_word[STATW_COMPONENT] , line , j + 1);
@@ -306,7 +309,7 @@ ContinuousParametricProcess* ContinuousParametricProcess::parsing(StatError &err
           }
 
           case HIDDEN_MARKOV : {
-            if (token != STAT_word[STATW_STATE]) {
+            if (*token != STAT_word[STATW_STATE]) {
               status = false;
               error.correction_update(STAT_parsing[STATP_KEYWORD] ,
                                       STAT_word[STATW_STATE] , line , j + 1);
@@ -320,7 +323,16 @@ ContinuousParametricProcess* ContinuousParametricProcess::parsing(StatError &err
         // test component/state index
 
         case 1 : {
-          lstatus = locale.stringToNum(token , &index);
+          lstatus = true;
+
+/*          try {
+            index = stoi(*token);   in C++ 11
+          }
+          catch(invalid_argument &arg) {
+            lstatus = false;
+          } */
+          index = atoi(token->c_str());
+
           if ((lstatus) && (index != i)) {
             lstatus = false;
           }
@@ -343,8 +355,8 @@ ContinuousParametricProcess* ContinuousParametricProcess::parsing(StatError &err
         // test OBSERVATION_DISTRIBUTION keyword
 
         case 2 : {
-          if ((token != STAT_word[STATW_OBSERVATION_DISTRIBUTION]) &&
-              (token != STAT_word[STATW_OBSERVATION_MODEL])) {
+          if ((*token != STAT_word[STATW_OBSERVATION_DISTRIBUTION]) &&
+              (*token != STAT_word[STATW_OBSERVATION_MODEL])) {
             status = false;
             error.correction_update(STAT_parsing[STATP_KEYWORD] ,
                                     STAT_word[STATW_OBSERVATION_DISTRIBUTION] , line , j + 1);
@@ -376,6 +388,11 @@ ContinuousParametricProcess* ContinuousParametricProcess::parsing(StatError &err
 
         break;
       }
+    }
+
+    if ((j == 0) && (!dist[i])) {
+      status = false;
+      error.update(STAT_parsing[STATP_FORMAT] , line);
     }
   }
 
@@ -435,15 +452,17 @@ ostream& ContinuousParametricProcess::ascii_print(ostream &os , Histogram **obse
                                                   bool exhaustive , bool file_flag , model_type model) const
 
 {
-  register int i , j , k;
+  int i , j , k;
   int nb_step , nb_element , buff , width[5];
-  long old_adjust;
   double step , value , min_value , max_value , mass , *observation_cumul ,
          **frequency , **cumul;
   boost::math::gamma_distribution<double> **gamma_dist;
   inverse_gaussian **inverse_gaussian_dist;
   normal **gaussian_dist;
+  ios_base::fmtflags format_flags;
 
+
+  format_flags = os.setf(ios::right , ios::adjustfield);
 
   if ((marginal_histogram) || (marginal_distribution)) {
     if (marginal_histogram) {
@@ -731,10 +750,6 @@ ostream& ContinuousParametricProcess::ascii_print(ostream &os , Histogram **obse
       }
 
       if (exhaustive) {
-        if (i == 0) {
-          old_adjust = os.setf(ios::right , ios::adjustfield);
-        }
-
         if (observation_histogram) {
           nb_element = observation_histogram[i]->nb_element;
         }
@@ -1316,14 +1331,14 @@ ostream& ContinuousParametricProcess::ascii_print(ostream &os , Histogram **obse
       delete [] gamma_dist;
     }
 
-    else if (ident ==  INVERSE_GAUSSIAN) {
+    else if (ident == INVERSE_GAUSSIAN) {
       for (i = 0;i < nb_state;i++) {
         delete inverse_gaussian_dist[i];
       }
       delete [] inverse_gaussian_dist;
     }
 
-    else if (ident ==  GAUSSIAN) {
+    else if (ident == GAUSSIAN) {
       for (i = 0;i < nb_state;i++) {
         delete gaussian_dist[i];
       }
@@ -1339,9 +1354,9 @@ ostream& ContinuousParametricProcess::ascii_print(ostream &os , Histogram **obse
       delete [] cumul[i];
     }
     delete [] cumul;
-
-    os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
   }
+
+  os.setf(format_flags , ios::adjustfield);
 
   return os;
 }
@@ -1367,7 +1382,7 @@ ostream& ContinuousParametricProcess::spreadsheet_print(ostream &os , Histogram 
                                                         model_type model) const
 
 {
-  register int i , j , k;
+  int i , j , k;
   int nb_step , nb_element;
   double step , value , min_value , max_value , mass , *observation_cumul ,
          **frequency , **cumul;
@@ -1550,7 +1565,7 @@ ostream& ContinuousParametricProcess::spreadsheet_print(ostream &os , Histogram 
 
         if (observation[i]->zero_probability == 1.) {
           for (j = 1;j < nb_step;j++) {
-            cumul[i][j] =  cumul[i][0];
+            cumul[i][j] = cumul[i][0];
             frequency[i][j] = 0.;
           }
         }
@@ -2277,7 +2292,7 @@ ostream& ContinuousParametricProcess::spreadsheet_print(ostream &os , Histogram 
       delete [] gamma_dist;
     }
 
-    else if (ident ==  INVERSE_GAUSSIAN) {
+    else if (ident == INVERSE_GAUSSIAN) {
       for (i = 0;i < nb_state;i++) {
         delete inverse_gaussian_dist[i];
       }
@@ -2326,7 +2341,7 @@ double** q_q_plot_computation(double min_value , double step ,
                               int nb_value , double **empirical_cdf)
 
 {
-  register int i , j;
+  int i , j;
   double value , **qqplot;
 
 
@@ -2376,7 +2391,7 @@ bool q_q_plot_print(const char *path , int nb_value , double **qqplot)
 
 {
   bool status = false;
-  register int i;
+  int i;
   ofstream out_file(path);
 
 
@@ -2425,7 +2440,7 @@ bool ContinuousParametricProcess::plot_print(const char *prefix , const char *ti
 
 {
   bool status = false;
-  register int i , j , k;
+  int i , j , k;
   int min_interval , nb_step , dist_index;
   double value , min_value , max_value , step , buff , max , *scale , *dist_max ,
          **cumul , **frequency , **qqplot;
@@ -3079,7 +3094,7 @@ bool ContinuousParametricProcess::plot_print(const char *prefix , const char *ti
                             dist_max[j] * scale[j]) * YSCALE) + 1;
           }
           else {
-            max = MIN(dist_max[j] * YSCALE , 1.);
+            max = dist_max[j] * YSCALE;
           }
 
           out_file << "plot [" << min_value << ":" << max_value << "] [0:"
@@ -3138,7 +3153,7 @@ bool ContinuousParametricProcess::plot_print(const char *prefix , const char *ti
         }
 
         out_file << "plot [" << min_value  << ":" << max_value << "] [0:"
-                 << MIN(max * YSCALE , 1.) << "] ";
+                 << max * YSCALE << "] ";
         for (j = 0;j < nb_state;j++) {
           out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\" using 1:" << j + 2
                    << " title \"";
@@ -3332,7 +3347,7 @@ bool ContinuousParametricProcess::plot_print(const char *prefix , const char *ti
       delete [] gamma_dist;
     }
 
-    else if (ident ==  INVERSE_GAUSSIAN) {
+    else if (ident == INVERSE_GAUSSIAN) {
       for (i = 0;i < nb_state;i++) {
         delete inverse_gaussian_dist[i];
       }
@@ -3377,7 +3392,7 @@ bool ContinuousParametricProcess::plot_print(const char *prefix , const char *ti
 void q_q_plotable_write(SinglePlot &plot , int nb_value , double **qqplot)
 
 {
-  register int i;
+  int i;
 
 
   for (i = 0;i < nb_value;i++) {
@@ -3416,7 +3431,7 @@ void ContinuousParametricProcess::plotable_write(MultiPlotSet &plot , int &index
                                                  model_type model) const
 
 {
-  register int i , j , k;
+  int i , j , k;
   int min_interval , nb_step;
   double value , min_value , max_value , step , buff , scale , max , *dist_max ,
          **cumul , **frequency , **qqplot;
@@ -3870,7 +3885,7 @@ void ContinuousParametricProcess::plotable_write(MultiPlotSet &plot , int &index
       }
       else {
         scale = 1.;
-        max = MIN(dist_max[i] * YSCALE , 1.);
+        max = dist_max[i] * YSCALE;
       }
 
       plot[index].yrange = Range(0 , max);
@@ -3955,7 +3970,7 @@ void ContinuousParametricProcess::plotable_write(MultiPlotSet &plot , int &index
         max = dist_max[i];
       }
     }
-    plot[index].yrange = Range(0 , MIN(max * YSCALE , 1.));
+    plot[index].yrange = Range(0 , max * YSCALE);
 
     for (i = 0;i < nb_state;i++) {
       legend.str("");
@@ -4262,7 +4277,7 @@ void ContinuousParametricProcess::plotable_write(MultiPlotSet &plot , int &index
     delete [] gamma_dist;
   }
 
-  else if (ident ==  INVERSE_GAUSSIAN) {
+  else if (ident == INVERSE_GAUSSIAN) {
     for (i = 0;i < nb_state;i++) {
       delete inverse_gaussian_dist[i];
     }
@@ -4302,7 +4317,7 @@ void ContinuousParametricProcess::plotable_write(MultiPlotSet &plot , int &index
 int ContinuousParametricProcess::nb_parameter_computation() const
 
 {
-  register int i;
+  int i;
   int nb_parameter = 0;
 
 
@@ -4328,6 +4343,9 @@ int ContinuousParametricProcess::nb_parameter_computation() const
   if (tied_dispersion) {
     nb_parameter -= (nb_state - 1);
   }
+  if (offset > 0.) {
+    nb_parameter++;
+  }
 
   return nb_parameter;
 }
@@ -4347,7 +4365,7 @@ int ContinuousParametricProcess::nb_parameter_computation() const
 double ContinuousParametricProcess::mean_computation(Distribution *pweight) const
 
 {
-  register int i;
+  int i;
   double mean;
 
 
@@ -4411,7 +4429,7 @@ double ContinuousParametricProcess::mean_computation(Distribution *pweight) cons
 double ContinuousParametricProcess::variance_computation(Distribution *pweight , double mean) const
 
 {
-  register int i;
+  int i;
   double variance;
 
 
@@ -4480,7 +4498,7 @@ void ContinuousParametricProcess::select_unit(angle_unit iunit)
 
 {
   if (ident == VON_MISES) {
-    register int i;
+    int i;
 
 
     unit = iunit;
@@ -4507,7 +4525,7 @@ void ContinuousParametricProcess::init(continuous_parametric iident , double min
                                        double mean , double variance)
 
 {
-  register int i;
+  int i;
 
 
   ident = iident;
@@ -4577,7 +4595,7 @@ void ContinuousParametricProcess::init(continuous_parametric iident , double min
 ostream& ContinuousParametricProcess::interval_computation(ostream &os)
 
 {
-  register int i , j , k;
+  int i , j , k;
   int nb_step , posterior_mode;
   double step , value , min_value , max_value , cumul , norm , max_posterior ,
          posterior_value , **quantile_limit , **posterior , **posterior_limit;
@@ -4798,7 +4816,7 @@ ostream& ContinuousParametricProcess::interval_computation(ostream &os)
 
     for (j = 1;j < nb_step;j++) {
       value += step;
-      if  (posterior[i][j] > max_posterior) {
+      if (posterior[i][j] > max_posterior) {
         max_posterior = posterior[i][j];
         posterior_mode = j;
         posterior_value = value;

@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -42,10 +42,9 @@
 #include <sstream>
 #include <iomanip>
 
-#include "tool/rw_tokenizer.h"
-#include "tool/rw_cstring.h"
-#include "tool/rw_locale.h"
-#include "tool/config.h"
+#include <boost/tokenizer.hpp>
+#include <boost/algorithm/string/trim.hpp>
+#include <boost/algorithm/string/classification.hpp>
 
 #include "stat_tool/stat_label.h"
 
@@ -55,6 +54,7 @@
 #include "sequence_label.h"
 
 using namespace std;
+using namespace boost;
 using namespace stat_tool;
 
 
@@ -77,16 +77,16 @@ namespace sequence_analysis {
 Sequences* Sequences::ascii_read(StatError &error , const string path , bool old_format)
 
 {
-  RWLocaleSnapshot locale("en");
-  RWCString buffer , token;
+  string buffer , trimmed_buffer;
   size_t position;
+  typedef tokenizer<char_separator<char>> tokenizer;
+  char_separator<char> separator(" \t");
   bool status , lstatus;
-  register int i , j , k , m;
+  int i , j , k , m;
   int line , read_line , offset , initial_nb_line , max_length , nb_variable = 0 ,
-      vector_size , nb_sequence , index , line_continue , *length;
+      vector_size , nb_sequence , index , int_value , line_continue , *length;
   variable_nature *type;
   index_parameter_type index_param_type = IMPLICIT_TYPE;
-  long int_value;
   double real_value;
   Sequences *seq;
   ifstream in_file(path.c_str());
@@ -110,32 +110,41 @@ Sequences* Sequences::ascii_read(StatError &error , const string path , bool old
 
     read_line = 0;
 
-    while (buffer.readLine(in_file , false)) {
+    while (getline(in_file , buffer)) {
       line++;
 
-      position = buffer.first('#');
-      if (position != RW_NPOS) {
-        buffer.remove(position);
+      position = buffer.find('#');
+      if (position != string::npos) {
+        buffer.erase(position);
       }
       i = 0;
 
-      RWCTokenizer next(buffer);
+      tokenizer tok_buffer(buffer , separator);
 
-      while (!((token = next()).isNull())) {
+      for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
         switch (i) {
 
         case 0 : {
 
           // test INDEX_PARAMETER keyword
 
-          if ((!old_format) && (read_line == 0) && (token == SEQ_word[SEQW_INDEX_PARAMETER])) {
+          if ((!old_format) && (read_line == 0) && (*token == SEQ_word[SEQW_INDEX_PARAMETER])) {
             index_param_type = TIME;
           }
 
           // test number of variables
 
           else {
-            lstatus = locale.stringToNum(token , &int_value);
+            lstatus = true;
+
+/*            try {
+              int_value = stoi(*token);   in C++ 11
+            }
+            catch(invalid_argument &arg) {
+              lstatus = false;
+            } */
+            int_value = atoi(token->c_str());
+
             if (lstatus) {
               if ((int_value < 1) || (int_value > SEQUENCE_NB_VARIABLE)) {
                 lstatus = false;
@@ -158,7 +167,7 @@ Sequences* Sequences::ascii_read(StatError &error , const string path , bool old
           // test separator
 
           if ((!old_format) && (read_line == 0) && (index_param_type != IMPLICIT_TYPE)) {
-            if (token != ":") {
+            if (*token != ":") {
               status = false;
               error.update(STAT_parsing[STATP_SEPARATOR] , line , i + 1);
             }
@@ -166,7 +175,7 @@ Sequences* Sequences::ascii_read(StatError &error , const string path , bool old
 
           // test VARIABLE(S) keyword
 
-          else if (token != STAT_word[nb_variable == 1 ? STATW_VARIABLE : STATW_VARIABLES]) {
+          else if (*token != STAT_word[nb_variable == 1 ? STATW_VARIABLE : STATW_VARIABLES]) {
             status = false;
             error.correction_update(STAT_parsing[STATP_KEYWORD] ,
                                     STAT_word[nb_variable == 1 ? STATW_VARIABLE : STATW_VARIABLES] , line , i + 1);
@@ -179,7 +188,7 @@ Sequences* Sequences::ascii_read(StatError &error , const string path , bool old
         case 2 : {
           if ((!old_format) && (read_line == 0) && (index_param_type != IMPLICIT_TYPE)) {
             for (j = TIME;j <= POSITION_INTERVAL;j++) {
-              if (token == SEQ_index_parameter_word[j]) {
+              if (*token == SEQ_index_parameter_word[j]) {
                 index_param_type = (index_parameter_type)j;
                 break;
               }
@@ -230,24 +239,24 @@ Sequences* Sequences::ascii_read(StatError &error , const string path , bool old
       read_line = 0;
       offset = (old_format ? 1 : 0);
 
-      while (buffer.readLine(in_file , false)) {
+      while (getline(in_file , buffer)) {
         line++;
 
-        position = buffer.first('#');
-        if (position != RW_NPOS) {
-          buffer.remove(position);
+        position = buffer.find('#');
+        if (position != string::npos) {
+          buffer.erase(position);
         }
         i = 0;
 
-        RWCTokenizer next(buffer);
+        tokenizer tok_buffer(buffer , separator);
 
-        while (!((token = next()).isNull())) {
+        for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
           switch (i) {
 
           // test VARIABLE keyword
 
           case 0 : {
-            if (token != STAT_word[STATW_VARIABLE]) {
+            if (*token != STAT_word[STATW_VARIABLE]) {
               status = false;
               error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_VARIABLE] , line , i + 1);
             }
@@ -257,7 +266,16 @@ Sequences* Sequences::ascii_read(StatError &error , const string path , bool old
           // test variable index
 
           case 1 : {
-            lstatus = locale.stringToNum(token , &int_value);
+            lstatus = true;
+
+/*            try {
+              int_value = stoi(*token);   in C++ 11
+            }
+            catch(invalid_argument &arg) {
+              lstatus = false;
+            } */
+            int_value = atoi(token->c_str());
+
             if ((lstatus) && (int_value != read_line + 1)) {
               lstatus = false;
             }
@@ -272,7 +290,7 @@ Sequences* Sequences::ascii_read(StatError &error , const string path , bool old
           // test separator
 
           case 2 : {
-            if (token != ":") {
+            if (*token != ":") {
               status = false;
               error.update(STAT_parsing[STATP_SEPARATOR] , line , i + 1);
             }
@@ -284,7 +302,7 @@ Sequences* Sequences::ascii_read(StatError &error , const string path , bool old
           case 3 : {
             if ((old_format) && (read_line == 0)) {
               for (j = TIME;j <= POSITION_INTERVAL;j++) {
-                if (token == SEQ_index_parameter_word[j]) {
+                if (*token == SEQ_index_parameter_word[j]) {
                   index_param_type = (index_parameter_type)j;
                   break;
                 }
@@ -293,7 +311,7 @@ Sequences* Sequences::ascii_read(StatError &error , const string path , bool old
               if (j == POSITION_INTERVAL + 1) {
 //                for (j = INT_VALUE;j <= STATE;j++) {
                 for (j = INT_VALUE;j <= OLD_INT_VALUE;j++) {
-                  if (token == STAT_variable_word[j]) {
+                  if (*token == STAT_variable_word[j]) {
 //                    if (j == STATE) {
                     if ((j == STATE) || (j == OLD_INT_VALUE)) {
                       j = INT_VALUE;
@@ -314,7 +332,7 @@ Sequences* Sequences::ascii_read(StatError &error , const string path , bool old
             else {
 //              for (j = INT_VALUE;j <= NB_INTERNODE;j++) {
               for (j = INT_VALUE;j <= OLD_INT_VALUE;j++) {
-                if (token == STAT_variable_word[j]) {
+                if (*token == STAT_variable_word[j]) {
 //                  if ((j == NB_INTERNODE) && ((read_line != offset) || ((read_line == offset) &&
                   if ((j == OLD_INT_VALUE) && ((read_line != offset) || ((read_line == offset) &&
                         (index_param_type != POSITION) && (index_param_type != POSITION_INTERVAL)))) {
@@ -400,14 +418,17 @@ Sequences* Sequences::ascii_read(StatError &error , const string path , bool old
       nb_sequence = 0;
       lstatus = true;
 
-      while (buffer.readLine(in_file , true)) {
-        position = buffer.first('#');
-        if (position != RW_NPOS) {
-          buffer.remove(position);
+//      while (buffer.readLine(in_file , true)) {
+      while (getline(in_file , buffer)) {
+        position = buffer.find('#');
+        if (position != string::npos) {
+          buffer.erase(position);
         }
 
-        if (!(buffer.isNull())) {
-          if (buffer.last('\\') == RW_NPOS) {
+        if (!(buffer.empty())) {
+          trimmed_buffer = trim_right_copy_if(buffer , is_any_of(" \t"));
+
+          if ((!(trimmed_buffer.empty())) && (trimmed_buffer.find('\\' , trimmed_buffer.length() - 1) == string::npos)) {
             nb_sequence++;
             lstatus = true;
           }
@@ -451,7 +472,7 @@ Sequences* Sequences::ascii_read(StatError &error , const string path , bool old
       line = 0;
 
       do {
-        buffer.readLine(in_file , false);
+        getline(in_file , buffer);
         line++;
 
 #       ifdef DEBUG
@@ -474,25 +495,25 @@ Sequences* Sequences::ascii_read(StatError &error , const string path , bool old
 
       i = 0;
 
-      while (buffer.readLine(in_file , false)) {
+      while (getline(in_file , buffer)) {
         line++;
 
 #       ifdef DEBUG
         cout << line << "  " << buffer << endl;
 #       endif
 
-        position = buffer.first('#');
-        if (position != RW_NPOS) {
-          buffer.remove(position);
+        position = buffer.find('#');
+        if (position != string::npos) {
+          buffer.erase(position);
         }
 
         j = 0;
         k = 0;
         line_continue = false;
 
-        RWCTokenizer next(buffer);
+        tokenizer tok_buffer(buffer , separator);
 
-        while (!((token = next()).isNull())) {
+        for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
           if (line_continue) {
             status = false;
             error.update(STAT_parsing[STATP_FORMAT] , line , j);
@@ -500,13 +521,13 @@ Sequences* Sequences::ascii_read(StatError &error , const string path , bool old
           }
 
           if ((vector_size > 1) && (j % (vector_size + 1) == vector_size)) {
-            if (token == "\\") {
+            if (*token == "\\") {
               line_continue = true;
               length[i]++;
             }
 
             else {
-              if (token != "|") {
+              if (*token != "|") {
                 status = false;
                 error.update(STAT_parsing[STATP_SEPARATOR] , line , j + 1);
               }
@@ -518,24 +539,38 @@ Sequences* Sequences::ascii_read(StatError &error , const string path , bool old
           }
 
           else {
-            if ((vector_size == 1) && (token == "\\")) {
+            if ((vector_size == 1) && (*token == "\\")) {
               line_continue = true;
             }
 
             else {
-              if (((index_param_type != IMPLICIT_TYPE) && (k == 0)) ||
-                  (type[k - offset] != REAL_VALUE)) {
-                lstatus = locale.stringToNum(token , &int_value);
+              lstatus = true;
+
+              if (((index_param_type != IMPLICIT_TYPE) && (k == 0)) || (type[k - offset] != REAL_VALUE)) {
+/*                try {
+                  int_value = stoi(*token);   in C++ 11
+                }
+                catch(invalid_argument &arg) {
+                  lstatus = false;
+                } */
+                int_value = atoi(token->c_str());
+
                 if ((lstatus) && (((k == 0) && (((index_param_type == TIME) || (index_param_type == POSITION) ||
                         (index_param_type == POSITION_INTERVAL)) && (int_value < 0)) ||
                       ((index_param_type == TIME_INTERVAL) && (int_value <= 0))))) {
 //                     ((k == 1) && (type[k - 1] == NB_INTERNODE) && (int_value < 0)))) {
                   lstatus = false;
                 }
+              }
 
-                else {
-                  lstatus = locale.stringToNum(token , &real_value);
+              else {
+/*                try {
+                  real_value = stod(*token);   in C++ 11
                 }
+                catch(invalid_argument &arg) {
+                  lstatus = false;
+                } */
+                real_value = atof(token->c_str());
               }
 
               if (!lstatus) {
@@ -653,7 +688,7 @@ Sequences* Sequences::ascii_read(StatError &error , const string path , bool old
       line = 0;
 
       do {
-        buffer.readLine(in_file , false);
+        getline(in_file , buffer);
         line++;
       }
       while (line < initial_nb_line);
@@ -661,21 +696,21 @@ Sequences* Sequences::ascii_read(StatError &error , const string path , bool old
       i = 0;
       j = 0;
 
-      while (buffer.readLine(in_file , false)) {
-        position = buffer.first('#');
-        if (position != RW_NPOS) {
-          buffer.remove(position);
+      while (getline(in_file , buffer)) {
+        position = buffer.find('#');
+        if (position != string::npos) {
+          buffer.erase(position);
         }
 
         k = 0;
         m = 0;
         line_continue = false;
 
-        RWCTokenizer next(buffer);
+        tokenizer tok_buffer(buffer , separator);
 
-        while (!((token = next()).isNull())) {
+        for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
           if ((vector_size > 1) && (m % (vector_size + 1) == vector_size)) {
-            if (token == "\\") {
+            if (*token == "\\") {
               line_continue = true;
             }
             k = 0;
@@ -683,25 +718,22 @@ Sequences* Sequences::ascii_read(StatError &error , const string path , bool old
           }
 
           else {
-            if ((vector_size == 1) && (token == "\\")) {
+            if ((vector_size == 1) && (*token == "\\")) {
               line_continue = true;
             }
 
             else {
-              if (((index_param_type != IMPLICIT_TYPE) && (k == 0)) ||
-                  (type[k - offset] != REAL_VALUE)) {
-                locale.stringToNum(token , &int_value);
-
-                if ((index_param_type != IMPLICIT_TYPE) && (k == 0)) {
-                  seq->index_parameter[i][j] = int_value;
-                }
-                else {
-                  seq->int_sequence[i][k - offset][j] = int_value;
-                }
+              if ((index_param_type != IMPLICIT_TYPE) && (k == 0)) {
+//                seq->index_parameter[i][j] = stoi(*token);   in C++ 11
+                seq->index_parameter[i][j] = atoi(token->c_str());
               }
-
+              else if (type[k - offset] != REAL_VALUE) {
+//                seq->int_sequence[i][k - offset][j] = stoi(*token);   in C++ 11
+                seq->int_sequence[i][k - offset][j] = atoi(token->c_str());
+              }
               else {
-                locale.stringToNum(token , seq->real_sequence[i][k - offset] + j);
+//                seq->real_sequence[i][k - offset][j] = stod(*token);   in C++ 11
+                seq->real_sequence[i][k - offset][j] = atof(token->c_str());
               }
 
               if (vector_size == 1) {
@@ -783,7 +815,7 @@ ostream& Sequences::line_write(ostream &os) const
 ostream& Sequences::ascii_write(ostream &os , bool exhaustive , bool comment_flag) const
 
 {
-  register int i , j , k;
+  int i , j , k;
   int *int_value , *pint_value;
   double mean , variance , median , lower_quartile , upper_quartile , *real_value , *preal_value;
 
@@ -1076,22 +1108,24 @@ bool Sequences::ascii_write(StatError &error , const string path ,
 /**
  *  \brief Writing of sequences.
  *
- *  \param[in,out] os                    stream,
- *  \param[in]     format                format (LINE/COLUMN/VECTOR/POSTERIOR_PROBABILITY),
- *  \param[in]     comment_flag          flag comment,
- *  \param[in]     posterior_probability posterior probabilities of the most probable state sequences,
- *  \param[in]     entropy               entropies of state sequences,
- *  \param[in]     nb_state_sequence     numbers of state sequences (hidden Markovian models),
- *  \param[in]     line_nb_character     number of characters per line.
+ *  \param[in,out] os                          stream,
+ *  \param[in]     format                      format (LINE/COLUMN/VECTOR/POSTERIOR_PROBABILITY),
+ *  \param[in]     comment_flag                flag comment,
+ *  \param[in]     posterior_probability       posterior probabilities of the most probable state sequences,
+ *  \param[in]     entropy                     entropies of state sequences,
+ *  \param[in]     nb_state_sequence           numbers of state sequences (hidden Markovian models),
+ *  \param[in]     posterior_state_probability posterior probabilities of the most probable initial state,
+ *  \param[in]     line_nb_character           number of characters per line.
  */
 /*--------------------------------------------------------------*/
 
 ostream& Sequences::ascii_print(ostream &os , output_sequence_format format , bool comment_flag ,
                                 double *posterior_probability , double *entropy ,
-                                double *nb_state_sequence , int line_nb_character) const
+                                double *nb_state_sequence , double *posterior_state_probability ,
+                                int line_nb_character) const
 
 {
-  register int i , j , k , m;
+  int i , j , k , m;
 
 
   switch (format) {
@@ -1244,10 +1278,10 @@ ostream& Sequences::ascii_print(ostream &os , output_sequence_format format , bo
 
   case LINE : {
     int buff , start , width;
-    long old_adjust;
+    ios_base::fmtflags format_flags;
 
 
-    old_adjust = os.setf(ios::right , ios::adjustfield);
+    format_flags = os.setf(ios::right , ios::adjustfield);
 
     if (index_parameter) {
       width = column_width(index_parameter_distribution->nb_value - 1);
@@ -1365,7 +1399,7 @@ ostream& Sequences::ascii_print(ostream &os , output_sequence_format format , bo
       }
     }
 
-    os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
+    os.setf(format_flags , ios::adjustfield);
     break;
   }
 
@@ -1488,9 +1522,9 @@ ostream& Sequences::ascii_print(ostream &os , output_sequence_format format , bo
   case POSTERIOR_PROBABILITY : {
     if ((posterior_probability) && (entropy) && (nb_state_sequence)) {
       bool *selected_sequence;
-      int index , width[6];
-      long old_adjust;
+      int index , width[7];
       double max , *divergence;
+      ios_base::fmtflags format_flags;
 
 
       divergence = new double[nb_sequence];
@@ -1504,43 +1538,55 @@ ostream& Sequences::ascii_print(ostream &os , output_sequence_format format , bo
       width[3] = column_width(nb_sequence , divergence) + ASCII_SPACE;
       width[4] = column_width(nb_sequence , nb_state_sequence) + ASCII_SPACE;
       width[5] = column_width(max_length) + ASCII_SPACE;
+      if (posterior_state_probability) {
+        width[6] = column_width(nb_sequence , posterior_state_probability) + ASCII_SPACE;
+      }
 
       selected_sequence = new bool[nb_sequence];
       for (i = 0;i < nb_sequence;i++) {
         selected_sequence[i] = false;
       }
 
-      old_adjust = os.setf(ios::left , ios::adjustfield);
+      format_flags = os.setf(ios::left , ios::adjustfield);
 
-      os << "\n6 " << STAT_word[STATW_VARIABLES] << endl;
+      os << "\n" << (posterior_state_probability ? 7 : 6) << " " << STAT_word[STATW_VARIABLES] << endl;
 
-      os << "\n" << STAT_word[STATW_VARIABLE] << " 1 : " << STAT_variable_word[INT_VALUE] << endl;
+      i = 1;
+      os << "\n" << STAT_word[STATW_VARIABLE] << " " << i++ << " : " << STAT_variable_word[INT_VALUE] << endl;
 
-      os << STAT_word[STATW_VARIABLE] << " 2 : " << STAT_variable_word[REAL_VALUE] << "   ";
+      if (posterior_state_probability) {
+        os << STAT_word[STATW_VARIABLE] << " " << i++ << " : " << STAT_variable_word[REAL_VALUE] << "   ";
+        if (comment_flag) {
+          os << "# ";
+        }
+        os << SEQ_label[SEQL_POSTERIOR_INITIAL_STATE_PROBABILITY] << endl;
+      }
+
+      os << STAT_word[STATW_VARIABLE] << " " << i++ << " : " << STAT_variable_word[REAL_VALUE] << "   ";
       if (comment_flag) {
         os << "# ";
       }
       os << SEQ_label[SEQL_POSTERIOR_STATE_SEQUENCE_PROBABILITY] << endl;
 
-      os << STAT_word[STATW_VARIABLE] << " 3 : " << STAT_variable_word[REAL_VALUE] << "   ";
+      os << STAT_word[STATW_VARIABLE] << " " << i++ << " : " << STAT_variable_word[REAL_VALUE] << "   ";
       if (comment_flag) {
         os << "# ";
       }
       os << SEQ_label[SEQL_STATE_SEQUENCE_ENTROPY] << endl;
 
-      os << STAT_word[STATW_VARIABLE] << " 4 : " << STAT_variable_word[REAL_VALUE] << "   ";
+      os << STAT_word[STATW_VARIABLE] << " " << i++ << " : " << STAT_variable_word[REAL_VALUE] << "   ";
       if (comment_flag) {
         os << "# ";
       }
       os << SEQ_label[SEQL_STATE_SEQUENCE_DIVERGENCE] << endl;
 
-      os << STAT_word[STATW_VARIABLE] << " 5 : " << STAT_variable_word[REAL_VALUE] << "   ";
+      os << STAT_word[STATW_VARIABLE] << " " << i++ << " : " << STAT_variable_word[REAL_VALUE] << "   ";
       if (comment_flag) {
         os << "# ";
       }
       os << SEQ_label[SEQL_NB_STATE_SEQUENCE] << endl;
 
-      os << STAT_word[STATW_VARIABLE] << " 6 : " << STAT_variable_word[INT_VALUE] << "    ";
+      os << STAT_word[STATW_VARIABLE] << " " << i << " : " << STAT_variable_word[INT_VALUE] << "    ";
       if (comment_flag) {
         os << "# ";
       }
@@ -1570,19 +1616,43 @@ ostream& Sequences::ascii_print(ostream &os , output_sequence_format format , bo
 #       endif
 
         max = 0.;
-        for (j = 0;j < nb_sequence;j++) {
-/*          if ((!selected_sequence[j]) && (entropy[j] > max)) {
-            max = entropy[j]; */
-          if ((!selected_sequence[j]) && (posterior_probability[j] > max)) {
-            max = posterior_probability[j];
-            index = j;
+
+        if (posterior_state_probability) {
+          for (j = 0;j < nb_sequence;j++) {
+            if ((!selected_sequence[j]) && (posterior_state_probability[j] > max)) {
+              max = posterior_state_probability[j];
+              index = j;
+            }
+          }
+        }
+
+        else {
+          for (j = 0;j < nb_sequence;j++) {
+/*            if ((!selected_sequence[j]) && (entropy[j] > max)) {
+              max = entropy[j]; */
+            if ((!selected_sequence[j]) && (posterior_probability[j] > max)) {
+              max = posterior_probability[j];
+              index = j;
+            }
           }
         }
 
         selected_sequence[index] = true;
 
-        os << setw(width[0]) << i + 1
-           << setw(width[1]) << posterior_probability[index]
+        os << setw(width[0]) << i + 1;
+
+        if (posterior_state_probability) {
+
+#         ifdef MESSAGE
+          if (posterior_probability[index] > posterior_state_probability[index] + DOUBLE_ERROR) {
+            cout << "\n" << SEQ_label[SEQL_SEQUENCE] << " " << identifier[index] << ", "<< SEQ_error[SEQR_POSTERIOR_PROBABILITY_ORDER] << endl;
+          }
+#         endif
+
+          os << setw(width[6]) << posterior_state_probability[index];
+        }
+
+        os << setw(width[1]) << posterior_probability[index]
            << setw(width[2]) << entropy[index]
            << setw(width[3]) << divergence[index]
            << setw(width[4]) << nb_state_sequence[index]
@@ -1596,7 +1666,7 @@ ostream& Sequences::ascii_print(ostream &os , output_sequence_format format , bo
       delete [] divergence;
       delete [] selected_sequence;
 
-      os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
+      os.setf(format_flags , ios::adjustfield);
     }
     break;
   }
@@ -1682,7 +1752,7 @@ bool Sequences::spreadsheet_write(StatError &error , const string path) const
 
 {
   bool status;
-  register int i , j , k;
+  int i , j , k;
   int *int_value , *pint_value;
   double mean , variance , median , lower_quartile , upper_quartile , *real_value , *preal_value;
   ofstream out_file(path.c_str());
@@ -1859,7 +1929,7 @@ bool Sequences::plot_write(StatError &error , const char *prefix ,
 
 {
   bool status;
-  register int i , j;
+  int i , j;
   int nb_histo;
   const FrequencyDistribution *phisto[2];
   ostringstream *data_file_name;
@@ -2085,7 +2155,7 @@ bool Sequences::plot_write(StatError &error , const char *prefix ,
 MultiPlotSet* Sequences::get_plotable() const
 
 {
-  register int i , j;
+  int i , j;
   int nb_plot_set;
   ostringstream legend;
   MultiPlotSet *plot_set;
@@ -2263,7 +2333,7 @@ bool Sequences::plot_print(const char *path , int ilength) const
 
 {
   bool status = false;
-  register int i , j , k;
+  int i , j , k;
   int length_nb_sequence , *index , *plength;
   ofstream out_file(path);
 
@@ -2322,7 +2392,7 @@ bool Sequences::plot_data_write(StatError &error , const char *prefix ,
 
 {
   bool status;
-  register int i , j , k;
+  int i , j , k;
   int min_index_parameter , max_index_parameter , *pfrequency , *length_nb_sequence;
   double min , max;
   ostringstream *data_file_name;
@@ -2558,7 +2628,7 @@ bool Sequences::plot_data_write(StatError &error , const char *prefix ,
 MultiPlotSet* Sequences::get_plotable_data(StatError &error) const
 
 {
-  register int i , j , k , m , n;
+  int i , j , k , m , n;
   int nb_plot_set , min_index_parameter , max_index_parameter;
   double min , max;
   ostringstream title , legend;
@@ -2739,7 +2809,7 @@ MultiPlotSet* Sequences::get_plotable_data(StatError &error) const
 void Sequences::max_length_computation()
 
 {
-  register int i;
+  int i;
 
 
   max_length = length[0];
@@ -2760,7 +2830,7 @@ void Sequences::max_length_computation()
 void Sequences::cumul_length_computation()
 
 {
-  register int i;
+  int i;
 
 
   cumul_length = 0;
@@ -2779,7 +2849,7 @@ void Sequences::cumul_length_computation()
 void Sequences::build_length_frequency_distribution()
 
 {
-  register int i;
+  int i;
 
 
   length_distribution = new FrequencyDistribution(max_length + 1);
@@ -2807,7 +2877,7 @@ void Sequences::index_parameter_computation()
 
 {
   if ((index_param_type == TIME_INTERVAL) || (index_param_type == POSITION_INTERVAL)) {
-    register int i , j;
+    int i , j;
 
 
     switch (index_param_type) {
@@ -2837,7 +2907,7 @@ void Sequences::index_parameter_computation()
 int Sequences::min_index_parameter_computation() const
 
 {
-  register int i;
+  int i;
   int min_index_parameter = I_DEFAULT;
 
 
@@ -2865,7 +2935,7 @@ int Sequences::min_index_parameter_computation() const
 int Sequences::max_index_parameter_computation(bool last_position) const
 
 {
-  register int i;
+  int i;
   int max_index_parameter = I_DEFAULT;
 
 
@@ -2903,7 +2973,7 @@ void Sequences::build_index_parameter_frequency_distribution()
 
 {
   if (index_parameter) {
-    register int i , j;
+    int i , j;
 
 
     index_parameter_distribution = new FrequencyDistribution(max_index_parameter_computation() + 1);
@@ -2938,7 +3008,7 @@ void Sequences::index_interval_computation()
 //  if ((index_param_type == TIME) || ((index_param_type == POSITION) &&
 //       (type[0] != NB_INTERNODE))) {
   if ((index_param_type == TIME) || (index_param_type == POSITION)) {
-    register int i , j;
+    int i , j;
 
 
     index_interval = new FrequencyDistribution(max_index_parameter_computation(true) + 1);
@@ -2979,7 +3049,7 @@ FrequencyDistribution* Sequences::value_index_interval_computation(StatError &er
 
 {
   bool status = true;
-  register int i , j;
+  int i , j;
   int previous_index_param , *pindex_param , *pisequence;
   FrequencyDistribution *value_index_interval;
 
@@ -3071,7 +3141,7 @@ FrequencyDistribution* Sequences::value_index_interval_computation(StatError &er
 void Sequences::min_value_computation(int variable)
 
 {
-  register int i , j;
+  int i , j;
 
 
   if ((type[variable] != REAL_VALUE) && (type[variable] != AUXILIARY)) {
@@ -3111,7 +3181,7 @@ void Sequences::min_value_computation(int variable)
 void Sequences::max_value_computation(int variable)
 
 {
-  register int i , j;
+  int i , j;
 
 
   if ((type[variable] != REAL_VALUE) && (type[variable] != AUXILIARY)) {
@@ -3152,7 +3222,7 @@ void Sequences::max_value_computation(int variable)
 void Sequences::marginal_frequency_distribution_computation(int variable)
 
 {
-  register int i , j;
+  int i , j;
 
 
   for (i = 0;i < marginal_distribution[variable]->nb_value;i++) {
@@ -3215,7 +3285,7 @@ void Sequences::build_marginal_histogram(int variable , double bin_width , doubl
 {
   if ((!marginal_histogram[variable]) || (bin_width != marginal_histogram[variable]->bin_width) ||
       (imin_value != D_INF)) {
-    register int i , j;
+    int i , j;
     int *pisequence;
     double *prsequence;
 
@@ -3351,7 +3421,7 @@ bool Sequences::select_bin_width(StatError &error , int variable ,
 double Sequences::mean_computation(int variable) const
 
 {
-  register int i , j;
+  int i , j;
   double mean;
 
 
@@ -3399,8 +3469,9 @@ double Sequences::mean_computation(int variable) const
 double Sequences::variance_computation(int variable , double mean) const
 
 {
-  register int i , j;
+  int i , j;
   double variance , diff;
+  long double square_sum;
 
 
   if (marginal_distribution[variable]) {
@@ -3408,14 +3479,14 @@ double Sequences::variance_computation(int variable , double mean) const
   }
 
   else {
-    variance = 0.;
-
     if (cumul_length > 1) {
+      square_sum = 0.;
+
       if ((type[variable] != REAL_VALUE) && (type[variable] != AUXILIARY)) {
         for (i = 0;i < nb_sequence;i++) {
           for (j = 0;j < length[i];j++) {
             diff = int_sequence[i][variable][j] - mean;
-            variance += diff * diff;
+            square_sum += diff * diff;
           }
         }
       }
@@ -3424,12 +3495,16 @@ double Sequences::variance_computation(int variable , double mean) const
         for (i = 0;i < nb_sequence;i++) {
           for (j = 0;j < length[i];j++) {
             diff = real_sequence[i][variable][j] - mean;
-            variance += diff * diff;
+            square_sum += diff * diff;
           }
         }
       }
 
-      variance /= (cumul_length - 1);
+      variance = square_sum / (cumul_length - 1);
+    }
+
+    else {
+      variance = 0.;
     }
   }
 
@@ -3451,7 +3526,7 @@ double Sequences::variance_computation(int variable , double mean) const
 double Sequences::mean_absolute_deviation_computation(int variable , double location) const
 
 {
-  register int i , j;
+  int i , j;
   double mean_absolute_deviation;
 
 
@@ -3498,7 +3573,7 @@ double Sequences::mean_absolute_deviation_computation(int variable , double loca
 double Sequences::mean_absolute_difference_computation(int variable) const
 
 {
-  register int i , j , k , m;
+  int i , j , k , m;
   double mean_absolute_difference;
 
 
@@ -3568,8 +3643,9 @@ double Sequences::mean_absolute_difference_computation(int variable) const
 double Sequences::skewness_computation(int variable , double mean , double variance) const
 
 {
-  register int i , j;
+  int i , j;
   double skewness , diff;
+  long double cube_sum;
 
 
   if (marginal_distribution[variable]) {
@@ -3577,14 +3653,14 @@ double Sequences::skewness_computation(int variable , double mean , double varia
   }
 
   else {
-    skewness = 0.;
-
     if ((cumul_length > 2) && (variance > 0.)) {
+      cube_sum = 0.;
+
       if ((type[variable] != REAL_VALUE) && (type[variable] != AUXILIARY)) {
         for (i = 0;i < nb_sequence;i++) {
           for (j = 0;j < length[i];j++) {
             diff = int_sequence[i][variable][j] - mean;
-            skewness += diff * diff * diff;
+            cube_sum += diff * diff * diff;
           }
         }
       }
@@ -3593,13 +3669,17 @@ double Sequences::skewness_computation(int variable , double mean , double varia
         for (i = 0;i < nb_sequence;i++) {
           for (j = 0;j < length[i];j++) {
             diff = real_sequence[i][variable][j] - mean;
-            skewness += diff * diff * diff;
+            cube_sum += diff * diff * diff;
           }
         }
       }
 
-      skewness = skewness * cumul_length / ((cumul_length - 1) *
+      skewness = cube_sum * cumul_length / ((cumul_length - 1) *
                   (double)(cumul_length - 2) * pow(variance , 1.5));
+    }
+
+    else {
+      skewness = 0.;
     }
   }
 
@@ -3623,8 +3703,9 @@ double Sequences::skewness_computation(int variable , double mean , double varia
 double Sequences::kurtosis_computation(int variable , double mean , double variance) const
 
 {
-  register int i , j;
+  int i , j;
   double kurtosis , diff;
+  long double power_sum;
 
 
   if (marginal_distribution[variable]) {
@@ -3632,18 +3713,14 @@ double Sequences::kurtosis_computation(int variable , double mean , double varia
   }
 
   else {
-    if (variance == 0.) {
-      kurtosis = -2.;
-    }
-
-    else {
-      kurtosis = 0.;
+    if (variance > 0.) {
+      power_sum = 0.;
 
       if ((type[variable] != REAL_VALUE) && (type[variable] != AUXILIARY)) {
         for (i = 0;i < nb_sequence;i++) {
           for (j = 0;j < length[i];j++) {
             diff = int_sequence[i][variable][j] - mean;
-            kurtosis += diff * diff * diff * diff;
+            power_sum += diff * diff * diff * diff;
           }
         }
       }
@@ -3652,12 +3729,16 @@ double Sequences::kurtosis_computation(int variable , double mean , double varia
         for (i = 0;i < nb_sequence;i++) {
           for (j = 0;j < length[i];j++) {
             diff = real_sequence[i][variable][j] - mean;
-            kurtosis += diff * diff * diff * diff;
+            power_sum += diff * diff * diff * diff;
           }
         }
       }
 
-      kurtosis = kurtosis / ((cumul_length - 1) * variance * variance) - 3.;
+      kurtosis = power_sum / ((cumul_length - 1) * variance * variance) - 3.;
+    }
+
+    else {
+      kurtosis = -2.;
     }
   }
 
@@ -3679,7 +3760,7 @@ double Sequences::kurtosis_computation(int variable , double mean , double varia
 double* Sequences::mean_direction_computation(int variable , angle_unit unit) const
 
 {
-  register int i , j;
+  int i , j;
   double *mean_direction;
 
 
@@ -3750,6 +3831,169 @@ double* Sequences::mean_direction_computation(int variable , angle_unit unit) co
   }
 
   return mean_direction;
+}
+
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the root mean square error or the mean absolute error for a variable.
+ *
+ *  \param[in] error       reference on a StatError object,
+ *  \param[in] display     flag for displaying the result,
+ *  \param[in] variable    variable index,
+ *  \param[in] iidentifier sequence identifier,
+ *  \param[in] robust      flag computation of mean absolute error.
+ *
+ *  \return                root mean square error or mean absolute error.
+ */
+/*--------------------------------------------------------------*/
+
+bool Sequences::mean_error_computation(StatError &error , bool display , int variable ,
+                                       int iidentifier , bool robust) const
+
+{
+  bool status = true;
+  int i , j;
+  int index;
+  double mean_error , diff;
+  long double mean_squared_error;
+
+
+  error.init();
+
+  if ((variable < 1) || (variable >= nb_variable)) {
+    status = false;
+    error.update(STAT_error[STATR_VARIABLE_INDEX]);
+  }
+
+  else {
+    variable--;
+
+    if ((type[variable] != INT_VALUE) && (type[variable] != REAL_VALUE)) {
+      status = false;
+      ostringstream correction_message;
+      correction_message << STAT_variable_word[INT_VALUE] << " or " << STAT_variable_word[REAL_VALUE];
+      error.correction_update(STAT_error[STATR_VARIABLE_TYPE] , (correction_message.str()).c_str());
+    }
+
+    if (type[variable + 1] != AUXILIARY) {
+      status = false;
+      ostringstream error_message;
+      error_message << STAT_label[STATL_VARIABLE] << " " << variable + 1 << ": "
+                    << STAT_error[STATR_VARIABLE_TYPE];
+      error.correction_update((error_message.str()).c_str() , STAT_variable_word[AUXILIARY]);
+    }
+  }
+
+  if (iidentifier != I_DEFAULT) {
+    for (i = 0;i < nb_sequence;i++) {
+      if (iidentifier == identifier[i]) {
+        index = i;
+        break;
+      }
+    }
+
+    if (i == nb_sequence) {
+      status = false;
+      error.update(SEQ_error[SEQR_SEQUENCE_IDENTIFIER]);
+    }
+  }
+
+  else {
+    index = I_DEFAULT;
+  }
+
+  if (status) {
+    if (robust) {
+      mean_error = 0.;
+
+      switch (type[variable]) {
+
+      case INT_VALUE : {
+        for (i = 0;i < nb_sequence;i++) {
+          if ((index == I_DEFAULT) || (index == i)) {
+            for (j = 0;j < length[i];j++) {
+              mean_error += fabs(int_sequence[i][variable][j] - real_sequence[i][variable + 1][j]);
+            }
+          }
+        }
+        break;
+      }
+
+      case REAL_VALUE : {
+        for (i = 0;i < nb_sequence;i++) {
+          if ((index == I_DEFAULT) || (index == i)) {
+            for (j = 0;j < length[i];j++) {
+              mean_error += fabs(real_sequence[i][variable][j] - real_sequence[i][variable + 1][j]);
+            }
+          }
+        }
+        break;
+      }
+      }
+
+      if (index == I_DEFAULT) {
+        mean_error /= cumul_length;
+      }
+      else {
+        mean_error /= length[index];
+      }
+    }
+
+    else {
+      mean_squared_error = 0.;
+
+      switch (type[variable]) {
+
+      case INT_VALUE : {
+        for (i = 0;i < nb_sequence;i++) {
+          if ((index == I_DEFAULT) || (index == i)) {
+            for (j = 0;j < length[i];j++) {
+              diff = int_sequence[i][variable][j] - real_sequence[i][variable + 1][j];
+              mean_squared_error += diff * diff;
+            }
+          }
+        }
+        break;
+      }
+
+      case REAL_VALUE : {
+        for (i = 0;i < nb_sequence;i++) {
+          if ((index == I_DEFAULT) || (index == i)) {
+            for (j = 0;j < length[i];j++) {
+              diff = real_sequence[i][variable][j] - real_sequence[i][variable + 1][j];
+              mean_squared_error += diff * diff;
+            }
+          }
+        }
+        break;
+      }
+      }
+
+      if (index == I_DEFAULT) {
+        mean_error = sqrtl(mean_squared_error / cumul_length);
+      }
+      else {
+        mean_error = sqrtl(mean_squared_error / length[index]);
+      }
+    }
+
+    if (display) {
+      cout << "\n";
+      if (((type[0] != STATE) && (nb_variable > 2)) || ((type[0] == STATE) && (nb_variable > 3))) {
+        cout << STAT_label[STATL_VARIABLE] << " " << variable + 1 << "   ";
+      }
+
+      if (robust) {
+        cout << SEQ_label[SEQL_MEAN_ABSOLUTE_ERROR] << ": " << mean_error << endl;
+      }
+      else {
+        cout << SEQ_label[SEQL_ROOT_MEAN_SQUARE_ERROR] << ": " << mean_error << endl;
+      }
+    }
+  }
+
+  return status;
 }
 
 

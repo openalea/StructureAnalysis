@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -98,7 +98,7 @@ namespace stat_tool {
   const double ref_critical_probability[NB_CRITICAL_PROBABILITY] = {0.05 , 0.01};
 
   const int NB_VALUE = 1000;             // number of values of a discrete variable
-  const int SAMPLE_NB_VALUE = NB_VALUE;  // number of values of a discrete sample 
+  const int SAMPLE_NB_VALUE = NB_VALUE;  // number of values of a discrete sample
 
   enum frequency_distribution_transformation {
     FREQUENCY_DISTRIBUTION_COPY ,
@@ -117,7 +117,9 @@ namespace stat_tool {
     BINOMIAL ,
     POISSON ,
     NEGATIVE_BINOMIAL ,
+    POISSON_GEOMETRIC ,
     UNIFORM ,
+    PRIOR_SEGMENT_LENGTH ,
     MULTINOMIAL                          // addition by Florence Chaubert
   };
 
@@ -137,7 +139,8 @@ namespace stat_tool {
     GAUSSIAN ,
     VON_MISES ,
     ZERO_INFLATED_GAMMA ,
-    LINEAR_MODEL
+    LINEAR_MODEL ,
+    AUTOREGRESSIVE_MODEL
   };
 
   enum angle_unit {
@@ -156,6 +159,12 @@ namespace stat_tool {
     ORDINAL ,
     NUMERIC ,
     CIRCULAR
+  };
+
+  enum log_base {
+    NATURAL ,
+    TWO ,
+    TEN
   };
 
   enum process_type {
@@ -354,7 +363,6 @@ namespace stat_tool {
   };
 
 
-
   /// \brief Class for error management
 
   class StatError {
@@ -391,7 +399,6 @@ namespace stat_tool {
   };
 
 
-
   /// \brief Abstract class defining a common interface
 
   class StatInterface {
@@ -401,6 +408,7 @@ namespace stat_tool {
     virtual std::ostream& line_write(std::ostream &os) const = 0;
 
     virtual std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const = 0;
+    std::string ascii_write(bool exhaustive = false) const;
     virtual bool ascii_write(StatError &error , const std::string path ,
                              bool exhaustive = false) const = 0;
     virtual bool spreadsheet_write(StatError &error , const std::string path) const = 0;
@@ -412,7 +420,6 @@ namespace stat_tool {
 
 //    bool binary_write(StatError &error , const std::string path) const;
   };
-
 
 
   class FrequencyDistribution;
@@ -557,22 +564,27 @@ namespace stat_tool {
                   const FrequencyDistribution **histo);
 
 
-
   class Forward;
 
   /// \brief Discrete parametric distribution
 
   class DiscreteParametric : public Distribution {
 
-      friend std::ostream& operator<<(std::ostream& , const DiscreteParametric&);
+    friend std::ostream& operator<<(std::ostream& , const DiscreteParametric&);
 
   public :
 
     discrete_parametric ident;  ///< identifier
-    int inf_bound;          ///< lower bound
-    int sup_bound;          ///< upper bound (binomial, uniform)
-    double parameter;       ///< parameter (Poisson, negative binomial)
-    double probability;     ///< probability of success (binomial, negative binomial)
+    union {
+      int inf_bound;        ///< lower bound
+      int no_segment;       ///< number of segments (prior segment length distribution)
+    };
+    union {
+      int sup_bound;        ///< upper bound (binomial, uniform)
+      int sequence_length;  ///< sequence length (prior segment length distribution)
+    };
+    double parameter;       ///< parameter (Poisson, negative binomial, Poisson geometric)
+    double probability;     ///< probability of success (binomial, negative binomial, Poisson geometric)
 
     void init(int iinf_bound , int isup_bound , double iparameter , double iprobability);
     void init(discrete_parametric iident , int iinf_bound , int isup_bound ,
@@ -625,7 +637,9 @@ namespace stat_tool {
                              distribution_computation mode);
     void negative_binomial_computation(int inb_value , double cumul_threshold ,
                                        distribution_computation mode);
+    void poisson_geometric_computation(int inb_value , double cumul_threshold);
     void uniform_computation();
+    void prior_segment_length_computation();
 
     void computation(int min_nb_value = 1 ,
                      double cumul_threshold = CUMUL_THRESHOLD);
@@ -642,8 +656,6 @@ namespace stat_tool {
                           const FrequencyDistribution *no_event ,
                           Reestimation<double> *inter_event_reestim ,
                           Reestimation<double> *length_bias_reestim , int iter) const;
-
-    void reestimation(const Reestimation<double> *reestim , int nb_estim = 1);
 
     double state_occupancy_likelihood_computation(const FrequencyDistribution &sojourn_time ,
                                                   const FrequencyDistribution &final_run) const;
@@ -666,7 +678,6 @@ namespace stat_tool {
   };
 
 
-
   /// \brief Forward recurrence or sojourn time distribution
 
   class Forward : public DiscreteParametric {
@@ -684,7 +695,6 @@ namespace stat_tool {
 
     void computation(const DiscreteParametric &dist);
   };
-
 
 
   class DiscreteDistributionData;
@@ -775,7 +785,7 @@ namespace stat_tool {
 
     DiscreteDistributionData* shift(StatError &error , int shift_param) const;
     DiscreteDistributionData* cluster(StatError &error , int step , rounding mode = FLOOR) const;
-    DiscreteDistributionData* cluster(StatError &error , double ratio , std::ostream &os) const;
+    DiscreteDistributionData* cluster(StatError &error , double ratio , bool display) const;
     DiscreteDistributionData* cluster(StatError &error , int nb_class , int *ilimit) const;
     DiscreteDistributionData* cluster(StatError &error , int nb_class , std::vector<int> ilimit) const;
     DiscreteDistributionData* transcode(StatError &error , int *category) const;
@@ -799,16 +809,16 @@ namespace stat_tool {
                              const char *title = NULL) const;
     MultiPlotSet* survival_get_plotable(StatError &error) const;
 
-    bool comparison(StatError &error , std::ostream &os , int nb_histo ,
+    bool comparison(StatError &error , bool display , int nb_histo ,
                     const FrequencyDistribution **ihisto , variable_type type ,
                     const std::string path = NULL , output_format format = ASCII) const;
-    bool comparison(StatError &error , std::ostream &os , int nb_histo ,
+    bool comparison(StatError &error , bool display , int nb_histo ,
                     const std::vector<FrequencyDistribution> ihisto , variable_type type ,
                     const std::string path = NULL , output_format format = ASCII) const;
 
-    void F_comparison(std::ostream &os , const FrequencyDistribution &histo) const;
-    void t_comparison(std::ostream &os , const FrequencyDistribution &histo) const;
-    bool wilcoxon_mann_whitney_comparison(StatError &error , std::ostream &os ,
+    void F_comparison(bool display , const FrequencyDistribution &histo) const;
+    void t_comparison(bool display , const FrequencyDistribution &histo) const;
+    bool wilcoxon_mann_whitney_comparison(StatError &error , bool display ,
                                           const FrequencyDistribution &ihisto) const;
 
     DiscreteParametricModel* fit(StatError &error , const DiscreteParametric &idist) const;
@@ -832,38 +842,38 @@ namespace stat_tool {
     DiscreteMixture* discrete_mixture_estimation(StatError &error , int nb_component , std::vector<discrete_parametric> ident ,
                                                  int min_inf_bound = 0 , bool mixt_flag = true ,
                                                  bool component_flag = true , double weight_step = 0.1) const;
-    DiscreteMixture* discrete_mixture_estimation(StatError &error , std::ostream &os , int min_nb_component ,
+    DiscreteMixture* discrete_mixture_estimation(StatError &error , bool display , int min_nb_component ,
                                                  int max_nb_component , discrete_parametric *ident , int min_inf_bound = 0 ,
                                                  bool mixt_flag = true , bool component_flag = true ,
                                                  model_selection_criterion criterion = BICc ,
                                                  double weight_step = 0.1) const;
-    DiscreteMixture* discrete_mixture_estimation(StatError &error , std::ostream &os , int min_nb_component ,
+    DiscreteMixture* discrete_mixture_estimation(StatError &error , bool display , int min_nb_component ,
                                                  int max_nb_component , std::vector<discrete_parametric> ident , int min_inf_bound = 0 ,
                                                  bool mixt_flag = true , bool component_flag = true ,
                                                  model_selection_criterion criterion = BICc ,
                                                  double weight_step = 0.1) const;
 
-    Convolution* convolution_estimation(StatError &error , std::ostream &os , const DiscreteParametric &known_dist ,
+    Convolution* convolution_estimation(StatError &error , bool display , const DiscreteParametric &known_dist ,
                                         const DiscreteParametric &unknown_dist , estimation_criterion estimator = LIKELIHOOD ,
                                         int nb_iter = I_DEFAULT , double weight = D_DEFAULT ,
                                         penalty_type pen_type = SECOND_DIFFERENCE , side_effect outside = ZERO) const;
-    Convolution* convolution_estimation(StatError &error , std::ostream &os , const DiscreteParametric &known_dist ,
+    Convolution* convolution_estimation(StatError &error , bool display , const DiscreteParametric &known_dist ,
                                         int min_inf_bound , estimation_criterion estimator = LIKELIHOOD ,
                                         int nb_iter = I_DEFAULT , double weight = D_DEFAULT ,
                                         penalty_type pen_type = SECOND_DIFFERENCE , side_effect outside = ZERO) const;
 
-    Compound* compound_estimation(StatError &error , std::ostream &os , const DiscreteParametric &sum_dist ,
+    Compound* compound_estimation(StatError &error , bool display , const DiscreteParametric &sum_dist ,
                                   const DiscreteParametric &dist , compound_distribution type ,
                                   estimation_criterion estimator = LIKELIHOOD , int nb_iter = I_DEFAULT ,
                                   double weight = D_DEFAULT , penalty_type pen_type = SECOND_DIFFERENCE ,
                                   side_effect outside = ZERO) const;
-    Compound* compound_estimation(StatError &error , std::ostream &os , const DiscreteParametric &known_dist ,
+    Compound* compound_estimation(StatError &error , bool display , const DiscreteParametric &known_dist ,
                                   compound_distribution type , int min_inf_bound = 0 ,
                                   estimation_criterion estimator = LIKELIHOOD ,
                                   int nb_iter = I_DEFAULT , double weight = D_DEFAULT ,
                                   penalty_type pen_type = SECOND_DIFFERENCE , side_effect outside = ZERO) const;
 
-    DiscreteParametricModel* estimation(StatError &error , std::ostream &os ,
+    DiscreteParametricModel* estimation(StatError &error , bool display ,
                                         const FrequencyDistribution &backward ,
                                         const FrequencyDistribution &forward ,
                                         const FrequencyDistribution *no_event ,
@@ -872,7 +882,7 @@ namespace stat_tool {
                                         duration_distribution_mean_estimator mean_estimator = COMPUTED ,
                                         double weight = D_DEFAULT , penalty_type pen_type = SECOND_DIFFERENCE ,
                                         side_effect outside = ZERO , double iinter_event_mean = D_DEFAULT) const;
-    DiscreteParametricModel* estimation(StatError &error , std::ostream &os ,
+    DiscreteParametricModel* estimation(StatError &error , bool display ,
                                         const FrequencyDistribution &backward ,
                                         const FrequencyDistribution &forward ,
                                         const FrequencyDistribution *no_event ,
@@ -886,7 +896,6 @@ namespace stat_tool {
   bool plot_print(const char *path , int nb_dist , const Distribution **dist ,
                   double *scale , int *dist_nb_value , int nb_histo ,
                   const FrequencyDistribution **histo);
-
 
 
   class Histogram;
@@ -903,23 +912,27 @@ namespace stat_tool {
     continuous_parametric ident;  ///< identifier
     union {
       double shape;         ///< shape parameter (gamma, zero-inflated gamma)
-      double location;      ///< mean (Gaussian, inverse Gaussian), mean direction (von Mises),
+      double location;      ///< mean (Gaussian, inverse Gaussian, autoregressive model), mean direction (von Mises),
       double intercept;     ///< for linear model
     };
     union {
       double scale;         ///< scale parameter (gamma, inverse Gaussian, zero-inflated gamma)
-      double dispersion;    ///< standard deviation (Gaussian, linear model), concentration (von Mises),
+      double dispersion;    ///< standard deviation (Gaussian, linear model, autoregressive model), concentration (von Mises),
     };
     union {
       double zero_probability;  ///< zero probability (zero-inflated gamma)
-      double slope;           ///< for linear model
+      double slope;         ///< for linear models
+      double autoregressive_coeff;  ///< for autoregressive models
     };
     double min_value;       ///< minimum value
     double max_value;       ///< maximum value
     angle_unit unit;        ///< unit (degree/radian - von Mises)
-    double slope_standard_deviation;  ///< for linear model
-    double sample_size;     ///< for linear model
-    double correlation;     ///< for linear model
+    double slope_standard_deviation;  ///< for linear models
+    double sample_size;     ///< for linear and autoregressive models
+    union {
+      double correlation;     ///< for linear models
+      double determination_coeff;  ///< for autoregressive models
+    };
     double *cumul;          ///< cumulative distribution function (von Mises)
 
     void copy(const ContinuousParametric &dist);
@@ -973,7 +986,6 @@ namespace stat_tool {
   };
 
 
-
   /// \brief Histogram
 
   class Histogram {
@@ -1006,7 +1018,6 @@ namespace stat_tool {
     void max_computation();
     double* cumul_computation() const;
   };
-
 
 
   int column_width(int);

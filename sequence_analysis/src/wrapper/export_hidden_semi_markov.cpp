@@ -21,8 +21,6 @@
 
 #include "wrapper_util.h"
 
-#include "tool/config.h"
-
 #include "stat_tool/stat_label.h"
 
 #include "sequence_analysis/hidden_semi_markov.h"
@@ -82,7 +80,8 @@ public:
   state_sequence_computation(const HiddenSemiMarkov &input,
       const MarkovianSequences &seq, bool characteristic_flag = true)
   {
-    std:stringstream os;
+    //std:stringstream os;
+    bool os = true; // display
     SIMPLE_METHOD_TEMPLATE_1(input, state_sequence_computation,
         SemiMarkovData, os, seq, characteristic_flag);
   }

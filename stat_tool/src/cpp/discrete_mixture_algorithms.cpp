@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -59,7 +59,7 @@ namespace stat_tool {
 double DiscreteMixtureData::information_computation() const
 
 {
-  register int i;
+  int i;
   double information , buff;
 
 
@@ -99,7 +99,7 @@ double DiscreteMixtureData::information_computation() const
 double DiscreteMixture::likelihood_computation(const DiscreteMixtureData &mixt_histo) const
 
 {
-  register int i;
+  int i;
   double likelihood , buff;
 
 
@@ -136,7 +136,7 @@ double DiscreteMixture::likelihood_computation(const DiscreteMixtureData &mixt_h
 void DiscreteMixture::computation(int min_nb_value , double cumul_threshold , bool component_flag)
 
 {
-  register int i , j;
+  int i , j;
 
 
   // computation of the weight distribution
@@ -205,7 +205,7 @@ void DiscreteMixture::init(const FrequencyDistribution &histo , bool *estimate ,
                            int min_inf_bound , bool component_flag)
 
 {
-  register int i , j = -1;
+  int i , j = -1;
   int nb_element = 0 , threshold , *pfrequency;
   double cumul_weight = 0. , shift_mean;
 
@@ -286,7 +286,7 @@ void DiscreteMixture::init(const FrequencyDistribution &histo , bool *estimate ,
 void DiscreteMixture::expectation_step(DiscreteMixtureData *mixt_histo , int nb_element) const
 
 {
-  register int i , j , k;
+  int i , j , k;
   int component_index , value_index;
   double scale , sum , max_frequency , **rfrequency;
 
@@ -396,7 +396,7 @@ void DiscreteMixture::variance_correction(DiscreteMixtureData *mixt_histo ,
                                           bool *estimate , int min_inf_bound) const
 
 {
-  register int i;
+  int i;
   double skewness;
   FrequencyDistribution *pcomponent , *ncomponent;
 
@@ -472,7 +472,7 @@ bool DiscreteMixture::component_order_test() const
 
 {
   bool order = true;
-  register int i;
+  int i;
 
 
   for (i = 1;i < nb_component;i++) {
@@ -516,7 +516,7 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
 
 {
   bool status = true;
-  register int i , j , k;
+  int i , j , k;
   int nb_component = imixt.nb_component , inf_bound[DISCRETE_MIXTURE_NB_COMPONENT] ,
       sup_bound[DISCRETE_MIXTURE_NB_COMPONENT];
   double step , likelihood , previous_likelihood , max_likelihood = D_INF ,
@@ -722,7 +722,7 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
 
 {
   bool estimate[DISCRETE_MIXTURE_NB_COMPONENT];
-  register int i;
+  int i;
   DiscreteMixture *mixt;
 
 
@@ -760,7 +760,7 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
 
 {
   bool estimate[DISCRETE_MIXTURE_NB_COMPONENT];
-  register int i;
+  int i;
   const DiscreteParametric *pcomponent[DISCRETE_MIXTURE_NB_COMPONENT];
   DiscreteMixture *imixt , *mixt;
 
@@ -827,7 +827,7 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
  *         distributions using the EM algorithm and a model selection criterion.
  *
  *  \param[in] error            reference on a StatError object,
- *  \param[in] os               stream,
+ *  \param[in] display          flag for displaying estimation intermediate results,
  *  \param[in] min_nb_component minimum number of components
  *  \param[in] max_nb_component maximum number of components,
  *  \param[in] ident            component identifiers,
@@ -841,7 +841,7 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
  */
 /*--------------------------------------------------------------*/
 
-DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &error , ostream &os ,
+DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &error , bool display ,
                                                                     int min_nb_component , int max_nb_component ,
                                                                     discrete_parametric *ident , int min_inf_bound ,
                                                                     bool mixt_flag , bool component_flag ,
@@ -850,7 +850,7 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
 
 {
   bool status = true , estimate[DISCRETE_MIXTURE_NB_COMPONENT];
-  register int i;
+  int i;
   int nb_parameter[DISCRETE_MIXTURE_NB_COMPONENT + 1];
   double penalty , max_likelihood , likelihood[DISCRETE_MIXTURE_NB_COMPONENT + 1] ,
          penalized_likelihood[DISCRETE_MIXTURE_NB_COMPONENT + 1];
@@ -903,10 +903,10 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
                                                    0.5 * nb_parameter[min_nb_component] * log((double)nb_element);
         }
 
-#       ifdef MESSAGE
-        os << "\n";
-        dist->ascii_print(os);
-#       endif
+        if (display) {
+          cout << "\n";
+          dist->ascii_print(cout);
+        }
 
         delete dist;
       }
@@ -998,8 +998,9 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
       }
     }
 
-#   ifdef MESSAGE
-    {
+    // display of estimation results
+
+    if (display) {
       double norm = 0. , weight[DISCRETE_MIXTURE_NB_COMPONENT + 1];
 
       for (i = min_nb_component;i <= max_nb_component;i++) {
@@ -1011,16 +1012,15 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
 
       for (i = min_nb_component;i <= max_nb_component;i++) {
         if (likelihood[i] != D_INF) {
-          os << "\n" << i << " " << STAT_label[i == 1 ? STATL_DISTRIBUTION : STATL_DISTRIBUTIONS]
-             << "   2 * " << STAT_label[STATL_LIKELIHOOD] << ": " << 2 * likelihood[i] << "   "
-             << nb_parameter[i] << " " << STAT_label[STATL_FREE_PARAMETERS]
-             << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("
-             << STAT_criterion_word[criterion] << "): " << 2 * penalized_likelihood[i] << "   "
-             << STAT_label[STATL_WEIGHT] << ": " << weight[i] / norm << endl;
+          cout << "\n" << i << " " << STAT_label[i == 1 ? STATL_DISTRIBUTION : STATL_DISTRIBUTIONS]
+               << "   2 * " << STAT_label[STATL_LIKELIHOOD] << ": " << 2 * likelihood[i] << "   "
+               << nb_parameter[i] << " " << STAT_label[STATL_FREE_PARAMETERS]
+               << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("
+               << STAT_criterion_word[criterion] << "): " << 2 * penalized_likelihood[i] << "   "
+               << STAT_label[STATL_WEIGHT] << ": " << weight[i] / norm << endl;
         }
       }
     }
-#   endif
 
     for (i = 0;i < max_nb_component;i++) {
       delete pcomponent[i];
@@ -1037,7 +1037,7 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
  *         distributions using the EM algorithm and a model selection criterion.
  *
  *  \param[in] error            reference on a StatError object,
- *  \param[in] os               stream,
+ *  \param[in] display          flag for displaying estimation intermediate results,
  *  \param[in] min_nb_component minimum number of components
  *  \param[in] max_nb_component maximum number of components,
  *  \param[in] ident            component identifiers,
@@ -1051,7 +1051,7 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
  */
 /*--------------------------------------------------------------*/
 
-DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &error , ostream &os ,
+DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &error , bool display ,
                                                                     int min_nb_component , int max_nb_component ,
                                                                     vector<discrete_parametric> ident , int min_inf_bound ,
                                                                     bool mixt_flag , bool component_flag ,
@@ -1059,7 +1059,7 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
                                                                     double weight_step) const
 
 {
-  return discrete_mixture_estimation(error , os , min_nb_component , max_nb_component , ident.data() ,
+  return discrete_mixture_estimation(error , display , min_nb_component , max_nb_component , ident.data() ,
                                      min_inf_bound , mixt_flag , component_flag , criterion , weight_step);
 }
 
@@ -1078,7 +1078,7 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
 DiscreteMixtureData* DiscreteMixture::simulation(StatError &error , int nb_element) const
 
 {
-  register int i , j;
+  int i , j;
   int value;
   DiscreteMixtureData *mixt_histo;
 

@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -43,8 +43,6 @@
 #include <boost/math/distributions/poisson.hpp>
 #include <boost/math/distributions/negative_binomial.hpp>
 
-#include "tool/config.h"
-
 #include "distribution.h"
 #include "stat_label.h"
 
@@ -69,7 +67,7 @@ namespace stat_tool {
 void Distribution::convolution(Distribution &dist1 , Distribution &dist2 , int inb_value)
 
 {
-  register int i , j;
+  int i , j;
   int coffset , cnb_value , min , max;
   double sum , *pmass1 , *pmass2 , *pmass;
 
@@ -120,7 +118,7 @@ void Distribution::convolution(Distribution &dist1 , Distribution &dist2 , int i
 void DiscreteParametric::binomial_computation(int inb_value , distribution_computation mode)
 
 {
-  register int i;
+  int i;
   int set , subset;
   double failure = 1. - probability , success = probability , ratio , scale , term;
 
@@ -258,7 +256,6 @@ void DiscreteParametric::binomial_computation(int inb_value , distribution_compu
   if (mode == STANDARD) {
     binomial dist(sup_bound - inf_bound , probability);
 
-
     cout << "\nTEST binomial distribution" << endl;
     for (i = inf_bound;i <= sup_bound;i++) {
       cout << i << "  " << pdf(dist , i - inf_bound) << " | " << mass[i]
@@ -286,12 +283,9 @@ void DiscreteParametric::poisson_computation(int inb_value , double cumul_thresh
                                              distribution_computation mode)
 
 {
-  register int i;
-  double log_parameter , num , denom , *pmass , *pcumul;
+  int i , j;
+  double log_parameter , num , denom;
 
-
-  pmass = mass;
-  pcumul = cumul;
 
   switch (mode) {
 
@@ -302,11 +296,11 @@ void DiscreteParametric::poisson_computation(int inb_value , double cumul_thresh
     // null probability values before the lower bound of the support
 
     for (i = 0;i < inf_bound;i++) {
-      *pmass++ = 0.;
-      *pcumul++ = 0.;
+      mass[i] = 0.;
+      cumul[i] = 0.;
     }
 
-    i = 1;
+    j = 1;
 
     // case direct computation
 
@@ -314,18 +308,17 @@ void DiscreteParametric::poisson_computation(int inb_value , double cumul_thresh
 
       // computation of the lower bound probability
 
-      *pmass = exp(-parameter);
-      *pcumul = *pmass;
+      mass[i] = exp(-parameter);
+      cumul[i] = mass[i];
 
       // computation of the probabilities for the successive values (forward recurrence)
 
-      while (((*pcumul < cumul_threshold) || (i + inf_bound < inb_value)) &&
-             (i + inf_bound < alloc_nb_value)) {
-        pmass++;
-        pcumul++;
-        *pmass = *(pmass - 1) * parameter / i;
-        *pcumul = *(pcumul - 1) + *pmass;
+      while (((cumul[i] < cumul_threshold) || (i < inb_value - 1)) &&
+             (i < alloc_nb_value - 1)) {
         i++;
+        mass[i] = mass[i - 1] * parameter / j;
+        j++;
+        cumul[i] = cumul[i - 1] + mass[i];
       }
     }
 
@@ -336,26 +329,24 @@ void DiscreteParametric::poisson_computation(int inb_value , double cumul_thresh
       // computation of the lower bound probability
 
       num = -parameter;
-      *pmass = exp(num);
-      *pcumul = *pmass;
+      mass[i] = exp(num);
+      cumul[i] = mass[i];
 
       // computation of the probabilities for the successive values (forward recurrence)
 
       log_parameter = log(parameter);
       denom = 0.;
 
-      while (((*pcumul < cumul_threshold) || (i + inf_bound < inb_value)) &&
-             (i + inf_bound < alloc_nb_value)) {
-        num += log_parameter;
-        denom += log((double)i);
-        *++pmass = exp(num - denom);
-        pcumul++;
-        *pcumul = *(pcumul - 1) + *pmass;
+      while (((cumul[i] < cumul_threshold) || (i < inb_value - 1)) &&
+             (i < alloc_nb_value - 1)) {
         i++;
+        num += log_parameter;
+        denom += log((double)j);
+        j++;
+        mass[i] = exp(num - denom);
+        cumul[i] = cumul[i - 1]  + mass[i];
       }
     }
-
-    i += inf_bound;
     break;
   }
 
@@ -366,12 +357,12 @@ void DiscreteParametric::poisson_computation(int inb_value , double cumul_thresh
     // null probability values before the lower bound of the support
 
     for (i = 0;i < MIN(inb_value , inf_bound);i++) {
-      *pmass++ = 0.;
-      *pcumul++ = 0.;
+      mass[i] = 0.;
+      cumul[i] = 0.;
     }
 
     if (inb_value > inf_bound) {
-      i = 1;
+      j = 1;
 
       // case direct computation
 
@@ -379,17 +370,16 @@ void DiscreteParametric::poisson_computation(int inb_value , double cumul_thresh
 
         // computation of the lower bound probability
 
-        *pmass = exp(-parameter);
-        *pcumul = *pmass;
+        mass[i] = exp(-parameter);
+        cumul[i] = mass[i];
 
         // computation of the probabilities for the successive values (forward recurrence)
 
-        while ((*pcumul < cumul_threshold) && (i + inf_bound < inb_value)) {
-          pmass++;
-          pcumul++;
-          *pmass = *(pmass - 1) * parameter / i;
-          *pcumul = *(pcumul - 1) + *pmass;
+        while ((cumul[i] < cumul_threshold) && (i < inb_value - 1)) {
           i++;
+          mass[i] = mass[i - 1] * parameter / j;
+          j++;
+          cumul[i] = cumul[i - 1] + mass[i];
         }
       }
 
@@ -400,37 +390,34 @@ void DiscreteParametric::poisson_computation(int inb_value , double cumul_thresh
         // computation of the lower bound probability
 
         num = -parameter;
-        *pmass = exp(num);
-        *pcumul = *pmass;
+        mass[i] = exp(num);
+        cumul[i] = mass[i];
 
         // computation of the probabilities for the successive values (forward recurrence)
 
         log_parameter = log(parameter);
         denom = 0.;
 
-        while ((*pcumul < cumul_threshold) && (i + inf_bound < inb_value)) {
-          num += log_parameter;
-          denom += log((double)i);
-          *++pmass = exp(num - denom);
-          pcumul++;
-          *pcumul = *(pcumul - 1) + *pmass;
+        while ((cumul[i] < cumul_threshold) && (i < inb_value - 1)) {
           i++;
+          num += log_parameter;
+          denom += log((double)j);
+          j++;
+          mass[i] = exp(num - denom);
+          cumul[i] = cumul[i - 1] + mass[i];
         }
       }
-
-      i += inf_bound;
     }
     break;
   }
   }
 
-  offset = MIN(inf_bound , i - 1);
-  nb_value = i;
+  offset = MIN(inf_bound , i);
+  nb_value = i + 1;
 
 # ifdef DEBUG2
   if (mode == STANDARD) {
     poisson dist(parameter);
-
 
     cout << "\nTEST Poisson distribution" << endl;
     for (i = inf_bound;i < nb_value;i++) {
@@ -459,13 +446,10 @@ void DiscreteParametric::negative_binomial_computation(int inb_value , double cu
                                                        distribution_computation mode)
 
 {
-  register int i;
+  int i;
   double failure = 1. - probability , success = probability , log_failure ,
-         set , subset , scale , term , *pmass , *pcumul;
+         set , subset , scale , term;
 
-
-  pmass = mass;
-  pcumul = cumul;
 
   switch (mode) {
 
@@ -476,35 +460,33 @@ void DiscreteParametric::negative_binomial_computation(int inb_value , double cu
     // null probability values before the lower bound of the support
 
     for (i = 0;i < inf_bound;i++) {
-      *pmass++ = 0.;
-      *pcumul++ = 0.;
+      mass[i] = 0.;
+      cumul[i] = 0.;
     }
 
-    i++;
     subset = parameter - 1.;
     set = subset;
+
+    // computation of the lower bound probability
+
+    term = pow(success , parameter);
+    mass[i] = term;
+    cumul[i] = mass[i];
 
     // case direct computation
 
     if (sqrt(parameter) / success < NB_THRESHOLD) {
 
-      // computation of the lower bound probability
-
-      term = pow(success , parameter);
-      *pmass = term;
-      *pcumul = *pmass;
-
       // computation of the probabilities for the successive values (forward recurrence)
 
-      while (((*pcumul < cumul_threshold) || (i < inb_value)) &&
-             (i < alloc_nb_value)) {
+      while (((cumul[i] < cumul_threshold) || (i < inb_value - 1)) &&
+             (i < alloc_nb_value - 1)) {
+        i++;
         set++;
         scale = set / (set - subset);
         term *= scale * failure;
-        *++pmass = term;
-        pcumul++;
-        *pcumul = *(pcumul - 1) + *pmass;
-        i++;
+        mass[i] = term;
+        cumul[i] = cumul[i - 1] + mass[i];
       }
     }
 
@@ -512,25 +494,18 @@ void DiscreteParametric::negative_binomial_computation(int inb_value , double cu
 
     else {
 
-      // computation of the lower bound probability
-
-      term = parameter * log(success);
-      *pmass = exp(term);
-      *pcumul = *pmass;
-
       // computation of the probabilities for the successive values (forward recurrence)
 
       log_failure = log(failure);
 
-      while (((*pcumul < cumul_threshold) || (i < inb_value)) &&
-             (i < alloc_nb_value)) {
+      while (((cumul[i] < cumul_threshold) || (i < inb_value - 1)) &&
+             (i < alloc_nb_value - 1)) {
+        i++;
         set++;
         scale = set / (set - subset);
         term += log(scale) + log_failure;
-        *++pmass = exp(term);
-        pcumul++;
-        *pcumul = *(pcumul - 1) + *pmass;
-        i++;
+        mass[i] = exp(term);
+        cumul[i] = cumul[i - 1]  + mass[i];
       }
     }
     break;
@@ -543,35 +518,33 @@ void DiscreteParametric::negative_binomial_computation(int inb_value , double cu
     // null probability values before the lower bound of the support
 
     for (i = 0;i < MIN(inf_bound , inb_value);i++) {
-      *pmass++ = 0.;
-      *pcumul++ = 0.;
+      mass[i] = 0.;
+      cumul[i] = 0.;
     }
 
     if (inb_value > inf_bound) {
-      i++;
       subset = parameter - 1.;
       set = subset;
+
+      // computation of the lower bound probability
+
+      term = pow(success , parameter);
+      mass[i] = term;
+      cumul[i] = mass[i];
 
       // case direct computation
 
       if (sqrt(parameter) / success < NB_THRESHOLD) {
 
-        // computation of the lower bound probability
-
-        term = pow(success , parameter);
-        *pmass = term;
-        *pcumul = *pmass;
-
         // computation of the probabilities for the successive values (forward recurrence)
 
-        while ((*pcumul < cumul_threshold) && (i < inb_value)) {
+        while ((cumul[i] < cumul_threshold) && (i < inb_value - 1)) {
+          i++;
           set++;
           scale = set / (set - subset);
           term *= scale * failure;
-          *++pmass = term;
-          pcumul++;
-          *pcumul = *(pcumul - 1) + *pmass;
-          i++;
+          mass[i] = term;
+          cumul[i] = cumul[i - 1] + mass[i];
         }
       }
 
@@ -579,24 +552,17 @@ void DiscreteParametric::negative_binomial_computation(int inb_value , double cu
 
       else {
 
-        // computation of the lower bound probability
-
-        term = parameter * log(success);
-        *pmass = exp(term);
-        *pcumul = *pmass;
-
         // computation of the probabilities for the successive values (forward recurrence)
 
         log_failure = log(failure);
 
-        while ((*pcumul < cumul_threshold) && (i < inb_value)) {
+        while ((cumul[i] < cumul_threshold) && (i < inb_value - 1)) {
+          i++;
           set++;
           scale = set / (set - subset);
           term += log(scale) + log_failure;
-          *++pmass = exp(term);
-          pcumul++;
-          *pcumul = *(pcumul - 1) + *pmass;
-          i++;
+          mass[i] = exp(term);
+          cumul[i] = cumul[i - 1] + mass[i];
         }
       }
     }
@@ -604,13 +570,12 @@ void DiscreteParametric::negative_binomial_computation(int inb_value , double cu
   }
   }
 
-  offset = MIN(inf_bound , i - 1);
-  nb_value = i;
+  offset = MIN(inf_bound , i);
+  nb_value = i + 1;
 
 # ifdef DEBUG2
   if (mode == STANDARD) {
     negative_binomial dist(parameter , probability);
-
 
     cout << "TEST negative binomial distribution" << endl;
     for (i = inf_bound;i < nb_value;i++) {
@@ -625,6 +590,151 @@ void DiscreteParametric::negative_binomial_computation(int inb_value , double cu
 
 /*--------------------------------------------------------------*/
 /**
+ *  \brief Computation of the probability mass function of a Poisson geometric distribution.
+ *         The number of values is determined using a threshold on the cumulative
+ *         distribution function or using a predefined bound.
+ *
+ *  \param[in] inb_value       number of values,
+ *  \param[in] cumul_threshold threshold on the cumulative distribution function.
+ */
+/*--------------------------------------------------------------*/
+
+void DiscreteParametric::poisson_geometric_computation(int inb_value , double cumul_threshold)
+
+{
+  int i , j , k;
+  double log_parameter , num , denom , failure = 1. - probability , success = probability , log_failure ,
+         scale , *sum_mass , *set , *subset , *term;
+
+
+  sum_mass = new double[alloc_nb_value];
+  set = new double[alloc_nb_value];
+  subset = new double[alloc_nb_value];
+  term = new double[alloc_nb_value];
+
+  log_failure = log(failure);
+
+  // null probability values before the lower bound of the support
+
+  for (i = 0;i < inf_bound;i++) {
+    mass[i] = 0.;
+    cumul[i] = 0.;
+  }
+
+  j = 1;
+
+  // case direct computation
+
+  if (parameter < P_THRESHOLD) {
+
+    // computation of the lower bound probability
+
+    sum_mass[i] = exp(-parameter);
+
+    subset[i] = i - 1;
+    set[i] = subset[i];
+    term[i] = pow(success , i);
+
+    mass[i] = sum_mass[i] * term[i];
+    cumul[i] = mass[i];
+
+    // computation of the probabilities for the successive values (forward recurrence)
+
+    while (((cumul[i] < cumul_threshold) || (i < inb_value - 1)) &&
+           (i < alloc_nb_value - 1)) {
+      i++;
+      sum_mass[i] = sum_mass[i - 1] * parameter / j;
+      j++;
+
+      subset[i] = i - 1;
+      set[i] = subset[i];
+      term[i] = pow(success , i);
+
+      mass[i] = sum_mass[i] * term[i];
+
+      for (k = inf_bound;k < i;k++) {
+        set[k]++;
+        scale = set[k] / (set[k] - subset[k]);
+
+        if (sqrt((double)k) / success < NB_THRESHOLD) {
+          term[k] *= scale * failure;
+          mass[i] += sum_mass[k] * term[k];
+        }
+        else {
+          term[k] += log(scale) + log_failure;
+          mass[i] += sum_mass[k] * exp(term[k]);
+        }
+      }
+
+      cumul[i] = cumul[i - 1] + mass[i];
+    }
+  }
+
+  // case computation in log
+
+  else {
+
+    // computation of the lower bound probability
+
+    num = -parameter;
+    sum_mass[i] = exp(num);
+
+    subset[i] = i - 1;
+    set[i] = subset[i];
+    term[i] = pow(success , i);
+
+    mass[i] = sum_mass[i] * term[i];
+    cumul[i] = mass[i];
+
+    // computation of the probabilities for the successive values (forward recurrence)
+
+    log_parameter = log(parameter);
+    denom = 0.;
+
+    while (((cumul[i] < cumul_threshold) || (i < inb_value - 1)) &&
+           (i < alloc_nb_value - 1)) {
+      i++;
+      num += log_parameter;
+      denom += log((double)j);
+      j++;
+
+      subset[i] = i - 1;
+      set[i] = subset[i];
+      term[i] = pow(success , i);
+
+      sum_mass[i] = exp(num - denom);
+      mass[i] = sum_mass[i] * term[i];
+
+      for (k = inf_bound;k < i;k++) {
+        set[k]++;
+        scale = set[k] / (set[k] - subset[k]);
+
+        if (sqrt((double)k) / success < NB_THRESHOLD) {
+          term[k] *= scale * failure;
+          mass[i] += sum_mass[k] * term[k];
+        }
+        else {
+          term[k] += log(scale) + log_failure;
+          mass[i] += sum_mass[k] * exp(term[k]);
+        }
+      }
+
+      cumul[i] = cumul[i - 1] + mass[i];
+    }
+  }
+
+  offset = inf_bound;
+  nb_value = i + 1;
+
+  delete [] sum_mass;
+  delete [] set;
+  delete [] subset;
+  delete [] term;
+}
+
+
+/*--------------------------------------------------------------*/
+/**
  *  \brief Computation of the probability mass function of a discrete uniform distribution.
  */
 /*--------------------------------------------------------------*/
@@ -632,7 +742,7 @@ void DiscreteParametric::negative_binomial_computation(int inb_value , double cu
 void DiscreteParametric::uniform_computation()
 
 {
-  register int i;
+  int i;
   double proba;
 
 
@@ -652,10 +762,156 @@ void DiscreteParametric::uniform_computation()
 }
 
 
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the prior segment length distribution corresponding to
+ *         the assumption of a uniform prior distribution for the possible segmentations.
+ */
+/*--------------------------------------------------------------*/
+
+void DiscreteParametric::prior_segment_length_computation()
+
+{
+  int i;
+  double buff , sum;
+
+
+  offset = 1;
+  nb_value = sequence_length - no_segment + 2;
+
+  mass[0] = 0.;
+
+  buff = 1.;
+  for (i = 1;i < no_segment - 1;i++) {
+    buff *= (double)(sequence_length - i - 1) / (double)i;
+  }
+  sum = buff * (double)(sequence_length - 1) / (double)(no_segment - 1);
+
+  for (i = 1;i <= sequence_length - no_segment + 1;i++) {
+    mass[i] = buff / sum;
+    buff *= (double)(sequence_length - i - no_segment + 1) /
+            (double)(sequence_length - i - 1);
+  }
+
+  cumul_computation();
+
+# ifdef MESSAGE
+  int j , k;
+  double bcumul , **segment_length , **nb_segmentation_forward , **nb_segmentation_backward;
+
+
+  nb_segmentation_forward = new double*[sequence_length];
+  for (i = 0;i < sequence_length;i++) {
+    nb_segmentation_forward[i] = new double[no_segment];
+  }
+
+  nb_segmentation_backward = new double*[sequence_length];
+  for (i = 0;i < sequence_length;i++) {
+    nb_segmentation_backward[i] = new double[no_segment];
+  }
+
+  segment_length = new double*[no_segment];
+  for (i = 0;i < no_segment;i++) {
+    segment_length[i] = new double[sequence_length - no_segment + 2];
+    for (j = 0;j <= sequence_length - no_segment + 1;j++) {
+      segment_length[i][j] = 0.;
+    }
+  }
+
+  // forward recurrence
+
+  for (i = 0;i < sequence_length;i++) {
+    for (j = 0;j < no_segment;j++) {
+      nb_segmentation_forward[i][j] = 0;
+    }
+
+    for (j = MAX(0 , no_segment + i - sequence_length);j < MIN((i < sequence_length - 1 ? no_segment - 1 : no_segment) , i + 1);j++) {
+      if (j == 0) {
+        nb_segmentation_forward[i][j]++;
+      }
+
+      else {
+        for (k = i;k >= j;k--) {
+          nb_segmentation_forward[i][j] += nb_segmentation_forward[k - 1][j - 1];
+        }
+      }
+    }
+  }
+
+  // backward recurrence
+
+  for (i = sequence_length - 1;i > 0;i--) {
+    for (j = 0;j < no_segment;j++) {
+      nb_segmentation_backward[i][j] = 0;
+    }
+
+    for (j = MAX(1 , no_segment + i - sequence_length);j < MIN(no_segment , i + 1);j++) {
+      if (j < no_segment - 1) {
+        for (k = i;k <= sequence_length + j - no_segment;k++) {
+          nb_segmentation_backward[i][j] += nb_segmentation_backward[k + 1][j + 1];
+          segment_length[j][k - i + 1] += nb_segmentation_forward[i - 1][j - 1] *
+                                          nb_segmentation_backward[k + 1][j + 1];
+        }
+      }
+
+      else {
+        nb_segmentation_backward[i][j]++;
+        segment_length[j][sequence_length - i] += nb_segmentation_forward[i - 1][j - 1];
+      }
+    }
+  }
+
+  for (i = 0;i <= sequence_length - no_segment;i++) {
+    segment_length[0][i + 1] += nb_segmentation_backward[i + 1][1];
+  }
+
+  for (i = 0;i < no_segment;i++) {
+    sum = 0.;
+    for (j = 1;j <= sequence_length - no_segment + 1;j++) {
+      sum += segment_length[i][j];
+    }
+
+    bcumul = 0.;
+    for (j = 1;j <= sequence_length - no_segment + 1;j++) {
+      bcumul += segment_length[i][j] / sum;
+
+      if ((bcumul < cumul[j] - DOUBLE_ERROR) || (bcumul > cumul[j] + DOUBLE_ERROR)) {
+        cout << "\nERROR: " << i << ", " << j << " | " << bcumul << " | " << cumul[j] << endl;
+      }
+    }
+
+/*    cout << "\n" << SEQ_label[SEQL_SEGMENT] << " " << i << ":";
+    for (j = 1;j <= sequence_length - no_segment + 1;j++) {
+      cout << " " << segment_length[i][j] / sum;
+    }
+    cout << endl; */
+  }
+
+  for (i = 0;i < sequence_length;i++) {
+    delete [] nb_segmentation_forward[i];
+  }
+  delete [] nb_segmentation_forward;
+
+  for (i = 0;i < sequence_length;i++) {
+    delete [] nb_segmentation_backward[i];
+  }
+  delete [] nb_segmentation_backward;
+
+  for (i = 0;i < no_segment;i++) {
+    delete [] segment_length[i];
+  }
+  delete [] segment_length;
+# endif
+
+}
+
+
 /*--------------------------------------------------------------*/
 /**
  *  \brief Computation of the number of values of a parametric discrete distribution
- *         (binomial, Poisson, negative binomial, uniform).
+ *         (binomial, Poisson, negative binomial, uniform, compound Poisson geometric,
+            prior segment length distribution for a multiple change-point model).
  *
  *  \param[in] ident           distribution identifier,
  *  \param[in] inf_bound       lower bound of the support,
@@ -679,8 +935,12 @@ int DiscreteParametric::nb_value_computation(discrete_parametric ident , int inf
     nb_value = sup_bound + 1;
   }
 
+  else if (ident == PRIOR_SEGMENT_LENGTH) {
+    nb_value = sup_bound - inf_bound + 2;
+  }
+
   else {
-    if ((ident == POISSON) || (ident == NEGATIVE_BINOMIAL)) {
+    if ((ident == POISSON) || (ident == NEGATIVE_BINOMIAL) || (ident == POISSON_GEOMETRIC)) {
       DiscreteParametric *dist;
 
       dist = new DiscreteParametric(ident , inf_bound , sup_bound , parameter ,
@@ -697,7 +957,8 @@ int DiscreteParametric::nb_value_computation(discrete_parametric ident , int inf
 /*--------------------------------------------------------------*/
 /**
  *  \brief Computation of the probability mass function of a parametric discrete distribution
- *         (binomial, Poisson, negative binomial, uniform).
+ *         (binomial, Poisson, negative binomial, uniform compound Poisson geometric,
+            prior segment length distribution for a multiple change-point model).
  *
  *  \param[in] min_nb_value    minimum number of values,
  *  \param[in] cumul_threshold threshold on the cumulative distribution function.
@@ -718,12 +979,24 @@ void DiscreteParametric::computation(int min_nb_value , double cumul_threshold)
     case NEGATIVE_BINOMIAL :
       negative_binomial_computation(min_nb_value , cumul_threshold , STANDARD);
       break;
+    case POISSON_GEOMETRIC :
+      poisson_geometric_computation(min_nb_value , cumul_threshold);
+      break;
     case UNIFORM :
       uniform_computation();
       break;
+    case PRIOR_SEGMENT_LENGTH :
+      prior_segment_length_computation();
+      break;
     }
 
-    max_computation();
+    if ((ident == UNIFORM) || (ident == PRIOR_SEGMENT_LENGTH)) {
+      max = mass[offset];
+    }
+    else {
+      max_computation();
+    }
+
     mean_computation();
     variance_computation();
   }
@@ -742,7 +1015,7 @@ void DiscreteParametric::computation(int min_nb_value , double cumul_threshold)
 void Forward::computation(const DiscreteParametric &dist)
 
 {
-  register int i;
+  int i;
   double norm;
 
 
@@ -786,7 +1059,7 @@ void Forward::computation(const DiscreteParametric &dist)
 double Distribution::survivor_likelihood_computation(const FrequencyDistribution &histo) const
 
 {
-  register int i;
+  int i;
   double likelihood = 0.;
 
 
@@ -827,7 +1100,7 @@ double Distribution::survivor_likelihood_computation(const FrequencyDistribution
 double Distribution::chi2_value_computation(const FrequencyDistribution &histo) const
 
 {
-  register int i;
+  int i;
   double value , var1 , var2;
 
 
@@ -886,7 +1159,7 @@ double Distribution::chi2_value_computation(const FrequencyDistribution &histo) 
 void Distribution::chi2_degree_of_freedom(const FrequencyDistribution &histo , Test &test) const
 
 {
-  register int i , j;
+  int i , j;
   int *filter_frequency;
   double *filter_mass;
   Distribution *filter_dist;
@@ -996,7 +1269,7 @@ void Distribution::chi2_fit(const FrequencyDistribution &histo , Test &test) con
 DiscreteParametricModel* Distribution::truncate(StatError &error , int imax_value) const
 
 {
-  register int i;
+  int i;
   DiscreteParametricModel *dist;
 
 
@@ -1256,7 +1529,7 @@ void Distribution::penalty_computation(double weight , penalty_type pen_type ,
                                        double *penalty , side_effect outside) const
 
 {
-  register int i;
+  int i;
 
 
   switch (pen_type) {
@@ -1348,69 +1621,6 @@ void Distribution::penalty_computation(double weight , penalty_type pen_type ,
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Reestimation of the parameters of a discrete distribution
- *         (binomial, Poisson or negative binomial).
- *
- *  \param[in] reestim  reference on the reestimation quantities,
- *  \param[in] nb_estim number of reestimated parameters (negative binomial).
- */
-/*--------------------------------------------------------------*/
-
-void DiscreteParametric::reestimation(const Reestimation<double> *reestim , int nb_estim)
-
-{
-  switch (ident) {
-
-  case BINOMIAL : {
-    probability = (reestim->mean - inf_bound) / (sup_bound - inf_bound);
-    break;
-  }
-
-  case POISSON : {
-    parameter = reestim->mean - inf_bound;
-    break;
-  }
-
-  case NEGATIVE_BINOMIAL : {
-    switch (nb_estim) {
-
-    case 1 : {
-      if (reestim->mean - inf_bound + parameter > 0.) {
-        probability = parameter / (reestim->mean - inf_bound + parameter);
-      }
-      break;
-    }
-
-    case 2 : {
-/*      register int i;
-      double previous_parameter = parameter , sum1 , sum2; */
-
-      parameter = (reestim->mean - inf_bound) * probability / (1. - probability);
-
-/*     sum1 = 0.;
-      sum2 = 0.;
-      for (i = inf_bound + 1;i < nb_value;i++) {
-        sum2 += 1. / (i - inf_bound + previous_parameter - 1);
-        sum1 += reestim->frequency[i] * sum2;
-      }
-
-      probability = exp(-sum1 / reestim->nb_element); */
-
-#     ifdef DEBUG
-//      cout << "<" << probability << "> ";
-#     endif
-      break;
-    }
-    }
-
-    break;
-  }
-  }
-}
-
-
-/*--------------------------------------------------------------*/
-/**
  *  \brief Simulation using the cumulative distribution function.
  *         The median is used to determine the direction of the algorithm
  *         (forward from the lower bound or backward from the highest value).
@@ -1426,7 +1636,7 @@ void DiscreteParametric::reestimation(const Reestimation<double> *reestim , int 
 int cumul_method(int nb_value , const double *cumul , double scale)
 
 {
-  register int i;
+  int i;
   double limit;
 
 
@@ -1524,7 +1734,7 @@ DiscreteDistributionData* DiscreteParametricModel::simulation(StatError &error ,
                                                               int nb_element) const
 
 {
-  register int i;
+  int i;
   DiscreteDistributionData *histo;
 
 
@@ -1652,7 +1862,7 @@ void DiscreteParametric::expectation_step(const FrequencyDistribution &within ,
                                           Reestimation<double> *length_bias_reestim , int iter) const
 
 {
-  register int i , j;
+  int i , j;
   int reestim_offset , reestim_nb_value , *pfrequency;
   double sum , *ifrequency , *lfrequency , *pmass , *pcumul , *norm;
 
@@ -1791,7 +2001,7 @@ double interval_bisection(Reestimation<double> *distribution_reestim ,
                           Reestimation<double> *length_bias_reestim)
 
 {
-  register int i;
+  int i;
   double ratio , inf_ratio , sup_ratio , mean , inf_mean , sup_mean , *dfrequency , *lfrequency;
 
 # ifdef DEBUG
@@ -1857,7 +2067,7 @@ double interval_bisection(Reestimation<double> *distribution_reestim ,
  *         using the EM algorithm.
  *
  *  \param[in] error             reference on a StatError object,
- *  \param[in] os                stream,
+ *  \param[in] display           flag for displaying estimation intermediate results,
  *  \param[in] backward          backward recurrence time frequency distribution,
  *  \param[in] forward           forward recurrence time frequency distribution,
  *  \param[in] no_event          observation period frequency distribution for the case of no event,
@@ -1875,7 +2085,7 @@ double interval_bisection(Reestimation<double> *distribution_reestim ,
  */
 /*--------------------------------------------------------------*/
 
-DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , ostream &os ,
+DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , bool display ,
                                                            const FrequencyDistribution &backward ,
                                                            const FrequencyDistribution &forward ,
                                                            const FrequencyDistribution *no_event ,
@@ -1887,7 +2097,7 @@ DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , os
 
 {
   bool status = true;
-  register int i;
+  int i;
   int inb_value , max_nb_value;
   double likelihood , previous_likelihood , inter_event_mean , *penalty;
   DiscreteParametricModel *inter_event;
@@ -1959,13 +2169,12 @@ DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , os
     backward_forward = new FrequencyDistribution(2 , phisto);
     delete phisto[0];
 
-#   ifdef MESSAGE
-    {
+    if (display) {
       int max_nb_element , width[2];
-      long old_adjust;
+      ios_base::fmtflags format_flags;
 
 
-      old_adjust = os.setf(ios::right , ios::adjustfield);
+      format_flags = cout.setf(ios::right , ios::adjustfield);
 
       width[0] = column_width(max_nb_value - 1);
 
@@ -1978,71 +2187,70 @@ DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , os
       }
       width[1] = column_width(max_nb_element) + ASCII_SPACE;
 
-      os << "\n   | " << STAT_label[STATL_OBSERVATION_INTER_EVENT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
-         << " | " << STAT_label[STATL_BACKWARD] << "/" << STAT_label[STATL_FORWARD]
-         << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
+      cout << "\n   | " << STAT_label[STATL_OBSERVATION_INTER_EVENT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
+           << " | " << STAT_label[STATL_BACKWARD] << "/" << STAT_label[STATL_FORWARD]
+           << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
       if (no_event) {
-        os << " | no-event " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
+        cout << " | no-event " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
       }
-      os << endl;
+      cout << endl;
 
       for (i = 0;i < max_nb_value;i++) {
-        os << setw(width[0]) << i;
+        cout << setw(width[0]) << i;
 
         if (i < nb_value) {
-          os << setw(width[1]) << frequency[i];
+          cout << setw(width[1]) << frequency[i];
         }
         else {
-          os << setw(width[1]) << " ";
+          cout << setw(width[1]) << " ";
         }
 
         if (i < backward_forward->nb_value) {
-          os << setw(width[1]) << backward_forward->frequency[i];
+          cout << setw(width[1]) << backward_forward->frequency[i];
         }
         else {
-          os << setw(width[1]) << " ";
+          cout << setw(width[1]) << " ";
         }
 
         if (no_event) {
           if (i < no_event->nb_value) {
-            os << setw(width[1]) << no_event->frequency[i];
+            cout << setw(width[1]) << no_event->frequency[i];
           }
           else {
-            os << setw(width[1]) << " ";
+            cout << setw(width[1]) << " ";
           }
         }
 
-        os << "    |  ";
+        cout << "    |  ";
         if (i < backward.nb_value) {
-          os << setw(width[1]) << backward.frequency[i];
+          cout << setw(width[1]) << backward.frequency[i];
         }
         else {
-          os << setw(width[1]) << " ";
+          cout << setw(width[1]) << " ";
         }
 
         if (i < forward.nb_value) {
-          os << setw(width[1]) << forward.frequency[i];
+          cout << setw(width[1]) << forward.frequency[i];
         }
         else {
-          os << setw(width[1]) << " ";
+          cout << setw(width[1]) << " ";
         }
 
-        os << endl;
+        cout << endl;
       }
-      os << endl;
+      cout << endl;
 
-      os << setw(width[0]) << " "
-         << setw(width[1]) << nb_element
-         << setw(width[1]) << backward_forward->nb_element;
+      cout << setw(width[0]) << " "
+           << setw(width[1]) << nb_element
+           << setw(width[1]) << backward_forward->nb_element;
       if (no_event) {
-        os << setw(width[1]) << no_event->nb_element;
+        cout << setw(width[1]) << no_event->nb_element;
       }
-      os << "    |  " << setw(width[1]) << backward.nb_element
-         << setw(width[1]) << forward.nb_element << "\n" << endl;
+      cout << "    |  " << setw(width[1]) << backward.nb_element
+           << setw(width[1]) << forward.nb_element << "\n" << endl;
 
-      os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
+      cout.setf(format_flags , ios::adjustfield);
     }
-#   endif
 
     // construction of the inter-event distribution
 
@@ -2124,14 +2332,14 @@ DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , os
       previous_likelihood = likelihood;
       likelihood = inter_event->renewal_likelihood_computation(*forward_dist , *this , backward ,
                                                                forward , no_event);
+      // display of estimation results
 
-#     ifdef MESSAGE
-      if ((i < 10) || ((i < 100) && (i % 10 == 0)) || ((i < 1000) && (i % 100 == 0)) || (i % 1000 == 0)) {
-        os << STAT_label[STATL_ITERATION] << " " << i << "   "
-           << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
-           << STAT_label[STATL_SMOOTHNESS] << ": " << inter_event->second_difference_norm_computation();
+      if ((display) && ((i < 10) || ((i < 100) && (i % 10 == 0)) || ((i < 1000) && (i % 100 == 0)) || (i % 1000 == 0))) {
+        cout << STAT_label[STATL_ITERATION] << " " << i << "   "
+             << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
+             << STAT_label[STATL_SMOOTHNESS] << ": " << inter_event->second_difference_norm_computation();
         if (estimator == PENALIZED_LIKELIHOOD) {
-          os << "   cumul: " << inter_event->cumul[inter_event->nb_value - 1];
+          cout << "   cumul: " << inter_event->cumul[inter_event->nb_value - 1];
         }
 
         if ((no_event) && (no_event->offset + 1 == no_event->nb_value) && (backward_forward->nb_value > nb_value) &&
@@ -2143,13 +2351,13 @@ DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , os
             inter_event_mean = inter_event->mean;
           }
 
-          os << "   smaller upper bound: "
-             << inb_value - 1 + (no_event->nb_element * inter_event_mean) /
-                                ((forward.nb_element + no_event->nb_element) * (1. - inter_event->cumul[inb_value - 2]));
+          cout << "   smaller upper bound: "
+               << inb_value - 1 + (no_event->nb_element * inter_event_mean) /
+                                  ((forward.nb_element + no_event->nb_element) * (1. - inter_event->cumul[inb_value - 2]));
         }
 
 /*        if (backward_forward->nb_value > nb_value) {
-          register int j;
+          int j;
           double term = forward.nb_element * (backward_forward->nb_value - 1) /
                         inter_event->mean + nb_element + backward.nb_element;
           if (no_event) {
@@ -2159,13 +2367,11 @@ DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , os
             term -= backward_forward->frequency[j] / (1. - inter_event->cumul[j - 1]);
           }
 
-          os << " |   " << term;
+          cout << " |   " << term;
         } */
 
-        os << endl;
+        cout << endl;
       }
-#     endif
-
     }
     while ((likelihood != D_INF) && (((nb_iter == I_DEFAULT) && (i < RENEWAL_NB_ITER) &&
              ((likelihood - previous_likelihood) / -likelihood > RENEWAL_LIKELIHOOD_DIFF)) ||
@@ -2173,30 +2379,31 @@ DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , os
 
     if (likelihood != D_INF) {
 
-#     ifdef MESSAGE
-      os << "\n" << i << " " << STAT_label[STATL_ITERATIONS] << "   "
-         << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
-         << STAT_label[STATL_SMOOTHNESS] << ": " << inter_event->second_difference_norm_computation();
-      if (estimator == PENALIZED_LIKELIHOOD) {
-        os << "   cumul: " << inter_event->cumul[inter_event->nb_value - 1];
-      }
+      // display of estimation results
 
-      if ((no_event) && (no_event->offset + 1 == no_event->nb_value) && (backward_forward->nb_value > nb_value) &&
-          ((forward.nb_element + no_event->nb_element) * (1. - inter_event->cumul[inb_value - 2]) > 0.)) {
-        if (mean_estimator == ESTIMATED) {
-          inter_event_mean = iinter_event_mean;
-        }
-        else {
-          inter_event_mean = inter_event->mean;
+      if (display) {
+        cout << "\n" << i << " " << STAT_label[STATL_ITERATIONS] << "   "
+             << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
+             << STAT_label[STATL_SMOOTHNESS] << ": " << inter_event->second_difference_norm_computation();
+        if (estimator == PENALIZED_LIKELIHOOD) {
+          cout << "   cumul: " << inter_event->cumul[inter_event->nb_value - 1];
         }
 
-        os << "   smaller upper bound: "
-           << inb_value - 1 + (no_event->nb_element * inter_event_mean) /
-                              ((forward.nb_element + no_event->nb_element) * (1. - inter_event->cumul[inb_value - 2]));
-      }
-      os << endl;
-#     endif
+        if ((no_event) && (no_event->offset + 1 == no_event->nb_value) && (backward_forward->nb_value > nb_value) &&
+            ((forward.nb_element + no_event->nb_element) * (1. - inter_event->cumul[inb_value - 2]) > 0.)) {
+          if (mean_estimator == ESTIMATED) {
+            inter_event_mean = iinter_event_mean;
+          }
+          else {
+            inter_event_mean = inter_event->mean;
+          }
 
+          cout << "   smaller upper bound: "
+               << inb_value - 1 + (no_event->nb_element * inter_event_mean) /
+                                  ((forward.nb_element + no_event->nb_element) * (1. - inter_event->cumul[inb_value - 2]));
+        }
+        cout << endl;
+      }
     }
 
     else {
@@ -2226,7 +2433,7 @@ DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , os
  *         using the EM algorithm.
  *
  *  \param[in] error          reference on a StatError object,
- *  \param[in] os             stream,
+ *  \param[in] display        flag for displaying estimation intermediate results,
  *  \param[in] backward       backward recurrence time frequency distribution,
  *  \param[in] forward        forward recurrence time frequency distribution,
  *  \param[in] no_event       observation period frequency distribution for the case of no event,
@@ -2242,7 +2449,7 @@ DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , os
  */
 /*--------------------------------------------------------------*/
 
-DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , ostream &os ,
+DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , bool display ,
                                                            const FrequencyDistribution &backward ,
                                                            const FrequencyDistribution &forward ,
                                                            const FrequencyDistribution *no_event ,
@@ -2251,7 +2458,7 @@ DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , os
                                                            double weight , penalty_type pen_type , side_effect outside) const
 
 {
-  register int i;
+  int i;
   int nb_histo , *pfrequency;
   double *pmass;
   DiscreteParametric *iinter_event;
@@ -2306,7 +2513,7 @@ DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , os
   iinter_event->ascii_print(cout);
 # endif
 
-  inter_event = estimation(error , os , backward , forward , no_event ,
+  inter_event = estimation(error , display , backward , forward , no_event ,
                            *iinter_event , estimator , nb_iter , mean_estimator ,
                            weight , pen_type , outside);
   delete iinter_event;
@@ -2429,7 +2636,7 @@ void DiscreteParametric::expectation_step(const FrequencyDistribution &sojourn_t
                                           Reestimation<double> *occupancy_reestim , int iter) const
 
 {
-  register int i;
+  int i;
   int *pfrequency;
   double sum , *ofrequency , *pmass , *pcumul;
 
@@ -2509,7 +2716,7 @@ void DiscreteParametric::expectation_step(const FrequencyDistribution &sojourn_t
                                           duration_distribution_mean_estimator mean_estimator) const
 
 {
-  register int i , j;
+  int i , j;
   int reestim_offset , reestim_nb_value , *pfrequency;
   double sum , occupancy_mean , *ofrequency , *lfrequency , *pmass , *pcumul , *norm;
 

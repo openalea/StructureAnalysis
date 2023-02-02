@@ -92,7 +92,7 @@ public:
     int nb_variables = boost::python::len(input_types);
     int nb_vectors = 0;
     index_parameter_type input_index_param_type = index_parameter_type(iinput_index_param_type);
-    
+
     Sequences *ret = NULL;
 
     int *lengths = NULL;
@@ -727,7 +727,8 @@ public:
       const object& max, bool keep)
   {
     HEADER(Sequences);
-    std::stringstream s;
+    //std::stringstream s;
+    bool display = true;
 
     boost::python::extract<int> get_min(min);
     boost::python::extract<int> get_max(max);
@@ -736,16 +737,16 @@ public:
       {
         int mi = get_min();
         int ma = get_max();
-        ret = seq.value_select(error, s, variable, mi, ma, keep);
+        ret = seq.value_select(error, display, variable, mi, ma, keep);
       }
     else
       {
         double mi = extract<double> (min);
         double ma = extract<double> (max);
-        ret = seq.value_select(error, s, variable, mi, ma, keep);
+        ret = seq.value_select(error, display, variable, mi, ma, keep);
       }
 
-    cout << s.str() << endl;
+    // cout << s.str() << endl;
     FOOTER;
   }
 
@@ -811,9 +812,9 @@ public:
   cluster_step_rounding(const Sequences &seq, int variable, int step, int imode)
   {
     StatError error;
-      
+
     Sequences *ret = NULL;
-    
+
     rounding rmode = rounding(imode);
     ret = seq.cluster(error, variable, step, rmode);
     if (!ret)
@@ -875,7 +876,7 @@ public:
       }
     delete mseq;
     mseq = NULL;
-    
+
     FOOTER;
   }
 
@@ -917,13 +918,14 @@ public:
   {
      StatError error;
     Sequences* ret;
-    std::ostringstream os;
+    //std::ostringstream os;
+    bool display = true;
 
-    ret = input.length_select(error, os,
+    ret = input.length_select(error, display,
         min_length, max_length, keep);
     if (!ret)
       sequence_analysis::wrap_util::throw_error(error);
-    cout << os.str() << endl;
+    //cout << os.str() << endl;
     return ret;
   }
 
@@ -993,13 +995,13 @@ public:
     return seq.get_index_parameter(iseq, index);
   }
 
- 
+
   static int
   get_index_parameter_type(const Sequences &seq)
-  {    
+  {
     return int(seq.get_index_param_type());
   }
- 
+
   static double
   get_max_value(const Sequences &seq, int variable)
   {
@@ -1044,13 +1046,14 @@ public:
   {
     StatError error;
     Sequences* ret;
-    std::ostringstream os;
+    //std::ostringstream os;
+    bool display = true;
 
-    ret = input.index_parameter_select(error,  os,
+    ret = input.index_parameter_select(error,  display,
         min_index_parameter, max_index_parameter, keep);
     if (!ret)
       sequence_analysis::wrap_util::throw_error(error);
-    cout << os.str() << endl;
+    // cout << os.str() << endl;
     return ret;
 
   }
@@ -1167,13 +1170,13 @@ public:
   extract_vectors(const Sequences &seq, int ipattern, int variable, int value)
   {
     StatError error;
-      
+
     Vectors *ret = NULL;
 
-    sequence_pattern pattern = sequence_pattern(ipattern);   
-      
+    sequence_pattern pattern = sequence_pattern(ipattern);
+
     ret = seq.extract_vectors(error, pattern, variable, value);
-    
+
     if (!ret)
       sequence_analysis::wrap_util::throw_error(error);
     return ret;
@@ -1408,20 +1411,22 @@ public:
   }
 
   static bool
-  segment_profile_write(const Sequences &input,int iidentifier,
+  segment_profile_write(const Sequences &input, int iidentifier,
                                int nb_segment , boost::python::list& model_type , change_point_profile output ,
-                               output_format format, latent_structure_algorithm segmentation ,
+                               latent_structure_algorithm segmentation ,
                                int nb_segmentation)
   {
-    std::stringstream os;
+//    std::stringstream os;
+
     StatError error;
     bool ret;
-    CREATE_ARRAY(model_type, segment_model, models);
-    ret = input.segment_profile_write(error, os, iidentifier,  nb_segment, models.get(),
-                                      true, NULL, output, format, segmentation, nb_segmentation);
+    std::vector<double> shape_parameters;
+    CREATE_VECTOR(model_type, segment_model, models);
+    ret = input.segment_profile_ascii_write(error, iidentifier, nb_segment, models,
+                                            true, shape_parameters, output, segmentation, nb_segmentation);
     if (!ret)
       sequence_analysis::wrap_util::throw_error(error);
-    cout << os.str() << endl;
+//    cout << os.str() << endl;
     return ret;
   }
 
@@ -1543,7 +1548,7 @@ class_sequences()
    .def("plot_data_write", SequencesWrap::plot_data_write, args("prefix", "title"), "Write GNUPLOT files")
    DEF_RETURN_VALUE("segment_profile_plotable_write", SequencesWrap::segment_profile_plotable_write, args("identifier", "nb_segment", "model_type", "output"), "Write segment_profile")
 
-    .def("segment_profile_write", SequencesWrap::segment_profile_write, args("sequences", "iidentifier","nb_segment", "model_type" , "output" ,"format","segmentation","nb_segmentation"), "segment profile write for Display")
+    .def("segment_profile_write", SequencesWrap::segment_profile_write, args("sequences", "iidentifier","nb_segment", "model_type" , "output", "segmentation", "nb_segmentation"), "segment profile write for Display")
     .def("select_bin_width", SequencesWrap::select_bin_width, args("variable", "bin_width"), "select_bin_width on sequences")
    DEF_RETURN_VALUE("get_marginal_histogram", SequencesWrap::get_marginal_histogram, args("variable"), "get_marginal_histogram wrapper")
 

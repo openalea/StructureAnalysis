@@ -21,8 +21,6 @@
 
 #include "wrapper_util.h"
 
-#include "tool/config.h"
-
 #include "stat_tool/stat_label.h"
 
 #include "sequence_analysis/semi_markov.h"

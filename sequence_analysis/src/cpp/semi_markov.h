@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -108,7 +108,6 @@ namespace sequence_analysis {
                                             double cumul_threshold = OCCUPANCY_THRESHOLD);
     void state_nb_pattern_mixture(int state , stat_tool::count_pattern pattern);
   };
-
 
 
   class SemiMarkovData;
@@ -225,14 +224,14 @@ namespace sequence_analysis {
     SemiMarkovData* simulation(stat_tool::StatError &error , int nb_sequence ,
                                const MarkovianSequences &iseq , bool counting_flag = true) const;
 
-    stat_tool::DistanceMatrix* divergence_computation(stat_tool::StatError &error , std::ostream &os , int nb_model ,
+    stat_tool::DistanceMatrix* divergence_computation(stat_tool::StatError &error , bool display , int nb_model ,
                                                       const SemiMarkov **ismarkov ,
                                                       stat_tool::FrequencyDistribution **hlength ,
                                                       const std::string path = "") const;
-    stat_tool::DistanceMatrix* divergence_computation(stat_tool::StatError &error , std::ostream &os , int nb_model ,
+    stat_tool::DistanceMatrix* divergence_computation(stat_tool::StatError &error , bool display , int nb_model ,
                                                       const SemiMarkov **smarkov , int nb_sequence ,
                                                       int length , const std::string path = "") const;
-    stat_tool::DistanceMatrix* divergence_computation(stat_tool::StatError &error , std::ostream &os , int nb_model ,
+    stat_tool::DistanceMatrix* divergence_computation(stat_tool::StatError &error , bool display , int nb_model ,
                                                       const SemiMarkov **smarkov , int nb_sequence ,
                                                       const MarkovianSequences **seq , const std::string path = "") const;
 
@@ -290,7 +289,6 @@ namespace sequence_analysis {
   };
 
 
-
   /// \brief Data structure corresponding to a semi-Markov chain
 
   class SemiMarkovData : public MarkovianSequences {
@@ -310,6 +308,7 @@ namespace sequence_analysis {
     double restoration_likelihood;  ///< log-likelihood for the restored state sequences
     double sample_entropy;  ///< entropy of the state sequences for the sample
     double *posterior_probability;  ///< posterior probabilities of the most probable state sequences
+    double *posterior_state_probability;  ///< posterior probabilities of the most probable initial state
     double *entropy;        ///< entropies of the state sequences
     double *nb_state_sequence;  ///< numbers of state sequences
 
@@ -357,6 +356,7 @@ namespace sequence_analysis {
     double get_restoration_likelihood() const { return restoration_likelihood; }
     double get_sample_entropy() const { return sample_entropy; }
     double get_posterior_probability(int index) const { return posterior_probability[index]; }
+    double get_state_posterior_probability(int index) const { return posterior_state_probability[index]; }
     double get_entropy(int index) const { return entropy[index]; }
     double get_nb_state_sequence(int index) const { return nb_state_sequence[index]; }
   };

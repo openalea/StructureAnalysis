@@ -24,11 +24,6 @@
 #include <math.h>
 #include <iomanip>
 #include <sstream>
-#include <tool/rw_tokenizer.h>
-#include <tool/rw_cstring.h>
-#include <tool/rw_locale.h>
-
-#include "tool/config.h"
 
 #include "stat_tool/stat_label.h"
 

@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -39,20 +39,18 @@
 #include <math.h>
 #include <sstream>
 
+#include <boost/tokenizer.hpp>
+
 #include <boost/math/distributions/gamma.hpp>
 #include <boost/math/distributions/inverse_gaussian.hpp>
 #include <boost/math/distributions/normal.hpp>
 #include <boost/math/special_functions/bessel.hpp>
 
-#include "tool/rw_tokenizer.h"
-#include "tool/rw_cstring.h"
-#include "tool/rw_locale.h"
-#include "tool/config.h"
-
 #include "vectors.h"
 #include "stat_label.h"
 
 using namespace std;
+using namespace boost;
 using namespace boost::math;
 
 
@@ -65,11 +63,12 @@ namespace stat_tool {
  *  \brief Constructor of the ContinuousParametric class.
  *
  *  \param[in] iident            identifier,
- *  \param[in] ilocation         location parameter (Gaussian, inverse Gaussian, von Mises),
+ *  \param[in] ilocation         location parameter (Gaussian, inverse Gaussian, autoregressive model, von Mises),
  *                               shape parameter (gamma, zero-inflated gamma) or intercept (linear model),
- *  \param[in] idispersion       dispersion parameter (Gaussian, von Mises, linear model) or
+ *  \param[in] idispersion       dispersion parameter (Gaussian, von Mises, linear model, autoregressive model) or
  *                               scale parameter (gamma, zero-inflated gamma, inverse Gaussian),
- *  \param[in] izero_probability zero probability (zero-inflated gamma) or slope (linear model),
+ *  \param[in] izero_probability zero probability (zero-inflated gamma), slope (linear model) or
+ *                               autoregressive coefficient (autoregressive model),
  *  \param[in] iunit             angle unit (von Mises).
  */
 /*--------------------------------------------------------------*/
@@ -122,7 +121,7 @@ void ContinuousParametric::copy(const ContinuousParametric &dist)
   correlation = dist.correlation;
 
   if (dist.cumul) {
-    register int i;
+    int i;
 
     cumul = new double[VON_MISES_NB_STEP];
 
@@ -189,11 +188,12 @@ ContinuousParametric* ContinuousParametric::parsing(StatError &error , ifstream 
                                                     int &line , continuous_parametric last_ident)
 
 {
-  RWLocaleSnapshot locale("en");
-  RWCString buffer , token;
+  string buffer;
   size_t position;
+  typedef tokenizer<char_separator<char>> tokenizer;
+  char_separator<char> separator(" \t");
   bool status = true , lstatus;
-  register int i , j;
+  int i , j;
   continuous_parametric ident = GAUSSIAN;
   union {
     double shape;
@@ -207,6 +207,7 @@ ContinuousParametric* ContinuousParametric::parsing(StatError &error , ifstream 
   union {
     double zero_probability;
     double slope;
+    double autoregressive_coeff;
   };
   ContinuousParametric *dist;
 
@@ -216,28 +217,28 @@ ContinuousParametric* ContinuousParametric::parsing(StatError &error , ifstream 
   dispersion = D_DEFAULT;
   slope = D_INF;
 
-  while (buffer.readLine(in_file , false)) {
+  while (getline(in_file , buffer)) {
     line++;
 
 #   ifdef DEBUG
     cout << line << " " << buffer << endl;
 #   endif
 
-    position = buffer.first('#');
-    if (position != RW_NPOS) {
-      buffer.remove(position);
+    position = buffer.find('#');
+    if (position != string::npos) {
+      buffer.erase(position);
     }
     i = 0;
 
-    RWCTokenizer next(buffer);
+    tokenizer tok_buffer(buffer , separator);
 
-    while (!((token = next()).isNull())) {
+    for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
 
       // test distribution name
 
       if (i == 0) {
         for (j = GAMMA;j <= last_ident;j++) {
-          if (token == STAT_continuous_distribution_word[j]) {
+          if (*token == STAT_continuous_distribution_word[j]) {
             ident = (continuous_parametric)j;
             break;
           }
@@ -257,31 +258,31 @@ ContinuousParametric* ContinuousParametric::parsing(StatError &error , ifstream 
         case 0 : {
           switch ((i - 1) / 3) {
 
-          // 1st parameter: shape parameter (gamma), mean (Gaussian, inverse Gaussian), mean direction (von Mises),
-          // zero probability (zero-inflated gamma), intercept (linear model)
+          // 1st parameter: shape parameter (gamma), mean (Gaussian, inverse Gaussian, autoregressive model),
+          // mean direction (von Mises), zero probability (zero-inflated gamma), intercept (linear model)
 
           case 0 : {
-            if ((ident == GAMMA) && (token != STAT_word[STATW_SHAPE])) {
+            if ((ident == GAMMA) && (*token != STAT_word[STATW_SHAPE])) {
               status = false;
               error.correction_update(STAT_parsing[STATP_PARAMETER_NAME] , STAT_word[STATW_SHAPE] , line , i + 1);
             }
 
-            if (((ident == INVERSE_GAUSSIAN) || (ident == GAUSSIAN)) && (token != STAT_word[STATW_MEAN])) {
+            if (((ident == INVERSE_GAUSSIAN) || (ident == GAUSSIAN) || (ident == AUTOREGRESSIVE_MODEL)) && (*token != STAT_word[STATW_MEAN])) {
               status = false;
               error.correction_update(STAT_parsing[STATP_PARAMETER_NAME] , STAT_word[STATW_MEAN] , line , i + 1);
             }
 
-            if ((ident == VON_MISES) && (token != STAT_word[STATW_MEAN_DIRECTION])) {
+            if ((ident == VON_MISES) && (*token != STAT_word[STATW_MEAN_DIRECTION])) {
               status = false;
               error.correction_update(STAT_parsing[STATP_PARAMETER_NAME] , STAT_word[STATW_MEAN_DIRECTION] , line , i + 1);
             }
 
-            if ((ident == ZERO_INFLATED_GAMMA) && (token != STAT_word[STATW_ZERO_PROBABILITY])) {
+            if ((ident == ZERO_INFLATED_GAMMA) && (*token != STAT_word[STATW_ZERO_PROBABILITY])) {
               status = false;
               error.correction_update(STAT_parsing[STATP_PARAMETER_NAME] , STAT_word[STATW_ZERO_PROBABILITY] , line , i + 1);
             }
 
-            if ((ident == LINEAR_MODEL) && (token != STAT_word[STATW_INTERCEPT])) {
+            if ((ident == LINEAR_MODEL) && (*token != STAT_word[STATW_INTERCEPT])) {
               status = false;
               error.correction_update(STAT_parsing[STATP_PARAMETER_NAME] , STAT_word[STATW_INTERCEPT] , line , i + 1);
             }
@@ -289,45 +290,51 @@ ContinuousParametric* ContinuousParametric::parsing(StatError &error , ifstream 
           }
 
           // 2nd parameter: scale parameter (gamma, inverse Gaussian), standard deviation (Gaussian),
-          // concentration (von Mises), shape parameter (zero-inflated gamma), slope (linear model)
+          // concentration (von Mises), shape parameter (zero-inflated gamma), slope (linear model),
+          // autoregressive coefficient (autoregressive model)
 
           case 1 : {
-            if (((ident == GAMMA) || (ident == INVERSE_GAUSSIAN)) && (token != STAT_word[STATW_SCALE])) {
+            if (((ident == GAMMA) || (ident == INVERSE_GAUSSIAN)) && (*token != STAT_word[STATW_SCALE])) {
               status = false;
               error.correction_update(STAT_parsing[STATP_PARAMETER_NAME] , STAT_word[STATW_SCALE] , line , i + 1);
             }
 
-            if ((ident == GAUSSIAN) && (token != STAT_word[STATW_STANDARD_DEVIATION])) {
+            if ((ident == GAUSSIAN) && (*token != STAT_word[STATW_STANDARD_DEVIATION])) {
               status = false;
               error.correction_update(STAT_parsing[STATP_PARAMETER_NAME] , STAT_word[STATW_STANDARD_DEVIATION] , line , i + 1);
             }
 
-            if ((ident == VON_MISES) && (token != STAT_word[STATW_CONCENTRATION])) {
+            if ((ident == VON_MISES) && (*token != STAT_word[STATW_CONCENTRATION])) {
               status = false;
               error.correction_update(STAT_parsing[STATP_PARAMETER_NAME] , STAT_word[STATW_CONCENTRATION] , line , i + 1);
             }
 
-            if ((ident == ZERO_INFLATED_GAMMA) && (token != STAT_word[STATW_SHAPE])) {
+            if ((ident == ZERO_INFLATED_GAMMA) && (*token != STAT_word[STATW_SHAPE])) {
               status = false;
               error.correction_update(STAT_parsing[STATP_PARAMETER_NAME] , STAT_word[STATW_SHAPE] , line , i + 1);
             }
 
-            if ((ident == LINEAR_MODEL) && (token != STAT_word[STATW_SLOPE])) {
+            if ((ident == LINEAR_MODEL) && (*token != STAT_word[STATW_SLOPE])) {
               status = false;
               error.correction_update(STAT_parsing[STATP_PARAMETER_NAME] , STAT_word[STATW_SLOPE] , line , i + 1);
+            }
+
+            if ((ident == AUTOREGRESSIVE_MODEL) && (*token != STAT_word[STATW_AUTOREGRESSIVE_COEFF])) {
+              status = false;
+              error.correction_update(STAT_parsing[STATP_PARAMETER_NAME] , STAT_word[STATW_AUTOREGRESSIVE_COEFF] , line , i + 1);
             }
             break;
           }
 
-          // 3rd parameter: scale parameter (zero-inflated gamma), residual standard deviation (linear model)
+          // 3rd parameter: scale parameter (zero-inflated gamma), residual standard deviation (linear model, autoregressive model),
 
           case 2 : {
-            if ((ident == ZERO_INFLATED_GAMMA) && (token != STAT_word[STATW_SCALE])) {
+            if ((ident == ZERO_INFLATED_GAMMA) && (*token != STAT_word[STATW_SCALE])) {
               status = false;
               error.correction_update(STAT_parsing[STATP_PARAMETER_NAME] , STAT_word[STATW_SCALE] , line , i + 1);
             }
 
-            if ((ident == LINEAR_MODEL) && (token != STAT_word[STATW_STANDARD_DEVIATION])) {
+            if (((ident == LINEAR_MODEL) || (ident == AUTOREGRESSIVE_MODEL)) && (*token != STAT_word[STATW_STANDARD_DEVIATION])) {
               status = false;
               error.correction_update(STAT_parsing[STATP_PARAMETER_NAME] , STAT_word[STATW_STANDARD_DEVIATION] , line , i + 1);
             }
@@ -341,7 +348,7 @@ ContinuousParametric* ContinuousParametric::parsing(StatError &error , ifstream 
         // test separator
 
         case 1 : {
-          if (token != ":") {
+          if (*token != ":") {
             status = false;
             error.update(STAT_parsing[STATP_SEPARATOR] , line , i + 1);
           }
@@ -351,67 +358,134 @@ ContinuousParametric* ContinuousParametric::parsing(StatError &error , ifstream 
         // test parameter value
 
         case 2 : {
+          lstatus = true;
+
           switch ((i - 1) / 3) {
 
-          // 1st parameter: shape parameter (gamma), mean (inverse Gaussian, Gaussian), mean direction (von Mises),
-          // zero probability (zero-inflated gamma), intercept (linear model)
+          // 1st parameter: shape parameter (gamma), mean (inverse Gaussian, Gaussian, autoregressive model),
+          // mean direction (von Mises), zero probability (zero-inflated gamma), intercept (linear model)
 
           case 0 : {
             if (ident == GAMMA) {
-              lstatus = locale.stringToNum(token , &shape);
+/*              try {
+                shape = stod(*token);   in C++ 11
+              }
+              catch(invalid_argument &arg) {
+                lstatus = false;
+              } */
+              shape = atof(token->c_str());
+
               if ((lstatus) && (shape < 0.)) {
                 lstatus = false;
               }
             }
 
-            else if (ident == INVERSE_GAUSSIAN) {
-              lstatus = locale.stringToNum(token , &location);
-              if ((lstatus) && (location <= 0.)) {
-                lstatus = false;
-              }
-            }
-
             else if (ident == ZERO_INFLATED_GAMMA) {
-              lstatus = locale.stringToNum(token , &zero_probability);
+/*              try {
+                zero_probability = stod(*token);   in C++ 11
+              }
+              catch(invalid_argument &arg) {
+                lstatus = false;
+              } */
+              zero_probability = atof(token->c_str());
+
               if ((lstatus) && ((zero_probability < 0.) || (zero_probability > 1.))) {
                 lstatus = false;
               }
             }
 
             else if (ident == LINEAR_MODEL) {
-              lstatus = locale.stringToNum(token , &intercept);
+/*              try {
+                intercept = stod(*token);   in C++ 11
+              }
+              catch(invalid_argument &arg) {
+                lstatus = false;
+              } */
+              intercept = atof(token->c_str());
             }
 
             else {
-              lstatus = locale.stringToNum(token , &location);
+/*              try {
+                location = stod(*token);   in C++ 11
+              }
+              catch(invalid_argument &arg) {
+                lstatus = false;
+              } */
+              location = atof(token->c_str());
+
+              if ((lstatus) && (ident == INVERSE_GAUSSIAN) && (location <= 0.)) {
+                lstatus = false;
+              }
             }
             break;
           }
 
           // 2nd parameter: scale parameter (gamma, inverse Gaussian), standard deviation (Gaussian),
-          // concentration (von Mises), shape parameter (zero-inflated gamma), slope (linear model)
+          // concentration (von Mises), shape parameter (zero-inflated gamma), slope (linear model),
+          // autoregressive coefficient (autoregressive model)
 
           case 1 : {
             if ((ident == GAMMA) || (ident == INVERSE_GAUSSIAN)) {
-              lstatus = locale.stringToNum(token , &scale);
+/*              try {
+                scale = stod(*token);   in C++ 11
+              }
+              catch(invalid_argument &arg) {
+                lstatus = false;
+              } */
+              scale = atof(token->c_str());
+
               if ((lstatus) && (scale <= 0.)) {
                 lstatus = false;
               }
             }
 
             else if (ident == ZERO_INFLATED_GAMMA) {
-              lstatus = locale.stringToNum(token , &shape);
+/*              try {
+                shape = stod(*token);   in C++ 11
+              }
+              catch(invalid_argument &arg) {
+                lstatus = false;
+              } */
+              shape = atof(token->c_str());
+
               if ((lstatus) && (shape <= 0.)) {
                 lstatus = false;
               }
             }
 
             else if (ident == LINEAR_MODEL) {
-              lstatus = locale.stringToNum(token , &slope);
+/*              try {
+                slope = stod(*token);   in C++ 11
+              }
+              catch(invalid_argument &arg) {
+                lstatus = false;
+              } */
+              slope = atof(token->c_str());
+            }
+
+            else if (ident == AUTOREGRESSIVE_MODEL) {
+/*              try {
+                autoregressive_coeff = stod(*token);   in C++ 11
+              }
+              catch(invalid_argument &arg) {
+                lstatus = false;
+              } */
+              autoregressive_coeff = atof(token->c_str());
+
+              if ((lstatus) && ((autoregressive_coeff < -1.) || (autoregressive_coeff > 1))) {
+                lstatus = false;
+              }
             }
 
             else {
-              lstatus = locale.stringToNum(token , &dispersion);
+/*              try {
+                dispersion = stod(*token);   in C++ 11
+              }
+              catch(invalid_argument &arg) {
+                lstatus = false;
+              } */
+              dispersion = atof(token->c_str());
+
               if ((lstatus) && (dispersion <= 0.)) {
                 lstatus = false;
               }
@@ -419,18 +493,32 @@ ContinuousParametric* ContinuousParametric::parsing(StatError &error , ifstream 
             break;
           }
 
-          // 3rd parameter: scale parameter (zero-inflated gamma), residual standard deviation (linear model)
+          // 3rd parameter: scale parameter (zero-inflated gamma), residual standard deviation (linear model, autoregressive model)
 
           case 2 : {
             if (ident == ZERO_INFLATED_GAMMA) {
-              lstatus = locale.stringToNum(token , &scale);
+/*              try {
+                scale = stod(*token);   in C++ 11
+              }
+              catch(invalid_argument &arg) {
+                lstatus = false;
+              } */
+              scale = atof(token->c_str());
+
               if ((lstatus) && (scale <= 0.)) {
                 lstatus = false;
               }
             }
 
-            else if (ident == LINEAR_MODEL) {
-              lstatus = locale.stringToNum(token , &dispersion);
+            else if ((ident == LINEAR_MODEL) || (ident == AUTOREGRESSIVE_MODEL)) {
+/*              try {
+                dispersion = stod(*token);   in C++ 11
+              }
+              catch(invalid_argument &arg) {
+                lstatus = false;
+              } */
+              dispersion = atof(token->c_str());
+
               if ((lstatus) && (dispersion <= 0.)) {
                 lstatus = false;
               }
@@ -453,7 +541,7 @@ ContinuousParametric* ContinuousParametric::parsing(StatError &error , ifstream 
 
     if (i > 0) {
       if ((((ident == GAMMA) || (ident == INVERSE_GAUSSIAN) || (ident == GAUSSIAN) || (ident == VON_MISES)) && (i != 7)) ||
-          (((ident == ZERO_INFLATED_GAMMA) || (ident == LINEAR_MODEL)) && (i != 10))) {
+          (((ident == ZERO_INFLATED_GAMMA) || (ident == LINEAR_MODEL) || (ident == AUTOREGRESSIVE_MODEL)) && (i != 10))) {
         status = false;
         error.update(STAT_parsing[STATP_FORMAT] , line);
       }
@@ -557,6 +645,43 @@ ostream& ContinuousParametric::ascii_parameter_print(ostream &os , bool file_fla
          << STAT_label[STATL_LIMIT_CORRELATION_COEFF] << ": -/+"
          << test.value / sqrt(test.value * test.value + sample_size) << "   "
          << STAT_label[STATL_CRITICAL_PROBABILITY] << ": " << test.critical_probability;
+    }
+
+    else {
+      os << "   " << STAT_word[STATW_STANDARD_DEVIATION] << " : " << dispersion;
+    }
+    break;
+  }
+
+  case AUTOREGRESSIVE_MODEL : {
+    os << STAT_word[STATW_MEAN] << " : " << location << "   "
+       << STAT_word[STATW_AUTOREGRESSIVE_COEFF] << " : " << autoregressive_coeff;
+
+    if (sample_size > 0.) {
+      normal dist;
+      double standard_normal_value = quantile(complement(dist , 0.025)) , standard_error;
+
+      standard_error = standard_normal_value * sqrt((1. - autoregressive_coeff * autoregressive_coeff) / sample_size);
+
+      if (!file_flag) {
+        os << "   (" << MAX(autoregressive_coeff - standard_error , -1.) << ", " << MIN(autoregressive_coeff + standard_error , 1.)
+           << "),   " << STAT_label[STATL_NULL_AUTOREGRESSIVE_COEFF_95_CONFIDENCE_LIMIT]
+           << ": -/+" << standard_normal_value / sqrt(sample_size);
+      }
+
+      os << "   " << STAT_word[STATW_STANDARD_DEVIATION] << " : " << dispersion;
+
+      if (file_flag) {
+        os << "   # " << MAX(autoregressive_coeff - standard_error , -1.) << ", " << MIN(autoregressive_coeff + standard_error , 1.)
+           << ",   " << STAT_label[STATL_NULL_AUTOREGRESSIVE_COEFF_95_CONFIDENCE_LIMIT]
+           << ": -/+" << standard_normal_value / sqrt(sample_size);
+      }
+
+      os << "\n";
+      if (file_flag) {
+        os << "# ";
+      }
+      os << STAT_label[STATL_DETERMINATION_COEFF] << ": " << determination_coeff;
     }
 
     else {
@@ -670,7 +795,7 @@ ostream& ContinuousParametric::ascii_characteristic_print(ostream &os , bool fil
       if (file_flag) {
         os << "# ";
       }
-      os << STAT_label[STATL_STANDARD_DEVIATION] << ": " <<  standard_deviation << endl;
+      os << STAT_label[STATL_STANDARD_DEVIATION] << ": " << standard_deviation << endl;
     }
 #   endif
 
@@ -689,7 +814,7 @@ ostream& ContinuousParametric::ascii_characteristic_print(ostream &os , bool fil
       variance = (1 - zero_probability) * shape * scale * scale * (1 + shape) - mean * mean;
     }
 
-    os << STAT_label[STATL_MEAN] << ": " <<  mean << "   "
+    os << STAT_label[STATL_MEAN] << ": " << mean << "   "
        << STAT_label[STATL_VARIANCE] << ": " << variance << "   "
        << STAT_label[STATL_STANDARD_DEVIATION] << ": " << sqrt(variance) << endl;
     break;
@@ -718,13 +843,13 @@ ostream& ContinuousParametric::ascii_print(ostream &os , bool file_flag ,
 
 {
   if ((histo1) || (histo2)) {
-    register int i , j;
+    int i , j;
     int nb_step , width[5];
-    long old_adjust;
     double step , histo_scale , mass , value , *frequency , *dist_cumul , *histo_cumul;
+    ios_base::fmtflags format_flags;
 
 
-    old_adjust = os.setf(ios::right , ios::adjustfield);
+    format_flags = os.setf(ios::right , ios::adjustfield);
 
     if (histo1) {
       step = histo1->bin_width;
@@ -1065,7 +1190,7 @@ ostream& ContinuousParametric::ascii_print(ostream &os , bool file_flag ,
       delete [] histo_cumul;
     }
 
-    os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
+    os.setf(format_flags , ios::adjustfield);
   }
 
   return os;
@@ -1148,6 +1273,27 @@ ostream& ContinuousParametric::spreadsheet_parameter_print(ostream &os) const
     else {
       os << "\t\t" << STAT_word[STATW_STANDARD_DEVIATION] << "\t" << dispersion;
     }
+    break;
+  }
+
+  case AUTOREGRESSIVE_MODEL : {
+    os << STAT_word[STATW_MEAN] << "\t" << location << "\t\t"
+       << STAT_word[STATW_AUTOREGRESSIVE_COEFF] << "\t" << autoregressive_coeff;
+
+    if (sample_size > 0.) {
+      normal dist;
+      double standard_normal_value = quantile(complement(dist , 0.025)) , standard_error;
+
+      standard_error = standard_normal_value * sqrt((1. - autoregressive_coeff * autoregressive_coeff) / sample_size);
+
+      os << "\t" << MAX(autoregressive_coeff - standard_error , -1.) << "\t" << MIN(autoregressive_coeff + standard_error , 1.)
+         << "\t" << STAT_label[STATL_NULL_AUTOREGRESSIVE_COEFF_95_CONFIDENCE_LIMIT]
+         << "\t-/+" << standard_normal_value / sqrt(sample_size);
+    }
+
+    os << "\t\t" << STAT_word[STATW_STANDARD_DEVIATION] << "\t" << dispersion << endl;
+
+    os << STAT_label[STATL_DETERMINATION_COEFF] << "\t" << determination_coeff;
     break;
   }
   }
@@ -1242,7 +1388,7 @@ ostream& ContinuousParametric::spreadsheet_characteristic_print(ostream &os) con
       variance = (1 - zero_probability) * shape * scale * scale * (1 + shape) - mean * mean;
     }
 
-    os << STAT_label[STATL_MEAN] << "\t" <<  mean << "\t\t"
+    os << STAT_label[STATL_MEAN] << "\t" << mean << "\t\t"
        << STAT_label[STATL_VARIANCE] << "\t" << variance << "\t\t"
        << STAT_label[STATL_STANDARD_DEVIATION] << "\t" << sqrt(variance) << endl;
     break;
@@ -1270,7 +1416,7 @@ ostream& ContinuousParametric::spreadsheet_print(ostream &os , bool cumul_flag ,
 
 {
   if ((histo1) || (histo2)) {
-    register int i , j;
+    int i , j;
     int nb_step;
     double step , histo_scale , value , mass , *frequency , *dist_cumul , *histo_cumul;
 
@@ -1613,6 +1759,10 @@ ostream& ContinuousParametric::plot_title_print(ostream &os) const
     os << intercept << ", " << slope << ", " << dispersion;
   }
 
+  else if (ident == AUTOREGRESSIVE_MODEL) {
+    os << location << ", " << autoregressive_coeff << ", " << dispersion;
+  }
+
   else {
     os << location << ", " << dispersion;
   }
@@ -1639,7 +1789,7 @@ bool ContinuousParametric::plot_print(const char *path , const Histogram *histo1
 
 {
   bool status = false;
-  register int i;
+  int i;
   int nb_step;
   double histo_scale , step , buff , value , max , *frequency;
   ofstream out_file(path);
@@ -1833,7 +1983,7 @@ bool ContinuousParametric::plot_print(const char *path , const Histogram *histo1
 
       case DEGREE : {
         max_value = 360;
-        step =  max_value / VON_MISES_NB_STEP;
+        step = max_value / VON_MISES_NB_STEP;
 
         value = 0.;
         for (i = 0;i < VON_MISES_NB_STEP;i++) {
@@ -1846,7 +1996,7 @@ bool ContinuousParametric::plot_print(const char *path , const Histogram *histo1
 
       case RADIAN : {
         max_value = 2 * M_PI;
-        step =  max_value / VON_MISES_NB_STEP;
+        step = max_value / VON_MISES_NB_STEP;
 
         value = 0.;
         for (i = 0;i < VON_MISES_NB_STEP;i++) {
@@ -1945,7 +2095,7 @@ bool ContinuousParametric::q_q_plot_print(const char *path , int nb_value ,
 
 {
   bool status = false;
-  register int i;
+  int i;
   double **qqplot;
   ofstream out_file(path);
 
@@ -1982,7 +2132,7 @@ void ContinuousParametric::plotable_write(SinglePlot &plot , const Histogram *hi
                                           const FrequencyDistribution *histo2)
 
 {
-  register int i;
+  int i;
   int nb_step;
   double histo_scale , step , buff , value , max , *frequency;
 
@@ -2267,7 +2417,7 @@ void ContinuousParametric::q_q_plotable_write(SinglePlot &plot , int nb_value ,
                                               double **empirical_cdf) const
 
 {
-  register int i;
+  int i;
   double **qqplot;
 
 
@@ -2338,6 +2488,11 @@ int ContinuousParametric::nb_parameter_computation() const
   }
 
   case LINEAR_MODEL : {
+    nb_parameter = 3;
+    break;
+  }
+
+  case AUTOREGRESSIVE_MODEL : {
     nb_parameter = 3;
     break;
   }
@@ -2571,6 +2726,18 @@ double ContinuousParametric::mass_computation(double inf , double sup) const
     }
     break;
   }
+
+  case AUTOREGRESSIVE_MODEL : {
+    normal dist(0. , dispersion);
+
+    if (inf == sup) {
+      mass = pdf(dist , inf);
+    }
+    else {
+      mass = cdf(dist , sup) - cdf(dist , inf);
+    }
+    break;
+  }
   }
 
 //  if (mass > 1.) {
@@ -2591,7 +2758,7 @@ double ContinuousParametric::mass_computation(double inf , double sup) const
 void ContinuousParametric::von_mises_cumul_computation()
 
 {
-  register int i , j;
+  int i , j;
   int start;
   double step , value;
 
@@ -2678,7 +2845,7 @@ double** ContinuousParametric::q_q_plot_computation(int nb_value ,
                                                     double **empirical_cdf) const
 
 {
-  register int i , j;
+  int i , j;
   double step , value , current_cumul , previous_cumul , **qqplot;
 
 
@@ -2817,7 +2984,7 @@ double ContinuousParametric::sup_norm_distance_computation(ContinuousParametric 
 
 {
   bool crossing;
-  register int i;
+  int i;
   double min , max , step , value , buff , distance , max_absolute_diff , cumul1[2] , cumul2[2];
 
 # ifdef MESSAGE
@@ -3297,7 +3464,7 @@ double ContinuousParametric::sup_norm_distance_computation(ContinuousParametric 
 double Vectors::likelihood_computation(int variable , const ContinuousParametric &dist) const
 
 {
-  register int i;
+  int i;
   double mass , likelihood;
 
 
@@ -3393,7 +3560,7 @@ double Vectors::likelihood_computation(int variable , const ContinuousParametric
 double Vectors::gamma_estimation(int variable , ContinuousParametric *dist) const
 
 {
-  register int i;
+  int i;
   int zero_count;
   double buff , log_geometric_mean , diff , likelihood = D_INF;
 //  double variance;
@@ -3540,7 +3707,7 @@ double Vectors::gamma_estimation(int variable , ContinuousParametric *dist) cons
 double Vectors::inverse_gaussian_estimation(int variable , ContinuousParametric *dist) const
 
 {
-  register int i;
+  int i;
   double inverse_scale , likelihood = D_INF;
 
 
@@ -3630,7 +3797,7 @@ double Vectors::gaussian_estimation(int variable , ContinuousParametric *dist) c
 double Vectors::von_mises_estimation(int variable , ContinuousParametric *dist) const
 
 {
-  register int i;
+  int i;
   double *mean_direction , likelihood = D_INF;
 
 
@@ -3767,7 +3934,7 @@ double Vectors::continuous_parametric_estimation(int variable , continuous_param
 double ContinuousParametric::simulation()
 
 {
-  register int i;
+  int i;
   int start;
   double limit , value , step , current_cumul , previous_cumul;
 
@@ -3903,6 +4070,13 @@ double ContinuousParametric::simulation()
   }
 
   case LINEAR_MODEL : {
+    normal dist(0. , dispersion);
+
+    value = quantile(dist , limit);
+    break;
+  }
+
+  case AUTOREGRESSIVE_MODEL : {
     normal dist(0. , dispersion);
 
     value = quantile(dist , limit);

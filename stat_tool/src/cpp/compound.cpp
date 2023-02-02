@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -39,13 +39,15 @@
 #include <string>
 #include <sstream>
 
-#include "tool/rw_tokenizer.h"
-#include "tool/rw_cstring.h"
+#include <boost/tokenizer.hpp>
+#include <boost/algorithm/string/trim.hpp>
+#include <boost/algorithm/string/classification.hpp>
 
 #include "compound.h"
 #include "stat_label.h"
 
 using namespace std;
+using namespace boost;
 
 
 namespace stat_tool {
@@ -84,11 +86,18 @@ Compound::Compound(const DiscreteParametric &sum_dist , const DiscreteParametric
   compound_data = NULL;
 
   sum_distribution = new DiscreteParametric(sum_dist , NORMALIZATION);
-  distribution = new DiscreteParametric(dist , NORMALIZATION);
+  distribution = new DiscreteParametric(dist.ident , dist.inf_bound , dist.sup_bound ,
+                                        dist.parameter , dist.probability , cumul_threshold);
 
   Distribution::init((sum_distribution->nb_value - 1) * (distribution->nb_value - 1) + 1);
 
   computation(1 , cumul_threshold , false , false);
+
+# ifdef DEBUG
+  dist.Distribution::ascii_print(cout , false , true , false);
+  distribution->Distribution::ascii_print(cout , false , true , false);
+# endif
+
 }
 
 
@@ -252,11 +261,12 @@ CompoundData* Compound::extract_data(StatError &error) const
 Compound* Compound::ascii_read(StatError &error , const string path , double cumul_threshold)
 
 {
-  RWCString buffer , token;
-
+  string buffer;
   size_t position;
+  typedef tokenizer<char_separator<char>> tokenizer;
+  char_separator<char> separator(" \t");
   bool status;
-  register int i;
+  int i;
   int line , read_line;
   DiscreteParametric *sum_dist , *dist;
   Compound *compound;
@@ -278,22 +288,22 @@ Compound* Compound::ascii_read(StatError &error , const string path , double cum
     sum_dist = NULL;
     dist = NULL;
 
-    while (buffer.readLine(in_file , false)) {
+    while (getline(in_file , buffer)) {
       line++;
 
 #     ifdef DEBUG
       cout << line << "  " << buffer << endl;
 #     endif
 
-      position = buffer.first('#');
-      if (position != RW_NPOS) {
-        buffer.remove(position);
+      position = buffer.find('#');
+      if (position != string::npos) {
+        buffer.erase(position);
       }
       i = 0;
 
-      RWCTokenizer next(buffer);
+      tokenizer tok_buffer(buffer , separator);
 
-      while (!((token = next()).isNull())) {
+      for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
 
         // test COMPOUND_DISTRIBUTION/SUM_DISTRIBUTION/ELEMENTARY_DISTRIBUTION keywords
 
@@ -301,7 +311,7 @@ Compound* Compound::ascii_read(StatError &error , const string path , double cum
           switch (read_line) {
 
           case 0 : {
-            if (token != STAT_word[STATW_COMPOUND]) {
+            if (*token != STAT_word[STATW_COMPOUND]) {
               status = false;
               error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_COMPOUND] , line);
             }
@@ -309,7 +319,7 @@ Compound* Compound::ascii_read(StatError &error , const string path , double cum
           }
 
           case 1 : {
-            if (token != STAT_word[STATW_SUM]) {
+            if (*token != STAT_word[STATW_SUM]) {
               status = false;
               error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_SUM] , line);
             }
@@ -317,7 +327,7 @@ Compound* Compound::ascii_read(StatError &error , const string path , double cum
           }
 
           case 2 : {
-            if (token != STAT_word[STATW_ELEMENTARY]) {
+            if (*token != STAT_word[STATW_ELEMENTARY]) {
               status = false;
               error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_ELEMENTARY] , line);
             }
@@ -368,19 +378,18 @@ Compound* Compound::ascii_read(StatError &error , const string path , double cum
       error.update(STAT_parsing[STATP_FORMAT] , line);
     }
 
-    while (buffer.readLine(in_file , false)) {
+    while (getline(in_file , buffer)) {
       line++;
 
 #     ifdef DEBUG
       cout << line << "  " << buffer << endl;
 #     endif
 
-      position = buffer.first('#');
-      if (position != RW_NPOS) {
-        buffer.remove(position);
+      position = buffer.find('#');
+      if (position != string::npos) {
+        buffer.erase(position);
       }
-
-      if (!(buffer.isNull())) {
+      if (!(trim_right_copy_if(buffer , is_any_of(" \t")).empty())) {
         status = false;
         error.update(STAT_parsing[STATP_FORMAT] , line);
       }
@@ -774,7 +783,7 @@ bool Compound::plot_write(const char *prefix , const char *title ,
 
 {
   bool status;
-  register int i;
+  int i;
   int nb_histo = 0;
   double scale[3];
   const Distribution *pdist[3];
@@ -997,7 +1006,7 @@ bool Compound::plot_write(StatError &error , const char *prefix ,
 MultiPlotSet* Compound::get_plotable(const CompoundData *compound_histo) const
 
 {
-  register int i , j;
+  int i , j;
   int xmax;
   double scale = 1.;
   ostringstream title , legend;

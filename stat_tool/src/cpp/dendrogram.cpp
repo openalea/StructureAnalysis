@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -38,8 +38,6 @@
 
 #include <string>
 #include <iomanip>
-
-#include "tool/config.h"
 
 #include "distance_matrix.h"
 #include "stat_label.h"
@@ -96,7 +94,7 @@ Dendrogram::Dendrogram()
 Dendrogram::Dendrogram(const DistanceMatrix &dist_matrix , cluster_scale iscale)
 
 {
-  register int i;
+  int i;
 
 
   distance_matrix = new DistanceMatrix(dist_matrix);
@@ -160,7 +158,7 @@ Dendrogram::Dendrogram(const DistanceMatrix &dist_matrix , cluster_scale iscale)
 void Dendrogram::copy(const Dendrogram &dendrogram)
 
 {
-  register int i , j;
+  int i , j;
 
 
   distance_matrix = new DistanceMatrix(*(dendrogram.distance_matrix));
@@ -234,7 +232,7 @@ void Dendrogram::copy(const Dendrogram &dendrogram)
 void Dendrogram::remove()
 
 {
-  register int i;
+  int i;
 
 
   delete [] cluster_nb_pattern;
@@ -344,7 +342,7 @@ ostream& Dendrogram::line_write(ostream &os) const
 double* Dendrogram::distance_ordering() const
 
 {
-  register int i , j;
+  int i , j;
   int offset;
   double *ordered_distance , *distance;
 
@@ -401,14 +399,14 @@ double* Dendrogram::distance_ordering() const
 ostream& Dendrogram::ascii_write(ostream &os , bool exhaustive) const
 
 {
-  register int i , j , k;
+  int i , j , k;
   int buff , max_identifier , max_nb_character , previous_nb_character ,
       *nb_character , width[3];
   double min_distance , min_diff_distance , *ordered_distance , *distance;
-  long old_adjust;
+  ios_base::fmtflags format_flags;
 
 
-  old_adjust = os.setf(ios::right , ios::adjustfield);
+  format_flags = os.setf(ios::right , ios::adjustfield);
 
   os << distance_matrix->nb_row << " " << distance_matrix->label << "s" << endl;
 
@@ -612,7 +610,7 @@ ostream& Dendrogram::ascii_write(ostream &os , bool exhaustive) const
   os << STAT_label[STATL_DIAMETER_COEFF] << ": "
      << coefficient_computation(DIAMETER) << endl;
 
-  os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
+  os.setf(format_flags , ios::adjustfield);
 
   return os;
 }
@@ -669,7 +667,7 @@ bool Dendrogram::spreadsheet_write(StatError &error , const string path) const
 
 {
   bool status;
-  register int i , j;
+  int i , j;
   double *ordered_distance;
   ofstream out_file(path.c_str());
 
@@ -758,7 +756,7 @@ bool Dendrogram::spreadsheet_write(StatError &error , const string path) const
 void Dendrogram::tree_computation()
 
 {
-  register int i , j , k;
+  int i , j , k;
 
 
   for (i = 0;i < nb_cluster - 1;i++) {
@@ -798,7 +796,7 @@ void Dendrogram::tree_computation()
 double Dendrogram::coefficient_computation(cluster_scale iscale) const
 
 {
-  register int i;
+  int i;
   double coeff , *distance;
 
 
@@ -856,7 +854,7 @@ Dendrogram* DistanceMatrix::agglomerative_hierarchical_clustering(hierarchical_s
                                                                   linkage criterion) const
 
 {
-  register int i , j , k;
+  int i , j , k;
   int index , index1 , index2 , icluster , *pattern_index , **cluster_pattern;
   double min_distance , *cumul_distance , **normalized_cluster_distance ,
          **normalized_pattern_distance , **max_between_cluster_distance;
@@ -1238,7 +1236,7 @@ Dendrogram* DistanceMatrix::agglomerative_hierarchical_clustering(hierarchical_s
 Dendrogram* DistanceMatrix::divisive_hierarchical_clustering() const
 
 {
-  register int i , j , k;
+  int i , j , k;
   int bnb_pattern , icluster , new_cluster , outlying_pattern , *passignment1 , *passignment2 ,
       *cluster_identifier , *cluster_index;
   double distance , max_cumul_distance , *cumul_distance , **normalized_distance;
@@ -1478,7 +1476,7 @@ Dendrogram* DistanceMatrix::divisive_hierarchical_clustering() const
  *  \brief Hierarchical clustering algorithms.
  *
  *  \param[in] error     reference on a StatError object,
- *  \param[in] os        stream,
+ *  \param[in] display   flag for displaying the hierarchical clustering results,
  *  \param[in] strategy  algorithm type (AGGLOMERATIVE/DIVISIVE/ORDERING),
  *  \param[in] criterion cluster merging criterion (agglomerative algorithm),
  *  \param[in] path      file path,
@@ -1488,7 +1486,7 @@ Dendrogram* DistanceMatrix::divisive_hierarchical_clustering() const
  */
 /*--------------------------------------------------------------*/
 
-bool DistanceMatrix::hierarchical_clustering(StatError &error , ostream &os ,
+bool DistanceMatrix::hierarchical_clustering(StatError &error , bool display ,
                                              hierarchical_strategy strategy , linkage criterion ,
                                              const string path , output_format format) const
 
@@ -1514,9 +1512,9 @@ bool DistanceMatrix::hierarchical_clustering(StatError &error , ostream &os ,
 
     // writing of results
 
-#   ifdef MESSAGE
-    dendrogram->ascii_write(os);
-#   endif
+    if (display) {
+      dendrogram->ascii_write(cout);
+    }
 
     if (!path.empty()) {
       switch (format) {

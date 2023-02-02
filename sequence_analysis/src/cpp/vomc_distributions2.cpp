@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -61,7 +61,7 @@ namespace sequence_analysis {
 void VariableOrderMarkovChain::state_nb_pattern_mixture(int istate , count_pattern pattern)
 
 {
-  register int i , j , k , m;
+  int i , j , k , m;
   int max_length , nb_pattern , index_nb_pattern , increment;
   double sum , *pmass , *lmass , **memory , **previous_memory;
   Distribution *pdist;
@@ -233,7 +233,7 @@ void VariableOrderMarkovChain::state_nb_pattern_mixture(int istate , count_patte
 void VariableOrderMarkov::output_nb_run_mixture(int variable , int output)
 
 {
-  register int i , j , k , m;
+  int i , j , k , m;
   int max_length , nb_pattern , index_nb_pattern;
   double sum , *observation , *pmass , *lmass , **memory , **previous_memory;
   Distribution *nb_run;
@@ -394,7 +394,7 @@ void VariableOrderMarkov::output_nb_run_mixture(int variable , int output)
 void VariableOrderMarkov::output_nb_occurrence_mixture(int variable , int output)
 
 {
-  register int i , j , k , m;
+  int i , j , k , m;
   int max_length , nb_pattern , index_nb_pattern;
   double sum , *observation , *pmass , *lmass , **memory , **previous_memory;
   Distribution *nb_occurrence;
@@ -542,7 +542,7 @@ void VariableOrderMarkov::characteristic_computation(int length , bool counting_
 {
   if (nb_component > 0) {
     bool computation[NB_OUTPUT_PROCESS + 1];
-    register int i , j , k;
+    int i , j , k;
     double *memory;
     DiscreteParametric dlength(UNIFORM , length , length , D_DEFAULT , D_DEFAULT);
 
@@ -748,7 +748,7 @@ void VariableOrderMarkov::characteristic_computation(const VariableOrderMarkovDa
 {
   if (nb_component > 0) {
     bool computation[NB_OUTPUT_PROCESS + 1];
-    register int i , j , k;
+    int i , j , k;
     int seq_variable;
     double *memory;
     Distribution dlength(*(seq.length_distribution));
@@ -758,9 +758,9 @@ void VariableOrderMarkov::characteristic_computation(const VariableOrderMarkovDa
 
     // computation of the state intensity and interval distributions
 
-    if  (((variable == I_DEFAULT) || (variable == 0)) && ((!length_flag) ||
-          ((length_flag) && ((!(state_process->length)) ||
-            (dlength != *(state_process->length)))))) {
+    if (((variable == I_DEFAULT) || (variable == 0)) && ((!length_flag) ||
+         ((length_flag) && ((!(state_process->length)) ||
+           (dlength != *(state_process->length)))))) {
       computation[0] = true;
       state_process->create_characteristic(dlength , true , counting_flag);
 

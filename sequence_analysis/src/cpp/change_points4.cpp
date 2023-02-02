@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -41,8 +41,6 @@
 #include <string>
 #include <sstream>
 #include <iomanip>
-
-#include "tool/config.h"
 
 #include "sequences.h"
 #include "sequence_label.h"
@@ -91,7 +89,7 @@ double Sequences::N_segmentation(int index , int nb_segment , segment_model *mod
 
 {
   bool **active_cell;
-  register int i , j , k , m;
+  int i , j , k , m;
   int seq_length , brank , previous_rank , count , nb_cell , *inf_bound_parameter ,
       *seq_index_parameter , *rank , *change_point , *psegment , ***optimal_length , ***optimal_rank;
   double buff , segmentation_likelihood , *nb_segmentation , **hyperparam , **seq_mean ,
@@ -355,7 +353,7 @@ double Sequences::N_segmentation(int index , int nb_segment , segment_model *mod
       }
     }
 
-    else if (model_type[i - 1] == AUTOREGRESSIVE_MODEL_CHANGE) {
+    else if ((model_type[i - 1] == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type[i - 1] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE)) {
       if ((index != I_DEFAULT) || (!common_contrast)) {
         mean[i] = new double*[nb_sequence];
         autoregressive_coeff[i] = new double*[nb_sequence];
@@ -571,18 +569,20 @@ double Sequences::N_segmentation(int index , int nb_segment , segment_model *mod
   }
 
 # ifdef MESSAGE
+  streamsize nb_digits;
+
   buff = 1.;
   for (i = 1;i < nb_segment;i++) {
     buff *= (double)(seq_length - i) / (double)i;
 //    buff = buff * (seq_length - i) / i;
   }
 
-  os.precision(10);
+  nb_digits = os.precision(10);
 
   os << "\n" << SEQ_label[SEQL_NB_SEGMENTATION] << ": "
      << nb_segmentation_forward[seq_length - 1][nb_segment - 1] << " (" << buff << ")" << endl;
 
-  os.precision(6);
+  os.precision(nb_digits);
 
   if (((model_type[0] == MEAN_CHANGE) || (model_type[0] == INTERCEPT_SLOPE_CHANGE)) &&
       (format == SPREADSHEET) && (nb_segment == 2) && (inb_segmentation >= seq_length - 1)) {
@@ -1136,7 +1136,7 @@ double Sequences::N_segmentation(int index , int nb_segment , segment_model *mod
       delete [] variance[i];
     }
 
-    else if (model_type[i - 1] == AUTOREGRESSIVE_MODEL_CHANGE) {
+    else if ((model_type[i - 1] == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type[i - 1] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE)) {
       if ((index != I_DEFAULT) || (!common_contrast)) {
         for (j = 0;j < nb_sequence;j++) {
           if ((index == I_DEFAULT) || (index == j)) {
@@ -1219,7 +1219,7 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
                                                        double likelihood) const
 
 {
-  register int i , j , k , m;
+  int i , j , k , m;
   int seq_length , count , *inf_bound_parameter , *seq_index_parameter , *change_point , *psegment ,
        **optimal_length;
   double buff , segmentation_likelihood , backward_max , **seq_mean , **hyperparam , **forward ,
@@ -1402,12 +1402,12 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
 
   piecewise_function = new double**[nb_variable];
   for (i = 1;i < nb_variable;i++) {
-    if ((model_type[i - 1] == POISSON_CHANGE) ||
-        (model_type[i - 1] == NEGATIVE_BINOMIAL_0_CHANGE) || (model_type[i - 1] == NEGATIVE_BINOMIAL_1_CHANGE) ||
-        (model_type[i - 1] == GAUSSIAN_CHANGE) || (model_type[0] == MEAN_CHANGE) ||
+    if ((model_type[i - 1] == POISSON_CHANGE) || (model_type[i - 1] == NEGATIVE_BINOMIAL_0_CHANGE) ||
+        (model_type[i - 1] == NEGATIVE_BINOMIAL_1_CHANGE) || (model_type[i - 1] == GAUSSIAN_CHANGE) ||
+        (model_type[0] == MEAN_CHANGE) || (model_type[i - 1] == VARIANCE_CHANGE) ||
         (model_type[i - 1] == LINEAR_MODEL_CHANGE) || (model_type[0] == INTERCEPT_SLOPE_CHANGE) ||
-        (model_type[i - 1] == VARIANCE_CHANGE) || (model_type[i - 1] == BAYESIAN_POISSON_CHANGE) ||
-        (model_type[i - 1] == BAYESIAN_GAUSSIAN_CHANGE)) {
+        (model_type[i - 1] == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type[i - 1] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE) ||
+        (model_type[i - 1] == BAYESIAN_POISSON_CHANGE) || (model_type[i - 1] == BAYESIAN_GAUSSIAN_CHANGE)) {
       piecewise_function[i] = new double*[nb_sequence];
       for (j = 0;j < nb_sequence;j++) {
         if ((index == I_DEFAULT) || (index == j)) {
@@ -1925,12 +1925,12 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
   delete [] backward_output;
 
   for (i = 1;i < nb_variable;i++) {
-    if ((model_type[i - 1] == POISSON_CHANGE) ||
-        (model_type[i - 1] == NEGATIVE_BINOMIAL_0_CHANGE) || (model_type[i - 1] == NEGATIVE_BINOMIAL_1_CHANGE) ||
-        (model_type[i - 1] == GAUSSIAN_CHANGE) || (model_type[0] == MEAN_CHANGE) ||
+    if ((model_type[i - 1] == POISSON_CHANGE) || (model_type[i - 1] == NEGATIVE_BINOMIAL_0_CHANGE) ||
+        (model_type[i - 1] == NEGATIVE_BINOMIAL_1_CHANGE) || (model_type[i - 1] == GAUSSIAN_CHANGE) ||
+        (model_type[0] == MEAN_CHANGE) || (model_type[i - 1] == VARIANCE_CHANGE) ||
         (model_type[i - 1] == LINEAR_MODEL_CHANGE) || (model_type[0] == INTERCEPT_SLOPE_CHANGE) ||
-        (model_type[i - 1] == VARIANCE_CHANGE) || (model_type[i - 1] == BAYESIAN_POISSON_CHANGE) ||
-        (model_type[i - 1] == BAYESIAN_GAUSSIAN_CHANGE)) {
+        (model_type[i - 1] == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type[i - 1] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE) ||
+        (model_type[i - 1] == BAYESIAN_POISSON_CHANGE) || (model_type[i - 1] == BAYESIAN_GAUSSIAN_CHANGE)) {
       for (j = 0;j < nb_sequence;j++) {
         delete [] piecewise_function[i][j];
       }
@@ -1972,7 +1972,7 @@ bool Sequences::segment_profile_write(StatError &error , ostream &os , int iiden
 
 {
   bool status = true;
-  register int i , j;
+  int i , j;
   int index;
   double segment_length_max , likelihood = D_INF , segmentation_likelihood , **rank;
   Sequences *seq;
@@ -2057,6 +2057,12 @@ bool Sequences::segment_profile_write(StatError &error , ostream &os , int iiden
                          << STAT_variable_word[REAL_VALUE];
       error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
     }
+
+    else if (((model_type[i] == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type[i] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE)) &&
+             (index_param_type != IMPLICIT_TYPE) && (index_interval->variance > 0.)) {
+      status = false;
+      error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
+    }
   }
 
   if (iidentifier != I_DEFAULT) {
@@ -2123,7 +2129,7 @@ bool Sequences::segment_profile_write(StatError &error , ostream &os , int iiden
       error.update(SEQ_error[SEQR_SEGMENTATION_FAILURE]);
     }
 
-    else if ((format == ASCII) || (length[index == I_DEFAULT ? 0 : index] <= 256)) {
+    else if ((format == ASCII) || (length[index == I_DEFAULT ? 0 : index] <= 400)) {
       switch (segmentation) {
       case FORWARD_DYNAMIC_PROGRAMMING :
         seq->N_segmentation(index , nb_segment , model_type , common_contrast , shape_parameter ,
@@ -2151,17 +2157,15 @@ bool Sequences::segment_profile_write(StatError &error , ostream &os , int iiden
 /*--------------------------------------------------------------*/
 /**
  *  \brief Computation of the N most probable segmentations, of segment/change-point profiles and
- *         entropy profiles for a single sequence or a sample of sequences.
+ *         entropy profiles for a single sequence or a sample of sequences and displaying the results.
  *
  *  \param[in] error           reference on a StatError object,
- *  \param[in] os              stream,
  *  \param[in] iidentifier     sequence identifier,
  *  \param[in] nb_segment      number of segments,
  *  \param[in] model_type      segment model types,
  *  \param[in] common_contrast flag contrast functions common to the individuals,
  *  \param[in] shape_parameter negative binomial shape parameters,
  *  \param[in] output          output type,
- *  \param[in] format          output format (ASCII/SPREADSHEET),
  *  \param[in] segmentation    method for computing segmentations (FORWARD_DYNAMIC_PROGRAMMING/ FORWARD_BACKWARD_SAMPLING),
  *  \param[in] nb_segmentation number of segmentations.
  *
@@ -2169,16 +2173,16 @@ bool Sequences::segment_profile_write(StatError &error , ostream &os , int iiden
  */
 /*--------------------------------------------------------------*/
 
-bool Sequences::segment_profile_write(StatError &error , ostream &os , int iidentifier ,
-                                      int nb_segment , vector<segment_model> model_type ,
-                                      bool common_contrast , vector<double> shape_parameter ,
-                                      change_point_profile output , output_format format ,
-                                      latent_structure_algorithm segmentation , int nb_segmentation) const
+bool Sequences::segment_profile_ascii_write(StatError &error , int iidentifier ,
+                                            int nb_segment , vector<segment_model> model_type ,
+                                            bool common_contrast , vector<double> shape_parameter ,
+                                            change_point_profile output ,
+                                            latent_structure_algorithm segmentation , int nb_segmentation) const
 
 {
-  return segment_profile_write(error , os , iidentifier , nb_segment , model_type.data() ,
+  return segment_profile_write(error , cout , iidentifier , nb_segment , model_type.data() ,
                                common_contrast , shape_parameter.data() , output ,
-                               format , segmentation , nb_segmentation);
+                               ASCII , segmentation , nb_segmentation);
 }
 
 
@@ -2205,8 +2209,8 @@ bool Sequences::segment_profile_write(StatError &error , ostream &os , int iiden
 /*--------------------------------------------------------------*/
 
 bool Sequences::segment_profile_write(StatError &error , const string path , int iidentifier ,
-                                      int nb_segment , segment_model *model_type ,
-                                      bool common_contrast , double *shape_parameter ,
+                                      int nb_segment , vector<segment_model> model_type ,
+                                      bool common_contrast , vector<double> shape_parameter ,
                                       change_point_profile output , output_format format ,
                                       latent_structure_algorithm segmentation , int nb_segmentation) const
 
@@ -2223,47 +2227,12 @@ bool Sequences::segment_profile_write(StatError &error , const string path , int
   }
 
   else {
-    status = segment_profile_write(error , out_file , iidentifier , nb_segment , model_type ,
-                                   common_contrast , shape_parameter , output , format ,
+    status = segment_profile_write(error , out_file , iidentifier , nb_segment , model_type.data() ,
+                                   common_contrast , shape_parameter.data() , output , format ,
                                    segmentation , nb_segmentation);
   }
 
   return status;
-}
-
-
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the N most probable segmentations, of segment/change-point profiles and
- *         entropy profiles for a single sequence or a sample of sequences and
- *         writing of the results in a file.
- *
- *  \param[in] error           reference on a StatError object,
- *  \param[in] path            file path,
- *  \param[in] iidentifier     sequence identifier,
- *  \param[in] nb_segment      number of segments,
- *  \param[in] model_type      segment model types,
- *  \param[in] common_contrast flag contrast functions common to the individuals,
- *  \param[in] shape_parameter negative binomial shape parameters,
- *  \param[in] output          output type,
- *  \param[in] format          file format (ASCII/SPREADSHEET),
- *  \param[in] segmentation    method for computing segmentations (FORWARD_DYNAMIC_PROGRAMMING/FORWARD_BACKWARD_SAMPLING),
- *  \param[in] nb_segmentation number of segmentations.
- *
- *  \return                    error status.
- */
-/*--------------------------------------------------------------*/
-
-bool Sequences::segment_profile_write(StatError &error , const string path , int iidentifier ,
-                                      int nb_segment , vector<segment_model> model_type ,
-                                      bool common_contrast , vector<double> shape_parameter ,
-                                      change_point_profile output , output_format format ,
-                                      latent_structure_algorithm segmentation , int nb_segmentation) const
-
-{
-  return segment_profile_write(error , path , iidentifier , nb_segment , model_type.data() ,
-                               common_contrast , shape_parameter.data() , output ,
-                               format , segmentation , nb_segmentation);
 }
 
 
@@ -2294,7 +2263,7 @@ bool Sequences::segment_profile_plot_write(StatError &error , const char *prefix
 
 {
   bool status = true;
-  register int i , j , k , m;
+  int i , j , k , m;
   int index , seq_length , *seq_index_parameter;
   double segment_length_max , likelihood = D_INF , segmentation_likelihood , **rank;
   Sequences *seq;
@@ -2380,6 +2349,12 @@ bool Sequences::segment_profile_plot_write(StatError &error , const char *prefix
                          << STAT_variable_word[STATE] << " or "
                          << STAT_variable_word[REAL_VALUE];
       error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
+    }
+
+    else if (((model_type[i] == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type[i] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE)) &&
+             (index_param_type != IMPLICIT_TYPE) && (index_interval->variance > 0.)) {
+      status = false;
+      error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
     }
   }
 
@@ -2512,8 +2487,9 @@ bool Sequences::segment_profile_plot_write(StatError &error , const char *prefix
           for (k = 1;k < seq->nb_variable;k++) {
             if ((model_type[k - 1] == POISSON_CHANGE) || (model_type[k - 1] == NEGATIVE_BINOMIAL_0_CHANGE) ||
                 (model_type[k - 1] == NEGATIVE_BINOMIAL_1_CHANGE) || (model_type[k - 1] == GAUSSIAN_CHANGE) ||
-                (model_type[0] == MEAN_CHANGE) || (model_type[k - 1] == LINEAR_MODEL_CHANGE) ||
-                (model_type[0] == INTERCEPT_SLOPE_CHANGE) || (model_type[k - 1] == VARIANCE_CHANGE) ||
+                (model_type[0] == MEAN_CHANGE) || (model_type[k - 1] == VARIANCE_CHANGE) ||
+                (model_type[k - 1] == LINEAR_MODEL_CHANGE) || (model_type[0] == INTERCEPT_SLOPE_CHANGE) ||
+                (model_type[k - 1] == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type[k - 1] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE) ||
                 (model_type[k - 1] == BAYESIAN_POISSON_CHANGE) || (model_type[k - 1] == BAYESIAN_GAUSSIAN_CHANGE)) {
               out_file << "set title \"";
               if (title) {
@@ -2819,7 +2795,7 @@ MultiPlotSet* Sequences::segment_profile_plotable_write(StatError &error , int i
 
 {
   bool status = true;
-  register int i , j , k;
+  int i , j , k;
   int index , nb_plot_set , segmentation_index , seq_length;
   double segment_length_max , likelihood = D_INF , segmentation_likelihood , **rank;
   Sequences *seq;
@@ -2907,6 +2883,12 @@ MultiPlotSet* Sequences::segment_profile_plotable_write(StatError &error , int i
                          << STAT_variable_word[REAL_VALUE];
       error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
     }
+
+    else if (((model_type[i] == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type[i] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE)) &&
+             (index_param_type != IMPLICIT_TYPE) && (index_interval->variance > 0.)) {
+      status = false;
+      error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
+    }
   }
 
   if (iidentifier != I_DEFAULT) {
@@ -2945,8 +2927,9 @@ MultiPlotSet* Sequences::segment_profile_plotable_write(StatError &error , int i
     for (i = 1;i < seq->nb_variable;i++) {
       if ((model_type[i - 1] == POISSON_CHANGE) || (model_type[i - 1] == NEGATIVE_BINOMIAL_0_CHANGE) ||
           (model_type[i - 1] == NEGATIVE_BINOMIAL_1_CHANGE) || (model_type[i - 1] == GAUSSIAN_CHANGE) ||
-          (model_type[0] == MEAN_CHANGE) || (model_type[i - 1] == LINEAR_MODEL_CHANGE) ||
-          (model_type[0] == INTERCEPT_SLOPE_CHANGE) || (model_type[i - 1] == VARIANCE_CHANGE) ||
+          (model_type[0] == MEAN_CHANGE) || (model_type[i - 1] == VARIANCE_CHANGE) ||
+          (model_type[i - 1] == LINEAR_MODEL_CHANGE) || (model_type[0] == INTERCEPT_SLOPE_CHANGE) ||
+          (model_type[i - 1] == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type[i - 1] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE) ||
           (model_type[i - 1] == BAYESIAN_POISSON_CHANGE) || (model_type[i - 1] == BAYESIAN_GAUSSIAN_CHANGE)) {
         nb_plot_set++;
       }
@@ -3006,8 +2989,9 @@ MultiPlotSet* Sequences::segment_profile_plotable_write(StatError &error , int i
       for (j = 1;j < seq->nb_variable;j++) {
         if ((model_type[j - 1] == POISSON_CHANGE) || (model_type[j - 1] == NEGATIVE_BINOMIAL_0_CHANGE) ||
             (model_type[j - 1] == NEGATIVE_BINOMIAL_1_CHANGE) || (model_type[j - 1] == GAUSSIAN_CHANGE) ||
-            (model_type[0] == MEAN_CHANGE) || (model_type[j - 1] == LINEAR_MODEL_CHANGE) ||
-            (model_type[0] == INTERCEPT_SLOPE_CHANGE) || (model_type[j - 1] == VARIANCE_CHANGE) ||
+            (model_type[0] == MEAN_CHANGE) || (model_type[j - 1] == VARIANCE_CHANGE) ||
+            (model_type[j - 1] == LINEAR_MODEL_CHANGE) || (model_type[0] == INTERCEPT_SLOPE_CHANGE) ||
+            (model_type[j - 1] == AUTOREGRESSIVE_MODEL_CHANGE) || (model_type[j - 1] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE) ||
             (model_type[j - 1] == BAYESIAN_POISSON_CHANGE) || (model_type[j - 1] == BAYESIAN_GAUSSIAN_CHANGE)) {
           if (seq->nb_variable > 2) {
             title.str("");

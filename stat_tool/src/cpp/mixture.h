@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -116,6 +116,8 @@ namespace stat_tool {
 
     Mixture();
     Mixture(int inb_component , int inb_output_process , int *nb_value);
+    Mixture(int inb_component , double offset , double mean , double standard_deviation ,
+            bool common_dispersion);
     Mixture(int inb_component , int ident , double mean , double standard_deviation ,
             bool tied_mean , tying_rule variance_factor);
     Mixture(const Mixture &mixt , bool data_flag = true)
@@ -163,7 +165,6 @@ namespace stat_tool {
     ContinuousParametricProcess* get_continuous_parametric_process(int variable) const
     { return continuous_parametric_process[variable]; }
   };
-
 
 
   /// \brief Data structure corresponding to a multivariate mixture of distributions

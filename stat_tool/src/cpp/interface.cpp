@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -37,6 +37,7 @@
 
 
 #include <string.h>
+#include <string>
 #include <sstream>
 
 #include "stat_tools.h"
@@ -60,7 +61,7 @@ namespace stat_tool {
 StatError::StatError(int imax_nb_error)
 
 {
-  register int i;
+  int i;
 
 
   nb_error = 0;
@@ -85,7 +86,7 @@ StatError::StatError(int imax_nb_error)
 StatError::~StatError()
 
 {
-  register int i;
+  int i;
 
 
   delete [] line;
@@ -112,7 +113,7 @@ StatError::~StatError()
 ostream& StatError::ascii_write(ostream &os , error_type type) const
 
 {
-  register int i;
+  int i;
 
 
   if (nb_error > 0) {
@@ -220,6 +221,64 @@ void StatError::correction_update(const char *ilabel , int correction ,
     nb_error++;
   }
 }
+
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a StructureAnalysis object (for display on the console).
+ *
+ *  \param[in] exhaustive flag detail level,
+ *
+ *  \return    string.
+ */
+/*--------------------------------------------------------------*/
+
+string StatInterface::ascii_write(bool exhaustive) const
+
+{
+  ostringstream oss;
+      
+
+  ascii_write(oss , exhaustive);
+
+  return oss.str();
+}
+
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a StructureAnalysis object in a file.
+ *
+ *  \param[in] error      reference on a StatError object,
+ *  \param[in] path       file path,
+ *  \param[in] exhaustive flag detail level.
+ *
+ *  \return               error status.
+ */
+/*--------------------------------------------------------------*/
+
+/* bool StatInterface::ascii_write(StatError &error , const string path ,
+                                bool exhaustive) const
+
+{
+  bool status;
+  ofstream out_file(path.c_str());
+
+
+  error.init();
+
+  if (!out_file) {
+    status = false;
+    error.update(STAT_error[STATR_FILE_NAME]);
+  }
+
+  else {
+    status = true;
+    ascii_write(out_file , exhaustive);
+  }
+
+  return status;
+} */
 
 
 };  // namespace stat_tool

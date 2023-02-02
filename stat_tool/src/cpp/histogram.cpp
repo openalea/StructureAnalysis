@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -41,8 +41,6 @@
 #include <iomanip>
 #include <cstring>
 
-#include "tool/config.h"
-
 #include "stat_tools.h"
 
 using namespace std;
@@ -77,7 +75,7 @@ Histogram::Histogram(int inb_bin , bool init_flag)
     frequency = new int[nb_bin];
 
     if (init_flag) {
-      register int i;
+      int i;
 
       for (i = 0;i < nb_bin;i++) {
         frequency[i] = 0;
@@ -102,7 +100,7 @@ Histogram::Histogram(int inb_bin , bool init_flag)
 Histogram::Histogram(const FrequencyDistribution &histo)
 
 {
-  register int i , j;
+  int i , j;
 
 
   nb_element = histo.nb_element;
@@ -137,7 +135,7 @@ Histogram::Histogram(const FrequencyDistribution &histo)
 void Histogram::copy(const Histogram &histo)
 
 {
-  register int i;
+  int i;
 
 
   nb_element = histo.nb_element;
@@ -241,13 +239,13 @@ int column_width(double min_value , double max_value)
 ostream& Histogram::ascii_print(ostream &os , bool comment_flag) const
 
 {
-  register int i;
+  int i;
   int width[2];
-  long old_adjust;
   double first_value , value;
+  ios_base::fmtflags format_flags;
 
 
-  old_adjust = os.setf(ios::right , ios::adjustfield);
+  format_flags = os.setf(ios::right , ios::adjustfield);
 
   // computation of the column widths
 
@@ -276,7 +274,7 @@ ostream& Histogram::ascii_print(ostream &os , bool comment_flag) const
     value += bin_width;
   }
 
-  os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
+  os.setf(format_flags , ios::adjustfield);
 
   return os;
 }
@@ -293,7 +291,7 @@ ostream& Histogram::ascii_print(ostream &os , bool comment_flag) const
 ostream& Histogram::spreadsheet_print(ostream &os) const
 
 {
-  register int i;
+  int i;
   double value;
 
 
@@ -331,7 +329,7 @@ bool Histogram::plot_print(const char *path) const
 
 {
   bool status = false;
-  register int i;
+  int i;
   double value;
   ofstream out_file(path);
 
@@ -371,7 +369,7 @@ bool Histogram::plot_print(const char *path) const
 void Histogram::plotable_write(SinglePlot &plot) const
 
 {
-  register int i;
+  int i;
   double value;
 
 
@@ -402,7 +400,7 @@ void Histogram::plotable_write(SinglePlot &plot) const
 void Histogram::max_computation()
 
 {
-  register int i;
+  int i;
 
 
   max = 0;
@@ -425,7 +423,7 @@ void Histogram::max_computation()
 double* Histogram::cumul_computation() const
 
 {
-  register int i;
+  int i;
   double *cumul;
 
 

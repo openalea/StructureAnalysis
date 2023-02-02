@@ -57,27 +57,28 @@ public:
     Clusters *ret;
     StatError error;
 
-    std::stringstream output;
+    bool display = true;
+    //std::stringstream output;
     int nb_proto = len(prototype);
 
-    ostringstream error_message;
+    //ostringstream error_message;
 
     if (nb_proto != 0)
       {
         stat_tool::wrap_util::auto_ptr_array<int> protos(new int[nb_proto]);
         for (int i = 0; i < nb_proto; i++)
           protos[i] = extract<int> (prototype[i]);
-        ret = dm.partitioning(error, output, nb_cluster, protos.get(),
+        ret = dm.partitioning(error, display, nb_cluster, protos.get(),
             initialization, algorithm);
       }
     else
       {
         int *protos = 0;
-        ret = dm.partitioning(error, output, nb_cluster, protos,
+        ret = dm.partitioning(error, display, nb_cluster, protos,
             initialization, algorithm);
       }
 
-    cout << output.str() << endl;
+    //cout << output.str() << endl;
     if (!ret)
       stat_tool::wrap_util::throw_error(error);
 
@@ -91,7 +92,9 @@ public:
     Clusters *ret;
     StatError error;
 
-    std::stringstream output;
+    // std::stringstream output;
+    bool display = true;
+
     int nb_cluster = len(clusters);
     int* cluster_nb_pattern;
     int** cluster_pattern;
@@ -127,7 +130,7 @@ public:
         delete[] cluster_pattern;
       }
 
-    ret = dm.partitioning(error, output, nb_cluster, cluster_nb_pattern,
+    ret = dm.partitioning(error, display, nb_cluster, cluster_nb_pattern,
         cluster_pattern);
 
     // Free memory
@@ -148,16 +151,18 @@ public:
       linkage criterion, const char*path, output_format format)
   {
     StatError error;
-    std::stringstream output;
+    //std::stringstream output;
+    bool display = true;
+
     bool ret;
 
-    ret = dm.hierarchical_clustering(error, output, algorithm, criterion, path,
+    ret = dm.hierarchical_clustering(error, display, algorithm, criterion, path,
         format);
 
     if (!ret)
       stat_tool::wrap_util::throw_error(error);
 
-    return output.str();
+    return string();
 
   }
 
@@ -269,7 +274,7 @@ public:
         cout << error_message.str() << endl;
         return -1;
       }
-    
+
     if (i < row_max && j < column_max && i >= 0 && j >= 0)
       ret = input.get_substitution_distance(i, j);
     else
@@ -281,9 +286,9 @@ public:
       }
     return ret;
   }
-  
-  
-  
+
+
+
   static double
   get_transposition_distance(DistanceMatrix &input, int i, int j)
   {
@@ -313,8 +318,8 @@ public:
       }
     return ret;
   }
-  
-  
+
+
   static double
   get_insertion_distance(DistanceMatrix &input, int i, int j)
   {
@@ -343,7 +348,7 @@ public:
       }
     return ret;
   }
-  
+
   static double
   get_distance(DistanceMatrix &input, int i, int j)
   {
@@ -552,7 +557,7 @@ class_distance_matrix()
       args("index"), "todo")
   .def("get_column_identifier", &CLASS::get_column_identifier,
       args("index"), "todo")
-  
+
   .def("get_nb_substitution", WRAP::get_nb_substitution,
       args("irow", "icolumn"), "returns nb of substitution between element i,j where i in [0, nbrow] and j in [0,nbcolum]")
   .def("get_nb_deletion", WRAP::get_nb_deletion,

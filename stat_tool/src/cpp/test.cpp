@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -244,14 +244,7 @@ ostream& Test::ascii_print(ostream &os , bool comment_flag , bool reference_flag
     }
 
     if (ident == STUDENT) {
-      switch (one_side) {
-      case true :
-        os << STAT_label[STATL_ONE_SIDED] << " ";
-        break;
-      case false :
-        os << STAT_label[STATL_TWO_SIDED] << " ";
-        break;
-      }
+      os << (one_side ? STAT_label[STATL_ONE_SIDED] : STAT_label[STATL_TWO_SIDED]) << " ";
     }
 
     switch (ident) {
@@ -296,7 +289,7 @@ ostream& Test::ascii_print(ostream &os , bool comment_flag , bool reference_flag
        << STAT_label[STATL_CRITICAL_PROBABILITY] << ": " << critical_probability << endl;
 
     if (reference_flag) {
-      register int i;
+      int i;
       Test *test;
 
 
@@ -305,13 +298,11 @@ ostream& Test::ascii_print(ostream &os , bool comment_flag , bool reference_flag
       for (i = 0;i < NB_CRITICAL_PROBABILITY;i++) {
         test->critical_probability = ref_critical_probability[i];
 
-/*        switch (test->one_side) {
-        case true :
+/*        if (test->one_side) {
           test->critical_probability = ref_critical_probability[i];
-          break;
-        case false :
+        }
+        else {
           test->critical_probability = 2 * ref_critical_probability[i];
-          break;
         } */
 
         switch (test->ident) {
@@ -377,14 +368,7 @@ ostream& Test::spreadsheet_print(ostream &os , bool reference_flag) const
 {
   if (value != 0.) {
     if (ident == STUDENT) {
-      switch (one_side) {
-      case true :
-        os << STAT_label[STATL_ONE_SIDED] << " ";
-        break;
-      case false :
-        os << STAT_label[STATL_TWO_SIDED] << " ";
-        break;
-      }
+      os << (one_side ? STAT_label[STATL_ONE_SIDED] : STAT_label[STATL_TWO_SIDED]) << " ";
     }
 
     switch (ident) {
@@ -425,7 +409,7 @@ ostream& Test::spreadsheet_print(ostream &os , bool reference_flag) const
        << STAT_label[STATL_CRITICAL_PROBABILITY] << "\t" << critical_probability << endl;
 
     if (reference_flag) {
-      register int i;
+      int i;
       Test *test;
 
 
@@ -434,13 +418,11 @@ ostream& Test::spreadsheet_print(ostream &os , bool reference_flag) const
       for (i = 0;i < NB_CRITICAL_PROBABILITY;i++) {
         test->critical_probability = ref_critical_probability[i];
 
-/*        switch (test->one_side) {
-        case true :
+/*        if (test->one_side) {
           test->critical_probability = ref_critical_probability[i];
-          break;
-        case false :
+        }
+        else {
           test->critical_probability = 2 * ref_critical_probability[i];
-          break;
         } */
 
         switch (test->ident) {
@@ -502,10 +484,11 @@ void Test::standard_normal_critical_probability_computation()
   normal dist;
 
 
-  critical_probability = cdf(complement(dist , value));
-
-  if (!one_side) {
-    critical_probability *= 2.;
+  if (one_side) {
+    critical_probability = cdf(complement(dist , value));
+  }
+  else {
+    critical_probability = 2 * cdf(complement(dist , fabs(value)));
   }
 }
 
@@ -523,7 +506,7 @@ void Test::standard_normal_value_computation()
   normal dist;
 
 
-  value = quantile(complement(dist , (one_side ? critical_probability : critical_probability / 2.)));
+  value = quantile(complement(dist , (one_side ? critical_probability : critical_probability / 2)));
 }
 
 
@@ -633,21 +616,11 @@ void Test::t_critical_probability_computation()
     students_t dist(df1);
 
 
-    critical_probability = cdf(complement(dist , value));
-
-    switch (one_side) {
-
-    case true : {
-      if (value < 0.) {
-        critical_probability = 1. - critical_probability;
-      }
-      break;
+    if (one_side) {
+      critical_probability = cdf(complement(dist , value));
     }
-
-    case false : {
-      critical_probability *= 2.;
-      break;
-    }
+    else {
+      critical_probability = 2 * cdf(complement(dist , fabs(value)));
     }
   }
 
@@ -671,7 +644,7 @@ void Test::t_value_computation()
     students_t dist(df1);
 
 
-    value = quantile(complement(dist , (one_side ? critical_probability : critical_probability / 2.)));
+    value = quantile(complement(dist , (one_side ? critical_probability : critical_probability / 2)));
   }
 
   else {

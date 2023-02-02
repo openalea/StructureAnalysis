@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -159,7 +159,6 @@ namespace sequence_analysis {
   };
 
 
-
   class VariableOrderMarkovChainData;
   class VariableOrderMarkovData;
 
@@ -294,14 +293,14 @@ namespace sequence_analysis {
                                         const MarkovianSequences &iseq ,
                                         bool counting_flag = true) const;
 
-    stat_tool::DistanceMatrix* divergence_computation(stat_tool::StatError &error , std::ostream &os , int nb_model ,
+    stat_tool::DistanceMatrix* divergence_computation(stat_tool::StatError &error , bool display , int nb_model ,
                                                       const VariableOrderMarkov **imarkov ,
                                                       stat_tool::FrequencyDistribution **hlength ,
                                                       const std::string path = "") const;
-    stat_tool::DistanceMatrix* divergence_computation(stat_tool::StatError &error , std::ostream &os , int nb_model ,
+    stat_tool::DistanceMatrix* divergence_computation(stat_tool::StatError &error , bool display , int nb_model ,
                                                       const VariableOrderMarkov **markov , int nb_sequence ,
                                                       int length , const std::string path = "") const;
-    stat_tool::DistanceMatrix* divergence_computation(stat_tool::StatError &error , std::ostream &os , int nb_model ,
+    stat_tool::DistanceMatrix* divergence_computation(stat_tool::StatError &error , bool display , int nb_model ,
                                                       const VariableOrderMarkov **markov , int nb_sequence ,
                                                       const MarkovianSequences **seq , const std::string path = "") const;
 
@@ -325,7 +324,6 @@ namespace sequence_analysis {
     stat_tool::ContinuousParametricProcess* get_continuous_parametric_process(int variable) const
     { return continuous_parametric_process[variable]; }
   };
-
 
 
   /// \brief Variable-order Markov chain iterator
@@ -372,7 +370,6 @@ namespace sequence_analysis {
                     transition_estimator estimator = MAXIMUM_LIKELIHOOD ,
                     double laplace_coeff = LAPLACE_COEFF) const;
   };
-
 
 
   /// \brief Data structure corresponding to a variable-order Markov chain

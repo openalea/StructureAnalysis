@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -74,7 +74,7 @@ template <typename Type>
 void ChainReestimation<Type>::init()
 
 {
-  register int i , j;
+  int i , j;
 
 
   if (initial) {
@@ -107,7 +107,7 @@ ChainReestimation<Type>::ChainReestimation(process_type itype , int inb_state ,
                                            int inb_row , bool init_flag)
 
 {
-  register int i;
+  int i;
 
 
   type = itype;
@@ -146,7 +146,7 @@ template <typename Type>
 void ChainReestimation<Type>::copy(const ChainReestimation<Type> &chain_data)
 
 {
-  register int i , j;
+  int i , j;
 
 
   nb_state = chain_data.nb_state;
@@ -201,7 +201,7 @@ void ChainReestimation<Type>::remove()
   delete [] initial;
 
   if (transition) {
-    register int i;
+    int i;
 
     for (i = 0;i < nb_row;i++) {
       delete [] transition[i];
@@ -260,7 +260,7 @@ template <typename Type>
 ostream& ChainReestimation<Type>::print(ostream &os) const
 
 {
-  register int i , j;
+  int i , j;
 
 
   os << nb_state << " " << STAT_label[STATL_STATES] << endl;
