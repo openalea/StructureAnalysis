@@ -160,7 +160,7 @@ class TestSequences1(_Cluster):
 
     def test_cluster_limit(self):
         data = self.data
-        print data.nb_variable
+        print(data.nb_variable)
         cluster1 = data.cluster_limit(1,[2], False)
         cluster2 = Cluster(data,"Limit", [2] , AddVariable=False)
         assert str(cluster1) == str(cluster2)

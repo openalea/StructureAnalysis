@@ -21,7 +21,7 @@
 """
 __revision__ = "$Id$"
 
-import error
+from . import error
 from openalea.stat_tool._stat_tool import \
      _DiscreteMixture, \
      _DiscreteMixtureData, \
@@ -31,7 +31,7 @@ from openalea.stat_tool._stat_tool import \
      _ConvolutionData,\
      _Vectors
 
-from enums import keep_type
+from .enums import keep_type
 
 
 

@@ -26,8 +26,8 @@ stat_tools.plot.DISABLE_PLOT = True
 inf_bound=0
 sup_bound=3
 distrib = stat_tools.Uniform(inf_bound, sup_bound)
-print "Distribution used for the number of children and the tree attributes:"
-print distrib
+print("Distribution used for the number of children and the tree attributes:")
+print(distrib)
 max_depth=3
 max_size=10
 nbtrees=40
@@ -51,12 +51,12 @@ for n in range(len(tree_list)):
     tree_list[n].Simulate(distrib_list)
 # initialize a Trees object
 T=trees.Trees(tree_list)
-print "A set of trees with variable types", T.Types(), \
-      " (initialized by ", tv, "):"
-print T
-print "Display Trees object with detail level 2:"
+print("A set of trees with variable types", T.Types(), \
+      " (initialized by ", tv, "):")
+print(T)
+print("Display Trees object with detail level 2:")
 T.Display(Detail=2)
-print "Display Trees object with data and detail level 1:"
+print("Display Trees object with data and detail level 1:")
 
 T.Display(ViewPoint="DATA", Detail=1)
 T.ExtractHistogram("Value", variable=1).plot()
@@ -71,9 +71,9 @@ T2 = trees.PickleLoad("tree.pkl")
 #m = MyThread()
 #m.doit(T)
 
-print "Number of trees (supposedly ", nbtrees, "): ", T.NbTrees()
-print "Comparison of trees contained in Trees " \
-      "and those used for initialization: "
+print("Number of trees (supposedly ", nbtrees, "): ", T.NbTrees())
+print("Comparison of trees contained in Trees " \
+      "and those used for initialization: ")
 equal=True
 differences=[]
 for n in range(len(tree_list)):
@@ -81,16 +81,16 @@ for n in range(len(tree_list)):
         equal=False
         differences.append(n)
 if not equal:
-    print "Differences found: ", differences
+    print("Differences found: ", differences)
 else:
-    print "Match!"
+    print("Match!")
     # print "Trees.Tree(", n, "):"
     # print T.Tree(n)
     # print "Tree number ", n, ":"
     # print tree_list[n]
     
 # trees with one vertex
-print "Test using trees of size one"
+print("Test using trees of size one")
 omax_size=1
 onbtrees=2
 # define a set of trees
@@ -110,19 +110,19 @@ for on in range(len(otree_list)):
     otree_list[on].Simulate(distrib_list)
 # initialize a Trees object
 OT=trees.Trees(otree_list)
-print "A set of trees with variable types", T.Types(), \
-      " (initialized by ", tv, "):"
-print OT
+print("A set of trees with variable types", T.Types(), \
+      " (initialized by ", tv, "):")
+print(OT)
 # copy constructor
-print "Test of the constructor by copy: "
+print("Test of the constructor by copy: ")
 T2=trees.Trees(T)
-print T2
+print(T2)
 # constructor from a MTG
-print "Read Trees object from MTG file 'sample_mtg_forest.txt':"
+print("Read Trees object from MTG file 'sample_mtg_forest.txt':")
 T=trees.Trees("sample_mtg_forest.txt")
-print "Read ", T.NbTrees(), " trees."
-print T
-print "Print 1st tree of Trees object:"
+print("Read ", T.NbTrees(), " trees.")
+print(T)
+print("Print 1st tree of Trees object:")
 T.Tree(0).Display()
 
 
@@ -134,10 +134,10 @@ import openalea.aml as amlPy
 amlPy.setmode(1)
 # build vectors from trees
 vec = T.BuildVectors()
-print vec
+print(vec)
 # reading a Tree from a MTG with filter and custom attributes
-print "Read tree from MTG file 'sample_mtg_forest.txt' using a filter", \
-      "and custom attributes:"
+print("Read tree from MTG file 'sample_mtg_forest.txt' using a filter", \
+      "and custom attributes:")
 f=lambda x: amlPy.Feature(x, "Length")*3*(amlPy.Feature(x, "Diam")/2)**2
 # FM=amlPy.MTG("sample_mtg_forest.txt")
 # f=lambda x: amlPy.Feature(x, "Diam")
@@ -147,78 +147,78 @@ filter=lambda x: x < 6
 # filter=lambda x: True
 attributes=["anything"]
 T=trees.Trees("sample_mtg_forest.txt", filter, attributes, [f], scale=2)
-print "Read ", T.NbTrees(), " trees."
-print T
-print "Print 1st tree of Trees object:"
-print T.Tree(0).Display()
+print("Read ", T.NbTrees(), " trees.")
+print(T)
+print("Print 1st tree of Trees object:")
+print(T.Tree(0).Display())
 # checking exceptions
 # invalid file name
 
 
 try:
     T=trees.Trees("no_such_file.t\/t")
-except IOError, e:
-    print e
+except IOError as e:
+    print(e)
 else:
-    print "Failed to raise exception for invalid MTG file name"
+    print("Failed to raise exception for invalid MTG file name")
     raise e
 # inconsistent attribute number
 try:
     T=trees.Trees("sample_mtg_forest.txt", filter, [], [f], scale=2)
-except ValueError, v:
-    print v
+except ValueError as v:
+    print(v)
 else:
-    print "Failed to raise exception for inconsistent attribute number"
+    print("Failed to raise exception for inconsistent attribute number")
 # bad attribute name
 
 try:
     T=trees.Trees("sample_mtg_forest.txt", filter, [f], [f], scale=2)
-except TypeError, t:
-    print t
+except TypeError as t:
+    print(t)
 else:
-    print "Failed to raise exception for bad attribute name"
+    print("Failed to raise exception for bad attribute name")
 # bad attribute function
 try:
     T=trees.Trees("sample_mtg_forest.txt", filter, attributes, attributes,
                   scale=2)
-except TypeError, t:
-    print t
+except TypeError as t:
+    print(t)
 else:
-    print "Failed to raise exception for bad attribute function"
+    print("Failed to raise exception for bad attribute function")
 # bad attribute type
 try:
     T=trees.Trees("sample_mtg_forest.txt", filter, attributes,
     [lambda x: amlPy.Descendants(x)], scale=2)
-except TypeError, t:
-    print t
+except TypeError as t:
+    print(t)
 else:
-    print "Failed to raise exception for bad attribute type"
+    print("Failed to raise exception for bad attribute type")
 # bad attribute name
 try:
     T=trees.Trees("sample_mtg_forest.txt", filter, [f], [f], scale=2)
-except TypeError, t:
-    print t
+except TypeError as t:
+    print(t)
 else:
-    print "Failed to raise exception for bad attribute name"
+    print("Failed to raise exception for bad attribute name")
 # bad filtering function
 try:
     T=trees.Trees("sample_mtg_forest.txt", attributes, attributes, [f], scale=2)
-except TypeError, t:
-    print t
+except TypeError as t:
+    print(t)
 else:
-    print "Failed to raise exception for bad attribute function"
+    print("Failed to raise exception for bad attribute function")
 # filtering function does not filter descendants
 try:
     T=trees.Trees("sample_mtg_forest.txt", lambda x: x != 2, attributes, [f],
                   scale=2)
-except IndexError, i:
-    print i
+except IndexError as i:
+    print(i)
 else:
-    print "Failed to raise exception for filter not filtering descendants"
+    print("Failed to raise exception for filter not filtering descendants")
 try:
     T=trees.Trees("sample_mtg_forest.txt", filter, attributes, [f], scale=1)
-except TypeError, t:
-    print t
+except TypeError as t:
+    print(t)
 
 # build MTG
 import openalea.mtg as mtg
@@ -262,6 +262,6 @@ flist = [lambda x: g.node(x).Name1, lambda x: g.node(x).Name2]
 T = treestats.extract_trees(g, 2, lambda x: True, flist)
 T.PickleDump("tree.pkl")
 T2 = trees.PickleLoad("tree.pkl")
-print T2.NbTrees()
+print(T2.NbTrees())
 T2.Tree(0).Display()
 

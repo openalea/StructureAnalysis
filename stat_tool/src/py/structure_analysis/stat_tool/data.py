@@ -1,6 +1,6 @@
 from functools import wraps
 
-import _stat_tool
+from . import _stat_tool
 import __stat_tool
 
 def wrapper(f):

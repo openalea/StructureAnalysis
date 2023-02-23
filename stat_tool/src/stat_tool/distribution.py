@@ -14,8 +14,8 @@
 """
 __version__ = "$Id$"
 
-import interface
-import error
+from . import interface
+from . import error
 
 from openalea.stat_tool._stat_tool import *
 
@@ -32,7 +32,7 @@ from openalea.stat_tool._stat_tool import VariableTypeBis
 from openalea.stat_tool._stat_tool import RestorationAlgorithm
 
 
-from enums import distribution_identifier_type
+from .enums import distribution_identifier_type
 
 __all__ = ["_Distribution",
            "_DiscreteParametricModel",
@@ -118,7 +118,7 @@ def Distribution(utype, *args):
             result = Uniform(*args)
         else:
             raise KeyError(" %s not found. Allowed keys are %s"
-                           % (utype, distribution_identifier_type.keys()))
+                           % (utype, list(distribution_identifier_type.keys())))
 
     return result
 

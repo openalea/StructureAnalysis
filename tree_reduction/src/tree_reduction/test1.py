@@ -388,14 +388,14 @@ def mapping_cgraph_test1(graph):
         edges_weight[i]=int(graph.edges[i].label)"""
     root=1        
     g = from_edges(root, edges, edges_weight)
-    print nb_nodes(graph), k
+    print(nb_nodes(graph), k)
     if (nb_nodes(graph)>1):
         assert g.nb_vertices() == nb_nodes(graph)
         assert g.nb_edges() == k
         return g
     else:
-        print 'Axiome:a'
-        print 'rules:{}'
+        print('Axiome:a')
+        print('rules:{}')
         return g
         
 
@@ -718,10 +718,10 @@ def G_construction(node_list,edge_list,val_edges):
             list_edge[i][1]=list_edge[i][1]+[k1]
             G_edge[(equiv[node_list[i]],equiv[edge_list[node_list[i]][j]])]=string.replace(G_node[equiv[node_list[i]]][0],equiv[edge_list[node_list[i]][j]],'W')
     nbr_edge=nbr_arc_construction(G_edge)
-    for k in range(len(G_edge.keys())):
-      for j in range(len(nbr_edge.keys())):
-        if equal_string(G_edge[G_edge.keys()[k]],nbr_edge.keys()[j]):
-          G_edge[G_edge.keys()[k]]=nbr_edge.keys()[j]    
+    for k in range(len(list(G_edge.keys()))):
+      for j in range(len(list(nbr_edge.keys()))):
+        if equal_string(G_edge[list(G_edge.keys())[k]],list(nbr_edge.keys())[j]):
+          G_edge[list(G_edge.keys())[k]]=list(nbr_edge.keys())[j]    
     return list_node,list_edge,G_node,G_edge,nbr_edge,parameters,parameters1,parameters2
     
 
@@ -866,45 +866,45 @@ def treat_long_path(glist,list_node,list_edge,G_node,G_edge,nbr_edge,parameters,
 
 def L_system(G_node,list_node):
     """affichage du PD0L_système a partir du graphe G"""
-    print 'Axiom=',list_node[0]
-    print 'rules:'
+    print('Axiom=',list_node[0])
+    print('rules:')
     for i in range(len(list_node)):
         for j in range(len(G_node[list_node[i]])):
-            print list_node[i],'-->',G_node[list_node[i]][j]
+            print(list_node[i],'-->',G_node[list_node[i]][j])
 
 def Parametric_L_system(G_node,list_node,parameters,parameters1,parameters2):  
-    for k1 in range(len(G_node.keys())):
-        if len(G_node[G_node.keys()[k1]][0])>1:
-            for k2 in range(len(G_node[G_node.keys()[k1]])):
-                for k in range(len(parameters.keys())):                
-                    if parameters.keys()[k]!= G_node.keys()[k1] and parameters.keys()[k]==parameters[parameters.keys()[k]][0] and ((G_node.keys()[k1] not in parameters1.keys()) or ((G_node.keys()[k1] in parameters1.keys()) and (parameters.keys()[k]!=parameters1[G_node.keys()[k1]]))) and ((G_node.keys()[k1] not in parameters2.keys()) or ((G_node.keys()[k1] in parameters2.keys()) and (parameters.keys()[k]!=parameters2[G_node.keys()[k1]]))):
-                        G_node[G_node.keys()[k1]][k2]=string.replace(G_node[G_node.keys()[k1]][k2],parameters.keys()[k],parameters[parameters.keys()[k]][0]+'('+str(parameters[parameters.keys()[k]][1])+')')
-                for k in range(len(parameters.keys())):
-                    if parameters.keys()[k]!= G_node.keys()[k1] and parameters.keys()[k]!=parameters[parameters.keys()[k]][0] and ((G_node.keys()[k1] not in parameters1.keys()) or ((G_node.keys()[k1] in parameters1.keys()) and (parameters.keys()[k]!=parameters1[G_node.keys()[k1]]))) and ((G_node.keys()[k1] not in parameters2.keys()) or ((G_node.keys()[k1] in parameters2.keys()) and (parameters.keys()[k]!=parameters2[G_node.keys()[k1]]))):                     
-                        G_node[G_node.keys()[k1]][k2]=string.replace(G_node[G_node.keys()[k1]][k2],parameters.keys()[k],parameters[parameters.keys()[k]][0]+'('+str(parameters[parameters.keys()[k]][1])+')')
+    for k1 in range(len(list(G_node.keys()))):
+        if len(G_node[list(G_node.keys())[k1]][0])>1:
+            for k2 in range(len(G_node[list(G_node.keys())[k1]])):
+                for k in range(len(list(parameters.keys()))):                
+                    if list(parameters.keys())[k]!= list(G_node.keys())[k1] and list(parameters.keys())[k]==parameters[list(parameters.keys())[k]][0] and ((list(G_node.keys())[k1] not in list(parameters1.keys())) or ((list(G_node.keys())[k1] in list(parameters1.keys())) and (list(parameters.keys())[k]!=parameters1[list(G_node.keys())[k1]]))) and ((list(G_node.keys())[k1] not in list(parameters2.keys())) or ((list(G_node.keys())[k1] in list(parameters2.keys())) and (list(parameters.keys())[k]!=parameters2[list(G_node.keys())[k1]]))):
+                        G_node[list(G_node.keys())[k1]][k2]=string.replace(G_node[list(G_node.keys())[k1]][k2],list(parameters.keys())[k],parameters[list(parameters.keys())[k]][0]+'('+str(parameters[list(parameters.keys())[k]][1])+')')
+                for k in range(len(list(parameters.keys()))):
+                    if list(parameters.keys())[k]!= list(G_node.keys())[k1] and list(parameters.keys())[k]!=parameters[list(parameters.keys())[k]][0] and ((list(G_node.keys())[k1] not in list(parameters1.keys())) or ((list(G_node.keys())[k1] in list(parameters1.keys())) and (list(parameters.keys())[k]!=parameters1[list(G_node.keys())[k1]]))) and ((list(G_node.keys())[k1] not in list(parameters2.keys())) or ((list(G_node.keys())[k1] in list(parameters2.keys())) and (list(parameters.keys())[k]!=parameters2[list(G_node.keys())[k1]]))):                     
+                        G_node[list(G_node.keys())[k1]][k2]=string.replace(G_node[list(G_node.keys())[k1]][k2],list(parameters.keys())[k],parameters[list(parameters.keys())[k]][0]+'('+str(parameters[list(parameters.keys())[k]][1])+')')
                     
     """affichage du L_système a partir du graphe G"""
     symbol=creer_symbol(G_node)
-    if list_node[0] in parameters.keys():
+    if list_node[0] in list(parameters.keys()):
         Axiom=parameters[list_node[0]][0]+'('+str(parameters[list_node[0]][1])+')'
     else:
         Axiom=list_node[0]
-    print 'Axiom=',Axiom
-    print 'rules:'
-    for k1 in range(len(G_node.keys())):
-        for k2 in range(len(G_node[G_node.keys()[k1]])):
-            G_node[G_node.keys()[k1]][k2]=string.replace(G_node[G_node.keys()[k1]][k2],list_node[len(list_node)-1],'l')
+    print('Axiom=',Axiom)
+    print('rules:')
+    for k1 in range(len(list(G_node.keys()))):
+        for k2 in range(len(G_node[list(G_node.keys())[k1]])):
+            G_node[list(G_node.keys())[k1]][k2]=string.replace(G_node[list(G_node.keys())[k1]][k2],list_node[len(list_node)-1],'l')
         
     for i in range(len(list_node)-1):
         if (len(G_node[list_node[i]])==1):
-            if list_node[i] in parameters1.keys():
-                print list_node[i],'(',symbol,') -->',string.replace(G_node[list_node[i]][0],parameters1[list_node[i]],parameters1[list_node[i]]+'('+symbol+')')
+            if list_node[i] in list(parameters1.keys()):
+                print(list_node[i],'(',symbol,') -->',string.replace(G_node[list_node[i]][0],parameters1[list_node[i]],parameters1[list_node[i]]+'('+symbol+')'))
             else:
-                print list_node[i],'-->',G_node[list_node[i]][0]
+                print(list_node[i],'-->',G_node[list_node[i]][0])
         else:
-            if list_node[i] in parameters2.keys():
-                print list_node[i],'(',symbol,')',':',symbol,'>0 -->',string.replace(G_node[list_node[i]][0],parameters2[list_node[i]],parameters2[list_node[i]]+'('+symbol+'-1)')
-                print list_node[i],'(',symbol,')',':',symbol,'=0 -->',G_node[list_node[i]][1]
+            if list_node[i] in list(parameters2.keys()):
+                print(list_node[i],'(',symbol,')',':',symbol,'>0 -->',string.replace(G_node[list_node[i]][0],parameters2[list_node[i]],parameters2[list_node[i]]+'('+symbol+'-1)'))
+                print(list_node[i],'(',symbol,')',':',symbol,'=0 -->',G_node[list_node[i]][1])
 
 if(__name__ == "__main__"):
     
@@ -913,12 +913,12 @@ if(__name__ == "__main__"):
 
     g = MTG(mtg_filename)
 
-    print 'Create the graph'
+    print('Create the graph')
     tree = mtg2graph(1, 2)
 
-    print 'Reduction'
+    print('Reduction')
     dag_exact = tree_reduction(tree)
-    print is_linear(dag_exact)
+    print(is_linear(dag_exact))
     
     """dag_linearization(dag_exact)"""
     
@@ -939,11 +939,11 @@ if(__name__ == "__main__"):
 
     print dag_exact.set_nb_signature(nb_nodes(dag_exact))
     """
-    print is_linear(dag_exact)
+    print(is_linear(dag_exact))
     G=mapping_cgraph_test1(dag_exact)
     """G=test1()"""
     if (G._edges!={}):
-        print 'taille',taille_arbre(G,1)
+        print('taille',taille_arbre(G,1))
         List1=DAG_init(G)
         List=G_construction(List1[0],List1[1],List1[2])
         list_node=List[0]
@@ -955,14 +955,14 @@ if(__name__ == "__main__"):
         parameters1=List[6]
         parameters2=List[7]
         nR=len(list_node)
-        print 'the corresponding PD0L-system:'
+        print('the corresponding PD0L-system:')
         L_system(G_node,list_node)
 
         S=signat_vert_comp(G)
         E=signat_edg_comp(G, S)
         Paths=MQPPRT(G, E)
         """print 'paths', Paths"""
-        print affiche_list_paths(G,list_node, Paths)
+        print(affiche_list_paths(G,list_node, Paths))
         MQPPRTINDEP=MQPPRT_classes(G, Paths, list_node)[0]
         """print 'indep',MQPPRTINDEP"""
         MQPPRTOVERL=MQPPRT_classes(G, Paths, list_node)[1]
@@ -985,9 +985,9 @@ if(__name__ == "__main__"):
         parameters1=List[6]
         parameters2=List[7]
         """affichage du L_système extrait de G"""
-        print 'the corresponding parametric PD0L-system:'
+        print('the corresponding parametric PD0L-system:')
         Parametric_L_system(G_node,list_node,parameters,parameters1,parameters2)
         nRe=len(list_node)
         icf=1-(nRe.__float__()/nR.__float__())
-        print 'the improved compression factor=',icf
-        print nRe.__float__(), nR.__float__()
+        print('the improved compression factor=',icf)
+        print(nRe.__float__(), nR.__float__())

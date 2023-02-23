@@ -15,7 +15,7 @@ def test_createMatchpath():
     l2 = [40,50]
     m = MyMatchPath(l1,l2)
     l = m.bipartiteMatching()
-    print '**',l
+    print('**',l)
 
 
 

@@ -4,7 +4,7 @@
 """
 __version__ = "$Id$"
 
-from output import StatInterface
+from .output import StatInterface
 
 
 

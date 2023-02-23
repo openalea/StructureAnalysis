@@ -58,7 +58,7 @@ def check_mtg_mapping(mtg_t):
                 msg += ") and number of tree vertices (" + str(Tr.Size())
                 msg += ") do not match for tree: " + str(t)
                 assert len(m) == Tr.Size(), msg
-        for i in tmap.keys():
+        for i in list(tmap.keys()):
             if tmapinv[tmap[i]] != i:
                 msg = "Inconsistency in mapping and inverse mapping"
                 msg += " in tree: " + str(t)
@@ -92,7 +92,7 @@ def test_cluster():
     mtg_t = test_mtg_build()
     try:
         T = mtg_t.Cluster("Step", 0, 10)
-    except trees.StatTreeError, msg:
+    except trees.StatTreeError as msg:
         assert False, str(msg) + "\n" + str(mtg_t)
     clust = T
 
@@ -101,8 +101,8 @@ def test_cluster_step_failure():
     mtg_t = test_mtg_build()
     try:
         T = mtg_t.Cluster("Step", 0, -10)
-    except trees.StatTreeError, msg:
-        print msg
+    except trees.StatTreeError as msg:
+        print(msg)
     else:
         msg = "Failed to raise exception for step in clustering"
         assert False, msg
@@ -112,7 +112,7 @@ def test_difference():
     mtg_t = test_mtg_build()
     try:
         T = mtg_t.Difference(0)
-    except trees.StatTreeError, msg:
+    except trees.StatTreeError as msg:
         assert False, str(msg) + "\n" + str(mtg_t)
 
 def test_merge():
@@ -120,7 +120,7 @@ def test_merge():
     mtg_t = test_mtg_build()
     try:
         T = mtg_t.Merge([mtg_t])
-    except trees.StatTreeError, msg:
+    except trees.StatTreeError as msg:
         assert False, str(msg) + "\n" + str(mtg_t)
     msg1 = "Bad number of merged trees"
     assert T.NbTrees() == mtg_t.NbTrees()*2, msg1
@@ -130,7 +130,7 @@ def test_merge_variables():
     mtg_t = test_mtg_build()
     try:
         T = mtg_t.MergeVariable([mtg_t])
-    except trees.StatTreeError, msg:
+    except trees.StatTreeError as msg:
         assert False, str(msg) + "\n" + str(mtg_t)
     msg1 = "Bad number of Variables"
     assert (T.NbVariables() == mtg_t.NbVariables()*2), msg1
@@ -144,7 +144,7 @@ def test_select_variable():
     mtg_t = test_mtg_build()
     try:
         T = mtg_t.SelectVariable(0)
-    except trees.StatTreeError, msg:
+    except trees.StatTreeError as msg:
         assert False, str(msg) + "\n" + str(mtg_t)
     msg = "Bad number of trees after variable selection"
     assert T.NbTrees() == mtg_t.NbTrees(), msg
@@ -156,7 +156,7 @@ def test_select_individual():
     mtg_t = test_mtg_build()
     try:
         T = mtg_t.SelectIndividual([0, 2])
-    except trees.StatTreeError, msg:
+    except trees.StatTreeError as msg:
         assert False, str(msg) + "\n" + str(mtg_t)
     msg = "Bad number of trees after variable selection"
     assert T.NbTrees() == 2, msg
@@ -171,8 +171,8 @@ def test_merge_failure():
     try:
         TS = mtg_t.SelectVariable(0)
         T = mtg_t.Merge([TS])
-    except trees.StatTreeError, msg:
-        print msg
+    except trees.StatTreeError as msg:
+        print(msg)
     else:
         msg = "Failed to raise exception for bad number "+\
             "of variables in merge"

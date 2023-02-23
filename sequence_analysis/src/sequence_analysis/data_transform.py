@@ -49,10 +49,10 @@ from openalea.sequence_analysis._sequence_analysis import GAUSSIAN_CHANGE
 from openalea.sequence_analysis._sequence_analysis import NB_EVENT
 from openalea.stat_tool._stat_tool import MIN_PROBABILITY
 
-from enums import markovian_sequence_type, output_map, histogram_type
-from enums import mode_type, func_map, estimator_map, model_type, seq_map
-from enums import renewal_nb_event_map, sub_func_map, nb_segment_map
-from enums import output_type
+from .enums import markovian_sequence_type, output_map, histogram_type
+from .enums import mode_type, func_map, estimator_map, model_type, seq_map
+from .enums import renewal_nb_event_map, sub_func_map, nb_segment_map
+from .enums import output_type
 
 
 from openalea.stat_tool.enums import keep_type, bool_type
@@ -1483,7 +1483,7 @@ def Extract(obj, *args, **kargs):
             elif key == "ObservationTime":
                 ret = obj.get_htime()
 
-            elif key in renewal_nb_event_map.keys():
+            elif key in list(renewal_nb_event_map.keys()):
 
                 ret = obj.extract(renewal_nb_event_map[key], I_DEFAULT)
         else:
@@ -1536,8 +1536,8 @@ def Extract(obj, *args, **kargs):
             ret = obj.extract_length()
         else:
             ident = args[0]
-            if ident not in markovian_sequence_type.keys():
-                print 'Wrong type %s. Use one of %s ' % (ident, markovian_sequence_type.keys())
+            if ident not in list(markovian_sequence_type.keys()):
+                print('Wrong type %s. Use one of %s ' % (ident, list(markovian_sequence_type.keys())))
                 raise ValueError('error in extract histogram to be done')
             if obj.nb_variable == 1:
                 variable = 1
@@ -1581,13 +1581,13 @@ def Extract(obj, *args, **kargs):
             error.CheckType([args[1], args[2]], [int, int])
             variable = args[1]
             value = args[2]
-            print seq_map[args[0]]
+            print(seq_map[args[0]])
             ret = obj.extract(seq_map[args[0]], variable, value)
         else:
             raise KeyError("expect only 1 or 2 arguments after the type")
 
     else:
-        print 'switch to openalea.stat_tool'
+        print('switch to openalea.stat_tool')
         # related to Top, Renewal, Markov that are in sequence
         try:
             from openalea.stat_tool.data_transform import Extract as newExtract

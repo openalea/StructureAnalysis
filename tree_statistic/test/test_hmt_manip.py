@@ -29,8 +29,8 @@ def test_hmt_data_failure():
     msg = "Failed to raise exception for missing data part"
     try:
         H.ExtractData()
-    except hmt.StatTreeError, e:
-        print e
+    except hmt.StatTreeError as e:
+        print(e)
     else:
         assert False, msg
 

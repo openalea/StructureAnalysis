@@ -24,15 +24,15 @@ parameter = cstat_tools.D_DEFAULT
 distrib = cstat_tools.distribution._DiscreteParametricModel(ident, inf_bound, sup_bound, parameter,
                                                             probability)
 
-print "Distribution used for the number of children and the tree attributes:"
-print distrib
+print("Distribution used for the number of children and the tree attributes:")
+print(distrib)
 
 max_depth = 3
 max_size = 10
 nbtrees = 4
 
 # test the initialization and the estimation of a HMT
-print "Test the initialization and the estimation of a HMT"
+print("Test the initialization and the estimation of a HMT")
 # define a set of trees
 
 tree_list = []
@@ -57,11 +57,11 @@ for n in range(len(tree_list)):
 # initialize a Trees object
 T = trees.Trees(tree_list)
 H = _hmt.HmtAsciiRead("hmot_np_2s.hmt")
-print "A HMT read from file 'hmot_np_2s.hmt':"
-print H.Display(False)
+print("A HMT read from file 'hmot_np_2s.hmt':")
+print(H.Display(False))
 T = H.Simulate(3, 20, 3, True)
-print "Set of simulated trees:"
-print T.Display(False)
+print("Set of simulated trees:")
+print(T.Display(False))
 
 
 # The remaining part of this test does not work : Cpp and python prototype
@@ -77,5 +77,5 @@ print T.Display(False)
 #print "Test the initialization of a CHmt_data object"
 # copy
 chmtd = _hmt.CHmt_data(T)
-print chmtd.Display(True)
+print(chmtd.Display(True))
 

@@ -14,10 +14,10 @@ def mtg2treegraph(mtg,scale = 1, root = None):
     
     if root is None: 
         # take first root of mtg at the given scale
-        root = mtg.components_at_scale_iter(mtg.root,scale=scale).next()
+        root = next(mtg.components_at_scale_iter(mtg.root,scale=scale))
     
     if mtg.scale(root) != scale:
-        root = mtg.components_at_scale_iter(root,scale=scale).next() 
+        root = next(mtg.components_at_scale_iter(root,scale=scale)) 
     
     tree.addNode(0,-1)
     idmap = { root : 0 }

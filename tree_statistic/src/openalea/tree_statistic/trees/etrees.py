@@ -3,7 +3,8 @@
 """
 
 
-import trees, ctree
+import ctree
+from openalea.tree_statistic import trees
 import openalea.tree_statistic.int_fl_containers as int_fl_containers
 import openalea.tree_statistic._errors as _errors
 import openalea.stat_tool as stat_tool
@@ -101,10 +102,10 @@ class Tree(trees.Tree):
            btype=True
        elif type(edgetype)==str:
            msg="Bad value for edge type: " + edgetype
-           raise ValueError, msg
+           raise ValueError(msg)
        else:
            msg="Bad type for edge type: " + str(type(edgetype))
-           raise TypeError, msg            
+           raise TypeError(msg)            
        self.__ctree.AddEdge(parentvid, childvid, btype)
 
     def Children(self, vid):
@@ -139,7 +140,7 @@ class Tree(trees.Tree):
             key=self.Root()
         if not (vids or attributes):
             vids=True
-        print self._display(key, vids, attributes, mtg_vids)
+        print(self._display(key, vids, attributes, mtg_vids))
     
     def IsRoot(self, vid):
         """Return True if and only if argument is the tree root 
@@ -230,10 +231,10 @@ class TreeStructure(trees.TreeStructure):
            btype=True
        elif type(edgetype)==str:
            msg="Bad value for edge type: " + edgetype
-           raise ValueError, msg
+           raise ValueError(msg)
        else:
            msg="Bad type for edge type: " + str(type(edgetype))
-           raise TypeError, msg    
+           raise TypeError(msg)    
        self.__tree.AddEdge(parentvid, childvid, btype)
 
     def Children(self, vid):
@@ -357,23 +358,23 @@ class TreeStructure(trees.TreeStructure):
         elif (len(VidDict) != self.NbTrees()):
             msg = "Bad number of dictionaries: " + str(len(VidDict))
             msg += " - should be " + str(self.NbTrees())
-            raise ValueError, msg
+            raise ValueError(msg)
         if (ValidityCheck):
             for t in range(self.NbTrees()):
                 if ((TreeId is None) or (TreeId == t)):
-                    for v in VidDict[t].values():
+                    for v in list(VidDict[t].values()):
                         check = self._valid_vid(t, v)
         for t in range(self.NbTrees()):
             if ((TreeId is None) or (TreeId == t)):
                 self.__mtg_to_tree_vid[t] = dict(VidDict[t])
                 self.__tree_to_mtg_vid[t] = {}
-                for k in VidDict[t].keys():
+                for k in list(VidDict[t].keys()):
                     v = VidDict[t][k]
-                    if self.__tree_to_mtg_vid[t].has_key(v):
+                    if v in self.__tree_to_mtg_vid[t]:
                         msg = "Tree vertex " + str(v)
                         msg += " already present in dictionary for "
                         msg += "tree " + str(t)
-                        raise ValueError, msg
+                        raise ValueError(msg)
                     else:
                         self.__tree_to_mtg_vid[t][v] = k
 
@@ -383,7 +384,7 @@ class TreeStructure(trees.TreeStructure):
         valid=self.__tree.IsEdge(parent, child)
         if not(valid):
             msg="pair ("+str(parent)+", "+str(child)+") is not a valid edge"
-            raise IndexError, msg
+            raise IndexError(msg)
     
     def __iter__(self):
         """Get an iterator on the tree vertices."""
@@ -481,13 +482,13 @@ class Trees(trees.Trees):
             else:
                 msg = "Bad number of dictionaries: " + str(len(VidDict))
                 msg += " - should be " + str(self.NbTrees())
-                raise ValueError, msg
+                raise ValueError(msg)
         if (ValidityCheck):
             for t in range(self.NbTrees()):
                 if ((TreeId is None) or (TreeId == t)):
-                    for v in VidDict[t].values():
+                    for v in list(VidDict[t].values()):
                         check = self._valid_vid(t, v)
-                    for k in VidDict[t].keys():
+                    for k in list(VidDict[t].keys()):
                         check_error.CheckType([k], [int])
         for t in range(self.NbTrees()):
             # copy dictionary MTG->Tree
@@ -495,22 +496,22 @@ class Trees(trees.Trees):
                 self.__mtg_to_tree_vid[t] = dict(VidDict[t])
                 # build dictionary Tree->MTG
                 self.__tree_to_mtg_vid[t] = {}
-                for k in VidDict[t].keys():
+                for k in list(VidDict[t].keys()):
                     v = VidDict[t][k]
-                    if self.__tree_to_mtg_vid[t].has_key(v):
+                    if v in self.__tree_to_mtg_vid[t]:
                         msg = "Tree vertex " + str(v)
                         msg += " already present in dictionary for "
                         msg += "tree " + str(t)
-                        raise ValueError, msg
+                        raise ValueError(msg)
                     else:
                         self.__tree_to_mtg_vid[t][v] = k
                 # update dictionaries MTGComponentRoot <--> Tree Roots
                 tr = self._ctrees().Tree(t).Root() # tree root
                 try:
                     v = self.__tree_to_mtg_vid[t][tr]  # MTGComponentRoot
-                except KeyError, error:
+                except KeyError as error:
                     if (ValidityCheck):
-                        raise KeyError, error
+                        raise KeyError(error)
                     else:
                         v = sorted(VidDict[t].keys())[0]
                 self.__mtg_to_tree_tid[v] = t

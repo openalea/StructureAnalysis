@@ -48,7 +48,7 @@ class TreeValue:
         if ((not hasattr(list_of_values, "__getitem__")) and 
             (not issubclass(list_of_values.__class__, TreeValue))):
             msg="bad type for attribute list: "+str(type(list_of_values))
-            raise TypeError, msg
+            raise TypeError(msg)
         for index in range(len(list_of_values)):
             o = list_of_values[index]
             if issubclass(o.__class__, VariableType):
@@ -72,7 +72,7 @@ class TreeValue:
             else:
                 s = "element %d of the list of values must be of type int or "\
                 "double"%nb_variables
-                raise TypeError, s
+                raise TypeError(s)
                 # STAT_error[STATR_VARIABLE_TYPE];
 
     def NbInt(self):
@@ -124,15 +124,15 @@ class TreeValue:
                 self.__values[index] = valeur+0.
                 # conversion from int to double is allowed
             else:
-                raise TypeError, "expected type: INT_VALUE or REAL_VALUE"
+                raise TypeError("expected type: INT_VALUE or REAL_VALUE")
                 # should not happen if self has been created properly
         elif type(valeur) == float:
             if self.__types[index] == VariableType.REAL_VALUE:
                 self.__values[index] = valeur
             else:
-                raise TypeError, "expected type: INT_VALUE"
+                raise TypeError("expected type: INT_VALUE")
         else:
-            raise TypeError, "expected type: INT_VALUE or REAL_VALUE"
+            raise TypeError("expected type: INT_VALUE or REAL_VALUE")
 
     def __len__(self):
         return len(self.__values)
@@ -198,10 +198,10 @@ class Tree:
                     + " instead of trees.Tree()"
                 import sys
                 sys.stderr.write(msg)
-                raise Tree, self
+                raise Tree(self)
         else:
             if not hasattr(arg, "__getitem__"):
-                raise TypeError, "argument 1 must have a __getitem__ method"
+                raise TypeError("argument 1 must have a __getitem__ method")
             if issubclass(arg[0].__class__, VariableType):
                 #... or a list of types
                 self.__types = list(arg)
@@ -271,7 +271,7 @@ class Tree:
           * `mtg_vids` (bool) -  if mtg_vids and vids are both True, the MTG \
             vids are displayed instead of the tree vids.
         """
-        print self._display(self.Root(), vids, attributes, mtg_vids)
+        print(self._display(self.Root(), vids, attributes, mtg_vids))
 
     def EdgeType(self, parent, child):
         """
@@ -337,8 +337,8 @@ class Tree:
             was obtained from a MTG, a MTG vid (int) is returned.
         """
         if self.__tree_to_mtg_vid is None:
-            raise Warning, "Current Trees object has not been obtained from " \
-                "a MTG"
+            raise Warning("Current Trees object has not been obtained from " \
+                "a MTG")
         if treevid is None:
             return dict(self.__tree_to_mtg_vid)
         else:
@@ -387,7 +387,7 @@ class Tree:
                 ftypes+=[t]
         try:
             while 1:
-                current_vertex=vertex_it.next()
+                current_vertex=next(vertex_it)
                 val=res.Get(current_vertex)
                 for v in ftypes:
                     val[v]=round(val[v], ndigits)
@@ -406,15 +406,15 @@ class Tree:
         elif len(variable_names)!=self.NbVariables():
             msg="bad number of variable names: "+str(len(variable_names)) \
                 +"; "+str(self.NbVariables())+" name(s) expected"
-            raise IndexError, msg
+            raise IndexError(msg)
         for var in range(len(variable_names)):
             if type(variable_names[var])!=str:
                 msg="bad type for name of variable "+str(var)
-                raise TypeError, msg
+                raise TypeError(msg)
             elif variable_names[var].find(" ")!=-1:
                 msg="name of variable "+str(var)+" should not contain "\
                      +"any space character"
-                raise ValueError, msg
+                raise ValueError(msg)
         if not overwrite:
             try:
                 f=file(file_name, 'r')
@@ -423,7 +423,7 @@ class Tree:
             else:
                 f.close()
                 msg="File "+file_name+" already exists"
-                raise IOError, msg
+                raise IOError(msg)
 
         f=file(file_name, 'w+')
         f.write(self.__mtg_header(variable_names))
@@ -486,8 +486,8 @@ class Tree:
     def TreeVertex(self, mtgvid=None):
         """Return the tree vid of a MTG vertex"""
         if self.__mtg_to_tree_vid is None:
-            raise Warning, "Current Trees object has not been obtained from " \
-                "a MTG"
+            raise Warning("Current Trees object has not been obtained from " \
+                "a MTG")
         if mtgvid is None:
             return dict(self.__mtg_to_tree_vid)
         else:
@@ -562,7 +562,7 @@ class Tree:
                     header+=self.__attributes[v]+" "
                 header+="][ "
                 filt=lambda var: (var not in smoothed) and (var > 0)
-                indices=filter(filt, range(len(self.__attributes)))
+                indices=list(filter(filt, list(range(len(self.__attributes)))))
                 for v in indices:
                     header+=self.__attributes[v]+" "
                 header+="]"
@@ -600,8 +600,8 @@ class Tree:
     def _mtg_tid(self):
         # return the vid in the MTG corresponding to the root of self
         if self.__mtg_tid is None:
-            raise Warning, "Current Tree object has not been obtained from " \
-                "a MTG"
+            raise Warning("Current Tree object has not been obtained from " \
+                "a MTG")
         else:
             return self.__mtg_tid
 
@@ -614,13 +614,13 @@ class Tree:
     def _set_int_value_type(self, variable):
         # turns a state variable into an integer-valued variable
         if (variable < 0 or variable >= self.NbVariables()):
-            raise IndexError, "variable index out of range: "+str(variable)
+            raise IndexError("variable index out of range: "+str(variable))
         elif (self.__types[variable]==VariableType.STATE):
             self.__types[variable]=VariableType.INT_VALUE
         else:
             msg="bad type for variable " + str(variable) + ": " + \
                 str(self.__types[variable])
-            raise TypeError, msg
+            raise TypeError(msg)
            
     def __display(self, key, vids, attributes, mtg_vids, smoothed, rounded):
         res, lineskip=self.__display_skip(key, "", False, vids, attributes, 
@@ -656,8 +656,8 @@ class Tree:
                         and (var not in rounded)
                     filt2=lambda var: (var not in smoothed) and (var > 0) \
                         and (var in rounded)
-                    indicesnr=filter(filt1, range(len(complete_value)))
-                    indicesr=filter(filt2, range(len(complete_value)))
+                    indicesnr=list(filter(filt1, list(range(len(complete_value)))))
+                    indicesr=list(filter(filt2, list(range(len(complete_value)))))
                     if (len(indicesr) + len(indicesnr)) > 0:
                         stream+='['
                         for v in range(len(complete_value)):
@@ -682,7 +682,7 @@ class Tree:
         current_child=0
         try:
             while 1:
-                children.append(children_it.next())
+                children.append(next(children_it))
         except StopIteration: pass
         if current_child <= len(children)-1:
         # at least one child remaining
@@ -779,7 +779,7 @@ class Tree:
         current_child=0
         try:
             while 1:
-                children.append(children_it.next())
+                children.append(next(children_it))
         except StopIteration: pass
         children_control = list(self.__ctree.Children(key))
         assert str(children_control) == str(children)
@@ -831,7 +831,7 @@ class Tree:
         valid=self.__ctree.IsEdge(parent, child)
         if not(valid):
             msg="pair ("+str(parent)+", "+str(child)+") is not a valid edge"
-            raise IndexError, msg
+            raise IndexError(msg)
 
     def __valid_value(self, value):
         tv=TreeValue(value)
@@ -841,7 +841,7 @@ class Tree:
         if len(tv) != self.NbVariables():
             msg+="number of attributes ("+str(self.NbVariables())+") "\
             "is incompatible with argument length ("+str(len(tv))+")"
-            raise TypeError, msg
+            raise TypeError(msg)
         for var in range(len(tv)):
             if type(tv[var])==int:
                 if self.Type(var)==VariableType.REAL_VALUE:
@@ -852,7 +852,7 @@ class Tree:
                 if self.Type(var)!=VariableType.REAL_VALUE:
                     msg+="incorrect type for element "+str(var)+" of current "\
                     "argument - type 'int' expected"
-                    raise TypeError, msg
+                    raise TypeError(msg)
                 reslist.append(tv[var])
         tv=TreeValue(reslist)
         return TreeValue(tv)
@@ -860,10 +860,10 @@ class Tree:
     def __valid_vid(self, vid):
         if type(vid) != int:
             msg=str(vid)+" has not the type of a valid vertex identifier."
-            raise TypeError, msg
+            raise TypeError(msg)
         elif (vid<0 or vid >= self.Size()):
             msg=str(vid)+" is not a valid vertex identifier."
-            raise IndexError, msg
+            raise IndexError(msg)
         return True
    
     def __str__(self):
@@ -935,7 +935,7 @@ class TreeStructure:
         The vids are displayed if and only if boolean argument vids is True.
         The edge types are displayed if and only if boolean argument edgetypes 
         is True."""
-        print self.__display(self.Root(), vids, edgetypes)
+        print(self.__display(self.Root(), vids, edgetypes))
 
     def EdgeType(self, parent, child):
         """Return the type of one given edge (parent, child)."""
@@ -958,8 +958,8 @@ class TreeStructure:
             was obtained from a MTG, a MTG vid (int) is returned.
         """
         if self.__tree_to_mtg_vid is None:
-            raise Warning, "Current Trees object has not been obtained from " \
-                "a MTG"
+            raise Warning("Current Trees object has not been obtained from " \
+                "a MTG")
         if treevid is None:
             return dict(self.__tree_to_mtg_vid)
         else:
@@ -1003,8 +1003,8 @@ class TreeStructure:
     def TreeVertex(self, mtgvid=None):
         """Return the tree vid of a MTG vertex"""
         if self.__mtg_to_tree_vid is None:
-            raise Warning, "Current Trees object has not been obtained from " \
-                "a MTG"
+            raise Warning("Current Trees object has not been obtained from " \
+                "a MTG")
         if mtgvid is None:
             return dict(self.__mtg_to_tree_vid)
         else:
@@ -1058,7 +1058,7 @@ class TreeStructure:
         current_child=0
         try:
             while 1:
-                children.append(children_it.next())
+                children.append(next(children_it))
         except StopIteration: pass
         if current_child <= len(children)-1:
         # at least one child remaining
@@ -1101,10 +1101,10 @@ class TreeStructure:
     def __valid_vid(self, vid):
         if type(vid) != int:
             msg=str(vid)+" has a not the type of a valid vertex."
-            raise TypeError, msg
+            raise TypeError(msg)
         elif vid >= self.Size():
             msg=str(vid)+" is not a valid vertex identifier."
-            raise IndexError, msg
+            raise IndexError(msg)
         return True
     
     def __valid_edge(self, parent, child):
@@ -1113,7 +1113,7 @@ class TreeStructure:
         valid=self.__tree.IsEdge(parent, child)
         if not(valid):
             msg="pair ("+str(parent)+", "+str(child)+") is not a valid edge"
-            raise IndexError, msg
+            raise IndexError(msg)
         else:
             return True
         
@@ -1125,7 +1125,7 @@ class TreeStructure:
         if len(tv) != self.NbVariables():
             msg+="number of attributes ("+str(self.NbVariables())+") "\
             "is incompatible with argument length ("+str(len(tv))+")"
-            raise TypeError, msg
+            raise TypeError(msg)
         for var in range(len(tv)):
             if type(tv[var])==int:
                 if self.Type(var)==VariableType.REAL_VALUE:
@@ -1136,7 +1136,7 @@ class TreeStructure:
                 if self.Type(var)!=VariableType.REAL_VALUE:
                     msg+="incorrect type for element "+str(var)+" of current "\
                     "argument - type 'int' expected"
-                    raise TypeError, msg
+                    raise TypeError(msg)
                 reslist.append(tv[var])
         tv=TreeValue(reslist)
         return TreeValue(tv)
@@ -1190,7 +1190,7 @@ class Trees(object):
                         or arg2[var]==VariableType.STATE
                         or arg2[var]==VariableType.REAL_VALUE):
                         msg="unknown type : "+str(arg2[var])
-                        raise TypeError, msg
+                        raise TypeError(msg)
                 self.__types=list(arg2)
         elif type(arg)==str:
             # ... or the name of a MTG file...
@@ -1292,19 +1292,19 @@ class Trees(object):
                 if len(attribute_names)!=len(attribute_def):
                     msg="inconsistent number of attributes in name list and" \
                         +" definition list"
-                    raise ValueError, msg
+                    raise ValueError(msg)
                 for name in attribute_names:
                     index+=1
                     if (type(name)!=str):
                         msg="bad type for name of attribute "+str(index) \
                             + ": type 'str' expected"
-                        raise TypeError, msg
+                        raise TypeError(msg)
                 index=0
                 for func in attribute_def:
                     if not callable(func):
                         msg="bad type for function defining attribute "\
                             +str(index)+": expecting a callable"
-                        raise TypeError, msg
+                        raise TypeError(msg)
                     index+=1                    
             if arg2 is None:
             # default filter: accept all vertices
@@ -1315,19 +1315,19 @@ class Trees(object):
                     val = arg2(x)
                     msg = "Bad filter type at vertex " + str(x) + ": "
                     if type(val) != bool:
-                        raise TypeError, msg+str(type(val))
+                        raise TypeError(msg+str(type(val)))
                     if val:
                         return True
                     else:
                         msg="Filter should discard every descendant of vertex "
                         f=[arg2(d) for d in g.Descendants(x)]
                         if any(f):
-                            raise IndexError, msg+str(x)
+                            raise IndexError(msg+str(x))
                         else:
                             return False
             else:
                 msg="bad type for filtering function: expecting a callable"
-                raise TypeError, msg
+                raise TypeError(msg)
             if no_scale:
             # scale should not be modified if given by user
                 scale=len(M.scales())-1
@@ -1349,14 +1349,14 @@ class Trees(object):
                     else:
                         msg="bad result type for function defining attribute "\
                             +str(index)+": expecting types 'int' or 'float'"
-                        raise TypeError, msg
+                        raise TypeError(msg)
                     index+=1
             if nbmtg > 0:
                 from openalea.mtg.treestats import extract_trees
                 F=extract_trees(M, scale, filt, attribute_def, attribute_names)
                 self.__ctrees=F._ctrees()
             else:
-                raise ValueError, "cannot build an empty Trees object"
+                raise ValueError("cannot build an empty Trees object")
             # inversion of table of the tree_to_mtg identifiers
             F._copy_vid_conversion(self)
             F._copy_tid_conversion(self)            
@@ -1424,7 +1424,7 @@ class Trees(object):
             # [integral_variables, real_variables].
             # Thus, self.__tmap maps the variables of self to
             # the variables of self.__ctrees
-            self.__tmap=range(len(self.__types))
+            self.__tmap=list(range(len(self.__types)))
             nbint=0
             for var in range(len(self.__types)):
                 if self.__types[var]!=VariableType.REAL_VALUE:
@@ -1439,7 +1439,7 @@ class Trees(object):
                     self.__tmap[var]=findex
                     findex+=1
             # computation of the inverse permutation of self.__tmap
-            self.__tmapi=range(len(self.__tmap))
+            self.__tmapi=list(range(len(self.__tmap)))
             for var in range(len(self.__tmap)):
                 self.__tmapi[self.__tmap[var]]=var
         if (attribute_names is None) and (len(self.__attributes) == 0):
@@ -1452,7 +1452,7 @@ class Trees(object):
             msg="Number of variables ("+str(len(self.__types))+\
                 ") and number of attribute names ("+str(len(self.__attributes))+\
                 ") do not match"
-            raise Warning, msg
+            raise Warning(msg)
 
     def Attributes(self):
         """Return the name of the tree attributes."""
@@ -1498,7 +1498,7 @@ class Trees(object):
                 prefix+=str(random.randint(1,9))                
         try:
             self.__ctrees.BuildSequences(file_name, MaximalSequences, AutoAxis)
-        except _errors.StatTreeError, error:
+        except _errors.StatTreeError as error:
             os.remove(file_name)
             raise _errors.StatTreeError(error)
         else:
@@ -1556,17 +1556,17 @@ class Trees(object):
             if not (mode.upper()=="STEP" or mode.upper()=="LIMIT"):
                 msg = "unknown clustering mode: "+str(mode)\
                     +" - expecting 'Step' or 'Limit'"
-                raise ValueError, msg
+                raise ValueError(msg)
             elif (mode.upper()=="STEP" and type(limit)!=int):
                 msg="incorrect type for clustering step: "+str(type(limit))
-                raise TypeError, msg
+                raise TypeError(msg)
             elif (mode.upper()=="LIMIT" and
                   not (hasattr(limit, "__getitem__"))):
                 msg = "incorrect type for clustering limits: "+str(type(limit))
-                raise TypeError, msg
+                raise TypeError(msg)
             else:
                 cclustered = self.__ctrees.Cluster(cvariable, limit)
-        except _errors.StatTreeError, error:
+        except _errors.StatTreeError as error:
             replaced = str(error) # self.__replacestr(str(cerror), "variable")
             raise _errors.StatTreeError(replaced)
         clustered = Trees(cclustered, self.__types, self.__attributes)
@@ -1589,14 +1589,14 @@ class Trees(object):
         RestorationAlgorithm=stat_tool.RestorationAlgorithm
         if not issubclass(model.__class__, hmt.HiddenMarkovIndOutTree):
             msg='bad type for argument "hmt": HiddenMarkovIndOutTree expected'
-            raise TypeError, msg
+            raise TypeError(msg)
         if type(algorithm)!=str:
             msg='bad type for argument "algorithm:"'+"type 'str' expected"
-            raise TypeError, msg
+            raise TypeError(msg)
         elif ((algorithm.upper()!="FORWARDBACKWARD")
               and (algorithm.upper()!="VITERBI")):
             msg='bad value for argument "algorithm":'+arg2
-            raise ValueError, msg
+            raise ValueError(msg)
         if (algorithm.upper()=="FORWARDBACKWARD"):
             arg5="FORWARD_BACKWARD"                    
         algorithm="RestorationAlgorithm."+algorithm.upper()
@@ -1632,7 +1632,7 @@ class Trees(object):
             cvariable = self._valid_cvariable(variable) + 1
         try:
             cdiff = self.__ctrees.Difference(cvariable)
-        except _errors.StatTreeError, error:
+        except _errors.StatTreeError as error:
             replaced = self.__replacestr(str(error), "variable")
             raise _errors.StatTreeError(replaced)
         if variable is None:
@@ -1655,28 +1655,28 @@ class Trees(object):
         elif type(Detail)!=int:
             msg="Bad type for 'Detail' argument:"+str(type(Detail)) \
             +" - expecting type 'int'"
-            raise TypeError, msg
+            raise TypeError(msg)
         else:
             msg="Bad value for 'Detail' argument:"+str(Detail) \
             +" - expecting 1 or 2"
-            raise ValueError, msg
+            raise ValueError(msg)
             
         replaced=self.__replacestr(self.__ctrees.Display(exhaustive), 
                                    "variable", True)
-        print replaced
+        print(replaced)
         if not (ViewPoint is None):
             if type(ViewPoint)!=str:
                 msg="Bad type for 'ViewPoint' argument:"+str(type(Detail)) \
                 +" - expecting type 'str'"
-                raise TypeError, msg
+                raise TypeError(msg)
             elif ViewPoint.upper()=="DATA":
                 for t in range(self.NbTrees()):
-                    print "("+str(t)+")"
+                    print("("+str(t)+")")
                     self.Tree(t).Display(vids=True, attributes=True)
             else:
                 msg="Bad value for 'ViewPoint' argument:"+str(type(Detail)) \
                 +" - expecting 'DATA'"
-                raise ValueError, msg
+                raise ValueError(msg)
 
     def Estimate(self, model_name, arg1, arg2=None, arg3=None, arg4=None, 
                  arg5=None, arg6=None, Algorithm="Forward", Saem=1., 
@@ -1740,7 +1740,7 @@ class Trees(object):
                 'SelfTransition, NbIteration, StateTrees, Algorithm, '\
                 'Saem, Counting): '\
                 +"type 'str' expected"
-                raise TypeError, msg                
+                raise TypeError(msg)                
             if Algorithm.upper() == "FORWARD":
                 algo="FORWARD"
                 algo="RestorationAlgorithm."+algo
@@ -1759,7 +1759,7 @@ class Trees(object):
                   'SelfTransition, NbIteration, StateTrees, Algorithm, '\
                   'Saem, Counting): '\
                   +str(Algorithm)
-                raise ValueError, msg
+                raise ValueError(msg)
             EMAlgo = eval(algo)
             if type(Saem) != float:
                 msg = 'bad type for argument "Saem" in ' \
@@ -1767,7 +1767,7 @@ class Trees(object):
                 'SelfTransition, NbIteration, StateTrees, Algorithm, '\
                 'Saem, Counting): '\
                 +"type 'float' expected"
-                raise TypeError, msg
+                raise TypeError(msg)
             if model_name.upper() == "HIDDEN_MARKOV_TREE":
                 # check types
                 types = self.Types()
@@ -1775,11 +1775,11 @@ class Trees(object):
                     if types[v] == stat_tool._stat_tool.VariableTypeBis.STATE:
                         msg = "Estimation from state variables not supported. (variable "
                         msg += str(v) + "). Conversion into integral variable required."
-                        raise Warning, msg
+                        raise Warning(msg)
                     elif types[v] != stat_tool._stat_tool.VariableTypeBis.INT_VALUE:
                         msg = "Bad type for variable " + str(v)
                         msg += ". Integral variable required."
-                        raise TypeError, msg
+                        raise TypeError(msg)
                 if type(arg1) == int:
                     # Estimate("HIDDEN_MARKOV_TREE", nb_state, structure, 
                     #          InitialSelfTransition, NbIteration, StateTrees, 
@@ -1789,14 +1789,14 @@ class Trees(object):
                         'Estimate("HIDDEN_MARKOV_TREE", nb_state, structure, '\
                         'SelfTransition, NbIteration, StateTrees, Counting, '\
                         'Algorithm, Saem, ForceParametric)'
-                        raise TypeError, msg
+                        raise TypeError(msg)
                     elif type(arg2) != str:
                         msg = 'bad type for argument "structure" in ' \
                         'Estimate("HIDDEN_MARKOV_TREE", nb_state, structure, '\
                         'SelfTransition, NbIteration, StateTrees, Counting, '\
                         'Algorithm, Saem, ForceParametric): '\
                         +"type 'str' expected"
-                        raise TypeError, msg
+                        raise TypeError(msg)
                     elif ((arg2.upper() != "IRREDUCTIBLE")
                           and (arg2.upper() != "IRREDUCIBLE")
                           and (arg2.upper() != "LEFTRIGHT")):
@@ -1805,7 +1805,7 @@ class Trees(object):
                         'SelfTransition, NbIteration, StateTrees, Counting, '\
                         'Algorithm, Saem, ForceParametric): '\
                         +arg2+" - expecting 'Irreducible' or 'LeftRight'"
-                        raise ValueError, msg
+                        raise ValueError(msg)
                     structure = (arg2.upper() == "LEFTRIGHT")
                     SelfTransition = arg3
                     if arg3 is None:
@@ -1816,7 +1816,7 @@ class Trees(object):
                         'SelfTransition, NbIteration, StateTrees, Counting, '\
                         'Algorithm, Saem, ForceParametric): '\
                         +"type 'float' expected"
-                        raise TypeError, msg
+                        raise TypeError(msg)
                     NbIteration = arg4
                     if arg4 is None:
                         NbIteration = stat_tool.D_DEFAULT
@@ -1826,7 +1826,7 @@ class Trees(object):
                         'SelfTransition, NbIteration, StateTrees, Counting, '\
                         'Algorithm, Saem, ForceParametric): '\
                         +"type 'int' expected"
-                        raise TypeError, msg
+                        raise TypeError(msg)
                     if arg5 is None:
                         arg5 = "VITERBI"
                     elif type(arg5) != str:
@@ -1835,7 +1835,7 @@ class Trees(object):
                         'SelfTransition, NbIteration, StateTrees, Counting, '\
                         'Algorithm, Saem, ForceParametric): '\
                         +"type 'str' expected"
-                        raise TypeError, msg
+                        raise TypeError(msg)
                     elif ((arg5.upper() != "FORWARDBACKWARD")
                           and (arg5.upper() != "VITERBI")):
                         msg = 'bad type for argument "StateTrees" in ' \
@@ -1843,7 +1843,7 @@ class Trees(object):
                         'SelfTransition, NbIteration, StateTrees, Counting, '\
                         'Algorithm, Saem, ForceParametric): '\
                         + arg2
-                        raise ValueError, msg
+                        raise ValueError(msg)
                     if (arg5.upper() == "FORWARDBACKWARD"):
                         arg5 = "FORWARD_BACKWARD"
                     arg5 = "RestorationAlgorithm."+arg5.upper()
@@ -1857,7 +1857,7 @@ class Trees(object):
                         'SelfTransition, NbIteration, StateTrees, Counting, '\
                         'Algorithm, Saem, ForceParametric): ' \
                         + "boolean type expected"
-                        raise TypeError, msg
+                        raise TypeError(msg)
                     chmt = chmt_data.EstimationCiHmot(arg1, structure, Counting,
                                                       StateTrees, EMAlgo,
                                                       Saem, SelfTransition, NbIteration,
@@ -1873,7 +1873,7 @@ class Trees(object):
                         'Estimate("HIDDEN_MARKOV_TREE", hmt, NbIteration, StateTrees,' \
                                   'Counting, Algorithm, Saem, ForceParametric): '\
                           +"type 'int' expected"
-                        raise TypeError, msg
+                        raise TypeError(msg)
                     if arg3 is None:
                         arg3 = "VITERBI"
                     elif type(arg3) != str:
@@ -1882,7 +1882,7 @@ class Trees(object):
                         'StateTrees, Counting, '\
                         'Algorithm, Saem, ForceParametric): '\
                         +"type 'str' expected"
-                        raise TypeError, msg
+                        raise TypeError(msg)
                     elif ((arg3.upper() != "FORWARDBACKWARD")
                           and (arg3.upper() != "VITERBI")):
                         msg = 'bad type for argument "StateTrees" in ' \
@@ -1890,7 +1890,7 @@ class Trees(object):
                         'StateTrees, Counting, ' \
                         'Algorithm, Saem, ForceParametric): '\
                         + arg3
-                        raise ValueError, msg
+                        raise ValueError(msg)
                     if (arg3.upper() == "FORWARDBACKWARD"):
                         arg3  = "FORWARD_BACKWARD"
                     arg3  = "RestorationAlgorithm."+arg3.upper()
@@ -1903,7 +1903,7 @@ class Trees(object):
                         'Estimate("HIDDEN_MARKOV_TREE", hmt, NbIteration, StateTrees, ' \
                                   'Counting, Algorithm, Saem, ForceParametric): '\
                           +"boolean type expected"
-                        raise TypeError, msg
+                        raise TypeError(msg)
                     if (ForceParametric == []):
                         ForceParametric  = False
                     elif type(ForceParametric) != bool:
@@ -1914,12 +1914,12 @@ class Trees(object):
                                                       ForceParametric)
                 else:
                     msg = "bad type for argument 1: " + str(type(arg1))
-                    raise TypeError, msg
+                    raise TypeError(msg)
             else:
                 msg  = "unknown model name: "+model_name
-                raise ValueError, msg
+                raise ValueError(msg)
         else:
-            raise TypeError, "bad type for argument 1: type 'str' expected"
+            raise TypeError("bad type for argument 1: type 'str' expected")
         estimated_hmt = hmt.HiddenMarkovIndOutTree(chmt, True)
         self._copy_vid_conversion(estimated_hmt)
         self._copy_tid_conversion(estimated_hmt)
@@ -1948,8 +1948,8 @@ class Trees(object):
                     # one variable
                         variable=0
                     else:
-                        raise TypeError, 'argument 2 is mandatory in ' \
-                                         'ExtractHistogram("Value", variable)'
+                        raise TypeError('argument 2 is mandatory in ' \
+                                         'ExtractHistogram("Value", variable)')
                 chisto = self.__ctrees.ExtractValueHistogram(
                             self._valid_cvariable(variable)+1)
                 return chisto
@@ -1966,14 +1966,14 @@ class Trees(object):
                     else:
                         msg='argument 2 is mandatory in ExtractHistogram' + \
                             '(FeatureName, variable, value)'
-                        raise TypeError, msg
+                        raise TypeError(msg)
                 if value is None:
                     # value argument is mandatory 
-                    raise TypeError, 'argument 3 is mandatory in ' \
-                        'ExtractHistogram(FeatureName, variable, value)'
+                    raise TypeError('argument 3 is mandatory in ' \
+                        'ExtractHistogram(FeatureName, variable, value)')
                 elif type(value) != int:
-                    raise TypeError, "bad type for argument 3: " \
-                                      "type 'int' expected"
+                    raise TypeError("bad type for argument 3: " \
+                                      "type 'int' expected")
                 if nature.upper()=="FIRSTOCCURRENCEROOT":
                     chartype=CharacteristicType.FIRST_OCCURRENCE_ROOT
                 elif nature.upper()=="FIRSTOCCURRENCELEAVES":
@@ -1993,11 +1993,11 @@ class Trees(object):
                     v=self.__name_to_variable(nature)
                 except ValueError:
                     msg="unknown feature histogram: "+nature
-                    raise ValueError, msg
+                    raise ValueError(msg)
                 chisto=self.__ctrees.ExtractValueHistogram(v+1)
                 return chisto
         else:
-            raise TypeError, "bad type for argument 1: type 'str' expected"
+            raise TypeError("bad type for argument 1: type 'str' expected")
 
     def Merge(self, tree_list):
         """Merge Trees objects (contained in a list) with self.
@@ -2012,7 +2012,7 @@ class Trees(object):
                 ctree_list.append(tree_list[t])
         try:
             cmerged = self.__ctrees.Merge(ctree_list)
-        except _errors.StatTreeError, error:
+        except _errors.StatTreeError as error:
             replaced = self.__replacestr(str(error), "variable")
             raise _errors.StatTreeError(replaced)
         merged = Trees(cmerged, self.__types, self.__attributes)
@@ -2055,7 +2055,7 @@ class Trees(object):
         if type(ViewPoint)!=str:
             msg='bad type for argument "ViewPoint": '\
               +"type 'str' expected"
-            raise TypeError, msg
+            raise TypeError(msg)
         import os
         if ViewPoint.upper()=="DATA":
             # Graphical output of the Trees using the Geom 3D viewer 
@@ -2208,7 +2208,7 @@ class Trees(object):
                 ftype=CharacteristicType.NB_ZONES
             else:
                 msg='bad value for argument "ViewPoint": '+ViewPoint
-                raise ValueError, msg
+                raise ValueError(msg)
             cvariable = self._valid_cvariable(variable)
             if (not self.__ctrees.IsCharacteristic(cvariable, ftype)):
                 msg = "Characteristic " + ViewPoint + " not computed " + \
@@ -2271,8 +2271,8 @@ class Trees(object):
             :func:`~openalea.tree_statistic.trees.Trees.TreeVertexId`.
         """
         if self.__tree_to_mtg_vid is None:
-            raise Warning, "Current Trees object has not been obtained from " \
-                "a MTG"
+            raise Warning("Current Trees object has not been obtained from " \
+                "a MTG")
         if TreeVertexId is None:
             return dict(self.__tree_to_mtg_vid[TreeId])
         else:
@@ -2282,8 +2282,8 @@ class Trees(object):
         """Return the MTG ComponentRoot corresponding to a given 
         tree identifier"""
         if self.__tree_to_mtg_tid is None:
-            raise Warning, "Current Trees object has not been obtained from " \
-                "a MTG"
+            raise Warning("Current Trees object has not been obtained from " \
+                "a MTG")
         if TreeId is None:
             return dict(self.__tree_to_mtg_tid)
         else:
@@ -2292,7 +2292,7 @@ class Trees(object):
             except KeyError:
                 msg="Tree number "+str(TreeId)+" of self" + \
                     "does not correspond to any component of the MTG"
-                raise IndexError, msg
+                raise IndexError(msg)
             else:
                 return res
 
@@ -2351,7 +2351,7 @@ class Trees(object):
         if type(ViewPoint)!=str:
             msg='bad type for argument "ViewPoint": '\
               +"type 'str' expected"
-            raise TypeError, msg
+            raise TypeError(msg)
         import os
         if ViewPoint.upper()=="DATA":
             # Graphical output of the Trees using the Geom 3D viewer 
@@ -2502,9 +2502,9 @@ class Trees(object):
                 ftype=CharacteristicType.NB_ZONES
             else:
                 msg='bad value for argument "ViewPoint": '+ViewPoint
-                raise ValueError, msg
+                raise ValueError(msg)
             cvariable = self._valid_cvariable(variable)
-            print "Using cvariable", cvariable
+            print("Using cvariable", cvariable)
             if (not self.__ctrees.IsCharacteristic(cvariable, ftype)):
                 msg = "Characteristic " + ViewPoint + " not computed " + \
                     "for variable ", variable
@@ -2520,15 +2520,15 @@ class Trees(object):
         elif len(variable_names)!=self.NbVariables():
             msg="bad number of variable names: "+str(len(variable_names)) \
                 +"; "+str(self.NbVariables())+" name(s) expected"
-            raise IndexError, msg
+            raise IndexError(msg)
         for var in range(len(variable_names)):
             if type(variable_names[var])!=str:
                 msg="bad type for name of variable "+str(var)
-                raise TypeError, msg
+                raise TypeError(msg)
             elif variable_names[var].find(" ")!=-1:
                 msg="name of variable "+str(var)+" should not contain "\
                      +"any space character"
-                raise ValueError, msg
+                raise ValueError(msg)
         if not overwrite:
             try:
                 f=file(file_name, 'r')
@@ -2536,7 +2536,7 @@ class Trees(object):
                 pass # f=file(file_name, 'w+')
             else:
                 msg="File "+file_name+" already exists"
-                raise IOError, msg
+                raise IOError(msg)
                                 
         f=file(file_name, 'w+')
         # write the MTG header
@@ -2577,7 +2577,7 @@ class Trees(object):
             if not (mode.upper()=="KEEP" or mode.upper()=="REJECT"):
                 msg="unknown selection mode: "+str(mode) \
                     + " - expecting 'Keep' or 'Reject'"
-                raise ValueError, msg
+                raise ValueError(msg)
             else:
                 if mode.upper()=="KEEP":
                     keep=True
@@ -2592,9 +2592,9 @@ class Trees(object):
                         types.append(self.__types[variable])
                         attributes.append(self.__attributes[variable])
                 cselected=self.__ctrees.SelectVariable(cvariables, keep)
-        except _errors.StatTreeError, error:
+        except _errors.StatTreeError as error:
             replaced = str(error) # self.__replacestr(str(cerror), "variable")
-            raise _errors.StatTreeError, replaced
+            raise _errors.StatTreeError(replaced)
         selected=Trees(cselected, types, attributes)
         self._copy_vid_conversion(selected)
         self._copy_tid_conversion(selected)
@@ -2616,7 +2616,7 @@ class Trees(object):
         if not (mode.upper()=="KEEP" or mode.upper()=="REJECT"):
             msg="unknown selection mode: "+str(mode) \
                 + " - expecting 'Keep' or 'Reject'"
-            raise ValueError, msg
+            raise ValueError(msg)
         else:
             if mode.upper()=="KEEP":
                 keep=True
@@ -2643,7 +2643,7 @@ class Trees(object):
                 map = dict(self.__tree_to_mtg_vid[i])
                 mapinv = {}
                 selected.__tree_to_mtg_vid.append(map)
-                for v in map.keys():
+                for v in list(map.keys()):
                     mapinv[map[v]] = v
                 selected.__mtg_to_tree_vid.append(mapinv)
         if self.__tree_to_mtg_tid is None:
@@ -2656,7 +2656,7 @@ class Trees(object):
             for i in selected_ind:
                 selected.__tree_to_mtg_tid[indiv] = self.__tree_to_mtg_tid[i]
                 indiv += 1
-            for v in selected.__tree_to_mtg_tid.keys():
+            for v in list(selected.__tree_to_mtg_tid.keys()):
                     selected.__mtg_to_tree_tid[selected.__tree_to_mtg_tid[v]] = v
 
         return selected
@@ -2677,7 +2677,7 @@ class Trees(object):
             if not (mode.upper()=="KEEP" or mode.upper()=="REJECT"):
                 msg="unknown selection mode: "+str(mode) \
                     + " - expecting 'Keep' or 'Reject'"
-                raise ValueError, msg
+                raise ValueError(msg)
             else:
                 if mode.upper()=="KEEP":
                     keep=True
@@ -2690,7 +2690,7 @@ class Trees(object):
                     attributes.append(self.__attributes[v])
             csegmentation=self.__ctrees.SegmentationExtract(cvariable, 
                                                             values, keep)
-        except _errors.StatTreeError, error:
+        except _errors.StatTreeError as error:
             replaced = self.__replacestr(str(error), "variable")
             raise _errors.StatTreeError(replaced)
         segmentation = Trees(csegmentation, types, attributes)
@@ -2705,7 +2705,7 @@ class Trees(object):
         if ((type(param)!=float) and (type(param)!=int)):
             msg='bad type for argument "param": '\
               +"type 'float' or 'int' expected"
-            raise TypeError, msg
+            raise TypeError(msg)
         # if the variable is of floating type, conversion of the parameter
         # to a float
         if ((self.Type(variable)==VariableType.REAL_VALUE) 
@@ -2715,7 +2715,7 @@ class Trees(object):
             eparam=param
         try:
             cshifted = self.__ctrees.Shift(cvariable, eparam)
-        except _errors.StatTreeError, error:
+        except _errors.StatTreeError as error:
             replaced = self.__replacestr(str(error), "variable")
             raise _errors.StatTreeError(replaced)
         shifted=Trees(cshifted, self.__types, self.__attributes)
@@ -2758,7 +2758,7 @@ class Trees(object):
         cvariable = self._valid_cvariable(Variable) + 1
         try:
             self.__ctrees.ToIntType(cvariable)
-        except _errors.StatTreeError, error:
+        except _errors.StatTreeError as error:
             replaced = self.__replacestr(str(error), "variable")
             raise _errors.StatTreeError(replaced)
         self.__types[Variable] = stat_tool._stat_tool.VariableTypeBis.INT_VALUE
@@ -2773,7 +2773,7 @@ class Trees(object):
             (self.Type(variable)!=VariableType.STATE)):
             msg="Bad variable: " + str(variable) + ": must be of integer" +  \
                 " or of state type"
-            raise IndexError, msg
+            raise IndexError(msg)
         cvariable=self._valid_cvariable(variable)+1
         # correspondence of variables between self and self.__ctrees
         ctranscoded = self.__ctrees.Transcode(cvariable, new_values)
@@ -2799,8 +2799,8 @@ class Trees(object):
         """Return the tree identifier corresponding to a given MTG 
         ComponentRoot."""
         if self.__mtg_to_tree_tid is None:
-            raise Warning, "Current Trees object has not been obtained from " \
-                "a MTG"
+            raise Warning("Current Trees object has not been obtained from " \
+                "a MTG")
         if MtgComponentRoot is None:
             return dict(self.__mtg_to_tree_tid)
         else:
@@ -2809,7 +2809,7 @@ class Trees(object):
             except KeyError:
                 msg="MTG Vertex "+str(MtgComponentRoot)+" is not the root "+\
                     "of any tree in self"
-                raise IndexError, msg
+                raise IndexError(msg)
             else:
                 return res
 
@@ -2850,8 +2850,8 @@ class Trees(object):
             :func:`~openalea.tree_statistic.trees.Trees.MTGVertexId`.
         """
         if self.__mtg_to_tree_vid is None:
-            raise Warning, "Current Trees object has not been obtained from " \
-                "a MTG"
+            raise Warning("Current Trees object has not been obtained from " \
+                "a MTG")
         if not(TreeId is None):
             if MTGVid is None:
                 return dict(self.__mtg_to_tree_vid[TreeId])
@@ -2859,7 +2859,7 @@ class Trees(object):
                 return self.__mtg_to_tree_vid[TreeId][MTGVid]
         else:
             if MTGVid is None:
-                raise ValueError, "TreeVertexId requires at least one argument"
+                raise ValueError("TreeVertexId requires at least one argument")
             else:
                 # find MTGVid in all the dictionaries
                 correct_vid=False
@@ -2873,7 +2873,7 @@ class Trees(object):
                         break
                 if not(correct_vid):
                     msg = "MTG Vertex "+str(MTGVid)+" not found"
-                    raise ValueError, msg
+                    raise ValueError(msg)
                 else:
                     return t, tree_vid
 
@@ -2979,7 +2979,7 @@ class Trees(object):
             
         """
         import openalea.mtg as mtg
-        import etrees
+        from . import etrees
         g = mtg.MTG()
         mtg2tree = {} # correspondence mtg components -> tree ids 
         tree2mtg = {} # correspondence tree ids -> mtg components
@@ -3030,30 +3030,30 @@ class Trees(object):
     def _set_int_value_type(self, variable):
         # turns a state variable into an integer-valued variable
         if (variable < 0 or variable >= self.NbVariables()):
-            raise IndexError, "variable index out of range: "+str(variable)
+            raise IndexError("variable index out of range: "+str(variable))
         elif (self.__types[variable]==VariableType.STATE):
             self.__types[variable]=VariableType.INT_VALUE
         else:
             msg="bad type for variable " + str(variable) + ": " + \
                 str(self.__types[variable])
-            raise TypeError, msg
+            raise TypeError(msg)
 
     def _valid_cvariable(self, variable):
         # check the validity of the variable index and return the corresponding 
         # index for the C++ programs
         if (type(variable)!=int):
-            raise TypeError, "bad variable index type: "+str(type(variable))
+            raise TypeError("bad variable index type: "+str(type(variable)))
         elif (variable < 0 or variable >= self.NbVariables()):
-            raise IndexError, "variable index out of range: "+str(variable)
+            raise IndexError("variable index out of range: "+str(variable))
         else:
             return self.__tmap[variable]
 
     def _valid_tree(self, TreeId):
         """Check whether a tree identifier is valid"""
         if type(TreeId)!=int:
-            raise TypeError, "bad tree index type: "+str(type(TreeId))
+            raise TypeError("bad tree index type: "+str(type(TreeId)))
         elif (TreeId < 0) or (TreeId >= self.NbTrees()):
-            raise IndexError, "tree index out of range: "+str(TreeId)
+            raise IndexError("tree index out of range: "+str(TreeId))
         else:
             return True
 
@@ -3062,10 +3062,10 @@ class Trees(object):
         if self._valid_tree(TreeId):
             if type(Vid) != int:
                 msg = str(Vid) + " has not the type of a valid vertex identifier."
-                raise TypeError, msg
+                raise TypeError(msg)
             elif (Vid < 0 or Vid >= self.Size(TreeId)):
                 msg = str(Vid) + " is not a valid vertex identifier."
-                raise IndexError, msg
+                raise IndexError(msg)
             return True
 
     def __default_tree_value(self):
@@ -3116,7 +3116,7 @@ class Trees(object):
         if type(name)!=str:
             msg="bad type for variable name: "+str(type(name)) \
                 + " - excpeting type 'str'"
-            raise TypeError, msg
+            raise TypeError(msg)
         variable=0
         found=False
         while ((variable < self.NbVariables()) and (not found)):
@@ -3126,7 +3126,7 @@ class Trees(object):
                 variable+=1
         if not found:
             msg="bad variable name: "+str(name)
-            raise ValueError, msg
+            raise ValueError(msg)
         else:
             return variable
 
@@ -3156,9 +3156,9 @@ class Trees(object):
 
     def __valid_tree(self, TreeId):
         if type(TreeId)!=int:
-            raise TypeError, "bad tree index type: "+str(type(TreeId))
+            raise TypeError("bad tree index type: "+str(type(TreeId)))
         elif (TreeId < 0) or (TreeId >= self.NbTrees()):
-            raise IndexError, "tree index out of range: "+str(TreeId)
+            raise IndexError("tree index out of range: "+str(TreeId))
         else:
             return True
         
@@ -3190,15 +3190,15 @@ def PickleLoad(name):
         pkl_file = open(name, 'rb')
         g, prop_name, attributes = pickle.load(pkl_file)
         pkl_file.close()
-    except IOError, e:
-        print e
+    except IOError as e:
+        print(e)
         g = None
     if g:
         from openalea.mtg import treestats
         variable_funcs = []
         prop = g.property(prop_name)
         # variable_funcs = filter(lambda var: lambda x: prop[x][var], range(len(attributes)))
-        variable_funcs = map(lambda i: lambda x: prop[x][i], range(len(attributes)))
+        variable_funcs = [lambda x: prop[x][i] for i in range(len(attributes))]
         T = treestats.extract_trees(g, 2, filter=lambda x: True, \
                                     variable_funcs=variable_funcs, variable_names=attributes)
         # T contains its own mapping with g.
@@ -3231,7 +3231,7 @@ def Mtg(T):
         return g
     else:
         msg = 'bad type for argument "T": Trees expected'
-        raise TypeError, msg
+        raise TypeError(msg)
 
 if __name__ == '__main__':
     pass # add a call to run your script here

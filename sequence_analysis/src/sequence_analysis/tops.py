@@ -150,7 +150,7 @@ def Tops(*args, **kargs):
             if Identifiers:
                 return _Tops(args[0], Identifiers, index_parameter)
             else:
-                return _Tops(args[0], range(0, len(args[0])), index_parameter)
+                return _Tops(args[0], list(range(0, len(args[0]))), index_parameter)
         else:
             raise ValueError("wrong arguments ?")
     else:

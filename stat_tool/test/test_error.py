@@ -162,4 +162,4 @@ def test_class_error():
     fe._error()
     fe = FormatError(error="test")
     fe._error()
-    print fe
+    print(fe)

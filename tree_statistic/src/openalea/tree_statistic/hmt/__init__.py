@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from hmt import *
+from .hmt import *
 
 from openalea.stat_tool import StatError
 from openalea.tree_statistic._errors import StatTreeError

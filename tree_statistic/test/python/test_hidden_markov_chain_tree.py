@@ -23,17 +23,17 @@ S=T.BuildPySequences()
 # S = S.markovian_sequences()
 
 # Print Sequences object
-print S
+print(S)
 # Print Trees object
-print T
+print(T)
 
 # Display sequence object
-print(S.display())
+print((S.display()))
 # Display forest object
 T.Display()
 
 # Display sequence object and data
-print(stat_tool.Display(S, ViewPoint="Data"))
+print((stat_tool.Display(S, ViewPoint="Data")))
 # Display forest object and data
 T.Display(ViewPoint="Data")
 
@@ -43,9 +43,9 @@ hmt=T.Estimate("HIDDEN_MARKOV_TREE", HMTI, 10)
 hmc=aml.Estimate(S, "HIDDEN_SEMI-MARKOV", HMCI, NbIteration=10)
 
 # Print an estimated HMC
-print hmc
+print(hmc)
 # Print an estimated HMT
-print hmt
+print(hmt)
 
 # Display an estimated HMT
 hmt.Display()

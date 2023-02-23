@@ -18,15 +18,15 @@
 
 __version__ = "$Id$"
 
-import error
-import interface
+from . import error
+from . import interface
 
-from enums import likelihood_penalty_type
-from enums import smoothing_penalty_type
-from enums import outside_type
-from enums import compound_type
-from enums import estimator_type
-from enums import distribution_identifier_type as dist_type
+from .enums import likelihood_penalty_type
+from .enums import smoothing_penalty_type
+from .enums import outside_type
+from .enums import compound_type
+from .enums import estimator_type
+from .enums import distribution_identifier_type as dist_type
 
 from openalea.stat_tool._stat_tool import _DiscreteParametricModel
 from openalea.stat_tool._stat_tool import _DiscreteParametric
@@ -96,7 +96,7 @@ class EstimateFunctions(object):
         try:
             ident_id = dist_type[ident]
         except KeyError:
-            raise KeyError("Valid type are %s" % (str(dist_type.keys())))
+            raise KeyError("Valid type are %s" % (str(list(dist_type.keys()))))
 
 
         return histo.parametric_estimation(ident_id, MinInfBound, flag)
@@ -303,7 +303,7 @@ class EstimateFunctions(object):
                 Type = compound_type[Type]
         except KeyError:
             raise AttributeError("Bad type. Possible types are %s"
-                                 % (str(compound_type.keys())))
+                                 % (str(list(compound_type.keys()))))
 
         #The second argument is either a string (e.g.,"Sum") or an unknown
         #distribution.
@@ -431,7 +431,7 @@ def Estimate(histo, itype, *args, **kargs):
     Type = itype.upper()
 
     # sequence analysis case
-    if Type not in fct_map.keys():
+    if Type not in list(fct_map.keys()):
         try:
             from openalea.sequence_analysis.estimate import Estimate \
                 as SeqEstimate

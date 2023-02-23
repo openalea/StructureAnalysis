@@ -166,8 +166,8 @@ def test_bad_hmt_init_failure():
     msg = "Failed to raise exception for incorrect initial HMT"
     try:
         EH = T.Estimate("HIDDEN_MARKOV_TREE", hmt, 50)
-    except TypeError, e:
-        print e
+    except TypeError as e:
+        print(e)
     else:
         assert False, msg
 
@@ -180,8 +180,8 @@ def test_bad_variable_hmt_estimate():
     try:
         #SS.ToIntType(0)
         EH2 = SS.Estimate("HIDDEN_MARKOV_TREE", 2, "Irreductible", 0.999, 20)
-    except Warning, e:
-        print e
+    except Warning as e:
+        print(e)
     else:
         assert False, msg
 

@@ -236,7 +236,7 @@ seq0 = Sequences("data/chene_sessile_15pa.seq")
 # change of unit for the variable diameter of the annual shoot
 
 marginal2 = ExtractHistogram(seq0, "Value", 2)
-print marginal2
+print(marginal2)
 Plot(Cluster(marginal2, "Information", 0.75))
 Plot(Cluster(marginal2, "Information", 0.61))
 Plot(Cluster(marginal2, "Step", 10))

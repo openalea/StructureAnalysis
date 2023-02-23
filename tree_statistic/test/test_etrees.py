@@ -57,7 +57,7 @@ def test_copy_vid_bad_dic_list_no_check():
     TreeVidDictListCp = []
     for t in range(T.NbTrees()):
         TreeVidDictListCp.append(T.TreeVertexId(t))
-        for k in TreeVidDictListCp[t].keys():
+        for k in list(TreeVidDictListCp[t].keys()):
             TreeVidDictListCp[t][k] += 1
     T._SetMTGVidDictionary(TreeVidDictListCp)
     assert (T.TreeVertexId(0) == TreeVidDictListCp[0]), msg
@@ -69,12 +69,12 @@ def test_copy_vid_bad_dic_list_check():
     TreeVidDictListCp = []
     for t in range(T.NbTrees()):
         TreeVidDictListCp.append(T.TreeVertexId(t))
-        for k in TreeVidDictListCp[t].keys():
+        for k in list(TreeVidDictListCp[t].keys()):
             TreeVidDictListCp[t][k] += 1
     try:
         T._SetMTGVidDictionary(TreeVidDictListCp, ValidityCheck=True)
-    except IndexError, e:
-        print e
+    except IndexError as e:
+        print(e)
     else:
         assert False, msg
 
@@ -89,8 +89,8 @@ def test_copy_vid_bad_value_dic_list_check():
     TreeVidDictListCp[0][3] = 0
     try:
         T._SetMTGVidDictionary(TreeVidDictListCp, ValidityCheck=True)
-    except ValueError, e:
-        print e
+    except ValueError as e:
+        print(e)
     else:
         assert False, msg
 
@@ -102,23 +102,23 @@ def test_copy_vid_bad_type_dic_list_check():
     TreeVidDictListCp = []
     for t in range(T.NbTrees()):
         TreeVidDictListCp.append(T.TreeVertexId(t))
-        for k in TreeVidDictListCp[t].keys():
+        for k in list(TreeVidDictListCp[t].keys()):
             TreeVidDictListCp[t][k] = str(TreeVidDictListCp[t][k])
     try:
         T._SetMTGVidDictionary(TreeVidDictListCp, ValidityCheck=True)
-    except TypeError, e:
-        print e
+    except TypeError as e:
+        print(e)
     else:
         assert False, msg
     TreeVidDictListCp = []
     for t in range(T.NbTrees()):
         TreeVidDictListCp.append({})
-        for k in TreeVidDictList[t].keys():
+        for k in list(TreeVidDictList[t].keys()):
             TreeVidDictListCp[t][str(k)] = TreeVidDictList[t][k]
     try :
         T._SetMTGVidDictionary(TreeVidDictListCp, ValidityCheck=True)
-    except Exception, msg:
-        print msg
+    except Exception as msg:
+        print(msg)
     else:
         assert False, msg
 

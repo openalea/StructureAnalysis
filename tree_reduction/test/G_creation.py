@@ -147,15 +147,15 @@ def G_construction(node_list,edge_list,val_edges):
             list_edge[i][1]=list_edge[i][1]+[k1]
             G_edge[(equiv[node_list[i]],equiv[edge_list[node_list[i]][j]])]=string.replace(G_node[equiv[node_list[i]]][0],equiv[edge_list[node_list[i]][j]],'W')
     nbr_edge=nbr_arc_construction(G_edge)
-    for k in range(len(G_edge.keys())):
-      for j in range(len(nbr_edge.keys())):
-        if functions.equal_string(G_edge[G_edge.keys()[k]],nbr_edge.keys()[j]):
-          G_edge[G_edge.keys()[k]]=nbr_edge.keys()[j]    
+    for k in range(len(list(G_edge.keys()))):
+      for j in range(len(list(nbr_edge.keys()))):
+        if functions.equal_string(G_edge[list(G_edge.keys())[k]],list(nbr_edge.keys())[j]):
+          G_edge[list(G_edge.keys())[k]]=list(nbr_edge.keys())[j]    
     return list_node,list_edge,G_node,G_edge,nbr_edge,parameters,parameters1
     
 def nbr_arc_construction(G_edge):
     nbr_edge={}
-    d=G_edge.values()
+    d=list(G_edge.values())
     while d!=[]:
         val=d[0]
         d.remove(val)

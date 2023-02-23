@@ -51,7 +51,7 @@ class HiddenMarkovIndOutTree:
             self._attributes=["Variable " + str(i) for i in range(nbvariables)]
         else:
             msg="bad argument type: "+str(type(arg))
-            raise TypeError, msg
+            raise TypeError(msg)
 
     def Display(self, ViewPoint=None, Detail=None, TreeId=None, 
                 NbStateTrees=2, StateTrees="GeneralizedViterbi",
@@ -67,7 +67,7 @@ class HiddenMarkovIndOutTree:
             wp=ViewPoint
         if type(wp)!=str:        
             msg='bad type for argument "ViewPoint": '+str(type(wp))
-            raise TypeError, msg
+            raise TypeError(msg)
         if (wp.upper()=="DATA"):
             if (TreeId is None):
                 if ((Detail==1) or (Detail is None)):
@@ -77,33 +77,33 @@ class HiddenMarkovIndOutTree:
                 elif type(Detail)!=int:
                     msg="Bad type for 'Detail' argument:"+str(type(Detail)) \
                     +" - expecting type 'int'"
-                    raise TypeError, msg
+                    raise TypeError(msg)
                 else:
                     msg="Bad value for 'Detail' argument:"+str(Detail) \
                     +" - expecting 1 or 2"
-                    raise ValueError, msg
-                print self.__chmt.Display(exhaustive)
+                    raise ValueError(msg)
+                print(self.__chmt.Display(exhaustive))
             else:
                 msg="Argument 'TreeId' is not required when using "+\
                 'Display() or Display(ViewPoint="Data")'
-                raise ValueError, msg
+                raise ValueError(msg)
         elif (wp.upper()=="STATEPROFILE"):
             if (Detail is None):
                 if (TreeId is None):
-                    raise TypeError, "Argument 'TreeId' is mandatory in "+\
-                            'Display(ViewPoint="StateProfile", TreeId)'
+                    raise TypeError("Argument 'TreeId' is mandatory in "+\
+                            'Display(ViewPoint="StateProfile", TreeId)')
                 if (type(TreeId) != int):
                     msg='bad type for argument "TreeId": '\
                         +str(type(TreeId))
-                    raise TypeError, msg
+                    raise TypeError(msg)
                 if (type(NbStateTrees)!=int):
                     msg='bad type for argument "NbStateTrees": '\
                         +str(type(NbStateTrees))
-                    raise TypeError, msg
+                    raise TypeError(msg)
                 if not(RootVertex is None) and (type(RootVertex)!=int):
                     msg='bad type for argument "RootVertex": '\
                         +str(type(RootVertex))
-                    raise TypeError, msg
+                    raise TypeError(msg)
                 elif RootVertex is None:
                     rv = stat_tool.I_DEFAULT
                 else:
@@ -111,7 +111,7 @@ class HiddenMarkovIndOutTree:
                 if (type(Entropy)!=str):
                     msg='bad type for argument "Entropy": '\
                         +str(type(Entropy))
-                    raise TypeError, msg
+                    raise TypeError(msg)
                 elif (Entropy.upper()=="UPWARD"):
                     entropy_algo=EntropyAlgorithm.UPWARD
                 elif (Entropy.upper()=="DOWNWARD"):
@@ -119,14 +119,14 @@ class HiddenMarkovIndOutTree:
                 else:
                     msg="Bad value for 'Entropy' argument:"+str(Entropy) \
                     +" - expecting 'UPWARD' or 'DOWNWARD'"
-                    raise ValueError, msg    
+                    raise ValueError(msg)    
                 res = self.__chmt.StateProfile(0, NbStateTrees,
                                                 TreeId, entropy_algo,
                                                 rv)
                 profile_nature=0
                 for o in res:
                     if (type(o)==str):
-                        print o
+                        print(o)
                     else:
                         if profile_nature==0:
                             # smoothing
@@ -177,10 +177,10 @@ class HiddenMarkovIndOutTree:
             else:
                 msg="Argument 'Detail' is not required when using "+\
                 'Display(ViewPoint="StateProfile")'
-                raise ValueError, msg
+                raise ValueError(msg)
         else:
             msg='bad value for argument "ViewPoint": '+ViewPoint
-            raise ValueError, msg
+            raise ValueError(msg)
 
     def EntropyComputation(self, TreeId=None, UpwardEntropy=False):
         """
@@ -235,11 +235,11 @@ class HiddenMarkovIndOutTree:
 
         if type(nature)==str:
             if type(variable)!=int:
-                raise TypeError, "bad type for argument variable: " \
-                                    "type 'int' expected"
+                raise TypeError("bad type for argument variable: " \
+                                    "type 'int' expected")
             if type(value)!=int:
-                raise TypeError, "bad type for argument value: " \
-                                    "type 'int' expected"
+                raise TypeError("bad type for argument value: " \
+                                    "type 'int' expected")
             if nature.upper()=="FIRSTOCCURRENCEROOT":
                 chartype = CharacteristicType.FIRST_OCCURRENCE_ROOT
             elif nature.upper()=="FIRSTOCCURRENCELEAVES":
@@ -255,10 +255,10 @@ class HiddenMarkovIndOutTree:
                 chartype+=0
             else:
                 msg='bad value for argument "Nature": '+ nature
-                raise ValueError, msg
+                raise ValueError(msg)
             distrib = self.__chmt.Extract(chartype, variable+1, value)
         else:
-            raise TypeError, "bad type for argument 1: type 'str' expected"
+            raise TypeError("bad type for argument 1: type 'str' expected")
         return distrib
 
     def ExtractData(self):
@@ -272,12 +272,12 @@ class HiddenMarkovIndOutTree:
         
         Usage:  ExtractPlot(TreeId, ViewPoint="StateProfile")"""
         if (TreeId is None):
-            raise TypeError, "Argument 'TreeId' is mandatory in "+\
-                    'ExtractPlot(TreeId, ViewPoint="StateProfile")'
+            raise TypeError("Argument 'TreeId' is mandatory in "+\
+                    'ExtractPlot(TreeId, ViewPoint="StateProfile")')
         if (type(Entropy)!=str):
             msg='bad type for argument "Entropy": '\
                 +str(type(Entropy))
-            raise TypeError, msg
+            raise TypeError(msg)
         elif (Entropy.upper()=="UPWARD"):
             entropy_algo=EntropyAlgorithm.UPWARD
         elif (Entropy.upper()=="DOWNWARD"):
@@ -326,7 +326,7 @@ class HiddenMarkovIndOutTree:
         if type(ViewPoint)!=str:
             msg='bad type for argument "ViewPoint": '\
               +"type 'str' expected"
-            raise TypeError, msg
+            raise TypeError(msg)
         import os
         is_observation=False
         if ViewPoint.upper()=="FIRSTOCCURRENCEROOT":
@@ -342,7 +342,7 @@ class HiddenMarkovIndOutTree:
             is_observation=True
         elif ViewPoint.upper()!="STATEPROFILE":
             msg='bad value for argument "ViewPoint": '+ViewPoint
-            raise ValueError, msg
+            raise ValueError(msg)
         if ViewPoint.upper()!="STATEPROFILE":
             try:
                 w = self.__chmt.NbValues(variable)
@@ -362,17 +362,17 @@ class HiddenMarkovIndOutTree:
             self.__chmt.plot(Title=Title, Suffix=file_id)
         else: # ViewPoint.upper()=="STATEPROFILE"
             if (type(TreeId)!=int):
-                raise TypeError, "bad tree index type: "+str(type(TreeId))
+                raise TypeError("bad tree index type: "+str(type(TreeId)))
             elif (TreeId < 0):
-                raise IndexError, "bad tree index value: "+str(variable)
+                raise IndexError("bad tree index value: "+str(variable))
             elif (type(EndVertex)!=int):
                 msg="bad type for vertex identifier: " + \
                          str(type(EndVertex))
-                raise TypeError, msg
+                raise TypeError(msg)
             if (type(Entropy)!=str):
                 msg='bad type for argument "Entropy": '\
                     +str(type(Entropy))
-                raise TypeError, msg
+                raise TypeError(msg)
             elif (Entropy.upper()=="UPWARD"):
                 entropy_algo=EntropyAlgorithm.UPWARD
             elif (Entropy.upper()=="DOWNWARD"):
@@ -380,7 +380,7 @@ class HiddenMarkovIndOutTree:
             else:
                 msg="Bad value for 'Entropy' argument:"+str(Entropy) \
                 +" - expecting 'UPWARD' or 'DOWNWARD'"
-                raise ValueError, msg    
+                raise ValueError(msg)    
             ref_file_id=""
             file_id=ref_file_id
             self.__chmt.plot(Title=Title, Suffix=file_id,
@@ -400,7 +400,7 @@ class HiddenMarkovIndOutTree:
         if type(ViewPoint)!=str:
             msg='bad type for argument "ViewPoint": '\
               +"type 'str' expected"
-            raise TypeError, msg
+            raise TypeError(msg)
         import os
         is_observation=False
         if ViewPoint.upper()=="FIRSTOCCURRENCEROOT":
@@ -416,12 +416,12 @@ class HiddenMarkovIndOutTree:
             is_observation=True
         else:
             msg='bad value for argument "ViewPoint": '+ViewPoint
-            raise ValueError, msg
+            raise ValueError(msg)
         try:
             w = self.__chmt.NbValues(variable)
         except StatTreeError:
             msg = "variable index out of range: "+str(variable)
-            raise IndexError, msg          
+            raise IndexError(msg)          
         # part of the filename which identifies the involved variable
         ref_file_id = str(variable+1)
         # part of the filename which identifies the graph to be displayed
@@ -449,13 +449,13 @@ class HiddenMarkovIndOutTree:
                 f=file(file_name, 'w+')
             else:
                 msg="File "+file_name+" already exists"
-                raise IOError, msg
+                raise IOError(msg)
             f.close()
         import string
         if not (string.upper(format)=="ASCII" 
                 or string.upper(format)=="SPREADSHEET"):
             msg="unknown file format: "+str(format)
-            raise ValueError, msg
+            raise ValueError(msg)
         elif (string.upper(format)=="ASCII"):
             self.__chmt.FileAsciiWrite(file_name)
         else:
@@ -472,16 +472,16 @@ class HiddenMarkovIndOutTree:
         if (type(arg1)==int) and (type(arg2)==int):
             # Simulate(sample_size, tree_size, nb_children)
             if arg3 is None:
-                raise TypeError, "argument 3 is mandatory in " \
-                    "Simulate(int, int, int)"
+                raise TypeError("argument 3 is mandatory in " \
+                    "Simulate(int, int, int)")
             chmt_data= self.__chmt.Simulate(arg1, arg2, arg3, True)
         elif type(arg1)==int:
             # Simulate(sample_size, Trees)
             if issubclass(arg2.__class__, trees.Trees):
                 chmt_data= self.__chmt.Simulate(arg1, arg2._ctrees(), True)
             else:
-                raise TypeError, "bad type for argument 2: trees.Trees " \
-                                    "expected"
+                raise TypeError("bad type for argument 2: trees.Trees " \
+                                    "expected")
         elif issubclass(arg1.__class__, stat_tool.histogram._DiscreteDistributionData):
             # Simulate(size_histo, nb_children_histo)
             expected_class = stat_tool.histogram._DiscreteDistributionData
@@ -492,11 +492,11 @@ class HiddenMarkovIndOutTree:
                 else:
                     msg = "bad type for argument 2:  " +  \
                           str(expected_class) + "expected"
-                    raise TypeError, msg
+                    raise TypeError(msg)
             else:
                 msg = "bad type for argument 1:  " +  \
                         str(expected_class) + "expected"
-                raise TypeError, msg
+                raise TypeError(msg)
         else:
             # Simulate(Trees)
             expected_class = trees.Trees
@@ -505,7 +505,7 @@ class HiddenMarkovIndOutTree:
             if issubclass(arg1.__class__, expected_class):
                 chmt_data = self.__chmt.Simulate(arg1._ctrees(), True)
             else:
-                raise TypeError, msg
+                raise TypeError(msg)
         chmt_data = chmt_data.StateTrees()
         return HiddenMarkovTreeData(chmt_data, self, True)
 
@@ -577,7 +577,7 @@ class HiddenMarkovTreeData(trees.Trees):
         elif issubclass(trees_object.__class__, trees.Trees):
             # ... or a Trees object...
             if trees_object is None:
-                raise ValueError, "second argument is mandatory"
+                raise ValueError("second argument is mandatory")
             elif issubclass(markov.__class__, HiddenMarkovIndOutTree):
                 # ... and the second argument must be a HiddenMarkovIndOutTree
                 # in the latter case
@@ -586,10 +586,10 @@ class HiddenMarkovTreeData(trees.Trees):
                 self.__ctrees=_hmt.CHmt_data(super(HiddenMarkovTreeData, self)._ctrees(), markov._chmt())
             else:
                 msg="bad type for second argument: "+str(type(trees_object))
-                raise TypeError, msg                
+                raise TypeError(msg)                
         else:
             msg="bad type for first argument: "+str(type(trees_object))
-            raise TypeError, msg
+            raise TypeError(msg)
 ##        if not (attribute_names is None):
 ##            self.__attributes=list(attribute_names)
 
@@ -617,7 +617,7 @@ class HiddenMarkovTreeData(trees.Trees):
             check_error.CheckType([variable], [int])
             if (variable < 1) or (variable > self.NbVariables()):
                 msg = "bad variable: " + str(variable)
-                raise IndexError, msg
+                raise IndexError(msg)
             chisto = self.__ctrees.ExtractMarginal(variable+1)
         elif ((nature.upper()=="FIRSTOCCURRENCEROOT") or
                 (nature.upper()=="FIRSTOCCURRENCELEAVES") or
@@ -634,14 +634,14 @@ class HiddenMarkovTreeData(trees.Trees):
                 else:
                     msg = 'argument 2 is mandatory in ExtractHistogram' + \
                             '(FeatureName, variable, state/value)'
-                    raise TypeError, msg
+                    raise TypeError(msg)
             if state is None:
                 # value argument is mandatory
-                raise TypeError, 'argument 3 is mandatory in ' \
-                    'ExtractHistogram(FeatureName, variable, state/value)'
+                raise TypeError('argument 3 is mandatory in ' \
+                    'ExtractHistogram(FeatureName, variable, state/value)')
             elif type(state)!=int:
-                raise TypeError, "bad type for argument 3: " \
-                                    "type 'int' expected"
+                raise TypeError("bad type for argument 3: " \
+                                    "type 'int' expected")
             if nature.upper()=="FIRSTOCCURRENCEROOT":
                 chartype = CharacteristicType.FIRST_OCCURRENCE_ROOT
             elif nature.upper()=="FIRSTOCCURRENCELEAVES":
@@ -676,7 +676,7 @@ class HiddenMarkovTreeData(trees.Trees):
         if type(ViewPoint)!=str:
             msg='bad type for argument "ViewPoint": '\
               +"type 'str' expected"
-            raise TypeError, msg
+            raise TypeError(msg)
         if (ViewPoint.upper()!="OBSERVATION"):
             # use Plot for Trees
             trees.Trees.Plot(self, ViewPoint, Length, BottomDiameter,
@@ -692,7 +692,7 @@ class HiddenMarkovTreeData(trees.Trees):
             else:
                 msg = "Bad variable type for variable ", variable, ": " + \
                       str(self.Type(variable))
-                raise TypeError, msg
+                raise TypeError(msg)
             ref_file_id = str(cvariable)
             # if the number of values is low for variable, 
             # each characteristic is drawn into a file with "0" suffix
@@ -722,15 +722,15 @@ class HiddenMarkovTreeData(trees.Trees):
             " of the hidden states"
         i = s.find("VARIABLE 1 : STATE", 0)
         if i == -1:
-            raise Warning, msg
+            raise Warning(msg)
         i = s.find("state marginal frequency distribution - sample size", i+1)
         if i == -1:
-            raise Warning, msg
+            raise Warning(msg)
         i=s.find("| frequency", i+1)
         if i == -1:
-            raise Warning, msg
+            raise Warning(msg)
         nb_states=self.__ctrees.NbValues(0)
-        res=range(nb_states)
+        res=list(range(nb_states))
         total=0.
         for v in range(nb_states):
             i=s.find(str(v), i+1)
@@ -738,7 +738,7 @@ class HiddenMarkovTreeData(trees.Trees):
             try:
                 res[v]=int(s[i+len(str(v)):e])
             except ValueError:
-                raise Warning, msg
+                raise Warning(msg)
             total+=res[v]
             i=e
         for v in range(nb_states):

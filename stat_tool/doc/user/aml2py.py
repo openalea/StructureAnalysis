@@ -14,9 +14,9 @@ meri5 = Histogram("../../test/data/meri5.his")
 
 #Merge the histograms
 meri_a = Merge(meri1, meri2, meri3, meri4, meri5)
-print meri_a.display()
+print(meri_a.display())
 
 meri_b = meri1.merge([meri2, meri3, meri4, meri5])
-print meri_b.display()
+print(meri_b.display())
 
 

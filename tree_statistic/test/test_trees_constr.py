@@ -90,12 +90,12 @@ def setup_func():
 def test_types():
     """Test the variables types"""
     msg = "Type lengths do not match"
-    print(T.Types())
+    print((T.Types()))
     assert len(T.Types()) == len(tv), msg
         
 def test_display():
-    print(T.Display(Detail=1))
-    print(T.Display(Detail=2))
+    print((T.Display(Detail=1)))
+    print((T.Display(Detail=2)))
     T.Display(ViewPoint="DATA", Detail=1)
 
 def test_tree():
@@ -166,7 +166,7 @@ def test_mtg_vertices():
     msg1 += str(d) + "\n - should be \n" + str(d_check)
     assert (d == d_check), msg1
     d2 = {}
-    for k in d.keys():
+    for k in list(d.keys()):
         d2[d[k]] = k
     msg2 += str(d2) + "\n - should be \n" + str(mtg_t.TreeVertexId(0))
     assert (d2 == mtg_t.TreeVertexId(0)), msg2
@@ -200,8 +200,8 @@ def test_exception_inheritance():
     mtg_t = test_mtg_build()
     try:
         T = mtg_t.Cluster("Step", 0, -10)
-    except trees.StatError, msg:
-        print msg
+    except trees.StatError as msg:
+        print(msg)
     else:
         msg = "Failed to catch StatTreeError as StatError exception"
         assert False, msg
@@ -222,8 +222,8 @@ def test_mtg_build_failure():
     """use invalid MTG file name"""
     try:
         T = trees.Trees("no_such_file.t\/t")
-    except IOError, e:
-        print e
+    except IOError as e:
+        print(e)
     else:
         msg = "Failed to raise exception for invalid MTG file name"
         assert False, msg
@@ -232,8 +232,8 @@ def test_list_build_failure():
     """use list of trees"""
     try:
         T = trees.Trees([0])
-    except TypeError, e:
-        print e
+    except TypeError as e:
+        print(e)
     else:
         msg = "Failed to raise exception for invalid elements in tree list"
         assert False, msg
@@ -244,8 +244,8 @@ def test_build_attribute_failure():
     filter = lambda x: True
     try:
         T = trees.Trees(mtg_name, filter, [], [f], scale=2)
-    except ValueError, v:
-        print v
+    except ValueError as v:
+        print(v)
     else:
         msg = "Failed to raise exception for inconsistent attribute number"
         assert False, msg
@@ -257,8 +257,8 @@ def test_attribute_name_failure():
     filter = lambda x: True
     try:
         T = trees.Trees(mtg_name, filter, [f], [f], scale=2)
-    except TypeError, t:
-        print t
+    except TypeError as t:
+        print(t)
     else:
         msg = "Failed to raise exception for bad attribute name"
         assert False, msg
@@ -270,8 +270,8 @@ def test_attribute_function_failure():
     try:
         T = trees.Trees(mtg_name, filter, attributes, attributes,
                         scale=2)
-    except TypeError, t:
-        print t
+    except TypeError as t:
+        print(t)
     else:
         msg = "Failed to raise exception for bad attribute function"
         assert False, msg
@@ -283,10 +283,10 @@ def test_attribute_type_failure():
     try:
         T = trees.Trees(mtg_name, filter, attributes,
                         [lambda x: "z"], scale=2)
-    except TypeError, t:
-        print t
+    except TypeError as t:
+        print(t)
     else:
-        print "Failed to raise exception for bad attribute type"
+        print("Failed to raise exception for bad attribute type")
     return 0
 
 def test_attribute_name_failure():
@@ -295,8 +295,8 @@ def test_attribute_name_failure():
     f = lambda x: 1
     try:
         T = trees.Trees(mtg_name, filter, [f], [f], scale=2)
-    except TypeError, t:
-        print t
+    except TypeError as t:
+        print(t)
     else:
         msg = "Failed to raise exception for bad attribute name"
         assert False, msg
@@ -308,8 +308,8 @@ def test_filter_failure():
     attributes = ["anything"]
     try:
         T = trees.Trees(mtg_name, attributes, attributes, [f], scale=2)
-    except TypeError, t:
-        print t
+    except TypeError as t:
+        print(t)
     else:
         msg = "Failed to raise exception for bad attribute function"
         assert False, msg
@@ -321,8 +321,8 @@ def test_nonrecursive_filter_failure():
     try:
         T = trees.Trees(mtg_name, lambda x: x != 24, attributes, [f],
                         scale=2)
-    except IndexError, i:
-        print i
+    except IndexError as i:
+        print(i)
     else:
         msg = "Failed to raise exception for filter not filtering descendants"
         assert False, msg
@@ -334,8 +334,8 @@ def test_filter_type_failure():
     attributes = ["anything"]
     try:
         T = trees.Trees(mtg_name, filt, attributes, [f], scale=2)
-    except TypeError, t:
-        print t
+    except TypeError as t:
+        print(t)
     else:
         msg = "Failed to raise exception for bad filter type"
         assert False, msg

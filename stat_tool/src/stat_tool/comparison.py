@@ -15,10 +15,10 @@
 """
 __version__ = "$Id$"
 
-import error
+from . import error
 
-from enums import variable_type
-from enums import format_type
+from .enums import variable_type
+from .enums import format_type
 
 
 from openalea.stat_tool._stat_tool import \
@@ -61,9 +61,9 @@ def compare_histo(histo, *args, **kargs):
 
     """
     utype = args[-1]
-    if utype not in variable_type.keys():
+    if utype not in list(variable_type.keys()):
         raise KeyError("%s not found. Allowed keys are %s"
-                       % (utype, variable_type.keys()))
+                       % (utype, list(variable_type.keys())))
 
 
     utype = variable_type[args[-1]]
@@ -243,7 +243,7 @@ def ComparisonTest(utype, histo1, histo2):
 	    "w": "wmw_comparison",
 	    }
 
-    if not type_dict.has_key(utype):
+    if utype not in type_dict:
         raise TypeError("to be done")
 
     func = getattr(histo1, type_dict[utype])

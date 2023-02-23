@@ -22,7 +22,7 @@ url = 'http://openalea.gforge.inria.fr'
 license = 'Cecill-C'
 
 packages = [ namespace+"."+pkg for pkg in find_packages('src') if 'vplants' not in pkg]
-print pkg_name
+print(pkg_name)
 setup(
     name=name,
     version=version,

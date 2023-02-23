@@ -45,7 +45,7 @@ if("nosetests" in sys.argv[0]):
 def adapt2list(arg):
     if arg is None:
         return []
-    elif type(arg) == types.ListType:
+    elif type(arg) == list:
         return arg
     else:
         return [arg]
@@ -207,7 +207,7 @@ def py_plot( obj, fig_id=1, title='', viewpoint="v", **kargs):
     if DISABLE_PLOT:
         return
     if obj:
-        if type(obj) == types.ListType:
+        if type(obj) == list:
             status = Plot(*obj, FigureId=fig_id, ViewPoint=viewpoint, **kargs)
         else:
             Plot(obj, FigureId=fig_id, ViewPoint=viewpoint, **kargs)
@@ -218,7 +218,7 @@ def py_plot_segprofile(seq, ind, nb_seg, model, output):
     if seq:
         args= [seq, ind, nb_seg]
         model = model.split(',')
-        model = map(lambda x:x.strip(),model)
+        model = [x.strip() for x in model]
         args.extend(model)
         kwds={'ViewPoint':'SegmentProfile', 'Output':output}
         Plot(*args, **kwds)
@@ -251,7 +251,7 @@ class PyObjectFromFile(Node):
         Node.__init__(self)
         self.add_input(name="filename", interface=IFileStr)
         self.add_input(name="Type", 
-                       interface = IEnumStr(self.Types.keys()), 
+                       interface = IEnumStr(list(self.Types.keys())), 
                        value = "BINOMIAL")
         self.add_output(name='Model')
         self.set_caption("import model")
@@ -336,7 +336,7 @@ def py_estimate_mixture( histo,
     args.append("MIXTURE")
 
     mix = components.split(',')
-    mix = map(lambda x:x.strip(),mix)
+    mix = [x.strip() for x in mix]
     args.extend(mix)
 
     kwds = {}
@@ -462,7 +462,7 @@ def py_estimate_distrib( histo,
 def py_merge( data ):
     
     if data:
-        if type(data) == types.ListType:
+        if type(data) == list:
             return Merge(*data)
         else:
             return Merge(data)
@@ -562,7 +562,7 @@ def py_segmentation(seq, ind, nb_segment, change_points,  model_list, model, NbS
     else:
         args.append(nb_segment)
     model = model.split(',')
-    model = map(lambda x:x.strip(),model)
+    model = [x.strip() for x in model]
     args.extend(model)
 
     if change_points:
@@ -583,7 +583,7 @@ def py_segmentation_sample(seq, nb_segment, model_list, model, Output):
     args= [seq, nb_segment]
 
     model = model.split(',')
-    model = map(lambda x:x.strip(),model)
+    model = [x.strip() for x in model]
     args.extend(model)
 
     kwds['Output']=Output
@@ -641,7 +641,7 @@ def py_regression(vec, regressionModel, explanatoryVariable, responseVariable, f
         elif distribution:
             reg = Regression(vec, regressionModel, explanatoryVariable, responseVariable, distribution, Algorithm=Algorithm)
         else:
-            raise "Missing filter parameters: Please, give us filter, frequencies or distribution to estimate a MovingAverage regression."
+            raise Exception("Missing filter parameters: Please, give us filter, frequencies or distribution to estimate a MovingAverage regression.")
     else:
         reg = Regression(vec, regressionModel, explanatoryVariable, responseVariable, span, Weighting=Weighting)
     return reg,

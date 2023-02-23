@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import os, commands, string
+import os, subprocess, string
 
 #Sources
 
@@ -24,14 +24,14 @@ test_hidden_markov_ind_out_trees_viterbi
 
 def check(p):
     os.popen("./"+p+" > output_current_test.txt")
-    res = commands.getoutput("diff output_current_test.txt Outputs/output_"+p+".txt")
+    res = subprocess.getoutput("diff output_current_test.txt Outputs/output_"+p+".txt")
     if res!='':
         chain = "actual and theoretical outputs differ for " + str(p) + ": \n" + str(res) + "\n"
-        print chain
+        print(chain)
     else:
         chain =  "actual and theoretical ouputs match for " + str(p) + "\n"
-        print chain
+        print(chain)
     return chain
 
-diffs = map(check, tests)
+diffs = list(map(check, tests))
 

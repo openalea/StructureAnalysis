@@ -16,7 +16,7 @@ __version__ = "$Id$"
 
 __all__ = ["Simulate"]
 
-import error
+from . import error
 
 
 def Simulate(obj, *args):

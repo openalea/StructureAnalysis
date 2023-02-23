@@ -49,7 +49,7 @@ def mapping_cgraph_test1(graph):
         edges_weight[i]=int(graph.edges[i].label)"""
     root=1        
     g = from_edges(root, edges, edges_weight)
-    print nb_nodes(graph), k
+    print(nb_nodes(graph), k)
     if (nb_nodes(graph)>1):
         assert g.nb_vertices() == nb_nodes(graph)
         assert g.nb_edges() == k
@@ -113,7 +113,7 @@ def parents(vid,E):
         if vid in D[i][1]:
             par.append(D[i][0])"""
     par=[]
-    K=E.keys()
+    K=list(E.keys())
     for i in range(len(K)):
         if K[i][1]==vid:
             par.append(K[i][0])
@@ -190,7 +190,7 @@ def MQPP(vid, g, edge, signat_edges):
                 while (not find) and i<len(Q):
                     lQ=len(Q[i])-1
                     vidf2=g._edges[Q[i][lQ]][1]
-                    if vidf2 in edge.keys():
+                    if vidf2 in list(edge.keys()):
                         D2=edge[vidf2]
                         cmpt=0
                         for j in range(len(D2)):
@@ -478,7 +478,7 @@ def overlap_select(g, list_node, MQPPRTOVERL, MQPPRTINCL):
         step=1
         stop=False
         while step<len(noeuds) and stop==False:
-            print 'CLIQUES',cliques
+            print('CLIQUES',cliques)
             stop=True
             for j in range(len(cliques)):
                 sets=[]
@@ -509,7 +509,7 @@ def overlap_select(g, list_node, MQPPRTOVERL, MQPPRTINCL):
                 trouv=False
                 k1=0
                 while k1<len(cliques[j]) and not(trouv):
-                    if k1<>k:
+                    if k1!=k:
                         if paths_perfect_inclusion(OV[i][cliques[j][k][0]],OV[i][cliques[j][k1][0]]):
                             trouv=True
                     k1=k1+1
@@ -556,8 +556,8 @@ def quotient_graph(g,node,edge,val,MQPPRTINDEP,MQPPRTINCL):
     NBsupE=0
     V=node[:]
     E={}
-    for i in range(len(val.keys())):
-        E[val.keys()[i]]=val[val.keys()[i]]
+    for i in range(len(list(val.keys()))):
+        E[list(val.keys())[i]]=val[list(val.keys())[i]]
     RE={}
     FE={}
     PE={}
@@ -570,7 +570,7 @@ def quotient_graph(g,node,edge,val,MQPPRTINDEP,MQPPRTINCL):
         RE=gre[2]
         FE=gre[3]
         PE=gre[4]
-        if gre[5]<>[]:
+        if gre[5]!=[]:
             initial_returns=gre[5]
         NBsupE=gre[6]
 
@@ -581,7 +581,7 @@ def quotient_graph(g,node,edge,val,MQPPRTINDEP,MQPPRTINCL):
         RE=gre[2]
         FE=gre[3]
         PE=gre[4]
-        if gre[5]<>[]:
+        if gre[5]!=[]:
             initial_returns=gre[5]
         NBsupE=gre[6]
  
@@ -609,14 +609,14 @@ def reduceindep(g,node,edge,val,NBsupE,V,E,RE,FE,PE,path):
     
     """create the final edge"""
     FE[(P[0][len(P[0])-2],P[len(P)-1][len(P[len(P)-1])-1])]=val[(P[0][len(P[0])-2],P[0][len(P[0])-1])]
-    if (P[0][len(P[0])-2],P[0][len(P[0])-1]) in E.keys():
+    if (P[0][len(P[0])-2],P[0][len(P[0])-1]) in list(E.keys()):
         E.pop((P[0][len(P[0])-2],P[0][len(P[0])-1]))
 
     """supression des arcs du path P"""
     i=1
     while i<len(P):
         for j in range(len(P[i])-1):
-            if (P[i][j],P[i][j+1]) in E.keys():
+            if (P[i][j],P[i][j+1]) in list(E.keys()):
                 E.pop((P[i][j],P[i][j+1]))
                 NBsupE+=1
         i+=1
@@ -633,7 +633,7 @@ def reduceindep(g,node,edge,val,NBsupE,V,E,RE,FE,PE,path):
             for k in range(len(par)):
                 if par[k] not in pp:
                     PE[(par[k],P[0][j],val[(par[k],P[i][j])])]=[alpha]
-                    if (par[k],P[i][j]) in E.keys():
+                    if (par[k],P[i][j]) in list(E.keys()):
                         E.pop((par[k],P[i][j]))
     initial_returns=[]
     if len(parents(P[0][0],E))==0 and len(parents(P[0][0],PE))==0 and len(parents(P[0][0],FE))==0:
@@ -645,33 +645,33 @@ def reduceindep(g,node,edge,val,NBsupE,V,E,RE,FE,PE,path):
         while not stop:
             stop=True
             KE=[]
-            for i in range(len(E.keys())):
-                KE.append(E.keys()[i][1])
+            for i in range(len(list(E.keys()))):
+                KE.append(list(E.keys())[i][1])
             KRE=[]
-            for i in range(len(RE.keys())):
-                KRE.append(RE.keys()[i][1])
+            for i in range(len(list(RE.keys()))):
+                KRE.append(list(RE.keys())[i][1])
             KFE=[]
-            for i in range(len(FE.keys())):
-                KFE.append(FE.keys()[i][1])
+            for i in range(len(list(FE.keys()))):
+                KFE.append(list(FE.keys())[i][1])
             KPE=[]
-            for i in range(len(PE.keys())):
-                KPE.append(PE.keys()[i][1])
+            for i in range(len(list(PE.keys()))):
+                KPE.append(list(PE.keys())[i][1])
             i=0
             while i<len(V):
-                if (V[i]<>g.root) and (V[i] not in KE) and (V[i] not in KRE) and (V[i] not in KFE) and (V[i] not in KPE):
+                if (V[i]!=g.root) and (V[i] not in KE) and (V[i] not in KRE) and (V[i] not in KFE) and (V[i] not in KPE):
                     stop=False
                     """supprimer les edges sortants de V[i]"""
                     j=0
-                    while j<len(E.keys()):
-                        if E.keys()[j][0]==V[i]:
-                            E.pop(E.keys()[j])
+                    while j<len(list(E.keys())):
+                        if list(E.keys())[j][0]==V[i]:
+                            E.pop(list(E.keys())[j])
                             NBsupE+=1
                         else:
                             j+=1
                     j=0
-                    while j<len(PE.keys()):
-                        if PE.keys()[j][0]==V[i]:
-                            PE.pop(PE.keys()[j])
+                    while j<len(list(PE.keys())):
+                        if list(PE.keys())[j][0]==V[i]:
+                            PE.pop(list(PE.keys())[j])
                             NBsupE+=1
                         else:
                             j+=1
@@ -679,7 +679,7 @@ def reduceindep(g,node,edge,val,NBsupE,V,E,RE,FE,PE,path):
                 else:
                     i+=1
         
-        K=PE.keys()
+        K=list(PE.keys())
         for i in range(len(K)):
             if (K[i][0] not in V) or (K[i][1] not in V):
                 PE.pop(K[i])
@@ -712,14 +712,14 @@ def reduceincl(g,node,edge,val,NBsupE,V,E,RE,FE,PE,seq):
 
         """create the final edge"""
         FE[(P[0][len(P[0])-2],P[len(P)-1][len(P[len(P)-1])-1])]=val[(P[0][len(P[0])-2],P[0][len(P[0])-1])]
-        if (P[0][len(P[0])-2],P[0][len(P[0])-1]) in E.keys():
+        if (P[0][len(P[0])-2],P[0][len(P[0])-1]) in list(E.keys()):
             E.pop((P[0][len(P[0])-2],P[0][len(P[0])-1]))
 
         """supression des arcs du path P"""
         i=1
         while i<len(P):
             for j in range(len(P[i])-1):
-                if (P[i][j],P[i][j+1]) in E.keys():
+                if (P[i][j],P[i][j+1]) in list(E.keys()):
                     E.pop((P[i][j],P[i][j+1]))
                     NBsupE+=1
             i+=1
@@ -737,15 +737,15 @@ def reduceincl(g,node,edge,val,NBsupE,V,E,RE,FE,PE,seq):
                     for k in range(len(par)):
                         if par[k] not in pp:
                             PE[(par[k],P[0][j],val[(par[k],P[i][j])])]=[alpha]
-                            if (par[k],P[i][j]) in E.keys():
+                            if (par[k],P[i][j]) in list(E.keys()):
                                 E.pop((par[k],P[i][j]))
                 else:
-                    par=PE.keys()
+                    par=list(PE.keys())
                     for k in range(len(par)):
                         if par[k][1]==P[i][j]:
                             PE[(par[k][0],P[0][j],par[k][2])]=PE[(par[k][0],P[i][j],par[k][2])]
                             PE[(par[k][0],P[0][j],par[k][2])].append(alpha)
-                            if P[i][j]<>P[0][j]:
+                            if P[i][j]!=P[0][j]:
                                 PE.pop((par[k][0],P[i][j],par[k][2]))
         a=a-1
         if len(parents(P[0][0],E))==0 and len(parents(P[0][0],PE))==0 and len(parents(P[0][0],FE))==0: 
@@ -756,33 +756,33 @@ def reduceincl(g,node,edge,val,NBsupE,V,E,RE,FE,PE,seq):
         while not stop:
             stop=True
             KE=[]
-            for i in range(len(E.keys())):
-                KE.append(E.keys()[i][1])
+            for i in range(len(list(E.keys()))):
+                KE.append(list(E.keys())[i][1])
             KRE=[]
-            for i in range(len(RE.keys())):
-                KRE.append(RE.keys()[i][1])
+            for i in range(len(list(RE.keys()))):
+                KRE.append(list(RE.keys())[i][1])
             KFE=[]
-            for i in range(len(FE.keys())):
-                KFE.append(FE.keys()[i][1])
+            for i in range(len(list(FE.keys()))):
+                KFE.append(list(FE.keys())[i][1])
             KPE=[]
-            for i in range(len(PE.keys())):
-                KPE.append(PE.keys()[i][1])
+            for i in range(len(list(PE.keys()))):
+                KPE.append(list(PE.keys())[i][1])
             i=0
             while i<len(V):
-                if (V[i]<>g.root) and (V[i] not in KE) and (V[i] not in KRE) and (V[i] not in KFE) and (V[i] not in KPE):
+                if (V[i]!=g.root) and (V[i] not in KE) and (V[i] not in KRE) and (V[i] not in KFE) and (V[i] not in KPE):
                     stop=False
                     """supprimer les edges sortants de V[i]"""
                     j=0
-                    while j<len(E.keys()):
-                        if E.keys()[j][0]==V[i]:
-                            E.pop(E.keys()[j])
+                    while j<len(list(E.keys())):
+                        if list(E.keys())[j][0]==V[i]:
+                            E.pop(list(E.keys())[j])
                             NBsupE+=1
                         else:
                             j+=1
                     j=0
-                    while j<len(PE.keys()):
-                        if PE.keys()[j][0]==V[i]:
-                            PE.pop(PE.keys()[j])
+                    while j<len(list(PE.keys())):
+                        if list(PE.keys())[j][0]==V[i]:
+                            PE.pop(list(PE.keys())[j])
                             NBsupE+=1
                         else:
                             j+=1
@@ -790,7 +790,7 @@ def reduceincl(g,node,edge,val,NBsupE,V,E,RE,FE,PE,seq):
                 else:
                     i+=1
 
-        K=PE.keys()
+        K=list(PE.keys())
         for i in range(len(K)):
             if (K[i][0] not in V) or (K[i][1] not in V):
                 PE.pop(K[i])
@@ -843,15 +843,15 @@ if(__name__ == "__main__"):
     S=signat_vert_comp(G)
     E=signat_edg_comp(G, S)
     Paths=MQPPRT(G, edge, E)
-    print 'paths', Paths
+    print('paths', Paths)
     MQPPRTINDEP=MQPPRT_classes(G, Paths, list_node)[0]
     MQPPRTOVERL=MQPPRT_classes(G, Paths, list_node)[1]
     MQPPRTINCL=MQPPRT_classes(G, Paths, list_node)[2]
-    print 'MQPPRTINDEP',MQPPRTINDEP
-    print 'MQPPOVERL',MQPPRTOVERL
-    print 'MQPPINCL',MQPPRTINCL
+    print('MQPPRTINDEP',MQPPRTINDEP)
+    print('MQPPOVERL',MQPPRTOVERL)
+    print('MQPPINCL',MQPPRTINCL)
     selection=overlap_select(G,list_node,MQPPRTOVERL,MQPPRTINCL)
-    print 'selection', selection
+    print('selection', selection)
     for i in range(len(MQPPRTOVERL)):
         for j in range(len(MQPPRTOVERL[i])):
             p=MQPPRTOVERL[i][j]
@@ -911,28 +911,28 @@ if(__name__ == "__main__"):
     PE=List[4]
     initial_returns=List[5]
     NBsupE=List[6]
-    print 'resulting graph'
-    print 'V',V
-    print 'E',E
-    print 'RE',RE
-    print 'FE',FE
-    print 'PE',PE
-    print 'initial returns',initial_returns
+    print('resulting graph')
+    print('V',V)
+    print('E',E)
+    print('RE',RE)
+    print('FE',FE)
+    print('PE',PE)
+    print('initial returns',initial_returns)
             
     TN=len(list_node)
-    Tedge=len(val.keys())
+    Tedge=len(list(val.keys()))
     initial=TN+Tedge
-    print 'taille init',initial
+    print('taille init',initial)
     TV=len(V)
-    TE=len(E.keys())
-    TRE=len(RE.keys())
-    TFE=len(FE.keys())
-    TPE=len(PE.keys())
+    TE=len(list(E.keys()))
+    TRE=len(list(RE.keys()))
+    TFE=len(list(FE.keys()))
+    TPE=len(list(PE.keys()))
     final=TV+TE+TRE+TFE+TPE
     """print final"""
     if (initial>0):
         gain=initial-final
-        print 'the gain',gain
+        print('the gain',gain)
         icf=1-(final.__float__()/initial.__float__())
-        print 'the improved compression factor=',icf
+        print('the improved compression factor=',icf)
         #print nRe.__float__(), nR.__float__()

@@ -350,8 +350,8 @@ class Test(interface):
 
         See also the vector case!"""
         seq = self.seqn
-        assert  str(seq.transcode(1, [0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,01,1,1,1,1,0,0], False))==\
-            str(Transcode(seq, 1, [0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,01,1,1,1,1,0,0]))
+        assert  str(seq.transcode(1, [0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0o1,1,1,1,1,0,0], False))==\
+            str(Transcode(seq, 1, [0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0o1,1,1,1,1,0,0]))
 
     def test_reverse(self):
         """reverse to be checked. seems to give same output as input"""

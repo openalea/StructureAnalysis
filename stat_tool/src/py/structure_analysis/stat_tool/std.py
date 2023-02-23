@@ -5,7 +5,7 @@ class Iterator(object):
         self.current = begin
         self.end = end
 
-    def next(self):
+    def __next__(self):
         if self.current == self.end:
             raise StopIteration()
         current = self.current.__next__(0)

@@ -92,7 +92,7 @@ def test():
     Plot(mixt2)
     Plot(ExtractDistribution(mixt2, "Mixture"))
 
-    print type(ExtractDistribution(mixt2, "Component", 1))
+    print(type(ExtractDistribution(mixt2, "Component", 1)))
 
 
     Plot(ExtractDistribution(mixt2, "Component", 1),

@@ -124,7 +124,7 @@ def load_ipython_extension(ipython):
                                 fig.hold(True)
                     #        break # nothing else to be done in principle
                         else:
-                            print "Warning. Empty data."
+                            print("Warning. Empty data.")
                             return
                     else:
                         pass
@@ -179,7 +179,7 @@ def load_ipython_extension(ipython):
                                         new_legends.insert(index_begin_line_collection, current_legend)
                                         index_begin_line_collection += 1
                                 axes.legend(new_legends, **kwds)
-                except Exception, e:
+                except Exception as e:
                     import warnings
                     warnings.warn('legend failed:'+str(e))
 
@@ -218,7 +218,7 @@ def load_ipython_extension(ipython):
 
     def get_plotables(obj):
         if isinstance(obj, ModuleType):
-            for obj in obj.__dict__.itervalues():
+            for obj in obj.__dict__.values():
                 get_plotables(obj)
         elif hasattr(obj, 'get_plotable'):
             obj.plot = wrapper(getattr(obj, 'get_plotable'))

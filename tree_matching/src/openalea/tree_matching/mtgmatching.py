@@ -1,5 +1,5 @@
 from openalea.tree_matching import Matching, ExtMatching, NodeCost
-from mtgimport import mtg2treegraph
+from .mtgimport import mtg2treegraph
 
 
 class NodeCostWrapper (NodeCost):
@@ -34,8 +34,8 @@ class MtgMatchingWrapper :
         self.tree1,self.idmap1 = mtg2treegraph(self.mtg1,scale1,root1)
         self.tree2,self.idmap2 = mtg2treegraph(self.mtg2,scale2,root2)
         # id map from treegraph to mtg 
-        self.idmap1 = dict([(j,i) for i,j in self.idmap1.iteritems()])
-        self.idmap2 = dict([(j,i) for i,j in self.idmap2.iteritems()])
+        self.idmap1 = dict([(j,i) for i,j in self.idmap1.items()])
+        self.idmap2 = dict([(j,i) for i,j in self.idmap2.items()])
         # making cost function.
         self.cost = cost
         self.costwrapper = NodeCostWrapper(self.cost,self.idmap1,self.idmap2)

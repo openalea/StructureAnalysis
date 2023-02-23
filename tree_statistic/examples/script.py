@@ -28,7 +28,7 @@ for tid in range(T.NbTrees()):
     censored += [{}]
     TA = T.Tree(tid)
     # identificateurs 
-    vids = TA.TreeVertex().values()
+    vids = list(TA.TreeVertex().values())
     for v in vids:
         # variables observees
         val = TA.Get(v)

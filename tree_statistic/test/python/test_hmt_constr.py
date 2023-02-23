@@ -10,7 +10,7 @@ distrib = stat_tool.Uniform(inf_bound, sup_bound)
 distrib_binom = stat_tool.Binomial(inf_bound, sup_bound, probability)
 distrib_nbinom = stat_tool.NegativeBinomial(inf_bound, 4, probability)
 # Distribution used for the number of children and the tree attributes
-print distrib
+print(distrib)
 max_depth = 3
 max_size = 10
 nbtrees = 4
@@ -38,57 +38,57 @@ H=hmt.HiddenMarkovIndOutTree("hmot.hmt")
 sample_size=2
 tree_size=20
 nb_children=3
-print 'A hidden Markov tree H read from file "hmot.hmt":'
-print H
+print('A hidden Markov tree H read from file "hmot.hmt":')
+print(H)
 H.Save("hmot_ascii.hmt", "ASCII", True)
 I=hmt.HiddenMarkovIndOutTree("hmot_ascii.hmt")
 I.Save("hmot_ascii.hmt", "ASCII", True)
 J=hmt.HiddenMarkovIndOutTree("hmot_ascii.hmt")
 if str(I)==str(J):
-    print "load o (save o load) == load"
+    print("load o (save o load) == load")
 else:
-    print "load o (save o load) != load"
-    print I
-    print J
-print "Saving H as a spreadsheet"
+    print("load o (save o load) != load")
+    print(I)
+    print(J)
+print("Saving H as a spreadsheet")
 I.Save("hmot_spreadsheet.hmt", "Spreadsheet", True)
-print "Simulation of the labels using H, tree size and number of children:"
+print("Simulation of the labels using H, tree size and number of children:")
 T=H.Simulate(sample_size, tree_size, nb_children)
 # print T
-print "Simulation of the labels using H, tree size and a Trees object:"
+print("Simulation of the labels using H, tree size and a Trees object:")
 T=H.Simulate(sample_size, T_ind)
 Histo_size=T_ind.ExtractHistogram("Size")
 Histo_nb_children=T_ind.ExtractHistogram("NbChildren")
 T=H.Simulate(Histo_size, Histo_nb_children)
-print "Simulated labels:"
-print T
+print("Simulated labels:")
+print(T)
 for t in range(T.NbTrees()):
     T.Tree(t).Display()
-print "Type of the attributes:", T.Types()
-print "Copy a hmt"
+print("Type of the attributes:", T.Types())
+print("Copy a hmt")
 HC=hmt.HiddenMarkovIndOutTree(H)
 HC.Display()
 # permutation of the states
 # check exceptions raised by StatePermutation
 try:
     HC.StatePermutation([2.2, 1.0])
-except TypeError, e:
-    print e
+except TypeError as e:
+    print(e)
 else:
-    print "Failed to raise exception for bad permutation"
+    print("Failed to raise exception for bad permutation")
 try:
     HC.StatePermutation([1, 1])
-except trees.StatTreeError, e:
-    print e
+except trees.StatTreeError as e:
+    print(e)
 else:
-    print "Failed to raise exception for bad permutation"
+    print("Failed to raise exception for bad permutation")
 try:
     HC.StatePermutation([0, 1, 2])
-except trees.StatTreeError, e:
-    print e
+except trees.StatTreeError as e:
+    print(e)
 else:
-    print "Failed to raise exception for bad permutation"
-print "Permutation of the states: "
+    print("Failed to raise exception for bad permutation")
+print("Permutation of the states: ")
 HC.StatePermutation([1, 0])
 HC.Display()
 

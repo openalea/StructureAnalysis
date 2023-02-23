@@ -11,20 +11,20 @@ H=hmt.HiddenMarkovIndOutTree("hmot.hmt")
 sample_size=200
 tree_size=30
 nb_children=2
-print 'A hidden Markov tree H read from file "hmot.hmt":'
+print('A hidden Markov tree H read from file "hmot.hmt":')
 H.Display()
 T=H.Simulate(sample_size, tree_size, nb_children)
-print "Label simulation using H: "
+print("Label simulation using H: ")
 T.Display()
-print "Delete the state variable"
+print("Delete the state variable")
 T=T.SelectVariable([1, 2])
 T.Display()
-print "Parameter estimation from the simulated trees " + \
-"using initial model specification:"
+print("Parameter estimation from the simulated trees " + \
+"using initial model specification:")
 EH=T.Estimate("HIDDEN_MARKOV_TREE", H, 100)
 EH.Display()
 # raise UserWarning, "Warning: need to be debugged"
-print "Parameter estimation from the simulated trees " + \
-"using state number and self transition specifications:"
+print("Parameter estimation from the simulated trees " + \
+"using state number and self transition specifications:")
 EH=T.Estimate("HIDDEN_MARKOV_TREE", 2, "IRREDUCIBLE", 0.99, 100)
 EH.Display()

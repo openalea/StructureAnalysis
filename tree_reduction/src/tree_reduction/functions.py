@@ -68,7 +68,7 @@ def ind_find(x,list_edge):
 
 def nbr_arc_construction(G_edge):
     nbr_edge={}
-    d=G_edge.values()
+    d=list(G_edge.values())
     while d!=[]:
         val=d[0]
         d.remove(val)

@@ -6,7 +6,7 @@ import os
 
 
 def compare(ref_mtg_name,tested_mtg_name,cacheprefix = None):
-    print 'read mtgs'
+    print('read mtgs')
     ref_mtg = readfile(ref_mtg_name)
     tested_mtg = readfile(tested_mtg_name)
     # if cacheprefix and not os.path.exists(cacheprefix) : os.makedirs(cacheprefix)
@@ -18,7 +18,7 @@ def main():
     # compare('mais_validated_piperadius.bmtg','mais_reconstruction_piperadius.bmtg','puu4')
     #newcscore, tscore = compare(*create_args('puu1'))
     newcscore, tscore = compare('puu1_validated.bmtg','puu1_reconstruction.bmtg') #,'puu1')
-    print newcscore, tscore
+    print(newcscore, tscore)
     
 if __name__ == '__main__':
     main()

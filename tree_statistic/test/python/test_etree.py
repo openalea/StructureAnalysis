@@ -21,74 +21,74 @@ init()
 
 # Build a predefined tree
 T = trees.etrees.Tree([0], 0, 0)
-v = range(n)
+v = list(range(n))
 for i in range(n):
     v[i] = T.AddVertex([i+1])
 T.AddEdge(v[0], v[1])
 T.AddEdge(v[0], v[2], '<')
 T.AddEdge(v[1], v[3])
 T.AddEdge(v[1], v[4], '<')
-print "The root of T is ", T.Root()
-print "The parent of vertex 4 is:", T.Parent(4)
-print "A predefined tree: "
-print T
-print "... with depth", T.Depth(), " and size ", T.Size(), "."
+print("The root of T is ", T.Root())
+print("The parent of vertex 4 is:", T.Parent(4))
+print("A predefined tree: ")
+print(T)
+print("... with depth", T.Depth(), " and size ", T.Size(), ".")
 for i in range(n):
-    print "Number of children of node ", i+1, ": ", T.NbChildren(i)
+    print("Number of children of node ", i+1, ": ", T.NbChildren(i))
 # Extract a subtree
-print "Subtree of T rooted at node 2:" 
-print T.Display(False, True, 1)
+print("Subtree of T rooted at node 2:") 
+print(T.Display(False, True, 1))
 # tree iterators
 vertex_iterator = iter(T)
 vertices = []
 try:
     while 1:
-        vertices.append(vertex_iterator.next()+1)
+        vertices.append(next(vertex_iterator)+1)
 except StopIteration: pass
-print "A vertex iterator:", vertices
+print("A vertex iterator:", vertices)
 preorder = T.Preorder()
 vertices = []
 try:
     while 1:
-        vertices.append(preorder.next()+1)
+        vertices.append(next(preorder)+1)
 except StopIteration: pass
-print "A preorder tree traversing:", vertices
+print("A preorder tree traversing:", vertices)
 inorder = T.Inorder()
 vertices = []
 try:
     while 1:
-        vertices.append(inorder.next()+1)
+        vertices.append(next(inorder)+1)
 except StopIteration: pass
-print "An inorder tree traversing:", vertices
+print("An inorder tree traversing:", vertices)
 postorder = T.Postorder()
 vertices = []
 try:
     while 1:
-        vertices.append(postorder.next()+1)
+        vertices.append(next(postorder)+1)
 except StopIteration: pass
-print "An postorder tree traversing:", vertices
+print("An postorder tree traversing:", vertices)
 breadthorder = T.Breadthorder()
 vertices = []
 try:
     while 1:
-        vertices.append(breadthorder.next()+1)
+        vertices.append(next(breadthorder)+1)
 except StopIteration: pass
-print "A breadth-fisrt tree traversing:", vertices
+print("A breadth-fisrt tree traversing:", vertices)
 leavesfirstorder = T.LeavesFirstorder()
 vertices = []
 try:
     while 1:
-        vertices.append(leavesfirstorder.next()+1)
+        vertices.append(next(leavesfirstorder)+1)
 except StopIteration: pass
-print "A tree traversing that minimizes the distance " \
-      "to nearest leaf node:", vertices
+print("A tree traversing that minimizes the distance " \
+      "to nearest leaf node:", vertices)
 # select subtree
 ST = T.SelectSubTree(1)
-print "Extract subtree rooted at vertex 2 from T:"
-print ST
+print("Extract subtree rooted at vertex 2 from T:")
+print(ST)
 ST = T.SelectSubTree(1, False)
-print "Prune subtree rooted at vertex 2 from T:"
-print ST
+print("Prune subtree rooted at vertex 2 from T:")
+print(ST)
 # extract sequences
 import openalea.aml as amlPy
 TS = trees.Trees([T])
@@ -99,14 +99,14 @@ amlPy.Display(S2, ViewPoint="Data")
 # W=T creates an alias
 W = trees.etrees.Tree(T)
 W.Put(W.Root(), [100])
-print "A (non-alias) copy of T with modified root attribute:"
-print W
+print("A (non-alias) copy of T with modified root attribute:")
+print(W)
 
 # Tree structures
-print "A random tree structure R:"
+print("A random tree structure R:")
 R = trees.etrees.TreeStructure(distrib, max_size, max_depth)
-print R
-print "(size, depth) = (", R.Size(), ", ", R.Depth(), ")."
+print(R)
+print("(size, depth) = (", R.Size(), ", ", R.Depth(), ").")
 # Copy constructor
 R2 = trees.etrees.TreeStructure(R)
 # Add vertex and egde
@@ -115,43 +115,43 @@ v = R2.AddVertex()
 #R2.AddEdge(2, v)
 #print R2.Display()
 
-print "Copying this structure to T:"
+print("Copying this structure to T:")
 T = trees.etrees.Tree([1.0, 0], R)
-print T
-print "Random simulation of the attributes of T:"
+print(T)
+print("Random simulation of the attributes of T:")
 distrib_list = []
 for i in range(T.NbInt()):
     distrib_list.append(distrib)
 T.Simulate(distrib_list)
-print T
-print "Conversion from etrees to tree"
+print(T)
+print("Conversion from etrees to tree")
 PT = trees.Tree(T)
-print PT
+print(PT)
 T = trees.etrees.Tree(PT)
-print T
+print(T)
 # S()
 try:
-    print "The parent of the root vertex is:", T.Parent(T.Root())
-except IndexError, e:
-    print e
+    print("The parent of the root vertex is:", T.Parent(T.Root()))
+except IndexError as e:
+    print(e)
 else:
-    print "Failed to detect incorrect call to Parent"
+    print("Failed to detect incorrect call to Parent")
 
 if (T.IsRoot(4)):
-   raise WarningError, "Failed to detect that vertex 4 is not the root"
+   raise WarningError("Failed to detect that vertex 4 is not the root")
 else:
-   print "Is vertex 4 the root ? ", str(T.IsRoot(4))
+   print("Is vertex 4 the root ? ", str(T.IsRoot(4)))
 
 # test copy and setting tree vids
-print "Read Trees object from MTG file 'sample_mtg_forest.txt':"
+print("Read Trees object from MTG file 'sample_mtg_forest.txt':")
 T = trees.etrees.Trees("sample_mtg_forest.txt")
-print "Read ", T.NbTrees(), " trees."
+print("Read ", T.NbTrees(), " trees.")
 TreeVidDictList = []
 TreeVidDictListCp = []
 for t in range(T.NbTrees()):
     TreeVidDictList.append(T.TreeVertexId(t))
     TreeVidDictListCp.append(T.TreeVertexId(t))
-    for k in TreeVidDictListCp[t].keys():
+    for k in list(TreeVidDictListCp[t].keys()):
         TreeVidDictListCp[t][k] += 1
 
 T._SetMTGVidDictionary(TreeVidDictListCp)
@@ -161,8 +161,8 @@ for t in range(T.NbTrees()):
 
 try:
     T._SetMTGVidDictionary(TreeVidDictListCp, ValidityCheck=True)
-except IndexError, msg:
-    print msg
+except IndexError as msg:
+    print(msg)
 else:
     assert False, "Failed to raise IndexError"
 
@@ -174,23 +174,23 @@ TreeVidDictListCp[0][3] = 0
 
 try:
     T._SetMTGVidDictionary(TreeVidDictListCp, ValidityCheck=True)
-except ValueError, msg:
-    print msg
+except ValueError as msg:
+    print(msg)
 else:
     assert False, "Failed to raise ValueError"
 
 TreeVidDictListCp = []
 for t in range(T.NbTrees()):
     TreeVidDictListCp.append(dict(TreeVidDictList[t]))
-    for k in TreeVidDictListCp[t].keys():
+    for k in list(TreeVidDictListCp[t].keys()):
         TreeVidDictListCp[t][k] = str(TreeVidDictListCp[t][k])
 
 
 T._SetMTGVidDictionary(TreeVidDictListCp)
 try :
     T._SetMTGVidDictionary(TreeVidDictListCp, ValidityCheck=True)
-except TypeError, msg:
-    print msg
+except TypeError as msg:
+    print(msg)
 else:
     assert False, "Failed to raise TypeError"
 
@@ -198,14 +198,14 @@ else:
 TreeVidDictListCp = []
 for t in range(T.NbTrees()):
     TreeVidDictListCp.append({})
-    for k in TreeVidDictList[t].keys():
+    for k in list(TreeVidDictList[t].keys()):
         TreeVidDictListCp[t][str(k)] = TreeVidDictList[t][k]
 
 T._SetMTGVidDictionary(TreeVidDictListCp)
 try :
     T._SetMTGVidDictionary(TreeVidDictListCp, ValidityCheck=True)
-except Exception, msg:
-    print msg
+except Exception as msg:
+    print(msg)
 else:
     assert False, "Failed to raise TypeError-like Exception"
 

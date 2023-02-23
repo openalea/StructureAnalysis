@@ -54,10 +54,10 @@ class Test(interface):
     def _test_constructor_array1(self):
         #print '--------------'
         #top = Tops([1,2,3,4,5], Identifiers=[1])
-        print '------------'
+        print('------------')
         #print type(top)
-        print '---------'
-        print top
+        print('---------')
+        print(top)
         #print self.data
         #top = Tops('data/tops1.dat')
         #print top

@@ -35,7 +35,7 @@ def load_ipython_extension(ipython):
             test = lhs.w_comparison(rhs)
         else:
             raise ValueError('\'test\' parameter')
-        print test
+        print(test)
 
     stat_tool.ComparisonTest = ComparisonTest
 

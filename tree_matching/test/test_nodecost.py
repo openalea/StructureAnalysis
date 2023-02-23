@@ -4,12 +4,12 @@ class MyNodeCost (NodeCost):
   def __init__(self):
      NodeCost.__init__(self)
   def getInsertionCost(self,a):
-    print 'ic'
-    print a
+    print('ic')
+    print(a)
     return 18
   def getDeletionCost(self,a):
-    print 'dc'
-    print a
+    print('dc')
+    print(a)
     return 50
 
 
@@ -28,16 +28,16 @@ def test_matching():
     tree2.addNode(3,0)
     
     node_cost = MyNodeCost()
-    print node_cost.getInsertionCost(tree1.getNode(4))
-    print node_cost.getDeletionCost(tree1.getNode(4))
-    print 'matching'
+    print(node_cost.getInsertionCost(tree1.getNode(4)))
+    print(node_cost.getDeletionCost(tree1.getNode(4)))
+    print('matching')
     
     m = Matching(tree1,tree2,node_cost)
     val = m.match()
-    print 'match =',val
+    print('match =',val)
     assert val == 118
-    print 'distance table'
-    print m.getDistanceTable()
+    print('distance table')
+    print(m.getDistanceTable())
 
 
 test_matching()

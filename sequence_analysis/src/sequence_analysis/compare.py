@@ -24,9 +24,9 @@ from openalea.sequence_analysis._sequence_analysis import _SemiMarkov, \
 from openalea.stat_tool.enums import histogram_types, bool_type, \
     format_type, algorithm_type
 
-from enums import begin_aligned_map
+from .enums import begin_aligned_map
 
-from enums import sequence_alignment_first_arg, output_sequence, \
+from .enums import sequence_alignment_first_arg, output_sequence, \
     markov_model_comparison_first_arg, indel_cost_map, ms_vomd_smd_nhmd,\
     markov_model_for_sequences_first_arg, markovian_algorithms, \
     markov_model_for_sequences_second_arg
@@ -64,7 +64,7 @@ def _compare_markovian_sequences(obj, *args, **kargs):
 
     filename = kargs.get("Filename", None)
 
-    from enums import ms_vomd_smd_list
+    from .enums import ms_vomd_smd_list
     # Type of arg0 is same as type of obj., so we have the following case
     # >>> Compare(hsmc1, hsmc2, ,..., nb_seq,  FileName="result")
     if type(args[0]) == type(obj):
