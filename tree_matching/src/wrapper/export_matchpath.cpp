@@ -80,9 +80,9 @@ public:
     begin++;end--;
     int i = 1;
     for (it = begin;it!=end;it++, i++){
-      result.append(make_tuple(this->who(i),who(*it)));
+      result.append(boost::python::make_tuple(this->who(i),who(*it)));
     }
-    return make_tuple(dist,result);
+    return boost::python::make_tuple(dist,result);
   }
 };
 

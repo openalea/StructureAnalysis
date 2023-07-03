@@ -12,13 +12,13 @@ def test_treegraph():
     tree.addNode(2,1)
     tree.addNode(3,1)
     tree.addNode(4,0)
-    print "init"
+    print("init")
     for i in range(5):
-        print tree.getNode(i)    
+        print(tree.getNode(i))    
     node = tree.getNode(4)
     node.addValue(2)
-    print node
-    print tree.getNode(4)
+    print(node)
+    print(tree.getNode(4))
 
 
 test_treenode()
@@ -32,7 +32,7 @@ def test_treenode_exists():
     n = tree.getNode(0)
     del tree
     n.addValue(1)
-    print n
+    print(n)
 
 def test_matching():
     tree1 = TreeGraph()
@@ -48,18 +48,18 @@ def test_matching():
     tree2.addNode(2,0)
     tree2.addNode(3,0)
 
-    print "#############"
-    print tree1
+    print("#############")
+    print(tree1)
     
-    print "#############"
-    print tree2
+    print("#############")
+    print(tree2)
 
     node_cost = NodeCost()
     
     m = Matching(tree1,tree1,node_cost)
     m.match()
-    print m.getDistanceTable()
-    print m.getDBT(0,0)
+    print(m.getDistanceTable())
+    print(m.getDBT(0,0))
     matrix = []
     for i in range(5):
         l = []
@@ -67,7 +67,7 @@ def test_matching():
             l += [m.getDBT(i,j)]
         matrix += [l]
     for i in range(5):
-        print matrix[i]
+        print(matrix[i])
 
          
     

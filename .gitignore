@@ -1,4 +1,6 @@
 build-scons
+build-cmake
+build
 .ipynb_checkpoints
 *.egg-info
 *~

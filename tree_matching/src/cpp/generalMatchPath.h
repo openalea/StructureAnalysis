@@ -91,7 +91,7 @@ class TREEMATCH_API GeneralMatchPath : public MatchPath
     int capacity(int);
     bool is_saturated();
 
-    void setCapacityToSourceEdge(int ni, int capacity) { assert(ni < _inputList.size()); _capacityList[ni] = capacity; }
+    void setCapacityToSourceEdge(int ni, int capacity) { assert(ni < _inputList->size()); _capacityList[ni] = capacity; }
 
 
 	// call the evaluator. Still can be redefined.

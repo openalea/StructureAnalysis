@@ -23,12 +23,12 @@ t = create_treegraph()
 def iterator_check(r = 2):
 	l1 = list(t.subtree_iter(r))
 	l2 = t.subtree_list(r)
-	print l1
+	print(l1)
 	assert l1 == l2
 
 def test_iterator():
-   for i in xrange(10):
-	  yield iterator_check, i
+   for i in range(10):
+       yield iterator_check, i
 	
 if __name__ == '__main__':
 	test_iterator()

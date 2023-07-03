@@ -35,7 +35,7 @@
 
 using namespace boost::python;
 
-
+void py_factory_finalize();
 
 BOOST_PYTHON_MODULE(__tree_matching__)
 {

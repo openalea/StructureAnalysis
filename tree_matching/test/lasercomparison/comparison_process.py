@@ -6,9 +6,9 @@ import os, os.path
 def get_shared_data(x) : return x
 
 def compute_global_bbx(bbxprop):
-    firstbbx = bbxprop.itervalues().next()
+    firstbbx = next(iter(bbxprop.values()))
     globalbbox = BoundingBox(firstbbx.lowerLeftCorner,firstbbx.upperRightCorner)
-    for bbx in bbxprop.itervalues(): globalbbox.extend(bbx)
+    for bbx in bbxprop.values(): globalbbox.extend(bbx)
     return globalbbox
 
 def comparable_mtg(mtg):
@@ -16,7 +16,7 @@ def comparable_mtg(mtg):
         macro nodes has associated skeleton, boundingbox and size.
         Scale 3 correspond to normal nodes. """
     s = mtg.max_scale()
-    root = mtg.roots_iter(scale=s).next()  # starting node ID of scale=s, eg, in scale 3 --> starting node ID is 3
+    root = next(mtg.roots_iter(scale=s))  # starting node ID of scale=s, eg, in scale 3 --> starting node ID is 3
 
     colors = {}
     colors[1] = [root]
@@ -33,7 +33,7 @@ def comparable_mtg(mtg):
     sizes = {}
     for vid in new_mtg.vertices_iter(scale=2):
         component_iter = new_mtg.components_iter(vid)
-        fcomponent = component_iter.next()
+        fcomponent = next(component_iter)
         pfcomponent = new_mtg.parent(fcomponent)
         points = []
         lradii = []
@@ -97,14 +97,14 @@ def create_edges_with_space_division(bbxprop1,bbxprop2,skeletonprop1,skeletonpro
     bbxcontains = {}
     for key,bbxkey in enumerate(bbxset):
         bbxcontains[key] = []
-    for vid2, bbx2 in bbxprop2.iteritems():
+    for vid2, bbx2 in bbxprop2.items():
         for key,bbxkey in enumerate(bbxset):
             if bbxkey.intersect(bbx2):
                 bbxcontains[key] += [vid2]
                 
         
     edges = []    
-    for vid1, bbx in bbxprop1.iteritems():
+    for vid1, bbx in bbxprop1.items():
         vid2tocompare = set()
         for key,bbxkey in enumerate(bbxset):
             if bbxkey.intersect(bbx):
@@ -116,8 +116,8 @@ def create_edges_with_space_division(bbxprop1,bbxprop2,skeletonprop1,skeletonpro
 
 def create_edges(bbxprop1,bbxprop2,skeletonprop1,skeletonprop2,maxdistance):
     edges = []    
-    for vid1, bbx in bbxprop1.iteritems():
-        for vid2, bbx2 in bbxprop2.iteritems():
+    for vid1, bbx in bbxprop1.items():
+        for vid2, bbx2 in bbxprop2.items():
             if bbx.distance(bbx2) <= maxdistance:
                 edges.append( (vid1,vid2, skeletonprop1[vid1].hausdorff_distance(skeletonprop2[vid2])) )
     return edges
@@ -133,18 +133,18 @@ def check_minimum_edges_cost(edges,set1,set2,delcost1,delcost2):
     
     pb1 = []
     for i in set1:
-        if not me1.has_key(i):
+        if i not in me1:
             pb1.append(i)
         elif me1[i] > delcost1[i]:
             pb1.append(i)
-    print len(pb1),pb1
+    print(len(pb1),pb1)
     pb2 = []
     for j in set2:
-        if not me2.has_key(j):
+        if j not in me2:
             pb2.append(j)
         elif me2[j] > delcost2[j]:
             pb2.append(j)
-    print len(pb2),pb2
+    print(len(pb2),pb2)
     
 def create_comparison(mtg1,mtg2,maxdistance = None, cacheprefix = None, cachepath = get_shared_data('comparison')):    
     set1 = mtg1.vertices(scale=2)
@@ -161,25 +161,25 @@ def create_comparison(mtg1,mtg2,maxdistance = None, cacheprefix = None, cachepat
     # max distance
     if maxdistance is None:
         # take second element to avoid appended trunk at the begining
-        firstelem = mtg1.roots_iter(scale=2).next()
-        secondelem = mtg1.children_iter(firstelem).next()
+        firstelem = next(mtg1.roots_iter(scale=2))
+        secondelem = next(mtg1.children_iter(firstelem))
         skel1 = skeletonprop1[secondelem]
         skel1length = Polyline(skel1).getLength()
         nbsegments = (len(skel1)-1)
         maxdistance = 2 * skel1length / nbsegments
-        print 'Use max distance :',maxdistance,(skel1length , nbsegments)
+        print('Use max distance :',maxdistance,(skel1length , nbsegments))
     
     # Compute edge
     from time import clock
     start = clock()
     
-    print 'Create edges of the bipartite graph'
+    print('Create edges of the bipartite graph')
     # edges = create_edges(bbxprop1,bbxprop2,skeletonprop1,skeletonprop2,maxdistance)
     edges = create_edges_with_space_division(bbxprop1,bbxprop2,skeletonprop1,skeletonprop2,maxdistance)
     nbedges = len(edges)
-    print 'Number of edge and Average degree:',nbedges,',',nbedges/len(bbxprop1)
+    print('Number of edge and Average degree:',nbedges,',',nbedges/len(bbxprop1))
     
-    print "Time to compute edges is : ", clock() - start
+    print("Time to compute edges is : ", clock() - start)
     if cacheprefix:
         edge_cache_file = os.path.join(cachepath,cacheprefix+'_edges.pkl')
         writefile(edge_cache_file,edges)
@@ -189,7 +189,7 @@ def create_comparison(mtg1,mtg2,maxdistance = None, cacheprefix = None, cachepat
         # Compute global bounding box
         globalbbox = compute_global_bbx(bbxprop2)    
         maxsize = norm(globalbbox.getSize())
-        print 'Use max size as non matching cost :', maxsize
+        print('Use max size as non matching cost :', maxsize)
         delset1cost =  [maxsize for i in set1]
         delset2cost =  [maxsize for i in set2]
 
@@ -231,8 +231,8 @@ def find_all_paths(node,maxpaths):
     result = []
     for maxpath in maxpaths:
         length = len(maxpath)
-        for j in xrange(ind,length):
-            for i in xrange(0,ind+1):
+        for j in range(ind,length):
+            for i in range(0,ind+1):
                 candidate = maxpath[i:j+1]
                 if not candidate in result:
                     result.append(candidate)
@@ -272,13 +272,13 @@ def extend_comparison(ref_mtg,tested_mtg, mapping, nonmapping1, nonmapping2, ver
         if choice == 2:
             newmapping += [(ni,nj)]
         elif choice == 0:
-            if verbose: print 'Extend mapping from',(ni,nj),' to ',(newmindistpath1,nj)
+            if verbose: print('Extend mapping from',(ni,nj),' to ',(newmindistpath1,nj))
             newmapping += [(newmindistpath1,nj)]
             for v in newmindistpath1:
                 if v != ni:
                     nonmapping1.discard(v)
         elif choice == 1:
-            if verbose: print 'Extend mapping from',(ni,nj),' to ',(ni,newmindistpath2)
+            if verbose: print('Extend mapping from',(ni,nj),' to ',(ni,newmindistpath2))
             newmapping += [(ni,newmindistpath2)]
             for v in newmindistpath2:
                 if v != nj:
@@ -350,42 +350,42 @@ def topological_comparison(ref_mtg,tested_mtg, mapping, nonmapping1, nonmapping2
 def comparison_process(ref_mtg,tested_mtg,cacheprefix = None,cachepath = get_shared_data('comparison')):
     """ Return score of geometrical comparison (nb of common elements) and topological comparison (nb of common edges) """
     from time import clock
-    print 'mtgs sizes :',ref_mtg.nb_vertices(scale=ref_mtg.max_scale()),tested_mtg.nb_vertices(scale=tested_mtg.max_scale())
-    print 'make mtgs comparable'
+    print('mtgs sizes :',ref_mtg.nb_vertices(scale=ref_mtg.max_scale()),tested_mtg.nb_vertices(scale=tested_mtg.max_scale()))
+    print('make mtgs comparable')
     ref_mtg = comparable_mtg(ref_mtg)
     tested_mtg = comparable_mtg(tested_mtg)
-    print 'mtgs sizes :',ref_mtg.nb_vertices(scale=2),tested_mtg.nb_vertices(scale=2)
+    print('mtgs sizes :',ref_mtg.nb_vertices(scale=2),tested_mtg.nb_vertices(scale=2))
     
     if cacheprefix:
         if not os.path.exists(cachepath): os.makedirs(cachepath)    
         raw_comparison_cache_file = os.path.join(cachepath,cacheprefix+'_raw_comparison.pkl')
     
     if cacheprefix and os.path.exists(raw_comparison_cache_file) : 
-        print 'Read raw matching from',repr(raw_comparison_cache_file)
+        print('Read raw matching from',repr(raw_comparison_cache_file))
         raw_comparison = readfile(raw_comparison_cache_file)
     else:
-        print 'Compute matching'
+        print('Compute matching')
         start = clock()
         matcher = create_comparison(ref_mtg,tested_mtg,None,cacheprefix,cachepath)
         if cacheprefix : 
             raw_comparison_cache_file_intermediate = os.path.join(cachepath,cacheprefix+'_raw_comparison_intermediate.pkl')
         else : raw_comparison_cache_file_intermediate = None
         raw_comparison = matcher.match(raw_comparison_cache_file_intermediate)
-        print ">>>>>>>> The time for computing matching is : ", clock() - start , " <<<<<<<<. "
+        print(">>>>>>>> The time for computing matching is : ", clock() - start , " <<<<<<<<. ")
         if cacheprefix : writefile(raw_comparison_cache_file,raw_comparison)
     distance, mapping, nonmapping1, nonmapping2 = raw_comparison
-    print 'Nb of mapping :',len(mapping), len(nonmapping1), len(nonmapping2)
-    print 'Distance :',distance
+    print('Nb of mapping :',len(mapping), len(nonmapping1), len(nonmapping2))
+    print('Distance :',distance)
     nbtotvertex = ref_mtg.nb_vertices(scale=2)+tested_mtg.nb_vertices(scale=2)
     nbmapped = 2.*len(mapping)
     score = nbmapped/float(nbtotvertex)
-    print 'Mapping score :',score
+    print('Mapping score :',score)
     ref_sizes = ref_mtg.property('size')
     tested_sizes = tested_mtg.property('size')
-    totlength = sum(ref_sizes.itervalues())+sum(tested_sizes.itervalues())
+    totlength = sum(ref_sizes.values())+sum(tested_sizes.values())
     matchedlength = sum([ref_sizes[i] for i,j in mapping])+sum([tested_sizes[j] for i,j in mapping])
     cscore = matchedlength/totlength
-    print 'Weighted mapping score :',cscore
+    print('Weighted mapping score :',cscore)
     
     # Extended comparison
     with_extension = False
@@ -394,12 +394,12 @@ def comparison_process(ref_mtg,tested_mtg,cacheprefix = None,cachepath = get_sha
         newmapping, newnonmapping1, newnonmapping2 = ext_comparison
         assert len(newmapping) == len(mapping)
         nbnewmapped = nbtotvertex-len(newnonmapping1)-len(newnonmapping2)
-        print 'Nb element added to the mapping :',nbnewmapped-nbmapped
+        print('Nb element added to the mapping :',nbnewmapped-nbmapped)
         nscore = nbnewmapped/float(nbtotvertex)
-        print 'New mapping score :',nscore
+        print('New mapping score :',nscore)
         nweunmatchedlength = sum([ref_sizes[i] for i in newnonmapping1])+sum([tested_sizes[i] for i in newnonmapping2])
         newcscore = (totlength-nweunmatchedlength)/totlength
-        print 'New Corrected mapping score :',newcscore
+        print('New Corrected mapping score :',newcscore)
         if cacheprefix:
             ext_comparison_cache_file = os.path.join(cachepath,cacheprefix+'_extended_comparison.pkl')
             writefile(ext_comparison_cache_file,ext_comparison)      
@@ -413,9 +413,9 @@ def comparison_process(ref_mtg,tested_mtg,cacheprefix = None,cachepath = get_sha
     
     # Topological comparison
     edgematching ,nonedgematching1,nonedgematching2 = topological_comparison(ref_mtg,tested_mtg,newmapping, newnonmapping1, newnonmapping2)
-    print map(len,[edgematching,nonedgematching1,nonedgematching2])
+    print(list(map(len,[edgematching,nonedgematching1,nonedgematching2])))
     tscore = (2*len(edgematching))/float(sum(map(len,[edgematching,edgematching,nonedgematching1,nonedgematching2])))
-    print 'Topological comparison score',tscore
+    print('Topological comparison score',tscore)
     return newcscore, tscore
     
 

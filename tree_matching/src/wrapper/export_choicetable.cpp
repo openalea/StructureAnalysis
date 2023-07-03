@@ -44,7 +44,7 @@ boost::python::object py_getList(ChoiceTable * m, int i_tree,int r_tree, TreeGra
   m->getList(i_tree,r_tree,T1, T2,&list_vtx);
   boost::python::list result;
   for(MatchRecordList::const_iterator it = list_vtx.begin(); it != list_vtx.end(); ++it)
-	  result.append(make_tuple(it->first,it->second));
+	  result.append(boost::python::make_tuple(it->first,it->second));
   return result;
 }
 

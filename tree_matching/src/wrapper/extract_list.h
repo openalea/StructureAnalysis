@@ -57,7 +57,7 @@ struct extract_vec {
 		while( true )
 		{
 			boost::python::object obj; 
-			try {  obj = iter_obj.attr( "next" )(); }
+			try {  obj = iter_obj.attr( "__next__" )(); }
 			catch( boost::python::error_already_set ){ PyErr_Clear(); break; }
 			element_type val = extractor_type( obj )();
 			result.push_back( val );
@@ -96,7 +96,7 @@ struct extract_dict {
 		while( true )
 		{
 			boost::python::object obj; 
-			try {  obj = iter_obj.attr( "next" )(); }
+			try {  obj = iter_obj.attr( "__next__" )(); }
 			catch( boost::python::error_already_set ){ PyErr_Clear(); break; }
 			key_type k = key_extractor_type( obj[0] );
 			value_type v = value_extractor_type( obj[1] );
