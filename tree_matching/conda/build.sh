@@ -30,6 +30,6 @@ echo
 echo "****** INSTALL PYTHON LIB"
 cd ..
 
-pip install --prefix=${PREFIX} 
+pip install . --prefix=${PREFIX} 
 
 echo "****** END OF BUILD PROCESS"
