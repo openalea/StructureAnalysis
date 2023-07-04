@@ -12,3 +12,5 @@ build
 */doc/latex/
 options.py
 /.project
+.vscode
+test_choicetable.dump

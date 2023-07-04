@@ -1,0 +1,20 @@
+name: Building Package
+
+on:
+  push:
+    branches: 
+      - '**'
+    tags:
+      - 'v*'
+  pull_request:
+    branches: 
+      - '**'
+
+
+jobs:
+  build:
+    uses: openalea/github-action-conda-build/.github/workflows/conda-package-build.yml@main
+    inputs:
+      python-minor-version: '[8,9,10,11]'
+    secrets: 
+      token: ${{ secrets.ANACONDA_TOKEN }}

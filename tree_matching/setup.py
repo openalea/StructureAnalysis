@@ -7,10 +7,11 @@ from setuptools import setup
  
 packagename = 'tree_matching'
 namespace = 'openalea'
+version='1.0.0'
 
     
 setup(name="OpenAlea.TreeMatching",
-      version='1.0.0',
+      version=version,
       author='Pascal Ferraro, Aida Ouangraoua',
       description='Tree matching library',
       url='https://github.com/openalea/StructureAnalysis',
