@@ -49,8 +49,8 @@ def test_matching():
   m.verbose = False
   # Compact option = 1
   val = m.match()
-  print 'match =',val
-  print m.getList(0,0)
+  print('match =',val)
+  print(m.getList(0,0))
   #for i in xrange(6):
   #  print m.getList(i,0)[0]
   #print
@@ -67,8 +67,8 @@ def test_extmatching():
   m.verbose = False
   # Compact option = 1
   val = m.match()
-  print 'match =',val
-  print m.getList(0,0)
+  print('match =',val)
+  print(m.getList(0,0))
   #for i in xrange(6):
   #  print m.getList(i,0)[0]
   #print
@@ -77,6 +77,6 @@ def test_extmatching():
 
 
 test_matching()
-print "end Matching"
+print("end Matching")
 test_extmatching()
 

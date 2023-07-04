@@ -1,0 +1,48 @@
+{% set data = load_setup_py_data() %}
+
+package:
+  name: openalea.treematching
+  version: {{ data.get('version') }}
+
+source:
+  path: ..
+
+about:
+  home: https://github.com/openalea/StructureAnalysis
+  license: Cecill-C
+  summary: An open-source toolkit for the comparison of tree graph structure.
+
+build:
+  number: 0
+  preserve_egg_dir: True
+
+requirements:
+  host:
+      - python x.x
+      - setuptools
+      - boost 
+          
+  build:
+    - python
+    - binutils_impl_linux-64            # [linux]
+    - {{ compiler('cxx') }}
+    - cmake
+    - pkg-config                        # [linux]
+    - make                              # [unix]
+
+  run:
+      - python x.x
+      - setuptools
+      - boost
+
+test:
+   requires:
+     - nose
+     - openalea.mtg
+   imports:
+     - openalea.tree_matching
+   source_files:
+     - test/**
+   commands:
+     - cd test
+     - nosetests -v .  # [unix]

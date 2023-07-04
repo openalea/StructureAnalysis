@@ -35,7 +35,7 @@
 
 using namespace boost::python;
 
-
+void py_factory_finalize();
 
 BOOST_PYTHON_MODULE(__tree_matching__)
 {
@@ -47,4 +47,6 @@ BOOST_PYTHON_MODULE(__tree_matching__)
   export_MatchPath();
   export_ChoiceTable();
   export_GeneralMatchPath();
+
+  Py_AtExit(&py_factory_finalize);
 };

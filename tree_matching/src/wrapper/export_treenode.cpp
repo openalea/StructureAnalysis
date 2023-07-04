@@ -111,17 +111,21 @@ std::string treenode_repr( TreeNode* tnode )
   return ss.str(); 
 } 
 
-static boost::python::object TreeNodeBuilder;
+static boost::python::object * TreeNodeBuilder = NULL;
 
 TreeNodePtr py_factory_build(int id, int father) {
-	return call<TreeNodePtr>(TreeNodeBuilder.ptr(),id,father);
+  if (TreeNodeBuilder == NULL) return TreeNodePtr();
+	return call<TreeNodePtr>((*TreeNodeBuilder).ptr(),id,father);
 }
 
 void py_factory_setBuilder(TreeNode::Factory * factory, boost::python::object b){
-	TreeNodeBuilder = b;
+	TreeNodeBuilder = new boost::python::object(b);
 	factory->setBuilder(&py_factory_build);
 }
 
+void py_factory_finalize() {
+  if (TreeNodeBuilder == NULL) delete TreeNodeBuilder;
+}
 
 void export_TreeNode() {
 

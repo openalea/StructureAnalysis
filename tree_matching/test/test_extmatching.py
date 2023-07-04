@@ -6,14 +6,14 @@ class MyNodeCost (NodeCost):
      NodeCost.__init__(self)
      
   def getInsertionCost(self,a):
-	return 1
+	  return 1
   
   def getDeletionCost(self,a):
     return 1
     
   def getChangingCost(self,a,b):    
-	return 0
- 
+	  return 0
+  
   def getMergingCost(self,a,b):
     return 2
     
@@ -62,7 +62,7 @@ def test_extmatching():
   # we suppose that because split is 0 cost and merge is big cost, no merging will occur and element of tree2 will be match only one time
   m2list = set() 
   for m1,m2,mv in resultmatchinglist:
-    print m1,m2,mv
+    print(m1,m2,mv)
     # check if it is a valid element of tree 1
     assert 0 <= m1 < nbVertex1
     # check if it is a valid element of tree 2
