@@ -14,7 +14,7 @@ on:
 jobs:
   build:
     uses: openalea/github-action-conda-build/.github/workflows/conda-package-build.yml@main
-    inputs:
+    with:
       python-minor-version: '[8,9,10,11]'
     secrets: 
       token: ${{ secrets.ANACONDA_TOKEN }}
