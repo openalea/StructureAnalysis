@@ -1,12 +1,10 @@
-=======
 TreeMatching
-=======
+============
 
 
 **TreeMatching** is an open-source toolkit for the comparison of tree graph structure.
 
 
-=============
 Installation
 =============
 
@@ -42,7 +40,6 @@ Or use the treematching modules in Python
 
 
 
-=============
 Compiling
 =============
 
