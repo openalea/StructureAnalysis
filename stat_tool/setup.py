@@ -3,8 +3,6 @@ __revision__ = "$Id$"
 
 """setup file for stat_tool package"""
 
-__revision__ = "$Id$"
-
 import os, sys
 from setuptools import setup, find_packages
 from openalea.deploy.binary_deps import binary_deps
@@ -20,15 +18,35 @@ for key,value in metadata.iteritems():
 build_prefix = "build-scons"
 
 # Scons build directory
-scons_parameters = ["build_prefix=" + build_prefix]
+scons_parameters = [] #["build_prefix=" + build_prefix]
 
 
 # platform dependencies
-install_requires = [binary_deps('vplants.tool')]
+install_requires = []#[binary_deps('vplants.tool')]
 if sys.platform.startswith('win'):
     install_requires += [binary_deps("boost")]
 install_requires = []
 setup_requires = install_requires + ['openalea.deploy']
+
+OPENALEA_NAMESPACE = False
+namespace_packages = ['structure_analysis']
+create_namespaces = False
+packages = ['structure_analysis',
+            'structure_analysis.stat_tool'
+           ]
+
+package_dir={}
+package_dir[""] = pj("src", "py")
+package_dir["structure_analysis"] = pj("src", "py", "structure_analysis")
+package_dir["structure_analysis.stat_tool"] = pj("src", "py", "structure_analysis", "stat_tool")
+
+if OPENALEA_NAMESPACE:
+    namespace_packages.append('openalea')
+    create_namespaces = True
+
+    packages.extend(['openalea', 'openalea.stat_tool'])
+    package_dir["openalea.stat_tool"] = pj("src", "stat_tool")
+    package_dir[""] = "src"
 
 
 if __name__ == '__main__':
@@ -48,17 +66,13 @@ if __name__ == '__main__':
           # Scons parameters  v
           scons_parameters=scons_parameters,
 
-          namespace_packages=['openalea'],
-          create_namespaces=True,
+          namespace_packages=namespace_packages,
+          create_namespaces=create_namespaces,
 
           # Packages
-          packages=['openalea', 
-                    'openalea.stat_tool',
-                    'structure_analysis',
-                    'structure_analysis.stat_tool' 
-                    ],
+          packages=packages,
+          package_dir=package_dir,
 
-          package_dir={ "openalea.stat_tool" : pj("src","stat_tool"), "structure_analysis" : pj("src", "py", "structure_analysis"), "structure_analysis.stat_tool" : pj("src", "py", "structure_analysis", "stat_tool"), '':'src'},
           share_dirs = { 'share' : 'share' },
 
 

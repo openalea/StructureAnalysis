@@ -6,26 +6,41 @@ import sys
 pj = os.path.join
 ALEASolution = config.ALEASolution
 
+OLD_WRAPPERS=False
+
 options = Variables(['../options.py', 'options.py'], ARGUMENTS)
 options.Add(BoolVariable('with_efence', 'build tests with efence library', 0))
+# a debug variable is already define by sconsx
 options.Add(BoolVariable('DEBUG', 'my debug', 0))
 
 tools = ['boost_python'] #, 'vplants.tool','qt4', 'install', 'alea']
 
 env = ALEASolution(options, tools)
-env.AppendUnique(CXXFLAGS=['-x', 'c++', '-std=c++0x'])
+env.AppendUnique(CXXFLAGS=['-x', 'c++', '-stdlib=libc++', '-std=c++11'])
+env.AppendUnique(LINKFLAGS=['-stdlib=libc++', '-std=c++11'])
 
 # Fix for Conda
-env.AppendUnique(CPPPATH=[sys.prefix + '/include'],
-                 LIBPATH=[sys.prefix + '/lib'])
+# With the last version of sconsx, this is no more needed
+#env.AppendUnique(CPPPATH=[sys.prefix + '/include'],
+#                 LIBPATH=[sys.prefix + '/lib'])
+
+# Silence warnings
+# Yann: This is to inform you about the warnings that are raised by the my gcc version (4.2.1)
+warnings = bool(env['warnings'])
+if not warnings:
+    env.AppendUnique(CXXFLAGS=['-Wno-switch', '-Wno-switch-bool', '-Wno-deprecated-register',
+        '-Wno-return-type', '-Wno-delete-non-virtual-dtor', '-Wno-tautological-constant-out-of-range-compare'])
 
 # Build stage
 prefix = env['build_prefix']
 SConscript(pj(prefix,"src/cpp/SConscript"),
            exports='env')
-# SConscript(pj(prefix,"src/py/wrapper/SConscript"),
-#            exports='env')
-# SConscript(pj(prefix,"src/wrapper/SConscript"),
-#            exports='env')
+
+if OLD_WRAPPERS:
+    SConscript(pj(prefix,"src/wrapper/SConscript"),
+               exports='env')
+
+SConscript(pj(prefix,"src/py/wrapper/SConscript"),
+           exports='env')
 
 Default("build")

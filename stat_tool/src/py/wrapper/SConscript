@@ -32,7 +32,7 @@ env.AppendUnique(LIBS=['vpstat_tool'])
 #env.ALEAWrapper("../openalea/stat_tool/old", "cstat_tool", ["cstat_tool.cpp"])
 
 
-env.ALEAWrapper("../sequence/analysis/stat_tool", "_stat_tool", sources)
+env.ALEAWrapper("../structure_analysis/stat_tool", "__stat_tool", sources)
 # includes in wrappers should be restricted to boost_python_aliases.h and wrapper_util.h
 # inc = env.Install('$build_includedir/stat_tool', includes)
 # inc = env.Install('$build_includedir/stat_tool', ["../../wrapper/boost_python_aliases.h", "../../wrapper/wrapper_util.h"])

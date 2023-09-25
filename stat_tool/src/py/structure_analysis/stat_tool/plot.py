@@ -32,8 +32,8 @@ def __iter__(self):
 SinglePlot.__iter__ = __iter__
 del __iter__
 
-MultiPlot.__len__ = MultiPlot.size
-del MultiPlot.size
+#MultiPlot.__len__ = MultiPlot.size
+#del MultiPlot.size
 
 def wrapper(f):
     @wraps(f)
@@ -45,11 +45,11 @@ def wrapper(f):
         return f(self, index)
     return __getitem__
 
-MultiPlot.__getitem__ = wrapper(MultiPlot.__setitem__)
-del wrapper, MultiPlot.__setitem__
+MultiPlot.__getitem__ = wrapper(MultiPlot.__getitem__)
+del wrapper #, MultiPlot.__getitem__
 
-MultiPlotSet.__len__ = MultiPlotSet.size
-del MultiPlotSet.size
+#MultiPlotSet.__len__ = MultiPlotSet.size
+#del MultiPlotSet.size
 
 def wrapper(f):
     @wraps(f)
@@ -61,5 +61,5 @@ def wrapper(f):
         return f(self, index)
     return __getitem__
 
-MultiPlotSet.__getitem__ = wrapper(MultiPlotSet.__setitem__)
-del wrapper, MultiPlotSet.__setitem__
+MultiPlotSet.__getitem__ = wrapper(MultiPlotSet.__getitem__)
+del wrapper, MultiPlotSet.__getitem__
