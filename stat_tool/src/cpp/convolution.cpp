@@ -3,7 +3,7 @@
  *
  *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2018 CIRAD AGAP
+ *       Copyright 1995-2019 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -112,7 +112,7 @@ Convolution::Convolution(int nb_dist , const DiscreteParametric **pdist)
  */
 /*--------------------------------------------------------------*/
 
-Convolution::Convolution(int nb_dist , const vector<DiscreteParametric>& idist)
+Convolution::Convolution(int nb_dist , const vector<DiscreteParametric> &idist)
 
 {
   int i;
@@ -368,7 +368,7 @@ Convolution* Convolution::build(StatError &error , int nb_dist , const DiscreteP
  */
 /*--------------------------------------------------------------*/
 
-Convolution* Convolution::build(StatError &error , const vector<DiscreteParametric>& dist)
+Convolution* Convolution::build(StatError &error , const vector<DiscreteParametric> &dist)
 
 {
   int nb_dist;

@@ -3,7 +3,7 @@
  *
  *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2018 CIRAD AGAP
+ *       Copyright 1995-2019 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -360,8 +360,8 @@ Vectors::Vectors(int inb_vector , int *iidentifier , int inb_variable , variable
  */
 /*--------------------------------------------------------------*/
 
-Vectors::Vectors(int inb_vector , const vector<int>& iidentifier , int nb_int_variable , int nb_real_variable ,
-                 const vector<vector<int> >& iint_vector , const vector<vector<double> >& ireal_vector)
+Vectors::Vectors(int inb_vector , const vector<int> &iidentifier , int nb_int_variable , int nb_real_variable ,
+                 const vector<vector<int> > &iint_vector , const vector<vector<double> > &ireal_vector)
 
 {
   int i , j , k;
@@ -435,8 +435,8 @@ Vectors::Vectors(int inb_vector , const vector<int>& iidentifier , int nb_int_va
  */
 /*--------------------------------------------------------------*/
 
-Vectors* Vectors::build(StatError &error , const vector<vector<int> >& iint_vector ,
-                        const vector<vector<double> >& ireal_vector , const vector<int>& iidentifier)
+Vectors* Vectors::build(StatError &error , const vector<vector<int> > &iint_vector ,
+                        const vector<vector<double> > &ireal_vector , const vector<int> &iidentifier)
 
 {
   bool status = true;
@@ -1302,7 +1302,7 @@ Vectors* Vectors::merge(StatError &error , int nb_sample , const Vectors **ivec)
  */
 /*--------------------------------------------------------------*/
 
-Vectors* Vectors::merge(StatError &error , int nb_sample , const vector<Vectors>& ivec) const
+Vectors* Vectors::merge(StatError &error , int nb_sample , const vector<Vectors> &ivec) const
 
 {
   int i;
@@ -2046,7 +2046,7 @@ Vectors* Vectors::transcode(StatError &error , int variable , int *category) con
  */
 /*--------------------------------------------------------------*/
 
-Vectors* Vectors::transcode(StatError &error , int variable , vector<int>& category) const
+Vectors* Vectors::transcode(StatError &error , int variable , vector<int> &category) const
 
 {
   return transcode(error , variable , category.data());
@@ -2171,7 +2171,7 @@ Vectors* Vectors::cluster(StatError &error , int variable ,
 /*--------------------------------------------------------------*/
 
 Vectors* Vectors::cluster(StatError &error , int variable ,
-                          int nb_class , vector<int>& ilimit) const
+                          int nb_class , vector<int> &ilimit) const
 
 {
   return cluster(error , variable , nb_class , ilimit.data());
@@ -2300,7 +2300,7 @@ Vectors* Vectors::cluster(StatError &error , int variable ,
 /*--------------------------------------------------------------*/
 
 Vectors* Vectors::cluster(StatError &error , int variable ,
-                          int nb_class , vector<double>& ilimit) const
+                          int nb_class , vector<double> &ilimit) const
 
 {
   return cluster(error , variable , nb_class , ilimit.data());
@@ -2832,7 +2832,7 @@ Vectors* Vectors::log_transform(StatError &error , int variable , log_base base)
  *  \brief Selection of individuals taking values in a given range for a variable.
  *
  *  \param[in] error      reference on a StatError object,
- *  \param[in] display    flag for displaying the selected individuals,
+ *  \param[in] os         stream for displaying the selected individuals,
  *  \param[in] variable   variable index,
  *  \param[in] imin_value lowest integer value,
  *  \param[in] imax_value highest integer value,
@@ -2842,7 +2842,7 @@ Vectors* Vectors::log_transform(StatError &error , int variable , log_base base)
  */
 /*--------------------------------------------------------------*/
 
-Vectors* Vectors::value_select(StatError &error , bool display , int variable ,
+Vectors* Vectors::value_select(StatError &error , ostream *os , int variable ,
                                int imin_value , int imax_value , bool keep) const
 
 {
@@ -2921,12 +2921,12 @@ Vectors* Vectors::value_select(StatError &error , bool display , int variable ,
     // copy of vectors
 
     if (status) {
-      if ((display) && (inb_vector <= DISPLAY_NB_INDIVIDUAL)) {
-        cout << "\n" << STAT_label[inb_vector == 1 ? STATL_VECTOR : STATL_VECTORS] << ": ";
+      if ((os) && (inb_vector <= DISPLAY_NB_INDIVIDUAL)) {
+        *os << "\n" << STAT_label[inb_vector == 1 ? STATL_VECTOR : STATL_VECTORS] << ": ";
         for (i = 0;i < inb_vector;i++) {
-          cout << iidentifier[i] << ", ";
+          *os << iidentifier[i] << ", ";
         }
-        cout << endl;
+        *os << endl;
       }
 
       vec = new Vectors(*this , inb_vector , index);
@@ -2945,7 +2945,7 @@ Vectors* Vectors::value_select(StatError &error , bool display , int variable ,
  *  \brief Selection of individuals taking values in a given range for a real-valued variable.
  *
  *  \param[in] error      reference on a StatError object,
- *  \param[in] display    flag for displaying the selected individuals,
+ *  \param[in] os         stream for displaying the selected individuals,
  *  \param[in] variable   variable index,
  *  \param[in] imin_value lowest real value,
  *  \param[in] imax_value highest real value,
@@ -2955,7 +2955,7 @@ Vectors* Vectors::value_select(StatError &error , bool display , int variable ,
  */
 /*--------------------------------------------------------------*/
 
-Vectors* Vectors::value_select(StatError &error , bool display , int variable ,
+Vectors* Vectors::value_select(StatError &error , ostream *os , int variable ,
                                double imin_value , double imax_value , bool keep) const
 
 {
@@ -3021,12 +3021,12 @@ Vectors* Vectors::value_select(StatError &error , bool display , int variable ,
     // copy of vectors
 
     if (status) {
-      if ((display) && (inb_vector <= DISPLAY_NB_INDIVIDUAL)) {
-        cout << "\n" << STAT_label[inb_vector == 1 ? STATL_VECTOR : STATL_VECTORS] << ": ";
+      if ((os) && (inb_vector <= DISPLAY_NB_INDIVIDUAL)) {
+        *os << "\n" << STAT_label[inb_vector == 1 ? STATL_VECTOR : STATL_VECTORS] << ": ";
         for (i = 0;i < inb_vector;i++) {
-          cout << iidentifier[i] << ", ";
+          *os << iidentifier[i] << ", ";
         }
-        cout << endl;
+        *os << endl;
       }
 
       vec = new Vectors(*this , inb_vector , index);
@@ -3227,7 +3227,7 @@ Vectors* Vectors::select_individual(StatError &error , int inb_vector ,
 /*--------------------------------------------------------------*/
 
 Vectors* Vectors::select_individual(StatError &error , int inb_vector ,
-                                    vector<int>& iidentifier , bool keep) const
+                                    vector<int> &iidentifier , bool keep) const
 
 {
   return select_individual(error , inb_vector , iidentifier.data() , keep);
@@ -3459,7 +3459,7 @@ Vectors* Vectors::select_variable(StatError &error , int inb_variable ,
 /*--------------------------------------------------------------*/
 
 Vectors* Vectors::select_variable(StatError &error , int inb_variable ,
-                                  vector<int>& ivariable , bool keep) const
+                                  vector<int> &ivariable , bool keep) const
 
 {
   return select_variable(error , inb_variable , ivariable.data() , keep);
@@ -3735,7 +3735,7 @@ Vectors* Vectors::sum_variable(StatError &error , int nb_summed_variable , int *
  */
 /*--------------------------------------------------------------*/
 
-Vectors* Vectors::sum_variable(StatError &error , int nb_summed_variable , vector<int>& ivariable) const
+Vectors* Vectors::sum_variable(StatError &error , int nb_summed_variable , vector<int> &ivariable) const
 
 {
   return sum_variable(error , nb_summed_variable , ivariable.data());
@@ -3894,7 +3894,7 @@ Vectors* Vectors::merge_variable(StatError &error , int nb_sample ,
 /*--------------------------------------------------------------*/
 
 Vectors* Vectors::merge_variable(StatError &error , int nb_sample ,
-                                 const vector<Vectors>& ivec , int ref_sample) const
+                                 const vector<Vectors> &ivec , int ref_sample) const
 
 {
   int i;

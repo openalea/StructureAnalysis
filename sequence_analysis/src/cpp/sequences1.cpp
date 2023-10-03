@@ -3,7 +3,7 @@
  *
  *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2018 CIRAD AGAP
+ *       Copyright 1995-2019 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -603,10 +603,10 @@ Sequences::Sequences(int inb_sequence , int *iidentifier , int *ilength ,
  */
 /*--------------------------------------------------------------*/
 
-Sequences::Sequences(int inb_sequence , const vector<int> iidentifier , int *ilength ,
-                     const vector<vector<int>> ivertex_identifier , index_parameter_type iindex_param_type ,
-                     const vector<vector<int>> iindex_parameter , int nb_int_variable , int nb_real_variable ,
-                     const vector<vector<vector<int>>> iint_sequence , const vector<vector<vector<double>>> ireal_sequence)
+Sequences::Sequences(int inb_sequence , const vector<int> &iidentifier , int *ilength ,
+                     const vector<vector<int> > &ivertex_identifier , index_parameter_type iindex_param_type ,
+                     const vector<vector<int> > &iindex_parameter , int nb_int_variable , int nb_real_variable ,
+                     const vector<vector<vector<int> > > &iint_sequence , const vector<vector<vector<double> > > &ireal_sequence)
 
 {
   int i , j , k , m;
@@ -658,10 +658,10 @@ Sequences::Sequences(int inb_sequence , const vector<int> iidentifier , int *ile
     for (j = 0;j < length[i];j++) {
       k = 0;
       for (m = 0;m < nb_int_variable;m++) {
-        int_sequence[i][j][k++] = iint_sequence[i][j][m];
+        int_sequence[i][k++][j] = iint_sequence[i][m][j];
       }
       for (m = 0;m < nb_real_variable;m++) {
-        real_sequence[i][j][k++] = ireal_sequence[i][j][m];
+        real_sequence[i][k++][j] = ireal_sequence[i][m][j];
       }
     }
   }

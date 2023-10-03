@@ -3,7 +3,7 @@
  *
  *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2018 CIRAD AGAP
+ *       Copyright 1995-2019 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -116,7 +116,7 @@ namespace stat_tool {
     DiscreteMixture(int inb_component , double *pweight , const DiscreteParametric **pcomponent);
     DiscreteMixture(const DiscreteMixture &mixt , bool *component_flag , int inb_value);
     DiscreteMixture(int inb_component , const DiscreteParametric **pcomponent);
-    DiscreteMixture(int inb_component , const std::vector<double>& iweight , const std::vector<DiscreteParametric>& icomponent);
+    DiscreteMixture(int inb_component , const std::vector<double> &iweight , const std::vector<DiscreteParametric> &icomponent);
     DiscreteMixture(const DiscreteMixture &mixt , bool data_flag = true)
     :Distribution(mixt) { copy(mixt , data_flag); }
     ~DiscreteMixture();
@@ -127,8 +127,8 @@ namespace stat_tool {
 
     static DiscreteMixture* build(StatError &error , int nb_component , double *weight ,
                                   const DiscreteParametric **component);
-    static DiscreteMixture* build(StatError &error , const std::vector<double>& weight ,
-                                  const std::vector<DiscreteParametric>& component);
+    static DiscreteMixture* build(StatError &error , const std::vector<double> &weight ,
+                                  const std::vector<DiscreteParametric> &component);
     static DiscreteMixture* ascii_read(StatError &error , const std::string path ,
                                        double cumul_threshold = CUMUL_THRESHOLD);
 

@@ -3,7 +3,7 @@
  *
  *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2018 CIRAD AGAP
+ *       Copyright 1995-2019 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -575,7 +575,7 @@ void TimeEvents::merge(int nb_sample , const TimeEvents **ptimev)
  */
 /*--------------------------------------------------------------*/
 
-TimeEvents* TimeEvents::merge(int nb_sample , const vector<TimeEvents> itimev) const
+TimeEvents* TimeEvents::merge(int nb_sample , const vector<TimeEvents> &itimev) const
 
 {
   int i;
@@ -956,7 +956,7 @@ TimeEvents* TimeEvents::build(StatError &error , FrequencyDistribution &nb_event
  */
 /*--------------------------------------------------------------*/
 
-TimeEvents* TimeEvents::build(StatError &error , const vector<vector<int>> time_nb_event)
+TimeEvents* TimeEvents::build(StatError &error , const vector<vector<int> > &time_nb_event)
 
 {
   bool status = true;
@@ -2670,7 +2670,7 @@ RenewalData* RenewalData::merge(StatError &error , int nb_sample ,
 /*--------------------------------------------------------------*/
 
 RenewalData* RenewalData::merge(StatError &error , int nb_sample ,
-                                const vector<RenewalData> itimev) const
+                                const vector<RenewalData> &itimev) const
 
 {
   int i;

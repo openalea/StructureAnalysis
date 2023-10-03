@@ -3,7 +3,7 @@
  *
  *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2018 CIRAD AGAP
+ *       Copyright 1995-2019 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -80,10 +80,10 @@ namespace sequence_analysis {
 /*--------------------------------------------------------------*/
 
 Sequences* Sequences::build(StatError &error , index_parameter_type iindex_param_type ,
-                            const vector<vector<int>> iindex_parameter ,
-                            const vector<vector<vector<int>>> iint_sequence ,
-                            const vector<vector<vector<double>>> ireal_sequence ,
-                            const vector<int> iidentifier , const vector<vector<int>> ivertex_identifier)
+                            const vector<vector<int> > &iindex_parameter ,
+                            const vector<vector<vector<int> > > &iint_sequence ,
+                            const vector<vector<vector<double> > > &ireal_sequence ,
+                            const vector<int> &iidentifier , const vector<vector<int> > &ivertex_identifier)
 
 {
   bool status = true;
@@ -4008,7 +4008,7 @@ double* Sequences::mean_direction_computation(int variable , angle_unit unit) co
  *  \brief Computation of the root mean square error or the mean absolute error for a variable.
  *
  *  \param[in] error       reference on a StatError object,
- *  \param[in] display     flag for displaying the result,
+ *  \param[in] os          stream for displaying the result,
  *  \param[in] variable    variable index,
  *  \param[in] iidentifier sequence identifier,
  *  \param[in] robust      flag computation of mean absolute error.
@@ -4017,7 +4017,7 @@ double* Sequences::mean_direction_computation(int variable , angle_unit unit) co
  */
 /*--------------------------------------------------------------*/
 
-bool Sequences::mean_error_computation(StatError &error , bool display , int variable ,
+bool Sequences::mean_error_computation(StatError &error , ostream *os , int variable ,
                                        int iidentifier , bool robust) const
 
 {
@@ -4147,17 +4147,17 @@ bool Sequences::mean_error_computation(StatError &error , bool display , int var
       }
     }
 
-    if (display) {
-      cout << "\n";
+    if (os) {
+      *os << "\n";
       if (((type[0] != STATE) && (nb_variable > 2)) || ((type[0] == STATE) && (nb_variable > 3))) {
-        cout << STAT_label[STATL_VARIABLE] << " " << variable + 1 << "   ";
+        *os << STAT_label[STATL_VARIABLE] << " " << variable + 1 << "   ";
       }
 
       if (robust) {
-        cout << SEQ_label[SEQL_MEAN_ABSOLUTE_ERROR] << ": " << mean_error << endl;
+        *os << SEQ_label[SEQL_MEAN_ABSOLUTE_ERROR] << ": " << mean_error << endl;
       }
       else {
-        cout << SEQ_label[SEQL_ROOT_MEAN_SQUARE_ERROR] << ": " << mean_error << endl;
+        *os << SEQ_label[SEQL_ROOT_MEAN_SQUARE_ERROR] << ": " << mean_error << endl;
       }
     }
   }

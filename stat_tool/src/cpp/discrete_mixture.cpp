@@ -3,7 +3,7 @@
  *
  *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2018 CIRAD AGAP
+ *       Copyright 1995-2019 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -126,8 +126,8 @@ DiscreteMixture::DiscreteMixture(int inb_component , double *iweight ,
  */
 /*--------------------------------------------------------------*/
 
-DiscreteMixture::DiscreteMixture(int inb_component , const vector<double>& iweight ,
-                                 const vector<DiscreteParametric>& icomponent)
+DiscreteMixture::DiscreteMixture(int inb_component , const vector<double> &iweight ,
+                                 const vector<DiscreteParametric> &icomponent)
 
 {
   int i;
@@ -451,8 +451,8 @@ DiscreteMixture* DiscreteMixture::build(StatError &error , int nb_component , do
  */
 /*--------------------------------------------------------------*/
 
-DiscreteMixture* DiscreteMixture::build(StatError &error , const vector<double>& weight ,
-                                        const vector<DiscreteParametric>& component)
+DiscreteMixture* DiscreteMixture::build(StatError &error , const vector<double> &weight ,
+                                        const vector<DiscreteParametric> &component)
 
 {
   bool status;
@@ -1417,6 +1417,10 @@ bool DiscreteMixture::plot_write(const char *prefix , const char *title ,
 
       ofstream out_file((file_name[0].str()).c_str());
 
+//      if (i == 0) {
+//        out_file << "set terminal x11" << endl;
+//      }
+
       if (i == 1) {
         out_file << "set terminal postscript" << endl;
         file_name[1] << label(prefix) << ".ps";
@@ -1466,6 +1470,7 @@ bool DiscreteMixture::plot_write(const char *prefix , const char *title ,
       if (mixt_histo) {
         if (i == 0) {
           out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
+//          out_file << "\npause mouse keypress \"Click any mouse button to continue\"" << endl;
         }
         out_file << endl;
 
@@ -1492,6 +1497,7 @@ bool DiscreteMixture::plot_write(const char *prefix , const char *title ,
           if (mixt_histo->component[k]->nb_element > 0) {
             if (i == 0) {
               out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
+//              out_file << "\npause mouse keypress \"Click any mouse button to continue\"" << endl;
             }
             out_file << endl;
 

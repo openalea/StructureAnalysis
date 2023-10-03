@@ -3,7 +3,7 @@
  *
  *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2018 CIRAD AGAP
+ *       Copyright 1995-2019 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -1206,7 +1206,7 @@ DistanceMatrix* DistanceMatrix::select_individual(StatError &error , int inb_pat
 /*--------------------------------------------------------------*/
 
 DistanceMatrix* DistanceMatrix::select_individual(StatError &error , int inb_pattern ,
-                                                  vector<int>& iidentifier , bool keep) const
+                                                  vector<int> &iidentifier , bool keep) const
 
 {
   return select_individual(error , inb_pattern , iidentifier.data() , keep);
