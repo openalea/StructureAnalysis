@@ -57,18 +57,18 @@ if __name__ == '__main__':
           #create_namespaces=False,
 
           # Packages
-          packages=['openalea.stat_tool',
+          packages=['openalea.stat_tool'],
                     #'structure_analysis',
                     #'structure_analysis.stat_tool',
                     #'stat_tool'
-                    ],
+                    #],
 
           package_dir={ "openalea.stat_tool" : pj("src","openalea", "stat_tool"),
                         #"stat_tool" : pj("src", "py", "stat_tool"),
                         #"structure_analysis" : pj("src", "py", "structure_analysis"),
                         #"structure_analysis.stat_tool" : pj("src", "py", "structure_analysis", "stat_tool"),
-
                         '':'src'},
+
           share_dirs = { 'share' : 'share' },
 
 
