@@ -9,7 +9,7 @@ options = Variables(['../options.py', 'options.py'], ARGUMENTS)
 options.Add(BoolVariable('with_efence', 'build tests with efence library', 0))
 options.Add(BoolVariable('DEBUG', 'my debug', 0))
 
-tools = ['boost_python', 'openalea.stat_tool']
+tools = ['boost_python', 'openalea.stattool']
 
 env = ALEASolution(options, tools)
 env.AppendUnique(CXXFLAGS=['-x', 'c++', '-std=c++0x'])
