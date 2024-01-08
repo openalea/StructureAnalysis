@@ -89,7 +89,6 @@ public:
   boost::python::object py_minCostFlow(){
     VertexVector map_list;
     map_list.resize(this->nbVertex,-1);
-    DistanceType dist = this->minCostFlow(map_list);
     boost::python::list result;
     VertexVector::iterator it = map_list.begin();
     VertexVector::iterator begin = map_list.begin();
@@ -97,11 +96,11 @@ public:
     begin++;end--;
     int i = 1;
     //std::cerr<<"Mapping : "<<dist<<std::endl;
+    DistanceType dist = this->minCostFlow(map_list);
     for (it = begin;it!=end;it++, i++){
-      result.append(make_tuple(this->who(i),who(*it)));
-      //std::cerr<<who(i)<<" -> "<<who(*it)<<std::endl;
+      result.append(boost::python::make_tuple(this->who(i),who(*it)));
     }
-    return make_tuple(dist,result);
+    return boost::python::make_tuple(boost::python::object(dist),result);
   }
 };
 

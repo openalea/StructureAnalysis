@@ -596,45 +596,48 @@ int GeneralMatchPath::next_edge(int n,int i)
   if (n<ni)
     {
       if (i==nbOut(n)) // arc retour
-	return 2*(n-1)+1;
+	      return 2*(n-1)+1;
       else{
-	// on considere que le successor est code a partir de ni
-	int successor ;
-	if (i == nbOut(n)-1)
-	  return 2*(ni-1)+2*nj*n;
-	else
-	  successor = _inputSuccessors[n-1][i-1]+2;
-	return 2*(ni-1)+2*nj*(n-1)+2*(successor-ni);
+      // on considere que le successor est code a partir de ni
+      int successor ;
+      if (i == nbOut(n)-1)
+        return 2*(ni-1)+2*nj*n;
+      else
+        successor = _inputSuccessors[n-1][i-1]+2;
+      return 2*(ni-1)+2*nj*(n-1)+2*(successor-ni);
       }
     }
-  if (n == ni) // empty node
-    if (i == nbOut(n))
+  if (n == ni) { // empty node
+    if (i == nbOut(n)){
       return 2*(ni-1)+1;
-    else
+    }
+    else {
       return 2*(ni-1)+2*nj*(ni-1)+2*i;
+    }
+  }
   if (n < ni+nj)
     {
       if (i==nbOut(n))
-	return (2*(ni-1)+2*ni*nj+2*(n-ni));
+	      return (2*(ni-1)+2*ni*nj+2*(n-ni));
       else{
-	int predecessor ;
-	if (i == nbOut(n) -1) // connection au noeud vide
-	  predecessor = ni;
-	else
-	  predecessor = _referencePredecessors[n-ni-1][i-1]+1;
-	//	cerr<<"n "<<n<<" ni "<<ni<<" i "<<i<<" nbOut "<<nbOut(n)<<" pred = "<<predecessor<<endl;
-	return 2*(ni-1)+2*nj*(predecessor-1)+2*(n-ni)+1;
+        int predecessor ;
+        if (i == nbOut(n) -1) // connection au noeud vide
+          predecessor = ni;
+        else
+          predecessor = _referencePredecessors[n-ni-1][i-1]+1;
+        //	cerr<<"n "<<n<<" ni "<<ni<<" i "<<i<<" nbOut "<<nbOut(n)<<" pred = "<<predecessor<<endl;
+        return 2*(ni-1)+2*nj*(predecessor-1)+2*(n-ni)+1;
       }
     }
   else{ //empty node
       if (i==nbOut(n))
-	{
-	  return(2*(ni-1)+2*ni*nj+2*nj);
-	}
+      {
+        return(2*(ni-1)+2*ni*nj+2*nj);
+      }
       else 
-	{
-	  return(2*(ni-1)+2*nj*(i-1)+2*nj+1);	
-	}
+      {
+        return(2*(ni-1)+2*nj*(i-1)+2*nj+1);	
+      }
   }
 }
 int GeneralMatchPath::next_vertex(int n,int i)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from openalea.mtg.io import *
-import cPickle as pickle
+import pickle as pickle
 
 
 def writefile(fn, obj):
@@ -39,7 +39,7 @@ def convertToStdMTG(g):
   zz = {}
   r = {}
   
-  for i,v in pdic.iteritems():
+  for i,v in pdic.items():
       xx[i]=v.x
       yy[i]=v.y
       zz[i]=v.z
@@ -113,7 +113,7 @@ def convertToMyMTG(g):
   
   rdic = g.property('radius')
   
-  for k,r in rdic.iteritems():
+  for k,r in rdic.items():
     parentid = g.parent(k)
     px = g.property('XX')[k]
     py = g.property('YY')[k]

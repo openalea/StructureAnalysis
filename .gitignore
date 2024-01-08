@@ -1,6 +1,7 @@
 build-scons
 build
 dist
+build-cmake
 .ipynb_checkpoints
 *.egg-info
 *~
@@ -13,3 +14,5 @@ dist
 options.py
 /.project
 .DS_Store
+.vscode
+test_choicetable.dump

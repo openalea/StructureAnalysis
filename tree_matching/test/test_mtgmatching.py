@@ -11,7 +11,7 @@ def my_random_mtg(nbvertices1 = 10,nbvertices2 = 10):
     # creating 
     vid = random_tree(g, root1, nb_vertices=nbvertices2)
     
-    for i in xrange(nbvertices1-1):
+    for i in range(nbvertices1-1):
         v1, complex1 = g.add_child_and_complex(vid)
         vid = random_tree(g, v1, nb_vertices=nbvertices2)
 

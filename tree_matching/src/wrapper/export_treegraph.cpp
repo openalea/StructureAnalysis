@@ -100,6 +100,7 @@ void export_TreeGraph() {
 
 	class_<TreeGraph::const_pre_order_iterator>("TreeGraphPreOrderIterator",no_init)
     .def("next",&py_next_iter)
+    .def("__next__",&py_next_iter)
     .def("atEnd",&TreeGraph::const_pre_order_iterator::atEnd)
     .def("__iter__",&nullfunc, return_self<>())
     ;

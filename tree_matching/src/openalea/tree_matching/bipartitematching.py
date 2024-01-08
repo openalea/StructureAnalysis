@@ -1,18 +1,18 @@
-from __tree_matching__ import GeneralMatchPath
+from .__tree_matching__ import GeneralMatchPath
 
 def test_nb_theta_as_min(edges):
     a, b = {}, {}
-    for ij,c in edges.iteritems():
+    for ij,c in edges.items():
         i,j = ij
-        if i != -1 and a.has_key(i):
+        if i != -1 and i in a:
             if a[i][0] > c: 
                 a[i] = (c,j)
         else: a[i] = (c,j)
-        if j != -1 and b.has_key(j):
+        if j != -1 and j in b:
             if b[j][0] > c: 
                 b[j] = (c,i)
         else: b[j] = (c,i)
-    print 'Check', len([1 for c,j in a.itervalues() if j == -1]),len([1 for c,i in b.itervalues() if i == -1])
+    print('Check', len([1 for c,j in a.values() if j == -1]),len([1 for c,i in b.values() if i == -1]))
 
 def remove_elements(todelete,elements,nonmatchingcost):
     elements = list(elements)
@@ -38,7 +38,7 @@ def filter_orphans(set1,set2, edges, nonmatchingset1cost, nonmatchingset2cost):
     orphans1 = []
     todelete = []
     orphanscost = 0
-    for ni,deg in degset1.iteritems():
+    for ni,deg in degset1.items():
         if deg == 0 : 
             orphans1.append(ni)
             todelete.append(idmapset1[ni])
@@ -47,7 +47,7 @@ def filter_orphans(set1,set2, edges, nonmatchingset1cost, nonmatchingset2cost):
             
     orphans2 = []
     todelete = []
-    for nj,deg in degset2.iteritems():
+    for nj,deg in degset2.items():
         if deg == 0 : 
             orphans2.append(nj)
             todelete.append(idmapset2[nj])
@@ -59,8 +59,8 @@ def filter_orphans(set1,set2, edges, nonmatchingset1cost, nonmatchingset2cost):
 
 def filter_insdel_sup_edges(set1,set2, edges, nonmatchingset1cost, nonmatchingset2cost):
     """ Filter edges with a cost sup than cost of deletion and insertion of its 2 nodes """
-    delcost1 = dict(zip(set1,nonmatchingset1cost))
-    delcost2 = dict(zip(set2,nonmatchingset2cost))
+    delcost1 = dict(list(zip(set1,nonmatchingset1cost)))
+    delcost2 = dict(list(zip(set2,nonmatchingset2cost)))
     
     newedges = []
     for ni,nj,cost in edges:
@@ -79,7 +79,7 @@ def filter_perfect_matches(set1,set2, edges, nonmatchingset1cost, nonmatchingset
             perfectly_matched2[nj] = perfectly_matched2.get(nj,[])+[ni]
     
     perfect_matches = []
-    for ni,njs in perfectly_matched1.iteritems():
+    for ni,njs in perfectly_matched1.items():
         if len(njs) == 1 and perfectly_matched2[njs[0]] == [ni]: # A unique one-to-one relation
             perfect_matches.append((ni,njs[0]))
     
@@ -138,12 +138,12 @@ class BipartiteMatching:
         idmapset2 = dict([(nj,self.nb_ni+i) for i,nj in enumerate(set2)])
         
         # reverse map to use to translate back results
-        self.idmapset = dict([(i,ni) for ni,i in idmapset1.iteritems()]+[(i,nj) for nj,i in idmapset2.iteritems()])
+        self.idmapset = dict([(i,ni) for ni,i in idmapset1.items()]+[(i,nj) for nj,i in idmapset2.items()])
         self.idmapset[-1] = None
         
         edges_cost = {}
-        inconnect = [[] for it in xrange(self.nb_ni)]
-        outconnect = [[] for it in xrange(self.nb_nj)]
+        inconnect = [[] for it in range(self.nb_ni)]
+        outconnect = [[] for it in range(self.nb_nj)]
         for ni,nj,cost in possiblematching:
             # normalize index
             nni, nnj = idmapset1[ni],idmapset2[nj]
@@ -167,9 +167,9 @@ class BipartiteMatching:
         class GeneralMatchPathWrapper(GeneralMatchPath):
             def __init__(self,ni,nj,inconnect,outconnect,edges_cost):
                 if set1capacity:
-                    GeneralMatchPath.__init__(self,range(ni),range(nj),inconnect,outconnect, set1capacity)
+                    GeneralMatchPath.__init__(self,list(range(ni)),list(range(nj)),inconnect,outconnect, set1capacity)
                 else:
-                    GeneralMatchPath.__init__(self,range(ni),range(nj),inconnect,outconnect)
+                    GeneralMatchPath.__init__(self,list(range(ni)),list(range(nj)),inconnect,outconnect)
                 self.edges_cost = edges_cost
                
             def edgeCost(self,a,b):
@@ -182,13 +182,12 @@ class BipartiteMatching:
         # print 'Nb matching found :',len(matching) # Attention ceci compte les paires "non matchees",
                                                   # certaines sont comptees deux fois
         if cachefile:
-            import cPickle as pickle
+            import pickle as pickle
             pickle.dump(matching, file(cachefile,'wb'), pickle.HIGHEST_PROTOCOL)
         newmatching = set()
         nonmatching1 = set()
         nonmatching2 = set()
         for ni,nj in matching:
-            # print (ni,nj),':',(self.idmapset[ni],self.idmapset[nj]),
             #[Pascal] J'ai corrige pour ne voir apparaitre qu'une seule fois un noeud non mappe
             if ni == -1 or nj == -1:
                if ni == -1: ni = nj   # put value diff from -1 in ni

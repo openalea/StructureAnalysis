@@ -1,0 +1,11 @@
+name: treematching
+channels:
+    - conda-forge
+    - defaults
+dependencies:
+    - python
+    - setuptools
+    - cmake
+    - boost
+    - ipython
+    - nose
