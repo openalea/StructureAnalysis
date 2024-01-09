@@ -1,0 +1,425 @@
+HIDDEN_MARKOV_OUT_TREE
+
+7 STATES
+
+INITIAL_PROBABILITIES
+0.7  0.2 0.02 0.02 0.02 0.02 0.02      
+
+TRANSITION_PROBABILITIES
+0.7  0.2 0.02 0.02 0.02 0.02 0.02  
+0.02 0.7  0.02 0.2 0.02 0.02 0.02
+0.02 0.02 0.7  0.2 0.02 0.02 0.02
+0.02 0.02 0.02 0.7  0.2 0.02 0.02
+0.02 0.02 0.02 0.02 0.7  0.2 0.02
+0.02 0.02 0.02 0.02 0.02 0.7  0.2
+0.02 0.02 0.02 0.02 0.02 0.2 0.7
+
+3 OUTPUT_PROCESSES
+
+OUTPUT_PROCESS 1 : PARAMETRIC
+
+STATE 0 OBSERVATION_DISTRIBUTION
+NEGATIVE_BINOMIAL   INF_BOUND : 0   PARAMETER : 1   PROBABILITY : 0.003
+# mean: 252.679   variance: 2881.13   standard deviation: 53.6761
+
+# state 0 observation histogram - sample size: 23
+# mean: 253.609   variance: 3010.07   standard deviation: 54.8641
+
+STATE 1 OBSERVATION_DISTRIBUTION
+NEGATIVE_BINOMIAL   INF_BOUND : 0   PARAMETER : 1   PROBABILITY : 0.04
+# mean: 22.0263   variance: 240.63   standard deviation: 15.5122
+
+# state 1 observation histogram - sample size: 97
+# mean: 21.7113   variance: 232.707   standard deviation: 15.2548
+
+STATE 2 OBSERVATION_DISTRIBUTION
+NEGATIVE_BINOMIAL   INF_BOUND : 0   PARAMETER : 1   PROBABILITY : 0.01
+# mean: 57.9907   variance: 391.958   standard deviation: 19.7979
+
+# state 2 observation histogram - sample size: 380
+# mean: 57.5263   variance: 395.221   standard deviation: 19.8802
+
+STATE 3 OBSERVATION_DISTRIBUTION
+NEGATIVE_BINOMIAL   INF_BOUND : 0   PARAMETER : 1   PROBABILITY : 0.009
+# mean: 108.374   variance: 1098.02   standard deviation: 33.1364
+
+# state 3 observation histogram - sample size: 462
+# mean: 107.253   variance: 1080.82   standard deviation: 32.8758
+
+STATE 4 OBSERVATION_DISTRIBUTION
+NEGATIVE_BINOMIAL   INF_BOUND : 0   PARAMETER : 1   PROBABILITY : 0.03
+# mean: 25.9022   variance: 262.047   standard deviation: 16.1879
+
+# state 4 observation histogram - sample size: 325
+# mean: 25.9292   variance: 272.257   standard deviation: 16.5002
+
+STATE 5 OBSERVATION_DISTRIBUTION
+NEGATIVE_BINOMIAL   INF_BOUND : 0   PARAMETER : 1   PROBABILITY : 0.01
+# mean: 85.8642   variance: 564.34   standard deviation: 23.7558
+
+# state 5 observation histogram - sample size: 139
+# mean: 86.3525   variance: 530.926   standard deviation: 23.0418
+
+STATE 6 OBSERVATION_DISTRIBUTION
+NEGATIVE_BINOMIAL   INF_BOUND : 0   PARAMETER : 1   PROBABILITY : 0.004
+# mean: 210.941   variance: 5599.61   standard deviation: 74.8306
+
+# state 6 observation histogram - sample size: 181
+# mean: 214.193   variance: 5524.72   standard deviation: 74.3285
+
+OUTPUT_PROCESS 2 : PARAMETRIC
+
+STATE 0 OBSERVATION_DISTRIBUTION
+NEGATIVE_BINOMIAL   INF_BOUND : 0   PARAMETER : 1   PROBABILITY : 0.1
+# mean: 9.14974   variance: 5.04512   standard deviation: 2.24613
+
+# state 0 observation histogram - sample size: 23
+# mean: 9.17391   variance: 5.42292   standard deviation: 2.32872
+
+STATE 1 OBSERVATION_DISTRIBUTION
+NEGATIVE_BINOMIAL   INF_BOUND : 0   PARAMETER : 1   PROBABILITY : 0.454
+# mean: 2.21106   variance: 0.917724   standard deviation: 0.957979
+
+# state 1 observation histogram - sample size: 97
+# mean: 2.20619   variance: 0.436211   standard deviation: 0.660463
+
+STATE 2 OBSERVATION_DISTRIBUTION
+NEGATIVE_BINOMIAL   INF_BOUND : 0   PARAMETER : 1   PROBABILITY : 0.380
+# mean: 2.63538   variance: 1.10049   standard deviation: 1.04904
+
+# state 2 observation histogram - sample size: 380
+# mean: 2.64474   variance: 0.810131   standard deviation: 0.900073
+
+STATE 3 OBSERVATION_DISTRIBUTION
+NEGATIVE_BINOMIAL   INF_BOUND : 0   PARAMETER : 1   PROBABILITY : 0.366
+# mean: 2.73469   variance: 1.23317   standard deviation: 1.11048
+
+# state 3 observation histogram - sample size: 462
+# mean: 2.74242   variance: 0.933511   standard deviation: 0.966184
+
+STATE 4 OBSERVATION_DISTRIBUTION
+NEGATIVE_BINOMIAL   INF_BOUND : 0   PARAMETER : 1   PROBABILITY :  0.729
+# mean: 1.37915   variance: 1.496   standard deviation: 1.22311
+
+# state 4 observation histogram - sample size: 325
+# mean: 1.38769   variance: 1.72577   standard deviation: 1.31369
+
+STATE 5 OBSERVATION_DISTRIBUTION
+NEGATIVE_BINOMIAL   INF_BOUND : 0   PARAMETER : 1   PROBABILITY : 0.9
+# mean: 1   variance: 0   standard deviation: 0
+
+# state 5 observation histogram - sample size: 139
+# mean: 1   variance: 0   standard deviation: 0
+
+STATE 6 OBSERVATION_DISTRIBUTION
+NEGATIVE_BINOMIAL   INF_BOUND : 0   PARAMETER : 1   PROBABILITY : 0.33
+# mean: 3.23431   variance: 2.73996   standard deviation: 1.65528
+
+# state 6 observation histogram - sample size: 181
+# mean: 3.23204   variance: 2.81252   standard deviation: 1.67706
+
+OUTPUT_PROCESS 3 : NONPARAMETRIC
+
+STATE 0 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.1
+OUTPUT 1 : 0.1
+OUTPUT 2 : 0.2
+OUTPUT 3 : 0.2
+OUTPUT 4 : 0.1
+OUTPUT 5 : 0.1
+OUTPUT 6 : 0.1
+OUTPUT 7 : 0.1
+
+STATE 1 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.1
+OUTPUT 1 : 0.2
+OUTPUT 2 : 0.2
+OUTPUT 3 : 0.1
+OUTPUT 4 : 0.1
+OUTPUT 5 : 0.1
+OUTPUT 6 : 0.1
+OUTPUT 7 : 0.1
+
+STATE 2 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.1
+OUTPUT 1 : 0.3
+OUTPUT 2 : 0.1
+OUTPUT 3 : 0.1
+OUTPUT 4 : 0.1
+OUTPUT 5 : 0.1
+OUTPUT 6 : 0.1
+OUTPUT 7 : 0.1
+
+STATE 3 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.1
+OUTPUT 1 : 0.1
+OUTPUT 2 : 0.3
+OUTPUT 3 : 0.1
+OUTPUT 4 : 0.1
+OUTPUT 5 : 0.1
+OUTPUT 6 : 0.1
+OUTPUT 7 : 0.1
+
+STATE 4 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.3
+OUTPUT 1 : 0.1
+OUTPUT 2 : 0.1
+OUTPUT 3 : 0.1
+OUTPUT 4 : 0.1
+OUTPUT 5 : 0.1
+OUTPUT 6 : 0.1
+OUTPUT 7 : 0.1
+
+STATE 5 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.1
+OUTPUT 1 : 0.3
+OUTPUT 2 : 0.1
+OUTPUT 3 : 0.1
+OUTPUT 4 : 0.1
+OUTPUT 5 : 0.1
+OUTPUT 6 : 0.1
+OUTPUT 7 : 0.1
+
+STATE 6 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.1
+OUTPUT 1 : 0.1
+OUTPUT 2 : 0.1
+OUTPUT 3 : 0.3
+OUTPUT 4 : 0.1
+OUTPUT 5 : 0.1
+OUTPUT 6 : 0.1
+OUTPUT 7 : 0.1
+
+# observation probability matrix
+
+#              0            1            2            3            4            5            6            7
+# 0        1e-05        1e-05     0.437727     0.475742    0.0432957    0.0432053        1e-05            0
+# 1    0.0460737     0.544713     0.381321    0.0278527        1e-05        1e-05        1e-05        1e-05
+# 2   0.00328077     0.962394    0.0342753        1e-05        1e-05        1e-05        1e-05        1e-05
+# 3   0.00649084        1e-05     0.832099     0.158585   0.00233717  0.000457835        1e-05        1e-05
+# 4       0.9844    0.0155401        1e-05        1e-05        1e-05        1e-05        1e-05        1e-05
+# 5   0.00730692     0.929865    0.0627982        1e-05        1e-05        1e-05            0            0
+# 6   0.00980312   0.00780312     0.118966     0.434398     0.266688     0.129649    0.0272444   0.00544889
+
+# path length (starting from root) up to the first occurrence of output 0 distribution
+
+# path length (starting from root) up to the first occurrence of output 0 histogram - sample size: 22
+# mean: 7.36364   variance: 5.09957   standard deviation: 2.25822
+
+# path length (starting from root) up to the first occurrence of output 1 distribution
+
+# path length (starting from root) up to the first occurrence of output 1 histogram - sample size: 22
+# mean: 2.09091   variance: 3.03896   standard deviation: 1.74326
+
+# path length (starting from root) up to the first occurrence of output 2 distribution
+
+# path length (starting from root) up to the first occurrence of output 2 histogram - sample size: 22
+# mean: 1.63636   variance: 3.57576   standard deviation: 1.89097
+
+# path length (starting from root) up to the first occurrence of output 3 distribution
+
+# path length (starting from root) up to the first occurrence of output 3 histogram - sample size: 20
+# mean: 2.75   variance: 11.3553   standard deviation: 3.36976
+
+# path length (starting from root) up to the first occurrence of output 4 distribution
+
+# path length (starting from root) up to the first occurrence of output 4 histogram - sample size: 12
+# mean: 8.66667   variance: 15.1515   standard deviation: 3.89249
+
+# path length (starting from root) up to the first occurrence of output 5 distribution
+
+# path length (starting from root) up to the first occurrence of output 5 histogram - sample size: 7
+# mean: 8.71429   variance: 26.5714   standard deviation: 5.15475
+
+# path length (starting from root) up to the first occurrence of output 6 distribution
+
+# path length (starting from root) up to the first occurrence of output 6 histogram - sample size: 3
+# mean: 11   variance: 13   standard deviation: 3.60555
+
+# path length (starting from root) up to the first occurrence of output 7 distribution
+
+# path length (starting from root) up to the first occurrence of output 7 histogram - sample size: 1
+# mean: 9   variance: 0   standard deviation: 0
+
+# path length (starting from terminal nodes) up to the first occurrence of output 0 distribution
+
+# path length (starting from terminal nodes) up to the first occurrence of output 0 histogram - sample size: 22
+# mean: 0.318182   variance: 0.798701   standard deviation: 0.893701
+
+# path length (starting from terminal nodes) up to the first occurrence of output 1 distribution
+
+# path length (starting from terminal nodes) up to the first occurrence of output 1 histogram - sample size: 22
+# mean: 0   variance: 0   standard deviation: 0
+
+# path length (starting from terminal nodes) up to the first occurrence of output 2 distribution
+
+# path length (starting from terminal nodes) up to the first occurrence of output 2 histogram - sample size: 22
+# mean: 0.409091   variance: 0.729437   standard deviation: 0.854071
+
+# path length (starting from terminal nodes) up to the first occurrence of output 3 distribution
+
+# path length (starting from terminal nodes) up to the first occurrence of output 3 histogram - sample size: 20
+# mean: 2.25   variance: 10.5132   standard deviation: 3.2424
+
+# path length (starting from terminal nodes) up to the first occurrence of output 4 distribution
+
+# path length (starting from terminal nodes) up to the first occurrence of output 4 histogram - sample size: 12
+# mean: 2   variance: 1.81818   standard deviation: 1.3484
+
+# path length (starting from terminal nodes) up to the first occurrence of output 5 distribution
+
+# path length (starting from terminal nodes) up to the first occurrence of output 5 histogram - sample size: 7
+# mean: 1.71429   variance: 1.57143   standard deviation: 1.25357
+
+# path length (starting from terminal nodes) up to the first occurrence of output 6 distribution
+
+# path length (starting from terminal nodes) up to the first occurrence of output 6 histogram - sample size: 3
+# mean: 2   variance: 1   standard deviation: 1
+
+# path length (starting from terminal nodes) up to the first occurrence of output 7 distribution
+
+# path length (starting from terminal nodes) up to the first occurrence of output 7 histogram - sample size: 1
+# mean: 2   variance: 0   standard deviation: 0
+
+# output 0 sojourn size distribution
+
+# output 0 sojourn size histogram - sample size: 314
+# mean: 1.05414   variance: 0.0705419   standard deviation: 0.265597
+
+# output 1 sojourn size distribution
+
+# output 1 sojourn size histogram - sample size: 397
+# mean: 1.41562   variance: 0.799048   standard deviation: 0.893895
+
+# output 2 sojourn size distribution
+
+# output 2 sojourn size histogram - sample size: 281
+# mean: 1.66192   variance: 1.14601   standard deviation: 1.07052
+
+# output 3 sojourn size distribution
+
+# output 3 sojourn size histogram - sample size: 126
+# mean: 1.30952   variance: 0.455429   standard deviation: 0.674854
+
+# output 4 sojourn size distribution
+
+# output 4 sojourn size histogram - sample size: 44
+# mean: 1.15909   variance: 0.183404   standard deviation: 0.428257
+
+# output 5 sojourn size distribution
+
+# output 5 sojourn size histogram - sample size: 21
+# mean: 1.19048   variance: 0.161905   standard deviation: 0.402374
+
+# output 6 sojourn size distribution
+
+# output 6 sojourn size histogram - sample size: 4
+# mean: 1.25   variance: 0.25   standard deviation: 0.5
+
+# output 7 sojourn size distribution
+
+# output 7 sojourn size histogram - sample size: 1
+# mean: 1   variance: 0   standard deviation: 0
+
+# mixture of number of zones of output 0 per tree distributions
+
+# number of zones of output 0 per tree histogram - sample size: 22
+# mean: 14.2727   variance: 148.874   standard deviation: 12.2014
+
+# mixture of number of zones of output 1 per tree distributions
+
+# number of zones of output 1 per tree histogram - sample size: 22
+# mean: 18.0455   variance: 126.236   standard deviation: 11.2355
+
+# mixture of number of zones of output 2 per tree distributions
+
+# number of zones of output 2 per tree histogram - sample size: 22
+# mean: 12.7727   variance: 47.2316   standard deviation: 6.87253
+
+# mixture of number of zones of output 3 per tree distributions
+
+# number of zones of output 3 per tree histogram - sample size: 22
+# mean: 5.72727   variance: 25.0649   standard deviation: 5.00649
+
+# mixture of number of zones of output 4 per tree distributions
+
+# number of zones of output 4 per tree histogram - sample size: 22
+# mean: 2   variance: 11.0476   standard deviation: 3.3238
+
+# mixture of number of zones of output 5 per tree distributions
+
+# number of zones of output 5 per tree histogram - sample size: 22
+# mean: 0.954545   variance: 3.75974   standard deviation: 1.939
+
+# mixture of number of zones of output 6 per tree distributions
+
+# number of zones of output 6 per tree histogram - sample size: 22
+# mean: 0.181818   variance: 0.251082   standard deviation: 0.501081
+
+# mixture of number of zones of output 7 per tree distributions
+
+# number of zones of output 7 per tree histogram - sample size: 22
+# mean: 0.0454545   variance: 0.0454545   standard deviation: 0.213201
+
+# mixture of number of occurrences of output 0 per tree distributions
+
+# number of occurrences of output 0 per tree histogram - sample size: 22
+# mean: 15.0455   variance: 168.045   standard deviation: 12.9632
+
+# mixture of number of occurrences of output 1 per tree distributions
+
+# number of occurrences of output 1 per tree histogram - sample size: 22
+# mean: 25.5455   variance: 172.641   standard deviation: 13.1393
+
+# mixture of number of occurrences of output 2 per tree distributions
+
+# number of occurrences of output 2 per tree histogram - sample size: 22
+# mean: 21.2273   variance: 125.613   standard deviation: 11.2077
+
+# mixture of number of occurrences of output 3 per tree distributions
+
+# number of occurrences of output 3 per tree histogram - sample size: 22
+# mean: 7.5   variance: 54.9286   standard deviation: 7.41138
+
+# mixture of number of occurrences of output 4 per tree distributions
+
+# number of occurrences of output 4 per tree histogram - sample size: 22
+# mean: 2.31818   variance: 15.2749   standard deviation: 3.90831
+
+# mixture of number of occurrences of output 5 per tree distributions
+
+# number of occurrences of output 5 per tree histogram - sample size: 22
+# mean: 1.13636   variance: 5.07576   standard deviation: 2.25294
+
+# mixture of number of occurrences of output 6 per tree distributions
+
+# number of occurrences of output 6 per tree histogram - sample size: 22
+# mean: 0.227273   variance: 0.374459   standard deviation: 0.61193
+
+# mixture of number of occurrences of output 7 per tree distributions
+
+# number of occurrences of output 7 per tree histogram - sample size: 22
+# mean: 0.0454545   variance: 0.0454545   standard deviation: 0.213201
+
+# tree size histogram - sample size: 22
+# mean: 73.0455   variance: 1847.47   standard deviation: 42.9823
+
+# cumulative size: 1607
+
+# information of the trees in the iid case: -13299.3 (-8.27588)
+
+# log-likelihood of the state trees: -11729.5   (normalized: -7.29902)
+
+# log-likelihood of the observed trees: -11649   (normalized: -7.24893)
+
+# 87 free parameters   2 * penalyzed log-likelihood (AIC): -23472.1
+
+# 87 free parameters   2 * penalyzed log-likelihood (AICc): -23482.1
+
+# 87 free parameters   2 * penalyzed log-likelihood (BIC): -23940.3
+
+# 87 free parameters   2 * penalyzed log-likelihood (BICc): nan
+
+# 87 free parameters   2 * penalyzed log-likelihood (ICL): -24101.3
+
+# 87 free parameters   2 * penalyzed log-likelihood (ICLc): nan
